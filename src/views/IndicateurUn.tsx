@@ -1,134 +1,110 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { RouteComponentProps } from "react-router-dom";
 import React from "react";
+import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
 
-import useField from "../hooks/useField";
-import FieldGroup from "../components/FieldGroup";
+import useField, { stateFieldType } from "../hooks/useField";
+import RowTrancheAge from "../components/RowTrancheAge";
+import Button from "../components/Button";
+import { displayNameCategorieSocioPro } from "../utils/helpers";
 
-function displayPercent(num: number): string {
-  return (num * 100).toFixed(2) + "%";
+interface Props extends RouteComponentProps {
+  effectif: Groupe;
+  updateEffectif: (group: Groupe) => void;
 }
 
-enum TranchesAges {
-  MoinsDe30ans = "MoinsDe30ans",
-  De30a39ans = "De30a39ans",
-  De40a49ans = "De40a49ans",
-  PlusDe50ans = "PlusDe50ans"
-}
-
-enum CategorieSocioPro {
-  Ouvriers = "Ouvriers",
-  Employes = "Employes",
-  Techniciens = "Techniciens",
-  Cadres = "Cadres"
-}
-
-interface Groupe {
+interface GroupeTrancheAgeFields {
   trancheAge: TranchesAges;
-  categorieSocioPro: CategorieSocioPro;
-  nombreSalariesFemmes: number | undefined;
-  nombreSalariesHommes: number | undefined;
-  remunerationAnnuelleBrutFemmes: number | undefined;
-  remunerationAnnuelleBrutHommes: number | undefined;
+  calculable: boolean;
+  remunerationAnnuelleBrutFemmesField: stateFieldType;
+  remunerationAnnuelleBrutHommesField: stateFieldType;
 }
 
-const appState: Array<Groupe> = [
-  {
-    trancheAge: TranchesAges.MoinsDe30ans,
-    categorieSocioPro: CategorieSocioPro.Ouvriers,
-    nombreSalariesFemmes: undefined,
-    nombreSalariesHommes: undefined,
-    remunerationAnnuelleBrutFemmes: undefined,
-    remunerationAnnuelleBrutHommes: undefined
-  }
-];
+function IndicateurUn({ effectif, updateEffectif, history }: Props) {
+  const allFields: Array<GroupeTrancheAgeFields> = effectif.tranchesAges.map(
+    ({
+      trancheAge,
+      nombreSalariesFemmes,
+      nombreSalariesHommes
+    }: GroupTranchesAges) => {
+      return {
+        trancheAge,
+        calculable:
+          (nombreSalariesFemmes || 0) >= 3 && (nombreSalariesHommes || 0) >= 3,
+        remunerationAnnuelleBrutFemmesField: useField(
+          "remunerationAnnuelleBrutFemmes" + trancheAge
+        ),
+        remunerationAnnuelleBrutHommesField: useField(
+          "remunerationAnnuelleBrutHommes" + trancheAge
+        )
+      };
+    }
+  );
 
-const sp = 5 / 100;
-
-function IndicateurUn() {
-  const nbSalarieFemmeField = useField("nombreSalariesFemmes");
-  const nbSalarieHommeField = useField("nombreSalariesHommes");
-
-  const remuFemmeField = useField("remunerationAnnuelleBrutFemmes");
-  const remuHommeField = useField("remunerationAnnuelleBrutHommes");
-
-  const vg =
-    nbSalarieFemmeField.meta.valueNumber >= 3 &&
-    nbSalarieHommeField.meta.valueNumber >= 3;
-
-  const ev =
-    nbSalarieFemmeField.meta.valueNumber + nbSalarieHommeField.meta.valueNumber;
-
-  const erm =
-    (remuHommeField.meta.valueNumber - remuFemmeField.meta.valueNumber) /
-    remuHommeField.meta.valueNumber;
-  const esp = Math.sign(erm) * Math.max(0, Math.abs(erm) - sp);
-
-  const tev = ev;
-
-  const ep = (esp * ev) / tev;
+  const saveGroup = () => {
+    const newGroup: Groupe = {
+      ...effectif,
+      tranchesAges: effectif.tranchesAges.map(
+        (groupTranchesAges: GroupTranchesAges) => {
+          const fields = allFields.find(
+            fields => fields.trancheAge === groupTranchesAges.trancheAge
+          );
+          if (!fields || !fields.calculable) {
+            return groupTranchesAges;
+          }
+          return {
+            ...groupTranchesAges,
+            remunerationAnnuelleBrutFemmes: parseInt(
+              fields.remunerationAnnuelleBrutFemmesField.input.value,
+              10
+            ),
+            remunerationAnnuelleBrutHommes: parseInt(
+              fields.remunerationAnnuelleBrutHommesField.input.value,
+              10
+            )
+          };
+        }
+      )
+    };
+    updateEffectif(newGroup);
+    history.push("/indicateur1result");
+  };
 
   return (
     <div>
       <div css={styles.bloc}>
-        <p css={styles.blocTitle}>Employés - 30 à 39 ans</p>
+        <p css={styles.blocTitle}>
+          Rémunération annuelle brute moyenne -{" "}
+          {displayNameCategorieSocioPro(effectif.categorieSocioPro)}
+        </p>
 
-        <FieldGroup
-          label="Nombre de salariés femmes"
-          field={nbSalarieFemmeField}
-        />
+        <div css={styles.row}>
+          <div css={styles.cellHead}>rémunération</div>
+          <div css={styles.cell}>femmes</div>
+          <div css={styles.cell}>hommes</div>
+        </div>
 
-        <FieldGroup
-          label="Nombre de salariés hommes"
-          field={nbSalarieHommeField}
-        />
-
-        {nbSalarieFemmeField.meta.touched && nbSalarieHommeField.meta.touched && (
-          <React.Fragment>
-            <div css={styles.message}>
-              {vg ? (
-                <p>Effectif valide de {ev} personnes</p>
-              ) : (
-                <p>
-                  Groupe invalide car il ne contient pas suffisament de
-                  personnes (au moins 3 femmes et 3 hommes)
-                </p>
-              )}
-            </div>
-            {vg && (
-              <React.Fragment>
-                <FieldGroup
-                  label="Rénumération annuelle brute moyenne femmes"
-                  field={remuFemmeField}
-                />
-                <FieldGroup
-                  label="Rénumération annuelle brute moyenne hommes"
-                  field={remuHommeField}
-                />
-
-                {remuFemmeField.meta.touched && remuHommeField.meta.touched && (
-                  <div css={styles.message}>
-                    {remuFemmeField.meta.valueNumber > 0 &&
-                    remuHommeField.meta.valueNumber > 0 ? (
-                      <React.Fragment>
-                        <p>
-                          Écart de rémunération moyenne {displayPercent(erm)}
-                        </p>
-                        <p>
-                          Écart après application du seuil de pertinence{" "}
-                          {displayPercent(esp)}
-                        </p>
-                        <p>Écart pondéré {displayPercent(ep)}</p>
-                      </React.Fragment>
-                    ) : (
-                      <p>Veuillez renseigner les rénumérations moyennes</p>
-                    )}
-                  </div>
-                )}
-              </React.Fragment>
-            )}
-          </React.Fragment>
+        {allFields.map(
+          ({
+            trancheAge,
+            calculable,
+            remunerationAnnuelleBrutFemmesField,
+            remunerationAnnuelleBrutHommesField
+          }: GroupeTrancheAgeFields) => {
+            return (
+              <RowTrancheAge
+                key={trancheAge}
+                trancheAge={trancheAge}
+                calculable={calculable}
+                femmesField={remunerationAnnuelleBrutFemmesField}
+                hommesField={remunerationAnnuelleBrutHommesField}
+              />
+            );
+          }
         )}
+
+        <Button onClick={saveGroup} label="Valider" />
       </div>
     </div>
   );
@@ -151,17 +127,25 @@ const styles = {
     paddingBottom: 24,
     color: "#353535"
   }),
-  fieldGroup: css({
+  row: css({
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
     marginBottom: 24
   }),
-  fieldLabel: css({
-    marginBottom: 6
+  cellHead: css({
+    flexGrow: 1,
+    flexBasis: "0%",
+    textAlign: "right",
+    fontWeight: "bold"
   }),
-  fieldInput: css({
-    fontSize: 20,
-    padding: "2px 6px"
+  cell: css({
+    flexGrow: 2,
+    flexBasis: "0%",
+    marginLeft: 24,
+    textAlign: "center",
+    fontWeight: "bold"
   }),
   message: css({
     fontSize: 26,

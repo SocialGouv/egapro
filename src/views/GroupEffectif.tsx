@@ -1,15 +1,16 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import React from "react";
-
+import { RouteComponentProps } from "react-router-dom";
 import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
+
 import useField, { stateFieldType } from "../hooks/useField";
 import RowTrancheAge from "../components/RowTrancheAge";
+import Button from "../components/Button";
 
 import { displayNameCategorieSocioPro } from "../utils/helpers";
 import mapEnum from "../utils/mapEnum";
 
-interface Props {
+interface Props extends RouteComponentProps {
   effectif: Groupe;
   updateEffectif: (group: Groupe) => void;
 }
@@ -20,10 +21,9 @@ interface GroupeTrancheAgeFields {
   nbSalarieHommeField: stateFieldType;
 }
 
-function GroupEffectif({ effectif, updateEffectif }: Props) {
-  const allFields: Array<GroupeTrancheAgeFields> = mapEnum(
-    TranchesAges,
-    (trancheAge: TranchesAges) => {
+function GroupEffectif({ effectif, updateEffectif, history }: Props) {
+  const allFields: Array<GroupeTrancheAgeFields> = effectif.tranchesAges.map(
+    ({ trancheAge }: GroupTranchesAges) => {
       return {
         trancheAge,
         nbSalarieFemmeField: useField("nombreSalariesFemmes" + trancheAge),
@@ -58,17 +58,8 @@ function GroupEffectif({ effectif, updateEffectif }: Props) {
       )
     };
     updateEffectif(newGroup);
+    history.push("/groupvalid");
   };
-
-  // const nbSalarieFemmeField = useField("nombreSalariesFemmes");
-  // const nbSalarieHommeField = useField("nombreSalariesHommes");
-
-  // const vg =
-  //   nbSalarieFemmeField.meta.valueNumber >= 3 &&
-  //   nbSalarieHommeField.meta.valueNumber >= 3;
-
-  // const ev =
-  //   nbSalarieFemmeField.meta.valueNumber + nbSalarieHommeField.meta.valueNumber;
 
   return (
     <div>
@@ -94,29 +85,15 @@ function GroupEffectif({ effectif, updateEffectif }: Props) {
               <RowTrancheAge
                 key={trancheAge}
                 trancheAge={trancheAge}
-                nbSalarieFemmeField={nbSalarieFemmeField}
-                nbSalarieHommeField={nbSalarieHommeField}
+                calculable={true}
+                femmesField={nbSalarieFemmeField}
+                hommesField={nbSalarieHommeField}
               />
             );
           }
         )}
 
-        <div onClick={saveGroup}>Valider</div>
-
-        {/* {nbSalarieFemmeField.meta.touched && nbSalarieHommeField.meta.touched && (
-          <React.Fragment>
-            <div css={styles.message}>
-              {vg ? (
-                <p>Effectif valide de {ev} personnes</p>
-              ) : (
-                <p>
-                  Groupe invalide car il ne contient pas suffisament de
-                  personnes (au moins 3 femmes et 3 hommes)
-                </p>
-              )}
-            </div>
-          </React.Fragment>
-        )} */}
+        <Button onClick={saveGroup} label="Valider" />
       </div>
     </div>
   );
@@ -159,13 +136,6 @@ const styles = {
     marginLeft: 24,
     textAlign: "center",
     fontWeight: "bold"
-  }),
-  message: css({
-    fontSize: 26,
-    fontWeight: 200,
-    textAlign: "center",
-    marginBottom: 32,
-    marginTop: 12
   })
 };
 
