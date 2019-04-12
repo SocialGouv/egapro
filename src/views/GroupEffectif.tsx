@@ -8,7 +8,6 @@ import RowTrancheAge from "../components/RowTrancheAge";
 import Button from "../components/Button";
 
 import { displayNameCategorieSocioPro } from "../utils/helpers";
-import mapEnum from "../utils/mapEnum";
 
 interface Props extends RouteComponentProps {
   effectif: Groupe;

@@ -9,37 +9,24 @@ import {
   Groupe,
   GroupTranchesAges
 } from "./globals.d";
+
 import mapEnum from "./utils/mapEnum";
+
+import {
+  calculValiditeGroupe,
+  calculEffectifsValides,
+  calculEcartRemunerationMoyenne,
+  calculEcartApresApplicationSeuilPertinence,
+  calculEcartPondere,
+  calculIndicateurCalculable,
+  calculIndicateurEcartRemuneration,
+  calculNote
+} from "./utils/calculsEgaPro";
 
 import GroupEffectif from "./views/GroupEffectif";
 import GroupValid from "./views/GroupValid";
 import IndicateurUn from "./views/IndicateurUn";
 import IndicateurUnResult from "./views/IndicateurUnResult";
-
-const baremeEcartRemuneration = [
-  40,
-  39,
-  38,
-  37,
-  36,
-  35,
-  34,
-  33,
-  31,
-  29,
-  27,
-  25,
-  23,
-  21,
-  19,
-  17,
-  14,
-  11,
-  8,
-  5,
-  2,
-  0
-];
 
 const baseGroupTranchesAgesState = {
   nombreSalariesFemmes: undefined,
@@ -58,10 +45,6 @@ const defaultDataIndex: Groupe = {
   tranchesAges: [...baseTranchesAge]
 };
 
-const tauxEffectifValide = 40 / 100;
-
-const seuilPertinence = 5 / 100;
-
 function App() {
   const [dataIndex, setDataIndex] = useState(defaultDataIndex);
 
@@ -78,22 +61,25 @@ function App() {
       remunerationAnnuelleBrutHommes = remunerationAnnuelleBrutHommes || 0;
 
       // VG
-      const validiteGroupe =
-        nombreSalariesFemmes >= 3 && nombreSalariesHommes >= 3;
+      const validiteGroupe = calculValiditeGroupe(
+        nombreSalariesFemmes,
+        nombreSalariesHommes
+      );
       // EV
-      const effectifsValides = validiteGroupe
-        ? nombreSalariesFemmes + nombreSalariesHommes
-        : 0;
+      const effectifsValides = calculEffectifsValides(
+        validiteGroupe,
+        nombreSalariesFemmes,
+        nombreSalariesHommes
+      );
       // ERM
-      const ecartRemunerationMoyenne =
-        remunerationAnnuelleBrutFemmes > 0 && remunerationAnnuelleBrutHommes > 0
-          ? (remunerationAnnuelleBrutHommes - remunerationAnnuelleBrutFemmes) /
-            remunerationAnnuelleBrutHommes
-          : 0;
+      const ecartRemunerationMoyenne = calculEcartRemunerationMoyenne(
+        remunerationAnnuelleBrutFemmes,
+        remunerationAnnuelleBrutHommes
+      );
       // ESP
-      const ecartApresApplicationSeuilPertinence =
-        Math.sign(ecartRemunerationMoyenne) *
-        Math.max(0, Math.abs(ecartRemunerationMoyenne) - seuilPertinence);
+      const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinence(
+        ecartRemunerationMoyenne
+      );
 
       return {
         validiteGroupe,
@@ -104,7 +90,10 @@ function App() {
     }
   );
 
-  const reducedData = dataIndex.tranchesAges.reduce(
+  const {
+    totalNombreSalariesFemmes,
+    totalNombreSalariesHommes
+  } = dataIndex.tranchesAges.reduce(
     (
       {
         totalNombreSalariesFemmes,
@@ -142,8 +131,7 @@ function App() {
 
   // TNB
   const totalNombreSalaries =
-    reducedData.totalNombreSalariesFemmes +
-    reducedData.totalNombreSalariesHommes;
+    totalNombreSalariesFemmes + totalNombreSalariesHommes;
 
   // TEV
   const totalEffectifsValides = computedDataByRow.reduce(
@@ -162,10 +150,12 @@ function App() {
       ecartApresApplicationSeuilPertinence: number;
     }) => {
       // EP
-      const ecartPondere = validiteGroupe
-        ? (ecartApresApplicationSeuilPertinence * effectifsValides) /
-          totalEffectifsValides
-        : 0;
+      const ecartPondere = calculEcartPondere(
+        validiteGroupe,
+        ecartApresApplicationSeuilPertinence,
+        effectifsValides,
+        totalEffectifsValides
+      );
 
       return ecartPondere;
     }
@@ -182,21 +172,19 @@ function App() {
   );
 
   // IC
-  const indicateurCalculable =
-    totalNombreSalaries > 0 &&
-    totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide;
+  const indicateurCalculable = calculIndicateurCalculable(
+    totalNombreSalaries,
+    totalEffectifsValides
+  );
 
   // IER
-  const indicateurEcartRemuneration = indicateurCalculable
-    ? 100 * totalEcartPondere //.toFixed(1)
-    : undefined;
+  const indicateurEcartRemuneration = calculIndicateurEcartRemuneration(
+    indicateurCalculable,
+    totalEcartPondere
+  );
 
   // NOTE
-  const noteIndicateurUn = indicateurEcartRemuneration
-    ? baremeEcartRemuneration[
-        Math.min(21, Math.ceil(indicateurEcartRemuneration))
-      ]
-    : undefined;
+  const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
 
   return (
     <Router>
