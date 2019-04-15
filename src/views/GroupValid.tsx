@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import React from "react";
+
+import { CategorieSocioPro } from "../globals.d";
 
 import LinkButton from "../components/LinkButton";
 
@@ -54,7 +55,10 @@ function GroupValid({
           </p>
         </div>
 
-        <LinkButton to="/indicateur1" label="Continuer" />
+        <LinkButton
+          to={`/indicateur1/${CategorieSocioPro.Ouvriers}`}
+          label="Continuer"
+        />
       </div>
     </div>
   );

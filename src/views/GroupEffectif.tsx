@@ -22,11 +22,21 @@ interface GroupeTrancheAgeFields {
 
 function GroupEffectif({ effectif, updateEffectif, history }: Props) {
   const allFields: Array<GroupeTrancheAgeFields> = effectif.tranchesAges.map(
-    ({ trancheAge }: GroupTranchesAges) => {
+    ({
+      trancheAge,
+      nombreSalariesFemmes,
+      nombreSalariesHommes
+    }: GroupTranchesAges) => {
       return {
         trancheAge,
-        nbSalarieFemmeField: useField("nombreSalariesFemmes" + trancheAge),
-        nbSalarieHommeField: useField("nombreSalariesHommes" + trancheAge)
+        nbSalarieFemmeField: useField(
+          "nombreSalariesFemmes" + trancheAge,
+          nombreSalariesFemmes === undefined ? "" : String(nombreSalariesFemmes)
+        ),
+        nbSalarieHommeField: useField(
+          "nombreSalariesHommes" + trancheAge,
+          nombreSalariesHommes === undefined ? "" : String(nombreSalariesHommes)
+        )
       };
     }
   );
@@ -44,20 +54,24 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
           }
           return {
             ...groupTranchesAges,
-            nombreSalariesFemmes: parseInt(
-              fields.nbSalarieFemmeField.input.value,
-              10
-            ),
-            nombreSalariesHommes: parseInt(
-              fields.nbSalarieHommeField.input.value,
-              10
-            )
+            nombreSalariesFemmes:
+              fields.nbSalarieFemmeField.input.value === ""
+                ? undefined
+                : parseInt(fields.nbSalarieFemmeField.input.value, 10),
+            nombreSalariesHommes:
+              fields.nbSalarieHommeField.input.value === ""
+                ? undefined
+                : parseInt(fields.nbSalarieHommeField.input.value, 10)
           };
         }
       )
     };
     updateEffectif(newGroup);
-    history.push("/groupvalid");
+    const nextRoute =
+      effectif.categorieSocioPro < 3
+        ? `/effectifs/${effectif.categorieSocioPro + 1}`
+        : "/groupvalid";
+    history.push(nextRoute);
   };
 
   return (

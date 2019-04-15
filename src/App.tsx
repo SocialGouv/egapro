@@ -24,6 +24,7 @@ import {
   calculNote
 } from "./utils/calculsEgaPro";
 
+import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
 import GroupValid from "./views/GroupValid";
 import IndicateurUn from "./views/IndicateurUn";
@@ -41,26 +42,53 @@ const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
   ...baseGroupTranchesAgesState
 }));
 
-const initialDataIndex: Groupe = {
-  categorieSocioPro: CategorieSocioPro.Ouvriers,
-  tranchesAges: [...baseTranchesAge]
-};
+const initialState: Array<Groupe> = [
+  {
+    categorieSocioPro: CategorieSocioPro.Ouvriers,
+    tranchesAges: [...baseTranchesAge]
+  },
+  {
+    categorieSocioPro: CategorieSocioPro.Employes,
+    tranchesAges: [...baseTranchesAge]
+  },
+  {
+    categorieSocioPro: CategorieSocioPro.Techniciens,
+    tranchesAges: [...baseTranchesAge]
+  },
+  {
+    categorieSocioPro: CategorieSocioPro.Cadres,
+    tranchesAges: [...baseTranchesAge]
+  }
+];
 
-function reducer(state: Groupe, action: ActionType) {
+function reducer(state: Array<Groupe>, action: ActionType) {
   switch (action.type) {
     case "updateEffectif":
-      return action.group;
-    case "updateIndicateurUn":
-      return action.group;
+    case "updateIndicateurUn": {
+      const index = state.findIndex(
+        ({ categorieSocioPro }) =>
+          categorieSocioPro === action.group.categorieSocioPro
+      );
+      return [
+        ...state.slice(0, index),
+        action.group,
+        ...state.slice(index + 1)
+      ];
+    }
     default:
       return state;
   }
 }
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, initialDataIndex);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const computedDataByRow = state.tranchesAges.map(
+  const dataByRow = state.reduce(
+    (acc: Array<GroupTranchesAges>, group) => acc.concat(group.tranchesAges),
+    []
+  );
+
+  const computedDataByRow = dataByRow.map(
     ({
       nombreSalariesFemmes,
       nombreSalariesHommes,
@@ -105,7 +133,7 @@ function App() {
   const {
     totalNombreSalariesFemmes,
     totalNombreSalariesHommes
-  } = state.tranchesAges.reduce(
+  } = dataByRow.reduce(
     (
       {
         totalNombreSalariesFemmes,
@@ -204,13 +232,14 @@ function App() {
         <header css={styles.header}>
           <p>EGAPRO - Prototype</p>
         </header>
+        <Route path="/" exact render={props => <Home {...props} />} />
         <Route
-          path="/"
-          exact
+          path="/effectifs/:categorieSocioPro"
           render={props => (
             <GroupEffectif
               {...props}
-              effectif={state}
+              key={props.match.params.categorieSocioPro}
+              effectif={state[props.match.params.categorieSocioPro]}
               updateEffectif={(group: Groupe) =>
                 dispatch({ type: "updateEffectif", group })
               }
@@ -223,7 +252,7 @@ function App() {
           render={props => (
             <GroupValid
               {...props}
-              nombreGroupes={state.tranchesAges.length}
+              nombreGroupes={dataByRow.length}
               nombreGroupesValides={groupesValides.length}
               nombreSalariesTotal={totalNombreSalaries}
               nombreSalariesGroupesValides={totalEffectifsValides}
@@ -232,12 +261,12 @@ function App() {
           )}
         />
         <Route
-          path="/indicateur1"
-          exact
+          path="/indicateur1/:categorieSocioPro"
           render={props => (
             <IndicateurUn
               {...props}
-              effectif={state}
+              key={props.match.params.categorieSocioPro}
+              effectif={state[props.match.params.categorieSocioPro]}
               updateEffectif={(group: Groupe) =>
                 dispatch({ type: "updateIndicateurUn", group })
               }

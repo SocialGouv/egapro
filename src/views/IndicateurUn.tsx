@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
-import React from "react";
 import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
 
 import useField, { stateFieldType } from "../hooks/useField";
@@ -26,17 +25,25 @@ function IndicateurUn({ effectif, updateEffectif, history }: Props) {
     ({
       trancheAge,
       nombreSalariesFemmes,
-      nombreSalariesHommes
+      nombreSalariesHommes,
+      remunerationAnnuelleBrutFemmes,
+      remunerationAnnuelleBrutHommes
     }: GroupTranchesAges) => {
       return {
         trancheAge,
         calculable:
           (nombreSalariesFemmes || 0) >= 3 && (nombreSalariesHommes || 0) >= 3,
         remunerationAnnuelleBrutFemmesField: useField(
-          "remunerationAnnuelleBrutFemmes" + trancheAge
+          "remunerationAnnuelleBrutFemmes" + trancheAge,
+          remunerationAnnuelleBrutFemmes === undefined
+            ? ""
+            : String(remunerationAnnuelleBrutFemmes)
         ),
         remunerationAnnuelleBrutHommesField: useField(
-          "remunerationAnnuelleBrutHommes" + trancheAge
+          "remunerationAnnuelleBrutHommes" + trancheAge,
+          remunerationAnnuelleBrutHommes === undefined
+            ? ""
+            : String(remunerationAnnuelleBrutHommes)
         )
       };
     }
@@ -55,20 +62,30 @@ function IndicateurUn({ effectif, updateEffectif, history }: Props) {
           }
           return {
             ...groupTranchesAges,
-            remunerationAnnuelleBrutFemmes: parseInt(
-              fields.remunerationAnnuelleBrutFemmesField.input.value,
-              10
-            ),
-            remunerationAnnuelleBrutHommes: parseInt(
-              fields.remunerationAnnuelleBrutHommesField.input.value,
-              10
-            )
+            remunerationAnnuelleBrutFemmes:
+              fields.remunerationAnnuelleBrutFemmesField.input.value === ""
+                ? undefined
+                : parseInt(
+                    fields.remunerationAnnuelleBrutFemmesField.input.value,
+                    10
+                  ),
+            remunerationAnnuelleBrutHommes:
+              fields.remunerationAnnuelleBrutHommesField.input.value === ""
+                ? undefined
+                : parseInt(
+                    fields.remunerationAnnuelleBrutHommesField.input.value,
+                    10
+                  )
           };
         }
       )
     };
     updateEffectif(newGroup);
-    history.push("/indicateur1result");
+    const nextRoute =
+      effectif.categorieSocioPro < 3
+        ? `/indicateur1/${effectif.categorieSocioPro + 1}`
+        : "/indicateur1result";
+    history.push(nextRoute);
   };
 
   return (
