@@ -1,3 +1,13 @@
+export type ActionType =
+  | {
+      type: "updateEffectif";
+      group: Groupe;
+    }
+  | {
+      type: "updateIndicateurUn";
+      group: Groupe;
+    };
+
 export enum TranchesAges {
   MoinsDe30ans,
   De30a39ans,

@@ -1,13 +1,14 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useState } from "react";
+import { useReducer } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import {
   TranchesAges,
   CategorieSocioPro,
   Groupe,
-  GroupTranchesAges
+  GroupTranchesAges,
+  ActionType
 } from "./globals.d";
 
 import mapEnum from "./utils/mapEnum";
@@ -40,15 +41,26 @@ const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
   ...baseGroupTranchesAgesState
 }));
 
-const defaultDataIndex: Groupe = {
+const initialDataIndex: Groupe = {
   categorieSocioPro: CategorieSocioPro.Ouvriers,
   tranchesAges: [...baseTranchesAge]
 };
 
-function App() {
-  const [dataIndex, setDataIndex] = useState(defaultDataIndex);
+function reducer(state: Groupe, action: ActionType) {
+  switch (action.type) {
+    case "updateEffectif":
+      return action.group;
+    case "updateIndicateurUn":
+      return action.group;
+    default:
+      return state;
+  }
+}
 
-  const computedDataByRow = dataIndex.tranchesAges.map(
+function App() {
+  const [state, dispatch] = useReducer(reducer, initialDataIndex);
+
+  const computedDataByRow = state.tranchesAges.map(
     ({
       nombreSalariesFemmes,
       nombreSalariesHommes,
@@ -93,7 +105,7 @@ function App() {
   const {
     totalNombreSalariesFemmes,
     totalNombreSalariesHommes
-  } = dataIndex.tranchesAges.reduce(
+  } = state.tranchesAges.reduce(
     (
       {
         totalNombreSalariesFemmes,
@@ -198,8 +210,10 @@ function App() {
           render={props => (
             <GroupEffectif
               {...props}
-              effectif={dataIndex}
-              updateEffectif={setDataIndex}
+              effectif={state}
+              updateEffectif={(group: Groupe) =>
+                dispatch({ type: "updateEffectif", group })
+              }
             />
           )}
         />
@@ -209,7 +223,7 @@ function App() {
           render={props => (
             <GroupValid
               {...props}
-              nombreGroupes={dataIndex.tranchesAges.length}
+              nombreGroupes={state.tranchesAges.length}
               nombreGroupesValides={groupesValides.length}
               nombreSalariesTotal={totalNombreSalaries}
               nombreSalariesGroupesValides={totalEffectifsValides}
@@ -223,8 +237,10 @@ function App() {
           render={props => (
             <IndicateurUn
               {...props}
-              effectif={dataIndex}
-              updateEffectif={setDataIndex}
+              effectif={state}
+              updateEffectif={(group: Groupe) =>
+                dispatch({ type: "updateIndicateurUn", group })
+              }
             />
           )}
         />
