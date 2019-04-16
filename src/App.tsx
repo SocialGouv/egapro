@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useReducer } from "react";
+import { useReducer, useEffect } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import {
@@ -26,8 +26,8 @@ import {
 
 import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
-import GroupValid from "./views/GroupValid";
-import IndicateurUn from "./views/IndicateurUn";
+import IndicateurUnStart from "./views/IndicateurUnStart";
+import IndicateurUnForm from "./views/IndicateurUnForm";
 import IndicateurUnResult from "./views/IndicateurUnResult";
 
 const baseGroupTranchesAgesState = {
@@ -42,7 +42,7 @@ const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
   ...baseGroupTranchesAgesState
 }));
 
-const initialState: Array<Groupe> = [
+const defaultState: Array<Groupe> = [
   {
     categorieSocioPro: CategorieSocioPro.Ouvriers,
     tranchesAges: [...baseTranchesAge]
@@ -80,8 +80,18 @@ function reducer(state: Array<Groupe>, action: ActionType) {
   }
 }
 
+const localStorageEgapro = localStorage.getItem("egapro");
+const initialState = localStorageEgapro
+  ? JSON.parse(localStorageEgapro)
+  : defaultState;
+
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    const stateStringify = JSON.stringify(state);
+    localStorage.setItem("egapro", stateStringify);
+  }, [state]);
 
   const dataByRow = state.reduce(
     (acc: Array<GroupTranchesAges>, group) => acc.concat(group.tranchesAges),
@@ -207,10 +217,6 @@ function App() {
     0
   );
 
-  const groupesValides = computedDataByRow.filter(
-    ({ validiteGroupe }: { validiteGroupe: boolean }) => validiteGroupe
-  );
-
   // IC
   const indicateurCalculable = calculIndicateurCalculable(
     totalNombreSalaries,
@@ -247,13 +253,11 @@ function App() {
           )}
         />
         <Route
-          path="/groupvalid"
+          path="/indicateur1"
           exact
           render={props => (
-            <GroupValid
+            <IndicateurUnStart
               {...props}
-              nombreGroupes={dataByRow.length}
-              nombreGroupesValides={groupesValides.length}
               nombreSalariesTotal={totalNombreSalaries}
               nombreSalariesGroupesValides={totalEffectifsValides}
               indicateurCalculable={indicateurCalculable}
@@ -263,7 +267,7 @@ function App() {
         <Route
           path="/indicateur1/:categorieSocioPro"
           render={props => (
-            <IndicateurUn
+            <IndicateurUnForm
               {...props}
               key={props.match.params.categorieSocioPro}
               effectif={state[props.match.params.categorieSocioPro]}

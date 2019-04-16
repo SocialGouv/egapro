@@ -5,51 +5,41 @@ import { CategorieSocioPro } from "../globals.d";
 
 import LinkButton from "../components/LinkButton";
 
+import { displayPercent } from "../utils/helpers";
+
 interface Props {
-  nombreGroupes: number;
-  nombreGroupesValides: number;
   nombreSalariesTotal: number;
   nombreSalariesGroupesValides: number;
   indicateurCalculable: boolean;
 }
 
-function GroupValid({
-  nombreGroupes,
-  nombreGroupesValides,
+function IndicateurUnStart({
   nombreSalariesTotal,
   nombreSalariesGroupesValides,
   indicateurCalculable
 }: Props) {
-  const onClick = () => {};
-
-  const messageGroupe1 =
-    nombreGroupesValides > 1
-      ? `${nombreGroupesValides} groupes sont valides`
-      : nombreGroupesValides === 1
-      ? "Un groupe est valide"
-      : "Aucun groupe n'est valide";
-
-  const messageGroupe2 =
-    nombreGroupes > 1
-      ? ` sur un total de ${nombreGroupes} groupes.`
-      : ` sur un total de ${nombreGroupes} groupe.`;
+  const pourcentageEffectifsValides =
+    nombreSalariesTotal > 0
+      ? nombreSalariesGroupesValides / nombreSalariesTotal
+      : 0;
 
   return (
     <div>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
-          {indicateurCalculable
-            ? "Indicateur Calculable"
-            : "Indicateur Non Calculable"}
+          Indicateur 1 {indicateurCalculable ? "Calculable" : "Non Calculable"}
         </p>
 
         <div css={styles.message}>
-          <p>{messageGroupe1 + messageGroupe2}</p>
+          <p>
+            Les groupes valident représentent{" "}
+            {displayPercent(pourcentageEffectifsValides, 0)}
+          </p>
         </div>
 
         <div css={styles.message}>
           <p>
-            Les groupes valident{" "}
+            Donc les groupes valident{" "}
             {indicateurCalculable ? "représentent" : "ne réprésentent pas"} un
             effectif supérieur ou égal à 40%.
           </p>
@@ -91,4 +81,4 @@ const styles = {
   })
 };
 
-export default GroupValid;
+export default IndicateurUnStart;

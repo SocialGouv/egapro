@@ -32,6 +32,6 @@ export function displayNameCategorieSocioPro(
   }
 }
 
-export function displayPercent(num: number): string {
-  return (num * 100).toFixed(2) + "%";
+export function displayPercent(num: number, digits: number = 2): string {
+  return (num * 100).toFixed(digits) + "%";
 }

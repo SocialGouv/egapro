@@ -16,15 +16,11 @@ function IndicateurUnResult({
   indicateurEcartRemuneration,
   noteIndicateurUn
 }: Props) {
-  // const onClick = () => {};
-
   return (
     <div>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
-          {indicateurCalculable
-            ? "Indicateur Calculable"
-            : "Indicateur Non Calculable"}
+          Indicateur 1 {indicateurCalculable ? "Calculable" : "Non Calculable"}
         </p>
 
         <div css={styles.message}>

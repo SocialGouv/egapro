@@ -70,7 +70,7 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
     const nextRoute =
       effectif.categorieSocioPro < 3
         ? `/effectifs/${effectif.categorieSocioPro + 1}`
-        : "/groupvalid";
+        : "/indicateur1";
     history.push(nextRoute);
   };
 

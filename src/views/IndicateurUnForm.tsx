@@ -20,7 +20,7 @@ interface GroupeTrancheAgeFields {
   remunerationAnnuelleBrutHommesField: stateFieldType;
 }
 
-function IndicateurUn({ effectif, updateEffectif, history }: Props) {
+function IndicateurUnForm({ effectif, updateEffectif, history }: Props) {
   const allFields: Array<GroupeTrancheAgeFields> = effectif.tranchesAges.map(
     ({
       trancheAge,
@@ -173,4 +173,4 @@ const styles = {
   })
 };
 
-export default IndicateurUn;
+export default IndicateurUnForm;
