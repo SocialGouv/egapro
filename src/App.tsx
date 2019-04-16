@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { useReducer, useEffect } from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import {
   TranchesAges,
@@ -13,22 +13,9 @@ import {
 
 import mapEnum from "./utils/mapEnum";
 
-import {
-  calculValiditeGroupe,
-  calculEffectifsValides,
-  calculEcartRemunerationMoyenne,
-  calculEcartApresApplicationSeuilPertinence,
-  calculEcartPondere,
-  calculIndicateurCalculable,
-  calculIndicateurEcartRemuneration,
-  calculNote
-} from "./utils/calculsEgaPro";
-
 import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
-import IndicateurUnStart from "./views/IndicateurUnStart";
-import IndicateurUnForm from "./views/IndicateurUnForm";
-import IndicateurUnResult from "./views/IndicateurUnResult";
+import IndicateurUn from "./views/IndicateurUn";
 
 const baseGroupTranchesAgesState = {
   nombreSalariesFemmes: undefined,
@@ -93,202 +80,34 @@ function App() {
     localStorage.setItem("egapro", stateStringify);
   }, [state]);
 
-  const dataByRow = state.reduce(
-    (acc: Array<GroupTranchesAges>, group) => acc.concat(group.tranchesAges),
-    []
-  );
-
-  const computedDataByRow = dataByRow.map(
-    ({
-      nombreSalariesFemmes,
-      nombreSalariesHommes,
-      remunerationAnnuelleBrutFemmes,
-      remunerationAnnuelleBrutHommes
-    }: GroupTranchesAges) => {
-      nombreSalariesFemmes = nombreSalariesFemmes || 0;
-      nombreSalariesHommes = nombreSalariesHommes || 0;
-      remunerationAnnuelleBrutFemmes = remunerationAnnuelleBrutFemmes || 0;
-      remunerationAnnuelleBrutHommes = remunerationAnnuelleBrutHommes || 0;
-
-      // VG
-      const validiteGroupe = calculValiditeGroupe(
-        nombreSalariesFemmes,
-        nombreSalariesHommes
-      );
-      // EV
-      const effectifsValides = calculEffectifsValides(
-        validiteGroupe,
-        nombreSalariesFemmes,
-        nombreSalariesHommes
-      );
-      // ERM
-      const ecartRemunerationMoyenne = calculEcartRemunerationMoyenne(
-        remunerationAnnuelleBrutFemmes,
-        remunerationAnnuelleBrutHommes
-      );
-      // ESP
-      const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinence(
-        ecartRemunerationMoyenne
-      );
-
-      return {
-        validiteGroupe,
-        effectifsValides,
-        ecartRemunerationMoyenne,
-        ecartApresApplicationSeuilPertinence
-      };
-    }
-  );
-
-  const {
-    totalNombreSalariesFemmes,
-    totalNombreSalariesHommes
-  } = dataByRow.reduce(
-    (
-      {
-        totalNombreSalariesFemmes,
-        totalNombreSalariesHommes,
-        totalRemunerationAnnuelleBrutFemmes,
-        totalRemunerationAnnuelleBrutHommes
-      },
-      {
-        nombreSalariesFemmes,
-        nombreSalariesHommes,
-        remunerationAnnuelleBrutFemmes,
-        remunerationAnnuelleBrutHommes
-      }
-    ) => {
-      return {
-        totalNombreSalariesFemmes:
-          totalNombreSalariesFemmes + (nombreSalariesFemmes || 0),
-        totalNombreSalariesHommes:
-          totalNombreSalariesHommes + (nombreSalariesHommes || 0),
-        totalRemunerationAnnuelleBrutFemmes:
-          totalRemunerationAnnuelleBrutFemmes +
-          (remunerationAnnuelleBrutFemmes || 0),
-        totalRemunerationAnnuelleBrutHommes:
-          totalRemunerationAnnuelleBrutHommes +
-          (remunerationAnnuelleBrutHommes || 0)
-      };
-    },
-    {
-      totalNombreSalariesFemmes: 0, //TNBF
-      totalNombreSalariesHommes: 0, //TNBH
-      totalRemunerationAnnuelleBrutFemmes: 0,
-      totalRemunerationAnnuelleBrutHommes: 0
-    }
-  );
-
-  // TNB
-  const totalNombreSalaries =
-    totalNombreSalariesFemmes + totalNombreSalariesHommes;
-
-  // TEV
-  const totalEffectifsValides = computedDataByRow.reduce(
-    (acc, { effectifsValides }) => acc + effectifsValides,
-    0
-  );
-
-  const ecartsPonderesByRow = computedDataByRow.map(
-    ({
-      validiteGroupe,
-      effectifsValides,
-      ecartApresApplicationSeuilPertinence
-    }: {
-      validiteGroupe: boolean;
-      effectifsValides: number;
-      ecartApresApplicationSeuilPertinence: number;
-    }) => {
-      // EP
-      const ecartPondere = calculEcartPondere(
-        validiteGroupe,
-        ecartApresApplicationSeuilPertinence,
-        effectifsValides,
-        totalEffectifsValides
-      );
-
-      return ecartPondere;
-    }
-  );
-
-  // TEP
-  const totalEcartPondere = ecartsPonderesByRow.reduce(
-    (acc, val) => acc + val,
-    0
-  );
-
-  // IC
-  const indicateurCalculable = calculIndicateurCalculable(
-    totalNombreSalaries,
-    totalEffectifsValides
-  );
-
-  // IER
-  const indicateurEcartRemuneration = calculIndicateurEcartRemuneration(
-    indicateurCalculable,
-    totalEcartPondere
-  );
-
-  // NOTE
-  const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
-
   return (
     <Router>
       <div>
         <header css={styles.header}>
           <p>EGAPRO - Prototype</p>
         </header>
-        <Route path="/" exact render={props => <Home {...props} />} />
-        <Route
-          path="/effectifs/:categorieSocioPro"
-          render={props => (
-            <GroupEffectif
-              {...props}
-              key={props.match.params.categorieSocioPro}
-              effectif={state[props.match.params.categorieSocioPro]}
-              updateEffectif={(group: Groupe) =>
-                dispatch({ type: "updateEffectif", group })
-              }
-            />
-          )}
-        />
-        <Route
-          path="/indicateur1"
-          exact
-          render={props => (
-            <IndicateurUnStart
-              {...props}
-              nombreSalariesTotal={totalNombreSalaries}
-              nombreSalariesGroupesValides={totalEffectifsValides}
-              indicateurCalculable={indicateurCalculable}
-            />
-          )}
-        />
-        <Route
-          path="/indicateur1/:categorieSocioPro"
-          render={props => (
-            <IndicateurUnForm
-              {...props}
-              key={props.match.params.categorieSocioPro}
-              effectif={state[props.match.params.categorieSocioPro]}
-              updateEffectif={(group: Groupe) =>
-                dispatch({ type: "updateIndicateurUn", group })
-              }
-            />
-          )}
-        />
-        <Route
-          path="/indicateur1result"
-          exact
-          render={props => (
-            <IndicateurUnResult
-              {...props}
-              indicateurCalculable={indicateurCalculable}
-              indicateurEcartRemuneration={indicateurEcartRemuneration}
-              noteIndicateurUn={noteIndicateurUn}
-            />
-          )}
-        />
+        <Switch>
+          <Route path="/" exact render={props => <Home {...props} />} />
+          <Route
+            path="/effectifs/:categorieSocioPro"
+            render={props => (
+              <GroupEffectif
+                {...props}
+                key={props.match.params.categorieSocioPro}
+                effectif={state[props.match.params.categorieSocioPro]}
+                updateEffectif={(group: Groupe) =>
+                  dispatch({ type: "updateEffectif", group })
+                }
+              />
+            )}
+          />
+          <Route
+            path="/indicateur1"
+            render={props => (
+              <IndicateurUn {...props} state={state} dispatch={dispatch} />
+            )}
+          />
+        </Switch>
       </div>
     </Router>
   );

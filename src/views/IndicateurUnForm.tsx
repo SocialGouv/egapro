@@ -10,7 +10,7 @@ import { displayNameCategorieSocioPro } from "../utils/helpers";
 
 interface Props extends RouteComponentProps {
   effectif: Groupe;
-  updateEffectif: (group: Groupe) => void;
+  updateIndicateurUn: (group: Groupe) => void;
 }
 
 interface GroupeTrancheAgeFields {
@@ -20,7 +20,7 @@ interface GroupeTrancheAgeFields {
   remunerationAnnuelleBrutHommesField: stateFieldType;
 }
 
-function IndicateurUnForm({ effectif, updateEffectif, history }: Props) {
+function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
   const allFields: Array<GroupeTrancheAgeFields> = effectif.tranchesAges.map(
     ({
       trancheAge,
@@ -80,11 +80,13 @@ function IndicateurUnForm({ effectif, updateEffectif, history }: Props) {
         }
       )
     };
-    updateEffectif(newGroup);
+    updateIndicateurUn(newGroup);
+
     const nextRoute =
-      effectif.categorieSocioPro < 3
-        ? `/indicateur1/${effectif.categorieSocioPro + 1}`
-        : "/indicateur1result";
+      "/indicateur1" +
+      (effectif.categorieSocioPro < 3
+        ? `/categorieSocioPro/${effectif.categorieSocioPro + 1}`
+        : "/resultat");
     history.push(nextRoute);
   };
 

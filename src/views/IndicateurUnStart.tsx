@@ -46,7 +46,7 @@ function IndicateurUnStart({
         </div>
 
         <LinkButton
-          to={`/indicateur1/${CategorieSocioPro.Ouvriers}`}
+          to={`/indicateur1/categorieSocioPro/${CategorieSocioPro.Ouvriers}`}
           label="Continuer"
         />
       </div>
