@@ -4,6 +4,7 @@ import {
   calculEcartRemunerationMoyenne,
   calculEcartApresApplicationSeuilPertinence,
   calculEcartPondere,
+  calculTotalEcartPondere,
   calculIndicateurCalculable,
   calculIndicateurEcartRemuneration,
   calculNote
@@ -40,9 +41,9 @@ it("calculEffectifsValides", () => {
 });
 
 it("calculEcartRemunerationMoyenne", () => {
-  expect(calculEcartRemunerationMoyenne(-1, -2)).toEqual(0);
-  expect(calculEcartRemunerationMoyenne(4, -2)).toEqual(0);
-  expect(calculEcartRemunerationMoyenne(0, 0)).toEqual(0);
+  expect(calculEcartRemunerationMoyenne(-1, -2)).toEqual(undefined);
+  expect(calculEcartRemunerationMoyenne(4, -2)).toEqual(undefined);
+  expect(calculEcartRemunerationMoyenne(0, 0)).toEqual(undefined);
 
   expect(calculEcartRemunerationMoyenne(12000, 12000)).toEqual(0);
   expect(calculEcartRemunerationMoyenne(12000, 19000)).toEqual(0.368);
@@ -52,6 +53,10 @@ it("calculEcartRemunerationMoyenne", () => {
 });
 
 it("calculEcartApresApplicationSeuilPertinence", () => {
+  expect(calculEcartApresApplicationSeuilPertinence(undefined)).toEqual(
+    undefined
+  );
+
   expect(calculEcartApresApplicationSeuilPertinence(-0.3)).toEqual(-0.25);
 
   expect(calculEcartApresApplicationSeuilPertinence(0)).toEqual(0);
@@ -71,14 +76,38 @@ it("calculEcartApresApplicationSeuilPertinence", () => {
 });
 
 it("calculEcartPondere", () => {
-  expect(calculEcartPondere(false, 0.318, 0, 300)).toEqual(0);
-  expect(calculEcartPondere(false, 0.318, 4, 300)).toEqual(0);
-  expect(calculEcartPondere(true, 0.318, 0, 300)).toEqual(0);
-  expect(calculEcartPondere(true, 0.318, 0, 0)).toEqual(0);
+  expect(calculEcartPondere(false, 0.318, 0, 300)).toEqual(undefined);
+  expect(calculEcartPondere(false, 0.318, 4, 300)).toEqual(undefined);
+  expect(calculEcartPondere(true, 0.318, 0, 300)).toEqual(0); // impossible case ?
+  expect(calculEcartPondere(true, 0.318, 0, 0)).toEqual(undefined);
+
+  expect(calculEcartPondere(false, undefined, 0, 300)).toEqual(undefined);
+  expect(calculEcartPondere(false, undefined, 4, 300)).toEqual(undefined);
+  expect(calculEcartPondere(true, undefined, 0, 300)).toEqual(undefined);
+  expect(calculEcartPondere(true, undefined, 0, 0)).toEqual(undefined);
+
+  expect(calculEcartPondere(true, undefined, 10, 300)).toEqual(undefined);
+  expect(calculEcartPondere(true, undefined, 20, 300)).toEqual(undefined);
+  expect(calculEcartPondere(true, undefined, 23, 321)).toEqual(undefined);
 
   expect(calculEcartPondere(true, 0.05, 10, 300)).toEqual(0.002);
   expect(calculEcartPondere(true, 0.05, 20, 300)).toEqual(0.003);
   expect(calculEcartPondere(true, 0.12, 23, 321)).toEqual(0.009);
+});
+
+it("calculTotalEcartPondere", () => {
+  expect(calculTotalEcartPondere([])).toEqual(undefined);
+  expect(calculTotalEcartPondere([undefined])).toEqual(undefined);
+  expect(calculTotalEcartPondere([undefined, undefined])).toEqual(undefined);
+  expect(calculTotalEcartPondere([undefined, 0])).toEqual(undefined);
+  expect(calculTotalEcartPondere([0, undefined])).toEqual(undefined);
+  expect(calculTotalEcartPondere([1, undefined])).toEqual(undefined);
+  expect(calculTotalEcartPondere([1.5, undefined])).toEqual(undefined);
+  expect(calculTotalEcartPondere([undefined, 2.2, 1.1])).toEqual(undefined);
+
+  expect(calculTotalEcartPondere([0, 2.2])).toEqual(2.2);
+  expect(calculTotalEcartPondere([1.1, 2.2])).toEqual(3.3);
+  expect(calculTotalEcartPondere([1.1, 0, 2.2, 0])).toEqual(3.3);
 });
 
 it("calculIndicateurCalculable", () => {
@@ -93,6 +122,11 @@ it("calculIndicateurCalculable", () => {
 });
 
 it("calculIndicateurEcartRemuneration", () => {
+  expect(calculIndicateurEcartRemuneration(false, undefined)).toEqual(
+    undefined
+  );
+  expect(calculIndicateurEcartRemuneration(true, undefined)).toEqual(undefined);
+
   expect(calculIndicateurEcartRemuneration(false, 0.01)).toEqual(undefined);
   expect(calculIndicateurEcartRemuneration(true, 0.01)).toEqual(1);
 

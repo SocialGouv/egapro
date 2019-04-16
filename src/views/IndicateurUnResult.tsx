@@ -24,7 +24,7 @@ function IndicateurUnResult({
         </p>
 
         <div css={styles.message}>
-          {indicateurEcartRemuneration ? (
+          {indicateurEcartRemuneration !== undefined ? (
             <p>
               indicateur d'écart de rémunération :{" "}
               {indicateurEcartRemuneration.toFixed(1)}%
@@ -35,7 +35,11 @@ function IndicateurUnResult({
         </div>
 
         <div css={styles.message}>
-          {noteIndicateurUn ? <p>Note : {noteIndicateurUn}</p> : <p>---</p>}
+          {noteIndicateurUn !== undefined ? (
+            <p>Note : {noteIndicateurUn}</p>
+          ) : (
+            <p>---</p>
+          )}
         </div>
 
         {/* <LinkButton to="/indicateur1" label="Continuer" /> */}

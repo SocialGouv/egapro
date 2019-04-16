@@ -51,39 +51,60 @@ export const calculEffectifsValides = (
 export const calculEcartRemunerationMoyenne = (
   remunerationAnnuelleBrutFemmes: number,
   remunerationAnnuelleBrutHommes: number
-): number =>
+): number | undefined =>
   remunerationAnnuelleBrutFemmes > 0 && remunerationAnnuelleBrutHommes > 0
     ? roundDecimal(
         (remunerationAnnuelleBrutHommes - remunerationAnnuelleBrutFemmes) /
           remunerationAnnuelleBrutHommes,
         3
       )
-    : 0;
+    : undefined;
 
 // ESP
 export const calculEcartApresApplicationSeuilPertinence = (
-  ecartRemunerationMoyenne: number
-): number =>
-  roundDecimal(
-    Math.sign(ecartRemunerationMoyenne) *
-      Math.max(0, Math.abs(ecartRemunerationMoyenne) - seuilPertinence),
-    3
-  );
+  ecartRemunerationMoyenne: number | undefined
+): number | undefined =>
+  ecartRemunerationMoyenne !== undefined
+    ? roundDecimal(
+        Math.sign(ecartRemunerationMoyenne) *
+          Math.max(0, Math.abs(ecartRemunerationMoyenne) - seuilPertinence),
+        3
+      )
+    : undefined;
 
 // EP
 export const calculEcartPondere = (
   validiteGroupe: boolean,
-  ecartApresApplicationSeuilPertinence: number,
+  ecartApresApplicationSeuilPertinence: number | undefined,
   effectifsValides: number,
   totalEffectifsValides: number
-): number =>
-  validiteGroupe && totalEffectifsValides > 0
+): number | undefined =>
+  validiteGroupe &&
+  totalEffectifsValides > 0 &&
+  ecartApresApplicationSeuilPertinence !== undefined
     ? roundDecimal(
         (ecartApresApplicationSeuilPertinence * effectifsValides) /
           totalEffectifsValides,
         3
       )
-    : 0;
+    : undefined;
+
+// TEP
+export const calculTotalEcartPondere = (
+  tableauEcartsPonderes: Array<number | undefined>
+): number | undefined =>
+  tableauEcartsPonderes.length === 0 ||
+  tableauEcartsPonderes.includes(undefined)
+    ? undefined
+    : roundDecimal(
+        tableauEcartsPonderes
+          .filter(ecartPondere => ecartPondere !== undefined)
+          .reduce(
+            (acc, val) => (acc || 0) + (val !== undefined ? val : 0),
+            undefined
+          ) || 0,
+        3
+      );
 
 // IC
 export const calculIndicateurCalculable = (
@@ -96,9 +117,11 @@ export const calculIndicateurCalculable = (
 // IER
 export const calculIndicateurEcartRemuneration = (
   indicateurCalculable: boolean,
-  totalEcartPondere: number
+  totalEcartPondere: number | undefined
 ): number | undefined =>
-  indicateurCalculable ? roundDecimal(100 * totalEcartPondere, 3) : undefined;
+  indicateurCalculable && totalEcartPondere !== undefined
+    ? roundDecimal(100 * totalEcartPondere, 3)
+    : undefined;
 
 // NOTE
 export const calculNote = (

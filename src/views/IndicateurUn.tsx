@@ -16,6 +16,7 @@ import {
   calculEcartRemunerationMoyenne,
   calculEcartApresApplicationSeuilPertinence,
   calculEcartPondere,
+  calculTotalEcartPondere,
   calculIndicateurCalculable,
   calculIndicateurEcartRemuneration,
   calculNote
@@ -130,33 +131,32 @@ function IndicateurUn({ state, dispatch, match }: Props) {
     0
   );
 
-  const ecartsPonderesByRow = computedDataByRow.map(
-    ({
-      validiteGroupe,
-      effectifsValides,
-      ecartApresApplicationSeuilPertinence
-    }: {
-      validiteGroupe: boolean;
-      effectifsValides: number;
-      ecartApresApplicationSeuilPertinence: number;
-    }) => {
-      // EP
-      const ecartPondere = calculEcartPondere(
+  const ecartsPonderesByRow = computedDataByRow
+    .filter(({ validiteGroupe }: { validiteGroupe: boolean }) => validiteGroupe)
+    .map(
+      ({
         validiteGroupe,
-        ecartApresApplicationSeuilPertinence,
         effectifsValides,
-        totalEffectifsValides
-      );
+        ecartApresApplicationSeuilPertinence
+      }: {
+        validiteGroupe: boolean;
+        effectifsValides: number;
+        ecartApresApplicationSeuilPertinence: number | undefined;
+      }) => {
+        // EP
+        const ecartPondere = calculEcartPondere(
+          validiteGroupe,
+          ecartApresApplicationSeuilPertinence,
+          effectifsValides,
+          totalEffectifsValides
+        );
 
-      return ecartPondere;
-    }
-  );
+        return ecartPondere;
+      }
+    );
 
   // TEP
-  const totalEcartPondere = ecartsPonderesByRow.reduce(
-    (acc, val) => acc + val,
-    0
-  );
+  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
 
   // IC
   const indicateurCalculable = calculIndicateurCalculable(
