@@ -1,16 +1,34 @@
 export type ActionType =
   | {
       type: "updateEffectif";
-      group: Groupe;
+      data: ActionEffectifData;
     }
   | {
       type: "updateIndicateurUn";
-      group: Groupe;
+      data: ActionIndicateurUnData;
     }
   | {
       type: "updateIndicateurDeux";
       data: ActionIndicateurDeuxData;
     };
+
+export type ActionEffectifData = {
+  categorieSocioPro: CategorieSocioPro;
+  tranchesAges: Array<{
+    trancheAge: TranchesAges;
+    nombreSalariesFemmes: number | undefined;
+    nombreSalariesHommes: number | undefined;
+  }>;
+};
+
+export type ActionIndicateurUnData = {
+  categorieSocioPro: CategorieSocioPro;
+  tranchesAges: Array<{
+    trancheAge: TranchesAges;
+    remunerationAnnuelleBrutFemmes: number | undefined;
+    remunerationAnnuelleBrutHommes: number | undefined;
+  }>;
+};
 
 export type ActionIndicateurDeuxData = Array<{
   categorieSocioPro: CategorieSocioPro;

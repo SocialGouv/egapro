@@ -1,7 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
-import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
+import {
+  TranchesAges,
+  Groupe,
+  GroupTranchesAges,
+  ActionEffectifData
+} from "../globals.d";
 
 import useField, { stateFieldType } from "../hooks/useField";
 import RowFemmesHommes from "../components/RowFemmesHommes";
@@ -14,7 +19,7 @@ import {
 
 interface Props extends RouteComponentProps {
   effectif: Groupe;
-  updateEffectif: (group: Groupe) => void;
+  updateEffectif: (data: ActionEffectifData) => void;
 }
 
 interface GroupeTrancheAgeFields {
@@ -45,31 +50,24 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
   );
 
   const saveGroup = () => {
-    const newGroup: Groupe = {
-      ...effectif,
-      tranchesAges: effectif.tranchesAges.map(
-        (groupTranchesAges: GroupTranchesAges) => {
-          const fields = allFields.find(
-            fields => fields.trancheAge === groupTranchesAges.trancheAge
-          );
-          if (!fields) {
-            return groupTranchesAges;
-          }
-          return {
-            ...groupTranchesAges,
-            nombreSalariesFemmes:
-              fields.nbSalarieFemmeField.input.value === ""
-                ? undefined
-                : parseInt(fields.nbSalarieFemmeField.input.value, 10),
-            nombreSalariesHommes:
-              fields.nbSalarieHommeField.input.value === ""
-                ? undefined
-                : parseInt(fields.nbSalarieHommeField.input.value, 10)
-          };
-        }
+    const data: ActionEffectifData = {
+      categorieSocioPro: effectif.categorieSocioPro,
+      tranchesAges: allFields.map(
+        ({ trancheAge, nbSalarieFemmeField, nbSalarieHommeField }) => ({
+          trancheAge,
+          nombreSalariesFemmes:
+            nbSalarieFemmeField.input.value === ""
+              ? undefined
+              : parseInt(nbSalarieFemmeField.input.value, 10),
+          nombreSalariesHommes:
+            nbSalarieHommeField.input.value === ""
+              ? undefined
+              : parseInt(nbSalarieHommeField.input.value, 10)
+        })
       )
     };
-    updateEffectif(newGroup);
+    updateEffectif(data);
+
     const nextRoute =
       effectif.categorieSocioPro < 3
         ? `/effectifs/${effectif.categorieSocioPro + 1}`

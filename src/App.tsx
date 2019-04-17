@@ -8,7 +8,8 @@ import {
   CategorieSocioPro,
   Groupe,
   GroupTranchesAges,
-  ActionType
+  ActionType,
+  ActionEffectifData
 } from "./globals.d";
 
 import mapEnum from "./utils/mapEnum";
@@ -59,17 +60,43 @@ const defaultState: Array<Groupe> = [
 
 function reducer(state: Array<Groupe>, action: ActionType) {
   switch (action.type) {
-    case "updateEffectif":
+    case "updateEffectif": {
+      const index = state.findIndex(
+        ({ categorieSocioPro }) =>
+          categorieSocioPro === action.data.categorieSocioPro
+      );
+      const currentGroup = state[index];
+      const newGroup: Groupe = {
+        ...currentGroup,
+        tranchesAges: currentGroup.tranchesAges.map(
+          (groupTranchesAges: GroupTranchesAges) => {
+            const datum = action.data.tranchesAges.find(
+              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
+            );
+            return Object.assign({}, groupTranchesAges, datum);
+          }
+        )
+      };
+      return [...state.slice(0, index), newGroup, ...state.slice(index + 1)];
+    }
     case "updateIndicateurUn": {
       const index = state.findIndex(
         ({ categorieSocioPro }) =>
-          categorieSocioPro === action.group.categorieSocioPro
+          categorieSocioPro === action.data.categorieSocioPro
       );
-      return [
-        ...state.slice(0, index),
-        action.group,
-        ...state.slice(index + 1)
-      ];
+      const currentGroup = state[index];
+      const newGroup: Groupe = {
+        ...currentGroup,
+        tranchesAges: currentGroup.tranchesAges.map(
+          (groupTranchesAges: GroupTranchesAges) => {
+            const datum = action.data.tranchesAges.find(
+              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
+            );
+            return Object.assign({}, groupTranchesAges, datum);
+          }
+        )
+      };
+      return [...state.slice(0, index), newGroup, ...state.slice(index + 1)];
     }
     case "updateIndicateurDeux": {
       return state.map((group: Groupe) => {
@@ -113,8 +140,8 @@ function App() {
                 {...props}
                 key={props.match.params.categorieSocioPro}
                 effectif={state[props.match.params.categorieSocioPro]}
-                updateEffectif={(group: Groupe) =>
-                  dispatch({ type: "updateEffectif", group })
+                updateEffectif={(data: ActionEffectifData) =>
+                  dispatch({ type: "updateEffectif", data })
                 }
               />
             )}

@@ -1,7 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
-import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
+import {
+  TranchesAges,
+  Groupe,
+  GroupTranchesAges,
+  ActionIndicateurUnData
+} from "../globals.d";
 
 import useField, { stateFieldType } from "../hooks/useField";
 import RowFemmesHommes from "../components/RowFemmesHommes";
@@ -13,7 +18,7 @@ import {
 
 interface Props extends RouteComponentProps {
   effectif: Groupe;
-  updateIndicateurUn: (group: Groupe) => void;
+  updateIndicateurUn: (data: ActionIndicateurUnData) => void;
 }
 
 interface GroupeTrancheAgeFields {
@@ -53,37 +58,27 @@ function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
   );
 
   const saveGroup = () => {
-    const newGroup: Groupe = {
-      ...effectif,
-      tranchesAges: effectif.tranchesAges.map(
-        (groupTranchesAges: GroupTranchesAges) => {
-          const fields = allFields.find(
-            fields => fields.trancheAge === groupTranchesAges.trancheAge
-          );
-          if (!fields || !fields.calculable) {
-            return groupTranchesAges;
-          }
-          return {
-            ...groupTranchesAges,
-            remunerationAnnuelleBrutFemmes:
-              fields.remunerationAnnuelleBrutFemmesField.input.value === ""
-                ? undefined
-                : parseInt(
-                    fields.remunerationAnnuelleBrutFemmesField.input.value,
-                    10
-                  ),
-            remunerationAnnuelleBrutHommes:
-              fields.remunerationAnnuelleBrutHommesField.input.value === ""
-                ? undefined
-                : parseInt(
-                    fields.remunerationAnnuelleBrutHommesField.input.value,
-                    10
-                  )
-          };
-        }
+    const data: ActionIndicateurUnData = {
+      categorieSocioPro: effectif.categorieSocioPro,
+      tranchesAges: allFields.map(
+        ({
+          trancheAge,
+          remunerationAnnuelleBrutFemmesField,
+          remunerationAnnuelleBrutHommesField
+        }) => ({
+          trancheAge,
+          remunerationAnnuelleBrutFemmes:
+            remunerationAnnuelleBrutFemmesField.input.value === ""
+              ? undefined
+              : parseInt(remunerationAnnuelleBrutFemmesField.input.value, 10),
+          remunerationAnnuelleBrutHommes:
+            remunerationAnnuelleBrutHommesField.input.value === ""
+              ? undefined
+              : parseInt(remunerationAnnuelleBrutHommesField.input.value, 10)
+        })
       )
     };
-    updateIndicateurUn(newGroup);
+    updateIndicateurUn(data);
 
     const nextRoute =
       "/indicateur1" +

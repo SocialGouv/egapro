@@ -7,7 +7,8 @@ import {
   CategorieSocioPro,
   Groupe,
   GroupTranchesAges,
-  ActionType
+  ActionType,
+  ActionIndicateurUnData
 } from "../globals.d";
 
 import {
@@ -32,8 +33,8 @@ interface Props extends RouteComponentProps {
 }
 
 function IndicateurUn({ state, dispatch, match }: Props) {
-  const updateIndicateurUn = (group: Groupe) =>
-    dispatch({ type: "updateIndicateurUn", group });
+  const updateIndicateurUn = (data: ActionIndicateurUnData) =>
+    dispatch({ type: "updateIndicateurUn", data });
 
   const dataByRow = state.reduce(
     (acc: Array<GroupTranchesAges>, group) => acc.concat(group.tranchesAges),
