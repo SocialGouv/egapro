@@ -71,6 +71,9 @@ function reducer(state: Array<Groupe>, action: ActionType) {
         ...state.slice(index + 1)
       ];
     }
+    case "updateIndicateurDeux": {
+      return action.state;
+    }
     default:
       return state;
   }

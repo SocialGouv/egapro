@@ -2,28 +2,26 @@
 import { css, jsx } from "@emotion/core";
 import React from "react";
 
-import { TranchesAges } from "../globals.d";
 import { stateFieldType } from "../hooks/useField";
 
-import { displayNameTranchesAges } from "../utils/helpers";
 import FieldGroup from "./FieldGroup";
 
 interface Props {
-  trancheAge: TranchesAges;
+  name: string;
   calculable: boolean;
   femmesField: stateFieldType;
   hommesField: stateFieldType;
 }
 
-function RowTrancheAge({
-  trancheAge,
+function RowFemmesHommes({
+  name,
   calculable,
   femmesField,
   hommesField
 }: Props) {
   return (
     <div css={styles.row}>
-      <div css={styles.cellHead}>{displayNameTranchesAges(trancheAge)}</div>
+      <div css={styles.cellHead}>{name}</div>
 
       {calculable ? (
         <React.Fragment>
@@ -68,4 +66,4 @@ const styles = {
   })
 };
 
-export default RowTrancheAge;
+export default RowFemmesHommes;

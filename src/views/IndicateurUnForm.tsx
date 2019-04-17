@@ -4,9 +4,12 @@ import { RouteComponentProps } from "react-router-dom";
 import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
 
 import useField, { stateFieldType } from "../hooks/useField";
-import RowTrancheAge from "../components/RowTrancheAge";
+import RowFemmesHommes from "../components/RowFemmesHommes";
 import Button from "../components/Button";
-import { displayNameCategorieSocioPro } from "../utils/helpers";
+import {
+  displayNameCategorieSocioPro,
+  displayNameTranchesAges
+} from "../utils/helpers";
 
 interface Props extends RouteComponentProps {
   effectif: Groupe;
@@ -112,9 +115,9 @@ function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
             remunerationAnnuelleBrutHommesField
           }: GroupeTrancheAgeFields) => {
             return (
-              <RowTrancheAge
+              <RowFemmesHommes
                 key={trancheAge}
-                trancheAge={trancheAge}
+                name={displayNameTranchesAges(trancheAge)}
                 calculable={calculable}
                 femmesField={remunerationAnnuelleBrutFemmesField}
                 hommesField={remunerationAnnuelleBrutHommesField}

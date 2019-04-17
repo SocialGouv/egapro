@@ -45,10 +45,7 @@ function IndicateurDeuxStart({
           </p>
         </div>
 
-        <LinkButton
-          to={`/indicateur2/categorieSocioPro/${CategorieSocioPro.Ouvriers}`}
-          label="Continuer"
-        />
+        <LinkButton to={`/indicateur2/formulaire`} label="Continuer" />
       </div>
     </div>
   );

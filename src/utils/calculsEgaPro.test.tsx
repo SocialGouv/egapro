@@ -188,28 +188,28 @@ it("calculEcartTauxAugmentation", () => {
   expect(calculEcartTauxAugmentation(4, -2)).toEqual(undefined);
   expect(calculEcartTauxAugmentation(0, 0)).toEqual(undefined);
 
-  expect(calculEcartTauxAugmentation(1.2, 1.2)).toEqual(0);
-  expect(calculEcartTauxAugmentation(1.2, 1.9)).toEqual(0.7);
-  expect(calculEcartTauxAugmentation(2, 3)).toEqual(1);
-  expect(calculEcartTauxAugmentation(2.8, 2.15)).toEqual(-0.65);
-  expect(calculEcartTauxAugmentation(2.5, 5)).toEqual(2.5);
+  expect(calculEcartTauxAugmentation(0.12, 0.12)).toEqual(0);
+  expect(calculEcartTauxAugmentation(0.12, 0.19)).toEqual(0.07);
+  expect(calculEcartTauxAugmentation(0.2, 0.3)).toEqual(0.1);
+  expect(calculEcartTauxAugmentation(0.28, 0.215)).toEqual(-0.065);
+  expect(calculEcartTauxAugmentation(0.25, 0.5)).toEqual(0.25);
 });
 
 it("calculIndicateurDeuxCalculable", () => {
-  expect(calculIndicateurDeuxCalculable(100, 39, 0.6, 0.7)).toEqual(false);
-  expect(calculIndicateurDeuxCalculable(100, 39, 0, 0.7)).toEqual(false);
-  expect(calculIndicateurDeuxCalculable(100, 40, 0, 0.7)).toEqual(true);
-  expect(calculIndicateurDeuxCalculable(100, 40, 0.6, 0.7)).toEqual(true);
+  expect(calculIndicateurDeuxCalculable(100, 39, 0.12, 0.23)).toEqual(false);
+  expect(calculIndicateurDeuxCalculable(100, 39, 0, 0.23)).toEqual(false);
+  expect(calculIndicateurDeuxCalculable(100, 40, 0, 0.23)).toEqual(true);
+  expect(calculIndicateurDeuxCalculable(100, 40, 0.12, 0.23)).toEqual(true);
 
-  expect(calculIndicateurDeuxCalculable(500, 199, 0.6, 0.7)).toEqual(false);
-  expect(calculIndicateurDeuxCalculable(500, 199, 0.6, 0)).toEqual(false);
-  expect(calculIndicateurDeuxCalculable(500, 400, 0.6, 0)).toEqual(true);
-  expect(calculIndicateurDeuxCalculable(1000, 400, 0.6, 0.7)).toEqual(true);
+  expect(calculIndicateurDeuxCalculable(500, 199, 0.12, 0.23)).toEqual(false);
+  expect(calculIndicateurDeuxCalculable(500, 199, 0.12, 0)).toEqual(false);
+  expect(calculIndicateurDeuxCalculable(500, 400, 0.12, 0)).toEqual(true);
+  expect(calculIndicateurDeuxCalculable(1000, 400, 0.12, 0.23)).toEqual(true);
 
-  expect(calculIndicateurDeuxCalculable(600, 200, 0.6, 0.7)).toEqual(false);
+  expect(calculIndicateurDeuxCalculable(600, 200, 0.12, 0.23)).toEqual(false);
   expect(calculIndicateurDeuxCalculable(600, 200, 0, 0)).toEqual(false);
   expect(calculIndicateurDeuxCalculable(700, 350, 0, 0)).toEqual(false);
-  expect(calculIndicateurDeuxCalculable(700, 350, 0.6, 0.7)).toEqual(true);
+  expect(calculIndicateurDeuxCalculable(700, 350, 0.12, 0.23)).toEqual(true);
 });
 
 it("calculIndicateurEcartAugmentation", () => {

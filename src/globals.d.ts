@@ -9,7 +9,7 @@ export type ActionType =
     }
   | {
       type: "updateIndicateurDeux";
-      group: Groupe;
+      state: Array<Groupe>;
     };
 
 export enum TranchesAges {

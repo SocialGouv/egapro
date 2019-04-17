@@ -22,8 +22,8 @@ import {
 } from "../utils/calculsEgaPro";
 
 import IndicateurDeuxStart from "./IndicateurDeuxStart";
-// import IndicateurDeuxForm from "./IndicateurDeuxForm";
-// import IndicateurDeuxResult from "./IndicateurDeuxResult";
+import IndicateurDeuxForm from "./IndicateurDeuxForm";
+import IndicateurDeuxResult from "./IndicateurDeuxResult";
 
 interface Props extends RouteComponentProps {
   state: Array<Groupe>;
@@ -31,8 +31,8 @@ interface Props extends RouteComponentProps {
 }
 
 function IndicateurDeux({ state, dispatch, match }: Props) {
-  const updateIndicateurDeux = (group: Groupe) =>
-    dispatch({ type: "updateIndicateurDeux", group });
+  const updateIndicateurDeux = (newState: Array<Groupe>) =>
+    dispatch({ type: "updateIndicateurDeux", state: newState });
 
   const computedDataByRow = state.map(
     ({
@@ -193,6 +193,14 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
     indicateurEcartAugmentation
   );
 
+  console.log({
+    totalEffectifsValides,
+    ecartsPonderesByRow,
+    totalEcartPondere,
+    indicateurEcartAugmentation,
+    noteIndicateurDeux
+  });
+
   return (
     <Switch>
       <Route
@@ -207,13 +215,12 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
           />
         )}
       />
-      {/* <Route
-        path={`${match.path}/categorieSocioPro/:categorieSocioPro`}
+      <Route
+        path={`${match.path}/formulaire`}
         render={props => (
           <IndicateurDeuxForm
             {...props}
-            key={props.match.params.categorieSocioPro}
-            effectif={state[props.match.params.categorieSocioPro]}
+            state={state}
             updateIndicateurDeux={updateIndicateurDeux}
           />
         )}
@@ -228,7 +235,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
             noteIndicateurDeux={noteIndicateurDeux}
           />
         )}
-      /> */}
+      />
     </Switch>
   );
 }
