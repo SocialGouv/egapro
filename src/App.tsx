@@ -72,7 +72,13 @@ function reducer(state: Array<Groupe>, action: ActionType) {
       ];
     }
     case "updateIndicateurDeux": {
-      return action.state;
+      return state.map((group: Groupe) => {
+        const datum = action.data.find(
+          ({ categorieSocioPro }) =>
+            categorieSocioPro === group.categorieSocioPro
+        );
+        return Object.assign({}, group, datum);
+      });
     }
     default:
       return state;

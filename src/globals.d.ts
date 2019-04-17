@@ -9,8 +9,14 @@ export type ActionType =
     }
   | {
       type: "updateIndicateurDeux";
-      state: Array<Groupe>;
+      data: ActionIndicateurDeuxData;
     };
+
+export type ActionIndicateurDeuxData = Array<{
+  categorieSocioPro: CategorieSocioPro;
+  tauxAugmentationFemmes: number | undefined;
+  tauxAugmentationHommes: number | undefined;
+}>;
 
 export enum TranchesAges {
   MoinsDe30ans,

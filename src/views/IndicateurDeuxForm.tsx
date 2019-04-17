@@ -1,7 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
-import { CategorieSocioPro, Groupe, GroupTranchesAges } from "../globals.d";
+import {
+  CategorieSocioPro,
+  Groupe,
+  GroupTranchesAges,
+  ActionIndicateurDeuxData
+} from "../globals.d";
 
 import useField, { stateFieldType } from "../hooks/useField";
 import RowFemmesHommes from "../components/RowFemmesHommes";
@@ -10,7 +15,7 @@ import { displayNameCategorieSocioPro } from "../utils/helpers";
 
 interface Props extends RouteComponentProps {
   state: Array<Groupe>;
-  updateIndicateurDeux: (newState: Array<Groupe>) => void;
+  updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void;
 }
 
 interface GroupeCategorioSocioProFields {
@@ -64,28 +69,25 @@ function IndicateurDeuxForm({ state, updateIndicateurDeux, history }: Props) {
     }
   );
 
-  // const saveGroup = () => {};
   const saveGroup = () => {
-    const newState: Array<Groupe> = state.map((group: Groupe) => {
-      const fields = allFields.find(
-        fields => fields.categorieSocioPro === group.categorieSocioPro
-      );
-      if (!fields || !fields.calculable) {
-        return group;
-      }
-      return {
-        ...group,
+    const data: ActionIndicateurDeuxData = allFields.map(
+      ({
+        categorieSocioPro,
+        tauxAugmentationFemmesField,
+        tauxAugmentationHommesField
+      }) => ({
+        categorieSocioPro,
         tauxAugmentationFemmes:
-          fields.tauxAugmentationFemmesField.input.value === ""
+          tauxAugmentationFemmesField.input.value === ""
             ? undefined
-            : parseFloat(fields.tauxAugmentationFemmesField.input.value) / 100,
+            : parseFloat(tauxAugmentationFemmesField.input.value) / 100,
         tauxAugmentationHommes:
-          fields.tauxAugmentationHommesField.input.value === ""
+          tauxAugmentationHommesField.input.value === ""
             ? undefined
-            : parseFloat(fields.tauxAugmentationHommesField.input.value) / 100
-      };
-    });
-    updateIndicateurDeux(newState);
+            : parseFloat(tauxAugmentationHommesField.input.value) / 100
+      })
+    );
+    updateIndicateurDeux(data);
 
     history.push("/indicateur2/resultat");
   };
