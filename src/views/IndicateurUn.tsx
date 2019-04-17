@@ -11,15 +11,15 @@ import {
 } from "../globals.d";
 
 import {
-  calculValiditeGroupe,
+  calculValiditeGroupeIndicateurUn,
   calculEffectifsValides,
   calculEcartRemunerationMoyenne,
   calculEcartApresApplicationSeuilPertinence,
   calculEcartPondere,
   calculTotalEcartPondere,
-  calculIndicateurCalculable,
+  calculIndicateurUnCalculable,
   calculIndicateurEcartRemuneration,
-  calculNote
+  calculNoteIndicateurUn
 } from "../utils/calculsEgaPro";
 
 import IndicateurUnStart from "./IndicateurUnStart";
@@ -53,7 +53,7 @@ function IndicateurUn({ state, dispatch, match }: Props) {
       remunerationAnnuelleBrutHommes = remunerationAnnuelleBrutHommes || 0;
 
       // VG
-      const validiteGroupe = calculValiditeGroupe(
+      const validiteGroupe = calculValiditeGroupeIndicateurUn(
         nombreSalariesFemmes,
         nombreSalariesHommes
       );
@@ -159,7 +159,7 @@ function IndicateurUn({ state, dispatch, match }: Props) {
   const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
 
   // IC
-  const indicateurCalculable = calculIndicateurCalculable(
+  const indicateurCalculable = calculIndicateurUnCalculable(
     totalNombreSalaries,
     totalEffectifsValides
   );
@@ -171,7 +171,7 @@ function IndicateurUn({ state, dispatch, match }: Props) {
   );
 
   // NOTE
-  const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
+  const noteIndicateurUn = calculNoteIndicateurUn(indicateurEcartRemuneration);
 
   return (
     <Switch>

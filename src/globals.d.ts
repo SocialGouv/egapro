@@ -6,6 +6,10 @@ export type ActionType =
   | {
       type: "updateIndicateurUn";
       group: Groupe;
+    }
+  | {
+      type: "updateIndicateurDeux";
+      group: Groupe;
     };
 
 export enum TranchesAges {
@@ -33,4 +37,6 @@ export interface GroupTranchesAges {
 export interface Groupe {
   categorieSocioPro: CategorieSocioPro;
   tranchesAges: Array<GroupTranchesAges>;
+  tauxAugmentationFemmes: number | undefined;
+  tauxAugmentationHommes: number | undefined;
 }

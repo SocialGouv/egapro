@@ -16,6 +16,7 @@ import mapEnum from "./utils/mapEnum";
 import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
 import IndicateurUn from "./views/IndicateurUn";
+import IndicateurDeux from "./views/IndicateurDeux";
 
 const baseGroupTranchesAgesState = {
   nombreSalariesFemmes: undefined,
@@ -32,19 +33,27 @@ const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
 const defaultState: Array<Groupe> = [
   {
     categorieSocioPro: CategorieSocioPro.Ouvriers,
-    tranchesAges: [...baseTranchesAge]
+    tranchesAges: [...baseTranchesAge],
+    tauxAugmentationFemmes: undefined,
+    tauxAugmentationHommes: undefined
   },
   {
     categorieSocioPro: CategorieSocioPro.Employes,
-    tranchesAges: [...baseTranchesAge]
+    tranchesAges: [...baseTranchesAge],
+    tauxAugmentationFemmes: undefined,
+    tauxAugmentationHommes: undefined
   },
   {
     categorieSocioPro: CategorieSocioPro.Techniciens,
-    tranchesAges: [...baseTranchesAge]
+    tranchesAges: [...baseTranchesAge],
+    tauxAugmentationFemmes: undefined,
+    tauxAugmentationHommes: undefined
   },
   {
     categorieSocioPro: CategorieSocioPro.Cadres,
-    tranchesAges: [...baseTranchesAge]
+    tranchesAges: [...baseTranchesAge],
+    tauxAugmentationFemmes: undefined,
+    tauxAugmentationHommes: undefined
   }
 ];
 
@@ -105,6 +114,12 @@ function App() {
             path="/indicateur1"
             render={props => (
               <IndicateurUn {...props} state={state} dispatch={dispatch} />
+            )}
+          />
+          <Route
+            path="/indicateur2"
+            render={props => (
+              <IndicateurDeux {...props} state={state} dispatch={dispatch} />
             )}
           />
         </Switch>

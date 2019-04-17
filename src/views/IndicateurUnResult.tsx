@@ -42,7 +42,7 @@ function IndicateurUnResult({
           )}
         </div>
 
-        {/* <LinkButton to="/indicateur1" label="Continuer" /> */}
+        <LinkButton to="/indicateur2" label="Continuer" />
       </div>
     </div>
   );
