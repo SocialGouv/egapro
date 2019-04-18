@@ -12,14 +12,14 @@ import {
 } from "../globals.d";
 
 import {
-  calculIndicateurDeuxEffectifsEtEcartAugmentParCategorieSocioPro,
-  calculIndicateurDeuxTotalEffectifsEtTauxAugmentation,
-  calculIndicateurDeuxEcartsPonderesParCategorieSocioPro,
+  calculEffectifsEtEcartAugmentParCategorieSocioPro,
+  calculTotalEffectifsEtTauxAugmentation,
+  calculEcartsPonderesParCategorieSocioPro,
   calculTotalEcartPondere,
-  calculIndicateurDeuxCalculable,
+  calculIndicateurCalculable,
   calculIndicateurEcartAugmentation,
-  calculNoteIndicateurDeux
-} from "../utils/calculsEgaPro";
+  calculNote
+} from "../utils/calculsEgaProIndicateurDeux";
 
 import IndicateurDeuxStart from "./IndicateurDeuxStart";
 import IndicateurDeuxForm from "./IndicateurDeuxForm";
@@ -34,7 +34,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
   const updateIndicateurDeux = (data: ActionIndicateurDeuxData) =>
     dispatch({ type: "updateIndicateurDeux", data });
 
-  const effectifEtEcartAugmentParGroupe = calculIndicateurDeuxEffectifsEtEcartAugmentParCategorieSocioPro(
+  const effectifEtEcartAugmentParGroupe = calculEffectifsEtEcartAugmentParCategorieSocioPro(
     state
   );
 
@@ -43,11 +43,9 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
     totalEffectifsValides,
     totalTauxAugmentationFemmes,
     totalTauxAugmentationHommes
-  } = calculIndicateurDeuxTotalEffectifsEtTauxAugmentation(
-    effectifEtEcartAugmentParGroupe
-  );
+  } = calculTotalEffectifsEtTauxAugmentation(effectifEtEcartAugmentParGroupe);
 
-  const ecartsPonderesByRow = calculIndicateurDeuxEcartsPonderesParCategorieSocioPro(
+  const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
     effectifEtEcartAugmentParGroupe,
     totalEffectifsValides
   );
@@ -56,7 +54,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
   const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
 
   // IC
-  const indicateurCalculable = calculIndicateurDeuxCalculable(
+  const indicateurCalculable = calculIndicateurCalculable(
     totalNombreSalaries,
     totalEffectifsValides,
     totalTauxAugmentationFemmes,
@@ -70,9 +68,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
   );
 
   // NOTE
-  const noteIndicateurDeux = calculNoteIndicateurDeux(
-    indicateurEcartAugmentation
-  );
+  const noteIndicateurDeux = calculNote(indicateurEcartAugmentation);
 
   console.log({
     effectifEtEcartAugmentParGroupe,
