@@ -1,4 +1,13 @@
-/* INDICATEUR 1 */
+import {
+  TranchesAges,
+  CategorieSocioPro,
+  Groupe,
+  GroupTranchesAges,
+  ActionType,
+  ActionEffectifData
+} from "../globals.d";
+
+/* INDICATEUR 1 CONST */
 
 const tauxEffectifValide = 40 / 100;
 
@@ -29,7 +38,7 @@ const baremeEcartRemuneration = [
   0
 ];
 
-/* INDICATEUR 2 */
+/* INDICATEUR 2 CONST */
 
 const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0];
 
@@ -41,6 +50,168 @@ const roundDecimal = (num: number, decimal: number): number => {
 };
 
 //////////////////
+// COMMON ////////
+//////////////////
+
+// EV
+export const calculEffectifsValides = (
+  validiteGroupe: boolean,
+  nombreSalariesFemmes: number,
+  nombreSalariesHommes: number
+): number => (validiteGroupe ? nombreSalariesFemmes + nombreSalariesHommes : 0);
+
+// EP
+export const calculEcartPondere = (
+  validiteGroupe: boolean,
+  ecartPourcentage: number | undefined,
+  effectifsValides: number,
+  totalEffectifsValides: number
+): number | undefined =>
+  validiteGroupe && totalEffectifsValides > 0 && ecartPourcentage !== undefined
+    ? roundDecimal(
+        (ecartPourcentage * effectifsValides) / totalEffectifsValides,
+        3
+      )
+    : undefined;
+
+const calculEcartsPonderesParGroupe = (
+  findEcartPourcentage: (
+    groupEffectifEtEcartAugment: effectifEtEcartAugmentGroup
+  ) => number | undefined
+) => (
+  groupEffectifEtEcartAugment: Array<effectifEtEcartAugmentGroup>,
+  totalEffectifsValides: number
+) =>
+  groupEffectifEtEcartAugment
+    .filter(({ validiteGroupe }: { validiteGroupe: boolean }) => validiteGroupe)
+    .map(effectifEtEcartAugment => {
+      const { validiteGroupe, effectifsValides } = effectifEtEcartAugment;
+      const ecartPourcentage = findEcartPourcentage(effectifEtEcartAugment);
+      // EP
+      const ecartPondere = calculEcartPondere(
+        validiteGroupe,
+        ecartPourcentage,
+        effectifsValides,
+        totalEffectifsValides
+      );
+
+      return ecartPondere;
+    });
+
+// TEP
+export const calculTotalEcartPondere = (
+  tableauEcartsPonderes: Array<number | undefined>
+): number | undefined =>
+  tableauEcartsPonderes.length === 0 ||
+  tableauEcartsPonderes.includes(undefined)
+    ? undefined
+    : roundDecimal(
+        tableauEcartsPonderes
+          .filter(ecartPondere => ecartPondere !== undefined)
+          .reduce(
+            (acc, val) => (acc || 0) + (val !== undefined ? val : 0),
+            undefined
+          ) || 0,
+        3
+      );
+
+//////////////////
+// EFFECTIFS /////
+//////////////////
+
+//export const calculEffectifsParTrancheAge = () =>
+
+interface effectifGroup {
+  nombreSalariesFemmes: number;
+  nombreSalariesHommes: number;
+  validiteGroupe: boolean;
+  effectifsValides: number;
+}
+
+const rowEffectifsParCategorieSocioPro = (
+  tranchesAges: Array<GroupTranchesAges>,
+  calculValiditeGroupe: (
+    nombreSalariesFemmes: number,
+    nombreSalariesHommes: number
+  ) => boolean
+): effectifGroup => {
+  const {
+    nombreSalariesFemmesGroupe,
+    nombreSalariesHommesGroupe
+  } = tranchesAges.reduce(
+    (
+      { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe },
+      { nombreSalariesFemmes, nombreSalariesHommes }
+    ) => ({
+      nombreSalariesFemmesGroupe:
+        nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
+      nombreSalariesHommesGroupe:
+        nombreSalariesHommesGroupe + (nombreSalariesHommes || 0)
+    }),
+    { nombreSalariesFemmesGroupe: 0, nombreSalariesHommesGroupe: 0 }
+  );
+
+  // VG
+  const validiteGroupe = calculValiditeGroupe(
+    nombreSalariesFemmesGroupe,
+    nombreSalariesHommesGroupe
+  );
+  // EV
+  const effectifsValides = calculEffectifsValides(
+    validiteGroupe,
+    nombreSalariesFemmesGroupe,
+    nombreSalariesHommesGroupe
+  );
+
+  return {
+    nombreSalariesFemmes: nombreSalariesFemmesGroupe,
+    nombreSalariesHommes: nombreSalariesHommesGroupe,
+    validiteGroupe,
+    effectifsValides
+  };
+};
+
+export const calculTotalEffectifs = (groupEffectif: Array<effectifGroup>) => {
+  const {
+    totalNombreSalariesFemmes,
+    totalNombreSalariesHommes
+  } = groupEffectif.reduce(
+    (
+      { totalNombreSalariesFemmes, totalNombreSalariesHommes },
+      { nombreSalariesFemmes, nombreSalariesHommes }
+    ) => {
+      return {
+        totalNombreSalariesFemmes:
+          totalNombreSalariesFemmes + nombreSalariesFemmes,
+        totalNombreSalariesHommes:
+          totalNombreSalariesHommes + nombreSalariesHommes
+      };
+    },
+    {
+      totalNombreSalariesFemmes: 0, //TNBF
+      totalNombreSalariesHommes: 0 //TNBH
+    }
+  );
+
+  // TNB
+  const totalNombreSalaries =
+    totalNombreSalariesFemmes + totalNombreSalariesHommes;
+
+  // TEV
+  const totalEffectifsValides = groupEffectif.reduce(
+    (acc, { effectifsValides }) => acc + effectifsValides,
+    0
+  );
+
+  return {
+    totalNombreSalariesFemmes,
+    totalNombreSalariesHommes,
+    totalNombreSalaries,
+    totalEffectifsValides
+  };
+};
+
+//////////////////
 // INDICATEUR 1 //
 //////////////////
 
@@ -49,13 +220,6 @@ export const calculValiditeGroupeIndicateurUn = (
   nombreSalariesFemmes: number,
   nombreSalariesHommes: number
 ): boolean => nombreSalariesFemmes >= 3 && nombreSalariesHommes >= 3;
-
-// EV
-export const calculEffectifsValides = (
-  validiteGroupe: boolean,
-  nombreSalariesFemmes: number,
-  nombreSalariesHommes: number
-): number => (validiteGroupe ? nombreSalariesFemmes + nombreSalariesHommes : 0);
 
 // ERM
 export const calculEcartRemunerationMoyenne = (
@@ -81,40 +245,6 @@ export const calculEcartApresApplicationSeuilPertinence = (
         3
       )
     : undefined;
-
-// EP
-export const calculEcartPondere = (
-  validiteGroupe: boolean,
-  ecartApresApplicationSeuilPertinence: number | undefined,
-  effectifsValides: number,
-  totalEffectifsValides: number
-): number | undefined =>
-  validiteGroupe &&
-  totalEffectifsValides > 0 &&
-  ecartApresApplicationSeuilPertinence !== undefined
-    ? roundDecimal(
-        (ecartApresApplicationSeuilPertinence * effectifsValides) /
-          totalEffectifsValides,
-        3
-      )
-    : undefined;
-
-// TEP
-export const calculTotalEcartPondere = (
-  tableauEcartsPonderes: Array<number | undefined>
-): number | undefined =>
-  tableauEcartsPonderes.length === 0 ||
-  tableauEcartsPonderes.includes(undefined)
-    ? undefined
-    : roundDecimal(
-        tableauEcartsPonderes
-          .filter(ecartPondere => ecartPondere !== undefined)
-          .reduce(
-            (acc, val) => (acc || 0) + (val !== undefined ? val : 0),
-            undefined
-          ) || 0,
-        3
-      );
 
 // IC
 export const calculIndicateurUnCalculable = (
@@ -162,6 +292,109 @@ export const calculEcartTauxAugmentation = (
     ? roundDecimal(nombreSalariesHommes - nombreSalariesFemmes, 3)
     : undefined;
 
+interface effectifEtEcartAugmentGroup extends effectifGroup {
+  categorieSocioPro: CategorieSocioPro;
+  tauxAugmentationFemmes: number;
+  tauxAugmentationHommes: number;
+  ecartTauxAugmentation: number | undefined;
+}
+
+export const calculIndicateurDeuxEffectifsEtEcartAugmentParCategorieSocioPro = (
+  state: Array<Groupe>
+): Array<effectifEtEcartAugmentGroup> => {
+  return state.map(
+    ({
+      categorieSocioPro,
+      tranchesAges,
+      tauxAugmentationFemmes,
+      tauxAugmentationHommes
+    }: Groupe) => {
+      tauxAugmentationFemmes = tauxAugmentationFemmes || 0;
+      tauxAugmentationHommes = tauxAugmentationHommes || 0;
+
+      const effectifs = rowEffectifsParCategorieSocioPro(
+        tranchesAges,
+        calculValiditeGroupeIndicateurDeux
+      );
+
+      // ETA
+      const ecartTauxAugmentation = calculEcartTauxAugmentation(
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes
+      );
+
+      return {
+        ...effectifs,
+        categorieSocioPro,
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes,
+        ecartTauxAugmentation
+      };
+    }
+  );
+};
+
+export const calculIndicateurDeuxTotalEffectifsEtTauxAugmentation = (
+  groupEffectifEtEcartAugment: Array<effectifEtEcartAugmentGroup>
+) => {
+  const {
+    totalNombreSalariesFemmes,
+    totalNombreSalariesHommes,
+    totalNombreSalaries,
+    totalEffectifsValides
+  } = calculTotalEffectifs(groupEffectifEtEcartAugment);
+
+  const {
+    sommeProduitTauxAugmentationFemmes,
+    sommeProduitTauxAugmentationHommes
+  } = groupEffectifEtEcartAugment.reduce(
+    (
+      {
+        sommeProduitTauxAugmentationFemmes,
+        sommeProduitTauxAugmentationHommes
+      },
+      {
+        nombreSalariesFemmes,
+        nombreSalariesHommes,
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes
+      }
+    ) => {
+      return {
+        sommeProduitTauxAugmentationFemmes:
+          sommeProduitTauxAugmentationFemmes +
+          (tauxAugmentationFemmes || 0) * nombreSalariesFemmes,
+        sommeProduitTauxAugmentationHommes:
+          sommeProduitTauxAugmentationHommes +
+          (tauxAugmentationHommes || 0) * nombreSalariesHommes
+      };
+    },
+    {
+      sommeProduitTauxAugmentationFemmes: 0,
+      sommeProduitTauxAugmentationHommes: 0
+    }
+  );
+
+  // TTAF
+  const totalTauxAugmentationFemmes =
+    sommeProduitTauxAugmentationFemmes / totalNombreSalariesFemmes;
+
+  // TTAH
+  const totalTauxAugmentationHommes =
+    sommeProduitTauxAugmentationHommes / totalNombreSalariesHommes;
+
+  return {
+    totalNombreSalaries,
+    totalEffectifsValides,
+    totalTauxAugmentationFemmes,
+    totalTauxAugmentationHommes
+  };
+};
+
+export const calculIndicateurDeuxEcartsPonderesParCategorieSocioPro = calculEcartsPonderesParGroupe(
+  ({ ecartTauxAugmentation }) => ecartTauxAugmentation
+);
+
 // IC
 export const calculIndicateurDeuxCalculable = (
   totalNombreSalaries: number,
@@ -188,6 +421,9 @@ export const calculNoteIndicateurDeux = (
 ): number | undefined =>
   indicateurEcartAugmentation !== undefined
     ? baremEcartAugmentation[
-        Math.min(11, Math.ceil(Math.max(0, indicateurEcartAugmentation)))
+        Math.min(
+          baremEcartAugmentation.length - 1,
+          Math.ceil(Math.max(0, indicateurEcartAugmentation))
+        )
       ]
     : undefined;

@@ -14,45 +14,39 @@ import Button from "../components/Button";
 import { displayNameCategorieSocioPro } from "../utils/helpers";
 
 interface Props extends RouteComponentProps {
-  state: Array<Groupe>;
+  ecartAugmentParCategorieSocioPro: Array<{
+    categorieSocioPro: CategorieSocioPro;
+    validiteGroupe: boolean;
+    tauxAugmentationFemmes: number | undefined;
+    tauxAugmentationHommes: number | undefined;
+  }>;
   updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void;
 }
 
 interface GroupeCategorioSocioProFields {
   categorieSocioPro: CategorieSocioPro;
-  calculable: boolean;
+  validiteGroupe: boolean;
   tauxAugmentationFemmesField: stateFieldType;
   tauxAugmentationHommesField: stateFieldType;
 }
 
-function IndicateurDeuxForm({ state, updateIndicateurDeux, history }: Props) {
-  const allFields: Array<GroupeCategorioSocioProFields> = state.map(
+function IndicateurDeuxForm({
+  ecartAugmentParCategorieSocioPro,
+  updateIndicateurDeux,
+  history
+}: Props) {
+  const allFields: Array<
+    GroupeCategorioSocioProFields
+  > = ecartAugmentParCategorieSocioPro.map(
     ({
       categorieSocioPro,
-      tranchesAges,
+      validiteGroupe,
       tauxAugmentationFemmes,
       tauxAugmentationHommes
-    }: Groupe) => {
-      const {
-        nombreSalariesFemmesGroupe,
-        nombreSalariesHommesGroupe
-      } = tranchesAges.reduce(
-        (
-          { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe },
-          { nombreSalariesFemmes, nombreSalariesHommes }
-        ) => ({
-          nombreSalariesFemmesGroupe:
-            nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
-          nombreSalariesHommesGroupe:
-            nombreSalariesHommesGroupe + (nombreSalariesHommes || 0)
-        }),
-        { nombreSalariesFemmesGroupe: 0, nombreSalariesHommesGroupe: 0 }
-      );
+    }) => {
       return {
         categorieSocioPro,
-        calculable:
-          (nombreSalariesFemmesGroupe || 0) >= 10 &&
-          (nombreSalariesHommesGroupe || 0) >= 10,
+        validiteGroupe,
         tauxAugmentationFemmesField: useField(
           "tauxAugmentationFemmes" + categorieSocioPro,
           tauxAugmentationFemmes === undefined
@@ -108,7 +102,7 @@ function IndicateurDeuxForm({ state, updateIndicateurDeux, history }: Props) {
         {allFields.map(
           ({
             categorieSocioPro,
-            calculable,
+            validiteGroupe,
             tauxAugmentationFemmesField,
             tauxAugmentationHommesField
           }: GroupeCategorioSocioProFields) => {
@@ -116,7 +110,7 @@ function IndicateurDeuxForm({ state, updateIndicateurDeux, history }: Props) {
               <RowFemmesHommes
                 key={categorieSocioPro}
                 name={displayNameCategorieSocioPro(categorieSocioPro)}
-                calculable={calculable}
+                calculable={validiteGroupe}
                 femmesField={tauxAugmentationFemmesField}
                 hommesField={tauxAugmentationHommesField}
               />

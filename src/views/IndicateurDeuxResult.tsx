@@ -20,7 +20,7 @@ function IndicateurDeuxResult({
     <div>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
-          Indicateur 1 {indicateurCalculable ? "Calculable" : "Non Calculable"}
+          Indicateur 2 {indicateurCalculable ? "Calculable" : "Non Calculable"}
         </p>
 
         <div css={styles.message}>

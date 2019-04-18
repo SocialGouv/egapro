@@ -12,10 +12,9 @@ import {
 } from "../globals.d";
 
 import {
-  calculValiditeGroupeIndicateurDeux,
-  calculEffectifsValides,
-  calculEcartTauxAugmentation,
-  calculEcartPondere,
+  calculIndicateurDeuxEffectifsEtEcartAugmentParCategorieSocioPro,
+  calculIndicateurDeuxTotalEffectifsEtTauxAugmentation,
+  calculIndicateurDeuxEcartsPonderesParCategorieSocioPro,
   calculTotalEcartPondere,
   calculIndicateurDeuxCalculable,
   calculIndicateurEcartAugmentation,
@@ -35,142 +34,23 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
   const updateIndicateurDeux = (data: ActionIndicateurDeuxData) =>
     dispatch({ type: "updateIndicateurDeux", data });
 
-  const computedDataByRow = state.map(
-    ({
-      tranchesAges,
-      tauxAugmentationFemmes,
-      tauxAugmentationHommes
-    }: Groupe) => {
-      tauxAugmentationFemmes = tauxAugmentationFemmes || 0;
-      tauxAugmentationHommes = tauxAugmentationHommes || 0;
-
-      const {
-        nombreSalariesFemmesGroupe,
-        nombreSalariesHommesGroupe
-      } = tranchesAges.reduce(
-        (
-          { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe },
-          { nombreSalariesFemmes, nombreSalariesHommes }
-        ) => ({
-          nombreSalariesFemmesGroupe:
-            nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
-          nombreSalariesHommesGroupe:
-            nombreSalariesHommesGroupe + (nombreSalariesHommes || 0)
-        }),
-        { nombreSalariesFemmesGroupe: 0, nombreSalariesHommesGroupe: 0 }
-      );
-
-      // VG
-      const validiteGroupe = calculValiditeGroupeIndicateurDeux(
-        nombreSalariesFemmesGroupe,
-        nombreSalariesHommesGroupe
-      );
-      // EV
-      const effectifsValides = calculEffectifsValides(
-        validiteGroupe,
-        nombreSalariesFemmesGroupe,
-        nombreSalariesHommesGroupe
-      );
-      // ETA
-      const ecartTauxAugmentation = calculEcartTauxAugmentation(
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes
-      );
-
-      return {
-        nombreSalariesFemmesGroupe,
-        nombreSalariesHommesGroupe,
-        validiteGroupe,
-        effectifsValides,
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes,
-        ecartTauxAugmentation
-      };
-    }
+  const effectifEtEcartAugmentParGroupe = calculIndicateurDeuxEffectifsEtEcartAugmentParCategorieSocioPro(
+    state
   );
 
   const {
-    totalNombreSalariesFemmes,
-    totalNombreSalariesHommes,
-    sommeProduitTauxAugmentationFemmes,
-    sommeProduitTauxAugmentationHommes
-  } = computedDataByRow.reduce(
-    (
-      {
-        totalNombreSalariesFemmes,
-        totalNombreSalariesHommes,
-        sommeProduitTauxAugmentationFemmes,
-        sommeProduitTauxAugmentationHommes
-      },
-      {
-        nombreSalariesFemmesGroupe,
-        nombreSalariesHommesGroupe,
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes
-      }
-    ) => {
-      return {
-        totalNombreSalariesFemmes:
-          totalNombreSalariesFemmes + nombreSalariesFemmesGroupe,
-        totalNombreSalariesHommes:
-          totalNombreSalariesHommes + nombreSalariesHommesGroupe,
-        sommeProduitTauxAugmentationFemmes:
-          sommeProduitTauxAugmentationFemmes +
-          (tauxAugmentationFemmes || 0) * nombreSalariesFemmesGroupe,
-        sommeProduitTauxAugmentationHommes:
-          sommeProduitTauxAugmentationHommes +
-          (tauxAugmentationHommes || 0) * nombreSalariesHommesGroupe
-      };
-    },
-    {
-      totalNombreSalariesFemmes: 0, //TNBF
-      totalNombreSalariesHommes: 0, //TNBH
-      sommeProduitTauxAugmentationFemmes: 0,
-      sommeProduitTauxAugmentationHommes: 0
-    }
+    totalNombreSalaries,
+    totalEffectifsValides,
+    totalTauxAugmentationFemmes,
+    totalTauxAugmentationHommes
+  } = calculIndicateurDeuxTotalEffectifsEtTauxAugmentation(
+    effectifEtEcartAugmentParGroupe
   );
 
-  // TNB
-  const totalNombreSalaries =
-    totalNombreSalariesFemmes + totalNombreSalariesHommes;
-
-  // TTAF
-  const totalTauxAugmentationFemmes =
-    sommeProduitTauxAugmentationFemmes / totalNombreSalariesFemmes;
-
-  // TTAH
-  const totalTauxAugmentationHommes =
-    sommeProduitTauxAugmentationHommes / totalNombreSalariesHommes;
-
-  // TEV
-  const totalEffectifsValides = computedDataByRow.reduce(
-    (acc, { effectifsValides }) => acc + effectifsValides,
-    0
+  const ecartsPonderesByRow = calculIndicateurDeuxEcartsPonderesParCategorieSocioPro(
+    effectifEtEcartAugmentParGroupe,
+    totalEffectifsValides
   );
-
-  const ecartsPonderesByRow = computedDataByRow
-    .filter(({ validiteGroupe }: { validiteGroupe: boolean }) => validiteGroupe)
-    .map(
-      ({
-        validiteGroupe,
-        effectifsValides,
-        ecartTauxAugmentation
-      }: {
-        validiteGroupe: boolean;
-        effectifsValides: number;
-        ecartTauxAugmentation: number | undefined;
-      }) => {
-        // EP
-        const ecartPondere = calculEcartPondere(
-          validiteGroupe,
-          ecartTauxAugmentation,
-          effectifsValides,
-          totalEffectifsValides
-        );
-
-        return ecartPondere;
-      }
-    );
 
   // TEP
   const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
@@ -195,6 +75,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
   );
 
   console.log({
+    effectifEtEcartAugmentParGroupe,
     totalEffectifsValides,
     ecartsPonderesByRow,
     totalEcartPondere,
@@ -221,7 +102,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
         render={props => (
           <IndicateurDeuxForm
             {...props}
-            state={state}
+            ecartAugmentParCategorieSocioPro={effectifEtEcartAugmentParGroupe}
             updateIndicateurDeux={updateIndicateurDeux}
           />
         )}
