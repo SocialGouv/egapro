@@ -10,6 +10,10 @@ export type ActionType =
   | {
       type: "updateIndicateurDeux";
       data: ActionIndicateurDeuxData;
+    }
+  | {
+      type: "updateIndicateurTrois";
+      data: ActionIndicateurTroisData;
     };
 
 export type ActionEffectifData = {
@@ -34,6 +38,12 @@ export type ActionIndicateurDeuxData = Array<{
   categorieSocioPro: CategorieSocioPro;
   tauxAugmentationFemmes: number | undefined;
   tauxAugmentationHommes: number | undefined;
+}>;
+
+export type ActionIndicateurTroisData = Array<{
+  categorieSocioPro: CategorieSocioPro;
+  tauxPromotionFemmes: number | undefined;
+  tauxPromotionHommes: number | undefined;
 }>;
 
 export enum TranchesAges {
@@ -63,4 +73,6 @@ export interface Groupe {
   tranchesAges: Array<GroupTranchesAges>;
   tauxAugmentationFemmes: number | undefined;
   tauxAugmentationHommes: number | undefined;
+  tauxPromotionFemmes: number | undefined;
+  tauxPromotionHommes: number | undefined;
 }

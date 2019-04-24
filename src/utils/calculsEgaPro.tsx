@@ -42,15 +42,17 @@ export const calculEcartsPonderesParGroupe = (
   findEcartPourcentage: (groupEffectifEtEcartAugment: {
     validiteGroupe: boolean;
     effectifsValides: number;
-    ecartTauxAugmentation?: number | undefined;
     ecartApresApplicationSeuilPertinence?: number | undefined;
+    ecartTauxAugmentation?: number | undefined;
+    ecartTauxPromotion?: number | undefined;
   }) => number | undefined
 ) => (
   groupEffectifEtEcart: Array<{
     validiteGroupe: boolean;
     effectifsValides: number;
-    ecartTauxAugmentation?: number | undefined;
     ecartApresApplicationSeuilPertinence?: number | undefined;
+    ecartTauxAugmentation?: number | undefined;
+    ecartTauxPromotion?: number | undefined;
   }>,
   totalEffectifsValides: number
 ) =>

@@ -7,27 +7,27 @@ import LinkButton from "../components/LinkButton";
 
 interface Props {
   indicateurCalculable: boolean;
-  indicateurEcartAugmentation: number | undefined;
-  noteIndicateurDeux: number | undefined;
+  indicateurEcartPromotion: number | undefined;
+  noteIndicateurTrois: number | undefined;
 }
 
-function IndicateurDeuxResult({
+function IndicateurTroisResult({
   indicateurCalculable,
-  indicateurEcartAugmentation,
-  noteIndicateurDeux
+  indicateurEcartPromotion,
+  noteIndicateurTrois
 }: Props) {
   return (
     <div>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
-          Indicateur 2 {indicateurCalculable ? "Calculable" : "Non Calculable"}
+          Indicateur 3 {indicateurCalculable ? "Calculable" : "Non Calculable"}
         </p>
 
         <div css={styles.message}>
-          {indicateurEcartAugmentation !== undefined ? (
+          {indicateurEcartPromotion !== undefined ? (
             <p>
               indicateur d'écart d'augmentation :{" "}
-              {indicateurEcartAugmentation.toFixed(1)}%
+              {indicateurEcartPromotion.toFixed(1)}%
             </p>
           ) : (
             <p>---</p>
@@ -35,14 +35,14 @@ function IndicateurDeuxResult({
         </div>
 
         <div css={styles.message}>
-          {noteIndicateurDeux !== undefined ? (
-            <p>Note : {noteIndicateurDeux}</p>
+          {noteIndicateurTrois !== undefined ? (
+            <p>Note : {noteIndicateurTrois}</p>
           ) : (
             <p>---</p>
           )}
         </div>
 
-        <LinkButton to="/indicateur3" label="Continuer" />
+        <LinkButton to="/indicateur4" label="Continuer" />
       </div>
     </div>
   );
@@ -75,4 +75,4 @@ const styles = {
   })
 };
 
-export default IndicateurDeuxResult;
+export default IndicateurTroisResult;

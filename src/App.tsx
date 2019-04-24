@@ -18,6 +18,7 @@ import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
 import IndicateurUn from "./views/IndicateurUn";
 import IndicateurDeux from "./views/IndicateurDeux";
+import IndicateurTrois from "./views/IndicateurTrois";
 
 const baseGroupTranchesAgesState = {
   nombreSalariesFemmes: undefined,
@@ -31,30 +32,30 @@ const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
   ...baseGroupTranchesAgesState
 }));
 
+const baseGroupe = {
+  tranchesAges: [...baseTranchesAge],
+  tauxAugmentationFemmes: undefined,
+  tauxAugmentationHommes: undefined,
+  tauxPromotionFemmes: undefined,
+  tauxPromotionHommes: undefined
+};
+
 const defaultState: Array<Groupe> = [
   {
     categorieSocioPro: CategorieSocioPro.Ouvriers,
-    tranchesAges: [...baseTranchesAge],
-    tauxAugmentationFemmes: undefined,
-    tauxAugmentationHommes: undefined
+    ...baseGroupe
   },
   {
     categorieSocioPro: CategorieSocioPro.Employes,
-    tranchesAges: [...baseTranchesAge],
-    tauxAugmentationFemmes: undefined,
-    tauxAugmentationHommes: undefined
+    ...baseGroupe
   },
   {
     categorieSocioPro: CategorieSocioPro.Techniciens,
-    tranchesAges: [...baseTranchesAge],
-    tauxAugmentationFemmes: undefined,
-    tauxAugmentationHommes: undefined
+    ...baseGroupe
   },
   {
     categorieSocioPro: CategorieSocioPro.Cadres,
-    tranchesAges: [...baseTranchesAge],
-    tauxAugmentationFemmes: undefined,
-    tauxAugmentationHommes: undefined
+    ...baseGroupe
   }
 ];
 
@@ -99,6 +100,15 @@ function reducer(state: Array<Groupe>, action: ActionType) {
       return [...state.slice(0, index), newGroup, ...state.slice(index + 1)];
     }
     case "updateIndicateurDeux": {
+      return state.map((group: Groupe) => {
+        const datum = action.data.find(
+          ({ categorieSocioPro }) =>
+            categorieSocioPro === group.categorieSocioPro
+        );
+        return Object.assign({}, group, datum);
+      });
+    }
+    case "updateIndicateurTrois": {
       return state.map((group: Groupe) => {
         const datum = action.data.find(
           ({ categorieSocioPro }) =>
@@ -156,6 +166,12 @@ function App() {
             path="/indicateur2"
             render={props => (
               <IndicateurDeux {...props} state={state} dispatch={dispatch} />
+            )}
+          />
+          <Route
+            path="/indicateur3"
+            render={props => (
+              <IndicateurTrois {...props} state={state} dispatch={dispatch} />
             )}
           />
         </Switch>
