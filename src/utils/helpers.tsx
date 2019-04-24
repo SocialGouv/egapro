@@ -35,3 +35,14 @@ export function displayNameCategorieSocioPro(
 export function displayPercent(num: number, digits: number = 2): string {
   return (num * 100).toFixed(digits) + "%";
 }
+
+/* Utils */
+
+export const roundDecimal = (num: number, decimal: number): number => {
+  const mult = Math.pow(10, decimal);
+  return Math.round(num * mult) / mult;
+};
+
+export const fractionToPercentage = (num: number) => roundDecimal(num * 100, 5);
+
+export const percentageToFraction = (num: number) => roundDecimal(num / 100, 5);

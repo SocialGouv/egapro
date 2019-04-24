@@ -11,7 +11,11 @@ import {
 import useField, { stateFieldType } from "../hooks/useField";
 import RowFemmesHommes from "../components/RowFemmesHommes";
 import Button from "../components/Button";
-import { displayNameCategorieSocioPro } from "../utils/helpers";
+import {
+  fractionToPercentage,
+  percentageToFraction,
+  displayNameCategorieSocioPro
+} from "../utils/helpers";
 
 interface Props extends RouteComponentProps {
   ecartAugmentParCategorieSocioPro: Array<{
@@ -51,13 +55,13 @@ function IndicateurDeuxForm({
           "tauxAugmentationFemmes" + categorieSocioPro,
           tauxAugmentationFemmes === undefined
             ? ""
-            : String(tauxAugmentationFemmes * 100)
+            : String(fractionToPercentage(tauxAugmentationFemmes))
         ),
         tauxAugmentationHommesField: useField(
           "tauxAugmentationHommes" + categorieSocioPro,
           tauxAugmentationHommes === undefined
             ? ""
-            : String(tauxAugmentationHommes * 100)
+            : String(fractionToPercentage(tauxAugmentationHommes))
         )
       };
     }
@@ -74,11 +78,15 @@ function IndicateurDeuxForm({
         tauxAugmentationFemmes:
           tauxAugmentationFemmesField.input.value === ""
             ? undefined
-            : parseFloat(tauxAugmentationFemmesField.input.value) / 100,
+            : percentageToFraction(
+                parseFloat(tauxAugmentationFemmesField.input.value)
+              ),
         tauxAugmentationHommes:
           tauxAugmentationHommesField.input.value === ""
             ? undefined
-            : parseFloat(tauxAugmentationHommesField.input.value) / 100
+            : percentageToFraction(
+                parseFloat(tauxAugmentationHommesField.input.value)
+              )
       })
     );
     updateIndicateurDeux(data);

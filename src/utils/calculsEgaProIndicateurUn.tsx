@@ -7,9 +7,10 @@ import {
   ActionEffectifData
 } from "../globals.d";
 
+import { roundDecimal } from "./helpers";
+
 import {
   tauxEffectifValide,
-  roundDecimal,
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
   calculTotalEffectifs,

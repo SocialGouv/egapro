@@ -7,16 +7,11 @@ import {
   ActionEffectifData
 } from "../globals.d";
 
+import { roundDecimal } from "./helpers";
+
 /* EFFECTIF CONST */
 
 export const tauxEffectifValide = 40 / 100;
-
-/* Utils */
-
-export const roundDecimal = (num: number, decimal: number): number => {
-  const mult = Math.pow(10, decimal);
-  return Math.round(num * mult) / mult;
-};
 
 //////////////////
 // COMMON ////////
