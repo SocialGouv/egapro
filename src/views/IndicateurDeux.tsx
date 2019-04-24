@@ -70,15 +70,6 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
   // NOTE
   const noteIndicateurDeux = calculNote(indicateurEcartAugmentation);
 
-  console.log({
-    effectifEtEcartAugmentParGroupe,
-    totalEffectifsValides,
-    ecartsPonderesByRow,
-    totalEcartPondere,
-    indicateurEcartAugmentation,
-    noteIndicateurDeux
-  });
-
   return (
     <Switch>
       <Route

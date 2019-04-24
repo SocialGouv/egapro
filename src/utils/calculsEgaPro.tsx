@@ -9,40 +9,7 @@ import {
 
 /* EFFECTIF CONST */
 
-const tauxEffectifValide = 40 / 100;
-
-/* INDICATEUR 1 CONST */
-
-const seuilPertinence = 5 / 100;
-
-const baremeEcartRemuneration = [
-  40,
-  39,
-  38,
-  37,
-  36,
-  35,
-  34,
-  33,
-  31,
-  29,
-  27,
-  25,
-  23,
-  21,
-  19,
-  17,
-  14,
-  11,
-  8,
-  5,
-  2,
-  0
-];
-
-/* INDICATEUR 2 CONST */
-
-const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0];
+export const tauxEffectifValide = 40 / 100;
 
 /* Utils */
 
@@ -56,14 +23,14 @@ export const roundDecimal = (num: number, decimal: number): number => {
 //////////////////
 
 // EV
-export const calculEffectifsValides = (
+const calculEffectifsValides = (
   validiteGroupe: boolean,
   nombreSalariesFemmes: number,
   nombreSalariesHommes: number
 ): number => (validiteGroupe ? nombreSalariesFemmes + nombreSalariesHommes : 0);
 
 // EP
-export const calculEcartPondere = (
+const calculEcartPondere = (
   validiteGroupe: boolean,
   ecartPourcentage: number | undefined,
   effectifsValides: number,
@@ -80,17 +47,19 @@ export const calculEcartsPonderesParGroupe = (
   findEcartPourcentage: (groupEffectifEtEcartAugment: {
     validiteGroupe: boolean;
     effectifsValides: number;
-    ecartTauxAugmentation: number | undefined;
+    ecartTauxAugmentation?: number | undefined;
+    ecartApresApplicationSeuilPertinence?: number | undefined;
   }) => number | undefined
 ) => (
-  groupEffectifEtEcartAugment: Array<{
+  groupEffectifEtEcart: Array<{
     validiteGroupe: boolean;
     effectifsValides: number;
-    ecartTauxAugmentation: number | undefined;
+    ecartTauxAugmentation?: number | undefined;
+    ecartApresApplicationSeuilPertinence?: number | undefined;
   }>,
   totalEffectifsValides: number
 ) =>
-  groupEffectifEtEcartAugment
+  groupEffectifEtEcart
     .filter(({ validiteGroupe }) => validiteGroupe)
     .map(effectifEtEcart => {
       const { validiteGroupe, effectifsValides } = effectifEtEcart;
@@ -127,14 +96,42 @@ export const calculTotalEcartPondere = (
 // EFFECTIFS /////
 //////////////////
 
-//export const calculEffectifsParTrancheAge = () =>
-
 export interface effectifGroup {
   nombreSalariesFemmes: number;
   nombreSalariesHommes: number;
   validiteGroupe: boolean;
   effectifsValides: number;
 }
+
+export const rowEffectifsParTrancheAge = (
+  { nombreSalariesFemmes, nombreSalariesHommes }: GroupTranchesAges,
+  calculValiditeGroupe: (
+    nombreSalariesFemmes: number,
+    nombreSalariesHommes: number
+  ) => boolean
+): effectifGroup => {
+  nombreSalariesFemmes = nombreSalariesFemmes || 0;
+  nombreSalariesHommes = nombreSalariesHommes || 0;
+
+  // VG
+  const validiteGroupe = calculValiditeGroupe(
+    nombreSalariesFemmes,
+    nombreSalariesHommes
+  );
+  // EV
+  const effectifsValides = calculEffectifsValides(
+    validiteGroupe,
+    nombreSalariesFemmes,
+    nombreSalariesHommes
+  );
+
+  return {
+    nombreSalariesFemmes,
+    nombreSalariesHommes,
+    validiteGroupe,
+    effectifsValides
+  };
+};
 
 export const rowEffectifsParCategorieSocioPro = (
   tranchesAges: Array<GroupTranchesAges>,
@@ -218,65 +215,3 @@ export const calculTotalEffectifs = (groupEffectif: Array<effectifGroup>) => {
     totalEffectifsValides
   };
 };
-
-//////////////////
-// INDICATEUR 1 //
-//////////////////
-
-// VG
-export const calculValiditeGroupeIndicateurUn = (
-  nombreSalariesFemmes: number,
-  nombreSalariesHommes: number
-): boolean => nombreSalariesFemmes >= 3 && nombreSalariesHommes >= 3;
-
-// ERM
-export const calculEcartRemunerationMoyenne = (
-  remunerationAnnuelleBrutFemmes: number,
-  remunerationAnnuelleBrutHommes: number
-): number | undefined =>
-  remunerationAnnuelleBrutFemmes > 0 && remunerationAnnuelleBrutHommes > 0
-    ? roundDecimal(
-        (remunerationAnnuelleBrutHommes - remunerationAnnuelleBrutFemmes) /
-          remunerationAnnuelleBrutHommes,
-        3
-      )
-    : undefined;
-
-// ESP
-export const calculEcartApresApplicationSeuilPertinence = (
-  ecartRemunerationMoyenne: number | undefined
-): number | undefined =>
-  ecartRemunerationMoyenne !== undefined
-    ? roundDecimal(
-        Math.sign(ecartRemunerationMoyenne) *
-          Math.max(0, Math.abs(ecartRemunerationMoyenne) - seuilPertinence),
-        3
-      )
-    : undefined;
-
-// IC
-export const calculIndicateurUnCalculable = (
-  totalNombreSalaries: number,
-  totalEffectifsValides: number
-): boolean =>
-  totalNombreSalaries > 0 &&
-  totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide;
-
-// IER
-export const calculIndicateurEcartRemuneration = (
-  indicateurCalculable: boolean,
-  totalEcartPondere: number | undefined
-): number | undefined =>
-  indicateurCalculable && totalEcartPondere !== undefined
-    ? roundDecimal(100 * totalEcartPondere, 3)
-    : undefined;
-
-// NOTE
-export const calculNoteIndicateurUn = (
-  indicateurEcartRemuneration: number | undefined
-): number | undefined =>
-  indicateurEcartRemuneration !== undefined
-    ? baremeEcartRemuneration[
-        Math.min(21, Math.ceil(Math.max(0, indicateurEcartRemuneration)))
-      ]
-    : undefined;

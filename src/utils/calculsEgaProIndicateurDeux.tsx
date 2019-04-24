@@ -8,17 +8,14 @@ import {
 } from "../globals.d";
 
 import {
+  tauxEffectifValide,
   roundDecimal,
-  calculEffectifsValides,
-  calculEcartPondere,
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
   calculTotalEffectifs,
   rowEffectifsParCategorieSocioPro,
   effectifGroup
 } from "./calculsEgaPro";
-
-const tauxEffectifValide = 40 / 100;
 
 const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0];
 
@@ -27,8 +24,6 @@ const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0];
 //////////////////
 
 export {
-  calculEffectifsValides, // EV
-  calculEcartPondere, // EP
   calculTotalEcartPondere // TEV
 };
 
@@ -44,11 +39,11 @@ export const calculValiditeGroupe = (
 
 // ETA
 export const calculEcartTauxAugmentation = (
-  nombreSalariesFemmes: number,
-  nombreSalariesHommes: number
+  tauxAugmentationFemmes: number,
+  tauxAugmentationHommes: number
 ): number | undefined =>
-  nombreSalariesFemmes > 0 && nombreSalariesHommes > 0
-    ? roundDecimal(nombreSalariesHommes - nombreSalariesFemmes, 3)
+  tauxAugmentationFemmes > 0 && tauxAugmentationHommes > 0
+    ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 3)
     : undefined;
 
 interface effectifEtEcartAugmentGroup extends effectifGroup {
