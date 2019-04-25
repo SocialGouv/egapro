@@ -1,16 +1,6 @@
-import {
-  TranchesAges,
-  CategorieSocioPro,
-  Groupe,
-  GroupTranchesAges,
-  ActionType,
-  ActionEffectifData
-} from "../globals.d";
-
-import { roundDecimal } from "./helpers";
+import { CategorieSocioPro, Groupe } from "../globals.d";
 
 import {
-  tauxEffectifValide,
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
   calculTotalEffectifs,
@@ -21,10 +11,6 @@ import {
 import {
   calculValiditeGroupe,
   calculEcartTauxAugmentation,
-  calculEffectifsEtEcartAugmentParCategorieSocioPro,
-  calculTotalEffectifsEtTauxAugmentation,
-  //calculEcartsPonderesParCategorieSocioPro,
-  //calculTotalEcartPondere,
   calculIndicateurCalculable,
   calculIndicateurEcartAugmentation
 } from "../utils/calculsEgaProIndicateurDeux";
@@ -42,10 +28,10 @@ export {
 };
 
 //////////////////
-// INDICATEUR 2 //
+// INDICATEUR 3 //
 //////////////////
 
-// ETA
+// ETP
 export const calculEcartTauxPromotion = calculEcartTauxAugmentation;
 
 interface effectifEtEcartPromoGroup extends effectifGroup {
@@ -128,11 +114,11 @@ export const calculTotalEffectifsEtTauxPromotion = (
     }
   );
 
-  // TTAF
+  // TTPF
   const totalTauxPromotionFemmes =
     sommeProduitTauxPromotionFemmes / totalNombreSalariesFemmes;
 
-  // TTAH
+  // TTPH
   const totalTauxPromotionHommes =
     sommeProduitTauxPromotionHommes / totalNombreSalariesHommes;
 
@@ -148,7 +134,7 @@ export const calculEcartsPonderesParCategorieSocioPro = calculEcartsPonderesParG
   ({ ecartTauxPromotion }) => ecartTauxPromotion
 );
 
-// IEA
+// IEP
 export const calculIndicateurEcartPromotion = calculIndicateurEcartAugmentation;
 
 // NOTE

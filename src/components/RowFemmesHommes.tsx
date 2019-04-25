@@ -1,24 +1,27 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import React from "react";
-
-import { stateFieldType } from "../hooks/useField";
+import { useField } from "react-final-form-hooks";
 
 import FieldGroup from "./FieldGroup";
 
 interface Props {
+  form: any;
   name: string;
   calculable: boolean;
-  femmesField: stateFieldType;
-  hommesField: stateFieldType;
+  femmeFieldName: string;
+  hommeFieldName: string;
 }
 
 function RowFemmesHommes({
+  form,
   name,
   calculable,
-  femmesField,
-  hommesField
+  femmeFieldName,
+  hommeFieldName
 }: Props) {
+  const femmesField = useField(femmeFieldName, form);
+  const hommesField = useField(hommeFieldName, form);
   return (
     <div css={styles.row}>
       <div css={styles.cellHead}>{name}</div>

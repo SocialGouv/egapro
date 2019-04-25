@@ -1,16 +1,11 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
-import {
-  CategorieSocioPro,
-  Groupe,
-  GroupTranchesAges,
-  ActionIndicateurDeuxData
-} from "../globals.d";
+import { useForm } from "react-final-form-hooks";
+import { CategorieSocioPro, ActionIndicateurDeuxData } from "../globals.d";
 
-import useField, { stateFieldType } from "../hooks/useField";
 import RowFemmesHommes from "../components/RowFemmesHommes";
-import Button from "../components/Button";
+import ButtonSubmit from "../components/ButtonSubmit";
 import {
   fractionToPercentage,
   percentageToFraction,
@@ -27,21 +22,17 @@ interface Props extends RouteComponentProps {
   updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void;
 }
 
-interface GroupeCategorioSocioProFields {
-  categorieSocioPro: CategorieSocioPro;
-  validiteGroupe: boolean;
-  tauxAugmentationFemmesField: stateFieldType;
-  tauxAugmentationHommesField: stateFieldType;
-}
+const getFieldName = (
+  categorieSocioPro: CategorieSocioPro,
+  genre: "Hommes" | "Femmes"
+): string => "tauxAugmentation" + categorieSocioPro + genre;
 
 function IndicateurDeuxForm({
   ecartAugmentParCategorieSocioPro,
   updateIndicateurDeux,
   history
 }: Props) {
-  const allFields: Array<
-    GroupeCategorioSocioProFields
-  > = ecartAugmentParCategorieSocioPro.map(
+  const infoFields = ecartAugmentParCategorieSocioPro.map(
     ({
       categorieSocioPro,
       validiteGroupe,
@@ -51,41 +42,58 @@ function IndicateurDeuxForm({
       return {
         categorieSocioPro,
         validiteGroupe,
-        tauxAugmentationFemmesField: useField(
-          "tauxAugmentationFemmes" + categorieSocioPro,
+        tauxAugmentationFemmesName: getFieldName(categorieSocioPro, "Femmes"),
+        tauxAugmentationFemmesValue:
           tauxAugmentationFemmes === undefined
             ? ""
-            : String(fractionToPercentage(tauxAugmentationFemmes))
-        ),
-        tauxAugmentationHommesField: useField(
-          "tauxAugmentationHommes" + categorieSocioPro,
+            : String(fractionToPercentage(tauxAugmentationFemmes)),
+        tauxAugmentationHommesName: getFieldName(categorieSocioPro, "Hommes"),
+        tauxAugmentationHommesValue:
           tauxAugmentationHommes === undefined
             ? ""
             : String(fractionToPercentage(tauxAugmentationHommes))
-        )
       };
     }
   );
 
-  const saveGroup = () => {
-    const data: ActionIndicateurDeuxData = allFields.map(
+  const initialValues = infoFields.reduce(
+    (
+      acc,
+      {
+        tauxAugmentationFemmesName,
+        tauxAugmentationFemmesValue,
+        tauxAugmentationHommesName,
+        tauxAugmentationHommesValue
+      }
+    ) => {
+      return {
+        ...acc,
+        [tauxAugmentationFemmesName]: tauxAugmentationFemmesValue,
+        [tauxAugmentationHommesName]: tauxAugmentationHommesValue
+      };
+    },
+    {}
+  );
+
+  const onSubmit = (formData: any) => {
+    const data: ActionIndicateurDeuxData = infoFields.map(
       ({
         categorieSocioPro,
-        tauxAugmentationFemmesField,
-        tauxAugmentationHommesField
+        tauxAugmentationFemmesName,
+        tauxAugmentationHommesName
       }) => ({
         categorieSocioPro,
         tauxAugmentationFemmes:
-          tauxAugmentationFemmesField.input.value === ""
+          formData[tauxAugmentationFemmesName] === ""
             ? undefined
             : percentageToFraction(
-                parseFloat(tauxAugmentationFemmesField.input.value)
+                parseFloat(formData[tauxAugmentationFemmesName])
               ),
         tauxAugmentationHommes:
-          tauxAugmentationHommesField.input.value === ""
+          formData[tauxAugmentationHommesName] === ""
             ? undefined
             : percentageToFraction(
-                parseFloat(tauxAugmentationHommesField.input.value)
+                parseFloat(formData[tauxAugmentationHommesName])
               )
       })
     );
@@ -94,8 +102,14 @@ function IndicateurDeuxForm({
     history.push("/indicateur2/resultat");
   };
 
+  const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
+    initialValues,
+    onSubmit // the function to call with your form values upon valid submit
+    //validate // a record-level validation function to check all form values
+  });
+
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
           Taux d'augmentation (proportions de salariés augmentés)
@@ -107,28 +121,29 @@ function IndicateurDeuxForm({
           <div css={styles.cell}>hommes</div>
         </div>
 
-        {allFields.map(
+        {infoFields.map(
           ({
             categorieSocioPro,
             validiteGroupe,
-            tauxAugmentationFemmesField,
-            tauxAugmentationHommesField
-          }: GroupeCategorioSocioProFields) => {
+            tauxAugmentationFemmesName,
+            tauxAugmentationHommesName
+          }) => {
             return (
               <RowFemmesHommes
                 key={categorieSocioPro}
+                form={form}
                 name={displayNameCategorieSocioPro(categorieSocioPro)}
                 calculable={validiteGroupe}
-                femmesField={tauxAugmentationFemmesField}
-                hommesField={tauxAugmentationHommesField}
+                femmeFieldName={tauxAugmentationFemmesName}
+                hommeFieldName={tauxAugmentationHommesName}
               />
             );
           }
         )}
 
-        <Button onClick={saveGroup} label="Valider" />
+        <ButtonSubmit label="Valider" />
       </div>
-    </div>
+    </form>
   );
 }
 

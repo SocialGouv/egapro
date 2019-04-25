@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
+import { useForm } from "react-final-form-hooks";
 import {
   TranchesAges,
   Groupe,
@@ -8,9 +9,8 @@ import {
   ActionEffectifData
 } from "../globals.d";
 
-import useField, { stateFieldType } from "../hooks/useField";
 import RowFemmesHommes from "../components/RowFemmesHommes";
-import Button from "../components/Button";
+import ButtonSubmit from "../components/ButtonSubmit";
 
 import {
   displayNameCategorieSocioPro,
@@ -22,14 +22,13 @@ interface Props extends RouteComponentProps {
   updateEffectif: (data: ActionEffectifData) => void;
 }
 
-interface GroupeTrancheAgeFields {
-  trancheAge: TranchesAges;
-  nbSalarieFemmeField: stateFieldType;
-  nbSalarieHommeField: stateFieldType;
-}
+const getFieldName = (
+  trancheAge: TranchesAges,
+  genre: "Hommes" | "Femmes"
+): string => "nombreSalaries" + trancheAge + genre;
 
 function GroupEffectif({ effectif, updateEffectif, history }: Props) {
-  const allFields: Array<GroupeTrancheAgeFields> = effectif.tranchesAges.map(
+  const infoFields = effectif.tranchesAges.map(
     ({
       trancheAge,
       nombreSalariesFemmes,
@@ -37,37 +36,56 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
     }: GroupTranchesAges) => {
       return {
         trancheAge,
-        nbSalarieFemmeField: useField(
-          "nombreSalariesFemmes" + trancheAge,
-          nombreSalariesFemmes === undefined ? "" : String(nombreSalariesFemmes)
-        ),
-        nbSalarieHommeField: useField(
-          "nombreSalariesHommes" + trancheAge,
+        nbSalarieFemmeName: getFieldName(trancheAge, "Femmes"),
+        nbSalarieFemmeValue:
+          nombreSalariesFemmes === undefined
+            ? ""
+            : String(nombreSalariesFemmes),
+        nbSalarieHommeName: getFieldName(trancheAge, "Hommes"),
+        nbSalarieHommeValue:
           nombreSalariesHommes === undefined ? "" : String(nombreSalariesHommes)
-        )
       };
     }
   );
 
-  const saveGroup = () => {
+  const initialValues = infoFields.reduce(
+    (
+      acc,
+      {
+        nbSalarieFemmeName,
+        nbSalarieFemmeValue,
+        nbSalarieHommeName,
+        nbSalarieHommeValue
+      }
+    ) => {
+      return {
+        ...acc,
+        [nbSalarieFemmeName]: nbSalarieFemmeValue,
+        [nbSalarieHommeName]: nbSalarieHommeValue
+      };
+    },
+    {}
+  );
+
+  const onSubmit = (formData: any) => {
     const data: ActionEffectifData = {
       categorieSocioPro: effectif.categorieSocioPro,
-      tranchesAges: allFields.map(
-        ({ trancheAge, nbSalarieFemmeField, nbSalarieHommeField }) => ({
+      tranchesAges: infoFields.map(
+        ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => ({
           trancheAge,
           nombreSalariesFemmes:
-            nbSalarieFemmeField.input.value === ""
+            formData[nbSalarieFemmeName] === ""
               ? undefined
-              : parseInt(nbSalarieFemmeField.input.value, 10),
+              : parseInt(formData[nbSalarieFemmeName], 10),
           nombreSalariesHommes:
-            nbSalarieHommeField.input.value === ""
+            formData[nbSalarieHommeName] === ""
               ? undefined
-              : parseInt(nbSalarieHommeField.input.value, 10)
+              : parseInt(formData[nbSalarieHommeName], 10)
         })
       )
     };
-    updateEffectif(data);
 
+    updateEffectif(data);
     const nextRoute =
       effectif.categorieSocioPro < 3
         ? `/effectifs/${effectif.categorieSocioPro + 1}`
@@ -75,8 +93,14 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
     history.push(nextRoute);
   };
 
+  const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
+    initialValues,
+    onSubmit // the function to call with your form values upon valid submit
+    //validate // a record-level validation function to check all form values
+  });
+
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
           Nombre de salarié -{" "}
@@ -89,27 +113,24 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
           <div css={styles.cell}>hommes</div>
         </div>
 
-        {allFields.map(
-          ({
-            trancheAge,
-            nbSalarieFemmeField,
-            nbSalarieHommeField
-          }: GroupeTrancheAgeFields) => {
+        {infoFields.map(
+          ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
             return (
               <RowFemmesHommes
                 key={trancheAge}
+                form={form}
                 name={displayNameTranchesAges(trancheAge)}
                 calculable={true}
-                femmesField={nbSalarieFemmeField}
-                hommesField={nbSalarieHommeField}
+                femmeFieldName={nbSalarieFemmeName}
+                hommeFieldName={nbSalarieHommeName}
               />
             );
           }
         )}
 
-        <Button onClick={saveGroup} label="Valider" />
+        <ButtonSubmit label="Valider" />
       </div>
-    </div>
+    </form>
   );
 }
 

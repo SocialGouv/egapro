@@ -2,14 +2,7 @@
 import { jsx } from "@emotion/core";
 import { RouteComponentProps, Route, Switch } from "react-router-dom";
 
-import {
-  TranchesAges,
-  CategorieSocioPro,
-  Groupe,
-  GroupTranchesAges,
-  ActionType,
-  ActionIndicateurDeuxData
-} from "../globals.d";
+import { Groupe, ActionType, ActionIndicateurDeuxData } from "../globals.d";
 
 import {
   calculEffectifsEtEcartAugmentParCategorieSocioPro,

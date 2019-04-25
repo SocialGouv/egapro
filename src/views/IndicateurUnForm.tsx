@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
+import { useForm } from "react-final-form-hooks";
 import {
   TranchesAges,
   Groupe,
@@ -8,9 +9,10 @@ import {
   ActionIndicateurUnData
 } from "../globals.d";
 
-import useField, { stateFieldType } from "../hooks/useField";
+import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
+
 import RowFemmesHommes from "../components/RowFemmesHommes";
-import Button from "../components/Button";
+import ButtonSubmit from "../components/ButtonSubmit";
 import {
   displayNameCategorieSocioPro,
   displayNameTranchesAges
@@ -21,15 +23,13 @@ interface Props extends RouteComponentProps {
   updateIndicateurUn: (data: ActionIndicateurUnData) => void;
 }
 
-interface GroupeTrancheAgeFields {
-  trancheAge: TranchesAges;
-  calculable: boolean;
-  remunerationAnnuelleBrutFemmesField: stateFieldType;
-  remunerationAnnuelleBrutHommesField: stateFieldType;
-}
+const getFieldName = (
+  trancheAge: TranchesAges,
+  genre: "Hommes" | "Femmes"
+): string => "remunerationAnnuelleBrut" + trancheAge + genre;
 
 function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
-  const allFields: Array<GroupeTrancheAgeFields> = effectif.tranchesAges.map(
+  const infoFields = effectif.tranchesAges.map(
     ({
       trancheAge,
       nombreSalariesFemmes,
@@ -39,42 +39,61 @@ function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
     }: GroupTranchesAges) => {
       return {
         trancheAge,
-        calculable:
-          (nombreSalariesFemmes || 0) >= 3 && (nombreSalariesHommes || 0) >= 3,
-        remunerationAnnuelleBrutFemmesField: useField(
-          "remunerationAnnuelleBrutFemmes" + trancheAge,
+        calculable: calculValiditeGroupe(
+          nombreSalariesFemmes || 0,
+          nombreSalariesHommes || 0
+        ),
+        remunerationAnnuelleBrutFemmesName: getFieldName(trancheAge, "Femmes"),
+        remunerationAnnuelleBrutFemmesValue:
           remunerationAnnuelleBrutFemmes === undefined
             ? ""
-            : String(remunerationAnnuelleBrutFemmes)
-        ),
-        remunerationAnnuelleBrutHommesField: useField(
-          "remunerationAnnuelleBrutHommes" + trancheAge,
+            : String(remunerationAnnuelleBrutFemmes),
+        remunerationAnnuelleBrutHommesName: getFieldName(trancheAge, "Hommes"),
+        remunerationAnnuelleBrutHommesValue:
           remunerationAnnuelleBrutHommes === undefined
             ? ""
             : String(remunerationAnnuelleBrutHommes)
-        )
       };
     }
   );
 
-  const saveGroup = () => {
+  const initialValues = infoFields.reduce(
+    (
+      acc,
+      {
+        remunerationAnnuelleBrutFemmesName,
+        remunerationAnnuelleBrutFemmesValue,
+        remunerationAnnuelleBrutHommesName,
+        remunerationAnnuelleBrutHommesValue
+      }
+    ) => {
+      return {
+        ...acc,
+        [remunerationAnnuelleBrutFemmesName]: remunerationAnnuelleBrutFemmesValue,
+        [remunerationAnnuelleBrutHommesName]: remunerationAnnuelleBrutHommesValue
+      };
+    },
+    {}
+  );
+
+  const onSubmit = (formData: any) => {
     const data: ActionIndicateurUnData = {
       categorieSocioPro: effectif.categorieSocioPro,
-      tranchesAges: allFields.map(
+      tranchesAges: infoFields.map(
         ({
           trancheAge,
-          remunerationAnnuelleBrutFemmesField,
-          remunerationAnnuelleBrutHommesField
+          remunerationAnnuelleBrutFemmesName,
+          remunerationAnnuelleBrutHommesName
         }) => ({
           trancheAge,
           remunerationAnnuelleBrutFemmes:
-            remunerationAnnuelleBrutFemmesField.input.value === ""
+            formData[remunerationAnnuelleBrutFemmesName] === ""
               ? undefined
-              : parseInt(remunerationAnnuelleBrutFemmesField.input.value, 10),
+              : parseInt(formData[remunerationAnnuelleBrutFemmesName], 10),
           remunerationAnnuelleBrutHommes:
-            remunerationAnnuelleBrutHommesField.input.value === ""
+            formData[remunerationAnnuelleBrutHommesName] === ""
               ? undefined
-              : parseInt(remunerationAnnuelleBrutHommesField.input.value, 10)
+              : parseInt(formData[remunerationAnnuelleBrutHommesName], 10)
         })
       )
     };
@@ -88,8 +107,14 @@ function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
     history.push(nextRoute);
   };
 
+  const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
+    initialValues,
+    onSubmit // the function to call with your form values upon valid submit
+    //validate // a record-level validation function to check all form values
+  });
+
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
           Rémunération annuelle brute moyenne -{" "}
@@ -102,28 +127,29 @@ function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
           <div css={styles.cell}>hommes</div>
         </div>
 
-        {allFields.map(
+        {infoFields.map(
           ({
             trancheAge,
             calculable,
-            remunerationAnnuelleBrutFemmesField,
-            remunerationAnnuelleBrutHommesField
-          }: GroupeTrancheAgeFields) => {
+            remunerationAnnuelleBrutFemmesName,
+            remunerationAnnuelleBrutHommesName
+          }) => {
             return (
               <RowFemmesHommes
                 key={trancheAge}
+                form={form}
                 name={displayNameTranchesAges(trancheAge)}
                 calculable={calculable}
-                femmesField={remunerationAnnuelleBrutFemmesField}
-                hommesField={remunerationAnnuelleBrutHommesField}
+                femmeFieldName={remunerationAnnuelleBrutFemmesName}
+                hommeFieldName={remunerationAnnuelleBrutHommesName}
               />
             );
           }
         )}
 
-        <Button onClick={saveGroup} label="Valider" />
+        <ButtonSubmit label="Valider" />
       </div>
-    </div>
+    </form>
   );
 }
 

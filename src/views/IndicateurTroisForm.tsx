@@ -1,16 +1,11 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
-import {
-  CategorieSocioPro,
-  Groupe,
-  GroupTranchesAges,
-  ActionIndicateurTroisData
-} from "../globals.d";
+import { useForm } from "react-final-form-hooks";
+import { CategorieSocioPro, ActionIndicateurTroisData } from "../globals.d";
 
-import useField, { stateFieldType } from "../hooks/useField";
 import RowFemmesHommes from "../components/RowFemmesHommes";
-import Button from "../components/Button";
+import ButtonSubmit from "../components/ButtonSubmit";
 import {
   fractionToPercentage,
   percentageToFraction,
@@ -27,21 +22,17 @@ interface Props extends RouteComponentProps {
   updateIndicateurTrois: (data: ActionIndicateurTroisData) => void;
 }
 
-interface GroupeCategorioSocioProFields {
-  categorieSocioPro: CategorieSocioPro;
-  validiteGroupe: boolean;
-  tauxPromotionFemmesField: stateFieldType;
-  tauxPromotionHommesField: stateFieldType;
-}
+const getFieldName = (
+  categorieSocioPro: CategorieSocioPro,
+  genre: "Hommes" | "Femmes"
+): string => "tauxPromotion" + categorieSocioPro + genre;
 
 function IndicateurTroisForm({
   ecartPromoParCategorieSocioPro,
   updateIndicateurTrois,
   history
 }: Props) {
-  const allFields: Array<
-    GroupeCategorioSocioProFields
-  > = ecartPromoParCategorieSocioPro.map(
+  const infoFields = ecartPromoParCategorieSocioPro.map(
     ({
       categorieSocioPro,
       validiteGroupe,
@@ -51,41 +42,58 @@ function IndicateurTroisForm({
       return {
         categorieSocioPro,
         validiteGroupe,
-        tauxPromotionFemmesField: useField(
-          "tauxPromotionFemmes" + categorieSocioPro,
+        tauxPromotionFemmesName: getFieldName(categorieSocioPro, "Femmes"),
+        tauxPromotionFemmesValue:
           tauxPromotionFemmes === undefined
             ? ""
-            : String(fractionToPercentage(tauxPromotionFemmes))
-        ),
-        tauxPromotionHommesField: useField(
-          "tauxPromotionHommes" + categorieSocioPro,
+            : String(fractionToPercentage(tauxPromotionFemmes)),
+        tauxPromotionHommesName: getFieldName(categorieSocioPro, "Hommes"),
+        tauxPromotionHommesValue:
           tauxPromotionHommes === undefined
             ? ""
             : String(fractionToPercentage(tauxPromotionHommes))
-        )
       };
     }
   );
 
-  const saveGroup = () => {
-    const data: ActionIndicateurTroisData = allFields.map(
+  const initialValues = infoFields.reduce(
+    (
+      acc,
+      {
+        tauxPromotionFemmesName,
+        tauxPromotionFemmesValue,
+        tauxPromotionHommesName,
+        tauxPromotionHommesValue
+      }
+    ) => {
+      return {
+        ...acc,
+        [tauxPromotionFemmesName]: tauxPromotionFemmesValue,
+        [tauxPromotionHommesName]: tauxPromotionHommesValue
+      };
+    },
+    {}
+  );
+
+  const onSubmit = (formData: any) => {
+    const data: ActionIndicateurTroisData = infoFields.map(
       ({
         categorieSocioPro,
-        tauxPromotionFemmesField,
-        tauxPromotionHommesField
+        tauxPromotionFemmesName,
+        tauxPromotionHommesName
       }) => ({
         categorieSocioPro,
         tauxPromotionFemmes:
-          tauxPromotionFemmesField.input.value === ""
+          formData[tauxPromotionFemmesName] === ""
             ? undefined
             : percentageToFraction(
-                parseFloat(tauxPromotionFemmesField.input.value)
+                parseFloat(formData[tauxPromotionFemmesName])
               ),
         tauxPromotionHommes:
-          tauxPromotionHommesField.input.value === ""
+          formData[tauxPromotionHommesName] === ""
             ? undefined
             : percentageToFraction(
-                parseFloat(tauxPromotionHommesField.input.value)
+                parseFloat(formData[tauxPromotionHommesName])
               )
       })
     );
@@ -94,8 +102,14 @@ function IndicateurTroisForm({
     history.push("/indicateur3/resultat");
   };
 
+  const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
+    initialValues,
+    onSubmit // the function to call with your form values upon valid submit
+    //validate // a record-level validation function to check all form values
+  });
+
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div css={styles.bloc}>
         <p css={styles.blocTitle}>
           Taux de promotion (proportions de salariés promus)
@@ -107,28 +121,29 @@ function IndicateurTroisForm({
           <div css={styles.cell}>hommes</div>
         </div>
 
-        {allFields.map(
+        {infoFields.map(
           ({
             categorieSocioPro,
             validiteGroupe,
-            tauxPromotionFemmesField,
-            tauxPromotionHommesField
-          }: GroupeCategorioSocioProFields) => {
+            tauxPromotionFemmesName,
+            tauxPromotionHommesName
+          }) => {
             return (
               <RowFemmesHommes
                 key={categorieSocioPro}
+                form={form}
                 name={displayNameCategorieSocioPro(categorieSocioPro)}
                 calculable={validiteGroupe}
-                femmesField={tauxPromotionFemmesField}
-                hommesField={tauxPromotionHommesField}
+                femmeFieldName={tauxPromotionFemmesName}
+                hommeFieldName={tauxPromotionHommesName}
               />
             );
           }
         )}
 
-        <Button onClick={saveGroup} label="Valider" />
+        <ButtonSubmit label="Valider" />
       </div>
-    </div>
+    </form>
   );
 }
 

@@ -1,11 +1,4 @@
-import {
-  TranchesAges,
-  CategorieSocioPro,
-  Groupe,
-  GroupTranchesAges,
-  ActionType,
-  ActionEffectifData
-} from "../globals.d";
+import { GroupTranchesAges } from "../globals.d";
 
 import { roundDecimal } from "./helpers";
 

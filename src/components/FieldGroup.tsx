@@ -1,11 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { stateFieldType } from "../hooks/useField";
-
 interface Props {
   label?: string;
-  field: stateFieldType;
+  field: any;
 }
 
 function FieldGroup({ label, field }: Props) {
@@ -16,7 +14,13 @@ function FieldGroup({ label, field }: Props) {
           {label}
         </label>
       )}
-      <input css={styles.fieldInput} id={field.input.name} {...field.input} />
+      <input
+        css={styles.fieldInput}
+        id={field.input.name}
+        type="number"
+        pattern="[0-9]"
+        {...field.input}
+      />
     </div>
   );
 }

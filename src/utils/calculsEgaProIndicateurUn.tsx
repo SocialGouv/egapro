@@ -1,11 +1,4 @@
-import {
-  TranchesAges,
-  CategorieSocioPro,
-  Groupe,
-  GroupTranchesAges,
-  ActionType,
-  ActionEffectifData
-} from "../globals.d";
+import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
 
 import { roundDecimal } from "./helpers";
 
@@ -171,6 +164,9 @@ export const calculNote = (
 ): number | undefined =>
   indicateurEcartRemuneration !== undefined
     ? baremeEcartRemuneration[
-        Math.min(21, Math.ceil(Math.max(0, indicateurEcartRemuneration)))
+        Math.min(
+          baremeEcartRemuneration.length - 1,
+          Math.ceil(Math.max(0, indicateurEcartRemuneration))
+        )
       ]
     : undefined;

@@ -1,8 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import React from "react";
 
-import { displayPercent } from "../utils/helpers";
 import LinkButton from "../components/LinkButton";
 
 interface Props {

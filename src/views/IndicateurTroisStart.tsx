@@ -1,8 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { CategorieSocioPro } from "../globals.d";
-
 import LinkButton from "../components/LinkButton";
 
 import { displayPercent } from "../utils/helpers";
