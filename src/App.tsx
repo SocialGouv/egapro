@@ -63,23 +63,26 @@ const defaultState: Array<Groupe> = [
 function reducer(state: Array<Groupe>, action: ActionType) {
   switch (action.type) {
     case "updateEffectif": {
-      const index = state.findIndex(
-        ({ categorieSocioPro }) =>
-          categorieSocioPro === action.data.categorieSocioPro
-      );
-      const currentGroup = state[index];
-      const newGroup: Groupe = {
-        ...currentGroup,
-        tranchesAges: currentGroup.tranchesAges.map(
-          (groupTranchesAges: GroupTranchesAges) => {
-            const datum = action.data.tranchesAges.find(
-              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
-            );
-            return Object.assign({}, groupTranchesAges, datum);
-          }
-        )
-      };
-      return [...state.slice(0, index), newGroup, ...state.slice(index + 1)];
+      return state.map((group: Groupe) => {
+        const datumCat = action.data.find(
+          ({ categorieSocioPro }) =>
+            categorieSocioPro === group.categorieSocioPro
+        );
+        return {
+          ...group,
+          tranchesAges: group.tranchesAges.map(
+            (groupTranchesAges: GroupTranchesAges) => {
+              const datumAge =
+                datumCat &&
+                datumCat.tranchesAges.find(
+                  ({ trancheAge }) =>
+                    trancheAge === groupTranchesAges.trancheAge
+                );
+              return Object.assign({}, groupTranchesAges, datumAge);
+            }
+          )
+        };
+      });
     }
     case "updateIndicateurUn": {
       const index = state.findIndex(
@@ -109,15 +112,15 @@ function reducer(state: Array<Groupe>, action: ActionType) {
         return Object.assign({}, group, datum);
       });
     }
-    // case "updateIndicateurTrois": {
-    //   return state.map((group: Groupe) => {
-    //     const datum = action.data.find(
-    //       ({ categorieSocioPro }) =>
-    //         categorieSocioPro === group.categorieSocioPro
-    //     );
-    //     return Object.assign({}, group, datum);
-    //   });
-    // }
+    case "updateIndicateurTrois": {
+      return state.map((group: Groupe) => {
+        const datum = action.data.find(
+          ({ categorieSocioPro }) =>
+            categorieSocioPro === group.categorieSocioPro
+        );
+        return Object.assign({}, group, datum);
+      });
+    }
     default:
       return state;
   }
@@ -143,12 +146,11 @@ function App() {
         <Switch>
           <Route path="/" exact render={props => <Home {...props} />} />
           <Route
-            path="/effectifs/:categorieSocioPro"
+            path="/effectifs"
             render={props => (
               <GroupEffectif
                 {...props}
-                key={props.match.params.categorieSocioPro}
-                effectif={state[props.match.params.categorieSocioPro]}
+                state={state}
                 updateEffectif={(data: ActionEffectifData) =>
                   dispatch({ type: "updateEffectif", data })
                 }

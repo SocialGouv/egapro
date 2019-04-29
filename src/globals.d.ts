@@ -16,14 +16,14 @@ export type ActionType =
       data: ActionIndicateurTroisData;
     };
 
-export type ActionEffectifData = {
+export type ActionEffectifData = Array<{
   categorieSocioPro: CategorieSocioPro;
   tranchesAges: Array<{
     trancheAge: TranchesAges;
     nombreSalariesFemmes: number | undefined;
     nombreSalariesHommes: number | undefined;
   }>;
-};
+}>;
 
 export type ActionIndicateurUnData = {
   categorieSocioPro: CategorieSocioPro;

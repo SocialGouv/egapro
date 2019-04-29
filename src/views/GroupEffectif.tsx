@@ -3,6 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
+  CategorieSocioPro,
   TranchesAges,
   Groupe,
   GroupTranchesAges,
@@ -21,79 +22,94 @@ import {
 } from "../utils/helpers";
 
 interface Props extends RouteComponentProps {
-  effectif: Groupe;
+  state: Array<Groupe>;
   updateEffectif: (data: ActionEffectifData) => void;
 }
 
 const getFieldName = (
+  categorieSocioPro: CategorieSocioPro,
   trancheAge: TranchesAges,
   genre: "Hommes" | "Femmes"
-): string => "nombreSalaries" + trancheAge + genre;
+): string => "nombreSalaries" + categorieSocioPro + genre + trancheAge;
 
-function GroupEffectif({ effectif, updateEffectif, history }: Props) {
-  const infoFields = effectif.tranchesAges.map(
-    ({
-      trancheAge,
-      nombreSalariesFemmes,
-      nombreSalariesHommes
-    }: GroupTranchesAges) => {
-      return {
-        trancheAge,
-        nbSalarieFemmeName: getFieldName(trancheAge, "Femmes"),
-        nbSalarieFemmeValue:
-          nombreSalariesFemmes === undefined
-            ? ""
-            : String(nombreSalariesFemmes),
-        nbSalarieHommeName: getFieldName(trancheAge, "Hommes"),
-        nbSalarieHommeValue:
-          nombreSalariesHommes === undefined ? "" : String(nombreSalariesHommes)
-      };
-    }
-  );
-
-  const initialValues = infoFields.reduce(
-    (
-      acc,
-      {
-        nbSalarieFemmeName,
-        nbSalarieFemmeValue,
-        nbSalarieHommeName,
-        nbSalarieHommeValue
-      }
-    ) => {
-      return {
-        ...acc,
-        [nbSalarieFemmeName]: nbSalarieFemmeValue,
-        [nbSalarieHommeName]: nbSalarieHommeValue
-      };
-    },
-    {}
-  );
-
-  const onSubmit = (formData: any) => {
-    const data: ActionEffectifData = {
-      categorieSocioPro: effectif.categorieSocioPro,
-      tranchesAges: infoFields.map(
-        ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => ({
+function GroupEffectif({ state, updateEffectif, history }: Props) {
+  const infoFields = state.map(({ categorieSocioPro, tranchesAges }) => {
+    return {
+      categorieSocioPro,
+      tranchesAges: tranchesAges.map(
+        ({
           trancheAge,
-          nombreSalariesFemmes:
-            formData[nbSalarieFemmeName] === ""
-              ? undefined
-              : parseInt(formData[nbSalarieFemmeName], 10),
-          nombreSalariesHommes:
-            formData[nbSalarieHommeName] === ""
-              ? undefined
-              : parseInt(formData[nbSalarieHommeName], 10)
-        })
+          nombreSalariesFemmes,
+          nombreSalariesHommes
+        }: GroupTranchesAges) => {
+          return {
+            trancheAge,
+            nbSalarieFemmeName: getFieldName(
+              categorieSocioPro,
+              trancheAge,
+              "Femmes"
+            ),
+            nbSalarieFemmeValue:
+              nombreSalariesFemmes === undefined
+                ? ""
+                : String(nombreSalariesFemmes),
+            nbSalarieHommeName: getFieldName(
+              categorieSocioPro,
+              trancheAge,
+              "Hommes"
+            ),
+            nbSalarieHommeValue:
+              nombreSalariesHommes === undefined
+                ? ""
+                : String(nombreSalariesHommes)
+          };
+        }
       )
     };
+  });
 
+  const initialValues = infoFields.reduce((acc1, { tranchesAges }) => {
+    return tranchesAges.reduce(
+      (
+        acc2,
+        {
+          nbSalarieFemmeName,
+          nbSalarieFemmeValue,
+          nbSalarieHommeName,
+          nbSalarieHommeValue
+        }
+      ) => {
+        return {
+          ...acc2,
+          [nbSalarieFemmeName]: nbSalarieFemmeValue,
+          [nbSalarieHommeName]: nbSalarieHommeValue
+        };
+      },
+      acc1
+    );
+  }, {});
+
+  const onSubmit = (formData: any) => {
+    const data: ActionEffectifData = infoFields.map(
+      ({ categorieSocioPro, tranchesAges }) => ({
+        categorieSocioPro,
+        tranchesAges: tranchesAges.map(
+          ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => ({
+            trancheAge,
+            nombreSalariesFemmes:
+              formData[nbSalarieFemmeName] === ""
+                ? undefined
+                : parseInt(formData[nbSalarieFemmeName], 10),
+            nombreSalariesHommes:
+              formData[nbSalarieHommeName] === ""
+                ? undefined
+                : parseInt(formData[nbSalarieHommeName], 10)
+          })
+        )
+      })
+    );
     updateEffectif(data);
-    const nextRoute =
-      effectif.categorieSocioPro < 3
-        ? `/effectifs/${effectif.categorieSocioPro + 1}`
-        : "/indicateur1";
-    history.push(nextRoute);
+    history.push("/indicateur1");
   };
 
   const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
@@ -111,30 +127,33 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
           (CSP) et par tranche d’âge
         </p>
 
-        <div css={styles.blocForm}>
-          <div css={styles.row}>
-            <CellHead style={styles.cellHead}>
-              {displayNameCategorieSocioPro(effectif.categorieSocioPro)}
-            </CellHead>
-            <Cell style={styles.cellMen}>hommes</Cell>
-            <Cell style={styles.cellWomen}>femmes</Cell>
-          </div>
+        {infoFields.map(({ categorieSocioPro, tranchesAges }) => (
+          <div css={styles.blocForm} key={categorieSocioPro}>
+            <div css={styles.row}>
+              <CellHead style={styles.cellHead}>
+                {displayNameCategorieSocioPro(categorieSocioPro)}
+              </CellHead>
+              <Cell style={styles.cellMen}>hommes</Cell>
+              <Cell style={styles.cellWomen}>femmes</Cell>
+            </div>
 
-          {infoFields.map(
-            ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
-              return (
-                <CellInputsMenWomen
-                  key={trancheAge}
-                  form={form}
-                  name={displayNameTranchesAges(trancheAge)}
-                  calculable={true}
-                  femmeFieldName={nbSalarieFemmeName}
-                  hommeFieldName={nbSalarieHommeName}
-                />
-              );
-            }
-          )}
-        </div>
+            {tranchesAges.map(
+              ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
+                return (
+                  <CellInputsMenWomen
+                    key={trancheAge}
+                    form={form}
+                    name={displayNameTranchesAges(trancheAge)}
+                    calculable={true}
+                    femmeFieldName={nbSalarieFemmeName}
+                    hommeFieldName={nbSalarieHommeName}
+                  />
+                );
+              }
+            )}
+          </div>
+        ))}
+
         <div css={styles.action}>
           <ButtonSubmit label="valider" />
         </div>
