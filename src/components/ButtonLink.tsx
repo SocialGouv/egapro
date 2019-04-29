@@ -8,7 +8,7 @@ interface Props {
   to: string;
 }
 
-function LinkButton({ label, to }: Props) {
+function ButtonLink({ label, to }: Props) {
   return (
     <Link to={to} css={styles.button}>
       <Button label={label} />
@@ -18,10 +18,9 @@ function LinkButton({ label, to }: Props) {
 
 const styles = {
   button: css({
-    margin: "24px auto",
-    color: "black",
+    display: "inline-flex",
     textDecoration: "none"
   })
 };
 
-export default LinkButton;
+export default ButtonLink;

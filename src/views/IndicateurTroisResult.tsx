@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import LinkButton from "../components/LinkButton";
+import ButtonLink from "../components/ButtonLink";
 
 interface Props {
   indicateurCalculable: boolean;
@@ -40,7 +40,7 @@ function IndicateurTroisResult({
           )}
         </div>
 
-        <LinkButton to="/indicateur4" label="Continuer" />
+        <ButtonLink to="/indicateur4" label="Continuer" />
       </div>
     </div>
   );

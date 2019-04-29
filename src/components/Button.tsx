@@ -3,15 +3,10 @@ import { css, jsx } from "@emotion/core";
 
 interface Props {
   label: string;
-  onClick?: () => void;
 }
 
-function Button({ label, onClick }: Props) {
-  return (
-    <div css={styles.button} onClick={onClick}>
-      {label}
-    </div>
-  );
+function Button({ label }: Props) {
+  return <div css={styles.button}>{label}</div>;
 }
 
 const styles = {
@@ -19,12 +14,12 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    height: 44,
-    padding: "4px 36px",
-    margin: "24px auto",
-    backgroundColor: "#FAFAFA",
-    borderRadius: 6,
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.12)",
+    height: 36,
+    minWidth: 110,
+    padding: "0 10px",
+    backgroundColor: "#8A92D9",
+    color: "#FFF",
+    borderRadius: 5,
     cursor: "pointer"
   })
 };

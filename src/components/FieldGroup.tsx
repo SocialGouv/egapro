@@ -2,21 +2,15 @@
 import { css, jsx } from "@emotion/core";
 
 interface Props {
-  label?: string;
   field: any;
+  style?: any;
 }
 
-function FieldGroup({ label, field }: Props) {
+function FieldGroup({ field, style }: Props) {
   return (
     <div css={styles.fieldGroup}>
-      {label && (
-        <label css={styles.fieldLabel} htmlFor={field.input.name}>
-          {label}
-        </label>
-      )}
       <input
-        css={styles.fieldInput}
-        id={field.input.name}
+        css={[styles.fieldInput, style]}
         type="number"
         pattern="[0-9]"
         {...field.input}
@@ -27,15 +21,15 @@ function FieldGroup({ label, field }: Props) {
 
 const styles = {
   fieldGroup: css({
-    display: "flex",
-    flexDirection: "column"
-  }),
-  fieldLabel: css({
-    marginBottom: 6
+    width: 62,
+    height: 22,
+    display: "flex"
   }),
   fieldInput: css({
-    fontSize: 22,
-    padding: "4px 12px",
+    appearance: "none",
+    border: "solid black 1px",
+    width: "100%",
+    fontSize: 14,
     textAlign: "center"
   })
 };

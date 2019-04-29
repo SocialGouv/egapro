@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 
 import { CategorieSocioPro } from "../globals.d";
 
-import LinkButton from "../components/LinkButton";
+import ButtonLink from "../components/ButtonLink";
 
 import { displayPercent } from "../utils/helpers";
 
@@ -45,7 +45,7 @@ function IndicateurUnStart({
           </p>
         </div>
 
-        <LinkButton
+        <ButtonLink
           to={`/indicateur1/categorieSocioPro/${CategorieSocioPro.Ouvriers}`}
           label="Continuer"
         />

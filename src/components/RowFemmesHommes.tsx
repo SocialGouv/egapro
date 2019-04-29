@@ -29,11 +29,17 @@ function RowFemmesHommes({
       {calculable ? (
         <React.Fragment>
           <div css={styles.cell}>
-            <FieldGroup field={femmesField} />
+            <FieldGroup
+              field={hommesField}
+              style={css({ borderColor: "#90C5C7" })}
+            />
           </div>
 
           <div css={styles.cell}>
-            <FieldGroup field={hommesField} />
+            <FieldGroup
+              field={femmesField}
+              style={css({ borderColor: "#8A92D9" })}
+            />
           </div>
         </React.Fragment>
       ) : (
@@ -52,13 +58,12 @@ const styles = {
   }),
   cellHead: css({
     flexGrow: 1,
-    flexBasis: "0%",
-    textAlign: "right"
+    marginRight: 2,
+    fontSize: 14
   }),
   cell: css({
-    flexGrow: 2,
-    flexBasis: "0%",
-    marginLeft: 24
+    flexShrink: 0,
+    marginLeft: 8
   }),
   cell2: css({
     flexGrow: 4,

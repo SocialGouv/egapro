@@ -4,29 +4,25 @@ import { RouteComponentProps } from "react-router-dom";
 
 import { CategorieSocioPro } from "../globals.d";
 
-import LinkButton from "../components/LinkButton";
+import ButtonLink from "../components/ButtonLink";
 
 function Home(props: RouteComponentProps) {
   return (
     <div>
       <div css={styles.bloc}>
-        <p css={styles.blocTitle}>Index de l'égalité</p>
+        <p css={styles.blocTitle}>Bienvenue sur Egapro</p>
 
-        <div css={styles.message}>
-          <p>
-            5 indicateurs pour résorber les inégalités entre les femmes et les
-            hommes en entreprise.
-          </p>
+        <p css={styles.message}>
+          5 indicateurs pour résorber les inégalités entre les femmes et les
+          hommes en entreprise.
+        </p>
+
+        <div css={styles.action}>
+          <ButtonLink
+            to={`/effectifs/${CategorieSocioPro.Ouvriers}`}
+            label="commencer la simulation"
+          />
         </div>
-
-        <div css={styles.message}>
-          <p>Entreprises de plus de 250 salariés</p>
-        </div>
-
-        <LinkButton
-          to={`/effectifs/${CategorieSocioPro.Ouvriers}`}
-          label="Commencer"
-        />
       </div>
     </div>
   );
@@ -36,26 +32,20 @@ const styles = {
   bloc: css({
     display: "flex",
     flexDirection: "column",
-    maxWidth: 800,
-    padding: "12px 24px",
-    margin: "24px auto",
-    backgroundColor: "white",
-    borderRadius: 6,
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.12)"
+    maxWidth: 1024,
+    padding: "12px 0",
+    margin: "24px auto"
   }),
   blocTitle: css({
-    fontSize: 24,
-    paddingTop: 6,
-    paddingBottom: 24,
-    color: "#353535",
-    textAlign: "center"
+    fontSize: 32
   }),
   message: css({
-    fontSize: 26,
-    fontWeight: 200,
-    textAlign: "center",
-    marginBottom: 32,
-    marginTop: 12
+    fontSize: 14
+  }),
+  action: css({
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 18
   })
 };
 

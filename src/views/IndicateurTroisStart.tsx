@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import LinkButton from "../components/LinkButton";
+import ButtonLink from "../components/ButtonLink";
 
 import { displayPercent } from "../utils/helpers";
 
@@ -43,7 +43,7 @@ function IndicateurTroisStart({
           </p>
         </div>
 
-        <LinkButton to={`/indicateur3/formulaire`} label="Continuer" />
+        <ButtonLink to={`/indicateur3/formulaire`} label="Continuer" />
       </div>
     </div>
   );

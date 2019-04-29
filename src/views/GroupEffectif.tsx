@@ -102,33 +102,39 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <div css={styles.bloc}>
-        <p css={styles.blocTitle}>
-          Nombre de salarié -{" "}
-          {displayNameCategorieSocioPro(effectif.categorieSocioPro)}
+        <p css={styles.blocTitle}>Indication des effectifs</p>
+        <p css={styles.blocSubtitle}>
+          Renseignez le nombre d’effectifs par catégorie socio-professionnelle
+          (CSP) et par tranche d’âge
         </p>
 
-        <div css={styles.row}>
-          <div css={styles.cellHead}>tranche d'âge</div>
-          <div css={styles.cell}>femmes</div>
-          <div css={styles.cell}>hommes</div>
+        <div css={styles.blocForm}>
+          <div css={styles.row}>
+            <div css={styles.cellHead}>
+              {displayNameCategorieSocioPro(effectif.categorieSocioPro)}
+            </div>
+            <div css={[styles.cell, css({ color: "#90C5C7" })]}>hommes</div>
+            <div css={[styles.cell, css({ color: "#8A92D9" })]}>femmes</div>
+          </div>
+
+          {infoFields.map(
+            ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
+              return (
+                <RowFemmesHommes
+                  key={trancheAge}
+                  form={form}
+                  name={displayNameTranchesAges(trancheAge)}
+                  calculable={true}
+                  femmeFieldName={nbSalarieFemmeName}
+                  hommeFieldName={nbSalarieHommeName}
+                />
+              );
+            }
+          )}
         </div>
-
-        {infoFields.map(
-          ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
-            return (
-              <RowFemmesHommes
-                key={trancheAge}
-                form={form}
-                name={displayNameTranchesAges(trancheAge)}
-                calculable={true}
-                femmeFieldName={nbSalarieFemmeName}
-                hommeFieldName={nbSalarieHommeName}
-              />
-            );
-          }
-        )}
-
-        <ButtonSubmit label="Valider" />
+        <div css={styles.action}>
+          <ButtonSubmit label="valider" />
+        </div>
       </div>
     </form>
   );
@@ -138,39 +144,46 @@ const styles = {
   bloc: css({
     display: "flex",
     flexDirection: "column",
-    maxWidth: 800,
-    padding: "12px 24px",
-    margin: "24px auto",
-    backgroundColor: "white",
-    borderRadius: 6,
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.12)"
+    maxWidth: 1024,
+    padding: "12px 0",
+    margin: "24px auto"
   }),
   blocTitle: css({
-    fontSize: 24,
-    paddingTop: 6,
-    paddingBottom: 24,
-    color: "#353535",
-    textAlign: "center"
+    fontSize: 32
+  }),
+  blocSubtitle: css({
+    marginTop: 7,
+    fontSize: 14
+  }),
+  blocForm: css({
+    maxWidth: 264,
+    margin: "24px 0"
+  }),
+  action: css({
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 18
   }),
   row: css({
     display: "flex",
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     marginTop: 12,
     marginBottom: 24
   }),
   cellHead: css({
     flexGrow: 1,
-    flexBasis: "0%",
-    textAlign: "right",
-    fontWeight: "bold"
+    marginRight: 2,
+    fontSize: 14,
+    textTransform: "uppercase"
   }),
   cell: css({
-    flexGrow: 2,
-    flexBasis: "0%",
-    marginLeft: 24,
-    textAlign: "center",
-    fontWeight: "bold"
+    width: 62,
+    flexShrink: 0,
+    marginLeft: 8,
+    fontSize: 12,
+    textAlign: "center"
   })
 };
 

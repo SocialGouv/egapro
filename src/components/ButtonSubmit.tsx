@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import Button from "./Button";
 
 interface Props {
   label: string;
@@ -8,15 +9,14 @@ interface Props {
 function ButtonSubmit({ label }: Props) {
   return (
     <button type="submit" css={styles.button}>
-      <div css={styles.buttonInner}>{label}</div>
+      <Button label={label} />
     </button>
   );
 }
 
 const styles = {
   button: css({
-    all: "unset",
-    margin: "24px auto"
+    all: "unset"
   }),
   buttonInner: css({
     display: "flex",

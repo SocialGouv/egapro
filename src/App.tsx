@@ -14,6 +14,7 @@ import {
 
 import mapEnum from "./utils/mapEnum";
 
+import Header from "./components/Header";
 import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
 import IndicateurUn from "./views/IndicateurUn";
@@ -108,15 +109,15 @@ function reducer(state: Array<Groupe>, action: ActionType) {
         return Object.assign({}, group, datum);
       });
     }
-    case "updateIndicateurTrois": {
-      return state.map((group: Groupe) => {
-        const datum = action.data.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return Object.assign({}, group, datum);
-      });
-    }
+    // case "updateIndicateurTrois": {
+    //   return state.map((group: Groupe) => {
+    //     const datum = action.data.find(
+    //       ({ categorieSocioPro }) =>
+    //         categorieSocioPro === group.categorieSocioPro
+    //     );
+    //     return Object.assign({}, group, datum);
+    //   });
+    // }
     default:
       return state;
   }
@@ -138,9 +139,7 @@ function App() {
   return (
     <Router>
       <div>
-        <header css={styles.header}>
-          <p>EGAPRO - Prototype</p>
-        </header>
+        <Header />
         <Switch>
           <Route path="/" exact render={props => <Home {...props} />} />
           <Route
@@ -180,18 +179,6 @@ function App() {
   );
 }
 
-const styles = {
-  header: css({
-    backgroundColor: "#282c34",
-    minHeight: "10vh",
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "calc(10px + 2vmin)",
-    color: "white",
-    textAlign: "center"
-  })
-};
+const styles = {};
 
 export default App;
