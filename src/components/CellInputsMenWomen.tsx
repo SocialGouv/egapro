@@ -3,7 +3,10 @@ import { css, jsx } from "@emotion/core";
 import React from "react";
 import { useField } from "react-final-form-hooks";
 
-import FieldGroup from "./FieldGroup";
+import globalStyles from "../utils/styles";
+
+import { CellHead, Cell2 } from "./Cell";
+import CellInput from "./CellInput";
 
 interface Props {
   form: any;
@@ -13,7 +16,7 @@ interface Props {
   hommeFieldName: string;
 }
 
-function RowFemmesHommes({
+function CellInputsMenWomen({
   form,
   name,
   calculable,
@@ -24,26 +27,16 @@ function RowFemmesHommes({
   const hommesField = useField(hommeFieldName, form);
   return (
     <div css={styles.row}>
-      <div css={styles.cellHead}>{name}</div>
+      <CellHead style={styles.cellHead}>{name}</CellHead>
 
       {calculable ? (
         <React.Fragment>
-          <div css={styles.cell}>
-            <FieldGroup
-              field={hommesField}
-              style={css({ borderColor: "#90C5C7" })}
-            />
-          </div>
+          <CellInput field={hommesField} style={styles.cellMen} />
 
-          <div css={styles.cell}>
-            <FieldGroup
-              field={femmesField}
-              style={css({ borderColor: "#8A92D9" })}
-            />
-          </div>
+          <CellInput field={femmesField} style={styles.cellWomen} />
         </React.Fragment>
       ) : (
-        <div css={styles.cell2}>Non Calculable</div>
+        <Cell2 css={styles.cell2}>Non Calculable</Cell2>
       )}
     </div>
   );
@@ -57,21 +50,17 @@ const styles = {
     marginBottom: 24
   }),
   cellHead: css({
-    flexGrow: 1,
-    marginRight: 2,
     fontSize: 14
   }),
-  cell: css({
-    flexShrink: 0,
-    marginLeft: 8
-  }),
   cell2: css({
-    flexGrow: 4,
-    flexBasis: "0%",
-    marginLeft: 24,
-    marginRight: 24,
     textAlign: "center"
+  }),
+  cellMen: css({
+    borderColor: globalStyles.colors.men
+  }),
+  cellWomen: css({
+    borderColor: globalStyles.colors.women
   })
 };
 
-export default RowFemmesHommes;
+export default CellInputsMenWomen;

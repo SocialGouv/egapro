@@ -4,7 +4,7 @@ import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import { CategorieSocioPro, ActionIndicateurDeuxData } from "../globals.d";
 
-import RowFemmesHommes from "../components/RowFemmesHommes";
+import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 import {
   fractionToPercentage,
@@ -129,7 +129,7 @@ function IndicateurDeuxForm({
             tauxAugmentationHommesName
           }) => {
             return (
-              <RowFemmesHommes
+              <CellInputsMenWomen
                 key={categorieSocioPro}
                 form={form}
                 name={displayNameCategorieSocioPro(categorieSocioPro)}

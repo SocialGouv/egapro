@@ -11,7 +11,7 @@ import {
 
 import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
 
-import RowFemmesHommes from "../components/RowFemmesHommes";
+import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 import {
   displayNameCategorieSocioPro,
@@ -135,7 +135,7 @@ function IndicateurUnForm({ effectif, updateIndicateurUn, history }: Props) {
             remunerationAnnuelleBrutHommesName
           }) => {
             return (
-              <RowFemmesHommes
+              <CellInputsMenWomen
                 key={trancheAge}
                 form={form}
                 name={displayNameTranchesAges(trancheAge)}

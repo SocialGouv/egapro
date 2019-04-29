@@ -9,7 +9,10 @@ import {
   ActionEffectifData
 } from "../globals.d";
 
-import RowFemmesHommes from "../components/RowFemmesHommes";
+import globalStyles from "../utils/styles";
+
+import { CellHead, Cell } from "../components/Cell";
+import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 
 import {
@@ -110,17 +113,17 @@ function GroupEffectif({ effectif, updateEffectif, history }: Props) {
 
         <div css={styles.blocForm}>
           <div css={styles.row}>
-            <div css={styles.cellHead}>
+            <CellHead style={styles.cellHead}>
               {displayNameCategorieSocioPro(effectif.categorieSocioPro)}
-            </div>
-            <div css={[styles.cell, css({ color: "#90C5C7" })]}>hommes</div>
-            <div css={[styles.cell, css({ color: "#8A92D9" })]}>femmes</div>
+            </CellHead>
+            <Cell style={styles.cellMen}>hommes</Cell>
+            <Cell style={styles.cellWomen}>femmes</Cell>
           </div>
 
           {infoFields.map(
             ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
               return (
-                <RowFemmesHommes
+                <CellInputsMenWomen
                   key={trancheAge}
                   form={form}
                   name={displayNameTranchesAges(trancheAge)}
@@ -173,17 +176,18 @@ const styles = {
     marginBottom: 24
   }),
   cellHead: css({
-    flexGrow: 1,
-    marginRight: 2,
     fontSize: 14,
     textTransform: "uppercase"
   }),
-  cell: css({
-    width: 62,
-    flexShrink: 0,
-    marginLeft: 8,
+  cellMen: css({
     fontSize: 12,
-    textAlign: "center"
+    textAlign: "center",
+    color: globalStyles.colors.men
+  }),
+  cellWomen: css({
+    fontSize: 12,
+    textAlign: "center",
+    color: globalStyles.colors.women
   })
 };
 

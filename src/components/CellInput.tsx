@@ -1,31 +1,32 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
+import { Cell } from "./Cell";
+
 interface Props {
   field: any;
   style?: any;
 }
 
-function FieldGroup({ field, style }: Props) {
+function CellInput({ field, style }: Props) {
   return (
-    <div css={styles.fieldGroup}>
+    <Cell style={styles.cell}>
       <input
-        css={[styles.fieldInput, style]}
+        css={[styles.input, style]}
         type="number"
         pattern="[0-9]"
         {...field.input}
       />
-    </div>
+    </Cell>
   );
 }
 
 const styles = {
-  fieldGroup: css({
-    width: 62,
+  cell: css({
     height: 22,
     display: "flex"
   }),
-  fieldInput: css({
+  input: css({
     appearance: "none",
     border: "solid black 1px",
     width: "100%",
@@ -34,4 +35,4 @@ const styles = {
   })
 };
 
-export default FieldGroup;
+export default CellInput;
