@@ -15,6 +15,8 @@ import {
 import mapEnum from "./utils/mapEnum";
 
 import Header from "./components/Header";
+import Menu from "./components/Menu";
+
 import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
 import IndicateurUn from "./views/IndicateurUn";
@@ -141,46 +143,97 @@ function App() {
 
   return (
     <Router>
-      <div>
-        <Header />
-        <Switch>
-          <Route path="/" exact render={props => <Home {...props} />} />
-          <Route
-            path="/effectifs"
-            render={props => (
-              <GroupEffectif
-                {...props}
-                state={state}
-                updateEffectif={(data: ActionEffectifData) =>
-                  dispatch({ type: "updateEffectif", data })
-                }
+      <div css={styles.layout}>
+        <div css={styles.leftColumn}>
+          <Header />
+
+          <div css={styles.main}>
+            <div css={styles.menu}>
+              <Menu />
+            </div>
+            <Switch>
+              <Route path="/" exact render={props => <Home {...props} />} />
+              <Route
+                path="/effectifs"
+                render={props => (
+                  <GroupEffectif
+                    {...props}
+                    state={state}
+                    updateEffectif={(data: ActionEffectifData) =>
+                      dispatch({ type: "updateEffectif", data })
+                    }
+                  />
+                )}
               />
-            )}
-          />
-          <Route
-            path="/indicateur1"
-            render={props => (
-              <IndicateurUn {...props} state={state} dispatch={dispatch} />
-            )}
-          />
-          <Route
-            path="/indicateur2"
-            render={props => (
-              <IndicateurDeux {...props} state={state} dispatch={dispatch} />
-            )}
-          />
-          <Route
-            path="/indicateur3"
-            render={props => (
-              <IndicateurTrois {...props} state={state} dispatch={dispatch} />
-            )}
-          />
-        </Switch>
+              <Route
+                path="/indicateur1"
+                render={props => (
+                  <IndicateurUn {...props} state={state} dispatch={dispatch} />
+                )}
+              />
+              <Route
+                path="/indicateur2"
+                render={props => (
+                  <IndicateurDeux
+                    {...props}
+                    state={state}
+                    dispatch={dispatch}
+                  />
+                )}
+              />
+              <Route
+                path="/indicateur3"
+                render={props => (
+                  <IndicateurTrois
+                    {...props}
+                    state={state}
+                    dispatch={dispatch}
+                  />
+                )}
+              />
+            </Switch>
+          </div>
+        </div>
+        <div css={styles.rightColumn} />
       </div>
     </Router>
   );
 }
 
-const styles = {};
+const styles = {
+  layout: css({
+    flex: 1,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center"
+  }),
+  leftColumn: css({
+    display: "flex",
+    flexDirection: "column",
+    flexGrow: 1,
+    maxWidth: 1280 - 375
+  }),
+  rightColumn: css({
+    display: "flex",
+    flexDirection: "column",
+    width: 375,
+    backgroundColor: "#AAAEE1"
+  }),
+  main: css({
+    overflowY: "auto",
+    display: "flex",
+    flex: 1,
+    position: "relative"
+  }),
+  menu: css({
+    position: "sticky",
+    top: 0,
+    width: 227,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    paddingBottom: 80
+  })
+};
 
 export default App;

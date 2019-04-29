@@ -18,6 +18,7 @@ const styles = {
   header: css({
     backgroundColor: "#FFF",
     height: 80,
+    flexShrink: 0,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
