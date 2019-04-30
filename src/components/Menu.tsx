@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Link } from "react-router-dom";
 
-import globalStyles from "../utils/styles";
+import globalStyles from "../utils/globalStyles";
 
 function Menu() {
   return (

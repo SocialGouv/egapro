@@ -2,14 +2,15 @@
 import { css, jsx } from "@emotion/core";
 import React from "react";
 import { useField } from "react-final-form-hooks";
+import { FormApi } from "final-form";
 
-import globalStyles from "../utils/styles";
+import globalStyles from "../utils/globalStyles";
 
 import { CellHead, Cell2 } from "./Cell";
 import CellInput from "./CellInput";
 
 interface Props {
-  form: any;
+  form: FormApi;
   name: string;
   calculable: boolean;
   femmeFieldName: string;
@@ -46,10 +47,15 @@ const styles = {
   row: css({
     display: "flex",
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24
+    alignItems: "flex-start",
+    height: 51,
+    marginBottom: 10
   }),
   cellHead: css({
+    height: 22,
+    display: "flex",
+    alignItems: "center",
+    borderBottom: `solid ${globalStyles.colors.default} 1px`,
     fontSize: 14
   }),
   cell2: css({

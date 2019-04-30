@@ -23,6 +23,7 @@ const styles = {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    paddingLeft: 227,
     borderBottom: "1px solid #EFECEF"
   }),
   headerInner: css({

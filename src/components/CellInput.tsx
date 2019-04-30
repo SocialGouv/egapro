@@ -1,10 +1,11 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { FieldRenderProps } from "react-final-form-hooks";
 
 import { Cell } from "./Cell";
 
 interface Props {
-  field: any;
+  field: FieldRenderProps;
   style?: any;
 }
 

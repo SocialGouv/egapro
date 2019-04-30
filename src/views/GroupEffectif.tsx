@@ -10,9 +10,7 @@ import {
   ActionEffectifData
 } from "../globals.d";
 
-import globalStyles from "../utils/styles";
-
-import { CellHead, Cell } from "../components/Cell";
+import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 
@@ -128,15 +126,12 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
         </p>
 
         {infoFields.map(({ categorieSocioPro, tranchesAges }) => (
-          <div css={styles.blocForm} key={categorieSocioPro}>
-            <div css={styles.row}>
-              <CellHead style={styles.cellHead}>
-                {displayNameCategorieSocioPro(categorieSocioPro)}
-              </CellHead>
-              <Cell style={styles.cellMen}>hommes</Cell>
-              <Cell style={styles.cellWomen}>femmes</Cell>
-            </div>
-
+          <BlocForm
+            key={categorieSocioPro}
+            title={displayNameCategorieSocioPro(categorieSocioPro)}
+            label="nombre de salariés"
+            footer="total 2000"
+          >
             {tranchesAges.map(
               ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
                 return (
@@ -151,7 +146,7 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
                 );
               }
             )}
-          </div>
+          </BlocForm>
         ))}
 
         <div css={styles.action}>
@@ -177,36 +172,11 @@ const styles = {
     marginTop: 7,
     fontSize: 14
   }),
-  blocForm: css({
-    maxWidth: 264,
-    margin: "24px 0"
-  }),
   action: css({
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 18
-  }),
-  row: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginTop: 12,
-    marginBottom: 24
-  }),
-  cellHead: css({
-    fontSize: 14,
-    textTransform: "uppercase"
-  }),
-  cellMen: css({
-    fontSize: 12,
-    textAlign: "center",
-    color: globalStyles.colors.men
-  }),
-  cellWomen: css({
-    fontSize: 12,
-    textAlign: "center",
-    color: globalStyles.colors.women
   })
 };
 
