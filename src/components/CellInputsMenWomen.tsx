@@ -9,6 +9,8 @@ import globalStyles from "../utils/globalStyles";
 import { CellHead, Cell2 } from "./Cell";
 import CellInput from "./CellInput";
 
+const validate = (value: string) => (value ? undefined : "Required");
+
 interface Props {
   form: FormApi;
   name: string;
@@ -24,32 +26,47 @@ function CellInputsMenWomen({
   femmeFieldName,
   hommeFieldName
 }: Props) {
-  const femmesField = useField(femmeFieldName, form);
-  const hommesField = useField(hommeFieldName, form);
+  const femmesField = useField(femmeFieldName, form, validate);
+  const hommesField = useField(hommeFieldName, form, validate);
+
+  const femmesError = femmesField.meta.error && femmesField.meta.touched;
+  const hommesError = hommesField.meta.error && hommesField.meta.touched;
+  const error = femmesError && hommesError;
+
   return (
-    <div css={styles.row}>
-      <CellHead style={styles.cellHead}>{name}</CellHead>
+    <div css={styles.container}>
+      <div css={styles.row}>
+        <CellHead style={[styles.cellHead, error && styles.cellHeadError]}>
+          {name}
+        </CellHead>
 
-      {calculable ? (
-        <React.Fragment>
-          <CellInput field={hommesField} style={styles.cellMen} />
+        {calculable ? (
+          <React.Fragment>
+            <CellInput field={hommesField} style={styles.cellMen} />
 
-          <CellInput field={femmesField} style={styles.cellWomen} />
-        </React.Fragment>
-      ) : (
-        <Cell2 css={styles.cell2}>Non Calculable</Cell2>
-      )}
+            <CellInput field={femmesField} style={styles.cellWomen} />
+          </React.Fragment>
+        ) : (
+          <Cell2 css={styles.cell2}>Non Calculable</Cell2>
+        )}
+      </div>
+      {error && <div css={styles.error}>{femmesField.meta.error}</div>}
     </div>
   );
 }
 
 const styles = {
+  container: css({
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    height: 51,
+    marginBottom: 10
+  }),
   row: css({
     display: "flex",
     flexDirection: "row",
-    alignItems: "flex-start",
-    height: 51,
-    marginBottom: 10
+    alignItems: "flex-start"
   }),
   cellHead: css({
     height: 22,
@@ -57,6 +74,10 @@ const styles = {
     alignItems: "center",
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
     fontSize: 14
+  }),
+  cellHeadError: css({
+    color: globalStyles.colors.error,
+    borderColor: "transparent"
   }),
   cell2: css({
     textAlign: "center"
@@ -66,6 +87,15 @@ const styles = {
   }),
   cellWomen: css({
     borderColor: globalStyles.colors.women
+  }),
+  error: css({
+    display: "flex",
+    alignItems: "center",
+    height: 18,
+    marginTop: 5,
+    color: globalStyles.colors.error,
+    fontSize: 11,
+    borderBottom: `solid ${globalStyles.colors.error} 1px`
   })
 };
 

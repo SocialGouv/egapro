@@ -48,7 +48,9 @@ const styles = {
     borderLeft: `solid ${globalStyles.colors.default} 1px`,
     borderRight: `solid ${globalStyles.colors.default} 1px`,
     marginTop: 50,
-    marginBottom: 20
+    marginBottom: 20,
+    paddingTop: 8,
+    paddingBottom: 16
   }),
   blocFormInner: css({
     paddingRight: PADDING,
