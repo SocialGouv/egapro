@@ -15,25 +15,28 @@ interface Props {
 
 function BlocForm({ title, label, footer, children, style }: Props) {
   return (
-    <div css={styles.blocForm}>
-      <div css={styles.rowHead}>
-        <CellHead style={styles.rowHeadCellHead}>{title}</CellHead>
-        <Cell2 style={styles.rowHeadCell}>{label}</Cell2>
-        <div css={styles.rowHeadBorder} />
-      </div>
+    <div css={styles.container}>
+      <div css={styles.background} />
+      <div css={styles.blocForm}>
+        <div css={styles.rowHead}>
+          <CellHead style={styles.rowHeadCellHead}>{title}</CellHead>
+          <Cell2 style={styles.rowHeadCell}>{label}</Cell2>
+          <div css={styles.rowHeadBorder} />
+        </div>
 
-      <div css={styles.rowGender}>
-        <CellHead />
-        <Cell style={styles.cellMen}>hommes</Cell>
-        <Cell style={styles.cellWomen}>femmes</Cell>
-      </div>
+        <div css={styles.rowGender}>
+          <CellHead />
+          <Cell style={styles.cellMen}>hommes</Cell>
+          <Cell style={styles.cellWomen}>femmes</Cell>
+        </div>
 
-      <div css={styles.blocFormInner}>{children}</div>
+        <div css={styles.blocFormInner}>{children}</div>
 
-      <div css={styles.rowFoot}>
-        <div css={styles.rowFootBorderLeft} />
-        <Cell2 style={styles.rowFootCell}>{footer}</Cell2>
-        <div css={styles.rowFootBorderRight} />
+        <div css={styles.rowFoot}>
+          <div css={styles.rowFootBorderLeft} />
+          <Cell2 style={styles.rowFootCell}>{footer}</Cell2>
+          <div css={styles.rowFootBorderRight} />
+        </div>
       </div>
     </div>
   );
@@ -42,13 +45,26 @@ function BlocForm({ title, label, footer, children, style }: Props) {
 const PADDING = 20;
 
 const styles = {
-  blocForm: css({
+  container: css({
     width: 300,
+    position: "relative",
+    marginTop: 50 + 14,
+    marginBottom: 20 + 14
+  }),
+  background: css({
+    backgroundColor: "#FFF",
+    position: "absolute",
+    top: -50,
+    bottom: -20,
+    left: -38,
+    right: -38,
+    borderRadius: "100%",
+    border: "1px solid #EFECEF"
+  }),
+  blocForm: css({
     position: "relative",
     borderLeft: `solid ${globalStyles.colors.default} 1px`,
     borderRight: `solid ${globalStyles.colors.default} 1px`,
-    marginTop: 50,
-    marginBottom: 20,
     paddingTop: 8,
     paddingBottom: 16
   }),

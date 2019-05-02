@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useReducer, useEffect } from "react";
+import { useReducer, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import {
@@ -141,6 +141,11 @@ function App() {
     localStorage.setItem("egapro", stateStringify);
   }, [state]);
 
+  const updateEffectif = useCallback(
+    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
+    [dispatch]
+  );
+
   return (
     <Router>
       <div css={styles.layout}>
@@ -159,9 +164,7 @@ function App() {
                   <GroupEffectif
                     {...props}
                     state={state}
-                    updateEffectif={(data: ActionEffectifData) =>
-                      dispatch({ type: "updateEffectif", data })
-                    }
+                    updateEffectif={updateEffectif}
                   />
                 )}
               />

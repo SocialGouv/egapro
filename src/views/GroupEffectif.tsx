@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { memo } from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
@@ -9,6 +10,8 @@ import {
   GroupTranchesAges,
   ActionEffectifData
 } from "../globals.d";
+
+import globalStyles from "../utils/globalStyles";
 
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
@@ -29,6 +32,9 @@ const getFieldName = (
   trancheAge: TranchesAges,
   genre: "Hommes" | "Femmes"
 ): string => "nombreSalaries" + categorieSocioPro + genre + trancheAge;
+
+const parseFormValue = (value: string, defaultValue: any = undefined) =>
+  value === "" ? defaultValue : parseInt(value, 10);
 
 function GroupEffectif({ state, updateEffectif, history }: Props) {
   const infoFields = state.map(({ categorieSocioPro, tranchesAges }) => {
@@ -87,34 +93,46 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
     );
   }, {});
 
-  const onSubmit = (formData: any) => {
+  const saveForm = (formData: any) => {
     const data: ActionEffectifData = infoFields.map(
       ({ categorieSocioPro, tranchesAges }) => ({
         categorieSocioPro,
         tranchesAges: tranchesAges.map(
           ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => ({
             trancheAge,
-            nombreSalariesFemmes:
-              formData[nbSalarieFemmeName] === ""
-                ? undefined
-                : parseInt(formData[nbSalarieFemmeName], 10),
-            nombreSalariesHommes:
-              formData[nbSalarieHommeName] === ""
-                ? undefined
-                : parseInt(formData[nbSalarieHommeName], 10)
+            nombreSalariesFemmes: parseFormValue(formData[nbSalarieFemmeName]),
+            nombreSalariesHommes: parseFormValue(formData[nbSalarieHommeName])
           })
         )
       })
     );
     updateEffectif(data);
+  };
+
+  const onSubmit = (formData: any) => {
+    saveForm(formData);
     history.push("/indicateur1");
   };
 
-  const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
+  const {
+    form,
+    handleSubmit,
+    values,
+    hasValidationErrors,
+    submitFailed
+  } = useForm({
     initialValues,
-    onSubmit // the function to call with your form values upon valid submit
-    //validate // a record-level validation function to check all form values
+    onSubmit
   });
+
+  form.subscribe(
+    ({ values, dirty }) => {
+      if (dirty) {
+        saveForm(values);
+      }
+    },
+    { values: true, dirty: true }
+  );
 
   return (
     <form onSubmit={handleSubmit}>
@@ -125,32 +143,54 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
           (CSP) et par tranche d’âge
         </p>
 
-        {infoFields.map(({ categorieSocioPro, tranchesAges }) => (
-          <BlocForm
-            key={categorieSocioPro}
-            title={displayNameCategorieSocioPro(categorieSocioPro)}
-            label="nombre de salariés"
-            footer="total 2000"
-          >
-            {tranchesAges.map(
-              ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
-                return (
-                  <CellInputsMenWomen
-                    key={trancheAge}
-                    form={form}
-                    name={displayNameTranchesAges(trancheAge)}
-                    calculable={true}
-                    femmeFieldName={nbSalarieFemmeName}
-                    hommeFieldName={nbSalarieHommeName}
-                  />
-                );
-              }
-            )}
-          </BlocForm>
-        ))}
+        {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
+          const totalNbSalarie = tranchesAges.reduce(
+            (acc, { nbSalarieFemmeName, nbSalarieHommeName }) => {
+              return (
+                acc +
+                parseFormValue(values[nbSalarieFemmeName], 0) +
+                parseFormValue(values[nbSalarieHommeName], 0)
+              );
+            },
+            0
+          );
+          return (
+            <BlocForm
+              key={categorieSocioPro}
+              title={displayNameCategorieSocioPro(categorieSocioPro)}
+              label="nombre de salariés"
+              footer={`total ${totalNbSalarie}`}
+            >
+              {tranchesAges.map(
+                ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
+                  return (
+                    <CellInputsMenWomen
+                      key={trancheAge}
+                      form={form}
+                      name={displayNameTranchesAges(trancheAge)}
+                      calculable={true}
+                      femmeFieldName={nbSalarieFemmeName}
+                      hommeFieldName={nbSalarieHommeName}
+                    />
+                  );
+                }
+              )}
+            </BlocForm>
+          );
+        })}
 
         <div css={styles.action}>
-          <ButtonSubmit label="valider" />
+          <ButtonSubmit
+            label="valider"
+            outline={hasValidationErrors}
+            error={submitFailed}
+          />
+          {submitFailed && (
+            <p css={styles.actionError}>
+              vous ne pouvez pas valider l’indicateur tant que vous n’avez pas
+              rempli tous les champs
+            </p>
+          )}
         </div>
       </div>
     </form>
@@ -161,23 +201,29 @@ const styles = {
   bloc: css({
     display: "flex",
     flexDirection: "column",
-    maxWidth: 1024,
-    padding: "12px 0",
-    margin: "24px auto"
+    maxWidth: 1024
   }),
   blocTitle: css({
+    marginTop: 36,
     fontSize: 32
   }),
   blocSubtitle: css({
-    marginTop: 7,
+    marginTop: 12,
+    marginBottom: 54,
     fontSize: 14
   }),
   action: css({
     display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 18
+    flexDirection: "column",
+    alignItems: "flex-start",
+    marginTop: 46,
+    marginBottom: 36
+  }),
+  actionError: css({
+    marginTop: 4,
+    color: globalStyles.colors.error,
+    fontSize: 12
   })
 };
 
-export default GroupEffectif;
+export default memo(GroupEffectif, () => true);
