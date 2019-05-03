@@ -1,21 +1,25 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { ReactNode } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
-import { CellHead, Cell, Cell2 } from "../components/Cell";
+import { useColumnsWidth } from "./GridContext";
+import { CellHead, Cell, Cell2 } from "./Cell";
 
 interface Props {
   title: string;
   label: string;
   footer: string;
-  children: any;
+  children: ReactNode;
   style?: any;
 }
 
 function BlocForm({ title, label, footer, children, style }: Props) {
+  const width = useColumnsWidth(3);
+
   return (
-    <div css={styles.container}>
+    <div css={[styles.container, css({ width })]}>
       <div css={styles.background} />
       <div css={styles.blocForm}>
         <div css={styles.rowHead}>
@@ -46,7 +50,6 @@ const PADDING = 20;
 
 const styles = {
   container: css({
-    width: 300,
     position: "relative",
     marginTop: 50 + 14,
     marginBottom: 20 + 14

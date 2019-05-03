@@ -5,6 +5,8 @@ import { Route, Link } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 
+import { useColumnsWidth } from "./GridContext";
+
 interface CustomNavLinkProps {
   children: ReactNode;
   to: string;
@@ -30,8 +32,10 @@ function CustomNavLink({
 }
 
 function Menu() {
+  const width = useColumnsWidth(2);
+
   return (
-    <div css={styles.menu}>
+    <div css={[styles.menu, css({ width })]}>
       <CustomNavLink to="/effectifs">effectif</CustomNavLink>
       <CustomNavLink to="/indicateur1">indicateur 1</CustomNavLink>
       <CustomNavLink to="/indicateur2">indicateur 2</CustomNavLink>
@@ -44,7 +48,8 @@ const styles = {
   menu: css({
     display: "flex",
     flexDirection: "column",
-    paddingLeft: 16
+    marginLeft: globalStyles.grid.gutterWidth,
+    marginRight: globalStyles.grid.gutterWidth
   }),
   link: css({
     marginTop: 7,

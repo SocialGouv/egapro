@@ -14,6 +14,7 @@ import {
 
 import mapEnum from "./utils/mapEnum";
 
+import GridProvider from "./components/GridContext";
 import Header from "./components/Header";
 import Menu from "./components/Menu";
 
@@ -148,57 +149,63 @@ function App() {
 
   return (
     <Router>
-      <div css={styles.layout}>
-        <div css={styles.leftColumn}>
-          <Header />
+      <GridProvider>
+        <div css={styles.layout}>
+          <div css={styles.leftColumn}>
+            <Header />
 
-          <div css={styles.main}>
-            <div css={styles.menu}>
-              <Menu />
+            <div css={styles.main}>
+              <div css={styles.menu}>
+                <Menu />
+              </div>
+              <Switch>
+                <Route path="/" exact render={props => <Home {...props} />} />
+                <Route
+                  path="/effectifs"
+                  render={props => (
+                    <GroupEffectif
+                      {...props}
+                      state={state}
+                      updateEffectif={updateEffectif}
+                    />
+                  )}
+                />
+                <Route
+                  path="/indicateur1"
+                  render={props => (
+                    <IndicateurUn
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
+                <Route
+                  path="/indicateur2"
+                  render={props => (
+                    <IndicateurDeux
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
+                <Route
+                  path="/indicateur3"
+                  render={props => (
+                    <IndicateurTrois
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
+              </Switch>
             </div>
-            <Switch>
-              <Route path="/" exact render={props => <Home {...props} />} />
-              <Route
-                path="/effectifs"
-                render={props => (
-                  <GroupEffectif
-                    {...props}
-                    state={state}
-                    updateEffectif={updateEffectif}
-                  />
-                )}
-              />
-              <Route
-                path="/indicateur1"
-                render={props => (
-                  <IndicateurUn {...props} state={state} dispatch={dispatch} />
-                )}
-              />
-              <Route
-                path="/indicateur2"
-                render={props => (
-                  <IndicateurDeux
-                    {...props}
-                    state={state}
-                    dispatch={dispatch}
-                  />
-                )}
-              />
-              <Route
-                path="/indicateur3"
-                render={props => (
-                  <IndicateurTrois
-                    {...props}
-                    state={state}
-                    dispatch={dispatch}
-                  />
-                )}
-              />
-            </Switch>
           </div>
+          <div css={styles.rightColumn} />
         </div>
-        <div css={styles.rightColumn} />
-      </div>
+      </GridProvider>
     </Router>
   );
 }
@@ -233,7 +240,6 @@ const styles = {
   menu: css({
     position: "sticky",
     top: 0,
-    width: 227,
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
