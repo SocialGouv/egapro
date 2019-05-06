@@ -16,7 +16,7 @@ interface Props {
 }
 
 function BlocForm({ title, label, footer, children, style }: Props) {
-  const width = useColumnsWidth(3);
+  const width = useColumnsWidth(4);
 
   return (
     <div css={[styles.container, css({ width })]}>

@@ -34,7 +34,11 @@ const getFieldName = (
 ): string => "nombreSalaries" + categorieSocioPro + genre + trancheAge;
 
 const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === "" ? defaultValue : parseInt(value, 10);
+  value === ""
+    ? defaultValue
+    : Number.isNaN(Number(value))
+    ? defaultValue
+    : parseInt(value, 10);
 
 const parseStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(value);

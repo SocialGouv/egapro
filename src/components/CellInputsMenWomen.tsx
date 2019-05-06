@@ -7,9 +7,22 @@ import { FormApi } from "final-form";
 import globalStyles from "../utils/globalStyles";
 
 import { CellHead, Cell2 } from "./Cell";
-import CellInput from "./CellInput";
+import CellInput, { hasFieldError } from "./CellInput";
 
-const validate = (value: string) => (value ? undefined : "Required");
+const required = (value: string): boolean => (value ? false : true);
+
+const mustBeNumber = (value: string): boolean =>
+  Number.isNaN(Number(value)) ? true : false;
+
+const validate = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  if (!requiredError && !mustBeNumberError) {
+    return undefined;
+  } else {
+    return { required: requiredError, mustBeNumber: mustBeNumberError };
+  }
+};
 
 interface Props {
   form: FormApi;
@@ -29,14 +42,20 @@ function CellInputsMenWomen({
   const femmesField = useField(femmeFieldName, form, validate);
   const hommesField = useField(hommeFieldName, form, validate);
 
-  const femmesError = femmesField.meta.error && femmesField.meta.touched;
-  const hommesError = hommesField.meta.error && hommesField.meta.touched;
-  const error = femmesError && hommesError;
+  const femmesError = hasFieldError(femmesField.meta);
+  const hommesError = hasFieldError(hommesField.meta);
+  const error = femmesError || hommesError;
 
   return (
     <div css={styles.container}>
       <div css={styles.row}>
-        <CellHead style={[styles.cellHead, error && styles.cellHeadError]}>
+        <CellHead
+          style={[
+            styles.cellHead,
+            !calculable && styles.cellHeadInvalid,
+            error && calculable && styles.cellHeadError
+          ]}
+        >
           {name}
         </CellHead>
 
@@ -47,10 +66,20 @@ function CellInputsMenWomen({
             <CellInput field={femmesField} style={styles.cellWomen} />
           </React.Fragment>
         ) : (
-          <Cell2 css={styles.cell2}>Non Calculable</Cell2>
+          <Cell2 css={styles.cell2} />
         )}
       </div>
-      {error && <div css={styles.error}>{femmesField.meta.error}</div>}
+      {!calculable && (
+        <div css={styles.invalid}>
+          Le groupe ne peut pas être pris en compte pour le calcul car il
+          comporte moins de 10 femmes ou 10 hommes
+        </div>
+      )}
+      {error && calculable && (
+        <div css={styles.error}>
+          ce champs n’est pas valide, renseignez une valeur numérique
+        </div>
+      )}
     </div>
   );
 }
@@ -75,6 +104,10 @@ const styles = {
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
     fontSize: 14
   }),
+  cellHeadInvalid: css({
+    color: globalStyles.colors.invalid,
+    borderColor: "transparent"
+  }),
   cellHeadError: css({
     color: globalStyles.colors.error,
     borderColor: "transparent"
@@ -88,6 +121,17 @@ const styles = {
   cellWomen: css({
     borderColor: globalStyles.colors.women
   }),
+  invalid: css({
+    display: "flex",
+    alignItems: "center",
+    height: 23,
+    paddingBottom: 4,
+    color: globalStyles.colors.invalid,
+    fontSize: 11,
+    fontStyle: "italic",
+    lineHeight: "12px",
+    borderBottom: `solid ${globalStyles.colors.invalid} 1px`
+  }),
   error: css({
     display: "flex",
     alignItems: "center",
@@ -95,6 +139,8 @@ const styles = {
     marginTop: 5,
     color: globalStyles.colors.error,
     fontSize: 11,
+    fontStyle: "italic",
+    lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.error} 1px`
   })
 };

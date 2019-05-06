@@ -36,7 +36,11 @@ const getFieldName = (
   "remunerationAnnuelleBrut" + categorieSocioPro + genre + trancheAge;
 
 const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === "" ? defaultValue : parseInt(value, 10);
+  value === ""
+    ? defaultValue
+    : Number.isNaN(Number(value))
+    ? defaultValue
+    : parseInt(value, 10);
 
 const parseStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(value);
@@ -135,13 +139,7 @@ function IndicateurUnForm({
     pushRouteIndicateurDeux();
   };
 
-  const {
-    form,
-    handleSubmit,
-    values,
-    hasValidationErrors,
-    submitFailed
-  } = useForm({
+  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
     initialValues,
     onSubmit
   });
@@ -167,6 +165,7 @@ function IndicateurUnForm({
             {tranchesAges.map(
               ({
                 trancheAge,
+                calculable,
                 remunerationAnnuelleBrutFemmesName,
                 remunerationAnnuelleBrutHommesName
               }) => {
@@ -175,7 +174,7 @@ function IndicateurUnForm({
                     key={trancheAge}
                     form={form}
                     name={displayNameTranchesAges(trancheAge)}
-                    calculable={true}
+                    calculable={calculable}
                     femmeFieldName={remunerationAnnuelleBrutFemmesName}
                     hommeFieldName={remunerationAnnuelleBrutHommesName}
                   />
