@@ -88,23 +88,26 @@ function reducer(state: Array<Groupe>, action: ActionType) {
       });
     }
     case "updateIndicateurUn": {
-      const index = state.findIndex(
-        ({ categorieSocioPro }) =>
-          categorieSocioPro === action.data.categorieSocioPro
-      );
-      const currentGroup = state[index];
-      const newGroup: Groupe = {
-        ...currentGroup,
-        tranchesAges: currentGroup.tranchesAges.map(
-          (groupTranchesAges: GroupTranchesAges) => {
-            const datum = action.data.tranchesAges.find(
-              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
-            );
-            return Object.assign({}, groupTranchesAges, datum);
-          }
-        )
-      };
-      return [...state.slice(0, index), newGroup, ...state.slice(index + 1)];
+      return state.map((group: Groupe) => {
+        const datumCat = action.data.find(
+          ({ categorieSocioPro }) =>
+            categorieSocioPro === group.categorieSocioPro
+        );
+        return {
+          ...group,
+          tranchesAges: group.tranchesAges.map(
+            (groupTranchesAges: GroupTranchesAges) => {
+              const datumAge =
+                datumCat &&
+                datumCat.tranchesAges.find(
+                  ({ trancheAge }) =>
+                    trancheAge === groupTranchesAges.trancheAge
+                );
+              return Object.assign({}, groupTranchesAges, datumAge);
+            }
+          )
+        };
+      });
     }
     case "updateIndicateurDeux": {
       return state.map((group: Groupe) => {

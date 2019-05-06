@@ -25,14 +25,14 @@ export type ActionEffectifData = Array<{
   }>;
 }>;
 
-export type ActionIndicateurUnData = {
+export type ActionIndicateurUnData = Array<{
   categorieSocioPro: CategorieSocioPro;
   tranchesAges: Array<{
     trancheAge: TranchesAges;
     remunerationAnnuelleBrutFemmes: number | undefined;
     remunerationAnnuelleBrutHommes: number | undefined;
   }>;
-};
+}>;
 
 export type ActionIndicateurDeuxData = Array<{
   categorieSocioPro: CategorieSocioPro;

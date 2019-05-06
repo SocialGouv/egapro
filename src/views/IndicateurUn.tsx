@@ -1,8 +1,11 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
+import { jsx, css } from "@emotion/core";
+import { useCallback } from "react";
 import { RouteComponentProps, Route, Switch } from "react-router-dom";
 
 import { Groupe, ActionType, ActionIndicateurUnData } from "../globals.d";
+
+import globalStyles from "../utils/globalStyles";
 
 import {
   calculEffectifsEtEcartRemuParTrancheAge,
@@ -14,7 +17,7 @@ import {
   calculNote
 } from "../utils/calculsEgaProIndicateurUn";
 
-import IndicateurUnStart from "./IndicateurUnStart";
+import ButtonLink from "../components/ButtonLink";
 import IndicateurUnForm from "./IndicateurUnForm";
 import IndicateurUnResult from "./IndicateurUnResult";
 
@@ -23,9 +26,17 @@ interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void;
 }
 
-function IndicateurUn({ state, dispatch, match }: Props) {
-  const updateIndicateurUn = (data: ActionIndicateurUnData) =>
-    dispatch({ type: "updateIndicateurUn", data });
+function IndicateurUn({ state, dispatch, match, history }: Props) {
+  const updateIndicateurUn = useCallback(
+    (data: ActionIndicateurUnData) =>
+      dispatch({ type: "updateIndicateurUn", data }),
+    [dispatch]
+  );
+
+  const pushRouteIndicateurDeux = useCallback(
+    () => history.push("/indicateur2"),
+    [history]
+  );
 
   const effectifEtEcartRemuParTranche = calculEffectifsEtEcartRemuParTrancheAge(
     state
@@ -59,43 +70,91 @@ function IndicateurUn({ state, dispatch, match }: Props) {
   const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
 
   return (
-    <Switch>
-      <Route
-        path={match.path}
-        exact
-        render={props => (
-          <IndicateurUnStart
-            {...props}
-            nombreSalariesTotal={totalNombreSalaries}
-            nombreSalariesGroupesValides={totalEffectifsValides}
-            indicateurCalculable={indicateurCalculable}
-          />
-        )}
-      />
-      <Route
-        path={`${match.path}/categorieSocioPro/:categorieSocioPro`}
-        render={props => (
+    <div css={styles.bloc}>
+      <p css={styles.blocTitle}>Indicateur 1, écart de rémunération</p>
+      <p css={styles.blocSubtitle}>
+        Renseignez la rémunération (annuelle / mensuelle) moyenne des femmes et
+        des hommes par CSP et par tranche d’âge.
+      </p>
+      {indicateurCalculable ? (
+        <div>
           <IndicateurUnForm
-            {...props}
-            key={props.match.params.categorieSocioPro}
-            effectif={state[props.match.params.categorieSocioPro]}
+            state={state}
             updateIndicateurUn={updateIndicateurUn}
+            pushRouteIndicateurDeux={pushRouteIndicateurDeux}
           />
-        )}
-      />
-      <Route
-        path={`${match.path}/resultat`}
-        render={props => (
-          <IndicateurUnResult
-            {...props}
-            indicateurCalculable={indicateurCalculable}
-            indicateurEcartRemuneration={indicateurEcartRemuneration}
-            noteIndicateurUn={noteIndicateurUn}
-          />
-        )}
-      />
-    </Switch>
+        </div>
+      ) : (
+        <div>
+          <div css={styles.indicatorUnavailable}>
+            <p css={styles.indicatorUnavailableTitle}>
+              Malheureusement votre indicateur n’est pas calculable
+            </p>
+            <p css={styles.indicatorUnavailableText}>
+              car l’ensemble des groupes valables (c’est-à-dire comptant au
+              moins 10 femmes et 10 hommes), représentent moins de 40% des
+              effectifs.
+            </p>
+          </div>
+          <div css={styles.action}>
+            <ButtonLink to="/indicateur2" label="suivant" />
+          </div>
+        </div>
+      )}
+      <Switch>
+        <Route
+          path={`${match.path}/resultat`}
+          render={props => (
+            <IndicateurUnResult
+              {...props}
+              indicateurCalculable={indicateurCalculable}
+              indicateurEcartRemuneration={indicateurEcartRemuneration}
+              noteIndicateurUn={noteIndicateurUn}
+            />
+          )}
+        />
+      </Switch>
+    </div>
   );
 }
+
+const styles = {
+  bloc: css({
+    display: "flex",
+    flexDirection: "column",
+    marginRight: globalStyles.grid.gutterWidth
+  }),
+  blocTitle: css({
+    marginTop: 36,
+    fontSize: 32
+  }),
+  blocSubtitle: css({
+    marginTop: 12,
+    marginBottom: 54,
+    fontSize: 14
+  }),
+  indicatorUnavailable: css({
+    padding: 16,
+    backgroundColor: "#FFF",
+    border: "1px solid #EFECEF"
+  }),
+  indicatorUnavailableTitle: css({
+    fontSize: 18,
+    lineHeight: "22px",
+    textTransform: "uppercase"
+  }),
+  indicatorUnavailableText: css({
+    marginTop: 4,
+    fontSize: 14,
+    lineHeight: "17px"
+  }),
+  action: css({
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    marginTop: 46,
+    marginBottom: 36
+  })
+};
 
 export default IndicateurUn;

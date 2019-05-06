@@ -10,7 +10,7 @@ import { CellHead, Cell, Cell2 } from "./Cell";
 interface Props {
   title: string;
   label: string;
-  footer: string;
+  footer?: string;
   children: ReactNode;
   style?: any;
 }
@@ -21,7 +21,7 @@ function BlocForm({ title, label, footer, children, style }: Props) {
   return (
     <div css={[styles.container, css({ width })]}>
       <div css={styles.background} />
-      <div css={styles.blocForm}>
+      <div css={[styles.blocForm, footer && styles.blocFormWithFooter]}>
         <div css={styles.rowHead}>
           <CellHead style={styles.rowHeadCellHead}>{title}</CellHead>
           <Cell2 style={styles.rowHeadCell}>{label}</Cell2>
@@ -36,11 +36,13 @@ function BlocForm({ title, label, footer, children, style }: Props) {
 
         <div css={styles.blocFormInner}>{children}</div>
 
-        <div css={styles.rowFoot}>
-          <div css={styles.rowFootBorderLeft} />
-          <Cell2 style={styles.rowFootCell}>{footer}</Cell2>
-          <div css={styles.rowFootBorderRight} />
-        </div>
+        {footer && (
+          <div css={styles.rowFoot}>
+            <div css={styles.rowFootBorderLeft} />
+            <Cell2 style={styles.rowFootCell}>{footer}</Cell2>
+            <div css={styles.rowFootBorderRight} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -68,8 +70,13 @@ const styles = {
     position: "relative",
     borderLeft: `solid ${globalStyles.colors.default} 1px`,
     borderRight: `solid ${globalStyles.colors.default} 1px`,
+    borderBottom: `solid ${globalStyles.colors.default} 1px`,
     paddingTop: 8,
-    paddingBottom: 16
+    paddingBottom: 8
+  }),
+  blocFormWithFooter: css({
+    borderBottom: "none",
+    paddingBottom: 8 + 8
   }),
   blocFormInner: css({
     paddingRight: PADDING,

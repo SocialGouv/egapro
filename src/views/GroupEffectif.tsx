@@ -36,6 +36,9 @@ const getFieldName = (
 const parseFormValue = (value: string, defaultValue: any = undefined) =>
   value === "" ? defaultValue : parseInt(value, 10);
 
+const parseStateValue = (value: number | undefined) =>
+  value === undefined ? "" : String(value);
+
 function GroupEffectif({ state, updateEffectif, history }: Props) {
   const infoFields = state.map(({ categorieSocioPro, tranchesAges }) => {
     return {
@@ -53,19 +56,13 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
               trancheAge,
               "Femmes"
             ),
-            nbSalarieFemmeValue:
-              nombreSalariesFemmes === undefined
-                ? ""
-                : String(nombreSalariesFemmes),
+            nbSalarieFemmeValue: parseStateValue(nombreSalariesFemmes),
             nbSalarieHommeName: getFieldName(
               categorieSocioPro,
               trancheAge,
               "Hommes"
             ),
-            nbSalarieHommeValue:
-              nombreSalariesHommes === undefined
-                ? ""
-                : String(nombreSalariesHommes)
+            nbSalarieHommeValue: parseStateValue(nombreSalariesHommes)
           };
         }
       )
@@ -140,7 +137,7 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
         <p css={styles.blocTitle}>Indication des effectifs</p>
         <p css={styles.blocSubtitle}>
           Renseignez le nombre d’effectifs par catégorie socio-professionnelle
-          (CSP) et par tranche d’âge
+          (CSP) et par tranche d’âge.
         </p>
 
         {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
@@ -200,8 +197,7 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
 const styles = {
   bloc: css({
     display: "flex",
-    flexDirection: "column",
-    maxWidth: 1024
+    flexDirection: "column"
   }),
   blocTitle: css({
     marginTop: 36,
