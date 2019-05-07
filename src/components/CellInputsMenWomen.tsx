@@ -39,8 +39,16 @@ function CellInputsMenWomen({
   femmeFieldName,
   hommeFieldName
 }: Props) {
-  const femmesField = useField(femmeFieldName, form, validate);
-  const hommesField = useField(hommeFieldName, form, validate);
+  const femmesField = useField(
+    femmeFieldName,
+    form,
+    calculable ? validate : undefined
+  );
+  const hommesField = useField(
+    hommeFieldName,
+    form,
+    calculable ? validate : undefined
+  );
 
   const femmesError = hasFieldError(femmesField.meta);
   const hommesError = hasFieldError(hommesField.meta);
@@ -71,8 +79,9 @@ function CellInputsMenWomen({
       </div>
       {!calculable && (
         <div css={styles.invalid}>
-          Le groupe ne peut pas être pris en compte pour le calcul car il
-          comporte moins de 10 femmes ou 10 hommes
+          Le groupe ne peut pas être pris en compte pour le calcul
+          <br />
+          car il comporte moins de 10 femmes ou 10 hommes
         </div>
       )}
       {error && calculable && (
