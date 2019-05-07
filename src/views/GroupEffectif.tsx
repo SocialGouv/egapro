@@ -4,9 +4,9 @@ import { memo } from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
+  AppState,
   CategorieSocioPro,
   TranchesAges,
-  Groupe,
   GroupTranchesAges,
   ActionEffectifData
 } from "../globals.d";
@@ -16,6 +16,7 @@ import globalStyles from "../utils/globalStyles";
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
+import ButtonLink from "../components/ButtonLink";
 
 import {
   displayNameCategorieSocioPro,
@@ -23,8 +24,9 @@ import {
 } from "../utils/helpers";
 
 interface Props extends RouteComponentProps {
-  state: Array<Groupe>;
+  state: AppState;
   updateEffectif: (data: ActionEffectifData) => void;
+  saveEffectif: (data: ActionEffectifData) => void;
 }
 
 const getFieldName = (
@@ -43,8 +45,8 @@ const parseFormValue = (value: string, defaultValue: any = undefined) =>
 const parseStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(value);
 
-function GroupEffectif({ state, updateEffectif, history }: Props) {
-  const infoFields = state.map(({ categorieSocioPro, tranchesAges }) => {
+function GroupEffectif({ state, updateEffectif, saveEffectif }: Props) {
+  const infoFields = state.data.map(({ categorieSocioPro, tranchesAges }) => {
     return {
       categorieSocioPro,
       tranchesAges: tranchesAges.map(
@@ -94,7 +96,7 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
     );
   }, {});
 
-  const saveForm = (formData: any) => {
+  const saveForm = (formData: any, valid: boolean = false) => {
     const data: ActionEffectifData = infoFields.map(
       ({ categorieSocioPro, tranchesAges }) => ({
         categorieSocioPro,
@@ -107,12 +109,12 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
         )
       })
     );
-    updateEffectif(data);
+    const actionEffectif = valid ? saveEffectif : updateEffectif;
+    actionEffectif(data);
   };
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    history.push("/indicateur1");
+    saveForm(formData, true);
   };
 
   const {
@@ -167,6 +169,7 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
                   return (
                     <CellInputsMenWomen
                       key={trancheAge}
+                      readOnly={state.formEffectifValidated}
                       form={form}
                       name={displayNameTranchesAges(trancheAge)}
                       calculable={true}
@@ -180,19 +183,25 @@ function GroupEffectif({ state, updateEffectif, history }: Props) {
           );
         })}
 
-        <div css={styles.action}>
-          <ButtonSubmit
-            label="valider"
-            outline={hasValidationErrors}
-            error={submitFailed}
-          />
-          {submitFailed && (
-            <p css={styles.actionError}>
-              vous ne pouvez pas valider l’indicateur tant que vous n’avez pas
-              rempli tous les champs
-            </p>
-          )}
-        </div>
+        {state.formEffectifValidated ? (
+          <div css={styles.action}>
+            <ButtonLink to="/indicateur1" label="suivant" />
+          </div>
+        ) : (
+          <div css={styles.action}>
+            <ButtonSubmit
+              label="valider"
+              outline={hasValidationErrors}
+              error={submitFailed}
+            />
+            {submitFailed && (
+              <p css={styles.actionError}>
+                vous ne pouvez pas valider l’indicateur tant que vous n’avez pas
+                rempli tous les champs
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </form>
   );

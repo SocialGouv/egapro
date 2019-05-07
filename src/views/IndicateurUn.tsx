@@ -3,7 +3,7 @@ import { jsx, css } from "@emotion/core";
 import { useCallback } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
-import { Groupe, ActionType, ActionIndicateurUnData } from "../globals.d";
+import { AppState, ActionType, ActionIndicateurUnData } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -22,7 +22,7 @@ import IndicateurUnForm from "./IndicateurUnForm";
 import IndicateurUnResult from "./IndicateurUnResult";
 
 interface Props extends RouteComponentProps {
-  state: Array<Groupe>;
+  state: AppState;
   dispatch: (action: ActionType) => void;
 }
 
@@ -33,13 +33,14 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
     [dispatch]
   );
 
-  const pushRouteIndicateurDeux = useCallback(
-    () => history.push("/indicateur2"),
-    [history]
+  const saveIndicateurUn = useCallback(
+    (data: ActionIndicateurUnData) =>
+      dispatch({ type: "saveIndicateurUn", data }),
+    [dispatch]
   );
 
   const effectifEtEcartRemuParTranche = calculEffectifsEtEcartRemuParTrancheAge(
-    state
+    state.data
   );
 
   const { totalNombreSalaries, totalEffectifsValides } = calculTotalEffectifs(
@@ -76,21 +77,25 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
         Renseignez la rémunération (annuelle / mensuelle) moyenne des femmes et
         des hommes par CSP et par tranche d’âge.
       </p>
-      {indicateurCalculable ? (
+      {indicateurCalculable && state.formEffectifValidated ? (
         <div css={styles.body}>
           <div>
             <IndicateurUnForm
-              state={state}
+              key={String(state.formIndicateurUnValidated)}
+              data={state.data}
+              readOnly={state.formIndicateurUnValidated}
               updateIndicateurUn={updateIndicateurUn}
-              pushRouteIndicateurDeux={pushRouteIndicateurDeux}
+              saveIndicateurUn={saveIndicateurUn}
             />
           </div>
-          <div css={styles.result}>
-            <IndicateurUnResult
-              indicateurEcartRemuneration={indicateurEcartRemuneration}
-              noteIndicateurUn={noteIndicateurUn}
-            />
-          </div>
+          {state.formIndicateurUnValidated && (
+            <div css={styles.result}>
+              <IndicateurUnResult
+                indicateurEcartRemuneration={indicateurEcartRemuneration}
+                noteIndicateurUn={noteIndicateurUn}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div>

@@ -4,15 +4,15 @@ import { useReducer, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import {
+  AppState,
   TranchesAges,
   CategorieSocioPro,
-  Groupe,
-  GroupTranchesAges,
-  ActionType,
   ActionEffectifData
 } from "./globals.d";
 
 import mapEnum from "./utils/mapEnum";
+
+import AppReducer from "./AppReducer";
 
 import GridProvider from "./components/GridContext";
 import Header from "./components/Header";
@@ -44,93 +44,28 @@ const baseGroupe = {
   tauxPromotionHommes: undefined
 };
 
-const defaultState: Array<Groupe> = [
-  {
-    categorieSocioPro: CategorieSocioPro.Ouvriers,
-    ...baseGroupe
-  },
-  {
-    categorieSocioPro: CategorieSocioPro.Employes,
-    ...baseGroupe
-  },
-  {
-    categorieSocioPro: CategorieSocioPro.Techniciens,
-    ...baseGroupe
-  },
-  {
-    categorieSocioPro: CategorieSocioPro.Cadres,
-    ...baseGroupe
-  }
-];
-
-function reducer(state: Array<Groupe>, action: ActionType) {
-  switch (action.type) {
-    case "updateEffectif": {
-      return state.map((group: Groupe) => {
-        const datumCat = action.data.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return {
-          ...group,
-          tranchesAges: group.tranchesAges.map(
-            (groupTranchesAges: GroupTranchesAges) => {
-              const datumAge =
-                datumCat &&
-                datumCat.tranchesAges.find(
-                  ({ trancheAge }) =>
-                    trancheAge === groupTranchesAges.trancheAge
-                );
-              return Object.assign({}, groupTranchesAges, datumAge);
-            }
-          )
-        };
-      });
+const defaultState: AppState = {
+  data: [
+    {
+      categorieSocioPro: CategorieSocioPro.Ouvriers,
+      ...baseGroupe
+    },
+    {
+      categorieSocioPro: CategorieSocioPro.Employes,
+      ...baseGroupe
+    },
+    {
+      categorieSocioPro: CategorieSocioPro.Techniciens,
+      ...baseGroupe
+    },
+    {
+      categorieSocioPro: CategorieSocioPro.Cadres,
+      ...baseGroupe
     }
-    case "updateIndicateurUn": {
-      return state.map((group: Groupe) => {
-        const datumCat = action.data.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return {
-          ...group,
-          tranchesAges: group.tranchesAges.map(
-            (groupTranchesAges: GroupTranchesAges) => {
-              const datumAge =
-                datumCat &&
-                datumCat.tranchesAges.find(
-                  ({ trancheAge }) =>
-                    trancheAge === groupTranchesAges.trancheAge
-                );
-              return Object.assign({}, groupTranchesAges, datumAge);
-            }
-          )
-        };
-      });
-    }
-    case "updateIndicateurDeux": {
-      return state.map((group: Groupe) => {
-        const datum = action.data.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return Object.assign({}, group, datum);
-      });
-    }
-    case "updateIndicateurTrois": {
-      return state.map((group: Groupe) => {
-        const datum = action.data.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return Object.assign({}, group, datum);
-      });
-    }
-    default:
-      return state;
-  }
-}
+  ],
+  formEffectifValidated: false,
+  formIndicateurUnValidated: false
+};
 
 const localStorageEgapro = localStorage.getItem("egapro");
 const initialState = localStorageEgapro
@@ -138,7 +73,7 @@ const initialState = localStorageEgapro
   : defaultState;
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(AppReducer, initialState);
 
   useEffect(() => {
     const stateStringify = JSON.stringify(state);
@@ -147,6 +82,11 @@ function App() {
 
   const updateEffectif = useCallback(
     (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
+    [dispatch]
+  );
+
+  const saveEffectif = useCallback(
+    (data: ActionEffectifData) => dispatch({ type: "saveEffectif", data }),
     [dispatch]
   );
 
@@ -170,6 +110,7 @@ function App() {
                       {...props}
                       state={state}
                       updateEffectif={updateEffectif}
+                      saveEffectif={saveEffectif}
                     />
                   )}
                 />

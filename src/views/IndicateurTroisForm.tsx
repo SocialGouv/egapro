@@ -133,6 +133,7 @@ function IndicateurTroisForm({
                 key={categorieSocioPro}
                 form={form}
                 name={displayNameCategorieSocioPro(categorieSocioPro)}
+                readOnly={false}
                 calculable={validiteGroupe}
                 femmeFieldName={tauxPromotionFemmesName}
                 hommeFieldName={tauxPromotionHommesName}

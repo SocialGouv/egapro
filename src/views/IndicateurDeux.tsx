@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/core";
 import { RouteComponentProps, Route, Switch } from "react-router-dom";
 
-import { Groupe, ActionType, ActionIndicateurDeuxData } from "../globals.d";
+import { AppState, ActionType, ActionIndicateurDeuxData } from "../globals.d";
 
 import {
   calculEffectifsEtEcartAugmentParCategorieSocioPro,
@@ -19,7 +19,7 @@ import IndicateurDeuxForm from "./IndicateurDeuxForm";
 import IndicateurDeuxResult from "./IndicateurDeuxResult";
 
 interface Props extends RouteComponentProps {
-  state: Array<Groupe>;
+  state: AppState;
   dispatch: (action: ActionType) => void;
 }
 
@@ -28,7 +28,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
     dispatch({ type: "updateIndicateurDeux", data });
 
   const effectifEtEcartAugmentParGroupe = calculEffectifsEtEcartAugmentParCategorieSocioPro(
-    state
+    state.data
   );
 
   const {

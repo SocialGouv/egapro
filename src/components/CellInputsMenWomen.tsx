@@ -6,7 +6,7 @@ import { FormApi } from "final-form";
 
 import globalStyles from "../utils/globalStyles";
 
-import { CellHead, Cell2 } from "./Cell";
+import { CellHead, Cell, Cell2 } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
 
 const required = (value: string): boolean => (value ? false : true);
@@ -26,6 +26,7 @@ const validate = (value: string) => {
 
 interface Props {
   form: FormApi;
+  readOnly: boolean;
   name: string;
   calculable: boolean;
   femmeFieldName: string;
@@ -35,6 +36,7 @@ interface Props {
 function CellInputsMenWomen({
   form,
   name,
+  readOnly,
   calculable,
   femmeFieldName,
   hommeFieldName
@@ -67,7 +69,17 @@ function CellInputsMenWomen({
           {name}
         </CellHead>
 
-        {calculable ? (
+        {readOnly ? (
+          <React.Fragment>
+            <Cell style={[styles.cellEmpty, styles.cellEmptyMen]}>
+              {hommesField.input.value}
+            </Cell>
+
+            <Cell style={[styles.cellEmpty, styles.cellEmptyWomen]}>
+              {femmesField.input.value}
+            </Cell>
+          </React.Fragment>
+        ) : calculable ? (
           <React.Fragment>
             <CellInput field={hommesField} style={styles.cellMen} />
 
@@ -129,6 +141,18 @@ const styles = {
   }),
   cellWomen: css({
     borderColor: globalStyles.colors.women
+  }),
+  cellEmpty: css({
+    height: 22,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+  }),
+  cellEmptyMen: css({
+    color: globalStyles.colors.men
+  }),
+  cellEmptyWomen: css({
+    color: globalStyles.colors.women
   }),
   invalid: css({
     display: "flex",

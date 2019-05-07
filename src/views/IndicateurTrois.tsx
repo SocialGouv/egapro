@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/core";
 import { RouteComponentProps, Route, Switch } from "react-router-dom";
 
-import { Groupe, ActionType, ActionIndicateurTroisData } from "../globals.d";
+import { AppState, ActionType, ActionIndicateurTroisData } from "../globals.d";
 
 import {
   calculEffectifsEtEcartPromoParCategorieSocioPro,
@@ -19,7 +19,7 @@ import IndicateurTroisForm from "./IndicateurTroisForm";
 import IndicateurTroisResult from "./IndicateurTroisResult";
 
 interface Props extends RouteComponentProps {
-  state: Array<Groupe>;
+  state: AppState;
   dispatch: (action: ActionType) => void;
 }
 
@@ -28,7 +28,7 @@ function IndicateurTrois({ state, dispatch, match }: Props) {
     dispatch({ type: "updateIndicateurTrois", data });
 
   const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
-    state
+    state.data
   );
 
   const {

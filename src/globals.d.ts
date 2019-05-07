@@ -1,10 +1,24 @@
+export type AppState = {
+  data: Array<Groupe>;
+  formEffectifValidated: boolean;
+  formIndicateurUnValidated: boolean;
+};
+
 export type ActionType =
   | {
       type: "updateEffectif";
       data: ActionEffectifData;
     }
   | {
+      type: "saveEffectif";
+      data: ActionEffectifData;
+    }
+  | {
       type: "updateIndicateurUn";
+      data: ActionIndicateurUnData;
+    }
+  | {
+      type: "saveIndicateurUn";
       data: ActionIndicateurUnData;
     }
   | {

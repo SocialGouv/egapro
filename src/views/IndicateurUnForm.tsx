@@ -17,15 +17,19 @@ import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
+import ButtonLink from "../components/ButtonLink";
+
 import {
   displayNameCategorieSocioPro,
   displayNameTranchesAges
 } from "../utils/helpers";
+import { read } from "fs";
 
 interface Props {
-  state: Array<Groupe>;
+  data: Array<Groupe>;
+  readOnly: boolean;
   updateIndicateurUn: (data: ActionIndicateurUnData) => void;
-  pushRouteIndicateurDeux: () => void;
+  saveIndicateurUn: (data: ActionIndicateurUnData) => void;
 }
 
 const getFieldName = (
@@ -46,11 +50,12 @@ const parseStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(value);
 
 function IndicateurUnForm({
-  state,
+  data,
+  readOnly,
   updateIndicateurUn,
-  pushRouteIndicateurDeux
+  saveIndicateurUn
 }: Props) {
-  const infoFields = state.map(({ categorieSocioPro, tranchesAges }) => {
+  const infoFields = data.map(({ categorieSocioPro, tranchesAges }) => {
     return {
       categorieSocioPro,
       tranchesAges: tranchesAges.map(
@@ -110,7 +115,7 @@ function IndicateurUnForm({
     );
   }, {});
 
-  const saveForm = (formData: any) => {
+  const saveForm = (formData: any, valid: boolean = false) => {
     const data: ActionIndicateurUnData = infoFields.map(
       ({ categorieSocioPro, tranchesAges }) => ({
         categorieSocioPro,
@@ -131,12 +136,12 @@ function IndicateurUnForm({
         )
       })
     );
-    updateIndicateurUn(data);
+    const actionIndicateurUn = valid ? saveIndicateurUn : updateIndicateurUn;
+    actionIndicateurUn(data);
   };
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    pushRouteIndicateurDeux();
+    saveForm(formData, true);
   };
 
   const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
@@ -174,6 +179,7 @@ function IndicateurUnForm({
                     key={trancheAge}
                     form={form}
                     name={displayNameTranchesAges(trancheAge)}
+                    readOnly={readOnly}
                     calculable={calculable}
                     femmeFieldName={remunerationAnnuelleBrutFemmesName}
                     hommeFieldName={remunerationAnnuelleBrutHommesName}
@@ -185,19 +191,25 @@ function IndicateurUnForm({
         );
       })}
 
-      <div css={styles.action}>
-        <ButtonSubmit
-          label="valider"
-          outline={hasValidationErrors}
-          error={submitFailed}
-        />
-        {submitFailed && (
-          <p css={styles.actionError}>
-            vous ne pouvez pas valider l’indicateur tant que vous n’avez pas
-            rempli tous les champs
-          </p>
-        )}
-      </div>
+      {readOnly ? (
+        <div css={styles.action}>
+          <ButtonLink to="/indicateur2" label="valider" />
+        </div>
+      ) : (
+        <div css={styles.action}>
+          <ButtonSubmit
+            label="valider"
+            outline={hasValidationErrors}
+            error={submitFailed}
+          />
+          {submitFailed && (
+            <p css={styles.actionError}>
+              vous ne pouvez pas valider l’indicateur tant que vous n’avez pas
+              rempli tous les champs
+            </p>
+          )}
+        </div>
+      )}
     </form>
   );
 }
