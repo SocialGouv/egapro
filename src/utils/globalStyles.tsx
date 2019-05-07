@@ -9,7 +9,7 @@ const globalStyles = {
   grid: {
     gutterWidth: 16,
     columns: 12,
-    maxWidth: 1280,
+    maxWidth: 1440,
     minWidth: 1024
   }
 };

@@ -10,6 +10,7 @@ import {
   ActionEffectifData
 } from "./globals.d";
 
+import globalStyles from "./utils/globalStyles";
 import mapEnum from "./utils/mapEnum";
 
 import AppReducer from "./AppReducer";
@@ -101,50 +102,52 @@ function App() {
               <div css={styles.menu}>
                 <Menu />
               </div>
-              <Switch>
-                <Route path="/" exact render={props => <Home {...props} />} />
-                <Route
-                  path="/effectifs"
-                  render={props => (
-                    <GroupEffectif
-                      {...props}
-                      state={state}
-                      updateEffectif={updateEffectif}
-                      saveEffectif={saveEffectif}
-                    />
-                  )}
-                />
-                <Route
-                  path="/indicateur1"
-                  render={props => (
-                    <IndicateurUn
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-                <Route
-                  path="/indicateur2"
-                  render={props => (
-                    <IndicateurDeux
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-                <Route
-                  path="/indicateur3"
-                  render={props => (
-                    <IndicateurTrois
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-              </Switch>
+              <div css={styles.view}>
+                <Switch>
+                  <Route path="/" exact render={props => <Home {...props} />} />
+                  <Route
+                    path="/effectifs"
+                    render={props => (
+                      <GroupEffectif
+                        {...props}
+                        state={state}
+                        updateEffectif={updateEffectif}
+                        saveEffectif={saveEffectif}
+                      />
+                    )}
+                  />
+                  <Route
+                    path="/indicateur1"
+                    render={props => (
+                      <IndicateurUn
+                        {...props}
+                        state={state}
+                        dispatch={dispatch}
+                      />
+                    )}
+                  />
+                  <Route
+                    path="/indicateur2"
+                    render={props => (
+                      <IndicateurDeux
+                        {...props}
+                        state={state}
+                        dispatch={dispatch}
+                      />
+                    )}
+                  />
+                  <Route
+                    path="/indicateur3"
+                    render={props => (
+                      <IndicateurTrois
+                        {...props}
+                        state={state}
+                        dispatch={dispatch}
+                      />
+                    )}
+                  />
+                </Switch>
+              </div>
             </div>
           </div>
           <div css={styles.rightColumn} />
@@ -165,7 +168,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
-    maxWidth: 1280 - 375
+    maxWidth: globalStyles.grid.maxWidth - 375
   }),
   rightColumn: css({
     display: "flex",
@@ -188,6 +191,9 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     paddingBottom: 80
+  }),
+  view: css({
+    flex: 1
   })
 };
 

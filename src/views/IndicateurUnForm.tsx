@@ -193,7 +193,7 @@ function IndicateurUnForm({
 
       {readOnly ? (
         <div css={styles.action}>
-          <ButtonLink to="/indicateur2" label="valider" />
+          <ButtonLink to="/indicateur2" label="suivant" />
         </div>
       ) : (
         <div css={styles.action}>
