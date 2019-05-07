@@ -1,75 +1,104 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import ButtonLink from "../components/ButtonLink";
+import globalStyles from "../utils/globalStyles";
 
 interface Props {
-  indicateurCalculable: boolean;
   indicateurEcartRemuneration: number | undefined;
   noteIndicateurUn: number | undefined;
 }
 
 function IndicateurUnResult({
-  indicateurCalculable,
   indicateurEcartRemuneration,
   noteIndicateurUn
 }: Props) {
+  const absoluteResult =
+    indicateurEcartRemuneration !== undefined
+      ? Math.abs(indicateurEcartRemuneration)
+      : undefined;
+  const genderFavoriteResult =
+    indicateurEcartRemuneration !== undefined
+      ? Math.sign(indicateurEcartRemuneration) < 0
+        ? "femmes"
+        : "hommes"
+      : undefined;
   return (
-    <div>
+    <div css={styles.container}>
       <div css={styles.bloc}>
-        <p css={styles.blocTitle}>
-          Indicateur 1 {indicateurCalculable ? "Calculable" : "Non Calculable"}
-        </p>
-
-        <div css={styles.message}>
-          {indicateurEcartRemuneration !== undefined ? (
-            <p>
-              indicateur d'écart de rémunération :{" "}
-              {indicateurEcartRemuneration.toFixed(1)}%
+        <div>
+          <p css={styles.message}>
+            <span css={styles.messageLabel}>votre résultat final est </span>
+            <span css={styles.messageData}>
+              {absoluteResult !== undefined ? absoluteResult.toFixed(1) : "--"}{" "}
+              %
+            </span>
+          </p>
+          {genderFavoriteResult && (
+            <p css={styles.info}>
+              l'écart est favorable pour les {genderFavoriteResult}
             </p>
-          ) : (
-            <p>---</p>
           )}
         </div>
 
-        <div css={styles.message}>
-          {noteIndicateurUn !== undefined ? (
-            <p>Note : {noteIndicateurUn}</p>
-          ) : (
-            <p>---</p>
-          )}
+        <div>
+          <p css={styles.message}>
+            <span css={styles.messageLabel}>votre note obtenue est </span>
+            <span css={styles.messageData}>
+              {noteIndicateurUn !== undefined ? noteIndicateurUn : "--"}
+              /40
+            </span>
+          </p>
+          <p css={styles.info}>mesures de correction prises en compte</p>
         </div>
-
-        <ButtonLink to="/indicateur2" label="Continuer" />
       </div>
     </div>
   );
 }
 
 const styles = {
+  container: css({
+    marginTop: 64,
+    width: "100%",
+    position: "relative",
+    height: 0,
+    paddingTop: "100%"
+  }),
   bloc: css({
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+
+    padding: "26% 8%",
     display: "flex",
     flexDirection: "column",
-    maxWidth: 800,
-    padding: "12px 24px",
-    margin: "24px auto",
-    backgroundColor: "white",
-    borderRadius: 6,
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.12)"
-  }),
-  blocTitle: css({
-    fontSize: 24,
-    paddingTop: 6,
-    paddingBottom: 24,
-    color: "#353535",
-    textAlign: "center"
+    justifyContent: "space-between",
+
+    color: "white",
+    backgroundColor: globalStyles.colors.default,
+    borderRadius: "100%"
   }),
   message: css({
-    fontSize: 26,
-    fontWeight: 200,
-    textAlign: "center",
-    marginBottom: 32,
-    marginTop: 12
+    marginBottom: 9,
+    display: "flex",
+    alignItems: "baseline",
+
+    fontSize: 14,
+    lineHeight: "17px"
+  }),
+  messageLabel: css({
+    marginRight: "auto"
+  }),
+  messageData: css({
+    fontWeight: "bold"
+  }),
+  info: css({
+    fontSize: 12,
+    fontStyle: "italic",
+    lineHeight: "15px",
+
+    borderBottom: "1px solid #FFFFFF"
   })
 };
 

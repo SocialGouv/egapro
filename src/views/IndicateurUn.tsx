@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx, css } from "@emotion/core";
 import { useCallback } from "react";
-import { RouteComponentProps, Route, Switch } from "react-router-dom";
+import { RouteComponentProps } from "react-router-dom";
 
 import { Groupe, ActionType, ActionIndicateurUnData } from "../globals.d";
 
@@ -77,12 +77,20 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
         des hommes par CSP et par tranche d’âge.
       </p>
       {indicateurCalculable ? (
-        <div>
-          <IndicateurUnForm
-            state={state}
-            updateIndicateurUn={updateIndicateurUn}
-            pushRouteIndicateurDeux={pushRouteIndicateurDeux}
-          />
+        <div css={styles.body}>
+          <div>
+            <IndicateurUnForm
+              state={state}
+              updateIndicateurUn={updateIndicateurUn}
+              pushRouteIndicateurDeux={pushRouteIndicateurDeux}
+            />
+          </div>
+          <div css={styles.result}>
+            <IndicateurUnResult
+              indicateurEcartRemuneration={indicateurEcartRemuneration}
+              noteIndicateurUn={noteIndicateurUn}
+            />
+          </div>
         </div>
       ) : (
         <div>
@@ -101,19 +109,6 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
           </div>
         </div>
       )}
-      <Switch>
-        <Route
-          path={`${match.path}/resultat`}
-          render={props => (
-            <IndicateurUnResult
-              {...props}
-              indicateurCalculable={indicateurCalculable}
-              indicateurEcartRemuneration={indicateurEcartRemuneration}
-              noteIndicateurUn={noteIndicateurUn}
-            />
-          )}
-        />
-      </Switch>
     </div>
   );
 }
@@ -133,6 +128,21 @@ const styles = {
     marginBottom: 54,
     fontSize: 14
   }),
+
+  body: css({
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-start"
+  }),
+  result: css({
+    flex: 1,
+    marginLeft: 16,
+    position: "sticky",
+    top: 0,
+    display: "flex",
+    flexDirection: "column"
+  }),
+
   indicatorUnavailable: css({
     padding: 16,
     backgroundColor: "#FFF",
