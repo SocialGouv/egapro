@@ -86,8 +86,8 @@ function App() {
     [dispatch]
   );
 
-  const saveEffectif = useCallback(
-    (data: ActionEffectifData) => dispatch({ type: "saveEffectif", data }),
+  const validateEffectif = useCallback(
+    (valid: boolean) => dispatch({ type: "validateEffectif", valid }),
     [dispatch]
   );
 
@@ -115,7 +115,7 @@ function App() {
                         {...props}
                         state={state}
                         updateEffectif={updateEffectif}
-                        saveEffectif={saveEffectif}
+                        validateEffectif={validateEffectif}
                       />
                     )}
                   />

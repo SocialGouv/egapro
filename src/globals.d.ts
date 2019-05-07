@@ -10,16 +10,16 @@ export type ActionType =
       data: ActionEffectifData;
     }
   | {
-      type: "saveEffectif";
-      data: ActionEffectifData;
+      type: "validateEffectif";
+      valid: boolean;
     }
   | {
       type: "updateIndicateurUn";
       data: ActionIndicateurUnData;
     }
   | {
-      type: "saveIndicateurUn";
-      data: ActionIndicateurUnData;
+      type: "validateIndicateurUn";
+      valid: boolean;
     }
   | {
       type: "updateIndicateurDeux";

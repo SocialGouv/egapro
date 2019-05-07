@@ -33,9 +33,8 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
     [dispatch]
   );
 
-  const saveIndicateurUn = useCallback(
-    (data: ActionIndicateurUnData) =>
-      dispatch({ type: "saveIndicateurUn", data }),
+  const validateIndicateurUn = useCallback(
+    (valid: boolean) => dispatch({ type: "validateIndicateurUn", valid }),
     [dispatch]
   );
 
@@ -81,11 +80,10 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
         <div css={styles.body}>
           <div>
             <IndicateurUnForm
-              key={String(state.formIndicateurUnValidated)}
               data={state.data}
               readOnly={state.formIndicateurUnValidated}
               updateIndicateurUn={updateIndicateurUn}
-              saveIndicateurUn={saveIndicateurUn}
+              validateIndicateurUn={validateIndicateurUn}
             />
           </div>
           {state.formIndicateurUnValidated && (
@@ -93,6 +91,7 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
               <IndicateurUnResult
                 indicateurEcartRemuneration={indicateurEcartRemuneration}
                 noteIndicateurUn={noteIndicateurUn}
+                validateIndicateurUn={validateIndicateurUn}
               />
             </div>
           )}

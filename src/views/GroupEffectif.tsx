@@ -26,7 +26,7 @@ import {
 interface Props extends RouteComponentProps {
   state: AppState;
   updateEffectif: (data: ActionEffectifData) => void;
-  saveEffectif: (data: ActionEffectifData) => void;
+  validateEffectif: (valid: boolean) => void;
 }
 
 const getFieldName = (
@@ -45,7 +45,7 @@ const parseFormValue = (value: string, defaultValue: any = undefined) =>
 const parseStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(value);
 
-function GroupEffectif({ state, updateEffectif, saveEffectif }: Props) {
+function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
   const infoFields = state.data.map(({ categorieSocioPro, tranchesAges }) => {
     return {
       categorieSocioPro,
@@ -96,7 +96,7 @@ function GroupEffectif({ state, updateEffectif, saveEffectif }: Props) {
     );
   }, {});
 
-  const saveForm = (formData: any, valid: boolean = false) => {
+  const saveForm = (formData: any) => {
     const data: ActionEffectifData = infoFields.map(
       ({ categorieSocioPro, tranchesAges }) => ({
         categorieSocioPro,
@@ -109,12 +109,12 @@ function GroupEffectif({ state, updateEffectif, saveEffectif }: Props) {
         )
       })
     );
-    const actionEffectif = valid ? saveEffectif : updateEffectif;
-    actionEffectif(data);
+    updateEffectif(data);
   };
 
   const onSubmit = (formData: any) => {
-    saveForm(formData, true);
+    saveForm(formData);
+    validateEffectif(true);
   };
 
   const {
@@ -235,4 +235,9 @@ const styles = {
   })
 };
 
-export default memo(GroupEffectif, () => true);
+export default memo(
+  GroupEffectif,
+  (prevProps, nextProps) =>
+    prevProps.state.formEffectifValidated ===
+    nextProps.state.formEffectifValidated
+);

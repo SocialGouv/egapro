@@ -28,7 +28,7 @@ interface Props {
   data: Array<Groupe>;
   readOnly: boolean;
   updateIndicateurUn: (data: ActionIndicateurUnData) => void;
-  saveIndicateurUn: (data: ActionIndicateurUnData) => void;
+  validateIndicateurUn: (valid: boolean) => void;
 }
 
 const getFieldName = (
@@ -52,7 +52,7 @@ function IndicateurUnForm({
   data,
   readOnly,
   updateIndicateurUn,
-  saveIndicateurUn
+  validateIndicateurUn
 }: Props) {
   const infoFields = data.map(({ categorieSocioPro, tranchesAges }) => {
     return {
@@ -114,7 +114,7 @@ function IndicateurUnForm({
     );
   }, {});
 
-  const saveForm = (formData: any, valid: boolean = false) => {
+  const saveForm = (formData: any) => {
     const data: ActionIndicateurUnData = infoFields.map(
       ({ categorieSocioPro, tranchesAges }) => ({
         categorieSocioPro,
@@ -135,12 +135,12 @@ function IndicateurUnForm({
         )
       })
     );
-    const actionIndicateurUn = valid ? saveIndicateurUn : updateIndicateurUn;
-    actionIndicateurUn(data);
+    updateIndicateurUn(data);
   };
 
   const onSubmit = (formData: any) => {
-    saveForm(formData, true);
+    saveForm(formData);
+    validateIndicateurUn(true);
   };
 
   const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
@@ -232,4 +232,7 @@ const styles = {
   })
 };
 
-export default memo(IndicateurUnForm, () => true);
+export default memo(
+  IndicateurUnForm,
+  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
+);

@@ -15,11 +15,10 @@ function AppReducer(state: AppState, action: ActionType) {
         data: updateEffectif(state.data, action.data)
       };
     }
-    case "saveEffectif": {
+    case "validateEffectif": {
       return {
         ...state,
-        formEffectifValidated: true,
-        data: updateEffectif(state.data, action.data)
+        formEffectifValidated: action.valid
       };
     }
     case "updateIndicateurUn": {
@@ -28,11 +27,10 @@ function AppReducer(state: AppState, action: ActionType) {
         data: updateIndicateurUn(state.data, action.data)
       };
     }
-    case "saveIndicateurUn": {
+    case "validateIndicateurUn": {
       return {
         ...state,
-        formIndicateurUnValidated: true,
-        data: updateIndicateurUn(state.data, action.data)
+        formIndicateurUnValidated: action.valid
       };
     }
     case "updateIndicateurDeux": {

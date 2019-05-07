@@ -6,11 +6,13 @@ import globalStyles from "../utils/globalStyles";
 interface Props {
   indicateurEcartRemuneration: number | undefined;
   noteIndicateurUn: number | undefined;
+  validateIndicateurUn: (valid: boolean) => void;
 }
 
 function IndicateurUnResult({
   indicateurEcartRemuneration,
-  noteIndicateurUn
+  noteIndicateurUn,
+  validateIndicateurUn
 }: Props) {
   const absoluteResult =
     indicateurEcartRemuneration !== undefined
@@ -23,34 +25,44 @@ function IndicateurUnResult({
         : "hommes"
       : undefined;
   return (
-    <div css={styles.container}>
-      <div css={styles.bloc}>
-        <div>
-          <p css={styles.message}>
-            <span css={styles.messageLabel}>votre résultat final est </span>
-            <span css={styles.messageData}>
-              {absoluteResult !== undefined ? absoluteResult.toFixed(1) : "--"}{" "}
-              %
-            </span>
-          </p>
-          {genderFavoriteResult && (
-            <p css={styles.info}>
-              l'écart est favorable pour les {genderFavoriteResult}
+    <div>
+      <div css={styles.container}>
+        <div css={styles.bloc}>
+          <div>
+            <p css={styles.message}>
+              <span css={styles.messageLabel}>votre résultat final est </span>
+              <span css={styles.messageData}>
+                {absoluteResult !== undefined
+                  ? absoluteResult.toFixed(1)
+                  : "--"}{" "}
+                %
+              </span>
             </p>
-          )}
-        </div>
+            {genderFavoriteResult && (
+              <p css={styles.info}>
+                l'écart est favorable pour les {genderFavoriteResult}
+              </p>
+            )}
+          </div>
 
-        <div>
-          <p css={styles.message}>
-            <span css={styles.messageLabel}>votre note obtenue est </span>
-            <span css={styles.messageData}>
-              {noteIndicateurUn !== undefined ? noteIndicateurUn : "--"}
-              /40
-            </span>
-          </p>
-          <p css={styles.info}>mesures de correction prises en compte</p>
+          <div>
+            <p css={styles.message}>
+              <span css={styles.messageLabel}>votre note obtenue est </span>
+              <span css={styles.messageData}>
+                {noteIndicateurUn !== undefined ? noteIndicateurUn : "--"}
+                /40
+              </span>
+            </p>
+            <p css={styles.info}>mesures de correction prises en compte</p>
+          </div>
         </div>
       </div>
+
+      <p css={styles.edit}>
+        <button css={styles.button} onClick={() => validateIndicateurUn(false)}>
+          modifier les données saisies
+        </button>
+      </p>
     </div>
   );
 }
@@ -99,6 +111,17 @@ const styles = {
     lineHeight: "15px",
 
     borderBottom: "1px solid #FFFFFF"
+  }),
+
+  edit: css({
+    marginTop: 14,
+    fontSize: 14,
+    textAlign: "center",
+    textDecoration: "underline"
+  }),
+  button: css({
+    all: "unset",
+    cursor: "pointer"
   })
 };
 
