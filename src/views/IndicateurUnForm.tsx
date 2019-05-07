@@ -23,7 +23,6 @@ import {
   displayNameCategorieSocioPro,
   displayNameTranchesAges
 } from "../utils/helpers";
-import { read } from "fs";
 
 interface Props {
   data: Array<Groupe>;

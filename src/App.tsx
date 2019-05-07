@@ -100,7 +100,10 @@ function App() {
 
             <div css={styles.main}>
               <div css={styles.menu}>
-                <Menu />
+                <Menu
+                  formEffectifValidated={state.formEffectifValidated}
+                  formIndicateurUnValidated={state.formIndicateurUnValidated}
+                />
               </div>
               <div css={styles.view}>
                 <Switch>

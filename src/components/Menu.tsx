@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
 import { Route, Link } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
@@ -8,13 +7,17 @@ import globalStyles from "../utils/globalStyles";
 import { useColumnsWidth } from "./GridContext";
 
 interface CustomNavLinkProps {
-  children: ReactNode;
+  title: string;
+  label?: string;
+  valid?: boolean;
   to: string;
   activeOnlyWhenExact?: boolean;
 }
 
 function CustomNavLink({
-  children,
+  title,
+  label,
+  valid,
   to,
   activeOnlyWhenExact = false
 }: CustomNavLinkProps) {
@@ -24,22 +27,46 @@ function CustomNavLink({
       exact={activeOnlyWhenExact}
       children={({ match }) => (
         <Link to={to} css={[styles.link, match && styles.activeLink]}>
-          {children}
+          <span>{`${valid ? "✓ " : ""}${title}`}</span>
+          <br />
+          {label && <span>{label}</span>}
         </Link>
       )}
     />
   );
 }
 
-function Menu() {
+interface Props {
+  formEffectifValidated: boolean;
+  formIndicateurUnValidated: boolean;
+}
+
+function Menu({ formEffectifValidated, formIndicateurUnValidated }: Props) {
   const width = useColumnsWidth(2);
 
   return (
     <div css={[styles.menu, css({ width })]}>
-      <CustomNavLink to="/effectifs">effectif</CustomNavLink>
-      <CustomNavLink to="/indicateur1">indicateur 1</CustomNavLink>
-      <CustomNavLink to="/indicateur2">indicateur 2</CustomNavLink>
-      <CustomNavLink to="/indicateur3">indicateur 3</CustomNavLink>
+      <CustomNavLink
+        to="/effectifs"
+        title="effectif"
+        valid={formEffectifValidated}
+      />
+      <CustomNavLink
+        to="/indicateur1"
+        title="indicateur 1"
+        label="écart de rémunération"
+        valid={formIndicateurUnValidated}
+      />
+      <CustomNavLink
+        to="/indicateur2"
+        title="indicateur 2"
+        label="écart d’augmentation"
+      />
+      <CustomNavLink
+        to="/indicateur3"
+        title="indicateur 3"
+        label="écart de promotions"
+      />
     </div>
   );
 }
@@ -48,16 +75,20 @@ const styles = {
   menu: css({
     display: "flex",
     flexDirection: "column",
+    alignItems: "flex-start",
     marginLeft: globalStyles.grid.gutterWidth,
     marginRight: globalStyles.grid.gutterWidth
   }),
   link: css({
-    marginTop: 7,
-    marginBottom: 7,
+    paddingTop: 7,
+    paddingBottom: 7,
     color: globalStyles.colors.default,
     fontSize: 12,
     lineHeight: "15px",
-    textDecoration: "none"
+    textDecoration: "none",
+    ":hover": {
+      color: globalStyles.colors.women
+    }
   }),
   activeLink: css({
     color: globalStyles.colors.women

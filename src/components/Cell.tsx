@@ -1,9 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { ReactNode } from "react";
 
 interface Props {
   style?: any;
-  children?: any;
+  children?: ReactNode;
 }
 
 function Cell({ style, children }: Props) {
