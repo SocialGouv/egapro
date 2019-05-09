@@ -1,7 +1,13 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useReducer, useEffect, useCallback } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { useReducer, useEffect, useCallback, ReactNode } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  withRouter,
+  RouteComponentProps
+} from "react-router-dom";
 
 import {
   AppState,
@@ -98,67 +104,81 @@ function App() {
           <div css={styles.leftColumn}>
             <Header />
 
-            <div css={styles.main}>
-              <div css={styles.menu}>
-                <Menu
-                  formEffectifValidated={state.formEffectifValidated}
-                  formIndicateurUnValidated={state.formIndicateurUnValidated}
+            <MainScrollViewWithRouter state={state}>
+              <Switch>
+                <Route path="/" exact render={props => <Home {...props} />} />
+                <Route
+                  path="/effectifs"
+                  render={props => (
+                    <GroupEffectif
+                      {...props}
+                      state={state}
+                      updateEffectif={updateEffectif}
+                      validateEffectif={validateEffectif}
+                    />
+                  )}
                 />
-              </div>
-              <div css={styles.view}>
-                <Switch>
-                  <Route path="/" exact render={props => <Home {...props} />} />
-                  <Route
-                    path="/effectifs"
-                    render={props => (
-                      <GroupEffectif
-                        {...props}
-                        state={state}
-                        updateEffectif={updateEffectif}
-                        validateEffectif={validateEffectif}
-                      />
-                    )}
-                  />
-                  <Route
-                    path="/indicateur1"
-                    render={props => (
-                      <IndicateurUn
-                        {...props}
-                        state={state}
-                        dispatch={dispatch}
-                      />
-                    )}
-                  />
-                  <Route
-                    path="/indicateur2"
-                    render={props => (
-                      <IndicateurDeux
-                        {...props}
-                        state={state}
-                        dispatch={dispatch}
-                      />
-                    )}
-                  />
-                  <Route
-                    path="/indicateur3"
-                    render={props => (
-                      <IndicateurTrois
-                        {...props}
-                        state={state}
-                        dispatch={dispatch}
-                      />
-                    )}
-                  />
-                </Switch>
-              </div>
-            </div>
+                <Route
+                  path="/indicateur1"
+                  render={props => (
+                    <IndicateurUn
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
+                <Route
+                  path="/indicateur2"
+                  render={props => (
+                    <IndicateurDeux
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
+                <Route
+                  path="/indicateur3"
+                  render={props => (
+                    <IndicateurTrois
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
+              </Switch>
+            </MainScrollViewWithRouter>
           </div>
+
           <div css={styles.rightColumn} />
         </div>
       </GridProvider>
     </Router>
   );
 }
+
+interface MainScrollViewProps extends RouteComponentProps {
+  children: ReactNode;
+  state: AppState;
+}
+
+function MainScrollView({ children, state, location }: MainScrollViewProps) {
+  // Usefull to reset the scroll while navigating
+  return (
+    <div css={styles.main} key={location.key}>
+      <div css={styles.menu}>
+        <Menu
+          formEffectifValidated={state.formEffectifValidated}
+          formIndicateurUnValidated={state.formIndicateurUnValidated}
+        />
+      </div>
+      <div css={styles.view}>{children}</div>
+    </div>
+  );
+}
+const MainScrollViewWithRouter = withRouter(MainScrollView);
 
 const styles = {
   layout: css({
@@ -177,6 +197,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     width: 375,
+    flexShrink: 0,
     backgroundColor: "#AAAEE1"
   }),
   main: css({
