@@ -98,7 +98,7 @@ function App() {
   );
 
   return (
-    <Router>
+    <Router basename="/egapro">
       <GridProvider>
         <div css={styles.layout}>
           <div css={styles.leftColumn}>

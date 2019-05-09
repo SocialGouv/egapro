@@ -18,10 +18,7 @@ function Home(props: RouteComponentProps) {
         </p>
 
         <div css={styles.action}>
-          <ButtonLink
-            to={`/effectifs/${CategorieSocioPro.Ouvriers}`}
-            label="commencer la simulation"
-          />
+          <ButtonLink to="/effectifs" label="commencer la simulation" />
         </div>
       </div>
     </div>
