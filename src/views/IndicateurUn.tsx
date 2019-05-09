@@ -78,14 +78,12 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
       </p>
       {indicateurCalculable && state.formEffectifValidated ? (
         <div css={styles.body}>
-          <div>
-            <IndicateurUnForm
-              data={state.data}
-              readOnly={state.formIndicateurUnValidated}
-              updateIndicateurUn={updateIndicateurUn}
-              validateIndicateurUn={validateIndicateurUn}
-            />
-          </div>
+          <IndicateurUnForm
+            data={state.data}
+            readOnly={state.formIndicateurUnValidated}
+            updateIndicateurUn={updateIndicateurUn}
+            validateIndicateurUn={validateIndicateurUn}
+          />
           {state.formIndicateurUnValidated && (
             <div css={styles.result}>
               <IndicateurUnResult

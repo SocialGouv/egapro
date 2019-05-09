@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
-import { useColumnsWidth } from "./GridContext";
 import { CellHead, Cell, Cell2 } from "./Cell";
 
 interface Props {
@@ -16,10 +15,8 @@ interface Props {
 }
 
 function BlocForm({ title, label, footer, children, style }: Props) {
-  const width = useColumnsWidth(4);
-
   return (
-    <div css={[styles.container, css({ width })]}>
+    <div css={styles.container}>
       <div css={styles.background} />
       <div css={[styles.blocForm, footer && styles.blocFormWithFooter]}>
         <div css={styles.rowHead}>

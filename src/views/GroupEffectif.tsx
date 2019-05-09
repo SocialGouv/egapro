@@ -13,6 +13,7 @@ import {
 
 import globalStyles from "../utils/globalStyles";
 
+import { useColumnsWidth } from "../components/GridContext";
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
@@ -138,15 +139,17 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
     { values: true, dirty: true }
   );
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <div css={styles.bloc}>
-        <p css={styles.blocTitle}>Indication des effectifs</p>
-        <p css={styles.blocSubtitle}>
-          Renseignez le nombre d’effectifs par catégorie socio-professionnelle
-          (CSP) et par tranche d’âge.
-        </p>
+  const width = useColumnsWidth(4);
 
+  return (
+    <div css={styles.bloc}>
+      <p css={styles.blocTitle}>Indication des effectifs</p>
+      <p css={styles.blocSubtitle}>
+        Renseignez le nombre d’effectifs par catégorie socio-professionnelle
+        (CSP) et par tranche d’âge.
+      </p>
+
+      <form onSubmit={handleSubmit} css={css({ width })}>
         {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
           const totalNbSalarie = tranchesAges.reduce(
             (acc, { nbSalarieFemmeName, nbSalarieHommeName }) => {
@@ -187,11 +190,9 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
         {state.formEffectifValidated ? (
           <div css={styles.action}>
             <ButtonLink to="/indicateur1" label="suivant" />
-            <div css={css({ marginLeft: 16 })}>
-              <Action onClick={() => validateEffectif(false)}>
-                modifier les données saisies
-              </Action>
-            </div>
+            <Action onClick={() => validateEffectif(false)}>
+              modifier les données saisies
+            </Action>
           </div>
         ) : (
           <div css={styles.action}>
@@ -205,15 +206,16 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               />
               {submitFailed && (
                 <p css={styles.actionError}>
-                  vous ne pouvez pas valider l’indicateur tant que vous n’avez
-                  pas rempli tous les champs
+                  vous ne pouvez pas valider l’indicateur
+                  <br />
+                  tant que vous n’avez pas rempli tous les champs
                 </p>
               )}
             </div>
           </div>
         )}
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
 
@@ -235,6 +237,7 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     marginTop: 46,
     marginBottom: 36
   }),

@@ -14,6 +14,7 @@ import globalStyles from "../utils/globalStyles";
 
 import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
 
+import { useColumnsWidth } from "../components/GridContext";
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
@@ -157,8 +158,10 @@ function IndicateurUnForm({
     { values: true, dirty: true }
   );
 
+  const width = useColumnsWidth(4);
+
   return (
-    <form onSubmit={handleSubmit} css={styles.bloc}>
+    <form onSubmit={handleSubmit} css={[styles.container, css({ width })]}>
       {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
         return (
           <BlocForm
@@ -214,7 +217,7 @@ function IndicateurUnForm({
 }
 
 const styles = {
-  bloc: css({
+  container: css({
     display: "flex",
     flexDirection: "column"
   }),
