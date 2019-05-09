@@ -142,14 +142,14 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
   const width = useColumnsWidth(4);
 
   return (
-    <div css={styles.bloc}>
+    <div>
       <p css={styles.blocTitle}>Indication des effectifs</p>
       <p css={styles.blocSubtitle}>
         Renseignez le nombre d’effectifs par catégorie socio-professionnelle
         (CSP) et par tranche d’âge.
       </p>
 
-      <form onSubmit={handleSubmit} css={css({ width })}>
+      <form onSubmit={handleSubmit} css={[styles.bloc, css({ width })]}>
         {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
           const totalNbSalarie = tranchesAges.reduce(
             (acc, { nbSalarieFemmeName, nbSalarieHommeName }) => {
