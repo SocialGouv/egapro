@@ -1,9 +1,16 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
+import globalStyles from "../utils/globalStyles";
+
+import { useColumnsWidth } from "./GridContext";
+
 function Header() {
+  const width = useColumnsWidth(2);
+
   return (
     <header css={styles.header}>
+      <div css={[styles.headerLeft, css({ width })]} />
       <div css={styles.headerInner}>
         <p css={styles.title}>Egapro</p>
         <p css={styles.subtitle}>
@@ -23,14 +30,16 @@ const styles = {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 227,
     borderBottom: "1px solid #EFECEF"
+  }),
+  headerLeft: css({
+    marginLeft: globalStyles.grid.gutterWidth,
+    marginRight: globalStyles.grid.gutterWidth
   }),
   headerInner: css({
     display: "flex",
     flexDirection: "row",
     flexGrow: 1,
-    maxWidth: 1024,
     alignItems: "baseline"
   }),
   title: css({
