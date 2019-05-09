@@ -202,12 +202,13 @@ function IndicateurUnForm({
           <ButtonSubmit
             label="valider"
             outline={hasValidationErrors}
-            error={submitFailed}
+            error={submitFailed && hasValidationErrors}
           />
-          {submitFailed && (
+          {submitFailed && hasValidationErrors && (
             <p css={styles.actionError}>
-              vous ne pouvez pas valider l’indicateur tant que vous n’avez pas
-              rempli tous les champs
+              vous ne pouvez pas valider l’indicateur
+              <br />
+              tant que vous n’avez pas rempli tous les champs
             </p>
           )}
         </div>

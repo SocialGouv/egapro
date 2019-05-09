@@ -202,11 +202,11 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               <ButtonSubmit
                 label="valider"
                 outline={hasValidationErrors}
-                error={submitFailed}
+                error={submitFailed && hasValidationErrors}
               />
-              {submitFailed && (
+              {submitFailed && hasValidationErrors && (
                 <p css={styles.actionError}>
-                  vous ne pouvez pas valider l’indicateur
+                  vous ne pouvez pas valider les effectifs
                   <br />
                   tant que vous n’avez pas rempli tous les champs
                 </p>
