@@ -17,6 +17,7 @@ import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 import ButtonLink from "../components/ButtonLink";
+import Action from "../components/Action";
 
 import {
   displayNameCategorieSocioPro,
@@ -186,20 +187,29 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
         {state.formEffectifValidated ? (
           <div css={styles.action}>
             <ButtonLink to="/indicateur1" label="suivant" />
+            <div css={css({ marginLeft: 16 })}>
+              <Action onClick={() => validateEffectif(false)}>
+                modifier les données saisies
+              </Action>
+            </div>
           </div>
         ) : (
           <div css={styles.action}>
-            <ButtonSubmit
-              label="valider"
-              outline={hasValidationErrors}
-              error={submitFailed}
-            />
-            {submitFailed && (
-              <p css={styles.actionError}>
-                vous ne pouvez pas valider l’indicateur tant que vous n’avez pas
-                rempli tous les champs
-              </p>
-            )}
+            <div
+              css={css({ flexDirection: "column", alignItems: "flex-start" })}
+            >
+              <ButtonSubmit
+                label="valider"
+                outline={hasValidationErrors}
+                error={submitFailed}
+              />
+              {submitFailed && (
+                <p css={styles.actionError}>
+                  vous ne pouvez pas valider l’indicateur tant que vous n’avez
+                  pas rempli tous les champs
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -223,8 +233,8 @@ const styles = {
   }),
   action: css({
     display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 46,
     marginBottom: 36
   }),

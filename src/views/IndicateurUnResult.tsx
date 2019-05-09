@@ -3,6 +3,8 @@ import { css, jsx } from "@emotion/core";
 
 import globalStyles from "../utils/globalStyles";
 
+import Action from "../components/Action";
+
 interface Props {
   indicateurEcartRemuneration: number | undefined;
   noteIndicateurUn: number | undefined;
@@ -40,7 +42,7 @@ function IndicateurUnResult({
             </p>
             {genderFavoriteResult && (
               <p css={styles.info}>
-                l'écart est favorable pour les {genderFavoriteResult}
+                écart favorable aux {genderFavoriteResult}
               </p>
             )}
           </div>
@@ -59,9 +61,9 @@ function IndicateurUnResult({
       </div>
 
       <p css={styles.edit}>
-        <button css={styles.button} onClick={() => validateIndicateurUn(false)}>
+        <Action onClick={() => validateIndicateurUn(false)}>
           modifier les données saisies
-        </button>
+        </Action>
       </p>
     </div>
   );
@@ -115,13 +117,7 @@ const styles = {
 
   edit: css({
     marginTop: 14,
-    fontSize: 14,
-    textAlign: "center",
-    textDecoration: "underline"
-  }),
-  button: css({
-    all: "unset",
-    cursor: "pointer"
+    textAlign: "center"
   })
 };
 

@@ -18,7 +18,10 @@ function AppReducer(state: AppState, action: ActionType) {
     case "validateEffectif": {
       return {
         ...state,
-        formEffectifValidated: action.valid
+        formEffectifValidated: action.valid,
+        formIndicateurUnValidated: action.valid
+          ? state.formIndicateurUnValidated
+          : false
       };
     }
     case "updateIndicateurUn": {
