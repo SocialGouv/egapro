@@ -20,7 +20,7 @@ function AppReducer(state: AppState, action: ActionType): AppState {
         ...state,
         formEffectifValidated: action.valid,
         formIndicateurUnValidated:
-          state.formIndicateurUnValidated === "Valid" ? "Invalid" : "None"
+          state.formIndicateurUnValidated !== "None" ? "Invalid" : "None"
       };
     }
     case "updateIndicateurUn": {

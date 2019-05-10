@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { memo } from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
   AppState,
@@ -143,7 +143,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
   const width = useColumnsWidth(4);
 
   return (
-    <div>
+    <div css={styles.page}>
       <p css={styles.blocTitle}>Indication des effectifs</p>
       <p css={styles.blocSubtitle}>
         Renseignez le nombre d’effectifs par catégorie socio-professionnelle
@@ -216,11 +216,35 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
           </div>
         )}
       </form>
+
+      {state.formEffectifValidated === "Valid" &&
+        state.formIndicateurUnValidated === "Invalid" && (
+          <div css={styles.indicatorInvalid}>
+            <p css={styles.indicatorInvalidTitle}>
+              Vos effectifs ont été modifiés
+            </p>
+            <p css={styles.indicatorInvalidText}>
+              afin de s'assurer de la cohérence de votre index, merci de
+              vérifier les données de vos indicateurs.
+            </p>
+            <p css={styles.indicatorInvalidText}>
+              <Link to="/indicateur1" css={styles.indicatorInvalidLink}>
+                aller à l'indicateur 1
+              </Link>
+            </p>
+          </div>
+        )}
     </div>
   );
 }
 
 const styles = {
+  page: css({
+    display: "flex",
+    flexDirection: "column",
+    marginRight: globalStyles.grid.gutterWidth,
+    marginBottom: globalStyles.grid.gutterWidth
+  }),
   bloc: css({
     display: "flex",
     flexDirection: "column"
@@ -246,6 +270,25 @@ const styles = {
     marginTop: 4,
     color: globalStyles.colors.error,
     fontSize: 12
+  }),
+
+  indicatorInvalid: css({
+    padding: 16,
+    border: `solid ${globalStyles.colors.default} 1px`
+  }),
+  indicatorInvalidTitle: css({
+    fontSize: 18,
+    lineHeight: "22px",
+    textTransform: "uppercase"
+  }),
+  indicatorInvalidText: css({
+    marginTop: 4,
+    fontSize: 14,
+    lineHeight: "17px"
+  }),
+  indicatorInvalidLink: css({
+    color: globalStyles.colors.default,
+    textDecoration: "underline"
   })
 };
 
