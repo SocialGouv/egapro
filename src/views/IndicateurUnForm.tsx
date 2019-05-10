@@ -11,14 +11,12 @@ import {
   FormState
 } from "../globals.d";
 
-import globalStyles from "../utils/globalStyles";
-
 import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
 
-import { useColumnsWidth } from "../components/GridContext";
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
-import ButtonSubmit from "../components/ButtonSubmit";
+import ActionBar from "../components/ActionBar";
+import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
 
 import {
@@ -159,10 +157,8 @@ function IndicateurUnForm({
     { values: true, dirty: true }
   );
 
-  const width = useColumnsWidth(4);
-
   return (
-    <form onSubmit={handleSubmit} css={[styles.container, css({ width })]}>
+    <form onSubmit={handleSubmit} css={styles.container}>
       {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
         return (
           <BlocForm
@@ -195,24 +191,18 @@ function IndicateurUnForm({
       })}
 
       {readOnly ? (
-        <div css={styles.action}>
+        <ActionBar>
           <ButtonLink to="/indicateur2" label="suivant" />
-        </div>
+        </ActionBar>
       ) : (
-        <div css={styles.action}>
-          <ButtonSubmit
-            label="valider"
-            outline={hasValidationErrors}
-            error={submitFailed && hasValidationErrors}
+        <ActionBar>
+          <FormSubmit
+            hasValidationErrors={hasValidationErrors}
+            submitFailed={submitFailed}
+            errorMessage="vous ne pouvez pas valider l’indicateur
+                tant que vous n’avez pas rempli tous les champs"
           />
-          {submitFailed && hasValidationErrors && (
-            <p css={styles.actionError}>
-              vous ne pouvez pas valider l’indicateur
-              <br />
-              tant que vous n’avez pas rempli tous les champs
-            </p>
-          )}
-        </div>
+        </ActionBar>
       )}
     </form>
   );
@@ -222,18 +212,6 @@ const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
-  }),
-  action: css({
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    marginTop: 46,
-    marginBottom: 36
-  }),
-  actionError: css({
-    marginTop: 4,
-    color: globalStyles.colors.error,
-    fontSize: 12
   })
 };
 
