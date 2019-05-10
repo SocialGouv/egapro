@@ -66,6 +66,13 @@ function CellInputsMenWomen({
             error && calculable && styles.cellHeadError
           ]}
         >
+          {femmesField.meta.valid && hommesField.meta.valid
+            ? calculable
+              ? "✓ "
+              : "✕ "
+            : error
+            ? "✕ "
+            : null}
           {name}
         </CellHead>
 
