@@ -7,7 +7,7 @@ import globalStyles from "../utils/globalStyles";
 import { CellHead, Cell, Cell2 } from "./Cell";
 
 interface Props {
-  title: string;
+  title?: string;
   label: string;
   footer?: string;
   children: ReactNode;

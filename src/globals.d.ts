@@ -2,6 +2,8 @@ export type AppState = {
   data: Array<Groupe>;
   formEffectifValidated: FormState;
   formIndicateurUnValidated: FormState;
+  formIndicateurDeuxValidated: FormState;
+  formIndicateurTroisValidated: FormState;
 };
 
 export type FormState = "None" | "Valid" | "Invalid";
@@ -28,8 +30,16 @@ export type ActionType =
       data: ActionIndicateurDeuxData;
     }
   | {
+      type: "validateIndicateurDeux";
+      valid: FormState;
+    }
+  | {
       type: "updateIndicateurTrois";
       data: ActionIndicateurTroisData;
+    }
+  | {
+      type: "validateIndicateurTrois";
+      valid: FormState;
     };
 
 export type ActionEffectifData = Array<{

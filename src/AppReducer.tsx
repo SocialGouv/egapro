@@ -20,7 +20,11 @@ function AppReducer(state: AppState, action: ActionType): AppState {
         ...state,
         formEffectifValidated: action.valid,
         formIndicateurUnValidated:
-          state.formIndicateurUnValidated !== "None" ? "Invalid" : "None"
+          state.formIndicateurUnValidated !== "None" ? "Invalid" : "None",
+        formIndicateurDeuxValidated:
+          state.formIndicateurDeuxValidated !== "None" ? "Invalid" : "None",
+        formIndicateurTroisValidated:
+          state.formIndicateurTroisValidated !== "None" ? "Invalid" : "None"
       };
     }
     case "updateIndicateurUn": {
@@ -46,6 +50,12 @@ function AppReducer(state: AppState, action: ActionType): AppState {
       return {
         ...state,
         data
+      };
+    }
+    case "validateIndicateurDeux": {
+      return {
+        ...state,
+        formIndicateurDeuxValidated: action.valid
       };
     }
     case "updateIndicateurTrois": {

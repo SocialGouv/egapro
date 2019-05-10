@@ -1,25 +1,35 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { RouteComponentProps } from "react-router-dom";
+import { memo } from "react";
 import { useForm } from "react-final-form-hooks";
-import { CategorieSocioPro, ActionIndicateurDeuxData } from "../globals.d";
+import {
+  FormState,
+  CategorieSocioPro,
+  ActionIndicateurDeuxData
+} from "../globals.d";
 
+import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
-import ButtonSubmit from "../components/ButtonSubmit";
+import ActionBar from "../components/ActionBar";
+import FormSubmit from "../components/FormSubmit";
+import ButtonLink from "../components/ButtonLink";
+
 import {
   fractionToPercentage,
   percentageToFraction,
   displayNameCategorieSocioPro
 } from "../utils/helpers";
 
-interface Props extends RouteComponentProps {
+interface Props {
   ecartAugmentParCategorieSocioPro: Array<{
     categorieSocioPro: CategorieSocioPro;
     validiteGroupe: boolean;
     tauxAugmentationFemmes: number | undefined;
     tauxAugmentationHommes: number | undefined;
   }>;
+  readOnly: boolean;
   updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void;
+  validateIndicateurDeux: (valid: FormState) => void;
 }
 
 const getFieldName = (
@@ -27,10 +37,21 @@ const getFieldName = (
   genre: "Hommes" | "Femmes"
 ): string => "tauxAugmentation" + categorieSocioPro + genre;
 
+const parseFormValue = (value: string, defaultValue: any = undefined) =>
+  value === ""
+    ? defaultValue
+    : Number.isNaN(Number(value))
+    ? defaultValue
+    : percentageToFraction(parseFloat(value));
+
+const parseStateValue = (value: number | undefined) =>
+  value === undefined ? "" : String(fractionToPercentage(value));
+
 function IndicateurDeuxForm({
   ecartAugmentParCategorieSocioPro,
+  readOnly,
   updateIndicateurDeux,
-  history
+  validateIndicateurDeux
 }: Props) {
   const infoFields = ecartAugmentParCategorieSocioPro.map(
     ({
@@ -43,15 +64,9 @@ function IndicateurDeuxForm({
         categorieSocioPro,
         validiteGroupe,
         tauxAugmentationFemmesName: getFieldName(categorieSocioPro, "Femmes"),
-        tauxAugmentationFemmesValue:
-          tauxAugmentationFemmes === undefined
-            ? ""
-            : String(fractionToPercentage(tauxAugmentationFemmes)),
+        tauxAugmentationFemmesValue: parseStateValue(tauxAugmentationFemmes),
         tauxAugmentationHommesName: getFieldName(categorieSocioPro, "Hommes"),
-        tauxAugmentationHommesValue:
-          tauxAugmentationHommes === undefined
-            ? ""
-            : String(fractionToPercentage(tauxAugmentationHommes))
+        tauxAugmentationHommesValue: parseStateValue(tauxAugmentationHommes)
       };
     }
   );
@@ -75,7 +90,7 @@ function IndicateurDeuxForm({
     {}
   );
 
-  const onSubmit = (formData: any) => {
+  const saveForm = (formData: any) => {
     const data: ActionIndicateurDeuxData = infoFields.map(
       ({
         categorieSocioPro,
@@ -83,44 +98,39 @@ function IndicateurDeuxForm({
         tauxAugmentationHommesName
       }) => ({
         categorieSocioPro,
-        tauxAugmentationFemmes:
-          formData[tauxAugmentationFemmesName] === ""
-            ? undefined
-            : percentageToFraction(
-                parseFloat(formData[tauxAugmentationFemmesName])
-              ),
-        tauxAugmentationHommes:
-          formData[tauxAugmentationHommesName] === ""
-            ? undefined
-            : percentageToFraction(
-                parseFloat(formData[tauxAugmentationHommesName])
-              )
+        tauxAugmentationFemmes: parseFormValue(
+          formData[tauxAugmentationFemmesName]
+        ),
+        tauxAugmentationHommes: parseFormValue(
+          formData[tauxAugmentationHommesName]
+        )
       })
     );
     updateIndicateurDeux(data);
-
-    history.push("/indicateur2/resultat");
   };
 
-  const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
+  const onSubmit = (formData: any) => {
+    saveForm(formData);
+    validateIndicateurDeux("Valid");
+  };
+
+  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
     initialValues,
-    onSubmit // the function to call with your form values upon valid submit
-    //validate // a record-level validation function to check all form values
+    onSubmit
   });
 
+  form.subscribe(
+    ({ values, dirty }) => {
+      if (dirty) {
+        saveForm(values);
+      }
+    },
+    { values: true, dirty: true }
+  );
+
   return (
-    <form onSubmit={handleSubmit}>
-      <div css={styles.bloc}>
-        <p css={styles.blocTitle}>
-          Taux d'augmentation (proportions de salariés augmentés)
-        </p>
-
-        <div css={styles.row}>
-          <div css={styles.cellHead}>taux</div>
-          <div css={styles.cell}>femmes</div>
-          <div css={styles.cell}>hommes</div>
-        </div>
-
+    <form onSubmit={handleSubmit} css={styles.container}>
+      <BlocForm label="% de salariés augmentés">
         {infoFields.map(
           ({
             categorieSocioPro,
@@ -133,7 +143,7 @@ function IndicateurDeuxForm({
                 key={categorieSocioPro}
                 form={form}
                 name={displayNameCategorieSocioPro(categorieSocioPro)}
-                readOnly={false}
+                readOnly={readOnly}
                 calculable={validiteGroupe}
                 femmeFieldName={tauxAugmentationFemmesName}
                 hommeFieldName={tauxAugmentationHommesName}
@@ -141,14 +151,32 @@ function IndicateurDeuxForm({
             );
           }
         )}
+      </BlocForm>
 
-        <ButtonSubmit label="Valider" />
-      </div>
+      {readOnly ? (
+        <ActionBar>
+          <ButtonLink to="/indicateur3" label="suivant" />
+        </ActionBar>
+      ) : (
+        <ActionBar>
+          <FormSubmit
+            hasValidationErrors={hasValidationErrors}
+            submitFailed={submitFailed}
+            errorMessage="vous ne pouvez pas valider l’indicateur
+                tant que vous n’avez pas rempli tous les champs"
+          />
+        </ActionBar>
+      )}
     </form>
   );
 }
 
 const styles = {
+  container: css({
+    display: "flex",
+    flexDirection: "column"
+  }),
+
   bloc: css({
     display: "flex",
     flexDirection: "column",
@@ -194,4 +222,7 @@ const styles = {
   })
 };
 
-export default IndicateurDeuxForm;
+export default memo(
+  IndicateurDeuxForm,
+  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
+);

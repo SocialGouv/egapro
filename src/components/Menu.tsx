@@ -11,7 +11,7 @@ import { useColumnsWidth } from "./GridContext";
 interface CustomNavLinkProps {
   title: string;
   label?: string;
-  valid?: FormState;
+  valid: FormState;
   to: string;
   activeOnlyWhenExact?: boolean;
 }
@@ -30,8 +30,7 @@ function CustomNavLink({
       children={({ match }) => (
         <Link to={to} css={[styles.link, match && styles.activeLink]}>
           <span>
-            {valid &&
-              `${valid === "Valid" ? "✓ " : valid === "Invalid" ? "✕ " : ""}`}
+            {valid === "Valid" ? "✓ " : valid === "Invalid" ? "✕ " : ""}
             {title}
           </span>
           <br />
@@ -45,9 +44,16 @@ function CustomNavLink({
 interface Props {
   formEffectifValidated: FormState;
   formIndicateurUnValidated: FormState;
+  formIndicateurDeuxValidated: FormState;
+  formIndicateurTroisValidated: FormState;
 }
 
-function Menu({ formEffectifValidated, formIndicateurUnValidated }: Props) {
+function Menu({
+  formEffectifValidated,
+  formIndicateurUnValidated,
+  formIndicateurDeuxValidated,
+  formIndicateurTroisValidated
+}: Props) {
   const width = useColumnsWidth(2);
 
   return (
@@ -67,11 +73,13 @@ function Menu({ formEffectifValidated, formIndicateurUnValidated }: Props) {
         to="/indicateur2"
         title="indicateur 2"
         label="écart d’augmentation"
+        valid={formIndicateurDeuxValidated}
       />
       <CustomNavLink
         to="/indicateur3"
         title="indicateur 3"
         label="écart de promotions"
+        valid={formIndicateurTroisValidated}
       />
     </div>
   );

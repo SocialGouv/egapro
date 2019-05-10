@@ -72,7 +72,9 @@ const defaultState: AppState = {
     }
   ],
   formEffectifValidated: "None",
-  formIndicateurUnValidated: "None"
+  formIndicateurUnValidated: "None",
+  formIndicateurDeuxValidated: "None",
+  formIndicateurTroisValidated: "None"
 };
 
 const localStorageEgapro = localStorage.getItem("egapro");
@@ -173,6 +175,8 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
         <Menu
           formEffectifValidated={state.formEffectifValidated}
           formIndicateurUnValidated={state.formIndicateurUnValidated}
+          formIndicateurDeuxValidated={state.formIndicateurDeuxValidated}
+          formIndicateurTroisValidated={state.formIndicateurTroisValidated}
         />
       </div>
       <div css={styles.view}>{children}</div>
