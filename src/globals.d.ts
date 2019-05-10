@@ -1,8 +1,10 @@
 export type AppState = {
   data: Array<Groupe>;
-  formEffectifValidated: boolean;
-  formIndicateurUnValidated: boolean;
+  formEffectifValidated: FormState;
+  formIndicateurUnValidated: FormState;
 };
+
+export type FormState = "None" | "Valid" | "Invalid";
 
 export type ActionType =
   | {
@@ -11,7 +13,7 @@ export type ActionType =
     }
   | {
       type: "validateEffectif";
-      valid: boolean;
+      valid: FormState;
     }
   | {
       type: "updateIndicateurUn";
@@ -19,7 +21,7 @@ export type ActionType =
     }
   | {
       type: "validateIndicateurUn";
-      valid: boolean;
+      valid: FormState;
     }
   | {
       type: "updateIndicateurDeux";

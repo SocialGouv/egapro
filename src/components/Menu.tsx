@@ -2,6 +2,8 @@
 import { css, jsx } from "@emotion/core";
 import { Route, Link } from "react-router-dom";
 
+import { FormState } from "../globals.d";
+
 import globalStyles from "../utils/globalStyles";
 
 import { useColumnsWidth } from "./GridContext";
@@ -9,7 +11,7 @@ import { useColumnsWidth } from "./GridContext";
 interface CustomNavLinkProps {
   title: string;
   label?: string;
-  valid?: boolean;
+  valid?: FormState;
   to: string;
   activeOnlyWhenExact?: boolean;
 }
@@ -27,7 +29,11 @@ function CustomNavLink({
       exact={activeOnlyWhenExact}
       children={({ match }) => (
         <Link to={to} css={[styles.link, match && styles.activeLink]}>
-          <span>{`${valid ? "✓ " : ""}${title}`}</span>
+          <span>
+            {valid &&
+              `${valid === "Valid" ? "✓ " : valid === "Invalid" ? "✕ " : ""}`}
+            {title}
+          </span>
           <br />
           {label && <span>{label}</span>}
         </Link>
@@ -37,8 +43,8 @@ function CustomNavLink({
 }
 
 interface Props {
-  formEffectifValidated: boolean;
-  formIndicateurUnValidated: boolean;
+  formEffectifValidated: FormState;
+  formIndicateurUnValidated: FormState;
 }
 
 function Menu({ formEffectifValidated, formIndicateurUnValidated }: Props) {

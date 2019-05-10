@@ -11,6 +11,7 @@ import {
 
 import {
   AppState,
+  FormState,
   TranchesAges,
   CategorieSocioPro,
   ActionEffectifData
@@ -70,8 +71,8 @@ const defaultState: AppState = {
       ...baseGroupe
     }
   ],
-  formEffectifValidated: false,
-  formIndicateurUnValidated: false
+  formEffectifValidated: "None",
+  formIndicateurUnValidated: "None"
 };
 
 const localStorageEgapro = localStorage.getItem("egapro");
@@ -93,7 +94,7 @@ function App() {
   );
 
   const validateEffectif = useCallback(
-    (valid: boolean) => dispatch({ type: "validateEffectif", valid }),
+    (valid: FormState) => dispatch({ type: "validateEffectif", valid }),
     [dispatch]
   );
 

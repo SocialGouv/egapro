@@ -1,6 +1,8 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
+import { FormState } from "../globals.d";
+
 import globalStyles from "../utils/globalStyles";
 
 import Action from "../components/Action";
@@ -8,7 +10,7 @@ import Action from "../components/Action";
 interface Props {
   indicateurEcartRemuneration: number | undefined;
   noteIndicateurUn: number | undefined;
-  validateIndicateurUn: (valid: boolean) => void;
+  validateIndicateurUn: (valid: FormState) => void;
 }
 
 function IndicateurUnResult({
@@ -61,7 +63,7 @@ function IndicateurUnResult({
       </div>
 
       <p css={styles.edit}>
-        <Action onClick={() => validateIndicateurUn(false)}>
+        <Action onClick={() => validateIndicateurUn("None")}>
           modifier les données saisies
         </Action>
       </p>

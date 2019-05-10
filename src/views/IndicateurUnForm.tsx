@@ -7,7 +7,8 @@ import {
   TranchesAges,
   Groupe,
   GroupTranchesAges,
-  ActionIndicateurUnData
+  ActionIndicateurUnData,
+  FormState
 } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
@@ -29,7 +30,7 @@ interface Props {
   data: Array<Groupe>;
   readOnly: boolean;
   updateIndicateurUn: (data: ActionIndicateurUnData) => void;
-  validateIndicateurUn: (valid: boolean) => void;
+  validateIndicateurUn: (valid: FormState) => void;
 }
 
 const getFieldName = (
@@ -141,7 +142,7 @@ function IndicateurUnForm({
 
   const onSubmit = (formData: any) => {
     saveForm(formData);
-    validateIndicateurUn(true);
+    validateIndicateurUn("Valid");
   };
 
   const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({

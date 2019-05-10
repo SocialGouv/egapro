@@ -3,7 +3,12 @@ import { jsx, css } from "@emotion/core";
 import { useCallback } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
-import { AppState, ActionType, ActionIndicateurUnData } from "../globals.d";
+import {
+  AppState,
+  FormState,
+  ActionType,
+  ActionIndicateurUnData
+} from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -34,7 +39,7 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
   );
 
   const validateIndicateurUn = useCallback(
-    (valid: boolean) => dispatch({ type: "validateIndicateurUn", valid }),
+    (valid: FormState) => dispatch({ type: "validateIndicateurUn", valid }),
     [dispatch]
   );
 
@@ -80,11 +85,11 @@ function IndicateurUn({ state, dispatch, match, history }: Props) {
         <div css={styles.body}>
           <IndicateurUnForm
             data={state.data}
-            readOnly={state.formIndicateurUnValidated}
+            readOnly={state.formIndicateurUnValidated === "Valid"}
             updateIndicateurUn={updateIndicateurUn}
             validateIndicateurUn={validateIndicateurUn}
           />
-          {state.formIndicateurUnValidated && (
+          {state.formIndicateurUnValidated === "Valid" && (
             <div css={styles.result}>
               <IndicateurUnResult
                 indicateurEcartRemuneration={indicateurEcartRemuneration}

@@ -2,8 +2,6 @@
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
 
-import { CategorieSocioPro } from "../globals.d";
-
 import ButtonLink from "../components/ButtonLink";
 
 function Home(props: RouteComponentProps) {

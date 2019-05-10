@@ -7,7 +7,7 @@ import {
   ActionIndicateurUnData
 } from "./globals.d";
 
-function AppReducer(state: AppState, action: ActionType) {
+function AppReducer(state: AppState, action: ActionType): AppState {
   switch (action.type) {
     case "updateEffectif": {
       return {
@@ -19,9 +19,8 @@ function AppReducer(state: AppState, action: ActionType) {
       return {
         ...state,
         formEffectifValidated: action.valid,
-        formIndicateurUnValidated: action.valid
-          ? state.formIndicateurUnValidated
-          : false
+        formIndicateurUnValidated:
+          state.formIndicateurUnValidated === "Valid" ? "Invalid" : "None"
       };
     }
     case "updateIndicateurUn": {

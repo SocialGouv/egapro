@@ -5,6 +5,7 @@ import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
   AppState,
+  FormState,
   CategorieSocioPro,
   TranchesAges,
   GroupTranchesAges,
@@ -28,7 +29,7 @@ import {
 interface Props extends RouteComponentProps {
   state: AppState;
   updateEffectif: (data: ActionEffectifData) => void;
-  validateEffectif: (valid: boolean) => void;
+  validateEffectif: (valid: FormState) => void;
 }
 
 const getFieldName = (
@@ -116,7 +117,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
 
   const onSubmit = (formData: any) => {
     saveForm(formData);
-    validateEffectif(true);
+    validateEffectif("Valid");
   };
 
   const {
@@ -173,7 +174,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
                   return (
                     <CellInputsMenWomen
                       key={trancheAge}
-                      readOnly={state.formEffectifValidated}
+                      readOnly={state.formEffectifValidated === "Valid"}
                       form={form}
                       name={displayNameTranchesAges(trancheAge)}
                       calculable={true}
@@ -187,10 +188,10 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
           );
         })}
 
-        {state.formEffectifValidated ? (
+        {state.formEffectifValidated === "Valid" ? (
           <div css={styles.action}>
             <ButtonLink to="/indicateur1" label="suivant" />
-            <Action onClick={() => validateEffectif(false)}>
+            <Action onClick={() => validateEffectif("None")}>
               modifier les données saisies
             </Action>
           </div>
