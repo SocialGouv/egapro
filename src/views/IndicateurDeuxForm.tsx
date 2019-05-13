@@ -8,6 +8,12 @@ import {
   ActionIndicateurDeuxData
 } from "../globals.d";
 
+import {
+  calculTotalEffectifsEtTauxAugmentation,
+  calculEcartTauxAugmentation,
+  effectifEtEcartAugmentGroup
+} from "../utils/calculsEgaProIndicateurDeux";
+
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ActionBar from "../components/ActionBar";
@@ -17,16 +23,12 @@ import ButtonLink from "../components/ButtonLink";
 import {
   fractionToPercentage,
   percentageToFraction,
-  displayNameCategorieSocioPro
+  displayNameCategorieSocioPro,
+  displayPercent
 } from "../utils/helpers";
 
 interface Props {
-  ecartAugmentParCategorieSocioPro: Array<{
-    categorieSocioPro: CategorieSocioPro;
-    validiteGroupe: boolean;
-    tauxAugmentationFemmes: number | undefined;
-    tauxAugmentationHommes: number | undefined;
-  }>;
+  ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>;
   readOnly: boolean;
   updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void;
   validateIndicateurDeux: (valid: FormState) => void;
@@ -114,7 +116,13 @@ function IndicateurDeuxForm({
     validateIndicateurDeux("Valid");
   };
 
-  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
+  const {
+    form,
+    values,
+    handleSubmit,
+    hasValidationErrors,
+    submitFailed
+  } = useForm({
     initialValues,
     onSubmit
   });
@@ -128,9 +136,43 @@ function IndicateurDeuxForm({
     { values: true, dirty: true }
   );
 
+  // Only for Total with updated values
+  const ecartAugmentParCategorieSocioProPourTotal = ecartAugmentParCategorieSocioPro.map(
+    (groupAugment, index) => {
+      const infoField = infoFields[index];
+      const tauxAugmentationFemmes = parseFormValue(
+        values[infoField.tauxAugmentationFemmesName]
+      );
+      const tauxAugmentationHommes = parseFormValue(
+        values[infoField.tauxAugmentationHommesName]
+      );
+      const ecartTauxAugmentation = calculEcartTauxAugmentation(
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes
+      );
+      return {
+        ...groupAugment,
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes,
+        ecartTauxAugmentation
+      };
+    }
+  );
+  const {
+    totalTauxAugmentationFemmes,
+    totalTauxAugmentationHommes
+  } = calculTotalEffectifsEtTauxAugmentation(
+    ecartAugmentParCategorieSocioProPourTotal
+  );
+
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
-      <BlocForm label="% de salariés augmentés">
+      <BlocForm
+        label="% de salariés augmentés"
+        footer={`total ${displayPercent(
+          totalTauxAugmentationHommes
+        )} ${displayPercent(totalTauxAugmentationFemmes)}`}
+      >
         {infoFields.map(
           ({
             categorieSocioPro,

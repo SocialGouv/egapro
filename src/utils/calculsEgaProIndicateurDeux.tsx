@@ -41,10 +41,10 @@ export const calculEcartTauxAugmentation = (
     ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 3)
     : undefined;
 
-interface effectifEtEcartAugmentGroup extends effectifGroup {
+export interface effectifEtEcartAugmentGroup extends effectifGroup {
   categorieSocioPro: CategorieSocioPro;
-  tauxAugmentationFemmes: number;
-  tauxAugmentationHommes: number;
+  tauxAugmentationFemmes: number | undefined;
+  tauxAugmentationHommes: number | undefined;
   ecartTauxAugmentation: number | undefined;
 }
 
@@ -58,9 +58,6 @@ export const calculEffectifsEtEcartAugmentParCategorieSocioPro = (
       tauxAugmentationFemmes,
       tauxAugmentationHommes
     }: Groupe) => {
-      tauxAugmentationFemmes = tauxAugmentationFemmes || 0;
-      tauxAugmentationHommes = tauxAugmentationHommes || 0;
-
       const effectifs = rowEffectifsParCategorieSocioPro(
         tranchesAges,
         calculValiditeGroupe
@@ -68,8 +65,8 @@ export const calculEffectifsEtEcartAugmentParCategorieSocioPro = (
 
       // ETA
       const ecartTauxAugmentation = calculEcartTauxAugmentation(
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes
+        tauxAugmentationFemmes || 0,
+        tauxAugmentationHommes || 0
       );
 
       return {
