@@ -1,75 +1,61 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import ButtonLink from "../components/ButtonLink";
+import { FormState } from "../globals.d";
+
+import ResultBubble from "../components/ResultBubble";
+import Action from "../components/Action";
 
 interface Props {
-  indicateurCalculable: boolean;
   indicateurEcartAugmentation: number | undefined;
   noteIndicateurDeux: number | undefined;
+  validateIndicateurDeux: (valid: FormState) => void;
 }
 
 function IndicateurDeuxResult({
-  indicateurCalculable,
   indicateurEcartAugmentation,
-  noteIndicateurDeux
+  noteIndicateurDeux,
+  validateIndicateurDeux
 }: Props) {
+  const absoluteResult =
+    indicateurEcartAugmentation !== undefined
+      ? Math.abs(indicateurEcartAugmentation)
+      : undefined;
+  const genderFavoriteResult =
+    indicateurEcartAugmentation !== undefined
+      ? Math.sign(indicateurEcartAugmentation) < 0
+        ? "femmes"
+        : "hommes"
+      : undefined;
   return (
     <div>
-      <div css={styles.bloc}>
-        <p css={styles.blocTitle}>
-          Indicateur 2 {indicateurCalculable ? "Calculable" : "Non Calculable"}
-        </p>
+      <ResultBubble
+        firstLineLabel="votre résultat final est"
+        firstLineData={
+          (absoluteResult !== undefined ? absoluteResult.toFixed(1) : "--") +
+          " %"
+        }
+        firstLineInfo={`écart favorable aux ${genderFavoriteResult}`}
+        secondLineLabel="votre note obtenue est"
+        secondLineData={
+          (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"
+        }
+        secondLineInfo="mesures de correction prises en compte"
+      />
 
-        <div css={styles.message}>
-          {indicateurEcartAugmentation !== undefined ? (
-            <p>
-              indicateur d'écart d'augmentation :{" "}
-              {indicateurEcartAugmentation.toFixed(1)}%
-            </p>
-          ) : (
-            <p>---</p>
-          )}
-        </div>
-
-        <div css={styles.message}>
-          {noteIndicateurDeux !== undefined ? (
-            <p>Note : {noteIndicateurDeux}</p>
-          ) : (
-            <p>---</p>
-          )}
-        </div>
-
-        <ButtonLink to="/indicateur3" label="Continuer" />
-      </div>
+      <p css={styles.edit}>
+        <Action onClick={() => validateIndicateurDeux("None")}>
+          modifier les données saisies
+        </Action>
+      </p>
     </div>
   );
 }
 
 const styles = {
-  bloc: css({
-    display: "flex",
-    flexDirection: "column",
-    maxWidth: 800,
-    padding: "12px 24px",
-    margin: "24px auto",
-    backgroundColor: "white",
-    borderRadius: 6,
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.12)"
-  }),
-  blocTitle: css({
-    fontSize: 24,
-    paddingTop: 6,
-    paddingBottom: 24,
-    color: "#353535",
+  edit: css({
+    marginTop: 14,
     textAlign: "center"
-  }),
-  message: css({
-    fontSize: 26,
-    fontWeight: 200,
-    textAlign: "center",
-    marginBottom: 32,
-    marginTop: 12
   })
 };
 

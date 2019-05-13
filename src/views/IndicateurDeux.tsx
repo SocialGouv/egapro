@@ -107,9 +107,9 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
           childrenResult={
             state.formIndicateurDeuxValidated === "Valid" && (
               <IndicateurDeuxResult
-                indicateurCalculable={indicateurCalculable}
                 indicateurEcartAugmentation={indicateurEcartAugmentation}
                 noteIndicateurDeux={noteIndicateurDeux}
+                validateIndicateurDeux={validateIndicateurDeux}
               />
             )
           }
