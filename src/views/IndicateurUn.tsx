@@ -83,7 +83,8 @@ function IndicateurUn({ state, dispatch }: Props) {
       tagline="Renseignez la rémunération (annuelle / mensuelle) moyenne des femmes et
         des hommes par CSP et par tranche d’âge."
     >
-      {effectifsIndicateurCalculable && state.formEffectifValidated ? (
+      {effectifsIndicateurCalculable &&
+      state.formEffectifValidated === "Valid" ? (
         <LayoutFormAndResult
           childrenForm={
             <IndicateurUnForm

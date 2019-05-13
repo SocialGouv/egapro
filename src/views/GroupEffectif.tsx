@@ -19,7 +19,7 @@ import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 import ButtonLink from "../components/ButtonLink";
-import Action from "../components/Action";
+import ActionLink from "../components/ActionLink";
 
 import {
   displayNameCategorieSocioPro,
@@ -191,9 +191,9 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
         {state.formEffectifValidated === "Valid" ? (
           <div css={styles.action}>
             <ButtonLink to="/indicateur1" label="suivant" />
-            <Action onClick={() => validateEffectif("None")}>
+            <ActionLink onClick={() => validateEffectif("None")}>
               modifier les données saisies
-            </Action>
+            </ActionLink>
           </div>
         ) : (
           <div css={styles.action}>

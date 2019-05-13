@@ -26,6 +26,7 @@ import LayoutFormAndResult from "../components/LayoutFormAndResult";
 import InfoBloc from "../components/InfoBloc";
 import ActionBar from "../components/ActionBar";
 import ButtonLink from "../components/ButtonLink";
+import ActionLink from "../components/ActionLink";
 
 import IndicateurDeuxForm from "./IndicateurDeuxForm";
 import IndicateurDeuxResult from "./IndicateurDeuxResult";
@@ -94,7 +95,24 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
       title="Indicateur 2, écart de taux d’augmentation individuelle “hors promotion”"
       tagline="Renseignez le pourcentage d’hommes et des femmes ayant été augmentés durant la période de référence, par CSP."
     >
-      {effectifsIndicateurCalculable && state.formEffectifValidated ? (
+      {!indicateurCalculable &&
+      state.formIndicateurDeuxValidated === "Valid" ? (
+        <div>
+          <InfoBloc
+            title="Malheureusement votre indicateur n’est pas calculable"
+            text="car il n’y a pas eu d’augmentation individuelle durant la période de référence."
+          />
+          <ActionBar>
+            <ActionLink onClick={() => validateIndicateurDeux("None")}>
+              modifier les données saisies
+            </ActionLink>
+          </ActionBar>
+          <ActionBar>
+            <ButtonLink to="/indicateur3" label="suivant" />
+          </ActionBar>
+        </div>
+      ) : effectifsIndicateurCalculable &&
+        state.formEffectifValidated === "Valid" ? (
         <LayoutFormAndResult
           childrenForm={
             <IndicateurDeuxForm

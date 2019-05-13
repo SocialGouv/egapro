@@ -4,7 +4,7 @@ import { css, jsx } from "@emotion/core";
 import { FormState } from "../globals.d";
 
 import ResultBubble from "../components/ResultBubble";
-import Action from "../components/Action";
+import ActionLink from "../components/ActionLink";
 
 interface Props {
   indicateurEcartAugmentation: number | undefined;
@@ -44,9 +44,9 @@ function IndicateurDeuxResult({
       />
 
       <p css={styles.edit}>
-        <Action onClick={() => validateIndicateurDeux("None")}>
+        <ActionLink onClick={() => validateIndicateurDeux("None")}>
           modifier les données saisies
-        </Action>
+        </ActionLink>
       </p>
     </div>
   );

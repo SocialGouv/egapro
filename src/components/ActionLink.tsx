@@ -7,7 +7,7 @@ interface Props {
   onClick: () => void;
 }
 
-function Action({ children, onClick }: Props) {
+function ActionLink({ children, onClick }: Props) {
   return (
     <button css={styles.button} onClick={onClick}>
       {children}
@@ -25,4 +25,4 @@ const styles = {
   })
 };
 
-export default Action;
+export default ActionLink;
