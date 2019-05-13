@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -9,7 +9,7 @@ import { CellHead, Cell, Cell2 } from "./Cell";
 interface Props {
   title?: string;
   label: string;
-  footer?: string;
+  footer?: string | [string, string];
   children: ReactNode;
   style?: any;
 }
@@ -36,7 +36,16 @@ function BlocForm({ title, label, footer, children, style }: Props) {
         {footer && (
           <div css={styles.rowFoot}>
             <div css={styles.rowFootBorderLeft} />
-            <Cell2 style={styles.rowFootCell}>{footer}</Cell2>
+            <div css={styles.rowFootTotal}>total</div>
+            {typeof footer === "string" ? (
+              <Cell2 style={styles.rowFootCell}>{footer}</Cell2>
+            ) : (
+              <Fragment>
+                <Cell style={styles.rowFootCell}>{footer[0]}</Cell>
+                <Cell style={styles.rowFootCell}>{footer[1]}</Cell>
+              </Fragment>
+            )}
+
             <div css={styles.rowFootBorderRight} />
           </div>
         )}
@@ -142,6 +151,10 @@ const styles = {
   rowFootCell: css({
     fontSize: 14,
     textAlign: "center"
+  }),
+  rowFootTotal: css({
+    fontSize: 14,
+    marginLeft: 8
   }),
   rowFootBorderLeft: css({
     height: 1,

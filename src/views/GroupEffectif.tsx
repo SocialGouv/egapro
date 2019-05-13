@@ -167,7 +167,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               key={categorieSocioPro}
               title={displayNameCategorieSocioPro(categorieSocioPro)}
               label="nombre de salariés"
-              footer={`total ${totalNbSalarie}`}
+              footer={String(totalNbSalarie)}
             >
               {tranchesAges.map(
                 ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
