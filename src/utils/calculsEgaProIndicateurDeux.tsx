@@ -37,7 +37,7 @@ export const calculEcartTauxAugmentation = (
   tauxAugmentationFemmes: number,
   tauxAugmentationHommes: number
 ): number | undefined =>
-  tauxAugmentationFemmes > 0 && tauxAugmentationHommes > 0
+  tauxAugmentationFemmes >= 0 && tauxAugmentationHommes >= 0
     ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 3)
     : undefined;
 
