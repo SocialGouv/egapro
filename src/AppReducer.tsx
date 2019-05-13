@@ -71,6 +71,12 @@ function AppReducer(state: AppState, action: ActionType): AppState {
         data
       };
     }
+    case "validateIndicateurTrois": {
+      return {
+        ...state,
+        formIndicateurTroisValidated: action.valid
+      };
+    }
     default:
       return state;
   }

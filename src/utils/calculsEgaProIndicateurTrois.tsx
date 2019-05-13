@@ -4,6 +4,7 @@ import {
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
   calculTotalEffectifs,
+  calculEffectifsIndicateurCalculable,
   rowEffectifsParCategorieSocioPro,
   effectifGroup
 } from "./calculsEgaPro";
@@ -24,6 +25,7 @@ const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0];
 export {
   calculValiditeGroupe, // VG
   calculTotalEcartPondere, // TEV
+  calculEffectifsIndicateurCalculable, // IC
   calculIndicateurCalculable // IC
 };
 
@@ -36,8 +38,8 @@ export const calculEcartTauxPromotion = calculEcartTauxAugmentation;
 
 interface effectifEtEcartPromoGroup extends effectifGroup {
   categorieSocioPro: CategorieSocioPro;
-  tauxPromotionFemmes: number;
-  tauxPromotionHommes: number;
+  tauxPromotionFemmes: number | undefined;
+  tauxPromotionHommes: number | undefined;
   ecartTauxPromotion: number | undefined;
 }
 
@@ -51,9 +53,6 @@ export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
       tauxPromotionFemmes,
       tauxPromotionHommes
     }: Groupe) => {
-      tauxPromotionFemmes = tauxPromotionFemmes || 0;
-      tauxPromotionHommes = tauxPromotionHommes || 0;
-
       const effectifs = rowEffectifsParCategorieSocioPro(
         tranchesAges,
         calculValiditeGroupe
@@ -61,8 +60,8 @@ export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
 
       // ETA
       const ecartTauxPromotion = calculEcartTauxPromotion(
-        tauxPromotionFemmes,
-        tauxPromotionHommes
+        tauxPromotionFemmes || 0,
+        tauxPromotionHommes || 0
       );
 
       return {

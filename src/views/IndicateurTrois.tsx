@@ -1,20 +1,33 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { RouteComponentProps, Route, Switch } from "react-router-dom";
+import { useCallback } from "react";
+import { RouteComponentProps } from "react-router-dom";
 
-import { AppState, ActionType, ActionIndicateurTroisData } from "../globals.d";
+import {
+  AppState,
+  FormState,
+  ActionType,
+  ActionIndicateurTroisData
+} from "../globals.d";
 
 import {
   calculEffectifsEtEcartPromoParCategorieSocioPro,
   calculTotalEffectifsEtTauxPromotion,
   calculEcartsPonderesParCategorieSocioPro,
   calculTotalEcartPondere,
+  calculEffectifsIndicateurCalculable,
   calculIndicateurCalculable,
   calculIndicateurEcartPromotion,
   calculNote
 } from "../utils/calculsEgaProIndicateurTrois";
 
-import IndicateurTroisStart from "./IndicateurTroisStart";
+import Page from "../components/Page";
+import LayoutFormAndResult from "../components/LayoutFormAndResult";
+import InfoBloc from "../components/InfoBloc";
+import ActionBar from "../components/ActionBar";
+import ButtonLink from "../components/ButtonLink";
+import ActionLink from "../components/ActionLink";
+
 import IndicateurTroisForm from "./IndicateurTroisForm";
 import IndicateurTroisResult from "./IndicateurTroisResult";
 
@@ -24,8 +37,16 @@ interface Props extends RouteComponentProps {
 }
 
 function IndicateurTrois({ state, dispatch, match }: Props) {
-  const updateIndicateurTrois = (data: ActionIndicateurTroisData) =>
-    dispatch({ type: "updateIndicateurTrois", data });
+  const updateIndicateurTrois = useCallback(
+    (data: ActionIndicateurTroisData) =>
+      dispatch({ type: "updateIndicateurTrois", data }),
+    [dispatch]
+  );
+
+  const validateIndicateurTrois = useCallback(
+    (valid: FormState) => dispatch({ type: "validateIndicateurTrois", valid }),
+    [dispatch]
+  );
 
   const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
     state.data
@@ -47,6 +68,12 @@ function IndicateurTrois({ state, dispatch, match }: Props) {
   const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
 
   // IC
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
+    totalNombreSalaries,
+    totalEffectifsValides
+  );
+
+  // IC
   const indicateurCalculable = calculIndicateurCalculable(
     totalNombreSalaries,
     totalEffectifsValides,
@@ -64,41 +91,61 @@ function IndicateurTrois({ state, dispatch, match }: Props) {
   const noteIndicateurTrois = calculNote(indicateurEcartPromotion);
 
   return (
-    <Switch>
-      <Route
-        path={match.path}
-        exact
-        render={props => (
-          <IndicateurTroisStart
-            {...props}
-            nombreSalariesTotal={totalNombreSalaries}
-            nombreSalariesGroupesValides={totalEffectifsValides}
-            indicateurCalculable={indicateurCalculable}
+    <Page
+      title="Indicateur 3, écart de taux de promotions"
+      tagline="Renseignez le pourcentage de femmes et d’hommes ayant été promus durant la période de référence par CSP."
+    >
+      {!indicateurCalculable &&
+      state.formIndicateurTroisValidated === "Valid" ? (
+        <div>
+          <InfoBloc
+            title="Malheureusement votre indicateur n’est pas calculable"
+            text="car il n’y a pas eu de promotion durant la période de référence."
           />
-        )}
-      />
-      <Route
-        path={`${match.path}/formulaire`}
-        render={props => (
-          <IndicateurTroisForm
-            {...props}
-            ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
-            updateIndicateurTrois={updateIndicateurTrois}
+          <ActionBar>
+            <ActionLink onClick={() => validateIndicateurTrois("None")}>
+              modifier les données saisies
+            </ActionLink>
+          </ActionBar>
+          <ActionBar>
+            <ButtonLink to="/indicateur4" label="suivant" />
+          </ActionBar>
+        </div>
+      ) : effectifsIndicateurCalculable &&
+        state.formEffectifValidated === "Valid" ? (
+        <LayoutFormAndResult
+          childrenForm={
+            <IndicateurTroisForm
+              ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
+              readOnly={state.formIndicateurTroisValidated === "Valid"}
+              updateIndicateurTrois={updateIndicateurTrois}
+              validateIndicateurTrois={validateIndicateurTrois}
+            />
+          }
+          childrenResult={
+            state.formIndicateurTroisValidated === "Valid" && (
+              <IndicateurTroisResult
+                indicateurEcartPromotion={indicateurEcartPromotion}
+                noteIndicateurTrois={noteIndicateurTrois}
+                validateIndicateurTrois={validateIndicateurTrois}
+              />
+            )
+          }
+        />
+      ) : (
+        <div>
+          <InfoBloc
+            title="Malheureusement votre indicateur n’est pas calculable"
+            text="car l’ensemble des groupes valables (c’est-à-dire comptant au
+              moins 10 femmes et 10 hommes), représentent moins de 40% des
+              effectifs."
           />
-        )}
-      />
-      <Route
-        path={`${match.path}/resultat`}
-        render={props => (
-          <IndicateurTroisResult
-            {...props}
-            indicateurCalculable={indicateurCalculable}
-            indicateurEcartPromotion={indicateurEcartPromotion}
-            noteIndicateurTrois={noteIndicateurTrois}
-          />
-        )}
-      />
-    </Switch>
+          <ActionBar>
+            <ButtonLink to="/indicateur4" label="suivant" />
+          </ActionBar>
+        </div>
+      )}
+    </Page>
   );
 }
 

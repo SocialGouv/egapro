@@ -1,25 +1,35 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { RouteComponentProps } from "react-router-dom";
+import { memo } from "react";
 import { useForm } from "react-final-form-hooks";
-import { CategorieSocioPro, ActionIndicateurTroisData } from "../globals.d";
+import {
+  FormState,
+  CategorieSocioPro,
+  ActionIndicateurTroisData
+} from "../globals.d";
 
+import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
-import ButtonSubmit from "../components/ButtonSubmit";
+import ActionBar from "../components/ActionBar";
+import FormSubmit from "../components/FormSubmit";
+import ButtonLink from "../components/ButtonLink";
+
 import {
   fractionToPercentage,
   percentageToFraction,
   displayNameCategorieSocioPro
 } from "../utils/helpers";
 
-interface Props extends RouteComponentProps {
+interface Props {
   ecartPromoParCategorieSocioPro: Array<{
     categorieSocioPro: CategorieSocioPro;
     validiteGroupe: boolean;
     tauxPromotionFemmes: number | undefined;
     tauxPromotionHommes: number | undefined;
   }>;
+  readOnly: boolean;
   updateIndicateurTrois: (data: ActionIndicateurTroisData) => void;
+  validateIndicateurTrois: (valid: FormState) => void;
 }
 
 const getFieldName = (
@@ -27,10 +37,21 @@ const getFieldName = (
   genre: "Hommes" | "Femmes"
 ): string => "tauxPromotion" + categorieSocioPro + genre;
 
+const parseFormValue = (value: string, defaultValue: any = undefined) =>
+  value === ""
+    ? defaultValue
+    : Number.isNaN(Number(value))
+    ? defaultValue
+    : percentageToFraction(parseFloat(value));
+
+const parseStateValue = (value: number | undefined) =>
+  value === undefined ? "" : String(fractionToPercentage(value));
+
 function IndicateurTroisForm({
   ecartPromoParCategorieSocioPro,
+  readOnly,
   updateIndicateurTrois,
-  history
+  validateIndicateurTrois
 }: Props) {
   const infoFields = ecartPromoParCategorieSocioPro.map(
     ({
@@ -43,15 +64,9 @@ function IndicateurTroisForm({
         categorieSocioPro,
         validiteGroupe,
         tauxPromotionFemmesName: getFieldName(categorieSocioPro, "Femmes"),
-        tauxPromotionFemmesValue:
-          tauxPromotionFemmes === undefined
-            ? ""
-            : String(fractionToPercentage(tauxPromotionFemmes)),
+        tauxPromotionFemmesValue: parseStateValue(tauxPromotionFemmes),
         tauxPromotionHommesName: getFieldName(categorieSocioPro, "Hommes"),
-        tauxPromotionHommesValue:
-          tauxPromotionHommes === undefined
-            ? ""
-            : String(fractionToPercentage(tauxPromotionHommes))
+        tauxPromotionHommesValue: parseStateValue(tauxPromotionHommes)
       };
     }
   );
@@ -75,7 +90,7 @@ function IndicateurTroisForm({
     {}
   );
 
-  const onSubmit = (formData: any) => {
+  const saveForm = (formData: any) => {
     const data: ActionIndicateurTroisData = infoFields.map(
       ({
         categorieSocioPro,
@@ -83,44 +98,35 @@ function IndicateurTroisForm({
         tauxPromotionHommesName
       }) => ({
         categorieSocioPro,
-        tauxPromotionFemmes:
-          formData[tauxPromotionFemmesName] === ""
-            ? undefined
-            : percentageToFraction(
-                parseFloat(formData[tauxPromotionFemmesName])
-              ),
-        tauxPromotionHommes:
-          formData[tauxPromotionHommesName] === ""
-            ? undefined
-            : percentageToFraction(
-                parseFloat(formData[tauxPromotionHommesName])
-              )
+        tauxPromotionFemmes: parseFormValue(formData[tauxPromotionFemmesName]),
+        tauxPromotionHommes: parseFormValue(formData[tauxPromotionHommesName])
       })
     );
     updateIndicateurTrois(data);
-
-    history.push("/indicateur3/resultat");
   };
 
-  const { form, handleSubmit /*, values, pristine, submitting*/ } = useForm({
+  const onSubmit = (formData: any) => {
+    saveForm(formData);
+    validateIndicateurTrois("Valid");
+  };
+
+  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
     initialValues,
-    onSubmit // the function to call with your form values upon valid submit
-    //validate // a record-level validation function to check all form values
+    onSubmit
   });
 
+  form.subscribe(
+    ({ values, dirty }) => {
+      if (dirty) {
+        saveForm(values);
+      }
+    },
+    { values: true, dirty: true }
+  );
+
   return (
-    <form onSubmit={handleSubmit}>
-      <div css={styles.bloc}>
-        <p css={styles.blocTitle}>
-          Taux de promotion (proportions de salariés promus)
-        </p>
-
-        <div css={styles.row}>
-          <div css={styles.cellHead}>taux</div>
-          <div css={styles.cell}>femmes</div>
-          <div css={styles.cell}>hommes</div>
-        </div>
-
+    <form onSubmit={handleSubmit} css={styles.container}>
+      <BlocForm label="% de salariés promus">
         {infoFields.map(
           ({
             categorieSocioPro,
@@ -133,7 +139,7 @@ function IndicateurTroisForm({
                 key={categorieSocioPro}
                 form={form}
                 name={displayNameCategorieSocioPro(categorieSocioPro)}
-                readOnly={false}
+                readOnly={readOnly}
                 calculable={validiteGroupe}
                 femmeFieldName={tauxPromotionFemmesName}
                 hommeFieldName={tauxPromotionHommesName}
@@ -141,57 +147,33 @@ function IndicateurTroisForm({
             );
           }
         )}
+      </BlocForm>
 
-        <ButtonSubmit label="Valider" />
-      </div>
+      {readOnly ? (
+        <ActionBar>
+          <ButtonLink to="/indicateur4" label="suivant" />
+        </ActionBar>
+      ) : (
+        <ActionBar>
+          <FormSubmit
+            hasValidationErrors={hasValidationErrors}
+            submitFailed={submitFailed}
+            errorMessage="vous ne pouvez pas valider l’indicateur tant que vous n’avez pas rempli tous les champs"
+          />
+        </ActionBar>
+      )}
     </form>
   );
 }
 
 const styles = {
-  bloc: css({
+  container: css({
     display: "flex",
-    flexDirection: "column",
-    maxWidth: 800,
-    padding: "12px 24px",
-    margin: "24px auto",
-    backgroundColor: "white",
-    borderRadius: 6,
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.12)"
-  }),
-  blocTitle: css({
-    fontSize: 24,
-    paddingTop: 6,
-    paddingBottom: 24,
-    color: "#353535"
-  }),
-  row: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-    marginBottom: 24
-  }),
-  cellHead: css({
-    flexGrow: 1,
-    flexBasis: "0%",
-    textAlign: "right",
-    fontWeight: "bold"
-  }),
-  cell: css({
-    flexGrow: 2,
-    flexBasis: "0%",
-    marginLeft: 24,
-    textAlign: "center",
-    fontWeight: "bold"
-  }),
-  message: css({
-    fontSize: 26,
-    fontWeight: 200,
-    textAlign: "center",
-    marginBottom: 32,
-    marginTop: 12
+    flexDirection: "column"
   })
 };
 
-export default IndicateurTroisForm;
+export default memo(
+  IndicateurTroisForm,
+  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
+);

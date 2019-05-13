@@ -218,50 +218,6 @@ const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
-  }),
-
-  bloc: css({
-    display: "flex",
-    flexDirection: "column",
-    maxWidth: 800,
-    padding: "12px 24px",
-    margin: "24px auto",
-    backgroundColor: "white",
-    borderRadius: 6,
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.12)"
-  }),
-  blocTitle: css({
-    fontSize: 24,
-    paddingTop: 6,
-    paddingBottom: 24,
-    color: "#353535"
-  }),
-  row: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-    marginBottom: 24
-  }),
-  cellHead: css({
-    flexGrow: 1,
-    flexBasis: "0%",
-    textAlign: "right",
-    fontWeight: "bold"
-  }),
-  cell: css({
-    flexGrow: 2,
-    flexBasis: "0%",
-    marginLeft: 24,
-    textAlign: "center",
-    fontWeight: "bold"
-  }),
-  message: css({
-    fontSize: 26,
-    fontWeight: 200,
-    textAlign: "center",
-    marginBottom: 32,
-    marginTop: 12
   })
 };
 
