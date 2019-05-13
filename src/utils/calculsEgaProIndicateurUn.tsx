@@ -3,12 +3,12 @@ import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
 import { roundDecimal } from "./helpers";
 
 import {
-  tauxEffectifValide,
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
   calculTotalEffectifs,
   rowEffectifsParTrancheAge,
-  effectifGroup
+  effectifGroup,
+  calculEffectifsIndicateurCalculable
 } from "./calculsEgaPro";
 
 /* INDICATEUR 1 CONST */
@@ -46,7 +46,8 @@ const baremeEcartRemuneration = [
 
 export {
   calculTotalEffectifs,
-  calculTotalEcartPondere // TEV
+  calculTotalEcartPondere, // TEV
+  calculEffectifsIndicateurCalculable // IC
 };
 
 //////////////////
@@ -140,14 +141,6 @@ export const calculEcartsPonderesParTrancheAge = calculEcartsPonderesParGroupe(
   ({ ecartApresApplicationSeuilPertinence }) =>
     ecartApresApplicationSeuilPertinence
 );
-
-// IC
-export const calculIndicateurCalculable = (
-  totalNombreSalaries: number,
-  totalEffectifsValides: number
-): boolean =>
-  totalNombreSalaries > 0 &&
-  totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide;
 
 // IER
 export const calculIndicateurEcartRemuneration = (

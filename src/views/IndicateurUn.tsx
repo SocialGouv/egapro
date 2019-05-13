@@ -15,7 +15,7 @@ import {
   calculTotalEffectifs,
   calculEcartsPonderesParTrancheAge,
   calculTotalEcartPondere,
-  calculIndicateurCalculable,
+  calculEffectifsIndicateurCalculable,
   calculIndicateurEcartRemuneration,
   calculNote
 } from "../utils/calculsEgaProIndicateurUn";
@@ -63,14 +63,14 @@ function IndicateurUn({ state, dispatch }: Props) {
   const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
 
   // IC
-  const indicateurCalculable = calculIndicateurCalculable(
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
     totalNombreSalaries,
     totalEffectifsValides
   );
 
   // IER
   const indicateurEcartRemuneration = calculIndicateurEcartRemuneration(
-    indicateurCalculable,
+    effectifsIndicateurCalculable,
     totalEcartPondere
   );
 
@@ -83,7 +83,7 @@ function IndicateurUn({ state, dispatch }: Props) {
       tagline="Renseignez la rémunération (annuelle / mensuelle) moyenne des femmes et
         des hommes par CSP et par tranche d’âge."
     >
-      {indicateurCalculable && state.formEffectifValidated ? (
+      {effectifsIndicateurCalculable && state.formEffectifValidated ? (
         <LayoutFormAndResult
           childrenForm={
             <IndicateurUnForm

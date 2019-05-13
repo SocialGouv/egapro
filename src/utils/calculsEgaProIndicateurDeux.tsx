@@ -3,12 +3,12 @@ import { CategorieSocioPro, Groupe } from "../globals.d";
 import { roundDecimal } from "./helpers";
 
 import {
-  tauxEffectifValide,
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
   calculTotalEffectifs,
   rowEffectifsParCategorieSocioPro,
-  effectifGroup
+  effectifGroup,
+  calculEffectifsIndicateurCalculable
 } from "./calculsEgaPro";
 
 const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0];
@@ -18,7 +18,8 @@ const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0];
 //////////////////
 
 export {
-  calculTotalEcartPondere // TEV
+  calculTotalEcartPondere, // TEV
+  calculEffectifsIndicateurCalculable // IC
 };
 
 //////////////////
@@ -150,8 +151,10 @@ export const calculIndicateurCalculable = (
   totalTauxAugmentationFemmes: number,
   totalTauxAugmentationHommes: number
 ): boolean =>
-  totalNombreSalaries > 0 &&
-  totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide &&
+  calculEffectifsIndicateurCalculable(
+    totalNombreSalaries,
+    totalEffectifsValides
+  ) &&
   (totalTauxAugmentationFemmes > 0 || totalTauxAugmentationHommes > 0);
 
 // IEA

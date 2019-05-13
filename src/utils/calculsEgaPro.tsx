@@ -205,3 +205,11 @@ export const calculTotalEffectifs = (groupEffectif: Array<effectifGroup>) => {
     totalEffectifsValides
   };
 };
+
+// IC
+export const calculEffectifsIndicateurCalculable = (
+  totalNombreSalaries: number,
+  totalEffectifsValides: number
+): boolean =>
+  totalNombreSalaries > 0 &&
+  totalEffectifsValides >= totalNombreSalaries * tauxEffectifValide;

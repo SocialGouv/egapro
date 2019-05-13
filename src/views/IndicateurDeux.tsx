@@ -15,6 +15,7 @@ import {
   calculTotalEffectifsEtTauxAugmentation,
   calculEcartsPonderesParCategorieSocioPro,
   calculTotalEcartPondere,
+  calculEffectifsIndicateurCalculable,
   calculIndicateurCalculable,
   calculIndicateurEcartAugmentation,
   calculNote
@@ -66,6 +67,12 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
   const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
 
   // IC
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
+    totalNombreSalaries,
+    totalEffectifsValides
+  );
+
+  // IC
   const indicateurCalculable = calculIndicateurCalculable(
     totalNombreSalaries,
     totalEffectifsValides,
@@ -87,7 +94,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
       title="Indicateur 2, écart de taux d’augmentation individuelle “hors promotion”"
       tagline="Renseignez le pourcentage d’hommes et des femmes ayant été augmentés durant la période de référence, par CSP."
     >
-      {indicateurCalculable && state.formEffectifValidated ? (
+      {effectifsIndicateurCalculable && state.formEffectifValidated ? (
         <LayoutFormAndResult
           childrenForm={
             <IndicateurDeuxForm
