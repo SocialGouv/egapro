@@ -16,15 +16,27 @@ function AppReducer(state: AppState, action: ActionType): AppState {
       };
     }
     case "validateEffectif": {
+      if (action.valid === "None") {
+        return {
+          ...state,
+          effectif: { ...state.effectif, formValidated: action.valid },
+          indicateurUn:
+            state.indicateurUn.formValidated === "Valid"
+              ? { ...state.indicateurUn, formValidated: "Invalid" }
+              : state.indicateurUn,
+          indicateurDeux:
+            state.indicateurDeux.formValidated === "Valid"
+              ? { ...state.indicateurDeux, formValidated: "Invalid" }
+              : state.indicateurDeux,
+          indicateurTrois:
+            state.indicateurTrois.formValidated === "Valid"
+              ? { ...state.indicateurTrois, formValidated: "Invalid" }
+              : state.indicateurTrois
+        };
+      }
       return {
         ...state,
-        formEffectifValidated: action.valid,
-        formIndicateurUnValidated:
-          state.formIndicateurUnValidated !== "None" ? "Invalid" : "None",
-        formIndicateurDeuxValidated:
-          state.formIndicateurDeuxValidated !== "None" ? "Invalid" : "None",
-        formIndicateurTroisValidated:
-          state.formIndicateurTroisValidated !== "None" ? "Invalid" : "None"
+        effectif: { ...state.effectif, formValidated: action.valid }
       };
     }
     case "updateIndicateurUn": {
@@ -36,7 +48,7 @@ function AppReducer(state: AppState, action: ActionType): AppState {
     case "validateIndicateurUn": {
       return {
         ...state,
-        formIndicateurUnValidated: action.valid
+        indicateurUn: { ...state.indicateurUn, formValidated: action.valid }
       };
     }
     case "updateIndicateurDeux": {
@@ -55,7 +67,7 @@ function AppReducer(state: AppState, action: ActionType): AppState {
     case "validateIndicateurDeux": {
       return {
         ...state,
-        formIndicateurDeuxValidated: action.valid
+        indicateurDeux: { ...state.indicateurDeux, formValidated: action.valid }
       };
     }
     case "updateIndicateurTrois": {
@@ -74,7 +86,10 @@ function AppReducer(state: AppState, action: ActionType): AppState {
     case "validateIndicateurTrois": {
       return {
         ...state,
-        formIndicateurTroisValidated: action.valid
+        indicateurTrois: {
+          ...state.indicateurTrois,
+          formValidated: action.valid
+        }
       };
     }
     default:

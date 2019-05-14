@@ -174,7 +174,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
                   return (
                     <CellInputsMenWomen
                       key={trancheAge}
-                      readOnly={state.formEffectifValidated === "Valid"}
+                      readOnly={state.effectif.formValidated === "Valid"}
                       form={form}
                       name={displayNameTranchesAges(trancheAge)}
                       calculable={true}
@@ -188,7 +188,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
           );
         })}
 
-        {state.formEffectifValidated === "Valid" ? (
+        {state.effectif.formValidated === "Valid" ? (
           <div css={styles.action}>
             <ButtonLink to="/indicateur1" label="suivant" />
             <ActionLink onClick={() => validateEffectif("None")}>
@@ -217,8 +217,8 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
         )}
       </form>
 
-      {state.formEffectifValidated === "Valid" &&
-        state.formIndicateurUnValidated === "Invalid" && (
+      {state.effectif.formValidated === "Valid" &&
+        state.indicateurUn.formValidated === "Invalid" && (
           <div css={styles.indicatorInvalid}>
             <p css={styles.indicatorInvalidTitle}>
               Vos effectifs ont été modifiés
@@ -295,6 +295,6 @@ const styles = {
 export default memo(
   GroupEffectif,
   (prevProps, nextProps) =>
-    prevProps.state.formEffectifValidated ===
-    nextProps.state.formEffectifValidated
+    prevProps.state.effectif.formValidated ===
+    nextProps.state.effectif.formValidated
 );

@@ -1,9 +1,19 @@
 export type AppState = {
   data: Array<Groupe>;
-  formEffectifValidated: FormState;
-  formIndicateurUnValidated: FormState;
-  formIndicateurDeuxValidated: FormState;
-  formIndicateurTroisValidated: FormState;
+  effectif: {
+    formValidated: FormState;
+  };
+  indicateurUn: {
+    formValidated: FormState;
+  };
+  indicateurDeux: {
+    formValidated: FormState;
+    presenceAugmentation: boolean;
+  };
+  indicateurTrois: {
+    formValidated: FormState;
+    presencePromotion: boolean;
+  };
 };
 
 export type FormState = "None" | "Valid" | "Invalid";

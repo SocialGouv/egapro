@@ -3,14 +3,14 @@ import { css, jsx } from "@emotion/core";
 
 interface Props {
   title: string;
-  text: string;
+  text?: string;
 }
 
 function InfoBloc({ title, text }: Props) {
   return (
     <div css={styles.bloc}>
       <p css={styles.blocTitle}>{title}</p>
-      <p css={styles.blocText}>{text}</p>
+      {text && <p css={styles.blocText}>{text}</p>}
     </div>
   );
 }

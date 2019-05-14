@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useCallback } from "react";
+import { useCallback, ReactNode } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import {
@@ -77,34 +77,24 @@ function IndicateurUn({ state, dispatch }: Props) {
   // NOTE
   const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
 
-  return (
-    <Page
-      title="Indicateur 1, écart de rémunération"
-      tagline="Renseignez la rémunération (annuelle / mensuelle) moyenne des femmes et
-        des hommes par CSP et par tranche d’âge."
-    >
-      {effectifsIndicateurCalculable &&
-      state.formEffectifValidated === "Valid" ? (
-        <LayoutFormAndResult
-          childrenForm={
-            <IndicateurUnForm
-              data={state.data}
-              readOnly={state.formIndicateurUnValidated === "Valid"}
-              updateIndicateurUn={updateIndicateurUn}
-              validateIndicateurUn={validateIndicateurUn}
-            />
-          }
-          childrenResult={
-            state.formIndicateurUnValidated === "Valid" && (
-              <IndicateurUnResult
-                indicateurEcartRemuneration={indicateurEcartRemuneration}
-                noteIndicateurUn={noteIndicateurUn}
-                validateIndicateurUn={validateIndicateurUn}
-              />
-            )
-          }
-        />
-      ) : (
+  // le formulaire d'effectif n'est pas validé
+  if (state.effectif.formValidated !== "Valid") {
+    return (
+      <PageIndicateurUn>
+        <div>
+          <InfoBloc title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur" />
+          <ActionBar>
+            <ButtonLink to="/effectifs" label="renseigner les effectifs" />
+          </ActionBar>
+        </div>
+      </PageIndicateurUn>
+    );
+  }
+
+  // les effectifs ne permettent pas de calculer l'indicateur
+  if (!effectifsIndicateurCalculable) {
+    return (
+      <PageIndicateurUn>
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
@@ -116,7 +106,43 @@ function IndicateurUn({ state, dispatch }: Props) {
             <ButtonLink to="/indicateur2" label="suivant" />
           </ActionBar>
         </div>
-      )}
+      </PageIndicateurUn>
+    );
+  }
+
+  return (
+    <PageIndicateurUn>
+      <LayoutFormAndResult
+        childrenForm={
+          <IndicateurUnForm
+            data={state.data}
+            readOnly={state.indicateurUn.formValidated === "Valid"}
+            updateIndicateurUn={updateIndicateurUn}
+            validateIndicateurUn={validateIndicateurUn}
+          />
+        }
+        childrenResult={
+          state.indicateurUn.formValidated === "Valid" && (
+            <IndicateurUnResult
+              indicateurEcartRemuneration={indicateurEcartRemuneration}
+              noteIndicateurUn={noteIndicateurUn}
+              validateIndicateurUn={validateIndicateurUn}
+            />
+          )
+        }
+      />
+    </PageIndicateurUn>
+  );
+}
+
+function PageIndicateurUn({ children }: { children: ReactNode }) {
+  return (
+    <Page
+      title="Indicateur 1, écart de rémunération"
+      tagline="Renseignez la rémunération (annuelle / mensuelle) moyenne des femmes et
+        des hommes par CSP et par tranche d’âge."
+    >
+      {children}
     </Page>
   );
 }

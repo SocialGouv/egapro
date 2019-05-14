@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useCallback } from "react";
+import { useCallback, ReactNode } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import {
@@ -90,13 +90,46 @@ function IndicateurTrois({ state, dispatch, match }: Props) {
   // NOTE
   const noteIndicateurTrois = calculNote(indicateurEcartPromotion);
 
-  return (
-    <Page
-      title="Indicateur 3, écart de taux de promotions"
-      tagline="Renseignez le pourcentage de femmes et d’hommes ayant été promus durant la période de référence par CSP."
-    >
-      {!indicateurCalculable &&
-      state.formIndicateurTroisValidated === "Valid" ? (
+  // le formulaire d'effectif n'est pas validé
+  if (state.effectif.formValidated !== "Valid") {
+    return (
+      <PageIndicateurTrois>
+        <div>
+          <InfoBloc title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur" />
+          <ActionBar>
+            <ButtonLink to="/effectifs" label="renseigner les effectifs" />
+          </ActionBar>
+        </div>
+      </PageIndicateurTrois>
+    );
+  }
+
+  // les effectifs ne permettent pas de calculer l'indicateur
+  if (!effectifsIndicateurCalculable) {
+    return (
+      <PageIndicateurTrois>
+        <div>
+          <InfoBloc
+            title="Malheureusement votre indicateur n’est pas calculable"
+            text="car l’ensemble des groupes valables (c’est-à-dire comptant au
+                moins 10 femmes et 10 hommes), représentent moins de 40% des
+                effectifs."
+          />
+          <ActionBar>
+            <ButtonLink to="/indicateur4" label="suivant" />
+          </ActionBar>
+        </div>
+      </PageIndicateurTrois>
+    );
+  }
+
+  // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
+  if (
+    state.indicateurTrois.formValidated === "Valid" &&
+    !indicateurCalculable
+  ) {
+    return (
+      <PageIndicateurTrois>
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
@@ -111,40 +144,42 @@ function IndicateurTrois({ state, dispatch, match }: Props) {
             <ButtonLink to="/indicateur4" label="suivant" />
           </ActionBar>
         </div>
-      ) : effectifsIndicateurCalculable &&
-        state.formEffectifValidated === "Valid" ? (
-        <LayoutFormAndResult
-          childrenForm={
-            <IndicateurTroisForm
-              ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
-              readOnly={state.formIndicateurTroisValidated === "Valid"}
-              updateIndicateurTrois={updateIndicateurTrois}
+      </PageIndicateurTrois>
+    );
+  }
+
+  return (
+    <PageIndicateurTrois>
+      <LayoutFormAndResult
+        childrenForm={
+          <IndicateurTroisForm
+            ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
+            readOnly={state.indicateurTrois.formValidated === "Valid"}
+            updateIndicateurTrois={updateIndicateurTrois}
+            validateIndicateurTrois={validateIndicateurTrois}
+          />
+        }
+        childrenResult={
+          state.indicateurTrois.formValidated === "Valid" && (
+            <IndicateurTroisResult
+              indicateurEcartPromotion={indicateurEcartPromotion}
+              noteIndicateurTrois={noteIndicateurTrois}
               validateIndicateurTrois={validateIndicateurTrois}
             />
-          }
-          childrenResult={
-            state.formIndicateurTroisValidated === "Valid" && (
-              <IndicateurTroisResult
-                indicateurEcartPromotion={indicateurEcartPromotion}
-                noteIndicateurTrois={noteIndicateurTrois}
-                validateIndicateurTrois={validateIndicateurTrois}
-              />
-            )
-          }
-        />
-      ) : (
-        <div>
-          <InfoBloc
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text="car l’ensemble des groupes valables (c’est-à-dire comptant au
-              moins 10 femmes et 10 hommes), représentent moins de 40% des
-              effectifs."
-          />
-          <ActionBar>
-            <ButtonLink to="/indicateur4" label="suivant" />
-          </ActionBar>
-        </div>
-      )}
+          )
+        }
+      />
+    </PageIndicateurTrois>
+  );
+}
+
+function PageIndicateurTrois({ children }: { children: ReactNode }) {
+  return (
+    <Page
+      title="Indicateur 3, écart de taux de promotions"
+      tagline="Renseignez le pourcentage de femmes et d’hommes ayant été promus durant la période de référence par CSP."
+    >
+      {children}
     </Page>
   );
 }
