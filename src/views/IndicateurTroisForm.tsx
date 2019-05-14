@@ -8,6 +8,12 @@ import {
   ActionIndicateurTroisData
 } from "../globals.d";
 
+import {
+  calculTotalEffectifsEtTauxPromotion,
+  calculEcartTauxPromotion,
+  effectifEtEcartPromoGroup
+} from "../utils/calculsEgaProIndicateurTrois";
+
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
 import ActionBar from "../components/ActionBar";
@@ -17,16 +23,12 @@ import ButtonLink from "../components/ButtonLink";
 import {
   fractionToPercentage,
   percentageToFraction,
-  displayNameCategorieSocioPro
+  displayNameCategorieSocioPro,
+  displayPercent
 } from "../utils/helpers";
 
 interface Props {
-  ecartPromoParCategorieSocioPro: Array<{
-    categorieSocioPro: CategorieSocioPro;
-    validiteGroupe: boolean;
-    tauxPromotionFemmes: number | undefined;
-    tauxPromotionHommes: number | undefined;
-  }>;
+  ecartPromoParCategorieSocioPro: Array<effectifEtEcartPromoGroup>;
   readOnly: boolean;
   updateIndicateurTrois: (data: ActionIndicateurTroisData) => void;
   validateIndicateurTrois: (valid: FormState) => void;
@@ -110,7 +112,13 @@ function IndicateurTroisForm({
     validateIndicateurTrois("Valid");
   };
 
-  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
+  const {
+    form,
+    values,
+    handleSubmit,
+    hasValidationErrors,
+    submitFailed
+  } = useForm({
     initialValues,
     onSubmit
   });
@@ -124,9 +132,44 @@ function IndicateurTroisForm({
     { values: true, dirty: true }
   );
 
+  // Only for Total with updated values
+  const ecartPromoParCategorieSocioProPourTotal = ecartPromoParCategorieSocioPro.map(
+    (groupAugment, index) => {
+      const infoField = infoFields[index];
+      const tauxPromotionFemmes = parseFormValue(
+        values[infoField.tauxPromotionFemmesName]
+      );
+      const tauxPromotionHommes = parseFormValue(
+        values[infoField.tauxPromotionHommesName]
+      );
+      const ecartTauxPromotion = calculEcartTauxPromotion(
+        tauxPromotionFemmes,
+        tauxPromotionHommes
+      );
+      return {
+        ...groupAugment,
+        tauxPromotionFemmes,
+        tauxPromotionHommes,
+        ecartTauxPromotion
+      };
+    }
+  );
+  const {
+    totalTauxPromotionFemmes,
+    totalTauxPromotionHommes
+  } = calculTotalEffectifsEtTauxPromotion(
+    ecartPromoParCategorieSocioProPourTotal
+  );
+
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
-      <BlocForm label="% de salariés promus">
+      <BlocForm
+        label="% de salariés promus"
+        footer={[
+          displayPercent(totalTauxPromotionHommes),
+          displayPercent(totalTauxPromotionFemmes)
+        ]}
+      >
         {infoFields.map(
           ({
             categorieSocioPro,

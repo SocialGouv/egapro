@@ -36,7 +36,7 @@ export {
 // ETP
 export const calculEcartTauxPromotion = calculEcartTauxAugmentation;
 
-interface effectifEtEcartPromoGroup extends effectifGroup {
+export interface effectifEtEcartPromoGroup extends effectifGroup {
   categorieSocioPro: CategorieSocioPro;
   tauxPromotionFemmes: number | undefined;
   tauxPromotionHommes: number | undefined;
