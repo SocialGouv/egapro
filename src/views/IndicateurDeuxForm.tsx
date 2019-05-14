@@ -16,6 +16,7 @@ import {
 
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
+import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
@@ -29,6 +30,7 @@ import {
 
 interface Props {
   ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>;
+  presenceAugmentation: boolean;
   readOnly: boolean;
   updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void;
   validateIndicateurDeux: (valid: FormState) => void;
@@ -51,6 +53,7 @@ const parseStateValue = (value: number | undefined) =>
 
 function IndicateurDeuxForm({
   ecartAugmentParCategorieSocioPro,
+  presenceAugmentation,
   readOnly,
   updateIndicateurDeux,
   validateIndicateurDeux
@@ -89,7 +92,7 @@ function IndicateurDeuxForm({
         [tauxAugmentationHommesName]: tauxAugmentationHommesValue
       };
     },
-    {}
+    { presenceAugmentation: String(presenceAugmentation) }
   );
 
   const saveForm = (formData: any) => {
@@ -167,34 +170,44 @@ function IndicateurDeuxForm({
 
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
-      <BlocForm
-        label="% de salariés augmentés"
-        footer={[
-          displayPercent(totalTauxAugmentationHommes),
-          displayPercent(totalTauxAugmentationFemmes)
-        ]}
-      >
-        {infoFields.map(
-          ({
-            categorieSocioPro,
-            validiteGroupe,
-            tauxAugmentationFemmesName,
-            tauxAugmentationHommesName
-          }) => {
-            return (
-              <CellInputsMenWomen
-                key={categorieSocioPro}
-                form={form}
-                name={displayNameCategorieSocioPro(categorieSocioPro)}
-                readOnly={readOnly}
-                calculable={validiteGroupe}
-                femmeFieldName={tauxAugmentationFemmesName}
-                hommeFieldName={tauxAugmentationHommesName}
-              />
-            );
-          }
-        )}
-      </BlocForm>
+      <RadiosBoolean
+        form={form}
+        fieldName="presenceAugmentation"
+        readOnly={readOnly}
+        labelTrue="il y a eu des augmentations durant la période de référence"
+        labelFalse="il n’y a pas eu d’augmentation durant la période de référence"
+      />
+
+      {values.presenceAugmentation === "true" && (
+        <BlocForm
+          label="% de salariés augmentés"
+          footer={[
+            displayPercent(totalTauxAugmentationHommes),
+            displayPercent(totalTauxAugmentationFemmes)
+          ]}
+        >
+          {infoFields.map(
+            ({
+              categorieSocioPro,
+              validiteGroupe,
+              tauxAugmentationFemmesName,
+              tauxAugmentationHommesName
+            }) => {
+              return (
+                <CellInputsMenWomen
+                  key={categorieSocioPro}
+                  form={form}
+                  name={displayNameCategorieSocioPro(categorieSocioPro)}
+                  readOnly={readOnly}
+                  calculable={validiteGroupe}
+                  femmeFieldName={tauxAugmentationFemmesName}
+                  hommeFieldName={tauxAugmentationHommesName}
+                />
+              );
+            }
+          )}
+        </BlocForm>
+      )}
 
       {readOnly ? (
         <ActionBar>

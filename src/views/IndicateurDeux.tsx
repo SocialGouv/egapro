@@ -151,6 +151,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
         childrenForm={
           <IndicateurDeuxForm
             ecartAugmentParCategorieSocioPro={effectifEtEcartAugmentParGroupe}
+            presenceAugmentation={state.indicateurDeux.presenceAugmentation}
             readOnly={state.indicateurDeux.formValidated === "Valid"}
             updateIndicateurDeux={updateIndicateurDeux}
             validateIndicateurDeux={validateIndicateurDeux}
