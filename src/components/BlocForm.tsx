@@ -8,7 +8,7 @@ import { CellHead, Cell, Cell2 } from "./Cell";
 
 interface Props {
   title?: string;
-  label: string;
+  label?: string;
   footer?: string | [string, string];
   children: ReactNode;
   style?: any;
@@ -54,6 +54,29 @@ function BlocForm({ title, label, footer, children, style }: Props) {
   );
 }
 
+export function BlocFormLight({
+  children,
+  superLight = false
+}: {
+  children: ReactNode;
+  superLight?: boolean;
+}) {
+  return (
+    <div css={styles.container}>
+      <div css={styles.background} />
+      <div
+        css={[
+          styles.blocForm,
+          styles.blocFormLight,
+          superLight && styles.blocFormSuperLight
+        ]}
+      >
+        <div css={styles.blocFormInner}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
 const PADDING = 20;
 
 const styles = {
@@ -84,6 +107,13 @@ const styles = {
     borderBottom: "none",
     paddingBottom: 8 + 8
   }),
+  blocFormLight: css({
+    borderRight: "none"
+  }),
+  blocFormSuperLight: css({
+    borderBottom: "none"
+  }),
+
   blocFormInner: css({
     paddingRight: PADDING,
     paddingLeft: PADDING

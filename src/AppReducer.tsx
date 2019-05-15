@@ -98,6 +98,24 @@ function AppReducer(state: AppState, action: ActionType): AppState {
         }
       };
     }
+    case "updateIndicateurQuatre": {
+      return {
+        ...state,
+        indicateurQuatre: {
+          ...state.indicateurQuatre,
+          ...action.data
+        }
+      };
+    }
+    case "validateIndicateurQuatre": {
+      return {
+        ...state,
+        indicateurQuatre: {
+          ...state.indicateurQuatre,
+          formValidated: action.valid
+        }
+      };
+    }
     default:
       return state;
   }

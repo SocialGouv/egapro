@@ -16,7 +16,7 @@ import globalStyles from "../utils/globalStyles";
 
 import { useColumnsWidth } from "../components/GridContext";
 import BlocForm from "../components/BlocForm";
-import CellInputsMenWomen from "../components/CellInputsMenWomen";
+import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
@@ -172,7 +172,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               {tranchesAges.map(
                 ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
                   return (
-                    <CellInputsMenWomen
+                    <FieldInputsMenWomen
                       key={trancheAge}
                       readOnly={state.effectif.formValidated === "Valid"}
                       form={form}

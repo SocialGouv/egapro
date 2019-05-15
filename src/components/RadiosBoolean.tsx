@@ -94,6 +94,7 @@ const styles = {
   fakeRadio: css({
     width: 16,
     height: 16,
+    flexShrink: 0,
     marginRight: 6,
     borderRadius: 8,
     backgroundColor: "white",

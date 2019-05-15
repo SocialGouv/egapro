@@ -15,7 +15,7 @@ import {
 } from "../utils/calculsEgaProIndicateurDeux";
 
 import BlocForm from "../components/BlocForm";
-import CellInputsMenWomen from "../components/CellInputsMenWomen";
+import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
@@ -198,7 +198,7 @@ function IndicateurDeuxForm({
               tauxAugmentationHommesName
             }) => {
               return (
-                <CellInputsMenWomen
+                <FieldInputsMenWomen
                   key={categorieSocioPro}
                   form={form}
                   name={displayNameCategorieSocioPro(categorieSocioPro)}

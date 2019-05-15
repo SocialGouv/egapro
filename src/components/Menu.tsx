@@ -42,17 +42,19 @@ function CustomNavLink({
 }
 
 interface Props {
-  formEffectifValidated: FormState;
-  formIndicateurUnValidated: FormState;
-  formIndicateurDeuxValidated: FormState;
-  formIndicateurTroisValidated: FormState;
+  effectifFormValidated: FormState;
+  indicateurUnFormValidated: FormState;
+  indicateurDeuxFormValidated: FormState;
+  indicateurTroisFormValidated: FormState;
+  indicateurQuatreFormValidated: FormState;
 }
 
 function Menu({
-  formEffectifValidated,
-  formIndicateurUnValidated,
-  formIndicateurDeuxValidated,
-  formIndicateurTroisValidated
+  effectifFormValidated,
+  indicateurUnFormValidated,
+  indicateurDeuxFormValidated,
+  indicateurTroisFormValidated,
+  indicateurQuatreFormValidated
 }: Props) {
   const width = useColumnsWidth(2);
 
@@ -61,25 +63,31 @@ function Menu({
       <CustomNavLink
         to="/effectifs"
         title="effectif"
-        valid={formEffectifValidated}
+        valid={effectifFormValidated}
       />
       <CustomNavLink
         to="/indicateur1"
         title="indicateur 1"
         label="écart de rémunération"
-        valid={formIndicateurUnValidated}
+        valid={indicateurUnFormValidated}
       />
       <CustomNavLink
         to="/indicateur2"
         title="indicateur 2"
         label="écart d’augmentation"
-        valid={formIndicateurDeuxValidated}
+        valid={indicateurDeuxFormValidated}
       />
       <CustomNavLink
         to="/indicateur3"
         title="indicateur 3"
         label="écart de promotions"
-        valid={formIndicateurTroisValidated}
+        valid={indicateurTroisFormValidated}
+      />
+      <CustomNavLink
+        to="/indicateur4"
+        title="indicateur 4"
+        label="congé maternité"
+        valid={indicateurQuatreFormValidated}
       />
     </div>
   );

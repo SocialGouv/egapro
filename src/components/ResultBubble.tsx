@@ -6,10 +6,10 @@ import globalStyles from "../utils/globalStyles";
 interface Props {
   firstLineLabel: string;
   firstLineData: string;
-  firstLineInfo: string;
+  firstLineInfo?: string;
   secondLineLabel: string;
   secondLineData: string;
-  secondLineInfo: string;
+  secondLineInfo?: string;
 }
 
 function ResultBubble({
@@ -23,20 +23,20 @@ function ResultBubble({
   return (
     <div css={styles.container}>
       <div css={styles.bloc}>
-        <div>
+        <div css={styles.blocInfo}>
           <p css={styles.message}>
             <span css={styles.messageLabel}>{firstLineLabel} </span>
             <span css={styles.messageData}>{firstLineData}</span>
           </p>
-          <p css={styles.info}>{firstLineInfo}</p>
+          {firstLineInfo && <p css={styles.info}>{firstLineInfo}</p>}
         </div>
 
-        <div>
+        <div css={styles.blocInfo}>
           <p css={styles.message}>
             <span css={styles.messageLabel}>{secondLineLabel} </span>
             <span css={styles.messageData}>{secondLineData}</span>
           </p>
-          <p css={styles.info}>{secondLineInfo}</p>
+          {secondLineInfo && <p css={styles.info}>{secondLineInfo}</p>}
         </div>
       </div>
     </div>
@@ -67,8 +67,11 @@ const styles = {
     backgroundColor: globalStyles.colors.default,
     borderRadius: "100%"
   }),
+  blocInfo: css({
+    borderBottom: "1px solid #FFFFFF"
+  }),
   message: css({
-    marginBottom: 9,
+    marginBottom: 2,
     display: "flex",
     alignItems: "baseline",
 
@@ -82,11 +85,10 @@ const styles = {
     fontWeight: "bold"
   }),
   info: css({
+    marginTop: 7,
     fontSize: 12,
     fontStyle: "italic",
-    lineHeight: "15px",
-
-    borderBottom: "1px solid #FFFFFF"
+    lineHeight: "15px"
   })
 };
 

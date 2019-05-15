@@ -33,7 +33,7 @@ interface Props {
   hommeFieldName: string;
 }
 
-function CellInputsMenWomen({
+function FieldInputsMenWomen({
   form,
   name,
   readOnly,
@@ -185,4 +185,4 @@ const styles = {
   })
 };
 
-export default CellInputsMenWomen;
+export default FieldInputsMenWomen;

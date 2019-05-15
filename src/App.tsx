@@ -31,6 +31,7 @@ import GroupEffectif from "./views/GroupEffectif";
 import IndicateurUn from "./views/IndicateurUn";
 import IndicateurDeux from "./views/IndicateurDeux";
 import IndicateurTrois from "./views/IndicateurTrois";
+import IndicateurQuatre from "./views/IndicateurQuatre";
 
 const baseGroupTranchesAgesState = {
   nombreSalariesFemmes: undefined,
@@ -84,6 +85,13 @@ const defaultState: AppState = {
   indicateurTrois: {
     formValidated: "None",
     presencePromotion: true
+  },
+  indicateurQuatre: {
+    formValidated: "None",
+    presenceAugmentation: true,
+    nombreSalariees: undefined,
+    nombreSalarieesPeriodeAugmentation: undefined,
+    toutesSalarieesAugmentees: true
   }
 };
 
@@ -161,6 +169,16 @@ function App() {
                     />
                   )}
                 />
+                <Route
+                  path="/indicateur4"
+                  render={props => (
+                    <IndicateurQuatre
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
               </Switch>
             </MainScrollViewWithRouter>
           </div>
@@ -183,10 +201,11 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
     <div css={styles.main} key={location.key}>
       <div css={styles.menu}>
         <Menu
-          formEffectifValidated={state.effectif.formValidated}
-          formIndicateurUnValidated={state.indicateurUn.formValidated}
-          formIndicateurDeuxValidated={state.indicateurDeux.formValidated}
-          formIndicateurTroisValidated={state.indicateurTrois.formValidated}
+          effectifFormValidated={state.effectif.formValidated}
+          indicateurUnFormValidated={state.indicateurUn.formValidated}
+          indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
+          indicateurTroisFormValidated={state.indicateurTrois.formValidated}
+          indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
         />
       </div>
       <div css={styles.view}>{children}</div>

@@ -36,7 +36,7 @@ interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void;
 }
 
-function IndicateurTrois({ state, dispatch, match }: Props) {
+function IndicateurTrois({ state, dispatch }: Props) {
   const updateIndicateurTrois = useCallback(
     (data: ActionIndicateurTroisData) =>
       dispatch({ type: "updateIndicateurTrois", data }),

@@ -14,7 +14,7 @@ import {
 import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
 
 import BlocForm from "../components/BlocForm";
-import CellInputsMenWomen from "../components/CellInputsMenWomen";
+import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
@@ -174,7 +174,7 @@ function IndicateurUnForm({
                 remunerationAnnuelleBrutHommesName
               }) => {
                 return (
-                  <CellInputsMenWomen
+                  <FieldInputsMenWomen
                     key={trancheAge}
                     form={form}
                     name={displayNameTranchesAges(trancheAge)}

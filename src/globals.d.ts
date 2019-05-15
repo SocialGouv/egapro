@@ -14,6 +14,13 @@ export type AppState = {
     formValidated: FormState;
     presencePromotion: boolean;
   };
+  indicateurQuatre: {
+    formValidated: FormState;
+    presenceAugmentation: boolean;
+    nombreSalariees: number | undefined;
+    nombreSalarieesPeriodeAugmentation: number | undefined;
+    toutesSalarieesAugmentees: boolean;
+  };
 };
 
 export type FormState = "None" | "Valid" | "Invalid";
@@ -49,6 +56,14 @@ export type ActionType =
     }
   | {
       type: "validateIndicateurTrois";
+      valid: FormState;
+    }
+  | {
+      type: "updateIndicateurQuatre";
+      data: ActionIndicateurQuatreData;
+    }
+  | {
+      type: "validateIndicateurQuatre";
       valid: FormState;
     };
 
@@ -86,6 +101,13 @@ export type ActionIndicateurTroisData = {
     tauxPromotionFemmes: number | undefined;
     tauxPromotionHommes: number | undefined;
   }>;
+};
+
+export type ActionIndicateurQuatreData = {
+  presenceAugmentation: boolean;
+  nombreSalariees: number | undefined;
+  nombreSalarieesPeriodeAugmentation: number | undefined;
+  toutesSalarieesAugmentees: boolean;
 };
 
 export enum TranchesAges {
