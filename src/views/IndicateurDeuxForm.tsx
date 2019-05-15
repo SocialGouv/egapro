@@ -96,7 +96,8 @@ function IndicateurDeuxForm({
   );
 
   const saveForm = (formData: any) => {
-    const data: ActionIndicateurDeuxData = infoFields.map(
+    const { presenceAugmentation } = formData;
+    const tauxAugmentation = infoFields.map(
       ({
         categorieSocioPro,
         tauxAugmentationFemmesName,
@@ -111,7 +112,10 @@ function IndicateurDeuxForm({
         )
       })
     );
-    updateIndicateurDeux(data);
+    updateIndicateurDeux({
+      tauxAugmentation,
+      presenceAugmentation: presenceAugmentation === "true"
+    });
   };
 
   const onSubmit = (formData: any) => {

@@ -8,11 +8,13 @@ import globalStyles from "../utils/globalStyles";
 function RadioField({
   field: { input },
   label,
-  value
+  value,
+  disabled
 }: {
   field: FieldRenderProps;
   label: string;
   value: string;
+  disabled: boolean;
 }) {
   const checked = input.value === value;
   return (
@@ -23,8 +25,15 @@ function RadioField({
         type="radio"
         value={value}
         checked={checked}
+        disabled={disabled}
       />
-      <div css={[styles.fakeRadio, checked && styles.fakeRadioChecked]} />
+      <div
+        css={[
+          styles.fakeRadio,
+          checked && styles.fakeRadioChecked,
+          disabled && styles.fakeRadioDisabled
+        ]}
+      />
       <span>{label}</span>
     </label>
   );
@@ -48,9 +57,19 @@ function RadiosBoolean({
   const field = useField(fieldName, form);
   return (
     <div css={styles.container}>
-      <RadioField field={field} label={labelTrue} value="true" />
+      <RadioField
+        field={field}
+        label={labelTrue}
+        value="true"
+        disabled={readOnly}
+      />
       <div css={styles.spacer} />
-      <RadioField field={field} label={labelFalse} value="false" />
+      <RadioField
+        field={field}
+        label={labelFalse}
+        value="false"
+        disabled={readOnly}
+      />
     </div>
   );
 }
@@ -84,6 +103,9 @@ const styles = {
     backgroundImage: `radial-gradient(${globalStyles.colors.default} 0%, ${
       globalStyles.colors.default
     } 3px, #FFF 3px)`
+  }),
+  fakeRadioDisabled: css({
+    opacity: 0.4
   })
 };
 

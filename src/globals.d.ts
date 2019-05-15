@@ -70,17 +70,23 @@ export type ActionIndicateurUnData = Array<{
   }>;
 }>;
 
-export type ActionIndicateurDeuxData = Array<{
-  categorieSocioPro: CategorieSocioPro;
-  tauxAugmentationFemmes: number | undefined;
-  tauxAugmentationHommes: number | undefined;
-}>;
+export type ActionIndicateurDeuxData = {
+  presenceAugmentation: boolean;
+  tauxAugmentation: Array<{
+    categorieSocioPro: CategorieSocioPro;
+    tauxAugmentationFemmes: number | undefined;
+    tauxAugmentationHommes: number | undefined;
+  }>;
+};
 
-export type ActionIndicateurTroisData = Array<{
-  categorieSocioPro: CategorieSocioPro;
-  tauxPromotionFemmes: number | undefined;
-  tauxPromotionHommes: number | undefined;
-}>;
+export type ActionIndicateurTroisData = {
+  presencePromotion: boolean;
+  tauxPromotion: Array<{
+    categorieSocioPro: CategorieSocioPro;
+    tauxPromotionFemmes: number | undefined;
+    tauxPromotionHommes: number | undefined;
+  }>;
+};
 
 export enum TranchesAges {
   MoinsDe30ans,

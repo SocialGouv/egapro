@@ -143,11 +143,13 @@ export const calculEcartsPonderesParCategorieSocioPro = calculEcartsPonderesParG
 
 // IC
 export const calculIndicateurCalculable = (
+  presenceAugmentation: boolean,
   totalNombreSalaries: number,
   totalEffectifsValides: number,
   totalTauxAugmentationFemmes: number,
   totalTauxAugmentationHommes: number
 ): boolean =>
+  presenceAugmentation &&
   calculEffectifsIndicateurCalculable(
     totalNombreSalaries,
     totalEffectifsValides

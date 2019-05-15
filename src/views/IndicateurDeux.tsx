@@ -36,7 +36,7 @@ interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void;
 }
 
-function IndicateurDeux({ state, dispatch, match }: Props) {
+function IndicateurDeux({ state, dispatch }: Props) {
   const updateIndicateurDeux = useCallback(
     (data: ActionIndicateurDeuxData) =>
       dispatch({ type: "updateIndicateurDeux", data }),
@@ -75,6 +75,7 @@ function IndicateurDeux({ state, dispatch, match }: Props) {
 
   // IC
   const indicateurCalculable = calculIndicateurCalculable(
+    state.indicateurDeux.presenceAugmentation,
     totalNombreSalaries,
     totalEffectifsValides,
     totalTauxAugmentationFemmes,

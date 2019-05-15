@@ -16,6 +16,7 @@ import {
 
 import BlocForm from "../components/BlocForm";
 import CellInputsMenWomen from "../components/CellInputsMenWomen";
+import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
@@ -29,6 +30,7 @@ import {
 
 interface Props {
   ecartPromoParCategorieSocioPro: Array<effectifEtEcartPromoGroup>;
+  presencePromotion: boolean;
   readOnly: boolean;
   updateIndicateurTrois: (data: ActionIndicateurTroisData) => void;
   validateIndicateurTrois: (valid: FormState) => void;
@@ -51,6 +53,7 @@ const parseStateValue = (value: number | undefined) =>
 
 function IndicateurTroisForm({
   ecartPromoParCategorieSocioPro,
+  presencePromotion,
   readOnly,
   updateIndicateurTrois,
   validateIndicateurTrois
@@ -89,11 +92,12 @@ function IndicateurTroisForm({
         [tauxPromotionHommesName]: tauxPromotionHommesValue
       };
     },
-    {}
+    { presencePromotion: String(presencePromotion) }
   );
 
   const saveForm = (formData: any) => {
-    const data: ActionIndicateurTroisData = infoFields.map(
+    const { presencePromotion } = formData;
+    const tauxPromotion = infoFields.map(
       ({
         categorieSocioPro,
         tauxPromotionFemmesName,
@@ -104,7 +108,10 @@ function IndicateurTroisForm({
         tauxPromotionHommes: parseFormValue(formData[tauxPromotionHommesName])
       })
     );
-    updateIndicateurTrois(data);
+    updateIndicateurTrois({
+      tauxPromotion,
+      presencePromotion: presencePromotion === "true"
+    });
   };
 
   const onSubmit = (formData: any) => {
@@ -163,34 +170,44 @@ function IndicateurTroisForm({
 
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
-      <BlocForm
-        label="% de salariés promus"
-        footer={[
-          displayPercent(totalTauxPromotionHommes),
-          displayPercent(totalTauxPromotionFemmes)
-        ]}
-      >
-        {infoFields.map(
-          ({
-            categorieSocioPro,
-            validiteGroupe,
-            tauxPromotionFemmesName,
-            tauxPromotionHommesName
-          }) => {
-            return (
-              <CellInputsMenWomen
-                key={categorieSocioPro}
-                form={form}
-                name={displayNameCategorieSocioPro(categorieSocioPro)}
-                readOnly={readOnly}
-                calculable={validiteGroupe}
-                femmeFieldName={tauxPromotionFemmesName}
-                hommeFieldName={tauxPromotionHommesName}
-              />
-            );
-          }
-        )}
-      </BlocForm>
+      <RadiosBoolean
+        form={form}
+        fieldName="presencePromotion"
+        readOnly={readOnly}
+        labelTrue="il y a eu des promotions durant la période de référence"
+        labelFalse="il n’y a pas eu de promotions durant la période de référence"
+      />
+
+      {values.presencePromotion === "true" && (
+        <BlocForm
+          label="% de salariés promus"
+          footer={[
+            displayPercent(totalTauxPromotionHommes),
+            displayPercent(totalTauxPromotionFemmes)
+          ]}
+        >
+          {infoFields.map(
+            ({
+              categorieSocioPro,
+              validiteGroupe,
+              tauxPromotionFemmesName,
+              tauxPromotionHommesName
+            }) => {
+              return (
+                <CellInputsMenWomen
+                  key={categorieSocioPro}
+                  form={form}
+                  name={displayNameCategorieSocioPro(categorieSocioPro)}
+                  readOnly={readOnly}
+                  calculable={validiteGroupe}
+                  femmeFieldName={tauxPromotionFemmesName}
+                  hommeFieldName={tauxPromotionHommesName}
+                />
+              );
+            }
+          )}
+        </BlocForm>
+      )}
 
       {readOnly ? (
         <ActionBar>

@@ -52,8 +52,10 @@ function AppReducer(state: AppState, action: ActionType): AppState {
       };
     }
     case "updateIndicateurDeux": {
+      const { tauxAugmentation, presenceAugmentation } = action.data;
+
       const data = state.data.map((group: Groupe) => {
-        const datum = action.data.find(
+        const datum = tauxAugmentation.find(
           ({ categorieSocioPro }) =>
             categorieSocioPro === group.categorieSocioPro
         );
@@ -61,7 +63,8 @@ function AppReducer(state: AppState, action: ActionType): AppState {
       });
       return {
         ...state,
-        data
+        data,
+        indicateurDeux: { ...state.indicateurDeux, presenceAugmentation }
       };
     }
     case "validateIndicateurDeux": {
@@ -71,8 +74,10 @@ function AppReducer(state: AppState, action: ActionType): AppState {
       };
     }
     case "updateIndicateurTrois": {
+      const { tauxPromotion, presencePromotion } = action.data;
+
       const data = state.data.map((group: Groupe) => {
-        const datum = action.data.find(
+        const datum = tauxPromotion.find(
           ({ categorieSocioPro }) =>
             categorieSocioPro === group.categorieSocioPro
         );
@@ -80,7 +85,8 @@ function AppReducer(state: AppState, action: ActionType): AppState {
       });
       return {
         ...state,
-        data
+        data,
+        indicateurTrois: { ...state.indicateurTrois, presencePromotion }
       };
     }
     case "validateIndicateurTrois": {

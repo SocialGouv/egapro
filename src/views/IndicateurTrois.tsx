@@ -75,6 +75,7 @@ function IndicateurTrois({ state, dispatch, match }: Props) {
 
   // IC
   const indicateurCalculable = calculIndicateurCalculable(
+    state.indicateurTrois.presencePromotion,
     totalNombreSalaries,
     totalEffectifsValides,
     totalTauxPromotionFemmes,
@@ -154,6 +155,7 @@ function IndicateurTrois({ state, dispatch, match }: Props) {
         childrenForm={
           <IndicateurTroisForm
             ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
+            presencePromotion={state.indicateurTrois.presencePromotion}
             readOnly={state.indicateurTrois.formValidated === "Valid"}
             updateIndicateurTrois={updateIndicateurTrois}
             validateIndicateurTrois={validateIndicateurTrois}
