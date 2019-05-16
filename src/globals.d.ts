@@ -19,7 +19,7 @@ export type AppState = {
     presenceAugmentation: boolean;
     nombreSalariees: number | undefined;
     nombreSalarieesPeriodeAugmentation: number | undefined;
-    toutesSalarieesAugmentees: boolean;
+    nombreSalarieesAugmentees: number | undefined;
   };
 };
 
@@ -107,7 +107,7 @@ export type ActionIndicateurQuatreData = {
   presenceAugmentation: boolean;
   nombreSalariees: number | undefined;
   nombreSalarieesPeriodeAugmentation: number | undefined;
-  toutesSalarieesAugmentees: boolean;
+  nombreSalarieesAugmentees: number | undefined;
 };
 
 export enum TranchesAges {

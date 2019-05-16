@@ -91,7 +91,7 @@ const defaultState: AppState = {
     presenceAugmentation: true,
     nombreSalariees: undefined,
     nombreSalarieesPeriodeAugmentation: undefined,
-    toutesSalarieesAugmentees: true
+    nombreSalarieesAugmentees: undefined
   }
 };
 

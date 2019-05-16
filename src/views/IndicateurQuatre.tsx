@@ -11,8 +11,8 @@ import {
 } from "../globals.d";
 
 import {
-  // calculIndicateurCalculable,
-  // calculIndicateurEcartAugmentation,
+  calculIndicateurCalculable,
+  calculIndicateurEcartAugmentation,
   calculNote
 } from "../utils/calculsEgaProIndicateurQuatre";
 
@@ -43,25 +43,19 @@ function IndicateurQuatre({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  // // IC
-  // const indicateurCalculable = calculIndicateurCalculable(
-  //   state.indicateurQuatre.presenceAugmentation
-  // );
-
-  // // IEA
-  // const indicateurEcartAugmentation = calculIndicateurEcartAugmentation(
-  //   indicateurCalculable,
-  //   state.indicateurQuatre.nombreSalariees,
-  //   state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
-  // );
-
-  // // NOTE
-  const noteIndicateurQuatre = calculNote(
-    state.indicateurQuatre.toutesSalarieesAugmentees
+  const indicateurCalculable = calculIndicateurCalculable(
+    state.indicateurQuatre.presenceAugmentation,
+    state.indicateurQuatre.nombreSalariees,
+    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
   );
 
-  //temp
-  const indicateurCalculable = true;
+  const indicateurEcartAugmentation = calculIndicateurEcartAugmentation(
+    indicateurCalculable,
+    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,
+    state.indicateurQuatre.nombreSalarieesAugmentees
+  );
+
+  const noteIndicateurQuatre = calculNote(indicateurEcartAugmentation);
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
   if (
@@ -81,7 +75,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
             </ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonLink to="/indicateur4" label="suivant" />
+            <ButtonLink to="/indicateur5" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurQuatre>
@@ -102,7 +96,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
         childrenResult={
           state.indicateurQuatre.formValidated === "Valid" && (
             <IndicateurQuatreResult
-              indicateurEcartAugmentation={undefined}
+              indicateurEcartAugmentation={indicateurEcartAugmentation}
               noteIndicateurQuatre={noteIndicateurQuatre}
               validateIndicateurQuatre={validateIndicateurQuatre}
             />

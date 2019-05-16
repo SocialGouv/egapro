@@ -40,8 +40,8 @@ function IndicateurQuatreForm({
     nombreSalarieesPeriodeAugmentation: parseStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
     ),
-    toutesSalarieesAugmentees: String(
-      indicateurQuatre.toutesSalarieesAugmentees
+    nombreSalarieesAugmentees: parseStateValue(
+      indicateurQuatre.nombreSalarieesAugmentees
     )
   };
 
@@ -50,7 +50,7 @@ function IndicateurQuatreForm({
       presenceAugmentation,
       nombreSalariees,
       nombreSalarieesPeriodeAugmentation,
-      toutesSalarieesAugmentees
+      nombreSalarieesAugmentees
     } = formData;
 
     updateIndicateurQuatre({
@@ -59,7 +59,7 @@ function IndicateurQuatreForm({
       nombreSalarieesPeriodeAugmentation: parseFormValue(
         nombreSalarieesPeriodeAugmentation
       ),
-      toutesSalarieesAugmentees: toutesSalarieesAugmentees === "true"
+      nombreSalarieesAugmentees: parseFormValue(nombreSalarieesAugmentees)
     });
   };
 
@@ -100,27 +100,24 @@ function IndicateurQuatreForm({
 
       {values.presenceAugmentation === "true" && (
         <BlocFormLight>
-          <div css={styles.blocFormInner}>
-            <FieldInput
-              form={form}
-              fieldName="nombreSalariees"
-              label="nombre de salariées de retour de congé maternité"
-              readOnly={readOnly}
-            />
-            <FieldInput
-              form={form}
-              fieldName="nombreSalarieesPeriodeAugmentation"
-              label="parmis ces congès maternité, combien ont chevauchée une periode d’augmentation"
-              readOnly={readOnly}
-            />
-            <RadiosBoolean
-              form={form}
-              fieldName="toutesSalarieesAugmentees"
-              readOnly={readOnly}
-              labelTrue="toutes ont été augmentée à leur retour de congès maternité"
-              labelFalse="toutes n’ont pas été augmentée à leur retour de congès maternité"
-            />
-          </div>
+          <FieldInput
+            form={form}
+            fieldName="nombreSalariees"
+            label="nombre de salariées de retour de congé maternité"
+            readOnly={readOnly}
+          />
+          <FieldInput
+            form={form}
+            fieldName="nombreSalarieesPeriodeAugmentation"
+            label="parmis ces congès maternité, combien ont chevauchée une periode d’augmentation"
+            readOnly={readOnly}
+          />
+          <FieldInput
+            form={form}
+            fieldName="nombreSalarieesAugmentees"
+            label="parmis ces congès maternité ayant chevauchée une periode d’augmentation, combien ont été augmentées ?"
+            readOnly={readOnly}
+          />
         </BlocFormLight>
       )}
 
@@ -145,9 +142,6 @@ const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
-  }),
-  blocFormInner: css({
-    paddingBottom: 15
   })
 };
 

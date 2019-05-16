@@ -64,18 +64,19 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "stretch",
-    height: 51,
+    height: 58,
     marginBottom: 10
   }),
   row: css({
     display: "flex",
     flexDirection: "row",
-    alignItems: "flex-start"
+    alignItems: "flex-end"
   }),
   cellHead: css({
-    height: 22,
+    height: 29,
+    paddingBottom: 2,
     display: "flex",
-    alignItems: "center",
+    alignItems: "flex-end",
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
     fontSize: 14
   }),
