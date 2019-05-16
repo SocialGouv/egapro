@@ -27,14 +27,8 @@ function RadioField({
         checked={checked}
         disabled={disabled}
       />
-      <div
-        css={[
-          styles.fakeRadio,
-          checked && styles.fakeRadioChecked,
-          disabled && styles.fakeRadioDisabled
-        ]}
-      />
-      <span>{label}</span>
+      <div css={[styles.fakeRadio, checked && styles.fakeRadioChecked]} />
+      <span css={styles.labelText}>{label}</span>
     </label>
   );
 }
@@ -63,13 +57,19 @@ function RadiosBoolean({
         value="true"
         disabled={readOnly}
       />
-      <div css={styles.spacer} />
-      <RadioField
-        field={field}
-        label={labelFalse}
-        value="false"
-        disabled={readOnly}
-      />
+      <div
+        css={[
+          styles.radioFieldFalse,
+          readOnly && styles.radioFieldFalseDisabled
+        ]}
+      >
+        <RadioField
+          field={field}
+          label={labelFalse}
+          value="false"
+          disabled={readOnly}
+        />
+      </div>
     </div>
   );
 }
@@ -81,12 +81,11 @@ const styles = {
   }),
   label: css({
     display: "flex",
-    alignItems: "center",
     fontSize: 14,
     cursor: "pointer"
   }),
-  spacer: css({
-    height: 9
+  labelText: css({
+    lineHeight: "16px"
   }),
   radio: css({
     display: "none"
@@ -105,8 +104,11 @@ const styles = {
       globalStyles.colors.default
     } 3px, #FFF 3px)`
   }),
-  fakeRadioDisabled: css({
-    opacity: 0.4
+  radioFieldFalse: css({
+    marginTop: 9
+  }),
+  radioFieldFalseDisabled: css({
+    opacity: 0
   })
 };
 
