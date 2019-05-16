@@ -28,7 +28,7 @@ function IndicateurDeuxResult({
         : "hommes"
       : undefined;
   return (
-    <div>
+    <div css={styles.container}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
@@ -53,6 +53,9 @@ function IndicateurDeuxResult({
 }
 
 const styles = {
+  container: css({
+    maxWidth: 250
+  }),
   edit: css({
     marginTop: 14,
     textAlign: "center"
