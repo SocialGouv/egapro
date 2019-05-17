@@ -1,7 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { useForm } from "react-final-form-hooks";
+import createDecorator from "final-form-calculate";
+
 import { AppState, FormState, ActionIndicateurCinqData } from "../globals.d";
 
 import { BlocFormLight } from "../components/BlocForm";
@@ -26,6 +28,27 @@ const parseFormValue = (value: string, defaultValue: any = undefined) =>
 
 const parseStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(value);
+
+const calculator = createDecorator(
+  {
+    field: "nombreSalariesFemmes",
+    updates: {
+      nombreSalariesHommes: (femmesValue, { nombreSalariesHommes }: any) =>
+        femmesValue !== ""
+          ? parseStateValue(10 - parseFormValue(femmesValue))
+          : nombreSalariesHommes
+    }
+  },
+  {
+    field: "nombreSalariesHommes",
+    updates: {
+      nombreSalariesFemmes: (hommesValue, { nombreSalariesFemmes }: any) =>
+        hommesValue !== ""
+          ? parseStateValue(10 - parseFormValue(hommesValue))
+          : nombreSalariesFemmes
+    }
+  }
+);
 
 function IndicateurCinqForm({
   indicateurCinq,
@@ -56,6 +79,11 @@ function IndicateurCinqForm({
     initialValues,
     onSubmit
   });
+
+  useEffect(() => {
+    const unsubscribe = calculator(form);
+    return () => unsubscribe();
+  }, [form]);
 
   form.subscribe(
     ({ values, dirty }) => {
