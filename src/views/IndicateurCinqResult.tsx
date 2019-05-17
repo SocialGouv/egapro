@@ -1,0 +1,65 @@
+/** @jsx jsx */
+import { css, jsx } from "@emotion/core";
+
+import { FormState } from "../globals.d";
+
+import ResultBubble from "../components/ResultBubble";
+import ActionLink from "../components/ActionLink";
+
+interface Props {
+  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined;
+  indicateurNombreSalariesSexeSousRepresente: number | undefined;
+  noteIndicateurCinq: number | undefined;
+  validateIndicateurCinq: (valid: FormState) => void;
+}
+
+function IndicateurCinqResult({
+  indicateurSexeSousRepresente,
+  indicateurNombreSalariesSexeSousRepresente,
+  noteIndicateurCinq,
+  validateIndicateurCinq
+}: Props) {
+  const firstLineInfo =
+    indicateurSexeSousRepresente === undefined
+      ? undefined
+      : indicateurSexeSousRepresente === "egalite"
+      ? "les hommes et les femmes sont à parité"
+      : indicateurSexeSousRepresente === "hommes"
+      ? "les hommes sont sur représentés"
+      : "les femmes sont sur-représentées";
+  return (
+    <div css={styles.container}>
+      <ResultBubble
+        firstLineLabel="votre résultat final est"
+        firstLineData={
+          indicateurNombreSalariesSexeSousRepresente !== undefined
+            ? String(indicateurNombreSalariesSexeSousRepresente)
+            : "--"
+        }
+        firstLineInfo={firstLineInfo}
+        secondLineLabel="votre note obtenue est"
+        secondLineData={
+          (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10"
+        }
+      />
+
+      <p css={styles.edit}>
+        <ActionLink onClick={() => validateIndicateurCinq("None")}>
+          modifier les données saisies
+        </ActionLink>
+      </p>
+    </div>
+  );
+}
+
+const styles = {
+  container: css({
+    maxWidth: 250
+  }),
+  edit: css({
+    marginTop: 14,
+    textAlign: "center"
+  })
+};
+
+export default IndicateurCinqResult;

@@ -32,6 +32,7 @@ import IndicateurUn from "./views/IndicateurUn";
 import IndicateurDeux from "./views/IndicateurDeux";
 import IndicateurTrois from "./views/IndicateurTrois";
 import IndicateurQuatre from "./views/IndicateurQuatre";
+import IndicateurCinq from "./views/IndicateurCinq";
 import PageNotFound from "./views/PageNotFound";
 
 const baseGroupTranchesAgesState = {
@@ -93,6 +94,11 @@ const defaultState: AppState = {
     nombreSalariees: undefined,
     nombreSalarieesPeriodeAugmentation: undefined,
     nombreSalarieesAugmentees: undefined
+  },
+  indicateurCinq: {
+    formValidated: "None",
+    nombreSalariesHommes: undefined,
+    nombreSalariesFemmes: undefined
   }
 };
 
@@ -180,6 +186,16 @@ function App() {
                     />
                   )}
                 />
+                <Route
+                  path="/indicateur5"
+                  render={props => (
+                    <IndicateurCinq
+                      {...props}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  )}
+                />
                 <Route component={PageNotFound} />
               </Switch>
             </MainScrollViewWithRouter>
@@ -208,6 +224,7 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
           indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
           indicateurTroisFormValidated={state.indicateurTrois.formValidated}
           indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
+          indicateurCinqFormValidated={state.indicateurCinq.formValidated}
         />
       </div>
       <div css={styles.view}>{children}</div>

@@ -21,6 +21,11 @@ export type AppState = {
     nombreSalarieesPeriodeAugmentation: number | undefined;
     nombreSalarieesAugmentees: number | undefined;
   };
+  indicateurCinq: {
+    formValidated: FormState;
+    nombreSalariesHommes: number | undefined;
+    nombreSalariesFemmes: number | undefined;
+  };
 };
 
 export type FormState = "None" | "Valid" | "Invalid";
@@ -65,6 +70,14 @@ export type ActionType =
   | {
       type: "validateIndicateurQuatre";
       valid: FormState;
+    }
+  | {
+      type: "updateIndicateurCinq";
+      data: ActionIndicateurCinqData;
+    }
+  | {
+      type: "validateIndicateurCinq";
+      valid: FormState;
     };
 
 export type ActionEffectifData = Array<{
@@ -108,6 +121,11 @@ export type ActionIndicateurQuatreData = {
   nombreSalariees: number | undefined;
   nombreSalarieesPeriodeAugmentation: number | undefined;
   nombreSalarieesAugmentees: number | undefined;
+};
+
+export type ActionIndicateurCinqData = {
+  nombreSalariesHommes: number | undefined;
+  nombreSalariesFemmes: number | undefined;
 };
 
 export enum TranchesAges {

@@ -116,6 +116,24 @@ function AppReducer(state: AppState, action: ActionType): AppState {
         }
       };
     }
+    case "updateIndicateurCinq": {
+      return {
+        ...state,
+        indicateurCinq: {
+          ...state.indicateurCinq,
+          ...action.data
+        }
+      };
+    }
+    case "validateIndicateurCinq": {
+      return {
+        ...state,
+        indicateurCinq: {
+          ...state.indicateurCinq,
+          formValidated: action.valid
+        }
+      };
+    }
     default:
       return state;
   }

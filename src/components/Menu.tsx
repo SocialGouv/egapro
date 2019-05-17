@@ -47,6 +47,7 @@ interface Props {
   indicateurDeuxFormValidated: FormState;
   indicateurTroisFormValidated: FormState;
   indicateurQuatreFormValidated: FormState;
+  indicateurCinqFormValidated: FormState;
 }
 
 function Menu({
@@ -54,7 +55,8 @@ function Menu({
   indicateurUnFormValidated,
   indicateurDeuxFormValidated,
   indicateurTroisFormValidated,
-  indicateurQuatreFormValidated
+  indicateurQuatreFormValidated,
+  indicateurCinqFormValidated
 }: Props) {
   const width = useColumnsWidth(2);
 
@@ -88,6 +90,12 @@ function Menu({
         title="indicateur 4"
         label="congé maternité"
         valid={indicateurQuatreFormValidated}
+      />
+      <CustomNavLink
+        to="/indicateur5"
+        title="indicateur 5"
+        label="hautes rémunérations"
+        valid={indicateurCinqFormValidated}
       />
     </div>
   );
