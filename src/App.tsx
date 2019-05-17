@@ -32,6 +32,7 @@ import IndicateurUn from "./views/IndicateurUn";
 import IndicateurDeux from "./views/IndicateurDeux";
 import IndicateurTrois from "./views/IndicateurTrois";
 import IndicateurQuatre from "./views/IndicateurQuatre";
+import PageNotFound from "./views/PageNotFound";
 
 const baseGroupTranchesAgesState = {
   nombreSalariesFemmes: undefined,
@@ -179,6 +180,7 @@ function App() {
                     />
                   )}
                 />
+                <Route component={PageNotFound} />
               </Switch>
             </MainScrollViewWithRouter>
           </div>

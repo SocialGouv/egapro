@@ -6,7 +6,7 @@ import globalStyles from "../utils/globalStyles";
 
 interface Props {
   title: string;
-  tagline: string;
+  tagline?: string;
   children: ReactNode;
 }
 
@@ -14,7 +14,7 @@ function Page({ title, tagline, children }: Props) {
   return (
     <div css={styles.page}>
       <p css={styles.title}>{title}</p>
-      <p css={styles.tagline}>{tagline}</p>
+      {tagline && <p css={styles.tagline}>{tagline}</p>}
       {children}
     </div>
   );
