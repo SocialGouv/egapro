@@ -26,6 +26,8 @@ import GridProvider from "./components/GridContext";
 import Header from "./components/Header";
 import Menu from "./components/Menu";
 
+import FAQ from "./views/FAQ";
+
 import Home from "./views/Home";
 import GroupEffectif from "./views/GroupEffectif";
 import IndicateurUn from "./views/IndicateurUn";
@@ -201,7 +203,7 @@ function App() {
             </MainScrollViewWithRouter>
           </div>
 
-          <div css={styles.rightColumn} />
+          <div css={styles.rightColumn}>{/*<FAQ />*/}</div>
         </div>
       </GridProvider>
     </Router>
@@ -250,8 +252,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     width: 375,
-    flexShrink: 0,
-    backgroundColor: "#AAAEE1"
+    flexShrink: 0
   }),
   main: css({
     overflowY: "auto",
@@ -259,7 +260,8 @@ const styles = {
     flex: 1,
     position: "relative",
     background:
-      "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), #EFF0FA"
+      "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), #EFF0FA",
+    borderRight: "1px solid #EFECEF"
   }),
   menu: css({
     position: "sticky",
