@@ -1,5 +1,8 @@
 @import "~normalize.css";
-@import url("https://fonts.googleapis.com/css?family=Cabin:400,700");
+
+@import url("https://fonts.googleapis.com/css?family=Cabin:400,700&display=swap");
+
+@import url("https://fonts.googleapis.com/css?family=Gabriela&display=swap");
 
 * {
   box-sizing: border-box;

@@ -259,7 +259,7 @@ const styles = {
     flex: 1,
     position: "relative",
     background:
-      "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), rgba(138, 146, 217, 0.14)"
+      "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), #EFF0FA"
   }),
   menu: css({
     position: "sticky",

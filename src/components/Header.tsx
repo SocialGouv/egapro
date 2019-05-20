@@ -5,12 +5,17 @@ import globalStyles from "../utils/globalStyles";
 
 import { useColumnsWidth } from "./GridContext";
 
+import Logo from "./Logo";
+
 function Header() {
   const width = useColumnsWidth(2);
-
   return (
     <header css={styles.header}>
-      <div css={[styles.headerLeft, css({ width })]} />
+      <div css={[styles.headerLeft, css({ width })]}>
+        <div css={styles.containerLogo}>
+          <Logo />
+        </div>
+      </div>
       <div css={styles.headerInner}>
         <p css={styles.title}>Egapro</p>
         <p css={styles.subtitle}>
@@ -33,8 +38,14 @@ const styles = {
     borderBottom: "1px solid #EFECEF"
   }),
   headerLeft: css({
+    display: "flex",
+    flexDirection: "row",
     marginLeft: globalStyles.grid.gutterWidth,
     marginRight: globalStyles.grid.gutterWidth
+  }),
+  containerLogo: css({
+    marginLeft: "auto",
+    marginRight: 25
   }),
   headerInner: css({
     display: "flex",
@@ -43,10 +54,12 @@ const styles = {
     alignItems: "baseline"
   }),
   title: css({
+    fontFamily: "'Gabriela', serif",
     marginRight: 24,
     fontSize: 24
   }),
   subtitle: css({
+    fontFamily: "'Gabriela', serif",
     fontSize: 12
   })
 };
