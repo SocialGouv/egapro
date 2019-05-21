@@ -8,34 +8,27 @@ import ActionLink from "../components/ActionLink";
 
 interface Props {
   indicateurEcartRemuneration: number | undefined;
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurUn: number | undefined;
   validateIndicateurUn: (valid: FormState) => void;
 }
 
 function IndicateurUnResult({
   indicateurEcartRemuneration,
+  indicateurSexeSurRepresente,
   noteIndicateurUn,
   validateIndicateurUn
 }: Props) {
-  const absoluteResult =
-    indicateurEcartRemuneration !== undefined
-      ? Math.abs(indicateurEcartRemuneration)
-      : undefined;
-  const genderFavoriteResult =
-    indicateurEcartRemuneration !== undefined
-      ? Math.sign(indicateurEcartRemuneration) < 0
-        ? "femmes"
-        : "hommes"
-      : undefined;
   return (
     <div css={styles.container}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
-          (absoluteResult !== undefined ? absoluteResult.toFixed(1) : "--") +
-          " %"
+          (indicateurEcartRemuneration !== undefined
+            ? indicateurEcartRemuneration.toFixed(1)
+            : "--") + " %"
         }
-        firstLineInfo={`écart favorable aux ${genderFavoriteResult}`}
+        firstLineInfo={`écart favorable aux ${indicateurSexeSurRepresente}`}
         secondLineLabel="votre note obtenue est"
         secondLineData={
           (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40"
@@ -54,7 +47,8 @@ function IndicateurUnResult({
 
 const styles = {
   container: css({
-    maxWidth: 250
+    maxWidth: 250,
+    marginTop: 64
   }),
   edit: css({
     marginTop: 14,

@@ -1,3 +1,5 @@
+import { AppState } from "../globals.d";
+
 import { roundDecimal } from "./helpers";
 
 //////////////////
@@ -18,7 +20,7 @@ export const calculIndicateurCalculable = (
   );
 };
 
-export const calculIndicateurEcartAugmentation = (
+export const calculIndicateurEcartNombreSalarieesAugmentees = (
   indicateurCalculable: boolean,
   nombreSalarieesPeriodeAugmentation: number | undefined,
   nombreSalarieesAugmentees: number | undefined
@@ -27,18 +29,49 @@ export const calculIndicateurEcartAugmentation = (
   nombreSalarieesPeriodeAugmentation !== undefined &&
   nombreSalarieesAugmentees !== undefined &&
   nombreSalarieesPeriodeAugmentation >= nombreSalarieesAugmentees
-    ? roundDecimal(
-        100 * (nombreSalarieesAugmentees / nombreSalarieesPeriodeAugmentation),
-        3
+    ? Math.abs(
+        roundDecimal(
+          100 *
+            (nombreSalarieesAugmentees / nombreSalarieesPeriodeAugmentation),
+          3
+        )
       )
     : undefined;
 
 // NOTE
 export const calculNote = (
-  indicateurEcartAugmentation: number | undefined
+  indicateurEcartNombreSalarieesAugmentees: number | undefined
 ): number | undefined =>
-  indicateurEcartAugmentation !== undefined
-    ? indicateurEcartAugmentation < 100
+  indicateurEcartNombreSalarieesAugmentees !== undefined
+    ? indicateurEcartNombreSalarieesAugmentees < 100
       ? 0
       : 15
     : undefined;
+
+/////////
+// ALL //
+/////////
+
+export default function calculIndicateurQuatre(state: AppState) {
+  const indicateurCalculable = calculIndicateurCalculable(
+    state.indicateurQuatre.presenceAugmentation,
+    state.indicateurQuatre.nombreSalariees,
+    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
+  );
+
+  const indicateurEcartNombreSalarieesAugmentees = calculIndicateurEcartNombreSalarieesAugmentees(
+    indicateurCalculable,
+    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,
+    state.indicateurQuatre.nombreSalarieesAugmentees
+  );
+
+  const noteIndicateurQuatre = calculNote(
+    indicateurEcartNombreSalarieesAugmentees
+  );
+
+  return {
+    indicateurCalculable,
+    indicateurEcartNombreSalarieesAugmentees,
+    noteIndicateurQuatre
+  };
+}

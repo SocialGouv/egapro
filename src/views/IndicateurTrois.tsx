@@ -10,16 +10,7 @@ import {
   ActionIndicateurTroisData
 } from "../globals.d";
 
-import {
-  calculEffectifsEtEcartPromoParCategorieSocioPro,
-  calculTotalEffectifsEtTauxPromotion,
-  calculEcartsPonderesParCategorieSocioPro,
-  calculTotalEcartPondere,
-  calculEffectifsIndicateurCalculable,
-  calculIndicateurCalculable,
-  calculIndicateurEcartPromotion,
-  calculNote
-} from "../utils/calculsEgaProIndicateurTrois";
+import calculIndicateurTrois from "../utils/calculsEgaProIndicateurTrois";
 
 import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
@@ -48,48 +39,14 @@ function IndicateurTrois({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
-    state.data
-  );
-
   const {
-    totalNombreSalaries,
-    totalEffectifsValides,
-    totalTauxPromotionFemmes,
-    totalTauxPromotionHommes
-  } = calculTotalEffectifsEtTauxPromotion(effectifEtEcartPromoParGroupe);
-
-  const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
+    effectifsIndicateurCalculable,
     effectifEtEcartPromoParGroupe,
-    totalEffectifsValides
-  );
-
-  // TEP
-  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
-
-  // IC
-  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
-    totalNombreSalaries,
-    totalEffectifsValides
-  );
-
-  // IC
-  const indicateurCalculable = calculIndicateurCalculable(
-    state.indicateurTrois.presencePromotion,
-    totalNombreSalaries,
-    totalEffectifsValides,
-    totalTauxPromotionFemmes,
-    totalTauxPromotionHommes
-  );
-
-  // IEA
-  const indicateurEcartPromotion = calculIndicateurEcartPromotion(
     indicateurCalculable,
-    totalEcartPondere
-  );
-
-  // NOTE
-  const noteIndicateurTrois = calculNote(indicateurEcartPromotion);
+    indicateurEcartPromotion,
+    indicateurSexeSurRepresente,
+    noteIndicateurTrois
+  } = calculIndicateurTrois(state);
 
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {
@@ -165,6 +122,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
           state.indicateurTrois.formValidated === "Valid" && (
             <IndicateurTroisResult
               indicateurEcartPromotion={indicateurEcartPromotion}
+              indicateurSexeSurRepresente={indicateurSexeSurRepresente}
               noteIndicateurTrois={noteIndicateurTrois}
               validateIndicateurTrois={validateIndicateurTrois}
             />

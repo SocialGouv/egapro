@@ -10,11 +10,7 @@ import {
   ActionIndicateurQuatreData
 } from "../globals.d";
 
-import {
-  calculIndicateurCalculable,
-  calculIndicateurEcartAugmentation,
-  calculNote
-} from "../utils/calculsEgaProIndicateurQuatre";
+import calculIndicateurQuatre from "../utils/calculsEgaProIndicateurQuatre";
 
 import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
@@ -43,19 +39,11 @@ function IndicateurQuatre({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const indicateurCalculable = calculIndicateurCalculable(
-    state.indicateurQuatre.presenceAugmentation,
-    state.indicateurQuatre.nombreSalariees,
-    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
-  );
-
-  const indicateurEcartAugmentation = calculIndicateurEcartAugmentation(
+  const {
     indicateurCalculable,
-    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,
-    state.indicateurQuatre.nombreSalarieesAugmentees
-  );
-
-  const noteIndicateurQuatre = calculNote(indicateurEcartAugmentation);
+    indicateurEcartNombreSalarieesAugmentees,
+    noteIndicateurQuatre
+  } = calculIndicateurQuatre(state);
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
   if (
@@ -96,7 +84,9 @@ function IndicateurQuatre({ state, dispatch }: Props) {
         childrenResult={
           state.indicateurQuatre.formValidated === "Valid" && (
             <IndicateurQuatreResult
-              indicateurEcartAugmentation={indicateurEcartAugmentation}
+              indicateurEcartNombreSalarieesAugmentees={
+                indicateurEcartNombreSalarieesAugmentees
+              }
               noteIndicateurQuatre={noteIndicateurQuatre}
               validateIndicateurQuatre={validateIndicateurQuatre}
             />

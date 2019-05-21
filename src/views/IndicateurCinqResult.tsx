@@ -25,8 +25,8 @@ function IndicateurCinqResult({
       : indicateurSexeSousRepresente === "egalite"
       ? "les hommes et les femmes sont à parité"
       : indicateurSexeSousRepresente === "hommes"
-      ? "les hommes sont sur représentés"
-      : "les femmes sont sur-représentées";
+      ? "les femmes sont sur-représentées"
+      : "les hommes sont sur-représentés";
   return (
     <div css={styles.container}>
       <ResultBubble
@@ -54,7 +54,8 @@ function IndicateurCinqResult({
 
 const styles = {
   container: css({
-    maxWidth: 250
+    maxWidth: 250,
+    marginTop: 64
   }),
   edit: css({
     marginTop: 14,

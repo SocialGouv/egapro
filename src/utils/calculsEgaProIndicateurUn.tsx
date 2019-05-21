@@ -1,4 +1,9 @@
-import { TranchesAges, Groupe, GroupTranchesAges } from "../globals.d";
+import {
+  AppState,
+  TranchesAges,
+  Groupe,
+  GroupTranchesAges
+} from "../globals.d";
 
 import { roundDecimal } from "./helpers";
 
@@ -151,6 +156,22 @@ export const calculIndicateurEcartRemuneration = (
     ? roundDecimal(100 * totalEcartPondere, 3)
     : undefined;
 
+export const calculIndicateurSexeSousRepresente = (
+  indicateurEcartRemuneration: number | undefined
+): "hommes" | "femmes" | undefined =>
+  indicateurEcartRemuneration !== undefined
+    ? Math.sign(indicateurEcartRemuneration) < 0
+      ? "femmes"
+      : "hommes"
+    : undefined;
+
+export const calculIndicateurEcartRemunerationAbsolute = (
+  indicateurEcartRemuneration: number | undefined
+): number | undefined =>
+  indicateurEcartRemuneration !== undefined
+    ? Math.abs(indicateurEcartRemuneration)
+    : undefined;
+
 // NOTE
 export const calculNote = (
   indicateurEcartRemuneration: number | undefined
@@ -163,3 +184,55 @@ export const calculNote = (
         )
       ]
     : undefined;
+
+/////////
+// ALL //
+/////////
+
+export default function calculIndicateurUn(state: AppState) {
+  const effectifEtEcartRemuParTranche = calculEffectifsEtEcartRemuParTrancheAge(
+    state.data
+  );
+
+  const { totalNombreSalaries, totalEffectifsValides } = calculTotalEffectifs(
+    effectifEtEcartRemuParTranche
+  );
+
+  const ecartsPonderesByRow = calculEcartsPonderesParTrancheAge(
+    effectifEtEcartRemuParTranche,
+    totalEffectifsValides
+  );
+
+  // TEP
+  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
+
+  // IC
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
+    totalNombreSalaries,
+    totalEffectifsValides
+  );
+
+  // IER
+  const indicateurEcartRemuneration = calculIndicateurEcartRemuneration(
+    effectifsIndicateurCalculable,
+    totalEcartPondere
+  );
+
+  const indicateurEcartRemunerationAbsolute = calculIndicateurEcartRemunerationAbsolute(
+    indicateurEcartRemuneration
+  );
+
+  const indicateurSexeSurRepresente = calculIndicateurSexeSousRepresente(
+    indicateurEcartRemuneration
+  );
+
+  // NOTE
+  const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
+
+  return {
+    effectifsIndicateurCalculable,
+    indicateurEcartRemuneration: indicateurEcartRemunerationAbsolute,
+    indicateurSexeSurRepresente,
+    noteIndicateurUn
+  };
+}

@@ -1,4 +1,4 @@
-import { CategorieSocioPro, Groupe } from "../globals.d";
+import { AppState, CategorieSocioPro, Groupe } from "../globals.d";
 
 import {
   calculEcartsPonderesParGroupe,
@@ -13,7 +13,9 @@ import {
   calculValiditeGroupe,
   calculEcartTauxAugmentation,
   calculIndicateurCalculable,
-  calculIndicateurEcartAugmentation
+  calculIndicateurEcartAugmentation,
+  calculIndicateurSexeSousRepresente,
+  calculIndicateurEcartAugmentationAbsolute
 } from "../utils/calculsEgaProIndicateurDeux";
 
 const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0];
@@ -136,6 +138,8 @@ export const calculEcartsPonderesParCategorieSocioPro = calculEcartsPonderesParG
 // IEP
 export const calculIndicateurEcartPromotion = calculIndicateurEcartAugmentation;
 
+export const calculIndicateurEcartPromotionAbsolute = calculIndicateurEcartAugmentationAbsolute;
+
 // NOTE
 export const calculNote = (
   indicateurEcartPromotion: number | undefined
@@ -148,3 +152,69 @@ export const calculNote = (
         )
       ]
     : undefined;
+
+/////////
+// ALL //
+/////////
+
+export default function calculIndicateurTrois(state: AppState) {
+  const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
+    state.data
+  );
+
+  const {
+    totalNombreSalaries,
+    totalEffectifsValides,
+    totalTauxPromotionFemmes,
+    totalTauxPromotionHommes
+  } = calculTotalEffectifsEtTauxPromotion(effectifEtEcartPromoParGroupe);
+
+  const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
+    effectifEtEcartPromoParGroupe,
+    totalEffectifsValides
+  );
+
+  // TEP
+  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
+
+  // IC
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
+    totalNombreSalaries,
+    totalEffectifsValides
+  );
+
+  // IC
+  const indicateurCalculable = calculIndicateurCalculable(
+    state.indicateurTrois.presencePromotion,
+    totalNombreSalaries,
+    totalEffectifsValides,
+    totalTauxPromotionFemmes,
+    totalTauxPromotionHommes
+  );
+
+  // IEA
+  const indicateurEcartPromotion = calculIndicateurEcartPromotion(
+    indicateurCalculable,
+    totalEcartPondere
+  );
+
+  const indicateurEcartPromotionAbsolute = calculIndicateurEcartPromotionAbsolute(
+    indicateurEcartPromotion
+  );
+
+  const indicateurSexeSurRepresente = calculIndicateurSexeSousRepresente(
+    indicateurEcartPromotion
+  );
+
+  // NOTE
+  const noteIndicateurTrois = calculNote(indicateurEcartPromotion);
+
+  return {
+    effectifsIndicateurCalculable,
+    effectifEtEcartPromoParGroupe,
+    indicateurCalculable,
+    indicateurEcartPromotion: indicateurEcartPromotionAbsolute,
+    indicateurSexeSurRepresente,
+    noteIndicateurTrois
+  };
+}

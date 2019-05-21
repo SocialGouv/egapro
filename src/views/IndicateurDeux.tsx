@@ -10,16 +10,7 @@ import {
   ActionIndicateurDeuxData
 } from "../globals.d";
 
-import {
-  calculEffectifsEtEcartAugmentParCategorieSocioPro,
-  calculTotalEffectifsEtTauxAugmentation,
-  calculEcartsPonderesParCategorieSocioPro,
-  calculTotalEcartPondere,
-  calculEffectifsIndicateurCalculable,
-  calculIndicateurCalculable,
-  calculIndicateurEcartAugmentation,
-  calculNote
-} from "../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurDeux from "../utils/calculsEgaProIndicateurDeux";
 
 import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
@@ -48,48 +39,14 @@ function IndicateurDeux({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const effectifEtEcartAugmentParGroupe = calculEffectifsEtEcartAugmentParCategorieSocioPro(
-    state.data
-  );
-
   const {
-    totalNombreSalaries,
-    totalEffectifsValides,
-    totalTauxAugmentationFemmes,
-    totalTauxAugmentationHommes
-  } = calculTotalEffectifsEtTauxAugmentation(effectifEtEcartAugmentParGroupe);
-
-  const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
+    effectifsIndicateurCalculable,
     effectifEtEcartAugmentParGroupe,
-    totalEffectifsValides
-  );
-
-  // TEP
-  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
-
-  // IC
-  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
-    totalNombreSalaries,
-    totalEffectifsValides
-  );
-
-  // IC
-  const indicateurCalculable = calculIndicateurCalculable(
-    state.indicateurDeux.presenceAugmentation,
-    totalNombreSalaries,
-    totalEffectifsValides,
-    totalTauxAugmentationFemmes,
-    totalTauxAugmentationHommes
-  );
-
-  // IEA
-  const indicateurEcartAugmentation = calculIndicateurEcartAugmentation(
     indicateurCalculable,
-    totalEcartPondere
-  );
-
-  // NOTE
-  const noteIndicateurDeux = calculNote(indicateurEcartAugmentation);
+    indicateurEcartAugmentation,
+    indicateurSexeSurRepresente,
+    noteIndicateurDeux
+  } = calculIndicateurDeux(state);
 
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {
@@ -162,6 +119,7 @@ function IndicateurDeux({ state, dispatch }: Props) {
           state.indicateurDeux.formValidated === "Valid" && (
             <IndicateurDeuxResult
               indicateurEcartAugmentation={indicateurEcartAugmentation}
+              indicateurSexeSurRepresente={indicateurSexeSurRepresente}
               noteIndicateurDeux={noteIndicateurDeux}
               validateIndicateurDeux={validateIndicateurDeux}
             />

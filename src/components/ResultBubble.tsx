@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 
 import globalStyles from "../utils/globalStyles";
 
-interface Props {
+export interface Props {
   firstLineLabel: string;
   firstLineData: string;
   firstLineInfo?: string;
@@ -45,7 +45,6 @@ function ResultBubble({
 
 const styles = {
   container: css({
-    marginTop: 64,
     width: "100%",
     position: "relative",
     height: 0,

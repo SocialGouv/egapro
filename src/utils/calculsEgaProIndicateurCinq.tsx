@@ -1,3 +1,5 @@
+import { AppState } from "../globals.d";
+
 function clamp(num: number, min: number, max: number) {
   return Math.min(max, Math.max(min, num));
 }
@@ -14,9 +16,9 @@ export const calculIndicateurSexeSousRepresente = (
 ): "hommes" | "femmes" | "egalite" | undefined =>
   nombreSalariesHommes !== undefined && nombreSalariesFemmes !== undefined
     ? nombreSalariesHommes > nombreSalariesFemmes
-      ? "hommes"
-      : nombreSalariesHommes < nombreSalariesFemmes
       ? "femmes"
+      : nombreSalariesHommes < nombreSalariesFemmes
+      ? "hommes"
       : "egalite"
     : undefined;
 
@@ -41,3 +43,29 @@ export const calculNote = (
         )
       ]
     : undefined;
+
+/////////
+// ALL //
+/////////
+
+export default function calculIndicateurCinq(state: AppState) {
+  const indicateurSexeSousRepresente = calculIndicateurSexeSousRepresente(
+    state.indicateurCinq.nombreSalariesHommes,
+    state.indicateurCinq.nombreSalariesFemmes
+  );
+
+  const indicateurNombreSalariesSexeSousRepresente = calculIndicateurNombreSalariesSexeSousRepresente(
+    state.indicateurCinq.nombreSalariesHommes,
+    state.indicateurCinq.nombreSalariesFemmes
+  );
+
+  const noteIndicateurCinq = calculNote(
+    indicateurNombreSalariesSexeSousRepresente
+  );
+
+  return {
+    indicateurSexeSousRepresente,
+    indicateurNombreSalariesSexeSousRepresente,
+    noteIndicateurCinq
+  };
+}

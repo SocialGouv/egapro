@@ -10,11 +10,7 @@ import {
   ActionIndicateurCinqData
 } from "../globals.d";
 
-import {
-  calculIndicateurSexeSousRepresente,
-  calculIndicateurNombreSalariesSexeSousRepresente,
-  calculNote
-} from "../utils/calculsEgaProIndicateurCinq";
+import calculIndicateurCinq from "../utils/calculsEgaProIndicateurCinq";
 
 import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
@@ -39,19 +35,11 @@ function IndicateurCinq({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const indicateurSexeSousRepresente = calculIndicateurSexeSousRepresente(
-    state.indicateurCinq.nombreSalariesHommes,
-    state.indicateurCinq.nombreSalariesFemmes
-  );
-
-  const indicateurNombreSalariesSexeSousRepresente = calculIndicateurNombreSalariesSexeSousRepresente(
-    state.indicateurCinq.nombreSalariesHommes,
-    state.indicateurCinq.nombreSalariesFemmes
-  );
-
-  const noteIndicateurCinq = calculNote(
-    indicateurNombreSalariesSexeSousRepresente
-  );
+  const {
+    indicateurSexeSousRepresente,
+    indicateurNombreSalariesSexeSousRepresente,
+    noteIndicateurCinq
+  } = calculIndicateurCinq(state);
 
   return (
     <PageIndicateurCinq>

@@ -10,15 +10,7 @@ import {
   ActionIndicateurUnData
 } from "../globals.d";
 
-import {
-  calculEffectifsEtEcartRemuParTrancheAge,
-  calculTotalEffectifs,
-  calculEcartsPonderesParTrancheAge,
-  calculTotalEcartPondere,
-  calculEffectifsIndicateurCalculable,
-  calculIndicateurEcartRemuneration,
-  calculNote
-} from "../utils/calculsEgaProIndicateurUn";
+import calculIndicateurUn from "../utils/calculsEgaProIndicateurUn";
 
 import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
@@ -46,36 +38,12 @@ function IndicateurUn({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const effectifEtEcartRemuParTranche = calculEffectifsEtEcartRemuParTrancheAge(
-    state.data
-  );
-
-  const { totalNombreSalaries, totalEffectifsValides } = calculTotalEffectifs(
-    effectifEtEcartRemuParTranche
-  );
-
-  const ecartsPonderesByRow = calculEcartsPonderesParTrancheAge(
-    effectifEtEcartRemuParTranche,
-    totalEffectifsValides
-  );
-
-  // TEP
-  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
-
-  // IC
-  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
-    totalNombreSalaries,
-    totalEffectifsValides
-  );
-
-  // IER
-  const indicateurEcartRemuneration = calculIndicateurEcartRemuneration(
+  const {
     effectifsIndicateurCalculable,
-    totalEcartPondere
-  );
-
-  // NOTE
-  const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
+    indicateurEcartRemuneration,
+    indicateurSexeSurRepresente,
+    noteIndicateurUn
+  } = calculIndicateurUn(state);
 
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {
@@ -125,6 +93,7 @@ function IndicateurUn({ state, dispatch }: Props) {
           state.indicateurUn.formValidated === "Valid" && (
             <IndicateurUnResult
               indicateurEcartRemuneration={indicateurEcartRemuneration}
+              indicateurSexeSurRepresente={indicateurSexeSurRepresente}
               noteIndicateurUn={noteIndicateurUn}
               validateIndicateurUn={validateIndicateurUn}
             />

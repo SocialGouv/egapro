@@ -35,6 +35,7 @@ import IndicateurDeux from "./views/IndicateurDeux";
 import IndicateurTrois from "./views/IndicateurTrois";
 import IndicateurQuatre from "./views/IndicateurQuatre";
 import IndicateurCinq from "./views/IndicateurCinq";
+import Recapitulatif from "./views/Recapitulatif";
 import PageNotFound from "./views/PageNotFound";
 
 const baseGroupTranchesAgesState = {
@@ -197,6 +198,10 @@ function App() {
                       dispatch={dispatch}
                     />
                   )}
+                />
+                <Route
+                  path="/recapitulatif"
+                  render={props => <Recapitulatif {...props} state={state} />}
                 />
                 <Route component={PageNotFound} />
               </Switch>

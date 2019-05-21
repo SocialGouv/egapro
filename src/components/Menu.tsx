@@ -11,7 +11,7 @@ import { useColumnsWidth } from "./GridContext";
 interface CustomNavLinkProps {
   title: string;
   label?: string;
-  valid: FormState;
+  valid?: FormState;
   to: string;
   activeOnlyWhenExact?: boolean;
 }
@@ -19,7 +19,7 @@ interface CustomNavLinkProps {
 function CustomNavLink({
   title,
   label,
-  valid,
+  valid = "None",
   to,
   activeOnlyWhenExact = false
 }: CustomNavLinkProps) {
@@ -97,6 +97,7 @@ function Menu({
         label="hautes rémunérations"
         valid={indicateurCinqFormValidated}
       />
+      <CustomNavLink to="/recapitulatif" title="récapitulatif" />
     </div>
   );
 }

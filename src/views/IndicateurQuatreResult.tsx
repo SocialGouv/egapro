@@ -7,27 +7,24 @@ import ResultBubble from "../components/ResultBubble";
 import ActionLink from "../components/ActionLink";
 
 interface Props {
-  indicateurEcartAugmentation: number | undefined;
+  indicateurEcartNombreSalarieesAugmentees: number | undefined;
   noteIndicateurQuatre: number | undefined;
   validateIndicateurQuatre: (valid: FormState) => void;
 }
 
 function IndicateurQuatreResult({
-  indicateurEcartAugmentation,
+  indicateurEcartNombreSalarieesAugmentees,
   noteIndicateurQuatre,
   validateIndicateurQuatre
 }: Props) {
-  const absoluteResult =
-    indicateurEcartAugmentation !== undefined
-      ? Math.abs(indicateurEcartAugmentation)
-      : undefined;
   return (
     <div css={styles.container}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
-          (absoluteResult !== undefined ? absoluteResult.toFixed(1) : "--") +
-          " %"
+          (indicateurEcartNombreSalarieesAugmentees !== undefined
+            ? indicateurEcartNombreSalarieesAugmentees.toFixed(1)
+            : "--") + " %"
         }
         secondLineLabel="votre note obtenue est"
         secondLineData={
@@ -47,7 +44,8 @@ function IndicateurQuatreResult({
 
 const styles = {
   container: css({
-    maxWidth: 250
+    maxWidth: 250,
+    marginTop: 64
   }),
   edit: css({
     marginTop: 14,

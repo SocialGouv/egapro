@@ -1,4 +1,4 @@
-import { CategorieSocioPro, Groupe } from "../globals.d";
+import { AppState, CategorieSocioPro, Groupe } from "../globals.d";
 
 import { roundDecimal } from "./helpers";
 
@@ -165,6 +165,22 @@ export const calculIndicateurEcartAugmentation = (
     ? roundDecimal(100 * totalEcartPondere, 3)
     : undefined;
 
+export const calculIndicateurSexeSousRepresente = (
+  indicateurEcartAugmentation: number | undefined
+): "hommes" | "femmes" | undefined =>
+  indicateurEcartAugmentation !== undefined
+    ? Math.sign(indicateurEcartAugmentation) < 0
+      ? "femmes"
+      : "hommes"
+    : undefined;
+
+export const calculIndicateurEcartAugmentationAbsolute = (
+  indicateurEcartAugmentation: number | undefined
+): number | undefined =>
+  indicateurEcartAugmentation !== undefined
+    ? Math.abs(indicateurEcartAugmentation)
+    : undefined;
+
 // NOTE
 export const calculNote = (
   indicateurEcartAugmentation: number | undefined
@@ -177,3 +193,69 @@ export const calculNote = (
         )
       ]
     : undefined;
+
+/////////
+// ALL //
+/////////
+
+export default function calculIndicateurDeux(state: AppState) {
+  const effectifEtEcartAugmentParGroupe = calculEffectifsEtEcartAugmentParCategorieSocioPro(
+    state.data
+  );
+
+  const {
+    totalNombreSalaries,
+    totalEffectifsValides,
+    totalTauxAugmentationFemmes,
+    totalTauxAugmentationHommes
+  } = calculTotalEffectifsEtTauxAugmentation(effectifEtEcartAugmentParGroupe);
+
+  const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
+    effectifEtEcartAugmentParGroupe,
+    totalEffectifsValides
+  );
+
+  // TEP
+  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
+
+  // IC
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
+    totalNombreSalaries,
+    totalEffectifsValides
+  );
+
+  // IC
+  const indicateurCalculable = calculIndicateurCalculable(
+    state.indicateurDeux.presenceAugmentation,
+    totalNombreSalaries,
+    totalEffectifsValides,
+    totalTauxAugmentationFemmes,
+    totalTauxAugmentationHommes
+  );
+
+  // IEA
+  const indicateurEcartAugmentation = calculIndicateurEcartAugmentation(
+    indicateurCalculable,
+    totalEcartPondere
+  );
+
+  const indicateurEcartAugmentationAbsolute = calculIndicateurEcartAugmentationAbsolute(
+    indicateurEcartAugmentation
+  );
+
+  const indicateurSexeSurRepresente = calculIndicateurSexeSousRepresente(
+    indicateurEcartAugmentation
+  );
+
+  // NOTE
+  const noteIndicateurDeux = calculNote(indicateurEcartAugmentation);
+
+  return {
+    effectifsIndicateurCalculable,
+    effectifEtEcartAugmentParGroupe,
+    indicateurCalculable,
+    indicateurEcartAugmentation: indicateurEcartAugmentationAbsolute,
+    indicateurSexeSurRepresente,
+    noteIndicateurDeux
+  };
+}
