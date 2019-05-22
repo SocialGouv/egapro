@@ -1,14 +1,22 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { FormState } from "../../globals.d";
+import { FormState, CategorieSocioPro } from "../../globals.d";
+
+import { displayNameCategorieSocioPro } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 
+import { RowDataFull, RowLabelFull } from "./components/RowData";
+
 interface Props {
   indicateurTroisFormValidated: FormState;
   indicateurTroisCalculable: boolean;
+  effectifEtEcartPromoParGroupe: Array<{
+    categorieSocioPro: CategorieSocioPro;
+    ecartTauxPromotion: number | undefined;
+  }>;
   indicateurEcartPromotion: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurTrois: number | undefined;
@@ -17,6 +25,7 @@ interface Props {
 function RecapitulatifIndicateurTrois({
   indicateurTroisFormValidated,
   indicateurTroisCalculable,
+  effectifEtEcartPromoParGroupe,
   indicateurEcartPromotion,
   indicateurSexeSurRepresente,
   noteIndicateurTrois
@@ -61,7 +70,17 @@ function RecapitulatifIndicateurTrois({
           secondLineInfo: "mesures de correction prises en compte"
         }}
       >
-        <div />
+        <RowLabelFull label="écart de taux de promotion par csp" />
+
+        {effectifEtEcartPromoParGroupe.map(
+          ({ categorieSocioPro, ecartTauxPromotion }) => (
+            <RowDataFull
+              key={categorieSocioPro}
+              name={displayNameCategorieSocioPro(categorieSocioPro)}
+              data={ecartTauxPromotion}
+            />
+          )
+        )}
       </RecapBloc>
     </div>
   );

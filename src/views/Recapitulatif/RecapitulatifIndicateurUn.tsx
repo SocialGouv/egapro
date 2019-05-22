@@ -1,13 +1,23 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { FormState } from "../../globals.d";
+import { FormState, TranchesAges, CategorieSocioPro } from "../../globals.d";
+
+import {
+  displayNameTranchesAges,
+  displayNameCategorieSocioPro
+} from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 
+import RowData, { RowLabels, RowLabelFull } from "./components/RowData";
+
 interface Props {
   indicateurUnFormValidated: FormState;
+  effectifEtEcartRemuParTranche: Array<{
+    ecartRemunerationMoyenne: number | undefined;
+  }>;
   indicateurEcartRemuneration: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurUn: number | undefined;
@@ -15,6 +25,7 @@ interface Props {
 
 function RecapitulatifIndicateurUn({
   indicateurUnFormValidated,
+  effectifEtEcartRemuParTranche,
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
   noteIndicateurUn
@@ -47,7 +58,52 @@ function RecapitulatifIndicateurUn({
           secondLineInfo: "mesures de correction prises en compte"
         }}
       >
-        <div />
+        <RowLabelFull label="écart de rémunération par csp" />
+        <RowLabels
+          labels={[
+            displayNameTranchesAges(TranchesAges.MoinsDe30ans),
+            displayNameTranchesAges(TranchesAges.De30a39ans),
+            displayNameTranchesAges(TranchesAges.De40a49ans),
+            displayNameTranchesAges(TranchesAges.PlusDe50ans)
+          ]}
+        />
+
+        <RowData
+          name={displayNameCategorieSocioPro(CategorieSocioPro.Ouvriers)}
+          data={[
+            effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
+          ]}
+        />
+        <RowData
+          name={displayNameCategorieSocioPro(CategorieSocioPro.Employes)}
+          data={[
+            effectifEtEcartRemuParTranche[4].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[5].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[6].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[7].ecartRemunerationMoyenne
+          ]}
+        />
+        <RowData
+          name={displayNameCategorieSocioPro(CategorieSocioPro.Techniciens)}
+          data={[
+            effectifEtEcartRemuParTranche[8].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[9].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[10].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[11].ecartRemunerationMoyenne
+          ]}
+        />
+        <RowData
+          name={displayNameCategorieSocioPro(CategorieSocioPro.Cadres)}
+          data={[
+            effectifEtEcartRemuParTranche[12].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[13].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[14].ecartRemunerationMoyenne,
+            effectifEtEcartRemuParTranche[15].ecartRemunerationMoyenne
+          ]}
+        />
       </RecapBloc>
     </div>
   );

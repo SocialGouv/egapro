@@ -56,7 +56,7 @@ function RecapitulatifIndicateurCinq({
             "/10"
         }}
       >
-        <div />
+        {null}
       </RecapBloc>
     </div>
   );

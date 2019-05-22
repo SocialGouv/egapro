@@ -34,10 +34,13 @@ export const calculValiditeGroupe = (
 
 // ETA
 export const calculEcartTauxAugmentation = (
-  tauxAugmentationFemmes: number,
-  tauxAugmentationHommes: number
+  tauxAugmentationFemmes: number | undefined,
+  tauxAugmentationHommes: number | undefined
 ): number | undefined =>
-  tauxAugmentationFemmes >= 0 && tauxAugmentationHommes >= 0
+  tauxAugmentationFemmes !== undefined &&
+  tauxAugmentationHommes !== undefined &&
+  tauxAugmentationFemmes >= 0 &&
+  tauxAugmentationHommes >= 0
     ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 3)
     : undefined;
 
@@ -65,8 +68,8 @@ export const calculEffectifsEtEcartAugmentParCategorieSocioPro = (
 
       // ETA
       const ecartTauxAugmentation = calculEcartTauxAugmentation(
-        tauxAugmentationFemmes || 0,
-        tauxAugmentationHommes || 0
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes
       );
 
       return {

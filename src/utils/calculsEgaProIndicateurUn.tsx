@@ -230,6 +230,7 @@ export default function calculIndicateurUn(state: AppState) {
   const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
 
   return {
+    effectifEtEcartRemuParTranche,
     effectifsIndicateurCalculable,
     indicateurEcartRemuneration: indicateurEcartRemunerationAbsolute,
     indicateurSexeSurRepresente,

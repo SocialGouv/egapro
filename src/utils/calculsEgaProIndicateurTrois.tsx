@@ -62,8 +62,8 @@ export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
 
       // ETA
       const ecartTauxPromotion = calculEcartTauxPromotion(
-        tauxPromotionFemmes || 0,
-        tauxPromotionHommes || 0
+        tauxPromotionFemmes,
+        tauxPromotionHommes
       );
 
       return {

@@ -26,6 +26,7 @@ interface Props extends RouteComponentProps {
 
 function Recapitulatif({ state }: Props) {
   const {
+    effectifEtEcartRemuParTranche,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn
@@ -33,6 +34,7 @@ function Recapitulatif({ state }: Props) {
 
   const {
     indicateurCalculable: indicateurDeuxCalculable,
+    effectifEtEcartAugmentParGroupe,
     indicateurEcartAugmentation,
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteIndicateurDeux
@@ -40,6 +42,7 @@ function Recapitulatif({ state }: Props) {
 
   const {
     indicateurCalculable: indicateurTroisCalculable,
+    effectifEtEcartPromoParGroupe,
     indicateurEcartPromotion,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteIndicateurTrois
@@ -92,6 +95,7 @@ function Recapitulatif({ state }: Props) {
       </div>
       <RecapitulatifIndicateurUn
         indicateurUnFormValidated={state.indicateurUn.formValidated}
+        effectifEtEcartRemuParTranche={effectifEtEcartRemuParTranche}
         indicateurEcartRemuneration={indicateurEcartRemuneration}
         indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
         noteIndicateurUn={noteIndicateurUn}
@@ -99,6 +103,7 @@ function Recapitulatif({ state }: Props) {
       <RecapitulatifIndicateurDeux
         indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
         indicateurDeuxCalculable={indicateurDeuxCalculable}
+        effectifEtEcartAugmentParGroupe={effectifEtEcartAugmentParGroupe}
         indicateurEcartAugmentation={indicateurEcartAugmentation}
         indicateurSexeSurRepresente={indicateurDeuxSexeSurRepresente}
         noteIndicateurDeux={noteIndicateurDeux}
@@ -106,6 +111,7 @@ function Recapitulatif({ state }: Props) {
       <RecapitulatifIndicateurTrois
         indicateurTroisFormValidated={state.indicateurTrois.formValidated}
         indicateurTroisCalculable={indicateurTroisCalculable}
+        effectifEtEcartPromoParGroupe={effectifEtEcartPromoParGroupe}
         indicateurEcartPromotion={indicateurEcartPromotion}
         indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
         noteIndicateurTrois={noteIndicateurTrois}

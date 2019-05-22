@@ -21,38 +21,51 @@ export function RecapBloc({ title, children, resultBubble }: Props) {
 
   return (
     <div css={styles.container}>
-      {/*<div css={styles.background} />*/}
-
-      {/*<div css={styles.blocForm}>
-        <div css={styles.blocFormInner}>{children}</div>
-  </div>*/}
       <div css={[styles.blocInfo, css({ width })]}>
         <div css={styles.title}>{title}</div>
+
+        {children && (
+          <div css={styles.bloc}>
+            <div css={styles.background} />
+
+            <div css={styles.bloc}>{children}</div>
+          </div>
+        )}
+
+        <div
+          css={[styles.borderBottomBloc, !children && styles.borderNoChildren]}
+        />
+        <div
+          css={[styles.borderLeftBloc, !children && styles.borderNoChildren]}
+        />
       </div>
 
       <div css={styles.blocResult}>
-        <div css={styles.borderResult} />
+        <div
+          css={[
+            styles.borderBottomResult,
+            !children && styles.borderNoChildren
+          ]}
+        />
+        <div
+          css={[styles.borderRightResult, !children && styles.borderNoChildren]}
+        />
         <ResultBubble {...resultBubble} />
       </div>
     </div>
   );
 }
 
-const PADDING = 20;
-
 const styles = {
   container: css({
     position: "relative",
-    // marginTop: 50 + 14,
-    // marginBottom: 20 + 14,
-
     display: "flex",
     flexDirection: "row"
   }),
   background: css({
     backgroundColor: "#FFF",
     position: "absolute",
-    top: -50,
+    top: -20,
     bottom: -20,
     left: -38,
     right: -38,
@@ -61,36 +74,51 @@ const styles = {
   }),
 
   blocInfo: css({
+    position: "relative",
     flexShrink: 0,
-    paddingRight: globalStyles.grid.gutterWidth,
-    paddingLeft: globalStyles.grid.gutterWidth,
-    borderLeft: `solid ${globalStyles.colors.default} 1px`,
-    borderBottom: `solid ${globalStyles.colors.default} 1px`
+    paddingLeft: globalStyles.grid.gutterWidth
   }),
   title: css({
+    marginBottom: 20,
     fontSize: 18,
     lineHeight: "22px",
     textTransform: "uppercase"
   }),
 
-  blocForm: css({
-    position: "relative",
-    borderLeft: `solid ${globalStyles.colors.default} 1px`,
-    borderBottom: `solid ${globalStyles.colors.default} 1px`,
-    paddingTop: 8,
-    paddingBottom: 8
+  bloc: css({
+    position: "relative"
   }),
-  blocFormInner: css({
-    paddingRight: PADDING,
-    paddingLeft: PADDING
+  borderBottomBloc: css({
+    position: "absolute",
+    height: 1,
+    backgroundColor: globalStyles.colors.default,
+    bottom: 0,
+    left: 0,
+    right: 0
+  }),
+  borderLeftBloc: css({
+    position: "absolute",
+    width: 1,
+    backgroundColor: globalStyles.colors.default,
+    bottom: 0,
+    top: 0,
+    left: 0
   }),
 
-  borderResult: css({
+  borderBottomResult: css({
     position: "absolute",
     height: 1,
     backgroundColor: globalStyles.colors.default,
     bottom: 0,
     left: -globalStyles.grid.gutterWidth,
+    right: "50%"
+  }),
+  borderRightResult: css({
+    position: "absolute",
+    width: 1,
+    backgroundColor: globalStyles.colors.default,
+    bottom: 0,
+    top: 0,
     right: "50%"
   }),
   blocResult: css({
@@ -100,6 +128,10 @@ const styles = {
     marginLeft: globalStyles.grid.gutterWidth,
     display: "flex",
     flexDirection: "column"
+  }),
+
+  borderNoChildren: css({
+    bottom: "50%"
   })
 };
 

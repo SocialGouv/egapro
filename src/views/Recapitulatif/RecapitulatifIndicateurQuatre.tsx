@@ -57,7 +57,7 @@ function RecapitulatifIndicateurQuatre({
             "/15"
         }}
       >
-        <div />
+        {null}
       </RecapBloc>
     </div>
   );
