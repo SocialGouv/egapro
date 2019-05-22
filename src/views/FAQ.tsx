@@ -20,7 +20,10 @@ const stylesHeader = {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderBottom: "1px solid #EFECEF"
+    borderBottom: "1px solid #EFECEF",
+
+    marginRight: 29,
+    marginLeft: 29
   }),
   title: css({
     fontFamily: "'Gabriela', serif",
@@ -117,7 +120,8 @@ function FAQ() {
       <FAQHeader />
 
       <div css={styles.content}>
-        <div css={css({ marginBottom: 26 })}>
+        <img css={css({})} src={process.env.PUBLIC_URL + "/faq-fake.png"} />
+        {/*<div css={css({ marginBottom: 26 })}>
           <FAQTitle>Champ d'application et entrée en vigueur</FAQTitle>
         </div>
 
@@ -139,7 +143,7 @@ function FAQ() {
             title="Périeffectifs à prendre en compte pour le calcul des indicateurs de référence"
             detail="6 articles"
           />
-        </div>
+        </div>*/}
       </div>
     </div>
   );
@@ -149,16 +153,16 @@ const styles = {
   container: css({
     flex: 1,
     display: "flex",
-    flexDirection: "column",
-    paddingRight: 29,
-    paddingLeft: 29
+    flexDirection: "column"
+    // paddingRight: 29,
+    // paddingLeft: 29
   }),
   content: css({
     overflowY: "auto",
     flex: 1,
     display: "flex",
-    flexDirection: "column",
-    paddingTop: 26
+    flexDirection: "column"
+    //paddingTop: 26
   })
 };
 

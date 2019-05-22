@@ -208,7 +208,9 @@ function App() {
             </MainScrollViewWithRouter>
           </div>
 
-          <div css={styles.rightColumn}>{/*<FAQ />*/}</div>
+          <div css={styles.rightColumn}>
+            <FAQ />
+          </div>
         </div>
       </GridProvider>
     </Router>
