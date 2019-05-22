@@ -180,6 +180,7 @@ function IndicateurUnForm({
                     name={displayNameTranchesAges(trancheAge)}
                     readOnly={readOnly}
                     calculable={calculable}
+                    calculableNumber={3}
                     femmeFieldName={remunerationAnnuelleBrutFemmesName}
                     hommeFieldName={remunerationAnnuelleBrutHommesName}
                   />

@@ -178,6 +178,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
                       form={form}
                       name={displayNameTranchesAges(trancheAge)}
                       calculable={true}
+                      calculableNumber={0}
                       femmeFieldName={nbSalarieFemmeName}
                       hommeFieldName={nbSalarieHommeName}
                     />

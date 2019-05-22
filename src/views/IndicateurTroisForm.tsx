@@ -200,6 +200,7 @@ function IndicateurTroisForm({
                   name={displayNameCategorieSocioPro(categorieSocioPro)}
                   readOnly={readOnly}
                   calculable={validiteGroupe}
+                  calculableNumber={10}
                   femmeFieldName={tauxPromotionFemmesName}
                   hommeFieldName={tauxPromotionHommesName}
                 />

@@ -29,6 +29,7 @@ interface Props {
   readOnly: boolean;
   name: string;
   calculable: boolean;
+  calculableNumber: number;
   femmeFieldName: string;
   hommeFieldName: string;
 }
@@ -38,6 +39,7 @@ function FieldInputsMenWomen({
   name,
   readOnly,
   calculable,
+  calculableNumber,
   femmeFieldName,
   hommeFieldName
 }: Props) {
@@ -100,7 +102,8 @@ function FieldInputsMenWomen({
         <div css={styles.invalid}>
           Le groupe ne peut pas être pris en compte pour le calcul
           <br />
-          car il comporte moins de 10 femmes ou 10 hommes
+          car il comporte moins de {calculableNumber} femmes ou{" "}
+          {calculableNumber} hommes
         </div>
       )}
       {error && calculable && (

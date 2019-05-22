@@ -204,6 +204,7 @@ function IndicateurDeuxForm({
                   name={displayNameCategorieSocioPro(categorieSocioPro)}
                   readOnly={readOnly}
                   calculable={validiteGroupe}
+                  calculableNumber={10}
                   femmeFieldName={tauxAugmentationFemmesName}
                   hommeFieldName={tauxAugmentationHommesName}
                 />
