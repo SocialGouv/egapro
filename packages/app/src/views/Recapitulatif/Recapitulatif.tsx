@@ -82,10 +82,17 @@ function Recapitulatif({ state }: Props) {
     >
       <div css={styles.indexBloc}>
         {allIndicateurValid ? (
-          <InfoBloc
-            title="Index égalité homme-femme"
-            text={`votre résultat total est ${noteIndex}/100`}
-          />
+          noteIndex ? (
+            <InfoBloc
+              title="Index égalité homme-femme"
+              text={`votre résultat total est ${noteIndex}/100`}
+            />
+          ) : (
+            <InfoBloc
+              title="Index égalité homme-femme"
+              text="Vos indicateurs représentent moins de 75 points, votre index ne peut-être calculé."
+            />
+          )
         ) : (
           <InfoBloc
             title="Index égalité homme-femme"
