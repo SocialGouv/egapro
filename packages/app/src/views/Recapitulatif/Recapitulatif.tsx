@@ -26,6 +26,7 @@ interface Props extends RouteComponentProps {
 
 function Recapitulatif({ state }: Props) {
   const {
+    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
     effectifEtEcartRemuParTranche,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
@@ -33,6 +34,7 @@ function Recapitulatif({ state }: Props) {
   } = calculIndicateurUn(state);
 
   const {
+    effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
     indicateurCalculable: indicateurDeuxCalculable,
     effectifEtEcartAugmentParGroupe,
     indicateurEcartAugmentation,
@@ -41,6 +43,7 @@ function Recapitulatif({ state }: Props) {
   } = calculIndicateurDeux(state);
 
   const {
+    effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
     indicateurCalculable: indicateurTroisCalculable,
     effectifEtEcartPromoParGroupe,
     indicateurEcartPromotion,
@@ -61,9 +64,12 @@ function Recapitulatif({ state }: Props) {
   } = calculIndicateurCinq(state);
 
   const allIndicateurValid =
-    state.indicateurUn.formValidated === "Valid" &&
-    state.indicateurDeux.formValidated === "Valid" &&
-    state.indicateurTrois.formValidated === "Valid" &&
+    (state.indicateurUn.formValidated === "Valid" ||
+      !effectifsIndicateurUnCalculable) &&
+    (state.indicateurDeux.formValidated === "Valid" ||
+      !effectifsIndicateurDeuxCalculable) &&
+    (state.indicateurTrois.formValidated === "Valid" ||
+      !effectifsIndicateurTroisCalculable) &&
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
@@ -102,6 +108,7 @@ function Recapitulatif({ state }: Props) {
       </div>
       <RecapitulatifIndicateurUn
         indicateurUnFormValidated={state.indicateurUn.formValidated}
+        effectifsIndicateurUnCalculable={effectifsIndicateurUnCalculable}
         effectifEtEcartRemuParTranche={effectifEtEcartRemuParTranche}
         indicateurEcartRemuneration={indicateurEcartRemuneration}
         indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
@@ -109,6 +116,7 @@ function Recapitulatif({ state }: Props) {
       />
       <RecapitulatifIndicateurDeux
         indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
+        effectifsIndicateurDeuxCalculable={effectifsIndicateurDeuxCalculable}
         indicateurDeuxCalculable={indicateurDeuxCalculable}
         effectifEtEcartAugmentParGroupe={effectifEtEcartAugmentParGroupe}
         indicateurEcartAugmentation={indicateurEcartAugmentation}
@@ -117,6 +125,7 @@ function Recapitulatif({ state }: Props) {
       />
       <RecapitulatifIndicateurTrois
         indicateurTroisFormValidated={state.indicateurTrois.formValidated}
+        effectifsIndicateurTroisCalculable={effectifsIndicateurTroisCalculable}
         indicateurTroisCalculable={indicateurTroisCalculable}
         effectifEtEcartPromoParGroupe={effectifEtEcartPromoParGroupe}
         indicateurEcartPromotion={indicateurEcartPromotion}

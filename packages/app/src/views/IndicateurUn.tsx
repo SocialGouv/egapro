@@ -67,7 +67,7 @@ function IndicateurUn({ state, dispatch }: Props) {
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
             text="car l’ensemble des groupes valables (c’est-à-dire comptant au
-              moins 10 femmes et 10 hommes), représentent moins de 40% des
+              moins 3 femmes et 3 hommes), représentent moins de 40% des
               effectifs."
           />
           <ActionBar>
