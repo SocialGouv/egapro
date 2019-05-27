@@ -7,6 +7,7 @@ import globalStyles from "../utils/globalStyles";
 
 import { CellHead, Cell } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
+import { IconValid, IconInvalid } from "./Icons";
 
 const required = (value: string): boolean => (value ? false : true);
 
@@ -38,8 +39,18 @@ function FieldInput({ form, fieldName, label, readOnly }: Props) {
     <div css={styles.container}>
       <div css={styles.row}>
         <CellHead style={[styles.cellHead, error && styles.cellHeadError]}>
-          {field.meta.valid ? "✓ " : error ? "✕ " : null}
-          {label}
+          <div css={styles.cellHeadInner}>
+            {field.meta.valid ? (
+              <div css={styles.cellHeadIcon}>
+                <IconValid />
+              </div>
+            ) : error ? (
+              <div css={styles.cellHeadIcon}>
+                <IconInvalid />
+              </div>
+            ) : null}
+            <span>{label}</span>
+          </div>
         </CellHead>
 
         {readOnly ? (
@@ -80,9 +91,16 @@ const styles = {
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
     fontSize: 14
   }),
+  cellHeadInner: css({
+    display: "flex",
+    alignItems: "baseline"
+  }),
   cellHeadError: css({
     color: globalStyles.colors.error,
     borderColor: "transparent"
+  }),
+  cellHeadIcon: css({
+    marginRight: 5
   }),
   cellMen: css({
     borderColor: globalStyles.colors.men
@@ -108,7 +126,7 @@ const styles = {
     height: 18,
     marginTop: 5,
     color: globalStyles.colors.error,
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.error} 1px`

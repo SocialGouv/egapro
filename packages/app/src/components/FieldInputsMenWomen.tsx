@@ -8,6 +8,7 @@ import globalStyles from "../utils/globalStyles";
 
 import { CellHead, Cell, Cell2 } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
+import { IconValid, IconInvalid } from "./Icons";
 
 const required = (value: string): boolean => (value ? false : true);
 
@@ -68,14 +69,22 @@ function FieldInputsMenWomen({
             error && calculable && styles.cellHeadError
           ]}
         >
-          {femmesField.meta.valid && hommesField.meta.valid
-            ? calculable
-              ? "✓ "
-              : "✕ "
-            : error
-            ? "✕ "
-            : null}
-          {name}
+          {femmesField.meta.valid && hommesField.meta.valid ? (
+            calculable ? (
+              <div css={styles.cellHeadIcon}>
+                <IconValid />
+              </div>
+            ) : (
+              <div css={styles.cellHeadIcon}>
+                <IconInvalid />
+              </div>
+            )
+          ) : error ? (
+            <div css={styles.cellHeadIcon}>
+              <IconInvalid />
+            </div>
+          ) : null}
+          <span>{name}</span>
         </CellHead>
 
         {readOnly ? (
@@ -143,6 +152,9 @@ const styles = {
     color: globalStyles.colors.error,
     borderColor: "transparent"
   }),
+  cellHeadIcon: css({
+    marginRight: 5
+  }),
   cell2: css({
     textAlign: "center"
   }),
@@ -170,7 +182,7 @@ const styles = {
     height: 23,
     paddingBottom: 4,
     color: globalStyles.colors.invalid,
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.invalid} 1px`
@@ -181,7 +193,7 @@ const styles = {
     height: 18,
     marginTop: 5,
     color: globalStyles.colors.error,
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.error} 1px`

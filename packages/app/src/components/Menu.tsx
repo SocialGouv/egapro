@@ -6,6 +6,7 @@ import { FormState } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
 
+import { IconValid, IconInvalid } from "./Icons";
 import { useColumnsWidth } from "./GridContext";
 
 interface CustomNavLinkProps {
@@ -29,11 +30,18 @@ function CustomNavLink({
       exact={activeOnlyWhenExact}
       children={({ match }) => (
         <Link to={to} css={[styles.link, match && styles.activeLink]}>
-          <span>
-            {valid === "Valid" ? "✓ " : valid === "Invalid" ? "✕ " : ""}
-            {title}
-          </span>
-          <br />
+          <div css={styles.linkInner}>
+            {valid === "Valid" ? (
+              <div css={styles.icon}>
+                <IconValid />
+              </div>
+            ) : valid === "Invalid" ? (
+              <div css={styles.icon}>
+                <IconInvalid />
+              </div>
+            ) : null}
+            <span>{title}</span>
+          </div>
           {label && <span>{label}</span>}
         </Link>
       )}
@@ -123,6 +131,14 @@ const styles = {
   }),
   activeLink: css({
     color: globalStyles.colors.women
+  }),
+  linkInner: css({
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center"
+  }),
+  icon: css({
+    marginRight: 3
   })
 };
 
