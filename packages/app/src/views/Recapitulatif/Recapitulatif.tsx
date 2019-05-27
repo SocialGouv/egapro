@@ -92,6 +92,7 @@ function Recapitulatif({ state }: Props) {
             <InfoBloc
               title="Index égalité homme-femme"
               text={`votre résultat total est ${noteIndex}/100`}
+              icon={null}
             />
           ) : (
             <InfoBloc

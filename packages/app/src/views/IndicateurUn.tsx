@@ -17,6 +17,7 @@ import LayoutFormAndResult from "../components/LayoutFormAndResult";
 import InfoBloc from "../components/InfoBloc";
 import ActionBar from "../components/ActionBar";
 import ButtonLink from "../components/ButtonLink";
+import TextLink from "../components/TextLink";
 
 import IndicateurUnForm from "./IndicateurUnForm";
 import IndicateurUnResult from "./IndicateurUnResult";
@@ -49,12 +50,10 @@ function IndicateurUn({ state, dispatch }: Props) {
   if (state.effectif.formValidated !== "Valid") {
     return (
       <PageIndicateurUn>
-        <div>
-          <InfoBloc title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur" />
-          <ActionBar>
-            <ButtonLink to="/effectifs" label="renseigner les effectifs" />
-          </ActionBar>
-        </div>
+        <InfoBloc
+          title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+          text={<TextLink to="/effectifs" label="renseigner les effectifs" />}
+        />
       </PageIndicateurUn>
     );
   }

@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
-import { Link, RouteComponentProps } from "react-router-dom";
+import { memo, Fragment } from "react";
+import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
   AppState,
@@ -20,6 +20,8 @@ import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
+import TextLink from "../components/TextLink";
+import InfoBloc from "../components/InfoBloc";
 
 import {
   displayNameCategorieSocioPro,
@@ -219,21 +221,48 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
       </form>
 
       {state.effectif.formValidated === "Valid" &&
-        state.indicateurUn.formValidated === "Invalid" && (
-          <div css={styles.indicatorInvalid}>
-            <p css={styles.indicatorInvalidTitle}>
-              Vos effectifs ont été modifiés
-            </p>
-            <p css={styles.indicatorInvalidText}>
-              afin de s'assurer de la cohérence de votre index, merci de
-              vérifier les données de vos indicateurs.
-            </p>
-            <p css={styles.indicatorInvalidText}>
-              <Link to="/indicateur1" css={styles.indicatorInvalidLink}>
-                aller à l'indicateur 1
-              </Link>
-            </p>
-          </div>
+        (state.indicateurUn.formValidated === "Invalid" ||
+          state.indicateurDeux.formValidated === "Invalid" ||
+          state.indicateurTrois.formValidated === "Invalid") && (
+          <InfoBloc
+            title="Vos effectifs ont été modifiés"
+            icon="cross"
+            text={
+              <Fragment>
+                <span>
+                  afin de s'assurer de la cohérence de votre index, merci de
+                  vérifier les données de vos indicateurs.
+                </span>
+                <br />
+                <span>
+                  {state.indicateurUn.formValidated === "Invalid" && (
+                    <Fragment>
+                      <TextLink
+                        to="/indicateur1"
+                        label="aller à l'indicateur 1"
+                      />
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {state.indicateurDeux.formValidated === "Invalid" && (
+                    <Fragment>
+                      <TextLink
+                        to="/indicateur2"
+                        label="aller à l'indicateur 2"
+                      />
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {state.indicateurTrois.formValidated === "Invalid" && (
+                    <TextLink
+                      to="/indicateur3"
+                      label="aller à l'indicateur 3"
+                    />
+                  )}
+                </span>
+              </Fragment>
+            }
+          />
         )}
     </div>
   );
@@ -271,25 +300,6 @@ const styles = {
     marginTop: 4,
     color: globalStyles.colors.error,
     fontSize: 12
-  }),
-
-  indicatorInvalid: css({
-    padding: 16,
-    border: `solid ${globalStyles.colors.default} 1px`
-  }),
-  indicatorInvalidTitle: css({
-    fontSize: 18,
-    lineHeight: "22px",
-    textTransform: "uppercase"
-  }),
-  indicatorInvalidText: css({
-    marginTop: 4,
-    fontSize: 14,
-    lineHeight: "17px"
-  }),
-  indicatorInvalidLink: css({
-    color: globalStyles.colors.default,
-    textDecoration: "underline"
   })
 };
 
