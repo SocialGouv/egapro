@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Link } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -17,7 +18,9 @@ function Header() {
         </div>
       </div>
       <div css={styles.headerInner}>
-        <p css={styles.title}>Egapro</p>
+        <Link to="/" css={styles.title}>
+          Egapro
+        </Link>
         <p css={styles.subtitle}>
           L'outil de simulation en ligne de vos indicateurs
         </p>
@@ -56,7 +59,9 @@ const styles = {
   title: css({
     fontFamily: "'Gabriela', serif",
     marginRight: 24,
-    fontSize: 24
+    fontSize: 24,
+    color: globalStyles.colors.default,
+    textDecoration: "none"
   }),
   subtitle: css({
     fontFamily: "'Gabriela', serif",
