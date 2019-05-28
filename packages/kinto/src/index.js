@@ -5,7 +5,7 @@ const configs = require('./config');
 const api = require('./kinto-api');
 
 const bucketName = 'egapro';
-const collectionName = 'indicator_datas';
+const collectionName = 'indicators_datas';
 
 api.createAdmin(configs.adminLogin, configs.adminPassword)
     .then((res) => {

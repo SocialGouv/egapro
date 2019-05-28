@@ -3,9 +3,12 @@ import { config } from 'dotenv';
 config();
 
 export const configuration = {
-    kintoLogin: asString(process.env.KINTO_LOGIN),
-    kintoPassword: asString(process.env.KINTO_PASSWORD),
-    kintoURL: asString(process.env.KINTO_URL),
+    apiPort: asNumber('API_PORT'),
+    
+    kintoBucket: asString('KINTO_BUCKET'),
+    kintoLogin: asString('KINTO_LOGIN'),
+    kintoPassword: asString('KINTO_PASSWORD'),
+    kintoURL: asString('KINTO_URL'),
 
     mailFrom: asString('MAIL_FROM'),
     mailHost: asString(`MAIL_HOST`),

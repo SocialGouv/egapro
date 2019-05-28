@@ -2079,6 +2079,13 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/btoa@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@types/btoa/-/btoa-1.2.3.tgz#2c8e7093f902bf8f0e10992a731a4996aa1a5732"
+  integrity sha512-ANNCZICS/ofxhzUl8V1DniBJs+sFQ+Yg5am1ZwVEf/sxoKY/J2+h5Fuw3xUErlZ7eJLdgzukBjZwnsV6+/2Rmg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/connect@*":
   version "3.4.32"
   resolved "https://registry.yarnpkg.com/@types/connect/-/connect-3.4.32.tgz#aa0e9616b9435ccad02bc52b5b454ffc2c70ba28"
@@ -2230,6 +2237,13 @@
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
+
+"@types/node-fetch@^2.3.4":
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.3.4.tgz#a46fc4fe9f94b491bf551b6bb7f0f493b9bacd1a"
+  integrity sha512-ZwGXz5osL88SF+jlbbz0WJlINlOZHoSWPrLytQRWRdB6j/KVLup1OoqIxnjO6q9ToqEEP3MZFzJCotgge+IiRw==
+  dependencies:
+    "@types/node" "*"
 
 "@types/node@*", "@types/node@^12.0.2":
   version "12.0.2"
