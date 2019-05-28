@@ -187,7 +187,7 @@ function FAQ() {
               />
             )}
           />
-          {/*<Route
+          <Route
             path="/recapitulatif"
             render={() => (
               <img
@@ -195,7 +195,7 @@ function FAQ() {
                 src={process.env.PUBLIC_URL + "/faq-fake-recap.jpg"}
               />
             )}
-            />*/}
+          />
         </Switch>
         {/*<div css={css({ marginBottom: 26 })}>
           <FAQTitle>Champ d'application et entrée en vigueur</FAQTitle>
