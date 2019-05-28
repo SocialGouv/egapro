@@ -140,7 +140,7 @@ const styles = {
     color: globalStyles.colors.invalid
   }),
   cellLabel: css({
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: "italic",
     textAlign: "center"
   }),

@@ -143,7 +143,7 @@ const styles = {
   }),
   rowHeadCell: css({
     height: 16,
-    fontSize: 11,
+    fontSize: 12,
     textAlign: "center"
   }),
   rowHeadBorder: css({
