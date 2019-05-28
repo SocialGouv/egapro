@@ -4,7 +4,10 @@
     "build": "lerna run build",
     "lint": "lerna run lint --parallel",
     "start": "lerna run start --parallel",
-    "release": "cd packages/app && yarn release"
+    "release": "cd packages/app && yarn release",
+    "db:start": "lerna run db:start --parallel",
+    "db:stop": "lerna run db:stop --parallel",
+    "db:init": "lerna run db:init --parallel"
   },
   "devDependencies": {
     "lerna": "^3.14.1"
