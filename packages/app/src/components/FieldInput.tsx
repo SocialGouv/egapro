@@ -70,13 +70,16 @@ function FieldInput({ form, fieldName, label, readOnly }: Props) {
   );
 }
 
+export const HEIGHT = 58;
+export const MARGIN_TOP = 10;
+
 const styles = {
   container: css({
     display: "flex",
     flexDirection: "column",
     alignItems: "stretch",
-    height: 58,
-    marginTop: 10
+    height: HEIGHT,
+    marginTop: MARGIN_TOP
   }),
   row: css({
     display: "flex",

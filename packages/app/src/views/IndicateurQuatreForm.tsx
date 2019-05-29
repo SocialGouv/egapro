@@ -1,11 +1,14 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
+import { memo, Fragment } from "react";
 import { useForm } from "react-final-form-hooks";
 import { AppState, FormState, ActionIndicateurQuatreData } from "../globals.d";
 
 import { BlocFormLight } from "../components/BlocForm";
-import FieldInput from "../components/FieldInput";
+import FieldInput, {
+  HEIGHT as FieldInputHeight,
+  MARGIN_TOP as FieldInputMarginTop
+} from "../components/FieldInput";
 import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
@@ -36,7 +39,7 @@ function IndicateurQuatreForm({
 }: Props) {
   const initialValues = {
     presenceAugmentation: String(indicateurQuatre.presenceAugmentation),
-    nombreSalariees: parseStateValue(indicateurQuatre.nombreSalariees),
+    presenceCongeMat: String(indicateurQuatre.presenceCongeMat),
     nombreSalarieesPeriodeAugmentation: parseStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
     ),
@@ -48,14 +51,14 @@ function IndicateurQuatreForm({
   const saveForm = (formData: any) => {
     const {
       presenceAugmentation,
-      nombreSalariees,
+      presenceCongeMat,
       nombreSalarieesPeriodeAugmentation,
       nombreSalarieesAugmentees
     } = formData;
 
     updateIndicateurQuatre({
       presenceAugmentation: presenceAugmentation === "true",
-      nombreSalariees: parseFormValue(nombreSalariees),
+      presenceCongeMat: presenceCongeMat === "true",
       nombreSalarieesPeriodeAugmentation: parseFormValue(
         nombreSalarieesPeriodeAugmentation
       ),
@@ -100,24 +103,32 @@ function IndicateurQuatreForm({
 
       {values.presenceAugmentation === "true" && (
         <BlocFormLight>
-          <FieldInput
+          <RadiosBoolean
             form={form}
-            fieldName="nombreSalariees"
-            label="nombre de salariées de retour de congé maternité"
+            fieldName="presenceCongeMat"
             readOnly={readOnly}
+            labelTrue="il y a eu des retours de congé maternité pendant la période de référence"
+            labelFalse="il n’y a pas eu de retour de congé maternité pendant la période de référence"
           />
-          <FieldInput
-            form={form}
-            fieldName="nombreSalarieesPeriodeAugmentation"
-            label="parmis ces congès maternité, combien ont chevauchée une periode d’augmentation"
-            readOnly={readOnly}
-          />
-          <FieldInput
-            form={form}
-            fieldName="nombreSalarieesAugmentees"
-            label="parmis ces congès maternité ayant chevauchée une periode d’augmentation, combien ont été augmentées ?"
-            readOnly={readOnly}
-          />
+          <div css={styles.spacer} />
+          {values.presenceCongeMat === "true" ? (
+            <Fragment>
+              <FieldInput
+                form={form}
+                fieldName="nombreSalarieesPeriodeAugmentation"
+                label="pour combien de salariées, ces congés maternités ont eu lieu pendant des périodes d’augmentation"
+                readOnly={readOnly}
+              />
+              <FieldInput
+                form={form}
+                fieldName="nombreSalarieesAugmentees"
+                label="parmi ces salariées combien ont été augmentées à leur retour"
+                readOnly={readOnly}
+              />
+            </Fragment>
+          ) : (
+            <div css={styles.emptyFields} />
+          )}
         </BlocFormLight>
       )}
 
@@ -142,6 +153,12 @@ const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
+  }),
+  spacer: css({
+    height: 24
+  }),
+  emptyFields: css({
+    height: (FieldInputHeight + FieldInputMarginTop) * 2
   })
 };
 
