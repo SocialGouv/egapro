@@ -5,6 +5,7 @@ import { useField } from "react-final-form-hooks";
 import { FormApi } from "final-form";
 
 import globalStyles from "../utils/globalStyles";
+import { displayPercent, displayInt } from "../utils/helpers";
 
 import { CellHead, Cell, Cell2 } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
@@ -44,8 +45,8 @@ const displayReadOnlyValue = (
     return value;
   }
   return mask === "percent"
-    ? Number(value).toLocaleString("en-US") + "%"
-    : Number(value).toLocaleString("fr-FR");
+    ? displayPercent(Number(value))
+    : displayInt(Number(value));
 };
 
 function FieldInputsMenWomen({

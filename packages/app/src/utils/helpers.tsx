@@ -32,8 +32,19 @@ export function displayNameCategorieSocioPro(
   }
 }
 
+export function displayFractionPercent(
+  num: number,
+  digits: number = 2
+): string {
+  return displayPercent(num * 100, digits);
+}
+
 export function displayPercent(num: number, digits: number = 2): string {
-  return (num * 100).toFixed(digits) + "%";
+  return num.toLocaleString("en-US", { maximumFractionDigits: digits }) + "%";
+}
+
+export function displayInt(num: number): string {
+  return num.toLocaleString("fr-FR");
 }
 
 /* Utils */

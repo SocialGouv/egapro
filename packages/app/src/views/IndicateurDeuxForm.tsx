@@ -25,7 +25,7 @@ import {
   fractionToPercentage,
   percentageToFraction,
   displayNameCategorieSocioPro,
-  displayPercent
+  displayFractionPercent
 } from "../utils/helpers";
 
 interface Props {
@@ -186,8 +186,8 @@ function IndicateurDeuxForm({
         <BlocForm
           label="% de salariés augmentés"
           footer={[
-            displayPercent(totalTauxAugmentationHommes),
-            displayPercent(totalTauxAugmentationFemmes)
+            displayFractionPercent(totalTauxAugmentationHommes),
+            displayFractionPercent(totalTauxAugmentationFemmes)
           ]}
         >
           {infoFields.map(

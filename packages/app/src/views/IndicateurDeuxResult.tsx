@@ -3,6 +3,8 @@ import { css, jsx } from "@emotion/core";
 
 import { FormState } from "../globals.d";
 
+import { displayPercent } from "../utils/helpers";
+
 import ResultBubble from "../components/ResultBubble";
 import ActionLink from "../components/ActionLink";
 
@@ -24,9 +26,9 @@ function IndicateurDeuxResult({
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
-          (indicateurEcartAugmentation !== undefined
-            ? indicateurEcartAugmentation.toFixed(1)
-            : "--") + " %"
+          indicateurEcartAugmentation !== undefined
+            ? displayPercent(indicateurEcartAugmentation)
+            : "--"
         }
         firstLineInfo={`écart favorable aux ${indicateurSexeSurRepresente}`}
         secondLineLabel="votre note obtenue est"

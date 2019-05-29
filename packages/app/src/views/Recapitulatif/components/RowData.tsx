@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 
 import globalStyles from "../../../utils/globalStyles";
 
-import { displayPercent } from "../../../utils/helpers";
+import { displayFractionPercent } from "../../../utils/helpers";
 
 import { CellHead, Cell } from "../../../components/Cell";
 
@@ -30,7 +30,7 @@ function RowData({
               datum === undefined && styles.cellEmpty
             ]}
           >
-            {datum !== undefined ? displayPercent(datum, 1) : "nc"}
+            {datum !== undefined ? displayFractionPercent(datum, 1) : "nc"}
           </Cell>
         ))}
       </div>
@@ -60,7 +60,7 @@ export function RowDataFull({
             data === undefined && styles.cellEmpty
           ]}
         >
-          {data !== undefined ? displayPercent(data, 1) : "nc"}
+          {data !== undefined ? displayFractionPercent(data, 1) : "nc"}
         </Cell>
       </div>
     </div>

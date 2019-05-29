@@ -13,6 +13,7 @@ import {
 } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
+import { displayInt } from "../utils/helpers";
 
 import { useColumnsWidth } from "../components/GridContext";
 import BlocForm from "../components/BlocForm";
@@ -206,8 +207,8 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               title={displayNameCategorieSocioPro(categorieSocioPro)}
               label="nombre de salariés"
               footer={[
-                String(totalGroupNbSalarieHomme),
-                String(totalGroupNbSalarieFemme)
+                displayInt(totalGroupNbSalarieHomme),
+                displayInt(totalGroupNbSalarieFemme)
               ]}
             >
               {tranchesAges.map(
@@ -233,14 +234,18 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
 
         <div css={styles.rowFoot}>
           <div css={styles.rowFootText}>total des effectifs</div>
-          <Cell style={styles.rowFootCell}>{totalNbSalarieHomme}</Cell>
-          <Cell style={styles.rowFootCell}>{totalNbSalarieFemme}</Cell>
+          <Cell style={styles.rowFootCell}>
+            {displayInt(totalNbSalarieHomme)}
+          </Cell>
+          <Cell style={styles.rowFootCell}>
+            {displayInt(totalNbSalarieFemme)}
+          </Cell>
         </div>
 
         <div css={styles.rowFoot}>
           <div css={styles.rowFootText}>soit</div>
           <Cell2 style={styles.rowFootCell}>
-            {totalNbSalarieHomme + totalNbSalarieFemme}
+            {displayInt(totalNbSalarieHomme + totalNbSalarieFemme)}
           </Cell2>
         </div>
 

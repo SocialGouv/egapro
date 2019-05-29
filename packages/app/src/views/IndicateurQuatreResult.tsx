@@ -3,6 +3,8 @@ import { css, jsx } from "@emotion/core";
 
 import { FormState } from "../globals.d";
 
+import { displayPercent } from "../utils/helpers";
+
 import ResultBubble from "../components/ResultBubble";
 import ActionLink from "../components/ActionLink";
 
@@ -22,9 +24,9 @@ function IndicateurQuatreResult({
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
-          (indicateurEcartNombreSalarieesAugmentees !== undefined
-            ? indicateurEcartNombreSalarieesAugmentees.toFixed(1)
-            : "--") + " %"
+          indicateurEcartNombreSalarieesAugmentees !== undefined
+            ? displayPercent(indicateurEcartNombreSalarieesAugmentees, 1)
+            : "--"
         }
         secondLineLabel="votre note obtenue est"
         secondLineData={
