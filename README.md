@@ -49,6 +49,6 @@ Action  |API                                | body                         |Rép
 --------|-----------------------------------|------------------------------|-------------------------------|
 POST    |`api/indicators_datas`             | `{ }`                        | `{id: string}`                |
 PUT     |`api/indicators_datas`             | `{id: string, data: string}` | `status` = `200` ou `400`     |
-GET     |`api/indicators_data/{id}`         |                              | `{id: string, data: string}`  |
-POST    |`api/indicators_data/{id}/emails`  | `{ email: string }`          | `status` = `200` ou `400`     |
+GET     |`api/indicators_datas/{id}`        |                              | `{id: string, data: string}`  |
+POST    |`api/indicators_datas/{id}/emails` | `{ email: string }`          | `status` = `200` ou `400`     |
 
