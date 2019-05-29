@@ -193,6 +193,7 @@ const styles = {
     textAlign: "center"
   }),
   rowFootTotal: css({
+    fontStyle: "italic",
     fontSize: 14,
     marginLeft: 8
   }),

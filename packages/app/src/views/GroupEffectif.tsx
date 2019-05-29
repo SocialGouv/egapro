@@ -22,6 +22,7 @@ import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
 import TextLink from "../components/TextLink";
 import InfoBloc from "../components/InfoBloc";
+import { Cell, Cell2 } from "../components/Cell";
 
 import {
   displayNameCategorieSocioPro,
@@ -144,6 +145,35 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
 
   const width = useColumnsWidth(4);
 
+  const { totalNbSalarieHomme, totalNbSalarieFemme } = infoFields.reduce(
+    (acc, { tranchesAges }) => {
+      const {
+        totalGroupNbSalarieHomme,
+        totalGroupNbSalarieFemme
+      } = tranchesAges.reduce(
+        (accGroup, { nbSalarieHommeName, nbSalarieFemmeName }) => {
+          return {
+            totalGroupNbSalarieHomme:
+              accGroup.totalGroupNbSalarieHomme +
+              parseFormValue(values[nbSalarieHommeName], 0),
+            totalGroupNbSalarieFemme:
+              accGroup.totalGroupNbSalarieFemme +
+              parseFormValue(values[nbSalarieFemmeName], 0)
+          };
+        },
+        { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
+      );
+
+      return {
+        totalNbSalarieHomme: acc.totalNbSalarieHomme + totalGroupNbSalarieHomme,
+        totalNbSalarieFemme: acc.totalNbSalarieFemme + totalGroupNbSalarieFemme
+      };
+    },
+    { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
+  );
+
+  console.log({ totalNbSalarieHomme, totalNbSalarieFemme });
+
   return (
     <div css={styles.page}>
       <p css={styles.blocTitle}>Indication des effectifs</p>
@@ -154,22 +184,31 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
 
       <form onSubmit={handleSubmit} css={[styles.bloc, css({ width })]}>
         {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
-          const totalNbSalarie = tranchesAges.reduce(
-            (acc, { nbSalarieFemmeName, nbSalarieHommeName }) => {
-              return (
-                acc +
-                parseFormValue(values[nbSalarieFemmeName], 0) +
-                parseFormValue(values[nbSalarieHommeName], 0)
-              );
+          const {
+            totalGroupNbSalarieHomme,
+            totalGroupNbSalarieFemme
+          } = tranchesAges.reduce(
+            (accGroup, { nbSalarieHommeName, nbSalarieFemmeName }) => {
+              return {
+                totalGroupNbSalarieHomme:
+                  accGroup.totalGroupNbSalarieHomme +
+                  parseFormValue(values[nbSalarieHommeName], 0),
+                totalGroupNbSalarieFemme:
+                  accGroup.totalGroupNbSalarieFemme +
+                  parseFormValue(values[nbSalarieFemmeName], 0)
+              };
             },
-            0
+            { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
           );
           return (
             <BlocForm
               key={categorieSocioPro}
               title={displayNameCategorieSocioPro(categorieSocioPro)}
               label="nombre de salariés"
-              footer={String(totalNbSalarie)}
+              footer={[
+                String(totalGroupNbSalarieHomme),
+                String(totalGroupNbSalarieFemme)
+              ]}
             >
               {tranchesAges.map(
                 ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
@@ -191,6 +230,19 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
             </BlocForm>
           );
         })}
+
+        <div css={styles.rowFoot}>
+          <div css={styles.rowFootText}>total des effectifs</div>
+          <Cell style={styles.rowFootCell}>{totalNbSalarieHomme}</Cell>
+          <Cell style={styles.rowFootCell}>{totalNbSalarieFemme}</Cell>
+        </div>
+
+        <div css={styles.rowFoot}>
+          <div css={styles.rowFootText}>soit</div>
+          <Cell2 style={styles.rowFootCell}>
+            {totalNbSalarieHomme + totalNbSalarieFemme}
+          </Cell2>
+        </div>
 
         {state.effectif.formValidated === "Valid" ? (
           <div css={styles.action}>
@@ -301,6 +353,24 @@ const styles = {
     marginTop: 4,
     color: globalStyles.colors.error,
     fontSize: 12
+  }),
+
+  rowFoot: css({
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    height: 16,
+    marginTop: 10,
+    paddingRight: 20
+  }),
+  rowFootCell: css({
+    fontSize: 14,
+    textAlign: "center"
+  }),
+  rowFootText: css({
+    fontStyle: "italic",
+    fontSize: 14,
+    marginLeft: "auto"
   })
 };
 
