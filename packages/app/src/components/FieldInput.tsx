@@ -14,7 +14,7 @@ const required = (value: string): boolean => (value ? false : true);
 const mustBeNumber = (value: string): boolean =>
   Number.isNaN(Number(value)) ? true : false;
 
-const validate = (value: string) => {
+export const validate = (value: string) => {
   const requiredError = required(value);
   const mustBeNumberError = mustBeNumber(value);
   if (!requiredError && !mustBeNumberError) {

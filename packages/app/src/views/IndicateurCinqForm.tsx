@@ -7,7 +7,7 @@ import createDecorator from "final-form-calculate";
 import { AppState, FormState, ActionIndicateurCinqData } from "../globals.d";
 
 import { BlocFormLight } from "../components/BlocForm";
-import FieldInput from "../components/FieldInput";
+import FieldInput, { validate } from "../components/FieldInput";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
@@ -29,12 +29,16 @@ const parseFormValue = (value: string, defaultValue: any = undefined) =>
 const parseStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(value);
 
+const valueValidateForCalculator = (value: string) => {
+  return validate(value) === undefined;
+};
+
 const calculator = createDecorator(
   {
     field: "nombreSalariesFemmes",
     updates: {
       nombreSalariesHommes: (femmesValue, { nombreSalariesHommes }: any) =>
-        femmesValue !== ""
+        valueValidateForCalculator(femmesValue)
           ? parseStateValue(10 - parseFormValue(femmesValue))
           : nombreSalariesHommes
     }
@@ -43,7 +47,7 @@ const calculator = createDecorator(
     field: "nombreSalariesHommes",
     updates: {
       nombreSalariesFemmes: (hommesValue, { nombreSalariesFemmes }: any) =>
-        hommesValue !== ""
+        valueValidateForCalculator(hommesValue)
           ? parseStateValue(10 - parseFormValue(hommesValue))
           : nombreSalariesFemmes
     }
