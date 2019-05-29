@@ -1,10 +1,9 @@
 import { IndicatorsData } from "../../model";
 import { indicatorsDataRepository } from "../../repository";
 
-const add = (email: string) => {
+const add = () => {
     const record: IndicatorsData = {
         data: {},
-        email,
     }
     return indicatorsDataRepository.add(record);
 }
@@ -18,7 +17,7 @@ const update = (record: IndicatorsData) => {
 }
 
 export interface IndicatorsDataService {
-    add: (email: string) => Promise<IndicatorsData>,
+    add: () => Promise<IndicatorsData>,
     one: (id: string) => Promise<IndicatorsData>,
     update: (record: IndicatorsData) => Promise<IndicatorsData>,
 }

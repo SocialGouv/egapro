@@ -2,13 +2,6 @@ import { createTransport, SentMessageInfo } from "nodemailer";
 import { configuration } from "../../configuration";
 import { logger } from "../../util";
 
-
-export interface Attachment {
-    cid: string,
-    filename: string,
-    path: string
-}
-
 export interface EmailAddress {
     email: string,
     name: string
@@ -34,18 +27,23 @@ const transporter = createTransport({
     }
 });
 
-// https://github.com/nodemailer/nodemailer/blob/master/examples/sendmail.js
-export const sendEmail : (email: Email) => Promise<SentMessageInfo> = (email: Email) => {
-    logger.info(`[EmailService.sendEmail] subject ${email.subject}`);
-    const message = {
-        from: configuration.mailFrom,
-        to: email.to.map(r => `${r.name} <${r.email}>`).join(','),
-        // tslint:disable-next-line: object-literal-sort-keys
-        bcc: email.bcc.map(r => `${r.name} <${r.email}>`).join(','),
-        subject: email.subject,
-        text: email.bodyText,
-    };
+export interface EmailService {
+    sendEmail: (email: Email) => Promise<SentMessageInfo>;
+}
 
-    return transporter.sendMail(message);
-    
+
+// https://github.com/nodemailer/nodemailer/blob/master/examples/sendmail.js
+export const emailService: EmailService = {
+    sendEmail: (email: Email) => {
+        logger.info(`[EmailService.sendEmail] subject ${email.subject}`);
+        const message = {
+            from: configuration.mailFrom,
+            to: email.to.map(r => `${r.name} <${r.email}>`).join(','),
+            // tslint:disable-next-line: object-literal-sort-keys
+            bcc: email.bcc.map(r => `${r.name} <${r.email}>`).join(','),
+            subject: email.subject,
+            text: email.bodyText,
+        };
+        return transporter.sendMail(message);
+    }
 }

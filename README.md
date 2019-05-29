@@ -43,3 +43,12 @@ pour démarrer, le front-end et le back-end
 yarn start
 ```
 
+## End Points
+
+Action  |API                                | body                         |Réponse                        |
+--------|-----------------------------------|------------------------------|-------------------------------|
+POST    |`api/indicators_datas`             | `{ }`                        | `{id: string}`                |
+PUT     |`api/indicators_datas`             | `{id: string, data: string}` | `status` = `200` ou `400`     |
+GET     |`api/indicators_data/{id}`         |                              | `{id: string, data: string}`  |
+POST    |`api/indicators_data/{id}/emails`  | `{ email: string }`          | `status` = `200` ou `400`     |
+
