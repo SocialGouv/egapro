@@ -1,5 +1,5 @@
 export interface IndicatorsData {
     id?: string;
-    email: string;
+    // email: string;
     data: any;
 }
