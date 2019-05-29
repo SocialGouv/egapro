@@ -181,6 +181,7 @@ function IndicateurUnForm({
                     readOnly={readOnly}
                     calculable={calculable}
                     calculableNumber={3}
+                    mask="number"
                     femmeFieldName={remunerationAnnuelleBrutFemmesName}
                     hommeFieldName={remunerationAnnuelleBrutHommesName}
                   />

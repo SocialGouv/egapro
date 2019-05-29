@@ -31,9 +31,22 @@ interface Props {
   name: string;
   calculable: boolean;
   calculableNumber: number;
+  mask?: "number" | "percent" | undefined;
   femmeFieldName: string;
   hommeFieldName: string;
 }
+
+const displayReadOnlyValue = (
+  value: string,
+  mask?: "number" | "percent" | undefined
+) => {
+  if (!mask || !value) {
+    return value;
+  }
+  return mask === "percent"
+    ? Number(value).toLocaleString("en-US") + "%"
+    : Number(value).toLocaleString("fr-FR");
+};
 
 function FieldInputsMenWomen({
   form,
@@ -41,6 +54,7 @@ function FieldInputsMenWomen({
   readOnly,
   calculable,
   calculableNumber,
+  mask,
   femmeFieldName,
   hommeFieldName
 }: Props) {
@@ -90,18 +104,22 @@ function FieldInputsMenWomen({
         {readOnly ? (
           <React.Fragment>
             <Cell style={[styles.cellEmpty, styles.cellEmptyMen]}>
-              {hommesField.input.value}
+              {displayReadOnlyValue(hommesField.input.value, mask)}
             </Cell>
 
             <Cell style={[styles.cellEmpty, styles.cellEmptyWomen]}>
-              {femmesField.input.value}
+              {displayReadOnlyValue(femmesField.input.value, mask)}
             </Cell>
           </React.Fragment>
         ) : calculable ? (
           <React.Fragment>
-            <CellInput field={hommesField} style={styles.cellMen} />
+            <CellInput field={hommesField} mask={mask} style={styles.cellMen} />
 
-            <CellInput field={femmesField} style={styles.cellWomen} />
+            <CellInput
+              field={femmesField}
+              mask={mask}
+              style={styles.cellWomen}
+            />
           </React.Fragment>
         ) : (
           <Cell2 css={styles.cell2} />

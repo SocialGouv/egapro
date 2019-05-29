@@ -205,6 +205,7 @@ function IndicateurDeuxForm({
                   readOnly={readOnly}
                   calculable={validiteGroupe}
                   calculableNumber={10}
+                  mask="percent"
                   femmeFieldName={tauxAugmentationFemmesName}
                   hommeFieldName={tauxAugmentationHommesName}
                 />
