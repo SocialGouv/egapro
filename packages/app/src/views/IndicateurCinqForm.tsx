@@ -6,6 +6,8 @@ import createDecorator from "final-form-calculate";
 
 import { AppState, FormState, ActionIndicateurCinqData } from "../globals.d";
 
+import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
+
 import { BlocFormLight } from "../components/BlocForm";
 import FieldInput, { validate } from "../components/FieldInput";
 import ActionBar from "../components/ActionBar";
@@ -19,16 +21,6 @@ interface Props {
   validateIndicateurCinq: (valid: FormState) => void;
 }
 
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : parseInt(value, 10);
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(value);
-
 const valueValidateForCalculator = (value: string) => {
   return validate(value) === undefined;
 };
@@ -39,7 +31,7 @@ const calculator = createDecorator(
     updates: {
       nombreSalariesHommes: (femmesValue, { nombreSalariesHommes }: any) =>
         valueValidateForCalculator(femmesValue)
-          ? parseStateValue(10 - parseFormValue(femmesValue))
+          ? parseIntStateValue(10 - parseIntFormValue(femmesValue))
           : nombreSalariesHommes
     }
   },
@@ -48,7 +40,7 @@ const calculator = createDecorator(
     updates: {
       nombreSalariesFemmes: (hommesValue, { nombreSalariesFemmes }: any) =>
         valueValidateForCalculator(hommesValue)
-          ? parseStateValue(10 - parseFormValue(hommesValue))
+          ? parseIntStateValue(10 - parseIntFormValue(hommesValue))
           : nombreSalariesFemmes
     }
   }
@@ -61,16 +53,20 @@ function IndicateurCinqForm({
   validateIndicateurCinq
 }: Props) {
   const initialValues = {
-    nombreSalariesHommes: parseStateValue(indicateurCinq.nombreSalariesHommes),
-    nombreSalariesFemmes: parseStateValue(indicateurCinq.nombreSalariesFemmes)
+    nombreSalariesHommes: parseIntStateValue(
+      indicateurCinq.nombreSalariesHommes
+    ),
+    nombreSalariesFemmes: parseIntStateValue(
+      indicateurCinq.nombreSalariesFemmes
+    )
   };
 
   const saveForm = (formData: any) => {
     const { nombreSalariesHommes, nombreSalariesFemmes } = formData;
 
     updateIndicateurCinq({
-      nombreSalariesHommes: parseFormValue(nombreSalariesHommes),
-      nombreSalariesFemmes: parseFormValue(nombreSalariesFemmes)
+      nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes),
+      nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes)
     });
   };
 

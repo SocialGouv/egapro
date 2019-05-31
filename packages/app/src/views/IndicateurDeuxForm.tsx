@@ -21,9 +21,8 @@ import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
 
+import { parseFloatFormValue, parseFloatStateValue } from "../utils/formParse";
 import {
-  fractionToPercentage,
-  percentageToFraction,
   displayNameCategorieSocioPro,
   displayFractionPercent
 } from "../utils/helpers";
@@ -40,16 +39,6 @@ const getFieldName = (
   categorieSocioPro: CategorieSocioPro,
   genre: "Hommes" | "Femmes"
 ): string => "tauxAugmentation" + categorieSocioPro + genre;
-
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : percentageToFraction(parseFloat(value));
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(fractionToPercentage(value));
 
 function IndicateurDeuxForm({
   ecartAugmentParCategorieSocioPro,
@@ -69,9 +58,13 @@ function IndicateurDeuxForm({
         categorieSocioPro,
         validiteGroupe,
         tauxAugmentationFemmesName: getFieldName(categorieSocioPro, "Femmes"),
-        tauxAugmentationFemmesValue: parseStateValue(tauxAugmentationFemmes),
+        tauxAugmentationFemmesValue: parseFloatStateValue(
+          tauxAugmentationFemmes
+        ),
         tauxAugmentationHommesName: getFieldName(categorieSocioPro, "Hommes"),
-        tauxAugmentationHommesValue: parseStateValue(tauxAugmentationHommes)
+        tauxAugmentationHommesValue: parseFloatStateValue(
+          tauxAugmentationHommes
+        )
       };
     }
   );
@@ -104,10 +97,10 @@ function IndicateurDeuxForm({
         tauxAugmentationHommesName
       }) => ({
         categorieSocioPro,
-        tauxAugmentationFemmes: parseFormValue(
+        tauxAugmentationFemmes: parseFloatFormValue(
           formData[tauxAugmentationFemmesName]
         ),
-        tauxAugmentationHommes: parseFormValue(
+        tauxAugmentationHommes: parseFloatFormValue(
           formData[tauxAugmentationHommesName]
         )
       })
@@ -147,10 +140,10 @@ function IndicateurDeuxForm({
   const ecartAugmentParCategorieSocioProPourTotal = ecartAugmentParCategorieSocioPro.map(
     (groupAugment, index) => {
       const infoField = infoFields[index];
-      const tauxAugmentationFemmes = parseFormValue(
+      const tauxAugmentationFemmes = parseFloatFormValue(
         values[infoField.tauxAugmentationFemmesName]
       );
-      const tauxAugmentationHommes = parseFormValue(
+      const tauxAugmentationHommes = parseFloatFormValue(
         values[infoField.tauxAugmentationHommesName]
       );
       const ecartTauxAugmentation = calculEcartTauxAugmentation(

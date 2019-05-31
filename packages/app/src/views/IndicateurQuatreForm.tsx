@@ -4,6 +4,8 @@ import { memo, Fragment } from "react";
 import { useForm } from "react-final-form-hooks";
 import { AppState, FormState, ActionIndicateurQuatreData } from "../globals.d";
 
+import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
+
 import { BlocFormLight } from "../components/BlocForm";
 import FieldInput, {
   HEIGHT as FieldInputHeight,
@@ -21,16 +23,6 @@ interface Props {
   validateIndicateurQuatre: (valid: FormState) => void;
 }
 
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : parseInt(value, 10);
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(value);
-
 function IndicateurQuatreForm({
   indicateurQuatre,
   readOnly,
@@ -40,10 +32,10 @@ function IndicateurQuatreForm({
   const initialValues = {
     presenceAugmentation: String(indicateurQuatre.presenceAugmentation),
     presenceCongeMat: String(indicateurQuatre.presenceCongeMat),
-    nombreSalarieesPeriodeAugmentation: parseStateValue(
+    nombreSalarieesPeriodeAugmentation: parseIntStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
     ),
-    nombreSalarieesAugmentees: parseStateValue(
+    nombreSalarieesAugmentees: parseIntStateValue(
       indicateurQuatre.nombreSalarieesAugmentees
     )
   };
@@ -59,10 +51,10 @@ function IndicateurQuatreForm({
     updateIndicateurQuatre({
       presenceAugmentation: presenceAugmentation === "true",
       presenceCongeMat: presenceCongeMat === "true",
-      nombreSalarieesPeriodeAugmentation: parseFormValue(
+      nombreSalarieesPeriodeAugmentation: parseIntFormValue(
         nombreSalarieesPeriodeAugmentation
       ),
-      nombreSalarieesAugmentees: parseFormValue(nombreSalarieesAugmentees)
+      nombreSalarieesAugmentees: parseIntFormValue(nombreSalarieesAugmentees)
     });
   };
 

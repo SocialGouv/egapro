@@ -21,9 +21,8 @@ import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
 
+import { parseFloatFormValue, parseFloatStateValue } from "../utils/formParse";
 import {
-  fractionToPercentage,
-  percentageToFraction,
   displayNameCategorieSocioPro,
   displayFractionPercent
 } from "../utils/helpers";
@@ -40,16 +39,6 @@ const getFieldName = (
   categorieSocioPro: CategorieSocioPro,
   genre: "Hommes" | "Femmes"
 ): string => "tauxPromotion" + categorieSocioPro + genre;
-
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : percentageToFraction(parseFloat(value));
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(fractionToPercentage(value));
 
 function IndicateurTroisForm({
   ecartPromoParCategorieSocioPro,
@@ -69,9 +58,9 @@ function IndicateurTroisForm({
         categorieSocioPro,
         validiteGroupe,
         tauxPromotionFemmesName: getFieldName(categorieSocioPro, "Femmes"),
-        tauxPromotionFemmesValue: parseStateValue(tauxPromotionFemmes),
+        tauxPromotionFemmesValue: parseFloatStateValue(tauxPromotionFemmes),
         tauxPromotionHommesName: getFieldName(categorieSocioPro, "Hommes"),
-        tauxPromotionHommesValue: parseStateValue(tauxPromotionHommes)
+        tauxPromotionHommesValue: parseFloatStateValue(tauxPromotionHommes)
       };
     }
   );
@@ -104,8 +93,12 @@ function IndicateurTroisForm({
         tauxPromotionHommesName
       }) => ({
         categorieSocioPro,
-        tauxPromotionFemmes: parseFormValue(formData[tauxPromotionFemmesName]),
-        tauxPromotionHommes: parseFormValue(formData[tauxPromotionHommesName])
+        tauxPromotionFemmes: parseFloatFormValue(
+          formData[tauxPromotionFemmesName]
+        ),
+        tauxPromotionHommes: parseFloatFormValue(
+          formData[tauxPromotionHommesName]
+        )
       })
     );
     updateIndicateurTrois({
@@ -143,10 +136,10 @@ function IndicateurTroisForm({
   const ecartPromoParCategorieSocioProPourTotal = ecartPromoParCategorieSocioPro.map(
     (groupAugment, index) => {
       const infoField = infoFields[index];
-      const tauxPromotionFemmes = parseFormValue(
+      const tauxPromotionFemmes = parseFloatFormValue(
         values[infoField.tauxPromotionFemmesName]
       );
-      const tauxPromotionHommes = parseFormValue(
+      const tauxPromotionHommes = parseFloatFormValue(
         values[infoField.tauxPromotionHommesName]
       );
       const ecartTauxPromotion = calculEcartTauxPromotion(

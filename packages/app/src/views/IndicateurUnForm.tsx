@@ -11,6 +11,7 @@ import {
   FormState
 } from "../globals.d";
 
+import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
 import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
 
 import BlocForm from "../components/BlocForm";
@@ -37,16 +38,6 @@ const getFieldName = (
   genre: "Hommes" | "Femmes"
 ): string =>
   "remunerationAnnuelleBrut" + categorieSocioPro + genre + trancheAge;
-
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : parseInt(value, 10);
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(value);
 
 function IndicateurUnForm({
   data,
@@ -76,7 +67,7 @@ function IndicateurUnForm({
               trancheAge,
               "Femmes"
             ),
-            remunerationAnnuelleBrutFemmesValue: parseStateValue(
+            remunerationAnnuelleBrutFemmesValue: parseIntStateValue(
               remunerationAnnuelleBrutFemmes
             ),
             remunerationAnnuelleBrutHommesName: getFieldName(
@@ -84,7 +75,7 @@ function IndicateurUnForm({
               trancheAge,
               "Hommes"
             ),
-            remunerationAnnuelleBrutHommesValue: parseStateValue(
+            remunerationAnnuelleBrutHommesValue: parseIntStateValue(
               remunerationAnnuelleBrutHommes
             )
           };
@@ -125,10 +116,10 @@ function IndicateurUnForm({
             remunerationAnnuelleBrutHommesName
           }) => ({
             trancheAge,
-            remunerationAnnuelleBrutFemmes: parseFormValue(
+            remunerationAnnuelleBrutFemmes: parseIntFormValue(
               formData[remunerationAnnuelleBrutFemmesName]
             ),
-            remunerationAnnuelleBrutHommes: parseFormValue(
+            remunerationAnnuelleBrutHommes: parseIntFormValue(
               formData[remunerationAnnuelleBrutHommesName]
             )
           })

@@ -13,6 +13,7 @@ import {
 } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
+import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
 import { displayInt } from "../utils/helpers";
 
 import { useColumnsWidth } from "../components/GridContext";
@@ -42,16 +43,6 @@ const getFieldName = (
   genre: "Hommes" | "Femmes"
 ): string => "nombreSalaries" + categorieSocioPro + genre + trancheAge;
 
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : parseInt(value, 10);
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(value);
-
 function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
   const infoFields = state.data.map(({ categorieSocioPro, tranchesAges }) => {
     return {
@@ -69,13 +60,13 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               trancheAge,
               "Femmes"
             ),
-            nbSalarieFemmeValue: parseStateValue(nombreSalariesFemmes),
+            nbSalarieFemmeValue: parseIntStateValue(nombreSalariesFemmes),
             nbSalarieHommeName: getFieldName(
               categorieSocioPro,
               trancheAge,
               "Hommes"
             ),
-            nbSalarieHommeValue: parseStateValue(nombreSalariesHommes)
+            nbSalarieHommeValue: parseIntStateValue(nombreSalariesHommes)
           };
         }
       )
@@ -110,8 +101,12 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
         tranchesAges: tranchesAges.map(
           ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => ({
             trancheAge,
-            nombreSalariesFemmes: parseFormValue(formData[nbSalarieFemmeName]),
-            nombreSalariesHommes: parseFormValue(formData[nbSalarieHommeName])
+            nombreSalariesFemmes: parseIntFormValue(
+              formData[nbSalarieFemmeName]
+            ),
+            nombreSalariesHommes: parseIntFormValue(
+              formData[nbSalarieHommeName]
+            )
           })
         )
       })
@@ -156,10 +151,10 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
           return {
             totalGroupNbSalarieHomme:
               accGroup.totalGroupNbSalarieHomme +
-              parseFormValue(values[nbSalarieHommeName], 0),
+              parseIntFormValue(values[nbSalarieHommeName], 0),
             totalGroupNbSalarieFemme:
               accGroup.totalGroupNbSalarieFemme +
-              parseFormValue(values[nbSalarieFemmeName], 0)
+              parseIntFormValue(values[nbSalarieFemmeName], 0)
           };
         },
         { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
@@ -191,10 +186,10 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               return {
                 totalGroupNbSalarieHomme:
                   accGroup.totalGroupNbSalarieHomme +
-                  parseFormValue(values[nbSalarieHommeName], 0),
+                  parseIntFormValue(values[nbSalarieHommeName], 0),
                 totalGroupNbSalarieFemme:
                   accGroup.totalGroupNbSalarieFemme +
-                  parseFormValue(values[nbSalarieFemmeName], 0)
+                  parseIntFormValue(values[nbSalarieFemmeName], 0)
               };
             },
             { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
