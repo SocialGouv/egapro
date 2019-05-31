@@ -173,8 +173,6 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
   );
 
-  console.log({ totalNbSalarieHomme, totalNbSalarieFemme });
-
   return (
     <div css={styles.page}>
       <p css={styles.blocTitle}>Indication des effectifs</p>

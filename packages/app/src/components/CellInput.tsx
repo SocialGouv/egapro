@@ -33,6 +33,29 @@ const parse = (inputValue: string) => {
     .replace(suffixPercent, "");
 };
 
+const digitRegExp = /\d/;
+const anyNonWhitespaceRegExp = /[^\s]/;
+
+// because designer don't want to block any char…
+const trickyMaskNumberToAllowAnyChar = (
+  mask: (value: string) => Array<string | RegExp>
+) => (value: string) => {
+  const valueOnlyNum = value
+    .replace(/_/g, "")
+    .replace(/%/g, "")
+    .replace(/[^\s]/g, "1");
+
+  const rawMaskArray = mask(valueOnlyNum);
+
+  const transformedMaskArray = rawMaskArray.map((char: any) => {
+    return char.source && char.source === digitRegExp.source
+      ? anyNonWhitespaceRegExp
+      : char;
+  });
+
+  return transformedMaskArray;
+};
+
 interface Props {
   field: FieldRenderProps;
   mask?: "number" | "percent" | undefined;
@@ -50,16 +73,20 @@ function CellInput({
   const error = hasFieldError(meta);
 
   const maskToUse = mask === "percent" ? percentNumberMask : numberMask;
-  const inputValue = conformToMask(value, maskToUse, {}).conformedValue;
+
+  const maskWithAnyChar = trickyMaskNumberToAllowAnyChar(maskToUse);
+
+  const inputValue = conformToMask(value, maskWithAnyChar(value), {})
+    .conformedValue;
 
   return (
     <Cell style={styles.cell}>
       {mask ? (
         <MaskedInput
-          mask={maskToUse}
+          mask={maskWithAnyChar}
           css={[styles.input, style, error && styles.inputError]}
           autoComplete="off"
-          value={error && !meta.active ? "erreur" : inputValue}
+          value={inputValue}
           onChange={event =>
             onChange({
               target: {
@@ -73,7 +100,7 @@ function CellInput({
         <input
           css={[styles.input, style, error && styles.inputError]}
           autoComplete="off"
-          value={error && !meta.active ? "erreur" : value}
+          value={value}
           onChange={onChange}
           {...inputProps}
         />
