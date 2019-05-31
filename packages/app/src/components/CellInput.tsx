@@ -10,7 +10,9 @@ import { Cell } from "./Cell";
 
 export const hasFieldError = (meta: FieldRenderProps["meta"]) =>
   (meta.error && meta.submitFailed) ||
-  (meta.error && meta.touched && meta.error.mustBeNumber);
+  (meta.error &&
+    meta.touched &&
+    Object.values({ ...meta.error, required: false }).includes(true));
 
 const numberMask = createNumberMask({
   prefix: "",

@@ -6,15 +6,11 @@ import { FormApi } from "final-form";
 
 import globalStyles from "../utils/globalStyles";
 import { displayPercent, displayInt } from "../utils/helpers";
+import { required, mustBeNumber } from "../utils/formHelpers";
 
 import { CellHead, Cell, Cell2 } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
 import { IconValid, IconInvalid } from "./Icons";
-
-const required = (value: string): boolean => (value ? false : true);
-
-const mustBeNumber = (value: string): boolean =>
-  Number.isNaN(Number(value)) ? true : false;
 
 const validate = (value: string) => {
   const requiredError = required(value);

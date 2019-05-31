@@ -13,7 +13,7 @@ import {
 } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
-import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
+import { parseIntFormValue, parseIntStateValue } from "../utils/formHelpers";
 import { displayInt } from "../utils/helpers";
 
 import { useColumnsWidth } from "../components/GridContext";

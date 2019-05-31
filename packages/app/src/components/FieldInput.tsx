@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useField } from "react-final-form-hooks";
+import { useField, FieldRenderProps } from "react-final-form-hooks";
 import { FormApi } from "final-form";
 
 import globalStyles from "../utils/globalStyles";
@@ -9,20 +9,11 @@ import { CellHead, Cell } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
 import { IconValid, IconInvalid } from "./Icons";
 
-const required = (value: string): boolean => (value ? false : true);
+const hasMinMaxInputError = (meta: FieldRenderProps["meta"]) =>
+  meta.error && meta.touched && (meta.error.minNumber || meta.error.maxNumber);
 
-const mustBeNumber = (value: string): boolean =>
-  Number.isNaN(Number(value)) ? true : false;
-
-export const validate = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  if (!requiredError && !mustBeNumberError) {
-    return undefined;
-  } else {
-    return { required: requiredError, mustBeNumber: mustBeNumberError };
-  }
-};
+const hasPreviousFieldInputError = (meta: FieldRenderProps["meta"]) =>
+  meta.error && meta.touched && meta.error.previousField;
 
 interface Props {
   form: FormApi;
@@ -32,8 +23,10 @@ interface Props {
 }
 
 function FieldInput({ form, fieldName, label, readOnly }: Props) {
-  const field = useField(fieldName, form, validate);
+  const field = useField(fieldName, form);
   const error = hasFieldError(field.meta);
+  const minMaxError = hasMinMaxInputError(field.meta);
+  const previousFieldError = hasPreviousFieldInputError(field.meta);
 
   return (
     <div css={styles.container}>
@@ -61,11 +54,20 @@ function FieldInput({ form, fieldName, label, readOnly }: Props) {
           <CellInput field={field} style={styles.cellWomen} />
         )}
       </div>
-      {error && (
-        <div css={styles.error}>
-          ce champs n’est pas valide, renseignez une valeur numérique
-        </div>
-      )}
+      {error &&
+        (minMaxError ? (
+          <div css={styles.error}>
+            ce champs doit contenir une valeur entre 0 et 10
+          </div>
+        ) : previousFieldError ? (
+          <div css={styles.error}>
+            ce champs ne peut être supérieur au précédent
+          </div>
+        ) : (
+          <div css={styles.error}>
+            ce champs n’est pas valide, renseignez une valeur numérique
+          </div>
+        ))}
     </div>
   );
 }

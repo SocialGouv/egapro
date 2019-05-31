@@ -21,7 +21,10 @@ import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
 
-import { parseFloatFormValue, parseFloatStateValue } from "../utils/formParse";
+import {
+  parseFloatFormValue,
+  parseFloatStateValue
+} from "../utils/formHelpers";
 import {
   displayNameCategorieSocioPro,
   displayFractionPercent

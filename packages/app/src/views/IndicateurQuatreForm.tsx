@@ -4,7 +4,13 @@ import { memo, Fragment } from "react";
 import { useForm } from "react-final-form-hooks";
 import { AppState, FormState, ActionIndicateurQuatreData } from "../globals.d";
 
-import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
+import {
+  parseIntFormValue,
+  parseIntStateValue,
+  required,
+  mustBeNumber,
+  maxNumber
+} from "../utils/formHelpers";
 
 import { BlocFormLight } from "../components/BlocForm";
 import FieldInput, {
@@ -15,6 +21,52 @@ import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
+
+const validate = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  if (!requiredError && !mustBeNumberError) {
+    return undefined;
+  } else {
+    return { required: requiredError, mustBeNumber: mustBeNumberError };
+  }
+};
+
+const validateWithPreviousField = (
+  value: string,
+  valuePreviousField: string
+) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  const maxNumberError = maxNumber(value, Number(valuePreviousField));
+  if (!requiredError && !mustBeNumberError && !maxNumberError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeNumber: mustBeNumberError,
+      previousField: maxNumberError
+    };
+  }
+};
+
+const validateForm = ({
+  nombreSalarieesPeriodeAugmentation,
+  nombreSalarieesAugmentees
+}: {
+  nombreSalarieesPeriodeAugmentation: string;
+  nombreSalarieesAugmentees: string;
+}) => ({
+  nombreSalarieesPeriodeAugmentation: validate(
+    nombreSalarieesPeriodeAugmentation
+  ),
+  nombreSalarieesAugmentees: validateWithPreviousField(
+    nombreSalarieesAugmentees,
+    nombreSalarieesPeriodeAugmentation
+  )
+});
+
+///////////////
 
 interface Props {
   indicateurQuatre: AppState["indicateurQuatre"];
@@ -71,7 +123,8 @@ function IndicateurQuatreForm({
     submitFailed
   } = useForm({
     initialValues,
-    onSubmit
+    onSubmit,
+    validate: validateForm
   });
 
   form.subscribe(

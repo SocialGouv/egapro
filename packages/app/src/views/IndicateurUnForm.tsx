@@ -11,7 +11,7 @@ import {
   FormState
 } from "../globals.d";
 
-import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
+import { parseIntFormValue, parseIntStateValue } from "../utils/formHelpers";
 import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
 
 import BlocForm from "../components/BlocForm";

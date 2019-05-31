@@ -6,20 +6,53 @@ import createDecorator from "final-form-calculate";
 
 import { AppState, FormState, ActionIndicateurCinqData } from "../globals.d";
 
-import { parseIntFormValue, parseIntStateValue } from "../utils/formParse";
+import {
+  parseIntFormValue,
+  parseIntStateValue,
+  required,
+  mustBeNumber,
+  minNumber,
+  maxNumber
+} from "../utils/formHelpers";
 
 import { BlocFormLight } from "../components/BlocForm";
-import FieldInput, { validate } from "../components/FieldInput";
+import FieldInput from "../components/FieldInput";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
 
-interface Props {
-  indicateurCinq: AppState["indicateurCinq"];
-  readOnly: boolean;
-  updateIndicateurCinq: (data: ActionIndicateurCinqData) => void;
-  validateIndicateurCinq: (valid: FormState) => void;
-}
+const validate = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  const minNumberError = minNumber(value, 0);
+  const maxNumberError = maxNumber(value, 10);
+  if (
+    !requiredError &&
+    !mustBeNumberError &&
+    !minNumberError &&
+    !maxNumberError
+  ) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeNumber: mustBeNumberError,
+      minNumber: minNumberError,
+      maxNumber: maxNumberError
+    };
+  }
+};
+
+const validateForm = ({
+  nombreSalariesFemmes,
+  nombreSalariesHommes
+}: {
+  nombreSalariesFemmes: string;
+  nombreSalariesHommes: string;
+}) => ({
+  nombreSalariesFemmes: validate(nombreSalariesFemmes),
+  nombreSalariesHommes: validate(nombreSalariesHommes)
+});
 
 const valueValidateForCalculator = (value: string) => {
   return validate(value) === undefined;
@@ -45,6 +78,15 @@ const calculator = createDecorator(
     }
   }
 );
+
+///////////////////
+
+interface Props {
+  indicateurCinq: AppState["indicateurCinq"];
+  readOnly: boolean;
+  updateIndicateurCinq: (data: ActionIndicateurCinqData) => void;
+  validateIndicateurCinq: (valid: FormState) => void;
+}
 
 function IndicateurCinqForm({
   indicateurCinq,
@@ -77,7 +119,8 @@ function IndicateurCinqForm({
 
   const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
     initialValues,
-    onSubmit
+    onSubmit,
+    validate: validateForm
   });
 
   useEffect(() => {
