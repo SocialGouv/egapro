@@ -225,7 +225,7 @@ interface MainScrollViewProps extends RouteComponentProps {
 function MainScrollView({ children, state, location }: MainScrollViewProps) {
   // Usefull to reset the scroll while navigating
   return (
-    <div css={styles.main} key={location.key}>
+    <div css={styles.main} key={location.pathname}>
       <div css={styles.menu}>
         <Menu
           effectifFormValidated={state.effectif.formValidated}

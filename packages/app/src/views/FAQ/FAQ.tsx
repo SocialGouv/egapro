@@ -13,22 +13,22 @@ function FAQ() {
   return (
     <Route
       render={({ location }) => {
+        console.log(location);
+        const locationFAQ = {
+          pathname:
+            location.state && location.state.faq
+              ? location.state.faq
+              : location.pathname,
+          search: "",
+          hash: "",
+          state: undefined
+        };
         return (
           <div css={styles.container}>
-            <FAQHeader />
+            <FAQHeader location={locationFAQ} />
 
-            <div css={styles.content}>
-              <Switch
-                location={{
-                  pathname:
-                    location.state && location.state.faq
-                      ? location.state.faq
-                      : location.pathname,
-                  search: "",
-                  hash: "",
-                  state: undefined
-                }}
-              >
+            <div css={styles.content} key={locationFAQ.pathname}>
+              <Switch location={locationFAQ}>
                 <Route path="/" exact render={() => <FAQHome />} />
 
                 <Route
@@ -103,7 +103,9 @@ const styles = {
   }),
   content: css({
     overflowY: "auto",
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
     display: "flex",
     flexDirection: "column",
     paddingRight: 29,
