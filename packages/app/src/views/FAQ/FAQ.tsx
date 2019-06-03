@@ -8,12 +8,12 @@ import FAQHeader from "./components/FAQHeader";
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
 import FAQQuestion from "./FAQQuestion";
+import FAQIndicateur2 from "./FAQIndicateur2";
 
 function FAQ() {
   return (
     <Route
       render={({ location }) => {
-        console.log(location);
         const locationFAQ = {
           pathname:
             location.state && location.state.faq
@@ -68,7 +68,7 @@ function FAQ() {
                 />
                 <Route
                   path="/indicateur2"
-                  render={() => <FAQSection section="indicateur2et3" />}
+                  render={() => <FAQIndicateur2 section="indicateur2et3" />}
                 />
                 <Route
                   path="/indicateur3"

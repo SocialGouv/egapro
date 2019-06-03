@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 import globalStyles from "../../../utils/globalStyles";
 
-function FAQTitle({ children }: { children: ReactNode }) {
+function FAQTitle2({ children }: { children: ReactNode }) {
   return (
     <div css={styles.container}>
       <span css={styles.title}>{children}</span>
@@ -14,14 +14,15 @@ function FAQTitle({ children }: { children: ReactNode }) {
 
 const styles = {
   container: css({
-    marginBottom: 26
+    marginBottom: 12
   }),
   title: css({
-    fontSize: 18,
-    lineHeight: "22px",
+    fontSize: 12,
+    fontWeight: "bold",
+    lineHeight: "15px",
     color: globalStyles.colors.women,
     textTransform: "uppercase"
   })
 };
 
-export default FAQTitle;
+export default FAQTitle2;

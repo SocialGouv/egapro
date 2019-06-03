@@ -158,3 +158,13 @@ export interface Groupe {
   tauxPromotionFemmes: number | undefined;
   tauxPromotionHommes: number | undefined;
 }
+
+export type FAQSectionType =
+  | "champApplication"
+  | "periodeReference"
+  | "effectifs"
+  | "remuneration"
+  | "indicateur1"
+  | "indicateur2et3"
+  | "indicateur4"
+  | "publication";
