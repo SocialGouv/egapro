@@ -1,15 +1,72 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
+import { memo, Fragment } from "react";
 import { useForm } from "react-final-form-hooks";
 import { AppState, FormState, ActionIndicateurQuatreData } from "../globals.d";
 
+import {
+  parseIntFormValue,
+  parseIntStateValue,
+  required,
+  mustBeNumber,
+  maxNumber
+} from "../utils/formHelpers";
+
 import { BlocFormLight } from "../components/BlocForm";
-import FieldInput from "../components/FieldInput";
+import FieldInput, {
+  HEIGHT as FieldInputHeight,
+  MARGIN_TOP as FieldInputMarginTop
+} from "../components/FieldInput";
 import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
 import ButtonLink from "../components/ButtonLink";
+
+const validate = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  if (!requiredError && !mustBeNumberError) {
+    return undefined;
+  } else {
+    return { required: requiredError, mustBeNumber: mustBeNumberError };
+  }
+};
+
+const validateWithPreviousField = (
+  value: string,
+  valuePreviousField: string
+) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  const maxNumberError = maxNumber(value, Number(valuePreviousField));
+  if (!requiredError && !mustBeNumberError && !maxNumberError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeNumber: mustBeNumberError,
+      previousField: maxNumberError
+    };
+  }
+};
+
+const validateForm = ({
+  nombreSalarieesPeriodeAugmentation,
+  nombreSalarieesAugmentees
+}: {
+  nombreSalarieesPeriodeAugmentation: string;
+  nombreSalarieesAugmentees: string;
+}) => ({
+  nombreSalarieesPeriodeAugmentation: validate(
+    nombreSalarieesPeriodeAugmentation
+  ),
+  nombreSalarieesAugmentees: validateWithPreviousField(
+    nombreSalarieesAugmentees,
+    nombreSalarieesPeriodeAugmentation
+  )
+});
+
+///////////////
 
 interface Props {
   indicateurQuatre: AppState["indicateurQuatre"];
@@ -17,16 +74,6 @@ interface Props {
   updateIndicateurQuatre: (data: ActionIndicateurQuatreData) => void;
   validateIndicateurQuatre: (valid: FormState) => void;
 }
-
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : parseInt(value, 10);
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(value);
 
 function IndicateurQuatreForm({
   indicateurQuatre,
@@ -36,11 +83,11 @@ function IndicateurQuatreForm({
 }: Props) {
   const initialValues = {
     presenceAugmentation: String(indicateurQuatre.presenceAugmentation),
-    nombreSalariees: parseStateValue(indicateurQuatre.nombreSalariees),
-    nombreSalarieesPeriodeAugmentation: parseStateValue(
+    presenceCongeMat: String(indicateurQuatre.presenceCongeMat),
+    nombreSalarieesPeriodeAugmentation: parseIntStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
     ),
-    nombreSalarieesAugmentees: parseStateValue(
+    nombreSalarieesAugmentees: parseIntStateValue(
       indicateurQuatre.nombreSalarieesAugmentees
     )
   };
@@ -48,18 +95,18 @@ function IndicateurQuatreForm({
   const saveForm = (formData: any) => {
     const {
       presenceAugmentation,
-      nombreSalariees,
+      presenceCongeMat,
       nombreSalarieesPeriodeAugmentation,
       nombreSalarieesAugmentees
     } = formData;
 
     updateIndicateurQuatre({
       presenceAugmentation: presenceAugmentation === "true",
-      nombreSalariees: parseFormValue(nombreSalariees),
-      nombreSalarieesPeriodeAugmentation: parseFormValue(
+      presenceCongeMat: presenceCongeMat === "true",
+      nombreSalarieesPeriodeAugmentation: parseIntFormValue(
         nombreSalarieesPeriodeAugmentation
       ),
-      nombreSalarieesAugmentees: parseFormValue(nombreSalarieesAugmentees)
+      nombreSalarieesAugmentees: parseIntFormValue(nombreSalarieesAugmentees)
     });
   };
 
@@ -76,7 +123,8 @@ function IndicateurQuatreForm({
     submitFailed
   } = useForm({
     initialValues,
-    onSubmit
+    onSubmit,
+    validate: validateForm
   });
 
   form.subscribe(
@@ -100,24 +148,32 @@ function IndicateurQuatreForm({
 
       {values.presenceAugmentation === "true" && (
         <BlocFormLight>
-          <FieldInput
+          <RadiosBoolean
             form={form}
-            fieldName="nombreSalariees"
-            label="nombre de salariées de retour de congé maternité"
+            fieldName="presenceCongeMat"
             readOnly={readOnly}
+            labelTrue="il y a eu des retours de congé maternité pendant la période de référence"
+            labelFalse="il n’y a pas eu de retour de congé maternité pendant la période de référence"
           />
-          <FieldInput
-            form={form}
-            fieldName="nombreSalarieesPeriodeAugmentation"
-            label="parmis ces congès maternité, combien ont chevauchée une periode d’augmentation"
-            readOnly={readOnly}
-          />
-          <FieldInput
-            form={form}
-            fieldName="nombreSalarieesAugmentees"
-            label="parmis ces congès maternité ayant chevauchée une periode d’augmentation, combien ont été augmentées ?"
-            readOnly={readOnly}
-          />
+          <div css={styles.spacer} />
+          {values.presenceCongeMat === "true" ? (
+            <Fragment>
+              <FieldInput
+                form={form}
+                fieldName="nombreSalarieesPeriodeAugmentation"
+                label="pour combien de salariées, ces congés maternités ont eu lieu pendant des périodes d’augmentation"
+                readOnly={readOnly}
+              />
+              <FieldInput
+                form={form}
+                fieldName="nombreSalarieesAugmentees"
+                label="parmi ces salariées combien ont été augmentées à leur retour"
+                readOnly={readOnly}
+              />
+            </Fragment>
+          ) : (
+            <div css={styles.emptyFields} />
+          )}
         </BlocFormLight>
       )}
 
@@ -142,6 +198,12 @@ const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
+  }),
+  spacer: css({
+    height: 24
+  }),
+  emptyFields: css({
+    height: (FieldInputHeight + FieldInputMarginTop) * 2
   })
 };
 

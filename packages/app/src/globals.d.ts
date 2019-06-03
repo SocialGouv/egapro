@@ -17,7 +17,7 @@ export type AppState = {
   indicateurQuatre: {
     formValidated: FormState;
     presenceAugmentation: boolean;
-    nombreSalariees: number | undefined;
+    presenceCongeMat: boolean;
     nombreSalarieesPeriodeAugmentation: number | undefined;
     nombreSalarieesAugmentees: number | undefined;
   };
@@ -118,7 +118,7 @@ export type ActionIndicateurTroisData = {
 
 export type ActionIndicateurQuatreData = {
   presenceAugmentation: boolean;
-  nombreSalariees: number | undefined;
+  presenceCongeMat: boolean;
   nombreSalarieesPeriodeAugmentation: number | undefined;
   nombreSalarieesAugmentees: number | undefined;
 };

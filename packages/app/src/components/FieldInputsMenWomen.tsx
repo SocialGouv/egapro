@@ -5,14 +5,12 @@ import { useField } from "react-final-form-hooks";
 import { FormApi } from "final-form";
 
 import globalStyles from "../utils/globalStyles";
+import { displayPercent, displayInt } from "../utils/helpers";
+import { required, mustBeNumber } from "../utils/formHelpers";
 
 import { CellHead, Cell, Cell2 } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
-
-const required = (value: string): boolean => (value ? false : true);
-
-const mustBeNumber = (value: string): boolean =>
-  Number.isNaN(Number(value)) ? true : false;
+import { IconValid, IconInvalid } from "./Icons";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -30,9 +28,22 @@ interface Props {
   name: string;
   calculable: boolean;
   calculableNumber: number;
+  mask?: "number" | "percent" | undefined;
   femmeFieldName: string;
   hommeFieldName: string;
 }
+
+const displayReadOnlyValue = (
+  value: string,
+  mask?: "number" | "percent" | undefined
+) => {
+  if (!mask || !value) {
+    return value;
+  }
+  return mask === "percent"
+    ? displayPercent(Number(value))
+    : displayInt(Number(value));
+};
 
 function FieldInputsMenWomen({
   form,
@@ -40,6 +51,7 @@ function FieldInputsMenWomen({
   readOnly,
   calculable,
   calculableNumber,
+  mask,
   femmeFieldName,
   hommeFieldName
 }: Props) {
@@ -68,31 +80,43 @@ function FieldInputsMenWomen({
             error && calculable && styles.cellHeadError
           ]}
         >
-          {femmesField.meta.valid && hommesField.meta.valid
-            ? calculable
-              ? "✓ "
-              : "✕ "
-            : error
-            ? "✕ "
-            : null}
-          {name}
+          {femmesField.meta.valid && hommesField.meta.valid ? (
+            calculable ? (
+              <div css={styles.cellHeadIcon}>
+                <IconValid />
+              </div>
+            ) : (
+              <div css={styles.cellHeadIcon}>
+                <IconInvalid />
+              </div>
+            )
+          ) : error ? (
+            <div css={styles.cellHeadIcon}>
+              <IconInvalid />
+            </div>
+          ) : null}
+          <span>{name}</span>
         </CellHead>
 
         {readOnly ? (
           <React.Fragment>
             <Cell style={[styles.cellEmpty, styles.cellEmptyMen]}>
-              {hommesField.input.value}
+              {displayReadOnlyValue(hommesField.input.value, mask)}
             </Cell>
 
             <Cell style={[styles.cellEmpty, styles.cellEmptyWomen]}>
-              {femmesField.input.value}
+              {displayReadOnlyValue(femmesField.input.value, mask)}
             </Cell>
           </React.Fragment>
         ) : calculable ? (
           <React.Fragment>
-            <CellInput field={hommesField} style={styles.cellMen} />
+            <CellInput field={hommesField} mask={mask} style={styles.cellMen} />
 
-            <CellInput field={femmesField} style={styles.cellWomen} />
+            <CellInput
+              field={femmesField}
+              mask={mask}
+              style={styles.cellWomen}
+            />
           </React.Fragment>
         ) : (
           <Cell2 css={styles.cell2} />
@@ -143,6 +167,9 @@ const styles = {
     color: globalStyles.colors.error,
     borderColor: "transparent"
   }),
+  cellHeadIcon: css({
+    marginRight: 5
+  }),
   cell2: css({
     textAlign: "center"
   }),
@@ -170,7 +197,7 @@ const styles = {
     height: 23,
     paddingBottom: 4,
     color: globalStyles.colors.invalid,
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.invalid} 1px`
@@ -181,7 +208,7 @@ const styles = {
     height: 18,
     marginTop: 5,
     color: globalStyles.colors.error,
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.error} 1px`

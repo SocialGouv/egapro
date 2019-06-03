@@ -12,6 +12,7 @@ import { RowDataFull, RowLabelFull } from "./components/RowData";
 
 interface Props {
   indicateurTroisFormValidated: FormState;
+  effectifsIndicateurTroisCalculable: boolean;
   indicateurTroisCalculable: boolean;
   effectifEtEcartPromoParGroupe: Array<{
     categorieSocioPro: CategorieSocioPro;
@@ -24,12 +25,24 @@ interface Props {
 
 function RecapitulatifIndicateurTrois({
   indicateurTroisFormValidated,
+  effectifsIndicateurTroisCalculable,
   indicateurTroisCalculable,
   effectifEtEcartPromoParGroupe,
   indicateurEcartPromotion,
   indicateurSexeSurRepresente,
   noteIndicateurTrois
 }: Props) {
+  if (!effectifsIndicateurTroisCalculable) {
+    return (
+      <div css={styles.container}>
+        <InfoBloc
+          title="Indicateur 3, écart de taux de promotion entre les hommes et les femmes"
+          text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
+        />
+      </div>
+    );
+  }
+
   if (indicateurTroisFormValidated !== "Valid") {
     return (
       <div css={styles.container}>

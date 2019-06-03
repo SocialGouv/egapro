@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
-import { Link, RouteComponentProps } from "react-router-dom";
+import { memo, Fragment } from "react";
+import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
   AppState,
@@ -13,6 +13,8 @@ import {
 } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
+import { parseIntFormValue, parseIntStateValue } from "../utils/formHelpers";
+import { displayInt } from "../utils/helpers";
 
 import { useColumnsWidth } from "../components/GridContext";
 import BlocForm from "../components/BlocForm";
@@ -20,6 +22,9 @@ import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
 import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
+import TextLink from "../components/TextLink";
+import InfoBloc from "../components/InfoBloc";
+import { Cell, Cell2 } from "../components/Cell";
 
 import {
   displayNameCategorieSocioPro,
@@ -38,16 +43,6 @@ const getFieldName = (
   genre: "Hommes" | "Femmes"
 ): string => "nombreSalaries" + categorieSocioPro + genre + trancheAge;
 
-const parseFormValue = (value: string, defaultValue: any = undefined) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : parseInt(value, 10);
-
-const parseStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(value);
-
 function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
   const infoFields = state.data.map(({ categorieSocioPro, tranchesAges }) => {
     return {
@@ -65,13 +60,13 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
               trancheAge,
               "Femmes"
             ),
-            nbSalarieFemmeValue: parseStateValue(nombreSalariesFemmes),
+            nbSalarieFemmeValue: parseIntStateValue(nombreSalariesFemmes),
             nbSalarieHommeName: getFieldName(
               categorieSocioPro,
               trancheAge,
               "Hommes"
             ),
-            nbSalarieHommeValue: parseStateValue(nombreSalariesHommes)
+            nbSalarieHommeValue: parseIntStateValue(nombreSalariesHommes)
           };
         }
       )
@@ -106,8 +101,12 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
         tranchesAges: tranchesAges.map(
           ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => ({
             trancheAge,
-            nombreSalariesFemmes: parseFormValue(formData[nbSalarieFemmeName]),
-            nombreSalariesHommes: parseFormValue(formData[nbSalarieHommeName])
+            nombreSalariesFemmes: parseIntFormValue(
+              formData[nbSalarieFemmeName]
+            ),
+            nombreSalariesHommes: parseIntFormValue(
+              formData[nbSalarieHommeName]
+            )
           })
         )
       })
@@ -142,6 +141,33 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
 
   const width = useColumnsWidth(4);
 
+  const { totalNbSalarieHomme, totalNbSalarieFemme } = infoFields.reduce(
+    (acc, { tranchesAges }) => {
+      const {
+        totalGroupNbSalarieHomme,
+        totalGroupNbSalarieFemme
+      } = tranchesAges.reduce(
+        (accGroup, { nbSalarieHommeName, nbSalarieFemmeName }) => {
+          return {
+            totalGroupNbSalarieHomme:
+              accGroup.totalGroupNbSalarieHomme +
+              parseIntFormValue(values[nbSalarieHommeName], 0),
+            totalGroupNbSalarieFemme:
+              accGroup.totalGroupNbSalarieFemme +
+              parseIntFormValue(values[nbSalarieFemmeName], 0)
+          };
+        },
+        { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
+      );
+
+      return {
+        totalNbSalarieHomme: acc.totalNbSalarieHomme + totalGroupNbSalarieHomme,
+        totalNbSalarieFemme: acc.totalNbSalarieFemme + totalGroupNbSalarieFemme
+      };
+    },
+    { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
+  );
+
   return (
     <div css={styles.page}>
       <p css={styles.blocTitle}>Indication des effectifs</p>
@@ -152,22 +178,31 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
 
       <form onSubmit={handleSubmit} css={[styles.bloc, css({ width })]}>
         {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
-          const totalNbSalarie = tranchesAges.reduce(
-            (acc, { nbSalarieFemmeName, nbSalarieHommeName }) => {
-              return (
-                acc +
-                parseFormValue(values[nbSalarieFemmeName], 0) +
-                parseFormValue(values[nbSalarieHommeName], 0)
-              );
+          const {
+            totalGroupNbSalarieHomme,
+            totalGroupNbSalarieFemme
+          } = tranchesAges.reduce(
+            (accGroup, { nbSalarieHommeName, nbSalarieFemmeName }) => {
+              return {
+                totalGroupNbSalarieHomme:
+                  accGroup.totalGroupNbSalarieHomme +
+                  parseIntFormValue(values[nbSalarieHommeName], 0),
+                totalGroupNbSalarieFemme:
+                  accGroup.totalGroupNbSalarieFemme +
+                  parseIntFormValue(values[nbSalarieFemmeName], 0)
+              };
             },
-            0
+            { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
           );
           return (
             <BlocForm
               key={categorieSocioPro}
               title={displayNameCategorieSocioPro(categorieSocioPro)}
               label="nombre de salariés"
-              footer={String(totalNbSalarie)}
+              footer={[
+                displayInt(totalGroupNbSalarieHomme),
+                displayInt(totalGroupNbSalarieFemme)
+              ]}
             >
               {tranchesAges.map(
                 ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => {
@@ -179,6 +214,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
                       name={displayNameTranchesAges(trancheAge)}
                       calculable={true}
                       calculableNumber={0}
+                      mask="number"
                       femmeFieldName={nbSalarieFemmeName}
                       hommeFieldName={nbSalarieHommeName}
                     />
@@ -188,6 +224,23 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
             </BlocForm>
           );
         })}
+
+        <div css={styles.rowFoot}>
+          <div css={styles.rowFootText}>total des effectifs</div>
+          <Cell style={styles.rowFootCell}>
+            {displayInt(totalNbSalarieHomme)}
+          </Cell>
+          <Cell style={styles.rowFootCell}>
+            {displayInt(totalNbSalarieFemme)}
+          </Cell>
+        </div>
+
+        <div css={styles.rowFoot}>
+          <div css={styles.rowFootText}>soit</div>
+          <Cell2 style={styles.rowFootCell}>
+            {displayInt(totalNbSalarieHomme + totalNbSalarieFemme)}
+          </Cell2>
+        </div>
 
         {state.effectif.formValidated === "Valid" ? (
           <div css={styles.action}>
@@ -219,21 +272,48 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
       </form>
 
       {state.effectif.formValidated === "Valid" &&
-        state.indicateurUn.formValidated === "Invalid" && (
-          <div css={styles.indicatorInvalid}>
-            <p css={styles.indicatorInvalidTitle}>
-              Vos effectifs ont été modifiés
-            </p>
-            <p css={styles.indicatorInvalidText}>
-              afin de s'assurer de la cohérence de votre index, merci de
-              vérifier les données de vos indicateurs.
-            </p>
-            <p css={styles.indicatorInvalidText}>
-              <Link to="/indicateur1" css={styles.indicatorInvalidLink}>
-                aller à l'indicateur 1
-              </Link>
-            </p>
-          </div>
+        (state.indicateurUn.formValidated === "Invalid" ||
+          state.indicateurDeux.formValidated === "Invalid" ||
+          state.indicateurTrois.formValidated === "Invalid") && (
+          <InfoBloc
+            title="Vos effectifs ont été modifiés"
+            icon="cross"
+            text={
+              <Fragment>
+                <span>
+                  afin de s'assurer de la cohérence de votre index, merci de
+                  vérifier les données de vos indicateurs.
+                </span>
+                <br />
+                <span>
+                  {state.indicateurUn.formValidated === "Invalid" && (
+                    <Fragment>
+                      <TextLink
+                        to="/indicateur1"
+                        label="aller à l'indicateur 1"
+                      />
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {state.indicateurDeux.formValidated === "Invalid" && (
+                    <Fragment>
+                      <TextLink
+                        to="/indicateur2"
+                        label="aller à l'indicateur 2"
+                      />
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {state.indicateurTrois.formValidated === "Invalid" && (
+                    <TextLink
+                      to="/indicateur3"
+                      label="aller à l'indicateur 3"
+                    />
+                  )}
+                </span>
+              </Fragment>
+            }
+          />
         )}
     </div>
   );
@@ -273,23 +353,22 @@ const styles = {
     fontSize: 12
   }),
 
-  indicatorInvalid: css({
-    padding: 16,
-    border: `solid ${globalStyles.colors.default} 1px`
+  rowFoot: css({
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    height: 16,
+    marginTop: 10,
+    paddingRight: 20
   }),
-  indicatorInvalidTitle: css({
-    fontSize: 18,
-    lineHeight: "22px",
-    textTransform: "uppercase"
-  }),
-  indicatorInvalidText: css({
-    marginTop: 4,
+  rowFootCell: css({
     fontSize: 14,
-    lineHeight: "17px"
+    textAlign: "center"
   }),
-  indicatorInvalidLink: css({
-    color: globalStyles.colors.default,
-    textDecoration: "underline"
+  rowFootText: css({
+    fontStyle: "italic",
+    fontSize: 14,
+    marginLeft: "auto"
   })
 };
 

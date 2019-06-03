@@ -2,6 +2,8 @@
 import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
 
+import { Route, Switch } from "react-router-dom";
+
 import globalStyles from "../utils/globalStyles";
 
 function FAQHeader() {
@@ -120,7 +122,81 @@ function FAQ() {
       <FAQHeader />
 
       <div css={styles.content}>
-        <img css={css({})} src={process.env.PUBLIC_URL + "/faq-fake.png"} />
+        <Switch>
+          <Route
+            path="/"
+            exact
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-home.jpg"}
+              />
+            )}
+          />
+          <Route
+            path="/effectifs"
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-eff.jpg"}
+              />
+            )}
+          />
+          <Route
+            path="/indicateur1"
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-indic1.jpg"}
+              />
+            )}
+          />
+          <Route
+            path="/indicateur2"
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-indic2.jpg"}
+              />
+            )}
+          />
+          <Route
+            path="/indicateur3"
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-indic3.jpg"}
+              />
+            )}
+          />
+          <Route
+            path="/indicateur4"
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-indic4.jpg"}
+              />
+            )}
+          />
+          <Route
+            path="/indicateur5"
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-indic5.jpg"}
+              />
+            )}
+          />
+          <Route
+            path="/recapitulatif"
+            render={() => (
+              <img
+                css={css({ width: 375 })}
+                src={process.env.PUBLIC_URL + "/faq-fake-recap.jpg"}
+              />
+            )}
+          />
+        </Switch>
         {/*<div css={css({ marginBottom: 26 })}>
           <FAQTitle>Champ d'application et entrée en vigueur</FAQTitle>
         </div>

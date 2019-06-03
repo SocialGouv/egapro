@@ -94,7 +94,7 @@ const defaultState: AppState = {
   indicateurQuatre: {
     formValidated: "None",
     presenceAugmentation: true,
-    nombreSalariees: undefined,
+    presenceCongeMat: true,
     nombreSalarieesPeriodeAugmentation: undefined,
     nombreSalarieesAugmentees: undefined
   },

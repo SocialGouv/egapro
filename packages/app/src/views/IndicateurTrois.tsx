@@ -18,6 +18,7 @@ import InfoBloc from "../components/InfoBloc";
 import ActionBar from "../components/ActionBar";
 import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
+import TextLink from "../components/TextLink";
 
 import IndicateurTroisForm from "./IndicateurTroisForm";
 import IndicateurTroisResult from "./IndicateurTroisResult";
@@ -52,12 +53,10 @@ function IndicateurTrois({ state, dispatch }: Props) {
   if (state.effectif.formValidated !== "Valid") {
     return (
       <PageIndicateurTrois>
-        <div>
-          <InfoBloc title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur" />
-          <ActionBar>
-            <ButtonLink to="/effectifs" label="renseigner les effectifs" />
-          </ActionBar>
-        </div>
+        <InfoBloc
+          title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+          text={<TextLink to="/effectifs" label="renseigner les effectifs" />}
+        />
       </PageIndicateurTrois>
     );
   }

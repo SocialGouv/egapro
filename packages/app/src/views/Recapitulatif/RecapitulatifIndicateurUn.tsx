@@ -15,6 +15,7 @@ import RowData, { RowLabels, RowLabelFull } from "./components/RowData";
 
 interface Props {
   indicateurUnFormValidated: FormState;
+  effectifsIndicateurUnCalculable: boolean;
   effectifEtEcartRemuParTranche: Array<{
     ecartRemunerationMoyenne: number | undefined;
   }>;
@@ -25,11 +26,23 @@ interface Props {
 
 function RecapitulatifIndicateurUn({
   indicateurUnFormValidated,
+  effectifsIndicateurUnCalculable,
   effectifEtEcartRemuParTranche,
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
   noteIndicateurUn
 }: Props) {
+  if (!effectifsIndicateurUnCalculable) {
+    return (
+      <div css={styles.container}>
+        <InfoBloc
+          title="Indicateur 1, écart de rémunération entre les hommes et les femmes"
+          text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
+        />
+      </div>
+    );
+  }
+
   if (indicateurUnFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
