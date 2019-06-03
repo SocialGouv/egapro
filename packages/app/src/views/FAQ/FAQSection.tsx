@@ -1,5 +1,8 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Link } from "react-router-dom";
+
+import globalStyles from "../../utils/globalStyles";
 
 import FAQSearchBox from "./components/FAQSearchBox";
 import FAQTitle from "./components/FAQTitle";
@@ -7,7 +10,15 @@ import FAQTitle from "./components/FAQTitle";
 import faqData from "../../data/faq";
 
 interface Props {
-  section: "champApplication" | "periodeReference";
+  section:
+    | "champApplication"
+    | "periodeReference"
+    | "effectifs"
+    | "remuneration"
+    | "indicateur1"
+    | "indicateur2et3"
+    | "indicateur4"
+    | "publication";
 }
 
 function FAQSection({ section }: Props) {
@@ -15,17 +26,19 @@ function FAQSection({ section }: Props) {
 
   return (
     <div css={styles.container}>
-      <div css={css({ marginBottom: 26 })}>
-        <FAQTitle>{faqSection.title}</FAQTitle>
-      </div>
+      <FAQTitle>{faqSection.title}</FAQTitle>
 
       <FAQSearchBox />
 
       <div css={styles.content}>
         {faqSection.qr.map(({ question }, index) => (
-          <p key={index} css={styles.questionRow}>
-            • {question}
-          </p>
+          <Link
+            key={index}
+            to={{ state: { faq: `/section/${section}/question/${index}` } }}
+            css={styles.link}
+          >
+            <p css={styles.questionRow}>• {question}</p>
+          </Link>
         ))}
       </div>
     </div>
@@ -49,6 +62,11 @@ const styles = {
 
     fontSize: 14,
     lineHeight: "17px"
+  }),
+
+  link: css({
+    color: globalStyles.colors.default,
+    textDecoration: "none"
   })
 };
 

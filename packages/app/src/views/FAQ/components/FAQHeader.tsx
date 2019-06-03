@@ -17,7 +17,9 @@ const styles = {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderBottom: "1px solid #EFECEF"
+    borderBottom: "1px solid #EFECEF",
+    marginRight: 29,
+    marginLeft: 29
   }),
   title: css({
     fontFamily: "'Gabriela', serif",

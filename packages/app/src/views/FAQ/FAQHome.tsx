@@ -17,6 +17,7 @@ function FAQHome() {
         {faqData.map(([faqKey, faqDatum]) => (
           <FAQSectionRow
             key={faqKey}
+            section={faqKey}
             title={faqDatum.title}
             detail={`${faqDatum.qr.length} articles`}
           />

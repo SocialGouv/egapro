@@ -4,7 +4,11 @@ import { css, jsx } from "@emotion/core";
 function Logo() {
   return (
     <div css={styles.container}>
-      <img css={styles.image} src={process.env.PUBLIC_URL + "/marianne.png"} />
+      <img
+        css={styles.image}
+        src={process.env.PUBLIC_URL + "/marianne.png"}
+        alt="ministère du travail"
+      />
       <span css={styles.text}>ministère du travail</span>
     </div>
   );

@@ -1,17 +1,26 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Link } from "react-router-dom";
 
 import globalStyles from "../../../utils/globalStyles";
 
-function FAQSectionRow({ title, detail }: { title: string; detail: string }) {
+interface Props {
+  section: string;
+  title: string;
+  detail: string;
+}
+
+function FAQSectionRow({ section, title, detail }: Props) {
   return (
-    <div css={styles.container}>
-      <div css={styles.row}>
-        <span css={styles.title}>{title}</span>
-        <span css={styles.chevron}>›</span>
+    <Link to={{ state: { faq: `/section/${section}` } }} css={styles.link}>
+      <div css={styles.container}>
+        <div css={styles.row}>
+          <span css={styles.title}>{title}</span>
+          <span css={styles.chevron}>›</span>
+        </div>
+        <span css={styles.detail}>{detail}</span>
       </div>
-      <span css={styles.detail}>{detail}</span>
-    </div>
+    </Link>
   );
 }
 
@@ -42,6 +51,11 @@ const styles = {
   detail: css({
     fontSize: 14,
     lineHeight: "17px"
+  }),
+
+  link: css({
+    color: globalStyles.colors.default,
+    textDecoration: "none"
   })
 };
 

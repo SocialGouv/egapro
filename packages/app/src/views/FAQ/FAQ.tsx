@@ -7,94 +7,91 @@ import FAQHeader from "./components/FAQHeader";
 
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
+import FAQQuestion from "./FAQQuestion";
 
 function FAQ() {
   return (
-    <div css={styles.container}>
-      <FAQHeader />
+    <Route
+      render={({ location }) => {
+        return (
+          <div css={styles.container}>
+            <FAQHeader />
 
-      <div css={styles.content}>
-        <Switch>
-          <Route path="/" exact render={() => <FAQHome />} />
-          <Route
-            path="/effectifs"
-            render={() => <FAQSection section="champApplication" />}
-          />
-          <Route
-            path="/indicateur1"
-            render={() => <FAQSection section="periodeReference" />}
-          />
-          <Route
-            path="/indicateur2"
-            render={() => (
-              <img
-                css={css({ width: 375 })}
-                src={process.env.PUBLIC_URL + "/faq-fake-indic2.jpg"}
-              />
-            )}
-          />
-          <Route
-            path="/indicateur3"
-            render={() => (
-              <img
-                css={css({ width: 375 })}
-                src={process.env.PUBLIC_URL + "/faq-fake-indic3.jpg"}
-              />
-            )}
-          />
-          <Route
-            path="/indicateur4"
-            render={() => (
-              <img
-                css={css({ width: 375 })}
-                src={process.env.PUBLIC_URL + "/faq-fake-indic4.jpg"}
-              />
-            )}
-          />
-          <Route
-            path="/indicateur5"
-            render={() => (
-              <img
-                css={css({ width: 375 })}
-                src={process.env.PUBLIC_URL + "/faq-fake-indic5.jpg"}
-              />
-            )}
-          />
-          <Route
-            path="/recapitulatif"
-            render={() => (
-              <img
-                css={css({ width: 375 })}
-                src={process.env.PUBLIC_URL + "/faq-fake-recap.jpg"}
-              />
-            )}
-          />
-        </Switch>
-        {/*<div css={css({ marginBottom: 26 })}>
-          <FAQTitle>Champ d'application et entrée en vigueur</FAQTitle>
-        </div>
+            <div css={styles.content}>
+              <Switch
+                location={{
+                  pathname:
+                    location.state && location.state.faq
+                      ? location.state.faq
+                      : location.pathname,
+                  search: "",
+                  hash: "",
+                  state: undefined
+                }}
+              >
+                <Route path="/" exact render={() => <FAQHome />} />
 
-        <FAQSearchBox />
+                <Route
+                  exact
+                  path="/section/:section"
+                  render={({
+                    match: {
+                      params: { section }
+                    }
+                  }) => <FAQSection section={section} />}
+                />
 
-        <div
-          css={css({
-            marginTop: 14,
-            marginBottom: 14,
-            display: "flex",
-            flexDirection: "column"
-          })}
-        >
-          <FAQSectionRow
-            title="Champ d'application et entrée en vigueur"
-            detail="4 articles"
-          />
-          <FAQSectionRow
-            title="Périeffectifs à prendre en compte pour le calcul des indicateurs de référence"
-            detail="6 articles"
-          />
-        </div>*/}
-      </div>
-    </div>
+                <Route
+                  exact
+                  path="/section/:section/question/:indexQuestion"
+                  render={({
+                    history,
+                    match: {
+                      params: { section, indexQuestion }
+                    }
+                  }) => (
+                    <FAQQuestion
+                      history={history}
+                      section={section}
+                      indexQuestion={indexQuestion}
+                    />
+                  )}
+                />
+
+                <Route
+                  path="/effectifs"
+                  render={() => <FAQSection section="effectifs" />}
+                />
+                <Route
+                  path="/indicateur1"
+                  render={() => <FAQSection section="indicateur1" />}
+                />
+                <Route
+                  path="/indicateur2"
+                  render={() => <FAQSection section="indicateur2et3" />}
+                />
+                <Route
+                  path="/indicateur3"
+                  render={() => <FAQSection section="periodeReference" />}
+                />
+                <Route
+                  path="/indicateur4"
+                  render={() => <FAQSection section="indicateur4" />}
+                />
+                <Route
+                  path="/indicateur5"
+                  render={() => <FAQSection section="champApplication" />}
+                />
+                <Route
+                  path="/recapitulatif"
+                  render={() => <FAQSection section="publication" />}
+                />
+              </Switch>
+            </div>
+          </div>
+        );
+      }}
+    />
   );
 }
 
@@ -102,15 +99,15 @@ const styles = {
   container: css({
     flex: 1,
     display: "flex",
-    flexDirection: "column",
-    paddingRight: 29,
-    paddingLeft: 29
+    flexDirection: "column"
   }),
   content: css({
     overflowY: "auto",
     flex: 1,
     display: "flex",
     flexDirection: "column",
+    paddingRight: 29,
+    paddingLeft: 29,
     paddingTop: 26
   })
 };
