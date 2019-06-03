@@ -1,0 +1,23 @@
+---
+version: "3"
+
+services:
+  egapro-frontend:
+    build: 
+      context: .
+      dockerfile: ./packages/app/Dockerfile
+    depends_on:
+    - egapro-api
+    ports:
+    - 8080:9000
+    links:
+    - egapro-api
+
+  egapro-api:
+    build:
+      context: .
+      dockerfile: ./packages/api/Dockerfile
+    ports:
+    - 4000:4000
+    external_links:
+    - egapro-kinto-web
