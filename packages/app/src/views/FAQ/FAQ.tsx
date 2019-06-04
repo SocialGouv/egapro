@@ -1,24 +1,40 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, RouteComponentProps } from "react-router-dom";
 
 import FAQHeader from "./components/FAQHeader";
 
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
 import FAQQuestion from "./FAQQuestion";
-import FAQIndicateur2 from "./FAQIndicateur2";
+
+const FAQPaths: { [key: string]: string } = {
+  "/effectifs": "/section/effectifs",
+  "/indicateur1": "/section/indicateur1",
+  "/indicateur2": "/section/indicateur2",
+  "/indicateur3": "/section/indicateur3",
+  "/indicateur4": "/section/indicateur4",
+  "/indicateur5": "/section/indicateur5",
+  "/recapitulatif": "/section/resultat"
+};
+
+function mapDefaultPathnameToFAQPathname(
+  location: RouteComponentProps["location"]
+) {
+  if (location.state && location.state.faq) {
+    return location.state.faq;
+  }
+  const faqPath = FAQPaths[location.pathname];
+  return faqPath ? faqPath : location.pathname;
+}
 
 function FAQ() {
   return (
     <Route
       render={({ location }) => {
         const locationFAQ = {
-          pathname:
-            location.state && location.state.faq
-              ? location.state.faq
-              : location.pathname,
+          pathname: mapDefaultPathnameToFAQPathname(location),
           search: "",
           hash: "",
           state: undefined
@@ -43,22 +59,22 @@ function FAQ() {
 
                 <Route
                   exact
-                  path="/section/:section/question/:indexQuestion"
+                  path="/part/:part/question/:indexQuestion"
                   render={({
                     history,
                     match: {
-                      params: { section, indexQuestion }
+                      params: { part, indexQuestion }
                     }
                   }) => (
                     <FAQQuestion
                       history={history}
-                      section={section}
+                      part={part}
                       indexQuestion={indexQuestion}
                     />
                   )}
                 />
 
-                <Route
+                {/*<Route
                   path="/effectifs"
                   render={() => <FAQSection section="effectifs" />}
                 />
@@ -68,11 +84,11 @@ function FAQ() {
                 />
                 <Route
                   path="/indicateur2"
-                  render={() => <FAQIndicateur2 section="indicateur2et3" />}
+                  render={() => <FAQIndicateur2 section="indicateur2" />}
                 />
                 <Route
                   path="/indicateur3"
-                  render={() => <FAQSection section="periodeReference" />}
+                  render={() => <FAQSection section="indicateur3" />}
                 />
                 <Route
                   path="/indicateur4"
@@ -80,12 +96,12 @@ function FAQ() {
                 />
                 <Route
                   path="/indicateur5"
-                  render={() => <FAQSection section="champApplication" />}
+                  render={() => <FAQSection section="indicateur5" />}
                 />
                 <Route
                   path="/recapitulatif"
-                  render={() => <FAQSection section="publication" />}
-                />
+                  render={() => <FAQSection section="resultat" />}
+                />*/}
               </Switch>
             </div>
           </div>

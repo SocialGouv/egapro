@@ -4,9 +4,9 @@ import { css, jsx } from "@emotion/core";
 import FAQSearchBox from "./components/FAQSearchBox";
 import FAQSectionRow from "./components/FAQSectionRow";
 
-import faqDataRaw from "../../data/faq";
+import { faqSections, faqData } from "../../data/faq";
 
-const faqData = Object.entries(faqDataRaw);
+const faqSectionsEntries = Object.entries(faqSections);
 
 function FAQHome() {
   return (
@@ -14,14 +14,22 @@ function FAQHome() {
       <FAQSearchBox />
 
       <div css={styles.content}>
-        {faqData.map(([faqKey, faqDatum]) => (
-          <FAQSectionRow
-            key={faqKey}
-            section={faqKey}
-            title={faqDatum.title}
-            detail={`${faqDatum.qr.length} articles`}
-          />
-        ))}
+        {faqSectionsEntries.map(([faqKey, faqSection]) => {
+          const questionsLength = faqSection.parts.reduce(
+            (acc, part) => acc + faqData[part].qr.length,
+            0
+          );
+          return (
+            <FAQSectionRow
+              key={faqKey}
+              section={faqKey}
+              title={faqSection.title}
+              detail={`${questionsLength} article${
+                questionsLength > 1 ? "s" : ""
+              }`}
+            />
+          );
+        })}
       </div>
     </div>
   );

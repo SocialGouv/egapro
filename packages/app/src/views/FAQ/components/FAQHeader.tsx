@@ -1,18 +1,24 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Switch, Route, RouteComponentProps } from "react-router-dom";
+import { Switch, Link, Route, RouteComponentProps } from "react-router-dom";
 
 function FAQHeaderBackButton({
-  history,
-  label
+  history
 }: {
   history: RouteComponentProps["history"];
-  label: string;
 }) {
   return (
     <button css={styles.buttonBack} onClick={() => history.goBack()}>
-      <span css={styles.backIcon}>◀</span> {label}
+      <span css={styles.backIcon}>◀</span> retour
     </button>
+  );
+}
+
+function FAQHeaderHomeButton() {
+  return (
+    <Link to={{ state: { faq: "/" } }} css={styles.buttonBack}>
+      <span css={styles.backIcon}>◀</span> voir toute l’aide
+    </Link>
   );
 }
 
@@ -28,19 +34,12 @@ function FAQHeader({
           <Route
             exact
             path="/section/:section"
-            render={({ history }) => (
-              <FAQHeaderBackButton
-                history={history}
-                label="voir toute l’aide"
-              />
-            )}
+            render={() => <FAQHeaderHomeButton />}
           />
           <Route
             exact
-            path="/section/:section/question/:indexQuestion"
-            render={({ history }) => (
-              <FAQHeaderBackButton history={history} label="retour" />
-            )}
+            path="/part/:part/question/:indexQuestion"
+            render={({ history }) => <FAQHeaderBackButton history={history} />}
           />
         </Switch>
       </div>

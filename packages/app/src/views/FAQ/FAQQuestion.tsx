@@ -2,25 +2,27 @@
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
 
+import { FAQPartType } from "../../globals.d";
+
 import globalStyles from "../../utils/globalStyles";
 
 import FAQTitle from "./components/FAQTitle";
 
-import faqData from "../../data/faq";
+import { faqData } from "../../data/faq";
 
 interface Props {
-  section: "champApplication" | "periodeReference";
+  part: FAQPartType;
   indexQuestion: number;
   history: RouteComponentProps["history"];
 }
 
-function FAQSection({ section, indexQuestion, history }: Props) {
-  const faqSection = faqData[section];
-  const faqQuestion = faqSection.qr[indexQuestion];
+function FAQSection({ part, indexQuestion, history }: Props) {
+  const faqPart = faqData[part];
+  const faqQuestion = faqPart.qr[indexQuestion];
 
   return (
     <div css={styles.container}>
-      <FAQTitle>{faqSection.title}</FAQTitle>
+      <FAQTitle>{faqPart.title}</FAQTitle>
 
       <div css={styles.content}>
         <p css={styles.question}>• {faqQuestion.question}</p>

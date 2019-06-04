@@ -1,4 +1,6 @@
-const faq = {
+import { FAQPart, FAQSection } from "../globals.d";
+
+export const faqData: FAQPart = {
   champApplication: {
     title: "champ d’application et entrée en vigueur",
     qr: [
@@ -257,7 +259,7 @@ const faq = {
     ]
   },
   indicateur1: {
-    title: "indicateur 1 – écart de rémunération",
+    title: "indicateur 1 - écart de rémunération",
     qr: [
       {
         question:
@@ -339,7 +341,7 @@ const faq = {
   },
   indicateur2et3: {
     title:
-      "indicateurs 2 et 3 – écart de taux d’augmentations et de promotions",
+      "indicateurs 2 et 3 - écart de taux d’augmentations et de promotions",
     qr: [
       {
         question:
@@ -396,7 +398,7 @@ const faq = {
     ]
   },
   indicateur4: {
-    title: "indicateur 4 – congé maternité",
+    title: "indicateur 4 - congé maternité",
     qr: [
       {
         question:
@@ -526,4 +528,37 @@ const faq = {
   }
 };
 
-export default faq;
+export const faqSections: FAQSection = {
+  champApplication: {
+    title: "champ d’application et entrée en vigueur",
+    parts: ["champApplication"]
+  },
+  effectifs: {
+    title: "période de référence et effectifs",
+    parts: ["periodeReference", "effectifs"]
+  },
+  indicateur1: {
+    title: "indicateur 1 - écart de rémunération",
+    parts: ["remuneration", "indicateur1"]
+  },
+  indicateur2: {
+    title: "indicateur 2 - écart d’augmentation",
+    parts: ["indicateur2et3"]
+  },
+  indicateur3: {
+    title: "indicateur 3 - écart de promotions",
+    parts: ["indicateur2et3"]
+  },
+  indicateur4: {
+    title: "indicateur 4 - congé maternité",
+    parts: ["indicateur4"]
+  },
+  indicateur5: {
+    title: "indicateur 5 - hautes rémunérations",
+    parts: []
+  },
+  resultat: {
+    title: "résultat",
+    parts: ["publication"]
+  }
+};

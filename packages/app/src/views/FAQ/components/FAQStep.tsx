@@ -35,16 +35,8 @@ const styles = {
     top: "50%",
     position: "absolute" as "absolute", // Because typescript…
     marginTop: -22,
-
     width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "white",
-    border: `solid ${globalStyles.colors.default} 1px`,
-
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
+    height: 44
   }
 };
 
