@@ -2,23 +2,17 @@
 import { jsx } from "@emotion/core";
 import { Fragment } from "react";
 
-import { IconLamp, IconMoney, IconGrow } from "../../../components/Icons";
+import { IconLamp, IconGrow } from "../../../components/Icons";
 import FAQStep from "../components/FAQStep";
 
-function FAQIndicateur2Steps() {
+function FAQIndicateur3Steps() {
   return (
     <Fragment>
-      <FAQStep icon={<IconMoney valid={true} />}>
-        La notion d'
+      <FAQStep icon={<IconGrow valid={true} />}>
+        La notion de promotion correspond au{" "}
         <strong>
-          augmentation individuelle correspond à une augmentation individuelle
-          du salaire de base du salarié concerné
+          passage à un niveau ou coefficient hierarchique supérieur.
         </strong>
-      </FAQStep>
-
-      <FAQStep icon={<IconGrow valid={false} />}>
-        La notion d’augmentation individuelle pour le calcul de cet index exclue
-        les augmentations de salaires liées à une promotion
       </FAQStep>
 
       <FAQStep icon={<IconLamp />}>
@@ -35,4 +29,4 @@ function FAQIndicateur2Steps() {
   );
 }
 
-export default FAQIndicateur2Steps;
+export default FAQIndicateur3Steps;

@@ -2,8 +2,6 @@
 import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
 
-import globalStyles from "../../../utils/globalStyles";
-
 function FAQStep({ children, icon }: { children: ReactNode; icon: ReactNode }) {
   return (
     <div css={styles.container}>

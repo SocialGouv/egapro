@@ -12,7 +12,12 @@ import FAQTitle from "./components/FAQTitle";
 import FAQTitle2 from "./components/FAQTitle2";
 
 import FAQEffectifsSteps from "./components-steps/FAQEffectifsSteps";
+import FAQIndicateur1Steps from "./components-steps/FAQIndicateur1Steps";
 import FAQIndicateur2Steps from "./components-steps/FAQIndicateur2Steps";
+import FAQIndicateur3Steps from "./components-steps/FAQIndicateur3Steps";
+import FAQIndicateur4Steps from "./components-steps/FAQIndicateur4Steps";
+import FAQIndicateur5Steps from "./components-steps/FAQIndicateur5Steps";
+import FAQResultatSteps from "./components-steps/FAQResultatSteps";
 
 import { faqData, faqSections } from "../../data/faq";
 
@@ -67,17 +72,17 @@ function FAQSteps({ section }: Props) {
     case "effectifs":
       return <FAQEffectifsSteps />;
     case "indicateur1":
-      return <FAQIndicateur2Steps />;
+      return <FAQIndicateur1Steps />;
     case "indicateur2":
       return <FAQIndicateur2Steps />;
     case "indicateur3":
-      return <FAQIndicateur2Steps />;
+      return <FAQIndicateur3Steps />;
     case "indicateur4":
-      return <FAQIndicateur2Steps />;
+      return <FAQIndicateur4Steps />;
     case "indicateur5":
-      return <FAQIndicateur2Steps />;
+      return <FAQIndicateur5Steps />;
     case "resultat":
-      return <FAQIndicateur2Steps />;
+      return <FAQResultatSteps />;
     default:
       return null;
   }
