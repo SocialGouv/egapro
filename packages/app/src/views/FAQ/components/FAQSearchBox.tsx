@@ -3,11 +3,19 @@ import { css, jsx } from "@emotion/core";
 
 import globalStyles from "../../../utils/globalStyles";
 
-function FAQSearchBox() {
+interface Props {
+  searchTerm: string;
+  setSearchTerm: (searchTerm: string) => void;
+}
+
+function FAQSearchBox({ searchTerm, setSearchTerm }: Props) {
+  const onChange = (event: any) => setSearchTerm(event.target.value);
   return (
     <input
       css={styles.input}
       type="search"
+      value={searchTerm}
+      onChange={onChange}
       placeholder="saisissez un mot clef"
     />
   );

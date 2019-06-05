@@ -7,9 +7,10 @@ import { FAQSectionType } from "../../globals.d";
 
 import globalStyles from "../../utils/globalStyles";
 
-import FAQSearchBox from "./components/FAQSearchBox";
+import FAQSearch from "./FAQSearch";
 import FAQTitle from "./components/FAQTitle";
 import FAQTitle2 from "./components/FAQTitle2";
+import FAQQuestionRow from "./components/FAQQuestionRow";
 
 import FAQEffectifsSteps from "./components-steps/FAQEffectifsSteps";
 import FAQIndicateur1Steps from "./components-steps/FAQIndicateur1Steps";
@@ -34,35 +35,34 @@ function FAQSection({ section }: Props) {
     <div css={styles.container}>
       <FAQTitle>{faqSection.title}</FAQTitle>
 
-      <FAQSearchBox />
+      <FAQSearch>
+        <div css={styles.content}>
+          {FAQStepsElement && (
+            <div css={styles.pasapas}>
+              <FAQTitle2>L'essentiel</FAQTitle2>
 
-      <div css={styles.content}>
-        {FAQStepsElement && (
-          <div css={styles.pasapas}>
-            <FAQTitle2>L'essentiel</FAQTitle2>
+              {FAQStepsElement}
+            </div>
+          )}
 
-            {FAQStepsElement}
-          </div>
-        )}
-
-        {faqSection.parts.length > 0 && (
-          <Fragment>
-            <FAQTitle2>Les questions récurrentes</FAQTitle2>
-            {faqSection.parts.map(part => {
-              const faqPart = faqData[part];
-              return faqPart.qr.map(({ question }, index) => (
-                <Link
-                  key={part + index}
-                  to={{ state: { faq: `/part/${part}/question/${index}` } }}
-                  css={styles.link}
-                >
-                  <p css={styles.questionRow}>• {question}</p>
-                </Link>
-              ));
-            })}
-          </Fragment>
-        )}
-      </div>
+          {faqSection.parts.length > 0 && (
+            <Fragment>
+              <FAQTitle2>Les questions récurrentes</FAQTitle2>
+              {faqSection.parts.map(part => {
+                const faqPart = faqData[part];
+                return faqPart.qr.map(({ question }, index) => (
+                  <FAQQuestionRow
+                    key={part + index}
+                    part={part}
+                    index={index}
+                    question={question}
+                  />
+                ));
+              })}
+            </Fragment>
+          )}
+        </div>
+      </FAQSearch>
     </div>
   );
 }
@@ -102,18 +102,6 @@ const styles = {
   }),
   pasapas: css({
     marginBottom: 28
-  }),
-
-  questionRow: css({
-    marginBottom: 12,
-
-    fontSize: 14,
-    lineHeight: "17px"
-  }),
-
-  link: css({
-    color: globalStyles.colors.default,
-    textDecoration: "none"
   })
 };
 
