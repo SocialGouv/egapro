@@ -166,6 +166,8 @@ export type FAQPartType =
   | "remuneration"
   | "indicateur1"
   | "indicateur2et3"
+  | "indicateur2"
+  | "indicateur3"
   | "indicateur4"
   | "publication";
 

@@ -345,11 +345,43 @@ export const faqData: FAQPart = {
     qr: [
       {
         question:
+          "S’agissant des indicateurs relatifs aux écarts de taux d’augmentations et de promotions, est-il possible d’apprécier ces indicateurs sur une période de référence de trois ans ?",
+        reponse: [
+          "L’employeur peut décider, uniquement pour les entreprises de 50 à 250 salariés, de calculer l’indicateur relatif aux augmentations individuelles sur une période de référence pluriannuelle, à partir des données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans."
+        ]
+      },
+      {
+        question:
+          "Pour les indicateurs 2 et 3, est-il possible, comme pour l’indicateur 1, de répartir les salariés par niveau ou coefficient hiérarchique ?",
+        reponse: [
+          "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d’une autre méthode de cotation des postes n’est possible que pour le calcul du 1er indicateur relatif à l’écart de rémunération.",
+          "S’agissant des indicateurs 2 et 3, pour les entreprises de plus de 250 salariés, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
+        ]
+      }
+    ]
+  },
+  indicateur2: {
+    title: "indicateur 2 - écart de taux d’augmentations",
+    qr: [
+      {
+        question:
           'Les "écarts de taux d’augmentations individuelles" correspondent-ils à des écarts de montants d’augmentations ou à des écarts de nombres de bénéficiaires d’augmentation ?',
         reponse: [
           "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles. Ainsi, l’indicateur 2° est calculé en comparant le pourcentage de salariés augmentés parmi les hommes à celui de salariées augmentées parmi les femmes pour chacun des quatre groupes de CSP comptant 10 salariés ou plus de l’un et de l’autre sexe. Il en va de même pour l’écart de taux de promotions."
         ]
       },
+      {
+        question:
+          "Lorsqu’en application d’un accord d’entreprise, une entreprise augmente automatiquement au bout de trois ans les salariés qui n’ont pas eu sur les trois dernières années l’équivalent de 3% d’augmentation, de telle sorte que sur les trois ans ils ont effectivement une rémunération augmentée de 3%, est-ce une augmentation individuelle ?",
+        reponse: [
+          "Non, dès lors que l’augmentation est basée sur des critères pouvant englober plusieurs salariés, en application d’un accord collectif d’entreprise, elle doit être considérée comme une augmentation collective."
+        ]
+      }
+    ]
+  },
+  indicateur3: {
+    title: "indicateur  3 - écart de taux de promotions",
+    qr: [
       {
         question:
           'Pour les "écarts de taux de promotions", quelle est la définition d’une "promotion" au sens du décret ?',
@@ -361,13 +393,6 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "S’agissant des indicateurs relatifs aux écarts de taux d’augmentations et de promotions, est-il possible d’apprécier ces indicateurs sur une période de référence de trois ans ?",
-        reponse: [
-          "L’employeur peut décider, uniquement pour les entreprises de 50 à 250 salariés, de calculer l’indicateur relatif aux augmentations individuelles sur une période de référence pluriannuelle, à partir des données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans."
-        ]
-      },
-      {
-        question:
           "Quel est l’effectif à prendre en compte pour le calcul du pourcentage de promotions ? Les salariés qui ont été promus au cours de l’année de référence mais qui ont quitté l’entreprise avant la fin de cette période sont-ils pris en compte ?",
         reponse: [
           "Le calcul des effectifs à prendre en compte est le même pour tous les indicateurs (cf. rubrique C du questions/réponses). Ainsi les salariés promus au cours de l’année de référence mais qui ont quitté l’entreprise avant la fin de la période sont pris en compte dès lors qu’ils remplissent les critères prévus au paragraphe 2 des annexes du décret du 8 janvier 2019."
@@ -375,24 +400,9 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Pour les indicateurs 2 et 3, est-il possible, comme pour l’indicateur 1, de répartir les salariés par niveau ou coefficient hiérarchique ?",
-        reponse: [
-          "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d’une autre méthode de cotation des postes n’est possible que pour le calcul du 1er indicateur relatif à l’écart de rémunération.",
-          "S’agissant des indicateurs 2 et 3, pour les entreprises de plus de 250 salariés, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
-        ]
-      },
-      {
-        question:
           "Pour le calcul de l’indicateur relatif aux taux de promotions, les changements automatiques de coefficient en application d’une convention collective nationale peuvent-ils être pris en compte ?",
         reponse: [
           "La notion de promotion est définie en annexes du décret comme le franchissement d’un niveau ou coefficient hiérarchique supérieur. Les changements automatiques de coefficient en application d’une convention collective nationale sont donc à prendre en compte pour le calcul de l’indicateur relatif aux taux de promotions."
-        ]
-      },
-      {
-        question:
-          "Lorsqu’en application d’un accord d’entreprise, une entreprise augmente automatiquement au bout de trois ans les salariés qui n’ont pas eu sur les trois dernières années l’équivalent de 3% d’augmentation, de telle sorte que sur les trois ans ils ont effectivement une rémunération augmentée de 3%, est-ce une augmentation individuelle ?",
-        reponse: [
-          "Non, dès lors que l’augmentation est basée sur des critères pouvant englober plusieurs salariés, en application d’un accord collectif d’entreprise, elle doit être considérée comme une augmentation collective."
         ]
       }
     ]
@@ -543,11 +553,11 @@ export const faqSections: FAQSection = {
   },
   indicateur2: {
     title: "indicateur 2 - écart d’augmentation",
-    parts: ["indicateur2et3"]
+    parts: ["indicateur2", "indicateur2et3"]
   },
   indicateur3: {
     title: "indicateur 3 - écart de promotions",
-    parts: ["indicateur2et3"]
+    parts: ["indicateur3", "indicateur2et3"]
   },
   indicateur4: {
     title: "indicateur 4 - congé maternité",
