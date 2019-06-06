@@ -45,7 +45,11 @@ function FAQ() {
 
             <div css={styles.content} key={locationFAQ.pathname}>
               <Switch location={locationFAQ}>
-                <Route path="/" exact render={() => <FAQHome />} />
+                <Route
+                  path={["/", "/simulateur"]}
+                  exact
+                  render={() => <FAQHome />}
+                />
 
                 <Route
                   exact

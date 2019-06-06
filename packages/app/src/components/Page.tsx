@@ -29,12 +29,14 @@ const styles = {
   }),
   title: css({
     marginTop: 36,
-    fontSize: 32
+    fontSize: 32,
+    lineHeight: "39px"
   }),
   tagline: css({
     marginTop: 12,
     marginBottom: 54,
-    fontSize: 14
+    fontSize: 14,
+    lineHeight: "17px"
   })
 };
 
