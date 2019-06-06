@@ -1,8 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
 
+import TextLink from "../../components/TextLink";
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 
@@ -24,7 +26,15 @@ function RecapitulatifIndicateurCinq({
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur 5, nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
-          text="Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies."
+          text={
+            <Fragment>
+              <span>
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez
+                pas encore validé vos données saissies.
+              </span>{" "}
+              <TextLink to="/indicateur1" label="valider les données" />
+            </Fragment>
+          }
         />
       </div>
     );

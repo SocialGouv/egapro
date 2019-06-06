@@ -1,10 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Fragment } from "react";
 
 import { FormState, CategorieSocioPro } from "../../globals.d";
 
 import { displayNameCategorieSocioPro } from "../../utils/helpers";
 
+import TextLink from "../../components/TextLink";
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 
@@ -48,7 +50,15 @@ function RecapitulatifIndicateurDeux({
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur 2, écart de taux d’augmentation entre les hommes et les femmes"
-          text="Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies."
+          text={
+            <Fragment>
+              <span>
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez
+                pas encore validé vos données saissies.
+              </span>{" "}
+              <TextLink to="/indicateur2" label="valider les données" />
+            </Fragment>
+          }
         />
       </div>
     );
@@ -59,7 +69,7 @@ function RecapitulatifIndicateurDeux({
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur 2, écart de taux d’augmentation entre les hommes et les femmes"
-          text="Malheureusement votre indicateur est incalculable car il n’y a pas eu d’augmentation durant la période de référence"
+          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu d’augmentation durant la période de référence"
         />
       </div>
     );
