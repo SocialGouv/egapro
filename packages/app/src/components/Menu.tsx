@@ -126,11 +126,11 @@ const styles = {
     lineHeight: "15px",
     textDecoration: "none",
     ":hover": {
-      color: globalStyles.colors.women
+      color: globalStyles.colors.primary
     }
   }),
   activeLink: css({
-    color: globalStyles.colors.women
+    color: globalStyles.colors.primary
   }),
   linkInner: css({
     display: "flex",

@@ -41,6 +41,13 @@ function IndicateurCinqResult({
         secondLineData={
           (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10"
         }
+        indicateurSexeSurRepresente={
+          indicateurSexeSousRepresente === undefined
+            ? undefined
+            : indicateurSexeSousRepresente === "hommes"
+            ? "femmes"
+            : "hommes"
+        }
       />
 
       <p css={styles.edit}>

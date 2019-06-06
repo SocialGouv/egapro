@@ -40,13 +40,13 @@ const styles = {
     fontSize: 12,
     fontWeight: "bold",
     lineHeight: "15px",
-    color: globalStyles.colors.women,
+    color: globalStyles.colors.primary,
     textTransform: "uppercase"
   }),
   chevron: css({
     marginLeft: 14,
     lineHeight: "15px",
-    color: globalStyles.colors.women
+    color: globalStyles.colors.primary
   }),
   detail: css({
     fontSize: 14,

@@ -54,7 +54,8 @@ function RecapitulatifIndicateurQuatre({
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") +
-            "/15"
+            "/15",
+          indicateurSexeSurRepresente: "femmes"
         }}
       >
         {null}

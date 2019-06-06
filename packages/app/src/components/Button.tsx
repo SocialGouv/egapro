@@ -31,14 +31,14 @@ const styles = {
     height: 36,
     minWidth: 110,
     padding: "0 10px",
-    backgroundColor: globalStyles.colors.women,
+    backgroundColor: globalStyles.colors.primary,
     color: "#FFF",
-    border: `solid ${globalStyles.colors.women} 1px`,
+    border: `solid ${globalStyles.colors.primary} 1px`,
     borderRadius: 5,
     cursor: "pointer"
   }),
   buttonOutline: css({
-    color: globalStyles.colors.women,
+    color: globalStyles.colors.primary,
     backgroundColor: "#FFF"
   }),
   buttonError: css({

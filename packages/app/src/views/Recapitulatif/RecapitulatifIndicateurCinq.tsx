@@ -53,7 +53,13 @@ function RecapitulatifIndicateurCinq({
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") +
-            "/10"
+            "/10",
+          indicateurSexeSurRepresente:
+            indicateurSexeSousRepresente === undefined
+              ? undefined
+              : indicateurSexeSousRepresente === "hommes"
+              ? "femmes"
+              : "hommes"
         }}
       >
         {null}

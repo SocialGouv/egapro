@@ -80,7 +80,8 @@ function RecapitulatifIndicateurTrois({
           secondLineData:
             (noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") +
             "/15",
-          secondLineInfo: "mesures de correction prises en compte"
+          secondLineInfo: "mesures de correction prises en compte",
+          indicateurSexeSurRepresente
         }}
       >
         <RowLabelFull label="écart de taux de promotion par csp" />

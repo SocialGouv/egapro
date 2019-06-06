@@ -19,7 +19,7 @@ const styles = {
   title: css({
     fontSize: 18,
     lineHeight: "22px",
-    color: globalStyles.colors.women,
+    color: globalStyles.colors.primary,
     textTransform: "uppercase"
   })
 };

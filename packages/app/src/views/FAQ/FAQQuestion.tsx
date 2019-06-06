@@ -74,7 +74,7 @@ const styles = {
     cursor: "pointer",
     marginTop: 12,
     fontSize: 12,
-    color: globalStyles.colors.women,
+    color: globalStyles.colors.primary,
     textDecoration: "none"
   }),
   buttonIcon: css({

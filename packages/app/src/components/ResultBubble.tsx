@@ -10,6 +10,7 @@ export interface Props {
   secondLineLabel: string;
   secondLineData: string;
   secondLineInfo?: string;
+  indicateurSexeSurRepresente?: "hommes" | "femmes" | undefined;
 }
 
 function ResultBubble({
@@ -18,11 +19,18 @@ function ResultBubble({
   firstLineInfo,
   secondLineLabel,
   secondLineData,
-  secondLineInfo
+  secondLineInfo,
+  indicateurSexeSurRepresente
 }: Props) {
   return (
     <div css={styles.container}>
-      <div css={styles.bloc}>
+      <div
+        css={[
+          styles.bloc,
+          indicateurSexeSurRepresente === "femmes" && styles.blocWomen,
+          indicateurSexeSurRepresente === "hommes" && styles.blocMen
+        ]}
+      >
         <div css={styles.blocInfo}>
           <p css={styles.message}>
             <span css={styles.messageLabel}>{firstLineLabel} </span>
@@ -65,6 +73,12 @@ const styles = {
     color: "white",
     backgroundColor: globalStyles.colors.default,
     borderRadius: "100%"
+  }),
+  blocWomen: css({
+    backgroundColor: globalStyles.colors.women
+  }),
+  blocMen: css({
+    backgroundColor: globalStyles.colors.men
   }),
   blocInfo: css({
     borderBottom: "1px solid #FFFFFF"

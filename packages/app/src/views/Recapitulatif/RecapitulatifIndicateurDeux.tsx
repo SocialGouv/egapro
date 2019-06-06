@@ -80,7 +80,8 @@ function RecapitulatifIndicateurDeux({
           secondLineData:
             (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") +
             "/20",
-          secondLineInfo: "mesures de correction prises en compte"
+          secondLineInfo: "mesures de correction prises en compte",
+          indicateurSexeSurRepresente
         }}
       >
         <RowLabelFull label="écart de taux d’augmentation par csp" />

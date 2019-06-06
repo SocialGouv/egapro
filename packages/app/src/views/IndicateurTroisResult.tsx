@@ -36,6 +36,7 @@ function IndicateurTroisResult({
           "/15"
         }
         secondLineInfo="mesures de correction prises en compte"
+        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
 
       <p css={styles.edit}>

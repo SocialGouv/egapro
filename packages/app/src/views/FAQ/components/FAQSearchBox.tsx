@@ -27,14 +27,14 @@ const styles = {
     height: 52,
     paddingLeft: 26,
     paddingRight: 26,
-    border: `solid ${globalStyles.colors.women} 1px`,
+    border: `solid ${globalStyles.colors.primary} 1px`,
     width: "100%",
     fontSize: 14,
     fontWeight: "bold",
-    color: globalStyles.colors.women,
+    color: globalStyles.colors.primary,
     "::placeholder": {
       fontWeight: "normal",
-      color: globalStyles.colors.women
+      color: globalStyles.colors.primary
     }
   })
 };
