@@ -4,6 +4,64 @@ import { ReactNode, Fragment } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
+export function IconWarning() {
+  return (
+    <svg
+      width="40"
+      height="35"
+      viewBox="0 0 40 35"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      css={[styles.strokeCurrentColor, styles.fillCurrentColor]}
+    >
+      <path
+        d="M28.7141 14.5L30.7662 18L32.8182 21.5"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M26.662 11L22.588 4.28044C21.4131 2.34268 18.5965 2.3571 17.4415 4.30678L2.68288 29.221C1.49824 31.2208 2.93964 33.75 5.264 33.75H34.7216C37.046 33.75 38.4874 31.2208 37.3027 29.221L34.9874 25.3125"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <circle cx="20" cy="27" r="2" stroke="none" />
+      <path
+        d="M18.0815 12.5707L19.7525 24.2676C19.7934 24.5538 20.2066 24.5538 20.2475 24.2676L21.9185 12.5707C21.9615 12.2695 21.7278 12 21.4235 12H18.5765C18.2722 12 18.0385 12.2695 18.0815 12.5707Z"
+        stroke="none"
+      />
+    </svg>
+  );
+}
+
+export function IconCircleCross() {
+  return (
+    <svg
+      width="35"
+      height="34"
+      viewBox="0 0 35 34"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <ellipse
+        cx="17.9928"
+        cy="17.357"
+        rx="15.9942"
+        ry="15.4286"
+        stroke="#191A49"
+        strokeWidth="2"
+      />
+      <path
+        d="M10.0945 24.9764L25.8913 9.73828M10.0945 9.73828L25.8913 24.9764"
+        stroke="#191A49"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function IconValid() {
   return (
     <svg
@@ -84,6 +142,9 @@ export function IconFemale() {
 const styles = {
   strokeCurrentColor: css({
     stroke: "currentColor"
+  }),
+  fillCurrentColor: css({
+    fill: "currentColor"
   })
 };
 

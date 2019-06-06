@@ -1,11 +1,8 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
-import { Link } from "react-router-dom";
 
 import { FAQSectionType } from "../../globals.d";
-
-import globalStyles from "../../utils/globalStyles";
 
 import FAQSearch from "./FAQSearch";
 import FAQTitle from "./components/FAQTitle";
