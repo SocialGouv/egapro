@@ -1,5 +1,3 @@
-import { roundDecimal } from "./helpers";
-
 ///////////
 // Index //
 ///////////
@@ -40,5 +38,5 @@ export const calculNoteIndex = (
     (noteIndicateurQuatre || 0) +
     (noteIndicateurCinq || 0);
 
-  return roundDecimal((totalPoint * 100) / totalPointCalculable, 3);
+  return Math.round((totalPoint * 100) / totalPointCalculable);
 };
