@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
 
 import { AppState } from "../../globals.d";
@@ -11,9 +11,9 @@ import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex";
 
-import InfoBloc from "../../components/InfoBloc";
 import Page from "../../components/Page";
 
+import RecapitulatifIndex from "./RecapitulatifIndex";
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn";
 import RecapitulatifIndicateurDeux from "./RecapitulatifIndicateurDeux";
 import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois";
@@ -73,7 +73,7 @@ function Recapitulatif({ state }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
-  const noteIndex = calculNoteIndex(
+  const { noteIndex, totalPointCalculable } = calculNoteIndex(
     noteIndicateurUn,
     noteIndicateurDeux,
     noteIndicateurTrois,
@@ -84,29 +84,13 @@ function Recapitulatif({ state }: Props) {
   return (
     <Page
       title="Récapitulatif des résultats de vos indicateurs"
-      tagline="Oubliez pas de décalarer vos résultats sur SOLEN avant le 1er septembre."
+      tagline="N'oubliez pas de décalarer vos résultats sur SOLEN avant le 1er septembre."
     >
-      <div css={styles.indexBloc}>
-        {allIndicateurValid ? (
-          noteIndex ? (
-            <InfoBloc
-              title="Index égalité homme-femme"
-              text={`votre résultat total est ${noteIndex}/100`}
-              icon={null}
-            />
-          ) : (
-            <InfoBloc
-              title="Index égalité homme-femme"
-              text="Vos indicateurs représentent moins de 75 points, votre index ne peut-être calculé."
-            />
-          )
-        ) : (
-          <InfoBloc
-            title="Index égalité homme-femme"
-            text="Vous n’avez pas encore validé tous vos indicateur, votre index ne peut-être calculé."
-          />
-        )}
-      </div>
+      <RecapitulatifIndex
+        allIndicateurValid={allIndicateurValid}
+        noteIndex={noteIndex}
+        totalPointCalculable={totalPointCalculable}
+      />
       <RecapitulatifIndicateurUn
         indicateurUnFormValidated={state.indicateurUn.formValidated}
         effectifsIndicateurUnCalculable={effectifsIndicateurUnCalculable}
@@ -152,12 +136,5 @@ function Recapitulatif({ state }: Props) {
     </Page>
   );
 }
-
-const styles = {
-  indexBloc: css({
-    marginTop: 22,
-    marginBottom: 22
-  })
-};
 
 export default Recapitulatif;

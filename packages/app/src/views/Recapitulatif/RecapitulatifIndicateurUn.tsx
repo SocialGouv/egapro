@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Fragment } from "react";
 
 import { FormState, TranchesAges, CategorieSocioPro } from "../../globals.d";
 
@@ -8,6 +9,7 @@ import {
   displayNameCategorieSocioPro
 } from "../../utils/helpers";
 
+import TextLink from "../../components/TextLink";
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 
@@ -48,7 +50,15 @@ function RecapitulatifIndicateurUn({
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur 1, écart de rémunération entre les hommes et les femmes"
-          text="Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies."
+          text={
+            <Fragment>
+              <span>
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez
+                pas encore validé vos données saissies.
+              </span>{" "}
+              <TextLink to="/indicateur1" label="valider les données" />
+            </Fragment>
+          }
         />
       </div>
     );
@@ -68,7 +78,8 @@ function RecapitulatifIndicateurUn({
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
-          secondLineInfo: "mesures de correction prises en compte"
+          secondLineInfo: "mesures de correction prises en compte",
+          indicateurSexeSurRepresente
         }}
       >
         <RowLabelFull label="écart de rémunération par csp" />

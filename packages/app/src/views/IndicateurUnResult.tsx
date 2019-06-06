@@ -36,6 +36,7 @@ function IndicateurUnResult({
           (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40"
         }
         secondLineInfo="mesures de correction prises en compte"
+        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
 
       <p css={styles.edit}>

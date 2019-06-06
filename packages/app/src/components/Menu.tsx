@@ -50,6 +50,7 @@ function CustomNavLink({
 }
 
 interface Props {
+  locationPathname: string;
   effectifFormValidated: FormState;
   indicateurUnFormValidated: FormState;
   indicateurDeuxFormValidated: FormState;
@@ -59,6 +60,7 @@ interface Props {
 }
 
 function Menu({
+  locationPathname,
   effectifFormValidated,
   indicateurUnFormValidated,
   indicateurDeuxFormValidated,
@@ -68,8 +70,13 @@ function Menu({
 }: Props) {
   const width = useColumnsWidth(2);
 
+  if (locationPathname === "/") {
+    return <div css={[styles.menu, css({ width })]} />;
+  }
+
   return (
     <div css={[styles.menu, css({ width })]}>
+      <CustomNavLink to="/simulateur" title="vos informations" />
       <CustomNavLink
         to="/effectifs"
         title="effectif"
@@ -126,11 +133,11 @@ const styles = {
     lineHeight: "15px",
     textDecoration: "none",
     ":hover": {
-      color: globalStyles.colors.women
+      color: globalStyles.colors.primary
     }
   }),
   activeLink: css({
-    color: globalStyles.colors.women
+    color: globalStyles.colors.primary
   }),
   linkInner: css({
     display: "flex",

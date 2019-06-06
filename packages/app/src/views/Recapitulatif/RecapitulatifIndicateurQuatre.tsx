@@ -1,8 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
 
+import TextLink from "../../components/TextLink";
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 
@@ -24,7 +26,15 @@ function RecapitulatifIndicateurQuatre({
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur 4, pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-          text="Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies."
+          text={
+            <Fragment>
+              <span>
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez
+                pas encore validé vos données saissies.
+              </span>{" "}
+              <TextLink to="/indicateur4" label="valider les données" />
+            </Fragment>
+          }
         />
       </div>
     );
@@ -35,7 +45,7 @@ function RecapitulatifIndicateurQuatre({
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur 4, pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-          text="Malheureusement votre indicateur est incalculable car il n’y a pas eu de congé maternité durant la période de référence"
+          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu de congé maternité durant la période de référence"
         />
       </div>
     );
@@ -54,7 +64,8 @@ function RecapitulatifIndicateurQuatre({
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") +
-            "/15"
+            "/15",
+          indicateurSexeSurRepresente: "femmes"
         }}
       >
         {null}

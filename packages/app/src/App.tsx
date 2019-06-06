@@ -29,6 +29,7 @@ import Menu from "./components/Menu";
 import FAQ from "./views/FAQ";
 
 import Home from "./views/Home";
+import HomeSimulateur from "./views/HomeSimulateur";
 import GroupEffectif from "./views/GroupEffectif";
 import IndicateurUn from "./views/IndicateurUn";
 import IndicateurDeux from "./views/IndicateurDeux";
@@ -139,6 +140,11 @@ function App() {
               <Switch>
                 <Route path="/" exact render={props => <Home {...props} />} />
                 <Route
+                  path="/simulateur"
+                  exact
+                  render={props => <HomeSimulateur {...props} />}
+                />
+                <Route
                   path="/effectifs"
                   render={props => (
                     <GroupEffectif
@@ -225,9 +231,10 @@ interface MainScrollViewProps extends RouteComponentProps {
 function MainScrollView({ children, state, location }: MainScrollViewProps) {
   // Usefull to reset the scroll while navigating
   return (
-    <div css={styles.main} key={location.key}>
+    <div css={styles.main} key={location.pathname}>
       <div css={styles.menu}>
         <Menu
+          locationPathname={location.pathname}
           effectifFormValidated={state.effectif.formValidated}
           indicateurUnFormValidated={state.indicateurUn.formValidated}
           indicateurDeuxFormValidated={state.indicateurDeux.formValidated}

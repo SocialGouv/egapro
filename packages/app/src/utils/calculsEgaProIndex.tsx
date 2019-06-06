@@ -1,5 +1,3 @@
-import { roundDecimal } from "./helpers";
-
 ///////////
 // Index //
 ///////////
@@ -10,7 +8,7 @@ export const calculNoteIndex = (
   noteIndicateurTrois: number | undefined,
   noteIndicateurQuatre: number | undefined,
   noteIndicateurCinq: number | undefined
-): number | undefined => {
+): { noteIndex: number | undefined; totalPointCalculable: number } => {
   const noteIndicateurUnPointCalculable =
     noteIndicateurUn !== undefined ? 40 : 0;
   const noteIndicateurDeuxPointCalculable =
@@ -30,7 +28,10 @@ export const calculNoteIndex = (
     noteIndicateurCinqPointCalculable;
 
   if (totalPointCalculable < 75) {
-    return undefined;
+    return {
+      noteIndex: undefined,
+      totalPointCalculable
+    };
   }
 
   const totalPoint =
@@ -40,5 +41,10 @@ export const calculNoteIndex = (
     (noteIndicateurQuatre || 0) +
     (noteIndicateurCinq || 0);
 
-  return roundDecimal((totalPoint * 100) / totalPointCalculable, 3);
+  const noteIndex = Math.round((totalPoint * 100) / totalPointCalculable);
+
+  return {
+    noteIndex,
+    totalPointCalculable
+  };
 };

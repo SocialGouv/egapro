@@ -158,3 +158,39 @@ export interface Groupe {
   tauxPromotionFemmes: number | undefined;
   tauxPromotionHommes: number | undefined;
 }
+
+export type FAQPartType =
+  | "champApplication"
+  | "periodeReference"
+  | "effectifs"
+  | "remuneration"
+  | "indicateur1"
+  | "indicateur2et3"
+  | "indicateur2"
+  | "indicateur3"
+  | "indicateur4"
+  | "publication";
+
+export type FAQPart = {
+  [key in FAQPartType]: {
+    title: string;
+    qr: Array<{ question: string; reponse: Array<string> }>;
+  }
+};
+
+export type FAQSectionType =
+  | "champApplication"
+  | "effectifs"
+  | "indicateur1"
+  | "indicateur2"
+  | "indicateur3"
+  | "indicateur4"
+  | "indicateur5"
+  | "resultat";
+
+export type FAQSection = {
+  [key in FAQSectionType]: {
+    title: string;
+    parts: Array<FAQPartType>;
+  }
+};

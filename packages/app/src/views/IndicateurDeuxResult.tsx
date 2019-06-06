@@ -36,6 +36,7 @@ function IndicateurDeuxResult({
           (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"
         }
         secondLineInfo="mesures de correction prises en compte"
+        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
 
       <p css={styles.edit}>

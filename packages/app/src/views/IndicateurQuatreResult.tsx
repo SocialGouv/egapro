@@ -33,6 +33,7 @@ function IndicateurQuatreResult({
           (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") +
           "/15"
         }
+        indicateurSexeSurRepresente="femmes"
       />
 
       <p css={styles.edit}>
