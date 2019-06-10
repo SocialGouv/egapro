@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres${HASH_BRANCH_NAME}
+  labels:
+    app: postgres${HASH_BRANCH_NAME}
+spec:
+  type: NodePort
+  ports:
+  - port: 5432
+  selector:
+    app: postgres${HASH_BRANCH_NAME}

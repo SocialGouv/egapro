@@ -1,0 +1,36 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: postgres${HASH_BRANCH_NAME}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres${HASH_BRANCH_NAME}
+        branch: egapro${HASH_BRANCH_NAME}
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:11-alpine
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: egapro-secret
+              key: DB_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: egapro-secret
+              key: DB_PASSWORD
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgredb
+      volumes:
+      - name: postgredb
+        emptyDir: {}

@@ -1,6 +1,7 @@
 ---
 include:
 - '/k8s/app/.deploy-egapro-app.yml'
+- '/k8s/postgres/.deploy-egapro-postgres.yml'
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -72,6 +73,16 @@ Deploy @egapro/app (dev):
   variables:
     <<: *deploy_stage_variables
     PORT: $APP_PORT
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  except:
+  - master
+
+Deploy @egapro/postgres (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
