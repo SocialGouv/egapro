@@ -51,7 +51,7 @@ Get Github Id (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - boni-ci
+  - master
 
 Get Github Id (prod):
   <<: *get_github_id_stage
@@ -59,7 +59,7 @@ Get Github Id (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - boni-ci
+  - master
 
 
 ###########################################
@@ -113,6 +113,8 @@ Register init kinto image:
     IMAGE_TAG: $CI_COMMIT_SHA
 #
 
+# Dev Environment
+
 Deploy @egapro/app (dev):
   <<: *deploy_stage
   extends: .deploy-egapro-app-k8s-dev
@@ -122,7 +124,7 @@ Deploy @egapro/app (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - boni-ci
+  - master
 
 Deploy @egapro/api (dev):
   <<: *deploy_stage
@@ -133,7 +135,7 @@ Deploy @egapro/api (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - boni-ci
+  - master
 
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
@@ -144,7 +146,7 @@ Deploy @egapro/postgres (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - boni-ci
+  - master
 
 Deploy @egapro/memcached (dev):
   <<: *deploy_stage
@@ -155,7 +157,7 @@ Deploy @egapro/memcached (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - boni-ci
+  - master
 
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
@@ -167,8 +169,9 @@ Deploy @egapro/kinto (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - boni-ci
+  - master
 
+# Prod Environment
 
 Deploy @egapro/app (prod):
   <<: *deploy_stage
@@ -179,7 +182,7 @@ Deploy @egapro/app (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - boni-ci
+  - master
 
 Deploy @egapro/api (prod):
   <<: *deploy_stage
@@ -190,7 +193,7 @@ Deploy @egapro/api (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - boni-ci
+  - master
 
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
@@ -201,7 +204,7 @@ Deploy @egapro/memcached (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - boni-ci
+  - master
 
 Deploy @egapro/kinto (pro):
   <<: *deploy_stage
@@ -213,7 +216,7 @@ Deploy @egapro/kinto (pro):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - boni-ci
+  - master
 
 
 ###########################################
@@ -241,7 +244,7 @@ Send deployment url to Github (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - boni-ci
+  - master
 
 
 Send deployment url to Github (prod):
@@ -251,7 +254,7 @@ Send deployment url to Github (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - boni-ci
+  - master
 
 
 ###########################################
@@ -270,4 +273,4 @@ Delete useless k8s objects:
   environment:
     name: $DEV_ENVIRONMENT_NAME
   only:
-  - boni-ci
+  - master

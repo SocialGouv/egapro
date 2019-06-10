@@ -12,8 +12,8 @@ spec:
         branch: egapro${HASH_BRANCH_NAME}
     spec:
       containers:
-      - name: postgres
-        image: kinto/kinto-server
+      - name: kinto
+        image: kinto/kinto-server:13.1.1
         imagePullPolicy: "IfNotPresent"
         ports:
         - containerPort: 8888

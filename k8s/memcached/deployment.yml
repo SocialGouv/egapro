@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: cache
-        image: library/memcached
+        image: library/memcached:1.5
         imagePullPolicy: "IfNotPresent"
         ports:
         - containerPort: ${PORT}
