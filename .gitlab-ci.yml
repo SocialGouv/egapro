@@ -166,6 +166,17 @@ Deploy @egapro/app (prod):
   only:
   - boni-ci
 
+Deploy @egapro/api (prod):
+  <<: *deploy_stage
+  extends: .deploy-egapro-api-k8s-prod
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $API_PORT
+  environment:
+    name: $PROD_ENVIRONMENT_NAME
+  only:
+  - boni-ci
+
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
   extends: .deploy-egapro-memcached-k8s-prod
