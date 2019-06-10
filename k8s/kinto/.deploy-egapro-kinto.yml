@@ -1,0 +1,17 @@
+.deploy-egapro-kinto-k8s-dev:
+  image:
+    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
+    entrypoint: [""]
+  before_script:
+  - /apps/create-kubeconfig.sh
+  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+  - envsubst < k8s/kinto/deployment.yml > k8s/kinto/deployment-egapro.yml
+  - envsubst < k8s/kinto/service.yml > k8s/kinto/service-egapro.yml
+  - envsubst < k8s/kinto/pod-init-kinto.yml > k8s/kinto/pod-init-kinto-egapro.yml
+  script:
+  - kubectl apply -f k8s/kinto/deployment-egapro.yml
+  - kubectl apply -f k8s/kinto/service-egapro.yml
+  - k8s/scripts/init-kinto.sh $HASH_BRANCH_NAME
+  allow_failure: false
+
