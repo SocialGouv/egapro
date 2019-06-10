@@ -1,0 +1,19 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: egapro-api
+  labels:
+    app: egapro-api
+    branch: egapro
+spec:
+  rules:
+  - host: egapro-api.${ENVIRONMENT}.social.gouv.fr
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: egapro-api
+          servicePort: ${PORT}
+  tls:
+  - secretName: egapro-crt-secret

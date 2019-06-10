@@ -1,3 +1,4 @@
+---
 .deploy-egapro-api-k8s-dev:
   image:
     name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
@@ -24,10 +25,10 @@
   - /apps/create-kubeconfig.sh
   - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
   - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
-  - envsubst < k8s/api/ingress.yml > k8s/api/ingress-egapro.yml
+  - envsubst < k8s/api/ingress-prod.yml > k8s/api/ingress-prod-egapro.yml
   script:
   - kubectl apply -f k8s/api/deployment-egapro.yml
   - kubectl apply -f k8s/api/service-egapro.yml
-  - kubectl apply -f k8s/api/ingress-egapro.yml
+  - kubectl apply -f k8s/api/ingress-prod-egapro.yml
   allow_failure: false
 

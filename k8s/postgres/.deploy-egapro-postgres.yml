@@ -1,3 +1,4 @@
+---
 .deploy-egapro-postgres-k8s-dev:
   image:
     name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
