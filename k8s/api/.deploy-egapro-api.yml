@@ -1,0 +1,18 @@
+.deploy-egapro-api-k8s-dev:
+  image:
+    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
+    entrypoint: [""]
+  before_script:
+  - /apps/create-kubeconfig.sh
+  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export HASH_BRANCH_INGRESS=$HASH_BRANCH_NAME-
+  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+  - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
+  - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
+  - envsubst < k8s/api/ingress.yml > k8s/api/ingress-egapro.yml
+  script:
+  - kubectl apply -f k8s/api/deployment-egapro.yml
+  - kubectl apply -f k8s/api/service-egapro.yml
+  - kubectl apply -f k8s/api/ingress-egapro.yml
+  allow_failure: false
+

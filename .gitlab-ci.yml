@@ -1,6 +1,7 @@
 ---
 include:
 - '/k8s/app/.deploy-egapro-app.yml'
+- '/k8s/api/.deploy-egapro-api.yml'
 - '/k8s/postgres/.deploy-egapro-postgres.yml'
 - '/k8s/memcached/.deploy-egapro-memcached.yml'
 - '/k8s/kinto/.deploy-egapro-kinto.yml'
@@ -13,6 +14,7 @@ variables:
   DEV_ENVIRONMENT_NAME: "dev.factory"
   PROD_ENVIRONMENT_NAME: "incubateur"
   APP_PORT: 9000
+  API_PORT: 4000
 
 stages:
 - "Registration"
@@ -75,6 +77,17 @@ Deploy @egapro/app (dev):
   variables:
     <<: *deploy_stage_variables
     PORT: $APP_PORT
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  except:
+  - master
+
+Deploy @egapro/api (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-api-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $API_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
