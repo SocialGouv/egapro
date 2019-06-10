@@ -100,12 +100,11 @@ function FieldInputsMenWomen({
 
         {readOnly ? (
           <React.Fragment>
-            <Cell style={[styles.cellEmpty, styles.cellEmptyMen]}>
-              {displayReadOnlyValue(hommesField.input.value, mask)}
-            </Cell>
-
             <Cell style={[styles.cellEmpty, styles.cellEmptyWomen]}>
               {displayReadOnlyValue(femmesField.input.value, mask)}
+            </Cell>
+            <Cell style={[styles.cellEmpty, styles.cellEmptyMen]}>
+              {displayReadOnlyValue(hommesField.input.value, mask)}
             </Cell>
           </React.Fragment>
         ) : calculable ? (
