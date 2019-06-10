@@ -109,13 +109,13 @@ function FieldInputsMenWomen({
           </React.Fragment>
         ) : calculable ? (
           <React.Fragment>
-            <CellInput field={hommesField} mask={mask} style={styles.cellMen} />
-
             <CellInput
               field={femmesField}
               mask={mask}
               style={styles.cellWomen}
             />
+
+            <CellInput field={hommesField} mask={mask} style={styles.cellMen} />
           </React.Fragment>
         ) : (
           <Cell2 css={styles.cell2} />
