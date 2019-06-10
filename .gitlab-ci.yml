@@ -21,6 +21,7 @@ stages:
 - "Registration"
 - "Deploy Egapro"
 - "Send Url to GitHub"
+- "Delete K8S objects"
 
 
 ###########################################
@@ -179,4 +180,23 @@ Send deployment url to Github (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
+  - master
+
+
+###########################################
+###     DELETE USELESS K8S OBJECTS      ###
+###########################################
+
+Delete useless k8s objects:
+  stage: "Delete K8S objects"
+  image:
+    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
+    entrypoint: [""]
+  before_script:
+  - /apps/create-kubeconfig.sh
+  script:
+  - python3 k8s/scripts/delete-k8s-objects.py
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  only:
   - master

@@ -5,6 +5,7 @@ metadata:
   name: cache${HASH_BRANCH_NAME}
   labels:
     app: cache${HASH_BRANCH_NAME}
+    branch: egapro${HASH_BRANCH_NAME}
 spec:
   type: NodePort
   ports:

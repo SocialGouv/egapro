@@ -5,7 +5,7 @@ metadata:
   name: egapro-init-kinto${HASH_BRANCH_NAME}
   labels:
     app: egapro-init-kinto
-    branch: egapro-init-kinto${HASH_BRANCH_NAME}
+    branch: egapro${HASH_BRANCH_NAME}
 spec:
   ttlSecondsAfterFinished: 100
   template:

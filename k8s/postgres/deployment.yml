@@ -3,6 +3,9 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: postgres${HASH_BRANCH_NAME}
+  labels:
+    app: postgres${HASH_BRANCH_NAME}
+    branch: egapro${HASH_BRANCH_NAME}
 spec:
   replicas: 1
   template:
