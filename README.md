@@ -47,24 +47,10 @@ yarn start
 
 ### avec docker
 
-lancer kinto,
-
-builder les images docker
-
 ```bash
-docker build -t egapro-app -f packages/app/Dockerfile .
-
-docker build -t egapro-api -f packages/api/Dockerfile .
+docker-compose up --build
 ```
 
-lancer les containeurs
-
-```bash
-
-docker run -p 8080:9000 egapro-app 
-
-docker run -p 4000:4000 egapro-api 
-```
 
 ## End Points
 
