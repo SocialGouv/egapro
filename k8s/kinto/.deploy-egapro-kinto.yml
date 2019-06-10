@@ -8,7 +8,7 @@
   - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
   - envsubst < k8s/kinto/deployment.yml > k8s/kinto/deployment-egapro.yml
   - envsubst < k8s/kinto/service.yml > k8s/kinto/service-egapro.yml
-  - envsubst < k8s/kinto/pod-init-kinto.yml > k8s/kinto/pod-init-kinto-egapro.yml
+  - envsubst < k8s/kinto/job-init-kinto.yml > k8s/kinto/job-init-kinto-egapro.yml
   script:
   - kubectl apply -f k8s/kinto/deployment-egapro.yml
   - kubectl apply -f k8s/kinto/service-egapro.yml
