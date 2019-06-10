@@ -14,7 +14,7 @@ function FAQFooter() {
 
 const styles = {
   container: css({
-    height: 60,
+    height: 80,
     flexShrink: 0,
     display: "flex",
     flexDirection: "row",

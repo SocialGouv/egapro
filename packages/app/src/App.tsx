@@ -24,6 +24,7 @@ import AppReducer from "./AppReducer";
 
 import GridProvider from "./components/GridContext";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import Menu from "./components/Menu";
 
 import FAQ from "./views/FAQ";
@@ -243,7 +244,10 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
           indicateurCinqFormValidated={state.indicateurCinq.formValidated}
         />
       </div>
-      <div css={styles.view}>{children}</div>
+      <div css={styles.viewContainer}>
+        <div css={styles.view}>{children}</div>
+        <Footer />
+      </div>
     </div>
   );
 }
@@ -284,6 +288,11 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     paddingBottom: 80
+  }),
+  viewContainer: css({
+    display: "flex",
+    flexDirection: "column",
+    flex: 1
   }),
   view: css({
     flex: 1
