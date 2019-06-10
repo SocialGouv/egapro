@@ -1,4 +1,7 @@
 ---
+include:
+- '/k8s/app/.deploy-egapro-app.yml'
+
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://localhost:2375
@@ -6,9 +9,17 @@ variables:
   IMAGE_INFRA_BASE_NAME: "infra/images-docker"
   DEV_ENVIRONMENT_NAME: "dev.factory"
   PROD_ENVIRONMENT_NAME: "incubateur"
+  APP_PORT: 8080
+
+stages:
+- "Registration"
+- "Deploy Egapro"
+
+###########################################
+###       REGISTER DOCKER IMAGES        ###
+###########################################
 
 #
-
 .register_stage: &register_stage
   stage: "Registration"
   image: docker:$DOCKER_VERSION
@@ -21,17 +32,7 @@ variables:
   - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
   - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA $CONTEXT
   - docker push $IMAGE_NAME
-
 #
-
-
-stages:
-- "Registration"
-
-###########################################
-###       REGISTER DOCKER IMAGES        ###
-###########################################
-
 
 Register api image:
   <<: *register_stage
@@ -50,3 +51,28 @@ Register init kinto image:
   variables:
     CONTEXT: packages/kinto
     IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
+
+
+###########################################
+###            DEPLOY TO K8S            ###
+###########################################
+
+#
+.deploy_stage: &deploy_stage
+  stage: "Deploy Egapro"
+  dependencies: []
+  variables: &deploy_stage_variables
+    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
+    IMAGE_TAG: $CI_COMMIT_SHA
+#
+
+Deploy @egapro/app (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-app-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $APP_PORT
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  except:
+  - master
