@@ -1,0 +1,52 @@
+---
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_VERSION: "18.06"
+  IMAGE_INFRA_BASE_NAME: "infra/images-docker"
+  DEV_ENVIRONMENT_NAME: "dev.factory"
+  PROD_ENVIRONMENT_NAME: "incubateur"
+
+#
+
+.register_stage: &register_stage
+  stage: "Registration"
+  image: docker:$DOCKER_VERSION
+  services:
+  - docker:$DOCKER_VERSION-dind
+  before_script:
+  - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+  - docker pull $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA || true
+  script:
+  - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
+  - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA $CONTEXT
+  - docker push $IMAGE_NAME
+
+#
+
+
+stages:
+- "Registration"
+
+###########################################
+###       REGISTER DOCKER IMAGES        ###
+###########################################
+
+
+Register api image:
+  <<: *register_stage
+  variables:
+    CONTEXT: packages/api
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
+
+Register app image:
+  <<: *register_stage
+  variables:
+    CONTEXT: packages/app
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
+
+Register init kinto image:
+  <<: *register_stage
+  variables:
+    CONTEXT: packages/kinto
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
