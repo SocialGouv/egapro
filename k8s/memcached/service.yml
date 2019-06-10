@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache${HASH_BRANCH_NAME}
+  labels:
+    app: cache${HASH_BRANCH_NAME}
+spec:
+  type: NodePort
+  ports:
+  - port: 11212
+  selector:
+    app: cache${HASH_BRANCH_NAME}

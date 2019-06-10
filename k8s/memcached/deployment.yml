@@ -1,0 +1,19 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cache${HASH_BRANCH_NAME}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cache${HASH_BRANCH_NAME}
+        branch: egapro${HASH_BRANCH_NAME}
+    spec:
+      containers:
+      - name: cache
+        image: library/memcached
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 11212
