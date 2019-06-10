@@ -4,6 +4,7 @@ import { css, jsx } from "@emotion/core";
 import { Route, Switch, RouteComponentProps } from "react-router-dom";
 
 import FAQHeader from "./components/FAQHeader";
+import FAQFooter from "./components/FAQFooter";
 
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
@@ -107,6 +108,8 @@ function FAQ() {
                   render={() => <FAQSection section="resultat" />}
                 />*/}
               </Switch>
+
+              <FAQFooter />
             </div>
           </div>
         );
