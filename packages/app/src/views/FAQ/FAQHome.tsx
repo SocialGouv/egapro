@@ -23,8 +23,8 @@ function FAQHome() {
                 key={faqKey}
                 section={faqKey}
                 title={faqSection.title}
-                detail={`${questionsLength} article${
-                  questionsLength > 1 ? "s" : ""
+                detail={`${questionsLength + 1} article${
+                  questionsLength + 1 > 1 ? "s" : ""
                 }`}
               />
             );

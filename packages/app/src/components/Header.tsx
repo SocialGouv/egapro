@@ -13,9 +13,14 @@ function Header() {
   return (
     <header css={styles.header}>
       <div css={[styles.headerLeft, css({ width })]}>
-        <div css={styles.containerLogo}>
+        <a
+          href="https://travail-emploi.gouv.fr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          css={styles.containerLogo}
+        >
           <Logo />
-        </div>
+        </a>
       </div>
       <div css={styles.headerInner}>
         <Link to="/" css={styles.title}>
@@ -48,7 +53,9 @@ const styles = {
   }),
   containerLogo: css({
     marginLeft: "auto",
-    marginRight: 25
+    marginRight: 25,
+    textDecoration: "none",
+    color: "currentColor"
   }),
   headerInner: css({
     display: "flex",

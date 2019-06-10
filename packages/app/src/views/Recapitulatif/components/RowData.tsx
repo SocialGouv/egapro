@@ -111,8 +111,9 @@ const styles = {
   }),
   cellHead: css({
     height: 22,
+    paddingBottom: 2,
     display: "flex",
-    alignItems: "center",
+    alignItems: "flex-end",
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
     fontSize: 14
   }),

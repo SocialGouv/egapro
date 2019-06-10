@@ -20,9 +20,16 @@ interface Props {
   fieldName: string;
   label: string;
   readOnly: boolean;
+  theme?: "hommes" | "femmes";
 }
 
-function FieldInput({ form, fieldName, label, readOnly }: Props) {
+function FieldInput({
+  form,
+  fieldName,
+  label,
+  readOnly,
+  theme = "femmes"
+}: Props) {
   const field = useField(fieldName, form);
   const error = hasFieldError(field.meta);
   const minMaxError = hasMinMaxInputError(field.meta);
@@ -47,11 +54,19 @@ function FieldInput({ form, fieldName, label, readOnly }: Props) {
         </CellHead>
 
         {readOnly ? (
-          <Cell style={[styles.cellEmpty, styles.cellEmptyWomen]}>
+          <Cell
+            style={[
+              styles.cellEmpty,
+              theme === "hommes" ? styles.cellEmptyMen : styles.cellEmptyWomen
+            ]}
+          >
             {field.input.value}
           </Cell>
         ) : (
-          <CellInput field={field} style={styles.cellWomen} />
+          <CellInput
+            field={field}
+            style={theme === "hommes" ? styles.cellMen : styles.cellWomen}
+          />
         )}
       </div>
       {error &&

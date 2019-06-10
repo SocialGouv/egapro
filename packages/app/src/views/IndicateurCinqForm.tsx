@@ -151,6 +151,7 @@ function IndicateurCinqForm({
           fieldName="nombreSalariesHommes"
           label="nombre d’hommes parmis les 10 plus hauts salaires"
           readOnly={readOnly}
+          theme="hommes"
         />
       </BlocFormLight>
 
