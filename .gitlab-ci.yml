@@ -48,7 +48,7 @@ Get Github Id (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - boni-ci
 
 
 ###########################################
@@ -111,7 +111,7 @@ Deploy @egapro/app (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - boni-ci
 
 Deploy @egapro/api (dev):
   <<: *deploy_stage
@@ -122,7 +122,7 @@ Deploy @egapro/api (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - boni-ci
 
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
@@ -132,7 +132,7 @@ Deploy @egapro/postgres (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - boni-ci
 
 Deploy @egapro/memcached (dev):
   <<: *deploy_stage
@@ -142,7 +142,7 @@ Deploy @egapro/memcached (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - boni-ci
 
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
@@ -152,8 +152,19 @@ Deploy @egapro/kinto (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - boni-ci
 
+
+Deploy @egapro/app (prod):
+  <<: *deploy_stage
+  extends: .deploy-egapro-app-k8s-prod
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $APP_PORT
+  environment:
+    name: $PROD_ENVIRONMENT_NAME
+  only:
+  - boni-ci
 
 ###########################################
 ###         SEND URL TO GITHUB          ###
@@ -180,7 +191,7 @@ Send deployment url to Github (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - boni-ci
 
 
 ###########################################
@@ -199,4 +210,4 @@ Delete useless k8s objects:
   environment:
     name: $DEV_ENVIRONMENT_NAME
   only:
-  - master
+  - boni-ci
