@@ -47,3 +47,11 @@ input::-webkit-outer-spin-button {
 svg {
   display: block;
 }
+
+*:focus {
+  outline: auto #696cd1 2px;
+}
+
+*:active {
+  outline: none;
+}
