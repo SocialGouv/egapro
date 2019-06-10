@@ -19,4 +19,4 @@ spec:
         image: library/memcached
         imagePullPolicy: "IfNotPresent"
         ports:
-        - containerPort: 11212
+        - containerPort: ${PORT}

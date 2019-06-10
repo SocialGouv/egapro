@@ -8,6 +8,6 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 8888
+  - port: ${PORT}
   selector:
     app: kinto${HASH_BRANCH_NAME}

@@ -9,6 +9,6 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 11212
+  - port: ${PORT}
   selector:
     app: cache${HASH_BRANCH_NAME}

@@ -15,6 +15,9 @@ variables:
   PROD_ENVIRONMENT_NAME: "incubateur"
   APP_PORT: 9000
   API_PORT: 4000
+  KINTO_PORT: 8888
+  POSTGRES_PORT: 5432
+  MEMCACHED_PORT: 11212
 
 stages:
 - "Prepare"
@@ -137,6 +140,7 @@ Deploy @egapro/postgres (dev):
   extends: .deploy-egapro-postgres-k8s-dev
   variables:
     <<: *deploy_stage_variables
+    PORT: $POSTGRES_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
@@ -147,6 +151,7 @@ Deploy @egapro/memcached (dev):
   extends: .deploy-egapro-memcached-k8s-dev
   variables:
     <<: *deploy_stage_variables
+    PORT: $MEMCACHED_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
@@ -157,6 +162,8 @@ Deploy @egapro/kinto (dev):
   extends: .deploy-egapro-kinto-k8s-dev
   variables:
     <<: *deploy_stage_variables
+    PORT: $KINTO_PORT
+    CACHE_PORT: $MEMCACHED_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
@@ -190,6 +197,7 @@ Deploy @egapro/memcached (prod):
   extends: .deploy-egapro-memcached-k8s-prod
   variables:
     <<: *deploy_stage_variables
+    PORT: $MEMCACHED_PORT
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
@@ -200,6 +208,8 @@ Deploy @egapro/kinto (pro):
   extends: .deploy-egapro-kinto-k8s-prod
   variables:
     <<: *deploy_stage_variables
+    PORT: $KINTO_PORT
+    CACHE_PORT: $MEMCACHED_PORT
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:

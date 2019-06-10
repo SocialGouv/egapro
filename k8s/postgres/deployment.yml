@@ -19,7 +19,7 @@ spec:
         image: postgres:11-alpine
         imagePullPolicy: "IfNotPresent"
         ports:
-        - containerPort: 5432
+        - containerPort: ${PORT}
         env:
         - name: POSTGRES_USER
           valueFrom:
