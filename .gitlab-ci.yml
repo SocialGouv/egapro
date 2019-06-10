@@ -50,6 +50,14 @@ Get Github Id (dev):
   except:
   - boni-ci
 
+Get Github Id (prod):
+  <<: *get_github_id_stage
+  stage: "Prepare"
+  environment:
+    name: $PROD_ENVIRONMENT_NAME
+  only:
+  - boni-ci
+
 
 ###########################################
 ###       REGISTER DOCKER IMAGES        ###
@@ -223,6 +231,16 @@ Send deployment url to Github (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
+  - boni-ci
+
+
+Send deployment url to Github (prod):
+  <<: *send_url_to_github_stage
+  before_script:
+  - export URL=http://egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
+  environment:
+    name: $PROD_ENVIRONMENT_NAME
+  only:
   - boni-ci
 
 
