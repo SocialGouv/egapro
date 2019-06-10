@@ -13,3 +13,15 @@
   - kubectl apply -f k8s/memcached/service-egapro.yml
   allow_failure: false
 
+.deploy-egapro-memcached-k8s-prod:
+  image:
+    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
+    entrypoint: [""]
+  before_script:
+  - /apps/create-kubeconfig.sh
+  - envsubst < k8s/memcached/deployment.yml > k8s/memcached/deployment-egapro.yml
+  - envsubst < k8s/memcached/service.yml > k8s/memcached/service-egapro.yml
+  script:
+  - kubectl apply -f k8s/memcached/deployment-egapro.yml
+  - kubectl apply -f k8s/memcached/service-egapro.yml
+  allow_failure: false
