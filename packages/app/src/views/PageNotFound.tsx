@@ -5,15 +5,13 @@ import { RouteComponentProps } from "react-router-dom";
 import Page from "../components/Page";
 
 import ActionBar from "../components/ActionBar";
-import Button from "../components/Button";
+import ButtonAction from "../components/ButtonAction";
 
 function PageNotFound({ history }: RouteComponentProps) {
   return (
     <Page title="Malheureusement la page que vous cherchez n’existe pas !">
       <ActionBar>
-        <div onClick={() => history.goBack()}>
-          <Button label="retour" />
-        </div>
+        <ButtonAction label="retour" onClick={() => history.goBack()} />
       </ActionBar>
     </Page>
   );

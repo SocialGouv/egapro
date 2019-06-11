@@ -12,6 +12,8 @@ import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex";
 
 import Page from "../../components/Page";
+import ActionBar from "../../components/ActionBar";
+import ButtonAction from "../../components/ButtonAction";
 
 import RecapitulatifIndex from "./RecapitulatifIndex";
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn";
@@ -133,6 +135,13 @@ function Recapitulatif({ state }: Props) {
         }
         noteIndicateurCinq={noteIndicateurCinq}
       />
+      <ActionBar>
+        <ButtonAction
+          label="imprimer"
+          outline={true}
+          onClick={() => window.print()}
+        />
+      </ActionBar>
     </Page>
   );
 }
