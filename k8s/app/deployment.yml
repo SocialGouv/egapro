@@ -1,0 +1,38 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: egapro-app${HASH_BRANCH_NAME}
+  labels:
+    app: egapro-app${HASH_BRANCH_NAME}
+    branch: egapro${HASH_BRANCH_NAME}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: egapro-app${HASH_BRANCH_NAME}
+  template:
+    metadata:
+      labels:
+        app: egapro-app${HASH_BRANCH_NAME}
+    spec:
+      containers:
+      - image: ${EGAPRO_REGISTRY}/app:${IMAGE_TAG}
+        name: egapro-app
+        ports:
+        - containerPort: ${PORT}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: ${PORT}
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: ${PORT}
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        env:
+        - name: API_URL
+          value: "http://${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr"

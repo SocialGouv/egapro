@@ -43,6 +43,15 @@ pour démarrer, le front-end et le back-end
 yarn start
 ```
 
+## Lancer en local
+
+### avec docker
+
+```bash
+docker-compose up --build
+```
+
+
 ## End Points
 
 Action  |API                                | body                         |Réponse                        |

@@ -1,0 +1,45 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kinto${HASH_BRANCH_NAME}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kinto${HASH_BRANCH_NAME}
+        branch: egapro${HASH_BRANCH_NAME}
+    spec:
+      containers:
+      - name: kinto
+        image: kinto/kinto-server
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 8888
+        env:
+        - name: KINTO_CACHE_BACKEND
+          value: "kinto.core.cache.memcached"
+        - name: KINTO_CACHE_HOSTS
+          value: "cache${HASH_BRANCH_NAME}:${CACHE_PORT} cache${HASH_BRANCH_NAME}:${CACHE_PORT}"
+        - name: KINTO_STORAGE_BACKEND
+          value: "kinto.core.storage.postgresql"
+        - name: KINTO_STORAGE_URL
+          value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${POSTGRES_HOST}/postgres"
+        - name: KINTO_PERMISSION_BACKEND
+          value: "kinto.core.permission.postgresql"
+        - name: KINTO_PERMISSION_URL
+          value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${POSTGRES_HOST}/postgres"
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:11-alpine
+        imagePullPolicy: Always
+        command:
+        - sh
+        - -c
+        - |
+          retry=120; # 5s * (12 * 10) = 10min
+          while ! pg_isready -h ${POSTGRES_HOST} > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
+            do
+              echo "Waiting for Postgres to go Green ($(( retry )))" ; sleep 5s ; done ;
+          echo Ready;

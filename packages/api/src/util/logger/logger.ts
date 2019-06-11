@@ -16,7 +16,7 @@ const alignedWithColorsAndTime = format.combine(
 
 const logger = createLogger({
   level: 'info',
-// tslint:disable-next-line: object-literal-sort-keys
+  // tslint:disable-next-line: object-literal-sort-keys
   format: alignedWithColorsAndTime,
   transports: [
     new transports.File({ filename: './logs/ds-collector-err.log', level: 'error' }),
@@ -28,10 +28,10 @@ const logger = createLogger({
 // If we're not in production then **ALSO** log to the `console`
 // with the colorized simple format.
 //
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new transports.Console({
-    format: alignedWithColorsAndTime
-  }));
-}
+// if (process.env.NODE_ENV !== 'production') {
+logger.add(new transports.Console({
+  format: alignedWithColorsAndTime
+}));
+// }
 
 export default logger;
