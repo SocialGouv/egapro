@@ -86,16 +86,10 @@ function FAQSteps({ section }: Props) {
 }
 
 const styles = {
-  container: css({
-    flex: 1,
-    display: "flex",
-    flexDirection: "column"
-  }),
+  container: css({}),
   content: css({
     marginTop: 28,
-    marginBottom: 14,
-    display: "flex",
-    flexDirection: "column"
+    marginBottom: 14
   }),
   pasapas: css({
     marginBottom: 28

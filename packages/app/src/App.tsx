@@ -313,6 +313,10 @@ const styles = {
     flex: 1,
     "@media print": {
       display: "block"
+    },
+    "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
+      // Only target IE11
+      display: "block"
     }
   }),
   view: css({

@@ -2,15 +2,18 @@
 import { css, jsx } from "@emotion/core";
 import { Switch, Link, Route, RouteComponentProps } from "react-router-dom";
 
+import globalStyles from "../../../utils/globalStyles";
+import ActionLink from "../../../components/ActionLink";
+
 function FAQHeaderBackButton({
   history
 }: {
   history: RouteComponentProps["history"];
 }) {
   return (
-    <button css={styles.buttonBack} onClick={() => history.goBack()}>
+    <ActionLink style={styles.buttonBack} onClick={() => history.goBack()}>
       <span css={styles.backIcon}>◀</span> retour
-    </button>
+    </ActionLink>
   );
 }
 
@@ -70,8 +73,7 @@ const styles = {
     flexBasis: 100
   }),
   buttonBack: css({
-    all: "unset",
-    cursor: "pointer",
+    color: globalStyles.colors.default,
     fontSize: 12,
     textDecoration: "none"
   }),

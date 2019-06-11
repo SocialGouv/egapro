@@ -78,35 +78,6 @@ function FAQ() {
                     />
                   )}
                 />
-
-                {/*<Route
-                  path="/effectifs"
-                  render={() => <FAQSection section="effectifs" />}
-                />
-                <Route
-                  path="/indicateur1"
-                  render={() => <FAQSection section="indicateur1" />}
-                />
-                <Route
-                  path="/indicateur2"
-                  render={() => <FAQIndicateur2 section="indicateur2" />}
-                />
-                <Route
-                  path="/indicateur3"
-                  render={() => <FAQSection section="indicateur3" />}
-                />
-                <Route
-                  path="/indicateur4"
-                  render={() => <FAQSection section="indicateur4" />}
-                />
-                <Route
-                  path="/indicateur5"
-                  render={() => <FAQSection section="indicateur5" />}
-                />
-                <Route
-                  path="/recapitulatif"
-                  render={() => <FAQSection section="resultat" />}
-                />*/}
               </Switch>
 
               <FAQFooter />
@@ -120,7 +91,9 @@ function FAQ() {
 
 const styles = {
   container: css({
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
     display: "flex",
     flexDirection: "column"
   }),
@@ -133,7 +106,11 @@ const styles = {
     flexDirection: "column",
     paddingRight: 29,
     paddingLeft: 29,
-    paddingTop: 26
+    paddingTop: 26,
+    "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
+      // Only target IE11
+      display: "block"
+    }
   })
 };
 

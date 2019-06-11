@@ -18,7 +18,14 @@ function ButtonSubmit({ label, outline = false, error = false }: Props) {
 
 const styles = {
   button: css({
-    all: "unset"
+    all: "unset",
+
+    padding: 0,
+    border: "none",
+    outline: "none",
+    font: "inherit",
+    color: "inherit",
+    background: "none"
   })
 };
 

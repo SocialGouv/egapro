@@ -4,7 +4,7 @@ import { RouteComponentProps } from "react-router-dom";
 
 import { FAQPartType } from "../../globals.d";
 
-import globalStyles from "../../utils/globalStyles";
+import ActionLink from "../../components/ActionLink";
 
 import FAQTitle from "./components/FAQTitle";
 
@@ -34,25 +34,18 @@ function FAQSection({ part, indexQuestion, history }: Props) {
           ))}
         </div>
 
-        <button css={styles.button} onClick={() => history.goBack()}>
+        <ActionLink style={styles.button} onClick={() => history.goBack()}>
           <span css={styles.buttonIcon}>◀</span> ︎retour aux questions
-        </button>
+        </ActionLink>
       </div>
     </div>
   );
 }
 
 const styles = {
-  container: css({
-    flex: 1,
-    display: "flex",
-    flexDirection: "column"
-  }),
+  container: css({}),
   content: css({
-    marginBottom: 14,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "start"
+    marginBottom: 14
   }),
   question: css({
     marginBottom: 12,
@@ -61,7 +54,8 @@ const styles = {
     lineHeight: "17px"
   }),
   responseBloc: css({
-    paddingLeft: 15
+    paddingLeft: 15,
+    marginBottom: 12
   }),
   responseRow: css({
     marginBottom: 4,
@@ -70,11 +64,7 @@ const styles = {
   }),
 
   button: css({
-    all: "unset",
-    cursor: "pointer",
-    marginTop: 12,
     fontSize: 12,
-    color: globalStyles.colors.primary,
     textDecoration: "none"
   }),
   buttonIcon: css({

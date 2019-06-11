@@ -5,11 +5,12 @@ import { ReactNode } from "react";
 interface Props {
   children: ReactNode;
   onClick: () => void;
+  style?: any;
 }
 
-function ActionLink({ children, onClick }: Props) {
+function ActionLink({ children, onClick, style }: Props) {
   return (
-    <button css={styles.button} onClick={onClick}>
+    <button type="button" css={[styles.button, style]} onClick={onClick}>
       {children}
     </button>
   );
@@ -18,6 +19,14 @@ function ActionLink({ children, onClick }: Props) {
 const styles = {
   button: css({
     all: "unset",
+
+    padding: 0,
+    border: "none",
+    outline: "none",
+    font: "inherit",
+    color: "inherit",
+    background: "none",
+
     cursor: "pointer",
     fontSize: 14,
     textAlign: "center",
