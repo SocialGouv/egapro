@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
 
 import { AppState } from "../../globals.d";
@@ -141,9 +141,19 @@ function Recapitulatif({ state }: Props) {
           outline={true}
           onClick={() => window.print()}
         />
+        <span css={styles.info}>
+          (possible d'enregistrer en PDF depuis la fenêtre d'impression)
+        </span>
       </ActionBar>
     </Page>
   );
 }
+
+const styles = {
+  info: css({
+    marginLeft: 4,
+    fontSize: 12
+  })
+};
 
 export default Recapitulatif;

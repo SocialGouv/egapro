@@ -12,7 +12,7 @@ function Header() {
   const width = useColumnsWidth(2);
   return (
     <header css={styles.header}>
-      <div css={[styles.headerLeft, css({ width })]}>
+      <div css={[styles.headerLeft, css({ width }), styles.headerLeftPrint]}>
         <a
           href="https://travail-emploi.gouv.fr/"
           target="_blank"
@@ -49,7 +49,15 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     marginLeft: globalStyles.grid.gutterWidth,
-    marginRight: globalStyles.grid.gutterWidth
+    marginRight: globalStyles.grid.gutterWidth,
+    "@media print": {
+      marginLeft: 0
+    }
+  }),
+  headerLeftPrint: css({
+    "@media print": {
+      width: "auto"
+    }
   }),
   containerLogo: css({
     marginLeft: "auto",

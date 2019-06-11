@@ -86,7 +86,12 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     backgroundColor: globalStyles.colors.default,
-    color: "white"
+    color: "white",
+    "@media print": {
+      backgroundColor: "white",
+      color: globalStyles.colors.default,
+      border: `solid ${globalStyles.colors.default} 1px`
+    }
   }),
   blocTitle: css({
     marginBottom: "auto",

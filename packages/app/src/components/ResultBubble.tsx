@@ -72,13 +72,26 @@ const styles = {
 
     color: "white",
     backgroundColor: globalStyles.colors.default,
-    borderRadius: "100%"
+    borderRadius: "100%",
+    "@media print": {
+      backgroundColor: "white",
+      color: globalStyles.colors.default,
+      border: `solid ${globalStyles.colors.default} 1px`
+    }
   }),
   blocWomen: css({
-    backgroundColor: globalStyles.colors.women
+    backgroundColor: globalStyles.colors.women,
+    "@media print": {
+      color: globalStyles.colors.women,
+      border: `solid ${globalStyles.colors.women} 1px`
+    }
   }),
   blocMen: css({
-    backgroundColor: globalStyles.colors.men
+    backgroundColor: globalStyles.colors.men,
+    "@media print": {
+      color: globalStyles.colors.men,
+      border: `solid ${globalStyles.colors.men} 1px`
+    }
   }),
   blocInfo: css({
     borderBottom: "1px solid #FFFFFF"

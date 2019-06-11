@@ -90,7 +90,10 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    borderTop: "1px solid #EFECEF"
+    borderTop: "1px solid #EFECEF",
+    "@media print": {
+      display: "none"
+    }
   }),
   footerLeft: css({
     display: "flex",

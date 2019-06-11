@@ -16,7 +16,10 @@ const styles = {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 46,
-    marginBottom: 36
+    marginBottom: 36,
+    "@media print": {
+      display: "none"
+    }
   })
 };
 

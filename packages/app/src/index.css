@@ -30,6 +30,17 @@ body {
   flex: 1;
 }
 
+@media print {
+  body {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  #root {
+    display: block;
+  }
+}
+
 p {
   margin: 0;
 }
