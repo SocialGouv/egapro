@@ -7,17 +7,26 @@ interface Props {
   onClick: () => void;
   outline?: boolean;
   error?: boolean;
+  disabled?: boolean;
+  loading?: boolean;
 }
 
 function ButtonAction({
   label,
   onClick,
   outline = false,
-  error = false
+  error = false,
+  disabled = false,
+  loading = false
 }: Props) {
   return (
-    <button type="button" css={styles.button} onClick={onClick}>
-      <Button label={label} outline={outline} error={error} />
+    <button
+      type="button"
+      disabled={disabled}
+      css={styles.button}
+      onClick={onClick}
+    >
+      <Button label={label} outline={outline} error={error} loading={loading} />
     </button>
   );
 }
