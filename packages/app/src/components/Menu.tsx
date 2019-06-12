@@ -103,7 +103,7 @@ function Menu({
       <CustomNavLink
         to="/indicateur4"
         title="indicateur 4"
-        label="congé maternité"
+        label="retour congé maternité"
         valid={indicateurQuatreFormValidated}
       />
       <CustomNavLink
