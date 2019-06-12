@@ -107,7 +107,7 @@ function PageIndicateurUn({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Indicateur 1, écart de rémunération"
-      tagline="Renseignez la rémunération (annuelle / mensuelle) moyenne des femmes et
+      tagline="Renseignez la rémunération annuelle moyenne des femmes et
         des hommes par CSP et par tranche d’âge."
     >
       {children}
