@@ -11,7 +11,7 @@ function FAQIndicateur1Steps() {
       <FAQStep icon={<IconText>ETP</IconText>}>
         La rémunériation doit être reconstituée en{" "}
         <strong>équivalent temps pleins</strong> sur toute la durée de la
-        période de référence
+        période de référence.
       </FAQStep>
 
       <FAQStep icon={<IconMoney valid={true} />}>
@@ -19,13 +19,19 @@ function FAQIndicateur1Steps() {
           <strong>Doivent être pris en compte dans la rémunération :</strong>
         </p>
         <ul css={styles.list}>
+           <li>
+            • les salaires ou traitements ordinaires de base ou minimum et tous les autres avantages et accessoires payés, directement ou indirectement, en espèces ou en nature, par l’employeur au salarié en raison de l’emploi de ce dernier
+          </li>
           <li>
             • les "bonus", les commissions sur produits, les primes d’objectif
             liées aux performances individuelles du salarié, variables d’un
-            individu à l’autre pour un même poste.
+            individu à l’autre pour un même poste
           </li>
           <li>
-            • les primes collectives (prime de transport ou prime de vacances).
+            • les primes collectives (ex : les primes de transport ou primes de vacances)
+          </li>
+          <li>
+            • les indemnités de congés payés.
           </li>
         </ul>
       </FAQStep>
@@ -33,19 +39,22 @@ function FAQIndicateur1Steps() {
       <FAQStep icon={<IconMoney valid={false} />}>
         <p>
           <strong>
-            Ne doivent pas être pris en compte dans la rémunération
+            Ne doivent pas être pris en compte dans la rémunération :
           </strong>
         </p>
         <ul css={styles.list}>
           <li>
-            • les primes liées à une sujétion particulière qui ne concernent pas
+            • lles indemnités de fin de CDD (notamment la prime de précarité)</li>
+          <li>• les sommes versées dans le cadre du compte épargne-temps (CET)</li>
+          <li>• les actions, stock-options, compensations différées en actions </li>
+          <li>• les primes liées à une sujétion particulière qui ne concernent pas
             la personne du salarié (prime de froid, prime de nuit etc.)
           </li>
           <li>• les heures supplémentaires et complémentaires</li>
           <li>• les indemnités de licenciement</li>
-          <li>• les indemnités de depart en retraite</li>
+          <li>• les indemnités de départ en retraite</li>
           <li>• les primes d’ancienneté</li>
-          <li>• les primes d’interessement et de participation</li>
+          <li>• les primes d’inteéressement et de participation.</li>
         </ul>
       </FAQStep>
 
@@ -56,8 +65,7 @@ function FAQIndicateur1Steps() {
       </FAQStep>
 
       <FAQStep icon={<IconLamp />}>
-        Si le total des effectifs pouvant être pris en compte est inférieur à
-        40% des effectifs totaux, l’indicateur n’est pas calculable
+        Si le total des effectifs pouvant être pris en compte est inférieur à 40% des effectifs totaux, l'indicateur et l'index ne sont pas calculables.
       </FAQStep>
     </Fragment>
   );
