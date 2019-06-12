@@ -13,12 +13,6 @@ function FAQIndicateur4Steps() {
         d’adoption) durant la période de référence sont prises en considération.
       </FAQStep>
 
-      <FAQStep icon={<IconPeople valid={false} />}>
-        Les femmes n’étant pas rentrées physiquement de congés maternité (ou
-        d’adoption) durant la période de référence ne sont pas prises en
-        considération.
-      </FAQStep>
-
       <FAQStep icon={<IconGrow />}>
         Sont considérées <strong>comme augmentées</strong> toutes salariées{" "}
         <strong>revenues de congé maternité</strong> pendant l'année de
@@ -26,20 +20,15 @@ function FAQIndicateur4Steps() {
         (générale ou individuelle){" "}
         <strong>à leur retour avant la fin de cette même période.</strong>
       </FAQStep>
-
-      <FAQStep icon={<IconLamp />}>
-        <p>L’indicateur ne peut-être calculé seulement :</p>
-        <ul css={styles.list}>
-          <li>
-            • si il y a eu des augmentations (individuelles ou collectives) au
-            cours de la periode de référence
-          </li>
-          <li>
-            • si il y a eu des retours de congé maternité (ou adoption) durant
-            la période de référence
-          </li>
-        </ul>
+      
+      <FAQStep icon={<IconGrow />}>
+        Si aucune augmentation (individuelle ou collective) n'est intervenue au cours de la période de référence, l’indicateur n’est pas calculable.
       </FAQStep>
+      
+      <FAQStep icon={<IconGrow />}>
+        Si il n'y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence, l’indicateur n’est pas calculable.
+      </FAQStep>
+
     </Fragment>
   );
 }
