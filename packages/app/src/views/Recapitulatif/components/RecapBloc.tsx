@@ -21,7 +21,7 @@ export function RecapBloc({ title, children, resultBubble }: Props) {
 
   return (
     <div css={styles.container}>
-      <div css={[styles.blocInfo, css({ width })]}>
+      <div css={[styles.blocInfo, css({ width }), styles.blocInfoPrint]}>
         <div css={styles.title}>{title}</div>
 
         {children && (
@@ -60,7 +60,9 @@ const styles = {
   container: css({
     position: "relative",
     display: "flex",
-    flexDirection: "row"
+    flexDirection: "row",
+    pageBreakInside: "avoid", // doesn't seems to work…
+    breakInside: "avoid"
   }),
   background: css({
     backgroundColor: "#FFF",
@@ -70,13 +72,25 @@ const styles = {
     left: -38,
     right: -38,
     borderRadius: "100%",
-    border: "1px solid #EFECEF"
+    border: "1px solid #EFECEF",
+    "@media print": {
+      display: "none"
+    }
   }),
 
   blocInfo: css({
     position: "relative",
     flexShrink: 0,
-    paddingLeft: globalStyles.grid.gutterWidth
+    paddingLeft: globalStyles.grid.gutterWidth,
+    "@media print": {
+      flexShrink: 1,
+      flexGrow: 1
+    }
+  }),
+  blocInfoPrint: css({
+    "@media print": {
+      width: "auto"
+    }
   }),
   title: css({
     marginBottom: 20,
@@ -94,7 +108,11 @@ const styles = {
     backgroundColor: globalStyles.colors.default,
     bottom: 0,
     left: 0,
-    right: 0
+    right: 0,
+    "@media print": {
+      borderBottom: `solid ${globalStyles.colors.default} 1px`,
+      background: "none"
+    }
   }),
   borderLeftBloc: css({
     position: "absolute",
@@ -102,7 +120,11 @@ const styles = {
     backgroundColor: globalStyles.colors.default,
     bottom: 0,
     top: 0,
-    left: 0
+    left: 0,
+    "@media print": {
+      borderLeft: `solid ${globalStyles.colors.default} 1px`,
+      background: "none"
+    }
   }),
 
   borderBottomResult: css({
@@ -111,7 +133,11 @@ const styles = {
     backgroundColor: globalStyles.colors.default,
     bottom: 0,
     left: -globalStyles.grid.gutterWidth,
-    right: "50%"
+    right: "50%",
+    "@media print": {
+      borderBottom: `solid ${globalStyles.colors.default} 1px`,
+      background: "none"
+    }
   }),
   borderRightResult: css({
     position: "absolute",
@@ -119,7 +145,11 @@ const styles = {
     backgroundColor: globalStyles.colors.default,
     bottom: 0,
     top: 0,
-    right: "50%"
+    right: "50%",
+    "@media print": {
+      borderRight: `solid ${globalStyles.colors.default} 1px`,
+      background: "none"
+    }
   }),
   blocResult: css({
     position: "relative",
@@ -127,7 +157,11 @@ const styles = {
     flex: 1,
     marginLeft: globalStyles.grid.gutterWidth,
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    "@media print": {
+      minWidth: 250,
+      flexShrink: 0
+    }
   }),
 
   borderNoChildren: css({

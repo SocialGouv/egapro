@@ -4,13 +4,19 @@ import Button from "./Button";
 
 interface Props {
   label: string;
+  onClick: () => void;
   outline?: boolean;
   error?: boolean;
 }
 
-function ButtonSubmit({ label, outline = false, error = false }: Props) {
+function ButtonAction({
+  label,
+  onClick,
+  outline = false,
+  error = false
+}: Props) {
   return (
-    <button type="submit" css={styles.button}>
+    <button type="button" css={styles.button} onClick={onClick}>
       <Button label={label} outline={outline} error={error} />
     </button>
   );
@@ -29,4 +35,4 @@ const styles = {
   })
 };
 
-export default ButtonSubmit;
+export default ButtonAction;

@@ -30,6 +30,17 @@ body {
   flex: 1;
 }
 
+@media print {
+  body {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  #root {
+    display: block;
+  }
+}
+
 p {
   margin: 0;
 }
@@ -46,4 +57,12 @@ input::-webkit-outer-spin-button {
 
 svg {
   display: block;
+}
+
+*:focus {
+  outline: auto #696cd1 2px;
+}
+
+*:active {
+  outline: none;
 }

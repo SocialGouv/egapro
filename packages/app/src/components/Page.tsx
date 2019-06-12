@@ -25,7 +25,11 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginRight: globalStyles.grid.gutterWidth,
-    marginBottom: globalStyles.grid.gutterWidth
+    marginBottom: globalStyles.grid.gutterWidth,
+    "@media print": {
+      display: "block",
+      marginRight: 0
+    }
   }),
   title: css({
     marginTop: 36,

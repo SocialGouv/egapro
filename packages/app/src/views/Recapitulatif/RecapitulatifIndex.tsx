@@ -77,10 +77,7 @@ function InfoBloc({ title, children, icon = "warning" }: InfoBlocProps) {
 const styles = {
   indexBloc: css({
     marginTop: 22,
-    marginBottom: 44,
-    position: "sticky",
-    top: 0,
-    zIndex: 100
+    marginBottom: 44
   }),
 
   bloc: css({
@@ -89,7 +86,12 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     backgroundColor: globalStyles.colors.default,
-    color: "white"
+    color: "white",
+    "@media print": {
+      backgroundColor: "white",
+      color: globalStyles.colors.default,
+      border: `solid ${globalStyles.colors.default} 1px`
+    }
   }),
   blocTitle: css({
     marginBottom: "auto",

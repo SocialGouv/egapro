@@ -18,7 +18,7 @@ function HomeSimulateur(props: RouteComponentProps) {
         <span css={styles.codeCopyText}>
           https://egapro.example.com/simulateur/MddPBM
         </span>
-        <ActionLink onClick={() => {}}>copier le code</ActionLink>
+        <ActionLink onClick={() => {}}>copier le lien</ActionLink>
       </div>
       <div css={styles.codeCopyVideo} />
       <div css={styles.action}>

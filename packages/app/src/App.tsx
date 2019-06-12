@@ -24,6 +24,7 @@ import AppReducer from "./AppReducer";
 
 import GridProvider from "./components/GridContext";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import Menu from "./components/Menu";
 
 import FAQ from "./views/FAQ";
@@ -243,7 +244,10 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
           indicateurCinqFormValidated={state.indicateurCinq.formValidated}
         />
       </div>
-      <div css={styles.view}>{children}</div>
+      <div css={styles.viewContainer}>
+        <div css={styles.view}>{children}</div>
+        <Footer />
+      </div>
     </div>
   );
 }
@@ -254,19 +258,28 @@ const styles = {
     flex: 1,
     display: "flex",
     flexDirection: "row",
-    justifyContent: "center"
+    justifyContent: "center",
+    "@media print": {
+      display: "block"
+    }
   }),
   leftColumn: css({
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
-    maxWidth: globalStyles.grid.maxWidth - 375
+    maxWidth: globalStyles.grid.maxWidth - 375,
+    "@media print": {
+      display: "block"
+    }
   }),
   rightColumn: css({
     display: "flex",
     flexDirection: "column",
     width: 375,
-    flexShrink: 0
+    flexShrink: 0,
+    "@media print": {
+      display: "none"
+    }
   }),
   main: css({
     overflowY: "auto",
@@ -275,7 +288,13 @@ const styles = {
     position: "relative",
     background:
       "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), #EFF0FA",
-    borderRight: "1px solid #EFECEF"
+    borderRight: "1px solid #EFECEF",
+    "@media print": {
+      overflow: "visible",
+      display: "block",
+      borderRight: "none",
+      background: "none"
+    }
   }),
   menu: css({
     position: "sticky",
@@ -283,7 +302,22 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    paddingBottom: 80
+    paddingBottom: 80,
+    "@media print": {
+      display: "none"
+    }
+  }),
+  viewContainer: css({
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    "@media print": {
+      display: "block"
+    },
+    "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
+      // Only target IE11
+      display: "block"
+    }
   }),
   view: css({
     flex: 1

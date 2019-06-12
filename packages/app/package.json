@@ -20,6 +20,7 @@
     "fuse.js": "3.4.5",
     "normalize.css": "8.0.1",
     "react": "^16.8.6",
+    "react-app-polyfill": "1.0.1",
     "react-dom": "^16.8.6",
     "react-final-form-hooks": "2.0.0",
     "react-router-dom": "5.0.0",

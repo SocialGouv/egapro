@@ -28,12 +28,12 @@ function BlocForm({ title, label, footer, children, style }: Props) {
 
         <div css={styles.rowGender}>
           <CellHead />
+          <Cell style={styles.cellWomen}>
+            <IconFemale /> femmes
+          </Cell>
           <Cell style={styles.cellMen}>
             <IconMale />
             <span>hommes</span>
-          </Cell>
-          <Cell style={styles.cellWomen}>
-            <IconFemale /> femmes
           </Cell>
         </div>
 

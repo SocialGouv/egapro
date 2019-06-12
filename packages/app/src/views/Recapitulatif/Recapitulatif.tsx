@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
 
 import { AppState } from "../../globals.d";
@@ -12,6 +12,8 @@ import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex";
 
 import Page from "../../components/Page";
+import ActionBar from "../../components/ActionBar";
+import ButtonAction from "../../components/ButtonAction";
 
 import RecapitulatifIndex from "./RecapitulatifIndex";
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn";
@@ -133,8 +135,25 @@ function Recapitulatif({ state }: Props) {
         }
         noteIndicateurCinq={noteIndicateurCinq}
       />
+      <ActionBar>
+        <ButtonAction
+          label="imprimer"
+          outline={true}
+          onClick={() => window.print()}
+        />
+        <span css={styles.info}>
+          (possible d'enregistrer en PDF depuis la fenêtre d'impression)
+        </span>
+      </ActionBar>
     </Page>
   );
 }
+
+const styles = {
+  info: css({
+    marginLeft: 4,
+    fontSize: 12
+  })
+};
 
 export default Recapitulatif;
