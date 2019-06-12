@@ -54,7 +54,7 @@ function FAQIndicateur1Steps() {
           <li>• les indemnités de licenciement</li>
           <li>• les indemnités de départ en retraite</li>
           <li>• les primes d’ancienneté</li>
-          <li>• les primes d’inteéressement et de participation.</li>
+          <li>• les primes d’interéssement et de participation.</li>
         </ul>
       </FAQStep>
 
