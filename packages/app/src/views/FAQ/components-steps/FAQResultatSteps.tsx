@@ -10,7 +10,7 @@ function FAQResultatSteps() {
     <Fragment>
       <FAQStep icon={<IconLamp />}>
         Les entreprises doivent par la suite déclarer leurs résultats au Ministère du Travail 
-        via l'outil <a href="https://solen1.enquetes.social.gouv.fr/cgi-1/HE/SF?P=1162z18z2z-1z-1zFD0365AA36" target="_blank">SOLEN</a>.
+        via l'outil <a href="https://solen1.enquetes.social.gouv.fr/cgi-1/HE/SF?P=1162z18z2z-1z-1zFD0365AA36" target="_blank" rel="noopener noreferrer">SOLEN</a>.
         Toutes les informations nécessaires à la déclaration se
         trouvent sur ce récapitulatif.
       </FAQStep>
