@@ -17,22 +17,22 @@ spec:
         app: egapro-app${HASH_BRANCH_NAME}
     spec:
       containers:
-      - image: ${EGAPRO_REGISTRY}/app:${IMAGE_TAG}
-        name: egapro-app
-        ports:
-        - containerPort: ${PORT}
-        livenessProbe:
-          httpGet:
-            path: /
-            port: ${PORT}
-          initialDelaySeconds: 3
-          periodSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /
-            port: ${PORT}
-          initialDelaySeconds: 3
-          periodSeconds: 5
-        env:
-        - name: API_URL
-          value: "https://egapro-api.${ENVIRONMENT}.social.gouv.fr"
+        - image: ${EGAPRO_REGISTRY}/app:${IMAGE_TAG}
+          name: egapro-app
+          ports:
+            - containerPort: ${PORT}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: ${PORT}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: ${PORT}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          env:
+            - name: REACT_APP_API_URL
+              value: "https://egapro-api.${ENVIRONMENT}.social.gouv.fr"
