@@ -18,12 +18,18 @@ function FAQIndicateur3Steps() {
       <FAQStep icon={<IconLamp />}>
         Les groupes ne comportant pas{" "}
         <strong>au moins 10 hommes et 10 femmes</strong> ne sont pas retenus
-        pour le calcul
+        pour le calcul.
+      </FAQStep>
+      
+      <FAQStep icon={<IconLamp />}>
+        Si aucune promotion n'est intervenue au cours de la période de référence,
+        l’indicateur n’est pas calculable.
       </FAQStep>
 
       <FAQStep icon={<IconLamp />}>
         Si le total des effectifs pouvant être pris en compte est inférieur à
-        40% des effectifs totaux, l’indicateur n’est pas calculable
+        40% des effectifs totaux, l’indicateur n’est pas calculable et
+        l'index ne sont pas calculables.
       </FAQStep>
     </Fragment>
   );
