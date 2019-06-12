@@ -14,15 +14,19 @@ function FAQEffectifsSteps() {
   return (
     <Fragment>
       <FAQStep icon={<IconCalendar valid={true} />}>
-        Les indicateurs sont calculés à partir des données de la période de référence annuelle choisie par l’entreprise.{" "}
+        Les indicateurs sont calculés à partir des données de la période de
+        référence annuelle choisie par l’entreprise.{" "}
         <strong>
-        Cette période doit être de 12 mois consécutifs et doit précéder l’année de publication.
+          Cette période doit être de 12 mois consécutifs et doit précéder
+          l’année de publication.
         </strong>{" "}
-        Elle doit donc nécessairement s’achever au plus tard le 31 décembre 2018 pour un Index publié en 2019.
+        Elle doit donc nécessairement s’achever au plus tard le 31 décembre 2018
+        pour un Index publié en 2019.
       </FAQStep>
 
       <FAQStep icon={<IconText>CSP</IconText>}>
-        L’effectif de l’entreprise est apprécié sur la période de référence. Il doit être renseigné par{" "}
+        L’effectif de l’entreprise est apprécié sur la période de référence. Il
+        doit être renseigné par{" "}
         <strong>catégories socio-professionnelles.</strong>
       </FAQStep>
 
@@ -38,11 +42,15 @@ function FAQEffectifsSteps() {
         </p>
         <ul css={styles.list}>
           <li>• les apprentis et les contrats de professionnalisation</li>
-          <li>• les salariés mis à la disposition de l'entreprise par une entreprise extérieure (dont les intérimaires)</li>
+          <li>
+            • les salariés mis à la disposition de l'entreprise par une
+            entreprise extérieure (dont les intérimaires)
+          </li>
           <li>• les expatriés</li>
           <li>• les salariés en pré-retraite</li>
           <li>
-            • les salariés absents plus de 6mois sur la période de référence (arrêt maladie, congés sans solde, cdd <6mois etc.).
+            • les salariés absents plus de 6mois sur la période de référence
+            (arrêt maladie, congés sans solde, cdd &lt;6mois etc.).
           </li>
         </ul>
       </FAQStep>
