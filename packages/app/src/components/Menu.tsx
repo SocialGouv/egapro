@@ -85,19 +85,19 @@ function Menu({
       <CustomNavLink
         to="/indicateur1"
         title="indicateur 1"
-        label="écart de rémunération"
+        label="écart de rémunérations"
         valid={indicateurUnFormValidated}
       />
       <CustomNavLink
         to="/indicateur2"
         title="indicateur 2"
-        label="écart d’augmentation"
+        label="écart de taux d'augmentations"
         valid={indicateurDeuxFormValidated}
       />
       <CustomNavLink
         to="/indicateur3"
         title="indicateur 3"
-        label="écart de promotions"
+        label="écart de taux de promotions"
         valid={indicateurTroisFormValidated}
       />
       <CustomNavLink
