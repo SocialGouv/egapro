@@ -44,7 +44,7 @@ function FAQIndicateur1Steps() {
         </p>
         <ul css={styles.list}>
           <li>
-            • lles indemnités de fin de CDD (notamment la prime de précarité)</li>
+            • les indemnités de fin de CDD (notamment la prime de précarité)</li>
           <li>• les sommes versées dans le cadre du compte épargne-temps (CET)</li>
           <li>• les actions, stock-options, compensations différées en actions </li>
           <li>• les primes liées à une sujétion particulière qui ne concernent pas
