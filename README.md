@@ -4,40 +4,13 @@
 
 ## Environnement de développement
 
-###  Kinto, la base de données
-
-ajouter le fichier `.env` dans `packages/kinto`
+ajouter le fichier `.env` à la racine du projet
 
 ```bash
 cp .env.sample .env
 ```
 
-lancer `kinto`
-
-```bash
-yarn db:start
-
-// la première fois, initialiser kinto
-yarn db:init
-```
-
-pour arrêter `kinto`
-
-```bash
-yarn db:stop
-```
-
-### le back-end
-
-ajouter le fichier `.env` dans `packages/api`
-
-```bash
-cp .env.sample .env
-```
-
-### les commandes 
-
-pour démarrer, le front-end et le back-end
+lancer le projet:
 
 ```bash
 yarn start
@@ -57,7 +30,7 @@ docker-compose up --build
 Action  |API                                | body                         |Réponse                        |
 --------|-----------------------------------|------------------------------|-------------------------------|
 POST    |`api/indicators_datas`             | `{ }`                        | `{id: string}`                |
-PUT     |`api/indicators_datas`             | `{id: string, data: string}` | `status` = `200` ou `400`     |
+PUT     |`api/indicators_datas/{id}`        | `{ id: string, data: string}`| `{id: string, data: string}`  |
 GET     |`api/indicators_datas/{id}`        |                              | `{id: string, data: string}`  |
 POST    |`api/indicators_datas/{id}/emails` | `{ email: string }`          | `status` = `200` ou `400`     |
 
