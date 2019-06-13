@@ -58,13 +58,13 @@ const putResource = (pathname, body) => fetchResource("PUT", pathname, body);
 
 /////////////
 
-export const readIndicatorsDatas = id => getResource(`/indicators-datas/${id}`);
+export const getIndicatorsDatas = id => getResource(`/indicators-datas/${id}`);
 
-export const createIndicatorsDatas = data =>
+export const postIndicatorsDatas = data =>
   postResource("/indicators-datas", data);
 
-export const updateIndicatorsDatas = (id, data) =>
-  putResource(`/indicators-datas`, { id, data });
+export const putIndicatorsDatas = (id, data) =>
+  putResource(`/indicators-datas/${id}`, { id, data });
 
 export const sendEmailIndicatorsDatas = (id, email) =>
   putResource(`/indicators-datas/${id}/emails`, { email });

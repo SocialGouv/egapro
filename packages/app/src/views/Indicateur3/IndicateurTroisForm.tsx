@@ -6,29 +6,29 @@ import {
   FormState,
   CategorieSocioPro,
   ActionIndicateurTroisData
-} from "../globals.d";
+} from "../../globals.d";
 
 import {
   calculTotalEffectifsEtTauxPromotion,
   calculEcartTauxPromotion,
   effectifEtEcartPromoGroup
-} from "../utils/calculsEgaProIndicateurTrois";
+} from "../../utils/calculsEgaProIndicateurTrois";
 
-import BlocForm from "../components/BlocForm";
-import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
-import RadiosBoolean from "../components/RadiosBoolean";
-import ActionBar from "../components/ActionBar";
-import FormSubmit from "../components/FormSubmit";
-import { ButtonSimulatorLink } from "../components/SimulatorLink";
+import BlocForm from "../../components/BlocForm";
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
+import RadiosBoolean from "../../components/RadiosBoolean";
+import ActionBar from "../../components/ActionBar";
+import FormSubmit from "../../components/FormSubmit";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import {
   parseFloatFormValue,
   parseFloatStateValue
-} from "../utils/formHelpers";
+} from "../../utils/formHelpers";
 import {
   displayNameCategorieSocioPro,
   displayFractionPercent
-} from "../utils/helpers";
+} from "../../utils/helpers";
 
 interface Props {
   ecartPromoParCategorieSocioPro: Array<effectifEtEcartPromoGroup>;

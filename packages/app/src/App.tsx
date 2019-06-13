@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useReducer, useEffect, useCallback, ReactNode } from "react";
+import { useReducer, useEffect, useRef, useState, ReactNode } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -9,17 +9,11 @@ import {
   RouteComponentProps
 } from "react-router-dom";
 
-import {
-  AppState,
-  FormState,
-  TranchesAges,
-  CategorieSocioPro,
-  ActionEffectifData,
-  ActionType
-} from "./globals.d";
+import { AppState, ActionType } from "./globals.d";
 
 import globalStyles from "./utils/globalStyles";
-import mapEnum from "./utils/mapEnum";
+import { getIndicatorsDatas, putIndicatorsDatas } from "./utils/api";
+import { useDebounceEffect } from "./utils/hooks";
 
 import AppReducer from "./AppReducer";
 
@@ -27,102 +21,25 @@ import GridProvider from "./components/GridContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
+import ActivityIndicator from "./components/ActivityIndicator";
 
 import FAQ from "./views/FAQ";
 
 import Home from "./views/Home";
 import HomeSimulateur from "./views/HomeSimulateur";
 import GroupEffectif from "./views/GroupEffectif";
-import IndicateurUn from "./views/IndicateurUn";
-import IndicateurDeux from "./views/IndicateurDeux";
-import IndicateurTrois from "./views/IndicateurTrois";
-import IndicateurQuatre from "./views/IndicateurQuatre";
-import IndicateurCinq from "./views/IndicateurCinq";
+import IndicateurUn from "./views/Indicateur1";
+import IndicateurDeux from "./views/Indicateur2";
+import IndicateurTrois from "./views/Indicateur3";
+import IndicateurQuatre from "./views/Indicateur4";
+import IndicateurCinq from "./views/Indicateur5";
 import Recapitulatif from "./views/Recapitulatif";
 import PageNotFound from "./views/PageNotFound";
 
-const baseGroupTranchesAgesState = {
-  nombreSalariesFemmes: undefined,
-  nombreSalariesHommes: undefined,
-  remunerationAnnuelleBrutFemmes: undefined,
-  remunerationAnnuelleBrutHommes: undefined
-};
-
-const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
-  trancheAge,
-  ...baseGroupTranchesAgesState
-}));
-
-const baseGroupe = {
-  tranchesAges: [...baseTranchesAge],
-  tauxAugmentationFemmes: undefined,
-  tauxAugmentationHommes: undefined,
-  tauxPromotionFemmes: undefined,
-  tauxPromotionHommes: undefined
-};
-
-const defaultState: AppState = {
-  data: [
-    {
-      categorieSocioPro: CategorieSocioPro.Ouvriers,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Employes,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Techniciens,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Cadres,
-      ...baseGroupe
-    }
-  ],
-  effectif: {
-    formValidated: "None"
-  },
-  indicateurUn: {
-    formValidated: "None"
-  },
-  indicateurDeux: {
-    formValidated: "None",
-    presenceAugmentation: true
-  },
-  indicateurTrois: {
-    formValidated: "None",
-    presencePromotion: true
-  },
-  indicateurQuatre: {
-    formValidated: "None",
-    presenceAugmentation: true,
-    presenceCongeMat: true,
-    nombreSalarieesPeriodeAugmentation: undefined,
-    nombreSalarieesAugmentees: undefined
-  },
-  indicateurCinq: {
-    formValidated: "None",
-    nombreSalariesHommes: undefined,
-    nombreSalariesFemmes: undefined
-  }
-};
-
-const localStorageEgapro = localStorage.getItem("egapro");
-const initialState = localStorageEgapro
-  ? JSON.parse(localStorageEgapro)
-  : defaultState;
-
 function App() {
-  const [state, dispatch] = useReducer(AppReducer, initialState);
-
-  useEffect(() => {
-    const stateStringify = JSON.stringify(state);
-    localStorage.setItem("egapro", stateStringify);
-  }, [state]);
-
+  const [state, dispatch] = useReducer(AppReducer, undefined);
   return (
-    <Router basename="/egapro">
+    <Router>
       <GridProvider>
         <div css={styles.layout}>
           <div css={styles.leftColumn}>
@@ -133,8 +50,12 @@ function App() {
                 <Route path="/" exact render={props => <Home {...props} />} />
                 <Route
                   path="/simulateur/:code"
-                  render={() => (
-                    <Simulateur state={state} dispatch={dispatch} />
+                  render={({
+                    match: {
+                      params: { code }
+                    }
+                  }) => (
+                    <Simulateur code={code} state={state} dispatch={dispatch} />
                   )}
                 />
                 <Route component={PageNotFound} />
@@ -152,20 +73,57 @@ function App() {
 }
 
 interface SimulateurProps {
-  state: AppState;
+  code: string;
+  state: AppState | undefined;
   dispatch: (action: ActionType) => void;
 }
 
-function Simulateur({ state, dispatch }: SimulateurProps) {
-  const updateEffectif = useCallback(
-    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
-    [dispatch]
+function Simulateur({ code, state, dispatch }: SimulateurProps) {
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(undefined);
+
+  useEffect(() => {
+    setLoading(true);
+    setErrorMessage(undefined);
+    getIndicatorsDatas(code)
+      .then(({ jsonBody }) => {
+        setLoading(false);
+        dispatch({ type: "initiateState", data: jsonBody.data });
+      })
+      .catch(error => {
+        setLoading(false);
+        const errorMessage =
+          (error.jsonBody && error.jsonBody.message) || "Erreur";
+        setErrorMessage(errorMessage);
+      });
+  }, [code, dispatch]);
+
+  useDebounceEffect(
+    state,
+    2000,
+    debouncedState => {
+      if (debouncedState) {
+        putIndicatorsDatas(code, debouncedState);
+      }
+    },
+    [code]
   );
 
-  const validateEffectif = useCallback(
-    (valid: FormState) => dispatch({ type: "validateEffectif", valid }),
-    [dispatch]
-  );
+  if (!loading && errorMessage) {
+    return (
+      <div css={styles.viewLoading}>
+        <p>{errorMessage}</p>
+      </div>
+    );
+  }
+
+  if (loading || !state) {
+    return (
+      <div css={styles.viewLoading}>
+        <ActivityIndicator size={30} color={globalStyles.colors.primary} />
+      </div>
+    );
+  }
 
   return (
     <Switch>
@@ -177,12 +135,7 @@ function Simulateur({ state, dispatch }: SimulateurProps) {
       <Route
         path="/simulateur/:code/effectifs"
         render={props => (
-          <GroupEffectif
-            {...props}
-            state={state}
-            updateEffectif={updateEffectif}
-            validateEffectif={validateEffectif}
-          />
+          <GroupEffectif {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
@@ -225,21 +178,38 @@ function Simulateur({ state, dispatch }: SimulateurProps) {
 
 interface MainScrollViewProps extends RouteComponentProps {
   children: ReactNode;
-  state: AppState;
+  state: AppState | undefined;
 }
 
 function MainScrollView({ children, state, location }: MainScrollViewProps) {
-  // Usefull to reset the scroll while navigating
+  const scrollEl = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (scrollEl.current) {
+      scrollEl.current.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+
   return (
-    <div css={styles.main} key={location.pathname}>
+    <div css={styles.main} ref={scrollEl}>
       <div css={styles.menu}>
         <Menu
-          effectifFormValidated={state.effectif.formValidated}
-          indicateurUnFormValidated={state.indicateurUn.formValidated}
-          indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
-          indicateurTroisFormValidated={state.indicateurTrois.formValidated}
-          indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
-          indicateurCinqFormValidated={state.indicateurCinq.formValidated}
+          effectifFormValidated={state ? state.effectif.formValidated : "None"}
+          indicateurUnFormValidated={
+            state ? state.indicateurUn.formValidated : "None"
+          }
+          indicateurDeuxFormValidated={
+            state ? state.indicateurDeux.formValidated : "None"
+          }
+          indicateurTroisFormValidated={
+            state ? state.indicateurTrois.formValidated : "None"
+          }
+          indicateurQuatreFormValidated={
+            state ? state.indicateurQuatre.formValidated : "None"
+          }
+          indicateurCinqFormValidated={
+            state ? state.indicateurCinq.formValidated : "None"
+          }
         />
       </div>
       <div css={styles.viewContainer}>
@@ -318,7 +288,12 @@ const styles = {
     }
   }),
   view: css({
-    flex: 1
+    flex: 1,
+    display: "flex",
+    flexDirection: "column"
+  }),
+  viewLoading: css({
+    margin: "auto"
   })
 };
 

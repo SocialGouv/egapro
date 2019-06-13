@@ -9,21 +9,21 @@ import {
   GroupTranchesAges,
   ActionIndicateurUnData,
   FormState
-} from "../globals.d";
+} from "../../globals.d";
 
-import { parseIntFormValue, parseIntStateValue } from "../utils/formHelpers";
-import { calculValiditeGroupe } from "../utils/calculsEgaProIndicateurUn";
+import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
+import { calculValiditeGroupe } from "../../utils/calculsEgaProIndicateurUn";
 
-import BlocForm from "../components/BlocForm";
-import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
-import ActionBar from "../components/ActionBar";
-import FormSubmit from "../components/FormSubmit";
-import { ButtonSimulatorLink } from "../components/SimulatorLink";
+import BlocForm from "../../components/BlocForm";
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
+import ActionBar from "../../components/ActionBar";
+import FormSubmit from "../../components/FormSubmit";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import {
   displayNameCategorieSocioPro,
   displayNameTranchesAges
-} from "../utils/helpers";
+} from "../../utils/helpers";
 
 interface Props {
   data: Array<Groupe>;

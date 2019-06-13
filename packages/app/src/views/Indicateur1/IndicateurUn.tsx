@@ -8,18 +8,18 @@ import {
   FormState,
   ActionType,
   ActionIndicateurUnData
-} from "../globals.d";
+} from "../../globals.d";
 
-import calculIndicateurUn from "../utils/calculsEgaProIndicateurUn";
+import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
 
-import Page from "../components/Page";
-import LayoutFormAndResult from "../components/LayoutFormAndResult";
-import InfoBloc from "../components/InfoBloc";
-import ActionBar from "../components/ActionBar";
+import Page from "../../components/Page";
+import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import InfoBloc from "../../components/InfoBloc";
+import ActionBar from "../../components/ActionBar";
 import {
   ButtonSimulatorLink,
   TextSimulatorLink
-} from "../components/SimulatorLink";
+} from "../../components/SimulatorLink";
 
 import IndicateurUnForm from "./IndicateurUnForm";
 import IndicateurUnResult from "./IndicateurUnResult";

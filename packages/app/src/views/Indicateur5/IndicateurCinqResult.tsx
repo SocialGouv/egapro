@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { FormState } from "../globals.d";
+import { FormState } from "../../globals.d";
 
-import ResultBubble from "../components/ResultBubble";
-import ActionLink from "../components/ActionLink";
+import ResultBubble from "../../components/ResultBubble";
+import ActionLink from "../../components/ActionLink";
 
 interface Props {
   indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined;

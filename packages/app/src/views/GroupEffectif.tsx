@@ -1,10 +1,11 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo, Fragment } from "react";
+import { memo, Fragment, useCallback } from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-final-form-hooks";
 import {
   AppState,
+  ActionType,
   FormState,
   CategorieSocioPro,
   TranchesAges,
@@ -35,8 +36,7 @@ import {
 
 interface Props extends RouteComponentProps {
   state: AppState;
-  updateEffectif: (data: ActionEffectifData) => void;
-  validateEffectif: (valid: FormState) => void;
+  dispatch: (action: ActionType) => void;
 }
 
 const getFieldName = (
@@ -45,7 +45,17 @@ const getFieldName = (
   genre: "Hommes" | "Femmes"
 ): string => "nombreSalaries" + categorieSocioPro + genre + trancheAge;
 
-function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
+function GroupEffectif({ state, dispatch }: Props) {
+  const updateEffectif = useCallback(
+    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
+    [dispatch]
+  );
+
+  const validateEffectif = useCallback(
+    (valid: FormState) => dispatch({ type: "validateEffectif", valid }),
+    [dispatch]
+  );
+
   const infoFields = state.data.map(({ categorieSocioPro, tranchesAges }) => {
     return {
       categorieSocioPro,

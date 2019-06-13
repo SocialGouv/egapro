@@ -1,46 +1,46 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { FormState } from "../globals.d";
-import { displayPercent } from "../utils/helpers";
+import { FormState } from "../../globals.d";
 
-import ResultBubble from "../components/ResultBubble";
-import ActionLink from "../components/ActionLink";
+import { displayPercent } from "../../utils/helpers";
+
+import ResultBubble from "../../components/ResultBubble";
+import ActionLink from "../../components/ActionLink";
 
 interface Props {
-  indicateurEcartPromotion: number | undefined;
+  indicateurEcartAugmentation: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
-  noteIndicateurTrois: number | undefined;
-  validateIndicateurTrois: (valid: FormState) => void;
+  noteIndicateurDeux: number | undefined;
+  validateIndicateurDeux: (valid: FormState) => void;
 }
 
-function IndicateurTroisResult({
-  indicateurEcartPromotion,
+function IndicateurDeuxResult({
+  indicateurEcartAugmentation,
   indicateurSexeSurRepresente,
-  noteIndicateurTrois,
-  validateIndicateurTrois
+  noteIndicateurDeux,
+  validateIndicateurDeux
 }: Props) {
   return (
     <div css={styles.container}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
-          indicateurEcartPromotion !== undefined
-            ? displayPercent(indicateurEcartPromotion)
+          indicateurEcartAugmentation !== undefined
+            ? displayPercent(indicateurEcartAugmentation)
             : "--"
         }
         firstLineInfo={`écart favorable aux ${indicateurSexeSurRepresente}`}
         secondLineLabel="votre note obtenue est"
         secondLineData={
-          (noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") +
-          "/15"
+          (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"
         }
         secondLineInfo="mesures de correction prises en compte"
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
 
       <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurTrois("None")}>
+        <ActionLink onClick={() => validateIndicateurDeux("None")}>
           modifier les données saisies
         </ActionLink>
       </p>
@@ -59,4 +59,4 @@ const styles = {
   })
 };
 
-export default IndicateurTroisResult;
+export default IndicateurDeuxResult;

@@ -8,12 +8,12 @@ import {
   FormState,
   ActionType,
   ActionIndicateurCinqData
-} from "../globals.d";
+} from "../../globals.d";
 
-import calculIndicateurCinq from "../utils/calculsEgaProIndicateurCinq";
+import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
 
-import Page from "../components/Page";
-import LayoutFormAndResult from "../components/LayoutFormAndResult";
+import Page from "../../components/Page";
+import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 
 import IndicateurCinqForm from "./IndicateurCinqForm";
 import IndicateurCinqResult from "./IndicateurCinqResult";

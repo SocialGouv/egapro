@@ -8,19 +8,19 @@ import {
   FormState,
   ActionType,
   ActionIndicateurTroisData
-} from "../globals.d";
+} from "../../globals.d";
 
-import calculIndicateurTrois from "../utils/calculsEgaProIndicateurTrois";
+import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
 
-import Page from "../components/Page";
-import LayoutFormAndResult from "../components/LayoutFormAndResult";
-import InfoBloc from "../components/InfoBloc";
-import ActionBar from "../components/ActionBar";
-import ActionLink from "../components/ActionLink";
+import Page from "../../components/Page";
+import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import InfoBloc from "../../components/InfoBloc";
+import ActionBar from "../../components/ActionBar";
+import ActionLink from "../../components/ActionLink";
 import {
   ButtonSimulatorLink,
   TextSimulatorLink
-} from "../components/SimulatorLink";
+} from "../../components/SimulatorLink";
 
 import IndicateurTroisForm from "./IndicateurTroisForm";
 import IndicateurTroisResult from "./IndicateurTroisResult";

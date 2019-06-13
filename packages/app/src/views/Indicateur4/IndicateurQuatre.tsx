@@ -8,16 +8,16 @@ import {
   FormState,
   ActionType,
   ActionIndicateurQuatreData
-} from "../globals.d";
+} from "../../globals.d";
 
-import calculIndicateurQuatre from "../utils/calculsEgaProIndicateurQuatre";
+import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
 
-import Page from "../components/Page";
-import LayoutFormAndResult from "../components/LayoutFormAndResult";
-import InfoBloc from "../components/InfoBloc";
-import ActionBar from "../components/ActionBar";
-import ActionLink from "../components/ActionLink";
-import { ButtonSimulatorLink } from "../components/SimulatorLink";
+import Page from "../../components/Page";
+import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import InfoBloc from "../../components/InfoBloc";
+import ActionBar from "../../components/ActionBar";
+import ActionLink from "../../components/ActionLink";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import IndicateurQuatreForm from "./IndicateurQuatreForm";
 import IndicateurQuatreResult from "./IndicateurQuatreResult";

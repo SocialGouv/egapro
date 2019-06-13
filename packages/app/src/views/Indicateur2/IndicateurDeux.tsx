@@ -8,19 +8,19 @@ import {
   FormState,
   ActionType,
   ActionIndicateurDeuxData
-} from "../globals.d";
+} from "../../globals.d";
 
-import calculIndicateurDeux from "../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";
 
-import Page from "../components/Page";
-import LayoutFormAndResult from "../components/LayoutFormAndResult";
-import InfoBloc from "../components/InfoBloc";
-import ActionBar from "../components/ActionBar";
-import ActionLink from "../components/ActionLink";
+import Page from "../../components/Page";
+import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import InfoBloc from "../../components/InfoBloc";
+import ActionBar from "../../components/ActionBar";
+import ActionLink from "../../components/ActionLink";
 import {
   ButtonSimulatorLink,
   TextSimulatorLink
-} from "../components/SimulatorLink";
+} from "../../components/SimulatorLink";
 
 import IndicateurDeuxForm from "./IndicateurDeuxForm";
 import IndicateurDeuxResult from "./IndicateurDeuxResult";
