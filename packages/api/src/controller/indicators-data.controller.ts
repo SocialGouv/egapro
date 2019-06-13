@@ -25,7 +25,7 @@ export const updateIndicatorsData = async (ctx: Koa.Context) => {
       record
     );
     ctx.status = updatedRecord ? 200 : 500;
-    ctx.body = updatedRecord ? "success" : "error";
+    ctx.body = updatedRecord;
   }
 };
 
