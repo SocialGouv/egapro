@@ -29,8 +29,8 @@ docker-compose up --build
 
 Action  |API                                | body                         |Réponse                        |
 --------|-----------------------------------|------------------------------|-------------------------------|
-POST    |`api/indicators_datas`             | `{ }`                        | `{id: string}`                |
-PUT     |`api/indicators_datas/{id}`        | `{ id: string, data: string}`| `{id: string, data: string}`  |
-GET     |`api/indicators_datas/{id}`        |                              | `{id: string, data: string}`  |
-POST    |`api/indicators_datas/{id}/emails` | `{ email: string }`          | `status` = `200` ou `400`     |
+POST    |`api/indicators-datas`             | `{ }`                        | `{id: string}`                |
+PUT     |`api/indicators-datas/{id}`        | `{ id: string, data: string}`| `{id: string, data: string}`  |
+GET     |`api/indicators-datas/{id}`        |                              | `{id: string, data: string}`  |
+POST    |`api/indicators-datas/{id}/emails` | `{ email: string }`          | `status` = `200` ou `400`     |
 
