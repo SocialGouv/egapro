@@ -2,9 +2,11 @@ ARG NODE_VERSION=10.15.3
 
 FROM node:${NODE_VERSION} as builder
 
-COPY . /app
-
 WORKDIR /app
+
+COPY packages/app .
+COPY yarn.lock ./yarn.lock
+
 RUN yarn
 RUN yarn build
 
