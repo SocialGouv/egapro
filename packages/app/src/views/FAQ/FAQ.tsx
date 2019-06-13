@@ -11,13 +11,13 @@ import FAQSection from "./FAQSection";
 import FAQQuestion from "./FAQQuestion";
 
 const FAQPaths: { [key: string]: string } = {
-  "/effectifs": "/section/effectifs",
-  "/indicateur1": "/section/indicateur1",
-  "/indicateur2": "/section/indicateur2",
-  "/indicateur3": "/section/indicateur3",
-  "/indicateur4": "/section/indicateur4",
-  "/indicateur5": "/section/indicateur5",
-  "/recapitulatif": "/section/resultat"
+  effectifs: "/section/effectifs",
+  indicateur1: "/section/indicateur1",
+  indicateur2: "/section/indicateur2",
+  indicateur3: "/section/indicateur3",
+  indicateur4: "/section/indicateur4",
+  indicateur5: "/section/indicateur5",
+  recapitulatif: "/section/resultat"
 };
 
 function mapDefaultPathnameToFAQPathname(
@@ -26,7 +26,14 @@ function mapDefaultPathnameToFAQPathname(
   if (location.state && location.state.faq) {
     return location.state.faq;
   }
-  const faqPath = FAQPaths[location.pathname];
+  const splittedLocationPathname = location.pathname.split("/").filter(Boolean);
+  if (
+    splittedLocationPathname[0] !== "simulateur" ||
+    splittedLocationPathname.length !== 3
+  ) {
+    return location.pathname;
+  }
+  const faqPath = FAQPaths[splittedLocationPathname[2]];
   return faqPath ? faqPath : location.pathname;
 }
 
@@ -47,7 +54,7 @@ function FAQ() {
             <div css={styles.content} key={locationFAQ.pathname}>
               <Switch location={locationFAQ}>
                 <Route
-                  path={["/", "/simulateur"]}
+                  path={["/", "/simulateur/:code"]}
                   exact
                   render={() => <FAQHome />}
                 />
