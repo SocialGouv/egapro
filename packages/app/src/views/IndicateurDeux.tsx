@@ -16,9 +16,11 @@ import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
 import InfoBloc from "../components/InfoBloc";
 import ActionBar from "../components/ActionBar";
-import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
-import TextLink from "../components/TextLink";
+import {
+  ButtonSimulatorLink,
+  TextSimulatorLink
+} from "../components/SimulatorLink";
 
 import IndicateurDeuxForm from "./IndicateurDeuxForm";
 import IndicateurDeuxResult from "./IndicateurDeuxResult";
@@ -55,7 +57,12 @@ function IndicateurDeux({ state, dispatch }: Props) {
       <PageIndicateurDeux>
         <InfoBloc
           title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={<TextLink to="/effectifs" label="renseigner les effectifs" />}
+          text={
+            <TextSimulatorLink
+              to="/effectifs"
+              label="renseigner les effectifs"
+            />
+          }
         />
       </PageIndicateurDeux>
     );
@@ -73,7 +80,7 @@ function IndicateurDeux({ state, dispatch }: Props) {
               effectifs."
           />
           <ActionBar>
-            <ButtonLink to="/indicateur3" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur3" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeux>
@@ -95,7 +102,7 @@ function IndicateurDeux({ state, dispatch }: Props) {
             </ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonLink to="/indicateur3" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur3" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeux>

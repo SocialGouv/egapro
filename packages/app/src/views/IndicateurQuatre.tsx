@@ -16,8 +16,8 @@ import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
 import InfoBloc from "../components/InfoBloc";
 import ActionBar from "../components/ActionBar";
-import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
+import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
 import IndicateurQuatreForm from "./IndicateurQuatreForm";
 import IndicateurQuatreResult from "./IndicateurQuatreResult";
@@ -63,7 +63,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
             </ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonLink to="/indicateur5" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur5" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurQuatre>

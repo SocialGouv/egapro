@@ -19,7 +19,7 @@ import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
-import ButtonLink from "../components/ButtonLink";
+import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
 import {
   parseFloatFormValue,
@@ -209,7 +209,7 @@ function IndicateurTroisForm({
 
       {readOnly ? (
         <ActionBar>
-          <ButtonLink to="/indicateur4" label="suivant" />
+          <ButtonSimulatorLink to="/indicateur4" label="suivant" />
         </ActionBar>
       ) : (
         <ActionBar>

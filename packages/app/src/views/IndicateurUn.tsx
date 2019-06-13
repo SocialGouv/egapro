@@ -16,8 +16,10 @@ import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
 import InfoBloc from "../components/InfoBloc";
 import ActionBar from "../components/ActionBar";
-import ButtonLink from "../components/ButtonLink";
-import TextLink from "../components/TextLink";
+import {
+  ButtonSimulatorLink,
+  TextSimulatorLink
+} from "../components/SimulatorLink";
 
 import IndicateurUnForm from "./IndicateurUnForm";
 import IndicateurUnResult from "./IndicateurUnResult";
@@ -52,7 +54,12 @@ function IndicateurUn({ state, dispatch }: Props) {
       <PageIndicateurUn>
         <InfoBloc
           title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={<TextLink to="/effectifs" label="renseigner les effectifs" />}
+          text={
+            <TextSimulatorLink
+              to="/effectifs"
+              label="renseigner les effectifs"
+            />
+          }
         />
       </PageIndicateurUn>
     );
@@ -70,7 +77,7 @@ function IndicateurUn({ state, dispatch }: Props) {
               effectifs."
           />
           <ActionBar>
-            <ButtonLink to="/indicateur2" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur2" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurUn>

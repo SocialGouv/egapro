@@ -16,9 +16,11 @@ import Page from "../components/Page";
 import LayoutFormAndResult from "../components/LayoutFormAndResult";
 import InfoBloc from "../components/InfoBloc";
 import ActionBar from "../components/ActionBar";
-import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
-import TextLink from "../components/TextLink";
+import {
+  ButtonSimulatorLink,
+  TextSimulatorLink
+} from "../components/SimulatorLink";
 
 import IndicateurTroisForm from "./IndicateurTroisForm";
 import IndicateurTroisResult from "./IndicateurTroisResult";
@@ -55,7 +57,12 @@ function IndicateurTrois({ state, dispatch }: Props) {
       <PageIndicateurTrois>
         <InfoBloc
           title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={<TextLink to="/effectifs" label="renseigner les effectifs" />}
+          text={
+            <TextSimulatorLink
+              to="/effectifs"
+              label="renseigner les effectifs"
+            />
+          }
         />
       </PageIndicateurTrois>
     );
@@ -73,7 +80,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
                 effectifs."
           />
           <ActionBar>
-            <ButtonLink to="/indicateur4" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur4" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurTrois>
@@ -98,7 +105,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
             </ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonLink to="/indicateur4" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur4" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurTrois>
