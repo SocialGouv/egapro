@@ -1,8 +1,8 @@
-import * as cors from '@koa/cors';
-import * as Koa from 'koa';
-import * as bodyParser from 'koa-bodyparser';
-import { configuration } from './configuration';
-import { router } from './routes';
+import * as cors from "@koa/cors";
+import * as Koa from "koa";
+import * as bodyParser from "koa-bodyparser";
+import { configuration } from "./configuration";
+import { router } from "./routes";
 
 const app = new Koa();
 
