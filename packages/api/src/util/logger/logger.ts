@@ -1,37 +1,52 @@
-import { createLogger, format, transports } from 'winston';
+import { format } from 'logform';
+import { createLogger, transports } from 'winston';
+
+const appendErrorInfo = (info: any, error: Error) => {
+  return {
+    ...info, message: error.message,
+    stack: error.stack
+  }
+}
+
+const errorStackFormat = format((info: any) => {
+  if (info instanceof Error) {
+    return appendErrorInfo(info, info);
+  }
+  const { ...args } = info;
+  if (args) {
+    for (let i = 0; i++; i < args.length) {
+      if (args[i] instanceof Error) {
+        return appendErrorInfo(info, args[i]);
+      }
+    }
+  }
+  return info
+})
+
 
 const alignedWithColorsAndTime = format.combine(
   format.colorize(),
   format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  format.align(),
-  format.errors({ stack: true }),
-  format.printf((info) => {
-    const {
-      timestamp, level, message, ...args
-    } = info;
+  errorStackFormat(),
+  format.printf((info: any) => {
+    const { timestamp, level, message, stack, ...args } = info;
 
-    return `${timestamp} [${level}]: ${message} ${Object.keys(args).length ? JSON.stringify(args, null, 2) : ''}`;
+    if (stack) {
+      return `${timestamp} ${level}: ${message}\n${stack}`;
+    } else {
+      return `${timestamp} ${level}: ${message} ${Object.keys(args).length ? JSON.stringify(args, null, 2) : ''}`;
+    }
   }),
 );
 
 const logger = createLogger({
   level: 'info',
-  // tslint:disable-next-line: object-literal-sort-keys
-  format: alignedWithColorsAndTime,
   transports: [
-    new transports.File({ filename: './logs/ds-collector-err.log', level: 'error' }),
-    new transports.File({ filename: './logs/ds-collector.log' })
+    new transports.Console({
+      format: alignedWithColorsAndTime,
+      handleExceptions: true
+    })
   ]
 });
-
-//
-// If we're not in production then **ALSO** log to the `console`
-// with the colorized simple format.
-//
-// if (process.env.NODE_ENV !== 'production') {
-logger.add(new transports.Console({
-  format: alignedWithColorsAndTime
-}));
-// }
 
 export default logger;
