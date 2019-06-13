@@ -7,6 +7,6 @@ const routeOptions: Router.IRouterOptions = {
 
 export const router = new Router(routeOptions);
 router.post('/indicators-datas', createIndicatorsData);
-router.put('/indicators-datas', updateIndicatorsData);
+router.put('/indicators-datas/:id', updateIndicatorsData);
 router.get('/indicators-datas/:id', getIndicatorsData);
 router.post('/indicators-datas/:id/emails', sendEmail);
