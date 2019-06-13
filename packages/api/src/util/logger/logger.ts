@@ -1,5 +1,11 @@
 import { format } from "logform";
+import { captureException, config } from "raven";
 import { createLogger, transports } from "winston";
+import { configuration } from "../../configuration";
+
+if (configuration.apiSentryEnabled) {
+  config(configuration.apiSentryDSN).install();
+}
 
 const appendErrorInfo = (info: any, error: Error) => {
   return {
@@ -41,7 +47,7 @@ const alignedWithColorsAndTime = format.combine(
   })
 );
 
-const logger = createLogger({
+const wLogger = createLogger({
   level: "info",
   transports: [
     new transports.Console({
@@ -50,5 +56,15 @@ const logger = createLogger({
     })
   ]
 });
+
+const logger = {
+  error: (message: string, err: Error) => {
+    wLogger.error(message, err);
+    if (configuration.apiSentryEnabled) {
+      captureException(err);
+    }
+  },
+  info: (message: string) => wLogger.info(message)
+};
 
 export default logger;
