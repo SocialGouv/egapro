@@ -32,6 +32,10 @@ export type FormState = "None" | "Valid" | "Invalid";
 
 export type ActionType =
   | {
+      type: "initiateState";
+      data: any;
+    }
+  | {
       type: "updateEffectif";
       data: ActionEffectifData;
     }

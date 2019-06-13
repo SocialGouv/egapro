@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { useState } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
-import { createIndicatorsDatas } from "../utils/api";
+import { postIndicatorsDatas } from "../utils/api";
 
 import Page from "../components/Page";
 import ButtonAction from "../components/ButtonAction";
@@ -12,7 +12,7 @@ function Home({ history }: RouteComponentProps) {
   const [loading, setLoading] = useState(false);
   const onClick = () => {
     setLoading(true);
-    createIndicatorsDatas({}).then(({ jsonBody: { id } }) => {
+    postIndicatorsDatas({}).then(({ jsonBody: { id } }) => {
       setLoading(false);
       history.push(`/simulateur/${id}`);
     });

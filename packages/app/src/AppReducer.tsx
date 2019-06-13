@@ -4,10 +4,89 @@ import {
   GroupTranchesAges,
   ActionType,
   ActionEffectifData,
-  ActionIndicateurUnData
+  ActionIndicateurUnData,
+  CategorieSocioPro,
+  TranchesAges
 } from "./globals.d";
+import mapEnum from "./utils/mapEnum";
 
-function AppReducer(state: AppState, action: ActionType): AppState {
+const baseGroupTranchesAgesState = {
+  nombreSalariesFemmes: undefined,
+  nombreSalariesHommes: undefined,
+  remunerationAnnuelleBrutFemmes: undefined,
+  remunerationAnnuelleBrutHommes: undefined
+};
+
+const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+  trancheAge,
+  ...baseGroupTranchesAgesState
+}));
+
+const baseGroupe = {
+  tranchesAges: [...baseTranchesAge],
+  tauxAugmentationFemmes: undefined,
+  tauxAugmentationHommes: undefined,
+  tauxPromotionFemmes: undefined,
+  tauxPromotionHommes: undefined
+};
+
+const defaultState: AppState = {
+  data: [
+    {
+      categorieSocioPro: CategorieSocioPro.Ouvriers,
+      ...baseGroupe
+    },
+    {
+      categorieSocioPro: CategorieSocioPro.Employes,
+      ...baseGroupe
+    },
+    {
+      categorieSocioPro: CategorieSocioPro.Techniciens,
+      ...baseGroupe
+    },
+    {
+      categorieSocioPro: CategorieSocioPro.Cadres,
+      ...baseGroupe
+    }
+  ],
+  effectif: {
+    formValidated: "None"
+  },
+  indicateurUn: {
+    formValidated: "None"
+  },
+  indicateurDeux: {
+    formValidated: "None",
+    presenceAugmentation: true
+  },
+  indicateurTrois: {
+    formValidated: "None",
+    presencePromotion: true
+  },
+  indicateurQuatre: {
+    formValidated: "None",
+    presenceAugmentation: true,
+    presenceCongeMat: true,
+    nombreSalarieesPeriodeAugmentation: undefined,
+    nombreSalarieesAugmentees: undefined
+  },
+  indicateurCinq: {
+    formValidated: "None",
+    nombreSalariesHommes: undefined,
+    nombreSalariesFemmes: undefined
+  }
+};
+
+function AppReducer(
+  state: AppState | undefined,
+  action: ActionType
+): AppState | undefined {
+  if (action.type === "initiateState") {
+    return Object.assign({}, defaultState, action.data);
+  }
+  if (!state) {
+    return state;
+  }
   switch (action.type) {
     case "updateEffectif": {
       return {
