@@ -1,4 +1,6 @@
-const origin = process.env.REACT_APP_API_URL + "/api";
+const origin = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/api`
+  : "/api";
 
 const commonHeaders = {
   Accept: "application/json"
