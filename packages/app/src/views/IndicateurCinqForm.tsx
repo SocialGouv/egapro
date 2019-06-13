@@ -19,7 +19,7 @@ import { BlocFormLight } from "../components/BlocForm";
 import FieldInput from "../components/FieldInput";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
-import ButtonLink from "../components/ButtonLink";
+import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -157,7 +157,7 @@ function IndicateurCinqForm({
 
       {readOnly ? (
         <ActionBar>
-          <ButtonLink to="/recapitulatif" label="suivant" />
+          <ButtonSimulatorLink to="/recapitulatif" label="suivant" />
         </ActionBar>
       ) : (
         <ActionBar>

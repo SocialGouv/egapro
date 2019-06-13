@@ -20,7 +20,7 @@ import FieldInput, {
 import RadiosBoolean from "../components/RadiosBoolean";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
-import ButtonLink from "../components/ButtonLink";
+import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -179,7 +179,7 @@ function IndicateurQuatreForm({
 
       {readOnly ? (
         <ActionBar>
-          <ButtonLink to="/indicateur5" label="suivant" />
+          <ButtonSimulatorLink to="/indicateur5" label="suivant" />
         </ActionBar>
       ) : (
         <ActionBar>

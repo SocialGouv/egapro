@@ -4,9 +4,9 @@ import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
 
-import TextLink from "../../components/TextLink";
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
+import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 interface Props {
   indicateurQuatreFormValidated: FormState;
@@ -32,7 +32,10 @@ function RecapitulatifIndicateurQuatre({
                 Nous ne pouvons pas calculer votre indicateur car vous n’avez
                 pas encore validé vos données saissies.
               </span>{" "}
-              <TextLink to="/indicateur4" label="valider les données" />
+              <TextSimulatorLink
+                to="/indicateur4"
+                label="valider les données"
+              />
             </Fragment>
           }
         />

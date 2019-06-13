@@ -6,7 +6,7 @@ import globalStyles from "../utils/globalStyles";
 
 import Page from "../components/Page";
 import ActionLink from "../components/ActionLink";
-import ButtonLink from "../components/ButtonLink";
+import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
 function HomeSimulateur(props: RouteComponentProps) {
   return (
@@ -22,7 +22,7 @@ function HomeSimulateur(props: RouteComponentProps) {
       </div>
       <div css={styles.codeCopyVideo} />
       <div css={styles.action}>
-        <ButtonLink to="/effectifs" label="suivant" />
+        <ButtonSimulatorLink to="/effectifs" label="suivant" />
       </div>
     </Page>
   );

@@ -14,7 +14,7 @@ function Home({ history }: RouteComponentProps) {
     setLoading(true);
     createIndicatorsDatas({}).then(({ jsonBody: { id } }) => {
       setLoading(false);
-      history.push("/simulateur");
+      history.push(`/simulateur/${id}`);
     });
   };
   return (

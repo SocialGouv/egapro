@@ -18,7 +18,7 @@ import BlocForm from "../components/BlocForm";
 import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import ActionBar from "../components/ActionBar";
 import FormSubmit from "../components/FormSubmit";
-import ButtonLink from "../components/ButtonLink";
+import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
 import {
   displayNameCategorieSocioPro,
@@ -185,7 +185,7 @@ function IndicateurUnForm({
 
       {readOnly ? (
         <ActionBar>
-          <ButtonLink to="/indicateur2" label="suivant" />
+          <ButtonSimulatorLink to="/indicateur2" label="suivant" />
         </ActionBar>
       ) : (
         <ActionBar>

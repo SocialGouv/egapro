@@ -14,7 +14,8 @@ import {
   FormState,
   TranchesAges,
   CategorieSocioPro,
-  ActionEffectifData
+  ActionEffectifData,
+  ActionType
 } from "./globals.d";
 
 import globalStyles from "./utils/globalStyles";
@@ -120,16 +121,6 @@ function App() {
     localStorage.setItem("egapro", stateStringify);
   }, [state]);
 
-  const updateEffectif = useCallback(
-    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
-    [dispatch]
-  );
-
-  const validateEffectif = useCallback(
-    (valid: FormState) => dispatch({ type: "validateEffectif", valid }),
-    [dispatch]
-  );
-
   return (
     <Router basename="/egapro">
       <GridProvider>
@@ -141,74 +132,10 @@ function App() {
               <Switch>
                 <Route path="/" exact render={props => <Home {...props} />} />
                 <Route
-                  path="/simulateur"
-                  exact
-                  render={props => <HomeSimulateur {...props} />}
-                />
-                <Route
-                  path="/effectifs"
-                  render={props => (
-                    <GroupEffectif
-                      {...props}
-                      state={state}
-                      updateEffectif={updateEffectif}
-                      validateEffectif={validateEffectif}
-                    />
+                  path="/simulateur/:code"
+                  render={() => (
+                    <Simulateur state={state} dispatch={dispatch} />
                   )}
-                />
-                <Route
-                  path="/indicateur1"
-                  render={props => (
-                    <IndicateurUn
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-                <Route
-                  path="/indicateur2"
-                  render={props => (
-                    <IndicateurDeux
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-                <Route
-                  path="/indicateur3"
-                  render={props => (
-                    <IndicateurTrois
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-                <Route
-                  path="/indicateur4"
-                  render={props => (
-                    <IndicateurQuatre
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-                <Route
-                  path="/indicateur5"
-                  render={props => (
-                    <IndicateurCinq
-                      {...props}
-                      state={state}
-                      dispatch={dispatch}
-                    />
-                  )}
-                />
-                <Route
-                  path="/recapitulatif"
-                  render={props => <Recapitulatif {...props} state={state} />}
                 />
                 <Route component={PageNotFound} />
               </Switch>
@@ -224,6 +151,78 @@ function App() {
   );
 }
 
+interface SimulateurProps {
+  state: AppState;
+  dispatch: (action: ActionType) => void;
+}
+
+function Simulateur({ state, dispatch }: SimulateurProps) {
+  const updateEffectif = useCallback(
+    (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
+    [dispatch]
+  );
+
+  const validateEffectif = useCallback(
+    (valid: FormState) => dispatch({ type: "validateEffectif", valid }),
+    [dispatch]
+  );
+
+  return (
+    <Switch>
+      <Route
+        path="/simulateur/:code/"
+        exact
+        render={props => <HomeSimulateur {...props} />}
+      />
+      <Route
+        path="/simulateur/:code/effectifs"
+        render={props => (
+          <GroupEffectif
+            {...props}
+            state={state}
+            updateEffectif={updateEffectif}
+            validateEffectif={validateEffectif}
+          />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/indicateur1"
+        render={props => (
+          <IndicateurUn {...props} state={state} dispatch={dispatch} />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/indicateur2"
+        render={props => (
+          <IndicateurDeux {...props} state={state} dispatch={dispatch} />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/indicateur3"
+        render={props => (
+          <IndicateurTrois {...props} state={state} dispatch={dispatch} />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/indicateur4"
+        render={props => (
+          <IndicateurQuatre {...props} state={state} dispatch={dispatch} />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/indicateur5"
+        render={props => (
+          <IndicateurCinq {...props} state={state} dispatch={dispatch} />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/recapitulatif"
+        render={props => <Recapitulatif {...props} state={state} />}
+      />
+    </Switch>
+  );
+}
+
 interface MainScrollViewProps extends RouteComponentProps {
   children: ReactNode;
   state: AppState;
@@ -235,7 +234,6 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
     <div css={styles.main} key={location.pathname}>
       <div css={styles.menu}>
         <Menu
-          locationPathname={location.pathname}
           effectifFormValidated={state.effectif.formValidated}
           indicateurUnFormValidated={state.indicateurUn.formValidated}
           indicateurDeuxFormValidated={state.indicateurDeux.formValidated}

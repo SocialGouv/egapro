@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Route, Link } from "react-router-dom";
+import { Fragment } from "react";
+import { Switch, Route, Link } from "react-router-dom";
 
 import { FormState } from "../globals.d";
 
@@ -50,7 +51,6 @@ function CustomNavLink({
 }
 
 interface Props {
-  locationPathname: string;
   effectifFormValidated: FormState;
   indicateurUnFormValidated: FormState;
   indicateurDeuxFormValidated: FormState;
@@ -60,7 +60,6 @@ interface Props {
 }
 
 function Menu({
-  locationPathname,
   effectifFormValidated,
   indicateurUnFormValidated,
   indicateurDeuxFormValidated,
@@ -70,49 +69,65 @@ function Menu({
 }: Props) {
   const width = useColumnsWidth(2);
 
-  if (locationPathname === "/") {
-    return <div css={[styles.menu, css({ width })]} />;
-  }
-
   return (
     <div css={[styles.menu, css({ width })]}>
-      <CustomNavLink to="/simulateur" title="vos informations" />
-      <CustomNavLink
-        to="/effectifs"
-        title="effectif"
-        valid={effectifFormValidated}
-      />
-      <CustomNavLink
-        to="/indicateur1"
-        title="indicateur 1"
-        label="écart de rémunérations"
-        valid={indicateurUnFormValidated}
-      />
-      <CustomNavLink
-        to="/indicateur2"
-        title="indicateur 2"
-        label="écart de taux d'augmentations"
-        valid={indicateurDeuxFormValidated}
-      />
-      <CustomNavLink
-        to="/indicateur3"
-        title="indicateur 3"
-        label="écart de taux de promotions"
-        valid={indicateurTroisFormValidated}
-      />
-      <CustomNavLink
-        to="/indicateur4"
-        title="indicateur 4"
-        label="retour congé maternité"
-        valid={indicateurQuatreFormValidated}
-      />
-      <CustomNavLink
-        to="/indicateur5"
-        title="indicateur 5"
-        label="hautes rémunérations"
-        valid={indicateurCinqFormValidated}
-      />
-      <CustomNavLink to="/recapitulatif" title="récapitulatif" />
+      <Switch>
+        <Route
+          path="/simulateur/:code"
+          render={({
+            match: {
+              params: { code }
+            }
+          }) => (
+            <Fragment>
+              <CustomNavLink
+                to={`/simulateur/${code}`}
+                title="vos informations"
+                activeOnlyWhenExact={true}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/effectifs`}
+                title="effectif"
+                valid={effectifFormValidated}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/indicateur1`}
+                title="indicateur 1"
+                label="écart de rémunérations"
+                valid={indicateurUnFormValidated}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/indicateur2`}
+                title="indicateur 2"
+                label="écart de taux d'augmentations"
+                valid={indicateurDeuxFormValidated}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/indicateur3`}
+                title="indicateur 3"
+                label="écart de taux de promotions"
+                valid={indicateurTroisFormValidated}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/indicateur4`}
+                title="indicateur 4"
+                label="retour congé maternité"
+                valid={indicateurQuatreFormValidated}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/indicateur5`}
+                title="indicateur 5"
+                label="hautes rémunérations"
+                valid={indicateurCinqFormValidated}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/recapitulatif`}
+                title="récapitulatif"
+              />
+            </Fragment>
+          )}
+        />
+      </Switch>
     </div>
   );
 }

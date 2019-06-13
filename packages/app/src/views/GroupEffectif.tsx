@@ -20,11 +20,13 @@ import { useColumnsWidth } from "../components/GridContext";
 import BlocForm from "../components/BlocForm";
 import FieldInputsMenWomen from "../components/FieldInputsMenWomen";
 import ButtonSubmit from "../components/ButtonSubmit";
-import ButtonLink from "../components/ButtonLink";
 import ActionLink from "../components/ActionLink";
-import TextLink from "../components/TextLink";
 import InfoBloc from "../components/InfoBloc";
 import { Cell, Cell2 } from "../components/Cell";
+import {
+  ButtonSimulatorLink,
+  TextSimulatorLink
+} from "../components/SimulatorLink";
 
 import {
   displayNameCategorieSocioPro,
@@ -244,7 +246,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
 
         {state.effectif.formValidated === "Valid" ? (
           <div css={styles.action}>
-            <ButtonLink to="/indicateur1" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur1" label="suivant" />
             <ActionLink onClick={() => validateEffectif("None")}>
               modifier les données saisies
             </ActionLink>
@@ -288,7 +290,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
                 <span>
                   {state.indicateurUn.formValidated === "Invalid" && (
                     <Fragment>
-                      <TextLink
+                      <TextSimulatorLink
                         to="/indicateur1"
                         label="aller à l'indicateur 1"
                       />
@@ -297,7 +299,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
                   )}
                   {state.indicateurDeux.formValidated === "Invalid" && (
                     <Fragment>
-                      <TextLink
+                      <TextSimulatorLink
                         to="/indicateur2"
                         label="aller à l'indicateur 2"
                       />
@@ -305,7 +307,7 @@ function GroupEffectif({ state, updateEffectif, validateEffectif }: Props) {
                     </Fragment>
                   )}
                   {state.indicateurTrois.formValidated === "Invalid" && (
-                    <TextLink
+                    <TextSimulatorLink
                       to="/indicateur3"
                       label="aller à l'indicateur 3"
                     />

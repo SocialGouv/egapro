@@ -6,9 +6,9 @@ import { FormState, CategorieSocioPro } from "../../globals.d";
 
 import { displayNameCategorieSocioPro } from "../../utils/helpers";
 
-import TextLink from "../../components/TextLink";
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
+import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 import { RowDataFull, RowLabelFull } from "./components/RowData";
 
@@ -56,7 +56,10 @@ function RecapitulatifIndicateurDeux({
                 Nous ne pouvons pas calculer votre indicateur car vous n’avez
                 pas encore validé vos données saissies.
               </span>{" "}
-              <TextLink to="/indicateur2" label="valider les données" />
+              <TextSimulatorLink
+                to="/indicateur2"
+                label="valider les données"
+              />
             </Fragment>
           }
         />
