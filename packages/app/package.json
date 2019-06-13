@@ -2,15 +2,11 @@
   "name": "app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://SocialGouv.github.io",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "clean": "rimraf build",
-    "deploy": "gh-pages -d build",
-    "release": "yarn clean && yarn build && yarn deploy"
+    "eject": "react-scripts eject"
   },
   "dependencies": {
     "@emotion/core": "^10.0.10",
@@ -34,8 +30,6 @@
     "@types/react": "^16.8.18",
     "@types/react-dom": "^16.8.4",
     "@types/react-router-dom": "^4.3.3",
-    "gh-pages": "2.0.1",
-    "rimraf": "2.6.3",
     "typescript": "3.4.5"
   },
   "eslintConfig": {
