@@ -12,8 +12,8 @@ import {
 import { AppState, ActionType } from "./globals.d";
 
 import globalStyles from "./utils/globalStyles";
-
-import { getIndicatorsDatas } from "./utils/api";
+import { getIndicatorsDatas, putIndicatorsDatas } from "./utils/api";
+import { useDebounceEffect } from "./utils/hooks";
 
 import AppReducer from "./AppReducer";
 
@@ -38,12 +38,6 @@ import PageNotFound from "./views/PageNotFound";
 
 function App() {
   const [state, dispatch] = useReducer(AppReducer, undefined);
-
-  useEffect(() => {
-    const stateStringify = JSON.stringify(state);
-    localStorage.setItem("egapro", stateStringify);
-  }, [state]);
-
   return (
     <Router>
       <GridProvider>
@@ -94,6 +88,17 @@ function Simulateur({ code, state, dispatch }: SimulateurProps) {
       dispatch({ type: "initiateState", data: jsonBody.data });
     });
   }, [code, dispatch]);
+
+  useDebounceEffect(
+    state,
+    2000,
+    debouncedState => {
+      if (debouncedState) {
+        putIndicatorsDatas(code, debouncedState);
+      }
+    },
+    [code]
+  );
 
   if (loading || !state) {
     return (

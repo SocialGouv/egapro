@@ -64,7 +64,7 @@ export const postIndicatorsDatas = data =>
   postResource("/indicators-datas", data);
 
 export const putIndicatorsDatas = (id, data) =>
-  putResource(`/indicators-datas`, { id, data });
+  putResource(`/indicators-datas/${id}`, { id, data });
 
 export const sendEmailIndicatorsDatas = (id, email) =>
   putResource(`/indicators-datas/${id}/emails`, { email });
