@@ -4,7 +4,7 @@ import { memo, useEffect } from "react";
 import { useForm } from "react-final-form-hooks";
 import createDecorator from "final-form-calculate";
 
-import { AppState, FormState, ActionIndicateurCinqData } from "../globals.d";
+import { AppState, FormState, ActionIndicateurCinqData } from "../../globals.d";
 
 import {
   parseIntFormValue,
@@ -13,13 +13,13 @@ import {
   mustBeNumber,
   minNumber,
   maxNumber
-} from "../utils/formHelpers";
+} from "../../utils/formHelpers";
 
-import { BlocFormLight } from "../components/BlocForm";
-import FieldInput from "../components/FieldInput";
-import ActionBar from "../components/ActionBar";
-import FormSubmit from "../components/FormSubmit";
-import { ButtonSimulatorLink } from "../components/SimulatorLink";
+import { BlocFormLight } from "../../components/BlocForm";
+import FieldInput from "../../components/FieldInput";
+import ActionBar from "../../components/ActionBar";
+import FormSubmit from "../../components/FormSubmit";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 const validate = (value: string) => {
   const requiredError = required(value);

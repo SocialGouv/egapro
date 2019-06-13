@@ -1,12 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { FormState } from "../globals.d";
+import { FormState } from "../../globals.d";
 
-import { displayPercent } from "../utils/helpers";
+import { displayPercent } from "../../utils/helpers";
 
-import ResultBubble from "../components/ResultBubble";
-import ActionLink from "../components/ActionLink";
+import ResultBubble from "../../components/ResultBubble";
+import ActionLink from "../../components/ActionLink";
 
 interface Props {
   indicateurEcartNombreSalarieesAugmentees: number | undefined;

@@ -2,7 +2,11 @@
 import { css, jsx } from "@emotion/core";
 import { memo, Fragment } from "react";
 import { useForm } from "react-final-form-hooks";
-import { AppState, FormState, ActionIndicateurQuatreData } from "../globals.d";
+import {
+  AppState,
+  FormState,
+  ActionIndicateurQuatreData
+} from "../../globals.d";
 
 import {
   parseIntFormValue,
@@ -10,17 +14,17 @@ import {
   required,
   mustBeNumber,
   maxNumber
-} from "../utils/formHelpers";
+} from "../../utils/formHelpers";
 
-import { BlocFormLight } from "../components/BlocForm";
+import { BlocFormLight } from "../../components/BlocForm";
 import FieldInput, {
   HEIGHT as FieldInputHeight,
   MARGIN_TOP as FieldInputMarginTop
-} from "../components/FieldInput";
-import RadiosBoolean from "../components/RadiosBoolean";
-import ActionBar from "../components/ActionBar";
-import FormSubmit from "../components/FormSubmit";
-import { ButtonSimulatorLink } from "../components/SimulatorLink";
+} from "../../components/FieldInput";
+import RadiosBoolean from "../../components/RadiosBoolean";
+import ActionBar from "../../components/ActionBar";
+import FormSubmit from "../../components/FormSubmit";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 const validate = (value: string) => {
   const requiredError = required(value);

@@ -33,11 +33,11 @@ import FAQ from "./views/FAQ";
 import Home from "./views/Home";
 import HomeSimulateur from "./views/HomeSimulateur";
 import GroupEffectif from "./views/GroupEffectif";
-import IndicateurUn from "./views/IndicateurUn";
-import IndicateurDeux from "./views/IndicateurDeux";
-import IndicateurTrois from "./views/IndicateurTrois";
-import IndicateurQuatre from "./views/IndicateurQuatre";
-import IndicateurCinq from "./views/IndicateurCinq";
+import IndicateurUn from "./views/Indicateur1";
+import IndicateurDeux from "./views/Indicateur2";
+import IndicateurTrois from "./views/Indicateur3";
+import IndicateurQuatre from "./views/Indicateur4";
+import IndicateurCinq from "./views/Indicateur5";
 import Recapitulatif from "./views/Recapitulatif";
 import PageNotFound from "./views/PageNotFound";
 
