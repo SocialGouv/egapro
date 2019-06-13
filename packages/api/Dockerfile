@@ -1,15 +1,19 @@
 ARG NODE_VERSION=10.15.3
 
-FROM node:${NODE_VERSION}
-
-ENV API_PORT=4000
-
-COPY . /app
-
+FROM node:${NODE_VERSION} as builder
 WORKDIR /app
+
+COPY packages/api .
+COPY yarn.lock ./yarn.lock
+
 RUN yarn
 RUN yarn build
 
-EXPOSE ${API_PORT}
+FROM node:${NODE_VERSION}
 
-CMD [ "yarn", "start"]
+WORKDIR /app
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/package.json /app/package.json
+
+CMD ["node", "dist/server.js"]
