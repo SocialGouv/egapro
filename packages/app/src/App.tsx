@@ -80,13 +80,22 @@ interface SimulateurProps {
 
 function Simulateur({ code, state, dispatch }: SimulateurProps) {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(undefined);
 
   useEffect(() => {
     setLoading(true);
-    getIndicatorsDatas(code).then(({ jsonBody }) => {
-      setLoading(false);
-      dispatch({ type: "initiateState", data: jsonBody.data });
-    });
+    setErrorMessage(undefined);
+    getIndicatorsDatas(code)
+      .then(({ jsonBody }) => {
+        setLoading(false);
+        dispatch({ type: "initiateState", data: jsonBody.data });
+      })
+      .catch(error => {
+        setLoading(false);
+        const errorMessage =
+          (error.jsonBody && error.jsonBody.message) || "Erreur";
+        setErrorMessage(errorMessage);
+      });
   }, [code, dispatch]);
 
   useDebounceEffect(
@@ -99,6 +108,14 @@ function Simulateur({ code, state, dispatch }: SimulateurProps) {
     },
     [code]
   );
+
+  if (!loading && errorMessage) {
+    return (
+      <div css={styles.viewLoading}>
+        <p>{errorMessage}</p>
+      </div>
+    );
+  }
 
   if (loading || !state) {
     return (
