@@ -182,7 +182,7 @@ interface MainScrollViewProps extends RouteComponentProps {
 }
 
 function MainScrollView({ children, state, location }: MainScrollViewProps) {
-  const scrollEl = useRef<HTMLInputElement>(null);
+  const scrollEl = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollEl.current) {
