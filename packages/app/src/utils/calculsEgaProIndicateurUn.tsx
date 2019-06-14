@@ -1,8 +1,10 @@
 import {
   AppState,
   TranchesAges,
+  CategorieSocioPro,
   Groupe,
-  GroupTranchesAges
+  GroupeIndicateurUn,
+  GroupTranchesAgesIndicateurUn
 } from "../globals.d";
 
 import { roundDecimal } from "./helpers";
@@ -90,38 +92,59 @@ export const calculEcartApresApplicationSeuilPertinence = (
       )
     : undefined;
 
-interface effectifEtEcartRemuGroup extends effectifGroup {
+export interface effectifEtEcartRemuGroup extends effectifGroup {
   trancheAge: TranchesAges;
-  remunerationAnnuelleBrutFemmes: number;
-  remunerationAnnuelleBrutHommes: number;
+  categorieSocioPro: CategorieSocioPro;
+  remunerationAnnuelleBrutFemmes: number | undefined;
+  remunerationAnnuelleBrutHommes: number | undefined;
   ecartRemunerationMoyenne: number | undefined;
   ecartApresApplicationSeuilPertinence: number | undefined;
 }
 
+export interface tmpGroupTranchesAges {
+  trancheAge: TranchesAges;
+  categorieSocioPro: CategorieSocioPro;
+  nombreSalariesFemmes: number | undefined;
+  nombreSalariesHommes: number | undefined;
+}
+
 export const calculEffectifsEtEcartRemuParTrancheAge = (
-  state: Array<Groupe>
+  dataEffectif: Array<Groupe>,
+  dataIndicateurUn: Array<GroupeIndicateurUn>
 ): Array<effectifEtEcartRemuGroup> => {
-  const dataByRow = state.reduce(
-    (acc: Array<GroupTranchesAges>, group) => acc.concat(group.tranchesAges),
+  const dataEffectifByRow = dataEffectif.reduce(
+    (acc: Array<tmpGroupTranchesAges>, { categorieSocioPro, tranchesAges }) =>
+      acc.concat(
+        tranchesAges.map(trancheAge => ({ ...trancheAge, categorieSocioPro }))
+      ),
+    []
+  );
+  const dataIndicateurUnByRow = dataIndicateurUn.reduce(
+    (acc: Array<GroupTranchesAgesIndicateurUn>, group) =>
+      acc.concat(group.tranchesAges),
     []
   );
 
-  const computedDataByRow = dataByRow.map(
-    (groupTrancheAge: GroupTranchesAges) => {
+  const computedDataByRow = dataEffectifByRow.map(
+    (groupTrancheAgeEffectif: tmpGroupTranchesAges, index: number) => {
+      const groupTrancheAgeIndicateurUn = dataIndicateurUnByRow[index];
+
       const remunerationAnnuelleBrutFemmes =
-        groupTrancheAge.remunerationAnnuelleBrutFemmes || 0;
+        groupTrancheAgeIndicateurUn &&
+        groupTrancheAgeIndicateurUn.remunerationAnnuelleBrutFemmes;
       const remunerationAnnuelleBrutHommes =
-        groupTrancheAge.remunerationAnnuelleBrutHommes || 0;
+        groupTrancheAgeIndicateurUn &&
+        groupTrancheAgeIndicateurUn.remunerationAnnuelleBrutHommes;
 
       const effectifs = rowEffectifsParTrancheAge(
-        groupTrancheAge,
+        groupTrancheAgeEffectif,
         calculValiditeGroupe
       );
 
       // ERM
       const ecartRemunerationMoyenne = calculEcartRemunerationMoyenne(
-        remunerationAnnuelleBrutFemmes,
-        remunerationAnnuelleBrutHommes
+        remunerationAnnuelleBrutFemmes || 0,
+        remunerationAnnuelleBrutHommes || 0
       );
       // ESP
       const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinence(
@@ -130,7 +153,8 @@ export const calculEffectifsEtEcartRemuParTrancheAge = (
 
       return {
         ...effectifs,
-        trancheAge: groupTrancheAge.trancheAge,
+        trancheAge: groupTrancheAgeEffectif.trancheAge,
+        categorieSocioPro: groupTrancheAgeEffectif.categorieSocioPro,
         remunerationAnnuelleBrutFemmes,
         remunerationAnnuelleBrutHommes,
         ecartRemunerationMoyenne,
@@ -191,7 +215,8 @@ export const calculNote = (
 
 export default function calculIndicateurUn(state: AppState) {
   const effectifEtEcartRemuParTranche = calculEffectifsEtEcartRemuParTrancheAge(
-    state.data
+    state.data,
+    state.indicateurUn.remunerationAnnuelle
   );
 
   const { totalNombreSalaries, totalEffectifsValides } = calculTotalEffectifs(

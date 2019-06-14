@@ -5,6 +5,7 @@ export type AppState = {
   };
   indicateurUn: {
     formValidated: FormState;
+    remunerationAnnuelle: Array<GroupeIndicateurUn>;
   };
   indicateurDeux: {
     formValidated: FormState;
@@ -95,14 +96,9 @@ export type ActionEffectifData = Array<{
   }>;
 }>;
 
-export type ActionIndicateurUnData = Array<{
-  categorieSocioPro: CategorieSocioPro;
-  tranchesAges: Array<{
-    trancheAge: TranchesAges;
-    remunerationAnnuelleBrutFemmes: number | undefined;
-    remunerationAnnuelleBrutHommes: number | undefined;
-  }>;
-}>;
+export type ActionIndicateurUnData = {
+  remunerationAnnuelle: Array<GroupeIndicateurUn>;
+};
 
 export type ActionIndicateurDeuxData = {
   presenceAugmentation: boolean;
@@ -126,6 +122,8 @@ export type ActionIndicateurCinqData = {
   nombreSalariesFemmes: number | undefined;
 };
 
+////
+
 export enum TranchesAges {
   MoinsDe30ans,
   De30a39ans,
@@ -140,17 +138,28 @@ export enum CategorieSocioPro {
   Cadres
 }
 
+//
 export interface GroupTranchesAges {
   trancheAge: TranchesAges;
   nombreSalariesFemmes: number | undefined;
   nombreSalariesHommes: number | undefined;
-  remunerationAnnuelleBrutFemmes: number | undefined;
-  remunerationAnnuelleBrutHommes: number | undefined;
 }
 
 export interface Groupe {
   categorieSocioPro: CategorieSocioPro;
   tranchesAges: Array<GroupTranchesAges>;
+}
+//
+
+export interface GroupTranchesAgesIndicateurUn {
+  trancheAge: TranchesAges;
+  remunerationAnnuelleBrutFemmes: number | undefined;
+  remunerationAnnuelleBrutHommes: number | undefined;
+}
+
+export interface GroupeIndicateurUn {
+  categorieSocioPro: CategorieSocioPro;
+  tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
 }
 
 export interface GroupeIndicateurDeux {
@@ -164,6 +173,8 @@ export interface GroupeIndicateurTrois {
   tauxPromotionFemmes: number | undefined;
   tauxPromotionHommes: number | undefined;
 }
+
+////////////
 
 export type FAQPartType =
   | "champApplication"

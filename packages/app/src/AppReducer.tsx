@@ -4,7 +4,6 @@ import {
   GroupTranchesAges,
   ActionType,
   ActionEffectifData,
-  ActionIndicateurUnData,
   CategorieSocioPro,
   TranchesAges
 } from "./globals.d";
@@ -25,6 +24,20 @@ const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
 const baseGroupe = {
   tranchesAges: [...baseTranchesAge]
 };
+
+////
+
+const dataIndicateurUn = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+      trancheAge,
+      remunerationAnnuelleBrutFemmes: undefined,
+      remunerationAnnuelleBrutHommes: undefined
+    }))
+  })
+);
 
 const dataIndicateurDeux = mapEnum(
   CategorieSocioPro,
@@ -67,7 +80,8 @@ const defaultState: AppState = {
     formValidated: "None"
   },
   indicateurUn: {
-    formValidated: "None"
+    formValidated: "None",
+    remunerationAnnuelle: dataIndicateurUn
   },
   indicateurDeux: {
     formValidated: "None",
@@ -135,9 +149,10 @@ function AppReducer(
       };
     }
     case "updateIndicateurUn": {
+      const { remunerationAnnuelle } = action.data;
       return {
         ...state,
-        data: updateIndicateurUn(state.data, action.data)
+        indicateurUn: { ...state.indicateurUn, remunerationAnnuelle }
       };
     }
     case "validateIndicateurUn": {
@@ -227,30 +242,6 @@ function AppReducer(
 function updateEffectif(
   stateData: AppState["data"],
   actionData: ActionEffectifData
-) {
-  return stateData.map((group: Groupe) => {
-    const datumCat = actionData.find(
-      ({ categorieSocioPro }) => categorieSocioPro === group.categorieSocioPro
-    );
-    return {
-      ...group,
-      tranchesAges: group.tranchesAges.map(
-        (groupTranchesAges: GroupTranchesAges) => {
-          const datumAge =
-            datumCat &&
-            datumCat.tranchesAges.find(
-              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
-            );
-          return Object.assign({}, groupTranchesAges, datumAge);
-        }
-      )
-    };
-  });
-}
-
-function updateIndicateurUn(
-  stateData: AppState["data"],
-  actionData: ActionIndicateurUnData
 ) {
   return stateData.map((group: Groupe) => {
     const datumCat = actionData.find(

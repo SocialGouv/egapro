@@ -43,6 +43,7 @@ function IndicateurUn({ state, dispatch }: Props) {
 
   const {
     effectifsIndicateurCalculable,
+    effectifEtEcartRemuParTranche,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn
@@ -89,7 +90,7 @@ function IndicateurUn({ state, dispatch }: Props) {
       <LayoutFormAndResult
         childrenForm={
           <IndicateurUnForm
-            data={state.data}
+            ecartRemuParTrancheAge={effectifEtEcartRemuParTranche}
             readOnly={state.indicateurUn.formValidated === "Valid"}
             updateIndicateurUn={updateIndicateurUn}
             validateIndicateurUn={validateIndicateurUn}
