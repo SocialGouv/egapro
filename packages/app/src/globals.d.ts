@@ -9,10 +9,12 @@ export type AppState = {
   indicateurDeux: {
     formValidated: FormState;
     presenceAugmentation: boolean;
+    tauxAugmentation: Array<GroupeIndicateurDeux>;
   };
   indicateurTrois: {
     formValidated: FormState;
     presencePromotion: boolean;
+    tauxPromotion: Array<GroupeIndicateurTrois>;
   };
   indicateurQuatre: {
     formValidated: FormState;
@@ -104,20 +106,12 @@ export type ActionIndicateurUnData = Array<{
 
 export type ActionIndicateurDeuxData = {
   presenceAugmentation: boolean;
-  tauxAugmentation: Array<{
-    categorieSocioPro: CategorieSocioPro;
-    tauxAugmentationFemmes: number | undefined;
-    tauxAugmentationHommes: number | undefined;
-  }>;
+  tauxAugmentation: Array<GroupeIndicateurDeux>;
 };
 
 export type ActionIndicateurTroisData = {
   presencePromotion: boolean;
-  tauxPromotion: Array<{
-    categorieSocioPro: CategorieSocioPro;
-    tauxPromotionFemmes: number | undefined;
-    tauxPromotionHommes: number | undefined;
-  }>;
+  tauxPromotion: Array<GroupeIndicateurTrois>;
 };
 
 export type ActionIndicateurQuatreData = {
@@ -157,8 +151,16 @@ export interface GroupTranchesAges {
 export interface Groupe {
   categorieSocioPro: CategorieSocioPro;
   tranchesAges: Array<GroupTranchesAges>;
+}
+
+export interface GroupeIndicateurDeux {
+  categorieSocioPro: CategorieSocioPro;
   tauxAugmentationFemmes: number | undefined;
   tauxAugmentationHommes: number | undefined;
+}
+
+export interface GroupeIndicateurTrois {
+  categorieSocioPro: CategorieSocioPro;
   tauxPromotionFemmes: number | undefined;
   tauxPromotionHommes: number | undefined;
 }

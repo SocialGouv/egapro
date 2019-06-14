@@ -23,12 +23,26 @@ const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
 }));
 
 const baseGroupe = {
-  tranchesAges: [...baseTranchesAge],
-  tauxAugmentationFemmes: undefined,
-  tauxAugmentationHommes: undefined,
-  tauxPromotionFemmes: undefined,
-  tauxPromotionHommes: undefined
+  tranchesAges: [...baseTranchesAge]
 };
+
+const dataIndicateurDeux = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tauxAugmentationFemmes: undefined,
+    tauxAugmentationHommes: undefined
+  })
+);
+
+const dataIndicateurTrois = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tauxPromotionFemmes: undefined,
+    tauxPromotionHommes: undefined
+  })
+);
 
 const defaultState: AppState = {
   data: [
@@ -57,11 +71,13 @@ const defaultState: AppState = {
   },
   indicateurDeux: {
     formValidated: "None",
-    presenceAugmentation: true
+    presenceAugmentation: true,
+    tauxAugmentation: dataIndicateurDeux
   },
   indicateurTrois: {
     formValidated: "None",
-    presencePromotion: true
+    presencePromotion: true,
+    tauxPromotion: dataIndicateurTrois
   },
   indicateurQuatre: {
     formValidated: "None",
@@ -132,18 +148,13 @@ function AppReducer(
     }
     case "updateIndicateurDeux": {
       const { tauxAugmentation, presenceAugmentation } = action.data;
-
-      const data = state.data.map((group: Groupe) => {
-        const datum = tauxAugmentation.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return Object.assign({}, group, datum);
-      });
       return {
         ...state,
-        data,
-        indicateurDeux: { ...state.indicateurDeux, presenceAugmentation }
+        indicateurDeux: {
+          ...state.indicateurDeux,
+          presenceAugmentation,
+          tauxAugmentation
+        }
       };
     }
     case "validateIndicateurDeux": {
@@ -154,18 +165,13 @@ function AppReducer(
     }
     case "updateIndicateurTrois": {
       const { tauxPromotion, presencePromotion } = action.data;
-
-      const data = state.data.map((group: Groupe) => {
-        const datum = tauxPromotion.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return Object.assign({}, group, datum);
-      });
       return {
         ...state,
-        data,
-        indicateurTrois: { ...state.indicateurTrois, presencePromotion }
+        indicateurTrois: {
+          ...state.indicateurTrois,
+          presencePromotion,
+          tauxPromotion
+        }
       };
     }
     case "validateIndicateurTrois": {
