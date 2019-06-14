@@ -1,7 +1,7 @@
 import {
   AppState,
   CategorieSocioPro,
-  Groupe,
+  GroupeEffectif,
   GroupeIndicateurTrois
 } from "../globals.d";
 
@@ -51,36 +51,38 @@ export interface effectifEtEcartPromoGroup extends effectifGroup {
 }
 
 export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
-  dataEffectif: Array<Groupe>,
+  dataEffectif: Array<GroupeEffectif>,
   dataIndicateurTrois: Array<GroupeIndicateurTrois>
 ): Array<effectifEtEcartPromoGroup> => {
-  return dataEffectif.map(({ categorieSocioPro, tranchesAges }: Groupe) => {
-    const effectifs = rowEffectifsParCategorieSocioPro(
-      tranchesAges,
-      calculValiditeGroupe
-    );
+  return dataEffectif.map(
+    ({ categorieSocioPro, tranchesAges }: GroupeEffectif) => {
+      const effectifs = rowEffectifsParCategorieSocioPro(
+        tranchesAges,
+        calculValiditeGroupe
+      );
 
-    const dataPromo = dataIndicateurTrois.find(
-      ({ categorieSocioPro: csp }) => csp === categorieSocioPro
-    );
+      const dataPromo = dataIndicateurTrois.find(
+        ({ categorieSocioPro: csp }) => csp === categorieSocioPro
+      );
 
-    const tauxPromotionFemmes = dataPromo && dataPromo.tauxPromotionFemmes;
-    const tauxPromotionHommes = dataPromo && dataPromo.tauxPromotionHommes;
+      const tauxPromotionFemmes = dataPromo && dataPromo.tauxPromotionFemmes;
+      const tauxPromotionHommes = dataPromo && dataPromo.tauxPromotionHommes;
 
-    // ETA
-    const ecartTauxPromotion = calculEcartTauxPromotion(
-      tauxPromotionFemmes,
-      tauxPromotionHommes
-    );
+      // ETA
+      const ecartTauxPromotion = calculEcartTauxPromotion(
+        tauxPromotionFemmes,
+        tauxPromotionHommes
+      );
 
-    return {
-      ...effectifs,
-      categorieSocioPro,
-      tauxPromotionFemmes,
-      tauxPromotionHommes,
-      ecartTauxPromotion
-    };
-  });
+      return {
+        ...effectifs,
+        categorieSocioPro,
+        tauxPromotionFemmes,
+        tauxPromotionHommes,
+        ecartTauxPromotion
+      };
+    }
+  );
 };
 
 export const calculTotalEffectifsEtTauxPromotion = (
@@ -165,7 +167,7 @@ export const calculNote = (
 
 export default function calculIndicateurTrois(state: AppState) {
   const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
-    state.data,
+    state.effectif.nombreSalaries,
     state.indicateurTrois.tauxPromotion
   );
 

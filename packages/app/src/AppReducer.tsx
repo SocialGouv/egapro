@@ -1,31 +1,22 @@
 import {
   AppState,
-  Groupe,
-  GroupTranchesAges,
   ActionType,
-  ActionEffectifData,
   CategorieSocioPro,
   TranchesAges
 } from "./globals.d";
 import mapEnum from "./utils/mapEnum";
 
-const baseGroupTranchesAgesState = {
-  nombreSalariesFemmes: undefined,
-  nombreSalariesHommes: undefined,
-  remunerationAnnuelleBrutFemmes: undefined,
-  remunerationAnnuelleBrutHommes: undefined
-};
-
-const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
-  trancheAge,
-  ...baseGroupTranchesAgesState
-}));
-
-const baseGroupe = {
-  tranchesAges: [...baseTranchesAge]
-};
-
-////
+const dataEffectif = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+      trancheAge,
+      nombreSalariesFemmes: undefined,
+      nombreSalariesHommes: undefined
+    }))
+  })
+);
 
 const dataIndicateurUn = mapEnum(
   CategorieSocioPro,
@@ -58,26 +49,9 @@ const dataIndicateurTrois = mapEnum(
 );
 
 const defaultState: AppState = {
-  data: [
-    {
-      categorieSocioPro: CategorieSocioPro.Ouvriers,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Employes,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Techniciens,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Cadres,
-      ...baseGroupe
-    }
-  ],
   effectif: {
-    formValidated: "None"
+    formValidated: "None",
+    nombreSalaries: dataEffectif
   },
   indicateurUn: {
     formValidated: "None",
@@ -119,9 +93,10 @@ function AppReducer(
   }
   switch (action.type) {
     case "updateEffectif": {
+      const { nombreSalaries } = action.data;
       return {
         ...state,
-        data: updateEffectif(state.data, action.data)
+        effectif: { ...state.effectif, nombreSalaries }
       };
     }
     case "validateEffectif": {
@@ -237,30 +212,6 @@ function AppReducer(
     default:
       return state;
   }
-}
-
-function updateEffectif(
-  stateData: AppState["data"],
-  actionData: ActionEffectifData
-) {
-  return stateData.map((group: Groupe) => {
-    const datumCat = actionData.find(
-      ({ categorieSocioPro }) => categorieSocioPro === group.categorieSocioPro
-    );
-    return {
-      ...group,
-      tranchesAges: group.tranchesAges.map(
-        (groupTranchesAges: GroupTranchesAges) => {
-          const datumAge =
-            datumCat &&
-            datumCat.tranchesAges.find(
-              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
-            );
-          return Object.assign({}, groupTranchesAges, datumAge);
-        }
-      )
-    };
-  });
 }
 
 export default AppReducer;

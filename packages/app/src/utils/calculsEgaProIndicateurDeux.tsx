@@ -1,7 +1,7 @@
 import {
   AppState,
   CategorieSocioPro,
-  Groupe,
+  GroupeEffectif,
   GroupeIndicateurDeux
 } from "../globals.d";
 
@@ -57,38 +57,40 @@ export interface effectifEtEcartAugmentGroup extends effectifGroup {
 }
 
 export const calculEffectifsEtEcartAugmentParCategorieSocioPro = (
-  dataEffectif: Array<Groupe>,
+  dataEffectif: Array<GroupeEffectif>,
   dataIndicateurDeux: Array<GroupeIndicateurDeux>
 ): Array<effectifEtEcartAugmentGroup> => {
-  return dataEffectif.map(({ categorieSocioPro, tranchesAges }: Groupe) => {
-    const effectifs = rowEffectifsParCategorieSocioPro(
-      tranchesAges,
-      calculValiditeGroupe
-    );
+  return dataEffectif.map(
+    ({ categorieSocioPro, tranchesAges }: GroupeEffectif) => {
+      const effectifs = rowEffectifsParCategorieSocioPro(
+        tranchesAges,
+        calculValiditeGroupe
+      );
 
-    const dataAugment = dataIndicateurDeux.find(
-      ({ categorieSocioPro: csp }) => csp === categorieSocioPro
-    );
+      const dataAugment = dataIndicateurDeux.find(
+        ({ categorieSocioPro: csp }) => csp === categorieSocioPro
+      );
 
-    const tauxAugmentationFemmes =
-      dataAugment && dataAugment.tauxAugmentationFemmes;
-    const tauxAugmentationHommes =
-      dataAugment && dataAugment.tauxAugmentationHommes;
+      const tauxAugmentationFemmes =
+        dataAugment && dataAugment.tauxAugmentationFemmes;
+      const tauxAugmentationHommes =
+        dataAugment && dataAugment.tauxAugmentationHommes;
 
-    // ETA
-    const ecartTauxAugmentation = calculEcartTauxAugmentation(
-      tauxAugmentationFemmes,
-      tauxAugmentationHommes
-    );
+      // ETA
+      const ecartTauxAugmentation = calculEcartTauxAugmentation(
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes
+      );
 
-    return {
-      ...effectifs,
-      categorieSocioPro,
-      tauxAugmentationFemmes,
-      tauxAugmentationHommes,
-      ecartTauxAugmentation
-    };
-  });
+      return {
+        ...effectifs,
+        categorieSocioPro,
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes,
+        ecartTauxAugmentation
+      };
+    }
+  );
 };
 
 export const calculTotalEffectifsEtTauxAugmentation = (
@@ -211,7 +213,7 @@ export const calculNote = (
 
 export default function calculIndicateurDeux(state: AppState) {
   const effectifEtEcartAugmentParGroupe = calculEffectifsEtEcartAugmentParCategorieSocioPro(
-    state.data,
+    state.effectif.nombreSalaries,
     state.indicateurDeux.tauxAugmentation
   );
 

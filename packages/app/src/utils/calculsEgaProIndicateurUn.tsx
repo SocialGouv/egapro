@@ -2,7 +2,7 @@ import {
   AppState,
   TranchesAges,
   CategorieSocioPro,
-  Groupe,
+  GroupeEffectif,
   GroupeIndicateurUn,
   GroupTranchesAgesIndicateurUn
 } from "../globals.d";
@@ -109,7 +109,7 @@ export interface tmpGroupTranchesAges {
 }
 
 export const calculEffectifsEtEcartRemuParTrancheAge = (
-  dataEffectif: Array<Groupe>,
+  dataEffectif: Array<GroupeEffectif>,
   dataIndicateurUn: Array<GroupeIndicateurUn>
 ): Array<effectifEtEcartRemuGroup> => {
   const dataEffectifByRow = dataEffectif.reduce(
@@ -215,7 +215,7 @@ export const calculNote = (
 
 export default function calculIndicateurUn(state: AppState) {
   const effectifEtEcartRemuParTranche = calculEffectifsEtEcartRemuParTrancheAge(
-    state.data,
+    state.effectif.nombreSalaries,
     state.indicateurUn.remunerationAnnuelle
   );
 

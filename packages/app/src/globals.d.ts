@@ -1,7 +1,7 @@
 export type AppState = {
-  data: Array<Groupe>;
   effectif: {
     formValidated: FormState;
+    nombreSalaries: Array<GroupeEffectif>;
   };
   indicateurUn: {
     formValidated: FormState;
@@ -87,14 +87,9 @@ export type ActionType =
       valid: FormState;
     };
 
-export type ActionEffectifData = Array<{
-  categorieSocioPro: CategorieSocioPro;
-  tranchesAges: Array<{
-    trancheAge: TranchesAges;
-    nombreSalariesFemmes: number | undefined;
-    nombreSalariesHommes: number | undefined;
-  }>;
-}>;
+export type ActionEffectifData = {
+  nombreSalaries: Array<GroupeEffectif>;
+};
 
 export type ActionIndicateurUnData = {
   remunerationAnnuelle: Array<GroupeIndicateurUn>;
@@ -138,18 +133,16 @@ export enum CategorieSocioPro {
   Cadres
 }
 
-//
-export interface GroupTranchesAges {
+export interface GroupTranchesAgesEffectif {
   trancheAge: TranchesAges;
   nombreSalariesFemmes: number | undefined;
   nombreSalariesHommes: number | undefined;
 }
 
-export interface Groupe {
+export interface GroupeEffectif {
   categorieSocioPro: CategorieSocioPro;
-  tranchesAges: Array<GroupTranchesAges>;
+  tranchesAges: Array<GroupTranchesAgesEffectif>;
 }
-//
 
 export interface GroupTranchesAgesIndicateurUn {
   trancheAge: TranchesAges;
