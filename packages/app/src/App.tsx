@@ -186,7 +186,11 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
 
   useEffect(() => {
     if (scrollEl.current) {
-      scrollEl.current.scrollTo(0, 0);
+      if (scrollEl.current.scrollTo) {
+        scrollEl.current.scrollTo(0, 0);
+      } else {
+        scrollEl.current.scrollTop = 0;
+      }
     }
   }, [location.pathname]);
 
