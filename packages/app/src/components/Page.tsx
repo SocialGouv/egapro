@@ -25,6 +25,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginRight: globalStyles.grid.gutterWidth,
+    marginLeft: globalStyles.grid.gutterWidth,
     marginBottom: globalStyles.grid.gutterWidth,
     "@media print": {
       display: "block",

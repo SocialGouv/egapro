@@ -17,7 +17,7 @@ import { useDebounceEffect } from "./utils/hooks";
 
 import AppReducer from "./AppReducer";
 
-import GridProvider from "./components/GridContext";
+import GridProvider, { useLayoutType } from "./components/GridContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
@@ -38,6 +38,7 @@ import PageNotFound from "./views/PageNotFound";
 
 function App() {
   const [state, dispatch] = useReducer(AppReducer, undefined);
+  const layoutType = useLayoutType();
   return (
     <Router>
       <GridProvider>
@@ -63,7 +64,12 @@ function App() {
             </MainScrollViewWithRouter>
           </div>
 
-          <div css={styles.rightColumn}>
+          <div
+            css={[
+              styles.rightColumn,
+              layoutType === "tablet" && styles.rightColumnTablet
+            ]}
+          >
             <FAQ />
           </div>
         </div>
@@ -184,6 +190,8 @@ interface MainScrollViewProps extends RouteComponentProps {
 function MainScrollView({ children, state, location }: MainScrollViewProps) {
   const scrollEl = useRef<HTMLDivElement>(null);
 
+  const layoutType = useLayoutType();
+
   useEffect(() => {
     if (scrollEl.current) {
       if (scrollEl.current.scrollTo) {
@@ -194,28 +202,44 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
     }
   }, [location.pathname]);
 
-  return (
-    <div css={styles.main} ref={scrollEl}>
-      <div css={styles.menu}>
-        <Menu
-          effectifFormValidated={state ? state.effectif.formValidated : "None"}
-          indicateurUnFormValidated={
-            state ? state.indicateurUn.formValidated : "None"
-          }
-          indicateurDeuxFormValidated={
-            state ? state.indicateurDeux.formValidated : "None"
-          }
-          indicateurTroisFormValidated={
-            state ? state.indicateurTrois.formValidated : "None"
-          }
-          indicateurQuatreFormValidated={
-            state ? state.indicateurQuatre.formValidated : "None"
-          }
-          indicateurCinqFormValidated={
-            state ? state.indicateurCinq.formValidated : "None"
-          }
-        />
+  const menu = (
+    <Menu
+      effectifFormValidated={state ? state.effectif.formValidated : "None"}
+      indicateurUnFormValidated={
+        state ? state.indicateurUn.formValidated : "None"
+      }
+      indicateurDeuxFormValidated={
+        state ? state.indicateurDeux.formValidated : "None"
+      }
+      indicateurTroisFormValidated={
+        state ? state.indicateurTrois.formValidated : "None"
+      }
+      indicateurQuatreFormValidated={
+        state ? state.indicateurQuatre.formValidated : "None"
+      }
+      indicateurCinqFormValidated={
+        state ? state.indicateurCinq.formValidated : "None"
+      }
+    />
+  );
+
+  if (layoutType === "tablet") {
+    return (
+      <div css={styles.main}>
+        {menu}
+        <div css={styles.scroll} ref={scrollEl}>
+          <div css={styles.viewContainer}>
+            <div css={styles.view}>{children}</div>
+            <Footer />
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div css={[styles.main, styles.scroll]} ref={scrollEl}>
+      <div css={styles.menu}>{menu}</div>
       <div css={styles.viewContainer}>
         <div css={styles.view}>{children}</div>
         <Footer />
@@ -253,14 +277,23 @@ const styles = {
       display: "none"
     }
   }),
+  rightColumnTablet: css({
+    width: 320
+  }),
   main: css({
+    borderRight: "1px solid #EFECEF",
+    display: "flex",
+    flexDirection: "column",
+    flex: 1
+  }),
+  scroll: css({
     overflowY: "auto",
     display: "flex",
+    flexDirection: "row",
     flex: 1,
     position: "relative",
     background:
       "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), #EFF0FA",
-    borderRight: "1px solid #EFECEF",
     "@media print": {
       overflow: "visible",
       display: "block",
