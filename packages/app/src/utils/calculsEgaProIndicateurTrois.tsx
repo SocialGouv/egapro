@@ -1,4 +1,9 @@
-import { AppState, CategorieSocioPro, Groupe } from "../globals.d";
+import {
+  AppState,
+  CategorieSocioPro,
+  GroupeEffectif,
+  GroupeIndicateurTrois
+} from "../globals.d";
 
 import {
   calculEcartsPonderesParGroupe,
@@ -46,19 +51,22 @@ export interface effectifEtEcartPromoGroup extends effectifGroup {
 }
 
 export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
-  state: Array<Groupe>
+  dataEffectif: Array<GroupeEffectif>,
+  dataIndicateurTrois: Array<GroupeIndicateurTrois>
 ): Array<effectifEtEcartPromoGroup> => {
-  return state.map(
-    ({
-      categorieSocioPro,
-      tranchesAges,
-      tauxPromotionFemmes,
-      tauxPromotionHommes
-    }: Groupe) => {
+  return dataEffectif.map(
+    ({ categorieSocioPro, tranchesAges }: GroupeEffectif) => {
       const effectifs = rowEffectifsParCategorieSocioPro(
         tranchesAges,
         calculValiditeGroupe
       );
+
+      const dataPromo = dataIndicateurTrois.find(
+        ({ categorieSocioPro: csp }) => csp === categorieSocioPro
+      );
+
+      const tauxPromotionFemmes = dataPromo && dataPromo.tauxPromotionFemmes;
+      const tauxPromotionHommes = dataPromo && dataPromo.tauxPromotionHommes;
 
       // ETA
       const ecartTauxPromotion = calculEcartTauxPromotion(
@@ -159,7 +167,8 @@ export const calculNote = (
 
 export default function calculIndicateurTrois(state: AppState) {
   const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
-    state.data
+    state.effectif.nombreSalaries,
+    state.indicateurTrois.tauxPromotion
   );
 
   const {

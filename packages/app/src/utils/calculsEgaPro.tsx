@@ -1,4 +1,4 @@
-import { GroupTranchesAges } from "../globals.d";
+import { GroupTranchesAgesEffectif } from "../globals.d";
 
 import { roundDecimal } from "./helpers";
 
@@ -94,7 +94,7 @@ export interface effectifGroup {
 }
 
 export const rowEffectifsParTrancheAge = (
-  { nombreSalariesFemmes, nombreSalariesHommes }: GroupTranchesAges,
+  { nombreSalariesFemmes, nombreSalariesHommes }: GroupTranchesAgesEffectif,
   calculValiditeGroupe: (
     nombreSalariesFemmes: number,
     nombreSalariesHommes: number
@@ -124,7 +124,7 @@ export const rowEffectifsParTrancheAge = (
 };
 
 export const rowEffectifsParCategorieSocioPro = (
-  tranchesAges: Array<GroupTranchesAges>,
+  tranchesAges: Array<GroupTranchesAgesEffectif>,
   calculValiditeGroupe: (
     nombreSalariesFemmes: number,
     nombreSalariesHommes: number

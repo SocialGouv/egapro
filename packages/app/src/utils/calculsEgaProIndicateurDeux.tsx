@@ -1,4 +1,9 @@
-import { AppState, CategorieSocioPro, Groupe } from "../globals.d";
+import {
+  AppState,
+  CategorieSocioPro,
+  GroupeEffectif,
+  GroupeIndicateurDeux
+} from "../globals.d";
 
 import { roundDecimal } from "./helpers";
 
@@ -52,19 +57,24 @@ export interface effectifEtEcartAugmentGroup extends effectifGroup {
 }
 
 export const calculEffectifsEtEcartAugmentParCategorieSocioPro = (
-  state: Array<Groupe>
+  dataEffectif: Array<GroupeEffectif>,
+  dataIndicateurDeux: Array<GroupeIndicateurDeux>
 ): Array<effectifEtEcartAugmentGroup> => {
-  return state.map(
-    ({
-      categorieSocioPro,
-      tranchesAges,
-      tauxAugmentationFemmes,
-      tauxAugmentationHommes
-    }: Groupe) => {
+  return dataEffectif.map(
+    ({ categorieSocioPro, tranchesAges }: GroupeEffectif) => {
       const effectifs = rowEffectifsParCategorieSocioPro(
         tranchesAges,
         calculValiditeGroupe
       );
+
+      const dataAugment = dataIndicateurDeux.find(
+        ({ categorieSocioPro: csp }) => csp === categorieSocioPro
+      );
+
+      const tauxAugmentationFemmes =
+        dataAugment && dataAugment.tauxAugmentationFemmes;
+      const tauxAugmentationHommes =
+        dataAugment && dataAugment.tauxAugmentationHommes;
 
       // ETA
       const ecartTauxAugmentation = calculEcartTauxAugmentation(
@@ -203,7 +213,8 @@ export const calculNote = (
 
 export default function calculIndicateurDeux(state: AppState) {
   const effectifEtEcartAugmentParGroupe = calculEffectifsEtEcartAugmentParCategorieSocioPro(
-    state.data
+    state.effectif.nombreSalaries,
+    state.indicateurDeux.tauxAugmentation
   );
 
   const {

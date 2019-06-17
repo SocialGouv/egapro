@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export function useDebounce(value: any, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -22,7 +22,12 @@ export function useDebounceEffect(
   callback: (debouncedValue: any) => void,
   dep: any[]
 ) {
+  const memoizedCallback = useCallback(callback, dep);
+
   const debouncedValue = useDebounce(value, delay);
 
-  useEffect(() => callback(debouncedValue), [debouncedValue, callback, dep]);
+  useEffect(() => memoizedCallback(debouncedValue), [
+    debouncedValue,
+    memoizedCallback
+  ]);
 }

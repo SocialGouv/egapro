@@ -1,67 +1,71 @@
 import {
   AppState,
-  Groupe,
-  GroupTranchesAges,
   ActionType,
-  ActionEffectifData,
-  ActionIndicateurUnData,
   CategorieSocioPro,
   TranchesAges
 } from "./globals.d";
 import mapEnum from "./utils/mapEnum";
 
-const baseGroupTranchesAgesState = {
-  nombreSalariesFemmes: undefined,
-  nombreSalariesHommes: undefined,
-  remunerationAnnuelleBrutFemmes: undefined,
-  remunerationAnnuelleBrutHommes: undefined
-};
+const dataEffectif = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+      trancheAge,
+      nombreSalariesFemmes: undefined,
+      nombreSalariesHommes: undefined
+    }))
+  })
+);
 
-const baseTranchesAge = mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
-  trancheAge,
-  ...baseGroupTranchesAgesState
-}));
+const dataIndicateurUn = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+      trancheAge,
+      remunerationAnnuelleBrutFemmes: undefined,
+      remunerationAnnuelleBrutHommes: undefined
+    }))
+  })
+);
 
-const baseGroupe = {
-  tranchesAges: [...baseTranchesAge],
-  tauxAugmentationFemmes: undefined,
-  tauxAugmentationHommes: undefined,
-  tauxPromotionFemmes: undefined,
-  tauxPromotionHommes: undefined
-};
+const dataIndicateurDeux = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tauxAugmentationFemmes: undefined,
+    tauxAugmentationHommes: undefined
+  })
+);
+
+const dataIndicateurTrois = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tauxPromotionFemmes: undefined,
+    tauxPromotionHommes: undefined
+  })
+);
 
 const defaultState: AppState = {
-  data: [
-    {
-      categorieSocioPro: CategorieSocioPro.Ouvriers,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Employes,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Techniciens,
-      ...baseGroupe
-    },
-    {
-      categorieSocioPro: CategorieSocioPro.Cadres,
-      ...baseGroupe
-    }
-  ],
   effectif: {
-    formValidated: "None"
+    formValidated: "None",
+    nombreSalaries: dataEffectif
   },
   indicateurUn: {
-    formValidated: "None"
+    formValidated: "None",
+    remunerationAnnuelle: dataIndicateurUn
   },
   indicateurDeux: {
     formValidated: "None",
-    presenceAugmentation: true
+    presenceAugmentation: true,
+    tauxAugmentation: dataIndicateurDeux
   },
   indicateurTrois: {
     formValidated: "None",
-    presencePromotion: true
+    presencePromotion: true,
+    tauxPromotion: dataIndicateurTrois
   },
   indicateurQuatre: {
     formValidated: "None",
@@ -89,9 +93,10 @@ function AppReducer(
   }
   switch (action.type) {
     case "updateEffectif": {
+      const { nombreSalaries } = action.data;
       return {
         ...state,
-        data: updateEffectif(state.data, action.data)
+        effectif: { ...state.effectif, nombreSalaries }
       };
     }
     case "validateEffectif": {
@@ -119,9 +124,10 @@ function AppReducer(
       };
     }
     case "updateIndicateurUn": {
+      const { remunerationAnnuelle } = action.data;
       return {
         ...state,
-        data: updateIndicateurUn(state.data, action.data)
+        indicateurUn: { ...state.indicateurUn, remunerationAnnuelle }
       };
     }
     case "validateIndicateurUn": {
@@ -132,18 +138,13 @@ function AppReducer(
     }
     case "updateIndicateurDeux": {
       const { tauxAugmentation, presenceAugmentation } = action.data;
-
-      const data = state.data.map((group: Groupe) => {
-        const datum = tauxAugmentation.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return Object.assign({}, group, datum);
-      });
       return {
         ...state,
-        data,
-        indicateurDeux: { ...state.indicateurDeux, presenceAugmentation }
+        indicateurDeux: {
+          ...state.indicateurDeux,
+          presenceAugmentation,
+          tauxAugmentation
+        }
       };
     }
     case "validateIndicateurDeux": {
@@ -154,18 +155,13 @@ function AppReducer(
     }
     case "updateIndicateurTrois": {
       const { tauxPromotion, presencePromotion } = action.data;
-
-      const data = state.data.map((group: Groupe) => {
-        const datum = tauxPromotion.find(
-          ({ categorieSocioPro }) =>
-            categorieSocioPro === group.categorieSocioPro
-        );
-        return Object.assign({}, group, datum);
-      });
       return {
         ...state,
-        data,
-        indicateurTrois: { ...state.indicateurTrois, presencePromotion }
+        indicateurTrois: {
+          ...state.indicateurTrois,
+          presencePromotion,
+          tauxPromotion
+        }
       };
     }
     case "validateIndicateurTrois": {
@@ -216,54 +212,6 @@ function AppReducer(
     default:
       return state;
   }
-}
-
-function updateEffectif(
-  stateData: AppState["data"],
-  actionData: ActionEffectifData
-) {
-  return stateData.map((group: Groupe) => {
-    const datumCat = actionData.find(
-      ({ categorieSocioPro }) => categorieSocioPro === group.categorieSocioPro
-    );
-    return {
-      ...group,
-      tranchesAges: group.tranchesAges.map(
-        (groupTranchesAges: GroupTranchesAges) => {
-          const datumAge =
-            datumCat &&
-            datumCat.tranchesAges.find(
-              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
-            );
-          return Object.assign({}, groupTranchesAges, datumAge);
-        }
-      )
-    };
-  });
-}
-
-function updateIndicateurUn(
-  stateData: AppState["data"],
-  actionData: ActionIndicateurUnData
-) {
-  return stateData.map((group: Groupe) => {
-    const datumCat = actionData.find(
-      ({ categorieSocioPro }) => categorieSocioPro === group.categorieSocioPro
-    );
-    return {
-      ...group,
-      tranchesAges: group.tranchesAges.map(
-        (groupTranchesAges: GroupTranchesAges) => {
-          const datumAge =
-            datumCat &&
-            datumCat.tranchesAges.find(
-              ({ trancheAge }) => trancheAge === groupTranchesAges.trancheAge
-            );
-          return Object.assign({}, groupTranchesAges, datumAge);
-        }
-      )
-    };
-  });
 }
 
 export default AppReducer;

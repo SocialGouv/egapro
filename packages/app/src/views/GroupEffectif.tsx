@@ -9,7 +9,7 @@ import {
   FormState,
   CategorieSocioPro,
   TranchesAges,
-  GroupTranchesAges,
+  GroupTranchesAgesEffectif,
   ActionEffectifData
 } from "../globals.d";
 
@@ -56,34 +56,36 @@ function GroupEffectif({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const infoFields = state.data.map(({ categorieSocioPro, tranchesAges }) => {
-    return {
-      categorieSocioPro,
-      tranchesAges: tranchesAges.map(
-        ({
-          trancheAge,
-          nombreSalariesFemmes,
-          nombreSalariesHommes
-        }: GroupTranchesAges) => {
-          return {
+  const infoFields = state.effectif.nombreSalaries.map(
+    ({ categorieSocioPro, tranchesAges }) => {
+      return {
+        categorieSocioPro,
+        tranchesAges: tranchesAges.map(
+          ({
             trancheAge,
-            nbSalarieFemmeName: getFieldName(
-              categorieSocioPro,
+            nombreSalariesFemmes,
+            nombreSalariesHommes
+          }: GroupTranchesAgesEffectif) => {
+            return {
               trancheAge,
-              "Femmes"
-            ),
-            nbSalarieFemmeValue: parseIntStateValue(nombreSalariesFemmes),
-            nbSalarieHommeName: getFieldName(
-              categorieSocioPro,
-              trancheAge,
-              "Hommes"
-            ),
-            nbSalarieHommeValue: parseIntStateValue(nombreSalariesHommes)
-          };
-        }
-      )
-    };
-  });
+              nbSalarieFemmeName: getFieldName(
+                categorieSocioPro,
+                trancheAge,
+                "Femmes"
+              ),
+              nbSalarieFemmeValue: parseIntStateValue(nombreSalariesFemmes),
+              nbSalarieHommeName: getFieldName(
+                categorieSocioPro,
+                trancheAge,
+                "Hommes"
+              ),
+              nbSalarieHommeValue: parseIntStateValue(nombreSalariesHommes)
+            };
+          }
+        )
+      };
+    }
+  );
 
   const initialValues = infoFields.reduce((acc1, { tranchesAges }) => {
     return tranchesAges.reduce(
@@ -107,7 +109,7 @@ function GroupEffectif({ state, dispatch }: Props) {
   }, {});
 
   const saveForm = (formData: any) => {
-    const data: ActionEffectifData = infoFields.map(
+    const nombreSalaries = infoFields.map(
       ({ categorieSocioPro, tranchesAges }) => ({
         categorieSocioPro,
         tranchesAges: tranchesAges.map(
@@ -123,7 +125,7 @@ function GroupEffectif({ state, dispatch }: Props) {
         )
       })
     );
-    updateEffectif(data);
+    updateEffectif({ nombreSalaries });
   };
 
   const onSubmit = (formData: any) => {
