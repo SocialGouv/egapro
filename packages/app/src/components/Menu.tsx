@@ -7,6 +7,8 @@ import { FormState } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
 
+import { useLayoutType } from "../components/GridContext";
+
 import { IconValid, IconInvalid } from "./Icons";
 import { useColumnsWidth } from "./GridContext";
 
@@ -25,12 +27,21 @@ function CustomNavLink({
   to,
   activeOnlyWhenExact = false
 }: CustomNavLinkProps) {
+  const layoutType = useLayoutType();
   return (
     <Route
       path={to}
       exact={activeOnlyWhenExact}
       children={({ match }) => (
-        <Link to={to} css={[styles.link, match && styles.activeLink]}>
+        <Link
+          to={to}
+          css={[
+            styles.link,
+            layoutType === "tablet" && styles.linkTablet,
+            ,
+            match && styles.activeLink
+          ]}
+        >
           <div css={styles.linkInner}>
             {valid === "Valid" ? (
               <div css={styles.icon}>
@@ -43,7 +54,7 @@ function CustomNavLink({
             ) : null}
             <span>{title}</span>
           </div>
-          {label && <span>{label}</span>}
+          {label && layoutType === "desktop" && <span>{label}</span>}
         </Link>
       )}
     />
@@ -68,9 +79,16 @@ function Menu({
   indicateurCinqFormValidated
 }: Props) {
   const width = useColumnsWidth(2);
+  const layoutType = useLayoutType();
 
   return (
-    <div css={[styles.menu, css({ width })]}>
+    <div
+      css={[
+        styles.menu,
+        layoutType === "tablet" && styles.menuTablet,
+        layoutType === "desktop" && css({ width })
+      ]}
+    >
       <Switch>
         <Route
           path="/simulateur/:code"
@@ -137,8 +155,13 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start",
-    marginLeft: globalStyles.grid.gutterWidth,
-    marginRight: globalStyles.grid.gutterWidth
+    marginLeft: globalStyles.grid.gutterWidth
+  }),
+  menuTablet: css({
+    flexDirection: "row",
+    alignItems: "stretch",
+    height: 44,
+    borderBottom: "1px solid #EFECEF"
   }),
   link: css({
     paddingTop: 7,
@@ -150,6 +173,15 @@ const styles = {
     ":hover": {
       color: globalStyles.colors.primary
     }
+  }),
+  linkTablet: css({
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center"
   }),
   activeLink: css({
     color: globalStyles.colors.primary

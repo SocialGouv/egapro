@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
-import { useColumnsWidth } from "../components/GridContext";
+import { useColumnsWidth, useLayoutType } from "../components/GridContext";
 
 interface Props {
   childrenForm: ReactNode;
@@ -12,7 +12,8 @@ interface Props {
 }
 
 function LayoutFormAndResult({ childrenForm, childrenResult }: Props) {
-  const width = useColumnsWidth(4);
+  const layoutType = useLayoutType();
+  const width = useColumnsWidth(layoutType === "desktop" ? 4 : 5);
   return (
     <div css={styles.body}>
       <div css={css({ width })}>{childrenForm}</div>
