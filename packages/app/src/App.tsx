@@ -27,7 +27,7 @@ import FAQ from "./views/FAQ";
 
 import Home from "./views/Home";
 import HomeSimulateur from "./views/HomeSimulateur";
-import GroupEffectif from "./views/GroupEffectif";
+import Effectif from "./views/Effectif";
 import IndicateurUn from "./views/Indicateur1";
 import IndicateurDeux from "./views/Indicateur2";
 import IndicateurTrois from "./views/Indicateur3";
@@ -135,7 +135,7 @@ function Simulateur({ code, state, dispatch }: SimulateurProps) {
       <Route
         path="/simulateur/:code/effectifs"
         render={props => (
-          <GroupEffectif {...props} state={state} dispatch={dispatch} />
+          <Effectif {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
