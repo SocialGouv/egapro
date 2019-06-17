@@ -55,20 +55,29 @@ const validateWithPreviousField = (
 };
 
 const validateForm = ({
+  presenceAugmentation,
+  presenceCongeMat,
   nombreSalarieesPeriodeAugmentation,
   nombreSalarieesAugmentees
 }: {
+  presenceAugmentation: string;
+  presenceCongeMat: string;
   nombreSalarieesPeriodeAugmentation: string;
   nombreSalarieesAugmentees: string;
-}) => ({
-  nombreSalarieesPeriodeAugmentation: validate(
-    nombreSalarieesPeriodeAugmentation
-  ),
-  nombreSalarieesAugmentees: validateWithPreviousField(
-    nombreSalarieesAugmentees,
-    nombreSalarieesPeriodeAugmentation
-  )
-});
+}) => {
+  if (presenceAugmentation === "false" || presenceCongeMat === "false") {
+    return null;
+  }
+  return {
+    nombreSalarieesPeriodeAugmentation: validate(
+      nombreSalarieesPeriodeAugmentation
+    ),
+    nombreSalarieesAugmentees: validateWithPreviousField(
+      nombreSalarieesAugmentees,
+      nombreSalarieesPeriodeAugmentation
+    )
+  };
+};
 
 ///////////////
 
