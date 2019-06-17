@@ -214,8 +214,8 @@ function GroupEffectif({ state, dispatch }: Props) {
               title={displayNameCategorieSocioPro(categorieSocioPro)}
               label="nombre de salariés"
               footer={[
-                displayInt(totalGroupNbSalarieHomme),
-                displayInt(totalGroupNbSalarieFemme)
+                displayInt(totalGroupNbSalarieFemme),
+                displayInt(totalGroupNbSalarieHomme)
               ]}
             >
               {tranchesAges.map(
@@ -242,10 +242,10 @@ function GroupEffectif({ state, dispatch }: Props) {
         <div css={styles.rowFoot}>
           <div css={styles.rowFootText}>total des effectifs</div>
           <Cell style={styles.rowFootCell}>
-            {displayInt(totalNbSalarieHomme)}
+            {displayInt(totalNbSalarieFemme)}
           </Cell>
           <Cell style={styles.rowFootCell}>
-            {displayInt(totalNbSalarieFemme)}
+            {displayInt(totalNbSalarieHomme)}
           </Cell>
         </div>
 

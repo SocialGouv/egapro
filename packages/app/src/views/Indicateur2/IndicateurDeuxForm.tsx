@@ -182,8 +182,8 @@ function IndicateurDeuxForm({
         <BlocForm
           label="% de salariés augmentés"
           footer={[
-            displayFractionPercent(totalTauxAugmentationHommes),
-            displayFractionPercent(totalTauxAugmentationFemmes)
+            displayFractionPercent(totalTauxAugmentationFemmes),
+            displayFractionPercent(totalTauxAugmentationHommes)
           ]}
         >
           {infoFields.map(
