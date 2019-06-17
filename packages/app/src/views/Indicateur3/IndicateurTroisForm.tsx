@@ -178,8 +178,8 @@ function IndicateurTroisForm({
         <BlocForm
           label="% de salariés promus"
           footer={[
-            displayFractionPercent(totalTauxPromotionHommes),
-            displayFractionPercent(totalTauxPromotionFemmes)
+            displayFractionPercent(totalTauxPromotionFemmes),
+            displayFractionPercent(totalTauxPromotionHommes)
           ]}
         >
           {infoFields.map(
