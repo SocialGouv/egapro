@@ -8,7 +8,10 @@ import ResultBubble, {
   Props as ResultBubbleProps
 } from "../../../components/ResultBubble";
 
-import { useColumnsWidth } from "../../../components/GridContext";
+import {
+  useColumnsWidth,
+  useLayoutType
+} from "../../../components/GridContext";
 
 interface Props {
   title: string;
@@ -17,7 +20,8 @@ interface Props {
 }
 
 export function RecapBloc({ title, children, resultBubble }: Props) {
-  const width = useColumnsWidth(4);
+  const layoutType = useLayoutType();
+  const width = useColumnsWidth(layoutType === "desktop" ? 4 : 5);
 
   return (
     <div css={styles.container}>

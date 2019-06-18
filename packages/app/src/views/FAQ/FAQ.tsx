@@ -3,6 +3,8 @@ import { css, jsx } from "@emotion/core";
 
 import { Route, Switch, RouteComponentProps } from "react-router-dom";
 
+import { useLayoutType } from "../../components/GridContext";
+
 import FAQHeader from "./components/FAQHeader";
 import FAQFooter from "./components/FAQFooter";
 
@@ -38,6 +40,7 @@ function mapDefaultPathnameToFAQPathname(
 }
 
 function FAQ() {
+  const layoutType = useLayoutType();
   return (
     <Route
       render={({ location }) => {
@@ -51,7 +54,13 @@ function FAQ() {
           <div css={styles.container}>
             <FAQHeader location={locationFAQ} />
 
-            <div css={styles.content} key={locationFAQ.pathname}>
+            <div
+              css={[
+                styles.content,
+                layoutType === "tablet" && styles.contentTablet
+              ]}
+              key={locationFAQ.pathname}
+            >
               <Switch location={locationFAQ}>
                 <Route
                   path={["/", "/simulateur/:code"]}
@@ -118,6 +127,10 @@ const styles = {
       // Only target IE11
       display: "block"
     }
+  }),
+  contentTablet: css({
+    paddingRight: 21,
+    paddingLeft: 21
   })
 };
 

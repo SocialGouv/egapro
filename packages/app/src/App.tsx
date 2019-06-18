@@ -38,45 +38,60 @@ import PageNotFound from "./views/PageNotFound";
 
 function App() {
   const [state, dispatch] = useReducer(AppReducer, undefined);
-  const layoutType = useLayoutType();
   return (
     <Router>
       <GridProvider>
-        <div css={styles.layout}>
-          <div css={styles.leftColumn}>
-            <Header />
-
-            <MainScrollViewWithRouter state={state}>
-              <Switch>
-                <Route path="/" exact render={props => <Home {...props} />} />
-                <Route
-                  path="/simulateur/:code"
-                  render={({
-                    match: {
-                      params: { code }
-                    }
-                  }) => (
-                    <Simulateur code={code} state={state} dispatch={dispatch} />
-                  )}
-                />
-                <Route component={PageNotFound} />
-              </Switch>
-            </MainScrollViewWithRouter>
-          </div>
-
-          <div
-            css={[
-              styles.rightColumn,
-              layoutType === "tablet" && styles.rightColumnTablet
-            ]}
-          >
-            <FAQ />
-          </div>
-        </div>
+        <AppLayout state={state} dispatch={dispatch} />
       </GridProvider>
     </Router>
   );
 }
+
+///////////////
+
+interface AppLayout {
+  state: AppState | undefined;
+  dispatch: (action: ActionType) => void;
+}
+
+function AppLayout({ state, dispatch }: AppLayout) {
+  const layoutType = useLayoutType();
+  return (
+    <div css={styles.layout}>
+      <div css={styles.leftColumn}>
+        <Header />
+
+        <MainScrollViewWithRouter state={state}>
+          <Switch>
+            <Route path="/" exact render={props => <Home {...props} />} />
+            <Route
+              path="/simulateur/:code"
+              render={({
+                match: {
+                  params: { code }
+                }
+              }) => (
+                <Simulateur code={code} state={state} dispatch={dispatch} />
+              )}
+            />
+            <Route component={PageNotFound} />
+          </Switch>
+        </MainScrollViewWithRouter>
+      </div>
+
+      <div
+        css={[
+          styles.rightColumn,
+          layoutType === "tablet" && styles.rightColumnTablet
+        ]}
+      >
+        <FAQ />
+      </div>
+    </div>
+  );
+}
+
+///////////////
 
 interface SimulateurProps {
   code: string;
@@ -181,6 +196,8 @@ function Simulateur({ code, state, dispatch }: SimulateurProps) {
     </Switch>
   );
 }
+
+///////////////
 
 interface MainScrollViewProps extends RouteComponentProps {
   children: ReactNode;

@@ -4,15 +4,22 @@ import { Link } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 
-import { useColumnsWidth } from "./GridContext";
+import { useColumnsWidth, useLayoutType } from "./GridContext";
 
 import Logo from "./Logo";
 
 function Header() {
   const width = useColumnsWidth(2);
+  const layoutType = useLayoutType();
   return (
     <header css={styles.header}>
-      <div css={[styles.headerLeft, css({ width }), styles.headerLeftPrint]}>
+      <div
+        css={[
+          styles.headerLeft,
+          layoutType === "desktop" && css({ width }),
+          styles.headerLeftPrint
+        ]}
+      >
         <a
           href="https://travail-emploi.gouv.fr/"
           target="_blank"
@@ -27,7 +34,8 @@ function Header() {
           Egapro
         </Link>
         <p css={styles.subtitle}>
-          L’outil de calcul de votre Index de l’égalité professionnelle Femmes Hommes
+          L’outil de calcul de votre Index de l’égalité professionnelle Femmes
+          Hommes
         </p>
       </div>
     </header>
