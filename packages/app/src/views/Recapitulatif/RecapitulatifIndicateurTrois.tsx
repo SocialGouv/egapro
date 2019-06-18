@@ -93,7 +93,6 @@ function RecapitulatifIndicateurTrois({
           secondLineData:
             (noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") +
             "/15",
-          secondLineInfo: "mesures de correction prises en compte",
           indicateurSexeSurRepresente
         }}
       >

@@ -35,7 +35,6 @@ function IndicateurTroisResult({
           (noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") +
           "/15"
         }
-        secondLineInfo="mesures de correction prises en compte"
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
 
