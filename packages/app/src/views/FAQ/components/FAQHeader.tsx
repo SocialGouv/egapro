@@ -49,7 +49,7 @@ function FAQHeader({
           />
           <Route
             exact
-            path="/part/:part/question/:indexQuestion"
+            path={["/part/:part/question/:indexQuestion", "/referent"]}
             render={({ history }) => <FAQHeaderBackButton history={history} />}
           />
         </Switch>

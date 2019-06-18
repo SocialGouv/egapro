@@ -1,12 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Link } from "react-router-dom";
+import { Link, LinkProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 
 interface Props {
   label: string;
-  to: string;
+  to: LinkProps["to"];
 }
 
 function TextLink({ label, to }: Props) {
