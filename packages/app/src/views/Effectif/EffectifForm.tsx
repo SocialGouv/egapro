@@ -14,7 +14,6 @@ import {
 import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
 import { displayInt } from "../../utils/helpers";
 
-import { useColumnsWidth } from "../../components/GridContext";
 import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import ActionBar from "../../components/ActionBar";
@@ -143,8 +142,6 @@ function EffectifForm({
     { values: true, dirty: true }
   );
 
-  const width = useColumnsWidth(4);
-
   const { totalNbSalarieHomme, totalNbSalarieFemme } = infoFields.reduce(
     (acc, { tranchesAges }) => {
       const {
@@ -173,7 +170,7 @@ function EffectifForm({
   );
 
   return (
-    <form onSubmit={handleSubmit} css={[styles.container, css({ width })]}>
+    <form onSubmit={handleSubmit} css={styles.container}>
       {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
         const {
           totalGroupNbSalarieHomme,

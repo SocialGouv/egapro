@@ -1,12 +1,17 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
+import TextLink from "../../../components/TextLink";
+
 function FAQFooter() {
   return (
     <div css={styles.container}>
       <span css={styles.text}>
         Vous n’avez pas trouveé l’aide que vous cherchiez ?<br />
-        Contactez les Direcctes
+        <TextLink
+          to={{ state: { faq: "/contact" } }}
+          label="Contacter votre référent EgaPro"
+        />
       </span>
     </div>
   );

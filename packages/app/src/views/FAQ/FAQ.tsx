@@ -3,12 +3,16 @@ import { css, jsx } from "@emotion/core";
 
 import { Route, Switch, RouteComponentProps } from "react-router-dom";
 
+import { useLayoutType } from "../../components/GridContext";
+
 import FAQHeader from "./components/FAQHeader";
 import FAQFooter from "./components/FAQFooter";
 
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
 import FAQQuestion from "./FAQQuestion";
+import FAQContact from "./FAQContact";
+import globalStyles from "../../utils/globalStyles";
 
 const FAQPaths: { [key: string]: string } = {
   effectifs: "/section/effectifs",
@@ -38,6 +42,7 @@ function mapDefaultPathnameToFAQPathname(
 }
 
 function FAQ() {
+  const layoutType = useLayoutType();
   return (
     <Route
       render={({ location }) => {
@@ -51,7 +56,14 @@ function FAQ() {
           <div css={styles.container}>
             <FAQHeader location={locationFAQ} />
 
-            <div css={styles.content} key={locationFAQ.pathname}>
+            <div
+              css={[
+                styles.content,
+                layoutType === "tablet" && styles.contentTablet,
+                layoutType === "mobile" && styles.contentMobile
+              ]}
+              key={locationFAQ.pathname}
+            >
               <Switch location={locationFAQ}>
                 <Route
                   path={["/", "/simulateur/:code"]}
@@ -85,6 +97,8 @@ function FAQ() {
                     />
                   )}
                 />
+
+                <Route exact path="/contact" render={() => <FAQContact />} />
               </Switch>
 
               <FAQFooter />
@@ -118,6 +132,14 @@ const styles = {
       // Only target IE11
       display: "block"
     }
+  }),
+  contentTablet: css({
+    paddingRight: 21,
+    paddingLeft: 21
+  }),
+  contentMobile: css({
+    paddingRight: globalStyles.grid.gutterWidth,
+    paddingLeft: globalStyles.grid.gutterWidth
   })
 };
 

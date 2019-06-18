@@ -93,7 +93,6 @@ function RecapitulatifIndicateurDeux({
           secondLineData:
             (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") +
             "/20",
-          secondLineInfo: "mesures de correction prises en compte",
           indicateurSexeSurRepresente
         }}
       >

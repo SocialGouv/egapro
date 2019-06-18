@@ -81,7 +81,6 @@ function RecapitulatifIndicateurUn({
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
-          secondLineInfo: "mesures de correction prises en compte",
           indicateurSexeSurRepresente
         }}
       >

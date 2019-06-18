@@ -25,14 +25,6 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          téléchargez le pas à pas, la FAQ
-        </a>
-        <a
-          href="https://travail-emploi.gouv.fr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          css={styles.link}
-        >
           téléchargez le simulateur au format excel
         </a>
         <a
@@ -86,6 +78,8 @@ const styles = {
   footer: css({
     backgroundColor: "#FFF",
     height: 80,
+    paddingLeft: globalStyles.grid.gutterWidth,
+    marginTop: 54,
     flexShrink: 0,
     display: "flex",
     flexDirection: "row",

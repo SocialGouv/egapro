@@ -4,6 +4,7 @@ import { Switch, Link, Route, RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../../../utils/globalStyles";
 import ActionLink from "../../../components/ActionLink";
+import { useLayoutType } from "../../../components/GridContext";
 
 function FAQHeaderBackButton({
   history
@@ -30,8 +31,15 @@ function FAQHeader({
 }: {
   location: RouteComponentProps["location"];
 }) {
+  const layoutType = useLayoutType();
   return (
-    <div css={styles.container}>
+    <div
+      css={[
+        styles.container,
+        layoutType === "tablet" && styles.containerTablet,
+        layoutType === "mobile" && styles.containerMobile
+      ]}
+    >
       <div css={styles.aroundTitle}>
         <Switch location={location}>
           <Route
@@ -41,7 +49,7 @@ function FAQHeader({
           />
           <Route
             exact
-            path="/part/:part/question/:indexQuestion"
+            path={["/part/:part/question/:indexQuestion", "/referent"]}
             render={({ history }) => <FAQHeaderBackButton history={history} />}
           />
         </Switch>
@@ -62,6 +70,15 @@ const styles = {
     borderBottom: "1px solid #EFECEF",
     marginRight: 29,
     marginLeft: 29
+  }),
+  containerTablet: css({
+    marginRight: 21,
+    marginLeft: 21
+  }),
+  containerMobile: css({
+    height: 44,
+    marginRight: globalStyles.grid.gutterWidth,
+    marginLeft: globalStyles.grid.gutterWidth
   }),
   title: css({
     fontFamily: "'Gabriela', serif",

@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 
 import { FormState } from "../globals.d";
@@ -38,7 +37,6 @@ function CustomNavLink({
           css={[
             styles.link,
             layoutType === "tablet" && styles.linkTablet,
-            ,
             match && styles.activeLink
           ]}
         >
@@ -82,13 +80,7 @@ function Menu({
   const layoutType = useLayoutType();
 
   return (
-    <div
-      css={[
-        styles.menu,
-        layoutType === "tablet" && styles.menuTablet,
-        layoutType === "desktop" && css({ width })
-      ]}
-    >
+    <div css={[layoutType === "desktop" && css({ width })]}>
       <Switch>
         <Route
           path="/simulateur/:code"
@@ -97,7 +89,9 @@ function Menu({
               params: { code }
             }
           }) => (
-            <Fragment>
+            <div
+              css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}
+            >
               <CustomNavLink
                 to={`/simulateur/${code}`}
                 title="vos informations"
@@ -142,7 +136,7 @@ function Menu({
                 to={`/simulateur/${code}/recapitulatif`}
                 title="récapitulatif"
               />
-            </Fragment>
+            </div>
           )}
         />
       </Switch>
@@ -155,13 +149,14 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start",
-    marginLeft: globalStyles.grid.gutterWidth
+    paddingLeft: globalStyles.grid.gutterWidth
   }),
   menuTablet: css({
     flexDirection: "row",
     alignItems: "stretch",
     height: 44,
-    borderBottom: "1px solid #EFECEF"
+    borderBottom: "1px solid #EFECEF",
+    paddingLeft: globalStyles.grid.gutterWidth
   }),
   link: css({
     paddingTop: 7,
