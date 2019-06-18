@@ -36,7 +36,8 @@ function FAQHeader({
     <div
       css={[
         styles.container,
-        layoutType === "tablet" && styles.containerTablet
+        layoutType === "tablet" && styles.containerTablet,
+        layoutType === "mobile" && styles.containerMobile
       ]}
     >
       <div css={styles.aroundTitle}>
@@ -73,6 +74,11 @@ const styles = {
   containerTablet: css({
     marginRight: 21,
     marginLeft: 21
+  }),
+  containerMobile: css({
+    height: 44,
+    marginRight: globalStyles.grid.gutterWidth,
+    marginLeft: globalStyles.grid.gutterWidth
   }),
   title: css({
     fontFamily: "'Gabriela', serif",

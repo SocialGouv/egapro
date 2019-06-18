@@ -11,6 +11,7 @@ import FAQFooter from "./components/FAQFooter";
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
 import FAQQuestion from "./FAQQuestion";
+import globalStyles from "../../utils/globalStyles";
 
 const FAQPaths: { [key: string]: string } = {
   effectifs: "/section/effectifs",
@@ -57,7 +58,8 @@ function FAQ() {
             <div
               css={[
                 styles.content,
-                layoutType === "tablet" && styles.contentTablet
+                layoutType === "tablet" && styles.contentTablet,
+                layoutType === "mobile" && styles.contentMobile
               ]}
               key={locationFAQ.pathname}
             >
@@ -131,6 +133,10 @@ const styles = {
   contentTablet: css({
     paddingRight: 21,
     paddingLeft: 21
+  }),
+  contentMobile: css({
+    paddingRight: globalStyles.grid.gutterWidth,
+    paddingLeft: globalStyles.grid.gutterWidth
   })
 };
 

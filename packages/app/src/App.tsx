@@ -56,6 +56,16 @@ interface AppLayout {
 
 function AppLayout({ state, dispatch }: AppLayout) {
   const layoutType = useLayoutType();
+
+  if (layoutType === "mobile") {
+    return (
+      <div css={styles.leftColumn}>
+        <Header />
+        <FAQ />
+      </div>
+    );
+  }
+
   return (
     <div css={styles.layout}>
       <div css={styles.leftColumn}>

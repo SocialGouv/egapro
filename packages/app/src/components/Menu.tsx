@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 
 import { FormState } from "../globals.d";
@@ -38,7 +37,6 @@ function CustomNavLink({
           css={[
             styles.link,
             layoutType === "tablet" && styles.linkTablet,
-            ,
             match && styles.activeLink
           ]}
         >
@@ -82,7 +80,7 @@ function Menu({
   const layoutType = useLayoutType();
 
   return (
-    <div css={[styles.container, layoutType === "desktop" && css({ width })]}>
+    <div css={[layoutType === "desktop" && css({ width })]}>
       <Switch>
         <Route
           path="/simulateur/:code"
@@ -147,19 +145,18 @@ function Menu({
 }
 
 const styles = {
-  container: css({
-    marginLeft: globalStyles.grid.gutterWidth
-  }),
   menu: css({
     display: "flex",
     flexDirection: "column",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
+    paddingLeft: globalStyles.grid.gutterWidth
   }),
   menuTablet: css({
     flexDirection: "row",
     alignItems: "stretch",
     height: 44,
-    borderBottom: "1px solid #EFECEF"
+    borderBottom: "1px solid #EFECEF",
+    paddingLeft: globalStyles.grid.gutterWidth
   }),
   link: css({
     paddingTop: 7,

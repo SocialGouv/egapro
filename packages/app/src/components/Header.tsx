@@ -24,19 +24,29 @@ function Header() {
           href="https://travail-emploi.gouv.fr/"
           target="_blank"
           rel="noopener noreferrer"
-          css={styles.containerLogo}
+          css={[
+            styles.containerLogo,
+            layoutType === "mobile" && styles.containerLogoMobile
+          ]}
         >
           <Logo />
         </a>
       </div>
-      <div css={styles.headerInner}>
+      <div
+        css={[
+          styles.headerInner,
+          layoutType === "mobile" && styles.headerInnerMobile
+        ]}
+      >
         <Link to="/" css={styles.title}>
           Egapro
         </Link>
-        <p css={styles.subtitle}>
-          L’outil de calcul de votre Index de l’égalité professionnelle Femmes
-          Hommes
-        </p>
+        {layoutType !== "mobile" && (
+          <p css={styles.subtitle}>
+            L’outil de calcul de votre Index de l’égalité professionnelle Femmes
+            Hommes
+          </p>
+        )}
       </div>
     </header>
   );
@@ -73,11 +83,17 @@ const styles = {
     textDecoration: "none",
     color: "currentColor"
   }),
+  containerLogoMobile: css({
+    marginRight: 0
+  }),
   headerInner: css({
     display: "flex",
     flexDirection: "row",
     flexGrow: 1,
     alignItems: "baseline"
+  }),
+  headerInnerMobile: css({
+    flexDirection: "column"
   }),
   title: css({
     fontFamily: "'Gabriela', serif",
