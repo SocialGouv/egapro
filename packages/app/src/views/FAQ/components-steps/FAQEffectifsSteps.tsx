@@ -17,7 +17,7 @@ function FAQEffectifsSteps() {
         Les indicateurs sont calculés à partir des données de la période de
         référence annuelle choisie par l’entreprise.{" "}
         <strong>
-          Cette période doit être de 12 mois consécutifs et doit précéder
+          Cette période doit être de 12 mois consécutifs et précéder
           l’année de publication.
         </strong>{" "}
         Elle doit donc nécessairement s’achever au plus tard le 31 décembre 2018
@@ -49,7 +49,7 @@ function FAQEffectifsSteps() {
           <li>• les expatriés</li>
           <li>• les salariés en pré-retraite</li>
           <li>
-            • les salariés absents plus de 6mois sur la période de référence
+            • les salariés absents plus de 6 mois sur la période de référence
             (arrêt maladie, congés sans solde, cdd &lt;6mois etc.).
           </li>
         </ul>
