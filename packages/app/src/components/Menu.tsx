@@ -80,7 +80,12 @@ function Menu({
   const layoutType = useLayoutType();
 
   return (
-    <div css={[layoutType === "desktop" && css({ width })]}>
+    <div
+      css={[
+        layoutType === "desktop" &&
+          css({ width, marginLeft: globalStyles.grid.gutterWidth })
+      ]}
+    >
       <Switch>
         <Route
           path="/simulateur/:code"
@@ -148,8 +153,7 @@ const styles = {
   menu: css({
     display: "flex",
     flexDirection: "column",
-    alignItems: "flex-start",
-    paddingLeft: globalStyles.grid.gutterWidth
+    alignItems: "flex-start"
   }),
   menuTablet: css({
     flexDirection: "row",

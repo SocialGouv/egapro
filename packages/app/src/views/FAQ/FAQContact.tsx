@@ -10,7 +10,7 @@ import globalStyles from "../../utils/globalStyles";
 function FAQContact() {
   return (
     <div>
-      <FAQTitle>List des référents égalité professionnelle</FAQTitle>
+      <FAQTitle>Liste des référents égalité professionnelle</FAQTitle>
 
       {contact.map(({ title, people }, i) => (
         <div key={i} css={styles.blocSection}>
