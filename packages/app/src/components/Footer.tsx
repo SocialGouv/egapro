@@ -44,7 +44,7 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          téléchargez le simulateur au format excel
+          Télécharger le simulateur au format Excel
         </a>
         <a
           href="https://travail-emploi.gouv.fr/"
@@ -52,7 +52,7 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          téléchargez la liste des référents
+          Télécharger la liste des référents égapro
         </a>
         <a
           href="https://solen1.enquetes.social.gouv.fr/cgi-5/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
@@ -60,24 +60,24 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          accèdez à SOLEN, l’outil de déclaration en ligne
+          Accéder à SOLEN pour la déclaration en ligne
         </a>
       </div>
 
       <div css={styles.footerInfo}>
         <em style={styles.info}>
-          L’outil Egapro a été développé par les équipes de l’incubateur des
+          L’outil Index Egapro a été développé par les équipes de l’incubateur des
           ministères sociaux
         </em>
         <span style={styles.info}>
-          Aidez-nous à améliorer cet outil
+          Pour nous aider à l'améliorer : 
           <a
             href="https://travail-emploi.gouv.fr/"
             target="_blank"
             rel="noopener noreferrer"
             css={styles.infoLink}
           >
-            donnez-nous votre avis
+            donnez-nous votre avis / 
           </a>
           <a
             href="https://github.com/SocialGouv/egapro"
