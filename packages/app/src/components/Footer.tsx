@@ -55,7 +55,7 @@ function Footer() {
           téléchargez la liste des référents
         </a>
         <a
-          href="https://solen1.enquetes.social.gouv.fr"
+          href="https://solen1.enquetes.social.gouv.fr/cgi-5/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
           target="_blank"
           rel="noopener noreferrer"
           css={styles.link}
