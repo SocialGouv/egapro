@@ -37,7 +37,9 @@ function HomeSimulateur(props: RouteComponentProps) {
         </span>
         <ActionLink onClick={onCopy}>copier le lien</ActionLink>
       </div>
-      <div css={styles.codeCopyVideo} />
+      <div css={styles.imageContainer}>
+        <div css={styles.image} />
+      </div>
       <div css={styles.action}>
         <ButtonSimulatorLink to="/effectifs" label="suivant" />
       </div>
@@ -56,14 +58,27 @@ const styles = {
     marginRight: 20,
     borderBottom: `solid ${globalStyles.colors.default} 1px`
   }),
-  codeCopyVideo: css({
-    height: 372,
-    border: `solid ${globalStyles.colors.default} 1px`
-  }),
   action: css({
     display: "flex",
     flexDirection: "row",
     marginTop: 32
+  }),
+
+  imageContainer: css({
+    height: 205 * 1.5,
+    position: "relative"
+  }),
+  image: css({
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    left: -(globalStyles.grid.gutterWidth * 1.5),
+    backgroundImage: `url(${
+      process.env.PUBLIC_URL
+    }/illustration-simulator.svg)`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "contain"
   })
 };
 

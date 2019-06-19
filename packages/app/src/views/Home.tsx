@@ -8,6 +8,7 @@ import { postIndicatorsDatas } from "../utils/api";
 import Page from "../components/Page";
 import ButtonAction from "../components/ButtonAction";
 import Button from "../components/Button";
+import globalStyles from "../utils/globalStyles";
 
 function Home({ history }: RouteComponentProps) {
   const [loading, setLoading] = useState(false);
@@ -41,7 +42,9 @@ function Home({ history }: RouteComponentProps) {
         </h2>
 
         <div css={styles.bloc}>
-          <div css={styles.blocImage} />
+          <div css={styles.blocImage}>
+            <div css={[styles.image, styles.illustrationData]} />
+          </div>
 
           <div css={styles.blocContent}>
             <span css={styles.blocContentStep}>Étape 1</span>
@@ -64,7 +67,9 @@ function Home({ history }: RouteComponentProps) {
         </div>
 
         <div css={styles.bloc}>
-          <div css={styles.blocImage} />
+          <div css={styles.blocImage}>
+            <div css={[styles.image, styles.illustrationSimulator]} />
+          </div>
 
           <div css={styles.blocContent}>
             <span css={styles.blocContentStep}>Étape 2</span>
@@ -84,7 +89,9 @@ function Home({ history }: RouteComponentProps) {
         </div>
 
         <div css={styles.bloc}>
-          <div css={styles.blocImage} />
+          <div css={styles.blocImage}>
+            <div css={[styles.image, styles.illustrationPublish]} />
+          </div>
 
           <div css={styles.blocContent}>
             <span css={styles.blocContentStep}>Étape 3</span>
@@ -140,8 +147,28 @@ const styles = {
     width: 300,
     height: 205,
     flexShrink: 0,
-    border: "solid black 1px"
+    position: "relative"
   }),
+
+  image: css({
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    left: -globalStyles.grid.gutterWidth,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "contain"
+  }),
+  illustrationData: css({
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-data.svg)`
+  }),
+  illustrationSimulator: css({
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-simulator.svg)`
+  }),
+  illustrationPublish: css({
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-publish.svg)`
+  }),
+
   blocContent: css({
     flexGrow: 1,
     display: "flex",
