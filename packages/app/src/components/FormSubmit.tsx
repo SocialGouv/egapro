@@ -19,7 +19,7 @@ function FormSubmit({
   return (
     <div css={styles.container}>
       <ButtonSubmit
-        label="valider"
+        label="Valider"
         outline={hasValidationErrors}
         error={submitFailed && hasValidationErrors}
       />
