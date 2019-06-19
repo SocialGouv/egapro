@@ -39,7 +39,7 @@ function Header() {
         ]}
       >
         <Link to="/" css={styles.title}>
-          Egapro
+          Index Egapro
         </Link>
         {layoutType !== "mobile" && (
           <p css={styles.subtitle}>

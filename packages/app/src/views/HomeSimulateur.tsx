@@ -28,7 +28,7 @@ function HomeSimulateur(props: RouteComponentProps) {
   };
   return (
     <Page
-      title="Bienvenue sur Egapro"
+      title="Bienvenue sur Index Egapro"
       tagline="Afin de pouvoir réaccéder à tout moment à votre calcul : pensez à copier le code ci-dessus et le conserver précieusement."
     >
       <div css={styles.codeCopyBloc}>
