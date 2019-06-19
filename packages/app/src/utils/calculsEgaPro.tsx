@@ -11,14 +11,14 @@ export const tauxEffectifValide = 40 / 100;
 //////////////////
 
 // EV
-const calculEffectifsValides = (
+export const calculEffectifsValides = (
   validiteGroupe: boolean,
   nombreSalariesFemmes: number,
   nombreSalariesHommes: number
 ): number => (validiteGroupe ? nombreSalariesFemmes + nombreSalariesHommes : 0);
 
 // EP
-const calculEcartPondere = (
+export const calculEcartPondere = (
   validiteGroupe: boolean,
   ecartPourcentage: number | undefined,
   effectifsValides: number,
