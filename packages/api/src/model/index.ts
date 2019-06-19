@@ -1,1 +1,1 @@
-export * from './indicators-data.model';
+export * from "./indicators-data.model";

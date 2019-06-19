@@ -1,17 +1,18 @@
 ---
-version: '3.2'
+version: "3.2"
 
 services:
   egapro-frontend:
-    build: 
-      context: ./packages/app/
+    build:
+      context: .
+      dockerfile: ./packages/app/Dockerfile
     env_file: .env
     depends_on:
-    - egapro-api
+      - egapro-api
     ports:
-    - 8080:9000
+      - 8080:9000
     links:
-    - egapro-api
+      - egapro-api
 
   egapro-api:
     build:
@@ -19,7 +20,7 @@ services:
       dockerfile: ./packages/api/Dockerfile
     env_file: .env
     ports:
-    - 4000:4000
+      - 4000:4000
 
   db:
     image: postgres
@@ -35,10 +36,10 @@ services:
   kinto-server:
     image: kinto/kinto-server
     links:
-    - db
-    - cache
+      - db
+      - cache
     ports:
-    - "8888:8888"
+      - "8888:8888"
     environment:
       KINTO_CACHE_BACKEND: kinto.core.cache.memcached
       KINTO_CACHE_HOSTS: cache:11211 cache:11212
@@ -52,13 +53,13 @@ services:
       context: ./packages/kinto/
     env_file: .env
     links:
-    - kinto-server
-    - db
-    - cache
+      - kinto-server
+      - db
+      - cache
     depends_on:
-    - db
-    - kinto-server
-    - cache
+      - db
+      - kinto-server
+      - cache
 
 volumes:
   egapro-pgdata:

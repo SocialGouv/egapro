@@ -29,7 +29,7 @@ function HomeSimulateur(props: RouteComponentProps) {
   return (
     <Page
       title="Bienvenue sur Egapro"
-      tagline="Voici votre lien-code d’accès : conservez le précieusement, il vous permettra d’accèder à tout moment à votre simulation"
+      tagline="Afin de pouvoir réaccéder à tout moment à votre calcul : pensez à copier le code ci-dessus et le conserver précieusement."
     >
       <div css={styles.codeCopyBloc}>
         <span ref={textEl} css={styles.codeCopyText} onClick={onCopy}>

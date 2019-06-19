@@ -20,7 +20,7 @@ function Home({ history }: RouteComponentProps) {
   };
   return (
     <Page
-      title="Bienvenue sur Egapro"
+      title="Bienvenue sur Index Egapro"
       tagline={[
         "L’index de l’égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
         "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",

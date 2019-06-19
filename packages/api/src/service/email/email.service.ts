@@ -3,47 +3,48 @@ import { configuration } from "../../configuration";
 import { logger } from "../../util";
 
 export interface EmailAddress {
-    email: string,
-    name: string
+  email: string;
+  name: string;
 }
 
 export interface Email {
-    to: EmailAddress[],
-    bcc: EmailAddress[],
-    cci: EmailAddress[],
-    subject: string,
-    bodyText: string
+  to: EmailAddress[];
+  bcc: EmailAddress[];
+  cci: EmailAddress[];
+  subject: string;
+  bodyText: string;
 }
 
 const transporter = createTransport({
-    host: configuration.mailHost,
-    port: configuration.mailPort,
-    secure: configuration.mailUseTLS, // true for 465, false for other ports
+  host: configuration.mailHost,
+  port: configuration.mailPort,
+  secure: configuration.mailUseTLS, // true for 465, false for other ports
+  // tslint:disable-next-line: object-literal-sort-keys
+  auth: {
+    user: configuration.mailUsername,
     // tslint:disable-next-line: object-literal-sort-keys
-    auth: {
-        user: configuration.mailUsername,
-        // tslint:disable-next-line: object-literal-sort-keys
-        pass: configuration.mailPassword
-    }
+    pass: configuration.mailPassword
+  }
 });
 
 export interface EmailService {
-    sendEmail: (email: Email) => Promise<SentMessageInfo>;
+  sendEmail: (email: Email) => Promise<SentMessageInfo>;
 }
-
 
 // https://github.com/nodemailer/nodemailer/blob/master/examples/sendmail.js
 export const emailService: EmailService = {
-    sendEmail: (email: Email) => {
-        logger.info(`[EmailService.sendEmail] subject ${email.subject}`);
-        const message = {
-            from: configuration.mailFrom,
-            to: email.to.map(r => `${r.name} <${r.email}>`).join(','),
-            // tslint:disable-next-line: object-literal-sort-keys
-            bcc: email.bcc.map(r => `${r.name} <${r.email}>`).join(','),
-            subject: email.subject,
-            text: email.bodyText,
-        };
-        return transporter.sendMail(message);
-    }
-}
+  sendEmail: (email: Email) => {
+    logger.info(`[EmailService.sendEmail] subject ${email.subject}`);
+    const message = {
+      from: configuration.mailFrom,
+      to: email.to.map((r: EmailAddress) => `${r.name} <${r.email}>`).join(","),
+      // tslint:disable-next-line: object-literal-sort-keys
+      bcc: email.bcc
+        .map((r: EmailAddress) => `${r.name} <${r.email}>`)
+        .join(","),
+      subject: email.subject,
+      text: email.bodyText
+    };
+    return transporter.sendMail(message);
+  }
+};

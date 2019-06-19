@@ -1,18 +1,16 @@
 {
-    "name": "kinto",
-    "version": "1.0.0",
-    "main": "index.js",
-    "author": "Incubateur des Ministères Sociaux <dsi-incubateur@sg.social.gouv.fr> (https://incubateur.social.gouv.fr)",
-    "license": "Apache-2.0",
-    "private": true,
-    "scripts": {
-        "db:start": "docker-compose up -d",
-        "db:stop": "docker-compose stop",
-        "db:init": "node src/index.js"
-    },
-    "dependencies": {
-        "btoa": "^1.2.1",
-        "dotenv": "^8.0.0",
-        "node-fetch": "^2.6.0"
-    }
+  "name": "kinto",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Incubateur des Ministères Sociaux <dsi-incubateur@sg.social.gouv.fr> (https://incubateur.social.gouv.fr)",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "start": "docker-compose up kinto-server init-kinto"
+  },
+  "dependencies": {
+    "btoa": "^1.2.1",
+    "dotenv": "^8.0.0",
+    "node-fetch": "^2.6.0"
+  }
 }

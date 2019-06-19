@@ -16,12 +16,12 @@ spec:
         env:
         - name: KINTO_BASE_URL
           value: "kinto${HASH_BRANCH_NAME}"
-        - name: KINTO_ADMIN_LOGIN
+        - name: KINTO_LOGIN
           valueFrom:
             secretKeyRef:
               name: egapro-secret
               key: KINTO_ADMIN_LOGIN
-        - name: KINTO_ADMIN_PASSWORD
+        - name: KINTO_PASSWORD
           valueFrom:
             secretKeyRef:
               name: egapro-secret

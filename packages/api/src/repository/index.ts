@@ -1,1 +1,1 @@
-export * from './indicators-data.repository'
+export * from "./indicators-data.repository";

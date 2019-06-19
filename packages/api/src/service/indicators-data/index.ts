@@ -1,1 +1,1 @@
-export * from './indicators-data.service';
+export * from "./indicators-data.service";
