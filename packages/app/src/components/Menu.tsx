@@ -104,19 +104,20 @@ function Menu({
               />
               <CustomNavLink
                 to={`/simulateur/${code}/effectifs`}
-                title="effectif"
+                title="Effectifs pris en compte"
+                label="pour le calcul"
                 valid={effectifFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur1`}
-                title="indicateur 1"
-                label="écart de rémunérations"
+                title="Indicateur 1"
+                label="Ecart de rémunération"
                 valid={indicateurUnFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur2`}
-                title="indicateur 2"
-                label="écart de taux d'augmentations"
+                title="Indicateur 2"
+                label="Ecart de taux d'augmentations"
                 valid={indicateurDeuxFormValidated}
               />
               <CustomNavLink
@@ -127,19 +128,19 @@ function Menu({
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur4`}
-                title="indicateur 4"
-                label="retour congé maternité"
+                title="Indicateur 4"
+                label="Retour congé maternité"
                 valid={indicateurQuatreFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur5`}
-                title="indicateur 5"
-                label="hautes rémunérations"
+                title="Indicateur 5"
+                label="Hautes rémunérations"
                 valid={indicateurCinqFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/recapitulatif`}
-                title="récapitulatif"
+                title="Récapitulatif"
               />
             </div>
           )}
