@@ -19,8 +19,8 @@ function Home({ history }: RouteComponentProps) {
   };
   return (
     <Page
-      title="Bienvenue sur Egapro"
-      tagline="L’index de l’égalité a été conçu pour faire progresser au sein des entreprises l’égalité entre les hommes et les femmes. Il permet de mesurer où en sont les entreprises sur le sujet, mettre en évidence leurs points de progression et mettre en œuvre les mesures correctives nécessaires. en savoir plus L’outil EgaPro permet aux entreprises de calculer leur index d’égalité professionnelle de façon simple, rapide et en profitant d’une aide en ligne sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées."
+      title="Bienvenue sur Index Egapro"
+      tagline="L’index de l’égalité a été conçu pour faire progresser au sein des entreprises l’égalité entre les femmes et les hommes. Il permet de mesurer où en sont les entreprises sur le sujet, mettre en évidence leurs points de progression et mettre en œuvre les mesures correctives nécessaires. en savoir plus L’outil EgaPro permet aux entreprises de calculer leur index d’égalité professionnelle de façon simple, rapide et en profitant d’une aide en ligne sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées."
     >
       <div css={styles.action}>
         <ButtonAction
