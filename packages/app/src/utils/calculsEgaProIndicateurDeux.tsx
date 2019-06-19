@@ -46,7 +46,7 @@ export const calculEcartTauxAugmentation = (
   tauxAugmentationHommes !== undefined &&
   tauxAugmentationFemmes >= 0 &&
   tauxAugmentationHommes >= 0
-    ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 3)
+    ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 6)
     : undefined;
 
 export interface effectifEtEcartAugmentGroup extends effectifGroup {
@@ -175,7 +175,7 @@ export const calculIndicateurEcartAugmentation = (
   totalEcartPondere: number | undefined
 ): number | undefined =>
   indicateurCalculable && totalEcartPondere !== undefined
-    ? roundDecimal(100 * totalEcartPondere, 3)
+    ? roundDecimal(100 * totalEcartPondere, 6)
     : undefined;
 
 export const calculIndicateurSexeSousRepresente = (

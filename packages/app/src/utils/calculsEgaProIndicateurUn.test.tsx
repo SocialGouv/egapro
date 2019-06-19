@@ -32,9 +32,9 @@ it("calculEcartRemunerationMoyenne", () => {
   expect(calculEcartRemunerationMoyenne(0, 0)).toEqual(undefined);
 
   expect(calculEcartRemunerationMoyenne(12000, 12000)).toEqual(0);
-  expect(calculEcartRemunerationMoyenne(12000, 19000)).toEqual(0.368);
-  expect(calculEcartRemunerationMoyenne(20000, 30000)).toEqual(0.333);
-  expect(calculEcartRemunerationMoyenne(28000, 21500)).toEqual(-0.302);
+  expect(calculEcartRemunerationMoyenne(12000, 19000)).toEqual(0.368421);
+  expect(calculEcartRemunerationMoyenne(20000, 30000)).toEqual(0.333333);
+  expect(calculEcartRemunerationMoyenne(28000, 21500)).toEqual(-0.302326);
   expect(calculEcartRemunerationMoyenne(25000, 50000)).toEqual(0.5);
 });
 

@@ -39,9 +39,9 @@ it("calculEcartPondere", () => {
   expect(calculEcartPondere(true, undefined, 20, 300)).toEqual(undefined);
   expect(calculEcartPondere(true, undefined, 23, 321)).toEqual(undefined);
 
-  expect(calculEcartPondere(true, 0.05, 10, 300)).toEqual(0.002);
-  expect(calculEcartPondere(true, 0.05, 20, 300)).toEqual(0.003);
-  expect(calculEcartPondere(true, 0.12, 23, 321)).toEqual(0.009);
+  expect(calculEcartPondere(true, 0.05, 10, 250)).toEqual(0.002);
+  expect(calculEcartPondere(true, 0.05, 20, 400)).toEqual(0.0025);
+  expect(calculEcartPondere(true, 0.12, 23, 321)).toEqual(0.008598);
 });
 
 it("calculTotalEcartPondere", () => {

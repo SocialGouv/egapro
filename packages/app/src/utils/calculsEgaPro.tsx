@@ -27,7 +27,7 @@ export const calculEcartPondere = (
   validiteGroupe && totalEffectifsValides > 0 && ecartPourcentage !== undefined
     ? roundDecimal(
         (ecartPourcentage * effectifsValides) / totalEffectifsValides,
-        3
+        6
       )
     : undefined;
 
@@ -79,7 +79,7 @@ export const calculTotalEcartPondere = (
             (acc, val) => (acc || 0) + (val !== undefined ? val : 0),
             undefined
           ) || 0,
-        3
+        6
       );
 
 //////////////////

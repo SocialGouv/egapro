@@ -76,7 +76,7 @@ export const calculEcartRemunerationMoyenne = (
     ? roundDecimal(
         (remunerationAnnuelleBrutHommes - remunerationAnnuelleBrutFemmes) /
           remunerationAnnuelleBrutHommes,
-        3
+        6
       )
     : undefined;
 
@@ -88,7 +88,7 @@ export const calculEcartApresApplicationSeuilPertinence = (
     ? roundDecimal(
         Math.sign(ecartRemunerationMoyenne) *
           Math.max(0, Math.abs(ecartRemunerationMoyenne) - seuilPertinence),
-        3
+        6
       )
     : undefined;
 
@@ -177,7 +177,7 @@ export const calculIndicateurEcartRemuneration = (
   totalEcartPondere: number | undefined
 ): number | undefined =>
   indicateurCalculable && totalEcartPondere !== undefined
-    ? roundDecimal(100 * totalEcartPondere, 3)
+    ? roundDecimal(100 * totalEcartPondere, 6)
     : undefined;
 
 export const calculIndicateurSexeSousRepresente = (
