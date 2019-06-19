@@ -44,7 +44,7 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          Télécharger le simulateur au format Excel
+          Téléchargez le simulateur au format Excel
         </a>
         <a
           href="https://travail-emploi.gouv.fr/"
@@ -52,7 +52,7 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          Télécharger la liste des référents égapro
+          Téléchargez la liste des référents égapro
         </a>
         <a
           href="https://solen1.enquetes.social.gouv.fr/cgi-5/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
@@ -60,7 +60,7 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          Accéder à SOLEN pour la déclaration en ligne
+          Accédez au formulaire de déclaration
         </a>
       </div>
 
