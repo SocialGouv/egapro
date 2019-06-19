@@ -552,7 +552,7 @@ export const faqSections: FAQSection = {
     parts: ["remuneration", "indicateur1"]
   },
   indicateur2: {
-    title: "indicateur 2 - écart d’augmentation",
+    title: "indicateur 2 - écart d’augmentations",
     parts: ["indicateur2", "indicateur2et3"]
   },
   indicateur3: {
