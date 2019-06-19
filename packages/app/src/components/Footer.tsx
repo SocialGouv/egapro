@@ -60,7 +60,7 @@ function Footer() {
           rel="noopener noreferrer"
           css={styles.link}
         >
-          accèdez à SOLEN, l’outil de déclaration en ligne
+          Accéder au formulaire de déclaration
         </a>
       </div>
 
