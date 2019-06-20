@@ -9,8 +9,8 @@ import {
 } from "../../globals.d";
 
 import {
-  calculTotalEffectifsEtTauxPromotion,
-  calculEcartTauxPromotion,
+  // calculTotalEffectifsEtTauxPromotion,
+  // calculEcartTauxPromotion,
   effectifEtEcartPromoGroup
 } from "../../utils/calculsEgaProIndicateurTrois";
 
@@ -26,8 +26,8 @@ import {
   parseFloatStateValue
 } from "../../utils/formHelpers";
 import {
-  displayNameCategorieSocioPro,
-  displayFractionPercent
+  displayNameCategorieSocioPro
+  // displayFractionPercent
 } from "../../utils/helpers";
 
 interface Props {
@@ -136,33 +136,33 @@ function IndicateurTroisForm({
   );
 
   // Only for Total with updated values
-  const ecartPromoParCategorieSocioProPourTotal = ecartPromoParCategorieSocioPro.map(
-    (groupAugment, index) => {
-      const infoField = infoFields[index];
-      const tauxPromotionFemmes = parseFloatFormValue(
-        values[infoField.tauxPromotionFemmesName]
-      );
-      const tauxPromotionHommes = parseFloatFormValue(
-        values[infoField.tauxPromotionHommesName]
-      );
-      const ecartTauxPromotion = calculEcartTauxPromotion(
-        tauxPromotionFemmes,
-        tauxPromotionHommes
-      );
-      return {
-        ...groupAugment,
-        tauxPromotionFemmes,
-        tauxPromotionHommes,
-        ecartTauxPromotion
-      };
-    }
-  );
-  const {
-    totalTauxPromotionFemmes,
-    totalTauxPromotionHommes
-  } = calculTotalEffectifsEtTauxPromotion(
-    ecartPromoParCategorieSocioProPourTotal
-  );
+  // const ecartPromoParCategorieSocioProPourTotal = ecartPromoParCategorieSocioPro.map(
+  //   (groupAugment, index) => {
+  //     const infoField = infoFields[index];
+  //     const tauxPromotionFemmes = parseFloatFormValue(
+  //       values[infoField.tauxPromotionFemmesName]
+  //     );
+  //     const tauxPromotionHommes = parseFloatFormValue(
+  //       values[infoField.tauxPromotionHommesName]
+  //     );
+  //     const ecartTauxPromotion = calculEcartTauxPromotion(
+  //       tauxPromotionFemmes,
+  //       tauxPromotionHommes
+  //     );
+  //     return {
+  //       ...groupAugment,
+  //       tauxPromotionFemmes,
+  //       tauxPromotionHommes,
+  //       ecartTauxPromotion
+  //     };
+  //   }
+  // );
+  // const {
+  //   totalTauxPromotionFemmes,
+  //   totalTauxPromotionHommes
+  // } = calculTotalEffectifsEtTauxPromotion(
+  //   ecartPromoParCategorieSocioProPourTotal
+  // );
 
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
@@ -177,10 +177,10 @@ function IndicateurTroisForm({
       {values.presencePromotion === "true" && (
         <BlocForm
           label="% de salariés promus"
-          footer={[
-            displayFractionPercent(totalTauxPromotionFemmes),
-            displayFractionPercent(totalTauxPromotionHommes)
-          ]}
+          // footer={[
+          //   displayFractionPercent(totalTauxPromotionFemmes),
+          //   displayFractionPercent(totalTauxPromotionHommes)
+          // ]}
         >
           {infoFields.map(
             ({

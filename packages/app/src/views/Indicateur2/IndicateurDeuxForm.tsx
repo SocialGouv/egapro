@@ -9,8 +9,8 @@ import {
 } from "../../globals.d";
 
 import {
-  calculTotalEffectifsEtTauxAugmentation,
-  calculEcartTauxAugmentation,
+  // calculTotalEffectifsEtTauxAugmentation,
+  // calculEcartTauxAugmentation,
   effectifEtEcartAugmentGroup
 } from "../../utils/calculsEgaProIndicateurDeux";
 
@@ -26,8 +26,8 @@ import {
   parseFloatStateValue
 } from "../../utils/formHelpers";
 import {
-  displayNameCategorieSocioPro,
-  displayFractionPercent
+  displayNameCategorieSocioPro
+  // displayFractionPercent
 } from "../../utils/helpers";
 
 interface Props {
@@ -140,33 +140,33 @@ function IndicateurDeuxForm({
   );
 
   // Only for Total with updated values
-  const ecartAugmentParCategorieSocioProPourTotal = ecartAugmentParCategorieSocioPro.map(
-    (groupAugment, index) => {
-      const infoField = infoFields[index];
-      const tauxAugmentationFemmes = parseFloatFormValue(
-        values[infoField.tauxAugmentationFemmesName]
-      );
-      const tauxAugmentationHommes = parseFloatFormValue(
-        values[infoField.tauxAugmentationHommesName]
-      );
-      const ecartTauxAugmentation = calculEcartTauxAugmentation(
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes
-      );
-      return {
-        ...groupAugment,
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes,
-        ecartTauxAugmentation
-      };
-    }
-  );
-  const {
-    totalTauxAugmentationFemmes,
-    totalTauxAugmentationHommes
-  } = calculTotalEffectifsEtTauxAugmentation(
-    ecartAugmentParCategorieSocioProPourTotal
-  );
+  // const ecartAugmentParCategorieSocioProPourTotal = ecartAugmentParCategorieSocioPro.map(
+  //   (groupAugment, index) => {
+  //     const infoField = infoFields[index];
+  //     const tauxAugmentationFemmes = parseFloatFormValue(
+  //       values[infoField.tauxAugmentationFemmesName]
+  //     );
+  //     const tauxAugmentationHommes = parseFloatFormValue(
+  //       values[infoField.tauxAugmentationHommesName]
+  //     );
+  //     const ecartTauxAugmentation = calculEcartTauxAugmentation(
+  //       tauxAugmentationFemmes,
+  //       tauxAugmentationHommes
+  //     );
+  //     return {
+  //       ...groupAugment,
+  //       tauxAugmentationFemmes,
+  //       tauxAugmentationHommes,
+  //       ecartTauxAugmentation
+  //     };
+  //   }
+  // );
+  // const {
+  //   totalTauxAugmentationFemmes,
+  //   totalTauxAugmentationHommes
+  // } = calculTotalEffectifsEtTauxAugmentation(
+  //   ecartAugmentParCategorieSocioProPourTotal
+  // );
 
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
@@ -181,10 +181,10 @@ function IndicateurDeuxForm({
       {values.presenceAugmentation === "true" && (
         <BlocForm
           label="% de salariés augmentés"
-          footer={[
-            displayFractionPercent(totalTauxAugmentationFemmes),
-            displayFractionPercent(totalTauxAugmentationHommes)
-          ]}
+          // footer={[
+          //   displayFractionPercent(totalTauxAugmentationFemmes),
+          //   displayFractionPercent(totalTauxAugmentationHommes)
+          // ]}
         >
           {infoFields.map(
             ({
