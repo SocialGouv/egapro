@@ -43,7 +43,7 @@ function Header() {
         </Link>
         {layoutType !== "mobile" && (
           <p css={styles.subtitle}>
-            L’outil de calcul de votre Index de l’égalité professionnelle Femmes
+            L’outil de calcul de votre index égalité professionnelle Femmes-
             Hommes
           </p>
         )}
