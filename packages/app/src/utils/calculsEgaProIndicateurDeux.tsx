@@ -262,7 +262,7 @@ export default function calculIndicateurDeux(state: AppState) {
   );
 
   // NOTE
-  const noteIndicateurDeux = calculNote(indicateurEcartAugmentation);
+  const noteIndicateurDeux = calculNote(indicateurEcartAugmentationAbsolute);
 
   return {
     effectifsIndicateurCalculable,
