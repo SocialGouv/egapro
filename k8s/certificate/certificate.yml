@@ -6,15 +6,15 @@ metadata:
 spec:
   secretName: egapro-crt-secret
   dnsNames:
-  - egapro.${ENVIRONMENT}.social.gouv.fr
-  - egapro-api.${ENVIRONMENT}.social.gouv.fr
+  - ${ENVIRONMENT}
+  - egapro-api.${ENVIRONMENT}
   acme:
     config:
     - http01:
         ingressClass: nginx
       domains:
-      - egapro.${ENVIRONMENT}.social.gouv.fr
-      - egapro-api.${ENVIRONMENT}.social.gouv.fr
+      - ${ENVIRONMENT}
+      - egapro-api.${ENVIRONMENT}
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
