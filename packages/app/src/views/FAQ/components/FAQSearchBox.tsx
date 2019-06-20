@@ -16,7 +16,7 @@ function FAQSearchBox({ searchTerm, setSearchTerm }: Props) {
       type="search"
       value={searchTerm}
       onChange={onChange}
-      placeholder="Recherche"
+      placeholder="Cherchez par mot clef"
     />
   );
 }
