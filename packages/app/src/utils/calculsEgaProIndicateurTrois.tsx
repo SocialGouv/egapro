@@ -216,7 +216,7 @@ export default function calculIndicateurTrois(state: AppState) {
   );
 
   // NOTE
-  const noteIndicateurTrois = calculNote(indicateurEcartPromotion);
+  const noteIndicateurTrois = calculNote(indicateurEcartPromotionAbsolute);
 
   return {
     effectifsIndicateurCalculable,

@@ -252,7 +252,7 @@ export default function calculIndicateurUn(state: AppState) {
   );
 
   // NOTE
-  const noteIndicateurUn = calculNote(indicateurEcartRemuneration);
+  const noteIndicateurUn = calculNote(indicateurEcartRemunerationAbsolute);
 
   return {
     effectifEtEcartRemuParTranche,
