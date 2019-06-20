@@ -23,7 +23,7 @@ const suffixPercent = "%";
 
 const percentNumberMask = createNumberMask({
   prefix: "",
-  thousandsSeparatorSymbol: " ",
+  includeThousandsSeparator: false,
   suffix: suffixPercent,
   allowDecimal: true
 });
