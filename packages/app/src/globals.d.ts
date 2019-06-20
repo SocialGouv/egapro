@@ -218,7 +218,9 @@ export type FAQContactPerson = {
   links: Array<FAQContactLink>;
 };
 
-export type FAQContact = Array<{
+export type FAQContactBloc = {
   title: string;
   people: Array<FAQContactPerson>;
-}>;
+};
+
+export type FAQContact = Array<FAQContactBloc>;
