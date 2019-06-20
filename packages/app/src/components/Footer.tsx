@@ -39,20 +39,12 @@ function Footer() {
 
       <div css={styles.footerLinks}>
         <a
-          href="https://travail-emploi.gouv.fr/"
+          href="https://travail-emploi.gouv.fr/actualites/l-actualite-du-ministere/article/index-de-l-egalite-femmes-hommes-comment-le-calculer"
           target="_blank"
           rel="noopener noreferrer"
           css={styles.link}
         >
-          téléchargez le simulateur au format Excel
-        </a>
-        <a
-          href="https://travail-emploi.gouv.fr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          css={styles.link}
-        >
-          téléchargez la liste des référents égapro
+          retrouvez le simulateur au format Excel
         </a>
         <a
           href="https://solen1.enquetes.social.gouv.fr/cgi-5/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
@@ -141,12 +133,10 @@ const styles = {
   },
 
   footerInfo: {
-    alignSelf: "flex-end",
     flex: 1,
     display: "flex",
     flexDirection: "column" as "column",
     textAlign: "right" as "right",
-    marginBottom: 6,
     marginRight: globalStyles.grid.gutterWidth
   },
   info: {
