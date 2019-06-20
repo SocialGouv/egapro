@@ -27,9 +27,8 @@ function FAQIndicateur3Steps() {
       </FAQStep>
 
       <FAQStep icon={<IconLamp />}>
-        Si le total des effectifs pouvant être pris en compte est inférieur à
-        40% des effectifs totaux, l’indicateur n’est pas calculable et
-        l'index ne sont pas calculables.
+        Si le total des effectifs retenus est inférieur à
+        40% des effectifs pris en compte pour le calcul des indicateurs, l’indicateur n’est pas calculable.
       </FAQStep>
     </Fragment>
   );
