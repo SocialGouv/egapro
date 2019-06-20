@@ -9,7 +9,7 @@ function Logo() {
         src={process.env.PUBLIC_URL + "/marianne.png"}
         alt="ministère du travail"
       />
-      <span css={styles.text}>ministère du travail</span>
+      <span css={styles.text}>Ministère du Travail</span>
     </div>
   );
 }
