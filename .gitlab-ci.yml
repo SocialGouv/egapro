@@ -12,7 +12,7 @@ variables:
   DOCKER_VERSION: "18.06"
   IMAGE_INFRA_BASE_NAME: "infra/images-docker"
   DEV_ENVIRONMENT_NAME: "dev.factory"
-  PROD_ENVIRONMENT_NAME: "incubateur"
+  PROD_ENVIRONMENT_NAME: "index-egapro.travail.gouv.fr"
   APP_PORT: 9000
   API_PORT: 4000
   KINTO_PORT: 8888
@@ -59,7 +59,7 @@ Get Github Id (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+  - change_prod_url
 
 
 ###########################################
@@ -185,7 +185,7 @@ Deploy @egapro/app (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+  - change_prod_url
 
 Deploy @egapro/api (prod):
   <<: *deploy_stage
@@ -196,7 +196,7 @@ Deploy @egapro/api (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+  - change_prod_url
 
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
@@ -207,7 +207,7 @@ Deploy @egapro/memcached (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+  - change_prod_url
 
 Deploy @egapro/kinto (pro):
   <<: *deploy_stage
@@ -219,7 +219,7 @@ Deploy @egapro/kinto (pro):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+  - change_prod_url
 
 
 ###########################################
@@ -257,7 +257,7 @@ Send deployment url to Github (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+  - change_prod_url
 
 
 ###########################################
