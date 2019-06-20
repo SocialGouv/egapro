@@ -7,7 +7,7 @@ function Logo() {
       <img
         css={styles.image}
         src={process.env.PUBLIC_URL + "/marianne.png"}
-        alt="ministère du travail"
+        alt="Ministère du Travail"
       />
       <span css={styles.text}>ministère du travail</span>
     </div>
