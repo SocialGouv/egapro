@@ -104,7 +104,8 @@ function Menu({
               />
               <CustomNavLink
                 to={`/simulateur/${code}/effectifs`}
-                title="effectif"
+                title="effectifs"
+                label="pris en compte"
                 valid={effectifFormValidated}
               />
               <CustomNavLink
