@@ -28,8 +28,8 @@ it("calculValiditeGroupe", () => {
 it("calculEcartTauxAugmentation", () => {
   expect(calculEcartTauxAugmentation(-1, -2)).toEqual(undefined);
   expect(calculEcartTauxAugmentation(4, -2)).toEqual(undefined);
-  expect(calculEcartTauxAugmentation(0, 0)).toEqual(undefined);
 
+  expect(calculEcartTauxAugmentation(0, 0)).toEqual(0);
   expect(calculEcartTauxAugmentation(0.12, 0.12)).toEqual(0);
   expect(calculEcartTauxAugmentation(0.12, 0.19)).toEqual(0.07);
   expect(calculEcartTauxAugmentation(0.2, 0.3)).toEqual(0.1);
@@ -38,20 +38,22 @@ it("calculEcartTauxAugmentation", () => {
 });
 
 it("calculIndicateurCalculable", () => {
-  expect(calculIndicateurCalculable(100, 39, 0.12, 0.23)).toEqual(false);
-  expect(calculIndicateurCalculable(100, 39, 0, 0.23)).toEqual(false);
-  expect(calculIndicateurCalculable(100, 40, 0, 0.23)).toEqual(true);
-  expect(calculIndicateurCalculable(100, 40, 0.12, 0.23)).toEqual(true);
+  expect(calculIndicateurCalculable(false, 100, 40, 0, 0.23)).toEqual(false);
 
-  expect(calculIndicateurCalculable(500, 199, 0.12, 0.23)).toEqual(false);
-  expect(calculIndicateurCalculable(500, 199, 0.12, 0)).toEqual(false);
-  expect(calculIndicateurCalculable(500, 400, 0.12, 0)).toEqual(true);
-  expect(calculIndicateurCalculable(1000, 400, 0.12, 0.23)).toEqual(true);
+  expect(calculIndicateurCalculable(true, 100, 39, 0.12, 0.23)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 100, 39, 0, 0.23)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 100, 40, 0, 0.23)).toEqual(true);
+  expect(calculIndicateurCalculable(true, 100, 40, 0.12, 0.23)).toEqual(true);
 
-  expect(calculIndicateurCalculable(600, 200, 0.12, 0.23)).toEqual(false);
-  expect(calculIndicateurCalculable(600, 200, 0, 0)).toEqual(false);
-  expect(calculIndicateurCalculable(700, 350, 0, 0)).toEqual(false);
-  expect(calculIndicateurCalculable(700, 350, 0.12, 0.23)).toEqual(true);
+  expect(calculIndicateurCalculable(true, 500, 199, 0.12, 0.23)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 500, 199, 0.12, 0)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 500, 400, 0.12, 0)).toEqual(true);
+  expect(calculIndicateurCalculable(true, 1000, 400, 0.12, 0.23)).toEqual(true);
+
+  expect(calculIndicateurCalculable(true, 600, 200, 0.12, 0.23)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 600, 200, 0, 0)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 700, 350, 0, 0)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 700, 350, 0.12, 0.23)).toEqual(true);
 });
 
 it("calculIndicateurEcartAugmentation", () => {
