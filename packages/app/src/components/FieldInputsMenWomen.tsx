@@ -131,7 +131,7 @@ function FieldInputsMenWomen({
       )}
       {error && calculable && (
         <div css={styles.error}>
-          ce champs n’est pas valide, renseignez une valeur numérique
+          ce champ n’est pas valide, renseignez une valeur numérique
         </div>
       )}
     </div>
