@@ -30,7 +30,7 @@ function Home({ history }: RouteComponentProps) {
       <div css={styles.action}>
         <ButtonAction
           onClick={onClick}
-          label="Commencer la simulation"
+          label="commencer la simulation"
           disabled={loading}
           loading={loading}
         />
@@ -75,7 +75,7 @@ function Home({ history }: RouteComponentProps) {
 
             <ButtonAction
               onClick={onClick}
-              label="Commencer le calcul"
+              label="commencer le calcul"
               disabled={loading}
               loading={loading}
             />
@@ -104,7 +104,7 @@ function Home({ history }: RouteComponentProps) {
               rel="noopener noreferrer"
               css={styles.button}
             >
-              <Button label="Accèder à la déclaration" />
+              <Button label="accèder à la déclaration" />
             </a>
           </div>
         </div>
