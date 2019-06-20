@@ -111,7 +111,7 @@ function Home({ history }: RouteComponentProps) {
               rel="noopener noreferrer"
               css={styles.button}
             >
-              <Button label="accèder à la déclaration" />
+              <Button label="accéder à la déclaration" />
             </a>
           </div>
         </div>
