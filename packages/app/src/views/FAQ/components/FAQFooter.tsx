@@ -7,10 +7,10 @@ function FAQFooter() {
   return (
     <div css={styles.container}>
       <span css={styles.text}>
-        Vous n’avez pas trouveé l’aide que vous cherchiez ?<br />
+        Vous n’avez pas trouvé l’aide que vous cherchiez ?<br />
         <TextLink
           to={{ state: { faq: "/contact" } }}
-          label="Contacter votre référent EgaPro"
+          label="Contactez votre référent égapro"
         />
       </span>
     </div>
