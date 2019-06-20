@@ -72,15 +72,15 @@ function FieldInput({
       {error &&
         (minMaxError ? (
           <div css={styles.error}>
-            ce champs doit contenir une valeur entre 0 et 10
+            ce champ doit contenir une valeur entre 0 et 10
           </div>
         ) : previousFieldError ? (
           <div css={styles.error}>
-            ce champs ne peut être supérieur au précédent
+            ce champ ne peut être supérieur au précédent
           </div>
         ) : (
           <div css={styles.error}>
-            ce champs n’est pas valide, renseignez une valeur numérique
+            ce champ n’est pas valide, renseignez une valeur numérique
           </div>
         ))}
     </div>
