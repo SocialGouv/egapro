@@ -9,8 +9,8 @@ function FAQIndicateur1Steps() {
   return (
     <Fragment>
       <FAQStep icon={<IconText>ETP</IconText>}>
-        La rémunériation doit être reconstituée en{" "}
-        <strong>équivalent temps pleins</strong> sur toute la durée de la
+        La rémunération doit être reconstituée en{" "}
+        <strong>équivalent temps plein</strong> sur toute la durée de la
         période de référence.
       </FAQStep>
 
@@ -54,7 +54,7 @@ function FAQIndicateur1Steps() {
           <li>• les indemnités de licenciement</li>
           <li>• les indemnités de départ en retraite</li>
           <li>• les primes d’ancienneté</li>
-          <li>• les primes d’interéssement et de participation.</li>
+          <li>• les primes d’intéressement et de participation.</li>
         </ul>
       </FAQStep>
 
