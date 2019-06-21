@@ -31,7 +31,7 @@ function Home({ history }: RouteComponentProps) {
       <div css={styles.action}>
         <ButtonAction
           onClick={onClick}
-          label="commencer la simulation"
+          label="commencer le calcul"
           disabled={loading}
           loading={loading}
         />
