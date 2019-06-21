@@ -352,7 +352,9 @@ const styles = {
     }
   }),
   view: css({
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: "auto",
     display: "flex",
     flexDirection: "column"
   }),
