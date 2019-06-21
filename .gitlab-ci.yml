@@ -51,7 +51,7 @@ Get Github Id (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - change_prod_url
 
 Get Github Id (prod):
   <<: *get_github_id_stage
@@ -127,7 +127,7 @@ Deploy @egapro/app (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - change_prod_url
 
 Deploy @egapro/api (dev):
   <<: *deploy_stage
@@ -138,7 +138,7 @@ Deploy @egapro/api (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - change_prod_url
 
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
@@ -149,7 +149,7 @@ Deploy @egapro/postgres (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - change_prod_url
 
 Deploy @egapro/memcached (dev):
   <<: *deploy_stage
@@ -160,7 +160,7 @@ Deploy @egapro/memcached (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - change_prod_url
 
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
@@ -172,7 +172,7 @@ Deploy @egapro/kinto (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - change_prod_url
 
 # Prod Environment
 
@@ -247,13 +247,13 @@ Send deployment url to Github (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+  - change_prod_url
 
 
 Send deployment url to Github (prod):
   <<: *send_url_to_github_stage
   before_script:
-  - export URL=http://egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
+  - export URL=http://egapro.${CI_ENVIRONMENT_NAME}/
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
@@ -276,4 +276,4 @@ Delete useless k8s objects:
   environment:
     name: $DEV_ENVIRONMENT_NAME
   only:
-  - master
+  -change_prod_urlr
