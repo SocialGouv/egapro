@@ -17,7 +17,7 @@ function FAQIndicateur2Steps() {
       </FAQStep>
 
       <FAQStep icon={<IconGrow valid={false} />}>
-        La notion d’augmentation individuelle pour le calcul de cet index exclue
+        La notion d’augmentation individuelle pour le calcul de cet indicateur exclut
         les augmentations de salaires liées à une promotion.
       </FAQStep>
 
@@ -32,7 +32,7 @@ function FAQIndicateur2Steps() {
       </FAQStep>
 
       <FAQStep icon={<IconLamp />}>
-        Si le total des effectifs retenus est inférieur à 40% des effectifs totaux l'indicateur et l'index ne sont pas calculables.
+        Si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul des indicateurs, l'indicateur n'est pas calculable.
       </FAQStep>
     </Fragment>
   );

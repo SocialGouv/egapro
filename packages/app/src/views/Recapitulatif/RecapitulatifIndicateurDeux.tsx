@@ -38,7 +38,7 @@ function RecapitulatifIndicateurDeux({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 2, écart de taux d’augmentation entre les hommes et les femmes"
+          title="Indicateur 2, écart de taux d’augmentations entre les hommes et les femmes"
           text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
         />
       </div>
