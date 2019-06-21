@@ -5,6 +5,8 @@ import {
   GroupeIndicateurTrois
 } from "../globals.d";
 
+import { roundDecimal } from "./helpers";
+
 import {
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
@@ -19,9 +21,10 @@ import {
   calculEcartTauxAugmentation,
   calculIndicateurCalculable,
   calculIndicateurEcartAugmentation,
-  calculIndicateurSexeSousRepresente,
+  calculIndicateurSexeSurRepresente,
   calculIndicateurEcartAugmentationAbsolute
 } from "../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurUn from "./calculsEgaProIndicateurUn";
 
 const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0];
 
@@ -150,16 +153,29 @@ export const calculIndicateurEcartPromotionAbsolute = calculIndicateurEcartAugme
 
 // NOTE
 export const calculNote = (
-  indicateurEcartPromotion: number | undefined
-): number | undefined =>
-  indicateurEcartPromotion !== undefined
+  indicateurEcartPromotion: number | undefined,
+  noteIndicateurUn: number | undefined,
+  indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
+  indicateurDeuxSexeSurRepresente: "hommes" | "femmes" | undefined
+): number | undefined => {
+  if (
+    noteIndicateurUn &&
+    noteIndicateurUn < 40 &&
+    indicateurUnSexeSurRepresente &&
+    indicateurDeuxSexeSurRepresente &&
+    indicateurUnSexeSurRepresente !== indicateurDeuxSexeSurRepresente
+  ) {
+    return baremEcartPromotion[0];
+  }
+  return indicateurEcartPromotion !== undefined
     ? baremEcartPromotion[
         Math.min(
           baremEcartPromotion.length - 1,
-          Math.ceil(Math.max(0, indicateurEcartPromotion))
+          Math.ceil(Math.max(0, roundDecimal(indicateurEcartPromotion, 1)))
         )
       ]
     : undefined;
+};
 
 /////////
 // ALL //
@@ -211,19 +227,30 @@ export default function calculIndicateurTrois(state: AppState) {
     indicateurEcartPromotion
   );
 
-  const indicateurSexeSurRepresente = calculIndicateurSexeSousRepresente(
+  const indicateurTroisSexeSurRepresente = calculIndicateurSexeSurRepresente(
     indicateurEcartPromotion
   );
 
+  // Mesures correction indicateur 1
+  const {
+    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
+    noteIndicateurUn
+  } = calculIndicateurUn(state);
+
   // NOTE
-  const noteIndicateurTrois = calculNote(indicateurEcartPromotionAbsolute);
+  const noteIndicateurTrois = calculNote(
+    indicateurEcartPromotionAbsolute,
+    noteIndicateurUn,
+    indicateurUnSexeSurRepresente,
+    indicateurTroisSexeSurRepresente
+  );
 
   return {
     effectifsIndicateurCalculable,
     effectifEtEcartPromoParGroupe,
     indicateurCalculable,
     indicateurEcartPromotion: indicateurEcartPromotionAbsolute,
-    indicateurSexeSurRepresente,
+    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteIndicateurTrois
   };
 }

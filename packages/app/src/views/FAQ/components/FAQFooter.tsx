@@ -6,13 +6,18 @@ import TextLink from "../../../components/TextLink";
 function FAQFooter() {
   return (
     <div css={styles.container}>
-      <span css={styles.text}>
-        Vous n’avez pas trouvé l’aide que vous cherchiez ?<br />
-        <TextLink
-          to={{ state: { faq: "/contact" } }}
-          label="Contactez votre référent égapro"
-        />
-      </span>
+      <div>
+        <span css={styles.text}>
+          Vous n’avez pas trouvé l’aide que vous cherchiez ?
+        </span>
+        <br />
+        <span css={styles.text}>
+          <TextLink
+            to={{ state: { faq: "/contact" } }}
+            label="Contactez votre référent égapro"
+          />
+        </span>
+      </div>
     </div>
   );
 }

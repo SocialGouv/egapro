@@ -23,9 +23,13 @@ function HomeSimulateur(props: RouteComponentProps) {
         selection.removeAllRanges();
         selection.addRange(range);
       }
-    }
 
-    navigator.clipboard.writeText(link);
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(link);
+      } else {
+        document.execCommand("copy");
+      }
+    }
   };
   return (
     <Page title="Bienvenue sur Index Egapro">
@@ -70,7 +74,10 @@ const styles = {
     background: "white",
     border: `solid ${globalStyles.colors.default} 1px`
   }),
-  codeCopyText: css({}),
+  codeCopyText: css({
+    fontSize: 14,
+    lineHeight: "17px"
+  }),
 
   tagline: css({
     marginTop: 36,

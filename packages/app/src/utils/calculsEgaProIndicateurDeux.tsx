@@ -15,6 +15,7 @@ import {
   effectifGroup,
   calculEffectifsIndicateurCalculable
 } from "./calculsEgaPro";
+import calculIndicateurUn from "./calculsEgaProIndicateurUn";
 
 const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0];
 
@@ -178,7 +179,7 @@ export const calculIndicateurEcartAugmentation = (
     ? roundDecimal(100 * totalEcartPondere, 6)
     : undefined;
 
-export const calculIndicateurSexeSousRepresente = (
+export const calculIndicateurSexeSurRepresente = (
   indicateurEcartAugmentation: number | undefined
 ): "hommes" | "femmes" | undefined =>
   indicateurEcartAugmentation !== undefined
@@ -196,16 +197,29 @@ export const calculIndicateurEcartAugmentationAbsolute = (
 
 // NOTE
 export const calculNote = (
-  indicateurEcartAugmentation: number | undefined
-): number | undefined =>
-  indicateurEcartAugmentation !== undefined
+  indicateurEcartAugmentation: number | undefined,
+  noteIndicateurUn: number | undefined,
+  indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
+  indicateurDeuxSexeSurRepresente: "hommes" | "femmes" | undefined
+): number | undefined => {
+  if (
+    noteIndicateurUn &&
+    noteIndicateurUn < 40 &&
+    indicateurUnSexeSurRepresente &&
+    indicateurDeuxSexeSurRepresente &&
+    indicateurUnSexeSurRepresente !== indicateurDeuxSexeSurRepresente
+  ) {
+    return baremEcartAugmentation[0];
+  }
+  return indicateurEcartAugmentation !== undefined
     ? baremEcartAugmentation[
         Math.min(
           baremEcartAugmentation.length - 1,
-          Math.ceil(Math.max(0, indicateurEcartAugmentation))
+          Math.ceil(Math.max(0, roundDecimal(indicateurEcartAugmentation, 1)))
         )
       ]
     : undefined;
+};
 
 /////////
 // ALL //
@@ -257,19 +271,30 @@ export default function calculIndicateurDeux(state: AppState) {
     indicateurEcartAugmentation
   );
 
-  const indicateurSexeSurRepresente = calculIndicateurSexeSousRepresente(
+  const indicateurDeuxSexeSurRepresente = calculIndicateurSexeSurRepresente(
     indicateurEcartAugmentation
   );
 
+  // Mesures correction indicateur 1
+  const {
+    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
+    noteIndicateurUn
+  } = calculIndicateurUn(state);
+
   // NOTE
-  const noteIndicateurDeux = calculNote(indicateurEcartAugmentationAbsolute);
+  const noteIndicateurDeux = calculNote(
+    indicateurEcartAugmentationAbsolute,
+    noteIndicateurUn,
+    indicateurUnSexeSurRepresente,
+    indicateurDeuxSexeSurRepresente
+  );
 
   return {
     effectifsIndicateurCalculable,
     effectifEtEcartAugmentParGroupe,
     indicateurCalculable,
     indicateurEcartAugmentation: indicateurEcartAugmentationAbsolute,
-    indicateurSexeSurRepresente,
+    indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteIndicateurDeux
   };
 }
