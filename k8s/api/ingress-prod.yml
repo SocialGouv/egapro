@@ -8,7 +8,7 @@ metadata:
     branch: egapro
 spec:
   rules:
-  - host: egapro-api.${ENVIRONMENT}.social.gouv.fr
+  - host: egapro-api.${ENVIRONMENT}
     http:
       paths:
       - path: /

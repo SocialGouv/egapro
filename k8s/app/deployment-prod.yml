@@ -35,4 +35,4 @@ spec:
             periodSeconds: 5
           env:
             - name: API_URL
-              value: "https://egapro-api.${ENVIRONMENT}.social.gouv.fr"
+              value: "https://egapro-api.${ENVIRONMENT}"

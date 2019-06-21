@@ -12,7 +12,7 @@ variables:
   DOCKER_VERSION: "18.06"
   IMAGE_INFRA_BASE_NAME: "infra/images-docker"
   DEV_ENVIRONMENT_NAME: "dev.factory"
-  PROD_ENVIRONMENT_NAME: "incubateur"
+  PROD_ENVIRONMENT_NAME: "index-egapro.travail.gouv.fr"
   APP_PORT: 9000
   API_PORT: 4000
   KINTO_PORT: 8888
@@ -253,7 +253,7 @@ Send deployment url to Github (dev):
 Send deployment url to Github (prod):
   <<: *send_url_to_github_stage
   before_script:
-  - export URL=http://egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
+  - export URL=http://egapro.${CI_ENVIRONMENT_NAME}/
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
