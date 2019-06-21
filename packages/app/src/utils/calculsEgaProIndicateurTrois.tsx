@@ -5,6 +5,8 @@ import {
   GroupeIndicateurTrois
 } from "../globals.d";
 
+import { roundDecimal } from "./helpers";
+
 import {
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
@@ -156,7 +158,7 @@ export const calculNote = (
     ? baremEcartPromotion[
         Math.min(
           baremEcartPromotion.length - 1,
-          Math.ceil(Math.max(0, indicateurEcartPromotion))
+          Math.ceil(Math.max(0, roundDecimal(indicateurEcartPromotion, 1)))
         )
       ]
     : undefined;
