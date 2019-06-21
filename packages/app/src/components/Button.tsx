@@ -46,6 +46,7 @@ const styles = {
     padding: "0 10px",
     backgroundColor: globalStyles.colors.primary,
     color: "#FFF",
+    WebkitTextFillColor: "#FFF",
     border: `solid ${globalStyles.colors.primary} 1px`,
     borderRadius: 5,
     cursor: "pointer",
@@ -53,10 +54,12 @@ const styles = {
   }),
   buttonOutline: css({
     color: globalStyles.colors.primary,
+    WebkitTextFillColor: globalStyles.colors.primary,
     backgroundColor: "#FFF"
   }),
   buttonError: css({
     color: globalStyles.colors.error,
+    WebkitTextFillColor: globalStyles.colors.error,
     borderColor: globalStyles.colors.error,
     backgroundColor: "#FFF"
   }),
