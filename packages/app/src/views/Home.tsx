@@ -53,15 +53,13 @@ function Home({ history }: RouteComponentProps) {
             </span>
             <p css={styles.blocContentBody}>
               Afin de procéder à la simulation, les entreprises doivent extraire
-              des données relatives à leurs salariés. Grâce à l’outil Index Egapro,
-              une aide est disponible pour chacun des indicateurs . Si
+              des données relatives à leurs salariés. Grâce à l’outil Index
+              Egapro, une aide est disponible pour chacun des indicateurs . Si
               l’entreprise décide de ne pas utiliser le simulateur, elle peut
               tout de même consulter l'aide et la FAQ mise à disposition.
             </p>
 
-            <span css={styles.blocContentInfo}>
-              Consultez l'aide ici ! →
-            </span>
+            <span css={styles.blocContentInfo}>Consultez l'aide ici ! →</span>
           </div>
         </div>
 
@@ -74,8 +72,8 @@ function Home({ history }: RouteComponentProps) {
             <span css={styles.blocContentStep}>Étape 2</span>
             <span css={styles.blocContentTitle}>Calcul de l'index</span>
             <p css={styles.blocContentBody}>
-              L’entreprise saisit les données et l’outil Index Egapro
-              calcule automatiquement les indicateurs et la note finale.
+              L’entreprise saisit les données et l’outil Index Egapro calcule
+              automatiquement les indicateurs et la note finale.
             </p>
 
             <ButtonAction
@@ -98,11 +96,12 @@ function Home({ history }: RouteComponentProps) {
               Déclaration et publication de l’index
             </span>
             <p css={styles.blocContentBody}>
-              Enfin, l’entreprise doit déclarer ses résultats, selon le délai imparti, dans l’outil SOLEN. Afin de faciliter la déclaration, l'outil Index Egapro
-              affiche à la fin du calcul une page avec toutes les informations
-              à déclarer. L’entreprise peut également
-              télécharger son récapitulatif pour le publier sur son site internet
-              ou l’envoyer au CSE.
+              Enfin, l’entreprise doit déclarer ses résultats, selon le délai
+              imparti, dans l’outil SOLEN. Afin de faciliter la déclaration,
+              l'outil Index Egapro affiche à la fin du calcul une page avec
+              toutes les informations à déclarer. L’entreprise peut également
+              télécharger son récapitulatif pour le publier sur son site
+              internet ou l’envoyer au CSE.
             </p>
 
             <a
@@ -191,7 +190,8 @@ const styles = {
   blocContentBody: css({
     fontSize: 14,
     lineHeight: "17px",
-    marginBottom: "auto"
+    marginBottom: "auto",
+    paddingBottom: 10
   }),
 
   blocContentInfo: css({
