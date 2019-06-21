@@ -70,7 +70,10 @@ const styles = {
     background: "white",
     border: `solid ${globalStyles.colors.default} 1px`
   }),
-  codeCopyText: css({}),
+  codeCopyText: css({
+    fontSize: 14,
+    lineHeight: "17px"
+  }),
 
   tagline: css({
     marginTop: 36,
