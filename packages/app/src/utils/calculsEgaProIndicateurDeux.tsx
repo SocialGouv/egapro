@@ -202,7 +202,7 @@ export const calculNote = (
     ? baremEcartAugmentation[
         Math.min(
           baremEcartAugmentation.length - 1,
-          Math.ceil(Math.max(0, indicateurEcartAugmentation))
+          Math.ceil(Math.max(0, roundDecimal(indicateurEcartAugmentation, 1)))
         )
       ]
     : undefined;

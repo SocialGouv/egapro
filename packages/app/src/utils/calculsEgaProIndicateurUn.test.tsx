@@ -91,4 +91,12 @@ it("calculNote", () => {
   expect(calculNote(8)).toEqual(31);
   expect(calculNote(13.2)).toEqual(19);
   expect(calculNote(50.5)).toEqual(0);
+
+  expect(calculNote(2.1)).toEqual(37);
+  expect(calculNote(2.09)).toEqual(37);
+  expect(calculNote(2.06)).toEqual(37);
+  expect(calculNote(2.05)).toEqual(37); // round to 2.1
+  expect(calculNote(2.04)).toEqual(38); // round to 2.0
+  expect(calculNote(2.01)).toEqual(38);
+  expect(calculNote(2.0)).toEqual(38);
 });

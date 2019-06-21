@@ -204,7 +204,7 @@ export const calculNote = (
     ? baremeEcartRemuneration[
         Math.min(
           baremeEcartRemuneration.length - 1,
-          Math.ceil(Math.max(0, indicateurEcartRemuneration))
+          Math.ceil(Math.max(0, roundDecimal(indicateurEcartRemuneration, 1)))
         )
       ]
     : undefined;
