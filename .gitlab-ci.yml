@@ -51,7 +51,7 @@ Get Github Id (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - change_prod_url
+  - master
 
 Get Github Id (prod):
   <<: *get_github_id_stage
@@ -59,7 +59,7 @@ Get Github Id (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - change_prod_url
+  - master
 
 
 ###########################################
@@ -127,7 +127,7 @@ Deploy @egapro/app (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - change_prod_url
+  - master
 
 Deploy @egapro/api (dev):
   <<: *deploy_stage
@@ -138,7 +138,7 @@ Deploy @egapro/api (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - change_prod_url
+  - master
 
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
@@ -149,7 +149,7 @@ Deploy @egapro/postgres (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - change_prod_url
+  - master
 
 Deploy @egapro/memcached (dev):
   <<: *deploy_stage
@@ -160,7 +160,7 @@ Deploy @egapro/memcached (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - change_prod_url
+  - master
 
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
@@ -172,7 +172,7 @@ Deploy @egapro/kinto (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - change_prod_url
+  - master
 
 # Prod Environment
 
@@ -185,7 +185,7 @@ Deploy @egapro/app (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - change_prod_url
+  - master
 
 Deploy @egapro/api (prod):
   <<: *deploy_stage
@@ -196,7 +196,7 @@ Deploy @egapro/api (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - change_prod_url
+  - master
 
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
@@ -207,7 +207,7 @@ Deploy @egapro/memcached (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - change_prod_url
+  - master
 
 Deploy @egapro/kinto (pro):
   <<: *deploy_stage
@@ -219,7 +219,7 @@ Deploy @egapro/kinto (pro):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - change_prod_url
+  - master
 
 
 ###########################################
@@ -247,7 +247,7 @@ Send deployment url to Github (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - change_prod_url
+  - master
 
 
 Send deployment url to Github (prod):
@@ -257,7 +257,7 @@ Send deployment url to Github (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - change_prod_url
+  - master
 
 
 ###########################################
@@ -276,4 +276,4 @@ Delete useless k8s objects:
   environment:
     name: $DEV_ENVIRONMENT_NAME
   only:
-  -change_prod_urlr
+  - master
