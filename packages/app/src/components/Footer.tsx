@@ -64,7 +64,7 @@ function Footer() {
         <span style={styles.info}>
           Pour nous aider à l'améliorer
           <a
-            href="https://travail-emploi.gouv.fr/"
+            href="https://aurlierollane.typeform.com/to/knTEbJ"
             target="_blank"
             rel="noopener noreferrer"
             css={styles.infoLink}
