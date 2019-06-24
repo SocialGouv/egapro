@@ -153,23 +153,23 @@ function IndicateurQuatreForm({
     <form onSubmit={handleSubmit} css={styles.container}>
       <RadiosBoolean
         form={form}
-        fieldName="presenceAugmentation"
+        fieldName="presenceCongeMat"
         readOnly={readOnly}
-        labelTrue="il y a eu des augmentations collective ou individuelle durant la période de référence"
-        labelFalse="il n’y a pas eu d’augmentation collective ou individuelle durant la période de référence"
+        labelTrue="il y a eu des retours de congé maternité pendant la période de référence"
+        labelFalse="il n’y a pas eu de retour de congé maternité pendant la période de référence"
       />
 
-      {values.presenceAugmentation === "true" && (
+      {values.presenceCongeMat === "true" && (
         <BlocFormLight>
           <RadiosBoolean
             form={form}
-            fieldName="presenceCongeMat"
+            fieldName="presenceAugmentation"
             readOnly={readOnly}
-            labelTrue="il y a eu des retours de congé maternité pendant la période de référence"
-            labelFalse="il n’y a pas eu de retour de congé maternité pendant la période de référence"
+            labelTrue="il y a eu des augmentations collective ou individuelle durant la période de référence"
+            labelFalse="il n’y a pas eu d’augmentation collective ou individuelle durant la période de référence"
           />
           <div css={styles.spacer} />
-          {values.presenceCongeMat === "true" ? (
+          {values.presenceAugmentation === "true" ? (
             <Fragment>
               <FieldInput
                 form={form}
