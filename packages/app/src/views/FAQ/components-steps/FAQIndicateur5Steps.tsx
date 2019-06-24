@@ -9,7 +9,7 @@ function FAQIndicateur5Steps() {
   return (
     <Fragment>
       <FAQStep icon={<IconMoney valid={true} />}>
-        Renseignez le nombre d’hommes et de femmes parmi les dix plus hautes
+        Renseignez le nombre de femmes et d'hommes parmi les dix plus hautes
         rémunérations de l’entreprise.
       </FAQStep>
     </Fragment>

@@ -139,6 +139,42 @@ export function IconFemale() {
   );
 }
 
+export function IconSearch() {
+  return (
+    <svg
+      width="19"
+      height="19"
+      viewBox="0 0 19 19"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="8" cy="8" r="7.5" stroke={globalStyles.colors.primary} />
+      <path
+        d="M17.6464 18.3536C17.8417 18.5488 18.1583 18.5488 18.3536 18.3536C18.5488 18.1583 18.5488 17.8417 18.3536 17.6464L17.6464 18.3536ZM18.3536 17.6464L13.3536 12.6464L12.6464 13.3536L17.6464 18.3536L18.3536 17.6464Z"
+        fill={globalStyles.colors.primary}
+      />
+    </svg>
+  );
+}
+
+export function IconClose() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M1 17L17 1M1 1L17 17"
+        stroke={globalStyles.colors.primary}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 const styles = {
   strokeCurrentColor: css({
     stroke: "currentColor"
