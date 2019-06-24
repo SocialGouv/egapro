@@ -143,7 +143,7 @@ function PageIndicateurTrois({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Indicateur 3, écart de taux de promotions"
-      tagline="Renseignez le pourcentage de femmes et d’hommes ayant été promus durant la période de référence par CSP."
+      tagline="Le pourcentage de Femmes et d’hommes ayant été promus durant la période de référence, doit être renseigné par CSP."
     >
       {children}
     </Page>
