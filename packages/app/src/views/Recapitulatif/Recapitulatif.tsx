@@ -86,7 +86,6 @@ function Recapitulatif({ state }: Props) {
   return (
     <Page
       title="Récapitulatif des résultats de vos indicateurs"
-      tagline="N'oubliez pas de décalarer vos résultats sur SOLEN avant le 1er septembre."
     >
       <RecapitulatifIndex
         allIndicateurValid={allIndicateurValid}
