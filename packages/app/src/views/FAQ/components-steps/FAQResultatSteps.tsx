@@ -9,24 +9,24 @@ function FAQResultatSteps() {
   return (
     <Fragment>
       <FAQStep icon={<IconLamp />}>
-        Les entreprises doivent par la suite déclarer leurs résultats au Ministère du Travail 
-        via l'outil <a href="https://solen1.enquetes.social.gouv.fr/cgi-1/HE/SF?P=1162z18z2z-1z-1zFD0365AA36" target="_blank" rel="noopener noreferrer">SOLEN</a>.
-        Toutes les informations nécessaires à la déclaration se
+        Les entreprises doivent transmettre leurs résultats au Ministère du Travail 
+        via le <a href="https://solen1.enquetes.social.gouv.fr/cgi-1/HE/SF?P=1162z18z2z-1z-1zFD0365AA36" target="_blank" rel="noopener noreferrer">formulaire en ligne</a>.
+        Toutes les informations nécessaires à la transmission se
         trouvent sur ce récapitulatif.
       </FAQStep>
       <FAQStep icon={<IconLamp />}>
-        Par la suite la note globale doit-être publiée sur le site internet de
-        la société déclarante ou à minima communiquée aux salariés ainsi qu’au
-        CSE
+        L'index doit être publié sur le site internet de l'entreprise déclarante 
+        ou en l'absence de site internet, communiqué aux salariés.
+        Les résultats doivent par ailleurs être communiqués au CSE.
       </FAQStep>
       <FAQStep icon={<IconLamp />}>
         <p css={styles.para}>
-          Si l’entreprise obtient moins de 75points, elle devra mettre en oeuvre 
-          des mesures de corrections lui permettant d’atteindre au moins 75 points 
-          dans un délai 3ans.
+          Si l’entreprise obtient moins de 75 points, elle devra mettre en oeuvre 
+          des mesures de correction lui permettant d’atteindre au moins 75 points 
+          dans un délai 3 ans.
         </p>
         <p css={styles.para}>
-          Les mesures prises pourront être annuelles ou pluriannuelles et seront définies :
+          Les mesures prises seront définies :
         </p>
         <ul css={styles.list}>
           <li>
