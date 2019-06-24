@@ -22,8 +22,8 @@ function FAQIndicateur4Steps() {
       </FAQStep>
 
       <FAQStep icon={<IconGrow />}>
-        Si aucune augmentation (individuelle ou collective) n'est intervenue au
-        cours de la période de référence, l’indicateur n’est pas calculable.
+        Si aucune augmentation (individuelle ou collective) n'est intervenue 
+        pendant leurs congés maternité, l’indicateur n’est pas calculable.
       </FAQStep>
 
       <FAQStep icon={<IconGrow />}>
