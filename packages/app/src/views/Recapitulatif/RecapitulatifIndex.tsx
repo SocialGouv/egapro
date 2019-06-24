@@ -33,7 +33,7 @@ function RecapitulatifIndex({
             </div>
           </InfoBloc>
         ) : (
-          <InfoBloc title="Index égalité homme-femme">
+          <InfoBloc title="Index égalité femmes-hommes">
             <p css={styles.blocText}>
               Vos indicateurs représentent moins de 75 points, votre index ne
               peut-être calculé.
@@ -41,10 +41,10 @@ function RecapitulatifIndex({
           </InfoBloc>
         )
       ) : (
-        <InfoBloc title="Index égalité homme-femme">
+        <InfoBloc title="Index égalité femmes-hommes">
           <p css={styles.blocText}>
-            Vous n’avez pas encore validé tous vos indicateur, votre index ne
-            peut-être calculé.
+            Vous n’avez pas encore validé tous vos indicateurs, votre index ne
+            peut être calculé.
           </p>
         </InfoBloc>
       )}
