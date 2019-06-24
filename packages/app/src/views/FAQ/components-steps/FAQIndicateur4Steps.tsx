@@ -20,15 +20,15 @@ function FAQIndicateur4Steps() {
         (générale ou individuelle){" "}
         <strong>à leur retour avant la fin de cette même période.</strong>
       </FAQStep>
-
-      <FAQStep icon={<IconGrow />}>
-        Si aucune augmentation (individuelle ou collective) n'est intervenue 
-        pendant leurs congés maternité, l’indicateur n’est pas calculable.
-      </FAQStep>
-
+      
       <FAQStep icon={<IconGrow />}>
         Si il n'y a eu aucun retour de congé maternité (ou adoption) au cours de
         la période de référence, l’indicateur n’est pas calculable.
+      </FAQStep>
+
+      <FAQStep icon={<IconGrow />}>
+        S'il n'y a eu aucune augmentation (individuelle ou collective) 
+        au cours des congés maternité, l’indicateur n’est pas calculable.
       </FAQStep>
     </Fragment>
   );
