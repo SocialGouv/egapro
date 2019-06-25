@@ -51,14 +51,17 @@ export function Modal({
 }) {
   const { container } = useContext(ModalContext);
 
-  const render = (
-    <div css={styles.container}>
-      <div css={styles.overlay} onClick={onRequestClose} />
-      <div css={styles.modal}>{children}</div>
+  const child = (
+    <div css={[styles.container, isOpen && styles.containerOpen]}>
+      <div
+        css={[styles.overlay, isOpen && styles.overlayOpen]}
+        onClick={onRequestClose}
+      />
+      <div css={[styles.modal, isOpen && styles.modalOpen]}>{children}</div>
     </div>
   );
 
-  return container && isOpen ? ReactDOM.createPortal(render, container) : null;
+  return container ? ReactDOM.createPortal(child, container) : null;
 }
 
 const styles = {
@@ -69,7 +72,14 @@ const styles = {
     right: 0,
     bottom: 0,
 
-    display: "flex"
+    display: "flex",
+
+    visibility: "hidden",
+    transition: "visibility 0ms linear 200ms"
+  }),
+  containerOpen: css({
+    visibility: "visible",
+    transitionDelay: "0ms"
   }),
   overlay: css({
     position: "absolute",
@@ -79,10 +89,26 @@ const styles = {
     bottom: 0,
 
     backgroundColor: "rgba(0,0,0,0.5)",
-    backdropFilter: "blur(10px)"
+    backdropFilter: "blur(10px)",
+
+    opacity: 0,
+    transition: "opacity 150ms ease-in-out 50ms"
+  }),
+  overlayOpen: css({
+    opacity: 1,
+    transitionDelay: "0ms"
   }),
   modal: css({
     position: "relative",
-    margin: "auto"
+    margin: "auto",
+
+    transition:
+      "opacity 200ms ease-in-out 0ms, transform 200ms ease-in-out 0ms",
+    opacity: 0,
+    transform: "scale(0.8)"
+  }),
+  modalOpen: css({
+    opacity: 1,
+    transform: "initial"
   })
 };
