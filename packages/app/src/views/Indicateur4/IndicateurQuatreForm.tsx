@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo, Fragment } from "react";
+import { memo } from "react";
 import { useForm } from "react-final-form-hooks";
 import {
   AppState,
@@ -55,17 +55,15 @@ const validateWithPreviousField = (
 };
 
 const validateForm = ({
-  presenceAugmentation,
   presenceCongeMat,
   nombreSalarieesPeriodeAugmentation,
   nombreSalarieesAugmentees
 }: {
-  presenceAugmentation: string;
   presenceCongeMat: string;
   nombreSalarieesPeriodeAugmentation: string;
   nombreSalarieesAugmentees: string;
 }) => {
-  if (presenceAugmentation === "false" || presenceCongeMat === "false") {
+  if (presenceCongeMat === "false") {
     return null;
   }
   return {
@@ -95,7 +93,6 @@ function IndicateurQuatreForm({
   validateIndicateurQuatre
 }: Props) {
   const initialValues = {
-    presenceAugmentation: String(indicateurQuatre.presenceAugmentation),
     presenceCongeMat: String(indicateurQuatre.presenceCongeMat),
     nombreSalarieesPeriodeAugmentation: parseIntStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
@@ -107,14 +104,12 @@ function IndicateurQuatreForm({
 
   const saveForm = (formData: any) => {
     const {
-      presenceAugmentation,
       presenceCongeMat,
       nombreSalarieesPeriodeAugmentation,
       nombreSalarieesAugmentees
     } = formData;
 
     updateIndicateurQuatre({
-      presenceAugmentation: presenceAugmentation === "true",
       presenceCongeMat: presenceCongeMat === "true",
       nombreSalarieesPeriodeAugmentation: parseIntFormValue(
         nombreSalarieesPeriodeAugmentation
@@ -161,32 +156,19 @@ function IndicateurQuatreForm({
 
       {values.presenceCongeMat === "true" && (
         <BlocFormLight>
-          <RadiosBoolean
+          <FieldInput
             form={form}
-            fieldName="presenceAugmentation"
+            fieldName="nombreSalarieesPeriodeAugmentation"
+            label="parmis ces retours, combien étaient en congés maternités pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
             readOnly={readOnly}
-            labelTrue="il y a eu des augmentations collective ou individuelle durant la période de référence"
-            labelFalse="il n’y a pas eu d’augmentation collective ou individuelle durant la période de référence"
           />
           <div css={styles.spacer} />
-          {values.presenceAugmentation === "true" ? (
-            <Fragment>
-              <FieldInput
-                form={form}
-                fieldName="nombreSalarieesPeriodeAugmentation"
-                label="pour combien de salariées, ces congés maternités ont eu lieu pendant des périodes d’augmentation"
-                readOnly={readOnly}
-              />
-              <FieldInput
-                form={form}
-                fieldName="nombreSalarieesAugmentees"
-                label="parmi ces salariées combien ont été augmentées à leur retour"
-                readOnly={readOnly}
-              />
-            </Fragment>
-          ) : (
-            <div css={styles.emptyFields} />
-          )}
+          <FieldInput
+            form={form}
+            fieldName="nombreSalarieesAugmentees"
+            label="parmi ces salariées combien ont bénéficié d'une augmentation salariale à leur retour de congé maternité, avant la fin de la période de référence ?"
+            readOnly={readOnly}
+          />
         </BlocFormLight>
       )}
 
