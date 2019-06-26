@@ -23,9 +23,9 @@ function Home({ history }: RouteComponentProps) {
     <Page
       title="Bienvenue sur Index Egapro"
       tagline={[
-        "L’index égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
+        "L’index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
         "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
-        "Avec outil de simulation en ligne, calculez votre index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées."
+        "Avec l'outil de simulation en ligne, calculez votre index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées."
       ]}
     >
       <div css={styles.action}>
