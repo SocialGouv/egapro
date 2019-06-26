@@ -74,7 +74,11 @@ function AppLayout({ state, dispatch }: AppLayout) {
 
         <MainScrollViewWithRouter state={state}>
           <Switch>
-            <Route path="/" exact render={props => <Home {...props} />} />
+            <Route
+              path="/"
+              exact
+              render={props => <Home {...props} dispatch={dispatch} />}
+            />
             <Route
               path="/simulateur/:code"
               render={({

@@ -35,6 +35,9 @@ export type FormState = "None" | "Valid" | "Invalid";
 
 export type ActionType =
   | {
+      type: "resetState";
+    }
+  | {
       type: "initiateState";
       data: any;
     }

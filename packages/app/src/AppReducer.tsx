@@ -85,6 +85,9 @@ function AppReducer(
   state: AppState | undefined,
   action: ActionType
 ): AppState | undefined {
+  if (action.type === "resetState") {
+    return undefined;
+  }
   if (action.type === "initiateState") {
     return Object.assign({}, defaultState, action.data);
   }

@@ -1,15 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-  useMemo,
-  useContext,
-  createContext,
-  ReactNode
-} from "react";
+import { useRef, useContext, createContext, ReactNode } from "react";
 import ReactDOM from "react-dom";
 
 // Context
@@ -21,12 +12,8 @@ export const ModalContext = createContext({
 // Provider
 
 function ModalProvider({ children }: { children: ReactNode }) {
-  const [isMounted, setIsMounted] = useState(false);
-
   const containerRef = useRef(null);
   const container = containerRef.current;
-
-  useEffect(() => setIsMounted(true), []);
 
   return (
     <ModalContext.Provider value={{ container }}>
@@ -75,7 +62,7 @@ const styles = {
     display: "flex",
 
     visibility: "hidden",
-    transition: "visibility 0ms linear 200ms"
+    transition: "visibility 0ms linear 250ms"
   }),
   containerOpen: css({
     visibility: "visible",
@@ -89,10 +76,10 @@ const styles = {
     bottom: 0,
 
     backgroundColor: "rgba(0,0,0,0.5)",
-    backdropFilter: "blur(10px)",
+    backdropFilter: "blur(6px)",
 
     opacity: 0,
-    transition: "opacity 150ms ease-in-out 50ms"
+    transition: "opacity 175ms ease-in-out 75ms"
   }),
   overlayOpen: css({
     opacity: 1,
@@ -103,7 +90,7 @@ const styles = {
     margin: "auto",
 
     transition:
-      "opacity 200ms ease-in-out 0ms, transform 200ms ease-in-out 0ms",
+      "opacity 250ms ease-in-out 0ms, transform 250ms ease-in-out 0ms",
     opacity: 0,
     transform: "scale(0.8)"
   }),

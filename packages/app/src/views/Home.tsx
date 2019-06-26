@@ -3,6 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { useState } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
+import { ActionType } from "../globals.d";
 import { postIndicatorsDatas } from "../utils/api";
 
 import Page from "../components/Page";
@@ -10,15 +11,26 @@ import ButtonAction from "../components/ButtonAction";
 import Button from "../components/Button";
 import globalStyles from "../utils/globalStyles";
 
-function Home({ history }: RouteComponentProps) {
+interface Props extends RouteComponentProps {
+  dispatch: (action: ActionType) => void;
+}
+
+function Home({ history, location, dispatch }: Props) {
   const [loading, setLoading] = useState(false);
+
   const onClick = () => {
     setLoading(true);
+    dispatch({ type: "resetState" });
+
     postIndicatorsDatas({}).then(({ jsonBody: { id } }) => {
       setLoading(false);
-      history.push(`/simulateur/${id}`);
+      history.push(`/simulateur/${id}`, {
+        ...(location.state && location.state),
+        openModalEmail: true
+      });
     });
   };
+
   return (
     <Page
       title="Bienvenue sur Index Egapro"
