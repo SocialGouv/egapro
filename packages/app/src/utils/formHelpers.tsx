@@ -42,3 +42,6 @@ export const minNumber = (value: string, min: number): boolean =>
 
 export const maxNumber = (value: string, max: number): boolean =>
   Number(value) > max ? true : false;
+
+const regexpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+export const validateEmail = (email: string) => !regexpEmail.test(email);

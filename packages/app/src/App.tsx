@@ -166,7 +166,7 @@ function Simulateur({ code, state, dispatch }: SimulateurProps) {
       <Route
         path="/simulateur/:code/"
         exact
-        render={props => <HomeSimulateur {...props} />}
+        render={props => <HomeSimulateur {...props} code={code} />}
       />
       <Route
         path="/simulateur/:code/effectifs"

@@ -10,11 +10,14 @@ import Page from "../components/Page";
 import ActionLink from "../components/ActionLink";
 import ActionBar from "../components/ActionBar";
 import { ButtonSimulatorLink } from "../components/SimulatorLink";
-import ButtonAction from "../components/ButtonAction";
 
 import ModalEmail from "./ModalEmail";
 
-function HomeSimulateur({ location, history }: RouteComponentProps) {
+interface Props extends RouteComponentProps {
+  code: string;
+}
+
+function HomeSimulateur({ location, history, code }: Props) {
   const textEl = useRef<HTMLSpanElement>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const closeModal = () => setModalIsOpen(false);
@@ -70,12 +73,9 @@ function HomeSimulateur({ location, history }: RouteComponentProps) {
       <ActionBar>
         <ButtonSimulatorLink to="/effectifs" label="suivant" />
       </ActionBar>
-      <ActionBar>
-        <ButtonAction onClick={() => setModalIsOpen(true)} label="open modal" />
-      </ActionBar>
 
       <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
-        <ModalEmail closeModal={closeModal} />
+        <ModalEmail closeModal={closeModal} code={code} />
       </Modal>
     </Page>
   );

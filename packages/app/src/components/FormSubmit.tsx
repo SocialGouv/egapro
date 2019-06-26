@@ -8,13 +8,15 @@ import ButtonSubmit from "../components/ButtonSubmit";
 interface Props {
   submitFailed: boolean;
   hasValidationErrors: boolean;
-  errorMessage: string;
+  errorMessage?: string;
+  loading?: boolean;
 }
 
 function FormSubmit({
   submitFailed,
   hasValidationErrors,
-  errorMessage
+  errorMessage,
+  loading = false
 }: Props) {
   return (
     <div css={styles.container}>
@@ -22,8 +24,9 @@ function FormSubmit({
         label="valider"
         outline={hasValidationErrors}
         error={submitFailed && hasValidationErrors}
+        loading={loading}
       />
-      {submitFailed && hasValidationErrors && (
+      {errorMessage && submitFailed && hasValidationErrors && (
         <p css={styles.error}>{errorMessage}</p>
       )}
     </div>
