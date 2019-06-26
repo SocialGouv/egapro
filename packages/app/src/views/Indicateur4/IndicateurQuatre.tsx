@@ -55,7 +55,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car il n’y a pas eu de promotion durant la période de référence."
+            text="car il n’y a pas eu de retour de congé maternité pendant la période de référence."
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurQuatre("None")}>

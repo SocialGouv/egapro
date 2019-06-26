@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { ReactNode } from "react";
 import { useField, FieldRenderProps } from "react-final-form-hooks";
 import { FormApi } from "final-form";
 
@@ -12,7 +13,7 @@ function RadioField({
   disabled
 }: {
   field: FieldRenderProps;
-  label: string;
+  label: ReactNode;
   value: string;
   disabled: boolean;
 }) {
@@ -37,8 +38,8 @@ interface Props {
   form: FormApi;
   readOnly: boolean;
   fieldName: string;
-  labelTrue: string;
-  labelFalse: string;
+  labelTrue: ReactNode;
+  labelFalse: ReactNode;
 }
 
 function RadiosBoolean({

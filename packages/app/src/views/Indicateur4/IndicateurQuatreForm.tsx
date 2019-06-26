@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
+import { memo, Fragment } from "react";
 import { useForm } from "react-final-form-hooks";
 import {
   AppState,
@@ -150,8 +150,18 @@ function IndicateurQuatreForm({
         form={form}
         fieldName="presenceCongeMat"
         readOnly={readOnly}
-        labelTrue="il y a eu des retours de congé maternité pendant la période de référence"
-        labelFalse="il n’y a pas eu de retour de congé maternité pendant la période de référence"
+        labelTrue={
+          <Fragment>
+            <strong>il y a eu des retours de congé maternité</strong> pendant la
+            période de référence
+          </Fragment>
+        }
+        labelFalse={
+          <Fragment>
+            <strong>il n’y a pas eu de retour de congé maternité</strong>{" "}
+            pendant la période de référence
+          </Fragment>
+        }
       />
 
       {values.presenceCongeMat === "true" && (
@@ -159,14 +169,14 @@ function IndicateurQuatreForm({
           <FieldInput
             form={form}
             fieldName="nombreSalarieesPeriodeAugmentation"
-            label="parmis ces retours, combien étaient en congés maternités pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
+            label="parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
             readOnly={readOnly}
           />
           <div css={styles.spacer} />
           <FieldInput
             form={form}
             fieldName="nombreSalarieesAugmentees"
-            label="parmi ces salariées combien ont bénéficié d'une augmentation salariale à leur retour de congé maternité, avant la fin de la période de référence ?"
+            label="parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
             readOnly={readOnly}
           />
         </BlocFormLight>
@@ -195,7 +205,7 @@ const styles = {
     flexDirection: "column"
   }),
   spacer: css({
-    height: 24
+    height: 8
   }),
   emptyFields: css({
     height: (FieldInputHeight + FieldInputMarginTop) * 2
