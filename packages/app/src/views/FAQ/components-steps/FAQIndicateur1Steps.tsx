@@ -10,8 +10,8 @@ function FAQIndicateur1Steps() {
     <Fragment>
       <FAQStep icon={<IconText>ETP</IconText>}>
         La rémunération doit être reconstituée en{" "}
-        <strong>équivalent temps plein</strong> sur toute la durée de la
-        période de référence.
+        <strong>équivalent temps plein</strong> sur toute la durée de la période
+        de référence.
       </FAQStep>
 
       <FAQStep icon={<IconMoney valid={true} />}>
@@ -19,8 +19,11 @@ function FAQIndicateur1Steps() {
           <strong>Doivent être pris en compte dans la rémunération :</strong>
         </p>
         <ul css={styles.list}>
-           <li>
-            • les salaires ou traitements ordinaires de base ou minimum et tous les autres avantages et accessoires payés, directement ou indirectement, en espèces ou en nature, par l’employeur au salarié en raison de l’emploi de ce dernier
+          <li>
+            • les salaires ou traitements ordinaires de base ou minimum et tous
+            les autres avantages et accessoires payés, directement ou
+            indirectement, en espèces ou en nature, par l’employeur au salarié
+            en raison de l’emploi de ce dernier
           </li>
           <li>
             • les "bonus", les commissions sur produits, les primes d’objectif
@@ -28,11 +31,10 @@ function FAQIndicateur1Steps() {
             individu à l’autre pour un même poste
           </li>
           <li>
-            • les primes collectives (ex : les primes de transport ou primes de vacances)
+            • les primes collectives (ex : les primes de transport ou primes de
+            vacances)
           </li>
-          <li>
-            • les indemnités de congés payés.
-          </li>
+          <li>• les indemnités de congés payés.</li>
         </ul>
       </FAQStep>
 
@@ -44,10 +46,16 @@ function FAQIndicateur1Steps() {
         </p>
         <ul css={styles.list}>
           <li>
-            • les indemnités de fin de CDD (notamment la prime de précarité)</li>
-          <li>• les sommes versées dans le cadre du compte épargne-temps (CET)</li>
-          <li>• les actions, stock-options, compensations différées en actions </li>
-          <li>• les primes liées à une sujétion particulière qui ne concernent pas
+            • les indemnités de fin de CDD (notamment la prime de précarité)
+          </li>
+          <li>
+            • les sommes versées dans le cadre du compte épargne-temps (CET)
+          </li>
+          <li>
+            • les actions, stock-options, compensations différées en actions{" "}
+          </li>
+          <li>
+            • les primes liées à une sujétion particulière qui ne concernent pas
             la personne du salarié (prime de froid, prime de nuit etc.)
           </li>
           <li>• les heures supplémentaires et complémentaires</li>
@@ -60,12 +68,14 @@ function FAQIndicateur1Steps() {
 
       <FAQStep icon={<IconLamp />}>
         Les groupes ne comportant pas{" "}
-        <strong>au moins 3 hommes et 3 femmes</strong> ne doivent pas être
+        <strong>au moins 3 femmes et 3 hommes</strong> ne doivent pas être
         retenus pour le calcul.
       </FAQStep>
 
       <FAQStep icon={<IconLamp />}>
-        Si le total des effectifs pouvant être pris en compte est inférieur à 40% des effectifs totaux, l'indicateur et l'index ne sont pas calculables.
+        Si le total des effectifs pouvant être pris en compte est inférieur à
+        40% des effectifs totaux, l'indicateur et l'index ne sont pas
+        calculables.
       </FAQStep>
     </Fragment>
   );

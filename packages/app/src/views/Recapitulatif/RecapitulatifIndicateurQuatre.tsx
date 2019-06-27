@@ -48,7 +48,7 @@ function RecapitulatifIndicateurQuatre({
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur 4, pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu de congé maternité durant la période de référence"
+          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu de retour de congé maternité durant la période de référence"
         />
       </div>
     );

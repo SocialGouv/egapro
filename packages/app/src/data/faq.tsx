@@ -282,7 +282,7 @@ export const faqData: FAQPart = {
           "Est-il possible de retenir une méthode de cotation reposant sur les seuls intitulés de postes ou de fonctions des salariés, ou selon les catégories de métiers ?",
         reponse: [
           "La méthode de cotation des postes ne doit pas aboutir à une construction des catégories par métier ou par fonction. Les catégories doivent au contraire inclure plusieurs métiers afin de corriger les biais liés à la non mixité de certains métiers.",
-          "Dès lors, la répartition des salariés selon le seul intitulé des postes ou des fonctions ne correspond pas à l’esprit du décret. Le but est bien de mesurer les écarts de rémunération entre hommes et femmes effectuant un travail de valeur égale.",
+          "Dès lors, la répartition des salariés selon le seul intitulé des postes ou des fonctions ne correspond pas à l’esprit du décret. Le but est bien de mesurer les écarts de rémunération entre femmes et hommes effectuant un travail de valeur égale.",
           "Ainsi, il n’est pas possible de procéder aux cotations de postes par filières si cela conduit à repartir les salariés par métiers.",
           "Les échantillons peuvent se faire, par exemple, par niveau de responsabilité. Par exemple : un(e) technicien(ne) de maintenance peut se trouver dans le même échantillon qu’un(e) assistant(e) des ventes, si leur niveau de responsabilité est le même et qu’ils sont dans la même tranche d’âge.",
           'La méthode de cotation peut consister à segmenter une CSP existante, par exemple, dans la catégorie "Cadre", distinguer "cadres dirigeants", "managers supérieurs", et "managers intermédiaires", etc.)'
