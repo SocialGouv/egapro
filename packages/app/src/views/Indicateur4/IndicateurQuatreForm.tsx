@@ -55,17 +55,15 @@ const validateWithPreviousField = (
 };
 
 const validateForm = ({
-  presenceAugmentation,
   presenceCongeMat,
   nombreSalarieesPeriodeAugmentation,
   nombreSalarieesAugmentees
 }: {
-  presenceAugmentation: string;
   presenceCongeMat: string;
   nombreSalarieesPeriodeAugmentation: string;
   nombreSalarieesAugmentees: string;
 }) => {
-  if (presenceAugmentation === "false" || presenceCongeMat === "false") {
+  if (presenceCongeMat === "false") {
     return null;
   }
   return {
@@ -95,7 +93,6 @@ function IndicateurQuatreForm({
   validateIndicateurQuatre
 }: Props) {
   const initialValues = {
-    presenceAugmentation: String(indicateurQuatre.presenceAugmentation),
     presenceCongeMat: String(indicateurQuatre.presenceCongeMat),
     nombreSalarieesPeriodeAugmentation: parseIntStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
@@ -107,14 +104,12 @@ function IndicateurQuatreForm({
 
   const saveForm = (formData: any) => {
     const {
-      presenceAugmentation,
       presenceCongeMat,
       nombreSalarieesPeriodeAugmentation,
       nombreSalarieesAugmentees
     } = formData;
 
     updateIndicateurQuatre({
-      presenceAugmentation: presenceAugmentation === "true",
       presenceCongeMat: presenceCongeMat === "true",
       nombreSalarieesPeriodeAugmentation: parseIntFormValue(
         nombreSalarieesPeriodeAugmentation
@@ -155,38 +150,35 @@ function IndicateurQuatreForm({
         form={form}
         fieldName="presenceCongeMat"
         readOnly={readOnly}
-        labelTrue="il y a eu des retours de congé maternité pendant la période de référence"
-        labelFalse="il n’y a pas eu de retour de congé maternité pendant la période de référence"
+        labelTrue={
+          <Fragment>
+            <strong>il y a eu des retours de congé maternité</strong> pendant la
+            période de référence
+          </Fragment>
+        }
+        labelFalse={
+          <Fragment>
+            <strong>il n’y a pas eu de retour de congé maternité</strong>{" "}
+            pendant la période de référence
+          </Fragment>
+        }
       />
 
       {values.presenceCongeMat === "true" && (
         <BlocFormLight>
-          <RadiosBoolean
+          <FieldInput
             form={form}
-            fieldName="presenceAugmentation"
+            fieldName="nombreSalarieesPeriodeAugmentation"
+            label="parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
             readOnly={readOnly}
-            labelTrue="il y a eu des augmentations collective ou individuelle durant la période de référence"
-            labelFalse="il n’y a pas eu d’augmentation collective ou individuelle durant la période de référence"
           />
           <div css={styles.spacer} />
-          {values.presenceAugmentation === "true" ? (
-            <Fragment>
-              <FieldInput
-                form={form}
-                fieldName="nombreSalarieesPeriodeAugmentation"
-                label="pour combien de salariées, ces congés maternités ont eu lieu pendant des périodes d’augmentation"
-                readOnly={readOnly}
-              />
-              <FieldInput
-                form={form}
-                fieldName="nombreSalarieesAugmentees"
-                label="parmi ces salariées combien ont été augmentées à leur retour"
-                readOnly={readOnly}
-              />
-            </Fragment>
-          ) : (
-            <div css={styles.emptyFields} />
-          )}
+          <FieldInput
+            form={form}
+            fieldName="nombreSalarieesAugmentees"
+            label="parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
+            readOnly={readOnly}
+          />
         </BlocFormLight>
       )}
 
@@ -213,7 +205,7 @@ const styles = {
     flexDirection: "column"
   }),
   spacer: css({
-    height: 24
+    height: 8
   }),
   emptyFields: css({
     height: (FieldInputHeight + FieldInputMarginTop) * 2

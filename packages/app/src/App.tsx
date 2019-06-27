@@ -18,6 +18,7 @@ import { useDebounceEffect } from "./utils/hooks";
 import AppReducer from "./AppReducer";
 
 import GridProvider, { useLayoutType } from "./components/GridContext";
+import ModalProvider from "./components/ModalContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
@@ -73,7 +74,11 @@ function AppLayout({ state, dispatch }: AppLayout) {
 
         <MainScrollViewWithRouter state={state}>
           <Switch>
-            <Route path="/" exact render={props => <Home {...props} />} />
+            <Route
+              path="/"
+              exact
+              render={props => <Home {...props} dispatch={dispatch} />}
+            />
             <Route
               path="/simulateur/:code"
               render={({
@@ -161,7 +166,7 @@ function Simulateur({ code, state, dispatch }: SimulateurProps) {
       <Route
         path="/simulateur/:code/"
         exact
-        render={props => <HomeSimulateur {...props} />}
+        render={props => <HomeSimulateur {...props} code={code} />}
       />
       <Route
         path="/simulateur/:code/effectifs"
@@ -265,12 +270,16 @@ function MainScrollView({ children, state, location }: MainScrollViewProps) {
   }
 
   return (
-    <div css={[styles.main, styles.scroll]} ref={scrollEl}>
-      <div css={styles.menu}>{menu}</div>
-      <div css={styles.viewContainer}>
-        <div css={styles.view}>{children}</div>
-        <Footer />
-      </div>
+    <div css={styles.main}>
+      <ModalProvider>
+        <div css={styles.scroll} ref={scrollEl}>
+          <div css={styles.menu}>{menu}</div>
+          <div css={styles.viewContainer}>
+            <div css={styles.view}>{children}</div>
+            <Footer />
+          </div>
+        </div>
+      </ModalProvider>
     </div>
   );
 }
@@ -311,7 +320,8 @@ const styles = {
     borderRight: "1px solid #EFECEF",
     display: "flex",
     flexDirection: "column",
-    flex: 1
+    flex: 1,
+    position: "relative"
   }),
   scroll: css({
     overflowY: "auto",

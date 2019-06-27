@@ -1,17 +1,36 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useRef } from "react";
+import { useRef, useState /*, useEffect*/ } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 
+import { Modal } from "../components/ModalContext";
 import Page from "../components/Page";
 import ActionLink from "../components/ActionLink";
 import ActionBar from "../components/ActionBar";
 import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
-function HomeSimulateur(props: RouteComponentProps) {
+import ModalEmail from "./ModalEmail";
+
+interface Props extends RouteComponentProps {
+  code: string;
+}
+
+function HomeSimulateur({ location, history, code }: Props) {
   const textEl = useRef<HTMLSpanElement>(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const closeModal = () => setModalIsOpen(false);
+
+  // useEffect(() => {
+  //   if (location.state && location.state.openModalEmail) {
+  //     history.replace(location.pathname, {
+  //       ...(location.state && location.state),
+  //       openModalEmail: false
+  //     });
+  //     setModalIsOpen(true);
+  //   }
+  // }, [location, history]);
 
   const link = window.location.href;
   const onCopy = () => {
@@ -54,6 +73,10 @@ function HomeSimulateur(props: RouteComponentProps) {
       <ActionBar>
         <ButtonSimulatorLink to="/effectifs" label="suivant" />
       </ActionBar>
+
+      <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
+        <ModalEmail closeModal={closeModal} code={code} />
+      </Modal>
     </Page>
   );
 }

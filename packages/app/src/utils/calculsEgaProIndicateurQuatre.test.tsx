@@ -9,17 +9,14 @@ import {
 //////////////////
 
 it("calculIndicateurCalculable", () => {
-  expect(calculIndicateurCalculable(false, false, undefined)).toEqual(false);
-  expect(calculIndicateurCalculable(true, false, undefined)).toEqual(false);
-  expect(calculIndicateurCalculable(true, true, undefined)).toEqual(false);
-  expect(calculIndicateurCalculable(false, true, 10)).toEqual(false);
-  expect(calculIndicateurCalculable(true, false, 10)).toEqual(false);
-  expect(calculIndicateurCalculable(false, false, 10)).toEqual(false);
-  expect(calculIndicateurCalculable(true, true, 0)).toEqual(false);
-  expect(calculIndicateurCalculable(true, true, -1)).toEqual(false);
+  expect(calculIndicateurCalculable(false, undefined)).toEqual(false);
+  expect(calculIndicateurCalculable(true, undefined)).toEqual(false);
+  expect(calculIndicateurCalculable(false, 10)).toEqual(false);
+  expect(calculIndicateurCalculable(true, 0)).toEqual(false);
+  expect(calculIndicateurCalculable(true, -1)).toEqual(false);
 
-  expect(calculIndicateurCalculable(true, true, 1)).toEqual(true);
-  expect(calculIndicateurCalculable(true, true, 10)).toEqual(true);
+  expect(calculIndicateurCalculable(true, 1)).toEqual(true);
+  expect(calculIndicateurCalculable(true, 10)).toEqual(true);
 });
 
 it("calculIndicateurEcartNombreSalarieesAugmentees", () => {

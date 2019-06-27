@@ -7,12 +7,10 @@ import { roundDecimal } from "./helpers";
 //////////////////
 
 export const calculIndicateurCalculable = (
-  presenceAugmentation: boolean,
   presenceCongeMat: boolean,
   nombreSalarieesPeriodeAugmentation: number | undefined
 ) => {
   return (
-    presenceAugmentation &&
     presenceCongeMat &&
     nombreSalarieesPeriodeAugmentation !== undefined &&
     nombreSalarieesPeriodeAugmentation > 0
@@ -53,7 +51,6 @@ export const calculNote = (
 
 export default function calculIndicateurQuatre(state: AppState) {
   const indicateurCalculable = calculIndicateurCalculable(
-    state.indicateurQuatre.presenceAugmentation,
     state.indicateurQuatre.presenceCongeMat,
     state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
   );

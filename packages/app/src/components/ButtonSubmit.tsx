@@ -6,12 +6,18 @@ interface Props {
   label: string;
   outline?: boolean;
   error?: boolean;
+  loading?: boolean;
 }
 
-function ButtonSubmit({ label, outline = false, error = false }: Props) {
+function ButtonSubmit({
+  label,
+  outline = false,
+  error = false,
+  loading = false
+}: Props) {
   return (
-    <button type="submit" css={styles.button}>
-      <Button label={label} outline={outline} error={error} />
+    <button type="submit" css={styles.button} disabled={loading}>
+      <Button label={label} outline={outline} error={error} loading={loading} />
     </button>
   );
 }

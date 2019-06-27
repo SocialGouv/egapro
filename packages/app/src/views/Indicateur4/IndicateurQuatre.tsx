@@ -55,7 +55,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car il n’y a pas eu de promotion durant la période de référence."
+            text="car il n’y a pas eu de retour de congé maternité pendant la période de référence."
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurQuatre("None")}>
@@ -101,6 +101,7 @@ function PageIndicateurQuatre({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Indicateur 4, pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+      tagline="Renseignez le taux de salariées en congès maternité durant la période de référence ayant reçu une augmentation à leur retour."
     >
       {children}
     </Page>
