@@ -140,7 +140,7 @@ function PageIndicateurDeux({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Indicateur 2, écart de taux d’augmentations individuelles hors promotion"
-      tagline="Le pourcentage de Femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."
+      tagline="Le pourcentage de femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."
     >
       {children}
     </Page>

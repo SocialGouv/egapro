@@ -38,7 +38,7 @@ function RecapitulatifIndicateurDeux({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 2, écart de taux d’augmentations entre les hommes et les femmes"
+          title="Indicateur 2, écart de taux d’augmentations entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
         />
       </div>
@@ -49,7 +49,7 @@ function RecapitulatifIndicateurDeux({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 2, écart de taux d’augmentations entre les hommes et les femmes"
+          title="Indicateur 2, écart de taux d’augmentations entre les femmes et les hommes"
           text={
             <Fragment>
               <span>
@@ -71,7 +71,7 @@ function RecapitulatifIndicateurDeux({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 2, écart de taux d’augmentations entre les hommes et les femmes"
+          title="Indicateur 2, écart de taux d’augmentations entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu d’augmentation durant la période de référence"
         />
       </div>
@@ -81,7 +81,7 @@ function RecapitulatifIndicateurDeux({
   return (
     <div css={styles.container}>
       <RecapBloc
-        title="Indicateur 2, écart de taux d’augmentations entre les hommes et les femmes"
+        title="Indicateur 2, écart de taux d’augmentations entre les femmes et les hommes"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
