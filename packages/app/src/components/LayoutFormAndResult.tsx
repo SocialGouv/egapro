@@ -29,7 +29,9 @@ const styles = {
     alignItems: "flex-start"
   }),
   result: css({
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "0%",
     marginLeft: globalStyles.grid.gutterWidth,
     position: "sticky",
     top: 0,

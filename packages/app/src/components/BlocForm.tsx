@@ -201,7 +201,9 @@ const styles = {
     height: 1,
     marginRight: 2,
     backgroundColor: globalStyles.colors.default,
-    flex: 1
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "0%"
   }),
   rowFootBorderRight: css({
     height: 1,

@@ -133,7 +133,9 @@ const styles = {
   },
 
   footerInfo: {
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "0%",
     display: "flex",
     flexDirection: "column" as "column",
     textAlign: "right" as "right",
