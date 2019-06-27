@@ -161,7 +161,8 @@ const styles = {
     alignItems: "stretch",
     height: 44,
     borderBottom: "1px solid #EFECEF",
-    paddingLeft: globalStyles.grid.gutterWidth
+    paddingLeft: globalStyles.grid.gutterWidth,
+    backgroundColor: "white"
   }),
   link: css({
     paddingTop: 7,

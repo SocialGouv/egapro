@@ -287,10 +287,14 @@ const MainScrollViewWithRouter = withRouter(MainScrollView);
 
 const styles = {
   layout: css({
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "0%",
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
+    background:
+      "linear-gradient(180deg, #FFFFFF 79px, rgba(255, 255, 255, 0) 79px, #FFFFFF 100%), #EFF0FA",
     "@media print": {
       display: "block"
     }
@@ -298,8 +302,10 @@ const styles = {
   leftColumn: css({
     display: "flex",
     flexDirection: "column",
-    flexGrow: 1,
-    maxWidth: globalStyles.grid.maxWidth - 375,
+    flexGrow: 0,
+    flexShrink: 1,
+    flexBasis: globalStyles.grid.maxWidth - 375,
+    minWidth: 0,
     "@media print": {
       display: "block"
     }
@@ -320,17 +326,19 @@ const styles = {
     borderRight: "1px solid #EFECEF",
     display: "flex",
     flexDirection: "column",
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "0%",
     position: "relative"
   }),
   scroll: css({
     overflowY: "auto",
     display: "flex",
     flexDirection: "row",
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "0%",
     position: "relative",
-    background:
-      "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), #EFF0FA",
     "@media print": {
       overflow: "visible",
       display: "block",
@@ -352,12 +360,10 @@ const styles = {
   viewContainer: css({
     display: "flex",
     flexDirection: "column",
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "0%",
     "@media print": {
-      display: "block"
-    },
-    "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
-      // Only target IE11
       display: "block"
     }
   }),
@@ -369,7 +375,8 @@ const styles = {
     flexDirection: "column"
   }),
   viewLoading: css({
-    margin: "auto"
+    margin: "auto",
+    alignSelf: "center"
   })
 };
 

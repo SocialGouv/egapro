@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { ReactNode } from "react";
 
 import globalStyles from "../../../utils/globalStyles";
 
@@ -81,7 +82,7 @@ export function RowLabels({ labels }: { labels: Array<string> }) {
   );
 }
 
-export function RowLabelFull({ label }: { label: string }) {
+export function RowLabelFull({ label }: { label: ReactNode }) {
   return (
     <div css={[styles.row, styles.rowLabel]}>
       <CellHead />

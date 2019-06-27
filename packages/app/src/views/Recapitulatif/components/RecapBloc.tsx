@@ -158,7 +158,9 @@ const styles = {
   blocResult: css({
     position: "relative",
     maxWidth: 250,
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "auto",
     marginLeft: globalStyles.grid.gutterWidth,
     display: "flex",
     flexDirection: "column",
