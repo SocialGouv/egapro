@@ -4,6 +4,8 @@ import { ReactNode } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
+import { useColumnsWidth, useLayoutType } from "./GridContext";
+
 interface Props {
   title: string;
   tagline?: string | Array<string>;
@@ -11,18 +13,22 @@ interface Props {
 }
 
 function Page({ title, tagline, children }: Props) {
+  const layoutType = useLayoutType();
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
   return (
     <div css={styles.page}>
-      <h1 css={styles.title}>{title}</h1>
-      {tagline && Array.isArray(tagline) ? (
-        tagline.map((tl, index) => (
-          <p css={styles.tagline} key={index}>
-            {tl}
-          </p>
-        ))
-      ) : (
-        <p css={styles.tagline}>{tagline}</p>
-      )}
+      <div css={css({ width })}>
+        <h1 css={styles.title}>{title}</h1>
+        {tagline && Array.isArray(tagline) ? (
+          tagline.map((tl, index) => (
+            <p css={styles.tagline} key={index}>
+              {tl}
+            </p>
+          ))
+        ) : (
+          <p css={styles.tagline}>{tagline}</p>
+        )}
+      </div>
       <div css={styles.spacer} />
       {children}
     </div>

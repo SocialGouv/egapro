@@ -5,6 +5,7 @@ import { RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 
+import { useColumnsWidth, useLayoutType } from "../components/GridContext";
 import { Modal } from "../components/ModalContext";
 import Page from "../components/Page";
 import ActionLink from "../components/ActionLink";
@@ -50,29 +51,37 @@ function HomeSimulateur({ location, history, code }: Props) {
       }
     }
   };
+
+  const layoutType = useLayoutType();
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
+
   return (
     <Page title="Bienvenue sur Index Egapro">
-      <div css={styles.codeCopyBloc}>
-        <div css={styles.codeCopyFakeInput}>
-          <span ref={textEl} css={styles.codeCopyText} onClick={onCopy}>
-            {link}
-          </span>
+      <div css={css({ width })}>
+        <div css={styles.codeCopyBloc}>
+          <div css={styles.codeCopyFakeInput}>
+            <span ref={textEl} css={styles.codeCopyText} onClick={onCopy}>
+              {link}
+            </span>
+          </div>
+          <div css={styles.codeCopyAction}>
+            <ActionLink onClick={onCopy}>copier le lien</ActionLink>
+          </div>
         </div>
-        <ActionLink onClick={onCopy}>copier le lien</ActionLink>
+
+        <p css={styles.tagline}>
+          Afin de pouvoir réaccéder à tout moment à votre calcul : pensez à
+          copier le code ci-dessus et le conserver précieusement.
+        </p>
+
+        <div css={styles.imageContainer}>
+          <div css={styles.image} />
+        </div>
+
+        <ActionBar>
+          <ButtonSimulatorLink to="/effectifs" label="suivant" />
+        </ActionBar>
       </div>
-
-      <p css={styles.tagline}>
-        Afin de pouvoir réaccéder à tout moment à votre calcul : pensez à copier
-        le code ci-dessus et le conserver précieusement.
-      </p>
-
-      <div css={styles.imageContainer}>
-        <div css={styles.image} />
-      </div>
-
-      <ActionBar>
-        <ButtonSimulatorLink to="/effectifs" label="suivant" />
-      </ActionBar>
 
       <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
         <ModalEmail closeModal={closeModal} code={code} />
@@ -87,19 +96,27 @@ const styles = {
     alignItems: "flex-end"
   }),
   codeCopyFakeInput: css({
-    flex: 1,
+    flexShrink: 1,
+    flexGrow: 1,
     marginRight: 20,
-    height: 38,
-    display: "flex",
-    alignItems: "center",
+
+    paddingTop: 9,
+    paddingBottom: 9,
     paddingLeft: globalStyles.grid.gutterWidth,
     paddingRight: globalStyles.grid.gutterWidth,
     background: "white",
-    border: `solid ${globalStyles.colors.default} 1px`
+    border: `solid ${globalStyles.colors.default} 1px`,
+
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis"
   }),
   codeCopyText: css({
     fontSize: 14,
     lineHeight: "17px"
+  }),
+  codeCopyAction: css({
+    flexShrink: 0
   }),
 
   tagline: css({

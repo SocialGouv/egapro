@@ -3,6 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
 
 import { IconWarning, IconCircleCross } from "./Icons";
+import { useColumnsWidth, useLayoutType } from "./GridContext";
 
 interface Props {
   title: string;
@@ -11,8 +12,10 @@ interface Props {
 }
 
 function InfoBloc({ title, text, icon = "warning" }: Props) {
+  const layoutType = useLayoutType();
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
   return (
-    <div css={styles.bloc}>
+    <div css={[styles.bloc, css({ width })]}>
       <p css={styles.blocTitle}>{title}</p>
       {text && (
         <div css={styles.blocBody}>

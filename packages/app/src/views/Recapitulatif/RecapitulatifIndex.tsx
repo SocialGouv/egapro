@@ -3,6 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
 
 import { IconWarning } from "../../components/Icons";
+import { useColumnsWidth, useLayoutType } from "../../components/GridContext";
 
 import globalStyles from "../../utils/globalStyles";
 
@@ -17,8 +18,10 @@ function RecapitulatifIndex({
   noteIndex,
   totalPointCalculable
 }: Props) {
+  const layoutType = useLayoutType();
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
   return (
-    <div css={styles.indexBloc}>
+    <div css={[styles.indexBloc, css({ width })]}>
       {allIndicateurValid ? (
         noteIndex ? (
           <InfoBloc title="Index égalité femmes-hommes" icon={null}>

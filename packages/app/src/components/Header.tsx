@@ -26,7 +26,7 @@ function Header() {
           rel="noopener noreferrer"
           css={[
             styles.containerLogo,
-            layoutType === "mobile" && styles.containerLogoMobile
+            layoutType === "desktop" && styles.containerLogoDesktop
           ]}
         >
           <Logo />
@@ -79,12 +79,12 @@ const styles = {
   }),
   containerLogo: css({
     marginLeft: "auto",
-    marginRight: 25,
+    marginRight: 0,
     textDecoration: "none",
     color: "currentColor"
   }),
-  containerLogoMobile: css({
-    marginRight: 0
+  containerLogoDesktop: css({
+    marginRight: 25
   }),
   headerInner: css({
     display: "flex",
