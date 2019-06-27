@@ -15,7 +15,10 @@ export const configuration = {
   mailPassword: asString(`MAIL_PASSWORD`),
   mailPort: asNumber(`MAIL_PORT`),
   mailUseTLS: asBoolean(`MAIL_USE_TLS`),
-  mailUsername: asString(`MAIL_USERNAME`)
+  mailUsername: asString(`MAIL_USERNAME`),
+
+  apiSentryDSN: asString(`API_SENTRY_DSN`),
+  apiSentryEnabled: asString(`API_SENTRY_ENABLED`)
 };
 
 function asString(arg: any): string {
