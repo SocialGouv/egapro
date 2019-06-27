@@ -84,7 +84,15 @@ function RecapitulatifIndicateurUn({
           indicateurSexeSurRepresente
         }}
       >
-        <RowLabelFull label="écart de rémunération par csp" />
+        <RowLabelFull
+          label={
+            <Fragment>
+              écart de rémunération par csp
+              <br />
+              (avant seuil de pertinence)
+            </Fragment>
+          }
+        />
         <RowLabels
           labels={[
             displayNameTranchesAges(TranchesAges.MoinsDe30ans),
