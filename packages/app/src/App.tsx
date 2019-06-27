@@ -291,6 +291,8 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
+    background:
+      "linear-gradient(180deg, #FFFFFF 79px, rgba(255, 255, 255, 0) 79px, #FFFFFF 100%), #EFF0FA",
     "@media print": {
       display: "block"
     }
@@ -329,8 +331,6 @@ const styles = {
     flexDirection: "row",
     flex: 1,
     position: "relative",
-    background:
-      "linear-gradient(0.08deg, #FFFFFF 0.09%, rgba(255, 255, 255, 0) 99.84%), #EFF0FA",
     "@media print": {
       overflow: "visible",
       display: "block",

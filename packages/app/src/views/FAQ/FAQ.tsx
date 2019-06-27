@@ -116,7 +116,8 @@ const styles = {
     flexShrink: 1,
     flexBasis: 0,
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    backgroundColor: "white"
   }),
   content: css({
     overflowY: "auto",
