@@ -115,8 +115,10 @@ function PageIndicateurUn({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Indicateur 1, écart de rémunération"
-      tagline="Les rémunérations annuelles moyennes des femmes et
-        des hommes doivent être renseignées par CSP et par tranche d’âge."
+      tagline={[
+        "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par CSP et par tranche d’âge.",
+        "La possibilité de répartir les salariés par niveau ou coefficient hiérarchique sera bientôt disponible sur cette page."
+      ]}
     >
       {children}
     </Page>
