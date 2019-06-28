@@ -38,7 +38,7 @@ function Home({ history, location, dispatch }: Props) {
         "L’Index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
         "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
         "Avec l'outil de simulation en ligne, calculez votre Index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées.",
-        "*Pour le moment, l’outil est configuré pour les entreprises de plus de 250 salariés : il le sera bientôt pour les entreprises de 50 à 250 salariés ! "
+        "Pour le moment, l’outil est configuré pour les entreprises de plus de 250 salariés : il le sera bientôt pour les entreprises de 50 à 250 salariés ! "
       ]}
     >
       <div css={styles.action}>
