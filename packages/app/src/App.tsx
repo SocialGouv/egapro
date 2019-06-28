@@ -333,6 +333,7 @@ const styles = {
   }),
   scroll: css({
     overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
     display: "flex",
     flexDirection: "row",
     flexGrow: 1,
