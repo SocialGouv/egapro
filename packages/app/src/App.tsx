@@ -302,10 +302,25 @@ const styles = {
   leftColumn: css({
     display: "flex",
     flexDirection: "column",
+
+    /* *** /!\ *** */
     flexGrow: 0,
     flexShrink: 1,
     flexBasis: globalStyles.grid.maxWidth - 375,
     minWidth: 0,
+    /*
+      Fix issue with IE11
+      the intention would be something like:
+
+      flexGrow: 1,
+      flexShrink: 1,
+      flexBasis: "auto",
+      maxWidth: globalStyles.grid.maxWidth - 375,
+
+      but the code above is a workaround described here:
+      https://github.com/philipwalton/flexbugs#flexbug-17
+    */
+
     "@media print": {
       display: "block"
     }
@@ -333,6 +348,7 @@ const styles = {
   }),
   scroll: css({
     overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
     display: "flex",
     flexDirection: "row",
     flexGrow: 1,

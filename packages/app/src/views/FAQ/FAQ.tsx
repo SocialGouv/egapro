@@ -121,6 +121,7 @@ const styles = {
   }),
   content: css({
     overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 0,
