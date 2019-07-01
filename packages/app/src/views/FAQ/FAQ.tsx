@@ -41,7 +41,11 @@ function mapDefaultPathnameToFAQPathname(
   return faqPath ? faqPath : location.pathname;
 }
 
-function FAQ() {
+interface Props {
+  closeMenu?: () => void;
+}
+
+function FAQ({ closeMenu }: Props) {
   const layoutType = useLayoutType();
   return (
     <Route
@@ -54,7 +58,7 @@ function FAQ() {
         };
         return (
           <div css={styles.container}>
-            <FAQHeader location={locationFAQ} />
+            <FAQHeader location={locationFAQ} closeMenu={closeMenu} />
 
             <div
               css={[

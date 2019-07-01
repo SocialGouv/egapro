@@ -6,13 +6,9 @@ import globalStyles from "../../../utils/globalStyles";
 import ActionLink from "../../../components/ActionLink";
 import { useLayoutType } from "../../../components/GridContext";
 
-function FAQHeaderBackButton({
-  history
-}: {
-  history: RouteComponentProps["history"];
-}) {
+function FAQHeaderBackButton({ onClick }: { onClick: () => void }) {
   return (
-    <ActionLink style={styles.buttonBack} onClick={() => history.goBack()}>
+    <ActionLink style={styles.buttonBack} onClick={onClick}>
       <span css={styles.backIcon}>◀</span> retour
     </ActionLink>
   );
@@ -27,9 +23,11 @@ function FAQHeaderHomeButton() {
 }
 
 function FAQHeader({
-  location
+  location,
+  closeMenu
 }: {
   location: RouteComponentProps["location"];
+  closeMenu?: () => void;
 }) {
   const layoutType = useLayoutType();
   return (
@@ -42,6 +40,13 @@ function FAQHeader({
     >
       <div css={styles.aroundTitle}>
         <Switch location={location}>
+          {closeMenu && (
+            <Route
+              exact
+              path="/"
+              render={() => <FAQHeaderBackButton onClick={closeMenu} />}
+            />
+          )}
           <Route
             exact
             path="/section/:section"
@@ -50,7 +55,9 @@ function FAQHeader({
           <Route
             exact
             path={["/part/:part/question/:indexQuestion", "/contact"]}
-            render={({ history }) => <FAQHeaderBackButton history={history} />}
+            render={({ history }) => (
+              <FAQHeaderBackButton onClick={() => history.goBack()} />
+            )}
           />
         </Switch>
       </div>
@@ -76,7 +83,7 @@ const styles = {
     marginLeft: 21
   }),
   containerMobile: css({
-    height: 44,
+    height: 56,
     marginRight: globalStyles.grid.gutterWidth,
     marginLeft: globalStyles.grid.gutterWidth
   }),
