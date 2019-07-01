@@ -15,6 +15,7 @@ import PageNotFound from "../views/PageNotFound";
 
 import Simulateur from "./Simulateur";
 import MainScrollView from "./MainScrollView";
+import MobileLayout from "./MobileLayout";
 
 interface Props {
   state: AppState | undefined;
@@ -25,12 +26,7 @@ function AppLayout({ state, dispatch }: Props) {
   const layoutType = useLayoutType();
 
   if (layoutType === "mobile") {
-    return (
-      <div css={styles.leftColumn}>
-        <Header />
-        <FAQ />
-      </div>
-    );
+    return <MobileLayout />;
   }
 
   return (

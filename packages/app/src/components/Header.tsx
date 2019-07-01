@@ -32,21 +32,14 @@ function Header() {
           <Logo />
         </a>
       </div>
-      <div
-        css={[
-          styles.headerInner,
-          layoutType === "mobile" && styles.headerInnerMobile
-        ]}
-      >
+      <div css={styles.headerInner}>
         <Link to="/" css={styles.title}>
           Index Egapro
         </Link>
-        {layoutType !== "mobile" && (
-          <p css={styles.subtitle}>
-            L’outil de calcul de votre index égalité professionnelle Femmes-
-            Hommes
-          </p>
-        )}
+        <p css={styles.subtitle}>
+          L’outil de calcul de votre index égalité professionnelle Femmes-
+          Hommes
+        </p>
       </div>
     </header>
   );
@@ -91,9 +84,6 @@ const styles = {
     flexDirection: "row",
     flexGrow: 1,
     alignItems: "baseline"
-  }),
-  headerInnerMobile: css({
-    flexDirection: "column"
   }),
   title: css({
     fontFamily: "'Gabriela', serif",
