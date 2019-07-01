@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { useState } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -7,15 +8,17 @@ import MobileHome from "../views/MobileHome";
 import FAQ from "../views/FAQ";
 
 function MobileLayout() {
-  const openMenu = () => {
-    console.log("openMenu");
-  };
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const openMenu = () => setIsMenuOpen(true);
+  const closeMenu = () => setIsMenuOpen(false);
   return (
     <div css={styles.mobileLayout}>
       <div css={styles.scroll}>
         <MobileHome openMenu={openMenu} />
       </div>
-      {/*<FAQ />*/}
+      <div css={[styles.faq, isMenuOpen && styles.faqOpen]}>
+        <FAQ closeMenu={closeMenu} />
+      </div>
     </div>
   );
 }
@@ -64,6 +67,26 @@ const styles = {
     flexShrink: 1,
     flexBasis: "0%",
     position: "relative"
+  }),
+  faq: css({
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    display: "flex",
+    flexDirection: "column",
+
+    visibility: "hidden",
+    transform: "translate3d(100%, 0, 0)",
+    transition: "visibility 0ms linear 250ms, transform 250ms ease-in-out",
+
+    boxShadow: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)"
+  }),
+  faqOpen: css({
+    visibility: "visible",
+    transform: "translate3d(0%, 0, 0)",
+    transitionDelay: "0ms"
   })
 };
 

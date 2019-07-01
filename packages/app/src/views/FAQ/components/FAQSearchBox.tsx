@@ -48,6 +48,7 @@ const styles = {
     paddingLeft: 52,
     paddingRight: 26,
     border: `solid ${globalStyles.colors.primary} 1px`,
+    borderRadius: 0,
     width: "100%",
     fontSize: 14,
     fontWeight: "bold",
