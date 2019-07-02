@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo, useCallback } from "react";
+import { memo, useCallback, Fragment } from "react";
 import { useForm } from "react-final-form-hooks";
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals.d";
 
@@ -27,8 +27,11 @@ function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
   const initialValues = { csp: parseBooleanStateValue(csp) };
 
   const saveForm = (formData: any) => {
-    const { csp } = formData;
-    updateIndicateurUnType({ csp: parseBooleanFormValue(csp) });
+    const { csp: cspFormData } = formData;
+
+    if (cspFormData !== csp) {
+      updateIndicateurUnType({ csp: parseBooleanFormValue(cspFormData) });
+    }
   };
 
   const { form, handleSubmit } = useForm({
@@ -36,14 +39,7 @@ function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
     onSubmit: () => {}
   });
 
-  form.subscribe(
-    ({ values, dirty }) => {
-      if (dirty) {
-        saveForm(values);
-      }
-    },
-    { values: true, dirty: true }
-  );
+  form.subscribe(({ values }) => saveForm(values), { values: true });
 
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
@@ -51,8 +47,16 @@ function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
         form={form}
         fieldName="csp"
         readOnly={readOnly}
-        labelTrue="je déclare en Catégories Socio-Professionnels"
-        labelFalse="je déclare en Niveau ou coefficient hiérarchique"
+        labelTrue={
+          <Fragment>
+            je déclare en <strong>Catégories Socio-Professionnels</strong>
+          </Fragment>
+        }
+        labelFalse={
+          <Fragment>
+            je déclare en <strong>Niveau ou coefficient hiérarchique</strong>
+          </Fragment>
+        }
       />
     </form>
   );

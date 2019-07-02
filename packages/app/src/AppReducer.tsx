@@ -24,7 +24,7 @@ const dataEffectif = mapEnum(
   })
 );
 
-const dataIndicateurUn = mapEnum(
+const dataIndicateurUnCsp = mapEnum(
   CategorieSocioPro,
   (categorieSocioPro: CategorieSocioPro) => ({
     categorieSocioPro,
@@ -35,6 +35,17 @@ const dataIndicateurUn = mapEnum(
     }))
   })
 );
+
+const dataIndicateurUnCoefGroup = {
+  name: "",
+  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+    trancheAge,
+    nombreSalariesFemmes: undefined,
+    nombreSalariesHommes: undefined,
+    remunerationAnnuelleBrutFemmes: undefined,
+    remunerationAnnuelleBrutHommes: undefined
+  }))
+};
 
 const dataIndicateurDeux = mapEnum(
   CategorieSocioPro,
@@ -62,7 +73,7 @@ const defaultState: AppState = {
   indicateurUn: {
     formValidated: "None",
     csp: true,
-    remunerationAnnuelle: dataIndicateurUn,
+    remunerationAnnuelle: dataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
     coefficient: []
   },
@@ -148,6 +159,27 @@ function AppReducer(
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, remunerationAnnuelle }
+      };
+    }
+    case "updateIndicateurUnAddGroupCoef": {
+      const newGroupCoef = { ...dataIndicateurUnCoefGroup }; // Clone to avoid mutable issues
+      const coefficient = [...state.indicateurUn.coefficient, newGroupCoef];
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, coefficient }
+      };
+    }
+    case "updateIndicateurUnDeleteGroupCoef": {
+      const coefficient = [
+        ...state.indicateurUn.coefficient.slice(0, action.index),
+        ...state.indicateurUn.coefficient.slice(
+          action.index + 1,
+          state.indicateurUn.coefficient.length
+        )
+      ];
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, coefficient }
       };
     }
     case "updateIndicateurUnCoef": {

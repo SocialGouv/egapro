@@ -12,16 +12,18 @@ export const hasFieldError = (meta: FieldRenderProps["meta"]) =>
 
 interface Props {
   field: FieldRenderProps;
+  placeholder?: string;
   style?: any;
 }
 
-function Input({ field: { input, meta }, style }: Props) {
+function Input({ field: { input, meta }, placeholder, style }: Props) {
   const error = hasFieldError(meta);
 
   return (
     <input
       css={[styles.input, style, error && styles.inputError]}
       autoComplete="off"
+      placeholder={placeholder}
       id={input.name}
       {...input}
     />

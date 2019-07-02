@@ -9,6 +9,7 @@ import Page from "../../components/Page";
 
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm";
 import IndicateurUnCsp from "./IndicateurUnCsp";
+import IndicateurUnCoef from "./IndicateurUnCoef";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -21,7 +22,11 @@ function IndicateurUn({ state, dispatch }: Props) {
   return (
     <PageIndicateurUn>
       <IndicateurUnTypeForm csp={csp} readOnly={readOnly} dispatch={dispatch} />
-      <IndicateurUnCsp state={state} dispatch={dispatch} />
+      {csp ? (
+        <IndicateurUnCsp state={state} dispatch={dispatch} />
+      ) : (
+        <IndicateurUnCoef state={state} dispatch={dispatch} />
+      )}
     </PageIndicateurUn>
   );
 }
