@@ -5,7 +5,7 @@ import { useForm } from "react-final-form-hooks";
 import {
   CategorieSocioPro,
   TranchesAges,
-  ActionIndicateurUnData,
+  ActionIndicateurUnCspData,
   FormState
 } from "../../globals.d";
 
@@ -26,7 +26,7 @@ import {
 interface Props {
   ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroup>;
   readOnly: boolean;
-  updateIndicateurUn: (data: ActionIndicateurUnData) => void;
+  updateIndicateurUn: (data: ActionIndicateurUnCspData) => void;
   validateIndicateurUn: (valid: FormState) => void;
 }
 

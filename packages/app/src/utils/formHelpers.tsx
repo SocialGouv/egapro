@@ -30,6 +30,12 @@ export const parseFloatFormValue = (
 export const parseFloatStateValue = (value: number | undefined) =>
   value === undefined ? "" : String(fractionToPercentage(value));
 
+// Boolean PARSE
+
+export const parseBooleanFormValue = (value: string) => value === "true";
+
+export const parseBooleanStateValue = (value: boolean) => String(value);
+
 // VALIDATION
 
 export const required = (value: string): boolean => (value ? false : true);

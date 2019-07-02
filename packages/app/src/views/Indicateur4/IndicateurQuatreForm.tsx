@@ -11,6 +11,8 @@ import {
 import {
   parseIntFormValue,
   parseIntStateValue,
+  parseBooleanFormValue,
+  parseBooleanStateValue,
   required,
   mustBeNumber,
   maxNumber
@@ -93,7 +95,7 @@ function IndicateurQuatreForm({
   validateIndicateurQuatre
 }: Props) {
   const initialValues = {
-    presenceCongeMat: String(indicateurQuatre.presenceCongeMat),
+    presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),
     nombreSalarieesPeriodeAugmentation: parseIntStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
     ),
@@ -110,7 +112,7 @@ function IndicateurQuatreForm({
     } = formData;
 
     updateIndicateurQuatre({
-      presenceCongeMat: presenceCongeMat === "true",
+      presenceCongeMat: parseBooleanFormValue(presenceCongeMat),
       nombreSalarieesPeriodeAugmentation: parseIntFormValue(
         nombreSalarieesPeriodeAugmentation
       ),

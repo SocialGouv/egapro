@@ -23,7 +23,9 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import {
   parseFloatFormValue,
-  parseFloatStateValue
+  parseFloatStateValue,
+  parseBooleanFormValue,
+  parseBooleanStateValue
 } from "../../utils/formHelpers";
 import {
   displayNameCategorieSocioPro
@@ -84,7 +86,7 @@ function IndicateurTroisForm({
         [tauxPromotionHommesName]: tauxPromotionHommesValue
       };
     },
-    { presencePromotion: String(presencePromotion) }
+    { presencePromotion: parseBooleanStateValue(presencePromotion) }
   );
 
   const saveForm = (formData: any) => {
@@ -106,7 +108,7 @@ function IndicateurTroisForm({
     );
     updateIndicateurTrois({
       tauxPromotion,
-      presencePromotion: presencePromotion === "true"
+      presencePromotion: parseBooleanFormValue(presencePromotion)
     });
   };
 

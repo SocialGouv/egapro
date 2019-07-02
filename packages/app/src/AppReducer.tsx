@@ -1,3 +1,4 @@
+import deepmerge from "deepmerge";
 import {
   AppState,
   ActionType,
@@ -5,6 +6,11 @@ import {
   TranchesAges
 } from "./globals.d";
 import mapEnum from "./utils/mapEnum";
+
+const overwriteMerge = (
+  destinationArray: Array<any>,
+  sourceArray: Array<any>
+) => sourceArray;
 
 const dataEffectif = mapEnum(
   CategorieSocioPro,
@@ -55,7 +61,10 @@ const defaultState: AppState = {
   },
   indicateurUn: {
     formValidated: "None",
-    remunerationAnnuelle: dataIndicateurUn
+    csp: true,
+    remunerationAnnuelle: dataIndicateurUn,
+    coefficientGroupFormValidated: "None",
+    coefficient: []
   },
   indicateurDeux: {
     formValidated: "None",
@@ -88,7 +97,9 @@ function AppReducer(
     return undefined;
   }
   if (action.type === "initiateState") {
-    return Object.assign({}, defaultState, action.data);
+    return deepmerge(defaultState, action.data, {
+      arrayMerge: overwriteMerge
+    });
   }
   if (!state) {
     return state;
@@ -125,11 +136,25 @@ function AppReducer(
         effectif: { ...state.effectif, formValidated: action.valid }
       };
     }
-    case "updateIndicateurUn": {
+    case "updateIndicateurUnType": {
+      const { csp } = action.data;
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, csp }
+      };
+    }
+    case "updateIndicateurUnCsp": {
       const { remunerationAnnuelle } = action.data;
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, remunerationAnnuelle }
+      };
+    }
+    case "updateIndicateurUnCoef": {
+      const { coefficient } = action.data;
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, coefficient }
       };
     }
     case "validateIndicateurUn": {
