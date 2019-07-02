@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useRef, useState /*, useEffect*/ } from "react";
+import { useRef, useState, /*, useEffect*/
+useEffect} from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
@@ -23,15 +24,15 @@ function HomeSimulateur({ location, history, code }: Props) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const closeModal = () => setModalIsOpen(false);
 
-  // useEffect(() => {
-  //   if (location.state && location.state.openModalEmail) {
-  //     history.replace(location.pathname, {
-  //       ...(location.state && location.state),
-  //       openModalEmail: false
-  //     });
-  //     setModalIsOpen(true);
-  //   }
-  // }, [location, history]);
+  useEffect(() => {
+    if (location.state && location.state.openModalEmail) {
+      history.replace(location.pathname, {
+        ...(location.state && location.state),
+        openModalEmail: false
+      });
+      setModalIsOpen(true);
+    }
+  }, [location, history]);
 
   const link = window.location.href;
   const onCopy = () => {
