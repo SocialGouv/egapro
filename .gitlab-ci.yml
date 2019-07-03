@@ -20,11 +20,31 @@ variables:
   MEMCACHED_PORT: 11212
 
 stages:
+  - "Code Quality"
   - "Prepare"
   - "Registration"
   - "Deploy Egapro"
   - "Send Url to GitHub"
   - "Delete K8S objects"
+
+#
+.quality_stage: &quality_stage
+  stage: "Code Quality"
+  image: node:10-alpine
+  before_script:
+    - yarn --frozen-lockfile
+#
+
+Quality tests:
+  <<: *quality_stage
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+  script:
+    - yarn build
+    - yarn lint
+    - yarn test
 
 ###########################################
 ###               PREPARE               ###
