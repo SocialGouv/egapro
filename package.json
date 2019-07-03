@@ -5,7 +5,8 @@
     "lint": "lerna run lint --parallel",
     "start": "lerna run start --parallel",
     "release": "cd packages/app && yarn release",
-    "test": "lerna run test --parallel"
+    "test": "lerna run test --parallel",
+    "coverage": "lerna run test --parallel -- --coverage"
   },
   "devDependencies": {
     "lerna": "^3.14.1"
