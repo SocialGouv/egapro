@@ -1,10 +1,10 @@
 ---
 include:
-- '/k8s/app/.deploy-egapro-app.yml'
-- '/k8s/api/.deploy-egapro-api.yml'
-- '/k8s/postgres/.deploy-egapro-postgres.yml'
-- '/k8s/memcached/.deploy-egapro-memcached.yml'
-- '/k8s/kinto/.deploy-egapro-kinto.yml'
+  - "/k8s/app/.deploy-egapro-app.yml"
+  - "/k8s/api/.deploy-egapro-api.yml"
+  - "/k8s/postgres/.deploy-egapro-postgres.yml"
+  - "/k8s/memcached/.deploy-egapro-memcached.yml"
+  - "/k8s/kinto/.deploy-egapro-kinto.yml"
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -20,12 +20,11 @@ variables:
   MEMCACHED_PORT: 11212
 
 stages:
-- "Prepare"
-- "Registration"
-- "Deploy Egapro"
-- "Send Url to GitHub"
-- "Delete K8S objects"
-
+  - "Prepare"
+  - "Registration"
+  - "Deploy Egapro"
+  - "Send Url to GitHub"
+  - "Delete K8S objects"
 
 ###########################################
 ###               PREPARE               ###
@@ -37,12 +36,12 @@ stages:
     name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
     entrypoint: [""]
   before_script:
-  - envsubst < k8s/scripts/get-deploy-id.sh > k8s/scripts/get-github-deploy-id.sh
+    - envsubst < k8s/scripts/get-deploy-id.sh > k8s/scripts/get-github-deploy-id.sh
   script:
-  - sh k8s/scripts/get-github-deploy-id.sh
+    - sh k8s/scripts/get-github-deploy-id.sh
   artifacts:
     paths:
-    - github_deploy_id
+      - github_deploy_id
 #
 
 Get Github Id (dev):
@@ -51,7 +50,7 @@ Get Github Id (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   except:
-  - master
+    - master
 
 Get Github Id (prod):
   <<: *get_github_id_stage
@@ -59,8 +58,7 @@ Get Github Id (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
-
+    - master
 
 ###########################################
 ###       REGISTER DOCKER IMAGES        ###
@@ -71,14 +69,14 @@ Get Github Id (prod):
   stage: "Registration"
   image: docker:$DOCKER_VERSION
   services:
-  - docker:$DOCKER_VERSION-dind
+    - docker:$DOCKER_VERSION-dind
   before_script:
-  - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
-  - docker pull $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA || true
+    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+    - docker pull $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA || true
   script:
-  - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
-  - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA -f $DOCKERFILE_PATH $CONTEXT
-  - docker push $IMAGE_NAME
+    - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
+    - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA -f $DOCKERFILE_PATH $CONTEXT
+    - docker push $IMAGE_NAME
 #
 
 Register api image:
@@ -101,7 +99,6 @@ Register init kinto image:
     CONTEXT: packages/kinto
     DOCKERFILE_PATH: packages/kinto/Dockerfile
     IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
-
 
 ###########################################
 ###            DEPLOY TO K8S            ###
@@ -231,7 +228,6 @@ Deploy @egapro/kinto (prod):
   only:
     - tags
 
-
 ###########################################
 ###         SEND URL TO GITHUB          ###
 ###########################################
@@ -243,17 +239,17 @@ Deploy @egapro/kinto (prod):
     name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
     entrypoint: [""]
   script:
-  - export DEPLOY_ID=$(cat github_deploy_id)
-  - envsubst < k8s/scripts/send-url.sh > k8s/scripts/send-url-to-github.sh
-  - sh k8s/scripts/send-url-to-github.sh $CI_COMMIT_REF_NAME
+    - export DEPLOY_ID=$(cat github_deploy_id)
+    - envsubst < k8s/scripts/send-url.sh > k8s/scripts/send-url-to-github.sh
+    - sh k8s/scripts/send-url-to-github.sh $CI_COMMIT_REF_NAME
 #
 
 Send deployment url to Github (dev):
   <<: *send_url_to_github_stage
   before_script:
-  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export HASH_BRANCH_NAME=$HASH_BRANCH_NAME
-  - export URL=http://$HASH_BRANCH_NAME-egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
+    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+    - export HASH_BRANCH_NAME=$HASH_BRANCH_NAME
+    - export URL=http://$HASH_BRANCH_NAME-egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
   environment:
     name: $DEV_ENVIRONMENT_NAME
   only:
@@ -261,16 +257,14 @@ Send deployment url to Github (dev):
   except:
     - master
 
-
 Send deployment url to Github (prod):
   <<: *send_url_to_github_stage
   before_script:
-  - export URL=http://egapro.${CI_ENVIRONMENT_NAME}/
+    - export URL=http://egapro.${CI_ENVIRONMENT_NAME}/
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
     - tags
-
 
 ###########################################
 ###     DELETE USELESS K8S OBJECTS      ###
@@ -282,10 +276,10 @@ Delete useless k8s objects:
     name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
     entrypoint: [""]
   before_script:
-  - /apps/create-kubeconfig.sh
+    - /apps/create-kubeconfig.sh
   script:
-  - python3 k8s/scripts/delete-k8s-objects.py
+    - python3 k8s/scripts/delete-k8s-objects.py
   environment:
     name: $DEV_ENVIRONMENT_NAME
   only:
-  - master
+    - master
