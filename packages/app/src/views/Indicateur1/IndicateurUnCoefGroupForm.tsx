@@ -4,14 +4,11 @@ import { memo } from "react";
 import { FormApi } from "final-form";
 import { useForm, useField } from "react-final-form-hooks";
 import {
-  CategorieSocioPro,
-  TranchesAges,
   GroupeCoefficient,
   ActionIndicateurUnCoefData,
   FormState
 } from "../../globals.d";
 
-import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
 import { required } from "../../utils/formHelpers";
 import globalStyles from "../../utils/globalStyles";
 
