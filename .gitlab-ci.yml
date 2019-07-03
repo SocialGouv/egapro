@@ -23,7 +23,8 @@ stages:
   - "Code Quality"
   - "Prepare"
   - "Registration"
-  - "Deploy Egapro"
+  - "Deploy dev"
+  - "Deploy prod"
   - "Send Url to GitHub"
   - "Delete K8S objects"
 
@@ -52,6 +53,7 @@ Quality tests:
 
 #
 .get_github_id_stage: &get_github_id_stage
+  stage: "Prepare"
   image:
     name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
     entrypoint: [""]
@@ -66,19 +68,19 @@ Quality tests:
 
 Get Github Id (dev):
   <<: *get_github_id_stage
-  stage: "Prepare"
   environment:
     name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
   except:
     - master
 
 Get Github Id (prod):
   <<: *get_github_id_stage
-  stage: "Prepare"
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-    - master
+    - tags
 
 ###########################################
 ###       REGISTER DOCKER IMAGES        ###
@@ -126,7 +128,6 @@ Register init kinto image:
 
 #
 .deploy_stage: &deploy_stage
-  stage: "Deploy Egapro"
   dependencies: []
   variables: &deploy_stage_variables
     EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
@@ -138,6 +139,7 @@ Register init kinto image:
 Deploy @egapro/app (dev):
   <<: *deploy_stage
   extends: .deploy-egapro-app-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $APP_PORT
@@ -151,6 +153,7 @@ Deploy @egapro/app (dev):
 Deploy @egapro/api (dev):
   <<: *deploy_stage
   extends: .deploy-egapro-api-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $API_PORT
@@ -164,6 +167,7 @@ Deploy @egapro/api (dev):
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
   extends: .deploy-egapro-postgres-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $POSTGRES_PORT
@@ -177,6 +181,7 @@ Deploy @egapro/postgres (dev):
 Deploy @egapro/memcached (dev):
   <<: *deploy_stage
   extends: .deploy-egapro-memcached-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $MEMCACHED_PORT
@@ -190,6 +195,7 @@ Deploy @egapro/memcached (dev):
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
   extends: .deploy-egapro-kinto-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $KINTO_PORT
@@ -206,6 +212,7 @@ Deploy @egapro/kinto (dev):
 Deploy @egapro/app (prod):
   <<: *deploy_stage
   extends: .deploy-egapro-app-k8s-prod
+  stage: "Deploy prod"
   variables:
     <<: *deploy_stage_variables
     PORT: $APP_PORT
@@ -217,6 +224,7 @@ Deploy @egapro/app (prod):
 Deploy @egapro/api (prod):
   <<: *deploy_stage
   extends: .deploy-egapro-api-k8s-prod
+  stage: "Deploy prod"
   variables:
     <<: *deploy_stage_variables
     PORT: $API_PORT
@@ -228,6 +236,7 @@ Deploy @egapro/api (prod):
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
   extends: .deploy-egapro-memcached-k8s-prod
+  stage: "Deploy prod"
   variables:
     <<: *deploy_stage_variables
     PORT: $MEMCACHED_PORT
@@ -239,6 +248,7 @@ Deploy @egapro/memcached (prod):
 Deploy @egapro/kinto (prod):
   <<: *deploy_stage
   extends: .deploy-egapro-kinto-k8s-prod
+  stage: "Deploy prod"
   variables:
     <<: *deploy_stage_variables
     PORT: $KINTO_PORT
