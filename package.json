@@ -4,10 +4,14 @@
     "build": "lerna run build",
     "lint": "lerna run lint --parallel",
     "start": "lerna run start --parallel",
-    "release": "cd packages/app && yarn release"
+    "release": "cd packages/app && yarn release",
+    "test": "lerna run test --parallel"
   },
   "devDependencies": {
     "lerna": "^3.14.1"
+  },
+  "resolutions": {
+    "jest": "24.7.1"
   },
   "workspaces": [
     "packages/*"

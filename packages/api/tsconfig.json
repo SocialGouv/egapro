@@ -19,5 +19,6 @@
     "sourceMap": true,
     "strict": true,
     "target": "esnext"
-  }
+  },
+  "files": ["./src/server.ts"]
 }
