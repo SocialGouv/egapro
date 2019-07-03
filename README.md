@@ -1,5 +1,9 @@
 # EgaPro
 
+[![pipeline status](https://gitlab.factory.social.gouv.fr/SocialGouv/egapro/badges/master/pipeline.svg)](https://gitlab.factory.social.gouv.fr/SocialGouv/egapro/commits/master)
+[![Build Status](https://travis-ci.com/SocialGouv/egapro.svg?branch=master)](https://travis-ci.com/SocialGouv/egapro)
+[![codecov](https://codecov.io/gh/SocialGouv/egapro/branch/master/graph/badge.svg)](https://codecov.io/gh/SocialGouv/egapro)
+
 > Calcul de l'indexe d'égalité homme / femme dans les entreprises
 
 ## Environnement de développement
