@@ -23,14 +23,14 @@ interface Props {
 }
 
 function IndicateurUnCoef({ state, dispatch }: Props) {
-  const updateIndicateurUnAddGroupCoef = useCallback(
-    () => dispatch({ type: "updateIndicateurUnAddGroupCoef" }),
+  const updateIndicateurUnCoefAddGroup = useCallback(
+    () => dispatch({ type: "updateIndicateurUnCoefAddGroup" }),
     [dispatch]
   );
 
-  const updateIndicateurUnDeleteGroupCoef = useCallback(
+  const updateIndicateurUnCoefDeleteGroup = useCallback(
     (index: number) =>
-      dispatch({ type: "updateIndicateurUnDeleteGroupCoef", index }),
+      dispatch({ type: "updateIndicateurUnCoefDeleteGroup", index }),
     [dispatch]
   );
 
@@ -80,8 +80,8 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
     <IndicateurUnCoefGroupForm
       coefficient={state.indicateurUn.coefficient}
       readOnly={state.indicateurUn.formValidated === "Valid"}
-      updateIndicateurUnAddGroupCoef={updateIndicateurUnAddGroupCoef}
-      updateIndicateurUnDeleteGroupCoef={updateIndicateurUnDeleteGroupCoef}
+      updateIndicateurUnCoefAddGroup={updateIndicateurUnCoefAddGroup}
+      updateIndicateurUnCoefDeleteGroup={updateIndicateurUnCoefDeleteGroup}
       updateIndicateurUnCoef={updateIndicateurUnCoef}
       validateIndicateurUnCoefGroup={validateIndicateurUnCoefGroup}
     />

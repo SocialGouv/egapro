@@ -18,11 +18,13 @@ import ActionLink from "../../components/ActionLink";
 import ActionBar from "../../components/ActionBar";
 import FormSubmit from "../../components/FormSubmit";
 
+const getFieldName = (index: number): string => "group" + index;
+
 interface Props {
   coefficient: Array<GroupeCoefficient>;
   readOnly: boolean;
-  updateIndicateurUnAddGroupCoef: () => void;
-  updateIndicateurUnDeleteGroupCoef: (index: number) => void;
+  updateIndicateurUnCoefAddGroup: () => void;
+  updateIndicateurUnCoefDeleteGroup: (index: number) => void;
   updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void;
   validateIndicateurUnCoefGroup: (valid: FormState) => void;
 }
@@ -30,13 +32,13 @@ interface Props {
 function IndicateurUnCoefGroupForm({
   coefficient,
   readOnly,
-  updateIndicateurUnAddGroupCoef,
-  updateIndicateurUnDeleteGroupCoef,
+  updateIndicateurUnCoefAddGroup,
+  updateIndicateurUnCoefDeleteGroup,
   updateIndicateurUnCoef,
   validateIndicateurUnCoefGroup
 }: Props) {
   const infoFields = coefficient.map((groupCoef, index) => [
-    "group" + index,
+    getFieldName(index),
     groupCoef.name
   ]);
   const initialValues = infoFields.reduce(
@@ -45,8 +47,13 @@ function IndicateurUnCoefGroupForm({
   );
 
   const saveForm = (formData: any) => {
-    console.log(formData);
-    // updateIndicateurUnCoef({ remunerationAnnuelle });
+    if (Object.entries(formData).length !== coefficient.length) {
+      return;
+    }
+    const newCoefficient = coefficient.map((groupCoef, index) => ({
+      name: formData[getFieldName(index)]
+    }));
+    updateIndicateurUnCoef({ coefficient: newCoefficient });
   };
 
   const onSubmit = (formData: any) => {
@@ -79,12 +86,28 @@ function IndicateurUnCoefGroupForm({
           name={name}
           form={form}
           index={index}
-          deleteGroup={updateIndicateurUnDeleteGroupCoef}
+          deleteGroup={updateIndicateurUnCoefDeleteGroup}
         />
       ))}
 
-      <ActionLink onClick={updateIndicateurUnAddGroupCoef}>
-        ajouter un niveau ou coefficient hiérarchique
+      <ActionLink onClick={updateIndicateurUnCoefAddGroup} style={styles.add}>
+        <div css={styles.addIcon}>
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 26 26"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+        <span>ajouter un niveau ou coefficient hiérarchique</span>
       </ActionLink>
 
       <ActionBar>
@@ -150,6 +173,24 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start"
+  }),
+
+  add: css({
+    display: "flex",
+    alignItems: "center",
+    marginTop: 46 - 18 - 5,
+    textDecoration: "none"
+  }),
+  addIcon: css({
+    width: 32,
+    height: 32,
+    marginRight: 16,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: globalStyles.colors.default,
+    borderRadius: 16
   }),
 
   inputField: css({

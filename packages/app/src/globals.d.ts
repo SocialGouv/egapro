@@ -60,10 +60,10 @@ export type ActionType =
       data: ActionIndicateurUnCspData;
     }
   | {
-      type: "updateIndicateurUnAddGroupCoef";
+      type: "updateIndicateurUnCoefAddGroup";
     }
   | {
-      type: "updateIndicateurUnDeleteGroupCoef";
+      type: "updateIndicateurUnCoefDeleteGroup";
       index: number;
     }
   | {
@@ -124,7 +124,9 @@ export type ActionIndicateurUnCspData = {
 };
 
 export type ActionIndicateurUnCoefData = {
-  coefficient: Array<GroupeCoefficient>;
+  coefficient:
+    | Array<{ name: string }>
+    | Array<{ tranchesAges: Array<GroupTranchesAgesCoefficient> }>;
 };
 
 export type ActionIndicateurDeuxData = {

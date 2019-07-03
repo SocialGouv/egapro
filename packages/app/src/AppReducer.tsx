@@ -6,11 +6,7 @@ import {
   TranchesAges
 } from "./globals.d";
 import mapEnum from "./utils/mapEnum";
-
-const overwriteMerge = (
-  destinationArray: Array<any>,
-  sourceArray: Array<any>
-) => sourceArray;
+import { overwriteMerge, combineMerge } from "./utils/merge";
 
 const dataEffectif = mapEnum(
   CategorieSocioPro,
@@ -161,7 +157,7 @@ function AppReducer(
         indicateurUn: { ...state.indicateurUn, remunerationAnnuelle }
       };
     }
-    case "updateIndicateurUnAddGroupCoef": {
+    case "updateIndicateurUnCoefAddGroup": {
       const newGroupCoef = { ...dataIndicateurUnCoefGroup }; // Clone to avoid mutable issues
       const coefficient = [...state.indicateurUn.coefficient, newGroupCoef];
       return {
@@ -169,7 +165,7 @@ function AppReducer(
         indicateurUn: { ...state.indicateurUn, coefficient }
       };
     }
-    case "updateIndicateurUnDeleteGroupCoef": {
+    case "updateIndicateurUnCoefDeleteGroup": {
       const coefficient = [
         ...state.indicateurUn.coefficient.slice(0, action.index),
         ...state.indicateurUn.coefficient.slice(
@@ -184,9 +180,17 @@ function AppReducer(
     }
     case "updateIndicateurUnCoef": {
       const { coefficient } = action.data;
+
+      const mergedCoefficient = deepmerge(
+        state.indicateurUn.coefficient,
+        // @ts-ignore
+        coefficient,
+        { arrayMerge: combineMerge }
+      );
+      // @ts-ignore
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, coefficient }
+        indicateurUn: { ...state.indicateurUn, coefficient: mergedCoefficient }
       };
     }
     case "validateIndicateurUn": {
