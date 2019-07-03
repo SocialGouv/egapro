@@ -126,8 +126,10 @@ Deploy @egapro/app (dev):
     PORT: $APP_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
   except:
-  - master
+    - master
 
 Deploy @egapro/api (dev):
   <<: *deploy_stage
@@ -137,8 +139,10 @@ Deploy @egapro/api (dev):
     PORT: $API_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
   except:
-  - master
+    - master
 
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
@@ -148,8 +152,10 @@ Deploy @egapro/postgres (dev):
     PORT: $POSTGRES_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
   except:
-  - master
+    - master
 
 Deploy @egapro/memcached (dev):
   <<: *deploy_stage
@@ -159,8 +165,10 @@ Deploy @egapro/memcached (dev):
     PORT: $MEMCACHED_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
   except:
-  - master
+    - master
 
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
@@ -171,8 +179,10 @@ Deploy @egapro/kinto (dev):
     CACHE_PORT: $MEMCACHED_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
   except:
-  - master
+    - master
 
 # Prod Environment
 
@@ -185,7 +195,7 @@ Deploy @egapro/app (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+    - tags
 
 Deploy @egapro/api (prod):
   <<: *deploy_stage
@@ -196,7 +206,7 @@ Deploy @egapro/api (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+    - tags
 
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
@@ -207,9 +217,9 @@ Deploy @egapro/memcached (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+    - tags
 
-Deploy @egapro/kinto (pro):
+Deploy @egapro/kinto (prod):
   <<: *deploy_stage
   extends: .deploy-egapro-kinto-k8s-prod
   variables:
@@ -219,7 +229,7 @@ Deploy @egapro/kinto (pro):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+    - tags
 
 
 ###########################################
@@ -246,8 +256,10 @@ Send deployment url to Github (dev):
   - export URL=http://$HASH_BRANCH_NAME-egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
   environment:
     name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
   except:
-  - master
+    - master
 
 
 Send deployment url to Github (prod):
@@ -257,7 +269,7 @@ Send deployment url to Github (prod):
   environment:
     name: $PROD_ENVIRONMENT_NAME
   only:
-  - master
+    - tags
 
 
 ###########################################
