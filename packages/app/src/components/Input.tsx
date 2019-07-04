@@ -36,6 +36,7 @@ const styles = {
     border: `solid ${globalStyles.colors.default} 1px`,
     width: "100%",
     fontSize: 14,
+    lineHeight: "17px",
     paddingLeft: 22,
     paddingRight: 22
   }),

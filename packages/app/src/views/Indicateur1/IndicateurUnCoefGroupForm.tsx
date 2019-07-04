@@ -15,6 +15,7 @@ import globalStyles from "../../utils/globalStyles";
 import { useColumnsWidth, useLayoutType } from "../../components/GridContext";
 import Input, { hasFieldError } from "../../components/Input";
 import ActionLink from "../../components/ActionLink";
+import ButtonAction from "../../components/ButtonAction";
 import ActionBar from "../../components/ActionBar";
 import FormSubmit from "../../components/FormSubmit";
 
@@ -27,6 +28,7 @@ interface Props {
   updateIndicateurUnCoefDeleteGroup: (index: number) => void;
   updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void;
   validateIndicateurUnCoefGroup: (valid: FormState) => void;
+  navigateToEffectif: () => void;
 }
 
 function IndicateurUnCoefGroupForm({
@@ -35,7 +37,8 @@ function IndicateurUnCoefGroupForm({
   updateIndicateurUnCoefAddGroup,
   updateIndicateurUnCoefDeleteGroup,
   updateIndicateurUnCoef,
-  validateIndicateurUnCoefGroup
+  validateIndicateurUnCoefGroup,
+  navigateToEffectif
 }: Props) {
   const infoFields = coefficient.map((groupCoef, index) => [
     getFieldName(index),
@@ -87,37 +90,52 @@ function IndicateurUnCoefGroupForm({
           form={form}
           index={index}
           deleteGroup={updateIndicateurUnCoefDeleteGroup}
+          readOnly={readOnly}
         />
       ))}
 
-      <ActionLink onClick={updateIndicateurUnCoefAddGroup} style={styles.add}>
-        <div css={styles.addIcon}>
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 26 26"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-        <span>ajouter un niveau ou coefficient hiérarchique</span>
-      </ActionLink>
+      {readOnly ? (
+        <div css={styles.spacerAdd} />
+      ) : (
+        <ActionLink onClick={updateIndicateurUnCoefAddGroup} style={styles.add}>
+          <div css={styles.addIcon}>
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 26 26"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <span>ajouter un niveau ou coefficient hiérarchique</span>
+        </ActionLink>
+      )}
 
-      <ActionBar>
-        <FormSubmit
-          hasValidationErrors={hasValidationErrors}
-          submitFailed={submitFailed}
-          errorMessage="vous ne pouvez pas valider les groupes
+      {readOnly ? (
+        <ActionBar>
+          <ButtonAction onClick={navigateToEffectif} label="suivant" />
+          <div css={styles.spacerActionBar} />
+          <ActionLink onClick={() => validateIndicateurUnCoefGroup("None")}>
+            modifier les groupes
+          </ActionLink>
+        </ActionBar>
+      ) : (
+        <ActionBar>
+          <FormSubmit
+            hasValidationErrors={hasValidationErrors}
+            submitFailed={submitFailed}
+            errorMessage="vous ne pouvez pas valider les groupes
                 tant que vous n’avez pas rempli tous les champs"
-        />
-      </ActionBar>
+          />
+        </ActionBar>
+      )}
     </form>
   );
 }
@@ -138,12 +156,14 @@ function InputField({
   name,
   form,
   index,
-  deleteGroup
+  deleteGroup,
+  readOnly
 }: {
   name: string;
   form: FormApi;
   index: number;
   deleteGroup: (index: number) => void;
+  readOnly: boolean;
 }) {
   const field = useField(name, form, validate);
   const error = hasFieldError(field.meta);
@@ -155,12 +175,20 @@ function InputField({
       >
         {`Groupe ${index + 1}`}
       </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} placeholder="Donnez un nom à votre groupe" />
-        <ActionLink onClick={() => deleteGroup(index)} style={styles.delete}>
-          supprimer le groupe
-        </ActionLink>
-      </div>
+
+      {readOnly ? (
+        <div css={styles.fieldRow}>
+          <div css={styles.fakeInput}>{field.input.value}</div>
+        </div>
+      ) : (
+        <div css={styles.fieldRow}>
+          <Input field={field} placeholder="Donnez un nom à votre groupe" />
+          <ActionLink onClick={() => deleteGroup(index)} style={styles.delete}>
+            supprimer le groupe
+          </ActionLink>
+        </div>
+      )}
+
       <p css={styles.error}>
         {error && "vous devez donner un nom à votre groupe"}
       </p>
@@ -171,8 +199,7 @@ function InputField({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start"
+    flexDirection: "column"
   }),
 
   add: css({
@@ -222,11 +249,28 @@ const styles = {
     fontSize: 12,
     fontStyle: "italic",
     lineHeight: "15px"
+  }),
+
+  fakeInput: css({
+    alignSelf: "center",
+    fontSize: 14,
+    lineHeight: "17px",
+    paddingLeft: 23,
+    paddingRight: 23
+  }),
+
+  spacerActionBar: css({
+    width: 66
+  }),
+  spacerAdd: css({
+    height: 32,
+    marginTop: 46 - 18 - 5
   })
 };
 
 export default memo(
   IndicateurUnCoefGroupForm,
   (prevProps, nextProps) =>
-    prevProps.coefficient.length === nextProps.coefficient.length
+    prevProps.coefficient.length === nextProps.coefficient.length &&
+    prevProps.readOnly === nextProps.readOnly
 );

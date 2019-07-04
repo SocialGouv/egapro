@@ -193,6 +193,15 @@ function AppReducer(
         indicateurUn: { ...state.indicateurUn, coefficient: mergedCoefficient }
       };
     }
+    case "validateIndicateurUnCoefGroup": {
+      return {
+        ...state,
+        indicateurUn: {
+          ...state.indicateurUn,
+          coefficientGroupFormValidated: action.valid
+        }
+      };
+    }
     case "validateIndicateurUn": {
       return {
         ...state,
