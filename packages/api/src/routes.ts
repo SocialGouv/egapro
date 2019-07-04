@@ -3,7 +3,8 @@ import {
   createIndicatorsData,
   getIndicatorsData,
   sendEmail,
-  updateIndicatorsData
+  updateIndicatorsData,
+  versionController
 } from "./controller";
 
 const routeOptions: Router.IRouterOptions = {
@@ -11,6 +12,7 @@ const routeOptions: Router.IRouterOptions = {
 };
 
 export const router = new Router(routeOptions);
+router.get("/version", versionController.get);
 router.post("/indicators-datas", createIndicatorsData);
 router.put("/indicators-datas/:id", updateIndicatorsData);
 router.get("/indicators-datas/:id", getIndicatorsData);

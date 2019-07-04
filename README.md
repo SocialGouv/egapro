@@ -33,6 +33,7 @@ docker-compose up --build
 
 Action  |API                                | body                         |Réponse                        |
 --------|-----------------------------------|------------------------------|-------------------------------|
+GET     |`api/version`                      |                              | `{ version: string }`         |
 POST    |`api/indicators-datas`             | `{ }`                        | `{id: string}`                |
 PUT     |`api/indicators-datas/{id}`        | `{ id: string, data: string}`| `{id: string, data: string}`  |
 GET     |`api/indicators-datas/{id}`        |                              | `{id: string, data: string}`  |
