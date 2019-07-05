@@ -19,6 +19,7 @@ import ActionLink from "../../components/ActionLink";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm";
+import IndicateurUnCoefEffectifForm from "./IndicateurUnCoefEffectifForm";
 
 type MenuOption = "groupe" | "effectif" | "remuneration";
 
@@ -54,6 +55,12 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
   const validateIndicateurUnCoefGroup = useCallback(
     (valid: FormState) =>
       dispatch({ type: "validateIndicateurUnCoefGroup", valid }),
+    [dispatch]
+  );
+
+  const validateIndicateurUnCoefEffectif = useCallback(
+    (valid: FormState) =>
+      dispatch({ type: "validateIndicateurUnCoefEffectif", valid }),
     [dispatch]
   );
 
@@ -111,7 +118,15 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
           navigateToEffectif={() => setMenuSelected("effectif")}
         />
       ) : menuSelected === "effectif" ? (
-        <div>effectif</div>
+        <IndicateurUnCoefEffectifForm
+          coefficient={state.indicateurUn.coefficient}
+          readOnly={
+            state.indicateurUn.coefficientEffectifFormValidated === "Valid"
+          }
+          updateIndicateurUnCoef={updateIndicateurUnCoef}
+          validateIndicateurUnCoefEffectif={validateIndicateurUnCoefEffectif}
+          navigateToRemuneration={() => setMenuSelected("remuneration")}
+        />
       ) : (
         <div>remu</div>
       )}
@@ -142,7 +157,7 @@ function MenuCoef({
       <ActionLink
         style={[
           styles.menuItem,
-          menuSelected == "effectif" && styles.menuItemSelected
+          menuSelected === "effectif" && styles.menuItemSelected
         ]}
         onClick={() => setMenuSelected("effectif")}
       >
@@ -164,8 +179,7 @@ function MenuCoef({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start"
+    flexDirection: "column"
   }),
 
   menu: css({

@@ -71,6 +71,7 @@ const defaultState: AppState = {
     csp: true,
     remunerationAnnuelle: dataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
+    coefficientEffectifFormValidated: "None",
     coefficient: []
   },
   indicateurDeux: {
@@ -199,6 +200,15 @@ function AppReducer(
         indicateurUn: {
           ...state.indicateurUn,
           coefficientGroupFormValidated: action.valid
+        }
+      };
+    }
+    case "validateIndicateurUnCoefEffectif": {
+      return {
+        ...state,
+        indicateurUn: {
+          ...state.indicateurUn,
+          coefficientEffectifFormValidated: action.valid
         }
       };
     }

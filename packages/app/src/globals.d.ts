@@ -8,6 +8,7 @@ export type AppState = {
     csp: boolean;
     remunerationAnnuelle: Array<GroupeIndicateurUn>;
     coefficientGroupFormValidated: FormState;
+    coefficientEffectifFormValidated: FormState;
     coefficient: Array<GroupeCoefficient>;
   };
   indicateurDeux: {
@@ -75,6 +76,10 @@ export type ActionType =
       valid: FormState;
     }
   | {
+      type: "validateIndicateurUnCoefEffectif";
+      valid: FormState;
+    }
+  | {
       type: "validateIndicateurUn";
       valid: FormState;
     }
@@ -126,7 +131,12 @@ export type ActionIndicateurUnCspData = {
 export type ActionIndicateurUnCoefData = {
   coefficient:
     | Array<{ name: string }>
-    | Array<{ tranchesAges: Array<GroupTranchesAgesCoefficient> }>;
+    | Array<{
+        tranchesAges: Array<GroupTranchesAgesEffectif>;
+      }>
+    | Array<{
+        tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
+      }>;
 };
 
 export type ActionIndicateurDeuxData = {
