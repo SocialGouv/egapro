@@ -1,70 +1,77 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
+import { memo, ReactNode } from "react";
 import { useForm } from "react-final-form-hooks";
 import {
-  CategorieSocioPro,
   TranchesAges,
-  ActionIndicateurUnCspData,
+  GroupTranchesAgesIndicateurUn,
   FormState
 } from "../../globals.d";
 
 import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
-import { effectifEtEcartRemuGroup } from "../../utils/calculsEgaProIndicateurUn";
 
 import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import ActionBar from "../../components/ActionBar";
 import FormSubmit from "../../components/FormSubmit";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
-import {
-  displayNameCategorieSocioPro,
-  displayNameTranchesAges
-} from "../../utils/helpers";
+import { displayNameTranchesAges } from "../../utils/helpers";
+
+interface remunerationGroup {
+  id: any;
+  name: string;
+  trancheAge: TranchesAges;
+  validiteGroupe: boolean;
+  remunerationAnnuelleBrutFemmes: number | undefined;
+  remunerationAnnuelleBrutHommes: number | undefined;
+}
 
 interface Props {
-  ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroup>;
+  ecartRemuParTrancheAge: Array<remunerationGroup>;
   readOnly: boolean;
-  updateIndicateurUn: (data: ActionIndicateurUnCspData) => void;
+  updateIndicateurUn: (
+    data: Array<{
+      id: any;
+      tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
+    }>
+  ) => void;
   validateIndicateurUn: (valid: FormState) => void;
+  nextLink: ReactNode;
 }
 
 const getFieldName = (
-  categorieSocioPro: CategorieSocioPro,
+  idGroupe: string,
   trancheAge: TranchesAges,
   genre: "Hommes" | "Femmes"
-): string =>
-  "remunerationAnnuelleBrut" + categorieSocioPro + genre + trancheAge;
+): string => "remunerationAnnuelleBrut" + idGroupe + genre + trancheAge;
 
 const groupByCategorieSocioPro = (
-  ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroup>
+  ecartRemuParTrancheAge: Array<remunerationGroup>
 ): Array<{
-  categorieSocioPro: CategorieSocioPro;
-  tranchesAges: Array<effectifEtEcartRemuGroup>;
+  id: any;
+  name: string;
+  tranchesAges: Array<remunerationGroup>;
 }> => {
   const tmpArray = ecartRemuParTrancheAge.reduce(
-    (acc, { categorieSocioPro, ...otherAttr }) => {
+    (acc, { id, name, ...otherAttr }) => {
       // @ts-ignore
-      const el = acc[categorieSocioPro];
+      const el = acc[id];
 
       if (el) {
         return {
           ...acc,
-          [categorieSocioPro]: {
+          [id]: {
             ...el,
-            tranchesAges: [
-              ...el.tranchesAges,
-              { categorieSocioPro, ...otherAttr }
-            ]
+            tranchesAges: [...el.tranchesAges, { id, ...otherAttr }]
           }
         };
       } else {
         return {
           ...acc,
-          [categorieSocioPro]: {
-            categorieSocioPro,
-            tranchesAges: [{ categorieSocioPro, ...otherAttr }]
+          [id]: {
+            id,
+            name,
+            tranchesAges: [{ id, ...otherAttr }]
           }
         };
       }
@@ -73,39 +80,41 @@ const groupByCategorieSocioPro = (
   );
 
   // @ts-ignore
-  return Object.entries(tmpArray).map(
-    ([categorieSocioPro, tranchesAges]) => tranchesAges
-  );
+  return Object.entries(tmpArray).map(([id, tranchesAges]) => tranchesAges);
 };
 
-function IndicateurUnForm({
+function IndicateurUnFormRaw({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
-  validateIndicateurUn
+  validateIndicateurUn,
+  nextLink
 }: Props) {
   const infoFields = groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
     ({
-      categorieSocioPro,
+      id,
+      name,
       tranchesAges
     }: {
-      categorieSocioPro: CategorieSocioPro;
-      tranchesAges: Array<effectifEtEcartRemuGroup>;
+      id: any;
+      name: string;
+      tranchesAges: Array<remunerationGroup>;
     }) => {
       return {
-        categorieSocioPro,
+        id,
+        name,
         tranchesAges: tranchesAges.map(
           ({
             trancheAge,
             validiteGroupe,
             remunerationAnnuelleBrutFemmes,
             remunerationAnnuelleBrutHommes
-          }: effectifEtEcartRemuGroup) => {
+          }: remunerationGroup) => {
             return {
               trancheAge,
               validiteGroupe,
               remunerationAnnuelleBrutFemmesName: getFieldName(
-                categorieSocioPro,
+                id,
                 trancheAge,
                 "Femmes"
               ),
@@ -113,7 +122,7 @@ function IndicateurUnForm({
                 remunerationAnnuelleBrutFemmes
               ),
               remunerationAnnuelleBrutHommesName: getFieldName(
-                categorieSocioPro,
+                id,
                 trancheAge,
                 "Hommes"
               ),
@@ -149,27 +158,25 @@ function IndicateurUnForm({
   }, {});
 
   const saveForm = (formData: any) => {
-    const remunerationAnnuelle = infoFields.map(
-      ({ categorieSocioPro, tranchesAges }) => ({
-        categorieSocioPro,
-        tranchesAges: tranchesAges.map(
-          ({
-            trancheAge,
-            remunerationAnnuelleBrutFemmesName,
-            remunerationAnnuelleBrutHommesName
-          }) => ({
-            trancheAge,
-            remunerationAnnuelleBrutFemmes: parseIntFormValue(
-              formData[remunerationAnnuelleBrutFemmesName]
-            ),
-            remunerationAnnuelleBrutHommes: parseIntFormValue(
-              formData[remunerationAnnuelleBrutHommesName]
-            )
-          })
-        )
-      })
-    );
-    updateIndicateurUn({ remunerationAnnuelle });
+    const remunerationAnnuelle = infoFields.map(({ id, tranchesAges }) => ({
+      id,
+      tranchesAges: tranchesAges.map(
+        ({
+          trancheAge,
+          remunerationAnnuelleBrutFemmesName,
+          remunerationAnnuelleBrutHommesName
+        }) => ({
+          trancheAge,
+          remunerationAnnuelleBrutFemmes: parseIntFormValue(
+            formData[remunerationAnnuelleBrutFemmesName]
+          ),
+          remunerationAnnuelleBrutHommes: parseIntFormValue(
+            formData[remunerationAnnuelleBrutHommesName]
+          )
+        })
+      )
+    }));
+    updateIndicateurUn(remunerationAnnuelle);
   };
 
   const onSubmit = (formData: any) => {
@@ -193,13 +200,9 @@ function IndicateurUnForm({
 
   return (
     <form onSubmit={handleSubmit} css={styles.container}>
-      {infoFields.map(({ categorieSocioPro, tranchesAges }) => {
+      {infoFields.map(({ id, name, tranchesAges }) => {
         return (
-          <BlocForm
-            key={categorieSocioPro}
-            title={displayNameCategorieSocioPro(categorieSocioPro)}
-            label="rémunération moyenne"
-          >
+          <BlocForm key={id} title={name} label="rémunération moyenne">
             {tranchesAges.map(
               ({
                 trancheAge,
@@ -227,9 +230,7 @@ function IndicateurUnForm({
       })}
 
       {readOnly ? (
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur2" label="suivant" />
-        </ActionBar>
+        <ActionBar>{nextLink}</ActionBar>
       ) : (
         <ActionBar>
           <FormSubmit
@@ -252,6 +253,6 @@ const styles = {
 };
 
 export default memo(
-  IndicateurUnForm,
+  IndicateurUnFormRaw,
   (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
 );

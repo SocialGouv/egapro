@@ -6,13 +6,13 @@ import {
   GroupeCoefficient,
   GroupTranchesAgesEffectif,
   ActionIndicateurUnCoefData
-} from "../../globals.d";
+} from "../../../globals";
 
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
-import ButtonAction from "../../components/ButtonAction";
+import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
+import ButtonAction from "../../../components/ButtonAction";
 
-import EffectifFormRaw from "../Effectif/EffectifFormRaw";
-import EffectifResult from "../Effectif/EffectifResult";
+import EffectifFormRaw from "../../Effectif/EffectifFormRaw";
+import EffectifResult from "../../Effectif/EffectifResult";
 
 interface Props {
   coefficient: Array<GroupeCoefficient>;
@@ -41,13 +41,12 @@ function IndicateurUnCoefEffectifForm({
 
   const updateEffectifRaw = useCallback(
     (
-      coefficientRaw: Array<{
+      data: Array<{
         id: any;
         tranchesAges: Array<GroupTranchesAgesEffectif>;
       }>
     ) => {
-      const coefficient = coefficientRaw.map(({ id, tranchesAges }) => ({
-        categorieSocioPro: id,
+      const coefficient = data.map(({ id, tranchesAges }) => ({
         tranchesAges
       }));
       updateIndicateurUnCoef({ coefficient });

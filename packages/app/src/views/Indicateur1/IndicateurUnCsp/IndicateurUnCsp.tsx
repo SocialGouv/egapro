@@ -7,20 +7,20 @@ import {
   FormState,
   ActionType,
   ActionIndicateurUnCspData
-} from "../../globals.d";
+} from "../../../globals";
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
+import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
 
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
-import InfoBloc from "../../components/InfoBloc";
-import ActionBar from "../../components/ActionBar";
+import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
+import InfoBloc from "../../../components/InfoBloc";
+import ActionBar from "../../../components/ActionBar";
 import {
   ButtonSimulatorLink,
   TextSimulatorLink
-} from "../../components/SimulatorLink";
+} from "../../../components/SimulatorLink";
 
 import IndicateurUnCspForm from "./IndicateurUnCspForm";
-import IndicateurUnCspResult from "./IndicateurUnCspResult";
+import IndicateurUnResult from "../IndicateurUnResult";
 
 interface Props {
   state: AppState;
@@ -41,7 +41,7 @@ function IndicateurUnCsp({ state, dispatch }: Props) {
 
   const {
     effectifsIndicateurCalculable,
-    effectifEtEcartRemuParTranche,
+    effectifEtEcartRemuParTrancheCsp,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn
@@ -80,7 +80,7 @@ function IndicateurUnCsp({ state, dispatch }: Props) {
     <LayoutFormAndResult
       childrenForm={
         <IndicateurUnCspForm
-          ecartRemuParTrancheAge={effectifEtEcartRemuParTranche}
+          ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCsp}
           readOnly={state.indicateurUn.formValidated === "Valid"}
           updateIndicateurUn={updateIndicateurUn}
           validateIndicateurUn={validateIndicateurUn}
@@ -88,7 +88,7 @@ function IndicateurUnCsp({ state, dispatch }: Props) {
       }
       childrenResult={
         state.indicateurUn.formValidated === "Valid" && (
-          <IndicateurUnCspResult
+          <IndicateurUnResult
             indicateurEcartRemuneration={indicateurEcartRemuneration}
             indicateurSexeSurRepresente={indicateurSexeSurRepresente}
             noteIndicateurUn={noteIndicateurUn}

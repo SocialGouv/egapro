@@ -39,12 +39,12 @@ function EffectifForm({
 
   const updateEffectifRaw = useCallback(
     (
-      nombreSalarieRaw: Array<{
+      data: Array<{
         id: any;
         tranchesAges: Array<GroupTranchesAgesEffectif>;
       }>
     ) => {
-      const nombreSalaries = nombreSalarieRaw.map(({ id, tranchesAges }) => ({
+      const nombreSalaries = data.map(({ id, tranchesAges }) => ({
         categorieSocioPro: id,
         tranchesAges
       }));

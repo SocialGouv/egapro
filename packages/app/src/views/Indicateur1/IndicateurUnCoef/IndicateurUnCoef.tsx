@@ -7,26 +7,35 @@ import {
   FormState,
   ActionType,
   ActionIndicateurUnCoefData
-} from "../../globals.d";
+} from "../../../globals";
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
-import globalStyles from "../../utils/globalStyles";
+import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
+import globalStyles from "../../../utils/globalStyles";
 
-import { useColumnsWidth, useLayoutType } from "../../components/GridContext";
-import InfoBloc from "../../components/InfoBloc";
-import ActionBar from "../../components/ActionBar";
-import ActionLink from "../../components/ActionLink";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import {
+  useColumnsWidth,
+  useLayoutType
+} from "../../../components/GridContext";
+import InfoBloc from "../../../components/InfoBloc";
+import ActionBar from "../../../components/ActionBar";
+import ActionLink from "../../../components/ActionLink";
+import { ButtonSimulatorLink } from "../../../components/SimulatorLink";
 
 import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm";
 import IndicateurUnCoefEffectifForm from "./IndicateurUnCoefEffectifForm";
+import IndicateurUnCoefRemuForm from "./IndicateurUnCoefRemuForm";
 
 type MenuOption = "groupe" | "effectif" | "remuneration";
 
 function getDefaultMenuSelected(
-  coefficientGroupFormValidated: FormState
+  coefficientGroupFormValidated: FormState,
+  coefficientEffectifFormValidated: FormState
 ): MenuOption {
-  return coefficientGroupFormValidated === "Valid" ? "effectif" : "groupe";
+  return coefficientEffectifFormValidated === "Valid"
+    ? "remuneration"
+    : coefficientGroupFormValidated === "Valid"
+    ? "effectif"
+    : "groupe";
 }
 
 interface Props {
@@ -72,16 +81,20 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
   const {
     coefficient,
     coefficientGroupFormValidated,
+    coefficientEffectifFormValidated,
     formValidated
   } = state.indicateurUn;
 
   const [menuSelected, setMenuSelected] = useState<MenuOption>(
-    getDefaultMenuSelected(coefficientGroupFormValidated)
+    getDefaultMenuSelected(
+      coefficientGroupFormValidated,
+      coefficientEffectifFormValidated
+    )
   );
 
   const {
     effectifsIndicateurCalculable,
-    effectifEtEcartRemuParTranche,
+    effectifEtEcartRemuParTrancheCoef,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
     noteIndicateurUn
@@ -119,16 +132,22 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
         />
       ) : menuSelected === "effectif" ? (
         <IndicateurUnCoefEffectifForm
-          coefficient={state.indicateurUn.coefficient}
-          readOnly={
-            state.indicateurUn.coefficientEffectifFormValidated === "Valid"
-          }
+          coefficient={coefficient}
+          readOnly={coefficientEffectifFormValidated === "Valid"}
           updateIndicateurUnCoef={updateIndicateurUnCoef}
           validateIndicateurUnCoefEffectif={validateIndicateurUnCoefEffectif}
           navigateToRemuneration={() => setMenuSelected("remuneration")}
         />
       ) : (
-        <div>remu</div>
+        <IndicateurUnCoefRemuForm
+          ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
+          readOnly={formValidated === "Valid"}
+          updateIndicateurUnCoef={updateIndicateurUnCoef}
+          validateIndicateurUn={validateIndicateurUn}
+          indicateurEcartRemuneration={indicateurEcartRemuneration}
+          indicateurSexeSurRepresente={indicateurSexeSurRepresente}
+          noteIndicateurUn={noteIndicateurUn}
+        />
       )}
     </div>
   );

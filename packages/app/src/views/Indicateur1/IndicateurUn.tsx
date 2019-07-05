@@ -8,8 +8,8 @@ import { AppState, ActionType } from "../../globals.d";
 import Page from "../../components/Page";
 
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm";
-import IndicateurUnCsp from "./IndicateurUnCsp";
-import IndicateurUnCoef from "./IndicateurUnCoef";
+import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp";
+import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef";
 
 interface Props extends RouteComponentProps {
   state: AppState;

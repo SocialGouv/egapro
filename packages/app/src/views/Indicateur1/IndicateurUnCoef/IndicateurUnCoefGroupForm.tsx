@@ -7,17 +7,20 @@ import {
   GroupeCoefficient,
   ActionIndicateurUnCoefData,
   FormState
-} from "../../globals.d";
+} from "../../../globals";
 
-import { required } from "../../utils/formHelpers";
-import globalStyles from "../../utils/globalStyles";
+import { required } from "../../../utils/formHelpers";
+import globalStyles from "../../../utils/globalStyles";
 
-import { useColumnsWidth, useLayoutType } from "../../components/GridContext";
-import Input, { hasFieldError } from "../../components/Input";
-import ActionLink from "../../components/ActionLink";
-import ButtonAction from "../../components/ButtonAction";
-import ActionBar from "../../components/ActionBar";
-import FormSubmit from "../../components/FormSubmit";
+import {
+  useColumnsWidth,
+  useLayoutType
+} from "../../../components/GridContext";
+import Input, { hasFieldError } from "../../../components/Input";
+import ActionLink from "../../../components/ActionLink";
+import ButtonAction from "../../../components/ButtonAction";
+import ActionBar from "../../../components/ActionBar";
+import FormSubmit from "../../../components/FormSubmit";
 
 const getFieldName = (index: number): string => "group" + index;
 
