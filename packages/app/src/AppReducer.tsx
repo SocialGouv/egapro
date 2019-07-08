@@ -199,7 +199,17 @@ function AppReducer(
         ...state,
         indicateurUn: {
           ...state.indicateurUn,
-          coefficientGroupFormValidated: action.valid
+          coefficientGroupFormValidated: action.valid,
+          coefficientEffectifFormValidated:
+            action.valid === "None" &&
+            state.indicateurUn.coefficientEffectifFormValidated === "Valid"
+              ? "Invalid"
+              : state.indicateurUn.coefficientEffectifFormValidated,
+          formValidated:
+            action.valid === "None" &&
+            state.indicateurUn.formValidated === "Valid"
+              ? "Invalid"
+              : state.indicateurUn.formValidated
         }
       };
     }
@@ -208,7 +218,12 @@ function AppReducer(
         ...state,
         indicateurUn: {
           ...state.indicateurUn,
-          coefficientEffectifFormValidated: action.valid
+          coefficientEffectifFormValidated: action.valid,
+          formValidated:
+            action.valid === "None" &&
+            state.indicateurUn.formValidated === "Valid"
+              ? "Invalid"
+              : state.indicateurUn.formValidated
         }
       };
     }

@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx, css } from "@emotion/core";
-import { useCallback, useState } from "react";
+import { useCallback, useState, Fragment } from "react";
 
 import {
   AppState,
@@ -10,6 +10,9 @@ import {
 } from "../../../globals";
 
 import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
+
+import InfoBloc from "../../../components/InfoBloc";
+import ActionLink from "../../../components/ActionLink";
 
 import IndicateurUnCoefMenu, { MenuOption } from "./IndicateurUnCoefMenu";
 import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm";
@@ -136,6 +139,71 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
           navigateToEffectif={navigateToEffectif}
         />
       )}
+
+      {menuSelected === "groupe" &&
+        coefficientGroupFormValidated === "Valid" &&
+        (coefficientEffectifFormValidated === "Invalid" ||
+          formValidated === "Invalid") && (
+          <InfoBloc
+            title="Vos groupes ont été modifiés"
+            icon="cross"
+            text={
+              <Fragment>
+                <span>
+                  afin de s'assurer de la cohérence de votre indicateur, merci
+                  de vérifier les données de vos étapes.
+                </span>
+                <br />
+                <span>
+                  {coefficientEffectifFormValidated === "Invalid" && (
+                    <Fragment>
+                      <ActionLink onClick={navigateToEffectif}>
+                        aller à l'étape 2 : effectifs
+                      </ActionLink>
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {formValidated === "Invalid" && (
+                    <Fragment>
+                      <ActionLink onClick={navigateToRemuneration}>
+                        aller à l'étape 3 : rémunérations
+                      </ActionLink>
+                      &emsp;
+                    </Fragment>
+                  )}
+                </span>
+              </Fragment>
+            }
+          />
+        )}
+
+      {menuSelected === "effectif" &&
+        coefficientEffectifFormValidated === "Valid" &&
+        formValidated === "Invalid" && (
+          <InfoBloc
+            title="Vos effectifs ont été modifiés"
+            icon="cross"
+            text={
+              <Fragment>
+                <span>
+                  afin de s'assurer de la cohérence de votre indicateur, merci
+                  de vérifier les données de vos étapes.
+                </span>
+                <br />
+                <span>
+                  {formValidated === "Invalid" && (
+                    <Fragment>
+                      <ActionLink onClick={navigateToRemuneration}>
+                        aller à l'étape 3 : rémunérations
+                      </ActionLink>
+                      &emsp;
+                    </Fragment>
+                  )}
+                </span>
+              </Fragment>
+            }
+          />
+        )}
     </div>
   );
 }
