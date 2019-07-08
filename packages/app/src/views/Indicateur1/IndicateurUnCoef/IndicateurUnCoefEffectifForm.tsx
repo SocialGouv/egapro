@@ -10,6 +10,8 @@ import {
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
 import ButtonAction from "../../../components/ButtonAction";
+import InfoBloc from "../../../components/InfoBloc";
+import ActionLink from "../../../components/ActionLink";
 
 import EffectifFormRaw from "../../Effectif/EffectifFormRaw";
 import EffectifResult from "../../Effectif/EffectifResult";
@@ -19,7 +21,9 @@ interface Props {
   readOnly: boolean;
   updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void;
   validateIndicateurUnCoefEffectif: (valid: FormState) => void;
+  coefficientGroupFormValidated: FormState;
   navigateToRemuneration: () => void;
+  navigateToGroupe: () => void;
 }
 
 function IndicateurUnCoefEffectifForm({
@@ -27,7 +31,9 @@ function IndicateurUnCoefEffectifForm({
   readOnly,
   updateIndicateurUnCoef,
   validateIndicateurUnCoefEffectif,
-  navigateToRemuneration
+  coefficientGroupFormValidated,
+  navigateToRemuneration,
+  navigateToGroupe
 }: Props) {
   const effectifRaw = useMemo(
     () =>
@@ -78,6 +84,20 @@ function IndicateurUnCoefEffectifForm({
     },
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
   );
+
+  // le formulaire d'effectif n'est pas validé
+  if (coefficientGroupFormValidated !== "Valid") {
+    return (
+      <InfoBloc
+        title="vous devez renseignez vos groupes avant d’avoir accès à cet indicateur"
+        text={
+          <ActionLink onClick={navigateToGroupe}>
+            renseigner les groupes
+          </ActionLink>
+        }
+      />
+    );
+  }
 
   return (
     <LayoutFormAndResult

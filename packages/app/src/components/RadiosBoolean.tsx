@@ -50,18 +50,21 @@ function RadiosBoolean({
   labelFalse
 }: Props) {
   const field = useField(fieldName, form);
+  const { value } = field.input;
   return (
     <div css={styles.container}>
-      <RadioField
-        field={field}
-        label={labelTrue}
-        value="true"
-        disabled={readOnly}
-      />
+      <div css={[readOnly && value === "false" && styles.radioFieldDisabled]}>
+        <RadioField
+          field={field}
+          label={labelTrue}
+          value="true"
+          disabled={readOnly}
+        />
+      </div>
       <div
         css={[
           styles.radioFieldFalse,
-          readOnly && styles.radioFieldFalseDisabled
+          readOnly && value === "true" && styles.radioFieldDisabled
         ]}
       >
         <RadioField
@@ -108,8 +111,8 @@ const styles = {
   radioFieldFalse: css({
     marginTop: 9
   }),
-  radioFieldFalseDisabled: css({
-    opacity: 0
+  radioFieldDisabled: css({
+    visibility: "hidden"
   })
 };
 
