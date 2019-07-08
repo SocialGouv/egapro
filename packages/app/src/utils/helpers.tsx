@@ -39,7 +39,7 @@ export function displayFractionPercent(
   return displayPercent(num * 100, digits);
 }
 
-export function displayPercent(num: number, digits: number = 2): string {
+export function displayPercent(num: number, digits: number = 1): string {
   return num.toLocaleString("en-US", { maximumFractionDigits: digits }) + "%";
 }
 

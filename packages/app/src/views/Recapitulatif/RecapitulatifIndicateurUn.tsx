@@ -10,7 +10,8 @@ import {
 
 import {
   displayNameTranchesAges,
-  displayNameCategorieSocioPro
+  displayNameCategorieSocioPro,
+  displayPercent
 } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
@@ -100,9 +101,9 @@ function RecapitulatifIndicateurUn({
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
-            (indicateurEcartRemuneration !== undefined
-              ? indicateurEcartRemuneration.toFixed(1)
-              : "--") + " %",
+            indicateurEcartRemuneration !== undefined
+              ? displayPercent(indicateurEcartRemuneration)
+              : "--",
           firstLineInfo: `écart favorable aux ${indicateurSexeSurRepresente}`,
           secondLineLabel: "votre note obtenue est",
           secondLineData:

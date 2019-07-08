@@ -4,7 +4,10 @@ import { Fragment } from "react";
 
 import { FormState, CategorieSocioPro } from "../../globals.d";
 
-import { displayNameCategorieSocioPro } from "../../utils/helpers";
+import {
+  displayNameCategorieSocioPro,
+  displayPercent
+} from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
@@ -85,9 +88,9 @@ function RecapitulatifIndicateurDeux({
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
-            (indicateurEcartAugmentation !== undefined
-              ? indicateurEcartAugmentation.toFixed(1)
-              : "--") + " %",
+            indicateurEcartAugmentation !== undefined
+              ? displayPercent(indicateurEcartAugmentation)
+              : "--",
           firstLineInfo: `écart favorable aux ${indicateurSexeSurRepresente}`,
           secondLineLabel: "votre note obtenue est",
           secondLineData:

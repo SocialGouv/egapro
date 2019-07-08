@@ -41,7 +41,7 @@ const displayReadOnlyValue = (
     return value;
   }
   return mask === "percent"
-    ? displayPercent(Number(value))
+    ? displayPercent(Number(value), 2)
     : displayInt(Number(value));
 };
 

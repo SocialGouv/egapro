@@ -4,6 +4,8 @@ import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
 
+import { displayPercent } from "../../utils/helpers";
+
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
@@ -61,9 +63,9 @@ function RecapitulatifIndicateurQuatre({
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
-            (indicateurEcartNombreSalarieesAugmentees !== undefined
-              ? indicateurEcartNombreSalarieesAugmentees.toFixed(1)
-              : "--") + " %",
+            indicateurEcartNombreSalarieesAugmentees !== undefined
+              ? displayPercent(indicateurEcartNombreSalarieesAugmentees)
+              : "--",
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") +
