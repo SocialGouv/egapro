@@ -2,7 +2,8 @@ import {
   // Indicateur 1
   calculValiditeGroupe,
   calculEcartRemunerationMoyenne,
-  calculEcartApresApplicationSeuilPertinence,
+  calculEcartApresApplicationSeuilPertinenceCsp,
+  calculEcartApresApplicationSeuilPertinenceCoef,
   calculIndicateurEcartRemuneration,
   calculNote
 } from "./calculsEgaProIndicateurUn";
@@ -48,34 +49,80 @@ describe("calculEcartRemunerationMoyenne", () => {
   });
 });
 
-describe("calculEcartApresApplicationSeuilPertinence", () => {
+describe("calculEcartApresApplicationSeuilPertinenceCsp", () => {
   test("ecartRemunerationMoyenne must be a number", () => {
-    expect(calculEcartApresApplicationSeuilPertinence(undefined)).toEqual(
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(undefined)).toEqual(
       undefined
     );
   });
 
   test("test incoherent data", () => {
-    expect(calculEcartApresApplicationSeuilPertinence(-0.3)).toEqual(-0.25);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(-0.3)).toEqual(-0.25);
   });
 
   test("test some valid data", () => {
-    expect(calculEcartApresApplicationSeuilPertinence(0)).toEqual(0);
-    expect(calculEcartApresApplicationSeuilPertinence(0.01)).toEqual(0);
-    expect(calculEcartApresApplicationSeuilPertinence(0.032)).toEqual(0);
-    expect(calculEcartApresApplicationSeuilPertinence(0.05)).toEqual(0);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0)).toEqual(0);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.01)).toEqual(0);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.032)).toEqual(0);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.05)).toEqual(0);
 
-    expect(calculEcartApresApplicationSeuilPertinence(0.051)).toEqual(0.001);
-    expect(calculEcartApresApplicationSeuilPertinence(0.06)).toEqual(0.01);
-    expect(calculEcartApresApplicationSeuilPertinence(0.067)).toEqual(0.017);
-    expect(calculEcartApresApplicationSeuilPertinence(0.083)).toEqual(0.033);
-    expect(calculEcartApresApplicationSeuilPertinence(0.09)).toEqual(0.04);
-    expect(calculEcartApresApplicationSeuilPertinence(0.1)).toEqual(0.05);
-    expect(calculEcartApresApplicationSeuilPertinence(0.101)).toEqual(0.051);
-    expect(calculEcartApresApplicationSeuilPertinence(0.333)).toEqual(0.283);
-    expect(calculEcartApresApplicationSeuilPertinence(0.368)).toEqual(0.318);
-    expect(calculEcartApresApplicationSeuilPertinence(0.368794)).toEqual(
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.051)).toEqual(0.001);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.06)).toEqual(0.01);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.067)).toEqual(0.017);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.083)).toEqual(0.033);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.09)).toEqual(0.04);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.1)).toEqual(0.05);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.101)).toEqual(0.051);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.333)).toEqual(0.283);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.368)).toEqual(0.318);
+    expect(calculEcartApresApplicationSeuilPertinenceCsp(0.368794)).toEqual(
       0.318794
+    );
+  });
+});
+
+describe("calculEcartApresApplicationSeuilPertinenceCoef", () => {
+  test("ecartRemunerationMoyenne must be a number", () => {
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(undefined)).toEqual(
+      undefined
+    );
+  });
+
+  test("test incoherent data", () => {
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(-0.3)).toEqual(-0.27);
+  });
+
+  test("test some valid data", () => {
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0)).toEqual(0);
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.01)).toEqual(0);
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.032)).toEqual(
+      0.002
+    );
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.05)).toEqual(0.02);
+
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.051)).toEqual(
+      0.021
+    );
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.06)).toEqual(0.03);
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.067)).toEqual(
+      0.037
+    );
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.083)).toEqual(
+      0.053
+    );
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.09)).toEqual(0.06);
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.1)).toEqual(0.07);
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.101)).toEqual(
+      0.071
+    );
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.333)).toEqual(
+      0.303
+    );
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.368)).toEqual(
+      0.338
+    );
+    expect(calculEcartApresApplicationSeuilPertinenceCoef(0.368794)).toEqual(
+      0.338794
     );
   });
 });

@@ -21,7 +21,8 @@ import {
 
 /* INDICATEUR 1 CONST */
 
-const seuilPertinence = 5 / 100;
+const seuilPertinenceCsp = 5 / 100;
+const seuilPertinenceCoef = 3 / 100;
 
 const baremeEcartRemuneration = [
   40,
@@ -82,8 +83,9 @@ export const calculEcartRemunerationMoyenne = (
     : undefined;
 
 // ESP
-export const calculEcartApresApplicationSeuilPertinence = (
-  ecartRemunerationMoyenne: number | undefined
+const calculEcartApresApplicationSeuilPertinence = (
+  ecartRemunerationMoyenne: number | undefined,
+  seuilPertinence: number
 ): number | undefined =>
   ecartRemunerationMoyenne !== undefined
     ? roundDecimal(
@@ -92,6 +94,22 @@ export const calculEcartApresApplicationSeuilPertinence = (
         6
       )
     : undefined;
+
+export const calculEcartApresApplicationSeuilPertinenceCsp = (
+  ecartRemunerationMoyenne: number | undefined
+): number | undefined =>
+  calculEcartApresApplicationSeuilPertinence(
+    ecartRemunerationMoyenne,
+    seuilPertinenceCsp
+  );
+
+export const calculEcartApresApplicationSeuilPertinenceCoef = (
+  ecartRemunerationMoyenne: number | undefined
+): number | undefined =>
+  calculEcartApresApplicationSeuilPertinence(
+    ecartRemunerationMoyenne,
+    seuilPertinenceCoef
+  );
 
 export interface effectifEtEcartRemuGroupCsp extends effectifGroup {
   categorieSocioPro: CategorieSocioPro;
@@ -171,7 +189,7 @@ export const calculEffectifsEtEcartRemuParTrancheAgeCsp = (
         remunerationAnnuelleBrutHommes || 0
       );
       // ESP
-      const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinence(
+      const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinenceCsp(
         ecartRemunerationMoyenne
       );
 
@@ -221,7 +239,7 @@ export const calculEffectifsEtEcartRemuParTrancheAgeCoef = (
         remunerationAnnuelleBrutHommes || 0
       );
       // ESP
-      const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinence(
+      const ecartApresApplicationSeuilPertinence = calculEcartApresApplicationSeuilPertinenceCoef(
         ecartRemunerationMoyenne
       );
 
