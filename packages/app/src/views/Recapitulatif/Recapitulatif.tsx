@@ -84,9 +84,7 @@ function Recapitulatif({ state }: Props) {
   );
 
   return (
-    <Page
-      title="Récapitulatif des résultats de vos indicateurs"
-    >
+    <Page title="Récapitulatif des résultats de vos indicateurs">
       <RecapitulatifIndex
         allIndicateurValid={allIndicateurValid}
         noteIndex={noteIndex}
