@@ -1,0 +1,2659 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resetState reset default state 1`] = `undefined`;
+
+exports[`resetState reset undefined state 1`] = `undefined`;
+
+exports[`test state used for test before testing stateDefault 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`test state used for test before testing stateUndefined 1`] = `undefined`;
+
+exports[`updateEffectif change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 23,
+            "nombreSalariesHommes": 32,
+            "trancheAge": 2,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateEffectif nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurCinq change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": 2,
+    "nombreSalariesHommes": 8,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurCinq nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurDeux change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": 2.2,
+        "tauxAugmentationHommes": 3.5,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurDeux nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurQuatre change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": 5,
+    "nombreSalarieesPeriodeAugmentation": 6,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurQuatre nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurTrois change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": 2.2,
+        "tauxPromotionHommes": 3.5,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurTrois nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurUnCoef Array<{name: string}> change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [
+      Object {
+        "name": "Custome Name",
+      },
+    ],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurUnCoef Array<{name: string}> nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [
+      Object {
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 28,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 1,
+          },
+        ],
+      },
+    ],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [
+      Object {
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+        ],
+      },
+    ],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> nothing undefined state 1`] = `undefined`;
+
+exports[`updateIndicateurUnCsp change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 1,
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`updateIndicateurUnCsp nothing undefined state 1`] = `undefined`;
