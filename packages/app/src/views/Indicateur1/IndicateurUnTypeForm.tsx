@@ -49,12 +49,13 @@ function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
         readOnly={readOnly}
         labelTrue={
           <Fragment>
-            je déclare en <strong>Catégories Socio-Professionnels</strong>
+            je déclare par <strong>Catégories Socio-Professionnels</strong>
           </Fragment>
         }
         labelFalse={
           <Fragment>
-            je déclare en <strong>Niveau ou coefficient hiérarchique</strong>
+            je déclare par{" "}
+            <strong>Niveaux ou coefficients hiérarchiques</strong>
           </Fragment>
         }
       />
