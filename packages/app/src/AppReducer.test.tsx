@@ -614,7 +614,7 @@ describe("validateEffectif", () => {
     });
   });
 
-  describe("None", () => {
+  describe("None with csp true", () => {
     const action = {
       type: "validateEffectif" as "validateEffectif",
       valid: "None" as FormState
@@ -622,6 +622,33 @@ describe("validateEffectif", () => {
 
     test("invalid complete validate state", () => {
       expect(AppReducer(stateCompleteAndValidate, action)).toMatchSnapshot();
+    });
+  });
+
+  describe("None with csp false", () => {
+    const actionUpdateIndicateurUnType = {
+      type: "updateIndicateurUnType" as "updateIndicateurUnType",
+      data: { csp: false }
+    };
+
+    const stateCompleteAndValidateCoef = AppReducer(
+      stateCompleteAndValidate,
+      actionUpdateIndicateurUnType
+    );
+
+    test("stateCompleteAndValidateCoef", () => {
+      expect(stateCompleteAndValidateCoef).toMatchSnapshot();
+    });
+
+    const action = {
+      type: "validateEffectif" as "validateEffectif",
+      valid: "None" as FormState
+    };
+
+    test("invalid complete validate state", () => {
+      expect(
+        AppReducer(stateCompleteAndValidateCoef, action)
+      ).toMatchSnapshot();
     });
   });
 });

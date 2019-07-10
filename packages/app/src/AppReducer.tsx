@@ -126,7 +126,8 @@ function AppReducer(
           ...state,
           effectif: { ...state.effectif, formValidated: action.valid },
           indicateurUn:
-            state.indicateurUn.formValidated === "Valid"
+            state.indicateurUn.formValidated === "Valid" &&
+            state.indicateurUn.csp
               ? { ...state.indicateurUn, formValidated: "Invalid" }
               : state.indicateurUn,
           indicateurDeux:
