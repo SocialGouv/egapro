@@ -51,25 +51,12 @@ function MainScrollView({ children, state, location }: Props) {
     />
   );
 
-  if (layoutType === "tablet") {
-    return (
-      <div css={styles.main}>
-        {menu}
-        <div css={styles.scroll} ref={scrollEl}>
-          <div css={styles.viewContainer}>
-            <div css={styles.view}>{children}</div>
-            <Footer />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div css={styles.main}>
       <ModalProvider>
+        {layoutType === "tablet" && menu}
         <div css={styles.scroll} ref={scrollEl}>
-          <div css={styles.menu}>{menu}</div>
+          {layoutType === "desktop" && <div css={styles.menu}>{menu}</div>}
           <div css={styles.viewContainer}>
             <div css={styles.view}>{children}</div>
             <Footer />
