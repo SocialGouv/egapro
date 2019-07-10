@@ -13,6 +13,7 @@ import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
 
 import InfoBloc from "../../../components/InfoBloc";
 import ActionLink from "../../../components/ActionLink";
+import { useScrollTo } from "../../../components/ScrollContext";
 
 import IndicateurUnCoefMenu, { MenuOption } from "./IndicateurUnCoefMenu";
 import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm";
@@ -92,9 +93,16 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
     noteIndicateurUn
   } = calculIndicateurUn(state);
 
-  const navigateToGroupe = () => setMenuSelected("groupe");
-  const navigateToEffectif = () => setMenuSelected("effectif");
-  const navigateToRemuneration = () => setMenuSelected("remuneration");
+  const scrollTo = useScrollTo();
+
+  const navigateTo = (menu: MenuOption) => {
+    scrollTo(0);
+    setMenuSelected(menu);
+  };
+
+  const navigateToGroupe = () => navigateTo("groupe");
+  const navigateToEffectif = () => navigateTo("effectif");
+  const navigateToRemuneration = () => navigateTo("remuneration");
 
   return (
     <div css={styles.container}>
