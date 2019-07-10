@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useRef, useState, /*, useEffect*/
-useEffect} from "react";
+import { useRef, useState, useEffect} from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
