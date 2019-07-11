@@ -49,7 +49,7 @@ function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
         readOnly={readOnly}
         labelTrue={
           <Fragment>
-            je renseigne par <strong>Catégories Socio-Professionnels</strong>
+            je renseigne par <strong>Catégories Socio-Professionnelles</strong>
           </Fragment>
         }
         labelFalse={
