@@ -2,13 +2,13 @@
 import { css, jsx } from "@emotion/core";
 import MaskedInput, { conformToMask } from "react-text-mask";
 import createNumberMask from "text-mask-addons/dist/createNumberMask";
-import { FieldRenderProps } from "react-final-form-hooks";
+import { FieldRenderProps, FieldMetaState } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 
 import { Cell } from "./Cell";
 
-export const hasFieldError = (meta: FieldRenderProps["meta"]) =>
+export const hasFieldError = (meta: FieldMetaState<any>) =>
   (meta.error && meta.submitFailed) ||
   (meta.error &&
     meta.touched &&
@@ -59,7 +59,7 @@ const trickyMaskNumberToAllowAnyChar = (
 };
 
 interface Props {
-  field: FieldRenderProps;
+  field: FieldRenderProps<string, HTMLInputElement>;
   mask?: "number" | "percent" | undefined;
   style?: any;
 }

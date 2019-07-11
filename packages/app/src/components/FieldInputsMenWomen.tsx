@@ -1,8 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import React from "react";
-import { useField } from "react-final-form-hooks";
-import { FormApi } from "final-form";
+import { useField } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 import { displayPercent, displayInt } from "../utils/helpers";
@@ -23,7 +22,6 @@ const validate = (value: string) => {
 };
 
 interface Props {
-  form: FormApi;
   readOnly: boolean;
   name: string;
   calculable: boolean;
@@ -46,7 +44,6 @@ const displayReadOnlyValue = (
 };
 
 function FieldInputsMenWomen({
-  form,
   name,
   readOnly,
   calculable,
@@ -55,16 +52,12 @@ function FieldInputsMenWomen({
   femmeFieldName,
   hommeFieldName
 }: Props) {
-  const femmesField = useField(
-    femmeFieldName,
-    form,
-    calculable ? validate : undefined
-  );
-  const hommesField = useField(
-    hommeFieldName,
-    form,
-    calculable ? validate : undefined
-  );
+  const femmesField = useField(femmeFieldName, {
+    validate: calculable ? validate : undefined
+  });
+  const hommesField = useField(hommeFieldName, {
+    validate: calculable ? validate : undefined
+  });
 
   const femmesError = hasFieldError(femmesField.meta);
   const hommesError = hasFieldError(hommesField.meta);
