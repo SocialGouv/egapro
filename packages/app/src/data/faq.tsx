@@ -32,10 +32,11 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Le seuil d'effectifs entraînant l'assujettissement à l'obligation de publier l'Index s'apprécie-t-il au niveau de l'unité économique et sociale (UES) quand il en existe une ?",
+          "Le seuil d'effectifs entraînant l'assujettissement à l'obligation de calculer l'Index s'apprécie-t-il au niveau de l'unité économique et sociale (UES) quand il en existe une ?",
         reponse: [
-          "Oui. Dès lors que l'unité économique et sociale (UES) a été reconnue comme telle et comprend au moins 1000 salariés, elle est soumise à l'obligation de publication au 1er mars 2019, quelle que soit la taille des entreprises qui la composent.",
-          "Par exemple, une UES comprenant 4 entreprises, respectivement de 800, 200, 150 et 40 salariés est soumise à l'obligation de publier l'Index au 1er mars 2019. L'effectif pris en compte pour le calcul de l'Index sera alors l'effectif total de l'UES."
+          "Oui. Dès lors que l'unité économique et sociale (UES) a été reconnue comme telle et comprend au moins 1000 salariés, elle est soumise à l'obligation de calcul de l'Index au 1er mars 2019, quelle que soit la taille des entreprises qui la composent.",
+          "Par exemple, une UES comprenant 4 entreprises, respectivement de 800, 200, 150 et 40 salariés est soumise à l'obligation de calculer l'Index au 1er mars 2019. L'effectif pris en compte pour le calcul de l'Index sera alors l'effectif total de l'UES.",
+          "En revanche, l'obligation de publier l'Index repose sur chaque entreprise comprenant au moins 50 salariés, et non l'UES."
         ]
       }
     ]
@@ -76,7 +77,7 @@ export const faqData: FAQPart = {
           "Quels sont les effectifs à prendre en considération pour calculer les indicateurs ?",
         reponse: [
           "L’effectif des salariés à prendre en compte pour le calcul des indicateurs est apprécié sur la période de référence annuelle choisie par l’employeur.",
-          "Sont obligatoirement exclus de ce périmètre : les apprentis, les titulaires d’un contrat de professionnalisation, les salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont les intérimaires), les salariés expatriés, ainsi que les salariés absents plus de la moitié de la période de référence annuelle considérée.",
+          "Sont obligatoirement exclus de ce périmètre : les apprentis, les titulaires d’un contrat de professionnalisation, les salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont les intérimaires), les salariés expatriés, ainsi que les salariés absents plus de la moitié de la période de référence annuelle considérée (sauf pour le calcul de l'indicateur relatif au retour de congé maternité - cf. rubrique G).",
           "Les salariés en pré-retraite, bien qu’ils apparaissent dans les effectifs, sont rémunérés mais ne sont pas présents, sont par ailleurs exclus."
         ]
       },
@@ -99,7 +100,7 @@ export const faqData: FAQPart = {
         question:
           "Qu’entend-on par une absence de plus de la moitié de la période de référence annuelle ? S’agit-il d’une période de suspension de rémunération et d’indemnisation ou de l’absence physique de la personne ?",
         reponse: [
-          "Pour déterminer qui sont les salariés absents plus de la moitié de la période de référence, on exclut les salariés dont le contrat de travail a été suspendu pendant plus de six mois au cours de cette période. Cela amène à exclure les salariés en congé maladie, en congé maternité, ou en congé sans solde et qui ont, à ce titre, été absents sur une durée de plus de 6 mois.",
+          "Pour déterminer quels sont les salariés absents plus de la moitié de la période de référence, on exclut les salariés dont le contrat de travail a été suspendu pendant plus de six mois au cours de cette période. Cela amène à exclure les salariés en congé maladie, en congé maternité (sauf pour l'indicateur relatif au retour de congé maternité - cf. rubrique G), ou en congé sans solde et qui ont, à ce titre, été absents sur une durée de plus de 6 mois.",
           "En revanche, les congés payés sont pris en compte comme du temps de présence.",
           "Les salariés titulaires d’un contrat de travail à durée déterminée de moins de 6 mois sont également exclus."
         ]
@@ -172,9 +173,10 @@ export const faqData: FAQPart = {
           "Pour le calcul de l’Index, le salaire de référence peut-il être le salaire contractuel de base versé ?",
         reponse: [
           "Non. Au sens de l’article L. 3221-3 du code du travail, la rémunération à prendre en compte comprend non seulement le salaire ou traitement ordinaire de base ou minimum, mais également tous les autres avantages et accessoires payés, directement ou indirectement, en espèces ou en nature, par l’employeur au salarié en raison de l’emploi de ce dernier.",
-          "Sont exclus de l’assiette de rémunération : les indemnités de licenciement (et de rupture conventionnelle) , les indemnités de fin CDD (notamment la prime de précarité) , les indemnités de départ à la retraite.",
-          "Sont également exclues les primes liées à une sujétion particulière (qui ne concerne pas la personne du salarié), les primes d’ancienneté, les heures supplémentaires, les heures complémentaires (y compris effectuées dans le cadre de compléments d’heures) ainsi que les versements effectués au titre de l’intéressement et de la participation.",
-          "En revanche, les indemnités de congés payés, versées en fin de contrat, sont prises en compte car elles correspondent à du salaire différé."
+          "Sont exclues de l’assiette de rémunération : les indemnités de licenciement (et de rupture conventionnelle) , les indemnités de fin CDD (notamment la prime de précarité), les indemnités de départ à la retraite, ainsi que les indemnités compensatrices de congés payés, versées en fin de contrat.",
+          "En revanche, les indemnités de congés payés sont prises en compte dans l'assiette de rémunération.
+          "Sont par ailleurs exclus les primes liées à une sujétion particulière (qui ne concerne pas la personne du salarié), les primes d’ancienneté, les heures supplémentaires, les heures complémentaires (y compris effectuées dans le cadre de compléments d’heures) et les versements effectués au titre de l’intéressement et de la participation.",
+          
         ]
       },
       {
@@ -395,7 +397,7 @@ export const faqData: FAQPart = {
         question:
           "Quel est l’effectif à prendre en compte pour le calcul du pourcentage de promotions ? Les salariés qui ont été promus au cours de l’année de référence mais qui ont quitté l’entreprise avant la fin de cette période sont-ils pris en compte ?",
         reponse: [
-          "Le calcul des effectifs à prendre en compte est le même pour tous les indicateurs (cf. rubrique C du questions/réponses). Ainsi les salariés promus au cours de l’année de référence mais qui ont quitté l’entreprise avant la fin de la période sont pris en compte dès lors qu’ils remplissent les critères prévus au paragraphe 2 des annexes du décret du 8 janvier 2019."
+          "Le calcul des effectifs à prendre en compte est le même pour tous les indicateurs (cf. rubrique C du questions/réponses). Ainsi les salariés promus au cours de l’année de référence mais qui ont quitté l’entreprise avant la fin de la période sont pris en compte dès lors qu’ils remplissent les critères prévus au paragraphe 2 des annexes du décret du 8 janvier 2019 (https://www.legifrance.gouv.fr/affichCodeArticle.do;jsessionid=26B8F4D02F6C0E60EC6708AD18D25B94.tplgfr23s_1?cidTexte=LEGITEXT000006072050&idArticle=LEGIARTI000038137262&dateTexte=20190225&categorieLien=id#LEGIARTI000038137262)."
         ]
       },
       {
@@ -415,16 +417,30 @@ export const faqData: FAQPart = {
           "Concernant l’indicateur 4.3, comment interpréter « l’année suivant » le retour de congé maternité ?",
         reponse: [
           "L’indicateur concerne les salariées qui sont revenues de congé maternité au cours de la période annuelle de référence. Parmi ces salariées, seules sont prises en compte, pour le calcul de l’indicateur, celles ayant eu un congé maternité durant lequel des augmentations salariales (générales ou individuelles) ont eu lieu. Pour elles, comme le prévoit la loi depuis 2006, il faut procéder à une réévaluation de leur rémunération.",
-          "Ainsi, si une salariée revient en décembre de congé maternité et que des augmentations ont été versées pendant cette période, elle devra avoir une augmentation à son retour avant la fin de l’année (si l’année civile est la période de référence).",
-          "L’indicateur est calculé en divisant le nombre de femmes dont le salaire de base a été augmenté à leur retour de congé maternité, par le nombre total de salariées ayant bénéficié d’un congé maternité.",
-          "Si plusieurs femmes sont parties en congé maternité sur l’année de référence, et qu’une seule d’entre elles n’a pas été augmentée alors qu’elle relève d’une catégorie où le salaire de base a bénéficié d’une augmentation, la note de l’indicateur est égale à 0."
+          "Ainsi, si une salariée revient en décembre de congé maternité et que des augmentations ont été versées pendant la période de ce congé, elle devra avoir une augmentation à son retour avant la fin de l’année (si l’année civile est la période de référence).",
+          "L’indicateur est calculé en divisant le nombre de femmes augmentées à leur retour de congé maternité (lorsque ce retour a lieu pendant la période de référence), par le nombre de salariées revenues de congé maternité pendant la période de référence, et au cours duquel des augmentations salariales ont eu lieu.",
+          "Si plusieurs femmes sont revenues de congé maternité pendant l’année de référence, et qu’une seule d’entre elles n’a pas été augmentée alors qu’elle relève d’une catégorie profesionnelle où la rémunération a été augmentée, la note de l’indicateur est égale à 0."
         ]
       },
       {
         question:
           "Comment calculer l’indicateur lorsque le congé maternité est suivi d’un congé parental ?",
         reponse: [
-          "Lorsque le congé maternité est suivi d’un congé parental, l’indicateur est calculé en comparant le nombre de salariées ayant bénéficié d’une augmentation à leur retour physique dans l’entreprise, pendant l’année de référence, au nombre total de salariées de l’entreprise. Seules les augmentations intervenues pendant le congé de maternité sont prises en compte, et non celles intervenues pendant le congé parental."
+          "Lorsque le congé maternité est suivi d’un congé parental, l’indicateur est calculé en comparant le nombre de salariées ayant bénéficié d’une augmentation à leur retour physique dans l’entreprise, pendant l’année de référence, au nombre de salariées ayant béneficié d'un congé maternité pendant lequel des augmentations salariales ont eu lieu. Seules les augmentations intervenues pendant le congé de maternité sont prises en compte, et non celles intervenues pendant le congé parental."
+        ]
+      },
+      {
+        question:
+          "Les salariées absentes plus de six mois mais qui sont revenuesavant la fin de la période de référence doivent-elles être prises en compte pour le calcul de l’indicateur relatif au retour de congé maternité ?",
+        reponse: [
+          "Oui, les salariées revenues de congé maternité pendant la période de référence et qui ont été absentes plus de 6 mois pendant cette même période, doivent être prises en compte uniquement pour le calcul de l’indicateur"
+        ]
+      },
+       {
+        question:
+          "En évaluant la période de référence du 1er janvier au 31 décembre 2018, si une salariée revient de congé maternité au 31 août 2018 et qu’elle est augmentée au 1er janvier 2019, alors que ses collègues ont été revalorisés au 1er juillet 2018, celle-ci est-elle considérée comme augmentée ou non au titre de l’indicateur 4?",
+        reponse: [
+          "Non, elle n’est pas considérée comme augmentée, car le respect de l’obligation est apprécié sur l’année de référence, soit dans cet exemple sur l'année civile 2018."
         ]
       },
       {
@@ -439,7 +455,7 @@ export const faqData: FAQPart = {
           "L’employeur doit-il verser à la salariée, à son retour de congé maternité, une moyenne des bonus qui ont été payés aux autres salariés en son absence ?",
         reponse: [
           "Non. L’article L. 1225-26 du code du travail prévoit qu’à leur retour de congé maternité, les salariées doivent bénéficier des augmentations générales ainsi que de la moyenne des augmentations individuelles perçues pendant la durée de ce congé par les salariés relevant de la même catégorie professionnelle ou, à défaut, de la moyenne des augmentations individuelles dans l’entreprise.",
-          "Selon la jurisprudence, dès lors qu’une prime est expressément subordonnée à la participation effective du salarié à une activité de l’entreprise et qu’elle répond à des critères d’attribution objectifs, mesurables et licites, elle n’est pas due à la salariée pendant son congé de maternité. (Cass. soc., 19 septembre 2018, nº 17-11.618 FS-PB)"
+          "Selon la jurisprudence, dès lors qu’une prime est expressément subordonnée à la participation effective du salarié à une activité de l’entreprise et qu’elle répond à des critères d’attribution objectifs, mesurables et licites, elle n’est pas due à la salariée pendant son congé de maternité. (Cass. soc., 19 septembre 2018, nº 17-11.618 FS-PB : https://www.courdecassation.fr/jurisprudence_2/arrets_publies_2986/chambre_sociale_3168/2018_8506/septembre_8946/1294_19_40212.html)"
         ]
       },
       {
@@ -473,7 +489,7 @@ export const faqData: FAQPart = {
         question:
           "Sur quel site internet l’entreprise doit-elle publier son Index ?",
         reponse: [
-          "La note globale de l’Index doit être publiée sur le site internet de l’entreprise, lorsqu’il en existe un. Une publication sur le site Intranet de l’entreprise n’est donc pas suffisante.",
+          "La note globale de l’Index doit être publiée sur le site internet de l’entreprise, lorsqu’il en existe un (y compris lorsque l'entreprise fait partie d'un groupe ou d'une UES. Une publication sur le site Intranet de l’entreprise n’est donc pas suffisante.",
           "La note globale pourra être publiée sur son site de présentation, il n’est pas pour autant obligatoire qu’elle figure sur la page d’accueil.",
           "Si un groupe d’entreprises ou une UES a un seul site Internet pour toutes ses entreprises, l’ensemble des index devront être publiés sur ce site.",
           "Si l’entreprise n’a pas de site internet propre, alors l’Index peut être publié sur le site Internet du groupe ou de l’UES, s’il en existe un.",
