@@ -22,7 +22,7 @@ import {
 /* INDICATEUR 1 CONST */
 
 const seuilPertinenceCsp = 5 / 100;
-const seuilPertinenceCoef = 3 / 100;
+const seuilPertinenceCoef = 2 / 100;
 
 const baremeEcartRemuneration = [
   40,
