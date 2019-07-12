@@ -2,11 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
 import { Form } from "react-final-form";
-import {
-  FormState,
-  TranchesAges,
-  GroupTranchesAgesEffectif
-} from "../../globals.d";
+import { FormState, GroupTranchesAgesEffectif } from "../../globals.d";
 
 import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
 import { displayInt } from "../../utils/helpers";
@@ -20,65 +16,42 @@ import { Cell, Cell2 } from "../../components/Cell";
 
 import { displayNameTranchesAges } from "../../utils/helpers";
 
+type Effectif = Array<{
+  id: any;
+  name: string;
+  tranchesAges: Array<GroupTranchesAgesEffectif>;
+}>;
+
 interface Props {
-  effectifRaw: Array<{
-    id: any;
-    name: string;
-    tranchesAges: Array<GroupTranchesAgesEffectif>;
-  }>;
+  effectifRaw: Effectif;
   readOnly: boolean;
-  updateEffectif: (
-    data: Array<{
-      id: any;
-      tranchesAges: Array<GroupTranchesAgesEffectif>;
-    }>
-  ) => void;
+  updateEffectif: (data: Effectif) => void;
   validateEffectif: (valid: FormState) => void;
   nextLink: ReactNode;
 }
 
-const getFieldName = (
-  idGroupe: string,
-  trancheAge: TranchesAges,
-  genre: "Hommes" | "Femmes"
-): string => "nombreSalaries" + idGroupe + genre + trancheAge;
-
 const getTotalGroupNbSalarie = (
-  tranchesAges: Array<{
-    nbSalarieHommeName: string;
-    nbSalarieFemmeName: string;
-  }>,
-  values: any
+  tranchesAges: Array<GroupTranchesAgesEffectif>
 ) =>
   tranchesAges.reduce(
-    (accGroup, { nbSalarieHommeName, nbSalarieFemmeName }) => {
+    (accGroup, { nombreSalariesHommes, nombreSalariesFemmes }) => {
       return {
         totalGroupNbSalarieHomme:
-          accGroup.totalGroupNbSalarieHomme +
-          parseIntFormValue(values[nbSalarieHommeName], 0),
+          accGroup.totalGroupNbSalarieHomme + (nombreSalariesHommes || 0),
         totalGroupNbSalarieFemme:
-          accGroup.totalGroupNbSalarieFemme +
-          parseIntFormValue(values[nbSalarieFemmeName], 0)
+          accGroup.totalGroupNbSalarieFemme + (nombreSalariesFemmes || 0)
       };
     },
     { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
   );
 
-const getTotalNbSalarie = (
-  infoFields: Array<{
-    tranchesAges: Array<{
-      nbSalarieHommeName: string;
-      nbSalarieFemmeName: string;
-    }>;
-  }>,
-  values: any
-) =>
-  infoFields.reduce(
+const getTotalNbSalarie = (effectif: Effectif) =>
+  effectif.reduce(
     (acc, { tranchesAges }) => {
       const {
         totalGroupNbSalarieHomme,
         totalGroupNbSalarieFemme
-      } = getTotalGroupNbSalarie(tranchesAges, values);
+      } = getTotalGroupNbSalarie(tranchesAges);
 
       return {
         totalNbSalarieHomme: acc.totalNbSalarieHomme + totalGroupNbSalarieHomme,
@@ -88,68 +61,52 @@ const getTotalNbSalarie = (
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
   );
 
-function EffectifForm({
+function EffectifFormRaw({
   effectifRaw,
   readOnly,
   updateEffectif,
   validateEffectif,
   nextLink
 }: Props) {
-  const infoFields = effectifRaw.map(({ id, name, tranchesAges }) => {
-    return {
-      id,
-      name,
+  const initialValues = {
+    effectif: effectifRaw.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+      ...otherPropGroupe,
       tranchesAges: tranchesAges.map(
         ({
-          trancheAge,
           nombreSalariesFemmes,
-          nombreSalariesHommes
-        }: GroupTranchesAgesEffectif) => {
+          nombreSalariesHommes,
+          ...otherPropsTrancheAge
+        }: any) => {
           return {
-            trancheAge,
-            nbSalarieFemmeName: getFieldName(id, trancheAge, "Femmes"),
-            nbSalarieFemmeValue: parseIntStateValue(nombreSalariesFemmes),
-            nbSalarieHommeName: getFieldName(id, trancheAge, "Hommes"),
-            nbSalarieHommeValue: parseIntStateValue(nombreSalariesHommes)
+            ...otherPropsTrancheAge,
+            nombreSalariesFemmes: parseIntStateValue(nombreSalariesFemmes),
+            nombreSalariesHommes: parseIntStateValue(nombreSalariesHommes)
           };
         }
       )
-    };
-  });
-
-  const initialValues = infoFields.reduce((acc1, { tranchesAges }) => {
-    return tranchesAges.reduce(
-      (
-        acc2,
-        {
-          nbSalarieFemmeName,
-          nbSalarieFemmeValue,
-          nbSalarieHommeName,
-          nbSalarieHommeValue
-        }
-      ) => {
-        return {
-          ...acc2,
-          [nbSalarieFemmeName]: nbSalarieFemmeValue,
-          [nbSalarieHommeName]: nbSalarieHommeValue
-        };
-      },
-      acc1
-    );
-  }, {});
+    }))
+  };
 
   const saveForm = (formData: any) => {
-    const nombreSalaries = infoFields.map(({ id, tranchesAges }) => ({
-      id,
-      tranchesAges: tranchesAges.map(
-        ({ trancheAge, nbSalarieFemmeName, nbSalarieHommeName }) => ({
-          trancheAge,
-          nombreSalariesFemmes: parseIntFormValue(formData[nbSalarieFemmeName]),
-          nombreSalariesHommes: parseIntFormValue(formData[nbSalarieHommeName])
-        })
-      )
-    }));
-    updateEffectif(nombreSalaries);
+    const effectif = formData.effectif.map(
+      ({ tranchesAges, ...otherPropGroupe }: any) => ({
+        ...otherPropGroupe,
+        tranchesAges: tranchesAges.map(
+          ({
+            nombreSalariesFemmes,
+            nombreSalariesHommes,
+            ...otherPropsTrancheAge
+          }: any) => {
+            return {
+              ...otherPropsTrancheAge,
+              nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes),
+              nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes)
+            };
+          }
+        )
+      })
+    );
+    updateEffectif(effectif);
   };
 
   const onSubmit = (formData: any) => {
@@ -158,20 +115,26 @@ function EffectifForm({
   };
 
   return (
-    <Form onSubmit={onSubmit} initialValues={initialValues}>
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => {
+    <Form
+      onSubmit={onSubmit}
+      initialValues={initialValues}
+      // mandatory to not change user inputs
+      // because we want to keep wrong string inside the input
+      // we don't want to block string value
+      initialValuesEqual={() => true}
+    >
+      {({ handleSubmit, hasValidationErrors, submitFailed }) => {
         const { totalNbSalarieHomme, totalNbSalarieFemme } = getTotalNbSalarie(
-          infoFields,
-          values
+          effectifRaw
         );
         return (
           <form onSubmit={handleSubmit} css={styles.container}>
             <FormAutoSave saveForm={saveForm} />
-            {infoFields.map(({ id, name, tranchesAges }) => {
+            {effectifRaw.map(({ id, name, tranchesAges }, indexGroupe) => {
               const {
                 totalGroupNbSalarieHomme,
                 totalGroupNbSalarieFemme
-              } = getTotalGroupNbSalarie(tranchesAges, values);
+              } = getTotalGroupNbSalarie(tranchesAges);
               return (
                 <BlocForm
                   key={id}
@@ -182,26 +145,20 @@ function EffectifForm({
                     displayInt(totalGroupNbSalarieHomme)
                   ]}
                 >
-                  {tranchesAges.map(
-                    ({
-                      trancheAge,
-                      nbSalarieFemmeName,
-                      nbSalarieHommeName
-                    }) => {
-                      return (
-                        <FieldInputsMenWomen
-                          key={trancheAge}
-                          readOnly={readOnly}
-                          name={displayNameTranchesAges(trancheAge)}
-                          calculable={true}
-                          calculableNumber={0}
-                          mask="number"
-                          femmeFieldName={nbSalarieFemmeName}
-                          hommeFieldName={nbSalarieHommeName}
-                        />
-                      );
-                    }
-                  )}
+                  {tranchesAges.map(({ trancheAge }, indexTrancheAge) => {
+                    return (
+                      <FieldInputsMenWomen
+                        key={trancheAge}
+                        readOnly={readOnly}
+                        name={displayNameTranchesAges(trancheAge)}
+                        calculable={true}
+                        calculableNumber={0}
+                        mask="number"
+                        femmeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesFemmes`}
+                        hommeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesHommes`}
+                      />
+                    );
+                  })}
                 </BlocForm>
               );
             })}
@@ -266,4 +223,4 @@ const styles = {
   })
 };
 
-export default EffectifForm;
+export default EffectifFormRaw;

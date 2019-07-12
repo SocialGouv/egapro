@@ -8,7 +8,7 @@ import globalStyles from "../utils/globalStyles";
 
 import { Cell } from "./Cell";
 
-export const hasFieldError = (meta: FieldMetaState<any>) =>
+export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
   (meta.error &&
     meta.touched &&

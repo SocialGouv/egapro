@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo, ReactNode } from "react";
-import { useForm } from "react-final-form-hooks";
+import { ReactNode } from "react";
+import { Form } from "react-final-form";
 import {
   TranchesAges,
   GroupTranchesAgesIndicateurUn,
@@ -13,6 +13,7 @@ import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
 import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import ActionBar from "../../components/ActionBar";
+import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 
 import { displayNameTranchesAges } from "../../utils/helpers";
@@ -39,12 +40,6 @@ interface Props {
   nextLink: ReactNode;
 }
 
-const getFieldName = (
-  idGroupe: string,
-  trancheAge: TranchesAges,
-  genre: "Hommes" | "Femmes"
-): string => "remunerationAnnuelleBrut" + idGroupe + genre + trancheAge;
-
 const groupByCategorieSocioPro = (
   ecartRemuParTrancheAge: Array<remunerationGroup>
 ): Array<{
@@ -62,7 +57,7 @@ const groupByCategorieSocioPro = (
           ...acc,
           [id]: {
             ...el,
-            tranchesAges: [...el.tranchesAges, { id, ...otherAttr }]
+            tranchesAges: [...el.tranchesAges, otherAttr]
           }
         };
       } else {
@@ -71,7 +66,7 @@ const groupByCategorieSocioPro = (
           [id]: {
             id,
             name,
-            tranchesAges: [{ id, ...otherAttr }]
+            tranchesAges: [otherAttr]
           }
         };
       }
@@ -90,92 +85,54 @@ function IndicateurUnFormRaw({
   validateIndicateurUn,
   nextLink
 }: Props) {
-  const infoFields = groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
-    ({
-      id,
-      name,
-      tranchesAges
-    }: {
-      id: any;
-      name: string;
-      tranchesAges: Array<remunerationGroup>;
-    }) => {
-      return {
-        id,
-        name,
+  const initialValues = {
+    remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
+      ({ tranchesAges, ...otherPropGroupe }: any) => ({
+        ...otherPropGroupe,
         tranchesAges: tranchesAges.map(
           ({
-            trancheAge,
-            validiteGroupe,
             remunerationAnnuelleBrutFemmes,
-            remunerationAnnuelleBrutHommes
-          }: remunerationGroup) => {
+            remunerationAnnuelleBrutHommes,
+            ...otherPropsTrancheAge
+          }: any) => {
             return {
-              trancheAge,
-              validiteGroupe,
-              remunerationAnnuelleBrutFemmesName: getFieldName(
-                id,
-                trancheAge,
-                "Femmes"
-              ),
-              remunerationAnnuelleBrutFemmesValue: parseIntStateValue(
+              ...otherPropsTrancheAge,
+              remunerationAnnuelleBrutFemmes: parseIntStateValue(
                 remunerationAnnuelleBrutFemmes
               ),
-              remunerationAnnuelleBrutHommesName: getFieldName(
-                id,
-                trancheAge,
-                "Hommes"
-              ),
-              remunerationAnnuelleBrutHommesValue: parseIntStateValue(
+              remunerationAnnuelleBrutHommes: parseIntStateValue(
                 remunerationAnnuelleBrutHommes
               )
             };
           }
         )
-      };
-    }
-  );
-
-  const initialValues = infoFields.reduce((acc1, { tranchesAges }) => {
-    return tranchesAges.reduce(
-      (
-        acc2,
-        {
-          remunerationAnnuelleBrutFemmesName,
-          remunerationAnnuelleBrutFemmesValue,
-          remunerationAnnuelleBrutHommesName,
-          remunerationAnnuelleBrutHommesValue
-        }
-      ) => {
-        return {
-          ...acc2,
-          [remunerationAnnuelleBrutFemmesName]: remunerationAnnuelleBrutFemmesValue,
-          [remunerationAnnuelleBrutHommesName]: remunerationAnnuelleBrutHommesValue
-        };
-      },
-      acc1
-    );
-  }, {});
+      })
+    )
+  };
 
   const saveForm = (formData: any) => {
-    const remunerationAnnuelle = infoFields.map(({ id, tranchesAges }) => ({
-      id,
-      tranchesAges: tranchesAges.map(
-        ({
-          trancheAge,
-          remunerationAnnuelleBrutFemmesName,
-          remunerationAnnuelleBrutHommesName
-        }) => ({
-          trancheAge,
-          remunerationAnnuelleBrutFemmes: parseIntFormValue(
-            formData[remunerationAnnuelleBrutFemmesName]
-          ),
-          remunerationAnnuelleBrutHommes: parseIntFormValue(
-            formData[remunerationAnnuelleBrutHommesName]
-          )
-        })
-      )
-    }));
+    const remunerationAnnuelle = formData.remunerationAnnuelle.map(
+      ({ tranchesAges, ...otherPropGroupe }: any) => ({
+        ...otherPropGroupe,
+        tranchesAges: tranchesAges.map(
+          ({
+            remunerationAnnuelleBrutFemmes,
+            remunerationAnnuelleBrutHommes,
+            trancheAge
+          }: any) => {
+            return {
+              trancheAge,
+              remunerationAnnuelleBrutFemmes: parseIntFormValue(
+                remunerationAnnuelleBrutFemmes
+              ),
+              remunerationAnnuelleBrutHommes: parseIntFormValue(
+                remunerationAnnuelleBrutHommes
+              )
+            };
+          }
+        )
+      })
+    );
     updateIndicateurUn(remunerationAnnuelle);
   };
 
@@ -184,64 +141,72 @@ function IndicateurUnFormRaw({
     validateIndicateurUn("Valid");
   };
 
-  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
-    initialValues,
-    onSubmit
-  });
-
-  form.subscribe(
-    ({ values, dirty }) => {
-      if (dirty) {
-        saveForm(values);
-      }
-    },
-    { values: true, dirty: true }
-  );
-
   return (
-    <form onSubmit={handleSubmit} css={styles.container}>
-      {infoFields.map(({ id, name, tranchesAges }) => {
-        return (
-          <BlocForm key={id} title={name} label="rémunération moyenne">
-            {tranchesAges.map(
-              ({
-                trancheAge,
-                validiteGroupe,
-                remunerationAnnuelleBrutFemmesName,
-                remunerationAnnuelleBrutHommesName
-              }) => {
-                return (
-                  <FieldInputsMenWomen
-                    key={trancheAge}
-                    form={form}
-                    name={displayNameTranchesAges(trancheAge)}
-                    readOnly={readOnly}
-                    calculable={validiteGroupe}
-                    calculableNumber={3}
-                    mask="number"
-                    femmeFieldName={remunerationAnnuelleBrutFemmesName}
-                    hommeFieldName={remunerationAnnuelleBrutHommesName}
-                  />
-                );
-              }
-            )}
-          </BlocForm>
-        );
-      })}
+    <Form
+      onSubmit={onSubmit}
+      initialValues={initialValues}
+      // mandatory to not change user inputs
+      // because we want to keep wrong string inside the input
+      // we don't want to block string value
+      initialValuesEqual={() => true}
+    >
+      {({ handleSubmit, hasValidationErrors, submitFailed }) => (
+        <form onSubmit={handleSubmit} css={styles.container}>
+          <FormAutoSave saveForm={saveForm} />
+          {initialValues.remunerationAnnuelle.map(
+            (
+              {
+                id,
+                name,
+                tranchesAges
+              }: {
+                id: any;
+                name: string;
+                tranchesAges: Array<{
+                  trancheAge: TranchesAges;
+                  validiteGroupe: boolean;
+                }>;
+              },
+              indexGroupe
+            ) => {
+              return (
+                <BlocForm key={id} title={name} label="rémunération moyenne">
+                  {tranchesAges.map(
+                    ({ trancheAge, validiteGroupe }, indexTrancheAge) => {
+                      return (
+                        <FieldInputsMenWomen
+                          key={trancheAge}
+                          name={displayNameTranchesAges(trancheAge)}
+                          readOnly={readOnly}
+                          calculable={validiteGroupe}
+                          calculableNumber={3}
+                          mask="number"
+                          femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
+                          hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                        />
+                      );
+                    }
+                  )}
+                </BlocForm>
+              );
+            }
+          )}
 
-      {readOnly ? (
-        <ActionBar>{nextLink}</ActionBar>
-      ) : (
-        <ActionBar>
-          <FormSubmit
-            hasValidationErrors={hasValidationErrors}
-            submitFailed={submitFailed}
-            errorMessage="vous ne pouvez pas valider l’indicateur
+          {readOnly ? (
+            <ActionBar>{nextLink}</ActionBar>
+          ) : (
+            <ActionBar>
+              <FormSubmit
+                hasValidationErrors={hasValidationErrors}
+                submitFailed={submitFailed}
+                errorMessage="vous ne pouvez pas valider l’indicateur
                 tant que vous n’avez pas rempli tous les champs"
-          />
-        </ActionBar>
+              />
+            </ActionBar>
+          )}
+        </form>
       )}
-    </form>
+    </Form>
   );
 }
 
@@ -252,7 +217,4 @@ const styles = {
   })
 };
 
-export default memo(
-  IndicateurUnFormRaw,
-  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
-);
+export default IndicateurUnFormRaw;

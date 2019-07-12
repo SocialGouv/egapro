@@ -52,12 +52,12 @@ function FieldInputsMenWomen({
   femmeFieldName,
   hommeFieldName
 }: Props) {
-  const femmesField = useField(femmeFieldName, {
+  const fieldOptions = {
     validate: calculable ? validate : undefined
-  });
-  const hommesField = useField(hommeFieldName, {
-    validate: calculable ? validate : undefined
-  });
+  };
+
+  const femmesField = useField(femmeFieldName, fieldOptions);
+  const hommesField = useField(hommeFieldName, fieldOptions);
 
   const femmesError = hasFieldError(femmesField.meta);
   const hommesError = hasFieldError(hommesField.meta);

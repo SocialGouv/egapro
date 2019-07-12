@@ -1,61 +1,51 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
-import { useField, FieldRenderProps } from "react-final-form-hooks";
-import { FormApi } from "final-form";
+import { useField } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 
 function RadioField({
-  field: { input },
+  fieldName,
   label,
   value,
   disabled
 }: {
-  field: FieldRenderProps;
+  fieldName: string;
   label: ReactNode;
   value: string;
   disabled: boolean;
 }) {
-  const checked = input.value === value;
+  const { input } = useField(fieldName, { type: "radio", value });
   return (
     <label css={styles.label}>
-      <input
-        css={styles.radio}
-        {...input}
-        type="radio"
-        value={value}
-        checked={checked}
-        disabled={disabled}
-      />
-      <div css={[styles.fakeRadio, checked && styles.fakeRadioChecked]} />
+      <input css={styles.radio} {...input} disabled={disabled} />
+      <div css={[styles.fakeRadio, input.checked && styles.fakeRadioChecked]} />
       <span css={styles.labelText}>{label}</span>
     </label>
   );
 }
 
 interface Props {
-  form: FormApi;
   readOnly: boolean;
   fieldName: string;
+  value: string;
   labelTrue: ReactNode;
   labelFalse: ReactNode;
 }
 
 function RadiosBoolean({
-  form,
   readOnly,
   fieldName,
+  value,
   labelTrue,
   labelFalse
 }: Props) {
-  const field = useField(fieldName, form);
-  const { value } = field.input;
   return (
     <div css={styles.container}>
       <div css={[readOnly && value === "false" && styles.radioFieldDisabled]}>
         <RadioField
-          field={field}
+          fieldName={fieldName}
           label={labelTrue}
           value="true"
           disabled={readOnly}
@@ -68,7 +58,7 @@ function RadiosBoolean({
         ]}
       >
         <RadioField
-          field={field}
+          fieldName={fieldName}
           label={labelFalse}
           value="false"
           disabled={readOnly}

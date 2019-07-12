@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo, useCallback, Fragment } from "react";
-import { useForm } from "react-final-form-hooks";
+import { useCallback, Fragment } from "react";
+import { Form } from "react-final-form";
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals.d";
 
 import {
@@ -9,6 +9,7 @@ import {
   parseBooleanStateValue
 } from "../../utils/formHelpers";
 
+import FormAutoSave from "../../components/FormAutoSave";
 import RadiosBoolean from "../../components/RadiosBoolean";
 
 interface Props {
@@ -34,32 +35,31 @@ function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
     }
   };
 
-  const { form, handleSubmit } = useForm({
-    initialValues,
-    onSubmit: () => {}
-  });
-
-  form.subscribe(({ values }) => saveForm(values), { values: true });
-
   return (
-    <form onSubmit={handleSubmit} css={styles.container}>
-      <RadiosBoolean
-        form={form}
-        fieldName="csp"
-        readOnly={readOnly}
-        labelTrue={
-          <Fragment>
-            je renseigne par <strong>Catégories Socio-Professionnelles</strong>
-          </Fragment>
-        }
-        labelFalse={
-          <Fragment>
-            je renseigne par{" "}
-            <strong>Niveaux ou coefficients hiérarchiques</strong>
-          </Fragment>
-        }
-      />
-    </form>
+    <Form onSubmit={() => {}} initialValues={initialValues}>
+      {({ handleSubmit, values }) => (
+        <form onSubmit={handleSubmit} css={styles.container}>
+          <FormAutoSave saveForm={saveForm} />
+          <RadiosBoolean
+            fieldName="csp"
+            value={values.csp}
+            readOnly={readOnly}
+            labelTrue={
+              <Fragment>
+                je renseigne par{" "}
+                <strong>Catégories Socio-Professionnelles</strong>
+              </Fragment>
+            }
+            labelFalse={
+              <Fragment>
+                je renseigne par{" "}
+                <strong>Niveaux ou coefficients hiérarchiques</strong>
+              </Fragment>
+            }
+          />
+        </form>
+      )}
+    </Form>
   );
 }
 
@@ -71,7 +71,4 @@ const styles = {
   })
 };
 
-export default memo(
-  IndicateurUnTypeForm,
-  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
-);
+export default IndicateurUnTypeForm;

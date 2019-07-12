@@ -1,12 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
-import { useForm } from "react-final-form-hooks";
-import {
-  FormState,
-  CategorieSocioPro,
-  ActionIndicateurDeuxData
-} from "../../globals.d";
+import { Form } from "react-final-form";
+import { FormState, ActionIndicateurDeuxData } from "../../globals.d";
 
 import {
   // calculTotalEffectifsEtTauxAugmentation,
@@ -18,6 +13,7 @@ import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import RadiosBoolean from "../../components/RadiosBoolean";
 import ActionBar from "../../components/ActionBar";
+import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
@@ -40,11 +36,6 @@ interface Props {
   validateIndicateurDeux: (valid: FormState) => void;
 }
 
-const getFieldName = (
-  categorieSocioPro: CategorieSocioPro,
-  genre: "Hommes" | "Femmes"
-): string => "tauxAugmentation" + categorieSocioPro + genre;
-
 function IndicateurDeuxForm({
   ecartAugmentParCategorieSocioPro,
   presenceAugmentation,
@@ -52,67 +43,39 @@ function IndicateurDeuxForm({
   updateIndicateurDeux,
   validateIndicateurDeux
 }: Props) {
-  const infoFields = ecartAugmentParCategorieSocioPro.map(
-    ({
-      categorieSocioPro,
-      validiteGroupe,
-      tauxAugmentationFemmes,
-      tauxAugmentationHommes
-    }) => {
-      return {
-        categorieSocioPro,
-        validiteGroupe,
-        tauxAugmentationFemmesName: getFieldName(categorieSocioPro, "Femmes"),
-        tauxAugmentationFemmesValue: parseFloatStateValue(
-          tauxAugmentationFemmes
-        ),
-        tauxAugmentationHommesName: getFieldName(categorieSocioPro, "Hommes"),
-        tauxAugmentationHommesValue: parseFloatStateValue(
-          tauxAugmentationHommes
-        )
-      };
-    }
-  );
-
-  const initialValues = infoFields.reduce(
-    (
-      acc,
-      {
-        tauxAugmentationFemmesName,
-        tauxAugmentationFemmesValue,
-        tauxAugmentationHommesName,
-        tauxAugmentationHommesValue
-      }
-    ) => {
-      return {
-        ...acc,
-        [tauxAugmentationFemmesName]: tauxAugmentationFemmesValue,
-        [tauxAugmentationHommesName]: tauxAugmentationHommesValue
-      };
-    },
-    { presenceAugmentation: parseBooleanStateValue(presenceAugmentation) }
-  );
+  const initialValues = {
+    presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
+    tauxAugmentation: ecartAugmentParCategorieSocioPro.map(
+      ({
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes,
+        ...otherProps
+      }: any) => ({
+        ...otherProps,
+        tauxAugmentationFemmes: parseFloatStateValue(tauxAugmentationFemmes),
+        tauxAugmentationHommes: parseFloatStateValue(tauxAugmentationHommes)
+      })
+    )
+  };
 
   const saveForm = (formData: any) => {
-    const { presenceAugmentation } = formData;
-    const tauxAugmentation = infoFields.map(
+    const presenceAugmentation = parseBooleanFormValue(
+      formData.presenceAugmentation
+    );
+    const tauxAugmentation = formData.tauxAugmentation.map(
       ({
         categorieSocioPro,
-        tauxAugmentationFemmesName,
-        tauxAugmentationHommesName
-      }) => ({
+        tauxAugmentationFemmes,
+        tauxAugmentationHommes
+      }: any) => ({
         categorieSocioPro,
-        tauxAugmentationFemmes: parseFloatFormValue(
-          formData[tauxAugmentationFemmesName]
-        ),
-        tauxAugmentationHommes: parseFloatFormValue(
-          formData[tauxAugmentationHommesName]
-        )
+        tauxAugmentationFemmes: parseFloatFormValue(tauxAugmentationFemmes),
+        tauxAugmentationHommes: parseFloatFormValue(tauxAugmentationHommes)
       })
     );
     updateIndicateurDeux({
       tauxAugmentation,
-      presenceAugmentation: parseBooleanFormValue(presenceAugmentation)
+      presenceAugmentation
     });
   };
 
@@ -120,26 +83,6 @@ function IndicateurDeuxForm({
     saveForm(formData);
     validateIndicateurDeux("Valid");
   };
-
-  const {
-    form,
-    values,
-    handleSubmit,
-    hasValidationErrors,
-    submitFailed
-  } = useForm({
-    initialValues,
-    onSubmit
-  });
-
-  form.subscribe(
-    ({ values, dirty }) => {
-      if (dirty) {
-        saveForm(values);
-      }
-    },
-    { values: true, dirty: true }
-  );
 
   // Only for Total with updated values
   // const ecartAugmentParCategorieSocioProPourTotal = ecartAugmentParCategorieSocioPro.map(
@@ -171,63 +114,69 @@ function IndicateurDeuxForm({
   // );
 
   return (
-    <form onSubmit={handleSubmit} css={styles.container}>
-      <RadiosBoolean
-        form={form}
-        fieldName="presenceAugmentation"
-        readOnly={readOnly}
-        labelTrue="il y a eu des augmentations durant la période de référence"
-        labelFalse="il n’y a pas eu d’augmentation durant la période de référence"
-      />
-
-      {values.presenceAugmentation === "true" && (
-        <BlocForm
-          label="% de salariés augmentés"
-          // footer={[
-          //   displayFractionPercent(totalTauxAugmentationFemmes),
-          //   displayFractionPercent(totalTauxAugmentationHommes)
-          // ]}
-        >
-          {infoFields.map(
-            ({
-              categorieSocioPro,
-              validiteGroupe,
-              tauxAugmentationFemmesName,
-              tauxAugmentationHommesName
-            }) => {
-              return (
-                <FieldInputsMenWomen
-                  key={categorieSocioPro}
-                  form={form}
-                  name={displayNameCategorieSocioPro(categorieSocioPro)}
-                  readOnly={readOnly}
-                  calculable={validiteGroupe}
-                  calculableNumber={10}
-                  mask="percent"
-                  femmeFieldName={tauxAugmentationFemmesName}
-                  hommeFieldName={tauxAugmentationHommesName}
-                />
-              );
-            }
-          )}
-        </BlocForm>
-      )}
-
-      {readOnly ? (
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur3" label="suivant" />
-        </ActionBar>
-      ) : (
-        <ActionBar>
-          <FormSubmit
-            hasValidationErrors={hasValidationErrors}
-            submitFailed={submitFailed}
-            errorMessage="vous ne pouvez pas valider l’indicateur
-                tant que vous n’avez pas rempli tous les champs"
+    <Form
+      onSubmit={onSubmit}
+      initialValues={initialValues}
+      // mandatory to not change user inputs
+      // because we want to keep wrong string inside the input
+      // we don't want to block string value
+      initialValuesEqual={() => true}
+    >
+      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+        <form onSubmit={handleSubmit} css={styles.container}>
+          <FormAutoSave saveForm={saveForm} />
+          <RadiosBoolean
+            fieldName="presenceAugmentation"
+            value={values.presenceAugmentation}
+            readOnly={readOnly}
+            labelTrue="il y a eu des augmentations durant la période de référence"
+            labelFalse="il n’y a pas eu d’augmentation durant la période de référence"
           />
-        </ActionBar>
+
+          {values.presenceAugmentation === "true" && (
+            <BlocForm
+              label="% de salariés augmentés"
+              // footer={[
+              //   displayFractionPercent(totalTauxAugmentationFemmes),
+              //   displayFractionPercent(totalTauxAugmentationHommes)
+              // ]}
+            >
+              {ecartAugmentParCategorieSocioPro.map(
+                ({ categorieSocioPro, validiteGroupe }, index) => {
+                  return (
+                    <FieldInputsMenWomen
+                      key={categorieSocioPro}
+                      name={displayNameCategorieSocioPro(categorieSocioPro)}
+                      readOnly={readOnly}
+                      calculable={validiteGroupe}
+                      calculableNumber={10}
+                      mask="percent"
+                      femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
+                      hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
+                    />
+                  );
+                }
+              )}
+            </BlocForm>
+          )}
+
+          {readOnly ? (
+            <ActionBar>
+              <ButtonSimulatorLink to="/indicateur3" label="suivant" />
+            </ActionBar>
+          ) : (
+            <ActionBar>
+              <FormSubmit
+                hasValidationErrors={hasValidationErrors}
+                submitFailed={submitFailed}
+                errorMessage="vous ne pouvez pas valider l’indicateur
+                tant que vous n’avez pas rempli tous les champs"
+              />
+            </ActionBar>
+          )}
+        </form>
       )}
-    </form>
+    </Form>
   );
 }
 
@@ -238,7 +187,4 @@ const styles = {
   })
 };
 
-export default memo(
-  IndicateurDeuxForm,
-  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
-);
+export default IndicateurDeuxForm;

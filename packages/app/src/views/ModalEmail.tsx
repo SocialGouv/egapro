@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useState } from "react";
-import { useForm, useField } from "react-final-form-hooks";
+import { useState, Fragment } from "react";
+import { Form, useField } from "react-final-form";
 
 import { sendEmailIndicatorsDatas } from "../utils/api";
 import { required, validateEmail } from "../utils/formHelpers";
@@ -40,14 +40,6 @@ function ModalEmail({ closeModal, code }: Props) {
     });
   };
 
-  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
-    onSubmit
-  });
-
-  const field = useField("email", form, validate);
-
-  const error = hasFieldError(field.meta);
-
   return (
     <div css={styles.container}>
       <div css={styles.image} />
@@ -64,30 +56,45 @@ function ModalEmail({ closeModal, code }: Props) {
         que nous puissions vous envoyer votre code.
       </p>
 
-      <form onSubmit={handleSubmit} css={styles.body}>
-        <label
-          css={[styles.label, error && styles.labelError]}
-          htmlFor={field.input.name}
-        >
-          email
-        </label>
-        <div css={styles.fieldRow}>
-          <Input field={field} />
-        </div>
-        <p css={styles.error}>{error && "l’adresse mail n’est pas valide"}</p>
+      <Form onSubmit={onSubmit}>
+        {({ handleSubmit, hasValidationErrors, submitFailed }) => (
+          <form onSubmit={handleSubmit} css={styles.body}>
+            <FieldEmail />
 
-        <ActionBar>
-          <FormSubmit
-            hasValidationErrors={hasValidationErrors}
-            submitFailed={submitFailed}
-            loading={loading}
-          />
-          <ActionLink onClick={closeModal} style={styles.actionLink}>
-            continuer sans donner de mail
-          </ActionLink>
-        </ActionBar>
-      </form>
+            <ActionBar>
+              <FormSubmit
+                hasValidationErrors={hasValidationErrors}
+                submitFailed={submitFailed}
+                loading={loading}
+              />
+              <ActionLink onClick={closeModal} style={styles.actionLink}>
+                continuer sans donner de mail
+              </ActionLink>
+            </ActionBar>
+          </form>
+        )}
+      </Form>
     </div>
+  );
+}
+
+function FieldEmail() {
+  const field = useField("email", { validate });
+  const error = hasFieldError(field.meta);
+
+  return (
+    <Fragment>
+      <label
+        css={[styles.label, error && styles.labelError]}
+        htmlFor={field.input.name}
+      >
+        email
+      </label>
+      <div css={styles.fieldRow}>
+        <Input field={field} />
+      </div>
+      <p css={styles.error}>{error && "l’adresse mail n’est pas valide"}</p>
+    </Fragment>
   );
 }
 

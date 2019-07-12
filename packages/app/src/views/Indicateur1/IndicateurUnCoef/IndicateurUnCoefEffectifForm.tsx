@@ -49,10 +49,11 @@ function IndicateurUnCoefEffectifForm({
     (
       data: Array<{
         id: any;
+        name: string;
         tranchesAges: Array<GroupTranchesAgesEffectif>;
       }>
     ) => {
-      const coefficient = data.map(({ id, tranchesAges }) => ({
+      const coefficient = data.map(({ tranchesAges }) => ({
         tranchesAges
       }));
       updateIndicateurUnCoef({ coefficient });

@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useField, FieldRenderProps } from "react-final-form-hooks";
-import { FormApi } from "final-form";
+import { useField, FieldMetaState } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -9,28 +8,21 @@ import { CellHead, Cell } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
 import { IconValid, IconInvalid } from "./Icons";
 
-const hasMinMaxInputError = (meta: FieldRenderProps["meta"]) =>
+const hasMinMaxInputError = (meta: FieldMetaState<string>) =>
   meta.error && meta.touched && (meta.error.minNumber || meta.error.maxNumber);
 
-const hasPreviousFieldInputError = (meta: FieldRenderProps["meta"]) =>
+const hasPreviousFieldInputError = (meta: FieldMetaState<string>) =>
   meta.error && meta.touched && meta.error.previousField;
 
 interface Props {
-  form: FormApi;
   fieldName: string;
   label: string;
   readOnly: boolean;
   theme?: "hommes" | "femmes";
 }
 
-function FieldInput({
-  form,
-  fieldName,
-  label,
-  readOnly,
-  theme = "femmes"
-}: Props) {
-  const field = useField(fieldName, form);
+function FieldInput({ fieldName, label, readOnly, theme = "femmes" }: Props) {
+  const field = useField(fieldName);
   const error = hasFieldError(field.meta);
   const minMaxError = hasMinMaxInputError(field.meta);
   const previousFieldError = hasPreviousFieldInputError(field.meta);

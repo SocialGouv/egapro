@@ -1,17 +1,17 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { FieldRenderProps } from "react-final-form-hooks";
+import { FieldRenderProps, FieldMetaState } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 
-export const hasFieldError = (meta: FieldRenderProps["meta"]) =>
+export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
   (meta.error &&
     meta.touched &&
     Object.values({ ...meta.error, required: false }).includes(true));
 
 interface Props {
-  field: FieldRenderProps;
+  field: FieldRenderProps<string, HTMLInputElement>;
   placeholder?: string;
   style?: any;
 }

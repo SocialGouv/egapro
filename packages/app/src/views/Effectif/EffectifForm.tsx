@@ -41,6 +41,7 @@ function EffectifForm({
     (
       data: Array<{
         id: any;
+        name: string;
         tranchesAges: Array<GroupTranchesAgesEffectif>;
       }>
     ) => {

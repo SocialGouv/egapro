@@ -1,8 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { memo } from "react";
-import { FormApi } from "final-form";
-import { useForm, useField } from "react-final-form-hooks";
+import { Form, useField } from "react-final-form";
 import {
   GroupeCoefficient,
   ActionIndicateurUnCoefData,
@@ -20,6 +19,7 @@ import Input, { hasFieldError } from "../../../components/Input";
 import ActionLink from "../../../components/ActionLink";
 import ButtonAction from "../../../components/ButtonAction";
 import ActionBar from "../../../components/ActionBar";
+import FormAutoSave from "../../../components/FormAutoSave";
 import FormSubmit from "../../../components/FormSubmit";
 
 const getFieldName = (index: number): string => "group" + index;
@@ -67,79 +67,94 @@ function IndicateurUnCoefGroupForm({
     validateIndicateurUnCoefGroup("Valid");
   };
 
-  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
-    initialValues,
-    onSubmit
-  });
+  // const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
+  //   initialValues,
+  //   onSubmit
+  // });
 
-  form.subscribe(
-    ({ values, dirty }) => {
-      if (dirty) {
-        saveForm(values);
-      }
-    },
-    { values: true, dirty: true }
-  );
+  // form.subscribe(
+  //   ({ values, dirty }) => {
+  //     if (dirty) {
+  //       saveForm(values);
+  //     }
+  //   },
+  //   { values: true, dirty: true }
+  // );
 
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
 
   return (
-    <form onSubmit={handleSubmit} css={[styles.container, { width }]}>
-      {infoFields.map(([name], index) => (
-        <InputField
-          key={name}
-          name={name}
-          form={form}
-          index={index}
-          deleteGroup={updateIndicateurUnCoefDeleteGroup}
-          readOnly={readOnly}
-        />
-      ))}
+    <Form
+      onSubmit={onSubmit}
+      initialValues={initialValues}
+      // mandatory to not change user inputs
+      // because we want to keep wrong string inside the input
+      // we don't want to block string value
+      initialValuesEqual={() => true}
+    >
+      {({ handleSubmit, hasValidationErrors, submitFailed }) => (
+        <form onSubmit={handleSubmit} css={[styles.container, { width }]}>
+          <FormAutoSave saveForm={saveForm} />
 
-      {readOnly ? (
-        <div css={styles.spacerAdd} />
-      ) : (
-        <ActionLink onClick={updateIndicateurUnCoefAddGroup} style={styles.add}>
-          <div css={styles.addIcon}>
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 26 26"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          {infoFields.map(([name], index) => (
+            <InputField
+              key={name}
+              name={name}
+              index={index}
+              deleteGroup={updateIndicateurUnCoefDeleteGroup}
+              readOnly={readOnly}
+            />
+          ))}
+
+          {readOnly ? (
+            <div css={styles.spacerAdd} />
+          ) : (
+            <ActionLink
+              onClick={updateIndicateurUnCoefAddGroup}
+              style={styles.add}
             >
-              <path
-                d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <span>ajouter un niveau ou coefficient hiérarchique</span>
-        </ActionLink>
-      )}
+              <div css={styles.addIcon}>
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 26 26"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+              <span>ajouter un niveau ou coefficient hiérarchique</span>
+            </ActionLink>
+          )}
 
-      {readOnly ? (
-        <ActionBar>
-          <ButtonAction onClick={navigateToEffectif} label="suivant" />
-          <div css={styles.spacerActionBar} />
-          <ActionLink onClick={() => validateIndicateurUnCoefGroup("None")}>
-            modifier les groupes
-          </ActionLink>
-        </ActionBar>
-      ) : (
-        <ActionBar>
-          <FormSubmit
-            hasValidationErrors={hasValidationErrors}
-            submitFailed={submitFailed}
-            errorMessage="vous ne pouvez pas valider les groupes
+          {readOnly ? (
+            <ActionBar>
+              <ButtonAction onClick={navigateToEffectif} label="suivant" />
+              <div css={styles.spacerActionBar} />
+              <ActionLink onClick={() => validateIndicateurUnCoefGroup("None")}>
+                modifier les groupes
+              </ActionLink>
+            </ActionBar>
+          ) : (
+            <ActionBar>
+              <FormSubmit
+                hasValidationErrors={hasValidationErrors}
+                submitFailed={submitFailed}
+                errorMessage="vous ne pouvez pas valider les groupes
                 tant que vous n’avez pas rempli tous les champs"
-          />
-        </ActionBar>
+              />
+            </ActionBar>
+          )}
+        </form>
       )}
-    </form>
+    </Form>
   );
 }
 
@@ -157,18 +172,16 @@ const validate = (value: string) => {
 
 function InputField({
   name,
-  form,
   index,
   deleteGroup,
   readOnly
 }: {
   name: string;
-  form: FormApi;
   index: number;
   deleteGroup: (index: number) => void;
   readOnly: boolean;
 }) {
-  const field = useField(name, form, validate);
+  const field = useField(name, { validate });
   const error = hasFieldError(field.meta);
   return (
     <div css={styles.inputField}>
