@@ -203,7 +203,7 @@ export const calculNote = (
   indicateurDeuxSexeSurRepresente: "hommes" | "femmes" | undefined
 ): { note: number | undefined; correctionMeasure: boolean } => {
   if (
-    noteIndicateurUn &&
+    noteIndicateurUn !== undefined &&
     noteIndicateurUn < 40 &&
     indicateurUnSexeSurRepresente &&
     indicateurDeuxSexeSurRepresente &&

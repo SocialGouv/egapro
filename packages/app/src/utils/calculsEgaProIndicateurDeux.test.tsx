@@ -260,5 +260,12 @@ describe("calculNote", () => {
         correctionMeasure: true
       });
     });
+
+    test("note indicator 1 is 0", () => {
+      expect(calculNote(8.1, 0, "hommes", "femmes")).toEqual({
+        note: 20,
+        correctionMeasure: true
+      });
+    });
   });
 });
