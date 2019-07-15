@@ -11,6 +11,7 @@ interface Props {
   indicateurEcartPromotion: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurTrois: number | undefined;
+  correctionMeasure: boolean;
   validateIndicateurTrois: (valid: FormState) => void;
 }
 
@@ -18,6 +19,7 @@ function IndicateurTroisResult({
   indicateurEcartPromotion,
   indicateurSexeSurRepresente,
   noteIndicateurTrois,
+  correctionMeasure,
   validateIndicateurTrois
 }: Props) {
   return (
@@ -34,6 +36,11 @@ function IndicateurTroisResult({
         secondLineData={
           (noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") +
           "/15"
+        }
+        secondLineInfo={
+          correctionMeasure
+            ? "mesures de correction prises en compte"
+            : undefined
         }
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />

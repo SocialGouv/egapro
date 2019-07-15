@@ -157,7 +157,7 @@ export const calculNote = (
   noteIndicateurUn: number | undefined,
   indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
   indicateurDeuxSexeSurRepresente: "hommes" | "femmes" | undefined
-): number | undefined => {
+): { note: number | undefined; correctionMeasure: boolean } => {
   if (
     noteIndicateurUn &&
     noteIndicateurUn < 40 &&
@@ -165,16 +165,18 @@ export const calculNote = (
     indicateurDeuxSexeSurRepresente &&
     indicateurUnSexeSurRepresente !== indicateurDeuxSexeSurRepresente
   ) {
-    return baremEcartPromotion[0];
+    return { note: baremEcartPromotion[0], correctionMeasure: true };
   }
-  return indicateurEcartPromotion !== undefined
-    ? baremEcartPromotion[
-        Math.min(
-          baremEcartPromotion.length - 1,
-          Math.ceil(Math.max(0, roundDecimal(indicateurEcartPromotion, 1)))
-        )
-      ]
-    : undefined;
+  const note =
+    indicateurEcartPromotion !== undefined
+      ? baremEcartPromotion[
+          Math.min(
+            baremEcartPromotion.length - 1,
+            Math.ceil(Math.max(0, roundDecimal(indicateurEcartPromotion, 1)))
+          )
+        ]
+      : undefined;
+  return { note, correctionMeasure: false };
 };
 
 /////////
@@ -238,7 +240,7 @@ export default function calculIndicateurTrois(state: AppState) {
   } = calculIndicateurUn(state);
 
   // NOTE
-  const noteIndicateurTrois = calculNote(
+  const { note: noteIndicateurTrois, correctionMeasure } = calculNote(
     indicateurEcartPromotionAbsolute,
     noteIndicateurUn,
     indicateurUnSexeSurRepresente,
@@ -251,6 +253,7 @@ export default function calculIndicateurTrois(state: AppState) {
     indicateurCalculable,
     indicateurEcartPromotion: indicateurEcartPromotionAbsolute,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
-    noteIndicateurTrois
+    noteIndicateurTrois,
+    correctionMeasure
   };
 }

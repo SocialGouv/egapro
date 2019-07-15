@@ -26,6 +26,7 @@ interface Props {
   indicateurEcartPromotion: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurTrois: number | undefined;
+  correctionMeasure: boolean;
 }
 
 function RecapitulatifIndicateurTrois({
@@ -35,7 +36,8 @@ function RecapitulatifIndicateurTrois({
   effectifEtEcartPromoParGroupe,
   indicateurEcartPromotion,
   indicateurSexeSurRepresente,
-  noteIndicateurTrois
+  noteIndicateurTrois,
+  correctionMeasure
 }: Props) {
   if (!effectifsIndicateurTroisCalculable) {
     return (
@@ -96,6 +98,9 @@ function RecapitulatifIndicateurTrois({
           secondLineData:
             (noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") +
             "/15",
+          secondLineInfo: correctionMeasure
+            ? "mesures de correction prises en compte"
+            : undefined,
           indicateurSexeSurRepresente
         }}
       >
