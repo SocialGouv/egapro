@@ -6,6 +6,8 @@ import { RouteComponentProps } from "react-router-dom";
 import { AppState, ActionType } from "../../globals.d";
 
 import Page from "../../components/Page";
+import InfoBloc from "../../components/InfoBloc";
+import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm";
 import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp";
@@ -19,6 +21,24 @@ interface Props extends RouteComponentProps {
 function IndicateurUn({ state, dispatch }: Props) {
   const { csp } = state.indicateurUn;
   const readOnly = state.indicateurUn.formValidated === "Valid";
+
+  // le formulaire d'effectif n'est pas validé
+  if (state.effectif.formValidated !== "Valid") {
+    return (
+      <PageIndicateurUn>
+        <InfoBloc
+          title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+          text={
+            <TextSimulatorLink
+              to="/effectifs"
+              label="renseigner les effectifs"
+            />
+          }
+        />
+      </PageIndicateurUn>
+    );
+  }
+
   return (
     <PageIndicateurUn>
       <IndicateurUnTypeForm csp={csp} readOnly={readOnly} dispatch={dispatch} />

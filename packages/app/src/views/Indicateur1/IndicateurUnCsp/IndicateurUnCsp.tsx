@@ -14,10 +14,7 @@ import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
 import InfoBloc from "../../../components/InfoBloc";
 import ActionBar from "../../../components/ActionBar";
-import {
-  ButtonSimulatorLink,
-  TextSimulatorLink
-} from "../../../components/SimulatorLink";
+import { ButtonSimulatorLink } from "../../../components/SimulatorLink";
 
 import IndicateurUnCspForm from "./IndicateurUnCspForm";
 import IndicateurUnResult from "../IndicateurUnResult";
@@ -46,18 +43,6 @@ function IndicateurUnCsp({ state, dispatch }: Props) {
     indicateurSexeSurRepresente,
     noteIndicateurUn
   } = calculIndicateurUn(state);
-
-  // le formulaire d'effectif n'est pas validé
-  if (state.effectif.formValidated !== "Valid") {
-    return (
-      <InfoBloc
-        title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-        text={
-          <TextSimulatorLink to="/effectifs" label="renseigner les effectifs" />
-        }
-      />
-    );
-  }
 
   // les effectifs ne permettent pas de calculer l'indicateur
   if (!effectifsIndicateurCalculable) {
