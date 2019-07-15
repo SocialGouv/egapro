@@ -68,7 +68,8 @@ const styles = {
     textDecoration: "none"
   }),
   buttonIcon: css({
-    fontSize: 8
+    fontSize: 8,
+    fontFamily: "Segoe UI Symbol" // fix Edge
   })
 };
 
