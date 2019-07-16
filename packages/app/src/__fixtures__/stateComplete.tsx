@@ -222,6 +222,10 @@ const actionUpdateIndicateurUnCsp = {
   }
 };
 
+const actionUpdateIndicateurUnCoefAddGroup = {
+  type: "updateIndicateurUnCoefAddGroup" as "updateIndicateurUnCoefAddGroup"
+};
+
 const actionUpdateIndicateurUnCoefName = {
   type: "updateIndicateurUnCoef" as "updateIndicateurUnCoef",
   data: {
@@ -382,10 +386,13 @@ const stateDefault = AppReducer(
             AppReducer(
               AppReducer(
                 AppReducer(
-                  AppReducer(undefined, actionInitiateState),
-                  actionUpdateEffectif
+                  AppReducer(
+                    AppReducer(undefined, actionInitiateState),
+                    actionUpdateEffectif
+                  ),
+                  actionUpdateIndicateurUnCsp
                 ),
-                actionUpdateIndicateurUnCsp
+                actionUpdateIndicateurUnCoefAddGroup
               ),
               actionUpdateIndicateurUnCoefName
             ),

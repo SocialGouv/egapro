@@ -4412,6 +4412,36 @@ Object {
     "coefficient": Array [
       Object {
         "name": "Commercial",
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
       },
     ],
     "coefficientEffectifFormValidated": "None",
@@ -5015,25 +5045,34 @@ Object {
   "indicateurUn": Object {
     "coefficient": Array [
       Object {
+        "name": "",
         "tranchesAges": Array [
           Object {
             "nombreSalariesFemmes": 3,
             "nombreSalariesHommes": 2,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
             "trancheAge": 0,
           },
           Object {
             "nombreSalariesFemmes": 0,
             "nombreSalariesHommes": 8,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
             "trancheAge": 1,
           },
           Object {
             "nombreSalariesFemmes": 10,
             "nombreSalariesHommes": 13,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
             "trancheAge": 2,
           },
           Object {
             "nombreSalariesFemmes": 4,
             "nombreSalariesHommes": 19,
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
             "trancheAge": 3,
           },
         ],
@@ -5640,23 +5679,32 @@ Object {
   "indicateurUn": Object {
     "coefficient": Array [
       Object {
+        "name": "",
         "tranchesAges": Array [
           Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
             "remunerationAnnuelleBrutFemmes": 25820,
             "remunerationAnnuelleBrutHommes": 24820,
             "trancheAge": 0,
           },
           Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
             "remunerationAnnuelleBrutFemmes": 32820,
             "remunerationAnnuelleBrutHommes": 32820,
             "trancheAge": 1,
           },
           Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
             "remunerationAnnuelleBrutFemmes": 41820,
             "remunerationAnnuelleBrutHommes": 43820,
             "trancheAge": 2,
           },
           Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
             "remunerationAnnuelleBrutFemmes": 49820,
             "remunerationAnnuelleBrutHommes": 53550,
             "trancheAge": 3,

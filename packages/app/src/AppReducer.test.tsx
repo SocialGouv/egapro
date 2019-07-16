@@ -341,6 +341,15 @@ describe("updateIndicateurUnCoefDeleteGroup", () => {
 });
 
 describe("updateIndicateurUnCoef", () => {
+  const actionCoefAddGroup = {
+    type: "updateIndicateurUnCoefAddGroup" as "updateIndicateurUnCoefAddGroup"
+  };
+  const stateUndefinedWithOneGroup = AppReducer(
+    stateUndefined,
+    actionCoefAddGroup
+  );
+  const stateDefaultWithOneGroup = AppReducer(stateDefault, actionCoefAddGroup);
+
   describe("Array<{name: string}>", () => {
     const action = {
       type: "updateIndicateurUnCoef" as "updateIndicateurUnCoef",
@@ -354,11 +363,11 @@ describe("updateIndicateurUnCoef", () => {
     };
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+      expect(AppReducer(stateUndefinedWithOneGroup, action)).toMatchSnapshot();
     });
 
     test("change default state", () => {
-      expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+      expect(AppReducer(stateDefaultWithOneGroup, action)).toMatchSnapshot();
     });
 
     test("change complete state", () => {
@@ -400,11 +409,11 @@ describe("updateIndicateurUnCoef", () => {
     };
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+      expect(AppReducer(stateUndefinedWithOneGroup, action)).toMatchSnapshot();
     });
 
     test("change default state", () => {
-      expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+      expect(AppReducer(stateDefaultWithOneGroup, action)).toMatchSnapshot();
     });
 
     test("change complete state", () => {
@@ -446,11 +455,11 @@ describe("updateIndicateurUnCoef", () => {
     };
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+      expect(AppReducer(stateUndefinedWithOneGroup, action)).toMatchSnapshot();
     });
 
     test("change default state", () => {
-      expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+      expect(AppReducer(stateDefaultWithOneGroup, action)).toMatchSnapshot();
     });
 
     test("change complete state", () => {
