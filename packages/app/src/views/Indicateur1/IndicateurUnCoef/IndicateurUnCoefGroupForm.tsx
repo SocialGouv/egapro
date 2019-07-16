@@ -1,7 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo } from "react";
+import { Fragment } from "react";
 import { Form, useField } from "react-final-form";
+import arrayMutators from "final-form-arrays";
+import { FieldArray } from "react-final-form-arrays";
 import {
   GroupeCoefficient,
   ActionIndicateurUnCoefData,
@@ -22,8 +24,6 @@ import ActionBar from "../../../components/ActionBar";
 import FormAutoSave from "../../../components/FormAutoSave";
 import FormSubmit from "../../../components/FormSubmit";
 
-const getFieldName = (index: number): string => "group" + index;
-
 interface Props {
   coefficient: Array<GroupeCoefficient>;
   readOnly: boolean;
@@ -43,23 +43,10 @@ function IndicateurUnCoefGroupForm({
   validateIndicateurUnCoefGroup,
   navigateToEffectif
 }: Props) {
-  const infoFields = coefficient.map((groupCoef, index) => [
-    getFieldName(index),
-    groupCoef.name
-  ]);
-  const initialValues = infoFields.reduce(
-    (acc, [name, value]) => ({ ...acc, [name]: value }),
-    {}
-  );
+  const initialValues = { groupes: coefficient };
 
   const saveForm = (formData: any) => {
-    if (Object.entries(formData).length !== coefficient.length) {
-      return;
-    }
-    const newCoefficient = coefficient.map((groupCoef, index) => ({
-      name: formData[getFieldName(index)]
-    }));
-    updateIndicateurUnCoef({ coefficient: newCoefficient });
+    updateIndicateurUnCoef({ coefficient: formData.groupes });
   };
 
   const onSubmit = (formData: any) => {
@@ -67,45 +54,37 @@ function IndicateurUnCoefGroupForm({
     validateIndicateurUnCoefGroup("Valid");
   };
 
-  // const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
-  //   initialValues,
-  //   onSubmit
-  // });
-
-  // form.subscribe(
-  //   ({ values, dirty }) => {
-  //     if (dirty) {
-  //       saveForm(values);
-  //     }
-  //   },
-  //   { values: true, dirty: true }
-  // );
-
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
 
   return (
     <Form
       onSubmit={onSubmit}
+      mutators={{
+        // potentially other mutators could be merged here
+        ...arrayMutators
+      }}
       initialValues={initialValues}
-      // mandatory to not change user inputs
-      // because we want to keep wrong string inside the input
-      // we don't want to block string value
-      initialValuesEqual={() => true}
     >
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={[styles.container, { width }]}>
           <FormAutoSave saveForm={saveForm} />
 
-          {infoFields.map(([name], index) => (
-            <InputField
-              key={name}
-              name={name}
-              index={index}
-              deleteGroup={updateIndicateurUnCoefDeleteGroup}
-              readOnly={readOnly}
-            />
-          ))}
+          <FieldArray name="groupes">
+            {({ fields }) => (
+              <Fragment>
+                {fields.map((name, index) => (
+                  <InputField
+                    key={name}
+                    name={`${name}.name`}
+                    index={index}
+                    deleteGroup={updateIndicateurUnCoefDeleteGroup}
+                    readOnly={readOnly}
+                  />
+                ))}
+              </Fragment>
+            )}
+          </FieldArray>
 
           {readOnly ? (
             <div css={styles.spacerAdd} />
@@ -284,9 +263,4 @@ const styles = {
   })
 };
 
-export default memo(
-  IndicateurUnCoefGroupForm,
-  (prevProps, nextProps) =>
-    prevProps.coefficient.length === nextProps.coefficient.length &&
-    prevProps.readOnly === nextProps.readOnly
-);
+export default IndicateurUnCoefGroupForm;
