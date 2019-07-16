@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/SocialGouv/egapro/compare/v1.1.0...v1.2.0) (2019-07-16)
+
+
+### Features
+
+* **email:** active email ([#90](https://github.com/SocialGouv/egapro/issues/90)) ([6b31eb8](https://github.com/SocialGouv/egapro/commit/6b31eb8))
+
+
+
+
+
 # 1.1.0 (2019-07-03)
 
 
