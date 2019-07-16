@@ -43,7 +43,7 @@ spec:
             - name: MAIL_PORT
               value: "465"
             - name: MAIL_FROM
-              value: "EgaPro <contact@egapro.beta.gouv.fr>"
+              value: "Index EgaPro <contact@egapro.beta.gouv.fr>"
             - name: MAIL_HOST
               valueFrom:
                 secretKeyRef:
