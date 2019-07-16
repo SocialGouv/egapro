@@ -123,12 +123,14 @@ function IndicateurUnCoefGroupForm({
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="vous ne pouvez pas valider les groupes
+              {coefficient.length > 0 && (
+                <FormSubmit
+                  hasValidationErrors={hasValidationErrors}
+                  submitFailed={submitFailed}
+                  errorMessage="vous ne pouvez pas valider les groupes
                 tant que vous n’avez pas rempli tous les champs"
-              />
+                />
+              )}
             </ActionBar>
           )}
         </form>
@@ -247,11 +249,17 @@ const styles = {
   }),
 
   fakeInput: css({
-    alignSelf: "center",
-    fontSize: 14,
-    lineHeight: "17px",
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "auto",
     paddingLeft: 23,
-    paddingRight: 23
+    paddingRight: 23,
+
+    backgroundColor: "white",
+    borderRadius: 5,
+
+    fontSize: 14,
+    lineHeight: "38px"
   }),
 
   spacerActionBar: css({
