@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
-import { Form, useField } from "react-final-form";
+import { Fragment, useState } from "react";
+import { Form } from "react-final-form";
 import arrayMutators from "final-form-arrays";
 import { FieldArray } from "react-final-form-arrays";
 import {
@@ -10,19 +10,21 @@ import {
   FormState
 } from "../../../globals";
 
-import { required } from "../../../utils/formHelpers";
 import globalStyles from "../../../utils/globalStyles";
 
 import {
   useColumnsWidth,
   useLayoutType
 } from "../../../components/GridContext";
-import Input, { hasFieldError } from "../../../components/Input";
 import ActionLink from "../../../components/ActionLink";
 import ButtonAction from "../../../components/ButtonAction";
 import ActionBar from "../../../components/ActionBar";
 import FormAutoSave from "../../../components/FormAutoSave";
 import FormSubmit from "../../../components/FormSubmit";
+import { Modal } from "../../../components/ModalContext";
+
+import InputField from "./components/CoefGroupInputField";
+import ModalConfirmDelete from "./components/CoefGroupModalConfirmDelete";
 
 interface Props {
   coefficient: Array<GroupeCoefficient>;
@@ -57,139 +59,108 @@ function IndicateurUnCoefGroupForm({
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
 
+  const [indexGroupToDelete, setIndexGroupToDelete] = useState<
+    number | undefined
+  >(undefined);
+  const confirmGroupToDelete = (index: number) => setIndexGroupToDelete(index);
+  const closeModal = () => setIndexGroupToDelete(undefined);
+
   return (
-    <Form
-      onSubmit={onSubmit}
-      mutators={{
-        // potentially other mutators could be merged here
-        ...arrayMutators
-      }}
-      initialValues={initialValues}
-    >
-      {({ handleSubmit, hasValidationErrors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={[styles.container, { width }]}>
-          <FormAutoSave saveForm={saveForm} />
-
-          <FieldArray name="groupes">
-            {({ fields }) => (
-              <Fragment>
-                {fields.map((name, index) => (
-                  <InputField
-                    key={name}
-                    name={`${name}.name`}
-                    index={index}
-                    deleteGroup={updateIndicateurUnCoefDeleteGroup}
-                    readOnly={readOnly}
-                  />
-                ))}
-              </Fragment>
-            )}
-          </FieldArray>
-
-          {readOnly ? (
-            <div css={styles.spacerAdd} />
-          ) : (
-            <ActionLink
-              onClick={updateIndicateurUnCoefAddGroup}
-              style={styles.add}
-            >
-              <div css={styles.addIcon}>
-                <svg
-                  width="26"
-                  height="26"
-                  viewBox="0 0 26 26"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-              <span>ajouter un niveau ou coefficient hiérarchique</span>
-            </ActionLink>
-          )}
-
-          {readOnly ? (
-            <ActionBar>
-              <ButtonAction onClick={navigateToEffectif} label="suivant" />
-              <div css={styles.spacerActionBar} />
-              <ActionLink onClick={() => validateIndicateurUnCoefGroup("None")}>
-                modifier les groupes
-              </ActionLink>
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              {coefficient.length > 0 && (
-                <FormSubmit
-                  hasValidationErrors={hasValidationErrors}
-                  submitFailed={submitFailed}
-                  errorMessage="vous ne pouvez pas valider les groupes
-                tant que vous n’avez pas rempli tous les champs"
-                />
-              )}
-            </ActionBar>
-          )}
-        </form>
-      )}
-    </Form>
-  );
-}
-
-// InputField
-
-const validate = (value: string) => {
-  const requiredError = required(value);
-
-  if (!requiredError) {
-    return undefined;
-  } else {
-    return { required: requiredError };
-  }
-};
-
-function InputField({
-  name,
-  index,
-  deleteGroup,
-  readOnly
-}: {
-  name: string;
-  index: number;
-  deleteGroup: (index: number) => void;
-  readOnly: boolean;
-}) {
-  const field = useField(name, { validate });
-  const error = hasFieldError(field.meta);
-  return (
-    <div css={styles.inputField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
+    <Fragment>
+      <Form
+        onSubmit={onSubmit}
+        mutators={{
+          // potentially other mutators could be merged here
+          ...arrayMutators
+        }}
+        initialValues={initialValues}
       >
-        {`Groupe ${index + 1}`}
-      </label>
+        {({ handleSubmit, hasValidationErrors, submitFailed }) => (
+          <form onSubmit={handleSubmit} css={[styles.container, { width }]}>
+            <FormAutoSave saveForm={saveForm} />
 
-      {readOnly ? (
-        <div css={styles.fieldRow}>
-          <div css={styles.fakeInput}>{field.input.value}</div>
-        </div>
-      ) : (
-        <div css={styles.fieldRow}>
-          <Input field={field} placeholder="Donnez un nom à votre groupe" />
-          <ActionLink onClick={() => deleteGroup(index)} style={styles.delete}>
-            supprimer le groupe
-          </ActionLink>
-        </div>
-      )}
+            <FieldArray name="groupes">
+              {({ fields }) => (
+                <Fragment>
+                  {fields.map((name, index) => (
+                    <InputField
+                      key={name}
+                      name={`${name}.name`}
+                      index={index}
+                      deleteGroup={confirmGroupToDelete}
+                      readOnly={readOnly}
+                    />
+                  ))}
+                </Fragment>
+              )}
+            </FieldArray>
 
-      <p css={styles.error}>
-        {error && "vous devez donner un nom à votre groupe"}
-      </p>
-    </div>
+            {readOnly ? (
+              <div css={styles.spacerAdd} />
+            ) : (
+              <ActionLink
+                onClick={updateIndicateurUnCoefAddGroup}
+                style={styles.add}
+              >
+                <div css={styles.addIcon}>
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 26 26"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <span>ajouter un niveau ou coefficient hiérarchique</span>
+              </ActionLink>
+            )}
+
+            {readOnly ? (
+              <ActionBar>
+                <ButtonAction onClick={navigateToEffectif} label="suivant" />
+                <div css={styles.spacerActionBar} />
+                <ActionLink
+                  onClick={() => validateIndicateurUnCoefGroup("None")}
+                >
+                  modifier les groupes
+                </ActionLink>
+              </ActionBar>
+            ) : (
+              <ActionBar>
+                {coefficient.length > 0 && (
+                  <FormSubmit
+                    hasValidationErrors={hasValidationErrors}
+                    submitFailed={submitFailed}
+                    errorMessage="vous ne pouvez pas valider les groupes
+                tant que vous n’avez pas rempli tous les champs"
+                  />
+                )}
+              </ActionBar>
+            )}
+          </form>
+        )}
+      </Form>
+
+      <Modal
+        isOpen={indexGroupToDelete !== undefined}
+        onRequestClose={closeModal}
+      >
+        <ModalConfirmDelete
+          closeModal={closeModal}
+          deleteGroup={() => {
+            indexGroupToDelete !== undefined &&
+              updateIndicateurUnCoefDeleteGroup(indexGroupToDelete);
+          }}
+        />
+      </Modal>
+    </Fragment>
   );
 }
 
@@ -215,51 +186,6 @@ const styles = {
 
     backgroundColor: globalStyles.colors.default,
     borderRadius: 16
-  }),
-
-  inputField: css({
-    alignSelf: "stretch"
-  }),
-  label: css({
-    fontSize: 14,
-    lineHeight: "17px"
-  }),
-  labelError: css({
-    color: globalStyles.colors.error
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex"
-  }),
-  delete: css({
-    flexShrink: 0,
-    alignSelf: "flex-end",
-    marginLeft: globalStyles.grid.gutterWidth,
-    fontSize: 12,
-    lineHeight: "15px"
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    fontStyle: "italic",
-    lineHeight: "15px"
-  }),
-
-  fakeInput: css({
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: "auto",
-    paddingLeft: 23,
-    paddingRight: 23,
-
-    backgroundColor: "white",
-    borderRadius: 5,
-
-    fontSize: 14,
-    lineHeight: "38px"
   }),
 
   spacerActionBar: css({
