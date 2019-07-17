@@ -161,7 +161,7 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
                   afin de s'assurer de la cohérence de votre indicateur, merci
                   de vérifier les données de vos étapes.
                 </span>
-                <br />
+                &emsp;
                 <span>
                   {coefficientEffectifFormValidated === "Invalid" && (
                     <Fragment>

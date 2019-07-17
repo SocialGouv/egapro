@@ -11,7 +11,6 @@ import { effectifEtEcartRemuGroupCoef } from "../../../utils/calculsEgaProIndica
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
 import InfoBloc from "../../../components/InfoBloc";
-import ActionBar from "../../../components/ActionBar";
 import ActionLink from "../../../components/ActionLink";
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink";
 
@@ -77,14 +76,11 @@ function IndicateurUnCoefEffectifForm({
     return (
       <div>
         <InfoBloc
-          title="Malheureusement votre indicateur n’est pas calculable"
+          title="Malheureusement votre indicateur n’est pas calculable en niveau ou coefficient hiérarchique"
           text="car l’ensemble des groupes valables (c’est-à-dire comptant au
               moins 3 femmes et 3 hommes), représentent moins de 40% des
-              effectifs."
+              effectifs. Vous devez calculer par CSP."
         />
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur2" label="suivant" />
-        </ActionBar>
       </div>
     );
   }
