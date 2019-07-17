@@ -29,7 +29,11 @@ function InputField({
   deleteGroup: (index: number) => void;
   readOnly: boolean;
 }) {
-  const field = useField(name, { validate });
+  const field = useField(name, {
+    validate,
+    parse: value => value,
+    format: value => value
+  });
   const error = hasFieldError(field.meta);
 
   return (
