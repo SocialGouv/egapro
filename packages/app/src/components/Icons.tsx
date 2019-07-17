@@ -4,11 +4,17 @@ import { ReactNode, Fragment } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
-export function IconWarning() {
+export function IconWarning({
+  width = 40,
+  height = 35
+}: {
+  width?: number;
+  height?: number;
+}) {
   return (
     <svg
-      width="40"
-      height="35"
+      width={width}
+      height={height}
       viewBox="0 0 40 35"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

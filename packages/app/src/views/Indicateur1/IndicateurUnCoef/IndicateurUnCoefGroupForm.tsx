@@ -138,8 +138,7 @@ function IndicateurUnCoefGroupForm({
                   <FormSubmit
                     hasValidationErrors={hasValidationErrors}
                     submitFailed={submitFailed}
-                    errorMessage="vous ne pouvez pas valider les groupes
-                tant que vous n’avez pas rempli tous les champs"
+                    errorMessage="Les groupes ne peuvent pas être validés si tous les champs ne sont pas remplis."
                   />
                 )}
               </ActionBar>

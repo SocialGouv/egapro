@@ -187,7 +187,7 @@ function EffectifFormRaw({
                 <FormSubmit
                   hasValidationErrors={hasValidationErrors}
                   submitFailed={submitFailed}
-                  errorMessage="vous ne pouvez pas valider les effectifs tant que vous n’avez pas rempli tous les champs"
+                  errorMessage="Les effectifs ne peuvent pas être validés si tous les champs ne sont pas remplis."
                 />
               </ActionBar>
             )}

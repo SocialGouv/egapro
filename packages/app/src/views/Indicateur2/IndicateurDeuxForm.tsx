@@ -169,8 +169,7 @@ function IndicateurDeuxForm({
               <FormSubmit
                 hasValidationErrors={hasValidationErrors}
                 submitFailed={submitFailed}
-                errorMessage="vous ne pouvez pas valider l’indicateur
-                tant que vous n’avez pas rempli tous les champs"
+                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
               />
             </ActionBar>
           )}
