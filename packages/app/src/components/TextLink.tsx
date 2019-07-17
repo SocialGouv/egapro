@@ -2,8 +2,6 @@
 import { css, jsx } from "@emotion/core";
 import { Link, LinkProps } from "react-router-dom";
 
-import globalStyles from "../utils/globalStyles";
-
 interface Props {
   label: string;
   to: LinkProps["to"];
@@ -19,7 +17,7 @@ function TextLink({ label, to }: Props) {
 
 const styles = {
   link: css({
-    color: globalStyles.colors.default,
+    color: "currentColor",
     textDecoration: "underline"
   })
 };

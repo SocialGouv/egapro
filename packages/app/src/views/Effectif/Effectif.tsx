@@ -99,7 +99,7 @@ function Effectif({ state, dispatch }: Props) {
                   afin de s'assurer de la cohérence de votre index, merci de
                   vérifier les données de vos indicateurs.
                 </span>
-                <br />
+                &emsp;
                 <span>
                   {state.indicateurUn.formValidated === "Invalid" && (
                     <Fragment>
