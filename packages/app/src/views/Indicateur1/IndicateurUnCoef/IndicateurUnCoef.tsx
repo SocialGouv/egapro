@@ -9,10 +9,6 @@ import {
   ActionIndicateurUnCoefData
 } from "../../../globals";
 
-import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
-
-import InfoBloc from "../../../components/InfoBloc";
-import ActionLink from "../../../components/ActionLink";
 import { useScrollTo } from "../../../components/ScrollContext";
 
 import IndicateurUnCoefMenu, { MenuOption } from "./IndicateurUnCoefMenu";
@@ -72,7 +68,6 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
   );
 
   const {
-    coefficient,
     coefficientGroupFormValidated,
     coefficientEffectifFormValidated,
     formValidated
@@ -84,14 +79,6 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
       coefficientEffectifFormValidated
     )
   );
-
-  const {
-    effectifsIndicateurCalculable,
-    effectifEtEcartRemuParTrancheCoef,
-    indicateurEcartRemuneration,
-    indicateurSexeSurRepresente,
-    noteIndicateurUn
-  } = calculIndicateurUn(state);
 
   const scrollTo = useScrollTo();
 
@@ -113,105 +100,33 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
         coefficientEffectifFormValidated={coefficientEffectifFormValidated}
         formValidated={formValidated}
       />
+
       {menuSelected === "groupe" ? (
         <IndicateurUnCoefGroupForm
-          coefficient={coefficient}
-          readOnly={coefficientGroupFormValidated === "Valid"}
+          state={state}
           updateIndicateurUnCoefAddGroup={updateIndicateurUnCoefAddGroup}
           updateIndicateurUnCoefDeleteGroup={updateIndicateurUnCoefDeleteGroup}
           updateIndicateurUnCoef={updateIndicateurUnCoef}
           validateIndicateurUnCoefGroup={validateIndicateurUnCoefGroup}
           navigateToEffectif={navigateToEffectif}
+          navigateToRemuneration={navigateToRemuneration}
         />
       ) : menuSelected === "effectif" ? (
         <IndicateurUnCoefEffectifForm
-          coefficient={coefficient}
-          readOnly={coefficientEffectifFormValidated === "Valid"}
+          state={state}
           updateIndicateurUnCoef={updateIndicateurUnCoef}
           validateIndicateurUnCoefEffectif={validateIndicateurUnCoefEffectif}
-          coefficientGroupFormValidated={coefficientGroupFormValidated}
           navigateToGroupe={navigateToGroupe}
           navigateToRemuneration={navigateToRemuneration}
         />
       ) : (
         <IndicateurUnCoefRemuForm
-          ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
-          readOnly={formValidated === "Valid"}
+          state={state}
           updateIndicateurUnCoef={updateIndicateurUnCoef}
           validateIndicateurUn={validateIndicateurUn}
-          coefficientEffectifFormValidated={coefficientEffectifFormValidated}
-          effectifsIndicateurCalculable={effectifsIndicateurCalculable}
-          indicateurEcartRemuneration={indicateurEcartRemuneration}
-          indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-          noteIndicateurUn={noteIndicateurUn}
           navigateToEffectif={navigateToEffectif}
         />
       )}
-
-      {menuSelected === "groupe" &&
-        coefficientGroupFormValidated === "Valid" &&
-        (coefficientEffectifFormValidated === "Invalid" ||
-          formValidated === "Invalid") && (
-          <InfoBloc
-            title="Vos groupes ont été modifiés"
-            icon="cross"
-            text={
-              <Fragment>
-                <span>
-                  afin de s'assurer de la cohérence de votre indicateur, merci
-                  de vérifier les données de vos étapes.
-                </span>
-                &emsp;
-                <span>
-                  {coefficientEffectifFormValidated === "Invalid" && (
-                    <Fragment>
-                      <ActionLink onClick={navigateToEffectif}>
-                        aller à l'étape 2 : effectifs
-                      </ActionLink>
-                      &emsp;
-                    </Fragment>
-                  )}
-                  {formValidated === "Invalid" && (
-                    <Fragment>
-                      <ActionLink onClick={navigateToRemuneration}>
-                        aller à l'étape 3 : rémunérations
-                      </ActionLink>
-                      &emsp;
-                    </Fragment>
-                  )}
-                </span>
-              </Fragment>
-            }
-          />
-        )}
-
-      {menuSelected === "effectif" &&
-        coefficientEffectifFormValidated === "Valid" &&
-        formValidated === "Invalid" && (
-          <InfoBloc
-            title="Vos effectifs ont été modifiés"
-            icon="cross"
-            text={
-              <Fragment>
-                <span>
-                  afin de s'assurer de la cohérence de votre indicateur, merci
-                  de vérifier les données de vos étapes.
-                </span>
-                <br />
-                <span>
-                  {formValidated === "Invalid" && (
-                    <Fragment>
-                      <ActionLink onClick={navigateToRemuneration}>
-                        aller à l'étape 3 : rémunérations
-                      </ActionLink>
-                      &emsp;
-                    </Fragment>
-                  )}
-                </span>
-              </Fragment>
-            }
-          />
-        )}
     </div>
   );
 }

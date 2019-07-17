@@ -1,12 +1,13 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useMemo, useCallback } from "react";
+import { Fragment, useMemo, useCallback } from "react";
 import {
+  AppState,
   FormState,
-  GroupeCoefficient,
   GroupTranchesAgesEffectif,
   ActionIndicateurUnCoefData
 } from "../../../globals";
+import totalNombreSalaries from "../../../utils/totalNombreSalaries";
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
 import ButtonAction from "../../../components/ButtonAction";
@@ -17,24 +18,27 @@ import EffectifFormRaw from "../../Effectif/EffectifFormRaw";
 import EffectifResult from "../../Effectif/EffectifResult";
 
 interface Props {
-  coefficient: Array<GroupeCoefficient>;
-  readOnly: boolean;
+  state: AppState;
   updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void;
   validateIndicateurUnCoefEffectif: (valid: FormState) => void;
-  coefficientGroupFormValidated: FormState;
   navigateToRemuneration: () => void;
   navigateToGroupe: () => void;
 }
 
 function IndicateurUnCoefEffectifForm({
-  coefficient,
-  readOnly,
+  state,
   updateIndicateurUnCoef,
   validateIndicateurUnCoefEffectif,
-  coefficientGroupFormValidated,
   navigateToRemuneration,
   navigateToGroupe
 }: Props) {
+  const {
+    coefficient,
+    coefficientGroupFormValidated,
+    coefficientEffectifFormValidated,
+    formValidated
+  } = state.indicateurUn;
+
   const effectifRaw = useMemo(
     () =>
       coefficient.map(({ name, tranchesAges }, index) => ({
@@ -61,30 +65,14 @@ function IndicateurUnCoefEffectifForm({
     [updateIndicateurUnCoef]
   );
 
-  const { totalNbSalarieHomme, totalNbSalarieFemme } = coefficient.reduce(
-    (acc, { tranchesAges }) => {
-      const {
-        totalGroupNbSalarieHomme,
-        totalGroupNbSalarieFemme
-      } = tranchesAges.reduce(
-        (accGroup, { nombreSalariesHommes, nombreSalariesFemmes }) => {
-          return {
-            totalGroupNbSalarieHomme:
-              accGroup.totalGroupNbSalarieHomme + (nombreSalariesHommes || 0),
-            totalGroupNbSalarieFemme:
-              accGroup.totalGroupNbSalarieFemme + (nombreSalariesFemmes || 0)
-          };
-        },
-        { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
-      );
-
-      return {
-        totalNbSalarieHomme: acc.totalNbSalarieHomme + totalGroupNbSalarieHomme,
-        totalNbSalarieFemme: acc.totalNbSalarieFemme + totalGroupNbSalarieFemme
-      };
-    },
-    { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
-  );
+  const {
+    totalNombreSalariesHomme: totalNombreSalariesHommeCoef,
+    totalNombreSalariesFemme: totalNombreSalariesFemmeCoef
+  } = totalNombreSalaries(coefficient);
+  const {
+    totalNombreSalariesHomme: totalNombreSalariesHommeCsp,
+    totalNombreSalariesFemme: totalNombreSalariesFemmeCsp
+  } = totalNombreSalaries(state.effectif.nombreSalaries);
 
   // le formulaire d'effectif n'est pas validé
   if (coefficientGroupFormValidated !== "Valid") {
@@ -100,29 +88,69 @@ function IndicateurUnCoefEffectifForm({
     );
   }
 
+  const readOnly = coefficientEffectifFormValidated === "Valid";
+
   return (
-    <LayoutFormAndResult
-      childrenForm={
-        <EffectifFormRaw
-          effectifRaw={effectifRaw}
-          readOnly={readOnly}
-          updateEffectif={updateEffectifRaw}
-          validateEffectif={validateIndicateurUnCoefEffectif}
-          nextLink={
-            <ButtonAction onClick={navigateToRemuneration} label="suivant" />
-          }
-        />
-      }
-      childrenResult={
-        readOnly && (
-          <EffectifResult
-            totalNbSalarieFemme={totalNbSalarieFemme}
-            totalNbSalarieHomme={totalNbSalarieHomme}
+    <Fragment>
+      <LayoutFormAndResult
+        childrenForm={
+          <EffectifFormRaw
+            effectifRaw={effectifRaw}
+            readOnly={readOnly}
+            updateEffectif={updateEffectifRaw}
             validateEffectif={validateIndicateurUnCoefEffectif}
+            nextLink={
+              <ButtonAction onClick={navigateToRemuneration} label="suivant" />
+            }
           />
-        )
-      }
-    />
+        }
+        childrenResult={
+          readOnly && (
+            <EffectifResult
+              totalNombreSalariesFemme={totalNombreSalariesFemmeCoef}
+              totalNombreSalariesHomme={totalNombreSalariesHommeCoef}
+              validateEffectif={validateIndicateurUnCoefEffectif}
+            />
+          )
+        }
+      />
+
+      {coefficientEffectifFormValidated === "Valid" &&
+        formValidated === "Invalid" && (
+          <InfoBloc
+            title="Vos effectifs ont été modifiés"
+            icon="cross"
+            text={
+              <Fragment>
+                <span>
+                  afin de s'assurer de la cohérence de votre indicateur, merci
+                  de vérifier les données de vos étapes.
+                </span>
+                <br />
+                <span>
+                  {formValidated === "Invalid" && (
+                    <Fragment>
+                      <ActionLink onClick={navigateToRemuneration}>
+                        aller à l'étape 3 : rémunérations
+                      </ActionLink>
+                      &emsp;
+                    </Fragment>
+                  )}
+                </span>
+              </Fragment>
+            }
+          />
+        )}
+
+      {coefficientEffectifFormValidated === "Valid" &&
+        (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
+          totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
+          <InfoBloc
+            title="Attention, vos effectifs ne sont pas les mêmes que ceux déclarés en catégories socio-professionnelles"
+            icon="cross"
+          />
+        )}
+    </Fragment>
   );
 }
 

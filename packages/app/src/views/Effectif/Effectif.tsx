@@ -8,6 +8,7 @@ import {
   FormState,
   ActionEffectifData
 } from "../../globals.d";
+import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
@@ -34,32 +35,13 @@ function Effectif({ state, dispatch }: Props) {
   );
 
   const {
-    totalNbSalarieHomme,
-    totalNbSalarieFemme
-  } = state.effectif.nombreSalaries.reduce(
-    (acc, { tranchesAges }) => {
-      const {
-        totalGroupNbSalarieHomme,
-        totalGroupNbSalarieFemme
-      } = tranchesAges.reduce(
-        (accGroup, { nombreSalariesHommes, nombreSalariesFemmes }) => {
-          return {
-            totalGroupNbSalarieHomme:
-              accGroup.totalGroupNbSalarieHomme + (nombreSalariesHommes || 0),
-            totalGroupNbSalarieFemme:
-              accGroup.totalGroupNbSalarieFemme + (nombreSalariesFemmes || 0)
-          };
-        },
-        { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
-      );
-
-      return {
-        totalNbSalarieHomme: acc.totalNbSalarieHomme + totalGroupNbSalarieHomme,
-        totalNbSalarieFemme: acc.totalNbSalarieFemme + totalGroupNbSalarieFemme
-      };
-    },
-    { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
-  );
+    totalNombreSalariesHomme: totalNombreSalariesHommeCsp,
+    totalNombreSalariesFemme: totalNombreSalariesFemmeCsp
+  } = totalNombreSalaries(state.effectif.nombreSalaries);
+  const {
+    totalNombreSalariesHomme: totalNombreSalariesHommeCoef,
+    totalNombreSalariesFemme: totalNombreSalariesFemmeCoef
+  } = totalNombreSalaries(state.indicateurUn.coefficient);
 
   return (
     <Page
@@ -78,8 +60,8 @@ function Effectif({ state, dispatch }: Props) {
         childrenResult={
           state.effectif.formValidated === "Valid" && (
             <EffectifResult
-              totalNbSalarieFemme={totalNbSalarieFemme}
-              totalNbSalarieHomme={totalNbSalarieHomme}
+              totalNombreSalariesFemme={totalNombreSalariesFemmeCsp}
+              totalNombreSalariesHomme={totalNombreSalariesHommeCsp}
               validateEffectif={validateEffectif}
             />
           )
@@ -128,6 +110,15 @@ function Effectif({ state, dispatch }: Props) {
                 </span>
               </Fragment>
             }
+          />
+        )}
+
+      {state.effectif.formValidated === "Valid" &&
+        (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
+          totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
+          <InfoBloc
+            title="Attention, vos effectifs ne sont pas les mêmes que ceux déclarés en niveaux ou coefficients hiérarchiques"
+            icon="cross"
           />
         )}
     </Page>

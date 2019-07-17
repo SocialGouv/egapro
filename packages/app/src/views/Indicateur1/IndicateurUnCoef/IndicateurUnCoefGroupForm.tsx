@@ -5,9 +5,9 @@ import { Form } from "react-final-form";
 import arrayMutators from "final-form-arrays";
 import { FieldArray } from "react-final-form-arrays";
 import {
-  GroupeCoefficient,
   ActionIndicateurUnCoefData,
-  FormState
+  FormState,
+  AppState
 } from "../../../globals";
 
 import globalStyles from "../../../utils/globalStyles";
@@ -16,6 +16,7 @@ import {
   useColumnsWidth,
   useLayoutType
 } from "../../../components/GridContext";
+import InfoBloc from "../../../components/InfoBloc";
 import ActionLink from "../../../components/ActionLink";
 import ButtonAction from "../../../components/ButtonAction";
 import ActionBar from "../../../components/ActionBar";
@@ -27,24 +28,32 @@ import InputField from "./components/CoefGroupInputField";
 import ModalConfirmDelete from "./components/CoefGroupModalConfirmDelete";
 
 interface Props {
-  coefficient: Array<GroupeCoefficient>;
-  readOnly: boolean;
+  state: AppState;
   updateIndicateurUnCoefAddGroup: () => void;
   updateIndicateurUnCoefDeleteGroup: (index: number) => void;
   updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void;
   validateIndicateurUnCoefGroup: (valid: FormState) => void;
   navigateToEffectif: () => void;
+  navigateToRemuneration: () => void;
 }
 
 function IndicateurUnCoefGroupForm({
-  coefficient,
-  readOnly,
+  state,
   updateIndicateurUnCoefAddGroup,
   updateIndicateurUnCoefDeleteGroup,
   updateIndicateurUnCoef,
   validateIndicateurUnCoefGroup,
-  navigateToEffectif
+  navigateToEffectif,
+  navigateToRemuneration
 }: Props) {
+  const {
+    coefficient,
+    coefficientGroupFormValidated,
+    coefficientEffectifFormValidated,
+    formValidated
+  } = state.indicateurUn;
+  const readOnly = coefficientGroupFormValidated === "Valid";
+
   const initialValues = { groupes: coefficient };
 
   const saveForm = (formData: any) => {
@@ -146,6 +155,42 @@ function IndicateurUnCoefGroupForm({
           </form>
         )}
       </Form>
+
+      {coefficientGroupFormValidated === "Valid" &&
+        (coefficientEffectifFormValidated === "Invalid" ||
+          formValidated === "Invalid") && (
+          <InfoBloc
+            title="Vos groupes ont été modifiés"
+            icon="cross"
+            text={
+              <Fragment>
+                <span>
+                  afin de s'assurer de la cohérence de votre indicateur, merci
+                  de vérifier les données de vos étapes.
+                </span>
+                &emsp;
+                <span>
+                  {coefficientEffectifFormValidated === "Invalid" && (
+                    <Fragment>
+                      <ActionLink onClick={navigateToEffectif}>
+                        aller à l'étape 2 : effectifs
+                      </ActionLink>
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {formValidated === "Invalid" && (
+                    <Fragment>
+                      <ActionLink onClick={navigateToRemuneration}>
+                        aller à l'étape 3 : rémunérations
+                      </ActionLink>
+                      &emsp;
+                    </Fragment>
+                  )}
+                </span>
+              </Fragment>
+            }
+          />
+        )}
 
       <Modal
         isOpen={indexGroupToDelete !== undefined}

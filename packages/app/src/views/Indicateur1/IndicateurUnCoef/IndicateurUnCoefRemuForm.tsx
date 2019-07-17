@@ -2,12 +2,13 @@
 import { jsx } from "@emotion/core";
 import { useCallback } from "react";
 import {
+  AppState,
   FormState,
   ActionIndicateurUnCoefData,
   GroupTranchesAgesIndicateurUn
 } from "../../../globals";
 
-import { effectifEtEcartRemuGroupCoef } from "../../../utils/calculsEgaProIndicateurUn";
+import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
 import InfoBloc from "../../../components/InfoBloc";
@@ -18,31 +19,32 @@ import IndicateurUnFormRaw from "../IndicateurUnFormRaw";
 import IndicateurUnResult from "../IndicateurUnResult";
 
 interface Props {
-  ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroupCoef>;
-  readOnly: boolean;
+  state: AppState;
   updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void;
   validateIndicateurUn: (valid: FormState) => void;
-  coefficientEffectifFormValidated: FormState;
-  effectifsIndicateurCalculable: boolean;
-  indicateurEcartRemuneration: number | undefined;
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
-  noteIndicateurUn: number | undefined;
   navigateToEffectif: () => void;
 }
 
 function IndicateurUnCoefEffectifForm({
-  ecartRemuParTrancheAge,
-  readOnly,
+  state,
   updateIndicateurUnCoef,
   validateIndicateurUn,
-  coefficientEffectifFormValidated,
-  effectifsIndicateurCalculable,
-  indicateurEcartRemuneration,
-  indicateurSexeSurRepresente,
-  noteIndicateurUn,
   navigateToEffectif
 }: Props) {
-  const updateIndicateurUnRaw = useCallback(
+  const {
+    coefficientEffectifFormValidated,
+    formValidated
+  } = state.indicateurUn;
+
+  const {
+    effectifsIndicateurCalculable,
+    effectifEtEcartRemuParTrancheCoef,
+    indicateurEcartRemuneration,
+    indicateurSexeSurRepresente,
+    noteIndicateurUn
+  } = calculIndicateurUn(state);
+
+  const updateIndicateurUn = useCallback(
     (
       data: Array<{
         id: any;
@@ -85,13 +87,15 @@ function IndicateurUnCoefEffectifForm({
     );
   }
 
+  const readOnly = formValidated === "Valid";
+
   return (
     <LayoutFormAndResult
       childrenForm={
         <IndicateurUnFormRaw
-          ecartRemuParTrancheAge={ecartRemuParTrancheAge}
+          ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCoef}
           readOnly={readOnly}
-          updateIndicateurUn={updateIndicateurUnRaw}
+          updateIndicateurUn={updateIndicateurUn}
           validateIndicateurUn={validateIndicateurUn}
           nextLink={<ButtonSimulatorLink to="/indicateur2" label="suivant" />}
         />

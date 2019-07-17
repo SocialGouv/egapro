@@ -9,14 +9,14 @@ import Bubble from "../../components/Bubble";
 import ActionLink from "../../components/ActionLink";
 
 interface Props {
-  totalNbSalarieHomme: number;
-  totalNbSalarieFemme: number;
+  totalNombreSalariesHomme: number;
+  totalNombreSalariesFemme: number;
   validateEffectif: (valid: FormState) => void;
 }
 
 function EffectifResult({
-  totalNbSalarieHomme,
-  totalNbSalarieFemme,
+  totalNombreSalariesHomme,
+  totalNombreSalariesFemme,
   validateEffectif
 }: Props) {
   return (
@@ -25,17 +25,17 @@ function EffectifResult({
         <div css={styles.blocNumbers}>
           <p css={styles.message}>
             <span css={styles.messageLabel}>Nombre de femmes</span>
-            <span css={styles.messageData}>{totalNbSalarieFemme}</span>
+            <span css={styles.messageData}>{totalNombreSalariesFemme}</span>
           </p>
           <p css={styles.message}>
             <span css={styles.messageLabel}>Nombre d’hommes</span>
-            <span css={styles.messageData}>{totalNbSalarieHomme}</span>
+            <span css={styles.messageData}>{totalNombreSalariesHomme}</span>
           </p>
         </div>
         <p css={styles.message}>
           <span css={styles.messageLabel}>Total effectifs</span>
           <span css={styles.messageData}>
-            {totalNbSalarieFemme + totalNbSalarieHomme}
+            {totalNombreSalariesFemme + totalNombreSalariesHomme}
           </span>
         </p>
       </Bubble>
@@ -56,6 +56,7 @@ const styles = {
   }),
   edit: css({
     marginTop: 14,
+    marginBottom: 14,
     textAlign: "center"
   }),
 
