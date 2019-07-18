@@ -488,7 +488,7 @@ export const faqData: FAQPart = {
         question:
           "Sur quel site internet l’entreprise doit-elle publier son Index ?",
         reponse: [
-          "La note globale de l’Index doit être publiée sur le site internet de l’entreprise, lorsqu’il en existe un (y compris lorsque l'entreprise fait partie d'un groupe ou d'une UES. Une publication sur le site Intranet de l’entreprise n’est donc pas suffisante.",
+          "La note globale de l’Index doit être publiée sur le site internet de l’entreprise, lorsqu’il en existe un (y compris lorsque l'entreprise fait partie d'un groupe ou d'une UES). Une publication sur le site Intranet de l’entreprise n’est donc pas suffisante.",
           "La note globale pourra être publiée sur son site de présentation, il n’est pas pour autant obligatoire qu’elle figure sur la page d’accueil.",
           "Si un groupe d’entreprises ou une UES a un seul site Internet pour toutes ses entreprises, l’ensemble des index devront être publiés sur ce site.",
           "Si l’entreprise n’a pas de site internet propre, alors l’Index peut être publié sur le site Internet du groupe ou de l’UES, s’il en existe un.",
