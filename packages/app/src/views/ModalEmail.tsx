@@ -47,13 +47,13 @@ function ModalEmail({ closeModal, code }: Props) {
         <IconClose />
       </div>
       <p css={styles.title}>
-        Assurez-vous de ne pas perdre le lien de votre calcul, renseignez votre
-        e-mail
+        Revenez sur vos données à tout moment. Renseignez votre
+        e-mail.
       </p>
       <p css={styles.text}>
-        Nous générons un code spécialement pour votre calcul. Pour pouvoir
-        réaccéder à tout moment à votre calcul, laissez-nous votre e-mail afin
-        que nous puissions vous envoyer votre code.
+        Nous générons un code spécialement pour vous. Pour pouvoir
+        réaccéder à tout moment à votre calcul, renseignez votre e-mail afin
+        que nous puissions vous envoyer votre lien.
       </p>
 
       <Form onSubmit={onSubmit}>
