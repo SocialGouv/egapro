@@ -174,9 +174,8 @@ export const faqData: FAQPart = {
         reponse: [
           "Non. Au sens de l’article L. 3221-3 du code du travail, la rémunération à prendre en compte comprend non seulement le salaire ou traitement ordinaire de base ou minimum, mais également tous les autres avantages et accessoires payés, directement ou indirectement, en espèces ou en nature, par l’employeur au salarié en raison de l’emploi de ce dernier.",
           "Sont exclues de l’assiette de rémunération : les indemnités de licenciement (et de rupture conventionnelle) , les indemnités de fin CDD (notamment la prime de précarité), les indemnités de départ à la retraite, ainsi que les indemnités compensatrices de congés payés, versées en fin de contrat.",
-          "En revanche, les indemnités de congés payés sont prises en compte dans l'assiette de rémunération.
-          "Sont par ailleurs exclus les primes liées à une sujétion particulière (qui ne concerne pas la personne du salarié), les primes d’ancienneté, les heures supplémentaires, les heures complémentaires (y compris effectuées dans le cadre de compléments d’heures) et les versements effectués au titre de l’intéressement et de la participation.",
-          
+          "En revanche, les indemnités de congés payés sont prises en compte dans l'assiette de rémunération.",
+          "Sont par ailleurs exclus les primes liées à une sujétion particulière (qui ne concerne pas la personne du salarié), les primes d’ancienneté, les heures supplémentaires, les heures complémentaires (y compris effectuées dans le cadre de compléments d’heures) et les versements effectués au titre de l’intéressement et de la participation."
         ]
       },
       {
