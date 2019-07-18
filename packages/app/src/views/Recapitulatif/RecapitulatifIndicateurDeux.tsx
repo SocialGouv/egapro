@@ -4,7 +4,10 @@ import { Fragment } from "react";
 
 import { FormState, CategorieSocioPro } from "../../globals.d";
 
-import { displayNameCategorieSocioPro } from "../../utils/helpers";
+import {
+  displayNameCategorieSocioPro,
+  displayPercent
+} from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
@@ -23,6 +26,7 @@ interface Props {
   indicateurEcartAugmentation: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurDeux: number | undefined;
+  correctionMeasure: boolean;
 }
 
 function RecapitulatifIndicateurDeux({
@@ -32,7 +36,8 @@ function RecapitulatifIndicateurDeux({
   effectifEtEcartAugmentParGroupe,
   indicateurEcartAugmentation,
   indicateurSexeSurRepresente,
-  noteIndicateurDeux
+  noteIndicateurDeux,
+  correctionMeasure
 }: Props) {
   if (!effectifsIndicateurDeuxCalculable) {
     return (
@@ -85,14 +90,17 @@ function RecapitulatifIndicateurDeux({
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
-            (indicateurEcartAugmentation !== undefined
-              ? indicateurEcartAugmentation.toFixed(1)
-              : "--") + " %",
+            indicateurEcartAugmentation !== undefined
+              ? displayPercent(indicateurEcartAugmentation)
+              : "--",
           firstLineInfo: `écart favorable aux ${indicateurSexeSurRepresente}`,
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") +
             "/20",
+          secondLineInfo: correctionMeasure
+            ? "mesures de correction prises en compte"
+            : undefined,
           indicateurSexeSurRepresente
         }}
       >

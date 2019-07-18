@@ -4,11 +4,17 @@ import { ReactNode, Fragment } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
-export function IconWarning() {
+export function IconWarning({
+  width = 40,
+  height = 35
+}: {
+  width?: number;
+  height?: number;
+}) {
   return (
     <svg
-      width="40"
-      height="35"
+      width={width}
+      height={height}
       viewBox="0 0 40 35"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -43,18 +49,17 @@ export function IconCircleCross() {
       viewBox="0 0 35 34"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      css={[styles.strokeCurrentColor]}
     >
       <ellipse
         cx="17.9928"
         cy="17.357"
         rx="15.9942"
         ry="15.4286"
-        stroke="#191A49"
         strokeWidth="2"
       />
       <path
         d="M10.0945 24.9764L25.8913 9.73828M10.0945 9.73828L25.8913 24.9764"
-        stroke="#191A49"
         strokeWidth="2"
         strokeLinecap="round"
       />

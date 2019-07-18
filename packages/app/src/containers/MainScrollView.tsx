@@ -1,12 +1,13 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useEffect, useRef, ReactNode } from "react";
+import { useEffect, ReactNode } from "react";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 
 import { AppState } from "../globals.d";
 
 import { useLayoutType } from "../components/GridContext";
 import ModalProvider from "../components/ModalContext";
+import ScrollProvider, { useScrollTo } from "../components/ScrollContext";
 import Footer from "../components/Footer";
 import Menu from "../components/Menu";
 
@@ -16,19 +17,7 @@ interface Props extends RouteComponentProps {
 }
 
 function MainScrollView({ children, state, location }: Props) {
-  const scrollEl = useRef<HTMLDivElement>(null);
-
   const layoutType = useLayoutType();
-
-  useEffect(() => {
-    if (scrollEl.current) {
-      if (scrollEl.current.scrollTo) {
-        scrollEl.current.scrollTo(0, 0);
-      } else {
-        scrollEl.current.scrollTop = 0;
-      }
-    }
-  }, [location.pathname]);
 
   const menu = (
     <Menu
@@ -55,14 +44,30 @@ function MainScrollView({ children, state, location }: Props) {
     <div css={styles.main}>
       <ModalProvider>
         {layoutType === "tablet" && menu}
-        <div css={styles.scroll} ref={scrollEl}>
+        <ScrollProvider style={styles.scroll}>
           {layoutType === "desktop" && <div css={styles.menu}>{menu}</div>}
-          <div css={styles.viewContainer}>
-            <div css={styles.view}>{children}</div>
-            <Footer />
-          </div>
-        </div>
+          <MainView pathname={location.pathname}>{children}</MainView>
+        </ScrollProvider>
       </ModalProvider>
+    </div>
+  );
+}
+
+function MainView({
+  children,
+  pathname
+}: {
+  children: ReactNode;
+  pathname: string;
+}) {
+  const scrollTo = useScrollTo();
+
+  useEffect(() => scrollTo(0), [pathname, scrollTo]);
+
+  return (
+    <div css={styles.viewContainer}>
+      <div css={styles.view}>{children}</div>
+      <Footer />
     </div>
   );
 }
@@ -78,16 +83,13 @@ const styles = {
     position: "relative"
   }),
   scroll: css({
-    overflowY: "auto",
-    WebkitOverflowScrolling: "touch",
     display: "flex",
     flexDirection: "row",
     flexGrow: 1,
     flexShrink: 1,
-    flexBasis: "0%",
+    flexBasis: "0px",
     position: "relative",
     "@media print": {
-      overflow: "visible",
       display: "block",
       borderRight: "none",
       background: "none"

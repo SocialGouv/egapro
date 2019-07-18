@@ -1,3 +1,4 @@
+import deepmerge from "deepmerge";
 import {
   AppState,
   ActionType,
@@ -5,6 +6,7 @@ import {
   TranchesAges
 } from "./globals.d";
 import mapEnum from "./utils/mapEnum";
+import { overwriteMerge, combineMerge } from "./utils/merge";
 
 const dataEffectif = mapEnum(
   CategorieSocioPro,
@@ -18,7 +20,7 @@ const dataEffectif = mapEnum(
   })
 );
 
-const dataIndicateurUn = mapEnum(
+const dataIndicateurUnCsp = mapEnum(
   CategorieSocioPro,
   (categorieSocioPro: CategorieSocioPro) => ({
     categorieSocioPro,
@@ -29,6 +31,17 @@ const dataIndicateurUn = mapEnum(
     }))
   })
 );
+
+const dataIndicateurUnCoefGroup = {
+  name: "",
+  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+    trancheAge,
+    nombreSalariesFemmes: undefined,
+    nombreSalariesHommes: undefined,
+    remunerationAnnuelleBrutFemmes: undefined,
+    remunerationAnnuelleBrutHommes: undefined
+  }))
+};
 
 const dataIndicateurDeux = mapEnum(
   CategorieSocioPro,
@@ -55,7 +68,11 @@ const defaultState: AppState = {
   },
   indicateurUn: {
     formValidated: "None",
-    remunerationAnnuelle: dataIndicateurUn
+    csp: true,
+    remunerationAnnuelle: dataIndicateurUnCsp,
+    coefficientGroupFormValidated: "None",
+    coefficientEffectifFormValidated: "None",
+    coefficient: []
   },
   indicateurDeux: {
     formValidated: "None",
@@ -88,7 +105,9 @@ function AppReducer(
     return undefined;
   }
   if (action.type === "initiateState") {
-    return Object.assign({}, defaultState, action.data);
+    return deepmerge(defaultState, action.data, {
+      arrayMerge: overwriteMerge
+    });
   }
   if (!state) {
     return state;
@@ -107,7 +126,8 @@ function AppReducer(
           ...state,
           effectif: { ...state.effectif, formValidated: action.valid },
           indicateurUn:
-            state.indicateurUn.formValidated === "Valid"
+            state.indicateurUn.formValidated === "Valid" &&
+            state.indicateurUn.csp
               ? { ...state.indicateurUn, formValidated: "Invalid" }
               : state.indicateurUn,
           indicateurDeux:
@@ -125,11 +145,87 @@ function AppReducer(
         effectif: { ...state.effectif, formValidated: action.valid }
       };
     }
-    case "updateIndicateurUn": {
+    case "updateIndicateurUnType": {
+      const { csp } = action.data;
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, csp }
+      };
+    }
+    case "updateIndicateurUnCsp": {
       const { remunerationAnnuelle } = action.data;
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, remunerationAnnuelle }
+      };
+    }
+    case "updateIndicateurUnCoefAddGroup": {
+      const newGroupCoef = { ...dataIndicateurUnCoefGroup }; // Clone to avoid mutable issues
+      const coefficient = [...state.indicateurUn.coefficient, newGroupCoef];
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, coefficient }
+      };
+    }
+    case "updateIndicateurUnCoefDeleteGroup": {
+      const coefficient = [
+        ...state.indicateurUn.coefficient.slice(0, action.index),
+        ...state.indicateurUn.coefficient.slice(
+          action.index + 1,
+          state.indicateurUn.coefficient.length
+        )
+      ];
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, coefficient }
+      };
+    }
+    case "updateIndicateurUnCoef": {
+      const { coefficient } = action.data;
+
+      const mergedCoefficient = deepmerge(
+        state.indicateurUn.coefficient,
+        // @ts-ignore
+        coefficient,
+        { arrayMerge: combineMerge }
+      );
+      // @ts-ignore
+      return {
+        ...state,
+        indicateurUn: { ...state.indicateurUn, coefficient: mergedCoefficient }
+      };
+    }
+    case "validateIndicateurUnCoefGroup": {
+      return {
+        ...state,
+        indicateurUn: {
+          ...state.indicateurUn,
+          coefficientGroupFormValidated: action.valid,
+          coefficientEffectifFormValidated:
+            action.valid === "None" &&
+            state.indicateurUn.coefficientEffectifFormValidated === "Valid"
+              ? "Invalid"
+              : state.indicateurUn.coefficientEffectifFormValidated,
+          formValidated:
+            action.valid === "None" &&
+            state.indicateurUn.formValidated === "Valid"
+              ? "Invalid"
+              : state.indicateurUn.formValidated
+        }
+      };
+    }
+    case "validateIndicateurUnCoefEffectif": {
+      return {
+        ...state,
+        indicateurUn: {
+          ...state.indicateurUn,
+          coefficientEffectifFormValidated: action.valid,
+          formValidated:
+            action.valid === "None" &&
+            state.indicateurUn.formValidated === "Valid"
+              ? "Invalid"
+              : state.indicateurUn.formValidated
+        }
       };
     }
     case "validateIndicateurUn": {

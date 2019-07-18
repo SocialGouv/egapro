@@ -102,7 +102,8 @@ const styles = {
     textDecoration: "none"
   }),
   backIcon: css({
-    fontSize: 8
+    fontSize: 8,
+    fontFamily: "Segoe UI Symbol" // fix Edge
   })
 };
 

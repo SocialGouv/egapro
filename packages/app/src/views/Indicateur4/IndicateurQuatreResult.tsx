@@ -52,6 +52,7 @@ const styles = {
   }),
   edit: css({
     marginTop: 14,
+    marginBottom: 14,
     textAlign: "center"
   })
 };

@@ -12,6 +12,7 @@ interface Props {
   indicateurEcartAugmentation: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurDeux: number | undefined;
+  correctionMeasure: boolean;
   validateIndicateurDeux: (valid: FormState) => void;
 }
 
@@ -19,6 +20,7 @@ function IndicateurDeuxResult({
   indicateurEcartAugmentation,
   indicateurSexeSurRepresente,
   noteIndicateurDeux,
+  correctionMeasure,
   validateIndicateurDeux
 }: Props) {
   return (
@@ -34,6 +36,11 @@ function IndicateurDeuxResult({
         secondLineLabel="votre note obtenue est"
         secondLineData={
           (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"
+        }
+        secondLineInfo={
+          correctionMeasure
+            ? "mesures de correction prises en compte"
+            : undefined
         }
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
@@ -54,6 +61,7 @@ const styles = {
   }),
   edit: css({
     marginTop: 14,
+    marginBottom: 14,
     textAlign: "center"
   })
 };

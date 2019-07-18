@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo, useEffect } from "react";
-import { useForm } from "react-final-form-hooks";
+import { Form } from "react-final-form";
 import createDecorator from "final-form-calculate";
 
 import { AppState, FormState, ActionIndicateurCinqData } from "../../globals.d";
@@ -18,6 +17,7 @@ import {
 import { BlocFormLight } from "../../components/BlocForm";
 import FieldInput from "../../components/FieldInput";
 import ActionBar from "../../components/ActionBar";
+import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
@@ -117,58 +117,50 @@ function IndicateurCinqForm({
     validateIndicateurCinq("Valid");
   };
 
-  const { form, handleSubmit, hasValidationErrors, submitFailed } = useForm({
-    initialValues,
-    onSubmit,
-    validate: validateForm
-  });
-
-  useEffect(() => {
-    const unsubscribe = calculator(form);
-    return () => unsubscribe();
-  }, [form]);
-
-  form.subscribe(
-    ({ values, dirty }) => {
-      if (dirty) {
-        saveForm(values);
-      }
-    },
-    { values: true, dirty: true }
-  );
-
   return (
-    <form onSubmit={handleSubmit} css={styles.container}>
-      <BlocFormLight>
-        <FieldInput
-          form={form}
-          fieldName="nombreSalariesFemmes"
-          label="nombre de femmes parmis les 10 plus hauts salaires"
-          readOnly={readOnly}
-        />
-        <FieldInput
-          form={form}
-          fieldName="nombreSalariesHommes"
-          label="nombre d’hommes parmis les 10 plus hauts salaires"
-          readOnly={readOnly}
-          theme="hommes"
-        />
-      </BlocFormLight>
+    <Form
+      onSubmit={onSubmit}
+      decorators={[calculator]}
+      validate={validateForm}
+      initialValues={initialValues}
+      // mandatory to not change user inputs
+      // because we want to keep wrong string inside the input
+      // we don't want to block string value
+      initialValuesEqual={() => true}
+    >
+      {({ handleSubmit, hasValidationErrors, submitFailed }) => (
+        <form onSubmit={handleSubmit} css={styles.container}>
+          <FormAutoSave saveForm={saveForm} />
+          <BlocFormLight>
+            <FieldInput
+              fieldName="nombreSalariesFemmes"
+              label="nombre de femmes parmis les 10 plus hauts salaires"
+              readOnly={readOnly}
+            />
+            <FieldInput
+              fieldName="nombreSalariesHommes"
+              label="nombre d’hommes parmis les 10 plus hauts salaires"
+              readOnly={readOnly}
+              theme="hommes"
+            />
+          </BlocFormLight>
 
-      {readOnly ? (
-        <ActionBar>
-          <ButtonSimulatorLink to="/recapitulatif" label="suivant" />
-        </ActionBar>
-      ) : (
-        <ActionBar>
-          <FormSubmit
-            hasValidationErrors={hasValidationErrors}
-            submitFailed={submitFailed}
-            errorMessage="vous ne pouvez pas valider l’indicateur tant que vous n’avez pas rempli tous les champs"
-          />
-        </ActionBar>
+          {readOnly ? (
+            <ActionBar>
+              <ButtonSimulatorLink to="/recapitulatif" label="suivant" />
+            </ActionBar>
+          ) : (
+            <ActionBar>
+              <FormSubmit
+                hasValidationErrors={hasValidationErrors}
+                submitFailed={submitFailed}
+                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+              />
+            </ActionBar>
+          )}
+        </form>
       )}
-    </form>
+    </Form>
   );
 }
 
@@ -179,7 +171,4 @@ const styles = {
   })
 };
 
-export default memo(
-  IndicateurCinqForm,
-  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
-);
+export default IndicateurCinqForm;

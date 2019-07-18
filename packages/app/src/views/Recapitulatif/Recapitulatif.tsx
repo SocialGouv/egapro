@@ -41,7 +41,8 @@ function Recapitulatif({ state }: Props) {
     effectifEtEcartAugmentParGroupe,
     indicateurEcartAugmentation,
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
-    noteIndicateurDeux
+    noteIndicateurDeux,
+    correctionMeasure: correctionMeasureIndicateurDeux
   } = calculIndicateurDeux(state);
 
   const {
@@ -50,7 +51,8 @@ function Recapitulatif({ state }: Props) {
     effectifEtEcartPromoParGroupe,
     indicateurEcartPromotion,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
-    noteIndicateurTrois
+    noteIndicateurTrois,
+    correctionMeasure: correctionMeasureIndicateurTrois
   } = calculIndicateurTrois(state);
 
   const {
@@ -84,9 +86,7 @@ function Recapitulatif({ state }: Props) {
   );
 
   return (
-    <Page
-      title="Récapitulatif des résultats de vos indicateurs"
-    >
+    <Page title="Récapitulatif des résultats de vos indicateurs">
       <RecapitulatifIndex
         allIndicateurValid={allIndicateurValid}
         noteIndex={noteIndex}
@@ -108,6 +108,7 @@ function Recapitulatif({ state }: Props) {
         indicateurEcartAugmentation={indicateurEcartAugmentation}
         indicateurSexeSurRepresente={indicateurDeuxSexeSurRepresente}
         noteIndicateurDeux={noteIndicateurDeux}
+        correctionMeasure={correctionMeasureIndicateurDeux}
       />
       <RecapitulatifIndicateurTrois
         indicateurTroisFormValidated={state.indicateurTrois.formValidated}
@@ -117,6 +118,7 @@ function Recapitulatif({ state }: Props) {
         indicateurEcartPromotion={indicateurEcartPromotion}
         indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
         noteIndicateurTrois={noteIndicateurTrois}
+        correctionMeasure={correctionMeasureIndicateurTrois}
       />
       <RecapitulatifIndicateurQuatre
         indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}

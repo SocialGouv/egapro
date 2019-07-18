@@ -5,7 +5,11 @@ export type AppState = {
   };
   indicateurUn: {
     formValidated: FormState;
+    csp: boolean;
     remunerationAnnuelle: Array<GroupeIndicateurUn>;
+    coefficientGroupFormValidated: FormState;
+    coefficientEffectifFormValidated: FormState;
+    coefficient: Array<GroupeCoefficient>;
   };
   indicateurDeux: {
     formValidated: FormState;
@@ -49,8 +53,31 @@ export type ActionType =
       valid: FormState;
     }
   | {
-      type: "updateIndicateurUn";
-      data: ActionIndicateurUnData;
+      type: "updateIndicateurUnType";
+      data: ActionIndicateurUnTypeData;
+    }
+  | {
+      type: "updateIndicateurUnCsp";
+      data: ActionIndicateurUnCspData;
+    }
+  | {
+      type: "updateIndicateurUnCoefAddGroup";
+    }
+  | {
+      type: "updateIndicateurUnCoefDeleteGroup";
+      index: number;
+    }
+  | {
+      type: "updateIndicateurUnCoef";
+      data: ActionIndicateurUnCoefData;
+    }
+  | {
+      type: "validateIndicateurUnCoefGroup";
+      valid: FormState;
+    }
+  | {
+      type: "validateIndicateurUnCoefEffectif";
+      valid: FormState;
     }
   | {
       type: "validateIndicateurUn";
@@ -93,8 +120,23 @@ export type ActionEffectifData = {
   nombreSalaries: Array<GroupeEffectif>;
 };
 
-export type ActionIndicateurUnData = {
+export type ActionIndicateurUnTypeData = {
+  csp: boolean;
+};
+
+export type ActionIndicateurUnCspData = {
   remunerationAnnuelle: Array<GroupeIndicateurUn>;
+};
+
+export type ActionIndicateurUnCoefData = {
+  coefficient:
+    | Array<{ name: string }>
+    | Array<{
+        tranchesAges: Array<GroupTranchesAgesEffectif>;
+      }>
+    | Array<{
+        tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
+      }>;
 };
 
 export type ActionIndicateurDeuxData = {
@@ -154,6 +196,19 @@ export interface GroupTranchesAgesIndicateurUn {
 export interface GroupeIndicateurUn {
   categorieSocioPro: CategorieSocioPro;
   tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
+}
+
+export interface GroupTranchesAgesCoefficient {
+  trancheAge: TranchesAges;
+  nombreSalariesFemmes: number | undefined;
+  nombreSalariesHommes: number | undefined;
+  remunerationAnnuelleBrutFemmes: number | undefined;
+  remunerationAnnuelleBrutHommes: number | undefined;
+}
+
+export interface GroupeCoefficient {
+  name: string;
+  tranchesAges: Array<GroupTranchesAgesCoefficient>;
 }
 
 export interface GroupeIndicateurDeux {

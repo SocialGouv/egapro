@@ -89,12 +89,14 @@ function Home({ history, location, dispatch }: Props) {
               automatiquement les indicateurs et la note finale.
             </p>
 
-            <ButtonAction
-              onClick={onClick}
-              label="commencer le calcul"
-              disabled={loading}
-              loading={loading}
-            />
+            <div css={styles.buttonAction}>
+              <ButtonAction
+                onClick={onClick}
+                label="commencer le calcul"
+                disabled={loading}
+                loading={loading}
+              />
+            </div>
           </div>
         </div>
 
@@ -181,9 +183,10 @@ const styles = {
 
   blocContent: css({
     flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
     display: "flex",
     flexDirection: "column",
-    alignItems: "flex-start",
     marginLeft: 24,
     paddingTop: 10,
     paddingBottom: 10
@@ -212,6 +215,9 @@ const styles = {
     lineHeight: "17px",
     fontStyle: "italic",
     alignSelf: "flex-end"
+  }),
+  buttonAction: css({
+    alignSelf: "flex-start"
   }),
   button: css({
     display: "inline-flex",

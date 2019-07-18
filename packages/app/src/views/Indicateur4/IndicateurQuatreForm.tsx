@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { memo, Fragment } from "react";
-import { useForm } from "react-final-form-hooks";
+import { Fragment } from "react";
+import { Form } from "react-final-form";
 import {
   AppState,
   FormState,
@@ -11,6 +11,8 @@ import {
 import {
   parseIntFormValue,
   parseIntStateValue,
+  parseBooleanFormValue,
+  parseBooleanStateValue,
   required,
   mustBeNumber,
   maxNumber
@@ -23,6 +25,7 @@ import FieldInput, {
 } from "../../components/FieldInput";
 import RadiosBoolean from "../../components/RadiosBoolean";
 import ActionBar from "../../components/ActionBar";
+import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
@@ -64,7 +67,7 @@ const validateForm = ({
   nombreSalarieesAugmentees: string;
 }) => {
   if (presenceCongeMat === "false") {
-    return null;
+    return undefined;
   }
   return {
     nombreSalarieesPeriodeAugmentation: validate(
@@ -93,7 +96,7 @@ function IndicateurQuatreForm({
   validateIndicateurQuatre
 }: Props) {
   const initialValues = {
-    presenceCongeMat: String(indicateurQuatre.presenceCongeMat),
+    presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),
     nombreSalarieesPeriodeAugmentation: parseIntStateValue(
       indicateurQuatre.nombreSalarieesPeriodeAugmentation
     ),
@@ -110,7 +113,7 @@ function IndicateurQuatreForm({
     } = formData;
 
     updateIndicateurQuatre({
-      presenceCongeMat: presenceCongeMat === "true",
+      presenceCongeMat: parseBooleanFormValue(presenceCongeMat),
       nombreSalarieesPeriodeAugmentation: parseIntFormValue(
         nombreSalarieesPeriodeAugmentation
       ),
@@ -123,79 +126,69 @@ function IndicateurQuatreForm({
     validateIndicateurQuatre("Valid");
   };
 
-  const {
-    form,
-    values,
-    handleSubmit,
-    hasValidationErrors,
-    submitFailed
-  } = useForm({
-    initialValues,
-    onSubmit,
-    validate: validateForm
-  });
-
-  form.subscribe(
-    ({ values, dirty }) => {
-      if (dirty) {
-        saveForm(values);
-      }
-    },
-    { values: true, dirty: true }
-  );
-
   return (
-    <form onSubmit={handleSubmit} css={styles.container}>
-      <RadiosBoolean
-        form={form}
-        fieldName="presenceCongeMat"
-        readOnly={readOnly}
-        labelTrue={
-          <Fragment>
-            <strong>il y a eu des retours de congé maternité</strong> pendant la
-            période de référence
-          </Fragment>
-        }
-        labelFalse={
-          <Fragment>
-            <strong>il n’y a pas eu de retour de congé maternité</strong>{" "}
-            pendant la période de référence
-          </Fragment>
-        }
-      />
-
-      {values.presenceCongeMat === "true" && (
-        <BlocFormLight>
-          <FieldInput
-            form={form}
-            fieldName="nombreSalarieesPeriodeAugmentation"
-            label="parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
+    <Form
+      onSubmit={onSubmit}
+      validate={validateForm}
+      initialValues={initialValues}
+      // mandatory to not change user inputs
+      // because we want to keep wrong string inside the input
+      // we don't want to block string value
+      initialValuesEqual={() => true}
+    >
+      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+        <form onSubmit={handleSubmit} css={styles.container}>
+          <FormAutoSave saveForm={saveForm} />
+          <RadiosBoolean
+            fieldName="presenceCongeMat"
+            value={values.presenceCongeMat}
             readOnly={readOnly}
+            labelTrue={
+              <Fragment>
+                <strong>il y a eu des retours de congé maternité</strong>{" "}
+                pendant la période de référence
+              </Fragment>
+            }
+            labelFalse={
+              <Fragment>
+                <strong>il n’y a pas eu de retour de congé maternité</strong>{" "}
+                pendant la période de référence
+              </Fragment>
+            }
           />
-          <div css={styles.spacer} />
-          <FieldInput
-            form={form}
-            fieldName="nombreSalarieesAugmentees"
-            label="parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
-            readOnly={readOnly}
-          />
-        </BlocFormLight>
-      )}
 
-      {readOnly ? (
-        <ActionBar>
-          <ButtonSimulatorLink to="/indicateur5" label="suivant" />
-        </ActionBar>
-      ) : (
-        <ActionBar>
-          <FormSubmit
-            hasValidationErrors={hasValidationErrors}
-            submitFailed={submitFailed}
-            errorMessage="vous ne pouvez pas valider l’indicateur tant que vous n’avez pas rempli tous les champs"
-          />
-        </ActionBar>
+          {values.presenceCongeMat === "true" && (
+            <BlocFormLight>
+              <FieldInput
+                fieldName="nombreSalarieesPeriodeAugmentation"
+                label="parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
+                readOnly={readOnly}
+              />
+              <div css={styles.spacer} />
+              <FieldInput
+                fieldName="nombreSalarieesAugmentees"
+                label="parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
+                readOnly={readOnly}
+              />
+            </BlocFormLight>
+          )}
+
+          {readOnly ? (
+            <ActionBar>
+              <ButtonSimulatorLink to="/indicateur5" label="suivant" />
+            </ActionBar>
+          ) : (
+            <ActionBar>
+              <FormSubmit
+                hasValidationErrors={hasValidationErrors}
+                submitFailed={submitFailed}
+                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+              />
+            </ActionBar>
+          )}
+        </form>
       )}
-    </form>
+    </Form>
   );
 }
 
@@ -212,7 +205,4 @@ const styles = {
   })
 };
 
-export default memo(
-  IndicateurQuatreForm,
-  (prevProps, nextProps) => prevProps.readOnly === nextProps.readOnly
-);
+export default IndicateurQuatreForm;

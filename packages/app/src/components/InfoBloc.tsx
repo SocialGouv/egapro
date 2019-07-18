@@ -2,6 +2,8 @@
 import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
 
+import globalStyles from "../utils/globalStyles";
+
 import { IconWarning, IconCircleCross } from "./Icons";
 import { useColumnsWidth, useLayoutType } from "./GridContext";
 
@@ -16,43 +18,43 @@ function InfoBloc({ title, text, icon = "warning" }: Props) {
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
   return (
     <div css={[styles.bloc, css({ width })]}>
-      <p css={styles.blocTitle}>{title}</p>
-      {text && (
-        <div css={styles.blocBody}>
-          {icon === null ? null : (
-            <div css={styles.blocIcon}>
-              {icon === "cross" ? <IconCircleCross /> : <IconWarning />}
-            </div>
-          )}
-          <p css={styles.blocText}>{text}</p>
+      {icon === null ? null : (
+        <div css={styles.blocIcon}>
+          {icon === "cross" ? <IconCircleCross /> : <IconWarning />}
         </div>
       )}
+
+      <div>
+        <p css={styles.blocTitle}>{title}</p>
+        {text && <p css={styles.blocText}>{text}</p>}
+      </div>
     </div>
   );
 }
 
 const styles = {
   bloc: css({
-    padding: 16,
-    backgroundColor: "#FFF",
-    border: "1px solid #EFECEF"
+    padding: "12px 18px",
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: globalStyles.colors.primary,
+    borderRadius: 5
   }),
   blocTitle: css({
     fontSize: 18,
     lineHeight: "22px",
-    textTransform: "uppercase"
+    textTransform: "uppercase",
+    color: "white"
   }),
-  blocBody: {
-    marginTop: 4,
-    display: "flex",
-    alignItems: "flex-end"
-  },
   blocIcon: {
-    marginRight: 22
+    marginRight: 22,
+    color: "white"
   },
   blocText: css({
+    marginTop: 4,
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
+    color: "white"
   })
 };
 
