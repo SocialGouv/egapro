@@ -33,6 +33,7 @@ function FAQSearchBox({ searchTerm, setSearchTerm }: Props) {
         value={searchTerm}
         onChange={onChange}
         placeholder="Cherchez par mot clef"
+        data-hj-whitelist
       />
     </div>
   );
