@@ -11,7 +11,7 @@ import AppLayout from "./containers/AppLayout";
 
 const history = createBrowserHistory();
 
-const piwik = new ReactPiwik({
+const piwik: any = new ReactPiwik({
   url: "stats.num.social.gouv.fr",
   siteId: 11,
   trackErrors: true
