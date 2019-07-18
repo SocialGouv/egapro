@@ -1,8 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
+import { Link } from "react-router-dom";
 
 import { FAQSectionType } from "../../globals.d";
+import globalStyles from "../../utils/globalStyles";
 
 import FAQSearch from "./FAQSearch";
 import FAQTitle from "./components/FAQTitle";
@@ -42,6 +44,23 @@ function FAQSection({ section }: Props) {
 
               {FAQStepsElement}
             </div>
+          )}
+
+          {[
+            "indicateur1",
+            "indicateur2",
+            "indicateur3",
+            "indicateur4",
+            "indicateur5",
+            "resultat"
+          ].includes(section) && (
+            <Link
+              to={{ state: { faq: `/section/${section}/detail-calcul` } }}
+              css={styles.link}
+            >
+              comprendre comment est calculé{" "}
+              {section === "resultat" ? "l'index" : "l'indicateur"}
+            </Link>
           )}
 
           {faqSection.parts.length > 0 && (
@@ -99,6 +118,13 @@ const styles = {
   }),
   pasapas: css({
     marginBottom: 28
+  }),
+  link: css({
+    display: "inline-block",
+    marginBottom: 48,
+    fontSize: 14,
+    lineHeight: "17px",
+    color: globalStyles.colors.default
   })
 };
 

@@ -10,6 +10,7 @@ import FAQFooter from "./components/FAQFooter";
 
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
+import FAQSectionDetailCalcul from "./FAQSectionDetailCalcul";
 import FAQQuestion from "./FAQQuestion";
 import globalStyles from "../../utils/globalStyles";
 
@@ -84,6 +85,16 @@ function FAQ({ closeMenu }: Props) {
                       params: { section }
                     }
                   }) => <FAQSection section={section} />}
+                />
+
+                <Route
+                  exact
+                  path="/section/:section/detail-calcul"
+                  render={({
+                    match: {
+                      params: { section }
+                    }
+                  }) => <FAQSectionDetailCalcul section={section} />}
                 />
 
                 <Route

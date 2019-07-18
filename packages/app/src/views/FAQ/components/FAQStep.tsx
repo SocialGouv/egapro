@@ -22,7 +22,7 @@ const styles = {
   background: css({
     backgroundColor: "#F9F7F9",
     borderRadius: 5,
-    padding: "10px 27px"
+    padding: "10px 18px 10px 27px"
   }),
   text: css({
     fontSize: 14,
