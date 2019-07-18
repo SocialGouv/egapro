@@ -39,7 +39,7 @@ function Footer() {
 
       <div css={styles.footerLinks}>
         <a
-          href="https://travail-emploi.gouv.fr/actualites/l-actualite-du-ministere/article/index-de-l-egalite-femmes-hommes-comment-le-calculer"
+          href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/questions-reponses-sur-le-calcul-de-l-index-de-l-egalite"
           target="_blank"
           rel="noopener noreferrer"
           css={styles.link}

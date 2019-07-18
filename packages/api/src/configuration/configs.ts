@@ -1,39 +1,58 @@
-import { config } from "dotenv";
-
-config({ path: "./../../.env" });
-
-export const configuration = {
-  apiPort: asNumber("API_PORT"),
-
-  kintoBucket: asString("KINTO_BUCKET"),
-  kintoLogin: asString("KINTO_LOGIN"),
-  kintoPassword: asString("KINTO_PASSWORD"),
-  kintoURL: asString("KINTO_URL"),
-
-  mailFrom: asString("MAIL_FROM"),
-  mailHost: asString(`MAIL_HOST`),
-  mailPassword: asString(`MAIL_PASSWORD`),
-  mailPort: asNumber(`MAIL_PORT`),
-  mailUseTLS: asBoolean(`MAIL_USE_TLS`),
-  mailUsername: asString(`MAIL_USERNAME`)
-};
-
-function asString(arg: any): string {
-  return getEnvValue(arg);
-}
-
-function asNumber(arg: any): number {
-  return Number.parseInt(getEnvValue(arg), 10);
-}
-
-function asBoolean(arg: any): boolean {
-  return "true" === getEnvValue(arg) ? true : false;
-}
-
-function getEnvValue(arg: string): string {
-  const res = process.env[arg];
+const asString = (
+  env: typeof process.env,
+  arg: string,
+  defaultValue: string
+): string => {
+  const res = env[arg];
   if (!res) {
-    throw new Error(`env variable ${arg} is required`);
+    return defaultValue;
   }
   return res;
-}
+};
+
+const asNumber = (
+  env: typeof process.env,
+  arg: string,
+  defaultValue: number
+): number => {
+  const res = env[arg];
+  if (!res) {
+    return defaultValue;
+  }
+  return Number.parseInt(res, 10);
+};
+
+const asBoolean = (
+  env: typeof process.env,
+  arg: string,
+  defaultValue: boolean
+): boolean => {
+  const res = env[arg];
+  if (!res) {
+    return defaultValue;
+  }
+  return "true" === res ? true : false;
+};
+
+export const getConfiguration = (env: typeof process.env) => ({
+  apiPort: asNumber(env, "API_PORT", 4000),
+
+  kintoBucket: asString(env, "KINTO_BUCKET", "egapro"),
+  kintoLogin: asString(env, "KINTO_LOGIN", "admin"),
+  kintoPassword: asString(env, "KINTO_PASSWORD", "passw0rd"),
+  kintoURL: asString(env, "KINTO_URL", "http://localhost:8888/v1"),
+
+  mailFrom: asString(
+    env,
+    "MAIL_FROM",
+    "Index EgaPro <contact@egapro.beta.gouv.fr>"
+  ),
+  mailHost: asString(env, `MAIL_HOST`, ""),
+  mailPassword: asString(env, `MAIL_PASSWORD`, ""),
+  mailPort: asNumber(env, `MAIL_PORT`, 465),
+  mailUseTLS: asBoolean(env, `MAIL_USE_TLS`, true),
+  mailUsername: asString(env, `MAIL_USERNAME`, ""),
+
+  apiSentryDSN: asString(env, `API_SENTRY_DSN`, ""),
+  apiSentryEnabled: asBoolean(env, `API_SENTRY_ENABLED`, false)
+});

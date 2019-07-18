@@ -69,12 +69,19 @@ export const sendEmail = async (ctx: Koa.Context) => {
 };
 
 function buildEmail(id: string, emailAddress: string) {
-  const subject: string = "EgaPro: Accéder au calculateur";
+  const subject: string =
+    "Calcul de l’index égalité professionnelle femmes-hommes";
   const body: string = `Bonjour,
 
-        Accéder au calculateur: ${id}
+Vous avez commencé votre calcul de l’Index de l’égalité professionnelle femmes-hommes.
 
-        L'équipe EgaPro`;
+Vous pouvez accéder aux données saisies en cliquant sur le lien suivant: https://index-egapro.travail.gouv.fr/simulateur/${id}
+
+
+Bien cordialement,
+
+
+Direction Générale du Travail`;
   return {
     bcc: [],
     bodyText: body,

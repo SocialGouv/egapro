@@ -1,4 +1,12 @@
 .env
-node_modules
+
+# dependencies
+/node_modules
+
 yarn-error.log
+
+# production
 dist
+
+# testing
+/coverage

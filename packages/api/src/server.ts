@@ -13,8 +13,8 @@ app.use(cors());
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-app.on("error", (err, ctx: Koa.Context) => {
-  logger.error(`[error] ${ctx.originalUrl}: `, err);
+app.on("error", (err: Error, ctx: Koa.Context) => {
+  logger.error(`url: ${ctx.originalUrl}: `, err);
 });
 
 app.listen(configuration.apiPort);

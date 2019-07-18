@@ -1,0 +1,58 @@
+---
+dist: xenial
+language: minimal
+git:
+  depth: 5
+
+#
+
+.env:
+  github_keys: &github_keys
+    - secure: "rFKFYTuRoS/F2WsCBKm3NVQAC6Km6ONlKbVKVRKmZWKN09cc9Vi+Hupu9I3lc733qDiPvYADP7/YQIFrpQcfMqTNg6XHnGaW/LhTdnQrr4FGQ+Thafgz9RTxbcICKgGLHXjYT+rRjC+Y8BEATaC9al0ajTVs9OH6oK+4LIvxOhn9OLlvZOy5Xz++7b/1wLno03C9eRbltS6wudhA38SI8RUWNgFyt/sBMdsn2cZYco0Ed/NNUCkyts6xpDj1HH2cFpCx01PuhClFZX8efC5e76IoxLqaQOIAwfeBTtOvfNyd3lhwcqgQhK5dSID6mKcobb+7AtJtqr47RTXVwpjTmIlhMZJTycVJS6H4BIzg3FnHSfgP8YbAgbkWJ4rHVfPnqEt5fT2MN3dqcNc+oPQ2mhj2fZmvhmrTcYX3k/Pgc1sBrLqDcyj4KsBOJDXHKxotNRYlZmyAeaieXNesEnm6tfJp22TzyDXo8PPctnYrr4hbX3vB+802JWxy0rDgwiySQAYn6e4wIKt+yiOik5a7r2UFjOMXpL4Sy1FuKu4uFqJm/8lhysMyavuKKmUAHcLNVbAC9bYVqFDdhu+ENwmU/M0rLpcBUbnNqK8BdP6GdzozGiBt3ZTaLoTOpvNB7QqqOAMEw4nY08fWZAS3Mwr3AsJOS4k86vlW9GGI2XobTg8="
+
+#
+
+.node_stage: &node_stage
+  language: node_js
+  node_js: "10"
+  cache: yarn
+  before_install:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH="$HOME/.yarn/bin:$PATH"
+  install:
+    - yarn --frozen-lockfile
+
+#
+
+jobs:
+  include:
+    - stage: Build
+      <<: *node_stage
+      script:
+        - yarn build
+        - yarn lint
+        - yarn coverage
+      after_script:
+        - npx codecov
+
+    #
+    #
+    #
+
+    - stage: Release
+      name: Make a new release 🎉
+      if: env(RELEASE)
+      <<: *node_stage
+      git:
+        # NOTE(douglasduteil): disable git --depth
+        # Try to have all the commits for the release Change Log
+        # see travis-ci/travis-ci#3412
+        depth: 9999999 # Over 9000 !
+      env: *github_keys
+      before_script:
+        - git checkout ${TRAVIS_BRANCH}
+        - git config user.name "Social Groovy Bot"
+        - git config user.email "45039513+SocialGroovyBot@users.noreply.github.com"
+        - git remote set-url origin https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+      script:
+        - GH_TOKEN=${GITHUB_TOKEN} yarn lerna version ${LERNA_ARGS:=--yes}
