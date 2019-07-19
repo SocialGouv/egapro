@@ -91,10 +91,16 @@ function FAQ({ closeMenu }: Props) {
                   exact
                   path="/section/:section/detail-calcul"
                   render={({
+                    history,
                     match: {
                       params: { section }
                     }
-                  }) => <FAQSectionDetailCalcul section={section} />}
+                  }) => (
+                    <FAQSectionDetailCalcul
+                      history={history}
+                      section={section}
+                    />
+                  )}
                 />
 
                 <Route

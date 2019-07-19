@@ -1,9 +1,11 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Link } from "react-router-dom";
+import { RouteComponentProps } from "react-router-dom";
 
 import { FAQSectionType } from "../../globals.d";
 import globalStyles from "../../utils/globalStyles";
+
+import ActionLink from "../../components/ActionLink";
 
 import FAQTitle from "./components/FAQTitle";
 import FAQTitle2 from "./components/FAQTitle2";
@@ -19,9 +21,10 @@ import { faqSections } from "../../data/faq";
 
 interface Props {
   section: FAQSectionType;
+  history: RouteComponentProps["history"];
 }
 
-function FAQSectionDetailCalcul({ section }: Props) {
+function FAQSectionDetailCalcul({ section, history }: Props) {
   const faqSection = faqSections[section];
 
   const FAQDetailCalculElement = FAQDetailCalcul({ section });
@@ -42,18 +45,15 @@ function FAQSectionDetailCalcul({ section }: Props) {
           </div>
         )}
 
-        <Link
-          to={{ state: { faq: `/section/${section}` } }}
-          css={styles.button}
-        >
+        <ActionLink style={styles.button} onClick={() => history.goBack()}>
           <span css={styles.buttonIcon}>◀</span> ︎retour
-        </Link>
+        </ActionLink>
       </div>
     </div>
   );
 }
 
-function FAQDetailCalcul({ section }: Props) {
+function FAQDetailCalcul({ section }: { section: FAQSectionType }) {
   switch (section) {
     case "indicateur1":
       return <FAQIndicateur1DetailCalcul />;

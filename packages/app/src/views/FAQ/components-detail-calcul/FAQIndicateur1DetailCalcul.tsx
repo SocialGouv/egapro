@@ -3,12 +3,15 @@ import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
 import { IconLamp, IconText } from "../../../components/Icons";
+
 import FAQStep from "../components/FAQStep";
+import FAQCalculScale from "../components/FAQCalculScale";
+import FAQTitle3 from "../components/FAQTitle3";
 
 function FAQIndicateur1Steps() {
   return (
     <Fragment>
-      <p css={styles.smallTitle}>Calculer l’indicateur</p>
+      <FAQTitle3>Calculer l’indicateur</FAQTitle3>
 
       <FAQStep icon={<IconLamp />}>
         Les groupes ne comportant pas{" "}
@@ -39,21 +42,25 @@ function FAQIndicateur1Steps() {
       </FAQStep>
 
       <div css={styles.content}>
-        <p css={styles.smallTitle}>
-          Appliquer le barème pour obtenir votre note
-        </p>
+        <FAQTitle3>Appliquer le barème pour obtenir votre note</FAQTitle3>
+
+        <FAQCalculScale
+          listTitle="écart"
+          list={[
+            "inférieur ou égal à 2% ",
+            "supérieur à 2% ou égal à 5%",
+            "supérieur à 5% ou égal à 10%",
+            "supérieur à 10%"
+          ]}
+          scaleTitle="note sur 20"
+          scale={["20 points", "10 points", "5 points", "0 points"]}
+        />
       </div>
     </Fragment>
   );
 }
 
 const styles = {
-  smallTitle: css({
-    paddingTop: 8,
-    marginBottom: 8,
-    fontSize: 14,
-    lineHeight: "17px"
-  }),
   content: css({
     marginTop: 30
   })
