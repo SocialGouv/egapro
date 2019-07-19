@@ -11,11 +11,11 @@ import FAQTitle from "./components/FAQTitle";
 import FAQTitle2 from "./components/FAQTitle2";
 
 import FAQIndicateur1DetailCalcul from "./components-detail-calcul/FAQIndicateur1DetailCalcul";
-// import FAQIndicateur2DetailCalcul from "./components-detail-calcul/FAQIndicateur2DetailCalcul";
-// import FAQIndicateur3DetailCalcul from "./components-detail-calcul/FAQIndicateur3DetailCalcul";
-// import FAQIndicateur4DetailCalcul from "./components-detail-calcul/FAQIndicateur4DetailCalcul";
-// import FAQIndicateur5DetailCalcul from "./components-detail-calcul/FAQIndicateur5DetailCalcul";
-// import FAQResultatDetailCalcul from "./components-detail-calcul/FAQResultatDetailCalcul";
+import FAQIndicateur2DetailCalcul from "./components-detail-calcul/FAQIndicateur2DetailCalcul";
+import FAQIndicateur3DetailCalcul from "./components-detail-calcul/FAQIndicateur3DetailCalcul";
+import FAQIndicateur4DetailCalcul from "./components-detail-calcul/FAQIndicateur4DetailCalcul";
+import FAQIndicateur5DetailCalcul from "./components-detail-calcul/FAQIndicateur5DetailCalcul";
+import FAQResultatDetailCalcul from "./components-detail-calcul/FAQResultatDetailCalcul";
 
 import { faqSections } from "../../data/faq";
 
@@ -57,16 +57,16 @@ function FAQDetailCalcul({ section }: { section: FAQSectionType }) {
   switch (section) {
     case "indicateur1":
       return <FAQIndicateur1DetailCalcul />;
-    // case "indicateur2":
-    //   return <FAQIndicateur2DetailCalcul />;
-    // case "indicateur3":
-    //   return <FAQIndicateur3DetailCalcul />;
-    // case "indicateur4":
-    //   return <FAQIndicateur4DetailCalcul />;
-    // case "indicateur5":
-    //   return <FAQIndicateur5DetailCalcul />;
-    // case "resultat":
-    //   return <FAQResultatDetailCalcul />;
+    case "indicateur2":
+      return <FAQIndicateur2DetailCalcul />;
+    case "indicateur3":
+      return <FAQIndicateur3DetailCalcul />;
+    case "indicateur4":
+      return <FAQIndicateur4DetailCalcul />;
+    case "indicateur5":
+      return <FAQIndicateur5DetailCalcul />;
+    case "resultat":
+      return <FAQResultatDetailCalcul />;
     default:
       return null;
   }

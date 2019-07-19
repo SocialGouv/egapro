@@ -31,7 +31,7 @@ const styles = {
   container: css({
     display: "flex",
     marginBottom: 12,
-    padding: "13px 27px",
+    padding: "13px 25px",
     backgroundColor: "#F9F7F9",
     borderRadius: 5
   }),
@@ -43,8 +43,9 @@ const styles = {
     flexDirection: "column"
   }),
   rightColumn: css({
+    marginLeft: 6,
     flexGrow: 0,
-    flexShrink: 1,
+    flexShrink: 0,
     flexBasis: "auto",
     display: "flex",
     flexDirection: "column"
