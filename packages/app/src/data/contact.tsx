@@ -632,7 +632,7 @@ export const contact: FAQContact = [
       },
       {
         title: "Seine-et-Marne (77)",
-        name: "Roselyne ZAMPINI - Stéphane ROUXEL",
+        name: "Roselyne ZAMPINI - Brigitte BOU",
         links: [
           {
             type: "email",
@@ -652,7 +652,7 @@ export const contact: FAQContact = [
       },
       {
         title: "Essonne (91)",
-        name: "Martine FRANCOIS - Brigitte MARCHIONI",
+        name: "Brigitte MARCHIONI",
         links: [
           {
             type: "email",
@@ -662,7 +662,7 @@ export const contact: FAQContact = [
       },
       {
         title: "Hauts de Seine (92)",
-        name: "Chantal BRILLET",
+        name: "Brigitte MAUVE",
         links: [
           {
             type: "email",
@@ -947,7 +947,7 @@ export const contact: FAQContact = [
       },
       {
         title: "Gard (30)",
-        name: "Paula NUNES",
+        name: "Corine BONICEL",
         links: [
           {
             type: "email",
