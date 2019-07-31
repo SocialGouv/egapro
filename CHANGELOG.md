@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.2](https://github.com/SocialGouv/egapro/compare/v1.2.1...v1.2.2) (2019-07-31)
+
+**Note:** Version bump only for package egapro
+
+
+
+
+
 ## [1.2.1](https://github.com/SocialGouv/egapro/compare/v1.3.0...v1.2.1) (2019-07-23)
 
 **Note:** Version bump only for package egapro
