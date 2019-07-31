@@ -35,10 +35,10 @@ function Home({ history, location, dispatch }: Props) {
     <Page
       title="Bienvenue sur Index Egapro"
       tagline={[
-        "L’Index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
+        "L’Index d'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
         "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
-        "Avec l'outil de simulation en ligne, calculez votre Index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées.",
-        "Pour le moment, l’outil est configuré pour les entreprises de plus de 250 salariés : il le sera bientôt pour les entreprises de 50 à 250 salariés !"
+        "Avec Index Egapro, calculez votre index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées.",
+        "Pour le moment, le calculateur est configuré pour les entreprises de plus de 250 salariés : il le sera bientôt pour les entreprises de 50 à 250 salariés !"
       ]}
     >
       <div css={styles.action}>
@@ -66,7 +66,7 @@ function Home({ history, location, dispatch }: Props) {
             </span>
             <p css={styles.blocContentBody}>
               Afin de procéder à la simulation, les entreprises doivent extraire
-              des données relatives à leurs salariés. Grâce à l’outil Index
+              des données relatives à leurs salariés. Grâce à Index
               Egapro, une aide est disponible pour chacun des indicateurs . Si
               l’entreprise décide de ne pas utiliser le simulateur, elle peut
               tout de même consulter l'aide et la FAQ mise à disposition.
@@ -85,7 +85,7 @@ function Home({ history, location, dispatch }: Props) {
             <span css={styles.blocContentStep}>Étape 2</span>
             <span css={styles.blocContentTitle}>Calcul de l'index</span>
             <p css={styles.blocContentBody}>
-              L’entreprise saisit les données et l’outil Index Egapro calcule
+              L’entreprise saisit les données et Index Egapro calcule
               automatiquement les indicateurs et la note finale.
             </p>
 
@@ -113,7 +113,7 @@ function Home({ history, location, dispatch }: Props) {
             <p css={styles.blocContentBody}>
               Enfin, l’entreprise doit déclarer ses résultats, selon le délai
               imparti, dans l’outil SOLEN. Afin de faciliter la déclaration,
-              l'outil Index Egapro affiche à la fin du calcul une page avec
+              Index Egapro affiche à la fin du calcul une page avec
               toutes les informations à déclarer. L’entreprise peut également
               télécharger son récapitulatif pour le publier sur son site
               internet ou l’envoyer au CSE.
