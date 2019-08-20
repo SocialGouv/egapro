@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.3](https://github.com/SocialGouv/egapro/compare/v1.2.2...v1.2.3) (2019-08-20)
+
+
+### Bug Fixes
+
+* prevent useless effectifs error no step 1 ([ee97163](https://github.com/SocialGouv/egapro/commit/ee97163))
+
+
+
+
+
 ## [1.2.2](https://github.com/SocialGouv/egapro/compare/v1.2.1...v1.2.2) (2019-07-31)
 
 **Note:** Version bump only for package app
