@@ -66,13 +66,12 @@ function Home({ history, location, dispatch }: Props) {
             </span>
             <p css={styles.blocContentBody}>
               Afin de procéder à la simulation, les entreprises doivent extraire
-              des données relatives à leurs salariés. Grâce à Index
-              Egapro, une aide est disponible pour chacun des indicateurs . Si
-              l’entreprise décide de ne pas utiliser le simulateur, elle peut
-              tout de même consulter l'aide et la FAQ mise à disposition.
+              des données relatives à leurs salariés. Grâce à Index Egapro, une
+              aide est disponible pour chacun des indicateurs . Si l’entreprise
+              décide de ne pas utiliser le simulateur, elle peut tout de même
+              consulter l'aide et la FAQ mise à disposition à droite de votre
+              écran.
             </p>
-
-            <span css={styles.blocContentInfo}>Consultez l'aide ici ! →</span>
           </div>
         </div>
 
@@ -113,10 +112,10 @@ function Home({ history, location, dispatch }: Props) {
             <p css={styles.blocContentBody}>
               Enfin, l’entreprise doit déclarer ses résultats, selon le délai
               imparti, dans l’outil SOLEN. Afin de faciliter la déclaration,
-              Index Egapro affiche à la fin du calcul une page avec
-              toutes les informations à déclarer. L’entreprise peut également
-              télécharger son récapitulatif pour le publier sur son site
-              internet ou l’envoyer au CSE.
+              Index Egapro affiche à la fin du calcul une page avec toutes les
+              informations à déclarer. L’entreprise peut également télécharger
+              son récapitulatif pour le publier sur son site internet ou
+              l’envoyer au CSE.
             </p>
 
             <a
