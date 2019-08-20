@@ -50,7 +50,7 @@ function MobileHome({ openMenu }: Props) {
       <div css={styles.info}>
         <p css={[styles.para, styles.noMargin]}>
           Le calcul de l'index n'est pas disponible sur smartphone. Mais vous
-          pouvez accéder à toute l'aide en ligne et à la FAQ en cliquant ici :
+          pouvez accéder à toute l'aide en ligne et à la FAQ.
         </p>
       </div>
 
