@@ -37,24 +37,23 @@ const styles = {
     padding: "12px 18px",
     display: "flex",
     alignItems: "center",
-    backgroundColor: globalStyles.colors.primary,
+    border: `2px solid ${globalStyles.colors.primary}`,
     borderRadius: 5
   }),
   blocTitle: css({
     fontSize: 18,
     lineHeight: "22px",
-    textTransform: "uppercase",
-    color: "white"
+    color: globalStyles.colors.primary
   }),
   blocIcon: {
     marginRight: 22,
-    color: "white"
+    color: globalStyles.colors.primary
   },
   blocText: css({
     marginTop: 4,
     fontSize: 14,
     lineHeight: "17px",
-    color: "white"
+    color: globalStyles.colors.primary
   })
 };
 

@@ -114,6 +114,7 @@ function Effectif({ state, dispatch }: Props) {
         )}
 
       {state.effectif.formValidated === "Valid" &&
+        state.indicateurUn.formValidated === "Valid" &&
         (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
           totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
           <InfoBloc
