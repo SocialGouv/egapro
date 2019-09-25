@@ -14,20 +14,31 @@ ajouter le fichier `.env` à la racine du projet
 cp .env.sample .env
 ```
 
-lancer le projet:
-
-```bash
-yarn start
-```
-
-## Lancer en local
-
-### avec docker
+## Lancer le projet en local avec docker
 
 ```bash
 docker-compose up --build
 ```
 
+Une fois que le message `egapro_init-kinto_1 exited with code 0` est affiché dans le terminal, le site est accessible sur http://localhost:8080.
+
+## Lancer le projet en local sans docker
+
+Il faut pour cela avoir au préalable installé toutes les dépendances :
+
+- l'[API](./packages/api)
+- [kinto](https://kinto.readthedocs.io)
+- une base de donnée postgresql
+- memcache
+- [init](./packages/kinto) de kinto
+
+Ensuite pour démarrer le frontend :
+
+```bash
+yarn start
+```
+
+Et le site est accessible sur http://localhost:9000
 
 ## End Points
 
