@@ -1,6 +1,13 @@
 const origin = process.env.REACT_APP_API_URL
-  ? `${process.env.REACT_APP_API_URL}/api`
-  : "/api";
+  // When deploying using docker, use the API_URL env variable to proxy to the
+  // egapro-api image. See the server.js file for the proxy configuration.
+  ? "/api"
+  // If this REACT_APP_API_URL env variable isn't present, we're in local
+  // development, so no proxy.
+  : "http://localhost:4000/api";
+
+console.log("[frontend] REACT_APP_API_URL", process.env.REACT_APP_API_URL);
+console.log("[frontend] API ORIGIN", origin);
 
 const commonHeaders = {
   Accept: "application/json"
@@ -49,7 +56,9 @@ function fetchResource(method, pathname, body) {
     body: body ? JSON.stringify(body) : undefined
   };
 
-  return fetch(origin + pathname, requestObj).then(checkStatusAndParseJson);
+  const url = origin + pathname;
+  console.log("[frontend] fetching resource", url);
+  return fetch(url, requestObj).then(checkStatusAndParseJson);
 }
 
 const getResource = pathname => fetchResource("GET", pathname);

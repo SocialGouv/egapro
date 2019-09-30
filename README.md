@@ -6,15 +6,18 @@
 
 > Calcul de l'indexe d'égalité homme / femme dans les entreprises
 
-## Environnement de développement
+## Lancer le projet avec docker
 
-ajouter le fichier `.env` à la racine du projet
+Ajouter le fichier `.env` à la racine du projet:
 
 ```bash
 cp .env.sample .env
 ```
 
-## Lancer le projet en local avec docker
+Y modifier les variables d'environnement nécessaires, comme par exemple les
+accès au serveur kinto, au serveur de mail...
+
+Puis lancer les conteneurs:
 
 ```bash
 docker-compose up --build
@@ -22,15 +25,17 @@ docker-compose up --build
 
 Une fois que le message `egapro_init-kinto_1 exited with code 0` est affiché dans le terminal, le site est accessible sur http://localhost:8080.
 
-## Lancer le projet en local sans docker
+## Contribuer au projet
 
-Il faut pour cela avoir au préalable installé toutes les dépendances :
+Pour contribuer au projet et avoir de l'auto-reload de
+l'[application](./packages/app) et de l'[API](./packages/api) lors d'un
+changement de fichier, ils ne sont pas lancés via docker, mais directement
+avec `yarn`. [Kinto](https://kinto.readthedocs.io), la base de donnée et
+memcache sont eux toujours lancés (automatiquement) via docker:
 
-- l'[API](./packages/api)
-- [kinto](https://kinto.readthedocs.io)
-- une base de donnée postgresql
-- memcache
-- [init](./packages/kinto) de kinto
+```bash
+yarn install
+```
 
 Ensuite pour démarrer le frontend :
 
@@ -38,17 +43,17 @@ Ensuite pour démarrer le frontend :
 yarn start
 ```
 
-Et le site est accessible sur http://localhost:9000
+Et le site est accessible sur http://localhost:3000
 
 ## End Points
 
-Action  |API                                | body                         |Réponse                        |
---------|-----------------------------------|------------------------------|-------------------------------|
-GET     |`api/version`                      |                              | `{ version: string }`         |
-POST    |`api/indicators-datas`             | `{ }`                        | `{id: string}`                |
-PUT     |`api/indicators-datas/{id}`        | `{ id: string, data: string}`| `{id: string, data: string}`  |
-GET     |`api/indicators-datas/{id}`        |                              | `{id: string, data: string}`  |
-POST    |`api/indicators-datas/{id}/emails` | `{ email: string }`          | `status` = `200` ou `400`     |
+| Action | API                                | body                          | Réponse                      |
+| ------ | ---------------------------------- | ----------------------------- | ---------------------------- |
+| GET    | `api/version`                      |                               | `{ version: string }`        |
+| POST   | `api/indicators-datas`             | `{ }`                         | `{id: string}`               |
+| PUT    | `api/indicators-datas/{id}`        | `{ id: string, data: string}` | `{id: string, data: string}` |
+| GET    | `api/indicators-datas/{id}`        |                               | `{id: string, data: string}` |
+| POST   | `api/indicators-datas/{id}/emails` | `{ email: string }`           | `status` = `200` ou `400`    |
 
 ## Release policy
 
