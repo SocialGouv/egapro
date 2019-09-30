@@ -2,6 +2,10 @@ ARG NODE_VERSION=10.15.3
 
 FROM node:${NODE_VERSION} as builder
 
+
+ARG REACT_APP_API_URL=http://egapro-api:4000
+ENV REACT_APP_API_URL="${REACT_APP_API_URL}"
+
 WORKDIR /app
 
 COPY packages/app .

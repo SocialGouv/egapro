@@ -14,7 +14,7 @@ spec:
       - image: ${EGAPRO_REGISTRY}/kinto:${IMAGE_TAG}
         name: egapro-init-kinto
         env:
-        - name: KINTO_BASE_URL
+        - name: KINTO_SERVER
           value: "kinto${HASH_BRANCH_NAME}"
         - name: KINTO_LOGIN
           valueFrom:

@@ -1,6 +1,10 @@
 const origin = process.env.REACT_APP_API_URL
-  ? `${process.env.REACT_APP_API_URL}/api`
-  : "/api";
+  // When deploying using docker, use the API_URL env variable to proxy to the
+  // egapro-api image. See the server.js file for the proxy configuration.
+  ? "/api"
+  // If this REACT_APP_API_URL env variable isn't present, we're in local
+  // development, so no proxy.
+  : "http://localhost:4000/api";
 
 const commonHeaders = {
   Accept: "application/json"

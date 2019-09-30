@@ -40,7 +40,7 @@ export const getConfiguration = (env: typeof process.env) => ({
   kintoBucket: asString(env, "KINTO_BUCKET", "egapro"),
   kintoLogin: asString(env, "KINTO_LOGIN", "admin"),
   kintoPassword: asString(env, "KINTO_PASSWORD", "passw0rd"),
-  kintoURL: asString(env, "KINTO_URL", "http://localhost:8888/v1"),
+  kintoURL: `http://${asString(env, "KINTO_SERVER", "localhost")}:8888/v1`,
 
   mailFrom: asString(
     env,

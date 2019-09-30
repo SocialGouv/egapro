@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 
-export KINTO_URL=http://$KINTO_BASE_URL:8888/v1
+export KINTO_URL=http://$KINTO_SERVER:8888/v1
 
 # Wait for kinto-server to be up
-while ! nc -z $KINTO_BASE_URL 8888;
+while ! nc -z $KINTO_SERVER 8888;
         do
           echo sleeping;
           sleep 1;

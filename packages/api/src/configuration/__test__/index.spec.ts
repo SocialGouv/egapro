@@ -9,7 +9,7 @@ const validEnv = {
   KINTO_BUCKET: "KINTO_BUCKET",
   KINTO_LOGIN: "KINTO_LOGIN",
   KINTO_PASSWORD: "KINTO_PASSWORD",
-  KINTO_URL: "KINTO_URL",
+  KINTO_SERVER: "KINTO_SERVER",
   MAIL_FROM: "MAIL_FROM",
   MAIL_HOST: "MAIL_HOST",
   MAIL_PASSWORD: "MAIL_PASSWORD",
@@ -19,8 +19,7 @@ const validEnv = {
 };
 
 it("should return the env configuration", () => {
-  const env = { ...validEnv };
-  expect(getConfiguration(env)).toMatchInlineSnapshot(`
+  expect(getConfiguration(validEnv)).toMatchInlineSnapshot(`
     Object {
       "apiPort": 123456,
       "apiSentryDSN": "API_SENTRY_DSN",
@@ -28,7 +27,7 @@ it("should return the env configuration", () => {
       "kintoBucket": "KINTO_BUCKET",
       "kintoLogin": "KINTO_LOGIN",
       "kintoPassword": "KINTO_PASSWORD",
-      "kintoURL": "KINTO_URL",
+      "kintoURL": "http://KINTO_SERVER:8888/v1",
       "mailFrom": "MAIL_FROM",
       "mailHost": "MAIL_HOST",
       "mailPassword": "MAIL_PASSWORD",

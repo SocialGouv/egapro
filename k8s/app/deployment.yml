@@ -34,5 +34,5 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 5
           env:
-            - name: API_URL
+            - name: REACT_APP_API_URL
               value: "http://${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr"
