@@ -4,8 +4,6 @@ import { getConfiguration } from "../configs";
 
 const validEnv = {
   API_PORT: "123456",
-  API_SENTRY_DSN: "API_SENTRY_DSN",
-  API_SENTRY_ENABLED: "true",
   KINTO_BUCKET: "KINTO_BUCKET",
   KINTO_LOGIN: "KINTO_LOGIN",
   KINTO_PASSWORD: "KINTO_PASSWORD",
@@ -22,8 +20,6 @@ it("should return the env configuration", () => {
   expect(getConfiguration(validEnv)).toMatchInlineSnapshot(`
     Object {
       "apiPort": 123456,
-      "apiSentryDSN": "API_SENTRY_DSN",
-      "apiSentryEnabled": true,
       "kintoBucket": "KINTO_BUCKET",
       "kintoLogin": "KINTO_LOGIN",
       "kintoPassword": "KINTO_PASSWORD",

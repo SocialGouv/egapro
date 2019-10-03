@@ -59,11 +59,6 @@ spec:
                 secretKeyRef:
                   name: egapro-secret
                   key: MAIL_PASSWORD
-            - name: API_SENTRY_ENABLED
-              valueFrom:
-                secretKeyRef:
-                  name: egapro-secret
-                  key: API_SENTRY_ENABLED
             - name: API_SENTRY_DSN
               valueFrom:
                 secretKeyRef:

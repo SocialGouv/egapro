@@ -1,70 +1,50 @@
-// @ts-ignore
-global.console = {
-  log: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn()
-};
-
-const someDate = new Date("2019-10-01 23:18:02");
-// @ts-ignore
-global.Date = class extends Date {
-  constructor() {
-    // @ts-ignore
-    return super(someDate);
-  }
-};
+const now = 1570137016663;
 
 describe("test the output of the logger", () => {
-  const OLD_ENV = process.env;
+  let mockStdout: jest.SpyInstance;
+  let logger: any;
 
   beforeEach(() => {
-    jest.resetModules(); // this is important - it clears the cache
-    process.env = { ...OLD_ENV };
+    // Mock stdout so we can check it's been called by the logger.
+    mockStdout = jest.spyOn(global.process.stdout, "write");
+    // jest.spyOn will still call the underlying function. We don't want logs to
+    // be displayed during the tests.
+    mockStdout.mockImplementation(() => {});
+    // Mock `Date.now()` so we have a comparable timestamp.
+    global.Date.now = jest.fn(() => now);
+    // Only now require the logger module so it uses the mocks.
+    logger = require("./").logger;
   });
 
   afterEach(() => {
-    process.env = OLD_ENV;
+    jest.restoreAllMocks();
   });
 
   test("info uses console.log", () => {
-    const logger = require("./").logger;
     logger.info("just an info");
-    // @ts-ignore
+    expect(mockStdout).toHaveBeenCalledTimes(1);
     // Grab the latest mock call, and get its first (and only) argument.
-    const latestMockCall = global.console.log.mock.calls.pop()[0];
+    const latestCall = mockStdout.mock.calls.pop();
+    const log = (latestCall && latestCall[0]) || "";
     // Contains the timestamp.
-    expect(latestMockCall).toContain("2019-10-01 23:18:02");
+    expect(log).toContain(now);
     // Contains the message.
-    expect(latestMockCall).toContain("just an info");
+    expect(log).toContain("just an info");
   });
   test("error uses console.log and includes the stack trace", () => {
-    const logger = require("./").logger;
     const error = new Error("this is an error");
     logger.error("just an error", error);
-    // @ts-ignore
+    expect(mockStdout).toHaveBeenCalledTimes(1);
     // Grab the latest mock call, and get its first (and only) argument.
-    const latestMockCall = global.console.log.mock.calls.pop()[0];
+    const latestCall = mockStdout.mock.calls.pop();
+    const log = (latestCall && latestCall[0]) || "";
     // Contains the timestamp.
-    expect(latestMockCall).toContain("2019-10-01 23:18:02");
+    expect(log).toContain(now);
     // Contains the message.
-    expect(latestMockCall).toContain("just an error");
+    expect(log).toContain("just an error");
     // Contains the error.
-    expect(latestMockCall).toContain("this is an error");
+    expect(log).toContain("this is an error");
     // ... and contains the stack trace.
-    expect(latestMockCall).toContain(error.stack);
-  });
-  test("error sends a call to sentry if it's enabled", () => {
-    // Fake the enabling of sentry.
-    process.env.API_SENTRY_ENABLED = "true";
-    // Mock raven.captureException.
-    const raven = require("raven");
-    raven.captureException = jest.fn();
-    // Log an error.
-    const logger = require("./").logger;
-    const error = new Error("this is an error");
-    logger.error("just an error", error);
-    // Make sure the error was sent to sentry.
-    expect(raven.captureException).toHaveBeenCalledWith(error);
+    expect(log).toContain(JSON.stringify(error.stack));
   });
 });
