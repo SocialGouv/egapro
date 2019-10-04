@@ -64,6 +64,5 @@ spec:
                 secretKeyRef:
                   name: egapro-secret
                   key: API_SENTRY_DSN
-            # Used as the default value for `--environment` by pino-sentry.
-            # - name: SENTRY_ENVIRONMENT
-            #   value: "development"
+            - name: API_SENTRY_ENVIRONMENT
+              value: "development"

@@ -36,6 +36,8 @@ const asBoolean = (
 
 export const getConfiguration = (env: typeof process.env) => ({
   apiPort: asNumber(env, "API_PORT", 4000),
+  apiSentryDsn: asString(env, "API_SENTRY_DSN", ""),
+  apiSentryEnvironment: asString(env, "API_SENTRY_ENVIRONMENT", "development"),
 
   kintoBucket: asString(env, "KINTO_BUCKET", "egapro"),
   kintoLogin: asString(env, "KINTO_LOGIN", "admin"),
