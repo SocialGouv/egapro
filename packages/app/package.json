@@ -9,7 +9,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@emotion/core": "10.0.14",
+    "@emotion/core": "10.0.20",
     "@types/react-text-mask": "5.4.6",
     "deepmerge": "4.0.0",
     "express": "4.17.1",
