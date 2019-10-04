@@ -18,4 +18,4 @@ COPY --from=builder /app/package.json /app/package.json
 
 # Display all the logs in the console AND pipe them to pino-sentry which is the
 # sentry transport for the pino logger.
-CMD ["bash", "-c", "node dist/server.js | tee >(yarn run pino-sentry --dsn=$API_SENTRY_DSN)"]
+CMD ["bash", "-c", "node dist/server.js | yarn run pino-sentry --dsn=$API_SENTRY_DSN --debug=true"]
