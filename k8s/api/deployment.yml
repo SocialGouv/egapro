@@ -24,8 +24,8 @@ spec:
           env:
             - name: API_PORT
               value: "${PORT}"
-            - name: KINTO_URL
-              value: "http://kinto${HASH_BRANCH_NAME}:8888/v1"
+            - name: KINTO_SERVER
+              value: "kinto${HASH_BRANCH_NAME}"
             - name: KINTO_BUCKET
               value: "egapro"
             - name: KINTO_LOGIN
