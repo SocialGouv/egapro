@@ -15,7 +15,7 @@
     "@koa/cors": "3.0.0",
     "@types/btoa": "1.2.3",
     "btoa": "1.2.1",
-    "dotenv": "8.0.0",
+    "dotenv": "8.1.0",
     "koa": "2.7.0",
     "koa-bodyparser": "4.2.1",
     "koa-router": "7.4.0",
