@@ -11,9 +11,6 @@
   "devDependencies": {
     "lerna": "3.16.4"
   },
-  "resolutions": {
-    "jest": "24.7.1"
-  },
   "workspaces": [
     "packages/*"
   ],
