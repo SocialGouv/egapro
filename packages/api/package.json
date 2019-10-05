@@ -38,7 +38,7 @@
     "@types/nodemailer": "6.2.1",
     "@types/raven": "2.5.3",
     "jest": "24.7.1",
-    "nodemon": "1.19.1",
+    "nodemon": "1.19.3",
     "prettier": "1.18.2",
     "ts-jest": "24.1.0",
     "ts-node": "8.3.0",
