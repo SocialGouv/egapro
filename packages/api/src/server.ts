@@ -13,6 +13,7 @@ app.use(cors());
 app.use(router.routes());
 app.use(router.allowedMethods());
 
+logger.error("test d'erreur", new Error("just a test error"));
 app.on("error", (err: Error, ctx: Koa.Context) => {
   logger.error(`url: ${ctx.originalUrl}: `, err);
 });

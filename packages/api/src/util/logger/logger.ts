@@ -3,6 +3,7 @@ import { captureException, config } from "raven";
 import { createLogger, transports } from "winston";
 import { configuration } from "../../configuration";
 
+process.stdout.write(`apiSentryEnabled: ${configuration.apiSentryEnabled}`);
 if (configuration.apiSentryEnabled) {
   config(configuration.apiSentryDSN).install();
 }
