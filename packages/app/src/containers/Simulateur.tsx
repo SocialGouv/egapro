@@ -10,6 +10,7 @@ import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api";
 import { useDebounceEffect } from "../utils/hooks";
 
 import ActivityIndicator from "../components/ActivityIndicator";
+import ErrorMessage from "../components/ErrorMessage";
 
 import HomeSimulateur from "../views/HomeSimulateur";
 import Effectif from "../views/Effectif";
@@ -41,7 +42,8 @@ function Simulateur({ code, state, dispatch }: Props) {
       .catch(error => {
         setLoading(false);
         const errorMessage =
-          (error.jsonBody && error.jsonBody.message) || "Erreur";
+          (error.jsonBody && error.jsonBody.message) ||
+          "Erreur lors de la récupération des données";
         setErrorMessage(errorMessage);
       });
   }, [code, dispatch]);
@@ -51,18 +53,20 @@ function Simulateur({ code, state, dispatch }: Props) {
     2000,
     debouncedState => {
       if (debouncedState) {
-        putIndicatorsDatas(code, debouncedState);
+        putIndicatorsDatas(code, debouncedState).catch(error => {
+          setLoading(false);
+          const errorMessage =
+            (error.jsonBody && error.jsonBody.message) ||
+            "Erreur lors de la sauvegarde des données";
+          setErrorMessage(errorMessage);
+        });
       }
     },
     [code]
   );
 
   if (!loading && errorMessage) {
-    return (
-      <div css={styles.viewLoading}>
-        <p>{errorMessage}</p>
-      </div>
-    );
+    return ErrorMessage(errorMessage);
   }
 
   if (loading || !state) {
