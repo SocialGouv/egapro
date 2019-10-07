@@ -64,6 +64,7 @@ interface Props {
   indicateurUnFormValidated: FormState;
   indicateurDeuxFormValidated: FormState;
   indicateurTroisFormValidated: FormState;
+  indicateurDeuxTroisFormValidated: FormState;
   indicateurQuatreFormValidated: FormState;
   indicateurCinqFormValidated: FormState;
 }
@@ -72,6 +73,7 @@ function Menu({
   effectifFormValidated,
   indicateurUnFormValidated,
   indicateurDeuxFormValidated,
+  indicateurDeuxTroisFormValidated,
   indicateurTroisFormValidated,
   indicateurQuatreFormValidated,
   indicateurCinqFormValidated
@@ -125,6 +127,12 @@ function Menu({
                 title="indicateur"
                 label="écart de taux de promotions"
                 valid={indicateurTroisFormValidated}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/indicateur2et3`}
+                title="indicateur"
+                label="écart de taux d'augmentations et de promotions"
+                valid={indicateurDeuxTroisFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur4`}

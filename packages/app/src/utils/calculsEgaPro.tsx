@@ -38,6 +38,7 @@ export const calculEcartsPonderesParGroupe = (
     ecartApresApplicationSeuilPertinence?: number | undefined;
     ecartTauxAugmentation?: number | undefined;
     ecartTauxPromotion?: number | undefined;
+    ecartTauxAugmentationPromotion?: number | undefined;
   }) => number | undefined
 ) => (
   groupEffectifEtEcart: Array<{
@@ -46,6 +47,7 @@ export const calculEcartsPonderesParGroupe = (
     ecartApresApplicationSeuilPertinence?: number | undefined;
     ecartTauxAugmentation?: number | undefined;
     ecartTauxPromotion?: number | undefined;
+    ecartTauxAugmentationPromotion?: number | undefined;
   }>,
   totalEffectifsValides: number
 ) =>

@@ -61,6 +61,15 @@ const dataIndicateurTrois = mapEnum(
   })
 );
 
+const dataIndicateurDeuxTrois = mapEnum(
+  CategorieSocioPro,
+  (categorieSocioPro: CategorieSocioPro) => ({
+    categorieSocioPro,
+    tauxAugmentationPromotionFemmes: undefined,
+    tauxAugmentationPromotionHommes: undefined
+  })
+);
+
 const defaultState: AppState = {
   effectif: {
     formValidated: "None",
@@ -83,6 +92,11 @@ const defaultState: AppState = {
     formValidated: "None",
     presencePromotion: true,
     tauxPromotion: dataIndicateurTrois
+  },
+  indicateurDeuxTrois: {
+    formValidated: "None",
+    presenceAugmentationPromotion: true,
+    tauxAugmentationPromotion: dataIndicateurDeuxTrois
   },
   indicateurQuatre: {
     formValidated: "None",
@@ -137,7 +151,11 @@ function AppReducer(
           indicateurTrois:
             state.indicateurTrois.formValidated === "Valid"
               ? { ...state.indicateurTrois, formValidated: "Invalid" }
-              : state.indicateurTrois
+              : state.indicateurTrois,
+          indicateurDeuxTrois:
+            state.indicateurTrois.formValidated === "Valid"
+              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
+              : state.indicateurDeuxTrois
         };
       }
       return {
@@ -265,8 +283,31 @@ function AppReducer(
     case "validateIndicateurTrois": {
       return {
         ...state,
-        indicateurTrois: {
-          ...state.indicateurTrois,
+        indicateurDeuxTrois: {
+          ...state.indicateurDeuxTrois,
+          formValidated: action.valid
+        }
+      };
+    }
+    case "updateIndicateurDeuxTrois": {
+      const {
+        tauxAugmentationPromotion,
+        presenceAugmentationPromotion
+      } = action.data;
+      return {
+        ...state,
+        indicateurDeuxTrois: {
+          ...state.indicateurDeuxTrois,
+          presenceAugmentationPromotion,
+          tauxAugmentationPromotion
+        }
+      };
+    }
+    case "validateIndicateurDeuxTrois": {
+      return {
+        ...state,
+        indicateurDeuxTrois: {
+          ...state.indicateurDeuxTrois,
           formValidated: action.valid
         }
       };

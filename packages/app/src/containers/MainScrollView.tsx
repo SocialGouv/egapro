@@ -31,6 +31,9 @@ function MainScrollView({ children, state, location }: Props) {
       indicateurTroisFormValidated={
         state ? state.indicateurTrois.formValidated : "None"
       }
+      indicateurDeuxTroisFormValidated={
+        state ? state.indicateurDeuxTrois.formValidated : "None"
+      }
       indicateurQuatreFormValidated={
         state ? state.indicateurQuatre.formValidated : "None"
       }

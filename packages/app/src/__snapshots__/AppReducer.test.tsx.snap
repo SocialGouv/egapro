@@ -144,6 +144,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": 7,
@@ -460,6 +486,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
     "nombreSalarieesAugmentees": 7,
@@ -467,7 +519,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -776,6 +828,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -1057,6 +1135,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -1376,6 +1480,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -1657,6 +1787,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -1976,6 +2132,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -2257,6 +2439,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 10.05,
         "tauxAugmentationHommes": 10.06,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -2576,6 +2784,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -2857,6 +3091,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -3176,6 +3436,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": 5,
@@ -3457,6 +3743,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -3776,6 +4088,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -4057,6 +4395,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -4373,6 +4737,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": undefined,
         "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -4694,6 +5084,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": 7,
@@ -5007,6 +5423,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": undefined,
         "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -5328,6 +5770,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": 7,
@@ -5641,6 +6109,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": undefined,
         "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -5959,6 +6453,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -6311,6 +6831,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -6629,6 +7175,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": 7,
@@ -6908,6 +7480,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": undefined,
         "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -7192,6 +7790,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -7511,6 +8135,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -7792,6 +8442,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -8111,6 +8787,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -8395,6 +9097,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
     "nombreSalarieesAugmentees": 7,
@@ -8402,7 +9130,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "Invalid",
+    "formValidated": "None",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -8711,6 +9439,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
     "nombreSalarieesAugmentees": 7,
@@ -8718,7 +9472,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -9027,6 +9781,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
     "nombreSalarieesAugmentees": 7,
@@ -9034,7 +9814,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "Invalid",
+    "formValidated": "None",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -9340,6 +10120,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -9659,6 +10465,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -9940,6 +10772,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -10259,6 +11117,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -10540,6 +11424,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -10859,6 +11769,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -11140,6 +12076,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -11459,6 +12421,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
     "nombreSalarieesAugmentees": undefined,
@@ -11743,6 +12731,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": 7,
@@ -11750,7 +12764,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -12059,6 +13073,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -12066,7 +13106,7 @@ Object {
     "presenceCongeMat": true,
   },
   "indicateurTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "presencePromotion": true,
     "tauxPromotion": Array [
       Object {
@@ -12340,6 +13380,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -12659,6 +13725,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -12943,6 +14035,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
     "nombreSalarieesAugmentees": 7,
@@ -12950,7 +14068,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -13256,6 +14374,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -13575,6 +14719,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "None",
     "nombreSalarieesAugmentees": undefined,
@@ -13859,6 +15029,32 @@ Object {
       },
     ],
   },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "Valid",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+    ],
+  },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
     "nombreSalarieesAugmentees": 7,
@@ -13866,7 +15062,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -14172,6 +15368,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": 12.15,
         "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },
@@ -14488,6 +15710,32 @@ Object {
         "categorieSocioPro": 3,
         "tauxAugmentationFemmes": undefined,
         "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "presenceAugmentationPromotion": true,
+    "tauxAugmentationPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationPromotionFemmes": undefined,
+        "tauxAugmentationPromotionHommes": undefined,
       },
     ],
   },

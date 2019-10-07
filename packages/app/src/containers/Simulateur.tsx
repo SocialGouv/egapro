@@ -17,6 +17,7 @@ import Effectif from "../views/Effectif";
 import IndicateurUn from "../views/Indicateur1";
 import IndicateurDeux from "../views/Indicateur2";
 import IndicateurTrois from "../views/Indicateur3";
+import IndicateurDeuxTrois from "../views/Indicateur2et3";
 import IndicateurQuatre from "../views/Indicateur4";
 import IndicateurCinq from "../views/Indicateur5";
 import Recapitulatif from "../views/Recapitulatif";
@@ -106,6 +107,12 @@ function Simulateur({ code, state, dispatch }: Props) {
         path="/simulateur/:code/indicateur3"
         render={props => (
           <IndicateurTrois {...props} state={state} dispatch={dispatch} />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/indicateur2et3"
+        render={props => (
+          <IndicateurDeuxTrois {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
