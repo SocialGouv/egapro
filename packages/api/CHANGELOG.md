@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# (to be released)
+
+
+### Features
+
+* **logger:** change logging strategy: switch from [winston](https://github.com/winstonjs/winston) and [raven](https://www.npmjs.com/package/raven) to [pino](http://getpino.io/) and [sentry](https://www.npmjs.com/package/@sentry/node). See [PR #116](https://github.com/SocialGouv/egapro/pull/116)
+
+
+
+
+
 # [1.2.0](https://github.com/SocialGouv/egapro/compare/v1.1.0...v1.2.0) (2019-07-16)
 
 

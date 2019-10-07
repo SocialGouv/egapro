@@ -5,9 +5,9 @@ import ReactDOM from "react-dom";
 
 // Context
 
-export const ModalContext = createContext({
-  container: null
-});
+const defaultValue: { container: null | Element } = { container: null };
+
+export const ModalContext = createContext(defaultValue);
 
 // Provider
 
