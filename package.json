@@ -9,7 +9,7 @@
     "coverage": "lerna run test --parallel -- --coverage"
   },
   "devDependencies": {
-    "lerna": "3.15.0"
+    "lerna": "3.16.4"
   },
   "resolutions": {
     "jest": "24.7.1"
