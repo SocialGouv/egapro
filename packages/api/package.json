@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@koa/cors": "3.0.0",
+    "@sentry/node": "5.6.2",
     "@types/btoa": "1.2.3",
     "btoa": "1.2.1",
     "dotenv": "8.1.0",
@@ -21,10 +22,10 @@
     "koa-router": "7.4.0",
     "node-fetch": "2.6.0",
     "nodemailer": "6.3.0",
-    "raven": "2.6.4",
-    "winston": "3.2.1"
+    "pino": "5.13.4"
   },
   "devDependencies": {
+    "@sentry/types": "5.6.1",
     "@socialgouv/tslint-config-recommended": "0.10.0",
     "@types/btoa": "1.2.3",
     "@types/dotenv": "6.1.1",
@@ -36,7 +37,7 @@
     "@types/node": "12.7.11",
     "@types/node-fetch": "2.5.2",
     "@types/nodemailer": "6.2.1",
-    "@types/raven": "2.5.3",
+    "@types/pino": "^5.8.10",
     "jest": "24.9.0",
     "nodemon": "1.19.3",
     "prettier": "1.18.2",
