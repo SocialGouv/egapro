@@ -79,7 +79,7 @@ function IndicateurUn({ state, dispatch }: Props) {
 function PageIndicateurUn({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur 1, écart de rémunération"
+      title="Indicateur écart de rémunération"
       tagline={[
         "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE ) et par tranche d’âge."
       ]}

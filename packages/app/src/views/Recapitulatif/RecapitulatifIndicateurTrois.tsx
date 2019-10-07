@@ -43,7 +43,7 @@ function RecapitulatifIndicateurTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 3, écart de taux de promotions entre les femmes et les hommes"
+          title="Indicateur écart de taux de promotions entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
         />
       </div>
@@ -54,7 +54,7 @@ function RecapitulatifIndicateurTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 3, écart de taux de promotions entre les femmes et les hommes"
+          title="Indicateur écart de taux de promotions entre les femmes et les hommes"
           text={
             <Fragment>
               <span>
@@ -76,7 +76,7 @@ function RecapitulatifIndicateurTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 3, écart de taux de promotions entre les femmes et les hommes"
+          title="Indicateur écart de taux de promotions entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu de promotion durant la période de référence"
         />
       </div>
@@ -86,7 +86,7 @@ function RecapitulatifIndicateurTrois({
   return (
     <div css={styles.container}>
       <RecapBloc
-        title="Indicateur 3, écart de taux de promotions entre les femmes et les hommes"
+        title="Indicateur écart de taux de promotions entre les femmes et les hommes"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:

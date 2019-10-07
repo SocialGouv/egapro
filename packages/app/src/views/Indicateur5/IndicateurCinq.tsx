@@ -72,7 +72,7 @@ function IndicateurCinq({ state, dispatch }: Props) {
 function PageIndicateurCinq({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur 5, nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
+      title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
       tagline="Renseignez le nombre de femmes et d'hommes parmi les 10 plus hautes rémunérations durant la période de référence."
     >
       {children}

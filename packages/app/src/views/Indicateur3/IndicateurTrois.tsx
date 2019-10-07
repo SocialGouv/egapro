@@ -144,7 +144,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
 function PageIndicateurTrois({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur 3, écart de taux de promotions"
+      title="Indicateur écart de taux de promotions"
       tagline="Le pourcentage de femmes et d’hommes ayant été promus durant la période de référence, doit être renseigné par CSP."
     >
       {children}

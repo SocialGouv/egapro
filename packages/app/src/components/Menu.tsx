@@ -110,31 +110,31 @@ function Menu({
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur1`}
-                title="indicateur 1"
+                title="indicateur"
                 label="écart de rémunérations"
                 valid={indicateurUnFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur2`}
-                title="indicateur 2"
+                title="indicateur"
                 label="écart de taux d'augmentations"
                 valid={indicateurDeuxFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur3`}
-                title="indicateur 3"
+                title="indicateur"
                 label="écart de taux de promotions"
                 valid={indicateurTroisFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur4`}
-                title="indicateur 4"
+                title="indicateur"
                 label="retour congé maternité"
                 valid={indicateurQuatreFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur5`}
-                title="indicateur 5"
+                title="indicateur"
                 label="hautes rémunérations"
                 valid={indicateurCinqFormValidated}
               />
