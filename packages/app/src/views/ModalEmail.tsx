@@ -1,12 +1,13 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useState, Fragment } from "react";
+import { useState, Fragment, ReactNode } from "react";
 import { Form, useField } from "react-final-form";
 
 import { sendEmailIndicatorsDatas } from "../utils/api";
 import { required, validateEmail } from "../utils/formHelpers";
 
 import Input, { hasFieldError } from "../components/Input";
+import ErrorMessage from "../components/ErrorMessage";
 import FormSubmit from "../components/FormSubmit";
 import ActionBar from "../components/ActionBar";
 import ActionLink from "../components/ActionLink";
@@ -31,29 +32,41 @@ interface Props {
 
 function ModalEmail({ closeModal, code }: Props) {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(undefined);
 
   const onSubmit = (formData: any) => {
     setLoading(true);
-    sendEmailIndicatorsDatas(code, formData.email).then(() => {
-      setLoading(false);
-      closeModal();
-    });
+    sendEmailIndicatorsDatas(code, formData.email)
+      .then(() => {
+        setLoading(false);
+        closeModal();
+      })
+      .catch(error => {
+        setLoading(false);
+        const errorMessage =
+          (error.jsonBody && error.jsonBody.message) ||
+          "Erreur lors de l'envoi de l'email";
+        setErrorMessage(errorMessage);
+      });
   };
 
+  if (!loading && errorMessage) {
+    return (
+      <ModalContainer closeModal={closeModal}>
+        {ErrorMessage(errorMessage)}
+      </ModalContainer>
+    );
+  }
+
   return (
-    <div css={styles.container}>
-      <div css={styles.image} />
-      <div css={styles.icon} onClick={closeModal}>
-        <IconClose />
-      </div>
+    <ModalContainer closeModal={closeModal}>
       <p css={styles.title}>
-        Revenez sur vos données à tout moment. Renseignez votre
-        e-mail.
+        Revenez sur vos données à tout moment. Renseignez votre e-mail.
       </p>
       <p css={styles.text}>
-        Nous générons un code spécialement pour vous. Pour pouvoir
-        réaccéder à tout moment à votre calcul, renseignez votre e-mail afin
-        que nous puissions vous envoyer votre lien.
+        Nous générons un code spécialement pour vous. Pour pouvoir réaccéder à
+        tout moment à votre calcul, renseignez votre e-mail afin que nous
+        puissions vous envoyer votre lien.
       </p>
 
       <Form onSubmit={onSubmit}>
@@ -74,6 +87,23 @@ function ModalEmail({ closeModal, code }: Props) {
           </form>
         )}
       </Form>
+    </ModalContainer>
+  );
+}
+
+interface ModalProps {
+  children: ReactNode;
+  closeModal: () => void;
+}
+
+function ModalContainer({ children, closeModal }: ModalProps) {
+  return (
+    <div css={styles.container}>
+      <div css={styles.image} />
+      <div css={styles.icon} onClick={closeModal}>
+        <IconClose />
+      </div>
+      {children}
     </div>
   );
 }

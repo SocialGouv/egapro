@@ -9,6 +9,7 @@ import { postIndicatorsDatas } from "../utils/api";
 import Page from "../components/Page";
 import ButtonAction from "../components/ButtonAction";
 import Button from "../components/Button";
+import ErrorMessage from "../components/ErrorMessage";
 import globalStyles from "../utils/globalStyles";
 
 interface Props extends RouteComponentProps {
@@ -17,19 +18,32 @@ interface Props extends RouteComponentProps {
 
 function Home({ history, location, dispatch }: Props) {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(undefined);
 
   const onClick = () => {
     setLoading(true);
     dispatch({ type: "resetState" });
 
-    postIndicatorsDatas({}).then(({ jsonBody: { id } }) => {
-      setLoading(false);
-      history.push(`/simulateur/${id}`, {
-        ...(location.state && location.state),
-        openModalEmail: true
+    postIndicatorsDatas({})
+      .then(({ jsonBody: { id } }) => {
+        setLoading(false);
+        history.push(`/simulateur/${id}`, {
+          ...(location.state && location.state),
+          openModalEmail: true
+        });
+      })
+      .catch(error => {
+        setLoading(false);
+        const errorMessage =
+          (error.jsonBody && error.jsonBody.message) ||
+          "Erreur lors de la récupération du code";
+        setErrorMessage(errorMessage);
       });
-    });
   };
+
+  if (!loading && errorMessage) {
+    return ErrorMessage(errorMessage);
+  }
 
   return (
     <Page
