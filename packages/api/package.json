@@ -38,7 +38,7 @@
     "@types/node-fetch": "2.5.2",
     "@types/nodemailer": "6.2.1",
     "@types/pino": "^5.8.10",
-    "jest": "24.7.1",
+    "jest": "24.9.0",
     "nodemon": "1.19.3",
     "prettier": "1.18.2",
     "ts-jest": "24.1.0",
