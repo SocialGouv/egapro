@@ -33,6 +33,13 @@ spec:
               port: ${PORT}
             initialDelaySeconds: 3
             periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
           env:
             - name: REACT_APP_API_URL
               value: "http://${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr"
