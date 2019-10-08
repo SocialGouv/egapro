@@ -260,7 +260,7 @@ export const faqData: FAQPart = {
     ]
   },
   indicateur1: {
-    title: "indicateur 1 - écart de rémunération",
+    title: "indicateur - écart de rémunération",
     qr: [
       {
         question:
@@ -300,7 +300,7 @@ export const faqData: FAQPart = {
         question:
           "Dans quels cas l’employeur doit-il obligatoirement consulter le comité social et économique (CSE) ?",
         reponse: [
-          "La consultation du CSE mentionnée au paragraphe 4.1. des annexes du décret du 8 janvier 2019 est obligatoire si l’employeur choisit une catégorisation par niveau ou coefficient hiérarchique en application de la classification de branche, ou d’une autre méthode de cotation des postes. La consultation du CSE n’est en revanche pas obligatoire dans le cas d’une répartition des salariés par CSP ou s’il choisit de regrouper entre elles une des 4 CSP existantes. Par exemple : le calcul de l’indicateur 1, avec 2 catégories cadres / non cadres (comprenant ouvriers / employés / techniciens-agents de maitrise) est possible sans consultation (avec un seuil de pertinence de 5% et non 2%).",
+          "La consultation du CSE mentionnée au paragraphe 4.1. des annexes du décret du 8 janvier 2019 est obligatoire si l’employeur choisit une catégorisation par niveau ou coefficient hiérarchique en application de la classification de branche, ou d’une autre méthode de cotation des postes. La consultation du CSE n’est en revanche pas obligatoire dans le cas d’une répartition des salariés par CSP ou s’il choisit de regrouper entre elles une des 4 CSP existantes. Par exemple : le calcul de l’indicateur écart de rémunérations, avec 2 catégories cadres / non cadres (comprenant ouvriers / employés / techniciens-agents de maitrise) est possible sans consultation (avec un seuil de pertinence de 5% et non 2%).",
           "Une entreprise ayant déjà informé ses IRP par le passé sur la méthode de cotation des postes devra procéder à une nouvelle consultation dans le cadre du calcul de l’Index."
         ]
       },
@@ -341,8 +341,7 @@ export const faqData: FAQPart = {
     ]
   },
   indicateur2et3: {
-    title:
-      "indicateurs 2 et 3 - écart de taux d’augmentations et de promotions",
+    title: "indicateurs - écart de taux d’augmentations et de promotions",
     qr: [
       {
         question:
@@ -353,22 +352,22 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Pour les indicateurs 2 et 3, est-il possible, comme pour l’indicateur 1, de répartir les salariés par niveau ou coefficient hiérarchique ?",
+          "Pour les indicateurs écart de taux d'augmentations et écart de taux de promotions, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par niveau ou coefficient hiérarchique ?",
         reponse: [
           "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d’une autre méthode de cotation des postes n’est possible que pour le calcul du 1er indicateur relatif à l’écart de rémunération.",
-          "S’agissant des indicateurs 2 et 3, pour les entreprises de plus de 250 salariés, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
+          "S’agissant des indicateurs écart de taux d'augmentations et écart de taux de promotions, pour les entreprises de plus de 250 salariés, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
         ]
       }
     ]
   },
   indicateur2: {
-    title: "indicateur 2 - écart de taux d’augmentations",
+    title: "indicateur - écart de taux d’augmentations",
     qr: [
       {
         question:
           'Les "écarts de taux d’augmentations individuelles" correspondent-ils à des écarts de montants d’augmentations ou à des écarts de nombres de bénéficiaires d’augmentation ?',
         reponse: [
-          "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles. Ainsi, l’indicateur 2° est calculé en comparant le pourcentage de salariés augmentés parmi les hommes à celui de salariées augmentées parmi les femmes pour chacun des quatre groupes de CSP comptant 10 salariés ou plus de l’un et de l’autre sexe. Il en va de même pour l’écart de taux de promotions."
+          "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles. Ainsi, l’indicateur écart de taux d'augmentations est calculé en comparant le pourcentage de salariés augmentés parmi les hommes à celui de salariées augmentées parmi les femmes pour chacun des quatre groupes de CSP comptant 10 salariés ou plus de l’un et de l’autre sexe. Il en va de même pour l’écart de taux de promotions."
         ]
       },
       {
@@ -381,14 +380,14 @@ export const faqData: FAQPart = {
     ]
   },
   indicateur3: {
-    title: "indicateur  3 - écart de taux de promotions",
+    title: "indicateur - écart de taux de promotions",
     qr: [
       {
         question:
           'Pour les "écarts de taux de promotions", quelle est la définition d’une "promotion" au sens du décret ?',
         reponse: [
           "La notion de promotion est définie en annexe du décret comme le passage à un niveau de classification ou coefficient supérieur, dans la classification de branche ou dans le système de cotation choisi par l’entreprise.",
-          "À noter que le passage à un niveau de classification ou coefficient supérieur n’est pas lié au choix retenu pour la répartition des salariés dans les catégories de postes pour le calcul de l’indicateur 1.",
+          "À noter que le passage à un niveau de classification ou coefficient supérieur n’est pas lié au choix retenu pour la répartition des salariés dans les catégories de postes pour le calcul de l’indicateur écart de rémunérations.",
           "Il est conseillé à l’entreprise d’être la plus transparente possible sur la méthode de promotion, afin que les salariés et les représentants élus au CSE puissent identifier clairement la notion de promotion."
         ]
       },
@@ -409,11 +408,11 @@ export const faqData: FAQPart = {
     ]
   },
   indicateur4: {
-    title: "indicateur 4 - congé maternité",
+    title: "indicateur - congé maternité",
     qr: [
       {
         question:
-          "Concernant l’indicateur 4.3, comment interpréter « l’année suivant » le retour de congé maternité ?",
+          "Concernant l’indicateur retour de congé maternité, comment interpréter « l’année suivant » le retour de congé maternité ?",
         reponse: [
           "L’indicateur concerne les salariées qui sont revenues de congé maternité au cours de la période annuelle de référence. Parmi ces salariées, seules sont prises en compte, pour le calcul de l’indicateur, celles ayant eu un congé maternité durant lequel des augmentations salariales (générales ou individuelles) ont eu lieu. Pour elles, comme le prévoit la loi depuis 2006, il faut procéder à une réévaluation de leur rémunération.",
           "Ainsi, si une salariée revient en décembre de congé maternité et que des augmentations ont été versées pendant la période de ce congé, elle devra avoir une augmentation à son retour avant la fin de l’année (si l’année civile est la période de référence).",
@@ -435,16 +434,16 @@ export const faqData: FAQPart = {
           "Oui, les salariées revenues de congé maternité pendant la période de référence et qui ont été absentes plus de 6 mois pendant cette même période, doivent être prises en compte uniquement pour le calcul de l’indicateur"
         ]
       },
-       {
+      {
         question:
-          "En évaluant la période de référence du 1er janvier au 31 décembre 2018, si une salariée revient de congé maternité au 31 août 2018 et qu’elle est augmentée au 1er janvier 2019, alors que ses collègues ont été revalorisés au 1er juillet 2018, celle-ci est-elle considérée comme augmentée ou non au titre de l’indicateur 4?",
+          "En évaluant la période de référence du 1er janvier au 31 décembre 2018, si une salariée revient de congé maternité au 31 août 2018 et qu’elle est augmentée au 1er janvier 2019, alors que ses collègues ont été revalorisés au 1er juillet 2018, celle-ci est-elle considérée comme augmentée ou non au titre de l’indicateur retour congé maternité ?",
         reponse: [
           "Non, elle n’est pas considérée comme augmentée, car le respect de l’obligation est apprécié sur l’année de référence, soit dans cet exemple sur l'année civile 2018."
         ]
       },
       {
         question:
-          "Les augmentations salariales des salariées en congé maternité, accordées durant ce congé (et non au retour de la salariée) sont-elles prises en compte pour le calcul de l’indicateur 4 ?",
+          "Les augmentations salariales des salariées en congé maternité, accordées durant ce congé (et non au retour de la salariée) sont-elles prises en compte pour le calcul de l’indicateur retour congé maternité ?",
         reponse: [
           "Oui. L’indicateur a pour objet de déterminer le pourcentage de salariées ayant bénéficié d’une augmentation à leur retour de congé maternité si des augmentations sont intervenues durant la durée de leur congé maternité. Or en pratique, beaucoup d’entreprises procèdent aux augmentations prévues par l’article L.1225-26 du code du travail simultanément aux augmentations générales prévues pour l’ensemble des salariés. Ces augmentations peuvent donc être effectives pendant le congé maternité et non à l’issue de celui-ci. Il est logique et conforme à l’esprit du texte de prendre en compte l’augmentation que les femmes ont connue au cours de leur congé de maternité si elle se situe pendant la période de référence pour le calcul de l’indicateur."
         ]
@@ -459,14 +458,14 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Le congé d’adoption est-il pris en compte pour le calcul de l’indicateur 4 ?",
+          "Le congé d’adoption est-il pris en compte pour le calcul de l’indicateur retour congé maternité ?",
         reponse: [
           "Oui, le congé d’adoption est pris en compte dans le calcul de l’indicateur, au même titre que le congé de maternité."
         ]
       },
       {
         question:
-          "Obtient-on nécessairement 0 à l’indicateur 4 dans le cas où seules 2 salariées n’ont pas bénéficié d’une augmentation durant l’année 2018 alors qu’elles étaient absentes pour congé maternité à l’occasion de l’exercice annuel de revalorisation, étant donné que ces deux salariées avaient bénéficié toutes deux d’une augmentation au second semestre 2017 ?",
+          "Obtient-on nécessairement 0 à l’indicateur retour congé maternité dans le cas où seules 2 salariées n’ont pas bénéficié d’une augmentation durant l’année 2018 alors qu’elles étaient absentes pour congé maternité à l’occasion de l’exercice annuel de revalorisation, étant donné que ces deux salariées avaient bénéficié toutes deux d’une augmentation au second semestre 2017 ?",
         reponse: [
           "Le calcul de l’Index étant basé sur une période de référence annuelle, si la période choisie est l’année 2018, il n’est pas possible de déroger à la règle posée par le décret n° 2019-15 du 8 janvier 2019, car les deux salariées concernées ont bénéficié d’une revalorisation au second semestre de l’année 2017."
         ]
@@ -563,23 +562,23 @@ export const faqSections: FAQSection = {
     parts: ["periodeReference", "effectifs"]
   },
   indicateur1: {
-    title: "indicateur 1 - écart de rémunération",
+    title: "indicateur - écart de rémunération",
     parts: ["remuneration", "indicateur1"]
   },
   indicateur2: {
-    title: "indicateur 2 - écart d’augmentations",
+    title: "indicateur - écart d’augmentations",
     parts: ["indicateur2", "indicateur2et3"]
   },
   indicateur3: {
-    title: "indicateur 3 - écart de promotions",
+    title: "indicateur - écart de promotions",
     parts: ["indicateur3", "indicateur2et3"]
   },
   indicateur4: {
-    title: "indicateur 4 - congé maternité",
+    title: "indicateur - congé maternité",
     parts: ["indicateur4"]
   },
   indicateur5: {
-    title: "indicateur 5 - hautes rémunérations",
+    title: "indicateur - hautes rémunérations",
     parts: []
   },
   resultat: {

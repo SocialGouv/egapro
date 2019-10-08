@@ -25,7 +25,7 @@ function RecapitulatifIndicateurCinq({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 5, nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
+          title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
           text={
             <Fragment>
               <span>
@@ -55,7 +55,7 @@ function RecapitulatifIndicateurCinq({
   return (
     <div css={styles.container}>
       <RecapBloc
-        title="Indicateur 5, nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
+        title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:

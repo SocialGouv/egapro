@@ -87,7 +87,7 @@ function Effectif({ state, dispatch }: Props) {
                     <Fragment>
                       <TextSimulatorLink
                         to="/indicateur1"
-                        label="aller à l'indicateur 1"
+                        label="aller à l'indicateur écart de rémunérations"
                       />
                       &emsp;
                     </Fragment>
@@ -96,7 +96,7 @@ function Effectif({ state, dispatch }: Props) {
                     <Fragment>
                       <TextSimulatorLink
                         to="/indicateur2"
-                        label="aller à l'indicateur 2"
+                        label="aller à l'indicateur écart de taux d'augmentations"
                       />
                       &emsp;
                     </Fragment>
@@ -104,7 +104,7 @@ function Effectif({ state, dispatch }: Props) {
                   {state.indicateurTrois.formValidated === "Invalid" && (
                     <TextSimulatorLink
                       to="/indicateur3"
-                      label="aller à l'indicateur 3"
+                      label="aller à l'indicateur écart de taux de promotions"
                     />
                   )}
                 </span>

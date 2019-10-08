@@ -27,7 +27,7 @@ function RecapitulatifIndicateurQuatre({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 4, pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+          title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
           text={
             <Fragment>
               <span>
@@ -49,7 +49,7 @@ function RecapitulatifIndicateurQuatre({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur 4, pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+          title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
           text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu de retour de congé maternité durant la période de référence"
         />
       </div>
@@ -59,7 +59,7 @@ function RecapitulatifIndicateurQuatre({
   return (
     <div css={styles.container}>
       <RecapBloc
-        title="Indicateur 4, pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
