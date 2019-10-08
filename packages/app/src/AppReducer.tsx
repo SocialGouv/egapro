@@ -61,15 +61,6 @@ const dataIndicateurTrois = mapEnum(
   })
 );
 
-const dataIndicateurDeuxTrois = mapEnum(
-  CategorieSocioPro,
-  (categorieSocioPro: CategorieSocioPro) => ({
-    categorieSocioPro,
-    tauxAugmentationPromotionFemmes: undefined,
-    tauxAugmentationPromotionHommes: undefined
-  })
-);
-
 const defaultState: AppState = {
   effectif: {
     formValidated: "None",
@@ -96,7 +87,11 @@ const defaultState: AppState = {
   indicateurDeuxTrois: {
     formValidated: "None",
     presenceAugmentationPromotion: true,
-    tauxAugmentationPromotion: dataIndicateurDeuxTrois
+    nombreAugmentationPromotionFemmes: undefined,
+    nombreAugmentationPromotionHommes: undefined,
+    memePeriodeReference: true,
+    periodeReferenceDebut: "",
+    periodeReferenceFin: ""
   },
   indicateurQuatre: {
     formValidated: "None",
@@ -153,7 +148,7 @@ function AppReducer(
               ? { ...state.indicateurTrois, formValidated: "Invalid" }
               : state.indicateurTrois,
           indicateurDeuxTrois:
-            state.indicateurTrois.formValidated === "Valid"
+            state.indicateurDeuxTrois.formValidated === "Valid"
               ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
               : state.indicateurDeuxTrois
         };
@@ -291,15 +286,23 @@ function AppReducer(
     }
     case "updateIndicateurDeuxTrois": {
       const {
-        tauxAugmentationPromotion,
-        presenceAugmentationPromotion
+        presenceAugmentationPromotion,
+        nombreAugmentationPromotionFemmes,
+        nombreAugmentationPromotionHommes,
+        memePeriodeReference,
+        periodeReferenceDebut,
+        periodeReferenceFin
       } = action.data;
       return {
         ...state,
         indicateurDeuxTrois: {
           ...state.indicateurDeuxTrois,
           presenceAugmentationPromotion,
-          tauxAugmentationPromotion
+          nombreAugmentationPromotionFemmes,
+          nombreAugmentationPromotionHommes,
+          memePeriodeReference,
+          periodeReferenceDebut,
+          periodeReferenceFin
         }
       };
     }

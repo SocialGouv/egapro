@@ -24,7 +24,11 @@ export type AppState = {
   indicateurDeuxTrois: {
     formValidated: FormState;
     presenceAugmentationPromotion: boolean;
-    tauxAugmentationPromotion: Array<GroupeIndicateurDeuxTrois>;
+    nombreAugmentationPromotionFemmes: number | undefined;
+    nombreAugmentationPromotionHommes: number | undefined;
+    memePeriodeReference: boolean;
+    periodeReferenceDebut: string;
+    periodeReferenceFin: string;
   };
   indicateurQuatre: {
     formValidated: FormState;
@@ -164,7 +168,16 @@ export type ActionIndicateurTroisData = {
 
 export type ActionIndicateurDeuxTroisData = {
   presenceAugmentationPromotion: boolean;
-  tauxAugmentationPromotion: Array<GroupeIndicateurDeuxTrois>;
+  nombreAugmentationPromotionFemmes: number | undefined;
+  nombreAugmentationPromotionHommes: number | undefined;
+  memePeriodeReference: boolean;
+  periodeReferenceDebut: string;
+  periodeReferenceFin: string;
+};
+
+export type DateInterval = {
+  start: Date;
+  end: Date;
 };
 
 export type ActionIndicateurQuatreData = {

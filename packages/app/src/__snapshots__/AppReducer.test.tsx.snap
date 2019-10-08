@@ -146,29 +146,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -488,29 +471,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -830,29 +796,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -1140,29 +1089,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -1482,29 +1414,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -1792,29 +1707,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -2134,29 +2032,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -2444,29 +2325,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -2786,29 +2650,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -3096,29 +2943,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -3438,29 +3268,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -3748,29 +3561,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -4090,29 +3886,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -4400,29 +4179,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -4742,29 +4504,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -5086,29 +4831,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -5428,29 +5156,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -5772,29 +5483,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -6114,29 +5808,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -6458,29 +6135,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -6833,29 +6493,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -7177,29 +6820,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -7485,29 +7111,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -7795,29 +7404,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -8137,29 +7729,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -8447,29 +8022,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -8789,29 +8347,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -9098,30 +8639,13 @@ Object {
     ],
   },
   "indicateurDeuxTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "Invalid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -9441,29 +8965,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -9782,30 +9289,13 @@ Object {
     ],
   },
   "indicateurDeuxTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "Invalid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -10125,29 +9615,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -10467,29 +9940,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -10777,29 +10233,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -11119,29 +10558,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -11429,29 +10851,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -11771,29 +11176,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -12081,29 +11469,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -12423,29 +11794,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -12733,29 +12087,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -13075,29 +12412,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -13385,29 +12705,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -13727,29 +13030,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -14037,29 +13323,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -14379,29 +13648,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -14721,29 +13973,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -15031,29 +14266,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
@@ -15373,29 +14591,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
@@ -15715,29 +14916,12 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
+    "memePeriodeReference": true,
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeReferenceDebut": "",
+    "periodeReferenceFin": "",
     "presenceAugmentationPromotion": true,
-    "tauxAugmentationPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationPromotionFemmes": undefined,
-        "tauxAugmentationPromotionHommes": undefined,
-      },
-    ],
   },
   "indicateurQuatre": Object {
     "formValidated": "None",

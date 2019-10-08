@@ -1,15 +1,15 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Form } from "react-final-form";
+import { Field, Form } from "react-final-form";
 import { FormState, ActionIndicateurDeuxTroisData } from "../../globals.d";
 
-import {
-  // calculTotalEffectifsEtTauxAugmentationPromotion,
-  // calculEcartTauxAugmentationPromotion,
-  effectifEtEcartAugmentationPromotionGroup
-} from "../../utils/calculsEgaProIndicateurDeuxTrois";
+// import {
+//   // calculTotalEffectifsEtTauxAugmentationPromotion,
+//   // calculEcartTauxAugmentationPromotion,
+//   effectifEtEcartAugmentationPromotionGroup
+// } from "../../utils/calculsEgaProIndicateurDeuxTrois";
 
-import BlocForm from "../../components/BlocForm";
+import { BlocFormLight } from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import RadiosBoolean from "../../components/RadiosBoolean";
 import ActionBar from "../../components/ActionBar";
@@ -18,29 +18,35 @@ import FormSubmit from "../../components/FormSubmit";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import {
-  parseFloatFormValue,
-  parseFloatStateValue,
+  parseIntFormValue,
+  parseIntStateValue,
   parseBooleanFormValue,
   parseBooleanStateValue
 } from "../../utils/formHelpers";
-import {
-  displayNameCategorieSocioPro
-  // displayFractionPercent
-} from "../../utils/helpers";
+// import {
+//   displayNameCategorieSocioPro
+//   // displayFractionPercent
+// } from "../../utils/helpers";
 
 interface Props {
-  ecartPromoParCategorieSocioPro: Array<
-    effectifEtEcartAugmentationPromotionGroup
-  >;
   presenceAugmentationPromotion: boolean;
+  nombreAugmentationPromotionFemmes: number | undefined;
+  nombreAugmentationPromotionHommes: number | undefined;
+  memePeriodeReference: boolean;
+  periodeReferenceDebut: string;
+  periodeReferenceFin: string;
   readOnly: boolean;
   updateIndicateurDeuxTrois: (data: ActionIndicateurDeuxTroisData) => void;
   validateIndicateurDeuxTrois: (valid: FormState) => void;
 }
 
 function IndicateurDeuxTroisForm({
-  ecartPromoParCategorieSocioPro,
   presenceAugmentationPromotion,
+  nombreAugmentationPromotionFemmes,
+  nombreAugmentationPromotionHommes,
+  memePeriodeReference,
+  periodeReferenceDebut,
+  periodeReferenceFin,
   readOnly,
   updateIndicateurDeuxTrois,
   validateIndicateurDeuxTrois
@@ -49,45 +55,37 @@ function IndicateurDeuxTroisForm({
     presenceAugmentationPromotion: parseBooleanStateValue(
       presenceAugmentationPromotion
     ),
-    tauxAugmentationPromotion: ecartPromoParCategorieSocioPro.map(
-      ({
-        tauxAugmentationPromotionFemmes,
-        tauxAugmentationPromotionHommes,
-        ...otherProps
-      }: any) => ({
-        ...otherProps,
-        tauxAugmentationPromotionFemmes: parseFloatStateValue(
-          tauxAugmentationPromotionFemmes
-        ),
-        tauxAugmentationPromotionHommes: parseFloatStateValue(
-          tauxAugmentationPromotionHommes
-        )
-      })
-    )
+    nombreAugmentationPromotionFemmes: parseIntStateValue(
+      nombreAugmentationPromotionFemmes
+    ),
+    nombreAugmentationPromotionHommes: parseIntStateValue(
+      nombreAugmentationPromotionHommes
+    ),
+    memePeriodeReference: parseBooleanStateValue(memePeriodeReference),
+    periodeReferenceDebut: periodeReferenceDebut,
+    periodeReferenceFin: periodeReferenceFin
   };
 
   const saveForm = (formData: any) => {
     const presenceAugmentationPromotion = parseBooleanFormValue(
       formData.presenceAugmentationPromotion
     );
-    const tauxAugmentationPromotion = formData.tauxAugmentationPromotion.map(
-      ({
-        categorieSocioPro,
-        tauxAugmentationPromotionFemmes,
-        tauxAugmentationPromotionHommes
-      }: any) => ({
-        categorieSocioPro,
-        tauxAugmentationPromotionFemmes: parseFloatFormValue(
-          tauxAugmentationPromotionFemmes
-        ),
-        tauxAugmentationPromotionHommes: parseFloatFormValue(
-          tauxAugmentationPromotionHommes
-        )
-      })
+    const nombreAugmentationPromotionFemmes = parseIntFormValue(
+      formData.nombreAugmentationPromotionFemmes
+    );
+    const nombreAugmentationPromotionHommes = parseIntFormValue(
+      formData.nombreAugmentationPromotionHommes
+    );
+    const memePeriodeReference = parseBooleanFormValue(
+      formData.memePeriodeReference
     );
     updateIndicateurDeuxTrois({
-      tauxAugmentationPromotion,
-      presenceAugmentationPromotion
+      presenceAugmentationPromotion,
+      nombreAugmentationPromotionFemmes,
+      nombreAugmentationPromotionHommes,
+      memePeriodeReference,
+      periodeReferenceDebut: formData.periodeReferenceDebut,
+      periodeReferenceFin: formData.periodeReferenceFin
     });
   };
 
@@ -95,35 +93,6 @@ function IndicateurDeuxTroisForm({
     saveForm(formData);
     validateIndicateurDeuxTrois("Valid");
   };
-
-  // Only for Total with updated values
-  // const ecartPromoParCategorieSocioProPourTotal = ecartPromoParCategorieSocioPro.map(
-  //   (groupAugment, index) => {
-  //     const infoField = infoFields[index];
-  //     const tauxAugmentationPromotionFemmes = parseFloatFormValue(
-  //       values[infoField.tauxAugmentationPromotionFemmesName]
-  //     );
-  //     const tauxAugmentationPromotionHommes = parseFloatFormValue(
-  //       values[infoField.tauxAugmentationPromotionHommesName]
-  //     );
-  //     const ecartTauxAugmentationPromotion = calculEcartTauxAugmentationPromotion(
-  //       tauxAugmentationPromotionFemmes,
-  //       tauxAugmentationPromotionHommes
-  //     );
-  //     return {
-  //       ...groupAugment,
-  //       tauxAugmentationPromotionFemmes,
-  //       tauxAugmentationPromotionHommes,
-  //       ecartTauxAugmentationPromotion
-  //     };
-  //   }
-  // );
-  // const {
-  //   totalTauxAugmentationPromotionFemmes,
-  //   totalTauxAugmentationPromotionHommes
-  // } = calculTotalEffectifsEtTauxAugmentationPromotion(
-  //   ecartPromoParCategorieSocioProPourTotal
-  // );
 
   return (
     <Form
@@ -138,6 +107,35 @@ function IndicateurDeuxTroisForm({
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadiosBoolean
+            fieldName="memePeriodeReference"
+            value={values.memePeriodeReference}
+            readOnly={readOnly}
+            labelTrue="je déclare sur la période de référence allant du XX/XX/XX au XX/XX/XX"
+            labelFalse="je souhaite déclarer sur une autre période de référence"
+          />
+
+          {values.memePeriodeReference === "false" && (
+            <div>
+              <Field
+                name="periodeReferenceDebut"
+                label="Date de début"
+                readOnly={readOnly}
+                render={props => {
+                  return <input {...props.input} type="date" />;
+                }}
+              />
+              <Field
+                name="periodeReferenceFin"
+                label="Date de fin"
+                readOnly={readOnly}
+                render={props => {
+                  return <input {...props.input} type="date" />;
+                }}
+              />
+            </div>
+          )}
+
+          <RadiosBoolean
             fieldName="presenceAugmentationPromotion"
             value={values.presenceAugmentationPromotion}
             readOnly={readOnly}
@@ -146,30 +144,17 @@ function IndicateurDeuxTroisForm({
           />
 
           {values.presenceAugmentationPromotion === "true" && (
-            <BlocForm
-              label="% de salariés augmentés ou promus"
-              // footer={[
-              //   displayFractionPercent(totalTauxAugmentationPromotionFemmes),
-              //   displayFractionPercent(totalTauxAugmentationPromotionHommes)
-              // ]}
-            >
-              {ecartPromoParCategorieSocioPro.map(
-                ({ categorieSocioPro, validiteGroupe }, index) => {
-                  return (
-                    <FieldInputsMenWomen
-                      key={categorieSocioPro}
-                      name={displayNameCategorieSocioPro(categorieSocioPro)}
-                      readOnly={readOnly}
-                      calculable={validiteGroupe}
-                      calculableNumber={10}
-                      mask="percent"
-                      femmeFieldName={`tauxAugmentationPromotion.${index}.tauxAugmentationPromotionFemmes`}
-                      hommeFieldName={`tauxAugmentationPromotion.${index}.tauxAugmentationPromotionHommes`}
-                    />
-                  );
-                }
-              )}
-            </BlocForm>
+            <BlocFormLight>
+              <FieldInputsMenWomen
+                name="nombre de salariés augmentés ou promus"
+                readOnly={readOnly}
+                calculable={true} // TODO: the total number of women and men must be above 5.
+                calculableNumber={5} // TODO: this calculable number applies to the "effectif" entered in the first step
+                mask="number"
+                femmeFieldName="nombreAugmentationPromotionFemmes"
+                hommeFieldName="nombreAugmentationPromotionHommes"
+              />
+            </BlocFormLight>
           )}
 
           {readOnly ? (

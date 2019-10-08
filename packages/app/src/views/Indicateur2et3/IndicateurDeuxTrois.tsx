@@ -45,7 +45,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
 
   const {
     effectifsIndicateurCalculable,
-    effectifEtEcartAugmentationPromotionParGroupe,
+    // effectifEtEcartAugmentationPromotionParGroupe,
     indicateurCalculable,
     indicateurEcartAugmentationPromotion,
     indicateurSexeSurRepresente,
@@ -119,12 +119,22 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
       <LayoutFormAndResult
         childrenForm={
           <IndicateurDeuxTroisForm
-            ecartPromoParCategorieSocioPro={
-              effectifEtEcartAugmentationPromotionParGroupe
-            }
             presenceAugmentationPromotion={
               state.indicateurDeuxTrois.presenceAugmentationPromotion
             }
+            nombreAugmentationPromotionFemmes={
+              state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes
+            }
+            nombreAugmentationPromotionHommes={
+              state.indicateurDeuxTrois.nombreAugmentationPromotionHommes
+            }
+            memePeriodeReference={
+              state.indicateurDeuxTrois.memePeriodeReference
+            }
+            periodeReferenceDebut={
+              state.indicateurDeuxTrois.periodeReferenceDebut
+            }
+            periodeReferenceFin={state.indicateurDeuxTrois.periodeReferenceFin}
             readOnly={state.indicateurDeuxTrois.formValidated === "Valid"}
             updateIndicateurDeuxTrois={updateIndicateurDeuxTrois}
             validateIndicateurDeuxTrois={validateIndicateurDeuxTrois}
@@ -151,8 +161,8 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
 function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur écart de taux d'augmenations et de promotions"
-      tagline="Le pourcentage de femmes et d’hommes ayant été augmentés ou promus durant la période de référence, doit être renseigné par CSP."
+      title="Indicateur écart de taux d'augmentations et de promotions"
+      tagline="Le nombre de femmes et d’hommes ayant été augmentés ou promus durant la période de référence, ou pendant les deux ou trois dernières années."
     >
       {children}
     </Page>
