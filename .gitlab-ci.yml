@@ -18,6 +18,7 @@ variables:
   KINTO_PORT: 8888
   POSTGRES_PORT: 5432
   MEMCACHED_PORT: 11212
+  RANCHER_PROJECT_ID: c-gsm8d:p-9mvwt
 
 stages:
   - "Code Quality"
@@ -86,6 +87,17 @@ stages:
 ###       REGISTER DOCKER IMAGES        ###
 ###########################################
 
+Create namespace (dev):
+  stage: "Registration"
+  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+  script:
+    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+    - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - kubectl create namespace ${K8S_NAMESPACE}
+    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
 #
 .register_stage: &register_stage
   stage: "Registration"
