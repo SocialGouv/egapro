@@ -94,6 +94,8 @@ Create namespace (dev):
     - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
     - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    # Skip the job if the namespace exists
+    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
     - kubectl create namespace ${K8S_NAMESPACE}
     - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
   environment:
