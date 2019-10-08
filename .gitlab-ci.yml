@@ -96,8 +96,12 @@ Create namespace (dev):
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
     # Skip the job if the namespace exists
     - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
+    # Create namespace
     - kubectl create namespace ${K8S_NAMESPACE}
     - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
+    # Create secret
+    - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
+    - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   environment:
     name: $DEV_ENVIRONMENT_NAME
 #
@@ -177,20 +181,20 @@ Deploy @egapro/api (dev):
     - branches
   except:
     - master
-#
-#Deploy @egapro/postgres (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $POSTGRES_PORT
-#  environment:
-#    name: $DEV_ENVIRONMENT_NAME
-#  only:
-#    - branches
-#  except:
-#    - master
+
+Deploy @egapro/postgres (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-dev
+  stage: "Deploy dev"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $POSTGRES_PORT
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
+  except:
+    - master
 #
 #Deploy @egapro/memcached (dev):
 #  <<: *deploy_stage
