@@ -21,6 +21,13 @@ spec:
           name: egapro-api
           ports:
             - containerPort: ${PORT}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           env:
             - name: API_PORT
               value: "${PORT}"
