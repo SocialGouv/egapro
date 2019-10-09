@@ -44,13 +44,11 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   );
 
   const {
-    effectifsIndicateurCalculable,
-    // effectifEtEcartAugmentationPromotionParGroupe,
     indicateurCalculable,
     indicateurEcartAugmentationPromotion,
+    indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente,
-    noteIndicateurDeuxTrois,
-    correctionMeasure
+    noteIndicateurDeuxTrois
   } = calculIndicateurDeuxTrois(state);
 
   // le formulaire d'effectif n'est pas validé
@@ -71,15 +69,13 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   }
 
   // les effectifs ne permettent pas de calculer l'indicateur
-  if (!effectifsIndicateurCalculable) {
+  if (!indicateurCalculable) {
     return (
       <PageIndicateurDeuxTrois>
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car l’ensemble des groupes valables (c’est-à-dire comptant au
-                moins 10 femmes et 10 hommes), représentent moins de 40% des
-                effectifs."
+            text="car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
           />
           <ActionBar>
             <ButtonSimulatorLink to="/indicateur4" label="suivant" />
@@ -92,7 +88,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
   if (
     state.indicateurDeuxTrois.formValidated === "Valid" &&
-    !indicateurCalculable
+    !state.indicateurDeuxTrois.presenceAugmentationPromotion
   ) {
     return (
       <PageIndicateurDeuxTrois>
@@ -146,9 +142,11 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
               indicateurEcartAugmentationPromotion={
                 indicateurEcartAugmentationPromotion
               }
+              indicateurEcartNombreEquivalentSalaries={
+                indicateurEcartNombreEquivalentSalaries
+              }
               indicateurSexeSurRepresente={indicateurSexeSurRepresente}
               noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
-              correctionMeasure={correctionMeasure}
               validateIndicateurDeuxTrois={validateIndicateurDeuxTrois}
             />
           )

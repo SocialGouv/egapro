@@ -1,298 +1,154 @@
-import {
-  AppState,
-  CategorieSocioPro,
-  GroupeEffectif,
-  GroupeIndicateurDeuxTrois
-} from "../globals.d";
+import { AppState } from "../globals.d";
 
 import { roundDecimal } from "./helpers";
+import totalNombreSalaries from "./totalNombreSalaries";
 
 import {
-  calculEcartsPonderesParGroupe,
-  calculTotalEcartPondere,
-  calculTotalEffectifs,
-  calculEffectifsIndicateurCalculable,
-  rowEffectifsParCategorieSocioPro,
-  effectifGroup
-} from "./calculsEgaPro";
-
-import {
-  calculValiditeGroupe,
   calculEcartTauxAugmentation,
-  calculIndicateurCalculable,
   calculIndicateurEcartAugmentation,
-  // calculIndicateurSexeSurRepresente,
+  calculIndicateurSexeSurRepresente,
   calculIndicateurEcartAugmentationAbsolute
 } from "../utils/calculsEgaProIndicateurDeux";
-// import calculIndicateurUn from "./calculsEgaProIndicateurUn";
 
-const baremEcartAugmentationPromotion = [
-  15,
-  15,
-  15,
-  10,
-  10,
-  10,
-  5,
-  5,
-  5,
-  5,
-  5,
-  0
-];
+const barem = [35, 35, 35, 25, 25, 25, 15, 15, 15, 15, 15, 0];
 
-//////////////////
-// COMMON ////////
-//////////////////
+///////////////////////
+// INDICATEUR 2 ET 3 //
+///////////////////////
 
-export {
-  calculValiditeGroupe, // VG
-  calculTotalEcartPondere, // TEV
-  calculEffectifsIndicateurCalculable, // IC
-  calculIndicateurCalculable // IC
-};
-
-//////////////////
-// INDICATEUR 3 //
-//////////////////
-
-// ETP
+// // ETP
 export const calculEcartTauxAugmentationPromotion = calculEcartTauxAugmentation;
 
-export interface effectifEtEcartAugmentationPromotionGroup
-  extends effectifGroup {
-  categorieSocioPro: CategorieSocioPro;
-  tauxAugmentationPromotionFemmes: number | undefined;
-  tauxAugmentationPromotionHommes: number | undefined;
-  ecartTauxAugmentationPromotion: number | undefined;
-}
-
-export const calculEffectifsEtEcartAugmentationPromotionParCategorieSocioPro = (
-  dataEffectif: Array<GroupeEffectif>,
-  dataIndicateurDeuxTrois: Array<GroupeIndicateurDeuxTrois>
-): Array<effectifEtEcartAugmentationPromotionGroup> => {
-  return dataEffectif.map(
-    ({ categorieSocioPro, tranchesAges }: GroupeEffectif) => {
-      const effectifs = rowEffectifsParCategorieSocioPro(
-        tranchesAges,
-        calculValiditeGroupe
-      );
-
-      const dataPromo = dataIndicateurDeuxTrois.find(
-        ({ categorieSocioPro: csp }) => csp === categorieSocioPro
-      );
-
-      const tauxAugmentationPromotionFemmes =
-        dataPromo && dataPromo.tauxAugmentationPromotionFemmes;
-      const tauxAugmentationPromotionHommes =
-        dataPromo && dataPromo.tauxAugmentationPromotionHommes;
-
-      // ETA
-      const ecartTauxAugmentationPromotion = calculEcartTauxAugmentationPromotion(
-        tauxAugmentationPromotionFemmes,
-        tauxAugmentationPromotionHommes
-      );
-
-      return {
-        ...effectifs,
-        categorieSocioPro,
-        tauxAugmentationPromotionFemmes,
-        tauxAugmentationPromotionHommes,
-        ecartTauxAugmentationPromotion
-      };
-    }
-  );
-};
-
-export const calculTotalEffectifsEtTauxAugmentationPromotion = (
-  groupEffectifEtEcartAugment: Array<effectifEtEcartAugmentationPromotionGroup>
-) => {
-  const {
-    totalNombreSalariesFemmes,
-    totalNombreSalariesHommes,
-    totalNombreSalaries,
-    totalEffectifsValides
-  } = calculTotalEffectifs(groupEffectifEtEcartAugment);
-
-  const {
-    sommeProduitTauxAugmentationPromotionFemmes,
-    sommeProduitTauxAugmentationPromotionHommes
-  } = groupEffectifEtEcartAugment.reduce(
-    (
-      {
-        sommeProduitTauxAugmentationPromotionFemmes,
-        sommeProduitTauxAugmentationPromotionHommes
-      },
-      {
-        nombreSalariesFemmes,
-        nombreSalariesHommes,
-        tauxAugmentationPromotionFemmes,
-        tauxAugmentationPromotionHommes
-      }
-    ) => {
-      return {
-        sommeProduitTauxAugmentationPromotionFemmes:
-          sommeProduitTauxAugmentationPromotionFemmes +
-          (tauxAugmentationPromotionFemmes || 0) * nombreSalariesFemmes,
-        sommeProduitTauxAugmentationPromotionHommes:
-          sommeProduitTauxAugmentationPromotionHommes +
-          (tauxAugmentationPromotionHommes || 0) * nombreSalariesHommes
-      };
-    },
-    {
-      sommeProduitTauxAugmentationPromotionFemmes: 0,
-      sommeProduitTauxAugmentationPromotionHommes: 0
-    }
-  );
-
-  // TTPF
-  const totalTauxAugmentationPromotionFemmes =
-    sommeProduitTauxAugmentationPromotionFemmes / totalNombreSalariesFemmes;
-
-  // TTPH
-  const totalTauxAugmentationPromotionHommes =
-    sommeProduitTauxAugmentationPromotionHommes / totalNombreSalariesHommes;
-
-  return {
-    totalNombreSalaries,
-    totalEffectifsValides,
-    totalTauxAugmentationPromotionFemmes,
-    totalTauxAugmentationPromotionHommes
-  };
-};
-
-export const calculEcartsPonderesParCategorieSocioPro = calculEcartsPonderesParGroupe(
-  ({ ecartTauxAugmentationPromotion }) => ecartTauxAugmentationPromotion
-);
-
-// IEP
+// // IEP
 export const calculIndicateurEcartAugmentationPromotion = calculIndicateurEcartAugmentation;
 
 export const calculIndicateurEcartAugmentationPromotionAbsolute = calculIndicateurEcartAugmentationAbsolute;
 
-// NOTE
+// // IC
+export const calculIndicateurCalculable = (
+  totalNombreSalariesHommes: number | undefined,
+  totalNombreSalariesFemmes: number | undefined
+): boolean => {
+  return (
+    totalNombreSalariesHommes !== undefined &&
+    totalNombreSalariesFemmes !== undefined &&
+    totalNombreSalariesHommes >= 5 &&
+    totalNombreSalariesFemmes >= 5
+  );
+};
+
+export const calculTaux = (
+  nombreSalaries: number | undefined,
+  totalNombreSalaries: number | undefined
+): number | undefined =>
+  nombreSalaries !== undefined &&
+  totalNombreSalaries !== undefined &&
+  totalNombreSalaries > 0
+    ? nombreSalaries / totalNombreSalaries
+    : undefined;
+
+export const calculIndicateurEcartNombreEquivalentSalaries = (
+  indicateurEcartAugmentationPromotionAbsolute: number | undefined,
+  totalNombreSalariesHommes: number | undefined,
+  totalNombreSalariesFemmes: number | undefined
+): number | undefined => {
+  return indicateurEcartAugmentationPromotionAbsolute !== undefined &&
+    totalNombreSalariesHommes !== undefined &&
+    totalNombreSalariesFemmes !== undefined
+    ? roundDecimal(
+        (indicateurEcartAugmentationPromotionAbsolute *
+          Math.min(totalNombreSalariesHommes, totalNombreSalariesFemmes)) /
+          100,
+        1
+      )
+    : undefined;
+};
+
+// // NOTE
+
+export const calculBarem = (indicateur: number): number => {
+  return barem[
+    Math.min(
+      barem.length - 1,
+      Math.ceil(Math.max(0, roundDecimal(indicateur, 1)))
+    )
+  ];
+};
+
 export const calculNote = (
-  indicateurEcartAugmentationPromotion: number | undefined,
-  noteIndicateurUn: number | undefined,
-  indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
-  indicateurDeuxSexeSurRepresente: "hommes" | "femmes" | undefined
-): { note: number | undefined; correctionMeasure: boolean } => {
-  if (
-    noteIndicateurUn !== undefined &&
-    noteIndicateurUn < 40 &&
-    indicateurUnSexeSurRepresente &&
-    indicateurDeuxSexeSurRepresente &&
-    indicateurUnSexeSurRepresente !== indicateurDeuxSexeSurRepresente
-  ) {
-    return {
-      note: baremEcartAugmentationPromotion[0],
-      correctionMeasure: true
-    };
+  ecartTaux: number | undefined,
+  ecartNombreSalaries: number | undefined
+): number | undefined => {
+  if (ecartTaux === undefined || ecartNombreSalaries === undefined) {
+    return undefined;
   }
-  const note =
-    indicateurEcartAugmentationPromotion !== undefined
-      ? baremEcartAugmentationPromotion[
-          Math.min(
-            baremEcartAugmentationPromotion.length - 1,
-            Math.ceil(
-              Math.max(0, roundDecimal(indicateurEcartAugmentationPromotion, 1))
-            )
-          )
-        ]
-      : undefined;
-  return { note, correctionMeasure: false };
+  const noteEcartTaux = calculBarem(ecartTaux);
+  const noteEcartNombreSalaries = calculBarem(ecartNombreSalaries);
+
+  return Math.max(noteEcartTaux, noteEcartNombreSalaries);
 };
 
 /////////
 // ALL //
 /////////
 
-// TODO: complete the computation
-// export default function calculIndicateurDeuxTrois(state: AppState) {
-//   const effectifEtEcartAugmentationPromotionParGroupe = calculEffectifsEtEcartAugmentationPromotionParCategorieSocioPro(
-//     state.effectif.nombreSalaries,
-//     state.indicateurDeuxTrois.tauxAugmentationPromotion
-//   );
-
-//   const {
-//     totalNombreSalaries,
-//     totalEffectifsValides,
-//     totalTauxAugmentationPromotionFemmes,
-//     totalTauxAugmentationPromotionHommes
-//   } = calculTotalEffectifsEtTauxAugmentationPromotion(
-//     effectifEtEcartAugmentationPromotionParGroupe
-//   );
-
-//   const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
-//     effectifEtEcartAugmentationPromotionParGroupe,
-//     totalEffectifsValides
-//   );
-
-//   // TEP
-//   const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
-
-//   // IC
-//   const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
-//     totalNombreSalaries,
-//     totalEffectifsValides
-//   );
-
-//   // IC
-//   const indicateurCalculable = calculIndicateurCalculable(
-//     state.indicateurDeuxTrois.presenceAugmentationPromotion,
-//     totalNombreSalaries,
-//     totalEffectifsValides,
-//     totalTauxAugmentationPromotionFemmes,
-//     totalTauxAugmentationPromotionHommes
-//   );
-
-//   // IEA
-//   const indicateurEcartAugmentationPromotion = calculIndicateurEcartAugmentationPromotion(
-//     indicateurCalculable,
-//     totalEcartPondere
-//   );
-
-//   const indicateurEcartAugmentationPromotionAbsolute = calculIndicateurEcartAugmentationPromotionAbsolute(
-//     indicateurEcartAugmentationPromotion
-//   );
-
-//   const indicateurDeuxTroisSexeSurRepresente = calculIndicateurSexeSurRepresente(
-//     indicateurEcartAugmentationPromotion
-//   );
-
-//   // Mesures correction indicateur 1
-//   const {
-//     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-//     noteIndicateurUn
-//   } = calculIndicateurUn(state);
-
-//   // NOTE
-//   const { note: noteIndicateurDeuxTrois, correctionMeasure } = calculNote(
-//     indicateurEcartAugmentationPromotionAbsolute,
-//     noteIndicateurUn,
-//     indicateurUnSexeSurRepresente,
-//     indicateurDeuxTroisSexeSurRepresente
-//   );
-
-//   return {
-//     effectifsIndicateurCalculable,
-//     effectifEtEcartAugmentationPromotionParGroupe,
-//     indicateurCalculable,
-//     indicateurEcartAugmentationPromotion: indicateurEcartAugmentationPromotionAbsolute,
-//     indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
-//     noteIndicateurDeuxTrois,
-//     correctionMeasure
-//   };
-// }
 export default function calculIndicateurDeuxTrois(state: AppState) {
-  const indicateurSexeSurRepresente: "hommes" | "femmes" | undefined = "hommes";
+  const {
+    totalNombreSalariesHomme: totalNombreSalariesHommes,
+    totalNombreSalariesFemme: totalNombreSalariesFemmes
+  } = totalNombreSalaries(state.effectif.nombreSalaries);
+
+  const indicateurCalculable = calculIndicateurCalculable(
+    totalNombreSalariesHommes,
+    totalNombreSalariesFemmes
+  );
+
+  const tauxAugmentationPromotionHommes = calculTaux(
+    state.indicateurDeuxTrois.nombreAugmentationPromotionHommes,
+    totalNombreSalariesHommes
+  );
+  const tauxAugmentationPromotionFemmes = calculTaux(
+    state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes,
+    totalNombreSalariesFemmes
+  );
+
+  // // IEA
+  const ecartTauxAugmentationPromotion = calculEcartTauxAugmentationPromotion(
+    tauxAugmentationPromotionFemmes,
+    tauxAugmentationPromotionHommes
+  );
+
+  const indicateurEcartAugmentationPromotion = calculIndicateurEcartAugmentationPromotion(
+    indicateurCalculable,
+    ecartTauxAugmentationPromotion
+  );
+
+  const indicateurEcartAugmentationPromotionAbsolute = calculIndicateurEcartAugmentationPromotionAbsolute(
+    indicateurEcartAugmentationPromotion
+  );
+
+  const indicateurSexeSurRepresente = calculIndicateurSexeSurRepresente(
+    indicateurEcartAugmentationPromotion
+  );
+
+  // // Ecart en nombre équivalent de salariés
+  const indicateurEcartNombreEquivalentSalaries = calculIndicateurEcartNombreEquivalentSalaries(
+    indicateurEcartAugmentationPromotionAbsolute,
+    totalNombreSalariesHommes,
+    totalNombreSalariesFemmes
+  );
+
+  // // NOTE
+  const noteIndicateurDeuxTrois = calculNote(
+    indicateurEcartAugmentationPromotionAbsolute,
+    indicateurEcartNombreEquivalentSalaries
+  );
+
   return {
-    effectifsIndicateurCalculable: 10,
-    effectifEtEcartAugmentationPromotionParGroupe: 0,
-    indicateurCalculable: true,
-    indicateurEcartAugmentationPromotion: 0,
-    indicateurSexeSurRepresente: indicateurSexeSurRepresente,
-    noteIndicateurDeuxTrois: 0,
-    correctionMeasure: false
+    indicateurCalculable,
+    indicateurEcartAugmentationPromotion: indicateurEcartAugmentationPromotionAbsolute,
+    indicateurEcartNombreEquivalentSalaries,
+    indicateurSexeSurRepresente,
+    noteIndicateurDeuxTrois
   };
 }

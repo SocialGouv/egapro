@@ -9,17 +9,17 @@ import ActionLink from "../../components/ActionLink";
 
 interface Props {
   indicateurEcartAugmentationPromotion: number | undefined;
+  indicateurEcartNombreEquivalentSalaries: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurDeuxTrois: number | undefined;
-  correctionMeasure: boolean;
   validateIndicateurDeuxTrois: (valid: FormState) => void;
 }
 
 function IndicateurDeuxTroisResult({
   indicateurEcartAugmentationPromotion,
+  indicateurEcartNombreEquivalentSalaries,
   indicateurSexeSurRepresente,
   noteIndicateurDeuxTrois,
-  correctionMeasure,
   validateIndicateurDeuxTrois
 }: Props) {
   return (
@@ -36,11 +36,11 @@ function IndicateurDeuxTroisResult({
         secondLineData={
           (noteIndicateurDeuxTrois !== undefined
             ? noteIndicateurDeuxTrois
-            : "--") + "/15"
+            : "--") + "/35"
         }
         secondLineInfo={
-          correctionMeasure
-            ? "mesures de correction prises en compte"
+          indicateurEcartNombreEquivalentSalaries
+            ? `écart en nombre équivalent salariés ${indicateurEcartNombreEquivalentSalaries}`
             : undefined
         }
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}

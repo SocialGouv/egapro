@@ -254,12 +254,6 @@ export interface GroupeIndicateurTrois {
   tauxPromotionHommes: number | undefined;
 }
 
-export interface GroupeIndicateurDeuxTrois {
-  categorieSocioPro: CategorieSocioPro;
-  tauxAugmentationPromotionFemmes: number | undefined;
-  tauxAugmentationPromotionHommes: number | undefined;
-}
-
 ////////////
 
 export type FAQPartType =
