@@ -39,9 +39,15 @@ spec:
                   name: egapro-secret
                   key: KINTO_ADMIN_PASSWORD
             - name: MAIL_USE_TLS
-              value: "true"
+              valueFrom:
+                secretKeyRef:
+                  name: egapro-secret
+                  key: MAIL_USE_TLS
             - name: MAIL_PORT
-              value: "465"
+              valueFrom:
+                secretKeyRef:
+                  name: egapro-secret
+                  key: MAIL_PORT
             - name: MAIL_FROM
               value: "Index EgaPro <contact@egapro.beta.gouv.fr>"
             - name: MAIL_HOST
