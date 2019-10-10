@@ -19,7 +19,7 @@ spec:
         image: kinto/kinto-server:13.1.1
         imagePullPolicy: "IfNotPresent"
         ports:
-          - containerPort: 8888
+          - containerPort: ${PORT}
         resources:
           requests:
             cpu: 50m

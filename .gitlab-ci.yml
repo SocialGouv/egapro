@@ -16,8 +16,6 @@ variables:
   APP_PORT: 9000
   API_PORT: 4000
   KINTO_PORT: 8888
-  POSTGRES_PORT: 5432
-  MEMCACHED_PORT: 11212
   RANCHER_PROJECT_ID: c-gsm8d:p-9mvwt
 
 stages:
@@ -205,7 +203,6 @@ Deploy @egapro/postgres (dev):
   stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
-    PORT: $POSTGRES_PORT
   environment:
     name: $DEV_ENVIRONMENT_NAME
   only:
@@ -226,7 +223,6 @@ Deploy @egapro/memcached (dev):
   except:
     - master
 
-##
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
   extends: .deploy-egapro-kinto-k8s-dev
