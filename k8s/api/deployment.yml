@@ -24,10 +24,10 @@ spec:
           resources:
             requests:
               cpu: 10m
-              memory: 128Mi
+              memory: 32Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 100m
+              memory: 64Mi
           env:
             - name: API_PORT
               value: "${PORT}"
