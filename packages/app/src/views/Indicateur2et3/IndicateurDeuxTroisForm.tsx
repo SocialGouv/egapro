@@ -1,17 +1,16 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Field, Form } from "react-final-form";
-import { FormState, ActionIndicateurDeuxTroisData } from "../../globals.d";
-
-// import {
-//   // calculTotalEffectifsEtTauxAugmentationPromotion,
-//   // calculEcartTauxAugmentationPromotion,
-//   effectifEtEcartAugmentationPromotionGroup
-// } from "../../utils/calculsEgaProIndicateurDeuxTrois";
+import { Form } from "react-final-form";
+import {
+  FormState,
+  ActionIndicateurDeuxTroisData,
+  PeriodeDeclaration
+} from "../../globals.d";
 
 import { BlocFormLight } from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import RadiosBoolean from "../../components/RadiosBoolean";
+import RadioButtons from "../../components/RadioButtons";
 import ActionBar from "../../components/ActionBar";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
@@ -21,20 +20,15 @@ import {
   parseIntFormValue,
   parseIntStateValue,
   parseBooleanFormValue,
-  parseBooleanStateValue
+  parseBooleanStateValue,
+  parsePeriodeDeclarationFormValue
 } from "../../utils/formHelpers";
-// import {
-//   displayNameCategorieSocioPro
-//   // displayFractionPercent
-// } from "../../utils/helpers";
 
 interface Props {
   presenceAugmentationPromotion: boolean;
   nombreAugmentationPromotionFemmes: number | undefined;
   nombreAugmentationPromotionHommes: number | undefined;
-  memePeriodeReference: boolean;
-  periodeReferenceDebut: string;
-  periodeReferenceFin: string;
+  periodeDeclaration: PeriodeDeclaration;
   readOnly: boolean;
   updateIndicateurDeuxTrois: (data: ActionIndicateurDeuxTroisData) => void;
   validateIndicateurDeuxTrois: (valid: FormState) => void;
@@ -44,9 +38,7 @@ function IndicateurDeuxTroisForm({
   presenceAugmentationPromotion,
   nombreAugmentationPromotionFemmes,
   nombreAugmentationPromotionHommes,
-  memePeriodeReference,
-  periodeReferenceDebut,
-  periodeReferenceFin,
+  periodeDeclaration,
   readOnly,
   updateIndicateurDeuxTrois,
   validateIndicateurDeuxTrois
@@ -61,9 +53,7 @@ function IndicateurDeuxTroisForm({
     nombreAugmentationPromotionHommes: parseIntStateValue(
       nombreAugmentationPromotionHommes
     ),
-    memePeriodeReference: parseBooleanStateValue(memePeriodeReference),
-    periodeReferenceDebut: periodeReferenceDebut,
-    periodeReferenceFin: periodeReferenceFin
+    periodeDeclaration: periodeDeclaration
   };
 
   const saveForm = (formData: any) => {
@@ -76,16 +66,14 @@ function IndicateurDeuxTroisForm({
     const nombreAugmentationPromotionHommes = parseIntFormValue(
       formData.nombreAugmentationPromotionHommes
     );
-    const memePeriodeReference = parseBooleanFormValue(
-      formData.memePeriodeReference
+    const periodeDeclaration = parsePeriodeDeclarationFormValue(
+      formData.periodeDeclaration
     );
     updateIndicateurDeuxTrois({
       presenceAugmentationPromotion,
       nombreAugmentationPromotionFemmes,
       nombreAugmentationPromotionHommes,
-      memePeriodeReference,
-      periodeReferenceDebut: formData.periodeReferenceDebut,
-      periodeReferenceFin: formData.periodeReferenceFin
+      periodeDeclaration
     });
   };
 
@@ -106,44 +94,41 @@ function IndicateurDeuxTroisForm({
       {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
-          <RadiosBoolean
-            fieldName="memePeriodeReference"
-            value={values.memePeriodeReference}
+          <RadioButtons
+            fieldName="periodeDeclaration"
+            label="je déclare sur"
+            value={values.periodeDeclaration}
             readOnly={readOnly}
-            labelTrue="je déclare sur la période de référence allant du XX/XX/XX au XX/XX/XX"
-            labelFalse="je souhaite déclarer sur une autre période de référence"
+            choices={[
+              {
+                label: "la dernière période de référence",
+                value: "unePeriodeReference"
+              },
+              {
+                label: "les deux dernières périodes de référence",
+                value: "deuxPeriodesReference"
+              },
+              {
+                label: "les trois dernières périodes de référence",
+                value: "troisPeriodesReference"
+              }
+            ]}
           />
 
-          {values.memePeriodeReference === "false" && (
-            <div>
-              <Field
-                name="periodeReferenceDebut"
-                label="Date de début"
-                readOnly={readOnly}
-                render={props => {
-                  return <input {...props.input} type="date" />;
-                }}
-              />
-              <Field
-                name="periodeReferenceFin"
-                label="Date de fin"
-                readOnly={readOnly}
-                render={props => {
-                  return <input {...props.input} type="date" />;
-                }}
-              />
-            </div>
+          <div css={styles.spacer} />
+
+          {values.periodeDeclaration === "unePeriodeReference" && (
+            <RadiosBoolean
+              fieldName="presenceAugmentationPromotion"
+              value={values.presenceAugmentationPromotion}
+              readOnly={readOnly}
+              labelTrue="il y a eu des augmentations ou des promotions durant la période de déclaration"
+              labelFalse="il n’y a pas eu d'augmentations ou de promotions durant la période de déclaration"
+            />
           )}
 
-          <RadiosBoolean
-            fieldName="presenceAugmentationPromotion"
-            value={values.presenceAugmentationPromotion}
-            readOnly={readOnly}
-            labelTrue="il y a eu des augmentations ou des promotions durant la période de référence"
-            labelFalse="il n’y a pas eu d'augmentations ou de promotions durant la période de référence"
-          />
-
-          {values.presenceAugmentationPromotion === "true" && (
+          {(values.presenceAugmentationPromotion === "true" ||
+            values.periodeDeclaration !== "unePeriodeReference") && (
             <BlocFormLight>
               <FieldInputsMenWomen
                 name="nombre de salariés augmentés ou promus"
@@ -180,6 +165,9 @@ const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
+  }),
+  spacer: css({
+    marginTop: "2em"
   })
 };
 

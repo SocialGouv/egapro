@@ -3,7 +3,8 @@ import {
   AppState,
   ActionType,
   CategorieSocioPro,
-  TranchesAges
+  TranchesAges,
+  PeriodeDeclaration
 } from "./globals.d";
 import mapEnum from "./utils/mapEnum";
 import { overwriteMerge, combineMerge } from "./utils/merge";
@@ -89,9 +90,7 @@ const defaultState: AppState = {
     presenceAugmentationPromotion: true,
     nombreAugmentationPromotionFemmes: undefined,
     nombreAugmentationPromotionHommes: undefined,
-    memePeriodeReference: true,
-    periodeReferenceDebut: "",
-    periodeReferenceFin: ""
+    periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration
   },
   indicateurQuatre: {
     formValidated: "None",
@@ -289,9 +288,7 @@ function AppReducer(
         presenceAugmentationPromotion,
         nombreAugmentationPromotionFemmes,
         nombreAugmentationPromotionHommes,
-        memePeriodeReference,
-        periodeReferenceDebut,
-        periodeReferenceFin
+        periodeDeclaration
       } = action.data;
       return {
         ...state,
@@ -300,9 +297,7 @@ function AppReducer(
           presenceAugmentationPromotion,
           nombreAugmentationPromotionFemmes,
           nombreAugmentationPromotionHommes,
-          memePeriodeReference,
-          periodeReferenceDebut,
-          periodeReferenceFin
+          periodeDeclaration
         }
       };
     }

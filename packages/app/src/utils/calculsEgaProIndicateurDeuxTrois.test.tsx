@@ -1,7 +1,7 @@
 import stateComplete from "../__fixtures__/stateComplete";
 import { calculBarem, calculNote } from "./calculsEgaProIndicateurDeuxTrois";
 import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois";
-import { AppState } from "../globals";
+import { AppState, PeriodeDeclaration } from "../globals";
 
 ///////////////////////
 // INDICATEUR 2 et 3 //
@@ -85,7 +85,7 @@ describe("calculNote", () => {
 });
 
 describe("test calculIndicateurDeuxTrois", () => {
-  const state: AppState = {
+  const state = {
     ...stateComplete,
     effectif: {
       formValidated: "Valid",
@@ -194,14 +194,12 @@ describe("test calculIndicateurDeuxTrois", () => {
     },
     indicateurDeuxTrois: {
       formValidated: "Valid",
-      memePeriodeReference: true,
+      periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration,
       nombreAugmentationPromotionFemmes: 2,
       nombreAugmentationPromotionHommes: 5,
-      presenceAugmentationPromotion: true,
-      periodeReferenceDebut: "",
-      periodeReferenceFin: ""
+      presenceAugmentationPromotion: true
     }
-  };
+  } as AppState;
   test("test data", () => {
     expect(calculIndicateurDeuxTrois(state)).toMatchSnapshot();
   });

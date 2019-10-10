@@ -26,9 +26,7 @@ export type AppState = {
     presenceAugmentationPromotion: boolean;
     nombreAugmentationPromotionFemmes: number | undefined;
     nombreAugmentationPromotionHommes: number | undefined;
-    memePeriodeReference: boolean;
-    periodeReferenceDebut: string;
-    periodeReferenceFin: string;
+    periodeDeclaration: PeriodeDeclaration;
   };
   indicateurQuatre: {
     formValidated: FormState;
@@ -42,6 +40,11 @@ export type AppState = {
     nombreSalariesFemmes: number | undefined;
   };
 };
+
+export type PeriodeDeclaration =
+  | "unePeriodeReference"
+  | "deuxPeriodesReference"
+  | "troisPeriodesReference";
 
 export type FormState = "None" | "Valid" | "Invalid";
 
@@ -170,9 +173,7 @@ export type ActionIndicateurDeuxTroisData = {
   presenceAugmentationPromotion: boolean;
   nombreAugmentationPromotionFemmes: number | undefined;
   nombreAugmentationPromotionHommes: number | undefined;
-  memePeriodeReference: boolean;
-  periodeReferenceDebut: string;
-  periodeReferenceFin: string;
+  periodeDeclaration: PeriodeDeclaration;
 };
 
 export type DateInterval = {

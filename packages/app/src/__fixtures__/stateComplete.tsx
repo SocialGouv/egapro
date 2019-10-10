@@ -1,4 +1,8 @@
-import { CategorieSocioPro, TranchesAges } from "../globals.d";
+import {
+  CategorieSocioPro,
+  PeriodeDeclaration,
+  TranchesAges
+} from "../globals.d";
 import AppReducer from "../AppReducer";
 
 const actionInitiateState = {
@@ -365,9 +369,7 @@ const actionUpdateIndicateurDeuxTrois = {
     presenceAugmentationPromotion: false,
     nombreAugmentationPromotionFemmes: 1,
     nombreAugmentationPromotionHommes: 2,
-    memePeriodeReference: false,
-    periodeReferenceDebut: "2017-11-01",
-    periodeReferenceFin: "2018-10-31"
+    periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration
   }
 };
 

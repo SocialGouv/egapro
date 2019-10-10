@@ -33,6 +33,11 @@ const actionValidateIndicateurTrois = {
   valid: "Valid" as FormState
 };
 
+const actionValidateIndicateurDeuxTrois = {
+  type: "validateIndicateurDeuxTrois" as "validateIndicateurDeuxTrois",
+  valid: "Valid" as FormState
+};
+
 const actionValidateIndicateurQuatre = {
   type: "validateIndicateurQuatre" as "validateIndicateurQuatre",
   valid: "Valid" as FormState
@@ -51,16 +56,19 @@ const stateDefault = AppReducer(
         AppReducer(
           AppReducer(
             AppReducer(
-              AppReducer(stateComplete, actionValidateEffectif),
-              actionValidateIndicateurUnCoefGroup
+              AppReducer(
+                AppReducer(stateComplete, actionValidateEffectif),
+                actionValidateIndicateurUnCoefGroup
+              ),
+              actionValidateIndicateurUnCoefEffectif
             ),
-            actionValidateIndicateurUnCoefEffectif
+            actionValidateIndicateurUn
           ),
-          actionValidateIndicateurUn
+          actionValidateIndicateurDeux
         ),
-        actionValidateIndicateurDeux
+        actionValidateIndicateurTrois
       ),
-      actionValidateIndicateurTrois
+      actionValidateIndicateurDeuxTrois
     ),
     actionValidateIndicateurQuatre
   ),

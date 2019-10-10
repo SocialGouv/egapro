@@ -1,4 +1,9 @@
-import { CategorieSocioPro, TranchesAges, FormState } from "./globals.d";
+import {
+  CategorieSocioPro,
+  TranchesAges,
+  FormState,
+  PeriodeDeclaration
+} from "./globals.d";
 
 import AppReducer from "./AppReducer";
 
@@ -561,9 +566,7 @@ describe("updateIndicateurDeuxTrois", () => {
       presenceAugmentationPromotion: true,
       nombreAugmentationPromotionFemmes: 3,
       nombreAugmentationPromotionHommes: 4,
-      memePeriodeReference: true,
-      periodeReferenceDebut: "2018-11-01",
-      periodeReferenceFin: "2019-10-31"
+      periodeDeclaration: "deuxPeriodesReference" as PeriodeDeclaration
     }
   };
 

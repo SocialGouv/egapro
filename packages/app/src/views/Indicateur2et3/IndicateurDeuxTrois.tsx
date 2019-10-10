@@ -89,7 +89,8 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
   if (
     state.indicateurDeuxTrois.formValidated === "Valid" &&
-    !state.indicateurDeuxTrois.presenceAugmentationPromotion
+    (!state.indicateurDeuxTrois.presenceAugmentationPromotion &&
+      state.indicateurDeuxTrois.periodeDeclaration === "unePeriodeReference")
   ) {
     return (
       <PageIndicateurDeuxTrois>
@@ -125,13 +126,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
             nombreAugmentationPromotionHommes={
               state.indicateurDeuxTrois.nombreAugmentationPromotionHommes
             }
-            memePeriodeReference={
-              state.indicateurDeuxTrois.memePeriodeReference
-            }
-            periodeReferenceDebut={
-              state.indicateurDeuxTrois.periodeReferenceDebut
-            }
-            periodeReferenceFin={state.indicateurDeuxTrois.periodeReferenceFin}
+            periodeDeclaration={state.indicateurDeuxTrois.periodeDeclaration}
             readOnly={state.indicateurDeuxTrois.formValidated === "Valid"}
             updateIndicateurDeuxTrois={updateIndicateurDeuxTrois}
             validateIndicateurDeuxTrois={validateIndicateurDeuxTrois}

@@ -146,11 +146,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -471,11 +469,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -796,11 +792,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -1089,11 +1083,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -1414,11 +1406,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -1707,11 +1697,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -2032,11 +2020,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -2325,11 +2311,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -2650,11 +2634,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -2943,11 +2925,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": 3,
     "nombreAugmentationPromotionHommes": 4,
-    "periodeReferenceDebut": "2018-11-01",
-    "periodeReferenceFin": "2019-10-31",
+    "periodeDeclaration": "deuxPeriodesReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -3268,11 +3248,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": 3,
     "nombreAugmentationPromotionHommes": 4,
-    "periodeReferenceDebut": "2018-11-01",
-    "periodeReferenceFin": "2019-10-31",
+    "periodeDeclaration": "deuxPeriodesReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -3561,11 +3539,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -3886,11 +3862,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -4179,11 +4153,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -4504,11 +4476,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -4797,11 +4767,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -5122,11 +5090,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -5449,11 +5415,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -5774,11 +5738,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -6101,11 +6063,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -6426,11 +6386,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -6753,11 +6711,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -7111,11 +7067,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -7438,11 +7392,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -7729,11 +7681,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -8022,11 +7972,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -8347,11 +8295,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -8640,11 +8586,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -8965,11 +8909,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -9258,11 +9200,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Invalid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -9583,11 +9523,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -9908,11 +9846,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Invalid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -10233,11 +10169,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -10558,11 +10492,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -10851,11 +10783,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -11176,11 +11106,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -11469,11 +11397,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -11794,11 +11720,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -12087,11 +12011,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -12412,11 +12334,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -12705,11 +12625,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -13030,11 +12948,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -13323,11 +13239,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -13648,11 +13562,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -13941,11 +13853,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -14266,11 +14176,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -14559,11 +14467,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -14884,11 +14790,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -15209,11 +15113,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
@@ -15502,11 +15404,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "Valid",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -15827,11 +15727,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": false,
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
-    "periodeReferenceDebut": "2017-11-01",
-    "periodeReferenceFin": "2018-10-31",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": false,
   },
   "indicateurQuatre": Object {
@@ -16152,11 +16050,9 @@ Object {
   },
   "indicateurDeuxTrois": Object {
     "formValidated": "None",
-    "memePeriodeReference": true,
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
-    "periodeReferenceDebut": "",
-    "periodeReferenceFin": "",
+    "periodeDeclaration": "unePeriodeReference",
     "presenceAugmentationPromotion": true,
   },
   "indicateurQuatre": Object {
