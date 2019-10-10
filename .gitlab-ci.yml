@@ -81,26 +81,27 @@ Quality tests:
 #  only:
 #    - tags
 
+Create namespace (dev):
+  stage: "Prepare"
+  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+  script:
+  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+  # Skip the job if the namespace exists
+  - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
+  # Create namespace
+  - kubectl create namespace ${K8S_NAMESPACE}
+  - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+
 ###########################################
 ###       REGISTER DOCKER IMAGES        ###
 ###########################################
 
-Create namespace (dev):
-  stage: "Registration"
-  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  script:
-    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-    # Skip the job if the namespace exists
-    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
-    # Create namespace
-    - kubectl create namespace ${K8S_NAMESPACE}
-    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
-  environment:
-    name: $DEV_ENVIRONMENT_NAME
-
 #
+
 .register_stage: &register_stage
   stage: "Registration"
   image: docker:$DOCKER_VERSION
@@ -134,6 +135,7 @@ Register init kinto image:
     CONTEXT: packages/kinto
     DOCKERFILE_PATH: packages/kinto/Dockerfile
     IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
+
 
 ###########################################
 ###            DEPLOY TO K8S            ###
