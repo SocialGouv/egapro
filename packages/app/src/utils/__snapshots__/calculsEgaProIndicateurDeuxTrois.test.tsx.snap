@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test calculIndicateurDeuxTrois test data 1`] = `
+Object {
+  "indicateurCalculable": true,
+  "indicateurEcartAugmentationPromotion": 11.1905,
+  "indicateurEcartNombreEquivalentSalaries": 3.1,
+  "indicateurSexeSurRepresente": "hommes",
+  "noteIndicateurDeuxTrois": 25,
+}
+`;

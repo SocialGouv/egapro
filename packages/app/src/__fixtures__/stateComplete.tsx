@@ -359,6 +359,18 @@ const actionUpdateIndicateurTrois = {
   }
 };
 
+const actionUpdateIndicateurDeuxTrois = {
+  type: "updateIndicateurDeuxTrois" as "updateIndicateurDeuxTrois",
+  data: {
+    presenceAugmentationPromotion: false,
+    nombreAugmentationPromotionFemmes: 1,
+    nombreAugmentationPromotionHommes: 2,
+    memePeriodeReference: false,
+    periodeReferenceDebut: "2017-11-01",
+    periodeReferenceFin: "2018-10-31"
+  }
+};
+
 const actionUpdateIndicateurQuatre = {
   type: "updateIndicateurQuatre" as "updateIndicateurQuatre",
   data: {
@@ -387,22 +399,25 @@ const stateDefault = AppReducer(
               AppReducer(
                 AppReducer(
                   AppReducer(
-                    AppReducer(undefined, actionInitiateState),
-                    actionUpdateEffectif
+                    AppReducer(
+                      AppReducer(undefined, actionInitiateState),
+                      actionUpdateEffectif
+                    ),
+                    actionUpdateIndicateurUnCsp
                   ),
-                  actionUpdateIndicateurUnCsp
+                  actionUpdateIndicateurUnCoefAddGroup
                 ),
-                actionUpdateIndicateurUnCoefAddGroup
+                actionUpdateIndicateurUnCoefName
               ),
-              actionUpdateIndicateurUnCoefName
+              actionUpdateIndicateurUnCoefNombreSalaries
             ),
-            actionUpdateIndicateurUnCoefNombreSalaries
+            actionUpdateIndicateurUnCoefRemuneration
           ),
-          actionUpdateIndicateurUnCoefRemuneration
+          actionUpdateIndicateurDeux
         ),
-        actionUpdateIndicateurDeux
+        actionUpdateIndicateurTrois
       ),
-      actionUpdateIndicateurTrois
+      actionUpdateIndicateurDeuxTrois
     ),
     actionUpdateIndicateurQuatre
   ),
