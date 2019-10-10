@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@koa/cors": "3.0.0",
-    "@sentry/node": "5.6.2",
+    "@sentry/node": "5.7.0",
     "@types/btoa": "1.2.3",
     "btoa": "1.2.1",
     "dotenv": "8.1.0",
@@ -25,7 +25,7 @@
     "pino": "5.13.4"
   },
   "devDependencies": {
-    "@sentry/types": "5.6.1",
+    "@sentry/types": "5.7.0",
     "@socialgouv/tslint-config-recommended": "0.10.0",
     "@types/btoa": "1.2.3",
     "@types/dotenv": "6.1.1",
