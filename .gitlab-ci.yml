@@ -29,24 +29,24 @@ stages:
   - "Send Url to GitHub"
   - "Delete K8S objects"
 
-##
-#.quality_stage: &quality_stage
-#  stage: "Code Quality"
-#  image: node:10-alpine
-#  before_script:
-#    - yarn --frozen-lockfile
-##
 #
-#Quality tests:
-#  <<: *quality_stage
-#  cache:
-#    key: ${CI_COMMIT_REF_SLUG}
-#    paths:
-#      - node_modules/
-#  script:
-#    - yarn build
-#    - yarn lint
-#    - yarn test
+.quality_stage: &quality_stage
+  stage: "Code Quality"
+  image: node:10-alpine
+  before_script:
+    - yarn --frozen-lockfile
+#
+
+Quality tests:
+  <<: *quality_stage
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+  script:
+    - yarn build
+    - yarn lint
+    - yarn test
 
 ###########################################
 ###               PREPARE               ###
@@ -101,20 +101,20 @@ Create namespace (dev):
     - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
   environment:
     name: $DEV_ENVIRONMENT_NAME
-##
-#.register_stage: &register_stage
-#  stage: "Registration"
-#  image: docker:$DOCKER_VERSION
-#  services:
-#    - docker:$DOCKER_VERSION-dind
-#  before_script:
-#    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
-#    - docker pull $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA || true
-#  script:
-#    - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
-#    - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA -f $DOCKERFILE_PATH $CONTEXT
-#    - docker push $IMAGE_NAME
+
 #
+.register_stage: &register_stage
+  stage: "Registration"
+  image: docker:$DOCKER_VERSION
+  services:
+    - docker:$DOCKER_VERSION-dind
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+    - docker pull $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA || true
+  script:
+    - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
+    - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA -f $DOCKERFILE_PATH $CONTEXT
+    - docker push $IMAGE_NAME
 
 #Register api image:
 #  <<: *register_stage
@@ -123,19 +123,19 @@ Create namespace (dev):
 #    DOCKERFILE_PATH: packages/api/Dockerfile
 #    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
 
-#Register app image:
-#  <<: *register_stage
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/app/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
+Register app image:
+  <<: *register_stage
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/app/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
 
-#Register init kinto image:
-#  <<: *register_stage
-#  variables:
-#    CONTEXT: packages/kinto
-#    DOCKERFILE_PATH: packages/kinto/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
+Register init kinto image:
+  <<: *register_stage
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
 
 ###########################################
 ###            DEPLOY TO K8S            ###
@@ -171,19 +171,19 @@ Deploy @secret (dev):
   except:
     - master
 
-#Deploy @egapro/app (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $APP_PORT
-#  environment:
-#    name: $DEV_ENVIRONMENT_NAME
-#  only:
-#    - branches
-#  except:
-#    - master
+Deploy @egapro/app (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-app-k8s-dev
+  stage: "Deploy dev"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $APP_PORT
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
+  except:
+    - master
 
 #Deploy @egapro/api (dev):
 #  <<: *deploy_stage
@@ -199,47 +199,47 @@ Deploy @secret (dev):
 #  except:
 #    - master
 
-#Deploy @egapro/postgres (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $POSTGRES_PORT
-#  environment:
-#    name: $DEV_ENVIRONMENT_NAME
-#  only:
-#    - branches
-#  except:
-#    - master
+Deploy @egapro/postgres (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-dev
+  stage: "Deploy dev"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $POSTGRES_PORT
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
+  except:
+    - master
 
-#Deploy @egapro/memcached (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: $DEV_ENVIRONMENT_NAME
-#  only:
-#    - branches
-#  except:
-#    - master
+Deploy @egapro/memcached (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-memcached-k8s-dev
+  stage: "Deploy dev"
+  variables:
+    <<: *deploy_stage_variables
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
+  except:
+    - master
+
 ##
-#Deploy @egapro/kinto (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $KINTO_PORT
-#    CACHE_PORT: $MEMCACHED_PORT
-#  environment:
-#    name: $DEV_ENVIRONMENT_NAME
-#  only:
-#    - branches
-#  except:
-#    - master
+Deploy @egapro/kinto (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-kinto-k8s-dev
+  stage: "Deploy dev"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $KINTO_PORT
+  environment:
+    name: $DEV_ENVIRONMENT_NAME
+  only:
+    - branches
+  except:
+    - master
 
 # Prod Environment
 

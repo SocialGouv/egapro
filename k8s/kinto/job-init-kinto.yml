@@ -3,6 +3,7 @@ kind: Job
 apiVersion: batch/v1
 metadata:
   name: egapro-init-kinto${HASH_BRANCH_NAME}
+  namespace: ${K8S_NAMESPACE}
   labels:
     app: egapro-init-kinto
     branch: egapro${HASH_BRANCH_NAME}
@@ -14,16 +15,17 @@ spec:
       - image: ${EGAPRO_REGISTRY}/kinto:${IMAGE_TAG}
         name: egapro-init-kinto
         env:
-        - name: KINTO_SERVER
-          value: "kinto${HASH_BRANCH_NAME}"
-        - name: KINTO_LOGIN
-          valueFrom:
-            secretKeyRef:
-              name: egapro-secret
-              key: KINTO_ADMIN_LOGIN
-        - name: KINTO_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: egapro-secret
-              key: KINTO_ADMIN_PASSWORD
+          - name: KINTO_SERVER
+            value: "kinto${HASH_BRANCH_NAME}"
+          - name: KINTO_LOGIN
+            value: "admin"
+          - name: KINTO_PASSWORD
+            value: "admin"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 20m
+            memory: 64Mi
       restartPolicy: Never
