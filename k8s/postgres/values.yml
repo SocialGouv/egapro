@@ -14,8 +14,8 @@ global:
 ##
 image:
   registry: docker.io
-  repository: postgres
-  tag: 11-alpine
+  repository: bitnami/postgresql
+  tag: 11-debian-9
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -107,7 +107,7 @@ postgresqlUsername: postgres
 ## PostgreSQL password
 ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md#setting-the-root-password-on-first-run
 ##
-#postgresqlPassword: postgres
+postgresqlPassword: postgres
 
 ## PostgreSQL password using existing secret
 ## existingSecret: secret
@@ -123,7 +123,7 @@ postgresqlUsername: postgres
 ## PostgreSQL data dir
 ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md
 ##
-postgresqlDataDir: /var/lib/postgresql/data
+postgresqlDataDir: /bitnami/postgresql/data
 
 ## Specify extra initdb args
 ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md
@@ -231,7 +231,7 @@ persistence:
   ## The path the volume will be mounted at, useful when using different
   ## PostgreSQL images.
   ##
-  mountPath: /var/lib/postgresql/data
+  mountPath: /bitnami/postgresql
 
   ## The subdirectory of the volume to mount to, useful in dev environments
   ## and one PV for multiple services.
@@ -294,8 +294,8 @@ slave:
 ##
 resources:
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 250m
+    memory: 256Mi
   limits:
     cpu: 500m
     memory: 256Mi
