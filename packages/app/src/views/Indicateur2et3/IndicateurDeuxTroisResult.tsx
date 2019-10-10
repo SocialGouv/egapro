@@ -12,6 +12,7 @@ interface Props {
   indicateurEcartNombreEquivalentSalaries: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurDeuxTrois: number | undefined;
+  correctionMeasure: boolean;
   validateIndicateurDeuxTrois: (valid: FormState) => void;
 }
 
@@ -20,6 +21,7 @@ function IndicateurDeuxTroisResult({
   indicateurEcartNombreEquivalentSalaries,
   indicateurSexeSurRepresente,
   noteIndicateurDeuxTrois,
+  correctionMeasure,
   validateIndicateurDeuxTrois
 }: Props) {
   return (
@@ -39,7 +41,9 @@ function IndicateurDeuxTroisResult({
             : "--") + "/35"
         }
         secondLineInfo={
-          indicateurEcartNombreEquivalentSalaries
+          correctionMeasure
+            ? "mesures de correction prises en compte"
+            : indicateurEcartNombreEquivalentSalaries
             ? `écart en nombre équivalent salariés ${indicateurEcartNombreEquivalentSalaries}`
             : undefined
         }

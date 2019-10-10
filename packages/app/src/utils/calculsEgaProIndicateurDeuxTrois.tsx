@@ -1,5 +1,6 @@
 import { AppState } from "../globals.d";
 
+import calculIndicateurUn from "./calculsEgaProIndicateurUn";
 import { roundDecimal } from "./helpers";
 import totalNombreSalaries from "./totalNombreSalaries";
 
@@ -77,15 +78,28 @@ export const calculBarem = (indicateur: number): number => {
 
 export const calculNote = (
   ecartTaux: number | undefined,
-  ecartNombreSalaries: number | undefined
-): number | undefined => {
+  ecartNombreSalaries: number | undefined,
+  noteIndicateurUn: number | undefined,
+  indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
+  indicateurDeuxTroisSexeSurRepresente: "hommes" | "femmes" | undefined
+): { note: number | undefined; correctionMeasure: boolean } => {
+  if (
+    noteIndicateurUn !== undefined &&
+    noteIndicateurUn < 40 &&
+    indicateurUnSexeSurRepresente &&
+    indicateurDeuxTroisSexeSurRepresente &&
+    indicateurUnSexeSurRepresente !== indicateurDeuxTroisSexeSurRepresente
+  ) {
+    return { note: barem[0], correctionMeasure: true };
+  }
   if (ecartTaux === undefined || ecartNombreSalaries === undefined) {
-    return undefined;
+    return { note: undefined, correctionMeasure: false };
   }
   const noteEcartTaux = calculBarem(ecartTaux);
   const noteEcartNombreSalaries = calculBarem(ecartNombreSalaries);
 
-  return Math.max(noteEcartTaux, noteEcartNombreSalaries);
+  const note = Math.max(noteEcartTaux, noteEcartNombreSalaries);
+  return { note, correctionMeasure: false };
 };
 
 /////////
@@ -138,10 +152,19 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
     totalNombreSalariesFemmes
   );
 
+  // Mesures correction indicateur 1
+  const {
+    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
+    noteIndicateurUn
+  } = calculIndicateurUn(state);
+
   // // NOTE
-  const noteIndicateurDeuxTrois = calculNote(
+  const { note: noteIndicateurDeuxTrois, correctionMeasure } = calculNote(
     indicateurEcartAugmentationPromotionAbsolute,
-    indicateurEcartNombreEquivalentSalaries
+    indicateurEcartNombreEquivalentSalaries,
+    noteIndicateurUn,
+    indicateurUnSexeSurRepresente,
+    indicateurSexeSurRepresente
   );
 
   return {
@@ -149,6 +172,7 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
     indicateurEcartAugmentationPromotion: indicateurEcartAugmentationPromotionAbsolute,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente,
-    noteIndicateurDeuxTrois
+    noteIndicateurDeuxTrois,
+    correctionMeasure
   };
 }

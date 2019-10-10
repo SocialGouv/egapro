@@ -48,7 +48,8 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     indicateurEcartAugmentationPromotion,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente,
-    noteIndicateurDeuxTrois
+    noteIndicateurDeuxTrois,
+    correctionMeasure
   } = calculIndicateurDeuxTrois(state);
 
   // le formulaire d'effectif n'est pas validé
@@ -147,6 +148,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
               }
               indicateurSexeSurRepresente={indicateurSexeSurRepresente}
               noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
+              correctionMeasure={correctionMeasure}
               validateIndicateurDeuxTrois={validateIndicateurDeuxTrois}
             />
           )

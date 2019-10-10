@@ -2,6 +2,7 @@
 
 exports[`test calculIndicateurDeuxTrois test data 1`] = `
 Object {
+  "correctionMeasure": false,
   "indicateurCalculable": true,
   "indicateurEcartAugmentationPromotion": 11.1905,
   "indicateurEcartNombreEquivalentSalaries": 3.1,

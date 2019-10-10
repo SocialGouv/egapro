@@ -21,15 +21,66 @@ describe("calculBarem", () => {
 });
 
 describe("calculNote", () => {
-  test("cant calcul note", () => {
-    expect(calculNote(undefined, undefined)).toEqual(undefined);
-    expect(calculNote(1, undefined)).toEqual(undefined);
-    expect(calculNote(undefined, 1)).toEqual(undefined);
+  test("can't calcul note", () => {
+    expect(
+      calculNote(undefined, undefined, undefined, undefined, undefined)
+    ).toEqual({ node: undefined, correctionMeasure: false });
+    expect(calculNote(1, undefined, undefined, undefined, undefined)).toEqual({
+      note: undefined,
+      correctionMeasure: false
+    });
+    expect(calculNote(undefined, 1, undefined, undefined, undefined)).toEqual({
+      note: undefined,
+      correctionMeasure: false
+    });
   });
 
   test("test max of both notes", () => {
-    expect(calculNote(15, 0)).toEqual(35);
-    expect(calculNote(0, 15)).toEqual(35);
+    expect(calculNote(15, 0, undefined, undefined, undefined)).toEqual({
+      note: 35,
+      correctionMeasure: false
+    });
+    expect(calculNote(0, 15, undefined, undefined, undefined)).toEqual({
+      note: 35,
+      correctionMeasure: false
+    });
+  });
+
+  describe("correction measure from indicateur 1", () => {
+    test("note indicator 1 is 40 so no correction measure", () => {
+      expect(calculNote(2.1, 2.1, 40, "femmes", "hommes")).toEqual({
+        note: 25,
+        correctionMeasure: false
+      });
+    });
+
+    test("overrepresented sex is same on indicator 1 & 2et3 so no correction measure", () => {
+      expect(calculNote(8.1, 8.1, 36, "hommes", "hommes")).toEqual({
+        note: 15,
+        correctionMeasure: false
+      });
+    });
+
+    test("correction measure for men", () => {
+      expect(calculNote(2.1, 2.1, 39, "femmes", "hommes")).toEqual({
+        note: 35,
+        correctionMeasure: true
+      });
+    });
+
+    test("correction measure for women", () => {
+      expect(calculNote(8.1, 8.1, 36, "hommes", "femmes")).toEqual({
+        note: 35,
+        correctionMeasure: true
+      });
+    });
+
+    test("note indicator 1 is 0", () => {
+      expect(calculNote(8.1, 8.1, 0, "hommes", "femmes")).toEqual({
+        note: 35,
+        correctionMeasure: true
+      });
+    });
   });
 });
 
