@@ -119,12 +119,12 @@ Create namespace (dev):
     - docker push $IMAGE_NAME
 #
 
-Register api image:
-  <<: *register_stage
-  variables:
-    CONTEXT: .
-    DOCKERFILE_PATH: packages/api/Dockerfile
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
+#Register api image:
+#  <<: *register_stage
+#  variables:
+#    CONTEXT: .
+#    DOCKERFILE_PATH: packages/api/Dockerfile
+#    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
 
 Register app image:
   <<: *register_stage
@@ -168,19 +168,19 @@ Deploy @egapro/app (dev):
   except:
     - master
 
-Deploy @egapro/api (dev):
-  <<: *deploy_stage
-  extends: .deploy-egapro-api-k8s-dev
-  stage: "Deploy dev"
-  variables:
-    <<: *deploy_stage_variables
-    PORT: $API_PORT
-  environment:
-    name: $DEV_ENVIRONMENT_NAME
-  only:
-    - branches
-  except:
-    - master
+#Deploy @egapro/api (dev):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-api-k8s-dev
+#  stage: "Deploy dev"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $API_PORT
+#  environment:
+#    name: $DEV_ENVIRONMENT_NAME
+#  only:
+#    - branches
+#  except:
+#    - master
 
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
