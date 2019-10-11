@@ -22,9 +22,15 @@ stages:
   - "Code Quality"
   - "Prepare"
   - "Registration"
+  - "Create secret dev"
   - "Deploy dev"
   - "Deploy prod"
   - "Send Url to GitHub"
+
+
+###########################################
+###            CODE QUALITY             ###
+###########################################
 
 #
 .quality_stage: &quality_stage
@@ -143,7 +149,7 @@ Register init kinto image:
 
 
 ###########################################
-###            DEPLOY TO K8S            ###
+###          CREATE SECRET DEV          ###
 ###########################################
 
 #
@@ -154,11 +160,9 @@ Register init kinto image:
     IMAGE_TAG: $CI_COMMIT_SHA
 #
 
-# Dev Environment
-
 Deploy @secret (dev):
   <<: *deploy_stage
-  stage: "Deploy dev"
+  stage: "Create secret dev"
   image:
     name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
   variables:
@@ -166,15 +170,22 @@ Deploy @secret (dev):
   environment:
     name: $DEV_ENVIRONMENT_NAME
   script:
-    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-    - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
-    - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
+  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+  - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
+  - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   only:
-    - branches
+  - branches
   except:
-    - master
+  - master
+
+
+###########################################
+###            DEPLOY TO K8S            ###
+###########################################
+
+# Dev Environment
 
 Deploy @egapro/app (dev):
   <<: *deploy_stage
