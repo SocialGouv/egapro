@@ -73,7 +73,7 @@ const styles = {
   }),
   radioField: css({
     marginTop: 9,
-    "&:first-child": {
+    "&:first-of-type": {
       marginTop: 0
     }
   }),
