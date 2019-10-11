@@ -117,18 +117,15 @@ function IndicateurDeuxTroisForm({
 
           <div css={styles.spacer} />
 
-          {values.periodeDeclaration === "unePeriodeReference" && (
-            <RadiosBoolean
-              fieldName="presenceAugmentationPromotion"
-              value={values.presenceAugmentationPromotion}
-              readOnly={readOnly}
-              labelTrue="il y a eu des augmentations ou des promotions durant la période de déclaration"
-              labelFalse="il n’y a pas eu d'augmentations ou de promotions durant la période de déclaration"
-            />
-          )}
+          <RadiosBoolean
+            fieldName="presenceAugmentationPromotion"
+            value={values.presenceAugmentationPromotion}
+            readOnly={readOnly}
+            labelTrue="il y a eu des augmentations ou des promotions durant la période de déclaration"
+            labelFalse="il n’y a pas eu d'augmentations ou de promotions durant la période de déclaration"
+          />
 
-          {(values.presenceAugmentationPromotion === "true" ||
-            values.periodeDeclaration !== "unePeriodeReference") && (
+          {values.presenceAugmentationPromotion === "true" && (
             <BlocForm>
               <FieldInputsMenWomen
                 name="nombre de salariés augmentés ou promus"

@@ -44,7 +44,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   );
 
   const {
-    indicateurCalculable,
+    effectifsIndicateurCalculable,
     indicateurEcartAugmentationPromotion,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente,
@@ -70,7 +70,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   }
 
   // les effectifs ne permettent pas de calculer l'indicateur
-  if (!indicateurCalculable) {
+  if (!effectifsIndicateurCalculable) {
     return (
       <PageIndicateurDeuxTrois>
         <div>
@@ -89,8 +89,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
   if (
     state.indicateurDeuxTrois.formValidated === "Valid" &&
-    (!state.indicateurDeuxTrois.presenceAugmentationPromotion &&
-      state.indicateurDeuxTrois.periodeDeclaration === "unePeriodeReference")
+    !state.indicateurDeuxTrois.presenceAugmentationPromotion
   ) {
     return (
       <PageIndicateurDeuxTrois>
