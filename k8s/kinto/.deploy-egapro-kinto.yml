@@ -14,7 +14,7 @@
   script:
   - kubectl apply -f k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
   - kubectl apply -f k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-  - k8s/scripts/init-kinto.sh $HASH_BRANCH_NAME
+  - k8s/scripts/init-kinto.sh $HASH_BRANCH_NAME ${K8S_NAMESPACE}
   allow_failure: false
 
 #.deploy-egapro-kinto-k8s-prod:
