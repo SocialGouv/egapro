@@ -2,59 +2,59 @@
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
-import { FormState, CategorieSocioPro } from "../../globals.d";
+import { FormState } from "../../globals.d";
 
-import {
-  displayNameCategorieSocioPro,
-  displayPercent
-} from "../../utils/helpers";
+import { displayPercent } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 
-import { RowDataFull, RowLabelFull } from "./components/RowData";
+import RowData, { RowLabels, RowLabelFull } from "./components/RowData";
 
 interface Props {
-  indicateurTroisFormValidated: FormState;
-  effectifsIndicateurTroisCalculable: boolean;
-  indicateurTroisCalculable: boolean;
-  effectifEtEcartPromoParGroupe: Array<{
-    categorieSocioPro: CategorieSocioPro;
-    ecartTauxPromotion: number | undefined;
-  }>;
-  indicateurEcartPromotion: number | undefined;
+  indicateurDeuxTroisFormValidated: FormState;
+  effectifsIndicateurDeuxTroisCalculable: boolean;
+  indicateurDeuxTroisCalculable: boolean;
+  indicateurEcartAugmentationPromotion: number | undefined;
+  indicateurEcartNombreEquivalentSalaries: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
-  noteIndicateurTrois: number | undefined;
+  noteIndicateurDeuxTrois: number | undefined;
   correctionMeasure: boolean;
+  tauxAugmentationPromotionFemmes: number | undefined;
+  tauxAugmentationPromotionHommes: number | undefined;
+  plusPetitNombreSalaries: "hommes" | "femmes" | undefined;
 }
 
-function RecapitulatifIndicateurTrois({
-  indicateurTroisFormValidated,
-  effectifsIndicateurTroisCalculable,
-  indicateurTroisCalculable,
-  effectifEtEcartPromoParGroupe,
-  indicateurEcartPromotion,
+function RecapitulatifIndicateurDeuxTrois({
+  indicateurDeuxTroisFormValidated,
+  effectifsIndicateurDeuxTroisCalculable,
+  indicateurDeuxTroisCalculable,
+  indicateurEcartAugmentationPromotion,
+  indicateurEcartNombreEquivalentSalaries,
   indicateurSexeSurRepresente,
-  noteIndicateurTrois,
-  correctionMeasure
+  noteIndicateurDeuxTrois,
+  correctionMeasure,
+  tauxAugmentationPromotionFemmes,
+  tauxAugmentationPromotionHommes,
+  plusPetitNombreSalaries
 }: Props) {
-  if (!effectifsIndicateurTroisCalculable) {
+  if (!effectifsIndicateurDeuxTroisCalculable) {
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur écart de taux de promotions entre les femmes et les hommes"
-          text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
+          title="Indicateur écart de taux d'augmentations et de promotions entre les femmes et les hommes"
+          text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
         />
       </div>
     );
   }
 
-  if (indicateurTroisFormValidated !== "Valid") {
+  if (indicateurDeuxTroisFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur écart de taux de promotions entre les femmes et les hommes"
+          title="Indicateur écart de taux d'augmentations et de promotions entre les femmes et les hommes"
           text={
             <Fragment>
               <span>
@@ -62,7 +62,7 @@ function RecapitulatifIndicateurTrois({
                 pas encore validé vos données saissies.
               </span>{" "}
               <TextSimulatorLink
-                to="/indicateur3"
+                to="/indicateur2et3"
                 label="valider les données"
               />
             </Fragment>
@@ -72,12 +72,12 @@ function RecapitulatifIndicateurTrois({
     );
   }
 
-  if (!indicateurTroisCalculable) {
+  if (!indicateurDeuxTroisCalculable) {
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur écart de taux de promotions entre les femmes et les hommes"
-          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu de promotion durant la période de référence"
+          title="Indicateur écart de taux d'augmentations et de promotions entre les femmes et les hommes"
+          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu d'augmentation ou de promotion durant la période de référence"
         />
       </div>
     );
@@ -86,39 +86,88 @@ function RecapitulatifIndicateurTrois({
   return (
     <div css={styles.container}>
       <RecapBloc
-        title="Indicateur écart de taux de promotions entre les femmes et les hommes"
+        title="Indicateur écart de taux de augmentations promotions entre les femmes et les hommes"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
-            indicateurEcartPromotion !== undefined
-              ? displayPercent(indicateurEcartPromotion)
+            indicateurEcartAugmentationPromotion !== undefined
+              ? displayPercent(indicateurEcartAugmentationPromotion)
               : "--",
           firstLineInfo: `écart favorable aux ${indicateurSexeSurRepresente}`,
           secondLineLabel: "votre note obtenue est",
           secondLineData:
-            (noteIndicateurTrois !== undefined ? noteIndicateurTrois : "--") +
-            "/15",
+            (noteIndicateurDeuxTrois !== undefined
+              ? noteIndicateurDeuxTrois
+              : "--") + "/35",
           secondLineInfo: correctionMeasure
             ? "mesures de correction prises en compte"
             : undefined,
           indicateurSexeSurRepresente
         }}
       >
-        <RowLabelFull label="écart de taux de promotions par csp" />
+        <RowLabelFull label="taux d'augmentation ou de promotion" />
+        <RowLabels labels={["femmes", "hommes"]} />
+        <RowData
+          name="taux de salariés augmentés ou promus"
+          data={[
+            tauxAugmentationPromotionFemmes,
+            tauxAugmentationPromotionHommes
+          ]}
+          asPercent={true}
+        />
 
-        {effectifEtEcartPromoParGroupe.map(
-          ({ categorieSocioPro, ecartTauxPromotion }) => (
-            <RowDataFull
-              key={categorieSocioPro}
-              name={displayNameCategorieSocioPro(categorieSocioPro)}
-              data={ecartTauxPromotion}
-            />
-          )
-        )}
+        <RowLabelFull label="écart en nombre équivalent de salariés" />
+        <RowData
+          name="nombre équivalent de salariés"
+          data={[indicateurEcartNombreEquivalentSalaries]}
+          message={messageEcartNombreEquivalentSalaries(
+            indicateurSexeSurRepresente,
+            plusPetitNombreSalaries
+          )}
+        />
       </RecapBloc>
     </div>
   );
 }
+
+const messageEcartNombreEquivalentSalaries = (
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined,
+  plusPetitNombreSalaries: "hommes" | "femmes" | undefined
+): string => {
+  if (
+    indicateurSexeSurRepresente === "hommes" &&
+    plusPetitNombreSalaries === "femmes"
+  ) {
+    return "si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+  } else if (
+    indicateurSexeSurRepresente === "hommes" &&
+    plusPetitNombreSalaries === "hommes"
+  ) {
+    return "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
+  } else if (
+    indicateurSexeSurRepresente === "hommes" &&
+    plusPetitNombreSalaries === undefined
+  ) {
+    return "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+  } else if (
+    indicateurSexeSurRepresente === "femmes" &&
+    plusPetitNombreSalaries === "femmes"
+  ) {
+    return "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
+  } else if (
+    indicateurSexeSurRepresente === "femmes" &&
+    plusPetitNombreSalaries === "hommes"
+  ) {
+    return "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+  } else if (
+    indicateurSexeSurRepresente === "femmes" &&
+    plusPetitNombreSalaries === undefined
+  ) {
+    return "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+  } else {
+    return "nothing";
+  }
+};
 
 const styles = {
   container: css({
@@ -126,7 +175,8 @@ const styles = {
     flexDirection: "column",
     marginTop: 22,
     marginBottom: 22
-  })
+  }),
+  message: css({})
 };
 
-export default RecapitulatifIndicateurTrois;
+export default RecapitulatifIndicateurDeuxTrois;

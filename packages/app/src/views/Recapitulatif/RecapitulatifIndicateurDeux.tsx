@@ -112,6 +112,7 @@ function RecapitulatifIndicateurDeux({
               key={categorieSocioPro}
               name={displayNameCategorieSocioPro(categorieSocioPro)}
               data={ecartTauxAugmentation}
+              asPercent={true}
             />
           )
         )}

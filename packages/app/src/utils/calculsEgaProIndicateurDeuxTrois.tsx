@@ -26,7 +26,7 @@ export const calculIndicateurEcartAugmentationPromotion = calculIndicateurEcartA
 export const calculIndicateurEcartAugmentationPromotionAbsolute = calculIndicateurEcartAugmentationAbsolute;
 
 // // IC
-export const calculIndicateurCalculable = (
+export const calculEffectifsIndicateurCalculable = (
   totalNombreSalariesHommes: number | undefined,
   totalNombreSalariesFemmes: number | undefined
 ): boolean => {
@@ -38,6 +38,13 @@ export const calculIndicateurCalculable = (
   );
 };
 
+export const calculIndicateurCalculable = (
+  presenceAugmentationPromotion: boolean,
+  effectifsIndicateurCalculable: boolean
+): boolean => {
+  return presenceAugmentationPromotion && effectifsIndicateurCalculable;
+};
+
 export const calculTaux = (
   nombreSalaries: number | undefined,
   totalNombreSalaries: number | undefined
@@ -47,6 +54,22 @@ export const calculTaux = (
   totalNombreSalaries > 0
     ? nombreSalaries / totalNombreSalaries
     : undefined;
+
+export const calculPlusPetitNombreSalaries = (
+  totalNombreSalariesHommes: number | undefined,
+  totalNombreSalariesFemmes: number | undefined
+): "hommes" | "femmes" | undefined => {
+  if (
+    totalNombreSalariesFemmes === totalNombreSalariesHommes ||
+    totalNombreSalariesFemmes === undefined ||
+    totalNombreSalariesHommes === undefined
+  ) {
+    return undefined;
+  }
+  return totalNombreSalariesHommes > totalNombreSalariesFemmes
+    ? "hommes"
+    : "femmes";
+};
 
 export const calculIndicateurEcartNombreEquivalentSalaries = (
   indicateurEcartAugmentationPromotionAbsolute: number | undefined,
@@ -112,9 +135,19 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
     totalNombreSalariesFemme: totalNombreSalariesFemmes
   } = totalNombreSalaries(state.effectif.nombreSalaries);
 
-  const indicateurCalculable = calculIndicateurCalculable(
+  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(
     totalNombreSalariesHommes,
     totalNombreSalariesFemmes
+  );
+
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
+    totalNombreSalariesHommes,
+    totalNombreSalariesFemmes
+  );
+
+  const indicateurCalculable = calculIndicateurCalculable(
+    state.indicateurDeuxTrois.presenceAugmentationPromotion,
+    effectifsIndicateurCalculable
   );
 
   const tauxAugmentationPromotionHommes = calculTaux(
@@ -168,11 +201,15 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
   );
 
   return {
+    effectifsIndicateurCalculable,
     indicateurCalculable,
     indicateurEcartAugmentationPromotion: indicateurEcartAugmentationPromotionAbsolute,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente,
     noteIndicateurDeuxTrois,
-    correctionMeasure
+    correctionMeasure,
+    tauxAugmentationPromotionHommes,
+    tauxAugmentationPromotionFemmes,
+    plusPetitNombreSalaries
   };
 }
