@@ -277,8 +277,8 @@ function AppReducer(
     case "validateIndicateurTrois": {
       return {
         ...state,
-        indicateurDeuxTrois: {
-          ...state.indicateurDeuxTrois,
+        indicateurTrois: {
+          ...state.indicateurTrois,
           formValidated: action.valid
         }
       };

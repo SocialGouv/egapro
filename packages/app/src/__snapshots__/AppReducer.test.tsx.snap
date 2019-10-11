@@ -481,7 +481,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Valid",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -9212,7 +9212,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Invalid",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -9535,7 +9535,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Valid",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -9858,7 +9858,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Invalid",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -13238,7 +13238,7 @@ Object {
     ],
   },
   "indicateurDeuxTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "nombreAugmentationPromotionFemmes": 1,
     "nombreAugmentationPromotionHommes": 2,
     "periodeDeclaration": "unePeriodeReference",
@@ -13251,7 +13251,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Valid",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -13561,7 +13561,7 @@ Object {
     ],
   },
   "indicateurDeuxTrois": Object {
-    "formValidated": "Valid",
+    "formValidated": "None",
     "nombreAugmentationPromotionFemmes": undefined,
     "nombreAugmentationPromotionHommes": undefined,
     "periodeDeclaration": "unePeriodeReference",
@@ -13574,7 +13574,7 @@ Object {
     "presenceCongeMat": true,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Valid",
     "presencePromotion": true,
     "tauxPromotion": Array [
       Object {
@@ -14479,7 +14479,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Valid",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
@@ -15416,7 +15416,7 @@ Object {
     "presenceCongeMat": false,
   },
   "indicateurTrois": Object {
-    "formValidated": "None",
+    "formValidated": "Valid",
     "presencePromotion": false,
     "tauxPromotion": Array [
       Object {
