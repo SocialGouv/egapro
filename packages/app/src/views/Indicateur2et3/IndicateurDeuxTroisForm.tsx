@@ -7,7 +7,7 @@ import {
   PeriodeDeclaration
 } from "../../globals.d";
 
-import { BlocFormLight } from "../../components/BlocForm";
+import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import RadiosBoolean from "../../components/RadiosBoolean";
 import RadioButtons from "../../components/RadioButtons";
@@ -129,7 +129,7 @@ function IndicateurDeuxTroisForm({
 
           {(values.presenceAugmentationPromotion === "true" ||
             values.periodeDeclaration !== "unePeriodeReference") && (
-            <BlocFormLight>
+            <BlocForm>
               <FieldInputsMenWomen
                 name="nombre de salariés augmentés ou promus"
                 readOnly={readOnly}
@@ -139,7 +139,7 @@ function IndicateurDeuxTroisForm({
                 femmeFieldName="nombreAugmentationPromotionFemmes"
                 hommeFieldName="nombreAugmentationPromotionHommes"
               />
-            </BlocFormLight>
+            </BlocForm>
           )}
 
           {readOnly ? (
