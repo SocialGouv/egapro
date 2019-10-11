@@ -343,11 +343,11 @@ export const contact: FAQContact = [
     people: [
       {
         title: "Coordination régionale",
-        name: "Floriane RODRIGUEZ",
+        name: "Fabienne MIRAMOND SCARDIA",
         links: [
           {
             type: "email",
-            data: "cvl.relations-travail@direccte.gouv.fr"
+            data: "cvl.ega-pro@direccte.gouv.fr"
           }
         ]
       },
@@ -472,7 +472,7 @@ export const contact: FAQContact = [
       },
       {
         title: "Haute Marne (52)",
-        name: "Christine VALTON - Gaëlle ESPRIT (en intérim)",
+        name: "Christine VALTON - Alexandra DUSSAUCY (en intérim)",
         links: [
           {
             type: "email",
