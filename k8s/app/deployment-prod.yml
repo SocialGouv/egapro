@@ -33,6 +33,13 @@ spec:
               port: ${PORT}
             initialDelaySeconds: 3
             periodSeconds: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
           env:
             - name: REACT_APP_API_URL
               value: "https://egapro-api.${ENVIRONMENT}"
