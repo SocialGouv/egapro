@@ -17,17 +17,16 @@
     - kubectl apply -f k8s/api/ingress-egapro.yml -n ${K8S_NAMESPACE}
   allow_failure: false
 
-#.deploy-egapro-api-k8s-prod:
-#  image:
-#    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
-#    entrypoint: [""]
-#  before_script:
-#    - /apps/create-kubeconfig.sh
-#    - envsubst < k8s/api/deployment-prod.yml > k8s/api/deployment-egapro.yml
-#    - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
-#    - envsubst < k8s/api/ingress-prod.yml > k8s/api/ingress-prod-egapro.yml
-#  script:
-#    - kubectl apply -f k8s/api/deployment-egapro.yml
-#    - kubectl apply -f k8s/api/service-egapro.yml
-#    - kubectl apply -f k8s/api/ingress-prod-egapro.yml
-#  allow_failure: false
+.deploy-egapro-api-k8s-prod:
+  image:
+    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+    entrypoint: [""]
+  before_script:
+    - envsubst < k8s/api/deployment-prod.yml > k8s/api/deployment-egapro.yml
+    - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
+    - envsubst < k8s/api/ingress-prod.yml > k8s/api/ingress-prod-egapro.yml
+  script:
+    - kubectl apply -f k8s/api/deployment-egapro.yml -n $NAMESPACE
+    - kubectl apply -f k8s/api/service-egapro.yml -n $NAMESPACE
+    - kubectl apply -f k8s/api/ingress-prod-egapro.yml -n $NAMESPACE
+  allow_failure: false
