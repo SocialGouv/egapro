@@ -42,4 +42,5 @@ spec:
               memory: 64Mi
           env:
             - name: REACT_APP_API_URL
-              value: "https://egapro-api.${ENVIRONMENT}"
+#              value: "https://egapro-api.${ENVIRONMENT}"
+              value: "http://egapro-api.${ENVIRONMENT}.social.gouv.fr"
