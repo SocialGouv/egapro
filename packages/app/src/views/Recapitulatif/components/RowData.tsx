@@ -10,10 +10,14 @@ import { CellHead, Cell } from "../../../components/Cell";
 
 function RowData({
   name,
-  data
+  data,
+  asPercent,
+  message
 }: {
   name: string;
   data: Array<number | undefined>;
+  asPercent?: boolean;
+  message?: string;
 }) {
   return (
     <div css={styles.container}>
@@ -31,20 +35,27 @@ function RowData({
               datum === undefined && styles.cellEmpty
             ]}
           >
-            {datum !== undefined ? displayFractionPercent(datum, 1) : "nc"}
+            {datum !== undefined
+              ? asPercent
+                ? displayFractionPercent(datum, 1)
+                : datum
+              : "nc"}
           </Cell>
         ))}
       </div>
+      <p css={css({ fontSize: "0.8em" })}>{message}</p>
     </div>
   );
 }
 
 export function RowDataFull({
   name,
-  data
+  data,
+  asPercent
 }: {
   name: string;
   data: number | undefined;
+  asPercent: boolean;
 }) {
   return (
     <div css={styles.container}>
@@ -61,7 +72,11 @@ export function RowDataFull({
             data === undefined && styles.cellEmpty
           ]}
         >
-          {data !== undefined ? displayFractionPercent(data, 1) : "nc"}
+          {data !== undefined
+            ? asPercent
+              ? displayFractionPercent(data, 1)
+              : data
+            : "nc"}
         </Cell>
       </div>
     </div>

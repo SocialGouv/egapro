@@ -146,6 +146,7 @@ function RecapitulatifIndicateurUn({
                 effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne,
                 effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
               ]}
+              asPercent={true}
             />
           )
         )}

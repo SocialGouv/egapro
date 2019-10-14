@@ -3,7 +3,8 @@ import {
   AppState,
   ActionType,
   CategorieSocioPro,
-  TranchesAges
+  TranchesAges,
+  PeriodeDeclaration
 } from "./globals.d";
 import mapEnum from "./utils/mapEnum";
 import { overwriteMerge, combineMerge } from "./utils/merge";
@@ -84,6 +85,13 @@ const defaultState: AppState = {
     presencePromotion: true,
     tauxPromotion: dataIndicateurTrois
   },
+  indicateurDeuxTrois: {
+    formValidated: "None",
+    presenceAugmentationPromotion: true,
+    nombreAugmentationPromotionFemmes: undefined,
+    nombreAugmentationPromotionHommes: undefined,
+    periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration
+  },
   indicateurQuatre: {
     formValidated: "None",
     presenceCongeMat: true,
@@ -137,7 +145,11 @@ function AppReducer(
           indicateurTrois:
             state.indicateurTrois.formValidated === "Valid"
               ? { ...state.indicateurTrois, formValidated: "Invalid" }
-              : state.indicateurTrois
+              : state.indicateurTrois,
+          indicateurDeuxTrois:
+            state.indicateurDeuxTrois.formValidated === "Valid"
+              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
+              : state.indicateurDeuxTrois
         };
       }
       return {
@@ -267,6 +279,33 @@ function AppReducer(
         ...state,
         indicateurTrois: {
           ...state.indicateurTrois,
+          formValidated: action.valid
+        }
+      };
+    }
+    case "updateIndicateurDeuxTrois": {
+      const {
+        presenceAugmentationPromotion,
+        nombreAugmentationPromotionFemmes,
+        nombreAugmentationPromotionHommes,
+        periodeDeclaration
+      } = action.data;
+      return {
+        ...state,
+        indicateurDeuxTrois: {
+          ...state.indicateurDeuxTrois,
+          presenceAugmentationPromotion,
+          nombreAugmentationPromotionFemmes,
+          nombreAugmentationPromotionHommes,
+          periodeDeclaration
+        }
+      };
+    }
+    case "validateIndicateurDeuxTrois": {
+      return {
+        ...state,
+        indicateurDeuxTrois: {
+          ...state.indicateurDeuxTrois,
           formValidated: action.valid
         }
       };

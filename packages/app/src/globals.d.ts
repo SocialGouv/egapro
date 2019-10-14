@@ -21,6 +21,13 @@ export type AppState = {
     presencePromotion: boolean;
     tauxPromotion: Array<GroupeIndicateurTrois>;
   };
+  indicateurDeuxTrois: {
+    formValidated: FormState;
+    presenceAugmentationPromotion: boolean;
+    nombreAugmentationPromotionFemmes: number | undefined;
+    nombreAugmentationPromotionHommes: number | undefined;
+    periodeDeclaration: PeriodeDeclaration;
+  };
   indicateurQuatre: {
     formValidated: FormState;
     presenceCongeMat: boolean;
@@ -33,6 +40,11 @@ export type AppState = {
     nombreSalariesFemmes: number | undefined;
   };
 };
+
+export type PeriodeDeclaration =
+  | "unePeriodeReference"
+  | "deuxPeriodesReference"
+  | "troisPeriodesReference";
 
 export type FormState = "None" | "Valid" | "Invalid";
 
@@ -100,6 +112,14 @@ export type ActionType =
       valid: FormState;
     }
   | {
+      type: "updateIndicateurDeuxTrois";
+      data: ActionIndicateurDeuxTroisData;
+    }
+  | {
+      type: "validateIndicateurDeuxTrois";
+      valid: FormState;
+    }
+  | {
       type: "updateIndicateurQuatre";
       data: ActionIndicateurQuatreData;
     }
@@ -147,6 +167,18 @@ export type ActionIndicateurDeuxData = {
 export type ActionIndicateurTroisData = {
   presencePromotion: boolean;
   tauxPromotion: Array<GroupeIndicateurTrois>;
+};
+
+export type ActionIndicateurDeuxTroisData = {
+  presenceAugmentationPromotion: boolean;
+  nombreAugmentationPromotionFemmes: number | undefined;
+  nombreAugmentationPromotionHommes: number | undefined;
+  periodeDeclaration: PeriodeDeclaration;
+};
+
+export type DateInterval = {
+  start: Date;
+  end: Date;
 };
 
 export type ActionIndicateurQuatreData = {
@@ -241,7 +273,7 @@ export type FAQPart = {
   [key in FAQPartType]: {
     title: string;
     qr: Array<{ question: string; reponse: Array<string> }>;
-  }
+  };
 };
 
 export type FAQSectionType =
@@ -258,7 +290,7 @@ export type FAQSection = {
   [key in FAQSectionType]: {
     title: string;
     parts: Array<FAQPartType>;
-  }
+  };
 };
 
 ////////////

@@ -1,4 +1,8 @@
-import { CategorieSocioPro, TranchesAges } from "../globals.d";
+import {
+  CategorieSocioPro,
+  PeriodeDeclaration,
+  TranchesAges
+} from "../globals.d";
 import AppReducer from "../AppReducer";
 
 const actionInitiateState = {
@@ -359,6 +363,16 @@ const actionUpdateIndicateurTrois = {
   }
 };
 
+const actionUpdateIndicateurDeuxTrois = {
+  type: "updateIndicateurDeuxTrois" as "updateIndicateurDeuxTrois",
+  data: {
+    presenceAugmentationPromotion: false,
+    nombreAugmentationPromotionFemmes: 1,
+    nombreAugmentationPromotionHommes: 2,
+    periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration
+  }
+};
+
 const actionUpdateIndicateurQuatre = {
   type: "updateIndicateurQuatre" as "updateIndicateurQuatre",
   data: {
@@ -387,22 +401,25 @@ const stateDefault = AppReducer(
               AppReducer(
                 AppReducer(
                   AppReducer(
-                    AppReducer(undefined, actionInitiateState),
-                    actionUpdateEffectif
+                    AppReducer(
+                      AppReducer(undefined, actionInitiateState),
+                      actionUpdateEffectif
+                    ),
+                    actionUpdateIndicateurUnCsp
                   ),
-                  actionUpdateIndicateurUnCsp
+                  actionUpdateIndicateurUnCoefAddGroup
                 ),
-                actionUpdateIndicateurUnCoefAddGroup
+                actionUpdateIndicateurUnCoefName
               ),
-              actionUpdateIndicateurUnCoefName
+              actionUpdateIndicateurUnCoefNombreSalaries
             ),
-            actionUpdateIndicateurUnCoefNombreSalaries
+            actionUpdateIndicateurUnCoefRemuneration
           ),
-          actionUpdateIndicateurUnCoefRemuneration
+          actionUpdateIndicateurDeux
         ),
-        actionUpdateIndicateurDeux
+        actionUpdateIndicateurTrois
       ),
-      actionUpdateIndicateurTrois
+      actionUpdateIndicateurDeuxTrois
     ),
     actionUpdateIndicateurQuatre
   ),

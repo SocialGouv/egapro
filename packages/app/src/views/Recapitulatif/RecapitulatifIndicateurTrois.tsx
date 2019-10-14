@@ -112,6 +112,7 @@ function RecapitulatifIndicateurTrois({
               key={categorieSocioPro}
               name={displayNameCategorieSocioPro(categorieSocioPro)}
               data={ecartTauxPromotion}
+              asPercent={true}
             />
           )
         )}

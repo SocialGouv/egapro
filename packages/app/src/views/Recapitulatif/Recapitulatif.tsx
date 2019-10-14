@@ -7,6 +7,7 @@ import { AppState } from "../../globals.d";
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
 import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
+import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex";
@@ -19,6 +20,7 @@ import RecapitulatifIndex from "./RecapitulatifIndex";
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn";
 import RecapitulatifIndicateurDeux from "./RecapitulatifIndicateurDeux";
 import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois";
+import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois";
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre";
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq";
 
@@ -56,6 +58,19 @@ function Recapitulatif({ state }: Props) {
   } = calculIndicateurTrois(state);
 
   const {
+    effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
+    indicateurCalculable: indicateurDeuxTroisCalculable,
+    indicateurEcartAugmentationPromotion,
+    indicateurEcartNombreEquivalentSalaries,
+    indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    noteIndicateurDeuxTrois,
+    correctionMeasure: correctionMeasureIndicateurDeuxTrois,
+    tauxAugmentationPromotionHommes,
+    tauxAugmentationPromotionFemmes,
+    plusPetitNombreSalaries
+  } = calculIndicateurDeuxTrois(state);
+
+  const {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre
@@ -74,6 +89,8 @@ function Recapitulatif({ state }: Props) {
       !effectifsIndicateurDeuxCalculable) &&
     (state.indicateurTrois.formValidated === "Valid" ||
       !effectifsIndicateurTroisCalculable) &&
+    (state.indicateurDeuxTrois.formValidated === "Valid" ||
+      !effectifsIndicateurDeuxTroisCalculable) &&
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
@@ -119,6 +136,27 @@ function Recapitulatif({ state }: Props) {
         indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
         noteIndicateurTrois={noteIndicateurTrois}
         correctionMeasure={correctionMeasureIndicateurTrois}
+      />
+      <RecapitulatifIndicateurDeuxTrois
+        indicateurDeuxTroisFormValidated={
+          state.indicateurDeuxTrois.formValidated
+        }
+        effectifsIndicateurDeuxTroisCalculable={
+          effectifsIndicateurDeuxTroisCalculable
+        }
+        indicateurDeuxTroisCalculable={indicateurDeuxTroisCalculable}
+        indicateurEcartAugmentationPromotion={
+          indicateurEcartAugmentationPromotion
+        }
+        indicateurEcartNombreEquivalentSalaries={
+          indicateurEcartNombreEquivalentSalaries
+        }
+        indicateurSexeSurRepresente={indicateurDeuxTroisSexeSurRepresente}
+        noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
+        correctionMeasure={correctionMeasureIndicateurDeuxTrois}
+        tauxAugmentationPromotionHommes={tauxAugmentationPromotionHommes}
+        tauxAugmentationPromotionFemmes={tauxAugmentationPromotionFemmes}
+        plusPetitNombreSalaries={plusPetitNombreSalaries}
       />
       <RecapitulatifIndicateurQuatre
         indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}

@@ -1,4 +1,9 @@
-import { CategorieSocioPro, TranchesAges, FormState } from "./globals.d";
+import {
+  CategorieSocioPro,
+  TranchesAges,
+  FormState,
+  PeriodeDeclaration
+} from "./globals.d";
 
 import AppReducer from "./AppReducer";
 
@@ -554,6 +559,30 @@ describe("updateIndicateurTrois", () => {
   });
 });
 
+describe("updateIndicateurDeuxTrois", () => {
+  const action = {
+    type: "updateIndicateurDeuxTrois" as "updateIndicateurDeuxTrois",
+    data: {
+      presenceAugmentationPromotion: true,
+      nombreAugmentationPromotionFemmes: 3,
+      nombreAugmentationPromotionHommes: 4,
+      periodeDeclaration: "deuxPeriodesReference" as PeriodeDeclaration
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
 describe("updateIndicateurQuatre", () => {
   const action = {
     type: "updateIndicateurQuatre" as "updateIndicateurQuatre",
@@ -767,6 +796,25 @@ describe("validateIndicateurDeux", () => {
 describe("validateIndicateurTrois", () => {
   const action = {
     type: "validateIndicateurTrois" as "validateIndicateurTrois",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("validateIndicateurDeuxTrois", () => {
+  const action = {
+    type: "validateIndicateurDeuxTrois" as "validateIndicateurDeuxTrois",
     valid: "Valid" as FormState
   };
 

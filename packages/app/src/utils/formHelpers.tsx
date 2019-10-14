@@ -1,4 +1,5 @@
 import { fractionToPercentage, percentageToFraction } from "./helpers";
+import { PeriodeDeclaration } from "../globals.d";
 
 // INT PARSE
 
@@ -35,6 +36,21 @@ export const parseFloatStateValue = (value: number | undefined) =>
 export const parseBooleanFormValue = (value: string) => value === "true";
 
 export const parseBooleanStateValue = (value: boolean) => String(value);
+
+// PeriodeDeclaration PARSE
+
+export const parsePeriodeDeclarationFormValue = (
+  value: string
+): PeriodeDeclaration => {
+  switch (value) {
+    case "deuxPeriodesReference":
+      return "deuxPeriodesReference" as PeriodeDeclaration;
+    case "troisPeriodesReference":
+      return "troisPeriodesReference" as PeriodeDeclaration;
+    default:
+      return "unePeriodeReference" as PeriodeDeclaration;
+  }
+};
 
 // VALIDATION
 
