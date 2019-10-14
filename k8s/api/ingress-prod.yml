@@ -6,6 +6,8 @@ metadata:
   labels:
     app: egapro-api
     branch: egapro
+  annotations:
+    kubernetes.io/ingress.class: "azure/application-gateway"
 spec:
   rules:
   - host: egapro-api.${ENVIRONMENT}
@@ -15,5 +17,5 @@ spec:
         backend:
           serviceName: egapro-api
           servicePort: ${PORT}
-  tls:
-  - secretName: egapro-crt-secret
+#  tls:
+#  - secretName: egapro-crt-secret
