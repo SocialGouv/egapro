@@ -14,9 +14,15 @@ interface Props {
   field: FieldRenderProps<string, HTMLInputElement>;
   placeholder?: string;
   style?: any;
+  readOnly?: boolean;
 }
 
-function Input({ field: { input, meta }, placeholder, style }: Props) {
+function Input({
+  field: { input, meta },
+  placeholder,
+  style,
+  readOnly = false
+}: Props) {
   const error = hasFieldError(meta);
 
   return (
@@ -25,6 +31,7 @@ function Input({ field: { input, meta }, placeholder, style }: Props) {
       autoComplete="off"
       placeholder={placeholder}
       id={input.name}
+      readOnly={readOnly}
       {...input}
     />
   );

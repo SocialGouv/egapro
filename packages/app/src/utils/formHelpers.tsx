@@ -72,13 +72,16 @@ export const parseTrancheEffectifsFormValue = (
 export const required = (value: string): boolean => (value ? false : true);
 
 export const mustBeNumber = (value: string): boolean =>
-  Number.isNaN(Number(value)) ? true : false;
+  Number.isNaN(Number(value));
 
 export const minNumber = (value: string, min: number): boolean =>
-  Number(value) < min ? true : false;
+  Number(value) < min;
 
 export const maxNumber = (value: string, max: number): boolean =>
-  Number(value) > max ? true : false;
+  Number(value) > max;
+
+export const mustBeDate = (value: string): boolean =>
+  Number.isNaN(Date.parse(value));
 
 const regexpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const validateEmail = (email: string) => !regexpEmail.test(email);

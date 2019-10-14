@@ -1,18 +1,60 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Form, Field } from "react-final-form";
+import { Fragment } from "react";
+import { FieldMetaState, Form, useField } from "react-final-form";
 
 import { AppState, FormState, ActionInformationsData } from "../../globals";
 
-import { parseTrancheEffectifsFormValue } from "../../utils/formHelpers";
+import {
+  mustBeDate,
+  parseTrancheEffectifsFormValue,
+  required
+} from "../../utils/formHelpers";
 
-import RadioButtons from "../../components/RadioButtons";
 import ActionBar from "../../components/ActionBar";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
+import Input, { hasFieldError } from "../../components/Input";
+import RadioButtons from "../../components/RadioButtons";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import globalStyles from "../../utils/globalStyles";
 
 ///////////////////
+
+const validate = (value: string) => {
+  const requiredError = required(value);
+  if (!requiredError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError
+    };
+  }
+};
+
+const validateDate = (value: string) => {
+  const requiredError = required(value);
+  const mustBeDateError = mustBeDate(value);
+  if (!requiredError && !mustBeDateError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeDate: mustBeDateError
+    };
+  }
+};
+
+const validateForm = ({
+  nomEntreprise,
+  debutPeriodeReference
+}: {
+  nomEntreprise: string;
+  debutPeriodeReference: string;
+}) => ({
+  nomEntreprise: validate(nomEntreprise),
+  debutPeriodeReference: validateDate(debutPeriodeReference)
+});
 
 interface Props {
   informations: AppState["informations"];
@@ -52,6 +94,7 @@ function InformationsForm({
     <Form
       onSubmit={onSubmit}
       initialValues={initialValues}
+      validate={validateForm}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
@@ -60,8 +103,7 @@ function InformationsForm({
       {({ handleSubmit, hasValidationErrors, submitFailed, values }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
-          <label>Quel est le nom de l'entreprise ?</label>
-          <Field name="nomEntreprise" component="input" readOnly={readOnly} />
+          <FieldNomEntreprise readOnly={readOnly} />
 
           <RadioButtons
             fieldName="trancheEffectifs"
@@ -84,15 +126,7 @@ function InformationsForm({
             readOnly={readOnly}
           />
 
-          <label>
-            Sur quelle période souhaitez-vous faire votre votre déclaration ?
-          </label>
-          <Field
-            name="debutPeriodeReference"
-            component="input"
-            type="date"
-            readOnly={readOnly}
-          />
+          <FieldDebutPeriodeReference readOnly={readOnly} />
 
           {readOnly ? (
             <ActionBar>
@@ -103,7 +137,7 @@ function InformationsForm({
               <FormSubmit
                 hasValidationErrors={hasValidationErrors}
                 submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                errorMessage="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
               />
             </ActionBar>
           )}
@@ -113,10 +147,81 @@ function InformationsForm({
   );
 }
 
+function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
+  const field = useField("nomEntreprise", { validate });
+  const error = hasFieldError(field.meta);
+
+  return (
+    <Fragment>
+      <label
+        css={[styles.label, error && styles.labelError]}
+        htmlFor={field.input.name}
+      >
+        Quel est le nom de l'entreprise ?
+      </label>
+      <div css={styles.fieldRow}>
+        <Input field={field} readOnly={readOnly} />
+      </div>
+      <p css={styles.error}>
+        {error && "le nom de l'entreprise n’est pas valide"}
+      </p>
+    </Fragment>
+  );
+}
+
+const hasMustBeDateError = (meta: FieldMetaState<string>) =>
+  meta.error && meta.touched && meta.error.mustBeDate;
+
+function FieldDebutPeriodeReference({ readOnly }: { readOnly: boolean }) {
+  const field = useField("debutPeriodeReference", { validate, type: "date" });
+  const error = hasFieldError(field.meta);
+  const mustBeDateError = hasMustBeDateError(field.meta);
+
+  return (
+    <Fragment>
+      <label
+        css={[styles.label, error && styles.labelError]}
+        htmlFor={field.input.name}
+      >
+        Sur quelle période souhaitez-vous faire votre votre déclaration ?
+      </label>
+      <div css={styles.fieldRow}>
+        <Input field={field} readOnly={readOnly} />
+      </div>
+      <p css={styles.error}>
+        {error &&
+          (mustBeDateError
+            ? "ce champ doit contenir une date au format jj/mm/aaaa"
+            : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
+      </p>
+    </Fragment>
+  );
+}
+
 const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
+  }),
+  label: css({
+    fontSize: 14,
+    lineHeight: "17px"
+  }),
+  labelError: css({
+    color: globalStyles.colors.error
+  }),
+  fieldRow: css({
+    height: 38,
+    marginTop: 5,
+    marginBottom: 5,
+    display: "flex"
+  }),
+  error: css({
+    height: 18,
+    color: globalStyles.colors.error,
+    fontSize: 12,
+    textDecoration: "underline",
+    lineHeight: "15px"
   })
 };
 
