@@ -1,5 +1,5 @@
 import { fractionToPercentage, percentageToFraction } from "./helpers";
-import { PeriodeDeclaration } from "../globals.d";
+import { PeriodeDeclaration, TrancheEffectifs } from "../globals.d";
 
 // INT PARSE
 
@@ -49,6 +49,21 @@ export const parsePeriodeDeclarationFormValue = (
       return "troisPeriodesReference" as PeriodeDeclaration;
     default:
       return "unePeriodeReference" as PeriodeDeclaration;
+  }
+};
+
+// TrancheEffectif PARSE
+
+export const parseTrancheEffectifsFormValue = (
+  value: string
+): TrancheEffectifs => {
+  switch (value) {
+    case "250 à 999":
+      return "250 à 999" as TrancheEffectifs;
+    case "1000 et plus":
+      return "1000 et plus" as TrancheEffectifs;
+    default:
+      return "50 à 249" as TrancheEffectifs;
   }
 };
 

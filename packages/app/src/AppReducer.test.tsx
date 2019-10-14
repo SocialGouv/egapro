@@ -2,7 +2,8 @@ import {
   CategorieSocioPro,
   TranchesAges,
   FormState,
-  PeriodeDeclaration
+  PeriodeDeclaration,
+  TrancheEffectifs
 } from "./globals.d";
 
 import AppReducer from "./AppReducer";
@@ -44,6 +45,29 @@ describe("resetState", () => {
 //////////////////
 // UPDATE ////////
 //////////////////
+
+describe("updateInformations", () => {
+  const action = {
+    type: "updateInformations" as "updateInformations",
+    data: {
+      nomEntreprise: "acme",
+      trancheEffectifs: "250 à 999" as TrancheEffectifs,
+      debutPeriodeReference: "2019-10-15"
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
 
 describe("updateEffectif", () => {
   const action = {
@@ -631,6 +655,25 @@ describe("updateIndicateurCinq", () => {
 //////////////////
 // VALIDATE //////
 //////////////////
+
+describe("validateInformations", () => {
+  const action = {
+    type: "validateInformations" as "validateInformations",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
 
 describe("validateEffectif", () => {
   describe("Valid", () => {

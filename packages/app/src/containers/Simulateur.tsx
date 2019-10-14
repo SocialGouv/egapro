@@ -20,6 +20,7 @@ import IndicateurTrois from "../views/Indicateur3";
 import IndicateurDeuxTrois from "../views/Indicateur2et3";
 import IndicateurQuatre from "../views/Indicateur4";
 import IndicateurCinq from "../views/Indicateur5";
+import Informations from "../views/Informations";
 import Recapitulatif from "../views/Recapitulatif";
 
 interface Props {
@@ -84,6 +85,12 @@ function Simulateur({ code, state, dispatch }: Props) {
         path="/simulateur/:code/"
         exact
         render={props => <HomeSimulateur {...props} code={code} />}
+      />
+      <Route
+        path="/simulateur/:code/informations"
+        render={props => (
+          <Informations {...props} state={state} dispatch={dispatch} />
+        )}
       />
       <Route
         path="/simulateur/:code/effectifs"

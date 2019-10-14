@@ -3,6 +3,11 @@ import AppReducer from "../AppReducer";
 
 import stateComplete from "./stateComplete";
 
+const actionValidateInformations = {
+  type: "validateInformations" as "validateInformations",
+  valid: "Valid" as FormState
+};
+
 const actionValidateEffectif = {
   type: "validateEffectif" as "validateEffectif",
   valid: "Valid" as FormState
@@ -57,7 +62,10 @@ const stateDefault = AppReducer(
           AppReducer(
             AppReducer(
               AppReducer(
-                AppReducer(stateComplete, actionValidateEffectif),
+                AppReducer(
+                  AppReducer(stateComplete, actionValidateInformations),
+                  actionValidateEffectif
+                ),
                 actionValidateIndicateurUnCoefGroup
               ),
               actionValidateIndicateurUnCoefEffectif

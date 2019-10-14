@@ -1,4 +1,10 @@
 export type AppState = {
+  informations: {
+    formValidated: FormState;
+    nomEntreprise: string;
+    trancheEffectifs: "50 à 249" | "250 à 999" | "1000 et plus";
+    debutPeriodeReference: string;
+  };
   effectif: {
     formValidated: FormState;
     nombreSalaries: Array<GroupeEffectif>;
@@ -46,6 +52,8 @@ export type PeriodeDeclaration =
   | "deuxPeriodesReference"
   | "troisPeriodesReference";
 
+export type TrancheEffectifs = "50 à 249" | "250 à 999" | "1000 et plus";
+
 export type FormState = "None" | "Valid" | "Invalid";
 
 export type ActionType =
@@ -55,6 +63,14 @@ export type ActionType =
   | {
       type: "initiateState";
       data: any;
+    }
+  | {
+      type: "updateInformations";
+      data: ActionInformationsData;
+    }
+  | {
+      type: "validateInformations";
+      valid: FormState;
     }
   | {
       type: "updateEffectif";
@@ -135,6 +151,12 @@ export type ActionType =
       type: "validateIndicateurCinq";
       valid: FormState;
     };
+
+export type ActionInformationsData = {
+  nomEntreprise: string;
+  trancheEffectifs: "50 à 249" | "250 à 999" | "1000 et plus";
+  debutPeriodeReference: string;
+};
 
 export type ActionEffectifData = {
   nombreSalaries: Array<GroupeEffectif>;

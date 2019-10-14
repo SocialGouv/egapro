@@ -1,13 +1,23 @@
 import {
   CategorieSocioPro,
   PeriodeDeclaration,
-  TranchesAges
+  TranchesAges,
+  TrancheEffectifs
 } from "../globals.d";
 import AppReducer from "../AppReducer";
 
 const actionInitiateState = {
   type: "initiateState" as "initiateState",
   data: {}
+};
+
+const actionUpdateInformations = {
+  type: "updateInformations" as "updateInformations",
+  data: {
+    nomEntreprise: "BigCorp",
+    trancheEffectifs: "1000 et plus" as TrancheEffectifs,
+    debutPeriodeReference: "2019-01-01"
+  }
 };
 
 const actionUpdateEffectif = {
@@ -402,7 +412,10 @@ const stateDefault = AppReducer(
                 AppReducer(
                   AppReducer(
                     AppReducer(
-                      AppReducer(undefined, actionInitiateState),
+                      AppReducer(
+                        AppReducer(undefined, actionInitiateState),
+                        actionUpdateInformations
+                      ),
                       actionUpdateEffectif
                     ),
                     actionUpdateIndicateurUnCsp
