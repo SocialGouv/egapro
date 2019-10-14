@@ -15,7 +15,7 @@ import ActionBar from "../../components/ActionBar";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Input, { hasFieldError } from "../../components/Input";
-import RadioButtons from "../../components/RadioButtons";
+import RadioLabels from "../../components/RadioLabels";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 import globalStyles from "../../utils/globalStyles";
 
@@ -105,7 +105,7 @@ function InformationsForm({
           <FormAutoSave saveForm={saveForm} />
           <FieldNomEntreprise readOnly={readOnly} />
 
-          <RadioButtons
+          <RadioLabels
             fieldName="trancheEffectifs"
             label="Quelle est la tranche d'effectifs de l'entreprise ?"
             choices={[
