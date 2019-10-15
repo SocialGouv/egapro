@@ -25,7 +25,7 @@ function InformationsResult({
         firstLineLabel="le nom de votre entreprise"
         firstLineData={nomEntreprise}
         firstLineInfo={`votre tranche d'effectifs: ${trancheEffectifs}`}
-        secondLineLabel="votre période de référence est"
+        secondLineLabel="votre période de référence débute le"
         secondLineData={debutPeriodeReference}
         indicateurSexeSurRepresente="hommes"
       />
