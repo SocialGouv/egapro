@@ -50,6 +50,7 @@ function Informations({ state, dispatch }: Props) {
               nomEntreprise={state.informations.nomEntreprise}
               trancheEffectifs={state.informations.trancheEffectifs}
               debutPeriodeReference={state.informations.debutPeriodeReference}
+              finPeriodeReference={state.informations.finPeriodeReference}
               validateInformations={validateInformations}
             />
           )

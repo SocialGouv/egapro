@@ -1,15 +1,16 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { FormState } from "../../globals";
+import { FormState, TrancheEffectifs } from "../../globals";
 
 import ResultBubble from "../../components/ResultBubble";
 import ActionLink from "../../components/ActionLink";
 
 interface Props {
   nomEntreprise: string;
-  trancheEffectifs: "50 à 249" | "250 à 999" | "1000 et plus";
+  trancheEffectifs: TrancheEffectifs;
   debutPeriodeReference: string;
+  finPeriodeReference: string;
   validateInformations: (valid: FormState) => void;
 }
 
@@ -17,6 +18,7 @@ function InformationsResult({
   nomEntreprise,
   trancheEffectifs,
   debutPeriodeReference,
+  finPeriodeReference,
   validateInformations
 }: Props) {
   return (
@@ -25,8 +27,8 @@ function InformationsResult({
         firstLineLabel="le nom de votre entreprise"
         firstLineData={nomEntreprise}
         firstLineInfo={`votre tranche d'effectifs: ${trancheEffectifs}`}
-        secondLineLabel="votre période de référence débute le"
-        secondLineData={debutPeriodeReference}
+        secondLineLabel="votre période de référence est"
+        secondLineData={`${debutPeriodeReference} au ${finPeriodeReference}`}
         indicateurSexeSurRepresente="hommes"
       />
 

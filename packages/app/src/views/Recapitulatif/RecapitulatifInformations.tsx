@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { Fragment, ReactNode } from "react";
 
 import { FormState, TrancheEffectifs } from "../../globals";
 
@@ -12,6 +12,7 @@ interface Props {
   informationsFormValidated: FormState;
   trancheEffectifs: TrancheEffectifs;
   debutPeriodeReference: string;
+  finPeriodeReference: string;
   nombreSalaries: number | undefined;
 }
 
@@ -19,6 +20,7 @@ function RecapitulatifInformations({
   informationsFormValidated,
   trancheEffectifs,
   debutPeriodeReference,
+  finPeriodeReference,
   nombreSalaries
 }: Props) {
   const layoutType = useLayoutType();
@@ -49,17 +51,37 @@ function RecapitulatifInformations({
 
   return (
     <div css={[styles.container, css({ width })]}>
-      <dl css={styles.dataDisplay}>
-        <dt>Effectifs</dt>
-        <dd>{nombreSalaries}</dd>
+      <DataDisplay header="Effectifs" data={nombreSalaries} />
 
-        <dt>Tranche de déclaration</dt>
-        <dd>{trancheEffectifs}</dd>
+      <DataDisplay header="Tranche de déclaration" data={trancheEffectifs} />
 
-        <dt>Date de début de période de référence</dt>
-        <dd>{debutPeriodeReference}</dd>
-      </dl>
+      <DataDisplay header="Periode de référence">
+        <div css={styles.dates}>
+          <div css={styles.dateField}>
+            <DataDisplay header="Date de début" data={debutPeriodeReference} />
+          </div>
+
+          <div css={styles.dateField}>
+            <DataDisplay header="Date de fin" data={finPeriodeReference} />
+          </div>
+        </div>
+      </DataDisplay>
     </div>
+  );
+}
+
+interface DataDisplayProps {
+  header: string;
+  children?: ReactNode;
+  data?: any;
+}
+
+function DataDisplay({ header, data, children }: DataDisplayProps) {
+  return (
+    <Fragment>
+      <p css={styles.header}>{header}</p>
+      {data ? <div css={styles.data}>{data}</div> : children}
+    </Fragment>
   );
 }
 
@@ -70,20 +92,24 @@ const styles = {
     marginTop: 22,
     marginBottom: 22
   }),
-  dataDisplay: css({
-    dt: {
-      fontWeight: "bold"
-    },
-    dd: {
-      backgroundColor: "#fff",
-      lineHeight: "2.5em",
-      paddingLeft: "1em",
-      marginBottom: 20,
-      marginLeft: 0,
-      marginTop: 5,
-      borderRadius: 4
-    }
-  })
+  header: css({
+    fontWeight: "bold",
+    marginTop: 5
+  }),
+  dates: css({
+    display: "flex",
+    justifyContent: "space-between"
+  }),
+  data: css({
+    backgroundColor: "#fff",
+    lineHeight: "2.5em",
+    paddingLeft: "1em",
+    marginBottom: 20,
+    marginLeft: 0,
+    marginTop: 5,
+    borderRadius: 4
+  }),
+  dateField: css({ width: "40%" })
 };
 
 export default RecapitulatifInformations;

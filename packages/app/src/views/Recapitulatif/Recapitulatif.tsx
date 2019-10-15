@@ -115,6 +115,7 @@ function Recapitulatif({ state }: Props) {
         informationsFormValidated={state.informations.formValidated}
         trancheEffectifs={state.informations.trancheEffectifs}
         debutPeriodeReference={state.informations.debutPeriodeReference}
+        finPeriodeReference={state.informations.finPeriodeReference}
         nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
       />
       <RecapitulatifIndex

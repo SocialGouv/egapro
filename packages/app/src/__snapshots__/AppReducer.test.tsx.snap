@@ -328,6 +328,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -657,6 +658,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -952,6 +954,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -1283,6 +1286,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -1578,6 +1582,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -1909,6 +1914,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -2204,6 +2210,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -2535,6 +2542,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -2830,6 +2838,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -3161,6 +3170,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -3456,6 +3466,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -3787,6 +3798,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -4082,6 +4094,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -4413,6 +4426,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -4708,6 +4722,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -5039,6 +5054,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -5368,6 +5384,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -5699,6 +5716,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -6028,6 +6046,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -6359,6 +6378,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -6688,6 +6708,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -7052,6 +7073,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -7381,6 +7403,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -7678,6 +7701,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -7973,6 +7997,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -8304,6 +8329,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -8599,6 +8625,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -8930,6 +8957,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -9225,6 +9253,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -9556,6 +9585,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-10-15",
+    "finPeriodeReference": "2020-10-14",
     "formValidated": "None",
     "nomEntreprise": "acme",
     "trancheEffectifs": "250 à 999",
@@ -9851,6 +9881,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-10-15",
+    "finPeriodeReference": "2020-10-14",
     "formValidated": "None",
     "nomEntreprise": "acme",
     "trancheEffectifs": "250 à 999",
@@ -10182,6 +10213,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -10511,6 +10543,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -10840,6 +10873,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -11169,6 +11203,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -11464,6 +11499,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -11795,6 +11831,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -12090,6 +12127,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -12421,6 +12459,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -12716,6 +12755,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -13047,6 +13087,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -13342,6 +13383,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -13673,6 +13715,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -13968,6 +14011,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -14299,6 +14343,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -14594,6 +14639,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -14925,6 +14971,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -15220,6 +15267,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -15551,6 +15599,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -15880,6 +15929,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -16175,6 +16225,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -16506,6 +16557,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -16835,6 +16887,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -17130,6 +17183,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",
@@ -17461,6 +17515,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
@@ -17756,6 +17811,7 @@ Object {
   },
   "informations": Object {
     "debutPeriodeReference": "",
+    "finPeriodeReference": "",
     "formValidated": "Valid",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 249",

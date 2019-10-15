@@ -67,7 +67,8 @@ const defaultState: AppState = {
     formValidated: "None",
     nomEntreprise: "",
     trancheEffectifs: "50 à 249",
-    debutPeriodeReference: ""
+    debutPeriodeReference: "",
+    finPeriodeReference: ""
   },
   effectif: {
     formValidated: "None",
@@ -131,7 +132,8 @@ function AppReducer(
       const {
         nomEntreprise,
         trancheEffectifs,
-        debutPeriodeReference
+        debutPeriodeReference,
+        finPeriodeReference
       } = action.data;
       return {
         ...state,
@@ -139,7 +141,8 @@ function AppReducer(
           ...state.informations,
           nomEntreprise,
           trancheEffectifs,
-          debutPeriodeReference
+          debutPeriodeReference,
+          finPeriodeReference
         }
       };
     }

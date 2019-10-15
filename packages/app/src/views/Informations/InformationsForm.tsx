@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
 import { FieldMetaState, Form, useField } from "react-final-form";
 
 import { AppState, FormState, ActionInformationsData } from "../../globals";
@@ -47,13 +46,16 @@ const validateDate = (value: string) => {
 
 const validateForm = ({
   nomEntreprise,
-  debutPeriodeReference
+  debutPeriodeReference,
+  finPeriodeReference
 }: {
   nomEntreprise: string;
   debutPeriodeReference: string;
+  finPeriodeReference: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
-  debutPeriodeReference: validateDate(debutPeriodeReference)
+  debutPeriodeReference: validateDate(debutPeriodeReference),
+  finPeriodeReference: validateDate(finPeriodeReference)
 });
 
 interface Props {
@@ -72,16 +74,23 @@ function InformationsForm({
   const initialValues: ActionInformationsData = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
-    debutPeriodeReference: informations.debutPeriodeReference
+    debutPeriodeReference: informations.debutPeriodeReference,
+    finPeriodeReference: informations.finPeriodeReference
   };
 
   const saveForm = (formData: any) => {
-    const { nomEntreprise, trancheEffectifs, debutPeriodeReference } = formData;
+    const {
+      nomEntreprise,
+      trancheEffectifs,
+      debutPeriodeReference,
+      finPeriodeReference
+    } = formData;
 
     updateInformations({
       nomEntreprise: nomEntreprise,
       trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
-      debutPeriodeReference: debutPeriodeReference
+      debutPeriodeReference: debutPeriodeReference,
+      finPeriodeReference: finPeriodeReference
     });
   };
 
@@ -126,7 +135,7 @@ function InformationsForm({
             readOnly={readOnly}
           />
 
-          <FieldDebutPeriodeReference readOnly={readOnly} />
+          <FieldPeriodeReference readOnly={readOnly} />
 
           {readOnly ? (
             <ActionBar>
@@ -152,7 +161,7 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
   const error = hasFieldError(field.meta);
 
   return (
-    <Fragment>
+    <div css={styles.formField}>
       <label
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
@@ -165,25 +174,55 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
       <p css={styles.error}>
         {error && "le nom de l'entreprise n’est pas valide"}
       </p>
-    </Fragment>
+    </div>
+  );
+}
+
+function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
+  return (
+    <div>
+      <label css={styles.label}>
+        Sur quelle période souhaitez-vous faire votre votre déclaration ?
+      </label>
+      <div css={styles.dates}>
+        <FieldDate
+          name="debutPeriodeReference"
+          label="Date de début"
+          readOnly={readOnly}
+        />
+        <FieldDate
+          name="finPeriodeReference"
+          label="Date de fin"
+          readOnly={readOnly}
+        />
+      </div>
+    </div>
   );
 }
 
 const hasMustBeDateError = (meta: FieldMetaState<string>) =>
   meta.error && meta.touched && meta.error.mustBeDate;
 
-function FieldDebutPeriodeReference({ readOnly }: { readOnly: boolean }) {
-  const field = useField("debutPeriodeReference", { validate, type: "date" });
+function FieldDate({
+  name,
+  label,
+  readOnly
+}: {
+  name: string;
+  label: string;
+  readOnly: boolean;
+}) {
+  const field = useField(name, { validate, type: "date" });
   const error = hasFieldError(field.meta);
   const mustBeDateError = hasMustBeDateError(field.meta);
 
   return (
-    <Fragment>
+    <div css={styles.dateField}>
       <label
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
       >
-        Sur quelle période souhaitez-vous faire votre votre déclaration ?
+        {label}
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
@@ -194,7 +233,7 @@ function FieldDebutPeriodeReference({ readOnly }: { readOnly: boolean }) {
             ? "ce champ doit contenir une date au format jj/mm/aaaa"
             : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
       </p>
-    </Fragment>
+    </div>
   );
 }
 
@@ -203,8 +242,12 @@ const styles = {
     display: "flex",
     flexDirection: "column"
   }),
+  formField: css({
+    marginBottom: 20
+  }),
   label: css({
     fontSize: 14,
+    fontWeight: "bold",
     lineHeight: "17px"
   }),
   labelError: css({
@@ -214,7 +257,8 @@ const styles = {
     height: 38,
     marginTop: 5,
     marginBottom: 5,
-    display: "flex"
+    display: "flex",
+    input: { borderRadius: 4 }
   }),
   error: css({
     height: 18,
@@ -222,6 +266,13 @@ const styles = {
     fontSize: 12,
     textDecoration: "underline",
     lineHeight: "15px"
+  }),
+  dates: css({
+    display: "flex",
+    justifyContent: "space-between"
+  }),
+  dateField: css({
+    marginTop: 5
   })
 };
 

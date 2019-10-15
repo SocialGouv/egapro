@@ -41,7 +41,7 @@ interface Props {
 function RadioLabels({ readOnly, fieldName, label, value, choices }: Props) {
   return (
     <div css={styles.container}>
-      <p>{label}</p>
+      <p css={styles.inputLabel}>{label}</p>
       <div css={[styles.radioField]}>
         {choices.map(({ label: choiceLabel, value: choiceValue }) => (
           <RadioField
@@ -63,11 +63,16 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     fontSize: 14,
-    marginBottom: 20
+    marginBottom: 40
   }),
   radioField: css({
     display: "flex",
     marginTop: 5
+  }),
+  inputLabel: css({
+    fontSize: 14,
+    fontWeight: "bold",
+    lineHeight: "17px"
   }),
   label: css({
     backgroundColor: "#fff",

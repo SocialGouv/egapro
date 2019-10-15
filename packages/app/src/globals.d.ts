@@ -2,8 +2,9 @@ export type AppState = {
   informations: {
     formValidated: FormState;
     nomEntreprise: string;
-    trancheEffectifs: "50 à 249" | "250 à 999" | "1000 et plus";
+    trancheEffectifs: TrancheEffectifs;
     debutPeriodeReference: string;
+    finPeriodeReference: string;
   };
   effectif: {
     formValidated: FormState;
@@ -154,8 +155,9 @@ export type ActionType =
 
 export type ActionInformationsData = {
   nomEntreprise: string;
-  trancheEffectifs: "50 à 249" | "250 à 999" | "1000 et plus";
+  trancheEffectifs: TrancheEffectifs;
   debutPeriodeReference: string;
+  finPeriodeReference: string;
 };
 
 export type ActionEffectifData = {
