@@ -14,16 +14,16 @@
   - helm upgrade --install memcached${HASH_BRANCH_NAME} --wait -f k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
-#.deploy-egapro-memcached-k8s-prod:
-#  image:
-#    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
-#    entrypoint: [""]
-#  before_script:
-#  - /apps/create-kubeconfig.sh
-#  - envsubst < k8s/memcached/deployment.yml > k8s/memcached/deployment-egapro.yml
-#  - envsubst < k8s/memcached/service.yml > k8s/memcached/service-egapro.yml
-#  script:
-#  - kubectl apply -f k8s/memcached/deployment-egapro.yml
-#  - kubectl apply -f k8s/memcached/service-egapro.yml
-#  allow_failure: false
+.deploy-egapro-memcached-k8s-prod:
+  image:
+    name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
+    entrypoint: [""]
+  before_script:
+  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+  - envsubst < k8s/memcached/values.yml > k8s/memcached/values-egapro.yml
+  script:
+  - helm init --client-only
+  - helm upgrade --install memcached${HASH_BRANCH_NAME} --wait -f k8s/memcached/values-egapro.yml stable/memcached --namespace ${NAMESPACE}
+  allow_failure: false
 

@@ -27,9 +27,9 @@
   - envsubst < k8s/app/ingress-prod.yml > k8s/app/ingress-prod-egapro.yml
 #  - envsubst < k8s/certificate/certificate.yml > k8s/certificate/certificate-egapro.yml
   script:
-  - kubectl apply -f k8s/app/deployment-egapro.yml -n $NAMESPACE
-  - kubectl apply -f k8s/app/service-egapro.yml -n $NAMESPACE
-  - kubectl apply -f k8s/app/ingress-prod-egapro.yml -n $NAMESPACE
+  - kubectl apply -f k8s/app/deployment-egapro.yml -n ${NAMESPACE}
+  - kubectl apply -f k8s/app/service-egapro.yml -n ${NAMESPACE}
+  - kubectl apply -f k8s/app/ingress-prod-egapro.yml -n ${NAMESPACE}
   - echo ${ENVIRONMENT}
 #  - kubectl apply -f k8s/certificate/certificate-egapro.yml
   allow_failure: false
