@@ -58,18 +58,18 @@ Quality tests:
 ###########################################
 
 
-.get_github_id_stage: &get_github_id_stage
-  stage: "Prepare"
-  image:
-    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
-    entrypoint: [""]
-  before_script:
-    - envsubst < k8s/scripts/get-deploy-id.sh > k8s/scripts/get-github-deploy-id.sh
-  script:
-    - sh k8s/scripts/get-github-deploy-id.sh
-  artifacts:
-    paths:
-      - github_deploy_id
+#.get_github_id_stage: &get_github_id_stage
+#  stage: "Prepare"
+#  image:
+#    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
+#    entrypoint: [""]
+#  before_script:
+#    - envsubst < k8s/scripts/get-deploy-id.sh > k8s/scripts/get-github-deploy-id.sh
+#  script:
+#    - sh k8s/scripts/get-github-deploy-id.sh
+#  artifacts:
+#    paths:
+#      - github_deploy_id
 #
 
 #Get Github Id (dev):
@@ -81,12 +81,12 @@ Quality tests:
 #  except:
 #    - master
 
-Get Github Id (prod):
-  <<: *get_github_id_stage
-  environment:
-    name: ${PROD_ENVIRONMENT_NAME}
-  only:
-    - /boni-ci-azure/
+#Get Github Id (prod):
+#  <<: *get_github_id_stage
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /boni-ci-azure/
 
 Create namespace (dev):
   stage: "Prepare"
