@@ -13,3 +13,19 @@
   - helm upgrade --install postgres${HASH_BRANCH_NAME} --wait -f k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
+
+.deploy-egapro-postgres-k8s-prod:
+  image:
+    name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
+  before_script:
+    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+    - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${NAMESPACE} -o jsonpath='{.data.DB_PASSWORD}' | base64 --decode)
+    - envsubst < k8s/postgres/values.yml > k8s/postgres/values-egapro.yml
+  script:
+    - helm init --client-only
+    - helm upgrade --install postgres${HASH_BRANCH_NAME} --wait -f k8s/postgres/values-egapro.yml stable/postgresql --namespace ${NAMESPACE}
+  allow_failure: false
+
+...
+
