@@ -16,24 +16,38 @@ spec:
         image: kinto/kinto-server
         imagePullPolicy: "IfNotPresent"
         ports:
-        - containerPort: 8888
+          - containerPort: ${PORT}
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
         env:
-        - name: KINTO_CACHE_BACKEND
-          value: "kinto.core.cache.memcached"
-        - name: KINTO_CACHE_HOSTS
-          value: "cache${HASH_BRANCH_NAME}:${CACHE_PORT} cache${HASH_BRANCH_NAME}:${CACHE_PORT}"
-        - name: KINTO_STORAGE_BACKEND
-          value: "kinto.core.storage.postgresql"
-        - name: KINTO_STORAGE_URL
-          value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${POSTGRES_HOST}/postgres"
-        - name: KINTO_PERMISSION_BACKEND
-          value: "kinto.core.permission.postgresql"
-        - name: KINTO_PERMISSION_URL
-          value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${POSTGRES_HOST}/postgres"
+          - name: KINTO_CACHE_BACKEND
+            value: "kinto.core.cache.memcached"
+          - name: KINTO_CACHE_HOSTS
+            value: "memcached${HASH_BRANCH_NAME}:11211 memcached${HASH_BRANCH_NAME}:11211"
+          - name: KINTO_STORAGE_BACKEND
+            value: "kinto.core.storage.postgresql"
+          - name: KINTO_STORAGE_URL
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${POSTGRES_HOST}/postgres"
+          - name: KINTO_PERMISSION_BACKEND
+            value: "kinto.core.permission.postgresql"
+          - name: KINTO_PERMISSION_URL
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${POSTGRES_HOST}/postgres"
       initContainers:
       - name: wait-for-postgres
         image: postgres:11-alpine
         imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 20m
+            memory: 32Mi
         command:
         - sh
         - -c
