@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { FieldMetaState, Form, useField } from "react-final-form";
+import createDecorator from "final-form-calculate";
 
 import { AppState, FormState, ActionInformationsData } from "../../globals";
 
@@ -9,6 +10,7 @@ import {
   parseTrancheEffectifsFormValue,
   required
 } from "../../utils/formHelpers";
+import { calendarYear, Year } from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
 import FormAutoSave from "../../components/FormAutoSave";
@@ -58,6 +60,31 @@ const validateForm = ({
   finPeriodeReference: validateDate(finPeriodeReference)
 });
 
+const valueValidateForCalculator = (value: string) => {
+  return validateDate(value) === undefined;
+};
+
+const calculator = createDecorator(
+  {
+    field: "debutPeriodeReference",
+    updates: {
+      finPeriodeReference: (dateDebut, { finPeriodeReference }: any) =>
+        valueValidateForCalculator(dateDebut)
+          ? calendarYear(dateDebut, Year.Add)
+          : finPeriodeReference
+    }
+  },
+  {
+    field: "finPeriodeReference",
+    updates: {
+      debutPeriodeReference: (dateFin, { debutPeriodeReference }: any) =>
+        valueValidateForCalculator(dateFin)
+          ? calendarYear(dateFin, Year.Subtract)
+          : debutPeriodeReference
+    }
+  }
+);
+
 interface Props {
   informations: AppState["informations"];
   readOnly: boolean;
@@ -103,6 +130,7 @@ function InformationsForm({
     <Form
       onSubmit={onSubmit}
       initialValues={initialValues}
+      decorators={[calculator]}
       validate={validateForm}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
