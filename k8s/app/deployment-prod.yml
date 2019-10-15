@@ -43,4 +43,4 @@ spec:
           env:
             - name: REACT_APP_API_URL
 #              value: "https://egapro-api.${ENVIRONMENT}"
-              value: "http://egapro-api.${ENVIRONMENT}.social.gouv.fr"
+              value: "http://egapro-api.fabrique.social.gouv.fr"
