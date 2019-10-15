@@ -26,7 +26,7 @@
     - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
     - envsubst < k8s/api/ingress-prod.yml > k8s/api/ingress-prod-egapro.yml
   script:
-    - kubectl apply -f k8s/api/deployment-egapro.yml -n $NAMESPACE
-    - kubectl apply -f k8s/api/service-egapro.yml -n $NAMESPACE
-    - kubectl apply -f k8s/api/ingress-prod-egapro.yml -n $NAMESPACE
+    - kubectl apply -f k8s/api/deployment-egapro.yml -n ${NAMESPACE}
+    - kubectl apply -f k8s/api/service-egapro.yml -n ${NAMESPACE}
+    - kubectl apply -f k8s/api/ingress-prod-egapro.yml -n ${NAMESPACE}
   allow_failure: false
