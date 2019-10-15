@@ -28,6 +28,18 @@ spec:
             limits:
               cpu: 100m
               memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: ${PORT}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: ${PORT}
+            initialDelaySeconds: 3
+            periodSeconds: 5
           env:
             - name: API_PORT
               value: "${PORT}"
