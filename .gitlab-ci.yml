@@ -315,7 +315,6 @@ Deploy @egapro/postgres (prod):
   only:
     - /boni-ci-azure/
 
-#
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
   extends: .deploy-egapro-memcached-k8s-prod
@@ -328,19 +327,20 @@ Deploy @egapro/memcached (prod):
     name: ${PROD_ENVIRONMENT_NAME}
   only:
     - /boni-ci-azure/
-#
-#Deploy @egapro/kinto (prod):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-prod
-#  stage: "Deploy prod"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $KINTO_PORT
-#    CACHE_PORT: $MEMCACHED_PORT
-#  environment:
-#    name: ${PROD_ENVIRONMENT_NAME}
-#  only:
-#    - tags
+
+Deploy @egapro/kinto (prod):
+  <<: *deploy_stage
+  extends: .deploy-egapro-kinto-k8s-prod
+  stage: "Deploy prod"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $KINTO_PORT
+    CACHE_PORT: $MEMCACHED_PORT
+    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
+  environment:
+    name: ${PROD_ENVIRONMENT_NAME}
+  only:
+    - /boni-ci-azure/
 
 
 ###########################################
