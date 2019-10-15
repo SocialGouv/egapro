@@ -301,6 +301,20 @@ Deploy @egapro/api (prod):
     name: ${PROD_ENVIRONMENT_NAME}
   only:
     - /boni-ci-azure/
+
+Deploy @egapro/postgres (prod):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-prod
+  stage: "Deploy prod"
+  when: manual
+  variables:
+    <<: *deploy_stage_variables
+    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
+  environment:
+    name: ${PROD_ENVIRONMENT_NAME}
+  only:
+    - /boni-ci-azure/
+
 #
 Deploy @egapro/memcached (prod):
   <<: *deploy_stage
