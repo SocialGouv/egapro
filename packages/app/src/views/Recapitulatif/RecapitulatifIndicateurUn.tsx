@@ -11,7 +11,8 @@ import {
 import {
   displayNameTranchesAges,
   displayNameCategorieSocioPro,
-  displayPercent
+  displayPercent,
+  displaySexeSurRepresente
 } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
@@ -104,7 +105,7 @@ function RecapitulatifIndicateurUn({
             indicateurEcartRemuneration !== undefined
               ? displayPercent(indicateurEcartRemuneration)
               : "--",
-          firstLineInfo: `écart favorable aux ${indicateurSexeSurRepresente}`,
+          firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",

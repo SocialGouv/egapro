@@ -47,6 +47,14 @@ export function displayInt(num: number): string {
   return num.toLocaleString("fr-FR");
 }
 
+export function displaySexeSurRepresente(
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
+): string {
+  return indicateurSexeSurRepresente !== undefined
+    ? `écart favorable aux ${indicateurSexeSurRepresente}`
+    : "les hommes et les femmes sont à égalité";
+}
+
 /* Utils */
 
 export const roundDecimal = (num: number, decimal: number): number => {

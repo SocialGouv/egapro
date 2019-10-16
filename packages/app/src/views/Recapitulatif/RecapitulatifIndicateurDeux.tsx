@@ -6,7 +6,8 @@ import { FormState, CategorieSocioPro } from "../../globals.d";
 
 import {
   displayNameCategorieSocioPro,
-  displayPercent
+  displayPercent,
+  displaySexeSurRepresente
 } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
@@ -93,7 +94,7 @@ function RecapitulatifIndicateurDeux({
             indicateurEcartAugmentation !== undefined
               ? displayPercent(indicateurEcartAugmentation)
               : "--",
-          firstLineInfo: `écart favorable aux ${indicateurSexeSurRepresente}`,
+          firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") +
