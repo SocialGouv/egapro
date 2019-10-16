@@ -147,6 +147,24 @@ function AppReducer(
       };
     }
     case "validateInformations": {
+      if (action.valid === "None") {
+        return {
+          ...state,
+          informations: { ...state.informations, formValidated: action.valid },
+          indicateurDeux:
+            state.indicateurDeux.formValidated === "Valid"
+              ? { ...state.indicateurDeux, formValidated: "Invalid" }
+              : state.indicateurDeux,
+          indicateurTrois:
+            state.indicateurTrois.formValidated === "Valid"
+              ? { ...state.indicateurTrois, formValidated: "Invalid" }
+              : state.indicateurTrois,
+          indicateurDeuxTrois:
+            state.indicateurDeuxTrois.formValidated === "Valid"
+              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
+              : state.indicateurDeuxTrois
+        };
+      }
       return {
         ...state,
         informations: {
