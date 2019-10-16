@@ -16,7 +16,7 @@
     "@sentry/node": "5.7.1",
     "@types/btoa": "1.2.3",
     "btoa": "1.2.1",
-    "dotenv": "8.1.0",
+    "dotenv": "8.2.0",
     "koa": "2.10.0",
     "koa-bodyparser": "4.2.1",
     "koa-router": "7.4.0",
