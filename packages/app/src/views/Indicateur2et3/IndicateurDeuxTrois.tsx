@@ -133,6 +133,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
       <LayoutFormAndResult
         childrenForm={
           <IndicateurDeuxTroisForm
+            finPeriodeReference={state.informations.finPeriodeReference}
             presenceAugmentationPromotion={
               state.indicateurDeuxTrois.presenceAugmentationPromotion
             }

@@ -70,7 +70,7 @@ const calculator = createDecorator(
     updates: {
       finPeriodeReference: (dateDebut, { finPeriodeReference }: any) =>
         valueValidateForCalculator(dateDebut)
-          ? calendarYear(dateDebut, Year.Add)
+          ? calendarYear(dateDebut, Year.Add, 1)
           : finPeriodeReference
     }
   },
@@ -79,7 +79,7 @@ const calculator = createDecorator(
     updates: {
       debutPeriodeReference: (dateFin, { debutPeriodeReference }: any) =>
         valueValidateForCalculator(dateFin)
-          ? calendarYear(dateFin, Year.Subtract)
+          ? calendarYear(dateFin, Year.Subtract, 1)
           : debutPeriodeReference
     }
   }
