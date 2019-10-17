@@ -42,4 +42,4 @@ spec:
               memory: 64Mi
           env:
             - name: REACT_APP_API_URL
-              value: "http://${HASH_BRANCH_INGRESS}egapro-api.dev.fabrique.social.gouv.fr"
+              value: "http://${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr"

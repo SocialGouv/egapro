@@ -10,7 +10,7 @@ metadata:
     kubernetes.io/ingress.class: "azure/application-gateway"
 spec:
   rules:
-  - host: ${HASH_BRANCH_INGRESS}egapro-api.dev.fabrique.social.gouv.fr
+  - host: ${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr
     http:
       paths:
       - path: /
