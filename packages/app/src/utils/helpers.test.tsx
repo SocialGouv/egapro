@@ -1,4 +1,9 @@
-import { calendarYear, displaySexeSurRepresente, Year } from "./helpers";
+import {
+  calendarYear,
+  displaySexeSurRepresente,
+  messageEcartNombreEquivalentSalaries,
+  Year
+} from "./helpers";
 
 describe("calendarYear", () => {
   test("adds a year", () => {
@@ -43,5 +48,61 @@ describe("displaySexeSurRepresente", () => {
     expect(displaySexeSurRepresente(undefined)).toEqual(
       "les hommes et les femmes sont à égalité"
     );
+  });
+});
+
+describe("messageEcartNombreEquivalentSalaries", () => {
+  describe("as many men as women in the company", () => {
+    test("no favorites", () => {
+      expect(
+        messageEcartNombreEquivalentSalaries(undefined, undefined)
+      ).toEqual("");
+    });
+    test("women favorited", () => {
+      expect(messageEcartNombreEquivalentSalaries("femmes", undefined)).toEqual(
+        "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+      );
+    });
+    test("men favorited", () => {
+      expect(messageEcartNombreEquivalentSalaries("hommes", undefined)).toEqual(
+        "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+      );
+    });
+  });
+
+  describe("more men than women in the company", () => {
+    test("no favorites", () => {
+      expect(messageEcartNombreEquivalentSalaries(undefined, "femmes")).toEqual(
+        ""
+      );
+    });
+    test("women favorited", () => {
+      expect(messageEcartNombreEquivalentSalaries("femmes", "femmes")).toEqual(
+        "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
+      );
+    });
+    test("men favorited", () => {
+      expect(messageEcartNombreEquivalentSalaries("hommes", "femmes")).toEqual(
+        "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+      );
+    });
+  });
+
+  describe("more women than men in the company", () => {
+    test("no favorites", () => {
+      expect(messageEcartNombreEquivalentSalaries(undefined, "hommes")).toEqual(
+        ""
+      );
+    });
+    test("women favorited", () => {
+      expect(messageEcartNombreEquivalentSalaries("femmes", "hommes")).toEqual(
+        "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+      );
+    });
+    test("men favorited", () => {
+      expect(messageEcartNombreEquivalentSalaries("hommes", "hommes")).toEqual(
+        "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
+      );
+    });
   });
 });
