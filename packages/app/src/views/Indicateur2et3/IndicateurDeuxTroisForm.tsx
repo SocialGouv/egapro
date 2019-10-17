@@ -4,7 +4,8 @@ import { Form } from "react-final-form";
 import {
   FormState,
   ActionIndicateurDeuxTroisData,
-  PeriodeDeclaration
+  PeriodeDeclaration,
+  GroupeEffectif
 } from "../../globals.d";
 
 import BlocForm from "../../components/BlocForm";
@@ -24,6 +25,7 @@ import {
   parsePeriodeDeclarationFormValue
 } from "../../utils/formHelpers";
 import { calendarYear, Year } from "../../utils/helpers";
+import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 interface Props {
   finPeriodeReference: string;
@@ -31,6 +33,7 @@ interface Props {
   nombreAugmentationPromotionFemmes: number | undefined;
   nombreAugmentationPromotionHommes: number | undefined;
   periodeDeclaration: PeriodeDeclaration;
+  nombreSalaries: GroupeEffectif[];
   readOnly: boolean;
   updateIndicateurDeuxTrois: (data: ActionIndicateurDeuxTroisData) => void;
   validateIndicateurDeuxTrois: (valid: FormState) => void;
@@ -42,6 +45,7 @@ function IndicateurDeuxTroisForm({
   nombreAugmentationPromotionFemmes,
   nombreAugmentationPromotionHommes,
   periodeDeclaration,
+  nombreSalaries,
   readOnly,
   updateIndicateurDeuxTrois,
   validateIndicateurDeuxTrois
@@ -88,6 +92,16 @@ function IndicateurDeuxTroisForm({
   const oneYear = calendarYear(finPeriodeReference, Year.Subtract, 1);
   const twoYears = calendarYear(finPeriodeReference, Year.Subtract, 2);
   const threeYears = calendarYear(finPeriodeReference, Year.Subtract, 3);
+
+  const {
+    totalNombreSalariesHomme: totalNombreSalariesHommes,
+    totalNombreSalariesFemme: totalNombreSalariesFemmes
+  } = totalNombreSalaries(nombreSalaries);
+
+  const validateEffectifs = (value: string, maxNum: number): boolean => {
+    const intValue = parseIntFormValue(value);
+    return intValue === undefined || intValue <= maxNum;
+  };
 
   return (
     <Form
@@ -137,11 +151,21 @@ function IndicateurDeuxTroisForm({
               <FieldInputsMenWomen
                 name="nombre de salariés augmentés ou promus"
                 readOnly={readOnly}
-                calculable={true} // TODO: the total number of women and men must be above 5.
-                calculableNumber={5} // TODO: this calculable number applies to the "effectif" entered in the first step
+                calculable={true} // This isn't used here, if the field is not calculable it's because of the number of men/women declared in the "effectifs"
+                calculableNumber={0} // Same here.
                 mask="number"
                 femmeFieldName="nombreAugmentationPromotionFemmes"
                 hommeFieldName="nombreAugmentationPromotionHommes"
+                customValidateFemmes={(value: string) => {
+                  return validateEffectifs(value, totalNombreSalariesFemmes)
+                    ? undefined
+                    : "Le nombre de femmes ne peut pas être supérieur aux effectifs";
+                }}
+                customValidateHommes={(value: string) => {
+                  return validateEffectifs(value, totalNombreSalariesHommes)
+                    ? undefined
+                    : "Le nombre d'hommes ne peut pas être supérieur aux effectifs";
+                }}
               />
             </BlocForm>
           )}

@@ -12,7 +12,8 @@ export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
   (meta.error &&
     meta.touched &&
-    Object.values({ ...meta.error, required: false }).includes(true));
+    !!Object.values({ ...meta.error, required: false }).filter(item => !!item)
+      .length);
 
 const numberMask = createNumberMask({
   prefix: "",
