@@ -3,7 +3,7 @@ kind: Job
 apiVersion: batch/v1
 metadata:
   name: egapro-init-kinto${HASH_BRANCH_NAME}
-  namespace: ${NAMESPACE}
+#  namespace: ${NAMESPACE}
   labels:
     app: egapro-init-kinto
     branch: egapro${HASH_BRANCH_NAME}

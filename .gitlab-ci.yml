@@ -18,6 +18,7 @@ variables:
   KINTO_PORT: 8888
   RANCHER_PROJECT_ID: c-gsm8d:p-9mvwt
   RANCHER_PROJECT_ID_PROD: c-l9h59:p-jcmhs
+  INFRA_GIT_DEPLOY_VERSION: "1.0"
 
 stages:
   - "Code Quality"
@@ -57,29 +58,26 @@ Quality tests:
 ###               PREPARE               ###
 ###########################################
 
+.get_github_id_stage: &get_github_id_stage
+  stage: "Prepare"
+  image:
+    name: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
+  before_script:
+    - envsubst < /scripts/get-deploy-id.sh > /scripts/get-github-deploy-id.sh
+  script:
+    - sh /scripts/get-github-deploy-id.sh
+  artifacts:
+    paths:
+      - github_deploy_id
 
-#.get_github_id_stage: &get_github_id_stage
-#  stage: "Prepare"
-#  image:
-#    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
-#    entrypoint: [""]
-#  before_script:
-#    - envsubst < k8s/scripts/get-deploy-id.sh > k8s/scripts/get-github-deploy-id.sh
-#  script:
-#    - sh k8s/scripts/get-github-deploy-id.sh
-#  artifacts:
-#    paths:
-#      - github_deploy_id
-#
-
-#Get Github Id (dev):
-#  <<: *get_github_id_stage
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - branches
-#  except:
-#    - master
+Get Github Id (dev):
+  <<: *get_github_id_stage
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - branches
+  except:
+    - master
 
 #Get Github Id (prod):
 #  <<: *get_github_id_stage
@@ -107,22 +105,22 @@ Create namespace (dev):
   except:
     - master
 
-Create namespace (prod):
-  stage: "Prepare"
-  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  script:
-    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-    - export K8S_NAMESPACE=egapro-${PROD_ENVIRONMENT_NAME}
-    # Skip the job if the namespace exists
-    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
-    # Create namespace
-    - kubectl create namespace ${K8S_NAMESPACE}
-    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID_PROD}
-  environment:
-    name: ${PROD_ENVIRONMENT_NAME}
-  only:
-    - /boni-ci-azure/
+#Create namespace (prod):
+#  stage: "Prepare"
+#  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+#  script:
+#    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+#    - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+#    - export K8S_NAMESPACE=egapro-${PROD_ENVIRONMENT_NAME}
+#    # Skip the job if the namespace exists
+#    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
+#    # Create namespace
+#    - kubectl create namespace ${K8S_NAMESPACE}
+#    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID_PROD}
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /boni-ci-azure/
 
 
 ###########################################
@@ -179,25 +177,25 @@ Register init kinto image:
 #
 
 
-#Deploy @secret (dev):
-#  <<: *deploy_stage
-#  stage: "Create secret dev"
-#  image:
-#    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  script:
-#  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-#  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-#  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-#  - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
-#  - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
-#  only:
-#  - branches
-#  except:
-#  - master
+Deploy @secret (dev):
+  <<: *deploy_stage
+  stage: "Create secret dev"
+  image:
+    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+  variables:
+    <<: *deploy_stage_variables
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  script:
+  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+  - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
+  - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
+  only:
+  - branches
+  except:
+  - master
 
 
 ###########################################
@@ -206,171 +204,169 @@ Register init kinto image:
 
 # Dev Environment
 
-#Deploy @egapro/app (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $APP_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy @egapro/api (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-api-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $API_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy @egapro/postgres (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy @egapro/memcached (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy @egapro/kinto (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-dev
-#  stage: "Deploy dev"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $KINTO_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - branches
-#  except:
-#    - master
-
-# Prod Environment
-
-Deploy @egapro/app (prod):
+Deploy @egapro/app (dev):
   <<: *deploy_stage
-  extends: .deploy-egapro-app-k8s-prod
-  stage: "Deploy prod"
+  extends: .deploy-egapro-app-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $APP_PORT
-    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
   environment:
-    name: ${PROD_ENVIRONMENT_NAME}
+    name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - /boni-ci-azure/
+    - branches
+  except:
+    - master
 
-Deploy @egapro/api (prod):
+Deploy @egapro/api (dev):
   <<: *deploy_stage
-  extends: .deploy-egapro-api-k8s-prod
-  stage: "Deploy prod"
+  extends: .deploy-egapro-api-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $API_PORT
-    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
   environment:
-    name: ${PROD_ENVIRONMENT_NAME}
+    name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - /boni-ci-azure/
+    - branches
+  except:
+    - master
 
-Deploy @egapro/postgres (prod):
+Deploy @egapro/postgres (dev):
   <<: *deploy_stage
-  extends: .deploy-egapro-postgres-k8s-prod
-  stage: "Deploy prod"
-  when: manual
+  extends: .deploy-egapro-postgres-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
-    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
   environment:
-    name: ${PROD_ENVIRONMENT_NAME}
+    name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - /boni-ci-azure/
+    - branches
+  except:
+    - master
 
-Deploy @egapro/memcached (prod):
+Deploy @egapro/memcached (dev):
   <<: *deploy_stage
-  extends: .deploy-egapro-memcached-k8s-prod
-  stage: "Deploy prod"
+  extends: .deploy-egapro-memcached-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
-    PORT: $MEMCACHED_PORT
-    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
   environment:
-    name: ${PROD_ENVIRONMENT_NAME}
+    name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - /boni-ci-azure/
+    - branches
+  except:
+    - master
 
-Deploy @egapro/kinto (prod):
+Deploy @egapro/kinto (dev):
   <<: *deploy_stage
-  extends: .deploy-egapro-kinto-k8s-prod
-  stage: "Deploy prod"
+  extends: .deploy-egapro-kinto-k8s-dev
+  stage: "Deploy dev"
   variables:
     <<: *deploy_stage_variables
     PORT: $KINTO_PORT
-    CACHE_PORT: $MEMCACHED_PORT
-    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
   environment:
-    name: ${PROD_ENVIRONMENT_NAME}
+    name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - /boni-ci-azure/
+    - branches
+  except:
+    - master
+
+# Prod Environment
+
+#Deploy @egapro/app (prod):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-app-k8s-prod
+#  stage: "Deploy prod"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $APP_PORT
+#    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /boni-ci-azure/
+#
+#Deploy @egapro/api (prod):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-api-k8s-prod
+#  stage: "Deploy prod"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $API_PORT
+#    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /boni-ci-azure/
+#
+#Deploy @egapro/postgres (prod):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-postgres-k8s-prod
+#  stage: "Deploy prod"
+#  when: manual
+#  variables:
+#    <<: *deploy_stage_variables
+#    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /boni-ci-azure/
+#
+#Deploy @egapro/memcached (prod):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-memcached-k8s-prod
+#  stage: "Deploy prod"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $MEMCACHED_PORT
+#    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /boni-ci-azure/
+#
+#Deploy @egapro/kinto (prod):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-kinto-k8s-prod
+#  stage: "Deploy prod"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $KINTO_PORT
+#    CACHE_PORT: $MEMCACHED_PORT
+#    NAMESPACE: egapro-${PROD_ENVIRONMENT_NAME}
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /boni-ci-azure/
 
 
 ###########################################
 ###         SEND URL TO GITHUB          ###
 ###########################################
 
-##
-#.send_url_to_github_stage: &send_url_to_github_stage
-#  stage: "Send Url to GitHub"
-#  image:
-#    name: $CI_REGISTRY/$IMAGE_INFRA_BASE_NAME/docker-kube:latest
-#    entrypoint: [""]
-#  script:
-#    - export DEPLOY_ID=$(cat github_deploy_id)
-#    - envsubst < k8s/scripts/send-url.sh > k8s/scripts/send-url-to-github.sh
-#    - sh k8s/scripts/send-url-to-github.sh $CI_COMMIT_REF_NAME
-##
-#
-#Send deployment url to Github (dev):
-#  <<: *send_url_to_github_stage
-#  before_script:
-#    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-#    - export HASH_BRANCH_NAME=$HASH_BRANCH_NAME
-#    - export URL=http://$HASH_BRANCH_NAME-egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - branches
-#  except:
-#    - master
+.send_url_to_github_stage: &send_url_to_github_stage
+  stage: "Send Url to GitHub"
+  image:
+    name: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
+  script:
+    - export DEPLOY_ID=$(cat github_deploy_id)
+    - envsubst < /scripts/send-url.sh > /scripts/send-url-to-github.sh
+    - sh /scripts/send-url-to-github.sh
+
+
+Send deployment url to Github (dev):
+  <<: *send_url_to_github_stage
+  before_script:
+    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+    - export HASH_BRANCH_NAME=$HASH_BRANCH_NAME
+    - export URL=http://$HASH_BRANCH_NAME-egapro.${CI_ENVIRONMENT_NAME}.social.gouv.fr/
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - branches
+  except:
+    - master
 
 #Send deployment url to Github (prod):
 #  <<: *send_url_to_github_stage
