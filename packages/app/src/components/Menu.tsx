@@ -139,7 +139,7 @@ function Menu({
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur2et3`}
                 title="indicateur"
-                label="écart de taux d'augmentations et de promotions"
+                label="écart de taux d'augmentations"
                 valid={indicateurDeuxTroisFormValidated}
               />
               <CustomNavLink

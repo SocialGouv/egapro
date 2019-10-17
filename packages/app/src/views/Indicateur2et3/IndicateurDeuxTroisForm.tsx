@@ -142,14 +142,14 @@ function IndicateurDeuxTroisForm({
             fieldName="presenceAugmentationPromotion"
             value={values.presenceAugmentationPromotion}
             readOnly={readOnly}
-            labelTrue="il y a eu des augmentations ou des promotions durant la période de déclaration"
-            labelFalse="il n’y a pas eu d'augmentations ou de promotions durant la période de déclaration"
+            labelTrue="il y a eu des augmentations durant la période de déclaration"
+            labelFalse="il n’y a pas eu d'augmentations durant la période de déclaration"
           />
 
           {values.presenceAugmentationPromotion === "true" && (
             <BlocForm>
               <FieldInputsMenWomen
-                name="nombre de salariés augmentés ou promus"
+                name="nombre de salariés augmentés"
                 readOnly={readOnly}
                 calculable={true} // This isn't used here, if the field is not calculable it's because of the number of men/women declared in the "effectifs"
                 calculableNumber={0} // Same here.
