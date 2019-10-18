@@ -129,7 +129,7 @@ function IndicateurDeuxTroisForm({
             readOnly={readOnly}
             choices={[
               {
-                label: `Période de référence choisie pour l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
+                label: `Période de référence de l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
                 value: "unePeriodeReference"
               },
               {
