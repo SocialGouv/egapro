@@ -85,7 +85,7 @@ Get Github Id (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - master
+    - boni-ci-azure
 
 Get Github Id (preprod):
   <<: *get_github_id_stage
@@ -269,25 +269,25 @@ Register init kinto image tag:
 #
 
 
-Deploy @secret (dev):
-  <<: *deploy_stage
-  stage: "Create secret horsprod"
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  variables:
-    <<: *deploy_stage_variables
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  script:
-  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-  - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
-  - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
-  only:
-  - branches
-  except:
-  - master
+#Deploy @secret (dev):
+#  <<: *deploy_stage
+#  stage: "Create secret horsprod"
+#  image:
+#    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+#  variables:
+#    <<: *deploy_stage_variables
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  script:
+#  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+#  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
+#  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+#  - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
+#  - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
+#  only:
+#  - branches
+#  except:
+#  - master
 
 Deploy @secret (master):
   <<: *deploy_stage
@@ -303,7 +303,7 @@ Deploy @secret (master):
     - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
     - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy @secret (preprod):
   <<: *deploy_stage
@@ -327,73 +327,73 @@ Deploy @secret (preprod):
 
 # Dev Environment
 
-Deploy @egapro/app (dev):
-  <<: *deploy_stage
-  extends: .deploy-egapro-app-k8s-dev
-  stage: "Deploy to K8S"
-  variables:
-    <<: *deploy_stage_variables
-    PORT: $APP_PORT
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - branches
-  except:
-    - master
-
-Deploy @egapro/api (dev):
-  <<: *deploy_stage
-  extends: .deploy-egapro-api-k8s-dev
-  stage: "Deploy to K8S"
-  variables:
-    <<: *deploy_stage_variables
-    PORT: $API_PORT
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - branches
-  except:
-    - master
-
-Deploy @egapro/postgres (dev):
-  <<: *deploy_stage
-  extends: .deploy-egapro-postgres-k8s-dev
-  stage: "Deploy to K8S"
-  variables:
-    <<: *deploy_stage_variables
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - branches
-  except:
-    - master
-
-Deploy @egapro/memcached (dev):
-  <<: *deploy_stage
-  extends: .deploy-egapro-memcached-k8s-dev
-  stage: "Deploy to K8S"
-  variables:
-    <<: *deploy_stage_variables
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - branches
-  except:
-    - master
-
-Deploy @egapro/kinto (dev):
-  <<: *deploy_stage
-  extends: .deploy-egapro-kinto-k8s-dev
-  stage: "Deploy to K8S"
-  variables:
-    <<: *deploy_stage_variables
-    PORT: $KINTO_PORT
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - branches
-  except:
-    - master
+#Deploy @egapro/app (dev):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-app-k8s-dev
+#  stage: "Deploy to K8S"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $APP_PORT
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - branches
+#  except:
+#    - master
+#
+#Deploy @egapro/api (dev):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-api-k8s-dev
+#  stage: "Deploy to K8S"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $API_PORT
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - branches
+#  except:
+#    - master
+#
+#Deploy @egapro/postgres (dev):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-postgres-k8s-dev
+#  stage: "Deploy to K8S"
+#  variables:
+#    <<: *deploy_stage_variables
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - branches
+#  except:
+#    - master
+#
+#Deploy @egapro/memcached (dev):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-memcached-k8s-dev
+#  stage: "Deploy to K8S"
+#  variables:
+#    <<: *deploy_stage_variables
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - branches
+#  except:
+#    - master
+#
+#Deploy @egapro/kinto (dev):
+#  <<: *deploy_stage
+#  extends: .deploy-egapro-kinto-k8s-dev
+#  stage: "Deploy to K8S"
+#  variables:
+#    <<: *deploy_stage_variables
+#    PORT: $KINTO_PORT
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - branches
+#  except:
+#    - master
 
 # Master Environment
 
@@ -407,7 +407,7 @@ Deploy @egapro/app (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy @egapro/api (master):
   <<: *deploy_stage
@@ -419,7 +419,7 @@ Deploy @egapro/api (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy @egapro/postgres (master):
   <<: *deploy_stage
@@ -430,7 +430,7 @@ Deploy @egapro/postgres (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy @egapro/memcached (master):
   <<: *deploy_stage
@@ -441,7 +441,7 @@ Deploy @egapro/memcached (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy @egapro/kinto (master):
   <<: *deploy_stage
@@ -453,7 +453,7 @@ Deploy @egapro/kinto (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - master
+    - boni-ci-azure
 
 # Preprod Environment
 
@@ -598,18 +598,18 @@ Deploy @egapro/kinto (preprod):
     - sh /scripts/send-url-to-github.sh
 
 
-Send deployment url to Github (dev):
-  <<: *send_url_to_github_stage
-  before_script:
-    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export HASH_BRANCH_NAME=$HASH_BRANCH_NAME
-    - export URL=http://$HASH_BRANCH_NAME-egapro.${ENVIRONMENT}.social.gouv.fr/
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - branches
-  except:
-    - master
+#Send deployment url to Github (dev):
+#  <<: *send_url_to_github_stage
+#  before_script:
+#    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+#    - export HASH_BRANCH_NAME=$HASH_BRANCH_NAME
+#    - export URL=http://$HASH_BRANCH_NAME-egapro.${ENVIRONMENT}.social.gouv.fr/
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - branches
+#  except:
+#    - master
 
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
@@ -618,7 +618,7 @@ Send deployment url to Github (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - master
+    - boni-ci-azure
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
@@ -654,4 +654,4 @@ Make a new release to deploy to preprod environment :
       --data '{"ref": "refs/tags/'${RELEASE_VERSION}'", "sha": "'${CI_COMMIT_SHA}'"}'
   when: manual
   only:
-    - master
+    - boni-ci-azure
