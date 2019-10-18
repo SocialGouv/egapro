@@ -1,11 +1,15 @@
+import { TrancheEffectifs } from "../globals";
+
 ///////////
 // Index //
 ///////////
 
 export const calculNoteIndex = (
+  trancheEffectifs: TrancheEffectifs,
   noteIndicateurUn: number | undefined,
   noteIndicateurDeux: number | undefined,
   noteIndicateurTrois: number | undefined,
+  noteIndicateurDeuxTrois: number | undefined,
   noteIndicateurQuatre: number | undefined,
   noteIndicateurCinq: number | undefined
 ): { noteIndex: number | undefined; totalPointCalculable: number } => {
@@ -15,6 +19,8 @@ export const calculNoteIndex = (
     noteIndicateurDeux !== undefined ? 20 : 0;
   const noteIndicateurTroisPointCalculable =
     noteIndicateurTrois !== undefined ? 15 : 0;
+  const noteIndicateurDeuxTroisPointCalculable =
+    noteIndicateurDeuxTrois !== undefined ? 35 : 0;
   const noteIndicateurQuatrePointCalculable =
     noteIndicateurQuatre !== undefined ? 15 : 0;
   const noteIndicateurCinqPointCalculable =
@@ -22,8 +28,9 @@ export const calculNoteIndex = (
 
   const totalPointCalculable =
     noteIndicateurUnPointCalculable +
-    noteIndicateurDeuxPointCalculable +
-    noteIndicateurTroisPointCalculable +
+    (trancheEffectifs !== "50 à 249"
+      ? noteIndicateurDeuxPointCalculable + noteIndicateurTroisPointCalculable
+      : noteIndicateurDeuxTroisPointCalculable) +
     noteIndicateurQuatrePointCalculable +
     noteIndicateurCinqPointCalculable;
 
@@ -36,8 +43,9 @@ export const calculNoteIndex = (
 
   const totalPoint =
     (noteIndicateurUn || 0) +
-    (noteIndicateurDeux || 0) +
-    (noteIndicateurTrois || 0) +
+    (trancheEffectifs !== "50 à 249"
+      ? (noteIndicateurDeux || 0) + (noteIndicateurTrois || 0)
+      : noteIndicateurDeuxTrois || 0) +
     (noteIndicateurQuatre || 0) +
     (noteIndicateurCinq || 0);
 
