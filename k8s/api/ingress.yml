@@ -8,6 +8,7 @@ metadata:
     branch: egapro${HASH_BRANCH_NAME}
   annotations:
     kubernetes.io/ingress.class: "azure/application-gateway"
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: ${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr
@@ -17,3 +18,5 @@ spec:
         backend:
           serviceName: egapro-api${HASH_BRANCH_NAME}
           servicePort: ${PORT}
+#  tls:
+#  - secretName: egapro-crt-secret
