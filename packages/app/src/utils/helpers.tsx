@@ -92,6 +92,10 @@ export function calendarYear(
   return asString;
 }
 
+export function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString();
+}
+
 /* Misc */
 
 export const messageEcartNombreEquivalentSalaries = (

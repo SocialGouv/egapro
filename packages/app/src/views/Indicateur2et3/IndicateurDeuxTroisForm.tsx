@@ -24,7 +24,7 @@ import {
   parseBooleanStateValue,
   parsePeriodeDeclarationFormValue
 } from "../../utils/formHelpers";
-import { calendarYear, Year } from "../../utils/helpers";
+import { calendarYear, formatDate, Year } from "../../utils/helpers";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 interface Props {
@@ -89,9 +89,16 @@ function IndicateurDeuxTroisForm({
     validateIndicateurDeuxTrois("Valid");
   };
 
-  const oneYear = calendarYear(finPeriodeReference, Year.Subtract, 1);
-  const twoYears = calendarYear(finPeriodeReference, Year.Subtract, 2);
-  const threeYears = calendarYear(finPeriodeReference, Year.Subtract, 3);
+  const oneYear = formatDate(
+    calendarYear(finPeriodeReference, Year.Subtract, 1)
+  );
+  const twoYears = formatDate(
+    calendarYear(finPeriodeReference, Year.Subtract, 2)
+  );
+  const threeYears = formatDate(
+    calendarYear(finPeriodeReference, Year.Subtract, 3)
+  );
+  const dateFinPeriodeReference = formatDate(finPeriodeReference);
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommes,
@@ -117,20 +124,20 @@ function IndicateurDeuxTroisForm({
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
             fieldName="periodeDeclaration"
-            label="je déclare sur"
+            label="Sur quelle période souhaitez-vous calculer votre indicateur ?"
             value={values.periodeDeclaration}
             readOnly={readOnly}
             choices={[
               {
-                label: `la période de référence choisie pour l'index du ${oneYear} au ${finPeriodeReference}`,
+                label: `Période de référence choisie pour l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
                 value: "unePeriodeReference"
               },
               {
-                label: `les deux dernières périodes de référence du ${twoYears} au ${finPeriodeReference}`,
+                label: `Période de référence de 2 ans (du ${twoYears} au ${dateFinPeriodeReference})`,
                 value: "deuxPeriodesReference"
               },
               {
-                label: `les trois dernières périodes de référence du ${threeYears} au ${finPeriodeReference}`,
+                label: `Période de référence de 3 ans (du ${threeYears} au ${dateFinPeriodeReference})`,
                 value: "troisPeriodesReference"
               }
             ]}
