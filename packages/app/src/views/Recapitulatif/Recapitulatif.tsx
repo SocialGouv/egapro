@@ -90,7 +90,7 @@ function Recapitulatif({ state }: Props) {
   const allIndicateurValid =
     (state.indicateurUn.formValidated === "Valid" ||
       !effectifsIndicateurUnCalculable) &&
-    (trancheEffectifs !== "50 à 249"
+    (trancheEffectifs !== "50 à 250"
       ? (state.indicateurDeux.formValidated === "Valid" ||
           !effectifsIndicateurDeuxCalculable) &&
         (state.indicateurTrois.formValidated === "Valid" ||
@@ -137,7 +137,7 @@ function Recapitulatif({ state }: Props) {
         indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
         noteIndicateurUn={noteIndicateurUn}
       />
-      {(trancheEffectifs !== "50 à 249" && (
+      {(trancheEffectifs !== "50 à 250" && (
         <Fragment>
           <RecapitulatifIndicateurDeux
             indicateurDeuxFormValidated={state.indicateurDeux.formValidated}

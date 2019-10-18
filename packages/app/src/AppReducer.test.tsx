@@ -51,7 +51,7 @@ describe("updateInformations", () => {
     type: "updateInformations" as "updateInformations",
     data: {
       nomEntreprise: "acme",
-      trancheEffectifs: "250 à 999" as TrancheEffectifs,
+      trancheEffectifs: "251 à 999" as TrancheEffectifs,
       debutPeriodeReference: "2019-10-15",
       finPeriodeReference: "2020-10-14"
     }

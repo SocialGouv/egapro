@@ -147,12 +147,12 @@ function InformationsForm({
             label="Quelle est la tranche d'effectifs de l'entreprise ?"
             choices={[
               {
-                label: "Entre 50 et 249",
-                value: "50 à 249"
+                label: "Entre 50 et 250",
+                value: "50 à 250"
               },
               {
-                label: "Entre 250 et 999",
-                value: "250 à 999"
+                label: "Entre 251 et 999",
+                value: "251 à 999"
               },
               {
                 label: "1000 et plus",

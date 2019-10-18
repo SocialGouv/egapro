@@ -60,7 +60,7 @@ function Informations({ state, dispatch }: Props) {
       />
 
       {state.informations.formValidated === "Valid" &&
-        (state.informations.trancheEffectifs !== "50 à 249"
+        (state.informations.trancheEffectifs !== "50 à 250"
           ? state.indicateurDeux.formValidated === "Invalid" ||
             state.indicateurTrois.formValidated === "Invalid"
           : state.indicateurDeuxTrois.formValidated === "Invalid") && (
@@ -75,7 +75,7 @@ function Informations({ state, dispatch }: Props) {
                 </span>
                 &emsp;
                 <span>
-                  {state.informations.trancheEffectifs !== "50 à 249" &&
+                  {state.informations.trancheEffectifs !== "50 à 250" &&
                     state.indicateurDeux.formValidated === "Invalid" && (
                       <Fragment>
                         <TextSimulatorLink
@@ -85,7 +85,7 @@ function Informations({ state, dispatch }: Props) {
                         &emsp;
                       </Fragment>
                     )}
-                  {state.informations.trancheEffectifs !== "50 à 249" &&
+                  {state.informations.trancheEffectifs !== "50 à 250" &&
                     state.indicateurTrois.formValidated === "Invalid" && (
                       <Fragment>
                         <TextSimulatorLink
@@ -95,7 +95,7 @@ function Informations({ state, dispatch }: Props) {
                         &emsp;
                       </Fragment>
                     )}
-                  {state.informations.trancheEffectifs === "50 à 249" &&
+                  {state.informations.trancheEffectifs === "50 à 250" &&
                     state.indicateurDeuxTrois.formValidated === "Invalid" && (
                       <TextSimulatorLink
                         to="/indicateur2et3"

@@ -53,7 +53,7 @@ export type PeriodeDeclaration =
   | "deuxPeriodesReference"
   | "troisPeriodesReference";
 
-export type TrancheEffectifs = "50 à 249" | "250 à 999" | "1000 et plus";
+export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus";
 
 export type FormState = "None" | "Valid" | "Invalid";
 
