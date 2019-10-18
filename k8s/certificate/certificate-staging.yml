@@ -1,0 +1,20 @@
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: egapro-crt
+spec:
+  secretName: egapro-crt-secret
+  dnsNames:
+  - ${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr
+  - ${HASH_BRANCH_INGRESS}egapro.${ENVIRONMENT}.social.gouv.fr
+  acme:
+    config:
+    - http01:
+        ingressClass: azure/application-gateway
+      domains:
+      - ${HASH_BRANCH_INGRESS}egapro-api.${ENVIRONMENT}.social.gouv.fr
+      - ${HASH_BRANCH_INGRESS}egapro.${ENVIRONMENT}.social.gouv.fr
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
