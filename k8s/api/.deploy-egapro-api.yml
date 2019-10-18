@@ -34,6 +34,23 @@
     - kubectl apply -f k8s/api/ingress-egapro.yml -n ${K8S_NAMESPACE}
   allow_failure: false
 
+.deploy-egapro-api-k8s-preprod:
+  image:
+    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+    entrypoint: [""]
+  before_script:
+    - export HASH_BRANCH_INGRESS=preprod.
+    - export HASH_BRANCH_NAME=-preprod
+    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
+    - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
+    - envsubst < k8s/api/ingress.yml > k8s/api/ingress-egapro.yml
+  script:
+    - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f k8s/api/ingress-egapro.yml -n ${K8S_NAMESPACE}
+  allow_failure: false
+
 #.deploy-egapro-api-k8s-prod:
 #  image:
 #    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
