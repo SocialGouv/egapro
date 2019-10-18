@@ -64,26 +64,15 @@ const valueValidateForCalculator = (value: string) => {
   return validateDate(value) === undefined;
 };
 
-const calculator = createDecorator(
-  {
-    field: "debutPeriodeReference",
-    updates: {
-      finPeriodeReference: (dateDebut, { finPeriodeReference }: any) =>
-        valueValidateForCalculator(dateDebut)
-          ? calendarYear(dateDebut, Year.Add, 1)
-          : finPeriodeReference
-    }
-  },
-  {
-    field: "finPeriodeReference",
-    updates: {
-      debutPeriodeReference: (dateFin, { debutPeriodeReference }: any) =>
-        valueValidateForCalculator(dateFin)
-          ? calendarYear(dateFin, Year.Subtract, 1)
-          : debutPeriodeReference
-    }
+const calculator = createDecorator({
+  field: "debutPeriodeReference",
+  updates: {
+    finPeriodeReference: (dateDebut, { finPeriodeReference }: any) =>
+      valueValidateForCalculator(dateDebut)
+        ? calendarYear(dateDebut, Year.Add, 1)
+        : finPeriodeReference
   }
-);
+});
 
 interface Props {
   informations: AppState["informations"];
@@ -220,8 +209,8 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
         />
         <FieldDate
           name="finPeriodeReference"
-          label="Date de fin"
-          readOnly={readOnly}
+          label="Date de fin (auto-calculée)"
+          readOnly={true}
         />
       </div>
     </div>
@@ -240,7 +229,7 @@ function FieldDate({
   label: string;
   readOnly: boolean;
 }) {
-  const field = useField(name, { validate, type: "date" });
+  const field = useField(name, { validate: validateDate, type: "date" });
   const error = hasFieldError(field.meta);
   const mustBeDateError = hasMustBeDateError(field.meta);
 
@@ -258,8 +247,8 @@ function FieldDate({
       <p css={styles.error}>
         {error &&
           (mustBeDateError
-            ? "ce champ doit contenir une date au format jj/mm/aaaa"
-            : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
+            ? "ce champ doit contenir une date"
+            : "ce champ n’est pas valide, renseignez une date au format aaaa-mm-jj")}
       </p>
     </div>
   );
