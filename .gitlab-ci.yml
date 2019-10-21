@@ -81,26 +81,26 @@ Get Github Id (dev):
   except:
     - master
 
-Get Github Id (master):
-  <<: *get_github_id_stage
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - boni-ci-azure
-
-Get Github Id (preprod):
-  <<: *get_github_id_stage
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  only:
-    - /^v.*/
-
-Get Github Id (prod):
-  <<: *get_github_id_stage
-  environment:
-    name: ${PROD_ENVIRONMENT_NAME}
-  only:
-    - /master/
+#Get Github Id (master):
+#  <<: *get_github_id_stage
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - boni-ci-azure
+#
+#Get Github Id (preprod):
+#  <<: *get_github_id_stage
+#  environment:
+#    name: ${DEV_ENVIRONMENT_NAME}
+#  only:
+#    - /^v.*/
+#
+#Get Github Id (prod):
+#  <<: *get_github_id_stage
+#  environment:
+#    name: ${PROD_ENVIRONMENT_NAME}
+#  only:
+#    - /master/
 
 Create namespace (dev):
   stage: "Prepare"
