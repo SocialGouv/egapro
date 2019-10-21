@@ -52,7 +52,7 @@ export function displaySexeSurRepresente(
 ): string {
   return indicateurSexeSurRepresente !== undefined
     ? `écart favorable aux ${indicateurSexeSurRepresente}`
-    : "les hommes et les femmes sont à égalité";
+    : "les femmes et les hommes sont à égalité";
 }
 
 /* Utils */

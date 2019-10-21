@@ -46,7 +46,7 @@ describe("displaySexeSurRepresente", () => {
 
   test("displays for undefined", () => {
     expect(displaySexeSurRepresente(undefined)).toEqual(
-      "les hommes et les femmes sont à égalité"
+      "les femmes et les hommes sont à égalité"
     );
   });
 });
