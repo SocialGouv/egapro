@@ -5,7 +5,7 @@ metadata:
   name: egapro-app${HASH_BRANCH_NAME}
   labels:
     app: egapro
-    environment: ${ENVIRONMENT}
+    environment: ${ENVIRONMENT_NAME}
     branch: ${HASH_BRANCH}
 spec:
   replicas: 1
