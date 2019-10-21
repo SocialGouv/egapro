@@ -48,9 +48,15 @@ spec:
             - name: KINTO_BUCKET
               value: "egapro"
             - name: KINTO_LOGIN
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: egapro-secret
+                  key: KINTO_ADMIN_LOGIN
             - name: KINTO_PASSWORD
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: egapro-secret
+                  key: KINTO_ADMIN_PASSWORD
             - name: MAIL_USE_TLS
               value: "true"
             - name: MAIL_PORT
