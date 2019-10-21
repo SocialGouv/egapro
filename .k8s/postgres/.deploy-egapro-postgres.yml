@@ -7,10 +7,10 @@
   - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
   - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
   - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-  - envsubst < k8s/postgres/values.yml > k8s/postgres/values-egapro.yml
+  - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
   script:
   - helm init --client-only
-  - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+  - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-postgres-k8s-master:
@@ -20,10 +20,10 @@
     - export HASH_BRANCH_NAME=-master
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
     - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < k8s/postgres/values.yml > k8s/postgres/values-egapro.yml
+    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
   script:
     - helm init --client-only
-    - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-postgres-k8s-preprod:
@@ -33,10 +33,10 @@
     - export HASH_BRANCH_NAME=-preprod
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
     - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < k8s/postgres/values.yml > k8s/postgres/values-egapro.yml
+    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
   script:
     - helm init --client-only
-    - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
 ...
