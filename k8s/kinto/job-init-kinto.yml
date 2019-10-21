@@ -18,9 +18,15 @@ spec:
           - name: KINTO_SERVER
             value: "kinto${HASH_BRANCH_NAME}"
           - name: KINTO_LOGIN
-            value: "admin"
+            valueFrom:
+              secretKeyRef:
+                name: egapro-secret
+                key: KINTO_ADMIN_LOGIN
           - name: KINTO_PASSWORD
-            value: "admin"
+            valueFrom:
+              secretKeyRef:
+                name: egapro-secret
+                key: KINTO_ADMIN_PASSWORD
         resources:
           requests:
             cpu: 10m
