@@ -1,10 +1,10 @@
 ---
 include:
-  - "/k8s/app/.deploy-egapro-app.yml"
-  - "/k8s/api/.deploy-egapro-api.yml"
-  - "/k8s/postgres/.deploy-egapro-postgres.yml"
-  - "/k8s/memcached/.deploy-egapro-memcached.yml"
-  - "/k8s/kinto/.deploy-egapro-kinto.yml"
+  - "/.k8s/app/.deploy-egapro-app.yml"
+  - "/.k8s/api/.deploy-egapro-api.yml"
+  - "/.k8s/postgres/.deploy-egapro-postgres.yml"
+  - "/.k8s/memcached/.deploy-egapro-memcached.yml"
+  - "/.k8s/kinto/.deploy-egapro-kinto.yml"
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -171,32 +171,32 @@ Create namespace (preprod):
     - docker push $IMAGE_NAME
 #
 
-#Register api image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/api/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
-#  only:
-#    - branches
-#
-#Register app image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/app/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
-#  only:
-#    - branches
-#
-#Register init kinto image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: packages/kinto
-#    DOCKERFILE_PATH: packages/kinto/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
-#  only:
-#    - branches
+Register api image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/api/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
+  only:
+    - branches
+
+Register app image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/app/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
+  only:
+    - branches
+
+Register init kinto image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
+  only:
+    - branches
 
 
 #
@@ -266,7 +266,7 @@ Register init kinto image tag:
 #  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
 #  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
 #  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-#  - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
+#  - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
 #  - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
 #  only:
 #  - branches
@@ -284,7 +284,7 @@ Deploy @secret (master):
     name: ${DEV_ENVIRONMENT_NAME}
   script:
     - export K8S_NAMESPACE=egapro-master
-    - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
+    - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
     - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   only:
     - boni-ci-azure
@@ -300,7 +300,7 @@ Deploy @secret (preprod):
     name: ${DEV_ENVIRONMENT_NAME}
   script:
     - export K8S_NAMESPACE=egapro-preprod
-    - envsubst < ./k8s/secret-dev.yml > ./secret-dev.yml
+    - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
     - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   only:
     - /^v.*/
@@ -594,40 +594,40 @@ Deploy egapro in production :
     - export PORT=$APP_PORT
     - export ENVIRONMENT_NAME=prod
     # app
-    - envsubst < k8s/app/deployment.yml > k8s/app/deployment-egapro.yml
-    - envsubst < k8s/app/service.yml > k8s/app/service-egapro.yml
-    - envsubst < k8s/app/ingress.yml > k8s/app/ingress-prod-egapro.yml
-    - envsubst < k8s/certificate/certificate-prod.yml > k8s/certificate/certificate-egapro.yml
+    - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
+    - envsubst < .k8s/app/service.yml > .k8s/app/service-egapro.yml
+    - envsubst < .k8s/app/ingress.yml > .k8s/app/ingress-prod-egapro.yml
+    - envsubst < .k8s/certificate/certificate-prod.yml > .k8s/certificate/certificate-egapro.yml
     # api
     - export PORT=$API_PORT
-    - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
-    - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
+    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
+    - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
     # postgres
     - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < k8s/postgres/values.yml > k8s/postgres/values-egapro.yml
+    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
     # kinto
     - export PORT=$KINTO_PORT
-    - envsubst < k8s/kinto/deployment.yml > k8s/kinto/deployment-egapro.yml
-    - envsubst < k8s/kinto/service.yml > k8s/kinto/service-egapro.yml
-    - envsubst < k8s/kinto/job-init-kinto.yml > k8s/kinto/job-init-kinto-egapro.yml
+    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
+    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
+    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
   script:
     # app
-    - kubectl apply -f k8s/app/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/app/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/app/ingress-prod-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/ingress-prod-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
     # api
-    - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
     # postgres
     - helm init --client-only
-    - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     # kinto
-    - kubectl apply -f k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-    - k8s/scripts/init-kinto.sh $HASH_BRANCH_NAME
+    - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
+    - .k8s/scripts/init-kinto.sh $HASH_BRANCH_NAME
     # memcached
     - helm init --client-only
-    - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
   only:
     - /^v.*/
