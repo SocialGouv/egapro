@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useRef, useState, useEffect} from "react";
+import { useRef, useState, useEffect } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
@@ -79,7 +79,7 @@ function HomeSimulateur({ location, history, code }: Props) {
         </div>
 
         <ActionBar>
-          <ButtonSimulatorLink to="/effectifs" label="suivant" />
+          <ButtonSimulatorLink to="/informations" label="suivant" />
         </ActionBar>
       </div>
 
@@ -137,9 +137,7 @@ const styles = {
     top: 0,
     bottom: 0,
     left: -(globalStyles.grid.gutterWidth * 2),
-    backgroundImage: `url(${
-      process.env.PUBLIC_URL
-    }/illustration-home-simulator.svg)`,
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-home-simulator.svg)`,
     backgroundRepeat: "no-repeat",
     backgroundSize: "contain"
   })
