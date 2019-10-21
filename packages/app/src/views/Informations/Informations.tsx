@@ -65,7 +65,7 @@ function Informations({ state, dispatch }: Props) {
             state.indicateurTrois.formValidated === "Invalid"
           : state.indicateurDeuxTrois.formValidated === "Invalid") && (
           <InfoBloc
-            title="Vos informations ont été modifiés"
+            title="Vos informations ont été modifiées"
             icon="cross"
             text={
               <Fragment>
