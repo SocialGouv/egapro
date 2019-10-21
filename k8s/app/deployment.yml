@@ -4,8 +4,9 @@ apiVersion: apps/v1
 metadata:
   name: egapro-app${HASH_BRANCH_NAME}
   labels:
-    app: egapro-app${HASH_BRANCH_NAME}
-    branch: egapro${HASH_BRANCH_NAME}
+    app: egapro
+    environment: ${ENVIRONMENT}
+    branch: ${HASH_BRANCH}
 spec:
   replicas: 1
   selector:
