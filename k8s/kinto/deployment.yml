@@ -31,7 +31,7 @@ spec:
           - name: KINTO_CACHE_BACKEND
             value: "kinto.core.cache.memcached"
           - name: KINTO_CACHE_HOSTS
-            value: "memcached${HASH_BRANCH_NAME}:11211 memcached${HASH_BRANCH_NAME}:11211"
+            value: "egapro${HASH_BRANCH_NAME}:11211 egapro${HASH_BRANCH_NAME}:11211"
           - name: KINTO_STORAGE_BACKEND
             value: "kinto.core.storage.postgresql"
           - name: KINTO_STORAGE_URL
