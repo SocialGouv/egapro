@@ -8,11 +8,11 @@
     - export HASH_BRANCH_INGRESS=$HASH_BRANCH_NAME-
     - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-    - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
-    - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
+    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
+    - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
   script:
-    - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-api-k8s-master:
@@ -23,11 +23,11 @@
     - export HASH_BRANCH_INGRESS=master.
     - export HASH_BRANCH_NAME=-master
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-    - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
-    - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
+    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
+    - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
   script:
-    - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-api-k8s-preprod:
@@ -38,11 +38,11 @@
     - export HASH_BRANCH_INGRESS=preprod.
     - export HASH_BRANCH_NAME=-preprod
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
-    - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
-    - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
+    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
+    - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
   script:
-    - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
 
   allow_failure: false
 
