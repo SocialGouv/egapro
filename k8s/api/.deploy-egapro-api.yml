@@ -10,13 +10,9 @@
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
     - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
     - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
-    - envsubst < k8s/api/ingress.yml > k8s/api/ingress-egapro.yml
-    - envsubst < k8s/certificate/certificate-staging.yml > k8s/certificate/certificate-egapro.yml
   script:
     - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/api/ingress-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-api-k8s-master:
@@ -29,13 +25,9 @@
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
     - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
     - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
-    - envsubst < k8s/api/ingress.yml > k8s/api/ingress-egapro.yml
-    - envsubst < k8s/certificate/certificate-staging.yml > k8s/certificate/certificate-egapro.yml
   script:
     - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/api/ingress-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-api-k8s-preprod:
@@ -48,13 +40,9 @@
     - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
     - envsubst < k8s/api/deployment.yml > k8s/api/deployment-egapro.yml
     - envsubst < k8s/api/service.yml > k8s/api/service-egapro.yml
-    - envsubst < k8s/api/ingress.yml > k8s/api/ingress-egapro.yml
-    - envsubst < k8s/certificate/certificate-staging.yml > k8s/certificate/certificate-egapro.yml
   script:
     - kubectl apply -f k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/api/ingress-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
 
   allow_failure: false
 
