@@ -11,7 +11,7 @@
   - envsubst < k8s/memcached/values.yml > k8s/memcached/values-egapro.yml
   script:
   - helm init --client-only
-  - helm upgrade --install egapro${HASH_BRANCH_NAME} --wait -f k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+  - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-memcached-k8s-master:
