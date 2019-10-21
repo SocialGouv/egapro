@@ -35,11 +35,11 @@ spec:
           - name: KINTO_STORAGE_BACKEND
             value: "kinto.core.storage.postgresql"
           - name: KINTO_STORAGE_URL
-            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@postgres${HASH_BRANCH_NAME}-postgresql/postgres"
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@egapro${HASH_BRANCH_NAME}-postgresql/postgres"
           - name: KINTO_PERMISSION_BACKEND
             value: "kinto.core.permission.postgresql"
           - name: KINTO_PERMISSION_URL
-            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@postgres${HASH_BRANCH_NAME}-postgresql/postgres"
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@egapro${HASH_BRANCH_NAME}-postgresql/postgres"
       initContainers:
       - name: wait-for-postgres
         image: postgres:11-alpine
