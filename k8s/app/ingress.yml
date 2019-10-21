@@ -18,5 +18,5 @@ spec:
         backend:
           serviceName: egapro-app${HASH_BRANCH_NAME}
           servicePort: ${PORT}
-#  tls:
-#  - secretName: egapro-crt-secret
+  tls:
+  - secretName: egapro-crt-secret
