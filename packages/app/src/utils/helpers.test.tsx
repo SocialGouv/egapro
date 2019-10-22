@@ -1,9 +1,25 @@
+import { format } from "date-fns";
 import {
   calendarYear,
   displaySexeSurRepresente,
   messageEcartNombreEquivalentSalaries,
+  parseDate,
   Year
 } from "./helpers";
+
+describe("parseDate", () => {
+  test("parses date as ISO format", () => {
+    expect(format(parseDate("2018-12-31"), "yyyy-MM-dd")).toEqual("2018-12-31");
+    expect(parseDate("2018-12-31a").toString()).toEqual("Invalid Date");
+    expect(parseDate("2018-31-12").toString()).toEqual("Invalid Date");
+  });
+
+  test("parses date as french format", () => {
+    expect(format(parseDate("31/12/2018"), "yyyy-MM-dd")).toEqual("2018-12-31");
+    expect(parseDate("31/12/2018a").toString()).toEqual("Invalid Date");
+    expect(parseDate("12/31/2018").toString()).toEqual("Invalid Date");
+  });
+});
 
 describe("calendarYear", () => {
   test("adds a year", () => {

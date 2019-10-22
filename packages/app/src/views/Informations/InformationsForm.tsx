@@ -56,8 +56,7 @@ const validateForm = ({
   finPeriodeReference: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
-  debutPeriodeReference: validateDate(debutPeriodeReference),
-  finPeriodeReference: validateDate(finPeriodeReference)
+  debutPeriodeReference: validateDate(debutPeriodeReference)
 });
 
 const valueValidateForCalculator = (value: string) => {
@@ -67,10 +66,11 @@ const valueValidateForCalculator = (value: string) => {
 const calculator = createDecorator({
   field: "debutPeriodeReference",
   updates: {
-    finPeriodeReference: (dateDebut, { finPeriodeReference }: any) =>
-      valueValidateForCalculator(dateDebut)
+    finPeriodeReference: (dateDebut, { finPeriodeReference }: any) => {
+      return valueValidateForCalculator(dateDebut)
         ? calendarYear(dateDebut, Year.Add, 1)
-        : finPeriodeReference
+        : finPeriodeReference;
+    }
   }
 });
 
@@ -247,8 +247,8 @@ function FieldDate({
       <p css={styles.error}>
         {error &&
           (mustBeDateError
-            ? "ce champ doit contenir une date"
-            : "ce champ n’est pas valide, renseignez une date au format aaaa-mm-jj")}
+            ? "ce champ doit contenir une date au format jj/mm/aaaa"
+            : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
       </p>
     </div>
   );

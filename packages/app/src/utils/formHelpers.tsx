@@ -1,4 +1,8 @@
-import { fractionToPercentage, percentageToFraction } from "./helpers";
+import {
+  fractionToPercentage,
+  parseDate,
+  percentageToFraction
+} from "./helpers";
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals.d";
 
 // INT PARSE
@@ -80,8 +84,9 @@ export const minNumber = (value: string, min: number): boolean =>
 export const maxNumber = (value: string, max: number): boolean =>
   Number(value) > max;
 
-export const mustBeDate = (value: string): boolean =>
-  Number.isNaN(Date.parse(value));
+export const mustBeDate = (value: string): boolean => {
+  return parseDate(value).toString() === "Invalid Date";
+};
 
 const regexpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const validateEmail = (email: string) => !regexpEmail.test(email);

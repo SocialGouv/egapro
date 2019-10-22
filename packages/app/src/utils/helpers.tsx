@@ -1,3 +1,11 @@
+import {
+  addYears,
+  addDays,
+  format,
+  parse as rootParse,
+  parseISO
+} from "date-fns";
+
 import { TranchesAges, CategorieSocioPro } from "../globals.d";
 
 export function displayNameTranchesAges(trancheAge: TranchesAges): string {
@@ -68,6 +76,14 @@ export const percentageToFraction = (num: number) => roundDecimal(num / 100, 5);
 
 /* Dates */
 
+export function parseDate(dateStr: string) {
+  const parsed = parseISO(dateStr);
+  if (parsed.toString() === "Invalid Date") {
+    return rootParse(dateStr, "dd/MM/yyyy", new Date());
+  }
+  return parsed;
+}
+
 export enum Year {
   Add,
   Subtract
@@ -84,12 +100,10 @@ export function calendarYear(
   // Subtracting a year: we add a day to the final result.
   const year = operation === Year.Add ? numYears : -numYears;
   const day = operation === Year.Add ? -1 : 1;
-  const date = new Date(dateStr);
-  date.setFullYear(date.getFullYear() + year);
-  date.setDate(date.getDate() + day);
-  // Only keep YYYY-MM-DD.
-  const asString = date.toISOString().slice(0, 10);
-  return asString;
+  const date = parseDate(dateStr);
+  const yearsAdded = addYears(date, year);
+  const dayAdded = addDays(yearsAdded, day);
+  return format(dayAdded, "yyyy-MM-dd");
 }
 
 export function formatDate(dateStr: string) {
