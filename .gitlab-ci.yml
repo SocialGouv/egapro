@@ -37,16 +37,11 @@ stages:
 ###            CODE QUALITY             ###
 ###########################################
 
-#
-.quality_stage: &quality_stage
+Quality tests:
   stage: "Code Quality"
   image: node:10-alpine
   before_script:
     - yarn --frozen-lockfile
-#
-
-Quality tests:
-  <<: *quality_stage
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -55,6 +50,8 @@ Quality tests:
     - yarn build
     - yarn lint
     - yarn test
+  when: manual
+  allow_failure: false
 
 
 ############################################
@@ -80,14 +77,14 @@ Get Github Id (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Get Github Id (master):
   <<: *get_github_id_stage
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - boni-ci-azure
+    - master
 
 Get Github Id (preprod):
   <<: *get_github_id_stage
@@ -126,14 +123,14 @@ Create namespace (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Create namespace (master):
   <<: *create_namespace
   before_script:
     - export K8S_NAMESPACE=egapro-master
   only:
-    - boni-ci-azure
+    - master
 
 Create namespace (preprod):
   <<: *create_namespace
@@ -257,14 +254,14 @@ Create @secret (dev):
   only:
   - branches
   except:
-  - boni-ci-azure
+  - master
 
 Create @secret (master):
   <<: *create_secret
   before_script:
     - export K8S_NAMESPACE=egapro-master
   only:
-    - boni-ci-azure
+    - master
 
 Create @secret (preprod):
   <<: *create_secret
@@ -299,7 +296,7 @@ Deploy @egapro/app (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/api (dev):
   <<: *deploy_stage
@@ -313,7 +310,7 @@ Deploy @egapro/api (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/postgres (dev):
   <<: *deploy_stage
@@ -326,7 +323,7 @@ Deploy @egapro/postgres (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/memcached (dev):
   <<: *deploy_stage
@@ -339,7 +336,7 @@ Deploy @egapro/memcached (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/kinto (dev):
   <<: *deploy_stage
@@ -353,7 +350,7 @@ Deploy @egapro/kinto (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 ## Master Environment
 
@@ -367,7 +364,7 @@ Deploy @egapro/app (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/api (master):
   <<: *deploy_stage
@@ -379,7 +376,7 @@ Deploy @egapro/api (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/postgres (master):
   <<: *deploy_stage
@@ -390,7 +387,7 @@ Deploy @egapro/postgres (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/memcached (master):
   <<: *deploy_stage
@@ -401,7 +398,7 @@ Deploy @egapro/memcached (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - boni-ci-azure
+    - master
 
 Deploy @egapro/kinto (master):
   <<: *deploy_stage
@@ -413,7 +410,7 @@ Deploy @egapro/kinto (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - boni-ci-azure
+    - master
 
 # Preprod Environment
 
@@ -509,7 +506,7 @@ Send deployment url to Github (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
@@ -518,7 +515,7 @@ Send deployment url to Github (master):
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
-    - boni-ci-azure
+    - master
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
@@ -545,7 +542,7 @@ Make a new release to deploy to preprod environment :
       --data '{"ref": "refs/tags/'${RELEASE_VERSION}'", "sha": "'${CI_COMMIT_SHA}'"}'
   when: manual
   only:
-    - boni-ci-azure
+    - master
 
 
 ###########################################
