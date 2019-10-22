@@ -2,7 +2,7 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: egapro-app${HASH_BRANCH_NAME}
+  name: egapro-app${SUFFIX_BRANCH_NAME}
   labels:
     app: egapro
     environment: ${ENVIRONMENT_NAME}
@@ -11,11 +11,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: egapro-app${HASH_BRANCH_NAME}
+      app: egapro-app${SUFFIX_BRANCH_NAME}
   template:
     metadata:
       labels:
-        app: egapro-app${HASH_BRANCH_NAME}
+        app: egapro-app${SUFFIX_BRANCH_NAME}
     spec:
       containers:
         - image: ${EGAPRO_REGISTRY}/app:${IMAGE_TAG}
@@ -43,4 +43,4 @@ spec:
               memory: 64Mi
           env:
             - name: REACT_APP_API_URL
-              value: "http://egapro-api${HASH_BRANCH_NAME}:4000"
+              value: "http://egapro-api${SUFFIX_BRANCH_NAME}:4000"

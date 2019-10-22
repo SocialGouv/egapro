@@ -2,21 +2,21 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: egapro-app${HASH_BRANCH_NAME}
+  name: egapro-app${SUFFIX_BRANCH_NAME}
   labels:
-    app: egapro-app${HASH_BRANCH_NAME}
-    branch: egapro${HASH_BRANCH_NAME}
+    app: egapro-app${SUFFIX_BRANCH_NAME}
+    branch: egapro${SUFFIX_BRANCH_NAME}
   annotations:
     kubernetes.io/ingress.class: "azure/application-gateway"
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-  - host: ${HASH_BRANCH_INGRESS}egapro.${ENVIRONMENT}.social.gouv.fr
+  - host: ${PREFIX_BRANCH_INGRESS}egapro.${ENVIRONMENT}.social.gouv.fr
     http:
       paths:
       - path: /
         backend:
-          serviceName: egapro-app${HASH_BRANCH_NAME}
+          serviceName: egapro-app${SUFFIX_BRANCH_NAME}
           servicePort: ${PORT}
   tls:
   - secretName: egapro-crt-secret

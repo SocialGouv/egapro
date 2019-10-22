@@ -1,13 +1,14 @@
 ---
+
 .deploy-egapro-api-k8s-dev:
   image:
     name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
     entrypoint: [""]
   before_script:
-    - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export HASH_BRANCH_INGRESS=$HASH_BRANCH_NAME-
-    - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+    - export PREFIX_BRANCH_INGRESS=$SUFFIX_BRANCH_NAME-
+    - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
     - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
   script:
@@ -20,9 +21,9 @@
     name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
     entrypoint: [""]
   before_script:
-    - export HASH_BRANCH_INGRESS=master.
-    - export HASH_BRANCH_NAME=-master
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - export PREFIX_BRANCH_INGRESS=master.
+    - export SUFFIX_BRANCH_NAME=-master
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
     - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
   script:
@@ -35,15 +36,14 @@
     name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
     entrypoint: [""]
   before_script:
-    - export HASH_BRANCH_INGRESS=preprod.
-    - export HASH_BRANCH_NAME=-preprod
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - export PREFIX_BRANCH_INGRESS=preprod.
+    - export SUFFIX_BRANCH_NAME=-preprod
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
     - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
   script:
     - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
-
   allow_failure: false
 
 ...

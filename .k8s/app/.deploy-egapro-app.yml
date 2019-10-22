@@ -4,11 +4,11 @@
     name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
     entrypoint: [""]
   before_script:
-  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export HASH_BRANCH=$HASH_BRANCH_NAME
-  - export HASH_BRANCH_INGRESS=$HASH_BRANCH_NAME-
-  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export HASH_BRANCH=$SUFFIX_BRANCH_NAME
+  - export PREFIX_BRANCH_INGRESS=$SUFFIX_BRANCH_NAME-
+  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
+  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
   - export ENVIRONMENT_NAME=dev
   - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
   - envsubst < .k8s/app/service.yml > .k8s/app/service-egapro.yml
@@ -27,9 +27,9 @@
     entrypoint: [""]
   before_script:
     - export HASH_BRANCH=master
-    - export HASH_BRANCH_INGRESS=master.
-    - export HASH_BRANCH_NAME=-master
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - export PREFIX_BRANCH_INGRESS=master.
+    - export SUFFIX_BRANCH_NAME=-master
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - export ENVIRONMENT_NAME=prod
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
     - envsubst < .k8s/app/service.yml > .k8s/app/service-egapro.yml
@@ -48,9 +48,9 @@
     entrypoint: [""]
   before_script:
     - export HASH_BRANCH=preprod
-    - export HASH_BRANCH_INGRESS=preprod.
-    - export HASH_BRANCH_NAME=-preprod
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - export PREFIX_BRANCH_INGRESS=preprod.
+    - export SUFFIX_BRANCH_NAME=-preprod
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - export ENVIRONMENT_NAME=preprod
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
     - envsubst < .k8s/app/service.yml > .k8s/app/service-egapro.yml
