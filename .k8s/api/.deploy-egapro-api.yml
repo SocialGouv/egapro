@@ -4,6 +4,7 @@
 .deploy_egapro_api: &deploy_egapro_api
   image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
   script:
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
     - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
     - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
@@ -17,20 +18,17 @@
     - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
     - export PREFIX_BRANCH_INGRESS=$SUFFIX_BRANCH_NAME-
     - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
 
 .deploy-egapro-api-k8s-master:
   <<: *deploy_egapro_api
   before_script:
     - export PREFIX_BRANCH_INGRESS=master.
     - export SUFFIX_BRANCH_NAME=-master
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
 
 .deploy-egapro-api-k8s-preprod:
   <<: *deploy_egapro_api
   before_script:
     - export PREFIX_BRANCH_INGRESS=preprod.
     - export SUFFIX_BRANCH_NAME=-preprod
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
 
 ...
