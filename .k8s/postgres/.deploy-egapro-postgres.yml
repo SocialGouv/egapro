@@ -1,43 +1,38 @@
 ---
+
+#
+.deploy_egapro_postgres: &deploy_egapro_postgres
+  image: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
+  script:
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
+    - helm init --client-only
+    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+  allow_failure: false
+#
+
 .deploy-egapro-postgres-k8s-dev:
+  <<: *deploy_egapro_postgres
   image:
     name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
   before_script:
   - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
   - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-  - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-  - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
-  script:
-  - helm init --client-only
-  - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
-  allow_failure: false
 
 .deploy-egapro-postgres-k8s-master:
+  <<: *deploy_egapro_postgres
   image:
     name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
   before_script:
     - export SUFFIX_BRANCH_NAME=-master
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
-  script:
-    - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
-  allow_failure: false
 
 .deploy-egapro-postgres-k8s-preprod:
+  <<: *deploy_egapro_postgres
   image:
     name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
   before_script:
     - export SUFFIX_BRANCH_NAME=-preprod
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
-  script:
-    - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
-  allow_failure: false
 
 ...
 
