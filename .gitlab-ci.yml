@@ -103,52 +103,42 @@ Get Github Id (prod):
   only:
     - /master/
 
-Create namespace (dev):
+#
+.create_namespace: &create_namespace
   stage: "Prepare"
   image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  script:
-  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-  # Skip the job if the namespace exists
-  - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
-  # Create namespace
-  - kubectl create namespace ${K8S_NAMESPACE}
-  - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
+  script:
+    # Skip the job if the namespace exists
+    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
+    # Create namespace
+    - kubectl create namespace ${K8S_NAMESPACE}
+    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
+#
+
+Create namespace (dev):
+  <<: *create_namespace
+  before_script:
+    - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+    - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
   only:
     - branches
   except:
     - master
 
 Create namespace (master):
-  stage: "Prepare"
-  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  script:
-  - export K8S_NAMESPACE=egapro-master
-  # Skip the job if the namespace exists
-  - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
-  # Create namespace
-  - kubectl create namespace ${K8S_NAMESPACE}
-  - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+  <<: *create_namespace
+  before_script:
+    - export K8S_NAMESPACE=egapro-master
   only:
     - master
 
 Create namespace (preprod):
-  stage: "Prepare"
-  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  script:
+  <<: *create_namespace
+  before_script:
     - export K8S_NAMESPACE=egapro-preprod
-    # Skip the job if the namespace exists
-    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
-    # Create namespace
-    - kubectl create namespace ${K8S_NAMESPACE}
-    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
   only:
     - /^v.*/
 
@@ -247,68 +237,53 @@ Register init kinto image tag:
 ############################################
 
 #
-.deploy_stage: &deploy_stage
-  dependencies: []
-  variables: &deploy_stage_variables
-    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
-    IMAGE_TAG: $CI_COMMIT_SHA
-#
-
-Deploy @secret (dev):
-  <<: *deploy_stage
+.create_secret: &create_secret
   stage: "Create secret horsprod"
   image:
     name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  variables:
-    <<: *deploy_stage_variables
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
+    - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
+    - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
+#
+
+Create @secret (dev):
+  <<: *create_secret
+  before_script:
   - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
   - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
   - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-  - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
-  - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   only:
   - branches
   except:
   - master
 
-Deploy @secret (master):
-  <<: *deploy_stage
-  stage: "Create secret horsprod"
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  variables:
-    <<: *deploy_stage_variables
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  script:
+Create @secret (master):
+  <<: *create_secret
+  before_script:
     - export K8S_NAMESPACE=egapro-master
-    - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
-    - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   only:
     - master
 
-Deploy @secret (preprod):
-  <<: *deploy_stage
-  stage: "Create secret horsprod"
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-  variables:
-    <<: *deploy_stage_variables
-  environment:
-    name: ${DEV_ENVIRONMENT_NAME}
-  script:
+Create @secret (preprod):
+  <<: *create_secret
+  before_script:
     - export K8S_NAMESPACE=egapro-preprod
-    - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
-    - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
   only:
     - /^v.*/
 
 ###########################################
 ###            DEPLOY TO K8S            ###
 ###########################################
+
+#
+.deploy_stage: &deploy_stage
+  dependencies: []
+  variables: &deploy_stage_variables
+    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
+    IMAGE_TAG: $CI_COMMIT_SHA
+#
 
 # Dev Environment
 
@@ -443,7 +418,6 @@ Deploy @egapro/kinto (master):
 # Preprod Environment
 
 #
-
 .deploy_tagged_stage: &deploy_tagged_stage
   dependencies: []
   variables: &deploy_tagged_stage_variables
@@ -590,7 +564,7 @@ Deploy egapro in production :
     name: ${PROD_ENVIRONMENT_NAME}
   when: manual
   before_script:
-    - export HASH_BRANCH=prod
+    - export ENVIRONMENT_BRANCH=prod
     - export PREFIX_BRANCH_INGRESS=prod.
     - export SUFFIX_BRANCH_NAME=-prod
     - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
