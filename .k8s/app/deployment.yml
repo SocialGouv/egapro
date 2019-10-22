@@ -6,7 +6,7 @@ metadata:
   labels:
     app: egapro
     environment: ${ENVIRONMENT_NAME}
-    branch: ${HASH_BRANCH}
+    branch: ${ENVIRONMENT_BRANCH}
 spec:
   replicas: 1
   selector:
