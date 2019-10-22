@@ -2,19 +2,19 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: egapro-api${HASH_BRANCH_NAME}
+  name: egapro-api${SUFFIX_BRANCH_NAME}
   labels:
-    app: egapro-api${HASH_BRANCH_NAME}
-    branch: egapro${HASH_BRANCH_NAME}
+    app: egapro-api${SUFFIX_BRANCH_NAME}
+    branch: egapro${SUFFIX_BRANCH_NAME}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: egapro-api${HASH_BRANCH_NAME}
+      app: egapro-api${SUFFIX_BRANCH_NAME}
   template:
     metadata:
       labels:
-        app: egapro-api${HASH_BRANCH_NAME}
+        app: egapro-api${SUFFIX_BRANCH_NAME}
     spec:
       containers:
         - image: ${EGAPRO_REGISTRY}/api:${IMAGE_TAG}
@@ -44,7 +44,7 @@ spec:
             - name: API_PORT
               value: "${PORT}"
             - name: KINTO_SERVER
-              value: "kinto${HASH_BRANCH_NAME}"
+              value: "kinto${SUFFIX_BRANCH_NAME}"
             - name: KINTO_BUCKET
               value: "egapro"
             - name: KINTO_LOGIN
