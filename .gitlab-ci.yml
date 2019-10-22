@@ -20,6 +20,7 @@ variables:
   RANCHER_PROJECT_ID_PROD: c-l9h59:p-jcmhs
   INFRA_GIT_DEPLOY_VERSION: "1.0"
   INFRA_CURL_VERSION: "1.0"
+  ENABLE_PERSISTENT_VOLUME: "false"
 
 stages:
   - "Code Quality"
@@ -157,99 +158,99 @@ stages:
 #############################################
 #
 ##
-#.register_stage commit sha: &register_stage_commit_sha
-#  stage: "Registration"
-#  image: docker:$DOCKER_VERSION
-#  services:
-#    - docker:$DOCKER_VERSION-dind
-#  before_script:
-#    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
-#    - docker pull $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA || true
-#  script:
-#    - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
-#    - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA -f $DOCKERFILE_PATH $CONTEXT
-#    - docker push $IMAGE_NAME
-##
+.register_stage commit sha: &register_stage_commit_sha
+  stage: "Registration"
+  image: docker:$DOCKER_VERSION
+  services:
+    - docker:$DOCKER_VERSION-dind
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+    - docker pull $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA || true
+  script:
+    - echo "Build $IMAGE_NAME:$CI_COMMIT_SHA from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
+    - docker build --cache-from $IMAGE_NAME:$CI_COMMIT_BEFORE_SHA -t $IMAGE_NAME:$CI_COMMIT_SHA -f $DOCKERFILE_PATH $CONTEXT
+    - docker push $IMAGE_NAME
 #
-#Register api image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/api/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
-#  only:
-#    - branches
+
+Register api image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/api/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
+  only:
+    - branches
+
+Register app image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/app/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
+  only:
+    - branches
+
+Register init kinto image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
+  only:
+    - branches
+
+
 #
-#Register app image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/app/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
-#  only:
-#    - branches
+.register_stage_tag: &register_stage_tag
+  stage: "Registration"
+  image: docker:$DOCKER_VERSION
+  services:
+    - docker:$DOCKER_VERSION-dind
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+  script:
+    - echo "Build $IMAGE_NAME:${RELEASE_VERSION}"
+    - docker build -t $IMAGE_NAME:${RELEASE_VERSION} -f $DOCKERFILE_PATH $CONTEXT
+    - docker push $IMAGE_NAME:${RELEASE_VERSION}
 #
-#Register init kinto image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: packages/kinto
-#    DOCKERFILE_PATH: packages/kinto/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
-#  only:
-#    - branches
-#
-#
-##
-#.register_stage_tag: &register_stage_tag
-#  stage: "Registration"
-#  image: docker:$DOCKER_VERSION
-#  services:
-#    - docker:$DOCKER_VERSION-dind
-#  before_script:
-#    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
-#  script:
-#    - echo "Build $IMAGE_NAME:${RELEASE_VERSION}"
-#    - docker build -t $IMAGE_NAME:${RELEASE_VERSION} -f $DOCKERFILE_PATH $CONTEXT
-#    - docker push $IMAGE_NAME:${RELEASE_VERSION}
-##
-#
-#Register api image tag:
-#  <<: *register_stage_tag
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/api/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
-#  only:
-#    - /^v.*/
-#
-#Register app image tag:
-#  <<: *register_stage_tag
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/app/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
-#  only:
-#    - /^v.*/
-#
-#Register init kinto image tag:
-#  <<: *register_stage_tag
-#  variables:
-#    CONTEXT: packages/kinto
-#    DOCKERFILE_PATH: packages/kinto/Dockerfile
-#    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
-#  only:
-#    - /^v.*/
+
+Register api image tag:
+  <<: *register_stage_tag
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/api/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/api
+  only:
+    - /^v.*/
+
+Register app image tag:
+  <<: *register_stage_tag
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/app/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/app
+  only:
+    - /^v.*/
+
+Register init kinto image tag:
+  <<: *register_stage_tag
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/kinto
+  only:
+    - /^v.*/
 #
 ############################################
 ####          CREATE SECRET DEV          ###
 ############################################
 #
 #
-#.deploy_stage: &deploy_stage
-#  dependencies: []
-#  variables: &deploy_stage_variables
-#    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
-#    IMAGE_TAG: $CI_COMMIT_SHA
+.deploy_stage: &deploy_stage
+  dependencies: []
+  variables: &deploy_stage_variables
+    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
+    IMAGE_TAG: $CI_COMMIT_SHA
 #
 #
 #
@@ -380,65 +381,65 @@ stages:
 ##    - master
 #
 ## Master Environment
-#
-#Deploy @egapro/app (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-master
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $APP_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy @egapro/api (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-api-k8s-master
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $API_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy @egapro/postgres (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-master
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy @egapro/memcached (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-master
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy @egapro/kinto (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-master
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: $KINTO_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - boni-ci-azure
-#
+
+Deploy @egapro/app (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-app-k8s-master
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $APP_PORT
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - boni-ci-azure
+
+Deploy @egapro/api (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-api-k8s-master
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $API_PORT
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - boni-ci-azure
+
+Deploy @egapro/postgres (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-master
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_stage_variables
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - boni-ci-azure
+
+Deploy @egapro/memcached (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-memcached-k8s-master
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_stage_variables
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - boni-ci-azure
+
+Deploy @egapro/kinto (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-kinto-k8s-master
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_stage_variables
+    PORT: $KINTO_PORT
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - boni-ci-azure
+
 ## Preprod Environment
 #
 ##
@@ -449,64 +450,64 @@ stages:
     IMAGE_TAG: ${RELEASE_VERSION}
 ##
 #
-#Deploy @egapro/app (preprod):
-#  <<: *deploy_tagged_stage
-#  extends: .deploy-egapro-app-k8s-preprod
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_tagged_stage_variables
-#    PORT: $APP_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - /^v.*/
-#
-#Deploy @egapro/api (preprod):
-#  <<: *deploy_tagged_stage
-#  extends: .deploy-egapro-api-k8s-preprod
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_tagged_stage_variables
-#    PORT: $API_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - /^v.*/
-#
-#Deploy @egapro/postgres (preprod):
-#  <<: *deploy_tagged_stage
-#  extends: .deploy-egapro-postgres-k8s-preprod
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_tagged_stage_variables
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - /^v.*/
-#
-#Deploy @egapro/memcached (preprod):
-#  <<: *deploy_tagged_stage
-#  extends: .deploy-egapro-memcached-k8s-preprod
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_tagged_stage_variables
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - /^v.*/
-#
-#Deploy @egapro/kinto (preprod):
-#  <<: *deploy_tagged_stage
-#  extends: .deploy-egapro-kinto-k8s-preprod
-#  stage: "Deploy to K8S"
-#  variables:
-#    <<: *deploy_tagged_stage_variables
-#    PORT: $KINTO_PORT
-#  environment:
-#    name: ${DEV_ENVIRONMENT_NAME}
-#  only:
-#    - /^v.*/
-#
+Deploy @egapro/app (preprod):
+  <<: *deploy_tagged_stage
+  extends: .deploy-egapro-app-k8s-preprod
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_tagged_stage_variables
+    PORT: $APP_PORT
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - /^v.*/
+
+Deploy @egapro/api (preprod):
+  <<: *deploy_tagged_stage
+  extends: .deploy-egapro-api-k8s-preprod
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_tagged_stage_variables
+    PORT: $API_PORT
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - /^v.*/
+
+Deploy @egapro/postgres (preprod):
+  <<: *deploy_tagged_stage
+  extends: .deploy-egapro-postgres-k8s-preprod
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_tagged_stage_variables
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - /^v.*/
+
+Deploy @egapro/memcached (preprod):
+  <<: *deploy_tagged_stage
+  extends: .deploy-egapro-memcached-k8s-preprod
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_tagged_stage_variables
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - /^v.*/
+
+Deploy @egapro/kinto (preprod):
+  <<: *deploy_tagged_stage
+  extends: .deploy-egapro-kinto-k8s-preprod
+  stage: "Deploy to K8S"
+  variables:
+    <<: *deploy_tagged_stage_variables
+    PORT: $KINTO_PORT
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  only:
+    - /^v.*/
+
 #
 #############################################
 #####         SEND URL TO GITHUB          ###
@@ -581,6 +582,7 @@ Deploy egapro in production :
   <<: *deploy_tagged_stage
   variables:
     <<: *deploy_tagged_stage_variables
+    ENABLE_PERSISTENT_VOLUME: "true"
   image:
     name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
   environment:
@@ -622,12 +624,12 @@ Deploy egapro in production :
     # postgres
     - helm init --client-only
     - helm upgrade --install egapro${HASH_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    # memcached
+    - helm init --client-only
+    - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
     # kinto
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
     - .k8s/scripts/init-kinto.sh $HASH_BRANCH_NAME
-    # memcached
-    - helm init --client-only
-    - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
   only:
     - /^v.*/
