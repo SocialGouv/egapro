@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/SocialGouv/egapro/compare/v1.2.4...v1.4.0) (2019-10-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency deepmerge to v4.1.1 ([#169](https://github.com/SocialGouv/egapro/issues/169)) ([0099c7a](https://github.com/SocialGouv/egapro/commit/0099c7a))
+* **deps:** update dependency deepmerge to v4.1.2 ([#211](https://github.com/SocialGouv/egapro/issues/211)) ([12aa679](https://github.com/SocialGouv/egapro/commit/12aa679))
+* **deps:** update dependency deepmerge to v4.2.0 ([#212](https://github.com/SocialGouv/egapro/issues/212)) ([01ddefc](https://github.com/SocialGouv/egapro/commit/01ddefc))
+* **deps:** update dependency dotenv to v8.2.0 ([#193](https://github.com/SocialGouv/egapro/issues/193)) ([e1b4f0f](https://github.com/SocialGouv/egapro/commit/e1b4f0f))
+* **deps:** update dependency koa to v2.10.0 ([#178](https://github.com/SocialGouv/egapro/issues/178)) ([6845060](https://github.com/SocialGouv/egapro/commit/6845060))
+* **deps:** update dependency koa to v2.9.0 ([#177](https://github.com/SocialGouv/egapro/issues/177)) ([9080588](https://github.com/SocialGouv/egapro/commit/9080588))
+* **deps:** update dependency nodemailer to v6.3.1 ([#171](https://github.com/SocialGouv/egapro/issues/171)) ([98fe406](https://github.com/SocialGouv/egapro/commit/98fe406))
+* **deps:** update dependency pino to v5.13.5 ([#180](https://github.com/SocialGouv/egapro/issues/180)) ([fbc5e11](https://github.com/SocialGouv/egapro/commit/fbc5e11))
+* **deps:** update sentry monorepo to v5.7.0 ([#174](https://github.com/SocialGouv/egapro/issues/174)) ([2086eb1](https://github.com/SocialGouv/egapro/commit/2086eb1))
+* **deps:** update sentry monorepo to v5.7.1 ([#185](https://github.com/SocialGouv/egapro/issues/185)) ([d6830ac](https://github.com/SocialGouv/egapro/commit/d6830ac))
+
+
+### Features
+
+* **50 à 250:** Nouvelle page indicateur 2 et 3 écart de taux d'augmentations et de promotions ([#166](https://github.com/SocialGouv/egapro/issues/166)) ([7c5544b](https://github.com/SocialGouv/egapro/commit/7c5544b))
+
+
+
+
+
 ## [1.2.4](https://github.com/SocialGouv/egapro/compare/v1.2.3...v1.2.4) (2019-10-08)
 
 **Note:** Version bump only for package egapro
