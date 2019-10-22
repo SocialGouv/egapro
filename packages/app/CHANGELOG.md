@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/SocialGouv/egapro/compare/v1.2.4...v1.4.0) (2019-10-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency deepmerge to v4.1.1 ([#169](https://github.com/SocialGouv/egapro/issues/169)) ([0099c7a](https://github.com/SocialGouv/egapro/commit/0099c7a))
+* **deps:** update dependency deepmerge to v4.1.2 ([#211](https://github.com/SocialGouv/egapro/issues/211)) ([12aa679](https://github.com/SocialGouv/egapro/commit/12aa679))
+* **deps:** update dependency deepmerge to v4.2.0 ([#212](https://github.com/SocialGouv/egapro/issues/212)) ([01ddefc](https://github.com/SocialGouv/egapro/commit/01ddefc))
+
+
+### Features
+
+* **50 à 250:** Nouvelle page indicateur 2 et 3 écart de taux d'augmentations et de promotions ([#166](https://github.com/SocialGouv/egapro/issues/166)) ([7c5544b](https://github.com/SocialGouv/egapro/commit/7c5544b))
+
+
+
+
+
 ## [1.2.4](https://github.com/SocialGouv/egapro/compare/v1.2.3...v1.2.4) (2019-10-08)
 
 **Note:** Version bump only for package app
