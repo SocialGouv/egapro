@@ -1,54 +1,36 @@
 ---
-.deploy-egapro-kinto-k8s-dev:
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-    entrypoint: [""]
-  before_script:
-  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export PREFIX_BRANCH_INGRESS=$SUFFIX_BRANCH_NAME-
-  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-  - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
-  - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
-  - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
+
+#
+.deploy_egapro_kinto: &deploy_egapro_kinto
+  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
   script:
-  - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
-  - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-  - .k8s/scripts/init-kinto.sh $SUFFIX_BRANCH_NAME
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
+    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
+    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
+    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
+    - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
+    - .k8s/scripts/init-kinto.sh $SUFFIX_BRANCH_NAME
   allow_failure: false
+#
+
+.deploy-egapro-kinto-k8s-dev:
+  <<: *deploy_egapro_kinto
+  before_script:
+    - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+    - export PREFIX_BRANCH_INGRESS=$SUFFIX_BRANCH_NAME-
+    - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
 
 .deploy-egapro-kinto-k8s-master:
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-    entrypoint: [""]
+  <<: *deploy_egapro_kinto
   before_script:
     - export PREFIX_BRANCH_INGRESS=master.
     - export SUFFIX_BRANCH_NAME=-master
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
-    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
-    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
-  script:
-    - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-    - .k8s/scripts/init-kinto.sh $SUFFIX_BRANCH_NAME
-  allow_failure: false
 
 .deploy-egapro-kinto-k8s-preprod:
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
-    entrypoint: [""]
+  <<: *deploy_egapro_kinto
   before_script:
     - export PREFIX_BRANCH_INGRESS=preprod.
     - export SUFFIX_BRANCH_NAME=-preprod
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
-    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
-    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
-  script:
-    - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-    - .k8s/scripts/init-kinto.sh $SUFFIX_BRANCH_NAME
-  allow_failure: false
 
 ...
