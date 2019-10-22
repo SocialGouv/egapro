@@ -17,7 +17,7 @@
   <<: *deploy_egapro_app
   before_script:
     - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export HASH_BRANCH=$SUFFIX_BRANCH_NAME
+    - export ENVIRONMENT_BRANCH=$SUFFIX_BRANCH_NAME
     - export PREFIX_BRANCH_INGRESS=$SUFFIX_BRANCH_NAME-
     - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
     - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
@@ -28,7 +28,7 @@
 .deploy-egapro-app-k8s-master:
   <<: *deploy_egapro_app
   before_script:
-    - export HASH_BRANCH=master
+    - export ENVIRONMENT_BRANCH=master
     - export PREFIX_BRANCH_INGRESS=master.
     - export SUFFIX_BRANCH_NAME=-master
     - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
@@ -39,7 +39,7 @@
 .deploy-egapro-app-k8s-preprod:
   <<: *deploy_egapro_app
   before_script:
-    - export HASH_BRANCH=preprod
+    - export ENVIRONMENT_BRANCH=preprod
     - export PREFIX_BRANCH_INGRESS=preprod.
     - export SUFFIX_BRANCH_NAME=-preprod
     - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
