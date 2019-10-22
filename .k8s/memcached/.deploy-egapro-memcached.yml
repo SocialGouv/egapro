@@ -5,12 +5,12 @@
     name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
     entrypoint: [""]
   before_script:
-  - HASH_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export HASH_BRANCH_NAME=-$HASH_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
+  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
   script:
   - helm init --client-only
-  - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
+  - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-memcached-k8s-master:
@@ -18,11 +18,11 @@
     name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
     entrypoint: [""]
   before_script:
-    - export HASH_BRANCH_NAME=-master
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - export SUFFIX_BRANCH_NAME=-master
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
   script:
     - helm init --client-only
-    - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
 .deploy-egapro-memcached-k8s-preprod:
@@ -30,11 +30,11 @@
     name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
     entrypoint: [""]
   before_script:
-    - export HASH_BRANCH_NAME=-preprod
-    - export K8S_NAMESPACE=egapro${HASH_BRANCH_NAME}
+    - export SUFFIX_BRANCH_NAME=-preprod
+    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
   script:
     - helm init --client-only
-    - helm upgrade --install egapro${HASH_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
   allow_failure: false
 
 ...

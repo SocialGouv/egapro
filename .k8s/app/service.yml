@@ -2,13 +2,13 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: egapro-app${HASH_BRANCH_NAME}
+  name: egapro-app${SUFFIX_BRANCH_NAME}
   labels:
-    app: egapro-app${HASH_BRANCH_NAME}
-    branch: egapro${HASH_BRANCH_NAME}
+    app: egapro-app${SUFFIX_BRANCH_NAME}
+    branch: egapro${SUFFIX_BRANCH_NAME}
 spec:
   selector:
-    app: egapro-app${HASH_BRANCH_NAME}
+    app: egapro-app${SUFFIX_BRANCH_NAME}
   ports:
   - port: ${PORT}
     name: app
