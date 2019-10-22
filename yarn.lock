@@ -2212,10 +2212,10 @@
     "@sentry/types" "5.7.1"
     tslib "^1.9.3"
 
-"@socialgouv/tslint-config-recommended@0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@socialgouv/tslint-config-recommended/-/tslint-config-recommended-0.10.1.tgz#1aa6bb4813f813e8ab5d81273a71dbb6c6d2989f"
-  integrity sha512-xrClUPV5iyphzzm2etfk6HH1QaZp3q+whYPK15SkbxT47Cx4TaHxCBOf1qEbMcDmT2OrAfx/1nWCdjVSVN3mKA==
+"@socialgouv/tslint-config-recommended@0.10.2":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/@socialgouv/tslint-config-recommended/-/tslint-config-recommended-0.10.2.tgz#7dc036a9728246ba2860a57587dc3a4127a4f43b"
+  integrity sha512-IYc0x5eqB1K0QuzsqXAD2HMdV5biFLflbz7mgGSxUeUYZ/KukA9CqNl+eVewDchySZLgIHCOSjvdUP/ao2tLyg==
   dependencies:
     tslint-config-prettier "~1.18.0"
     tslint-plugin-prettier "~2.0.1"
