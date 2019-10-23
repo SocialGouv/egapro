@@ -32,14 +32,14 @@ spec:
             httpGet:
               path: /api/version
               port: ${PORT}
-            initialDelaySeconds: 3
-            periodSeconds: 5
+            initialDelaySeconds: 20
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /api/version
               port: ${PORT}
-            initialDelaySeconds: 3
-            periodSeconds: 5
+            initialDelaySeconds: 20
+            periodSeconds: 10
           env:
             - name: API_PORT
               value: "${PORT}"
