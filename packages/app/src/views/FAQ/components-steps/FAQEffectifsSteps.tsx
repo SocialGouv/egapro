@@ -20,8 +20,8 @@ function FAQEffectifsSteps() {
           Cette période doit être de 12 mois consécutifs et précéder
           l’année de publication.
         </strong>{" "}
-        Elle doit donc nécessairement s’achever au plus tard le 31 décembre 2018
-        pour un Index publié en 2019.
+        Elle doit donc nécessairement s’achever au plus tard le 31 décembre 2019
+        pour un Index publié en 2020.
       </FAQStep>
 
       <FAQStep icon={<IconText>CSP</IconText>}>
