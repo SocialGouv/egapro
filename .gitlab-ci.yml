@@ -280,11 +280,11 @@ Register init kinto image tag:
   variables: &deploy_stage_variables
     EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
     IMAGE_TAG: $CI_COMMIT_SHA
-    API_RESOURCE_CPU_LIMIT: "50m"
+    API_RESOURCE_CPU_LIMIT: "25m"
     API_RESOURCE_MEMORY_LIMIT: "32Mi"
     API_RESOURCE_CPU_REQUEST: "5m"
     API_RESOURCE_MEMORY_REQUEST: "16Mi"
-    APP_RESOURCE_CPU_LIMIT: "50m"
+    APP_RESOURCE_CPU_LIMIT: "25m"
     APP_RESOURCE_MEMORY_LIMIT: "32Mi"
     APP_RESOURCE_CPU_REQUEST: "5m"
     APP_RESOURCE_MEMORY_REQUEST: "16Mi"
@@ -614,15 +614,15 @@ Deploy egapro in production :
   variables:
     <<: *deploy_tagged_stage_variables
     ENABLE_PERSISTENT_VOLUME: "true"
-    API_RESOURCE_CPU_LIMIT: "500m"
+    API_RESOURCE_CPU_LIMIT: "250m"
     API_RESOURCE_MEMORY_LIMIT: "256Mi"
     API_RESOURCE_CPU_REQUEST: "5m"
     API_RESOURCE_MEMORY_REQUEST: "16Mi"
-    APP_RESOURCE_CPU_LIMIT: "500m"
+    APP_RESOURCE_CPU_LIMIT: "250m"
     APP_RESOURCE_MEMORY_LIMIT: "256Mi"
     APP_RESOURCE_CPU_REQUEST: "5m"
     APP_RESOURCE_MEMORY_REQUEST: "16Mi"
-    KINTO_RESOURCE_CPU_LIMIT: "1000m"
+    KINTO_RESOURCE_CPU_LIMIT: "500m"
     KINTO_RESOURCE_MEMORY_LIMIT: "512Mi"
     KINTO_RESOURCE_CPU_REQUEST: "10m"
     KINTO_RESOURCE_MEMORY_REQUEST: "32Mi"
@@ -634,7 +634,7 @@ Deploy egapro in production :
     MEMCACHED_RESOURCE_MEMORY_LIMIT: "256Mi"
     MEMCACHED_RESOURCE_CPU_REQUEST: "10m"
     MEMCACHED_RESOURCE_MEMORY_REQUEST: "32Mi"
-    POSTGRES_RESOURCE_CPU_LIMIT: "1000m"
+    POSTGRES_RESOURCE_CPU_LIMIT: "500m"
     POSTGRES_RESOURCE_MEMORY_LIMIT: "512Mi"
     POSTGRES_RESOURCE_CPU_REQUEST: "25m"
     POSTGRES_RESOURCE_MEMORY_REQUEST: "128Mi"
@@ -660,6 +660,8 @@ Deploy egapro in production :
     - export PORT=$API_PORT
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
     - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
+    # memcached
+    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
     # postgres
     - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
@@ -682,7 +684,7 @@ Deploy egapro in production :
     - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     # memcached
     - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
     # kinto
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
