@@ -174,8 +174,8 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
 function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur écart de taux d'augmentations et de promotions"
-      tagline="Le nombre de femmes et d’hommes ayant été augmentés ou promus durant la période de référence, ou pendant les deux ou trois dernières années."
+      title="Indicateur écart de taux d'augmentations"
+      tagline="Le nombre de femmes et d’hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
     >
       {children}
     </Page>

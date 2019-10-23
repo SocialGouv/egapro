@@ -341,21 +341,21 @@ export const faqData: FAQPart = {
     ]
   },
   indicateur2et3: {
-    title: "indicateurs - écart de taux d’augmentations et de promotions",
+    title: "indicateurs - écart de taux d’augmentations",
     qr: [
       {
         question:
-          "S’agissant des indicateurs relatifs aux écarts de taux d’augmentations et de promotions, est-il possible d’apprécier ces indicateurs sur une période de référence de trois ans ?",
+          "S’agissant des indicateurs relatifs aux écarts de taux d’augmentations",
         reponse: [
           "L’employeur peut décider, uniquement pour les entreprises de 50 à 250 salariés, de calculer l’indicateur relatif aux augmentations individuelles sur une période de référence pluriannuelle, à partir des données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans."
         ]
       },
       {
         question:
-          "Pour les indicateurs écart de taux d'augmentations et écart de taux de promotions, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par niveau ou coefficient hiérarchique ?",
+          "Pour les indicateurs écart de taux d'augmentations, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par niveau ou coefficient hiérarchique ?",
         reponse: [
           "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d’une autre méthode de cotation des postes n’est possible que pour le calcul du 1er indicateur relatif à l’écart de rémunération.",
-          "S’agissant des indicateurs écart de taux d'augmentations et écart de taux de promotions, pour les entreprises de plus de 250 salariés, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
+          "S’agissant des indicateurs écart de taux d'augmentations, pour les entreprises de plus de 250 salariés, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
         ]
       }
     ]
@@ -499,7 +499,7 @@ export const faqData: FAQPart = {
         question:
           "Quelles sont les informations à transmettre au comité social et économique (CSE) ? ",
         reponse: [
-          "Les indicateurs ainsi que la note globale sont mis à la disposition du comité social et économique (CSE), via la base de données économiques et sociales. Les résultats sont présentés, pour le premier indicateur relatif à l’écart de rémunération entre les femmes et les hommes, par catégorie socioprofessionnelle, niveau ou coefficient hiérarchique ou selon les niveaux de la méthode de cotation des postes de l’entreprise, ainsi que par tranches d’âge. Les résultats des indicateurs relatifs au écarts de taux d’augmentations et de promotions sont présentés par catégorie socioprofessionnelle. Le CSE est destinataire a minima de toutes les informations transmises à la DIRECCTE.",
+          "Les indicateurs ainsi que la note globale sont mis à la disposition du comité social et économique (CSE), via la base de données économiques et sociales. Les résultats sont présentés, pour le premier indicateur relatif à l’écart de rémunération entre les femmes et les hommes, par catégorie socioprofessionnelle, niveau ou coefficient hiérarchique ou selon les niveaux de la méthode de cotation des postes de l’entreprise, ainsi que par tranches d’âge. Les résultats des indicateurs relatifs au écarts de taux d’augmentations sont présentés par catégorie socioprofessionnelle. Le CSE est destinataire a minima de toutes les informations transmises à la DIRECCTE.",
           "Conformément à l’article D. 1142-5 du code du travail, les informations mentionnées ci-dessus sont accompagnées de toutes les précisions utiles à leur compréhension, notamment relatives à la méthodologie appliquée, la répartition des salariés par catégorie socio-professionnelle ou selon les niveaux de la méthode de cotation des postes de l’entreprise et, le cas échéant, des mesures de correction envisagées ou déjà mises en œuvre.",
           "Dans le cas où certains indicateurs ne peuvent pas être calculés, l’information du CSE sur les indicateurs doit quand même être assurée et est accompagnée de toutes les précisions expliquant les raisons pour lesquelles les indicateurs n’ont pas pu être calculés."
         ]

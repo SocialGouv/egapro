@@ -95,7 +95,7 @@ function Informations({ state, dispatch }: Props) {
                   {state.indicateurDeuxTrois.formValidated === "Invalid" && (
                     <TextSimulatorLink
                       to="/indicateur2et3"
-                      label="aller à l'indicateur écart de taux d'augmentations et de propotions"
+                      label="aller à l'indicateur écart de taux d'augmentations"
                     />
                   )}
                 </span>

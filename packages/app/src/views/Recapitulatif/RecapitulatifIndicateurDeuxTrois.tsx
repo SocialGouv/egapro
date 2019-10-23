@@ -46,7 +46,7 @@ function RecapitulatifIndicateurDeuxTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur écart de taux d'augmentations et de promotions entre les femmes et les hommes"
+          title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
         />
       </div>
@@ -57,7 +57,7 @@ function RecapitulatifIndicateurDeuxTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur écart de taux d'augmentations et de promotions entre les femmes et les hommes"
+          title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
           text={
             <Fragment>
               <span>
@@ -79,8 +79,8 @@ function RecapitulatifIndicateurDeuxTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
-          title="Indicateur écart de taux d'augmentations et de promotions entre les femmes et les hommes"
-          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu d'augmentation ou de promotion durant la période de référence"
+          title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
+          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu d'augmentation durant la période de référence"
         />
       </div>
     );
@@ -89,7 +89,7 @@ function RecapitulatifIndicateurDeuxTrois({
   return (
     <div css={styles.container}>
       <RecapBloc
-        title="Indicateur écart de taux de augmentations promotions entre les femmes et les hommes"
+        title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
           firstLineData:
@@ -108,10 +108,10 @@ function RecapitulatifIndicateurDeuxTrois({
           indicateurSexeSurRepresente
         }}
       >
-        <RowLabelFull label="taux d'augmentation ou de promotion" />
+        <RowLabelFull label="taux d'augmentation" />
         <RowLabels labels={["femmes", "hommes"]} />
         <RowData
-          name="taux de salariés augmentés ou promus"
+          name="taux de salariés augmentés"
           data={[
             tauxAugmentationPromotionFemmes,
             tauxAugmentationPromotionHommes
