@@ -3,6 +3,7 @@ import {
   parseDate,
   percentageToFraction
 } from "./helpers";
+
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals.d";
 
 // INT PARSE
