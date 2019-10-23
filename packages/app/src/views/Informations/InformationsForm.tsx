@@ -13,6 +13,7 @@ import {
 import { calendarYear, Year } from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
+import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Input, { hasFieldError } from "../../components/Input";
@@ -157,6 +158,14 @@ function InformationsForm({
           {readOnly ? (
             <ActionBar>
               <ButtonSimulatorLink to="/effectifs" label="suivant" />
+              &emsp;
+              {informations.formValidated === "Valid" && (
+                <p css={styles.edit}>
+                  <ActionLink onClick={() => validateInformations("None")}>
+                    modifier les données saisies
+                  </ActionLink>
+                </p>
+              )}
             </ActionBar>
           ) : (
             <ActionBar>
@@ -291,6 +300,11 @@ const styles = {
   }),
   dateField: css({
     marginTop: 5
+  }),
+  edit: css({
+    marginTop: 14,
+    marginBottom: 14,
+    textAlign: "center"
   })
 };
 

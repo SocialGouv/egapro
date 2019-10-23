@@ -16,7 +16,6 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 import InformationsForm from "./InformationsForm";
-import InformationsResult from "./InformationsResult";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -46,17 +45,7 @@ function Informations({ state, dispatch }: Props) {
             validateInformations={validateInformations}
           />
         }
-        childrenResult={
-          state.informations.formValidated === "Valid" && (
-            <InformationsResult
-              nomEntreprise={state.informations.nomEntreprise}
-              trancheEffectifs={state.informations.trancheEffectifs}
-              debutPeriodeReference={state.informations.debutPeriodeReference}
-              finPeriodeReference={state.informations.finPeriodeReference}
-              validateInformations={validateInformations}
-            />
-          )
-        }
+        childrenResult={null}
       />
 
       {state.informations.formValidated === "Valid" &&
