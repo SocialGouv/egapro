@@ -144,6 +144,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
               state.indicateurDeuxTrois.nombreAugmentationPromotionHommes
             }
             periodeDeclaration={state.indicateurDeuxTrois.periodeDeclaration}
+            nombreSalaries={state.effectif.nombreSalaries}
             readOnly={state.indicateurDeuxTrois.formValidated === "Valid"}
             updateIndicateurDeuxTrois={updateIndicateurDeuxTrois}
             validateIndicateurDeuxTrois={validateIndicateurDeuxTrois}

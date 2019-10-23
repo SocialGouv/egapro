@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import React from "react";
-import { useField } from "react-final-form";
+import { useField, FieldMetaState } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 import { displayPercent, displayInt } from "../utils/helpers";
@@ -11,7 +11,9 @@ import { CellHead, Cell, Cell2 } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
 import { IconValid, IconInvalid } from "./Icons";
 
-const validate = (value: string) => {
+type ValidateFunction = (value: string) => any;
+
+const validate: ValidateFunction = value => {
   const requiredError = required(value);
   const mustBeNumberError = mustBeNumber(value);
   if (!requiredError && !mustBeNumberError) {
@@ -20,16 +22,6 @@ const validate = (value: string) => {
     return { required: requiredError, mustBeNumber: mustBeNumberError };
   }
 };
-
-interface Props {
-  readOnly: boolean;
-  name: string;
-  calculable: boolean;
-  calculableNumber: number;
-  mask?: "number" | "percent" | undefined;
-  femmeFieldName: string;
-  hommeFieldName: string;
-}
 
 const displayReadOnlyValue = (
   value: string,
@@ -43,6 +35,34 @@ const displayReadOnlyValue = (
     : displayInt(Number(value));
 };
 
+const validateFunction = (
+  validate: ValidateFunction,
+  customValidate: ValidateFunction | undefined
+): ValidateFunction => {
+  return (value: string) => {
+    const errors = validate(value);
+    if (customValidate !== undefined && customValidate(value) !== undefined) {
+      return { ...errors, customValidate: customValidate(value) };
+    }
+    return errors;
+  };
+};
+
+export const getCustomValidateFieldError = (meta: FieldMetaState<string>) =>
+  meta.error && meta.touched && meta.error.customValidate;
+
+interface Props {
+  readOnly: boolean;
+  name: string;
+  calculable: boolean;
+  calculableNumber: number;
+  mask?: "number" | "percent" | undefined;
+  femmeFieldName: string;
+  hommeFieldName: string;
+  customValidateFemmes?: ValidateFunction;
+  customValidateHommes?: ValidateFunction;
+}
+
 function FieldInputsMenWomen({
   name,
   readOnly,
@@ -50,18 +70,30 @@ function FieldInputsMenWomen({
   calculableNumber,
   mask,
   femmeFieldName,
-  hommeFieldName
+  hommeFieldName,
+  customValidateFemmes,
+  customValidateHommes
 }: Props) {
-  const fieldOptions = {
-    validate: calculable ? validate : undefined
-  };
-
-  const femmesField = useField(femmeFieldName, fieldOptions);
-  const hommesField = useField(hommeFieldName, fieldOptions);
+  const femmesField = useField(femmeFieldName, {
+    validate: calculable
+      ? validateFunction(validate, customValidateFemmes)
+      : undefined
+  });
+  const hommesField = useField(hommeFieldName, {
+    validate: calculable
+      ? validateFunction(validate, customValidateHommes)
+      : undefined
+  });
 
   const femmesError = hasFieldError(femmesField.meta);
   const hommesError = hasFieldError(hommesField.meta);
   const error = femmesError || hommesError;
+  const customValidateErrorFemmes = getCustomValidateFieldError(
+    femmesField.meta
+  );
+  const customValidateErrorHommes = getCustomValidateFieldError(
+    hommesField.meta
+  );
 
   return (
     <div css={styles.container}>
@@ -122,11 +154,17 @@ function FieldInputsMenWomen({
           {calculableNumber} hommes
         </div>
       )}
-      {error && calculable && (
-        <div css={styles.error}>
-          ce champ n’est pas valide, renseignez une valeur numérique
-        </div>
-      )}
+      {(customValidateErrorFemmes && calculable && (
+        <div css={styles.error}>{customValidateErrorFemmes}</div>
+      )) ||
+        (customValidateErrorHommes && calculable && (
+          <div css={styles.error}>{customValidateErrorHommes}</div>
+        )) ||
+        (error && calculable && (
+          <div css={styles.error}>
+            ce champ n’est pas valide, renseignez une valeur numérique
+          </div>
+        ))}
     </div>
   );
 }
