@@ -23,8 +23,10 @@ import {
   parseBooleanStateValue,
   parsePeriodeDeclarationFormValue
 } from "../../utils/formHelpers";
+import { calendarYear, Year } from "../../utils/helpers";
 
 interface Props {
+  finPeriodeReference: string;
   presenceAugmentationPromotion: boolean;
   nombreAugmentationPromotionFemmes: number | undefined;
   nombreAugmentationPromotionHommes: number | undefined;
@@ -35,6 +37,7 @@ interface Props {
 }
 
 function IndicateurDeuxTroisForm({
+  finPeriodeReference,
   presenceAugmentationPromotion,
   nombreAugmentationPromotionFemmes,
   nombreAugmentationPromotionHommes,
@@ -82,6 +85,10 @@ function IndicateurDeuxTroisForm({
     validateIndicateurDeuxTrois("Valid");
   };
 
+  const oneYear = calendarYear(finPeriodeReference, Year.Subtract, 1);
+  const twoYears = calendarYear(finPeriodeReference, Year.Subtract, 2);
+  const threeYears = calendarYear(finPeriodeReference, Year.Subtract, 3);
+
   return (
     <Form
       onSubmit={onSubmit}
@@ -101,15 +108,15 @@ function IndicateurDeuxTroisForm({
             readOnly={readOnly}
             choices={[
               {
-                label: "la dernière période de référence",
+                label: `la période de référence choisie pour l'index du ${oneYear} au ${finPeriodeReference}`,
                 value: "unePeriodeReference"
               },
               {
-                label: "les deux dernières périodes de référence",
+                label: `les deux dernières périodes de référence du ${twoYears} au ${finPeriodeReference}`,
                 value: "deuxPeriodesReference"
               },
               {
-                label: "les trois dernières périodes de référence",
+                label: `les trois dernières périodes de référence du ${threeYears} au ${finPeriodeReference}`,
                 value: "troisPeriodesReference"
               }
             ]}

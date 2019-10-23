@@ -60,6 +60,7 @@ function CustomNavLink({
 }
 
 interface Props {
+  informationsFormValidated: FormState;
   effectifFormValidated: FormState;
   indicateurUnFormValidated: FormState;
   indicateurDeuxFormValidated: FormState;
@@ -70,6 +71,7 @@ interface Props {
 }
 
 function Menu({
+  informationsFormValidated,
   effectifFormValidated,
   indicateurUnFormValidated,
   indicateurDeuxFormValidated,
@@ -103,6 +105,12 @@ function Menu({
                 to={`/simulateur/${code}`}
                 title="vos informations"
                 activeOnlyWhenExact={true}
+              />
+              <CustomNavLink
+                to={`/simulateur/${code}/informations`}
+                title="informations entreprise"
+                label="et période de référence"
+                valid={informationsFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/effectifs`}

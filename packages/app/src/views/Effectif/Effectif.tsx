@@ -71,7 +71,8 @@ function Effectif({ state, dispatch }: Props) {
       {state.effectif.formValidated === "Valid" &&
         (state.indicateurUn.formValidated === "Invalid" ||
           state.indicateurDeux.formValidated === "Invalid" ||
-          state.indicateurTrois.formValidated === "Invalid") && (
+          state.indicateurTrois.formValidated === "Invalid" ||
+          state.indicateurDeuxTrois.formValidated === "Invalid") && (
           <InfoBloc
             title="Vos effectifs ont été modifiés"
             icon="cross"
@@ -102,9 +103,18 @@ function Effectif({ state, dispatch }: Props) {
                     </Fragment>
                   )}
                   {state.indicateurTrois.formValidated === "Invalid" && (
+                    <Fragment>
+                      <TextSimulatorLink
+                        to="/indicateur3"
+                        label="aller à l'indicateur écart de taux de promotions"
+                      />
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {state.indicateurDeuxTrois.formValidated === "Invalid" && (
                     <TextSimulatorLink
-                      to="/indicateur3"
-                      label="aller à l'indicateur écart de taux de promotions"
+                      to="/indicateur2et3"
+                      label="aller à l'indicateur écart de taux d'augmentations et de propotions"
                     />
                   )}
                 </span>

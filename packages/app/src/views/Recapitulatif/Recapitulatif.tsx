@@ -11,12 +11,14 @@ import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTr
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex";
+import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 import Page from "../../components/Page";
 import ActionBar from "../../components/ActionBar";
 import ButtonAction from "../../components/ButtonAction";
 
 import RecapitulatifIndex from "./RecapitulatifIndex";
+import RecapitulatifInformations from "./RecapitulatifInformations";
 import RecapitulatifIndicateurUn from "./RecapitulatifIndicateurUn";
 import RecapitulatifIndicateurDeux from "./RecapitulatifIndicateurDeux";
 import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois";
@@ -102,8 +104,20 @@ function Recapitulatif({ state }: Props) {
     noteIndicateurCinq
   );
 
+  const {
+    totalNombreSalariesHomme,
+    totalNombreSalariesFemme
+  } = totalNombreSalaries(state.effectif.nombreSalaries);
+
   return (
     <Page title="Récapitulatif des résultats de vos indicateurs">
+      <RecapitulatifInformations
+        informationsFormValidated={state.informations.formValidated}
+        trancheEffectifs={state.informations.trancheEffectifs}
+        debutPeriodeReference={state.informations.debutPeriodeReference}
+        finPeriodeReference={state.informations.finPeriodeReference}
+        nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
+      />
       <RecapitulatifIndex
         allIndicateurValid={allIndicateurValid}
         noteIndex={noteIndex}

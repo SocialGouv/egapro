@@ -52,6 +52,23 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     correctionMeasure
   } = calculIndicateurDeuxTrois(state);
 
+  // le formulaire d'informations n'est pas validé
+  if (state.informations.formValidated !== "Valid") {
+    return (
+      <PageIndicateurDeuxTrois>
+        <InfoBloc
+          title="vous devez renseignez vos informations d'entreprise avant d’avoir accès à cet indicateur"
+          text={
+            <TextSimulatorLink
+              to="/informations"
+              label="renseigner les informations"
+            />
+          }
+        />
+      </PageIndicateurDeuxTrois>
+    );
+  }
+
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {
     return (
@@ -116,6 +133,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
       <LayoutFormAndResult
         childrenForm={
           <IndicateurDeuxTroisForm
+            finPeriodeReference={state.informations.finPeriodeReference}
             presenceAugmentationPromotion={
               state.indicateurDeuxTrois.presenceAugmentationPromotion
             }

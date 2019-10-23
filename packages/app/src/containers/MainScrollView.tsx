@@ -21,6 +21,9 @@ function MainScrollView({ children, state, location }: Props) {
 
   const menu = (
     <Menu
+      informationsFormValidated={
+        state ? state.informations.formValidated : "None"
+      }
       effectifFormValidated={state ? state.effectif.formValidated : "None"}
       indicateurUnFormValidated={
         state ? state.indicateurUn.formValidated : "None"

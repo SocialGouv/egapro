@@ -63,6 +63,13 @@ const dataIndicateurTrois = mapEnum(
 );
 
 const defaultState: AppState = {
+  informations: {
+    formValidated: "None",
+    nomEntreprise: "",
+    trancheEffectifs: "50 à 249",
+    debutPeriodeReference: "",
+    finPeriodeReference: ""
+  },
   effectif: {
     formValidated: "None",
     nombreSalaries: dataEffectif
@@ -121,6 +128,51 @@ function AppReducer(
     return state;
   }
   switch (action.type) {
+    case "updateInformations": {
+      const {
+        nomEntreprise,
+        trancheEffectifs,
+        debutPeriodeReference,
+        finPeriodeReference
+      } = action.data;
+      return {
+        ...state,
+        informations: {
+          ...state.informations,
+          nomEntreprise,
+          trancheEffectifs,
+          debutPeriodeReference,
+          finPeriodeReference
+        }
+      };
+    }
+    case "validateInformations": {
+      if (action.valid === "None") {
+        return {
+          ...state,
+          informations: { ...state.informations, formValidated: action.valid },
+          indicateurDeux:
+            state.indicateurDeux.formValidated === "Valid"
+              ? { ...state.indicateurDeux, formValidated: "Invalid" }
+              : state.indicateurDeux,
+          indicateurTrois:
+            state.indicateurTrois.formValidated === "Valid"
+              ? { ...state.indicateurTrois, formValidated: "Invalid" }
+              : state.indicateurTrois,
+          indicateurDeuxTrois:
+            state.indicateurDeuxTrois.formValidated === "Valid"
+              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
+              : state.indicateurDeuxTrois
+        };
+      }
+      return {
+        ...state,
+        informations: {
+          ...state.informations,
+          formValidated: action.valid
+        }
+      };
+    }
     case "updateEffectif": {
       const { nombreSalaries } = action.data;
       return {

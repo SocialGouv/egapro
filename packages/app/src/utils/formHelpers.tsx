@@ -1,5 +1,5 @@
 import { fractionToPercentage, percentageToFraction } from "./helpers";
-import { PeriodeDeclaration } from "../globals.d";
+import { PeriodeDeclaration, TrancheEffectifs } from "../globals.d";
 
 // INT PARSE
 
@@ -52,18 +52,36 @@ export const parsePeriodeDeclarationFormValue = (
   }
 };
 
+// TrancheEffectif PARSE
+
+export const parseTrancheEffectifsFormValue = (
+  value: string
+): TrancheEffectifs => {
+  switch (value) {
+    case "250 à 999":
+      return "250 à 999" as TrancheEffectifs;
+    case "1000 et plus":
+      return "1000 et plus" as TrancheEffectifs;
+    default:
+      return "50 à 249" as TrancheEffectifs;
+  }
+};
+
 // VALIDATION
 
 export const required = (value: string): boolean => (value ? false : true);
 
 export const mustBeNumber = (value: string): boolean =>
-  Number.isNaN(Number(value)) ? true : false;
+  Number.isNaN(Number(value));
 
 export const minNumber = (value: string, min: number): boolean =>
-  Number(value) < min ? true : false;
+  Number(value) < min;
 
 export const maxNumber = (value: string, max: number): boolean =>
-  Number(value) > max ? true : false;
+  Number(value) > max;
+
+export const mustBeDate = (value: string): boolean =>
+  Number.isNaN(Date.parse(value));
 
 const regexpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const validateEmail = (email: string) => !regexpEmail.test(email);
