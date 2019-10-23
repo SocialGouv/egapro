@@ -23,11 +23,11 @@ spec:
             - containerPort: ${PORT}
           resources:
             requests:
-              cpu: 10m
-              memory: 32Mi
+              cpu: 5m
+              memory: 16Mi
             limits:
-              cpu: 100m
-              memory: 64Mi
+              cpu: 50m
+              memory: 32Mi
           livenessProbe:
             httpGet:
               path: /api/version
