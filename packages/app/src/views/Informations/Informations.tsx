@@ -49,10 +49,9 @@ function Informations({ state, dispatch }: Props) {
       />
 
       {state.informations.formValidated === "Valid" &&
-        (state.informations.trancheEffectifs !== "50 à 250"
-          ? state.indicateurDeux.formValidated === "Invalid" ||
-            state.indicateurTrois.formValidated === "Invalid"
-          : state.indicateurDeuxTrois.formValidated === "Invalid") && (
+        (state.indicateurDeux.formValidated === "Invalid" ||
+          state.indicateurTrois.formValidated === "Invalid" ||
+          state.indicateurDeuxTrois.formValidated === "Invalid") && (
           <InfoBloc
             title="Vos informations ont été modifiées"
             icon="cross"
@@ -64,33 +63,26 @@ function Informations({ state, dispatch }: Props) {
                 </span>
                 &emsp;
                 <span>
-                  {state.informations.trancheEffectifs !== "50 à 250" &&
-                    state.indicateurDeux.formValidated === "Invalid" && (
-                      <Fragment>
-                        <TextSimulatorLink
-                          to="/indicateur2"
-                          label="aller à l'indicateur écart de taux d'augmentations"
-                        />
-                        &emsp;
-                      </Fragment>
-                    )}
-                  {state.informations.trancheEffectifs !== "50 à 250" &&
-                    state.indicateurTrois.formValidated === "Invalid" && (
-                      <Fragment>
-                        <TextSimulatorLink
-                          to="/indicateur3"
-                          label="aller à l'indicateur écart de taux de promotions"
-                        />
-                        &emsp;
-                      </Fragment>
-                    )}
-                  {state.informations.trancheEffectifs === "50 à 250" &&
-                    state.indicateurDeuxTrois.formValidated === "Invalid" && (
+                  {state.informations.trancheEffectifs !== "50 à 250" && (
+                    <Fragment>
                       <TextSimulatorLink
-                        to="/indicateur2et3"
+                        to="/indicateur2"
                         label="aller à l'indicateur écart de taux d'augmentations"
                       />
-                    )}
+                      &emsp;
+                      <TextSimulatorLink
+                        to="/indicateur3"
+                        label="aller à l'indicateur écart de taux de promotions"
+                      />
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {state.informations.trancheEffectifs === "50 à 250" && (
+                    <TextSimulatorLink
+                      to="/indicateur2et3"
+                      label="aller à l'indicateur écart de taux d'augmentations"
+                    />
+                  )}
                 </span>
               </Fragment>
             }
