@@ -4,7 +4,7 @@ import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
 
-import { displayPercent } from "../../utils/helpers";
+import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
@@ -93,7 +93,7 @@ function RecapitulatifIndicateurDeuxTrois({
             indicateurEcartAugmentationPromotion !== undefined
               ? displayPercent(indicateurEcartAugmentationPromotion)
               : "--",
-          firstLineInfo: `écart favorable aux ${indicateurSexeSurRepresente}`,
+          firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurDeuxTrois !== undefined

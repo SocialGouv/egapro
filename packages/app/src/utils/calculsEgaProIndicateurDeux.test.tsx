@@ -3,6 +3,7 @@ import {
   calculEcartTauxAugmentation,
   calculIndicateurCalculable,
   calculIndicateurEcartAugmentation,
+  calculIndicateurSexeSurRepresente,
   calculNote
 } from "./calculsEgaProIndicateurDeux";
 
@@ -106,6 +107,24 @@ describe("calculIndicateurEcartAugmentation", () => {
     expect(calculIndicateurEcartAugmentation(true, 0.01)).toEqual(1);
     expect(calculIndicateurEcartAugmentation(true, 0.022)).toEqual(2.2);
     expect(calculIndicateurEcartAugmentation(true, 0.505)).toEqual(50.5);
+  });
+});
+
+describe("calculIndicateurSexeSurRepresente", () => {
+  test("ecart is undefined", () => {
+    expect(calculIndicateurSexeSurRepresente(undefined)).toEqual(undefined);
+  });
+
+  test("ecart is in favor of men", () => {
+    expect(calculIndicateurSexeSurRepresente(12)).toEqual("hommes");
+  });
+
+  test("ecart is in favor of women", () => {
+    expect(calculIndicateurSexeSurRepresente(-12)).toEqual("femmes");
+  });
+
+  test("ecart is 0", () => {
+    expect(calculIndicateurSexeSurRepresente(0)).toEqual(undefined);
   });
 });
 

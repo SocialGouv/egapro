@@ -276,12 +276,15 @@ export const calculIndicateurEcartRemuneration = (
 
 export const calculIndicateurSexeSousRepresente = (
   indicateurEcartRemuneration: number | undefined
-): "hommes" | "femmes" | undefined =>
-  indicateurEcartRemuneration !== undefined
-    ? Math.sign(indicateurEcartRemuneration) < 0
-      ? "femmes"
-      : "hommes"
-    : undefined;
+): "hommes" | "femmes" | undefined => {
+  if (
+    indicateurEcartRemuneration === undefined ||
+    indicateurEcartRemuneration === 0
+  ) {
+    return undefined;
+  }
+  return Math.sign(indicateurEcartRemuneration) < 0 ? "femmes" : "hommes";
+};
 
 export const calculIndicateurEcartRemunerationAbsolute = (
   indicateurEcartRemuneration: number | undefined

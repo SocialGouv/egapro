@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 
 import { FormState } from "../../globals.d";
-import { displayPercent } from "../../utils/helpers";
+import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers";
 
 import ResultBubble from "../../components/ResultBubble";
 import ActionLink from "../../components/ActionLink";
@@ -33,7 +33,7 @@ function IndicateurDeuxTroisResult({
             ? displayPercent(indicateurEcartAugmentationPromotion)
             : "--"
         }
-        firstLineInfo={`écart favorable aux ${indicateurSexeSurRepresente}`}
+        firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
         secondLineLabel="votre note obtenue est"
         secondLineData={
           (noteIndicateurDeuxTrois !== undefined

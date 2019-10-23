@@ -181,12 +181,15 @@ export const calculIndicateurEcartAugmentation = (
 
 export const calculIndicateurSexeSurRepresente = (
   indicateurEcartAugmentation: number | undefined
-): "hommes" | "femmes" | undefined =>
-  indicateurEcartAugmentation !== undefined
-    ? Math.sign(indicateurEcartAugmentation) < 0
-      ? "femmes"
-      : "hommes"
-    : undefined;
+): "hommes" | "femmes" | undefined => {
+  if (
+    indicateurEcartAugmentation === undefined ||
+    indicateurEcartAugmentation === 0
+  ) {
+    return undefined;
+  }
+  return Math.sign(indicateurEcartAugmentation) < 0 ? "femmes" : "hommes";
+};
 
 export const calculIndicateurEcartAugmentationAbsolute = (
   indicateurEcartAugmentation: number | undefined

@@ -68,7 +68,8 @@ function RecapitulatifIndicateurCinq({
             (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") +
             "/10",
           indicateurSexeSurRepresente:
-            indicateurSexeSousRepresente === undefined
+            indicateurSexeSousRepresente === undefined ||
+            indicateurSexeSousRepresente === "egalite"
               ? undefined
               : indicateurSexeSousRepresente === "hommes"
               ? "femmes"
