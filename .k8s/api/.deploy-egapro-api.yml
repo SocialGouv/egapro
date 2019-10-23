@@ -28,6 +28,7 @@
 .deploy-egapro-api-k8s-preprod:
   <<: *deploy_egapro_api
   before_script:
+    - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     - export PREFIX_BRANCH_INGRESS=preprod.
     - export SUFFIX_BRANCH_NAME=-preprod
 
