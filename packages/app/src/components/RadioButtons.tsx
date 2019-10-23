@@ -44,7 +44,7 @@ interface Props {
 function RadioButtons({ readOnly, fieldName, label, value, choices }: Props) {
   return (
     <div css={styles.container}>
-      <p>{label}</p>
+      <p css={styles.headerLabel}>{label}</p>
       {choices.map(({ label: choiceLabel, value: choiceValue }) => (
         <div
           key={choiceLabel}
@@ -70,6 +70,9 @@ const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
+  }),
+  headerLabel: css({
+    marginBottom: 10
   }),
   radioField: css({
     marginTop: 9,
