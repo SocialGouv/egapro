@@ -28,9 +28,9 @@ spec:
                 key: KINTO_ADMIN_PASSWORD
         resources:
           requests:
-            cpu: 10m
-            memory: 8Mi
+            cpu: ${INIT_KINTO_RESOURCE_CPU_REQUEST}
+            memory: ${INIT_KINTO_RESOURCE_MEMORY_REQUEST}
           limits:
-            cpu: 20m
-            memory: 16Mi
+            cpu: ${INIT_KINTO_RESOURCE_CPU_LIMIT}
+            memory: ${INIT_KINTO_RESOURCE_MEMORY_LIMIT}
       restartPolicy: Never
