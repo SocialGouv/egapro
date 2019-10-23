@@ -294,11 +294,11 @@ slave:
 ##
 resources:
   requests:
-    cpu: 25m
-    memory: 128Mi
+    cpu: ${POSTGRES_RESOURCE_CPU_REQUEST}
+    memory: ${POSTGRES_RESOURCE_MEMORY_REQUEST}
   limits:
-    cpu: 50m
-    memory: 256Mi
+    cpu: ${POSTGRES_RESOURCE_CPU_LIMIT}
+    memory: ${POSTGRES_RESOURCE_MEMORY_LIMIT}
 
 networkPolicy:
   ## Enable creation of NetworkPolicy resources.
