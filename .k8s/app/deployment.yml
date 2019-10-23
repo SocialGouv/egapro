@@ -36,11 +36,11 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              cpu: 5m
-              memory: 16Mi
+              cpu: ${APP_RESOURCE_CPU_REQUEST}
+              memory: ${APP_RESOURCE_MEMORY_REQUEST}
             limits:
-              cpu: 50m
-              memory: 32Mi
+              cpu: ${APP_RESOURCE_CPU_LIMIT}
+              memory: ${APP_RESOURCE_MEMORY_LIMIT}
           env:
             - name: REACT_APP_API_URL
               value: "http://egapro-api${SUFFIX_BRANCH_NAME}:4000"

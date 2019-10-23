@@ -22,11 +22,11 @@ spec:
           - containerPort: ${PORT}
         resources:
           requests:
-            cpu: 10m
-            memory: 32Mi
+            cpu: ${KINTO_RESOURCE_CPU_REQUEST}
+            memory: ${KINTO_RESOURCE_MEMORY_REQUEST}
           limits:
-            cpu: 100m
-            memory: 128Mi
+            cpu: ${KINTO_RESOURCE_CPU_LIMIT}
+            memory: ${KINTO_RESOURCE_MEMORY_LIMIT}
         env:
           - name: KINTO_CACHE_BACKEND
             value: "kinto.core.cache.memcached"
