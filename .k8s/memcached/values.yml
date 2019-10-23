@@ -53,11 +53,11 @@ updateStrategy:
 ##
 resources:
   requests:
-    memory: 32Mi
-    cpu: 10m
+    memory: ${MEMCACHED_RESOURCE_MEMORY_REQUEST}
+    cpu: ${MEMCACHED_RESOURCE_CPU_REQUEST}
   limits:
-    memory: 64Mi
-    cpu: 50m
+    memory: ${MEMCACHED_RESOURCE_MEMORY_LIMIT}
+    cpu: ${MEMCACHED_RESOURCE_CPU_LIMIT}
 
 ## Key:value pair for assigning pod to specific sets of nodes
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
