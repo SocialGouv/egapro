@@ -275,7 +275,8 @@ const styles = {
     marginTop: 5,
     marginBottom: 5,
     display: "flex",
-    input: { borderRadius: 4 }
+    input: { borderRadius: 4 },
+    "input[readonly]": { border: 0 }
   }),
   error: css({
     height: 18,

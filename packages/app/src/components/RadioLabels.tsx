@@ -18,7 +18,13 @@ function RadioField({
 }) {
   const { input } = useField(fieldName, { type: "radio", value: choiceValue });
   return (
-    <label css={[styles.label, value === choiceValue && styles.labelChecked]}>
+    <label
+      css={[
+        styles.label,
+        value === choiceValue && styles.labelChecked,
+        disabled && styles.labelDisabled
+      ]}
+    >
       <input css={styles.radio} {...input} disabled={disabled} />
       <span css={styles.labelText}>{label}</span>
     </label>
@@ -96,6 +102,12 @@ const styles = {
   labelChecked: css({
     backgroundColor: "#696CD1",
     color: "#fff"
+  }),
+  labelDisabled: css({
+    border: 0,
+    "&:last-of-type": {
+      borderRight: 0
+    }
   }),
   labelText: css({
     lineHeight: "16px"
