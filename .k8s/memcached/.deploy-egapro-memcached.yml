@@ -24,6 +24,7 @@
 .deploy-egapro-memcached-k8s-preprod:
   <<: *deploy_egapro_memcached
   before_script:
+    - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     - export SUFFIX_BRANCH_NAME=-preprod
 
 ...
