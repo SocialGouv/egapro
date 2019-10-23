@@ -102,7 +102,7 @@ function IndicateurDeuxTroisForm({
     const intValue = parseIntFormValue(value);
     return intValue === undefined || intValue <= maxNum;
   };
-
+  
   return (
     <Form
       onSubmit={onSubmit}
