@@ -3,8 +3,11 @@ import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
-
-import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers";
+import {
+  displayPercent,
+  displaySexeSurRepresente,
+  messageEcartNombreEquivalentSalaries
+} from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
@@ -129,45 +132,6 @@ function RecapitulatifIndicateurDeuxTrois({
     </div>
   );
 }
-
-const messageEcartNombreEquivalentSalaries = (
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined,
-  plusPetitNombreSalaries: "hommes" | "femmes" | undefined
-): string => {
-  if (
-    indicateurSexeSurRepresente === "hommes" &&
-    plusPetitNombreSalaries === "femmes"
-  ) {
-    return "si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
-  } else if (
-    indicateurSexeSurRepresente === "hommes" &&
-    plusPetitNombreSalaries === "hommes"
-  ) {
-    return "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
-  } else if (
-    indicateurSexeSurRepresente === "hommes" &&
-    plusPetitNombreSalaries === undefined
-  ) {
-    return "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
-  } else if (
-    indicateurSexeSurRepresente === "femmes" &&
-    plusPetitNombreSalaries === "femmes"
-  ) {
-    return "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
-  } else if (
-    indicateurSexeSurRepresente === "femmes" &&
-    plusPetitNombreSalaries === "hommes"
-  ) {
-    return "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
-  } else if (
-    indicateurSexeSurRepresente === "femmes" &&
-    plusPetitNombreSalaries === undefined
-  ) {
-    return "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
-  } else {
-    return "nothing";
-  }
-};
 
 const styles = {
   container: css({

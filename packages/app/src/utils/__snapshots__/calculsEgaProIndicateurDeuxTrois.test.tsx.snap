@@ -9,7 +9,7 @@ Object {
   "indicateurEcartNombreEquivalentSalaries": 3.1,
   "indicateurSexeSurRepresente": "hommes",
   "noteIndicateurDeuxTrois": 25,
-  "plusPetitNombreSalaries": "femmes",
+  "plusPetitNombreSalaries": "hommes",
   "tauxAugmentationPromotionFemmes": 0.06666666666666667,
   "tauxAugmentationPromotionHommes": 0.17857142857142858,
 }

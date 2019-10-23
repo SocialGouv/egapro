@@ -67,8 +67,8 @@ export const calculPlusPetitNombreSalaries = (
     return undefined;
   }
   return totalNombreSalariesHommes > totalNombreSalariesFemmes
-    ? "hommes"
-    : "femmes";
+    ? "femmes"
+    : "hommes";
 };
 
 export const calculIndicateurEcartNombreEquivalentSalaries = (
