@@ -93,30 +93,33 @@ function Effectif({ state, dispatch }: Props) {
                       &emsp;
                     </Fragment>
                   )}
-                  {state.indicateurDeux.formValidated === "Invalid" && (
-                    <Fragment>
+                  {state.informations.trancheEffectifs !== "50 à 249" &&
+                    state.indicateurDeux.formValidated === "Invalid" && (
+                      <Fragment>
+                        <TextSimulatorLink
+                          to="/indicateur2"
+                          label="aller à l'indicateur écart de taux d'augmentations"
+                        />
+                        &emsp;
+                      </Fragment>
+                    )}
+                  {state.informations.trancheEffectifs !== "50 à 249" &&
+                    state.indicateurTrois.formValidated === "Invalid" && (
+                      <Fragment>
+                        <TextSimulatorLink
+                          to="/indicateur3"
+                          label="aller à l'indicateur écart de taux de promotions"
+                        />
+                        &emsp;
+                      </Fragment>
+                    )}
+                  {state.informations.trancheEffectifs === "50 à 249" &&
+                    state.indicateurDeuxTrois.formValidated === "Invalid" && (
                       <TextSimulatorLink
-                        to="/indicateur2"
+                        to="/indicateur2et3"
                         label="aller à l'indicateur écart de taux d'augmentations"
                       />
-                      &emsp;
-                    </Fragment>
-                  )}
-                  {state.indicateurTrois.formValidated === "Invalid" && (
-                    <Fragment>
-                      <TextSimulatorLink
-                        to="/indicateur3"
-                        label="aller à l'indicateur écart de taux de promotions"
-                      />
-                      &emsp;
-                    </Fragment>
-                  )}
-                  {state.indicateurDeuxTrois.formValidated === "Invalid" && (
-                    <TextSimulatorLink
-                      to="/indicateur2et3"
-                      label="aller à l'indicateur écart de taux d'augmentations"
-                    />
-                  )}
+                    )}
                 </span>
               </Fragment>
             }

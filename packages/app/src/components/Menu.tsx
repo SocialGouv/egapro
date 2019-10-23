@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Switch, Route, Link } from "react-router-dom";
 
-import { FormState } from "../globals.d";
+import { FormState, TrancheEffectifs } from "../globals.d";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -10,6 +10,7 @@ import { useLayoutType } from "../components/GridContext";
 
 import { IconValid, IconInvalid } from "./Icons";
 import { useColumnsWidth } from "./GridContext";
+import { Fragment } from "react";
 
 interface CustomNavLinkProps {
   title: string;
@@ -60,6 +61,7 @@ function CustomNavLink({
 }
 
 interface Props {
+  trancheEffectifs: TrancheEffectifs;
   informationsFormValidated: FormState;
   effectifFormValidated: FormState;
   indicateurUnFormValidated: FormState;
@@ -71,6 +73,7 @@ interface Props {
 }
 
 function Menu({
+  trancheEffectifs,
   informationsFormValidated,
   effectifFormValidated,
   indicateurUnFormValidated,
@@ -124,24 +127,29 @@ function Menu({
                 label="écart de rémunérations"
                 valid={indicateurUnFormValidated}
               />
-              <CustomNavLink
-                to={`/simulateur/${code}/indicateur2`}
-                title="indicateur"
-                label="écart de taux d'augmentations"
-                valid={indicateurDeuxFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/indicateur3`}
-                title="indicateur"
-                label="écart de taux de promotions"
-                valid={indicateurTroisFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/indicateur2et3`}
-                title="indicateur"
-                label="écart de taux d'augmentations"
-                valid={indicateurDeuxTroisFormValidated}
-              />
+              {(trancheEffectifs !== "50 à 249" && (
+                <Fragment>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/indicateur2`}
+                    title="indicateur"
+                    label="écart de taux d'augmentations"
+                    valid={indicateurDeuxFormValidated}
+                  />
+                  <CustomNavLink
+                    to={`/simulateur/${code}/indicateur3`}
+                    title="indicateur"
+                    label="écart de taux de promotions"
+                    valid={indicateurTroisFormValidated}
+                  />
+                </Fragment>
+              )) || (
+                <CustomNavLink
+                  to={`/simulateur/${code}/indicateur2et3`}
+                  title="indicateur"
+                  label="écart de taux d'augmentations"
+                  valid={indicateurDeuxTroisFormValidated}
+                />
+              )}
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur4`}
                 title="indicateur"

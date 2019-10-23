@@ -21,6 +21,9 @@ function MainScrollView({ children, state, location }: Props) {
 
   const menu = (
     <Menu
+      trancheEffectifs={
+        state ? state.informations.trancheEffectifs : "50 à 249"
+      }
       informationsFormValidated={
         state ? state.informations.formValidated : "None"
       }
