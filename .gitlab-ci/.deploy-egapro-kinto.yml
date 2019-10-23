@@ -10,7 +10,7 @@
     - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-    - .k8s/scripts/init-kinto.sh $SUFFIX_BRANCH_NAME
+    - .gitlab-ci/scripts/init-kinto.sh $SUFFIX_BRANCH_NAME
   allow_failure: false
 #
 
