@@ -295,7 +295,7 @@ slave:
 resources:
   requests:
     cpu: 25m
-    memory: 256Mi
+    memory: 128Mi
   limits:
     cpu: 50m
     memory: 256Mi

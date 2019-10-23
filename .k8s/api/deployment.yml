@@ -60,10 +60,7 @@ spec:
             - name: MAIL_USE_TLS
               value: "true"
             - name: MAIL_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: egapro-secret
-                  key: MAIL_PORT
+              value: "465"
             - name: MAIL_FROM
               value: "Index EgaPro <contact@egapro.beta.gouv.fr>"
             - name: MAIL_HOST
