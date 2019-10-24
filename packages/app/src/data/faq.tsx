@@ -62,9 +62,12 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Les entreprises de plus de 250 salariés assujetties à l'obligation de publication au 1er septembre 2019 peuvent-elles calculer leurs indicateurs sur la base des données de septembre 2018 à août 2019 ?",
+          "Les entreprises de plus de 50 salariés assujetties à l'obligation de publication au 1er mars 2020 doivent-elles calculer leurs indicateurs sur la base des données de l'année 2019 ?",
         reponse: [
-          "Non, cela n'est pas possible. L’entrée en vigueur différée du décret pour les entreprises de moins de 1000 salariés a uniquement pour objet de laisser plus de temps aux TPE-PME de se mettre en conformité avec leurs obligations. Les périodes annuelles de référence possibles sont les mêmes que celles prévues pour les entreprises de plus de 1000 salariés."
+          "Les indicateurs sont calculés à partir des données de la période de référence annuelle que l’employeur a choisie. Cette période de référence, de 12 mois consécutifs, est celle qui précède l’année de publication : elle doit donc nécessairement s’achever au plus tard le 31 décembre 2019 pour un Index publié en 2020.",
+          "Ainsi, si l’entreprise de plus de 50 salariés a choisi l’année civile comme année de référence, les données seront celles du 1er janvier 2019 au 31 décembre 2019, pour une publication au 1er mars 2020. La période de référence peut également aller du 1er juin 2018 au 31 mai 2019, mais pas du 1er janvier 2018 au 31 décembre 2018 pour une publication en 2020.",
+          "Attention : pour l’indicateur 2 relatif aux augmentations individuelles, la période de référence choisie par l’employeur peut être pluriannuelle, à partir des données des 2 ou 3 années précédentes. Son caractère pluriannuel peut alors être révisé tous les 3 ans.",
+          "Par exemple, si l’entreprise de plus de 50 salariés a choisi l’année civile 2019 comme période de référence pour le calcul de son Index en 2020, elle pourra calculer son indicateur 2 sur une période de référence de 2 ou 3 ans. Cette période de référence pourra ainsi aller respectivement du 1er janvier 2018 au 31 décembre 2019, ou du 1er janvier 2017 au 31 décembre 2019. En 2023, elle pourra alors réviser le caractère pluriannuel de cette période de référence."
         ]
       },
       {
