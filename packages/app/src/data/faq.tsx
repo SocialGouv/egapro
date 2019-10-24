@@ -510,12 +510,11 @@ export const faqData: FAQPart = {
         question:
           "Sur quel site internet l’entreprise doit-elle publier son Index ?",
         reponse: [
-          "La note globale de l’Index doit être publiée sur le site internet de l’entreprise, lorsqu’il en existe un (y compris lorsque l'entreprise fait partie d'un groupe ou d'une UES). Une publication sur le site Intranet de l’entreprise n’est donc pas suffisante.",
-          "La note globale pourra être publiée sur son site de présentation, il n’est pas pour autant obligatoire qu’elle figure sur la page d’accueil.",
-          "Si un groupe d’entreprises ou une UES a un seul site Internet pour toutes ses entreprises, l’ensemble des index devront être publiés sur ce site.",
-          "Si l’entreprise n’a pas de site internet propre, alors l’Index peut être publié sur le site Internet du groupe ou de l’UES, s’il en existe un.",
-          "S’il n’y a aucun site Internet, la note globale sera portée à la connaissance des salariés par tout moyen (courrier papier ou électronique, affichage…).",
-          "L’employeur devra, dans tous les cas, communiquer aux services de l’inspection du travail et au CSE, en même temps que ses résultats, le lien du site internet sur lequel est publié son Index."
+          "La note globale de l’Index doit être publiée sur le site internet de l'entreprise, lorsqu'il en existe un (y compris lorsque l’entreprise fait partie d’un groupe ou d’une UES). Une publication sur le site Intranet de l'entreprise n'est donc pas suffisante.",
+          "La note globale pourra être publiée sur son site de présentation, il n'est pas pour autant obligatoire qu'elle figure sur la page d'accueil. ",
+          "A défaut de site internet propre à l'entreprise, l'Index doit être publié sur le site du groupe (ou de l'UES) auquel l'entreprise appartient, s'il en existe un.",
+          "S'il n'y a aucun site Internet (au niveau de l'entreprise, du groupe ou de l'UES), la note globale sera portée à la connaissance des salariés par tout moyen (courrier papier ou électronique, affichage...).",
+          "L'employeur devra, dans tous les cas, communiquer aux services de l'inspection du travail et au CSE, en même temps que ses résultats, le lien du site internet sur lequel est publié son Index."
         ]
       },
       {
@@ -544,23 +543,16 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Une entreprise créée en juillet 2018 doit-elle publier son Index en 2019 ?",
+          "Une entreprise créée en juillet 2019 doit-elle publier son Index en 2020 ?",
         reponse: [
-          "Une entreprise créée en juillet 2018 doit publier son Index au 1er mars 2019 si, à cette date, elle comprend au moins 1000 salariés ; au 1er septembre 2019 si, à cette date, elle comprend plus de 250 salariés, et au 1er mars 2020 si, à cette date, son effectif est compris entre 50 et 250 salariés. Néanmoins, si elle ne dispose pas de données sur douze mois consécutifs à la date d’assujettissement à l’obligation de publication, ses indicateurs et, partant, son Index ne seront pas calculables pour la première année. L’entreprise devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5)."
+          "Une entreprise créée en juillet 2019 doit publier son Index au 1er mars 2020 si, à cette date, elle comprend au moins 50 salariés. Néanmoins, si elle ne dispose pas de données sur douze mois consécutifs à la date d’assujettissement à l’obligation de publication, ses indicateurs et, partant, son Index ne seront pas calculables pour la première année. L’entreprise devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5)."
         ]
       },
       {
         question:
-          "A quelle date doit être publié l’Index d’une entreprise qui n’a actuellement aucun salarié et se verra transférer plus de 250 salariés au 1er mars 2019 ?",
+          "A quelle date doit être publié l’Index d’une entreprise qui n’a actuellement aucun salarié et se verra transférer plus de 50 salariés au 1er mars 2020 ?",
         reponse: [
-          "Il convient de dissocier l’assujettissement à l’obligation de publier l’index et la période de référence. Dans le cas présent, l’entreprise aura l’obligation de publier l’Index au 1er septembre 2019. En revanche, à défaut de données sur douze mois consécutifs, son Index ne sera pas calculable à cette date. Dès le 1er septembre 2019, l’entreprise devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5)."
-        ]
-      },
-      {
-        question:
-          "Une entreprise dont l’effectif est compris entre 250 et 1000 salariés devra-t-elle publier son Index au 1er septembre 2019 et au 1er mars 2020 ?",
-        reponse: [
-          "Oui, uniquement pour 2019. La première année de publication de l’Index, un délai supplémentaire a été accordé aux entreprises de 250 à 1000 salariés avec une obligation de publier au 1er septembre et non au 1er mars, sur une période de référence devant s’achever en 2018. A partir de l’année 2020, ces entreprises devront publier, comme toutes les entreprises de plus de 50 salariés, leur index chaque année, au plus tard le 1er mars. Pour la publication au 1er mars 2020, la période de référence devra s’achever en 2019 : elle ne sera donc pas la même que celle utilisée par les entreprises de 250 à 1000 salariés pour la publication de leur index au 1er septembre 2019."
+          "Il convient de dissocier l’assujettissement à l’obligation de publier l’Index et la période de référence. Dans le cas présent, l’entreprise aura l’obligation de publier l’Index au 1er mars 2020. En revanche, à défaut de données sur douze mois consécutifs, son Index ne sera pas calculable à cette date. Elle devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5)."
         ]
       },
       {
