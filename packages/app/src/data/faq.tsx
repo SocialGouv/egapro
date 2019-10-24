@@ -557,6 +557,10 @@ export const faqSections: FAQSection = {
     title: "champ d’application et entrée en vigueur",
     parts: ["champApplication"]
   },
+  informations: {
+    title: "période de référence et effectifs",
+    parts: ["periodeReference", "effectifs"]
+  },
   effectifs: {
     title: "période de référence et effectifs",
     parts: ["periodeReference", "effectifs"]
@@ -572,6 +576,10 @@ export const faqSections: FAQSection = {
   indicateur3: {
     title: "indicateur - écart de promotions",
     parts: ["indicateur3", "indicateur2et3"]
+  },
+  indicateur2et3: {
+    title: "indicateur - écart d'augmentations",
+    parts: ["indicateur2et3"]
   },
   indicateur4: {
     title: "indicateur - congé maternité",

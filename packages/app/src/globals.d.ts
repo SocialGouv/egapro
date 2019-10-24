@@ -287,9 +287,9 @@ export type FAQPartType =
   | "effectifs"
   | "remuneration"
   | "indicateur1"
-  | "indicateur2et3"
   | "indicateur2"
   | "indicateur3"
+  | "indicateur2et3"
   | "indicateur4"
   | "publication";
 
@@ -302,10 +302,12 @@ export type FAQPart = {
 
 export type FAQSectionType =
   | "champApplication"
+  | "informations"
   | "effectifs"
   | "indicateur1"
   | "indicateur2"
   | "indicateur3"
+  | "indicateur2et3"
   | "indicateur4"
   | "indicateur5"
   | "resultat";

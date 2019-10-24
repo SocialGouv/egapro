@@ -13,8 +13,10 @@ import FAQEffectifsSteps from "./components-steps/FAQEffectifsSteps";
 import FAQIndicateur1Steps from "./components-steps/FAQIndicateur1Steps";
 import FAQIndicateur2Steps from "./components-steps/FAQIndicateur2Steps";
 import FAQIndicateur3Steps from "./components-steps/FAQIndicateur3Steps";
+import FAQIndicateur2et3Steps from "./components-steps/FAQIndicateur2et3Steps";
 import FAQIndicateur4Steps from "./components-steps/FAQIndicateur4Steps";
 import FAQIndicateur5Steps from "./components-steps/FAQIndicateur5Steps";
+import FAQInformationsSteps from "./components-steps/FAQInformationsSteps";
 import FAQResultatSteps from "./components-steps/FAQResultatSteps";
 
 import { faqData, faqSections } from "../../data/faq";
@@ -66,6 +68,8 @@ function FAQSection({ section }: Props) {
 
 function FAQSteps({ section }: Props) {
   switch (section) {
+    case "informations":
+      return <FAQInformationsSteps />;
     case "effectifs":
       return <FAQEffectifsSteps />;
     case "indicateur1":
@@ -74,6 +78,8 @@ function FAQSteps({ section }: Props) {
       return <FAQIndicateur2Steps />;
     case "indicateur3":
       return <FAQIndicateur3Steps />;
+    case "indicateur2et3":
+      return <FAQIndicateur2et3Steps />;
     case "indicateur4":
       return <FAQIndicateur4Steps />;
     case "indicateur5":
