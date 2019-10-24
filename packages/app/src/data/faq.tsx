@@ -34,9 +34,16 @@ export const faqData: FAQPart = {
         question:
           "Le seuil d'effectifs entraînant l'assujettissement à l'obligation de calculer l'Index s'apprécie-t-il au niveau de l'unité économique et sociale (UES) quand il en existe une ?",
         reponse: [
-          "Oui. Dès lors que l'unité économique et sociale (UES) a été reconnue comme telle et comprend au moins 1000 salariés, elle est soumise à l'obligation de calcul de l'Index au 1er mars 2019, quelle que soit la taille des entreprises qui la composent.",
-          "Par exemple, une UES comprenant 4 entreprises, respectivement de 800, 200, 150 et 40 salariés est soumise à l'obligation de calculer l'Index au 1er mars 2019. L'effectif pris en compte pour le calcul de l'Index sera alors l'effectif total de l'UES.",
+          "Oui. Dès lors que l'unité économique et sociale (UES) a été reconnue comme telle et comprend au moins 50 salariés, elle est soumise à l'obligation de calcul de l'Index, quelle que soit la taille des entreprises qui la composent.",
+          "Par exemple, une UES comprenant 3 entreprises, respectivement de 100, 80 et 20 salariés est soumise à l'obligation de calculer l'Index. L'effectif pris en compte pour le calcul de l'Index sera alors l'effectif total de l'UES.",
           "En revanche, l'obligation de publier l'Index repose sur chaque entreprise comprenant au moins 50 salariés, et non l'UES."
+        ]
+      },
+      {
+        question:
+          "Une entreprise ayant déjà publié son Index en 2019 (sur une période de référence se terminant en 2018) est-elle tenue de le faire à nouveau au 1er mars 2020 (sur une période de référence se terminant en 2019) ?",
+        reponse: [
+          "Oui, toutes les entreprises d’au moins 50 salariés doivent publier leur Index au plus tard le 1er mars 2020 (sur une période de référence se terminant en 2019), même si elles ont déjà procédé à cette publication en 2019."
         ]
       }
     ]
