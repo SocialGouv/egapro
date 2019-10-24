@@ -350,26 +350,6 @@ export const faqData: FAQPart = {
       }
     ]
   },
-  indicateur2et3: {
-    title: "indicateurs - écart de taux d’augmentations",
-    qr: [
-      {
-        question:
-          "S’agissant des indicateurs relatifs aux écarts de taux d’augmentations",
-        reponse: [
-          "L’employeur peut décider, uniquement pour les entreprises de 50 à 250 salariés, de calculer l’indicateur relatif aux augmentations individuelles sur une période de référence pluriannuelle, à partir des données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans."
-        ]
-      },
-      {
-        question:
-          "Pour les indicateurs écart de taux d'augmentations, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par niveau ou coefficient hiérarchique ?",
-        reponse: [
-          "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d’une autre méthode de cotation des postes n’est possible que pour le calcul du 1er indicateur relatif à l’écart de rémunération.",
-          "S’agissant des indicateurs écart de taux d'augmentations, pour les entreprises de plus de 250 salariés, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
-        ]
-      }
-    ]
-  },
   indicateur2: {
     title: "indicateur - écart de taux d’augmentations",
     qr: [
@@ -413,6 +393,39 @@ export const faqData: FAQPart = {
           "Pour le calcul de l’indicateur relatif aux taux de promotions, les changements automatiques de coefficient en application d’une convention collective nationale peuvent-ils être pris en compte ?",
         reponse: [
           "La notion de promotion est définie en annexes du décret comme le franchissement d’un niveau ou coefficient hiérarchique supérieur. Les changements automatiques de coefficient en application d’une convention collective nationale sont donc à prendre en compte pour le calcul de l’indicateur relatif aux taux de promotions."
+        ]
+      }
+    ]
+  },
+  indicateur2et3: {
+    title: "indicateurs - écart de taux d’augmentations",
+    qr: [
+      {
+        question:
+          "Les « écarts de taux d’augmentations individuelles » correspondent-ils à des écarts de montants d’augmentations ou à des écarts de nombres de bénéficiaires d’augmentation ?",
+        reponse: [
+          "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles, qu’elles correspondent ou non à une promotion. Ainsi, l’indicateur écart de taux d'augmentations est calculé en comparant le pourcentage, au niveau de l’entreprise, de salariés augmentés parmi les hommes à celui de salariées augmentées."
+        ]
+      },
+      {
+        question:
+          "Lorsqu’en application d’un accord d’entreprise, une entreprise augmente automatiquement au bout de trois ans les salariés qui n’ont pas eu sur les trois dernières années l’équivalent de 3% d’augmentation, de telle sorte que sur les trois ans ils ont effectivement une rémunération augmentée de 3%, est-ce une augmentation individuelle ?",
+        reponse: [
+          "Non, dès lors que l’augmentation est basée sur des critères pouvant englober plusieurs salariés, en application d’un accord collectif d’entreprise, elle doit être considérée comme une augmentation collective."
+        ]
+      },
+      {
+        question:
+          "S’agissant de l’indicateur relatif à l’écart de taux d’augmentations, est-il possible d’apprécier cet indicateur sur une période de référence de trois ans ?",
+        reponse: [
+          "L’employeur peut décider de calculer l’indicateur relatif aux augmentations individuelles sur une période de référence pluriannuelle, à partir des données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé tous les trois ans."
+        ]
+      },
+      {
+        question:
+          "Pour l’indicateur relatif à l’écart de taux d’augmentations individuelles, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par CSP ou par niveau ou coefficient hiérarchique ?",
+        reponse: [
+          "Non. Le calcul de l’indicateur relatif à l’écart de taux d’augmentations individuelles est effectué au niveau de l’entreprise, et non par groupes de salariés."
         ]
       }
     ]
