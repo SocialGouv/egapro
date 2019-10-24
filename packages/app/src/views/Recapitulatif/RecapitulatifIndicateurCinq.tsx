@@ -47,7 +47,7 @@ function RecapitulatifIndicateurCinq({
     indicateurSexeSousRepresente === undefined
       ? undefined
       : indicateurSexeSousRepresente === "egalite"
-      ? "les femmes et les hommes sont à parité"
+      ? "les femmes et les hommes sont à égalité"
       : indicateurSexeSousRepresente === "hommes"
       ? "les femmes sont sur-représentées"
       : "les hommes sont sur-représentés";

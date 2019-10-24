@@ -66,7 +66,7 @@ const defaultState: AppState = {
   informations: {
     formValidated: "None",
     nomEntreprise: "",
-    trancheEffectifs: "50 à 249",
+    trancheEffectifs: "50 à 250",
     debutPeriodeReference: "",
     finPeriodeReference: ""
   },

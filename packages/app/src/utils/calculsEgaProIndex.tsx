@@ -28,7 +28,7 @@ export const calculNoteIndex = (
 
   const totalPointCalculable =
     noteIndicateurUnPointCalculable +
-    (trancheEffectifs !== "50 à 249"
+    (trancheEffectifs !== "50 à 250"
       ? noteIndicateurDeuxPointCalculable + noteIndicateurTroisPointCalculable
       : noteIndicateurDeuxTroisPointCalculable) +
     noteIndicateurQuatrePointCalculable +
@@ -43,7 +43,7 @@ export const calculNoteIndex = (
 
   const totalPoint =
     (noteIndicateurUn || 0) +
-    (trancheEffectifs !== "50 à 249"
+    (trancheEffectifs !== "50 à 250"
       ? (noteIndicateurDeux || 0) + (noteIndicateurTrois || 0)
       : noteIndicateurDeuxTrois || 0) +
     (noteIndicateurQuatre || 0) +

@@ -93,7 +93,7 @@ function Effectif({ state, dispatch }: Props) {
                       &emsp;
                     </Fragment>
                   )}
-                  {state.informations.trancheEffectifs !== "50 à 249" &&
+                  {state.informations.trancheEffectifs !== "50 à 250" &&
                     state.indicateurDeux.formValidated === "Invalid" && (
                       <Fragment>
                         <TextSimulatorLink
@@ -103,7 +103,7 @@ function Effectif({ state, dispatch }: Props) {
                         &emsp;
                       </Fragment>
                     )}
-                  {state.informations.trancheEffectifs !== "50 à 249" &&
+                  {state.informations.trancheEffectifs !== "50 à 250" &&
                     state.indicateurTrois.formValidated === "Invalid" && (
                       <Fragment>
                         <TextSimulatorLink
@@ -113,7 +113,7 @@ function Effectif({ state, dispatch }: Props) {
                         &emsp;
                       </Fragment>
                     )}
-                  {state.informations.trancheEffectifs === "50 à 249" &&
+                  {state.informations.trancheEffectifs === "50 à 250" &&
                     state.indicateurDeuxTrois.formValidated === "Invalid" && (
                       <TextSimulatorLink
                         to="/indicateur2et3"

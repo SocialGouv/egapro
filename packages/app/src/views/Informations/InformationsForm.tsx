@@ -13,6 +13,7 @@ import {
 import { calendarYear, Year } from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
+import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Input, { hasFieldError } from "../../components/Input";
@@ -56,34 +57,23 @@ const validateForm = ({
   finPeriodeReference: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
-  debutPeriodeReference: validateDate(debutPeriodeReference),
-  finPeriodeReference: validateDate(finPeriodeReference)
+  debutPeriodeReference: validateDate(debutPeriodeReference)
 });
 
 const valueValidateForCalculator = (value: string) => {
   return validateDate(value) === undefined;
 };
 
-const calculator = createDecorator(
-  {
-    field: "debutPeriodeReference",
-    updates: {
-      finPeriodeReference: (dateDebut, { finPeriodeReference }: any) =>
-        valueValidateForCalculator(dateDebut)
-          ? calendarYear(dateDebut, Year.Add, 1)
-          : finPeriodeReference
-    }
-  },
-  {
-    field: "finPeriodeReference",
-    updates: {
-      debutPeriodeReference: (dateFin, { debutPeriodeReference }: any) =>
-        valueValidateForCalculator(dateFin)
-          ? calendarYear(dateFin, Year.Subtract, 1)
-          : debutPeriodeReference
+const calculator = createDecorator({
+  field: "debutPeriodeReference",
+  updates: {
+    finPeriodeReference: (dateDebut, { finPeriodeReference }: any) => {
+      return valueValidateForCalculator(dateDebut)
+        ? calendarYear(dateDebut, Year.Add, 1)
+        : finPeriodeReference;
     }
   }
-);
+});
 
 interface Props {
   informations: AppState["informations"];
@@ -147,12 +137,12 @@ function InformationsForm({
             label="Quelle est la tranche d'effectifs de l'entreprise ?"
             choices={[
               {
-                label: "Entre 50 et 249",
-                value: "50 à 249"
+                label: "Entre 50 et 250",
+                value: "50 à 250"
               },
               {
-                label: "Entre 250 et 999",
-                value: "250 à 999"
+                label: "Entre 251 et 999",
+                value: "251 à 999"
               },
               {
                 label: "1000 et plus",
@@ -168,6 +158,14 @@ function InformationsForm({
           {readOnly ? (
             <ActionBar>
               <ButtonSimulatorLink to="/effectifs" label="suivant" />
+              &emsp;
+              {informations.formValidated === "Valid" && (
+                <p css={styles.edit}>
+                  <ActionLink onClick={() => validateInformations("None")}>
+                    modifier les données saisies
+                  </ActionLink>
+                </p>
+              )}
             </ActionBar>
           ) : (
             <ActionBar>
@@ -220,8 +218,8 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
         />
         <FieldDate
           name="finPeriodeReference"
-          label="Date de fin"
-          readOnly={readOnly}
+          label="Date de fin (auto-calculée)"
+          readOnly={true}
         />
       </div>
     </div>
@@ -240,7 +238,7 @@ function FieldDate({
   label: string;
   readOnly: boolean;
 }) {
-  const field = useField(name, { validate, type: "date" });
+  const field = useField(name, { validate: validateDate, type: "date" });
   const error = hasFieldError(field.meta);
   const mustBeDateError = hasMustBeDateError(field.meta);
 
@@ -286,7 +284,8 @@ const styles = {
     marginTop: 5,
     marginBottom: 5,
     display: "flex",
-    input: { borderRadius: 4 }
+    input: { borderRadius: 4 },
+    "input[readonly]": { border: 0 }
   }),
   error: css({
     height: 18,
@@ -301,6 +300,11 @@ const styles = {
   }),
   dateField: css({
     marginTop: 5
+  }),
+  edit: css({
+    marginTop: 14,
+    marginBottom: 14,
+    textAlign: "center"
   })
 };
 

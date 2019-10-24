@@ -16,7 +16,6 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 import InformationsForm from "./InformationsForm";
-import InformationsResult from "./InformationsResult";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -46,26 +45,15 @@ function Informations({ state, dispatch }: Props) {
             validateInformations={validateInformations}
           />
         }
-        childrenResult={
-          state.informations.formValidated === "Valid" && (
-            <InformationsResult
-              nomEntreprise={state.informations.nomEntreprise}
-              trancheEffectifs={state.informations.trancheEffectifs}
-              debutPeriodeReference={state.informations.debutPeriodeReference}
-              finPeriodeReference={state.informations.finPeriodeReference}
-              validateInformations={validateInformations}
-            />
-          )
-        }
+        childrenResult={null}
       />
 
       {state.informations.formValidated === "Valid" &&
-        (state.informations.trancheEffectifs !== "50 à 249"
-          ? state.indicateurDeux.formValidated === "Invalid" ||
-            state.indicateurTrois.formValidated === "Invalid"
-          : state.indicateurDeuxTrois.formValidated === "Invalid") && (
+        (state.indicateurDeux.formValidated === "Invalid" ||
+          state.indicateurTrois.formValidated === "Invalid" ||
+          state.indicateurDeuxTrois.formValidated === "Invalid") && (
           <InfoBloc
-            title="Vos informations ont été modifiés"
+            title="Vos informations ont été modifiées"
             icon="cross"
             text={
               <Fragment>
@@ -75,33 +63,26 @@ function Informations({ state, dispatch }: Props) {
                 </span>
                 &emsp;
                 <span>
-                  {state.informations.trancheEffectifs !== "50 à 249" &&
-                    state.indicateurDeux.formValidated === "Invalid" && (
-                      <Fragment>
-                        <TextSimulatorLink
-                          to="/indicateur2"
-                          label="aller à l'indicateur écart de taux d'augmentations"
-                        />
-                        &emsp;
-                      </Fragment>
-                    )}
-                  {state.informations.trancheEffectifs !== "50 à 249" &&
-                    state.indicateurTrois.formValidated === "Invalid" && (
-                      <Fragment>
-                        <TextSimulatorLink
-                          to="/indicateur3"
-                          label="aller à l'indicateur écart de taux de promotions"
-                        />
-                        &emsp;
-                      </Fragment>
-                    )}
-                  {state.informations.trancheEffectifs === "50 à 249" &&
-                    state.indicateurDeuxTrois.formValidated === "Invalid" && (
+                  {state.informations.trancheEffectifs !== "50 à 250" && (
+                    <Fragment>
                       <TextSimulatorLink
-                        to="/indicateur2et3"
+                        to="/indicateur2"
                         label="aller à l'indicateur écart de taux d'augmentations"
                       />
-                    )}
+                      &emsp;
+                      <TextSimulatorLink
+                        to="/indicateur3"
+                        label="aller à l'indicateur écart de taux de promotions"
+                      />
+                      &emsp;
+                    </Fragment>
+                  )}
+                  {state.informations.trancheEffectifs === "50 à 250" && (
+                    <TextSimulatorLink
+                      to="/indicateur2et3"
+                      label="aller à l'indicateur écart de taux d'augmentations"
+                    />
+                  )}
                 </span>
               </Fragment>
             }
