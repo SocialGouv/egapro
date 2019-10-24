@@ -459,9 +459,9 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "En évaluant la période de référence du 1er janvier au 31 décembre 2018, si une salariée revient de congé maternité au 31 août 2018 et qu’elle est augmentée au 1er janvier 2019, alors que ses collègues ont été revalorisés au 1er juillet 2018, celle-ci est-elle considérée comme augmentée ou non au titre de l’indicateur retour congé maternité ?",
+          "En évaluant la période de référence du 1er janvier au 31 décembre 2019, si une salariée revient de congé maternité au 31 août 2019 et qu’elle est augmentée au 1er janvier 2020, alors que ses collègues ont été revalorisés au 1er juillet 2019, celle-ci est-elle considérée comme augmentée ou non au titre de l’indicateur retour de congé maternité ?",
         reponse: [
-          "Non, elle n’est pas considérée comme augmentée, car le respect de l’obligation est apprécié sur l’année de référence, soit dans cet exemple sur l'année civile 2018."
+          "Non, elle n’est pas considérée comme augmentée, car le respect de l’obligation est apprécié sur l’année de référence, soit dans cet exemple sur l'année civile 2019."
         ]
       },
       {
@@ -488,9 +488,9 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Obtient-on nécessairement 0 à l’indicateur retour congé maternité dans le cas où seules 2 salariées n’ont pas bénéficié d’une augmentation durant l’année 2018 alors qu’elles étaient absentes pour congé maternité à l’occasion de l’exercice annuel de revalorisation, étant donné que ces deux salariées avaient bénéficié toutes deux d’une augmentation au second semestre 2017 ?",
+          "Obtient-on nécessairement 0 à l’indicateur retour congé maternité dans le cas où seules 2 salariées n’ont pas bénéficié d’une augmentation durant l’année 2019 alors qu’elles étaient absentes pour congé maternité à l’occasion de l’exercice annuel de revalorisation, étant donné que ces deux salariées avaient bénéficié toutes deux d’une augmentation au second semestre 2018 ?",
         reponse: [
-          "Le calcul de l’Index étant basé sur une période de référence annuelle, si la période choisie est l’année 2018, il n’est pas possible de déroger à la règle posée par le décret n° 2019-15 du 8 janvier 2019, car les deux salariées concernées ont bénéficié d’une revalorisation au second semestre de l’année 2017."
+          "Le calcul de l’Index étant basé sur une période de référence annuelle, si la période choisie est l’année 2019, il n’est pas possible de déroger à la règle posée par le décret n° 2019-15 du 8 janvier 2019, car les deux salariées concernées ont bénéficié d’une revalorisation au second semestre de l’année 2018."
         ]
       }
     ]
