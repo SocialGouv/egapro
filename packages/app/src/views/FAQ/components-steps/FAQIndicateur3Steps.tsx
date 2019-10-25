@@ -8,6 +8,12 @@ import FAQStep from "../components/FAQStep";
 function FAQIndicateur3Steps() {
   return (
     <Fragment>
+      <strong>
+        Indicateur concernant les entreprises de plus de 250 salariés
+      </strong>
+      <br />
+      <br />
+
       <FAQStep icon={<IconGrow valid={true} />}>
         La notion de promotion correspond au{" "}
         <strong>

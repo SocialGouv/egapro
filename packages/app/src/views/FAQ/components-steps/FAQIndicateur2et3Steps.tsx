@@ -8,6 +8,12 @@ import FAQStep from "../components/FAQStep";
 function FAQIndicateur2et3Steps() {
   return (
     <Fragment>
+      <strong>
+        Indicateur concernant les entreprises entre 50 et 250 salariés
+      </strong>
+      <br />
+      <br />
+
       <FAQStep icon={<IconGrow valid={true} />}>
         La notion d'
         <strong>

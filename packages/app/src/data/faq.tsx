@@ -585,15 +585,15 @@ export const faqSections: FAQSection = {
     parts: ["remuneration", "indicateur1"]
   },
   indicateur2: {
-    title: "indicateur - écart d’augmentations",
-    parts: ["indicateur2", "indicateur2et3"]
+    title: "indicateur - écart d’augmentations (+250)",
+    parts: ["indicateur2"]
   },
   indicateur3: {
-    title: "indicateur - écart de promotions",
-    parts: ["indicateur3", "indicateur2et3"]
+    title: "indicateur - écart de promotions (+250)",
+    parts: ["indicateur3"]
   },
   indicateur2et3: {
-    title: "indicateur - écart d'augmentations",
+    title: "indicateur - écart d'augmentations (+50)",
     parts: ["indicateur2et3"]
   },
   indicateur4: {
