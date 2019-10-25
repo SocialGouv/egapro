@@ -151,6 +151,10 @@ function AppReducer(
         return {
           ...state,
           informations: { ...state.informations, formValidated: action.valid },
+          effectif:
+            state.effectif.formValidated === "Valid"
+              ? { ...state.effectif, formValidated: "Invalid" }
+              : state.effectif,
           indicateurDeux:
             state.indicateurDeux.formValidated === "Valid"
               ? { ...state.indicateurDeux, formValidated: "Invalid" }
