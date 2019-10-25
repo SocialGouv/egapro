@@ -27,7 +27,7 @@ function IndicateurDeuxTroisResult({
   return (
     <div css={styles.container}>
       <ResultBubble
-        firstLineLabel="votre résultat final est"
+        firstLineLabel="votre écart de taux d'augmentation est"
         firstLineData={
           indicateurEcartAugmentationPromotion !== undefined
             ? displayPercent(indicateurEcartAugmentationPromotion)

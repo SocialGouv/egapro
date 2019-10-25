@@ -91,7 +91,7 @@ function RecapitulatifIndicateurDeuxTrois({
       <RecapBloc
         title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
         resultBubble={{
-          firstLineLabel: "votre résultat final est",
+          firstLineLabel: "votre écart de taux d'augmentation est",
           firstLineData:
             indicateurEcartAugmentationPromotion !== undefined
               ? displayPercent(indicateurEcartAugmentationPromotion)
