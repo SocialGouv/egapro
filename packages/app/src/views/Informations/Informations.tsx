@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useCallback, Fragment, ReactNode } from "react";
+import { useCallback, ReactNode } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import {
@@ -13,7 +13,6 @@ import {
 import InfoBloc from "../../components/InfoBloc";
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 import InformationsForm from "./InformationsForm";
 
@@ -49,42 +48,21 @@ function Informations({ state, dispatch }: Props) {
       />
 
       {state.informations.formValidated === "Valid" &&
-        (state.indicateurDeux.formValidated === "Invalid" ||
+        (state.effectif.formValidated === "Invalid" ||
+          state.indicateurUn.formValidated === "Invalid" ||
+          state.indicateurDeux.formValidated === "Invalid" ||
           state.indicateurTrois.formValidated === "Invalid" ||
-          state.indicateurDeuxTrois.formValidated === "Invalid") && (
+          state.indicateurDeuxTrois.formValidated === "Invalid" ||
+          state.indicateurQuatre.formValidated === "Invalid" ||
+          state.indicateurCinq.formValidated === "Invalid") && (
           <InfoBloc
             title="Vos informations ont été modifiées"
             icon="cross"
             text={
-              <Fragment>
-                <span>
-                  afin de s'assurer de la cohérence de votre index, merci de
-                  vérifier les données de vos indicateurs.
-                </span>
-                &emsp;
-                <span>
-                  {state.informations.trancheEffectifs !== "50 à 250" && (
-                    <Fragment>
-                      <TextSimulatorLink
-                        to="/indicateur2"
-                        label="aller à l'indicateur écart de taux d'augmentations"
-                      />
-                      &emsp;
-                      <TextSimulatorLink
-                        to="/indicateur3"
-                        label="aller à l'indicateur écart de taux de promotions"
-                      />
-                      &emsp;
-                    </Fragment>
-                  )}
-                  {state.informations.trancheEffectifs === "50 à 250" && (
-                    <TextSimulatorLink
-                      to="/indicateur2et3"
-                      label="aller à l'indicateur écart de taux d'augmentations"
-                    />
-                  )}
-                </span>
-              </Fragment>
+              <span>
+                afin de s'assurer de la cohérence de votre index, merci de
+                vérifier les données de vos indicateurs.
+              </span>
             }
           />
         )}
