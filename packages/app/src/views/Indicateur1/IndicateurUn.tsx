@@ -58,7 +58,14 @@ function IndicateurUn({ state, dispatch }: Props) {
               effectifs."
         />
         <ActionBar>
-          <ButtonSimulatorLink to="/indicateur2" label="suivant" />
+          <ButtonSimulatorLink
+            to={
+              state.informations.trancheEffectifs === "50 à 250"
+                ? "/indicateur2et3"
+                : "/indicateur2"
+            }
+            label="suivant"
+          />
         </ActionBar>
       </PageIndicateurUn>
     );

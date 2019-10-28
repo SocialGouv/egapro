@@ -44,6 +44,7 @@ function IndicateurUnCsp({ state, dispatch }: Props) {
     <LayoutFormAndResult
       childrenForm={
         <IndicateurUnCspForm
+          state={state}
           ecartRemuParTrancheAge={effectifEtEcartRemuParTrancheCsp}
           readOnly={state.indicateurUn.formValidated === "Valid"}
           updateIndicateurUn={updateIndicateurUn}
