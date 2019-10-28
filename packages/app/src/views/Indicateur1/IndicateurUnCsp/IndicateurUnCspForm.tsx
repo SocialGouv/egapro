@@ -3,6 +3,7 @@ import { jsx } from "@emotion/core";
 import { useMemo, useCallback } from "react";
 import {
   ActionIndicateurUnCspData,
+  AppState,
   GroupTranchesAgesIndicateurUn,
   FormState
 } from "../../../globals";
@@ -16,6 +17,7 @@ import { displayNameCategorieSocioPro } from "../../../utils/helpers";
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw";
 
 interface Props {
+  state: AppState;
   ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroupCsp>;
   readOnly: boolean;
   updateIndicateurUn: (data: ActionIndicateurUnCspData) => void;
@@ -23,6 +25,7 @@ interface Props {
 }
 
 function IndicateurUnCspForm({
+  state,
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
@@ -60,7 +63,16 @@ function IndicateurUnCspForm({
       readOnly={readOnly}
       updateIndicateurUn={updateIndicateurUnRaw}
       validateIndicateurUn={validateIndicateurUn}
-      nextLink={<ButtonSimulatorLink to="/indicateur2" label="suivant" />}
+      nextLink={
+        <ButtonSimulatorLink
+          to={
+            state.informations.trancheEffectifs === "50 à 250"
+              ? "/indicateur2et3"
+              : "/indicateur2"
+          }
+          label="suivant"
+        />
+      }
     />
   );
 }
