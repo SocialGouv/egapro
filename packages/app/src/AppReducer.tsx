@@ -155,6 +155,10 @@ function AppReducer(
             state.effectif.formValidated === "Valid"
               ? { ...state.effectif, formValidated: "Invalid" }
               : state.effectif,
+          indicateurUn:
+            state.indicateurUn.formValidated === "Valid"
+              ? { ...state.indicateurUn, formValidated: "Invalid" }
+              : state.indicateurUn,
           indicateurDeux:
             state.indicateurDeux.formValidated === "Valid"
               ? { ...state.indicateurDeux, formValidated: "Invalid" }
@@ -166,7 +170,15 @@ function AppReducer(
           indicateurDeuxTrois:
             state.indicateurDeuxTrois.formValidated === "Valid"
               ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
-              : state.indicateurDeuxTrois
+              : state.indicateurDeuxTrois,
+          indicateurQuatre:
+            state.indicateurQuatre.formValidated === "Valid"
+              ? { ...state.indicateurQuatre, formValidated: "Invalid" }
+              : state.indicateurQuatre,
+          indicateurCinq:
+            state.indicateurCinq.formValidated === "Valid"
+              ? { ...state.indicateurCinq, formValidated: "Invalid" }
+              : state.indicateurCinq
         };
       }
       return {
