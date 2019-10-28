@@ -135,22 +135,16 @@ function AppReducer(
         debutPeriodeReference,
         finPeriodeReference
       } = action.data;
-      return {
-        ...state,
-        informations: {
-          ...state.informations,
-          nomEntreprise,
-          trancheEffectifs,
-          debutPeriodeReference,
-          finPeriodeReference
-        }
-      };
-    }
-    case "validateInformations": {
-      if (action.valid === "None") {
+      if (trancheEffectifs !== state.informations.trancheEffectifs) {
         return {
           ...state,
-          informations: { ...state.informations, formValidated: action.valid },
+          informations: {
+            ...state.informations,
+            nomEntreprise,
+            trancheEffectifs,
+            debutPeriodeReference,
+            finPeriodeReference
+          },
           effectif:
             state.effectif.formValidated === "Valid"
               ? { ...state.effectif, formValidated: "Invalid" }
@@ -181,6 +175,18 @@ function AppReducer(
               : state.indicateurCinq
         };
       }
+      return {
+        ...state,
+        informations: {
+          ...state.informations,
+          nomEntreprise,
+          trancheEffectifs,
+          debutPeriodeReference,
+          finPeriodeReference
+        }
+      };
+    }
+    case "validateInformations": {
       return {
         ...state,
         informations: {
