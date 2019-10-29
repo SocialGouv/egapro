@@ -322,7 +322,10 @@ const styles = {
     marginTop: 5,
     marginBottom: 5,
     display: "flex",
-    input: { borderRadius: 4 },
+    input: {
+      borderRadius: 4,
+      border: "1px solid"
+    },
     "input[readonly]": { border: 0 }
   }),
   error: css({
@@ -337,7 +340,10 @@ const styles = {
     justifyContent: "space-between"
   }),
   dateField: css({
-    marginTop: 5
+    marginTop: 5,
+    ".react-datepicker-popper": {
+      zIndex: 9
+    }
   }),
   edit: css({
     marginTop: 14,
