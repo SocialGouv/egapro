@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { FieldMetaState, Form, useField } from "react-final-form";
+import { Field, FieldMetaState, Form, useField } from "react-final-form";
 import createDecorator from "final-form-calculate";
 
 import { AppState, FormState, ActionInformationsData } from "../../globals";
@@ -10,7 +10,12 @@ import {
   parseTrancheEffectifsFormValue,
   required
 } from "../../utils/formHelpers";
-import { calendarYear, Year } from "../../utils/helpers";
+import {
+  calendarYear,
+  dateToString,
+  parseDate,
+  Year
+} from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -20,6 +25,11 @@ import Input, { hasFieldError } from "../../components/Input";
 import RadioLabels from "../../components/RadioLabels";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 import globalStyles from "../../utils/globalStyles";
+
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import fr from "date-fns/locale/fr";
+registerLocale("fr", fr);
 
 ///////////////////
 
@@ -64,16 +74,28 @@ const valueValidateForCalculator = (value: string) => {
   return validateDate(value) === undefined;
 };
 
-const calculator = createDecorator({
-  field: "debutPeriodeReference",
-  updates: {
-    finPeriodeReference: (dateDebut, { finPeriodeReference }: any) => {
-      return valueValidateForCalculator(dateDebut)
-        ? calendarYear(dateDebut, Year.Add, 1)
-        : finPeriodeReference;
+const calculator = createDecorator(
+  {
+    field: "debutPeriodeReference",
+    updates: {
+      finPeriodeReference: (dateDebut, { finPeriodeReference }: any) => {
+        return valueValidateForCalculator(dateDebut)
+          ? calendarYear(dateDebut, Year.Add, 1)
+          : finPeriodeReference;
+      }
+    }
+  },
+  {
+    field: "finPeriodeReference",
+    updates: {
+      debutPeriodeReference: (dateFin, { debutPeriodeReference }: any) => {
+        return valueValidateForCalculator(dateFin)
+          ? calendarYear(dateFin, Year.Subtract, 1)
+          : debutPeriodeReference;
+      }
     }
   }
-});
+);
 
 interface Props {
   informations: AppState["informations"];
@@ -217,13 +239,13 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
       <div css={styles.dates}>
         <FieldDate
           name="debutPeriodeReference"
-          label="Date de début"
+          label="Date de début (jj/mm/aaaa)"
           readOnly={readOnly}
         />
         <FieldDate
           name="finPeriodeReference"
-          label="Date de fin (auto-calculée)"
-          readOnly={true}
+          label="Date de fin (jj/mm/aaaa)"
+          readOnly={readOnly}
         />
       </div>
     </div>
@@ -242,7 +264,7 @@ function FieldDate({
   label: string;
   readOnly: boolean;
 }) {
-  const field = useField(name, { validate: validateDate, type: "date" });
+  const field = useField(name, { validate: validateDate });
   const error = hasFieldError(field.meta);
   const mustBeDateError = hasMustBeDateError(field.meta);
 
@@ -255,7 +277,19 @@ function FieldDate({
         {label}
       </label>
       <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
+        <Field name={name} validate={validateDate}>
+          {props => (
+            <DatePicker
+              locale="fr"
+              dateFormat="dd/MM/yyyy"
+              selected={parseDate(props.input.value)}
+              onChange={date =>
+                date ? props.input.onChange(dateToString(date)) : ""
+              }
+              readOnly={readOnly}
+            />
+          )}
+        </Field>
       </div>
       <p css={styles.error}>
         {error &&
@@ -288,7 +322,10 @@ const styles = {
     marginTop: 5,
     marginBottom: 5,
     display: "flex",
-    input: { borderRadius: 4 },
+    input: {
+      borderRadius: 4,
+      border: "1px solid"
+    },
     "input[readonly]": { border: 0 }
   }),
   error: css({
@@ -303,7 +340,10 @@ const styles = {
     justifyContent: "space-between"
   }),
   dateField: css({
-    marginTop: 5
+    marginTop: 5,
+    ".react-datepicker-popper": {
+      zIndex: 9
+    }
   }),
   edit: css({
     marginTop: 14,

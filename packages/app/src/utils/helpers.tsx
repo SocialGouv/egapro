@@ -76,12 +76,20 @@ export const percentageToFraction = (num: number) => roundDecimal(num / 100, 5);
 
 /* Dates */
 
-export function parseDate(dateStr: string) {
+export function parseDate(dateStr: string): Date | undefined {
   const parsed = parseISO(dateStr);
   if (parsed.toString() === "Invalid Date") {
-    return rootParse(dateStr, "dd/MM/yyyy", new Date());
+    const rootParsed = rootParse(dateStr, "dd/MM/yyyy", new Date());
+    if (rootParsed.toString() === "Invalid Date") {
+      return;
+    }
+    return rootParsed;
   }
   return parsed;
+}
+
+export function dateToString(date: Date | undefined): string {
+  return date !== undefined ? format(date, "dd/MM/yyyy") : "";
 }
 
 export enum Year {
@@ -101,13 +109,12 @@ export function calendarYear(
   const year = operation === Year.Add ? numYears : -numYears;
   const day = operation === Year.Add ? -1 : 1;
   const date = parseDate(dateStr);
+  if (date === undefined) {
+    return "";
+  }
   const yearsAdded = addYears(date, year);
   const dayAdded = addDays(yearsAdded, day);
-  return format(dayAdded, "yyyy-MM-dd");
-}
-
-export function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString();
+  return format(dayAdded, "dd/MM/yyyy");
 }
 
 /* Misc */
