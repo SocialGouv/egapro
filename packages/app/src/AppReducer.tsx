@@ -135,6 +135,46 @@ function AppReducer(
         debutPeriodeReference,
         finPeriodeReference
       } = action.data;
+      if (trancheEffectifs !== state.informations.trancheEffectifs) {
+        return {
+          ...state,
+          informations: {
+            ...state.informations,
+            nomEntreprise,
+            trancheEffectifs,
+            debutPeriodeReference,
+            finPeriodeReference
+          },
+          effectif:
+            state.effectif.formValidated === "Valid"
+              ? { ...state.effectif, formValidated: "Invalid" }
+              : state.effectif,
+          indicateurUn:
+            state.indicateurUn.formValidated === "Valid"
+              ? { ...state.indicateurUn, formValidated: "Invalid" }
+              : state.indicateurUn,
+          indicateurDeux:
+            state.indicateurDeux.formValidated === "Valid"
+              ? { ...state.indicateurDeux, formValidated: "Invalid" }
+              : state.indicateurDeux,
+          indicateurTrois:
+            state.indicateurTrois.formValidated === "Valid"
+              ? { ...state.indicateurTrois, formValidated: "Invalid" }
+              : state.indicateurTrois,
+          indicateurDeuxTrois:
+            state.indicateurDeuxTrois.formValidated === "Valid"
+              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
+              : state.indicateurDeuxTrois,
+          indicateurQuatre:
+            state.indicateurQuatre.formValidated === "Valid"
+              ? { ...state.indicateurQuatre, formValidated: "Invalid" }
+              : state.indicateurQuatre,
+          indicateurCinq:
+            state.indicateurCinq.formValidated === "Valid"
+              ? { ...state.indicateurCinq, formValidated: "Invalid" }
+              : state.indicateurCinq
+        };
+      }
       return {
         ...state,
         informations: {
@@ -147,28 +187,6 @@ function AppReducer(
       };
     }
     case "validateInformations": {
-      if (action.valid === "None") {
-        return {
-          ...state,
-          informations: { ...state.informations, formValidated: action.valid },
-          effectif:
-            state.effectif.formValidated === "Valid"
-              ? { ...state.effectif, formValidated: "Invalid" }
-              : state.effectif,
-          indicateurDeux:
-            state.indicateurDeux.formValidated === "Valid"
-              ? { ...state.indicateurDeux, formValidated: "Invalid" }
-              : state.indicateurDeux,
-          indicateurTrois:
-            state.indicateurTrois.formValidated === "Valid"
-              ? { ...state.indicateurTrois, formValidated: "Invalid" }
-              : state.indicateurTrois,
-          indicateurDeuxTrois:
-            state.indicateurDeuxTrois.formValidated === "Valid"
-              ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
-              : state.indicateurDeuxTrois
-        };
-      }
       return {
         ...state,
         informations: {
