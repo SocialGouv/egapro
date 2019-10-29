@@ -74,16 +74,28 @@ const valueValidateForCalculator = (value: string) => {
   return validateDate(value) === undefined;
 };
 
-const calculator = createDecorator({
-  field: "debutPeriodeReference",
-  updates: {
-    finPeriodeReference: (dateDebut, { finPeriodeReference }: any) => {
-      return valueValidateForCalculator(dateDebut)
-        ? calendarYear(dateDebut, Year.Add, 1)
-        : finPeriodeReference;
+const calculator = createDecorator(
+  {
+    field: "debutPeriodeReference",
+    updates: {
+      finPeriodeReference: (dateDebut, { finPeriodeReference }: any) => {
+        return valueValidateForCalculator(dateDebut)
+          ? calendarYear(dateDebut, Year.Add, 1)
+          : finPeriodeReference;
+      }
+    }
+  },
+  {
+    field: "finPeriodeReference",
+    updates: {
+      debutPeriodeReference: (dateFin, { debutPeriodeReference }: any) => {
+        return valueValidateForCalculator(dateFin)
+          ? calendarYear(dateFin, Year.Subtract, 1)
+          : debutPeriodeReference;
+      }
     }
   }
-});
+);
 
 interface Props {
   informations: AppState["informations"];
@@ -232,7 +244,7 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
         />
         <FieldDate
           name="finPeriodeReference"
-          label="Date de fin (auto-calculée)"
+          label="Date de fin (jj/mm/aaaa)"
           readOnly={readOnly}
         />
       </div>
