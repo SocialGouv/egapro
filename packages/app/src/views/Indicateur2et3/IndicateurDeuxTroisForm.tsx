@@ -24,7 +24,12 @@ import {
   parseBooleanStateValue,
   parsePeriodeDeclarationFormValue
 } from "../../utils/formHelpers";
-import { calendarYear, formatDate, Year } from "../../utils/helpers";
+import {
+  calendarYear,
+  dateToString,
+  parseDate,
+  Year
+} from "../../utils/helpers";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 interface Props {
@@ -89,16 +94,16 @@ function IndicateurDeuxTroisForm({
     validateIndicateurDeuxTrois("Valid");
   };
 
-  const oneYear = formatDate(
-    calendarYear(finPeriodeReference, Year.Subtract, 1)
+  const oneYear = dateToString(
+    parseDate(calendarYear(finPeriodeReference, Year.Subtract, 1))
   );
-  const twoYears = formatDate(
-    calendarYear(finPeriodeReference, Year.Subtract, 2)
+  const twoYears = dateToString(
+    parseDate(calendarYear(finPeriodeReference, Year.Subtract, 2))
   );
-  const threeYears = formatDate(
-    calendarYear(finPeriodeReference, Year.Subtract, 3)
+  const threeYears = dateToString(
+    parseDate(calendarYear(finPeriodeReference, Year.Subtract, 3))
   );
-  const dateFinPeriodeReference = formatDate(finPeriodeReference);
+  const dateFinPeriodeReference = dateToString(parseDate(finPeriodeReference));
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommes,

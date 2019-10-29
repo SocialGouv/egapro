@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import {
   calendarYear,
+  dateToString,
   displaySexeSurRepresente,
   messageEcartNombreEquivalentSalaries,
   parseDate,
@@ -9,41 +10,45 @@ import {
 
 describe("parseDate", () => {
   test("parses date as ISO format", () => {
-    expect(format(parseDate("2018-12-31"), "yyyy-MM-dd")).toEqual("2018-12-31");
-    expect(parseDate("2018-12-31a").toString()).toEqual("Invalid Date");
-    expect(parseDate("2018-31-12").toString()).toEqual("Invalid Date");
+    expect(dateToString(parseDate("2018-12-31"))).toEqual("31/12/2018");
+    expect(parseDate("2018-12-31a")).toBe(undefined);
+    expect(dateToString(parseDate("2018-12-31a"))).toEqual("");
+    expect(parseDate("2018-31-12")).toBe(undefined);
+    expect(dateToString(parseDate("2018-31-12"))).toEqual("");
   });
 
   test("parses date as french format", () => {
-    expect(format(parseDate("31/12/2018"), "yyyy-MM-dd")).toEqual("2018-12-31");
-    expect(parseDate("31/12/2018a").toString()).toEqual("Invalid Date");
-    expect(parseDate("12/31/2018").toString()).toEqual("Invalid Date");
+    expect(dateToString(parseDate("31/12/2018"))).toEqual("31/12/2018");
+    expect(parseDate("31/12/2018a")).toBe(undefined);
+    expect(dateToString(parseDate("31/12/2018a"))).toEqual("");
+    expect(parseDate("12/31/2018")).toBe(undefined);
+    expect(dateToString(parseDate("12/31/2018"))).toEqual("");
   });
 });
 
 describe("calendarYear", () => {
   test("adds a year", () => {
-    expect(calendarYear("2018-12-31", Year.Add, 1)).toEqual("2019-12-30");
-    expect(calendarYear("2019-01-01", Year.Add, 1)).toEqual("2019-12-31");
-    expect(calendarYear("2019-01-02", Year.Add, 1)).toEqual("2020-01-01");
+    expect(calendarYear("2018-12-31", Year.Add, 1)).toEqual("30/12/2019");
+    expect(calendarYear("2019-01-01", Year.Add, 1)).toEqual("31/12/2019");
+    expect(calendarYear("2019-01-02", Year.Add, 1)).toEqual("01/01/2020");
   });
 
   test("subtracts a year", () => {
-    expect(calendarYear("2018-12-30", Year.Subtract, 1)).toEqual("2017-12-31");
-    expect(calendarYear("2018-12-31", Year.Subtract, 1)).toEqual("2018-01-01");
-    expect(calendarYear("2019-01-01", Year.Subtract, 1)).toEqual("2018-01-02");
+    expect(calendarYear("2018-12-30", Year.Subtract, 1)).toEqual("31/12/2017");
+    expect(calendarYear("2018-12-31", Year.Subtract, 1)).toEqual("01/01/2018");
+    expect(calendarYear("2019-01-01", Year.Subtract, 1)).toEqual("02/01/2018");
   });
 
   test("adds more than one year", () => {
-    expect(calendarYear("2018-12-31", Year.Add, 2)).toEqual("2020-12-30");
-    expect(calendarYear("2019-01-01", Year.Add, 2)).toEqual("2020-12-31");
-    expect(calendarYear("2019-01-02", Year.Add, 2)).toEqual("2021-01-01");
+    expect(calendarYear("2018-12-31", Year.Add, 2)).toEqual("30/12/2020");
+    expect(calendarYear("2019-01-01", Year.Add, 2)).toEqual("31/12/2020");
+    expect(calendarYear("2019-01-02", Year.Add, 2)).toEqual("01/01/2021");
   });
 
   test("subtracts more than one year", () => {
-    expect(calendarYear("2018-12-30", Year.Subtract, 2)).toEqual("2016-12-31");
-    expect(calendarYear("2018-12-31", Year.Subtract, 2)).toEqual("2017-01-01");
-    expect(calendarYear("2019-01-01", Year.Subtract, 2)).toEqual("2017-01-02");
+    expect(calendarYear("2018-12-30", Year.Subtract, 2)).toEqual("31/12/2016");
+    expect(calendarYear("2018-12-31", Year.Subtract, 2)).toEqual("01/01/2017");
+    expect(calendarYear("2019-01-01", Year.Subtract, 2)).toEqual("02/01/2017");
   });
 });
 

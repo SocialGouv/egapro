@@ -86,7 +86,8 @@ export const maxNumber = (value: string, max: number): boolean =>
   Number(value) > max;
 
 export const mustBeDate = (value: string): boolean => {
-  return parseDate(value).toString() === "Invalid Date";
+  const parsed = parseDate(value);
+  return parsed === undefined || parsed.toString() === "Invalid Date";
 };
 
 const regexpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
