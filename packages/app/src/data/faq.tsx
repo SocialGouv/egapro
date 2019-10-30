@@ -34,7 +34,7 @@ export const faqData: FAQPart = {
         question:
           "Le seuil d'effectifs entraînant l'assujettissement à l'obligation de calculer l'Index s'apprécie-t-il au niveau de l'unité économique et sociale (UES) quand il en existe une ?",
         reponse: [
-          "Oui. Dès lors que l'unité économique et sociale (UES) a été reconnue comme telle et comprend au moins 50 salariés, elle est soumise à l'obligation de calcul de l'Index, quelle que soit la taille des entreprises qui la composent.",
+          "Oui. Dès lors que l'unité économique et sociale (UES) a été reconnue comme telle et comprend au moins 50 salariés à la date de l'obligation de publication de l'Index, elle est soumise à l'obligation de calcul de l'Index, quelle que soit la taille des entreprises qui la composent.",
           "Par exemple, une UES comprenant 3 entreprises, respectivement de 100, 80 et 20 salariés est soumise à l'obligation de calculer l'Index. L'effectif pris en compte pour le calcul de l'Index sera alors l'effectif total de l'UES.",
           "En revanche, l'obligation de publier l'Index repose sur chaque entreprise comprenant au moins 50 salariés, et non l'UES."
         ]
@@ -53,21 +53,14 @@ export const faqData: FAQPart = {
     qr: [
       {
         question:
-          "Les entreprises de plus de 1000 salariés assujetties à l'obligation de publication au 1er mars 2019 doivent-elles calculer leurs indicateurs sur la base des données de l'année 2018 ?",
-        reponse: [
-          "Les indicateurs sont calculés à partir des données de la période de référence annuelle que l’employeur a choisie. Cette période de référence, de 12 mois consécutifs, est celle qui précède l’année de publication : elle doit donc nécessairement s’achever au plus tard le 31 décembre 2018 pour un Index publié en 2019.",
-          "Ainsi, si l’entreprise de plus de 1000 salariés a choisi l’année civile comme année de référence, les données seront celles du 1er janvier 2018 au 31 décembre 2018, pour une publication au 1er mars 2019. La période de référence peut également aller du 1er juin 2017 au 31 mai 2018, mais pas du 1er janvier 2017 au 31 décembre 2017 pour une publication en 2019.",
-          "La même faculté est laissée aux entreprises de plus de 250 salariés et de moins de 1000 salariés, assujetties à l'obligation de publication au 1er septembre 2019."
-        ]
-      },
-      {
-        question:
           "Les entreprises d'au moins 50 salariés assujetties à l'obligation de publication au 1er mars 2020 doivent-elles calculer leurs indicateurs sur la base des données de l'année 2019 ?",
         reponse: [
           "Les indicateurs sont calculés à partir des données de la période de référence annuelle que l’employeur a choisie. Cette période de référence, de 12 mois consécutifs, est celle qui précède l’année de publication : elle doit donc nécessairement s’achever au plus tard le 31 décembre 2019 pour un Index publié en 2020.",
           "Ainsi, si l’entreprise d'au moins 50 salariés a choisi l’année civile comme année de référence, les données seront celles du 1er janvier 2019 au 31 décembre 2019, pour une publication au 1er mars 2020. La période de référence peut également aller du 1er juin 2018 au 31 mai 2019, mais pas du 1er janvier 2018 au 31 décembre 2018 pour une publication en 2020.",
-          "Attention : pour l’indicateur relatif aux augmentations individuelles, et uniquement pour les entreprises de 50 à 250 salariés, la période de référence choisie par l’employeur peut être pluriannuelle, à partir des données des 2 ou 3 années précédentes. Son caractère pluriannuel peut alors être révisé tous les 3 ans.",
-          "Par exemple, si l’entreprise de 50 à 250 salariés a choisi l’année civile 2019 comme période de référence pour le calcul de son Index en 2020, elle pourra calculer son indicateur relatif aux augmentations individuelles sur une période de référence de 2 ou 3 ans. Cette période de référence pourra ainsi aller respectivement du 1er janvier 2018 au 31 décembre 2019, ou du 1er janvier 2017 au 31 décembre 2019. En 2023, elle pourra alors réviser le caractère pluriannuel de cette période de référence."
+
+          "Attention : dans les entreprises de 50 à 250 salariés, l'employeur peut décider de calculer l’indicateur relatif à l'écart de taux augmentations individuelles sur une période de référence pluriannuelle, à partir des données des 2 ou 3 années précédentes. Son caractère pluriannuel peut alors être révisé tous les 3 ans.",
+          "Par exemple, si l’entreprise a choisi l’année civile 2019 comme période de référence pour le calcul de son Index en 2020, elle pourra calculer son indicateur relatif à l'écart de taux augmentations individuelles sur une période de référence de 2 ou 3 ans.",
+          "Cette période de référence pourra ainsi aller respectivement du 1er janvier 2018 au 31 décembre 2019, ou du 1er janvier 2017 au 31 décembre 2019. En 2023, elle pourra alors réviser le caractère pluriannuel de cette période de référence."
         ]
       },
       {
@@ -357,7 +350,7 @@ export const faqData: FAQPart = {
         question:
           'Les "écarts de taux d’augmentations individuelles" correspondent-ils à des écarts de montants d’augmentations ou à des écarts de nombres de bénéficiaires d’augmentation ?',
         reponse: [
-          "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles. Ainsi, l’indicateur écart de taux d'augmentations est calculé en comparant le pourcentage de salariés augmentés parmi les hommes à celui de salariées augmentées parmi les femmes pour chacun des quatre groupes de CSP comptant 10 salariés ou plus de l’un et de l’autre sexe. Il en va de même pour l’écart de taux de promotions."
+          "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles. Ainsi, l’indicateur écart de taux d'augmentations est calculé en comparant le pourcentage de salariés augmentés, hors promotions, parmi les hommes à celui de salariées augmentées, hors promotions, parmi les femmes pour chacun des quatre groupes de CSP comptant 10 salariés ou plus de l’un et de l’autre sexe. Il en va de même pour le calcul de l'indicateur relatif à l’écart de taux de promotions."
         ]
       },
       {
@@ -365,6 +358,14 @@ export const faqData: FAQPart = {
           "Lorsqu’en application d’un accord d’entreprise, une entreprise augmente automatiquement au bout de trois ans les salariés qui n’ont pas eu sur les trois dernières années l’équivalent de 3% d’augmentation, de telle sorte que sur les trois ans ils ont effectivement une rémunération augmentée de 3%, est-ce une augmentation individuelle ?",
         reponse: [
           "Non, dès lors que l’augmentation est basée sur des critères pouvant englober plusieurs salariés, en application d’un accord collectif d’entreprise, elle doit être considérée comme une augmentation collective."
+        ]
+      },
+      {
+        question:
+          "Pour l’indicateur relatif à l’écart de taux d'augmentations, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par CSP ou par niveau ou coefficient hiérarchique ?",
+        reponse: [
+          "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d'une autre méthode de cotation des postes n'est possible que pour le calcul du 1er indicateur relatif à l'écart de rémunération.",
+          "Pour le calcul de l'indicateurs relatif à l'écart de taux d'augmentations, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
         ]
       }
     ]
@@ -394,6 +395,14 @@ export const faqData: FAQPart = {
         reponse: [
           "La notion de promotion est définie en annexes du décret comme le franchissement d’un niveau ou coefficient hiérarchique supérieur. Les changements automatiques de coefficient en application d’une convention collective nationale sont donc à prendre en compte pour le calcul de l’indicateur relatif aux taux de promotions."
         ]
+      },
+      {
+        question:
+          "Pour l’indicateur relatif à l’écart de taux de promotions, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par CSP ou par niveau ou coefficient hiérarchique ?",
+        reponse: [
+          "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d'une autre méthode de cotation des postes n'est possible que pour le calcul du 1er indicateur relatif à l'écart de rémunération.",
+          "Pour le calcul de l'indicateurs relatif à l'écart de taux de promotions, les salariés sont répartis selon les 4 catégories socioprofessionnelles définies en annexe du décret (ouvriers ; employés ; techniciens et agents de maîtrise ; ingénieurs et cadres)."
+        ]
       }
     ]
   },
@@ -404,7 +413,7 @@ export const faqData: FAQPart = {
         question:
           "Les « écarts de taux d’augmentations individuelles » correspondent-ils à des écarts de montants d’augmentations ou à des écarts de nombres de bénéficiaires d’augmentation ?",
         reponse: [
-          "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles, qu’elles correspondent ou non à une promotion. Ainsi, l’indicateur écart de taux d'augmentations est calculé en comparant le pourcentage, au niveau de l’entreprise, de salariés augmentés parmi les hommes à celui de salariées augmentées."
+          "La notion d’ « écarts de taux d’augmentations individuelles » renvoie à l’écart des taux de bénéficiaires d’augmentations individuelles, qu’elles correspondent ou non à une promotion. Pour que l'indicateur soit calculable, l'entreprise doit comporter au moins 5 femmes et 5 hommes après retraitement des effectifs pour le calcul de l'ensemble des indicateurs."
         ]
       },
       {
@@ -425,7 +434,8 @@ export const faqData: FAQPart = {
         question:
           "Pour l’indicateur relatif à l’écart de taux d’augmentations individuelles, est-il possible, comme pour l’indicateur écart de rémunérations, de répartir les salariés par CSP ou par niveau ou coefficient hiérarchique ?",
         reponse: [
-          "Non. Le calcul de l’indicateur relatif à l’écart de taux d’augmentations individuelles est effectué au niveau de l’entreprise, et non par groupes de salariés."
+          "Non. La répartition des salariés, après consultation du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification de branche ou d'une autre méthode de cotation des postes n'est possible que pour le calcul du 1er indicateur relatif à l'écart de rémunération.",
+          "Le calcul de l'indicateur relatif à l'écart de taux d'augmentations individuelles est effectué au niveau de l'entreprise."
         ]
       }
     ]
@@ -435,7 +445,7 @@ export const faqData: FAQPart = {
     qr: [
       {
         question:
-          "Concernant l’indicateur retour de congé maternité, comment interpréter « l’année suivant » le retour de congé maternité ?",
+          "Concernant l’indicateur relatif au retour de congé maternité, comment interpréter « l’année suivant » le retour de congé maternité ?",
         reponse: [
           "L’indicateur concerne les salariées qui sont revenues de congé maternité au cours de la période annuelle de référence. Parmi ces salariées, seules sont prises en compte, pour le calcul de l’indicateur, celles ayant eu un congé maternité durant lequel des augmentations salariales (générales ou individuelles) ont eu lieu. Pour elles, comme le prévoit la loi depuis 2006, il faut procéder à une réévaluation de leur rémunération.",
           "Ainsi, si une salariée revient en décembre de congé maternité et que des augmentations ont été versées pendant la période de ce congé, elle devra avoir une augmentation à son retour avant la fin de l’année (si l’année civile est la période de référence).",
@@ -459,14 +469,14 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "En évaluant la période de référence du 1er janvier au 31 décembre 2019, si une salariée revient de congé maternité au 31 août 2019 et qu’elle est augmentée au 1er janvier 2020, alors que ses collègues ont été revalorisés au 1er juillet 2019, celle-ci est-elle considérée comme augmentée ou non au titre de l’indicateur retour de congé maternité ?",
+          "En évaluant la période de référence du 1er janvier au 31 décembre 2019, si une salariée revient de congé maternité au 31 août 2019 et qu’elle est augmentée au 1er janvier 2020, alors que ses collègues ont été revalorisés au 1er juillet 2019, celle-ci est-elle considérée comme augmentée ou non au titre de l’indicateur relatif au retour de congé maternité ?",
         reponse: [
           "Non, elle n’est pas considérée comme augmentée, car le respect de l’obligation est apprécié sur l’année de référence, soit dans cet exemple sur l'année civile 2019."
         ]
       },
       {
         question:
-          "Les augmentations salariales des salariées en congé maternité, accordées durant ce congé (et non au retour de la salariée) sont-elles prises en compte pour le calcul de l’indicateur retour congé maternité ?",
+          "Les augmentations salariales des salariées en congé maternité, accordées durant ce congé (et non au retour de la salariée) sont-elles prises en compte pour le calcul de l’indicateur relatif au retour de congé maternité ?",
         reponse: [
           "Oui. L’indicateur a pour objet de déterminer le pourcentage de salariées ayant bénéficié d’une augmentation à leur retour de congé maternité si des augmentations sont intervenues durant la durée de leur congé maternité. Or en pratique, beaucoup d’entreprises procèdent aux augmentations prévues par l’article L.1225-26 du code du travail simultanément aux augmentations générales prévues pour l’ensemble des salariés. Ces augmentations peuvent donc être effectives pendant le congé maternité et non à l’issue de celui-ci. Il est logique et conforme à l’esprit du texte de prendre en compte l’augmentation que les femmes ont connue au cours de leur congé de maternité si elle se situe pendant la période de référence pour le calcul de l’indicateur."
         ]
@@ -481,14 +491,14 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Le congé d’adoption est-il pris en compte pour le calcul de l’indicateur retour congé maternité ?",
+          "Le congé d’adoption est-il pris en compte pour le calcul de l’indicateur relatif au retour de congé maternité ?",
         reponse: [
           "Oui, le congé d’adoption est pris en compte dans le calcul de l’indicateur, au même titre que le congé de maternité."
         ]
       },
       {
         question:
-          "Obtient-on nécessairement 0 à l’indicateur retour congé maternité dans le cas où seules 2 salariées n’ont pas bénéficié d’une augmentation durant l’année 2019 alors qu’elles étaient absentes pour congé maternité à l’occasion de l’exercice annuel de revalorisation, étant donné que ces deux salariées avaient bénéficié toutes deux d’une augmentation au second semestre 2018 ?",
+          "Obtient-on nécessairement 0 à l’indicateur relatif au retour de congé maternité dans le cas où seules 2 salariées n’ont pas bénéficié d’une augmentation durant l’année 2019 alors qu’elles étaient absentes pour congé maternité à l’occasion de l’exercice annuel de revalorisation, étant donné que ces deux salariées avaient bénéficié toutes deux d’une augmentation au second semestre 2018 ?",
         reponse: [
           "Le calcul de l’Index étant basé sur une période de référence annuelle, si la période choisie est l’année 2019, il n’est pas possible de déroger à la règle posée par le décret n° 2019-15 du 8 janvier 2019, car les deux salariées concernées ont bénéficié d’une revalorisation au second semestre de l’année 2018."
         ]
@@ -545,7 +555,7 @@ export const faqData: FAQPart = {
         question:
           "Une entreprise créée en juillet 2019 doit-elle publier son Index en 2020 ?",
         reponse: [
-          "Une entreprise créée en juillet 2019 doit publier son Index au 1er mars 2020 si, à cette date, elle comprend au moins 50 salariés. Néanmoins, si elle ne dispose pas de données sur douze mois consécutifs à la date d’assujettissement à l’obligation de publication, ses indicateurs et, partant, son Index ne seront pas calculables pour la première année. L’entreprise devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5)."
+          "Une entreprise créée en juillet 2019 doit publier son Index au 1er mars 2020 si, à cette date, son effectif comprend au moins 50 salariés. Néanmoins, si elle ne dispose pas de données sur douze mois consécutifs à la date d’assujettissement à l’obligation de publication, ses indicateurs et, partant, son Index ne seront pas calculables pour la première année. L’entreprise devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5)."
         ]
       },
       {
@@ -584,6 +594,10 @@ export const faqSections: FAQSection = {
     title: "indicateur - écart de rémunération",
     parts: ["remuneration", "indicateur1"]
   },
+  indicateur2et3: {
+    title: "indicateur - écart d'augmentations (+50)",
+    parts: ["indicateur2et3"]
+  },
   indicateur2: {
     title: "indicateur - écart d’augmentations (+250)",
     parts: ["indicateur2"]
@@ -591,10 +605,6 @@ export const faqSections: FAQSection = {
   indicateur3: {
     title: "indicateur - écart de promotions (+250)",
     parts: ["indicateur3"]
-  },
-  indicateur2et3: {
-    title: "indicateur - écart d'augmentations (+50)",
-    parts: ["indicateur2et3"]
   },
   indicateur4: {
     title: "indicateur - congé maternité",
