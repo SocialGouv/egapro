@@ -62,12 +62,12 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "Les entreprises de plus de 50 salariés assujetties à l'obligation de publication au 1er mars 2020 doivent-elles calculer leurs indicateurs sur la base des données de l'année 2019 ?",
+          "Les entreprises d'au moins 50 salariés assujetties à l'obligation de publication au 1er mars 2020 doivent-elles calculer leurs indicateurs sur la base des données de l'année 2019 ?",
         reponse: [
           "Les indicateurs sont calculés à partir des données de la période de référence annuelle que l’employeur a choisie. Cette période de référence, de 12 mois consécutifs, est celle qui précède l’année de publication : elle doit donc nécessairement s’achever au plus tard le 31 décembre 2019 pour un Index publié en 2020.",
-          "Ainsi, si l’entreprise de plus de 50 salariés a choisi l’année civile comme année de référence, les données seront celles du 1er janvier 2019 au 31 décembre 2019, pour une publication au 1er mars 2020. La période de référence peut également aller du 1er juin 2018 au 31 mai 2019, mais pas du 1er janvier 2018 au 31 décembre 2018 pour une publication en 2020.",
-          "Attention : pour l’indicateur relatif aux augmentations individuelles, la période de référence choisie par l’employeur peut être pluriannuelle, à partir des données des 2 ou 3 années précédentes. Son caractère pluriannuel peut alors être révisé tous les 3 ans.",
-          "Par exemple, si l’entreprise de plus de 50 salariés a choisi l’année civile 2019 comme période de référence pour le calcul de son Index en 2020, elle pourra calculer son indicateur 2 sur une période de référence de 2 ou 3 ans. Cette période de référence pourra ainsi aller respectivement du 1er janvier 2018 au 31 décembre 2019, ou du 1er janvier 2017 au 31 décembre 2019. En 2023, elle pourra alors réviser le caractère pluriannuel de cette période de référence."
+          "Ainsi, si l’entreprise d'au moins 50 salariés a choisi l’année civile comme année de référence, les données seront celles du 1er janvier 2019 au 31 décembre 2019, pour une publication au 1er mars 2020. La période de référence peut également aller du 1er juin 2018 au 31 mai 2019, mais pas du 1er janvier 2018 au 31 décembre 2018 pour une publication en 2020.",
+          "Attention : pour l’indicateur relatif aux augmentations individuelles, et uniquement pour les entreprises de 50 à 250 salariés, la période de référence choisie par l’employeur peut être pluriannuelle, à partir des données des 2 ou 3 années précédentes. Son caractère pluriannuel peut alors être révisé tous les 3 ans.",
+          "Par exemple, si l’entreprise de 50 à 250 salariés a choisi l’année civile 2019 comme période de référence pour le calcul de son Index en 2020, elle pourra calculer son indicateur relatif aux augmentations individuelles sur une période de référence de 2 ou 3 ans. Cette période de référence pourra ainsi aller respectivement du 1er janvier 2018 au 31 décembre 2019, ou du 1er janvier 2017 au 31 décembre 2019. En 2023, elle pourra alors réviser le caractère pluriannuel de cette période de référence."
         ]
       },
       {
@@ -573,12 +573,12 @@ export const faqSections: FAQSection = {
     parts: ["champApplication"]
   },
   informations: {
-    title: "période de référence et effectifs",
-    parts: ["periodeReference", "effectifs"]
+    title: "période de référence",
+    parts: ["periodeReference"]
   },
   effectifs: {
-    title: "période de référence et effectifs",
-    parts: ["periodeReference", "effectifs"]
+    title: "effectifs pris en compte",
+    parts: ["effectifs"]
   },
   indicateur1: {
     title: "indicateur - écart de rémunération",
