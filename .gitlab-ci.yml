@@ -21,6 +21,8 @@ variables:
   DOCKER_VERSION: "18.06"
   INFRA_GIT_DEPLOY_VERSION: "1.0"
   INFRA_CURL_VERSION: "1.0"
+  HELM_VERSION: "0.6.0"
+  KUBECTL_VERSION: "0.7.0"
   # Ports
   APP_PORT: 9000
   API_PORT: 4000
@@ -131,7 +133,7 @@ Get Github Id (preprod):
 #
 .create_namespace: &create_namespace
   stage: "Prepare"
-  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+  image: $CI_REGISTRY/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
@@ -265,7 +267,7 @@ Register init kinto image tag:
 .create_secret: &create_secret
   stage: "Create secret hors prod"
   image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+    name: $CI_REGISTRY/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
@@ -610,7 +612,7 @@ Deploy egapro in production :
     POSTGRES_RESOURCE_CPU_REQUEST: "25m"
     POSTGRES_RESOURCE_MEMORY_REQUEST: "128Mi"
   image:
-    name: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
+    name: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
   environment:
     name: ${PROD_ENVIRONMENT_NAME}
   when: manual

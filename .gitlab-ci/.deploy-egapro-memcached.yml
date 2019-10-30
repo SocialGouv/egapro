@@ -2,7 +2,7 @@
 
 #
 .deploy_egapro_memcached: &deploy_egapro_memcached
-  image: $CI_REGISTRY/socialgouv/docker/helm:0.7.1
+  image: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
   script:
     - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml

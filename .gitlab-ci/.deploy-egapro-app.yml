@@ -2,7 +2,7 @@
 
 #
 .deploy_egapro_app: &deploy_egapro_app
-  image: $CI_REGISTRY/socialgouv/docker/kubectl:0.7.1
+  image: $CI_REGISTRY/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
     - envsubst < .k8s/app/service.yml > .k8s/app/service-egapro.yml
