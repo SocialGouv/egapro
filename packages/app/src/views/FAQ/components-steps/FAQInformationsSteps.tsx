@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { jsx } from "@emotion/core";
 import { Fragment } from "react";
 
 import { IconCalendar } from "../../../components/Icons";
