@@ -445,11 +445,14 @@ Restore @egapro/postgres:
   variables:
     <<: *deploy_stage_variables
     SUFFIX_BRANCH_NAME: -master
+    PORT: $KINTO_PORT
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
-  # delete old restore job and postgres
-  - kubectl delete job egapro-restore${SUFFIX_BRANCH_NAME} || true;
+  # delete old restore job, kinto and postgres
+  - kubectl delete job egapro-restore${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
+  - kubectl delete job egapro-init-kinto${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
+  - kubectl delete deploy kinto${SUFFIX_BRANCH_NAME} || true;
   - helm delete --purge egapro${SUFFIX_BRANCH_NAME}-pg
   # deploy clean postgres
   - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
@@ -460,6 +463,16 @@ Restore @egapro/postgres:
   # run restore job
   - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-egapro.yml
   - kubectl apply -f .k8s/postgres/restore-job-egapro.yml -n ${K8S_NAMESPACE}
+  - kubectl wait --for=condition=complete job/egapro-restore${SUFFIX_BRANCH_NAME} --timeout=600s -n ${K8S_NAMESPACE}
+  # deploy kinto
+  - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
+  - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
+  - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
+  - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
+  - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
+  - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
+  - kubectl wait --for=condition=complete job/egapro-init-kinto${SUFFIX_BRANCH_NAME} --timeout=600s -n ${K8S_NAMESPACE}
+
   only:
   - boni-ci-azure
   when: manual
