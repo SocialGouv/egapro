@@ -595,15 +595,15 @@ export const faqSections: FAQSection = {
     parts: ["remuneration", "indicateur1"]
   },
   indicateur2et3: {
-    title: "indicateur - écart d'augmentations (+50)",
+    title: "indicateur - écart d'augmentations (50 à 250 salariés)",
     parts: ["indicateur2et3"]
   },
   indicateur2: {
-    title: "indicateur - écart d’augmentations (+250)",
+    title: "indicateur - écart d’augmentations (plus de 250 salariés)",
     parts: ["indicateur2"]
   },
   indicateur3: {
-    title: "indicateur - écart de promotions (+250)",
+    title: "indicateur - écart de promotions (plus de 250 salariés)",
     parts: ["indicateur3"]
   },
   indicateur4: {
