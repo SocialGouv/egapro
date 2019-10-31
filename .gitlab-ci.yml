@@ -72,21 +72,21 @@ stages:
 ###            CODE QUALITY             ###
 ###########################################
 
-Quality tests:
-  stage: "Code Quality"
-  image: node:10-alpine
-  before_script:
-    - yarn --frozen-lockfile
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-  script:
-    - yarn build
-    - yarn lint
-    - yarn test
-  when: manual
-  allow_failure: false
+#Quality tests:
+#  stage: "Code Quality"
+#  image: node:10-alpine
+#  before_script:
+#    - yarn --frozen-lockfile
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - node_modules/
+#  script:
+#    - yarn build
+#    - yarn lint
+#    - yarn test
+#  when: manual
+#  allow_failure: false
 
 
 ############################################
@@ -271,8 +271,14 @@ Register init kinto image tag:
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
-    - envsubst < ./.k8s/secret-dev.yml > ./secret-dev.yml
-    - kubectl apply -f ./secret-dev.yml -n ${K8S_NAMESPACE}
+    # Create egapro secrets
+    - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev.yml
+    - kubectl apply -f ./secret/secret-dev.yml -n ${K8S_NAMESPACE}
+    # Create azure volume secrets to access backup
+    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret egapro-backup-restore -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
+    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret egapro-backup-restore -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
+    - envsubst < .k8s/secret/secret-azure-volume.yml > ./secret-azure-volume.yml
+    - kubectl apply -f ./secret/secret-azure-volume.yml -n ${K8S_NAMESPACE}
 #
 
 Create @secret (dev):
@@ -432,6 +438,7 @@ Deploy @egapro/kinto (master):
     name: ${DEV_ENVIRONMENT_NAME}
   only:
     - boni-ci-azure
+
 
 # Preprod Environment
 
