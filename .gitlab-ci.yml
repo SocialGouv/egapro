@@ -459,7 +459,7 @@ Restore @egapro/postgres:
   - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
   # run restore job
   - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-egapro.yml
-  - kubectl apply -f .k8s/postgres/restore-job-egapro.yml
+  - kubectl apply -f .k8s/postgres/restore-job-egapro.yml -n ${K8S_NAMESPACE}
   only:
   - boni-ci-azure
   when: manual
