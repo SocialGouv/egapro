@@ -15,10 +15,12 @@ import FAQContact from "./FAQContact";
 import globalStyles from "../../utils/globalStyles";
 
 const FAQPaths: { [key: string]: string } = {
+  informations: "/section/informations",
   effectifs: "/section/effectifs",
   indicateur1: "/section/indicateur1",
   indicateur2: "/section/indicateur2",
   indicateur3: "/section/indicateur3",
+  indicateur2et3: "/section/indicateur2et3",
   indicateur4: "/section/indicateur4",
   indicateur5: "/section/indicateur5",
   recapitulatif: "/section/resultat"

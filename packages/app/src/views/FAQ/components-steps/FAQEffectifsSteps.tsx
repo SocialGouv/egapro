@@ -2,28 +2,12 @@
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
-import {
-  IconLamp,
-  IconText,
-  IconPeople,
-  IconCalendar
-} from "../../../components/Icons";
+import { IconLamp, IconText, IconPeople } from "../../../components/Icons";
 import FAQStep from "../components/FAQStep";
 
 function FAQEffectifsSteps() {
   return (
     <Fragment>
-      <FAQStep icon={<IconCalendar valid={true} />}>
-        Les indicateurs sont calculés à partir des données de la période de
-        référence annuelle choisie par l’entreprise.{" "}
-        <strong>
-          Cette période doit être de 12 mois consécutifs et précéder
-          l’année de publication.
-        </strong>{" "}
-        Elle doit donc nécessairement s’achever au plus tard le 31 décembre 2019
-        pour un Index publié en 2020.
-      </FAQStep>
-
       <FAQStep icon={<IconText>CSP</IconText>}>
         L’effectif de l’entreprise est apprécié sur la période de référence. Il
         doit être renseigné par{" "}
