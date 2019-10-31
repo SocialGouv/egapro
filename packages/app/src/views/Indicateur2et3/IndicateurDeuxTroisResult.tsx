@@ -2,14 +2,14 @@
 import { css, jsx } from "@emotion/core";
 
 import { FormState } from "../../globals.d";
-import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers";
+import { displaySexeSurRepresente } from "../../utils/helpers";
+import { Result } from "./IndicateurDeuxTrois";
 
 import ResultBubble from "../../components/ResultBubble";
 import ActionLink from "../../components/ActionLink";
 
 interface Props {
-  indicateurEcartAugmentationPromotion: number | undefined;
-  indicateurEcartNombreEquivalentSalaries: number | undefined;
+  bestResult: Result;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   noteIndicateurDeuxTrois: number | undefined;
   correctionMeasure: boolean;
@@ -17,8 +17,7 @@ interface Props {
 }
 
 function IndicateurDeuxTroisResult({
-  indicateurEcartAugmentationPromotion,
-  indicateurEcartNombreEquivalentSalaries,
+  bestResult,
   indicateurSexeSurRepresente,
   noteIndicateurDeuxTrois,
   correctionMeasure,
@@ -27,12 +26,8 @@ function IndicateurDeuxTroisResult({
   return (
     <div css={styles.container}>
       <ResultBubble
-        firstLineLabel="votre écart de taux d'augmentation est"
-        firstLineData={
-          indicateurEcartAugmentationPromotion !== undefined
-            ? displayPercent(indicateurEcartAugmentationPromotion)
-            : "--"
-        }
+        firstLineLabel={bestResult.label}
+        firstLineData={bestResult.result}
         firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
         secondLineLabel="votre note obtenue est"
         secondLineData={
@@ -43,8 +38,6 @@ function IndicateurDeuxTroisResult({
         secondLineInfo={
           correctionMeasure
             ? "mesures de correction prises en compte"
-            : indicateurEcartNombreEquivalentSalaries
-            ? `écart en nombre équivalent salariés ${indicateurEcartNombreEquivalentSalaries}`
             : undefined
         }
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}

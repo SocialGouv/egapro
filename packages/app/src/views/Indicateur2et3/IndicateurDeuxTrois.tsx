@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core";
 import { useCallback, ReactNode } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
@@ -10,7 +10,11 @@ import {
   ActionIndicateurDeuxTroisData
 } from "../../globals";
 
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
+import calculIndicateurDeuxTrois, {
+  calculPlusPetitNombreSalaries,
+  calculBarem
+} from "../../utils/calculsEgaProIndicateurDeuxTrois";
+import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
@@ -21,6 +25,10 @@ import {
   ButtonSimulatorLink,
   TextSimulatorLink
 } from "../../components/SimulatorLink";
+import {
+  messageEcartNombreEquivalentSalaries,
+  displayPercent
+} from "../../utils/helpers";
 
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm";
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult";
@@ -128,6 +136,20 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     );
   }
 
+  const results = getResults(
+    indicateurEcartAugmentationPromotion,
+    indicateurEcartNombreEquivalentSalaries
+  );
+
+  const {
+    totalNombreSalariesHomme: totalNombreSalariesHommes,
+    totalNombreSalariesFemme: totalNombreSalariesFemmes
+  } = totalNombreSalaries(state.effectif.nombreSalaries);
+  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(
+    totalNombreSalariesHommes,
+    totalNombreSalariesFemmes
+  );
+
   return (
     <PageIndicateurDeuxTrois>
       <LayoutFormAndResult
@@ -153,12 +175,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
         childrenResult={
           state.indicateurDeuxTrois.formValidated === "Valid" && (
             <IndicateurDeuxTroisResult
-              indicateurEcartAugmentationPromotion={
-                indicateurEcartAugmentationPromotion
-              }
-              indicateurEcartNombreEquivalentSalaries={
-                indicateurEcartNombreEquivalentSalaries
-              }
+              bestResult={results.best}
               indicateurSexeSurRepresente={indicateurSexeSurRepresente}
               noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
               correctionMeasure={correctionMeasure}
@@ -167,6 +184,13 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
           )
         }
       />
+      {state.indicateurDeuxTrois.formValidated === "Valid" && (
+        <AdditionalInfo
+          results={results}
+          indicateurSexeSurRepresente={indicateurSexeSurRepresente}
+          plusPetitNombreSalaries={plusPetitNombreSalaries}
+        />
+      )}
     </PageIndicateurDeuxTrois>
   );
 }
@@ -181,5 +205,84 @@ function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
     </Page>
   );
 }
+
+export type Result = { label: string; result: string; note: number };
+export type Results = { best: Result; worst: Result };
+
+export const getResults = (
+  indicateurEcartAugmentationPromotion: number | undefined,
+  indicateurEcartNombreEquivalentSalaries: number | undefined
+): Results => {
+  const ecartTaux = {
+    label: "votre résultat en pourcentage est de",
+    result:
+      indicateurEcartAugmentationPromotion !== undefined
+        ? displayPercent(indicateurEcartAugmentationPromotion)
+        : "--",
+    note:
+      indicateurEcartAugmentationPromotion !== undefined
+        ? calculBarem(indicateurEcartAugmentationPromotion)
+        : 0
+  };
+  const ecartNbSalaries = {
+    label: "votre résultat en nombre équivalent de salariés* est",
+    result:
+      indicateurEcartNombreEquivalentSalaries !== undefined
+        ? `${indicateurEcartNombreEquivalentSalaries}`
+        : "--",
+    note:
+      indicateurEcartNombreEquivalentSalaries !== undefined
+        ? calculBarem(indicateurEcartNombreEquivalentSalaries)
+        : 0
+  };
+  const results =
+    indicateurEcartNombreEquivalentSalaries !== undefined &&
+    indicateurEcartAugmentationPromotion !== undefined &&
+    indicateurEcartNombreEquivalentSalaries <
+      indicateurEcartAugmentationPromotion
+      ? { best: ecartNbSalaries, worst: ecartTaux }
+      : { worst: ecartNbSalaries, best: ecartTaux };
+  return results;
+};
+
+export function AdditionalInfo({
+  indicateurSexeSurRepresente,
+  plusPetitNombreSalaries,
+  results
+}: {
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
+  plusPetitNombreSalaries: "hommes" | "femmes" | undefined;
+  results: Results;
+}) {
+  return (
+    <div css={styles.additionalInfo}>
+      <p>
+        {results.worst.label} <strong>{results.worst.result}</strong>, la note
+        obtenue est de <strong>{results.worst.note}/35</strong>
+        <br />
+        {results.worst.note < results.best.note &&
+          "cette note n'a pas été retenue dans le calcul de votre index car elle est la moins favorable"}
+      </p>
+      <p>
+        {messageEcartNombreEquivalentSalaries(
+          indicateurSexeSurRepresente,
+          plusPetitNombreSalaries
+        )}
+      </p>
+    </div>
+  );
+}
+
+const styles = {
+  additionalInfo: css({
+    color: "#61676F",
+    fontSize: 14,
+    fontStyle: "italic",
+    maxWidth: 500,
+    "& > p": {
+      marginBottom: 30
+    }
+  })
+};
 
 export default IndicateurDeuxTrois;

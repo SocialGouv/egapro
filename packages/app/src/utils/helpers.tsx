@@ -127,32 +127,32 @@ export const messageEcartNombreEquivalentSalaries = (
     indicateurSexeSurRepresente === "hommes" &&
     plusPetitNombreSalaries === "femmes"
   ) {
-    return "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+    return "* si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
   } else if (
     indicateurSexeSurRepresente === "hommes" &&
     plusPetitNombreSalaries === "hommes"
   ) {
-    return "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
+    return "* si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
   } else if (
     indicateurSexeSurRepresente === "hommes" &&
     plusPetitNombreSalaries === undefined
   ) {
-    return "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+    return "* si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
   } else if (
     indicateurSexeSurRepresente === "femmes" &&
     plusPetitNombreSalaries === "femmes"
   ) {
-    return "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
+    return "* si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes.";
   } else if (
     indicateurSexeSurRepresente === "femmes" &&
     plusPetitNombreSalaries === "hommes"
   ) {
-    return "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+    return "* si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
   } else if (
     indicateurSexeSurRepresente === "femmes" &&
     plusPetitNombreSalaries === undefined
   ) {
-    return "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
+    return "* si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes.";
   } else {
     return "";
   }

@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Fragment } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import { AppState } from "../../globals.d";
@@ -25,7 +26,6 @@ import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois";
 import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois";
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre";
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq";
-import { Fragment } from "react";
 
 interface Props extends RouteComponentProps {
   state: AppState;
