@@ -272,13 +272,13 @@ Register init kinto image tag:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
     # Create egapro secrets
-    - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev.yml
-    - kubectl apply -f ./secret/secret-dev.yml -n ${K8S_NAMESPACE}
+    - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev-egapro.yml
+    - kubectl apply -f .k8s/secret/secret-dev-egapro.yml -n ${K8S_NAMESPACE}
     # Create azure volume secrets to access backup
-    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret egapro-backup-restore -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
-    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret egapro-backup-restore -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
-    - envsubst < .k8s/secret/secret-azure-volume.yml > ./secret-azure-volume.yml
-    - kubectl apply -f ./secret/secret-azure-volume.yml -n ${K8S_NAMESPACE}
+    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaprodev-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
+    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaprodev-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
+    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-egapro.yml
+    - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
 #
 
 Create @secret (dev):
