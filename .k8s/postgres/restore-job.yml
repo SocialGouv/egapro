@@ -42,7 +42,7 @@ spec:
         - name: volume
           azureFile:
             secretName: egapro-azure-storage
-            shareName: emjpm-backup-restore
+            shareName: egapro-backup-restore
             readOnly: false
       initContainers:
         - name: wait-for-postgres
