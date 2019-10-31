@@ -41,7 +41,7 @@ spec:
       volumes:
         - name: volume
           azureFile:
-            secretName: egapro-azure-storage${SUFFIX_BRANCH_NAME}
+            secretName: egapro-azure-storage
             shareName: emjpm-backup-restore
             readOnly: false
       initContainers:
