@@ -39,7 +39,7 @@
     "@types/node": "11.15.2",
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.3",
-    "@types/react-router-dom": "5.1.1",
+    "@types/react-router-dom": "5.1.2",
     "typescript": "3.6.4"
   },
   "eslintConfig": {
