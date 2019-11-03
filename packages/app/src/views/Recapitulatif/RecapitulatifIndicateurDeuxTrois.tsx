@@ -3,17 +3,18 @@ import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
-import {
-  displayPercent,
-  displaySexeSurRepresente,
-  messageEcartNombreEquivalentSalaries
-} from "../../utils/helpers";
+import { displaySexeSurRepresente } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import RecapBloc from "./components/RecapBloc";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 import RowData, { RowLabels, RowLabelFull } from "./components/RowData";
+
+import {
+  getResults,
+  AdditionalInfo
+} from "../Indicateur2et3/IndicateurDeuxTrois";
 
 interface Props {
   indicateurDeuxTroisFormValidated: FormState;
@@ -86,16 +87,18 @@ function RecapitulatifIndicateurDeuxTrois({
     );
   }
 
+  const results = getResults(
+    indicateurEcartAugmentationPromotion,
+    indicateurEcartNombreEquivalentSalaries
+  );
+
   return (
     <div css={styles.container}>
       <RecapBloc
         title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
         resultBubble={{
-          firstLineLabel: "votre résultat final est",
-          firstLineData:
-            indicateurEcartAugmentationPromotion !== undefined
-              ? displayPercent(indicateurEcartAugmentationPromotion)
-              : "--",
+          firstLineLabel: results.best.label,
+          firstLineData: results.best.result,
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
           secondLineLabel: "votre note obtenue est",
           secondLineData:
@@ -118,17 +121,12 @@ function RecapitulatifIndicateurDeuxTrois({
           ]}
           asPercent={true}
         />
-
-        <RowLabelFull label="écart en nombre équivalent de salariés" />
-        <RowData
-          name="nombre équivalent de salariés"
-          data={[indicateurEcartNombreEquivalentSalaries]}
-          message={messageEcartNombreEquivalentSalaries(
-            indicateurSexeSurRepresente,
-            plusPetitNombreSalaries
-          )}
-        />
       </RecapBloc>
+      <AdditionalInfo
+        results={results}
+        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
+        plusPetitNombreSalaries={plusPetitNombreSalaries}
+      />
     </div>
   );
 }

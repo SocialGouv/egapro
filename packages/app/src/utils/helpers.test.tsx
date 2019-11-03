@@ -81,12 +81,12 @@ describe("messageEcartNombreEquivalentSalaries", () => {
     });
     test("women favorited", () => {
       expect(messageEcartNombreEquivalentSalaries("femmes", undefined)).toEqual(
-        "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+        "* si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
       );
     });
     test("men favorited", () => {
       expect(messageEcartNombreEquivalentSalaries("hommes", undefined)).toEqual(
-        "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+        "* si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
       );
     });
   });
@@ -99,12 +99,12 @@ describe("messageEcartNombreEquivalentSalaries", () => {
     });
     test("women favorited", () => {
       expect(messageEcartNombreEquivalentSalaries("femmes", "femmes")).toEqual(
-        "Si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
+        "* si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
       );
     });
     test("men favorited", () => {
       expect(messageEcartNombreEquivalentSalaries("hommes", "femmes")).toEqual(
-        "Si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+        "* si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
       );
     });
   });
@@ -117,12 +117,12 @@ describe("messageEcartNombreEquivalentSalaries", () => {
     });
     test("women favorited", () => {
       expect(messageEcartNombreEquivalentSalaries("femmes", "hommes")).toEqual(
-        "Si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
+        "* si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
       );
     });
     test("men favorited", () => {
       expect(messageEcartNombreEquivalentSalaries("hommes", "hommes")).toEqual(
-        "Si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
+        "* si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
       );
     });
   });
