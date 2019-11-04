@@ -274,11 +274,6 @@ Register init kinto image tag:
     # Create egapro secrets
     - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev-egapro.yml
     - kubectl apply -f .k8s/secret/secret-dev-egapro.yml -n ${K8S_NAMESPACE}
-    # Create azure volume secrets to access backup
-    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaprodev-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
-    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaprodev-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
-    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-egapro.yml
-    - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
 #
 
 Create egapro/secret (dev):
@@ -627,6 +622,10 @@ Make a new release to deploy to preprod environment:
     - export SUFFIX_BRANCH_NAME=-prod
     - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - export ENVIRONMENT_NAME=prod
+    # azure volume secrets
+    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-egapro.yml
+    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaprodev-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
+    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaprodev-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
     # app
     - export PORT=$APP_PORT
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
@@ -692,6 +691,8 @@ Restore egapro/postgres:
     - kubectl delete deploy kinto${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
     - helm delete --purge egapro${SUFFIX_BRANCH_NAME}-pg || true;
     - kubectl delete pvc data-egapro-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
+    # Create azure volume secrets
+    - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
     # deploy clean postgres
     - helm init --client-only
     - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
