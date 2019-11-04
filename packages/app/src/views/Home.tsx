@@ -51,8 +51,7 @@ function Home({ history, location, dispatch }: Props) {
       tagline={[
         "L’Index d'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
         "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
-        "Avec Index Egapro, calculez votre index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées.",
-        "Pour le moment, le calculateur est configuré pour les entreprises de plus de 250 salariés : il le sera bientôt pour les entreprises de 50 à 250 salariés !"
+        "Avec Index Egapro, calculez votre index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées."
       ]}
     >
       <div css={styles.action}>
