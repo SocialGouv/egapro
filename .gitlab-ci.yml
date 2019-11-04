@@ -120,14 +120,14 @@ Get Github Id (dev):
 Get Github Id (master):
   <<: *get_github_id_stage
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: master
   only:
     - boni-ci-azure
 
 Get Github Id (preprod):
   <<: *get_github_id_stage
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: preprod
   only:
     - /^v.*/
 
@@ -535,7 +535,7 @@ Send deployment url to Github (master):
   before_script:
     - export URL=http://master.egapro.${ENVIRONMENT}.social.gouv.fr/
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: master
   only:
     - boni-ci-azure
 
@@ -544,7 +544,7 @@ Send deployment url to Github (preprod):
   before_script:
     - export URL=http://preprod.egapro.${ENVIRONMENT}.social.gouv.fr/
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: preprod
   only:
     - /^v.*/
 
