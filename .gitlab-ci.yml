@@ -258,7 +258,6 @@ Register init kinto image tag:
   only:
     - /^v.*/
 
-
 ############################################
 ####          CREATE SECRET DEV          ###
 ############################################
@@ -281,30 +280,30 @@ Register init kinto image tag:
     - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
 #
 
-Create @secret (dev):
-  <<: *create_secret
-  before_script:
-  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
-  only:
-  - branches
-  except:
-    - boni-ci-azure
-
-Create @secret (master):
-  <<: *create_secret
-  before_script:
-    - export K8S_NAMESPACE=egapro-master
-  only:
-    - boni-ci-azure
-
-Create @secret (preprod):
-  <<: *create_secret
-  before_script:
-    - export K8S_NAMESPACE=egapro-preprod
-  only:
-    - /^v.*/
+#Create @secret (dev):
+#  <<: *create_secret
+#  before_script:
+#  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
+#  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
+#  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
+#  only:
+#  - branches
+#  except:
+#    - boni-ci-azure
+#
+#Create @secret (master):
+#  <<: *create_secret
+#  before_script:
+#    - export K8S_NAMESPACE=egapro-master
+#  only:
+#    - boni-ci-azure
+#
+#Create @secret (preprod):
+#  <<: *create_secret
+#  before_script:
+#    - export K8S_NAMESPACE=egapro-preprod
+#  only:
+#    - /^v.*/
 
 ###########################################
 ###       DEPLOY TO HORS PROD K8S       ###
@@ -450,12 +449,12 @@ Restore @egapro/postgres:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
   # delete old restore job, kinto and postgres
+  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
   - kubectl delete job egapro-restore${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
   - kubectl delete job egapro-init-kinto${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
-  - kubectl delete deploy kinto${SUFFIX_BRANCH_NAME} || true;
-  - helm delete --purge egapro${SUFFIX_BRANCH_NAME}-pg
+  - kubectl delete deploy kinto${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
+  - helm delete --purge egapro${SUFFIX_BRANCH_NAME}-pg || true;
   # deploy clean postgres
-  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
   - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
   - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
   - helm init --client-only
@@ -472,7 +471,6 @@ Restore @egapro/postgres:
   - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
   - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
   - kubectl wait --for=condition=complete job/egapro-init-kinto${SUFFIX_BRANCH_NAME} --timeout=600s -n ${K8S_NAMESPACE}
-
   only:
   - boni-ci-azure
   when: manual
