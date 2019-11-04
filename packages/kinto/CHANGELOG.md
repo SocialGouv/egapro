@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/SocialGouv/egapro/compare/v1.2.4...v1.4.0) (2019-11-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency dotenv to v8.2.0 ([#193](https://github.com/SocialGouv/egapro/issues/193)) ([e1b4f0f](https://github.com/SocialGouv/egapro/commit/e1b4f0f))
+
+
+
+
+
 ## [1.2.4](https://github.com/SocialGouv/egapro/compare/v1.2.3...v1.2.4) (2019-10-08)
 
 **Note:** Version bump only for package kinto
