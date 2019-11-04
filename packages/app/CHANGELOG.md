@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/SocialGouv/egapro/compare/v2.0.0...v2.0.1) (2019-11-04)
+
+
+### Bug Fixes
+
+* **page mobile:** reformulation 'calcul pas disponible' ([4d8d5b1](https://github.com/SocialGouv/egapro/commit/4d8d5b1))
+
+
+
+
+
 # [2.0.0](https://github.com/SocialGouv/egapro/compare/v1.4.0...v2.0.0) (2019-11-04)
 
 
