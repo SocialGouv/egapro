@@ -49,7 +49,7 @@ function MobileHome({ openMenu }: Props) {
 
       <div css={styles.info}>
         <p css={[styles.para, styles.noMargin]}>
-          Le calcul de l'index n'est pas disponible sur smartphone. Mais vous
+          Le calcul de l'index nécessite un affichage plus grand. Mais vous
           pouvez accéder à toute l'aide en ligne et à la FAQ.
         </p>
       </div>
@@ -164,9 +164,7 @@ const styles = {
     position: "absolute",
     bottom: 0,
     left: 0,
-    backgroundImage: `url(${
-      process.env.PUBLIC_URL
-    }/illustration-home-simulator.svg)`,
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-home-simulator.svg)`,
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover"
   }),
