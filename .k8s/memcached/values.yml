@@ -102,7 +102,7 @@ extraVolumes: |
 ## Custom metadata labels to be applied to statefulset and pods
 podLabels:
   component: memcached
-  branch: egapro${SUFFIX_BRANCH_NAME}
+  namespace: egapro-${ENVIRONMENT_NAME}
   job: "${CI_JOB_ID}"
 
 # To be added to the server pod(s)
