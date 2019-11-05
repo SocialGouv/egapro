@@ -7,6 +7,7 @@ metadata:
     app: egapro
     component: app
     branch: egapro${SUFFIX_BRANCH_NAME}
+    job: "${CI_JOB_ID}"
 spec:
   selector:
     component: app

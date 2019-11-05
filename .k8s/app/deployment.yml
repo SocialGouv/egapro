@@ -8,6 +8,7 @@ metadata:
     component: app
     environment: ${ENVIRONMENT_NAME}
     branch: ${ENVIRONMENT_BRANCH}
+    job: "${CI_JOB_ID}"
 spec:
   replicas: 1
   selector:
@@ -16,10 +17,14 @@ spec:
   template:
     metadata:
       labels:
+        app: egapro
         component: app
+        environment: ${ENVIRONMENT_NAME}
+        branch: ${ENVIRONMENT_BRANCH}
+        job: "${CI_JOB_ID}"
     spec:
       containers:
-        - image: ${EGAPRO_REGISTRY}/app:${IMAGE_TAG}
+        - image: ${CI_REGISTRY_IMAGE}/app:${IMAGE_TAG}
           name: app
           ports:
             - containerPort: ${PORT}
