@@ -7,7 +7,7 @@
     - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
     - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
     - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
   allow_failure: false
 #
 
