@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: kinto
-        image: kinto/kinto-server:13.1.1
+        image: kinto/kinto-server:${KINTO_VERSION}
         imagePullPolicy: "IfNotPresent"
         ports:
           - containerPort: ${PORT}
@@ -45,7 +45,7 @@ spec:
             value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@egapro${SUFFIX_BRANCH_NAME}-pg-postgresql/postgres"
       initContainers:
       - name: wait-for-postgres
-        image: postgres:11-alpine
+        image: postgres:${POSTGRES_JOB_VERSION}
         imagePullPolicy: Always
         resources:
           requests:
