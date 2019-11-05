@@ -2,29 +2,26 @@
 kind: Job
 apiVersion: batch/v1
 metadata:
-  name: egapro-init-kinto${SUFFIX_BRANCH_NAME}
-  labels:
-    app: egapro-init-kinto
-    branch: egapro${SUFFIX_BRANCH_NAME}
+  name: init-kinto
 spec:
   ttlSecondsAfterFinished: 100
   template:
     spec:
       containers:
       - image: ${EGAPRO_REGISTRY}/kinto:${IMAGE_TAG}
-        name: egapro-init-kinto
+        name: init-kinto
         env:
           - name: KINTO_SERVER
-            value: "kinto${SUFFIX_BRANCH_NAME}"
+            value: "kinto"
           - name: KINTO_LOGIN
             valueFrom:
               secretKeyRef:
-                name: egapro-secret
+                name: egapro
                 key: KINTO_ADMIN_LOGIN
           - name: KINTO_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: egapro-secret
+                name: egapro
                 key: KINTO_ADMIN_PASSWORD
         resources:
           requests:
