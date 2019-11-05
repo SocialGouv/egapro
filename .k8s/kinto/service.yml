@@ -2,12 +2,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: kinto${SUFFIX_BRANCH_NAME}
+  name: kinto
   labels:
-    app: kinto${SUFFIX_BRANCH_NAME}
+    app: egapro
+    component: kinto
+    branch: egapro${SUFFIX_BRANCH_NAME}
 spec:
   type: NodePort
   ports:
-  - port: ${PORT}
+    - port: ${PORT}
   selector:
-    app: kinto${SUFFIX_BRANCH_NAME}
+    component: kinto

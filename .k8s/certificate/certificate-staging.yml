@@ -2,9 +2,13 @@
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
-  name: egapro-crt
+  name: crt
+  labels:
+    app: egapro
+    component: certificate
+    branch: egapro${SUFFIX_BRANCH_NAME}
 spec:
-  secretName: egapro-crt-secret
+  secretName: crt
   dnsNames:
     - ${PREFIX_BRANCH_INGRESS}egapro.${ENVIRONMENT}.social.gouv.fr
   acme:

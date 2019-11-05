@@ -2,16 +2,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: egapro-restore${SUFFIX_BRANCH_NAME}
-  labels:
-    app: egapro-restore${SUFFIX_BRANCH_NAME}
-    branch: egapro${SUFFIX_BRANCH_NAME}
+  name: restore-backup
 spec:
   template:
     spec:
       containers:
-        - name: egapro-restore${SUFFIX_BRANCH_NAME}
-          image: postgres:11-alpine
+        - name: restore-backup
+          image: postgres:${POSTGRES_JOB_VERSION}
           command:
             - sh
           args:
@@ -32,7 +29,7 @@ spec:
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: egapro-secret
+                  name: egapro
                   key: POSTGRES_EGAPRO_PASSWORD
           volumeMounts:
             - mountPath: "/mnt/data"
@@ -41,12 +38,12 @@ spec:
       volumes:
         - name: volume
           azureFile:
-            secretName: egapro-azure-storage
+            secretName: azure-storage
             shareName: egapro-backup-restore
             readOnly: false
       initContainers:
         - name: wait-for-postgres
-          image: postgres:10-alpine
+          image: postgres:${POSTGRES_JOB_VERSION}
           imagePullPolicy: Always
           resources:
             requests:

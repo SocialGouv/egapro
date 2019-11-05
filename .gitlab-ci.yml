@@ -640,7 +640,7 @@ Make a new release to deploy to preprod environment:
     # memcached
     - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
     # postgres
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro-secret -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
     # kinto
     - export PORT=$KINTO_PORT
