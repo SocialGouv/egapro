@@ -273,8 +273,7 @@ Register init kinto image tag:
 #
 .create_secret: &create_secret
   stage: "Create secret hors prod"
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  image: $CI_REGISTRY/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   script:
@@ -315,9 +314,7 @@ Create egapro/secret (preprod):
 #
 .deploy_stage: &deploy_stage
   stage: "Deploy to hors prod K8S"
-  dependencies: []
   variables: &deploy_stage_variables
-    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
     IMAGE_TAG: $CI_COMMIT_SHA
 #
 
@@ -444,19 +441,10 @@ Deploy egapro/kinto (master):
 
 # Preprod Environment
 
-#
-.deploy_tagged_stage: &deploy_tagged_stage
-  dependencies: []
-  variables: &deploy_tagged_stage_variables
-    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
-#
-
 Deploy egapro/app (preprod):
-  <<: *deploy_tagged_stage
   extends: .deploy-egapro-app-k8s-preprod
   stage: "Deploy to hors prod K8S"
   variables:
-    <<: *deploy_tagged_stage_variables
     PORT: $APP_PORT
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
@@ -464,11 +452,9 @@ Deploy egapro/app (preprod):
     - /^v.*/
 
 Deploy egapro/api (preprod):
-  <<: *deploy_tagged_stage
   extends: .deploy-egapro-api-k8s-preprod
   stage: "Deploy to hors prod K8S"
   variables:
-    <<: *deploy_tagged_stage_variables
     PORT: $API_PORT
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
@@ -476,33 +462,25 @@ Deploy egapro/api (preprod):
     - /^v.*/
 
 Deploy egapro/postgres (preprod):
-  <<: *deploy_tagged_stage
   extends: .deploy-egapro-postgres-k8s-preprod
   stage: "Deploy to hors prod K8S"
-  variables:
-    <<: *deploy_tagged_stage_variables
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
     - /^v.*/
 
 Deploy egapro/memcached (preprod):
-  <<: *deploy_tagged_stage
   extends: .deploy-egapro-memcached-k8s-preprod
   stage: "Deploy to hors prod K8S"
-  variables:
-    <<: *deploy_tagged_stage_variables
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
     - /^v.*/
 
 Deploy egapro/kinto (preprod):
-  <<: *deploy_tagged_stage
   extends: .deploy-egapro-kinto-k8s-preprod
   stage: "Deploy to hors prod K8S"
   variables:
-    <<: *deploy_tagged_stage_variables
     PORT: $KINTO_PORT
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
@@ -516,8 +494,7 @@ Deploy egapro/kinto (preprod):
 
 .send_url_to_github_stage: &send_url_to_github_stage
   stage: "Send Url to GitHub"
-  image:
-    name: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
+  image: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
   script:
     - export DEPLOY_ID=$(cat github_deploy_id)
     - envsubst < /scripts/send-url.sh > /scripts/send-url-to-github.sh
@@ -592,11 +569,8 @@ Make a new release to deploy to preprod environment:
 
 #
 .deploy_prod_stage: &deploy_prod_stage
-  dependencies: []
-  image:
-    name: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
+  image: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
   variables: &deploy_prod_stage_variables
-    EGAPRO_REGISTRY: $CI_REGISTRY_IMAGE
     ENABLE_PERSISTENT_VOLUME: "true"
     API_RESOURCE_CPU_LIMIT: "250m"
     API_RESOURCE_MEMORY_LIMIT: "256Mi"
