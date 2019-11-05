@@ -8,7 +8,7 @@ spec:
   template:
     spec:
       containers:
-      - image: ${EGAPRO_REGISTRY}/kinto:${IMAGE_TAG}
+      - image: ${CI_REGISTRY_IMAGE}/kinto:${IMAGE_TAG}
         name: init-kinto
         env:
           - name: KINTO_SERVER

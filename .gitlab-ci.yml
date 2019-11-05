@@ -81,21 +81,21 @@ stages:
 ###            CODE QUALITY             ###
 ###########################################
 
-Quality tests:
-  stage: "Code Quality"
-  image: node:${NODE_VERSION}
-  before_script:
-    - yarn --frozen-lockfile
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-  script:
-    - yarn build
-    - yarn lint
-    - yarn test
-  when: manual
-  allow_failure: false
+#Quality tests:
+#  stage: "Code Quality"
+#  image: node:${NODE_VERSION}
+#  before_script:
+#    - yarn --frozen-lockfile
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - node_modules/
+#  script:
+#    - yarn build
+#    - yarn lint
+#    - yarn test
+#  when: manual
+#  allow_failure: false
 
 
 ############################################
@@ -156,9 +156,8 @@ Get Github Id (preprod):
 Create namespace (dev):
   <<: *create_namespace
   before_script:
-    - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
+    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
   only:
     - branches
   except:
@@ -286,11 +285,10 @@ Register init kinto image tag:
 Create egapro/secret (dev):
   <<: *create_secret
   before_script:
-  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
-  - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
+    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
   only:
-  - branches
+    - branches
   except:
     - master
 
@@ -505,9 +503,8 @@ Deploy egapro/kinto (preprod):
 Send deployment url to Github (dev):
   <<: *send_url_to_github_stage
   before_script:
-    - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-    - export SUFFIX_BRANCH_NAME=$SUFFIX_BRANCH_NAME
-    - export URL=https://${SUFFIX_BRANCH_NAME}-egapro.${ENVIRONMENT}.social.gouv.fr/
+    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)}
+    - export URL=https://${ENVIRONMENT_NAME}.egapro.${ENVIRONMENT}.social.gouv.fr/
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
@@ -600,11 +597,9 @@ Make a new release to deploy to preprod environment:
   before_script:
     # set environment variables
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export ENVIRONMENT_BRANCH=prod
-    - export PREFIX_BRANCH_INGRESS=prod.
-    - export SUFFIX_BRANCH_NAME=-prod
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
+    - export ENVIRONMENT_TYPE=prod
     - export ENVIRONMENT_NAME=prod
+    - export K8S_NAMESPACE=egapro${ENVIRONMENT_NAME}
     # azure volume secrets
     - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
     - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
@@ -651,10 +646,10 @@ Deploy egapro in production :
     - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
     # postgres
     - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     # memcached
     - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
     # kinto
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
@@ -672,22 +667,22 @@ Restore egapro/postgres:
     # delete old restore job, kinto and postgres
     - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
     - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
-    - helm delete --purge egapro${SUFFIX_BRANCH_NAME}-pg || true;
+    - helm delete --purge egapro-${ENVIRONMENT_NAME}-pg || true;
     - kubectl delete pvc data-egapro-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
     # Create azure volume secrets
     - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
     # deploy clean postgres
     - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install egapro-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     # run restore job
     - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-egapro.yml
     - kubectl apply -f .k8s/postgres/restore-job-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl wait --for=condition=complete job/egapro-restore${SUFFIX_BRANCH_NAME} --timeout=600s -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
     # deploy kinto
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl wait --for=condition=complete job/egapro-init-kinto${SUFFIX_BRANCH_NAME} --timeout=600s -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/init-kinto --timeout=600s -n ${K8S_NAMESPACE}
   only:
     - /^v.*/
   when: manual

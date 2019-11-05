@@ -6,18 +6,18 @@ metadata:
   labels:
     app: egapro
     component: certificate
-    branch: egapro${SUFFIX_BRANCH_NAME}
+    namespace: egapro-${ENVIRONMENT_NAME}
     job: "${CI_JOB_ID}"
 spec:
   secretName: crt
   dnsNames:
-    - ${PREFIX_BRANCH_INGRESS}egapro.${ENVIRONMENT}.social.gouv.fr
+    - ${ENVIRONMENT_NAME}.egapro.${ENVIRONMENT}.social.gouv.fr
   acme:
     config:
       - http01:
           ingressClass: azure/application-gateway
         domains:
-          - ${PREFIX_BRANCH_INGRESS}egapro.${ENVIRONMENT}.social.gouv.fr
+          - ${ENVIRONMENT_NAME}.egapro.${ENVIRONMENT}.social.gouv.fr
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
