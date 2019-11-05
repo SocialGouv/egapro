@@ -260,7 +260,10 @@ master:
   nodeSelector: {}
   affinity: {}
   tolerations: []
-  podLabels: {}
+  podLabels:
+    component: postgres
+    branch: egapro${SUFFIX_BRANCH_NAME}
+    job: "${CI_JOB_ID}"
   podAnnotations: {}
   ## Additional PostgreSQL Master Volume mounts
   ##
