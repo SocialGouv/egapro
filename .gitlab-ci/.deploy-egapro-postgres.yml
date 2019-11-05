@@ -9,7 +9,7 @@
     - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
     - helm init --client-only
     - helm upgrade --install egapro-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE} --version ${POSTGRES_CHART_VERSION}
-    - kubectl wait --for=condition=Ready pod -l component=postgres,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
+    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #
 
