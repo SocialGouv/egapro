@@ -41,11 +41,6 @@ function MobileHome({ openMenu }: Props) {
         simple et rapide, tout en profitant de l’aide sur les détails du calcul
         de chaque indicateur et sur les questions les plus fréquemment posées.
       </p>
-      <p css={styles.para}>
-        Pour le moment, l’outil est configuré pour les entreprises de plus de
-        250 salariés : il le sera bientôt pour les entreprises de 50 à 250
-        salariés !
-      </p>
 
       <div css={styles.info}>
         <p css={[styles.para, styles.noMargin]}>
