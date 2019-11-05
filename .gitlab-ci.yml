@@ -641,19 +641,25 @@ Deploy egapro in production :
     - kubectl apply -f .k8s/app/service-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/app/ingress-prod-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=app,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
     # api
     - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=api,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
     # postgres
     - helm init --client-only
     - helm upgrade --install egapro-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=postgres,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
     # memcached
     - helm init --client-only
     - helm upgrade --install egapro-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=memcached,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
     # kinto
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=kinto,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
+    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
   only:
     - /^v.*/
 
@@ -674,6 +680,7 @@ Restore egapro/postgres:
     # deploy clean postgres
     - helm init --client-only
     - helm upgrade --install egapro-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=postgres,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
     # run restore job
     - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-egapro.yml
     - kubectl apply -f .k8s/postgres/restore-job-egapro.yml -n ${K8S_NAMESPACE}
