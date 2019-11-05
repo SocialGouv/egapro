@@ -45,7 +45,7 @@ spec:
             - name: API_PORT
               value: "${PORT}"
             - name: KINTO_SERVER
-              value: "kinto${SUFFIX_BRANCH_NAME}"
+              value: "kinto"
             - name: KINTO_BUCKET
               value: "egapro"
             - name: KINTO_LOGIN
