@@ -2,23 +2,24 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: egapro-api${SUFFIX_BRANCH_NAME}
+  name: api
   labels:
-    app: egapro-api${SUFFIX_BRANCH_NAME}
+    app: egapro
+    component: api
     branch: egapro${SUFFIX_BRANCH_NAME}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: egapro-api${SUFFIX_BRANCH_NAME}
+      component: api
   template:
     metadata:
       labels:
-        app: egapro-api${SUFFIX_BRANCH_NAME}
+        component: api
     spec:
       containers:
         - image: ${EGAPRO_REGISTRY}/api:${IMAGE_TAG}
-          name: egapro-api
+          name: api
           ports:
             - containerPort: ${PORT}
           resources:
@@ -50,12 +51,12 @@ spec:
             - name: KINTO_LOGIN
               valueFrom:
                 secretKeyRef:
-                  name: egapro-secret
+                  name: egapro
                   key: KINTO_ADMIN_LOGIN
             - name: KINTO_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: egapro-secret
+                  name: egapro
                   key: KINTO_ADMIN_PASSWORD
             - name: MAIL_USE_TLS
               value: "true"
@@ -66,22 +67,22 @@ spec:
             - name: MAIL_HOST
               valueFrom:
                 secretKeyRef:
-                  name: egapro-secret
+                  name: egapro
                   key: MAIL_HOST
             - name: MAIL_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: egapro-secret
+                  name: egapro
                   key: MAIL_USERNAME
             - name: MAIL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: egapro-secret
+                  name: egapro
                   key: MAIL_PASSWORD
             - name: API_SENTRY_DSN
               valueFrom:
                 secretKeyRef:
-                  name: egapro-secret
+                  name: egapro
                   key: API_SENTRY_DSN
             - name: API_SENTRY_ENVIRONMENT
               value: "development"

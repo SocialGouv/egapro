@@ -2,17 +2,20 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: kinto${SUFFIX_BRANCH_NAME}
+  name: kinto
+  labels:
+    app: egapro
+    component: kinto
+    branch: egapro${SUFFIX_BRANCH_NAME}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kinto${SUFFIX_BRANCH_NAME}
+      component: kinto
   template:
     metadata:
       labels:
-        app: kinto${SUFFIX_BRANCH_NAME}
-        branch: egapro${SUFFIX_BRANCH_NAME}
+        component: kinto
     spec:
       containers:
       - name: kinto

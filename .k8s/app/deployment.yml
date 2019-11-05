@@ -2,24 +2,25 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: egapro-app${SUFFIX_BRANCH_NAME}
+  name: app
   labels:
     app: egapro
+    component: app
     environment: ${ENVIRONMENT_NAME}
     branch: ${ENVIRONMENT_BRANCH}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: egapro-app${SUFFIX_BRANCH_NAME}
+      component: app
   template:
     metadata:
       labels:
-        app: egapro-app${SUFFIX_BRANCH_NAME}
+        component: app
     spec:
       containers:
         - image: ${EGAPRO_REGISTRY}/app:${IMAGE_TAG}
-          name: egapro-app
+          name: app
           ports:
             - containerPort: ${PORT}
           livenessProbe:
@@ -43,4 +44,4 @@ spec:
               memory: ${APP_RESOURCE_MEMORY_LIMIT}
           env:
             - name: REACT_APP_API_URL
-              value: "http://egapro-api${SUFFIX_BRANCH_NAME}:4000"
+              value: "http://api:4000"

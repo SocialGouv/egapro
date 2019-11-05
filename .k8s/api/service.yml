@@ -2,13 +2,14 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: egapro-api${SUFFIX_BRANCH_NAME}
+  name: api
   labels:
-    app: egapro-api${SUFFIX_BRANCH_NAME}
+    app: egapro
+    component: api
     branch: egapro${SUFFIX_BRANCH_NAME}
 spec:
   selector:
-    app: egapro-api${SUFFIX_BRANCH_NAME}
+    component: api
   ports:
-  - port: ${PORT}
-    name: api
+    - port: ${PORT}
+      name: api
