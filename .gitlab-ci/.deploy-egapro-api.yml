@@ -9,7 +9,7 @@
     - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
     - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl wait --for=condition=Ready pod -l component=api -n ${K8S_NAMESPACE} --timeout=600s
+    - kubectl wait --for=condition=Ready pod -l component=api,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #
 
