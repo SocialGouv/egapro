@@ -4,28 +4,27 @@
 .deploy_egapro_memcached: &deploy_egapro_memcached
   image: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
   script:
-    - export K8S_NAMESPACE=egapro${SUFFIX_BRANCH_NAME}
+    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
     - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
     - helm init --client-only
-    - helm upgrade --install egapro${SUFFIX_BRANCH_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
+    - helm upgrade --install egapro-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
   allow_failure: false
 #
 
 .deploy-egapro-memcached-k8s-dev:
   <<: *deploy_egapro_memcached
   before_script:
-  - SUFFIX_BRANCH_NAME=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)
-  - export SUFFIX_BRANCH_NAME=-$SUFFIX_BRANCH_NAME
+    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
 
 .deploy-egapro-memcached-k8s-master:
   <<: *deploy_egapro_memcached
   before_script:
-    - export SUFFIX_BRANCH_NAME=-master
+    - export ENVIRONMENT_NAME=master
 
 .deploy-egapro-memcached-k8s-preprod:
   <<: *deploy_egapro_memcached
   before_script:
-    - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export SUFFIX_BRANCH_NAME=-preprod
+    - export ENVIRONMENT_NAME=preprod
 
 ...

@@ -262,7 +262,7 @@ master:
   tolerations: []
   podLabels:
     component: postgres
-    branch: egapro${SUFFIX_BRANCH_NAME}
+    namespace: egapro-${ENVIRONMENT_NAME}
     job: "${CI_JOB_ID}"
   podAnnotations: {}
   ## Additional PostgreSQL Master Volume mounts

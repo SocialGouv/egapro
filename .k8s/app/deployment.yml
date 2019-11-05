@@ -7,7 +7,7 @@ metadata:
     app: egapro
     component: app
     environment: ${ENVIRONMENT_NAME}
-    branch: ${ENVIRONMENT_BRANCH}
+    namespace: egapro-${ENVIRONMENT_NAME}
     job: "${CI_JOB_ID}"
 spec:
   replicas: 1
@@ -19,8 +19,8 @@ spec:
       labels:
         app: egapro
         component: app
-        environment: ${ENVIRONMENT_NAME}
-        branch: ${ENVIRONMENT_BRANCH}
+        environment: ${ENVIRONMENT_TYPE}
+        namespace: egapro-${ENVIRONMENT_NAME}
         job: "${CI_JOB_ID}"
     spec:
       containers:

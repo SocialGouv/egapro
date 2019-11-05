@@ -6,7 +6,7 @@ metadata:
   labels:
     app: egapro
     component: app
-    branch: egapro${SUFFIX_BRANCH_NAME}
+    namespace: egapro-${ENVIRONMENT_NAME}
     job: "${CI_JOB_ID}"
 spec:
   selector:
