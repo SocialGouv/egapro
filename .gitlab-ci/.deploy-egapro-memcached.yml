@@ -8,6 +8,7 @@
     - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
     - helm init --client-only
     - helm upgrade --install egapro-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
+    - kubectl wait --for=condition=Ready pod -l component=memcached,job="${CI_JOB_ID}" -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #
 
