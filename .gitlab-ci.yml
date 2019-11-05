@@ -629,7 +629,7 @@ Make a new release to deploy to preprod environment:
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
     - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
     - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
-    - kubectl delete job egapro-init-kinto${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
+    - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
   environment:
     name: ${PROD_ENVIRONMENT_NAME}
   when: manual
@@ -670,8 +670,8 @@ Restore egapro/postgres:
     PORT: $KINTO_PORT
   script:
     # delete old restore job, kinto and postgres
-    - kubectl delete job egapro-restore${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
-    - kubectl delete deploy kinto${SUFFIX_BRANCH_NAME} -n ${K8S_NAMESPACE} || true;
+    - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
+    - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
     - helm delete --purge egapro${SUFFIX_BRANCH_NAME}-pg || true;
     - kubectl delete pvc data-egapro-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
     # Create azure volume secrets
