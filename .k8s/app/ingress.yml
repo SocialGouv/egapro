@@ -7,7 +7,6 @@ metadata:
     app: egapro
     component: app
     namespace: egapro-${ENVIRONMENT_NAME}
-    job: "${CI_JOB_ID}"
   annotations:
     kubernetes.io/ingress.class: "azure/application-gateway"
     appgw.ingress.kubernetes.io/ssl-redirect: "true"

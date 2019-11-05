@@ -7,7 +7,6 @@ metadata:
     app: egapro
     component: api
     namespace: egapro-${ENVIRONMENT_NAME}
-    job: "${CI_JOB_ID}"
 spec:
   selector:
     component: api
