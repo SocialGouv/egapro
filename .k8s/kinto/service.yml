@@ -1,16 +1,16 @@
 ---
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
   name: kinto
   labels:
     app: egapro
     component: kinto
-    branch: egapro${SUFFIX_BRANCH_NAME}
+    namespace: egapro-${ENVIRONMENT_NAME}
     job: "${CI_JOB_ID}"
 spec:
-  type: NodePort
-  ports:
-    - port: ${PORT}
   selector:
     component: kinto
+  ports:
+  - port: ${PORT}
+    name: kinto

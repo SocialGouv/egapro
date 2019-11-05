@@ -6,7 +6,7 @@ metadata:
   labels:
     app: egapro
     component: kinto
-    branch: egapro${SUFFIX_BRANCH_NAME}
+    namespace: egapro-${ENVIRONMENT_NAME}
     job: "${CI_JOB_ID}"
 spec:
   replicas: 1
@@ -18,7 +18,7 @@ spec:
       labels:
         app: egapro
         component: kinto
-        branch: egapro${SUFFIX_BRANCH_NAME}
+        namespace: egapro-${ENVIRONMENT_NAME}
         job: "${CI_JOB_ID}"
     spec:
       containers:
@@ -38,15 +38,15 @@ spec:
           - name: KINTO_CACHE_BACKEND
             value: "kinto.core.cache.memcached"
           - name: KINTO_CACHE_HOSTS
-            value: "egapro${SUFFIX_BRANCH_NAME}-memcached:11211 egapro${SUFFIX_BRANCH_NAME}-memcached:11211"
+            value: "egapro-${ENVIRONMENT_NAME}-memcached:11211 egapro-${ENVIRONMENT_NAME}-memcached:11211"
           - name: KINTO_STORAGE_BACKEND
             value: "kinto.core.storage.postgresql"
           - name: KINTO_STORAGE_URL
-            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@egapro${SUFFIX_BRANCH_NAME}-pg-postgresql/postgres"
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@egapro-${ENVIRONMENT_NAME}-pg-postgresql/postgres"
           - name: KINTO_PERMISSION_BACKEND
             value: "kinto.core.permission.postgresql"
           - name: KINTO_PERMISSION_URL
-            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@egapro${SUFFIX_BRANCH_NAME}-pg-postgresql/postgres"
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@egapro-${ENVIRONMENT_NAME}-pg-postgresql/postgres"
       initContainers:
       - name: wait-for-postgres
         image: postgres:${POSTGRES_JOB_VERSION}
@@ -63,7 +63,7 @@ spec:
         - -c
         - |
           retry=120; # 5s * (12 * 10) = 10min
-          while ! pg_isready -h egapro${SUFFIX_BRANCH_NAME}-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
+          while ! pg_isready -h egapro-${ENVIRONMENT_NAME}-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
             do
               echo "Waiting for Postgres to go Green ($(( retry )))" ; sleep 5s ; done ;
           echo Ready;
