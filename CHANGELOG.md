@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.2](https://github.com/SocialGouv/egapro/compare/v2.0.1...v2.0.2) (2019-11-05)
+
+
+### Bug Fixes
+
+* **50 à 250:** suppression de la phrase 'pour le moment' sur la page d'accueil mobile ([4690530](https://github.com/SocialGouv/egapro/commit/4690530))
+
+
+
+
+
 ## [2.0.1](https://github.com/SocialGouv/egapro/compare/v2.0.0...v2.0.1) (2019-11-04)
 
 
