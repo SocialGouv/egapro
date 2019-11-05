@@ -12,6 +12,8 @@
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
+    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #
 

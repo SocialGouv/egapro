@@ -10,6 +10,7 @@
     - kubectl apply -f .k8s/app/deployment-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/app/service-egapro.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/app/ingress-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=app -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #
 
