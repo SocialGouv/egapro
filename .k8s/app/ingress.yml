@@ -4,15 +4,15 @@ kind: Ingress
 metadata:
   name: app
   labels:
-    app: egapro
+    app: ${STARTUP}
     component: app
-    namespace: egapro-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
   annotations:
     kubernetes.io/ingress.class: "azure/application-gateway"
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-  - host: ${ENVIRONMENT_NAME}.egapro.${APP_DOMAIN_NAME}
+  - host: ${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
     http:
       paths:
         - path: /

@@ -4,7 +4,7 @@
 .deploy_egapro_api: &deploy_egapro_api
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
-    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
     - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
     - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
@@ -17,7 +17,7 @@
   <<: *deploy_egapro_api
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
 
 .deploy-egapro-api-k8s-master:
   <<: *deploy_egapro_api
