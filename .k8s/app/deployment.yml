@@ -6,8 +6,8 @@ metadata:
   labels:
     app: ${STARTUP}
     component: app
-    environment: ${ENVIRONMENT_NAME}
-    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+    feature: ${IS_FEATURE_ENVIRONMENT}
+    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
 spec:
   replicas: 1
   selector:
@@ -19,7 +19,7 @@ spec:
         app: ${STARTUP}
         component: app
         feature: ${IS_FEATURE_ENVIRONMENT}
-        namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+        namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
     spec:
       containers:
         - image: ${CI_REGISTRY_IMAGE}/app:${IMAGE_TAG}

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ${STARTUP}
     component: kinto
-    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
 spec:
   selector:
     component: kinto
