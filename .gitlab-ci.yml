@@ -14,8 +14,9 @@ variables:
   DEV_ENVIRONMENT_NAME: "egapro-dev"
   PROD_ENVIRONMENT_NAME: "prod"
   ENABLE_PERSISTENT_VOLUME: "false"
-  STARTUP: egapro
-  APP_DOMAIN_NAME: dev.fabrique.social.gouv.fr
+  IS_FEATURE_ENVIRONMENT: "false"
+  STARTUP: "egapro"
+  APP_DOMAIN_NAME: "dev.fabrique.social.gouv.fr"
   # Rancher project id
   RANCHER_PROJECT_ID: c-gsm8d:p-9mvwt
   RANCHER_PROJECT_ID_PROD: c-l9h59:p-jcmhs
@@ -600,7 +601,6 @@ Make a new release to deploy to preprod environment:
   before_script:
     # set environment variables
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export ENVIRONMENT_TYPE=prod
     - export ENVIRONMENT_NAME=prod
     - export K8S_NAMESPACE=egapro${ENVIRONMENT_NAME}
     # azure volume secrets

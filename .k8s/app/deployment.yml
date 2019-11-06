@@ -18,7 +18,7 @@ spec:
       labels:
         app: ${STARTUP}
         component: app
-        environment: ${ENVIRONMENT_TYPE}
+        feature: ${IS_FEATURE_ENVIRONMENT}
         namespace: ${STARTUP}-${ENVIRONMENT_NAME}
     spec:
       containers:
