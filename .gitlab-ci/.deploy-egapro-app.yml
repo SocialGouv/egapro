@@ -2,7 +2,7 @@
 
 #
 .deploy_egapro_app: &deploy_egapro_app
-  image: $CI_REGISTRY/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
     - envsubst < .k8s/app/service.yml > .k8s/app/service-egapro.yml
@@ -17,7 +17,7 @@
 .deploy-egapro-app-k8s-dev:
   <<: *deploy_egapro_app
   before_script:
-    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)}
+    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
     - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
     - export ENVIRONMENT_TYPE=feature
     - envsubst < .k8s/certificate/certificate-staging.yml > .k8s/certificate/certificate-egapro.yml
