@@ -25,7 +25,7 @@ spec:
             - name: PGUSER
               value: postgres
             - name: PGHOST
-              value: ${STARTUP}-${ENVIRONMENT_NAME}-pg-postgresql
+              value: ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg-postgresql
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
@@ -57,7 +57,7 @@ spec:
             - -c
             - |
               retry=120; # 5s * (12 * 10) = 10min
-              while ! pg_isready -h ${STARTUP}-${ENVIRONMENT_NAME}-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
+              while ! pg_isready -h ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
                 do
                   echo "Waiting for Postgres to go Green ($(( retry )))" ; sleep 5s ; done ;
               echo Ready;

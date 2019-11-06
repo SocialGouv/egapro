@@ -6,13 +6,13 @@ metadata:
   labels:
     app: ${STARTUP}
     component: app
-    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
   annotations:
     kubernetes.io/ingress.class: "azure/application-gateway"
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-  - host: ${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
+  - host: ${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
     http:
       paths:
         - path: /

@@ -4,10 +4,10 @@
 .deploy_egapro_memcached: &deploy_egapro_memcached
   image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
   script:
-    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
     - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #
@@ -15,17 +15,12 @@
 .deploy-egapro-memcached-k8s-dev:
   <<: *deploy_egapro_memcached
   before_script:
-    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
 
 .deploy-egapro-memcached-k8s-master:
   <<: *deploy_egapro_memcached
-  before_script:
-    - export ENVIRONMENT_NAME=${MASTER_ENVIRONMENT_NAME}
 
 .deploy-egapro-memcached-k8s-preprod:
   <<: *deploy_egapro_memcached
-  before_script:
-    - export ENVIRONMENT_NAME=${PREPROD_ENVIRONMENT_NAME}
 
 ...
