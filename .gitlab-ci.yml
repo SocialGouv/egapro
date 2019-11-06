@@ -14,6 +14,7 @@ variables:
   DEV_ENVIRONMENT_NAME: "egapro-dev"
   PROD_ENVIRONMENT_NAME: "prod"
   ENABLE_PERSISTENT_VOLUME: "false"
+  APP_DOMAIN_NAME: dev.fabrique.social.gouv.fr
   # Rancher project id
   RANCHER_PROJECT_ID: c-gsm8d:p-9mvwt
   RANCHER_PROJECT_ID_PROD: c-l9h59:p-jcmhs
@@ -570,6 +571,7 @@ Make a new release to deploy to preprod environment:
   image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
   variables: &deploy_prod_stage_variables
     ENABLE_PERSISTENT_VOLUME: "true"
+    APP_DOMAIN_NAME: fabrique.social.gouv.fr
     API_RESOURCE_CPU_LIMIT: "250m"
     API_RESOURCE_MEMORY_LIMIT: "256Mi"
     API_RESOURCE_CPU_REQUEST: "5m"

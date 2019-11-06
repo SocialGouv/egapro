@@ -10,13 +10,13 @@ metadata:
 spec:
   secretName: crt
   dnsNames:
-    - ${ENVIRONMENT_NAME}.egapro.${ENVIRONMENT}.social.gouv.fr
+    - ${ENVIRONMENT_NAME}.egapro.${APP_DOMAIN_NAME}
   acme:
     config:
       - http01:
           ingressClass: azure/application-gateway
         domains:
-          - ${ENVIRONMENT_NAME}.egapro.${ENVIRONMENT}.social.gouv.fr
+          - ${ENVIRONMENT_NAME}.egapro.${APP_DOMAIN_NAME}
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
