@@ -87,21 +87,42 @@ stages:
 ###            CODE QUALITY             ###
 ###########################################
 
-#Quality tests:
-#  stage: "Code Quality"
-#  image: node:${NODE_VERSION}
-#  before_script:
-#    - yarn --frozen-lockfile
-#  cache:
-#    key: ${CI_COMMIT_REF_SLUG}
-#    paths:
-#      - node_modules/
-#  script:
-#    - yarn build
-#    - yarn lint
-#    - yarn test
-#  when: manual
-#  allow_failure: false
+#
+.quality_stage: &quality_stage
+  stage: "Code Quality"
+  image: node:${NODE_VERSION}
+  before_script:
+    - yarn --frozen-lockfile
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+  script:
+    - yarn build
+    - yarn lint
+    - yarn test
+  when: manual
+  allow_failure: false
+#
+
+Code quality (dev):
+  <<: *quality_stage
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Code quality (master):
+  <<: *quality_stage
+  only:
+    - boni-ci-azure
+  except:
+    - /^v.*/
+
+Code quality (preprod):
+  <<: *quality_stage
+  only:
+    - /^v.*/
 
 
 ############################################
@@ -122,7 +143,7 @@ stages:
       - github_deploy_id
 #
 
-Get Github Id (dev):
+Get Github id (dev):
   <<: *get_github_id_stage
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
@@ -131,14 +152,16 @@ Get Github Id (dev):
   except:
     - boni-ci-azure
 
-Get Github Id (master):
+Get Github id (master):
   <<: *get_github_id_stage
   environment:
     name: master
   only:
     - boni-ci-azure
+  except:
+    - /^v.*/
 
-Get Github Id (preprod):
+Get Github id (preprod):
   <<: *get_github_id_stage
   environment:
     name: preprod
@@ -175,6 +198,8 @@ Create namespace (master):
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
     - boni-ci-azure
+  except:
+    - /^v.*/
 
 Create namespace (preprod):
   <<: *create_namespace
@@ -188,47 +213,53 @@ Create namespace (preprod):
 #####       REGISTER DOCKER IMAGES        ###
 #############################################
 
-##
-#.register_stage commit sha: &register_stage_commit_sha
-#  stage: "Registration"
-#  image: docker:${DOCKER_VERSION}
-#  services:
-#    - docker:${DOCKER_VERSION}-dind
-#  before_script:
-#    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
-#    - docker pull ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} || true
-#  script:
-#    - echo "Build ${IMAGE_NAME}:${CI_COMMIT_SHA} from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}"
-#    - docker build --cache-from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} -t ${IMAGE_NAME}:${CI_COMMIT_SHA} -f ${DOCKERFILE_PATH} ${CONTEXT}
-#    - docker push ${IMAGE_NAME}
-##
 #
-#Register api image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/api/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
-#  only:
-#    - branches
+.register_stage commit sha: &register_stage_commit_sha
+  stage: "Registration"
+  image: docker:${DOCKER_VERSION}
+  services:
+    - docker:${DOCKER_VERSION}-dind
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
+    - docker pull ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} || true
+  script:
+    - echo "Build ${IMAGE_NAME}:${CI_COMMIT_SHA} from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}"
+    - docker build --cache-from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} -t ${IMAGE_NAME}:${CI_COMMIT_SHA} -f ${DOCKERFILE_PATH} ${CONTEXT}
+    - docker push ${IMAGE_NAME}
 #
-#Register app image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/app/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
-#  only:
-#    - branches
-#
-#Register init kinto image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: packages/kinto
-#    DOCKERFILE_PATH: packages/kinto/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
-#  only:
-#    - branches
+
+Register api image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/api/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
+  only:
+    - branches
+  except:
+    - /^v.*/
+
+Register app image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/app/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
+  only:
+    - branches
+  except:
+    - /^v.*/
+
+Register init kinto image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
+  only:
+    - branches
+  except:
+    - /^v.*/
 
 #
 .register_stage_tag: &register_stage_tag
@@ -306,6 +337,8 @@ Create egapro/secret (master):
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
     - boni-ci-azure
+  except:
+    - /^v.*/
 
 Create egapro/secret (preprod):
   <<: *create_secret
@@ -396,63 +429,73 @@ Deploy egapro/kinto (dev):
 
 # Master Environment
 
-#Deploy egapro/app (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${APP_PORT}
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy egapro/api (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-api-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${API_PORT}
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy egapro/postgres (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy egapro/memcached (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#
-#Deploy egapro/kinto (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#    PORT: ${KINTO_PORT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
+Deploy egapro/app (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-app-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    PORT: ${APP_PORT}
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - boni-ci-azure
+  except:
+    - /^v.*/
+
+Deploy egapro/api (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-api-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    PORT: ${API_PORT}
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - boni-ci-azure
+  except:
+    - /^v.*/
+
+Deploy egapro/postgres (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - boni-ci-azure
+  except:
+    - /^v.*/
+
+Deploy egapro/memcached (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-memcached-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - boni-ci-azure
+  except:
+    - /^v.*/
+
+Deploy egapro/kinto (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-kinto-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+    PORT: ${KINTO_PORT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - boni-ci-azure
+  except:
+    - /^v.*/
 
 
 # Preprod Environment
@@ -544,6 +587,8 @@ Send deployment url to Github (master):
     name: ${MASTER_NAMESPACE_ENVIRONMENT}
   only:
     - boni-ci-azure
+  except:
+    - /^v.*/
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
@@ -582,6 +627,8 @@ Make a new release to deploy to preprod environment:
     - GH_TOKEN=${GITHUB_TOKEN} yarn lerna version ${LERNA_ARGS:="--force-publish --yes"}
   only:
     - boni-ci-azure
+  except:
+    - /^v.*/
   when: manual
 
 
@@ -647,7 +694,6 @@ Make a new release to deploy to preprod environment:
     # kinto
     - export PORT=${KINTO_PORT}
     - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
     - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
     - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
