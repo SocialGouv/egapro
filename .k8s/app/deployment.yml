@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ${STARTUP}
     component: app
-    feature: ${IS_FEATURE_ENVIRONMENT}
+    lifetime: ${LIFETIME}
     namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
 spec:
   replicas: 1
@@ -18,7 +18,7 @@ spec:
       labels:
         app: ${STARTUP}
         component: app
-        feature: ${IS_FEATURE_ENVIRONMENT}
+        lifetime: ${LIFETIME}
         namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
     spec:
       containers:
