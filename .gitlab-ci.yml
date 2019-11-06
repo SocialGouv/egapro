@@ -117,8 +117,6 @@ Code quality (master):
   only:
     refs:
       - boni-ci-azure
-    variables:
-      - $CI_COMMIT_REF_NAME =~ /^v.*/
 
 Code quality (preprod):
   <<: *quality_stage
@@ -160,8 +158,6 @@ Get Github id (master):
   only:
     refs:
       - boni-ci-azure
-    variables:
-      - $CI_COMMIT_REF_NAME =~ /^v.*/
 
 Get Github id (preprod):
   <<: *get_github_id_stage
