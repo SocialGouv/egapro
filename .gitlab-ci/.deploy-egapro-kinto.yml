@@ -5,15 +5,15 @@
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - export POSTGRESQL_USER=$(kubectl get secret egapro -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
-    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
-    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
+    - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
+    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
+    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
     - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
-    - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
     - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
