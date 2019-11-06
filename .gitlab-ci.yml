@@ -115,8 +115,7 @@ Code quality (dev):
 Code quality (master):
   <<: *quality_stage
   only:
-    refs:
-      - boni-ci-azure
+    - boni-ci-azure
     variables:
       - $CI_COMMIT_REF_NAME =~ /^v.*/
 
