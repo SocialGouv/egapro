@@ -116,10 +116,9 @@ Code quality (master):
   <<: *quality_stage
   only:
     refs:
-    - boni-ci-azure
-  except:
+      - boni-ci-azure
     variables:
-    - $CI_COMMIT_TAG =~ /^v.*/
+      - $CI_COMMIT_TAG != /^v.*/
 
 
 Code quality (preprod):
