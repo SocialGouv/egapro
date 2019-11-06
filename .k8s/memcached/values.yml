@@ -102,7 +102,7 @@ extraVolumes: |
 ## Custom metadata labels to be applied to statefulset and pods
 podLabels:
   component: memcached
-  namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+  namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
 
 # To be added to the server pod(s)
 podAnnotations: {}

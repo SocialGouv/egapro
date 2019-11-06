@@ -11,12 +11,12 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://localhost:2375
   IMAGE_INFRA_BASE_NAME: "infra/images-docker"
-  DEV_ENVIRONMENT_NAME: "egapro-dev"
-  MASTER_ENVIRONMENT_NAME: "master"
-  PREPROD_ENVIRONMENT_NAME: "preprod"
-  PROD_ENVIRONMENT_NAME: "prod"
+  DEV_NAMESPACE_ENVIRONMENT: "egapro-dev"
+  MASTER_NAMESPACE_ENVIRONMENT: "master"
+  PREPROD_NAMESPACE_ENVIRONMENT: "preprod"
+  PROD_NAMESPACE_ENVIRONMENT: "prod"
   ENABLE_PERSISTENT_VOLUME: "false"
-  IS_FEATURE_ENVIRONMENT: "no"
+  IS_FEATURE_ENVIRONMENT: "false"
   STARTUP: "egapro"
   APP_DOMAIN_NAME: "dev.fabrique.social.gouv.fr"
   # Rancher project id
@@ -124,7 +124,7 @@ stages:
 Get Github Id (dev):
   <<: *get_github_id_stage
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -149,7 +149,7 @@ Get Github Id (preprod):
   stage: "Prepare"
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
     # Skip the job if the namespace exists
     - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
@@ -161,8 +161,8 @@ Get Github Id (preprod):
 Create namespace (dev):
   <<: *create_namespace
   before_script:
-    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -171,14 +171,14 @@ Create namespace (dev):
 Create namespace (master):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${MASTER_ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
 Create namespace (preprod):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
@@ -280,7 +280,7 @@ Register init kinto image tag:
   stage: "Create secret hors prod"
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
     # Create egapro secrets
     - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev-egapro.yml
@@ -290,8 +290,8 @@ Register init kinto image tag:
 Create egapro/secret (dev):
   <<: *create_secret
   before_script:
-    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -300,14 +300,14 @@ Create egapro/secret (dev):
 Create egapro/secret (master):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${MASTER_ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
 Create egapro/secret (preprod):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
@@ -331,7 +331,7 @@ Deploy egapro/app (dev):
     <<: *deploy_stage_variables
     PORT: ${APP_PORT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -344,7 +344,7 @@ Deploy egapro/api (dev):
     <<: *deploy_stage_variables
     PORT: ${API_PORT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -356,7 +356,7 @@ Deploy egapro/postgres (dev):
   variables:
     <<: *deploy_stage_variables
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -368,7 +368,7 @@ Deploy egapro/memcached (dev):
   variables:
     <<: *deploy_stage_variables
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -381,7 +381,7 @@ Deploy egapro/kinto (dev):
     <<: *deploy_stage_variables
     PORT: ${KINTO_PORT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -395,8 +395,9 @@ Deploy egapro/app (master):
   variables:
     <<: *deploy_stage_variables
     PORT: ${APP_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
@@ -406,8 +407,9 @@ Deploy egapro/api (master):
   variables:
     <<: *deploy_stage_variables
     PORT: ${API_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
@@ -416,8 +418,9 @@ Deploy egapro/postgres (master):
   extends: .deploy-egapro-postgres-k8s-master
   variables:
     <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
@@ -426,8 +429,9 @@ Deploy egapro/memcached (master):
   extends: .deploy-egapro-memcached-k8s-master
   variables:
     <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
@@ -436,9 +440,10 @@ Deploy egapro/kinto (master):
   extends: .deploy-egapro-kinto-k8s-master
   variables:
     <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
     PORT: ${KINTO_PORT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
@@ -450,8 +455,9 @@ Deploy egapro/app (preprod):
   stage: "Deploy to hors prod K8S"
   variables:
     PORT: ${APP_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
@@ -460,24 +466,29 @@ Deploy egapro/api (preprod):
   stage: "Deploy to hors prod K8S"
   variables:
     PORT: ${API_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
 Deploy egapro/postgres (preprod):
   extends: .deploy-egapro-postgres-k8s-preprod
   stage: "Deploy to hors prod K8S"
+  variables:
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
 Deploy egapro/memcached (preprod):
   extends: .deploy-egapro-memcached-k8s-preprod
   stage: "Deploy to hors prod K8S"
+  variables:
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
@@ -486,8 +497,9 @@ Deploy egapro/kinto (preprod):
   stage: "Deploy to hors prod K8S"
   variables:
     PORT: ${KINTO_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
@@ -508,10 +520,10 @@ Deploy egapro/kinto (preprod):
 Send deployment url to Github (dev):
   <<: *send_url_to_github_stage
   before_script:
-    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export URL=https://${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export URL=https://${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
-    name: ${DEV_ENVIRONMENT_NAME}
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -520,18 +532,18 @@ Send deployment url to Github (dev):
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://${MASTER_ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
+    - export URL=https://${MASTER_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
-    name: ${MASTER_ENVIRONMENT_NAME}
+    name: ${MASTER_NAMESPACE_ENVIRONMENT}
   only:
     - master
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://${PREPROD_ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
+    - export URL=https://${PREPROD_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
-    name: ${PREPROD_ENVIRONMENT_NAME}
+    name: ${PREPROD_NAMESPACE_ENVIRONMENT}
   only:
     - /^v.*/
 
@@ -576,6 +588,7 @@ Make a new release to deploy to preprod environment:
   variables: &deploy_prod_stage_variables
     ENABLE_PERSISTENT_VOLUME: "true"
     APP_DOMAIN_NAME: fabrique.social.gouv.fr
+    NAMESPACE_ENVIRONMENT: ${PROD_NAMESPACE_ENVIRONMENT}
     API_RESOURCE_CPU_LIMIT: "250m"
     API_RESOURCE_MEMORY_LIMIT: "256Mi"
     API_RESOURCE_CPU_REQUEST: "5m"
@@ -603,8 +616,7 @@ Make a new release to deploy to preprod environment:
   before_script:
     # set environment variables
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export ENVIRONMENT_NAME=prod
-    - export K8S_NAMESPACE=egapro${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=egapro-${NAMESPACE_ENVIRONMENT}
     # azure volume secrets
     - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
     - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
@@ -631,7 +643,7 @@ Make a new release to deploy to preprod environment:
     - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
     - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
   environment:
-    name: ${PROD_ENVIRONMENT_NAME}
+    name: ${PROD_NAMESPACE_ENVIRONMENT}
   when: manual
 #
 
@@ -653,11 +665,11 @@ Deploy egapro in production :
     - kubectl wait --for=condition=Ready pod -l component=api -n ${K8S_NAMESPACE} --timeout=600s
     # postgres
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
     # memcached
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
     # kinto
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
@@ -678,13 +690,13 @@ Restore egapro/postgres:
     # delete old restore job, kinto and postgres
     - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
     - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
-    - helm delete --purge egapro-${ENVIRONMENT_NAME}-pg || true;
+    - helm delete --purge egapro-${NAMESPACE_ENVIRONMENT}-pg || true;
     - kubectl delete pvc data-egapro-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
     # Create azure volume secrets
     - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
     # deploy clean postgres
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
     # run restore job
     - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-egapro.yml

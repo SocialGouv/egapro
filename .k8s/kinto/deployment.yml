@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ${STARTUP}
     component: kinto
-    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
       labels:
         app: ${STARTUP}
         component: kinto
-        namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+        namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
     spec:
       containers:
       - name: kinto
@@ -36,15 +36,15 @@ spec:
           - name: KINTO_CACHE_BACKEND
             value: "kinto.core.cache.memcached"
           - name: KINTO_CACHE_HOSTS
-            value: "${STARTUP}-${ENVIRONMENT_NAME}-memcached:11211 ${STARTUP}-${ENVIRONMENT_NAME}-memcached:11211"
+            value: "${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached:11211 ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached:11211"
           - name: KINTO_STORAGE_BACKEND
             value: "kinto.core.storage.postgresql"
           - name: KINTO_STORAGE_URL
-            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${STARTUP}-${ENVIRONMENT_NAME}-pg-postgresql/postgres"
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg-postgresql/postgres"
           - name: KINTO_PERMISSION_BACKEND
             value: "kinto.core.permission.postgresql"
           - name: KINTO_PERMISSION_URL
-            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${STARTUP}-${ENVIRONMENT_NAME}-pg-postgresql/postgres"
+            value: "postgresql://${POSTGRES_API_USER}:${POSTGRES_API_USER_PASSWORD}@${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg-postgresql/postgres"
       initContainers:
       - name: wait-for-postgres
         image: postgres:${POSTGRES_JOB_VERSION}
@@ -61,7 +61,7 @@ spec:
         - -c
         - |
           retry=120; # 5s * (12 * 10) = 10min
-          while ! pg_isready -h ${STARTUP}-${ENVIRONMENT_NAME}-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
+          while ! pg_isready -h ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
             do
               echo "Waiting for Postgres to go Green ($(( retry )))" ; sleep 5s ; done ;
           echo Ready;

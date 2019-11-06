@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ${STARTUP}
     component: api
-    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
       labels:
         app: ${STARTUP}
         component: api
-        namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+        namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
     spec:
       containers:
         - image: ${CI_REGISTRY_IMAGE}/api:${IMAGE_TAG}
