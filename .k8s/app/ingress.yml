@@ -12,7 +12,7 @@ metadata:
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-  - host: ${ENVIRONMENT_NAME}.egapro.${ENVIRONMENT}.social.gouv.fr
+  - host: ${ENVIRONMENT_NAME}.egapro.${APP_DOMAIN_NAME}
     http:
       paths:
         - path: /
