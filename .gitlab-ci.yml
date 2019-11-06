@@ -116,8 +116,10 @@ Code quality (dev):
 Code quality (master):
   <<: *quality_stage
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Code quality (preprod):
   <<: *quality_stage
@@ -157,8 +159,10 @@ Get Github id (master):
   environment:
     name: master
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Get Github id (preprod):
   <<: *get_github_id_stage
@@ -196,8 +200,10 @@ Create namespace (master):
   before_script:
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Create namespace (preprod):
   <<: *create_namespace
@@ -233,8 +239,10 @@ Register api image commit sha:
     DOCKERFILE_PATH: packages/api/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
   only:
-    - branches
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - branches
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Register app image commit sha:
   <<: *register_stage_commit_sha
@@ -243,8 +251,10 @@ Register app image commit sha:
     DOCKERFILE_PATH: packages/app/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
   only:
-    - branches
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - branches
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Register init kinto image commit sha:
   <<: *register_stage_commit_sha
@@ -253,8 +263,10 @@ Register init kinto image commit sha:
     DOCKERFILE_PATH: packages/kinto/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
   only:
-    - branches
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - branches
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 #
 .register_stage_tag: &register_stage_tag
@@ -331,8 +343,10 @@ Create egapro/secret (master):
   before_script:
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Create egapro/secret (preprod):
   <<: *create_secret
@@ -433,8 +447,10 @@ Deploy egapro/app (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Deploy egapro/api (master):
   <<: *deploy_stage
@@ -446,8 +462,10 @@ Deploy egapro/api (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Deploy egapro/postgres (master):
   <<: *deploy_stage
@@ -458,8 +476,10 @@ Deploy egapro/postgres (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Deploy egapro/memcached (master):
   <<: *deploy_stage
@@ -470,8 +490,10 @@ Deploy egapro/memcached (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Deploy egapro/kinto (master):
   <<: *deploy_stage
@@ -483,8 +505,10 @@ Deploy egapro/kinto (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 
 # Preprod Environment
@@ -575,8 +599,10 @@ Send deployment url to Github (master):
   environment:
     name: ${MASTER_NAMESPACE_ENVIRONMENT}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
@@ -614,8 +640,10 @@ Make a new release to deploy to preprod environment:
     - yarn --frozen-lockfile
     - GH_TOKEN=${GITHUB_TOKEN} yarn lerna version ${LERNA_ARGS:="--force-publish --yes"}
   only:
-    - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG !~ /^v.*/
   when: manual
 
 
