@@ -119,7 +119,7 @@ Code quality (master):
     refs:
       - boni-ci-azure
     variables:
-      - $CI_JOB_TRIGGERED == "false"
+      - $CI_JOB_TRIGGERED
 
 Code quality (preprod):
   <<: *quality_stage
