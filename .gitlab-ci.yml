@@ -634,7 +634,7 @@ Make a new release to deploy to preprod environment:
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-${STARTUP}.yml
     - envsubst < .k8s/app/service.yml > .k8s/app/service-${STARTUP}.yml
     - envsubst < .k8s/app/ingress.yml > .k8s/app/ingress-prod-${STARTUP}.yml
-    - envsubst < .k8s/certificate/certificate-prod.yml > .k8s/certificate/certificate-${STARTUP}.yml
+    - envsubst < .k8s/certificate/certificate.yml > .k8s/certificate/certificate-${STARTUP}.yml
     # api
     - export PORT=${API_PORT}
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-${STARTUP}.yml
