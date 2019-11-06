@@ -101,9 +101,9 @@ stages:
     - echo $CI_COMMIT_TAG
     - echo $CI_COMMIT_REF_NAME
     - echo $CI_JOB_TRIGGERED
-    - yarn build
-    - yarn lint
-    - yarn test
+#    - yarn build
+#    - yarn lint
+#    - yarn test
   when: manual
   allow_failure: false
 #
@@ -121,7 +121,7 @@ Code quality (master):
     refs:
       - boni-ci-azure
     variables:
-      - $CI_COMMIT_REF_NAME =~ /^boni-ci-azure/
+      - $CI_COMMIT_TAG == ""
 
 Code quality (preprod):
   <<: *quality_stage
