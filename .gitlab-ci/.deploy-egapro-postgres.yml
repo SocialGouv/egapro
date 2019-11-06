@@ -2,7 +2,7 @@
 
 #
 .deploy_egapro_postgres: &deploy_egapro_postgres
-  image: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
+  image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
   script:
     - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
     - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
@@ -15,20 +15,17 @@
 
 .deploy-egapro-postgres-k8s-dev:
   <<: *deploy_egapro_postgres
-  image: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
   before_script:
-    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "$CI_COMMIT_REF_NAME" | sha1sum | cut -c1-5)}
+    - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
     - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
 
 .deploy-egapro-postgres-k8s-master:
   <<: *deploy_egapro_postgres
-  image: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
   before_script:
     - export ENVIRONMENT_NAME=master
 
 .deploy-egapro-postgres-k8s-preprod:
   <<: *deploy_egapro_postgres
-  image: $CI_REGISTRY/socialgouv/docker/helm:${HELM_VERSION}
   before_script:
     - export ENVIRONMENT_NAME=preprod
 
