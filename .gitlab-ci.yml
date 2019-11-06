@@ -129,14 +129,14 @@ Get Github Id (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Get Github Id (master):
   <<: *get_github_id_stage
   environment:
     name: master
   only:
-    - master
+    - boni-ci-azure
 
 Get Github Id (preprod):
   <<: *get_github_id_stage
@@ -167,14 +167,14 @@ Create namespace (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Create namespace (master):
   <<: *create_namespace
   before_script:
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 Create namespace (preprod):
   <<: *create_namespace
@@ -296,14 +296,14 @@ Create egapro/secret (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Create egapro/secret (master):
   <<: *create_secret
   before_script:
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 Create egapro/secret (preprod):
   <<: *create_secret
@@ -338,7 +338,7 @@ Deploy egapro/app (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/api (dev):
   <<: *deploy_stage
@@ -351,7 +351,7 @@ Deploy egapro/api (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/postgres (dev):
   <<: *deploy_stage
@@ -363,7 +363,7 @@ Deploy egapro/postgres (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/memcached (dev):
   <<: *deploy_stage
@@ -375,7 +375,7 @@ Deploy egapro/memcached (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/kinto (dev):
   <<: *deploy_stage
@@ -388,7 +388,7 @@ Deploy egapro/kinto (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 # Master Environment
 
@@ -402,7 +402,7 @@ Deploy egapro/app (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/api (master):
   <<: *deploy_stage
@@ -414,7 +414,7 @@ Deploy egapro/api (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/postgres (master):
   <<: *deploy_stage
@@ -425,7 +425,7 @@ Deploy egapro/postgres (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/memcached (master):
   <<: *deploy_stage
@@ -436,7 +436,7 @@ Deploy egapro/memcached (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 Deploy egapro/kinto (master):
   <<: *deploy_stage
@@ -448,7 +448,7 @@ Deploy egapro/kinto (master):
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 
 # Preprod Environment
@@ -530,7 +530,7 @@ Send deployment url to Github (dev):
   only:
     - branches
   except:
-    - master
+    - boni-ci-azure
 
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
@@ -539,7 +539,7 @@ Send deployment url to Github (master):
   environment:
     name: ${MASTER_NAMESPACE_ENVIRONMENT}
   only:
-    - master
+    - boni-ci-azure
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
@@ -577,7 +577,7 @@ Make a new release to deploy to preprod environment:
     - yarn --frozen-lockfile
     - GH_TOKEN=${GITHUB_TOKEN} yarn lerna version ${LERNA_ARGS:="--force-publish --yes"}
   only:
-    - master
+    - boni-ci-azure
   when: manual
 
 
