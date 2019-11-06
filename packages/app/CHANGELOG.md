@@ -3,6 +3,182 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.38](https://github.com/SocialGouv/egapro/compare/v1.4.35...v1.4.38) (2019-11-07)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.37](https://github.com/SocialGouv/egapro/compare/v1.4.35...v1.4.37) (2019-11-07)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.36](https://github.com/SocialGouv/egapro/compare/v1.4.35...v1.4.36) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.35](https://github.com/SocialGouv/egapro/compare/v1.4.34...v1.4.35) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.34](https://github.com/SocialGouv/egapro/compare/v1.4.33...v1.4.34) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.33](https://github.com/SocialGouv/egapro/compare/v1.4.32...v1.4.33) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.32](https://github.com/SocialGouv/egapro/compare/v1.4.31...v1.4.32) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.31](https://github.com/SocialGouv/egapro/compare/v1.4.30...v1.4.31) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.30](https://github.com/SocialGouv/egapro/compare/v1.4.29...v1.4.30) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.29](https://github.com/SocialGouv/egapro/compare/v1.4.28...v1.4.29) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.28](https://github.com/SocialGouv/egapro/compare/v1.4.27...v1.4.28) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.27](https://github.com/SocialGouv/egapro/compare/v1.4.26...v1.4.27) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.26](https://github.com/SocialGouv/egapro/compare/v1.4.25...v1.4.26) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.25](https://github.com/SocialGouv/egapro/compare/v1.4.24...v1.4.25) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.24](https://github.com/SocialGouv/egapro/compare/v1.4.23...v1.4.24) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.23](https://github.com/SocialGouv/egapro/compare/v1.4.22...v1.4.23) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.22](https://github.com/SocialGouv/egapro/compare/v1.4.21...v1.4.22) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.21](https://github.com/SocialGouv/egapro/compare/v1.4.20...v1.4.21) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.20](https://github.com/SocialGouv/egapro/compare/v1.4.19...v1.4.20) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.19](https://github.com/SocialGouv/egapro/compare/v1.4.17...v1.4.19) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.17](https://github.com/SocialGouv/egapro/compare/v1.4.16...v1.4.17) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
+## [1.4.16](https://github.com/SocialGouv/egapro/compare/v1.4.15...v1.4.16) (2019-11-06)
+
+**Note:** Version bump only for package app
+
+
+
+
+
 ## [1.4.15](https://github.com/SocialGouv/egapro/compare/v1.4.14...v1.4.15) (2019-11-06)
 
 **Note:** Version bump only for package app
