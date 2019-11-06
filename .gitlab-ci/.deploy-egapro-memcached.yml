@@ -21,11 +21,11 @@
 .deploy-egapro-memcached-k8s-master:
   <<: *deploy_egapro_memcached
   before_script:
-    - export ENVIRONMENT_NAME=master
+    - export ENVIRONMENT_NAME=${MASTER_ENVIRONMENT_NAME}
 
 .deploy-egapro-memcached-k8s-preprod:
   <<: *deploy_egapro_memcached
   before_script:
-    - export ENVIRONMENT_NAME=preprod
+    - export ENVIRONMENT_NAME=${PREPROD_ENVIRONMENT_NAME}
 
 ...

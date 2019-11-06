@@ -4,7 +4,7 @@
 .deploy_egapro_kinto: &deploy_egapro_kinto
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
-    - export K8S_NAMESPACE=${STARTUP}-{ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
     - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
     - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
@@ -21,17 +21,16 @@
   <<: *deploy_egapro_kinto
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-{ENVIRONMENT_NAME}
 
 .deploy-egapro-kinto-k8s-master:
   <<: *deploy_egapro_kinto
   before_script:
-    - export ENVIRONMENT_NAME=master
+    - export ENVIRONMENT_NAME=${MASTER_ENVIRONMENT_NAME}
 
 .deploy-egapro-kinto-k8s-preprod:
   <<: *deploy_egapro_kinto
   before_script:
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export ENVIRONMENT_NAME=preprod
+    - export ENVIRONMENT_NAME=${PREPROD_ENVIRONMENT_NAME}
 
 ...
