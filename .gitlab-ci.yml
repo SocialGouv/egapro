@@ -87,21 +87,45 @@ stages:
 ###            CODE QUALITY             ###
 ###########################################
 
-#Quality tests:
-#  stage: "Code Quality"
-#  image: node:${NODE_VERSION}
-#  before_script:
-#    - yarn --frozen-lockfile
-#  cache:
-#    key: ${CI_COMMIT_REF_SLUG}
-#    paths:
-#      - node_modules/
-#  script:
-#    - yarn build
-#    - yarn lint
-#    - yarn test
-#  when: manual
-#  allow_failure: false
+#
+.quality_stage: &quality_stage
+  stage: "Code Quality"
+  image: node:${NODE_VERSION}
+  before_script:
+    - yarn --frozen-lockfile
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+  script:
+    - yarn build
+    - yarn lint
+    - yarn test
+  when: manual
+  allow_failure: false
+#
+
+Code quality (dev):
+  <<: *quality_stage
+  only:
+    - branches
+  except:
+    - master
+
+Code quality (master):
+  <<: *quality_stage
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
+  only:
+    - master
+
+
+
+Code quality (preprod):
+  <<: *quality_stage
+  only:
+    - /^v.*/
 
 
 ############################################
@@ -122,23 +146,26 @@ stages:
       - github_deploy_id
 #
 
-Get Github Id (dev):
+Get Github id (dev):
   <<: *get_github_id_stage
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
-Get Github Id (master):
+Get Github id (master):
   <<: *get_github_id_stage
   environment:
     name: master
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
-Get Github Id (preprod):
+Get Github id (preprod):
   <<: *get_github_id_stage
   environment:
     name: preprod
@@ -167,14 +194,17 @@ Create namespace (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Create namespace (master):
   <<: *create_namespace
   before_script:
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 Create namespace (preprod):
   <<: *create_namespace
@@ -209,6 +239,9 @@ Register api image commit sha:
     CONTEXT: .
     DOCKERFILE_PATH: packages/api/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
     - branches
 
@@ -218,6 +251,9 @@ Register app image commit sha:
     CONTEXT: .
     DOCKERFILE_PATH: packages/app/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
     - branches
 
@@ -227,6 +263,9 @@ Register init kinto image commit sha:
     CONTEXT: packages/kinto
     DOCKERFILE_PATH: packages/kinto/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
     - branches
 
@@ -296,7 +335,7 @@ Create egapro/secret (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Create egapro/secret (master):
   <<: *create_secret
@@ -304,8 +343,11 @@ Create egapro/secret (master):
     NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   before_script:
     - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 Create egapro/secret (preprod):
   <<: *create_secret
@@ -342,7 +384,7 @@ Deploy egapro/app (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/api (dev):
   <<: *deploy_stage
@@ -355,7 +397,7 @@ Deploy egapro/api (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/postgres (dev):
   <<: *deploy_stage
@@ -367,7 +409,7 @@ Deploy egapro/postgres (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/memcached (dev):
   <<: *deploy_stage
@@ -379,7 +421,7 @@ Deploy egapro/memcached (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/kinto (dev):
   <<: *deploy_stage
@@ -392,7 +434,7 @@ Deploy egapro/kinto (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 # Master Environment
 
@@ -405,8 +447,11 @@ Deploy egapro/app (master):
     NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/api (master):
   <<: *deploy_stage
@@ -417,8 +462,11 @@ Deploy egapro/api (master):
     NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/postgres (master):
   <<: *deploy_stage
@@ -428,8 +476,11 @@ Deploy egapro/postgres (master):
     NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/memcached (master):
   <<: *deploy_stage
@@ -439,8 +490,11 @@ Deploy egapro/memcached (master):
     NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 Deploy egapro/kinto (master):
   <<: *deploy_stage
@@ -451,8 +505,11 @@ Deploy egapro/kinto (master):
     PORT: ${KINTO_PORT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 
 # Preprod Environment
@@ -534,7 +591,7 @@ Send deployment url to Github (dev):
   only:
     - branches
   except:
-    - boni-ci-azure
+    - master
 
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
@@ -542,8 +599,11 @@ Send deployment url to Github (master):
     - export URL=https://${MASTER_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
     name: ${MASTER_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
@@ -580,8 +640,11 @@ Make a new release to deploy to preprod environment:
     - yarn config set cache-folder ${CI_PROJECT_DIR}/.yarn
     - yarn --frozen-lockfile
     - GH_TOKEN=${GITHUB_TOKEN} yarn lerna version ${LERNA_ARGS:="--force-publish --yes"}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - boni-ci-azure
+    - master
   when: manual
 
 
@@ -590,9 +653,9 @@ Make a new release to deploy to preprod environment:
 ###########################################
 
 #
-.deploy_prod_stage: &deploy_prod_stage
+.prod_stage: &prod_stage
   image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
-  variables: &deploy_prod_stage_variables
+  variables: &prod_stage_variables
     ENABLE_PERSISTENT_VOLUME: "true"
     APP_DOMAIN_NAME: fabrique.social.gouv.fr
     NAMESPACE_ENVIRONMENT: ${PROD_NAMESPACE_ENVIRONMENT}
@@ -646,6 +709,7 @@ Make a new release to deploy to preprod environment:
     - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-${STARTUP}.yml
     # kinto
     - export PORT=${KINTO_PORT}
+    - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
     - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
     - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
@@ -653,13 +717,15 @@ Make a new release to deploy to preprod environment:
   environment:
     name: ${PROD_NAMESPACE_ENVIRONMENT}
   when: manual
+  only:
+    - /^v.*/
 #
 
 Deploy egapro in production :
   stage: "Deploy to prod K8S"
-  <<: *deploy_prod_stage
+  <<: *prod_stage
   variables:
-    <<: *deploy_prod_stage_variables
+    <<: *prod_stage_variables
   script:
     # app
     - kubectl apply -f .k8s/app/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
@@ -685,14 +751,12 @@ Deploy egapro in production :
     - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
     - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
-  only:
-    - /^v.*/
 
 Restore egapro/postgres:
   stage: "Restore prod backup"
-  <<: *deploy_prod_stage
+  <<: *prod_stage
   variables:
-    <<: *deploy_prod_stage_variables
+    <<: *prod_stage_variables
     PORT: ${KINTO_PORT}
   script:
     # delete old restore job, kinto and postgres
