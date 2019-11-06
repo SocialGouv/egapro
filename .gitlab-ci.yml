@@ -16,7 +16,8 @@ variables:
   PREPROD_NAMESPACE_ENVIRONMENT: "preprod"
   PROD_NAMESPACE_ENVIRONMENT: "prod"
   ENABLE_PERSISTENT_VOLUME: "false"
-  IS_FEATURE_ENVIRONMENT: "false"
+  LIFETIME: "permanent"
+  LETS_ENCRYPT_ISSUER: "letsencrypt-prod"
   STARTUP: "egapro"
   APP_DOMAIN_NAME: "dev.fabrique.social.gouv.fr"
   # Rancher project id
@@ -320,6 +321,7 @@ Create egapro/secret (preprod):
   stage: "Deploy to hors prod K8S"
   variables: &deploy_stage_variables
     IMAGE_TAG: ${CI_COMMIT_SHA}
+    LETS_ENCRYPT_ISSUER: "letsencrypt-staging"
 #
 
 # Dev Environment
@@ -330,6 +332,7 @@ Deploy egapro/app (dev):
   variables:
     <<: *deploy_stage_variables
     PORT: ${APP_PORT}
+    LIFETIME: "temporary"
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:

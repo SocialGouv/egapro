@@ -18,5 +18,5 @@ spec:
         domains:
           - ${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
   issuerRef:
-    name: letsencrypt-prod
+    name: ${LETS_ENCRYPT_ISSUER}
     kind: ClusterIssuer
