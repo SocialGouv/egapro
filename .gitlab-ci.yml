@@ -284,8 +284,8 @@ Register init kinto image tag:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
     # Create egapro secrets
-    - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev-egapro.yml
-    - kubectl apply -f .k8s/secret/secret-dev-egapro.yml -n ${K8S_NAMESPACE}
+    - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev-${STARTUP}.yml
+    - kubectl apply -f .k8s/secret/secret-dev-${STARTUP}.yml -n ${K8S_NAMESPACE}
 #
 
 Create egapro/secret (dev):
@@ -623,32 +623,32 @@ Make a new release to deploy to preprod environment:
   before_script:
     # set environment variables
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export K8S_NAMESPACE=egapro-${NAMESPACE_ENVIRONMENT}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - export APP_URL=${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
     # azure volume secrets
-    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
-    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')
-    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-egapro.yml
+    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountname}')
+    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountkey}')
+    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${STARTUP}.yml
     # app
     - export PORT=${APP_PORT}
-    - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-egapro.yml
-    - envsubst < .k8s/app/service.yml > .k8s/app/service-egapro.yml
-    - envsubst < .k8s/app/ingress.yml > .k8s/app/ingress-prod-egapro.yml
-    - envsubst < .k8s/certificate/certificate-prod.yml > .k8s/certificate/certificate-egapro.yml
+    - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-${STARTUP}.yml
+    - envsubst < .k8s/app/service.yml > .k8s/app/service-${STARTUP}.yml
+    - envsubst < .k8s/app/ingress.yml > .k8s/app/ingress-prod-${STARTUP}.yml
+    - envsubst < .k8s/certificate/certificate-prod.yml > .k8s/certificate/certificate-${STARTUP}.yml
     # api
     - export PORT=${API_PORT}
-    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
-    - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
+    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-${STARTUP}.yml
+    - envsubst < .k8s/api/service.yml > .k8s/api/service-${STARTUP}.yml
     # memcached
-    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
+    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-${STARTUP}.yml
     # postgres
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-egapro.yml
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-${STARTUP}.yml
     # kinto
     - export PORT=${KINTO_PORT}
-    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
-    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
-    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-egapro.yml
+    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
+    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
+    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
     - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
   environment:
     name: ${PROD_NAMESPACE_ENVIRONMENT}
@@ -662,27 +662,27 @@ Deploy egapro in production :
     <<: *deploy_prod_stage_variables
   script:
     # app
-    - kubectl apply -f .k8s/app/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/app/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/app/ingress-prod-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/ingress-prod-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/certificate/certificate-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=app -n ${K8S_NAMESPACE} --timeout=600s
     # api
-    - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=api -n ${K8S_NAMESPACE} --timeout=600s
     # postgres
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
     # memcached
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-${STARTUP}.yml stable/memcached --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
     # kinto
-    - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
     - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
   only:
@@ -698,22 +698,22 @@ Restore egapro/postgres:
     # delete old restore job, kinto and postgres
     - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
     - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
-    - helm delete --purge egapro-${NAMESPACE_ENVIRONMENT}-pg || true;
-    - kubectl delete pvc data-egapro-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
+    - helm delete --purge ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg || true;
+    - kubectl delete pvc data-${STARTUP}-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
     # Create azure volume secrets
-    - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/secret/secret-azure-volume-${STARTUP}.yml -n ${K8S_NAMESPACE}
     # deploy clean postgres
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
     # run restore job
-    - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-egapro.yml
-    - kubectl apply -f .k8s/postgres/restore-job-egapro.yml -n ${K8S_NAMESPACE}
+    - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-${STARTUP}.yml
+    - kubectl apply -f .k8s/postgres/restore-job-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
     # deploy kinto
-    - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/service-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/job-init-kinto-egapro.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=complete job/init-kinto --timeout=600s -n ${K8S_NAMESPACE}
   only:
     - /^v.*/
