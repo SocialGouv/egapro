@@ -17,17 +17,16 @@
   <<: *deploy_egapro_api
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
 
 .deploy-egapro-api-k8s-master:
   <<: *deploy_egapro_api
   before_script:
-    - export ENVIRONMENT_NAME=master
+    - export ENVIRONMENT_NAME=${MASTER_ENVIRONMENT_NAME}
 
 .deploy-egapro-api-k8s-preprod:
   <<: *deploy_egapro_api
   before_script:
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export ENVIRONMENT_NAME=preprod
+    - export ENVIRONMENT_NAME=${PREPROD_ENVIRONMENT_NAME}
 
 ...

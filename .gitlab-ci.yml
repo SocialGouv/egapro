@@ -12,9 +12,11 @@ variables:
   DOCKER_HOST: tcp://localhost:2375
   IMAGE_INFRA_BASE_NAME: "infra/images-docker"
   DEV_ENVIRONMENT_NAME: "egapro-dev"
+  MASTER_ENVIRONMENT_NAME: "master"
+  PREPROD_ENVIRONMENT_NAME: "preprod"
   PROD_ENVIRONMENT_NAME: "prod"
   ENABLE_PERSISTENT_VOLUME: "false"
-  IS_FEATURE_ENVIRONMENT: "false"
+  IS_FEATURE_ENVIRONMENT: "no"
   STARTUP: "egapro"
   APP_DOMAIN_NAME: "dev.fabrique.social.gouv.fr"
   # Rancher project id
@@ -169,14 +171,14 @@ Create namespace (dev):
 Create namespace (master):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-master
+    - export K8S_NAMESPACE=${STARTUP}-${MASTER_ENVIRONMENT_NAME}
   only:
     - master
 
 Create namespace (preprod):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-preprod
+    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_ENVIRONMENT_NAME}
   only:
     - /^v.*/
 
@@ -298,14 +300,14 @@ Create egapro/secret (dev):
 Create egapro/secret (master):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-master
+    - export K8S_NAMESPACE=${STARTUP}-${MASTER_ENVIRONMENT_NAME}
   only:
     - master
 
 Create egapro/secret (preprod):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=${STARTUP}-preprod
+    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_ENVIRONMENT_NAME}
   only:
     - /^v.*/
 
@@ -518,18 +520,18 @@ Send deployment url to Github (dev):
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://master.${STARTUP}.${APP_DOMAIN_NAME}
+    - export URL=https://${MASTER_ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
-    name: master
+    name: ${MASTER_ENVIRONMENT_NAME}
   only:
     - master
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://preprod.${STARTUP}.${APP_DOMAIN_NAME}
+    - export URL=https://${PREPROD_ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
-    name: preprod
+    name: ${PREPROD_ENVIRONMENT_NAME}
   only:
     - /^v.*/
 
