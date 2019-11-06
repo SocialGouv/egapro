@@ -624,6 +624,7 @@ Make a new release to deploy to preprod environment:
     # set environment variables
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     - export K8S_NAMESPACE=egapro-${NAMESPACE_ENVIRONMENT}
+    - export APP_URL=${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
     # azure volume secrets
     - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountname}')
     - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n egapro-secret -ojsonpath='{.data.azurestorageaccountkey}')

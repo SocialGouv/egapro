@@ -10,13 +10,13 @@ metadata:
 spec:
   secretName: crt
   dnsNames:
-    - ${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+    - ${APP_URL}
   acme:
     config:
       - http01:
           ingressClass: azure/application-gateway
         domains:
-          - ${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+          - ${APP_URL}
   issuerRef:
     name: ${LETS_ENCRYPT_ISSUER}
     kind: ClusterIssuer
