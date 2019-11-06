@@ -18,7 +18,7 @@
   <<: *deploy_egapro_app
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
     - export ENVIRONMENT_TYPE=feature
     - envsubst < .k8s/certificate/certificate-staging.yml > .k8s/certificate/certificate-egapro.yml
     - kubectl apply -f .k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
@@ -27,7 +27,7 @@
   <<: *deploy_egapro_app
   before_script:
     - export ENVIRONMENT_NAME=master
-    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
     - export ENVIRONMENT_TYPE=master
     - envsubst < .k8s/certificate/certificate-staging.yml > .k8s/certificate/certificate-egapro.yml
     - kubectl apply -f .k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
@@ -37,7 +37,7 @@
   before_script:
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     - export ENVIRONMENT_NAME=master
-    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
     - export ENVIRONMENT_TYPE=preprod
     - envsubst < .k8s/certificate/certificate-prod.yml > .k8s/certificate/certificate-egapro.yml
     - kubectl apply -f .k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}

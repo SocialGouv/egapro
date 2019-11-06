@@ -4,9 +4,9 @@ apiVersion: apps/v1
 metadata:
   name: api
   labels:
-    app: egapro
+    app: ${STARTUP}
     component: api
-    namespace: egapro-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
 spec:
   replicas: 1
   selector:
@@ -15,9 +15,9 @@ spec:
   template:
     metadata:
       labels:
-        app: egapro
+        app: ${STARTUP}
         component: api
-        namespace: egapro-${ENVIRONMENT_NAME}
+        namespace: ${STARTUP}-${ENVIRONMENT_NAME}
     spec:
       containers:
         - image: ${CI_REGISTRY_IMAGE}/api:${IMAGE_TAG}
@@ -49,42 +49,42 @@ spec:
             - name: KINTO_SERVER
               value: "kinto"
             - name: KINTO_BUCKET
-              value: "egapro"
+              value: "${STARTUP}"
             - name: KINTO_LOGIN
               valueFrom:
                 secretKeyRef:
-                  name: egapro
+                  name: ${STARTUP}
                   key: KINTO_ADMIN_LOGIN
             - name: KINTO_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: egapro
+                  name: ${STARTUP}
                   key: KINTO_ADMIN_PASSWORD
             - name: MAIL_USE_TLS
               value: "true"
             - name: MAIL_PORT
               value: "465"
             - name: MAIL_FROM
-              value: "Index EgaPro <contact@egapro.beta.gouv.fr>"
+              value: "Index EgaPro <contact@${STARTUP}.beta.gouv.fr>"
             - name: MAIL_HOST
               valueFrom:
                 secretKeyRef:
-                  name: egapro
+                  name: ${STARTUP}
                   key: MAIL_HOST
             - name: MAIL_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: egapro
+                  name: ${STARTUP}
                   key: MAIL_USERNAME
             - name: MAIL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: egapro
+                  name: ${STARTUP}
                   key: MAIL_PASSWORD
             - name: API_SENTRY_DSN
               valueFrom:
                 secretKeyRef:
-                  name: egapro
+                  name: ${STARTUP}
                   key: API_SENTRY_DSN
             - name: API_SENTRY_ENVIRONMENT
               value: "development"

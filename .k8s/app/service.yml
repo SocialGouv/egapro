@@ -4,9 +4,9 @@ apiVersion: v1
 metadata:
   name: app
   labels:
-    app: egapro
+    app: ${STARTUP}
     component: app
-    namespace: egapro-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
 spec:
   selector:
     component: app

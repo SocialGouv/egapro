@@ -4,10 +4,10 @@ apiVersion: apps/v1
 metadata:
   name: app
   labels:
-    app: egapro
+    app: ${STARTUP}
     component: app
     environment: ${ENVIRONMENT_NAME}
-    namespace: egapro-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
 spec:
   replicas: 1
   selector:
@@ -16,10 +16,10 @@ spec:
   template:
     metadata:
       labels:
-        app: egapro
+        app: ${STARTUP}
         component: app
         environment: ${ENVIRONMENT_TYPE}
-        namespace: egapro-${ENVIRONMENT_NAME}
+        namespace: ${STARTUP}-${ENVIRONMENT_NAME}
     spec:
       containers:
         - image: ${CI_REGISTRY_IMAGE}/app:${IMAGE_TAG}
