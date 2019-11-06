@@ -98,7 +98,8 @@ stages:
     paths:
       - node_modules/
   script:
-    - cat $CI_JOB_TRIGGERED
+    - echo $CI_JOB_TRIGGERED
+    - echo $CI_COMMIT_REF_NAME
     - yarn build
     - yarn lint
     - yarn test
@@ -118,8 +119,6 @@ Code quality (master):
   only:
     refs:
       - boni-ci-azure
-    variables:
-      - $CI_JOB_TRIGGERED
 
 Code quality (preprod):
   <<: *quality_stage
