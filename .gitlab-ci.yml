@@ -164,7 +164,7 @@ Get Github id (master):
     refs:
       - boni-ci-azure
     variables:
-      - $CI_COMMIT_REF_NAME =~ /^boni-ci-azure/
+      - $CI_COMMIT_TAG == ""
 
 Get Github id (preprod):
   <<: *get_github_id_stage
@@ -631,9 +631,10 @@ Make a new release to deploy to preprod environment:
     - yarn --frozen-lockfile
     - GH_TOKEN=${GITHUB_TOKEN} yarn lerna version ${LERNA_ARGS:="--force-publish --yes"}
   only:
-    - boni-ci-azure
-  except:
-    - /^v.*/
+    refs:
+      - boni-ci-azure
+    variables:
+      - $CI_COMMIT_TAG == ""
   when: manual
 
 
