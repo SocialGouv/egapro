@@ -12,7 +12,7 @@ metadata:
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-  - host: ${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+  - host: ${APP_URL}
     http:
       paths:
         - path: /
