@@ -160,7 +160,7 @@ Create namespace (dev):
   <<: *create_namespace
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP_NAME}-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
   only:
     - branches
   except:
@@ -169,14 +169,14 @@ Create namespace (dev):
 Create namespace (master):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=${STARTUP_NAME}-master
+    - export K8S_NAMESPACE=${STARTUP}-master
   only:
     - master
 
 Create namespace (preprod):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=${STARTUP_NAME}-preprod
+    - export K8S_NAMESPACE=${STARTUP}-preprod
   only:
     - /^v.*/
 
@@ -289,7 +289,7 @@ Create egapro/secret (dev):
   <<: *create_secret
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP_NAME}-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP}-${ENVIRONMENT_NAME}
   only:
     - branches
   except:
@@ -298,14 +298,14 @@ Create egapro/secret (dev):
 Create egapro/secret (master):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=${STARTUP_NAME}-master
+    - export K8S_NAMESPACE=${STARTUP}-master
   only:
     - master
 
 Create egapro/secret (preprod):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=${STARTUP_NAME}-preprod
+    - export K8S_NAMESPACE=${STARTUP}-preprod
   only:
     - /^v.*/
 
@@ -507,7 +507,7 @@ Send deployment url to Github (dev):
   <<: *send_url_to_github_stage
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export URL=https://${ENVIRONMENT_NAME}.${STARTUP_NAME}.${APP_DOMAIN_NAME}
+    - export URL=https://${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
@@ -518,7 +518,7 @@ Send deployment url to Github (dev):
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://master.${STARTUP_NAME}.${APP_DOMAIN_NAME}
+    - export URL=https://master.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
     name: master
   only:
@@ -527,7 +527,7 @@ Send deployment url to Github (master):
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://preprod.${STARTUP_NAME}.${APP_DOMAIN_NAME}
+    - export URL=https://preprod.${STARTUP}.${APP_DOMAIN_NAME}
   environment:
     name: preprod
   only:
@@ -651,11 +651,11 @@ Deploy egapro in production :
     - kubectl wait --for=condition=Ready pod -l component=api -n ${K8S_NAMESPACE} --timeout=600s
     # postgres
     - helm init --client-only
-    - helm upgrade --install egapro-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
     # memcached
     - helm init --client-only
-    - helm upgrade --install egapro-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${ENVIRONMENT_NAME}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
     # kinto
     - kubectl apply -f .k8s/kinto/deployment-egapro.yml -n ${K8S_NAMESPACE}
@@ -682,7 +682,7 @@ Restore egapro/postgres:
     - kubectl apply -f .k8s/secret/secret-azure-volume-egapro.yml -n ${K8S_NAMESPACE}
     # deploy clean postgres
     - helm init --client-only
-    - helm upgrade --install egapro-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - helm upgrade --install ${STARTUP}-${ENVIRONMENT_NAME}-pg --wait -f .k8s/postgres/values-egapro.yml stable/postgresql --namespace ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
     # run restore job
     - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-egapro.yml
