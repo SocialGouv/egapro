@@ -19,7 +19,7 @@
   before_script:
     - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - export IS_FEATURE_ENVIRONMENT=true
+    - export IS_FEATURE_ENVIRONMENT=toto
     - envsubst < .k8s/certificate/certificate-staging.yml > .k8s/certificate/certificate-egapro.yml
     - kubectl apply -f .k8s/certificate/certificate-egapro.yml -n ${K8S_NAMESPACE}
 
