@@ -6,17 +6,17 @@ metadata:
   labels:
     app: ${STARTUP}
     component: certificate
-    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
 spec:
   secretName: crt
   dnsNames:
-    - ${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
+    - ${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
   acme:
     config:
       - http01:
           ingressClass: azure/application-gateway
         domains:
-          - ${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
+          - ${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
