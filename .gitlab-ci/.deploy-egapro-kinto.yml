@@ -4,6 +4,8 @@
 .deploy_egapro_kinto: &deploy_egapro_kinto
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
+    - export POSTGRESQL_USER=$(kubectl get secret egapro -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret egapro -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-egapro.yml
     - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-egapro.yml
