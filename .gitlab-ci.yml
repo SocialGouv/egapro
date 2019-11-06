@@ -98,6 +98,9 @@ stages:
     paths:
       - node_modules/
   script:
+    - echo $CI_COMMIT_TAG
+    - echo $CI_COMMIT_REF_NAME
+    - echo $CI_JOB_TRIGGERED
     - yarn build
     - yarn lint
     - yarn test
