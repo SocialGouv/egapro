@@ -14,6 +14,7 @@ variables:
   DEV_ENVIRONMENT_NAME: "egapro-dev"
   PROD_ENVIRONMENT_NAME: "prod"
   ENABLE_PERSISTENT_VOLUME: "false"
+  STARTUP: egapro
   APP_DOMAIN_NAME: dev.fabrique.social.gouv.fr
   # Rancher project id
   RANCHER_PROJECT_ID: c-gsm8d:p-9mvwt
@@ -158,7 +159,7 @@ Create namespace (dev):
   <<: *create_namespace
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP_NAME}-${ENVIRONMENT_NAME}
   only:
     - branches
   except:
@@ -167,14 +168,14 @@ Create namespace (dev):
 Create namespace (master):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=egapro-master
+    - export K8S_NAMESPACE=${STARTUP_NAME}-master
   only:
     - master
 
 Create namespace (preprod):
   <<: *create_namespace
   before_script:
-    - export K8S_NAMESPACE=egapro-preprod
+    - export K8S_NAMESPACE=${STARTUP_NAME}-preprod
   only:
     - /^v.*/
 
@@ -190,7 +191,7 @@ Create namespace (preprod):
   services:
     - docker:${DOCKER_VERSION}-dind
   before_script:
-    - docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
+    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
     - docker pull ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} || true
   script:
     - echo "Build ${IMAGE_NAME}:${CI_COMMIT_SHA} from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}"
@@ -233,7 +234,7 @@ Register init kinto image commit sha:
     - docker:${DOCKER_VERSION}-dind
   before_script:
     - export RELEASE_VERSION=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
+    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
   script:
     - echo "Build ${IMAGE_NAME}:${RELEASE_VERSION}"
     - docker build -t ${IMAGE_NAME}:${RELEASE_VERSION} -f ${DOCKERFILE_PATH} ${CONTEXT}
@@ -287,7 +288,7 @@ Create egapro/secret (dev):
   <<: *create_secret
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=egapro-${ENVIRONMENT_NAME}
+    - export K8S_NAMESPACE=${STARTUP_NAME}-${ENVIRONMENT_NAME}
   only:
     - branches
   except:
@@ -296,14 +297,14 @@ Create egapro/secret (dev):
 Create egapro/secret (master):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=egapro-master
+    - export K8S_NAMESPACE=${STARTUP_NAME}-master
   only:
     - master
 
 Create egapro/secret (preprod):
   <<: *create_secret
   before_script:
-    - export K8S_NAMESPACE=egapro-preprod
+    - export K8S_NAMESPACE=${STARTUP_NAME}-preprod
   only:
     - /^v.*/
 
@@ -505,7 +506,7 @@ Send deployment url to Github (dev):
   <<: *send_url_to_github_stage
   before_script:
     - export ENVIRONMENT_NAME=${ENVIRONMENT_NAME:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export URL=https://${ENVIRONMENT_NAME}.egapro.${ENVIRONMENT}.social.gouv.fr/
+    - export URL=https://${ENVIRONMENT_NAME}.${STARTUP_NAME}.${APP_DOMAIN_NAME}
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   only:
@@ -516,7 +517,7 @@ Send deployment url to Github (dev):
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://master.egapro.dev.fabrique.social.gouv.fr/
+    - export URL=https://master.${STARTUP_NAME}.${APP_DOMAIN_NAME}
   environment:
     name: master
   only:
@@ -525,7 +526,7 @@ Send deployment url to Github (master):
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://preprod.egapro.dev.fabrique.social.gouv.fr/
+    - export URL=https://preprod.${STARTUP_NAME}.${APP_DOMAIN_NAME}
   environment:
     name: preprod
   only:

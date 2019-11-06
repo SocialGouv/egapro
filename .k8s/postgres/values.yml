@@ -262,7 +262,7 @@ master:
   tolerations: []
   podLabels:
     component: postgres
-    namespace: egapro-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
   podAnnotations: {}
   ## Additional PostgreSQL Master Volume mounts
   ##

@@ -4,19 +4,19 @@ kind: Certificate
 metadata:
   name: crt
   labels:
-    app: egapro
+    app: ${STARTUP}
     component: certificate
-    namespace: egapro-${ENVIRONMENT_NAME}
+    namespace: ${STARTUP}-${ENVIRONMENT_NAME}
 spec:
   secretName: crt
   dnsNames:
-    - ${ENVIRONMENT_NAME}.egapro.${APP_DOMAIN_NAME}
+    - ${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
   acme:
     config:
       - http01:
           ingressClass: azure/application-gateway
         domains:
-          - ${ENVIRONMENT_NAME}.egapro.${APP_DOMAIN_NAME}
+          - ${ENVIRONMENT_NAME}.${STARTUP}.${APP_DOMAIN_NAME}
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer
