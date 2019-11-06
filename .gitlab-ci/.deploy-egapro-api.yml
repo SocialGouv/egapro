@@ -5,10 +5,10 @@
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-egapro.yml
-    - envsubst < .k8s/api/service.yml > .k8s/api/service-egapro.yml
-    - kubectl apply -f .k8s/api/deployment-egapro.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/api/service-egapro.yml -n ${K8S_NAMESPACE}
+    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-${STARTUP}.yml
+    - envsubst < .k8s/api/service.yml > .k8s/api/service-${STARTUP}.yml
+    - kubectl apply -f .k8s/api/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=Ready pod -l component=api -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #

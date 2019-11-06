@@ -5,9 +5,9 @@
   image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
   script:
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-egapro.yml
+    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-${STARTUP}.yml
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-egapro.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-${STARTUP}.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
     - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
   allow_failure: false
 #
