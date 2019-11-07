@@ -116,11 +116,8 @@ Code quality (dev):
 Code quality (master):
   <<: *quality_stage
   only:
-    refs:
+      - $CI_COMMIT_MESSAGE !~ /^version.*/
       - boni-ci-azure
-  except:
-    variables:
-    - $CI_COMMIT_MESSAGE =~ /^version.*/
 
 
 Code quality (preprod):
