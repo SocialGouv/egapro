@@ -118,7 +118,7 @@ Code quality (master):
   <<: *quality_stage
   except:
     variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore.*/
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
   - boni-ci-azure
 
