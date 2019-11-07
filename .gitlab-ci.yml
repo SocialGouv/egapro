@@ -82,541 +82,511 @@ stages:
   - "Deploy to prod K8S"
   - "Restore prod backup"
 
-#
-quality_stage:
-  stage: "Code Quality"
-  image: node:${NODE_VERSION}
-  script:
-    - echo $CI_COMMIT_TAG
-    - echo $CI_COMMIT_REF_NAME
-    - echo $CI_JOB_TRIGGERED
-  when: manual
-  only:
-    refs:
-    - boni-ci-azure
-##    - $CI_COMMIT_TAG !~ /^v.*/
-##  allow_failure: false
 
 ###########################################
 ###            CODE QUALITY             ###
 ###########################################
 
-##
-#.quality_stage: &quality_stage
-#  stage: "Code Quality"
-#  image: node:${NODE_VERSION}
-#  before_script:
-#    - yarn --frozen-lockfile
-#  cache:
-#    key: ${CI_COMMIT_REF_SLUG}
-#    paths:
-#      - node_modules/
-#  script:
-#    - yarn build
-#    - yarn lint
-#    - yarn test
-#  when: manual
-#  allow_failure: false
-##
 #
-#Code quality (dev):
-#  <<: *quality_stage
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
+.quality_stage: &quality_stage
+  stage: "Code Quality"
+  image: node:${NODE_VERSION}
+  before_script:
+    - yarn --frozen-lockfile
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+  script:
+    - yarn build
+    - yarn lint
+    - yarn test
+  when: manual
+  allow_failure: false
 #
-#Code quality (master):
-#  <<: *quality_stage
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
-#
-#Code quality (preprod):
-#  <<: *quality_stage
-#  only:
-#    - /^v.*/
-#
-#
-#############################################
-#####               PREPARE               ###
-#############################################
-#
-##
-#.get_github_id_stage: &get_github_id_stage
-#  stage: "Prepare"
-#  image:
-#    name: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
-#  before_script:
-#    - envsubst < /scripts/get-deploy-id.sh > /scripts/get-github-deploy-id.sh
-#  script:
-#    - sh /scripts/get-github-deploy-id.sh
-#  artifacts:
-#    paths:
-#      - github_deploy_id
-##
-#
-#Get Github id (dev):
-#  <<: *get_github_id_stage
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
-#
-#Get Github id (master):
-#  <<: *get_github_id_stage
-#  environment:
-#    name: master
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
-#
-#Get Github id (preprod):
-#  <<: *get_github_id_stage
-#  environment:
-#    name: preprod
-#  only:
-#    - /^v.*/
-#
-##
-#.create_namespace: &create_namespace
-#  stage: "Prepare"
-#  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  script:
-#    # Skip the job if the namespace exists
-#    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
-#    # Create namespace
-#    - kubectl create namespace ${K8S_NAMESPACE}
-#    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
-##
-#
-#Create namespace (dev):
-#  <<: *create_namespace
-#  before_script:
-#    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-#    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
-#
-#Create namespace (master):
-#  <<: *create_namespace
-#  before_script:
-#    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
-#
-#Create namespace (preprod):
-#  <<: *create_namespace
-#  before_script:
-#    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#
-##############################################
-######       REGISTER DOCKER IMAGES        ###
-##############################################
-#
-##
-#.register_stage commit sha: &register_stage_commit_sha
-#  stage: "Registration"
-#  image: docker:${DOCKER_VERSION}
-#  services:
-#    - docker:${DOCKER_VERSION}-dind
-#  before_script:
-#    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
-#    - docker pull ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} || true
-#  script:
-#    - echo "Build ${IMAGE_NAME}:${CI_COMMIT_SHA} from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}"
-#    - docker build --cache-from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} -t ${IMAGE_NAME}:${CI_COMMIT_SHA} -f ${DOCKERFILE_PATH} ${CONTEXT}
-#    - docker push ${IMAGE_NAME}
-##
-#
-#Register api image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/api/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
-#  only:
-#    refs:
-#      - branches
-#    variables:
-#    - /^chore./
-#
-#Register app image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/app/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
-#  only:
-#    refs:
-#      - branches
-#    variables:
-#    - /^chore./
-#
-#Register init kinto image commit sha:
-#  <<: *register_stage_commit_sha
-#  variables:
-#    CONTEXT: packages/kinto
-#    DOCKERFILE_PATH: packages/kinto/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
-#  only:
-#    refs:
-#      - branches
-#    variables:
-#    - /^chore./
-#
-##
-#.register_stage_tag: &register_stage_tag
-#  stage: "Registration"
-#  image: docker:${DOCKER_VERSION}
-#  services:
-#    - docker:${DOCKER_VERSION}-dind
-#  before_script:
-#    - export RELEASE_VERSION=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-#    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
-#  script:
-#    - echo "Build ${IMAGE_NAME}:${RELEASE_VERSION}"
-#    - docker build -t ${IMAGE_NAME}:${RELEASE_VERSION} -f ${DOCKERFILE_PATH} ${CONTEXT}
-#    - docker push ${IMAGE_NAME}:${RELEASE_VERSION}
-##
-#
-#Register api image tag:
-#  <<: *register_stage_tag
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/api/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
-#  only:
-#    - /^v.*/
-#
-#Register app image tag:
-#  <<: *register_stage_tag
-#  variables:
-#    CONTEXT: .
-#    DOCKERFILE_PATH: packages/app/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
-#  only:
-#    - /^v.*/
-#
-#Register init kinto image tag:
-#  <<: *register_stage_tag
-#  variables:
-#    CONTEXT: packages/kinto
-#    DOCKERFILE_PATH: packages/kinto/Dockerfile
-#    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
-#  only:
-#    - /^v.*/
-#
-#############################################
-#####          CREATE SECRET DEV          ###
-#############################################
-#
-##
-#.create_secret: &create_secret
-#  stage: "Create secret hors prod"
-#  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  script:
-#    # Create egapro secrets
-#    - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev-${STARTUP}.yml
-#    - kubectl apply -f .k8s/secret/secret-dev-${STARTUP}.yml -n ${K8S_NAMESPACE}
-##
-#
-#Create egapro/secret (dev):
-#  <<: *create_secret
-#  before_script:
-#    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-#    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
-#
-#Create egapro/secret (master):
-#  <<: *create_secret
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  before_script:
-#    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
-#
-#Create egapro/secret (preprod):
-#  <<: *create_secret
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  before_script:
-#    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
+
+Code quality (dev):
+  <<: *quality_stage
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Code quality (master):
+  <<: *quality_stage
+  only:
+    refs:
+      - boni-ci-azure
+
+Code quality (preprod):
+  <<: *quality_stage
+  only:
+    - /^v.*/
+
+
 ############################################
-####       DEPLOY TO HORS PROD K8S       ###
+####               PREPARE               ###
 ############################################
+
 #
-##
-#.deploy_stage: &deploy_stage
-#  stage: "Deploy to hors prod K8S"
-#  variables: &deploy_stage_variables
-#    IMAGE_TAG: ${CI_COMMIT_SHA}
-#    LETS_ENCRYPT_ISSUER: "letsencrypt-staging"
-##
+.get_github_id_stage: &get_github_id_stage
+  stage: "Prepare"
+  image:
+    name: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
+  before_script:
+    - envsubst < /scripts/get-deploy-id.sh > /scripts/get-github-deploy-id.sh
+  script:
+    - sh /scripts/get-github-deploy-id.sh
+  artifacts:
+    paths:
+      - github_deploy_id
 #
-## Dev Environment
+
+Get Github id (dev):
+  <<: *get_github_id_stage
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Get Github id (master):
+  <<: *get_github_id_stage
+  environment:
+    name: master
+  only:
+    refs:
+      - boni-ci-azure
+
+Get Github id (preprod):
+  <<: *get_github_id_stage
+  environment:
+    name: preprod
+  only:
+    - /^v.*/
+
 #
-#Deploy egapro/app (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${APP_PORT}
-#    LIFETIME: "temporary"
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
+.create_namespace: &create_namespace
+  stage: "Prepare"
+  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  script:
+    # Skip the job if the namespace exists
+    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
+    # Create namespace
+    - kubectl create namespace ${K8S_NAMESPACE}
+    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
 #
-#Deploy egapro/api (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-api-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${API_PORT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
+
+Create namespace (dev):
+  <<: *create_namespace
+  before_script:
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Create namespace (master):
+  <<: *create_namespace
+  before_script:
+    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+Create namespace (preprod):
+  <<: *create_namespace
+  before_script:
+    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+
+#############################################
+#####       REGISTER DOCKER IMAGES        ###
+#############################################
+
 #
-#Deploy egapro/postgres (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
+.register_stage commit sha: &register_stage_commit_sha
+  stage: "Registration"
+  image: docker:${DOCKER_VERSION}
+  services:
+    - docker:${DOCKER_VERSION}-dind
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
+    - docker pull ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} || true
+  script:
+    - echo "Build ${IMAGE_NAME}:${CI_COMMIT_SHA} from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA}"
+    - docker build --cache-from ${IMAGE_NAME}:${CI_COMMIT_BEFORE_SHA} -t ${IMAGE_NAME}:${CI_COMMIT_SHA} -f ${DOCKERFILE_PATH} ${CONTEXT}
+    - docker push ${IMAGE_NAME}
 #
-#Deploy egapro/memcached (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
+
+Register api image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/api/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
+  only:
+    refs:
+      - branches
+
+Register app image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/app/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
+  only:
+    refs:
+      - branches
+
+Register init kinto image commit sha:
+  <<: *register_stage_commit_sha
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
+  only:
+    refs:
+      - branches
+
 #
-#Deploy egapro/kinto (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${KINTO_PORT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
+.register_stage_tag: &register_stage_tag
+  stage: "Registration"
+  image: docker:${DOCKER_VERSION}
+  services:
+    - docker:${DOCKER_VERSION}-dind
+  before_script:
+    - export RELEASE_VERSION=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
+    - echo "$CI_JOB_TOKEN" | docker login ${CI_REGISTRY} -u gitlab-ci-token --password-stdin
+  script:
+    - echo "Build ${IMAGE_NAME}:${RELEASE_VERSION}"
+    - docker build -t ${IMAGE_NAME}:${RELEASE_VERSION} -f ${DOCKERFILE_PATH} ${CONTEXT}
+    - docker push ${IMAGE_NAME}:${RELEASE_VERSION}
 #
-## Master Environment
+
+Register api image tag:
+  <<: *register_stage_tag
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/api/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
+  only:
+    - /^v.*/
+
+Register app image tag:
+  <<: *register_stage_tag
+  variables:
+    CONTEXT: .
+    DOCKERFILE_PATH: packages/app/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
+  only:
+    - /^v.*/
+
+Register init kinto image tag:
+  <<: *register_stage_tag
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
+  only:
+    - /^v.*/
+
+############################################
+####          CREATE SECRET DEV          ###
+############################################
+
 #
-#Deploy egapro/app (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${APP_PORT}
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
+.create_secret: &create_secret
+  stage: "Create secret hors prod"
+  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  script:
+    # Create egapro secrets
+    - envsubst < ./.k8s/secret/secret-dev.yml > .k8s/secret/secret-dev-${STARTUP}.yml
+    - kubectl apply -f .k8s/secret/secret-dev-${STARTUP}.yml -n ${K8S_NAMESPACE}
 #
-#Deploy egapro/api (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-api-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${API_PORT}
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
+
+Create egapro/secret (dev):
+  <<: *create_secret
+  before_script:
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Create egapro/secret (master):
+  <<: *create_secret
+  variables:
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  before_script:
+    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+Create egapro/secret (preprod):
+  <<: *create_secret
+  variables:
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+  before_script:
+    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+###########################################
+###       DEPLOY TO HORS PROD K8S       ###
+###########################################
+
 #
-#Deploy egapro/postgres (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
+.deploy_stage: &deploy_stage
+  stage: "Deploy to hors prod K8S"
+  variables: &deploy_stage_variables
+    IMAGE_TAG: ${CI_COMMIT_SHA}
+    LETS_ENCRYPT_ISSUER: "letsencrypt-staging"
 #
-#Deploy egapro/memcached (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
-#
-#Deploy egapro/kinto (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#    PORT: ${KINTO_PORT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
-#
-#
-## Preprod Environment
-#
-#Deploy egapro/app (preprod):
-#  extends: .deploy-egapro-app-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    PORT: ${APP_PORT}
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/api (preprod):
-#  extends: .deploy-egapro-api-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    PORT: ${API_PORT}
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/postgres (preprod):
-#  extends: .deploy-egapro-postgres-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/memcached (preprod):
-#  extends: .deploy-egapro-memcached-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/kinto (preprod):
-#  extends: .deploy-egapro-kinto-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    PORT: ${KINTO_PORT}
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#
-##############################################
-######         SEND URL TO GITHUB          ###
-##############################################
-#
-#.send_url_to_github_stage: &send_url_to_github_stage
-#  stage: "Send Url to GitHub"
-#  image: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
-#  script:
-#    - export DEPLOY_ID=$(cat github_deploy_id)
-#    - envsubst < /scripts/send-url.sh > /scripts/send-url-to-github.sh
-#    - sh /scripts/send-url-to-github.sh
-#
-#
-#Send deployment url to Github (dev):
-#  <<: *send_url_to_github_stage
-#  before_script:
-#    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-#    - export URL=https://${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - boni-ci-azure
-#
-#Send deployment url to Github (master):
-#  <<: *send_url_to_github_stage
-#  before_script:
-#    - export URL=https://${MASTER_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
-#  environment:
-#    name: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - boni-ci-azure
-#  except:
-#    - /^chore./
-#
-#Send deployment url to Github (preprod):
-#  <<: *send_url_to_github_stage
-#  before_script:
-#    - export URL=https://${PREPROD_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
-#  environment:
-#    name: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#
+
+# Dev Environment
+
+Deploy egapro/app (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-app-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
+    PORT: ${APP_PORT}
+    LIFETIME: "temporary"
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Deploy egapro/api (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-api-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
+    PORT: ${API_PORT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Deploy egapro/postgres (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Deploy egapro/memcached (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-memcached-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Deploy egapro/kinto (dev):
+  <<: *deploy_stage
+  extends: .deploy-egapro-kinto-k8s-dev
+  variables:
+    <<: *deploy_stage_variables
+    PORT: ${KINTO_PORT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+# Master Environment
+
+Deploy egapro/app (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-app-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    PORT: ${APP_PORT}
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+Deploy egapro/api (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-api-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    PORT: ${API_PORT}
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+Deploy egapro/postgres (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-postgres-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+Deploy egapro/memcached (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-memcached-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+Deploy egapro/kinto (master):
+  <<: *deploy_stage
+  extends: .deploy-egapro-kinto-k8s-master
+  variables:
+    <<: *deploy_stage_variables
+    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
+    PORT: ${KINTO_PORT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+
+# Preprod Environment
+
+Deploy egapro/app (preprod):
+  extends: .deploy-egapro-app-k8s-preprod
+  stage: "Deploy to hors prod K8S"
+  variables:
+    PORT: ${APP_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+Deploy egapro/api (preprod):
+  extends: .deploy-egapro-api-k8s-preprod
+  stage: "Deploy to hors prod K8S"
+  variables:
+    PORT: ${API_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+Deploy egapro/postgres (preprod):
+  extends: .deploy-egapro-postgres-k8s-preprod
+  stage: "Deploy to hors prod K8S"
+  variables:
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+Deploy egapro/memcached (preprod):
+  extends: .deploy-egapro-memcached-k8s-preprod
+  stage: "Deploy to hors prod K8S"
+  variables:
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+Deploy egapro/kinto (preprod):
+  extends: .deploy-egapro-kinto-k8s-preprod
+  stage: "Deploy to hors prod K8S"
+  variables:
+    PORT: ${KINTO_PORT}
+    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+
+#############################################
+#####         SEND URL TO GITHUB          ###
+#############################################
+
+.send_url_to_github_stage: &send_url_to_github_stage
+  stage: "Send Url to GitHub"
+  image: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
+  script:
+    - export DEPLOY_ID=$(cat github_deploy_id)
+    - envsubst < /scripts/send-url.sh > /scripts/send-url-to-github.sh
+    - sh /scripts/send-url-to-github.sh
+
+
+Send deployment url to Github (dev):
+  <<: *send_url_to_github_stage
+  before_script:
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export URL=https://${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - boni-ci-azure
+
+Send deployment url to Github (master):
+  <<: *send_url_to_github_stage
+  before_script:
+    - export URL=https://${MASTER_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+  environment:
+    name: ${MASTER_NAMESPACE_ENVIRONMENT}
+  only:
+    refs:
+      - boni-ci-azure
+
+Send deployment url to Github (preprod):
+  <<: *send_url_to_github_stage
+  before_script:
+    - export URL=https://${PREPROD_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+  environment:
+    name: ${PREPROD_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+
 ############################################
 ####           RELEASE VERSION           ###
 ############################################
@@ -647,141 +617,141 @@ Make a new release to deploy to preprod environment:
       - boni-ci-azure
       - $CI_COMMIT_TAG !~ /^v.*/
   when: manual
+
+
+###########################################
+###          DEPLOY TO PROD K8S         ###
+###########################################
+
 #
+.deploy_prod_stage: &deploy_prod_stage
+  image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
+  variables: &deploy_prod_stage_variables
+    ENABLE_PERSISTENT_VOLUME: "true"
+    APP_DOMAIN_NAME: fabrique.social.gouv.fr
+    NAMESPACE_ENVIRONMENT: ${PROD_NAMESPACE_ENVIRONMENT}
+    API_RESOURCE_CPU_LIMIT: "250m"
+    API_RESOURCE_MEMORY_LIMIT: "256Mi"
+    API_RESOURCE_CPU_REQUEST: "5m"
+    API_RESOURCE_MEMORY_REQUEST: "16Mi"
+    APP_RESOURCE_CPU_LIMIT: "250m"
+    APP_RESOURCE_MEMORY_LIMIT: "256Mi"
+    APP_RESOURCE_CPU_REQUEST: "5m"
+    APP_RESOURCE_MEMORY_REQUEST: "16Mi"
+    KINTO_RESOURCE_CPU_LIMIT: "500m"
+    KINTO_RESOURCE_MEMORY_LIMIT: "512Mi"
+    KINTO_RESOURCE_CPU_REQUEST: "10m"
+    KINTO_RESOURCE_MEMORY_REQUEST: "32Mi"
+    INIT_KINTO_RESOURCE_CPU_LIMIT: "20m"
+    INIT_KINTO_RESOURCE_MEMORY_LIMIT: "16Mi"
+    INIT_KINTO_RESOURCE_CPU_REQUEST: "10m"
+    INIT_KINTO_RESOURCE_MEMORY_REQUEST: "8Mi"
+    MEMCACHED_RESOURCE_CPU_LIMIT: "500m"
+    MEMCACHED_RESOURCE_MEMORY_LIMIT: "256Mi"
+    MEMCACHED_RESOURCE_CPU_REQUEST: "10m"
+    MEMCACHED_RESOURCE_MEMORY_REQUEST: "32Mi"
+    POSTGRES_RESOURCE_CPU_LIMIT: "500m"
+    POSTGRES_RESOURCE_MEMORY_LIMIT: "512Mi"
+    POSTGRES_RESOURCE_CPU_REQUEST: "25m"
+    POSTGRES_RESOURCE_MEMORY_REQUEST: "128Mi"
+  before_script:
+    # set environment variables
+    - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
+    - export APP_URL=${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+    # azure volume secrets
+    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountname}')
+    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountkey}')
+    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${STARTUP}.yml
+    # app
+    - export PORT=${APP_PORT}
+    - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-${STARTUP}.yml
+    - envsubst < .k8s/app/service.yml > .k8s/app/service-${STARTUP}.yml
+    - envsubst < .k8s/app/ingress.yml > .k8s/app/ingress-prod-${STARTUP}.yml
+    - envsubst < .k8s/certificate/certificate.yml > .k8s/certificate/certificate-${STARTUP}.yml
+    # api
+    - export PORT=${API_PORT}
+    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-${STARTUP}.yml
+    - envsubst < .k8s/api/service.yml > .k8s/api/service-${STARTUP}.yml
+    # memcached
+    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-${STARTUP}.yml
+    # postgres
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-${STARTUP}.yml
+    # kinto
+    - export PORT=${KINTO_PORT}
+    - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
+    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
+    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
+    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
+    - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
+  environment:
+    name: ${PROD_NAMESPACE_ENVIRONMENT}
+  when: manual
 #
-############################################
-####          DEPLOY TO PROD K8S         ###
-############################################
-#
-##
-#.deploy_prod_stage: &deploy_prod_stage
-#  image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
-#  variables: &deploy_prod_stage_variables
-#    ENABLE_PERSISTENT_VOLUME: "true"
-#    APP_DOMAIN_NAME: fabrique.social.gouv.fr
-#    NAMESPACE_ENVIRONMENT: ${PROD_NAMESPACE_ENVIRONMENT}
-#    API_RESOURCE_CPU_LIMIT: "250m"
-#    API_RESOURCE_MEMORY_LIMIT: "256Mi"
-#    API_RESOURCE_CPU_REQUEST: "5m"
-#    API_RESOURCE_MEMORY_REQUEST: "16Mi"
-#    APP_RESOURCE_CPU_LIMIT: "250m"
-#    APP_RESOURCE_MEMORY_LIMIT: "256Mi"
-#    APP_RESOURCE_CPU_REQUEST: "5m"
-#    APP_RESOURCE_MEMORY_REQUEST: "16Mi"
-#    KINTO_RESOURCE_CPU_LIMIT: "500m"
-#    KINTO_RESOURCE_MEMORY_LIMIT: "512Mi"
-#    KINTO_RESOURCE_CPU_REQUEST: "10m"
-#    KINTO_RESOURCE_MEMORY_REQUEST: "32Mi"
-#    INIT_KINTO_RESOURCE_CPU_LIMIT: "20m"
-#    INIT_KINTO_RESOURCE_MEMORY_LIMIT: "16Mi"
-#    INIT_KINTO_RESOURCE_CPU_REQUEST: "10m"
-#    INIT_KINTO_RESOURCE_MEMORY_REQUEST: "8Mi"
-#    MEMCACHED_RESOURCE_CPU_LIMIT: "500m"
-#    MEMCACHED_RESOURCE_MEMORY_LIMIT: "256Mi"
-#    MEMCACHED_RESOURCE_CPU_REQUEST: "10m"
-#    MEMCACHED_RESOURCE_MEMORY_REQUEST: "32Mi"
-#    POSTGRES_RESOURCE_CPU_LIMIT: "500m"
-#    POSTGRES_RESOURCE_MEMORY_LIMIT: "512Mi"
-#    POSTGRES_RESOURCE_CPU_REQUEST: "25m"
-#    POSTGRES_RESOURCE_MEMORY_REQUEST: "128Mi"
-#  before_script:
-#    # set environment variables
-#    - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-#    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-#    - export APP_URL=${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
-#    # azure volume secrets
-#    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountname}')
-#    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountkey}')
-#    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${STARTUP}.yml
-#    # app
-#    - export PORT=${APP_PORT}
-#    - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-${STARTUP}.yml
-#    - envsubst < .k8s/app/service.yml > .k8s/app/service-${STARTUP}.yml
-#    - envsubst < .k8s/app/ingress.yml > .k8s/app/ingress-prod-${STARTUP}.yml
-#    - envsubst < .k8s/certificate/certificate.yml > .k8s/certificate/certificate-${STARTUP}.yml
-#    # api
-#    - export PORT=${API_PORT}
-#    - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-${STARTUP}.yml
-#    - envsubst < .k8s/api/service.yml > .k8s/api/service-${STARTUP}.yml
-#    # memcached
-#    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-${STARTUP}.yml
-#    # postgres
-#    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-#    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-${STARTUP}.yml
-#    # kinto
-#    - export PORT=${KINTO_PORT}
-#    - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
-#    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
-#    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
-#    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
-#    - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
-#  environment:
-#    name: ${PROD_NAMESPACE_ENVIRONMENT}
-#  when: manual
-##
-#
-#Deploy egapro in production :
-#  stage: "Deploy to prod K8S"
-#  <<: *deploy_prod_stage
-#  variables:
-#    <<: *deploy_prod_stage_variables
-#  script:
-#    # app
-#    - kubectl apply -f .k8s/app/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/app/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/app/ingress-prod-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/certificate/certificate-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=app -n ${K8S_NAMESPACE} --timeout=600s
-#    # api
-#    - kubectl apply -f .k8s/api/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/api/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=api -n ${K8S_NAMESPACE} --timeout=600s
-#    # postgres
-#    - helm init --client-only
-#    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
-#    # memcached
-#    - helm init --client-only
-#    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-${STARTUP}.yml stable/memcached --namespace ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
-#    # kinto
-#    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
-#    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
-#  only:
-#    - /^v.*/
-#
-#Restore egapro/postgres:
-#  stage: "Restore prod backup"
-#  <<: *deploy_prod_stage
-#  variables:
-#    <<: *deploy_prod_stage_variables
-#    PORT: ${KINTO_PORT}
-#  script:
-#    # delete old restore job, kinto and postgres
-#    - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
-#    - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
-#    - helm delete --purge ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg || true;
-#    - kubectl delete pvc data-${STARTUP}-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
-#    # Create azure volume secrets
-#    - kubectl apply -f .k8s/secret/secret-azure-volume-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    # deploy clean postgres
-#    - helm init --client-only
-#    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
-#    # run restore job
-#    - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-${STARTUP}.yml
-#    - kubectl apply -f .k8s/postgres/restore-job-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
-#    # deploy kinto
-#    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=complete job/init-kinto --timeout=600s -n ${K8S_NAMESPACE}
-#  only:
-#    - /^v.*/
-#  when: manual
-#
-#...
+
+Deploy egapro in production :
+  stage: "Deploy to prod K8S"
+  <<: *deploy_prod_stage
+  variables:
+    <<: *deploy_prod_stage_variables
+  script:
+    # app
+    - kubectl apply -f .k8s/app/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/app/ingress-prod-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/certificate/certificate-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=app -n ${K8S_NAMESPACE} --timeout=600s
+    # api
+    - kubectl apply -f .k8s/api/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/api/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=api -n ${K8S_NAMESPACE} --timeout=600s
+    # postgres
+    - helm init --client-only
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
+    # memcached
+    - helm init --client-only
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-${STARTUP}.yml stable/memcached --namespace ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
+    # kinto
+    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
+    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
+  only:
+    - /^v.*/
+
+Restore egapro/postgres:
+  stage: "Restore prod backup"
+  <<: *deploy_prod_stage
+  variables:
+    <<: *deploy_prod_stage_variables
+    PORT: ${KINTO_PORT}
+  script:
+    # delete old restore job, kinto and postgres
+    - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
+    - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
+    - helm delete --purge ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg || true;
+    - kubectl delete pvc data-${STARTUP}-prod-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
+    # Create azure volume secrets
+    - kubectl apply -f .k8s/secret/secret-azure-volume-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    # deploy clean postgres
+    - helm init --client-only
+    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
+    # run restore job
+    - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-${STARTUP}.yml
+    - kubectl apply -f .k8s/postgres/restore-job-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
+    # deploy kinto
+    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/init-kinto --timeout=600s -n ${K8S_NAMESPACE}
+  only:
+    - /^v.*/
+  when: manual
+
+...
