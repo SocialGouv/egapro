@@ -91,14 +91,15 @@ stages:
 .quality_stage: &quality_stage
   stage: "Code Quality"
   image: node:${NODE_VERSION}
-  before_script:
-    - yarn --frozen-lockfile
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
+#  before_script:
+#    - yarn --frozen-lockfile
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - node_modules/
   script:
-    - echo toto
+    - echo $CI_COMMIT_MESSAGE
+    - printenv
 #    - yarn build
 #    - yarn lint
 #    - yarn test
@@ -116,10 +117,10 @@ Code quality (dev):
 Code quality (master):
   <<: *quality_stage
   except:
-    - $CI_COMMIT_MESSAGE !~ /^chore.*/
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore.*/
   only:
-    - boni-ci-azure
-
+  - boni-ci-azure
 
 
 
