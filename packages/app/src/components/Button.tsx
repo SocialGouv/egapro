@@ -23,11 +23,11 @@ function Button({
       css={[
         styles.button,
         outline && styles.buttonOutline,
-        error && styles.buttonError
+        error && styles.buttonError,
+        !outline && !error && styles.buttonHover
       ]}
     >
-      {!outline && !error && <div css={styles.backgroundHover} />}
-      <span css={[styles.text, loading && styles.textLoading]}>{label}</span>
+      <span css={[loading && styles.textLoading]}>{label}</span>
       {loading && (
         <div css={styles.loader}>
           <ActivityIndicator />
@@ -47,41 +47,30 @@ const styles = {
     padding: "0 10px",
     backgroundColor: globalStyles.colors.primary,
     color: "#FFF",
-    WebkitTextFillColor: "#FFF",
     border: `solid ${globalStyles.colors.primary} 1px`,
     borderRadius: 5,
     cursor: "pointer",
     position: "relative",
-
-    ":hover :first-of-type": {
-      opacity: 1
-    }
+    background:
+      "linear-gradient(64.86deg, #696CD1 0%, #696CD1 51%, #191A49 100%)",
+    backgroundSize: "200%",
+    transition: "background-position 350ms ease-in-out"
   }),
-  backgroundHover: css({
-    content: '""',
-    position: "absolute",
-    top: -1, // because border
-    left: -1,
-    right: -1,
-    bottom: -1,
-    zIndex: 0,
-    background: "linear-gradient(64.86deg, #696CD1 0%, #191A49 100%)",
-    borderRadius: 5,
-
-    opacity: 0,
-    transition: "opacity 350ms ease-in-out",
-    willChange: "opacity"
+  buttonHover: css({
+    ":hover": {
+      backgroundPosition: "right center"
+    }
   }),
   buttonOutline: css({
     color: globalStyles.colors.primary,
-    WebkitTextFillColor: globalStyles.colors.primary,
-    backgroundColor: "#FFF"
+    backgroundColor: "#FFF",
+    background: "none"
   }),
   buttonError: css({
     color: globalStyles.colors.error,
-    WebkitTextFillColor: globalStyles.colors.error,
     borderColor: globalStyles.colors.error,
-    backgroundColor: "#FFF"
+    backgroundColor: "#FFF",
+    background: "none"
   }),
 
   loader: css({
@@ -90,16 +79,12 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 2,
 
     display: "flex",
     alignItems: "center",
     justifyContent: "center"
   }),
 
-  text: css({
-    zIndex: 1
-  }),
   textLoading: css({
     visibility: "hidden"
   })

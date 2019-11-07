@@ -341,8 +341,13 @@ const styles = {
   }),
   dateField: css({
     marginTop: 5,
-    ".react-datepicker-popper": {
-      zIndex: 9
+    input: {
+      display: "flex",
+      fontSize: 14,
+      paddingLeft: 22,
+      paddingRight: 22,
+      height: 38,
+      marginTop: 5
     }
   }),
   edit: css({
