@@ -118,7 +118,7 @@ Code quality (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Code quality (preprod):
   <<: *quality_stage
@@ -160,7 +160,7 @@ Get Github id (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Get Github id (preprod):
   <<: *get_github_id_stage
@@ -200,7 +200,7 @@ Create namespace (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Create namespace (preprod):
   <<: *create_namespace
@@ -239,7 +239,7 @@ Register api image commit sha:
     refs:
       - branches
     variables:
-    - /^chore\(release\)./
+    - /^chore./
 
 Register app image commit sha:
   <<: *register_stage_commit_sha
@@ -251,7 +251,7 @@ Register app image commit sha:
     refs:
       - branches
     variables:
-    - /^chore\(release\)./
+    - /^chore./
 
 Register init kinto image commit sha:
   <<: *register_stage_commit_sha
@@ -263,7 +263,7 @@ Register init kinto image commit sha:
     refs:
       - branches
     variables:
-    - /^chore\(release\)./
+    - /^chore./
 
 #
 .register_stage_tag: &register_stage_tag
@@ -342,7 +342,7 @@ Create egapro/secret (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Create egapro/secret (preprod):
   <<: *create_secret
@@ -445,7 +445,7 @@ Deploy egapro/app (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Deploy egapro/api (master):
   <<: *deploy_stage
@@ -459,7 +459,7 @@ Deploy egapro/api (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Deploy egapro/postgres (master):
   <<: *deploy_stage
@@ -472,7 +472,7 @@ Deploy egapro/postgres (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Deploy egapro/memcached (master):
   <<: *deploy_stage
@@ -485,7 +485,7 @@ Deploy egapro/memcached (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Deploy egapro/kinto (master):
   <<: *deploy_stage
@@ -499,7 +499,7 @@ Deploy egapro/kinto (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 
 # Preprod Environment
@@ -592,7 +592,7 @@ Send deployment url to Github (master):
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
 
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
@@ -632,7 +632,7 @@ Make a new release to deploy to preprod environment:
   only:
     - boni-ci-azure
   except:
-    - /^chore\(release\)./
+    - /^chore./
   when: manual
 
 
