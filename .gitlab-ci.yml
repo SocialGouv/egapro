@@ -116,8 +116,8 @@ Code quality (dev):
 Code quality (master):
   <<: *quality_stage
   only:
-      - $CI_COMMIT_MESSAGE !~ /^version.*/
-      - boni-ci-azure
+    - $CI_COMMIT_MESSAGE !~ /^chore.*/
+    - boni-ci-azure
 
 
 Code quality (preprod):
