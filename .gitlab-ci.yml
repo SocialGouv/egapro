@@ -83,17 +83,19 @@ stages:
   - "Restore prod backup"
 
 #
-.quality_stage:
+quality_stage:
   stage: "Code Quality"
   image: node:${NODE_VERSION}
   script:
     - echo $CI_COMMIT_TAG
+    - echo $CI_COMMIT_REF_NAME
+    - echo $CI_JOB_TRIGGERED
   when: manual
   only:
     refs:
     - boni-ci-azure
-    - $CI_COMMIT_TAG !~ /^v.*/
-  allow_failure: false
+##    - $CI_COMMIT_TAG !~ /^v.*/
+##  allow_failure: false
 
 ###########################################
 ###            CODE QUALITY             ###
