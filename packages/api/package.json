@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "main": "index.js",
   "author": "Incubateur des Ministères Sociaux <dsi-incubateur@sg.social.gouv.fr> (https://incubateur.social.gouv.fr)",
   "license": "Apache-2.0",
