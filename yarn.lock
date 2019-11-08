@@ -2605,10 +2605,10 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
   integrity sha512-ewFXqrQHlFsgc09MK5jP5iR7vumV/BYayNC6PgJO2LPe8vrnNFyjQjSppfEngITi0qvfKtzFvgKymGheFM9UOA==
 
-"@types/react-datepicker@2.9.3":
-  version "2.9.3"
-  resolved "https://registry.yarnpkg.com/@types/react-datepicker/-/react-datepicker-2.9.3.tgz#af8e7a40e159ce95fe33edbcf707fdbf594e53d2"
-  integrity sha512-87L4+bQ1FwAmlb+6bMaXVMKFdVvH0u7Zib0x4kOPRqAb0qfrQuaWOlLYvd/yETYhCFuHuQEA46kasyU6PpH3+A==
+"@types/react-datepicker@2.9.4":
+  version "2.9.4"
+  resolved "https://registry.yarnpkg.com/@types/react-datepicker/-/react-datepicker-2.9.4.tgz#6a125dff98f89d74d00df46ceb4688ad96b649e1"
+  integrity sha512-YhjYeNzijYl0GF7G3XfccheqHND8vo/OGsFu0uqmG2b0LFobClAaf3vkEcYYJ7zwaC/Nww1BE/T8B9t1jwpxPA==
   dependencies:
     "@types/react" "*"
     date-fns "^2.0.1"
