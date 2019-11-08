@@ -132,7 +132,17 @@ function Effectif({ state, dispatch }: Props) {
           totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
           <InfoBloc
             title="Attention, vos effectifs ne sont pas les mêmes que ceux déclarés en niveaux ou coefficients hiérarchiques"
-            icon="cross"
+            icon="warning"
+          />
+        )}
+
+      {state.informations.formValidated === "Valid" &&
+        state.effectif.formValidated === "Valid" &&
+        totalNombreSalariesHommeCsp + totalNombreSalariesFemmeCsp > 250 &&
+        state.informations.trancheEffectifs === "50 à 250" && (
+          <InfoBloc
+            title="Attention, les effectifs pris en compte pour le calcul sont supérieurs aux effectifs déclarés pour l'entreprise"
+            icon="warning"
           />
         )}
     </Page>
