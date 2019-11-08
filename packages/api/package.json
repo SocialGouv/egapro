@@ -22,7 +22,7 @@
     "koa-router": "7.4.0",
     "node-fetch": "2.6.0",
     "nodemailer": "6.3.1",
-    "pino": "5.13.5"
+    "pino": "5.13.6"
   },
   "devDependencies": {
     "@sentry/types": "5.7.1",
