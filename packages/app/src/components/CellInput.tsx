@@ -50,15 +50,11 @@ const trickyMaskNumberToAllowAnyChar = (
 
   const rawMaskArray = mask(valueOnlyNum);
 
-  console.log(rawMaskArray);
-
   const transformedMaskArray = rawMaskArray.map((char: any) => {
     return char.source && char.source === digitRegExp.source
       ? anyNonWhitespaceRegExp
       : char;
   });
-
-  console.log(transformedMaskArray);
 
   return transformedMaskArray;
 };
