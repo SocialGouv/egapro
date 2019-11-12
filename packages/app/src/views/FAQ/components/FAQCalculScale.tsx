@@ -10,53 +10,41 @@ interface Props {
 
 function FAQCalculScale({ listTitle, list, scaleTitle, scale }: Props) {
   return (
-    <div css={styles.container}>
-      <div css={styles.leftColumn}>
-        <span css={[styles.text, styles.title]}>{listTitle}</span>
-        {list.map(listEl => (
-          <span css={styles.text}>• {listEl}</span>
+    <table css={styles.container}>
+      <thead>
+        <tr>
+          <th css={[styles.text, styles.title]}>{listTitle}</th>
+          <th css={[styles.text, styles.title]}>{scaleTitle}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {list.map((listEl, index) => (
+          <tr key={listEl}>
+            <td css={styles.text}>• {listEl}</td>
+            <td css={styles.text}>{scale[index]}</td>
+          </tr>
         ))}
-      </div>
-      <div css={styles.rightColumn}>
-        <span css={[styles.text, styles.title]}>{scaleTitle}</span>
-        {scale.map(scaleEl => (
-          <span css={styles.text}>{scaleEl}</span>
-        ))}
-      </div>
-    </div>
+      </tbody>
+    </table>
   );
 }
 
 const styles = {
   container: css({
-    display: "flex",
     marginBottom: 12,
     padding: "13px 25px",
     backgroundColor: "#F9F7F9",
-    borderRadius: 5
-  }),
-  leftColumn: css({
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: "auto",
-    display: "flex",
-    flexDirection: "column"
-  }),
-  rightColumn: css({
-    marginLeft: 6,
-    flexGrow: 0,
-    flexShrink: 0,
-    flexBasis: "auto",
-    display: "flex",
-    flexDirection: "column"
+    borderRadius: 5,
+    width: "100%"
   }),
   text: css({
     fontSize: 14,
     lineHeight: "17px"
   }),
   title: css({
-    marginBottom: 8,
-    fontWeight: "bold"
+    paddingBottom: 8,
+    fontWeight: "bold",
+    textAlign: "left"
   })
 };
 
