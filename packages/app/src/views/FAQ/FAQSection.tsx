@@ -50,6 +50,7 @@ function FAQSection({ section }: Props) {
             "indicateur1",
             "indicateur2",
             "indicateur3",
+            "indicateur2et3",
             "indicateur4",
             "indicateur5",
             "resultat"
