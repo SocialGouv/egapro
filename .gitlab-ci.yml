@@ -184,6 +184,7 @@ Get Github id (preprod):
     # Create namespace
     - kubectl create namespace ${K8S_NAMESPACE}
     - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
+    - kubectl label namespace ${K8S_NAMESPACE} cert=wildcard
 #
 
 Create namespace (dev):
@@ -585,7 +586,7 @@ Send deployment url to Github (dev):
   <<: *send_url_to_github_stage
   before_script:
     - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export URL=https://${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+    - export URL=https://${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
@@ -596,7 +597,7 @@ Send deployment url to Github (dev):
 Send deployment url to Github (master):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://${MASTER_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+    - export URL=https://${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
   environment:
     name: ${MASTER_NAMESPACE_ENVIRONMENT}
   except:
@@ -608,7 +609,7 @@ Send deployment url to Github (master):
 Send deployment url to Github (preprod):
   <<: *send_url_to_github_stage
   before_script:
-    - export URL=https://${PREPROD_NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+    - export URL=https://${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
   environment:
     name: ${PREPROD_NAMESPACE_ENVIRONMENT}
   only:
@@ -687,17 +688,18 @@ Make a new release to deploy to preprod environment:
     # set environment variables
     - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - export APP_URL=${NAMESPACE_ENVIRONMENT}.${STARTUP}.${APP_DOMAIN_NAME}
+    - export APP_URL=${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
     # azure volume secrets
     - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountname}')
     - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountkey}')
+    - export CERTIFICATE_ENVIRONMENT=crt
     - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${STARTUP}.yml
     # app
     - export PORT=${APP_PORT}
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-${STARTUP}.yml
     - envsubst < .k8s/app/service.yml > .k8s/app/service-${STARTUP}.yml
     - envsubst < .k8s/app/ingress.yml > .k8s/app/ingress-prod-${STARTUP}.yml
-    - envsubst < .k8s/certificate/certificate.yml > .k8s/certificate/certificate-${STARTUP}.yml
+    - envsubst < .k8s/certificate/certificate-prod.yml > .k8s/certificate/certificate-${STARTUP}.yml
     # api
     - export PORT=${API_PORT}
     - envsubst < .k8s/api/deployment.yml > .k8s/api/deployment-${STARTUP}.yml
