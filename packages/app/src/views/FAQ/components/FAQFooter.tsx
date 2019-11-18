@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-
-import TextLink from "../../../components/TextLink";
+import globalStyles from "../../../utils/globalStyles";
 
 function FAQFooter() {
   return (
@@ -12,10 +11,12 @@ function FAQFooter() {
         </span>
         <br />
         <span css={styles.text}>
-          <TextLink
-            to={{ state: { faq: "/contact" } }}
-            label="Contactez votre référent égapro"
-          />
+          <a
+            href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
+            css={styles.infoLink}
+          >
+            Contactez votre référent égapro
+          </a>
         </span>
       </div>
     </div>
@@ -35,7 +36,12 @@ const styles = {
   text: css({
     fontSize: 12,
     lineHeight: "15px"
-  })
+  }),
+  infoLink: {
+    color: globalStyles.colors.default,
+    textDecoration: "underline",
+    marginLeft: 8
+  }
 };
 
 export default FAQFooter;
