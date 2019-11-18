@@ -16,43 +16,45 @@ function FAQIndicateur2et3DetailCalcul() {
       <FAQStep icon={<IconLamp />}>
         Pour que le calcul soit possible il faut que les effectifs pris en
         compte comptent <strong>au moins 5 femmes et 5 hommes</strong>, et qu'il
-        y ai eu des augmentations durant la période de déclaration.
+        y ait eu des augmentations durant la période de calcul de l'indicateur.
       </FAQStep>
 
       <FAQStep icon={<IconText>1</IconText>}>
         Calculer le nombre de femmes et d’hommes augmentés au cours de la
-        période de déclaration.
+        période de calcul de l'indicateur.
       </FAQStep>
 
       <FAQStep icon={<IconText>2</IconText>}>
-        Calculer le taux que représente le nombre de femmes augmentées par
-        rapport au nombre total de femmes employées, et le nombre d'hommes
-        augmentés par rapport au nombre total d'hommes employés
+        Calculer le taux d'augmentation des femmes en rapportant le nombre de
+        femmes augmentées au nombre total de femmes salariées. Calculer de la
+        même façon le taux d'augmentation des hommes.
       </FAQStep>
 
       <FAQStep icon={<IconText>3a</IconText>}>
-        Une première donnée est la valeur absolue de l'écart entre les deux taux
-        calculés en 2. Cet écart est utilisé en "points de pourcentage". Exemple
-        d'un écart de <em>3.1%</em> : la note sera calculée sur la donnée{" "}
-        <em>3.1</em>.
+        Un premier résultat est la valeur absolue de l'écart entre les deux taux
+        calculés en 2. Cet écart est mesuré en "points de pourcentage". Exemple
+        d'un taux d'augmentation des femmes de <em>33,13%</em> et d'un taux
+        d'augmentation des hommes de <em>30,00%</em> d'où un écart de{" "}
+        <em>3,13</em> points de pourcentage : la note sera calculée sur la
+        donnée <em>3,13</em>.
       </FAQStep>
 
       <FAQStep icon={<IconText>3b</IconText>}>
-        Une deuxième donnée est "l'écart en équivalent nombre de salariés" :
-        l'écart de taux calculé en 3a est appliqué au plus petit effectif, pour
-        calculer le plus petit nombre d'employés qu'il aurait fallu augmenter ou
-        ne pas augmenter pour être à égalité. Exemple d'un écart de{" "}
-        <em>3.1%</em> dans une entreprise employant 15 femmes et 20 hommes : on
-        applique <em>3.1%</em> à 15 femmes, pour un nombre équivalent de
-        salariés de <em>0.465</em>.
+        Un second résultat est "l'écart en nombre équivalent de salariés" :
+        l'écart de taux calculé en 3a est appliqué au plus petit effectif entre
+        les femmes et les hommes. Il correspond au plus petit nombre de salariés
+        qu'il aurait fallu augmenter ou ne pas augmenter pour être à égalité des
+        taux d'augmentation. Exemple d'un écart de <em>3,13</em> points de
+        pourcentage dans une entreprise employant 15 femmes et 20 hommes : on
+        applique <em>3,13%</em> à 15 femmes, pour un nombre équivalent de
+        salariés de <em>0,4695</em>.
       </FAQStep>
 
       <FAQStep icon={<IconText>4</IconText>}>
-        Les donnés 3a et 3b sont enfin arrondies à une décimale, et la plus
+        Les données 3a et 3b sont enfin arrondies à une décimale, et la plus
         petite donnée est utilisée pour le calcul de la note finale, car étant
-        la plus avantageuse. Pour reprendre les exemples ci-dessus, c'est la
-        donnée 3b arrondie (0.5) qui sera conservée, pour une note finale de 35
-        points.
+        la plus avantageuse. En reprenant l'exemple ci-dessus, c'est la donnée
+        3b arrondie (0,5) qui sera conservée, pour une note finale de 35 points.
       </FAQStep>
 
       <div css={styles.content}>
