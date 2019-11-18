@@ -5,8 +5,6 @@ import { RouteComponentProps } from "react-router-dom";
 import { FAQSectionType } from "../../globals.d";
 import globalStyles from "../../utils/globalStyles";
 
-import ActionLink from "../../components/ActionLink";
-
 import FAQTitle from "./components/FAQTitle";
 import FAQTitle2 from "./components/FAQTitle2";
 
@@ -45,10 +43,6 @@ function FAQSectionDetailCalcul({ section, history }: Props) {
             {FAQDetailCalculElement}
           </div>
         )}
-
-        <ActionLink style={styles.button} onClick={() => history.goBack()}>
-          <span css={styles.buttonIcon}>◀</span> ︎retour
-        </ActionLink>
       </div>
     </div>
   );
