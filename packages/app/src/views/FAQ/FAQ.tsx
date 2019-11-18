@@ -11,7 +11,6 @@ import FAQFooter from "./components/FAQFooter";
 import FAQHome from "./FAQHome";
 import FAQSection from "./FAQSection";
 import FAQQuestion from "./FAQQuestion";
-import FAQContact from "./FAQContact";
 import globalStyles from "../../utils/globalStyles";
 
 const FAQPaths: { [key: string]: string } = {
@@ -103,8 +102,6 @@ function FAQ({ closeMenu }: Props) {
                     />
                   )}
                 />
-
-                <Route exact path="/contact" render={() => <FAQContact />} />
               </Switch>
 
               <FAQFooter />

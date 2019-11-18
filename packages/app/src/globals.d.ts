@@ -318,23 +318,3 @@ export type FAQSection = {
     parts: Array<FAQPartType>;
   };
 };
-
-////////////
-
-export type FAQContactLink = {
-  type: "email" | "link";
-  data: string;
-};
-
-export type FAQContactPerson = {
-  title?: string;
-  name: string;
-  links: Array<FAQContactLink>;
-};
-
-export type FAQContactBloc = {
-  title: string;
-  people: Array<FAQContactPerson>;
-};
-
-export type FAQContact = Array<FAQContactBloc>;
