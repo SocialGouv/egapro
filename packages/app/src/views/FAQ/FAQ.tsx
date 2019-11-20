@@ -71,7 +71,7 @@ function FAQ({ closeMenu }: Props) {
             >
               <Switch location={locationFAQ}>
                 <Route
-                  path={["/", "/simulateur/:code"]}
+                  path={["/", "/mentions-legales", "/simulateur/:code"]}
                   exact
                   render={() => <FAQHome />}
                 />
