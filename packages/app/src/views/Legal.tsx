@@ -1,10 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Fragment } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import { ActionType } from "../globals";
-
-import Page from "../components/Page";
 
 interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void;
@@ -12,7 +11,8 @@ interface Props extends RouteComponentProps {
 
 function Legal({ history, location, dispatch }: Props) {
   return (
-    <Page title="Mentions légales de Egapro">
+    <Fragment>
+      <h1>Mentions légales de Egapro</h1>
       <div css={styles.content}>
         <h2 css={styles.title}>Editeur de la Plateforme</h2>
         La Plateforme EgaPro est éditée par l’Incubateur des Ministères sociaux
@@ -69,7 +69,7 @@ function Legal({ history, location, dispatch }: Props) {
         associés à la plateforme ne seront à l’origine d’envoi de courriels pour
         demander la saisie d’informations personnelles.
       </div>
-    </Page>
+    </Fragment>
   );
 }
 
@@ -79,10 +79,10 @@ const styles = {
     fontSize: 18,
     lineHeight: "22px",
     fontWeight: "bold",
-    marginTop: 60,
+    marginTop: 30,
     marginLeft: 0,
     marginRight: 0,
-    marginBottom: 30
+    marginBottom: 10
   })
 };
 
