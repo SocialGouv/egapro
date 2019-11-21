@@ -59,6 +59,13 @@ function FAQHeader({
               <FAQHeaderBackButton onClick={() => history.goBack()} />
             )}
           />
+          <Route
+            exact
+            path="/section/:section/detail-calcul"
+            render={({ history }) => (
+              <FAQHeaderBackButton onClick={() => history.goBack()} />
+            )}
+          />
         </Switch>
       </div>
       <span css={styles.title}>Aide</span>
