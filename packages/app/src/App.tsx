@@ -12,7 +12,7 @@ import AppLayout from "./containers/AppLayout";
 const history = createBrowserHistory();
 
 const piwik: any = new ReactPiwik({
-  url: "matomo.tools.factory.social.gouv.fr",
+  url: "matomo.fabrique.social.gouv.fr",
   siteId: 11,
   trackErrors: true
 });
