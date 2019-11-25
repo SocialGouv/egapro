@@ -234,7 +234,7 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
   return (
     <div>
       <label css={styles.label}>
-        Sur quelle période souhaitez-vous faire votre votre déclaration ?
+        Sur quelle période souhaitez-vous faire votre déclaration ?
       </label>
       <div css={styles.dates}>
         <FieldDate
