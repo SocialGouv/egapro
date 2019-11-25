@@ -6,7 +6,8 @@
     "start": "lerna run start --parallel",
     "release": "cd packages/app && yarn release",
     "test": "lerna run test --parallel -- --watchAll=false",
-    "coverage": "lerna run test --parallel -- --coverage"
+    "coverage": "lerna run test --parallel -- --coverage",
+    "functional-tests": "lerna run functional-tests"
   },
   "devDependencies": {
     "lerna": "3.19.0"
