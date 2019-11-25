@@ -214,7 +214,11 @@ function Recapitulatif({ state }: Props) {
         </span>
       </ActionBar>
 
-      <a href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48">
+      <a
+        href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <img
           src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg"
           alt="Je donne mon avis"
