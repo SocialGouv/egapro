@@ -101,7 +101,7 @@ function PageIndicateurQuatre({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-      tagline="Renseignez le taux de salariées en congès maternité durant la période de référence ayant reçu une augmentation à leur retour."
+      tagline="Renseignez le taux de salariées en congés maternité durant la période de référence ayant reçu une augmentation à leur retour."
     >
       {children}
     </Page>
