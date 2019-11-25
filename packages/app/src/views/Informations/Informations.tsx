@@ -74,7 +74,7 @@ function PageInformations({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Information société et période de référence"
-      tagline="Renseignez le nom et la tranche d'effectifs de votre enteprise, ainsi que la période de référence."
+      tagline="Renseignez le nom et la tranche d'effectifs de votre entreprise, ainsi que la période de référence."
     >
       {children}
     </Page>
