@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/SocialGouv/egapro/compare/v2.1.0...v2.2.0) (2019-11-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/react-datepicker to v2.9.5 ([#324](https://github.com/SocialGouv/egapro/issues/324)) ([4675b73](https://github.com/SocialGouv/egapro/commit/4675b73))
+
+
+### Features
+
+* **bouton mon avis:** ajout d'un bouton "mon avis" en fin de récapitulatif ([#326](https://github.com/SocialGouv/egapro/issues/326)) ([97003ba](https://github.com/SocialGouv/egapro/commit/97003ba))
+
+
+
+
+
 # [2.1.0](https://github.com/SocialGouv/egapro/compare/v2.0.2...v2.1.0) (2019-11-25)
 
 
