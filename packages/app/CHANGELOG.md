@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/SocialGouv/egapro/compare/v2.0.2...v2.1.0) (2019-11-25)
+
+
+### Bug Fixes
+
+* **css:** suppression des z-index, whitespace sur les datepicker ([#276](https://github.com/SocialGouv/egapro/issues/276)) ([c5b5987](https://github.com/SocialGouv/egapro/commit/c5b5987))
+* **css in js:** fix typo in strokeWidth and strokeLinecap attributes ([8d59500](https://github.com/SocialGouv/egapro/commit/8d59500))
+* **deps:** update dependency @types/react-datepicker to v2.9.4 ([#286](https://github.com/SocialGouv/egapro/issues/286)) ([30803cf](https://github.com/SocialGouv/egapro/commit/30803cf))
+* **deps:** update dependency date-fns to v2.7.0 ([#283](https://github.com/SocialGouv/egapro/issues/283)) ([14f3eee](https://github.com/SocialGouv/egapro/commit/14f3eee))
+* **deps:** update dependency date-fns to v2.8.0 ([#306](https://github.com/SocialGouv/egapro/issues/306)) ([422e535](https://github.com/SocialGouv/egapro/commit/422e535))
+* **deps:** update dependency date-fns to v2.8.1 ([#317](https://github.com/SocialGouv/egapro/issues/317)) ([e116195](https://github.com/SocialGouv/egapro/commit/e116195))
+* **deps:** update dependency final-form to v4.18.6 ([#282](https://github.com/SocialGouv/egapro/issues/282)) ([e2cf474](https://github.com/SocialGouv/egapro/commit/e2cf474))
+* **deps:** update dependency final-form-arrays to v3.0.2 ([#309](https://github.com/SocialGouv/egapro/issues/309)) ([e9ce72b](https://github.com/SocialGouv/egapro/commit/e9ce72b))
+* **deps:** update dependency fuse.js to v3.4.6 ([#313](https://github.com/SocialGouv/egapro/issues/313)) ([e60cdbf](https://github.com/SocialGouv/egapro/commit/e60cdbf))
+* **deps:** update dependency react-datepicker to v2.10.0 ([#293](https://github.com/SocialGouv/egapro/issues/293)) ([3733fcd](https://github.com/SocialGouv/egapro/commit/3733fcd))
+* **deps:** update dependency react-datepicker to v2.10.1 ([#315](https://github.com/SocialGouv/egapro/issues/315)) ([9468820](https://github.com/SocialGouv/egapro/commit/9468820))
+* **deps:** update react monorepo to v16.12.0 ([#299](https://github.com/SocialGouv/egapro/issues/299)) ([b4a7d40](https://github.com/SocialGouv/egapro/commit/b4a7d40))
+* **matomo:** mise à jour de l'url de matomo ([#321](https://github.com/SocialGouv/egapro/issues/321)) ([566c970](https://github.com/SocialGouv/egapro/commit/566c970))
+
+
+### Features
+
+* **effectifs pris en compte:** affichage d'un avertissement si les effectifs pris en compte sont incohérents avec la tranche d'effectifs ([#288](https://github.com/SocialGouv/egapro/issues/288)) ([831a481](https://github.com/SocialGouv/egapro/commit/831a481))
+* **FAQ:** le lien vers les référents pointe sur le site du ministère ([#303](https://github.com/SocialGouv/egapro/issues/303)) ([6c25a0b](https://github.com/SocialGouv/egapro/commit/6c25a0b))
+
+
+
+
+
 ## [2.0.2](https://github.com/SocialGouv/egapro/compare/v2.0.1...v2.0.2) (2019-11-05)
 
 

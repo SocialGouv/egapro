@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/SocialGouv/egapro/compare/v2.0.2...v2.1.0) (2019-11-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @sentry/node to v5.8.0 ([#295](https://github.com/SocialGouv/egapro/issues/295)) ([211d490](https://github.com/SocialGouv/egapro/commit/211d490))
+* **deps:** update dependency @sentry/node to v5.9.0 ([#297](https://github.com/SocialGouv/egapro/issues/297)) ([62a3518](https://github.com/SocialGouv/egapro/commit/62a3518))
+* **deps:** update dependency pino to v5.13.6 ([#289](https://github.com/SocialGouv/egapro/issues/289)) ([6a7aa53](https://github.com/SocialGouv/egapro/commit/6a7aa53))
+* **deps:** update dependency pino to v5.14.0 ([#316](https://github.com/SocialGouv/egapro/issues/316)) ([705106e](https://github.com/SocialGouv/egapro/commit/705106e))
+
+
+
+
+
 # [2.0.0](https://github.com/SocialGouv/egapro/compare/v1.4.0...v2.0.0) (2019-11-04)
 
 **Note:** Version bump only for package api
