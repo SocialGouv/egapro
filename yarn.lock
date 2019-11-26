@@ -11221,10 +11221,10 @@ react-onclickoutside@^6.9.0:
   resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.9.0.tgz#a54bc317ae8cf6131a5d78acea55a11067f37a1f"
   integrity sha512-8ltIY3bC7oGhj2nPAvWOGi+xGFybPNhJM0V1H8hY/whNcXgmDeaeoCMPPd8VatrpTsUWjb/vGzrmu6SrXVty3A==
 
-react-piwik@1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/react-piwik/-/react-piwik-1.6.0.tgz#3b9eee55167d953824867791cd5288593d652d66"
-  integrity sha512-ANK/SDDA3z827vcY8w77tTC8pOkpMSw1xNs5ifImho92oNS1rIfiTdVXNW7TpqP3a8hU+p9AxPAgPZhmkYtyzw==
+react-piwik@1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/react-piwik/-/react-piwik-1.7.0.tgz#7f0919e7f0f936c5c4b3682424355f9915b4bc9b"
+  integrity sha512-7nDwVFtOuKmFDXmb1VEUU7H/4iXwV2+FZDG0fkANVJM5Cj8NgS/i8mZGC5PUt1kbQp5UzigwJqk8XROyyDNBCg==
 
 react-popper@^1.3.4:
   version "1.3.4"
