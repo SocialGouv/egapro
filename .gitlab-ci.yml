@@ -46,7 +46,7 @@ Quality tests:
     - yarn build
     - yarn lint
     - yarn test
-    - yarn functional-tests
+    # - yarn functional-tests
 
 ###########################################
 ###               PREPARE               ###
