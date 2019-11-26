@@ -134,12 +134,12 @@ function IndicateurCinqForm({
           <BlocFormLight>
             <FieldInput
               fieldName="nombreSalariesFemmes"
-              label="nombre de femmes parmis les 10 plus hauts salaires"
+              label="nombre de femmes parmi les 10 plus hauts salaires"
               readOnly={readOnly}
             />
             <FieldInput
               fieldName="nombreSalariesHommes"
-              label="nombre d’hommes parmis les 10 plus hauts salaires"
+              label="nombre d’hommes parmi les 10 plus hauts salaires"
               readOnly={readOnly}
               theme="hommes"
             />
