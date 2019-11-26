@@ -287,6 +287,7 @@ function FieldDate({
                 date ? props.input.onChange(dateToString(date)) : ""
               }
               readOnly={readOnly}
+              name={name}
             />
           )}
         </Field>
