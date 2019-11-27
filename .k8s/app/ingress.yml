@@ -12,12 +12,15 @@ metadata:
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-  - host: ${APP_URL}
-    http:
-      paths:
-        - path: /
-          backend:
-            serviceName: app
-            servicePort: ${PORT}
+    - host: ${APP_URL}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: app
+              servicePort: ${PORT}
   tls:
-    - secretName: crt
+    - hosts:
+        - ${APP_URL}
+      secretName: ${CERTIFICATE_ENVIRONMENT}
+...
