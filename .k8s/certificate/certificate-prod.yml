@@ -20,3 +20,4 @@ spec:
   issuerRef:
     name: ${LETS_ENCRYPT_ISSUER}
     kind: ClusterIssuer
+...
