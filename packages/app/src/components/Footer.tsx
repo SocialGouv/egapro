@@ -9,6 +9,8 @@ import { useColumnsWidth, useLayoutType } from "./GridContext";
 function Footer() {
   const width = useColumnsWidth(2);
   const layoutType = useLayoutType();
+  const version = process.env.VERSION || require("../../package.json").version;
+
   return (
     <footer
       css={[
@@ -72,7 +74,7 @@ function Footer() {
             donnez-nous votre avis
           </a>
           <a
-            href="https://github.com/SocialGouv/egapro"
+            href={`https://github.com/SocialGouv/egapro/tree/v${version}`}
             target="_blank"
             rel="noopener noreferrer"
             css={styles.infoLink}
