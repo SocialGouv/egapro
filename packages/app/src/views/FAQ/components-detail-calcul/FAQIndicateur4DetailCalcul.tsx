@@ -14,10 +14,13 @@ function FAQIndicateur4DetailCalcul() {
       <FAQTitle3>Calculer l’indicateur</FAQTitle3>
 
       <FAQStep icon={<IconText>1</IconText>}>
-        Comparer le nombre de salariées ayant bénéficié d’une augmentation à
-        leur retour de congé maternité (avant la fin de la période de référence)
-        au total de salariées de retour de congé maternité et dont leur congé à
-        eu lieu durant une période d’augmentation
+        L’indicateur correspond au ratio entre le nombre de salariés 
+        revenues de congé maternité ou d’adoption pendant la période de 
+        référence et ayant bénéficié d’une augmentation, avant la fin de 
+        celle-ci, si des augmentations ont eu lieu pendant leur congé, 
+        d’une part; et, d’autre part, le nombre de salariés revenus, 
+        pendant la période de référence, de congé maternité ou d’adoption, 
+        durant lequel il y a eu des augmentations salariales
       </FAQStep>
 
       <div css={styles.content}>
