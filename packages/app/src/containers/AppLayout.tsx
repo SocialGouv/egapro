@@ -8,6 +8,7 @@ import globalStyles from "../utils/globalStyles";
 
 import { useLayoutType } from "../components/GridContext";
 import Header from "../components/Header";
+import UserBar from "../components/UserBar";
 
 import FAQ from "../views/FAQ";
 import Home from "../views/Home";
@@ -62,6 +63,7 @@ function AppLayout({ state, dispatch }: Props) {
           layoutType === "tablet" && styles.rightColumnTablet
         ]}
       >
+        <UserBar />
         <FAQ />
       </div>
     </div>

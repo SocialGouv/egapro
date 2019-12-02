@@ -137,7 +137,8 @@ const styles = {
     flexBasis: 0,
     display: "flex",
     flexDirection: "column",
-    backgroundColor: "white"
+    backgroundColor: "white",
+    marginTop: 20
   }),
   content: css({
     overflowY: "auto",
