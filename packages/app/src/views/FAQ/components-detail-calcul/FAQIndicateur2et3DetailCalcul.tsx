@@ -16,12 +16,12 @@ function FAQIndicateur2et3DetailCalcul() {
       <FAQStep icon={<IconLamp />}>
         Pour que le calcul soit possible il faut que les effectifs pris en
         compte comptent <strong>au moins 5 femmes et 5 hommes</strong>, et qu'il
-        y ait eu des augmentations durant la période de calcul de l'indicateur.
+        y ait eu des augmentations durant la période de référence.
       </FAQStep>
 
       <FAQStep icon={<IconText>1</IconText>}>
         Calculer le nombre de femmes et d’hommes augmentés au cours de la
-        période de calcul de l'indicateur.
+        période de référence.
       </FAQStep>
 
       <FAQStep icon={<IconText>2</IconText>}>
@@ -68,7 +68,7 @@ function FAQIndicateur2et3DetailCalcul() {
             "supérieur à 5 ou égal à 10",
             "supérieur à 10"
           ]}
-          scaleTitle="note sur 15"
+          scaleTitle="note sur 35"
           scale={["35 points", "25 points", "15 points", "0 point"]}
         />
 
