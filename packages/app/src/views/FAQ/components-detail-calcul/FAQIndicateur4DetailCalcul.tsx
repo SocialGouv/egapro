@@ -14,7 +14,7 @@ function FAQIndicateur4DetailCalcul() {
       <FAQTitle3>Calculer l’indicateur</FAQTitle3>
 
       <FAQStep icon={<IconText>1</IconText>}>
-        L’indicateur correspond au ratio entre le nombre de salariés 
+        L’indicateur correspond au ratio entre le nombre de salariées 
         revenues de congé maternité ou d’adoption pendant la période de 
         référence et ayant bénéficié d’une augmentation, avant la fin de 
         celle-ci, si des augmentations ont eu lieu pendant leur congé, 
