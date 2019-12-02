@@ -13,12 +13,9 @@ function FAQResultatDetailCalcul() {
       <FAQTitle3>Calculer l’index</FAQTitle3>
 
       <FAQStep icon={<IconText>1</IconText>}>
-        Additionner les notes obtenues aux 4 (pour les entreprises de 50 à 250
-        salariés) ou 5 (pour les entreprises de plus de 250 salariés)
-        indicateurs.
+        Les indicateurs calculables doivent représenter au moins 75 points de l’Index pour que celui-ci soit calculable.
         <br />
-        Si un indicateur n’est pas calculable, il ne sera pas pris en compte
-        dans le calcul de l’index.
+        Le nombre total de points ainsi obtenus est ramené sur 100 en appliquant la règle de la proportionnalité.
       </FAQStep>
     </Fragment>
   );
