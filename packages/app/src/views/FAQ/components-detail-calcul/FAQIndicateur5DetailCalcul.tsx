@@ -22,8 +22,8 @@ function FAQIndicateur5DetailCalcul() {
         <FAQTitle3>Appliquer le barème pour obtenir votre note</FAQTitle3>
 
         <FAQCalculScale
-          listTitle="nombre de personnes sexes sous représenté"
-          list={["4 ou 5 salariés", "2 ou 3 salariés", "0 ou 2 salariés"]}
+          listTitle="nombre de personnes du sexe sous-représenté"
+          list={["4 ou 5 salariés", "2 ou 3 salariés", "0 ou 1 salarié"]}
           scaleTitle="note sur 10"
           scale={["10 points", "5 points", "0 point"]}
         />
