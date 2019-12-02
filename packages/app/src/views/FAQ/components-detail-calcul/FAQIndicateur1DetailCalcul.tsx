@@ -25,8 +25,8 @@ function FAQIndicateur1DetailCalcul() {
       </FAQStep>
 
       <FAQStep icon={<IconText>2</IconText>}>
-        Puis soustraire pour chaque groupe la rémunération moyenne des femmes à
-        celle des hommes.
+        Calculer l’écart de rémunération pour chaque groupe en soustrayant la rémunération 
+        moyenne des femmes à celle des hommes et en rapportant ce résultat à la rémunération moyenne des hommes.
       </FAQStep>
 
       <FAQStep icon={<IconText>3</IconText>}>
@@ -70,7 +70,7 @@ function FAQIndicateur1DetailCalcul() {
             "supérieur à 19% ou égal à 20%",
             "supérieur à 20%"
           ]}
-          scaleTitle="note sur 20"
+          scaleTitle="note sur 40"
           scale={[
             "40 points",
             "39 points",
