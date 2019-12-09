@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@koa/cors": "3.0.0",
-    "@sentry/node": "5.10.1",
+    "@sentry/node": "5.10.2",
     "@types/btoa": "1.2.3",
     "btoa": "1.2.1",
     "dotenv": "8.2.0",
