@@ -21,7 +21,7 @@ variables:
   STARTUP: "egapro"
   APP_DOMAIN_NAME: "dev.fabrique.social.gouv.fr"
   # Rancher project id
-  RANCHER_PROJECT_ID: c-gsm8d:p-9mvwt
+  RANCHER_PROJECT_ID: c-kk8xm:p-zqfvb
   RANCHER_PROJECT_ID_PROD: c-l9h59:p-jcmhs
   # Docker Image Version
   DOCKER_VERSION: "18.06"
@@ -690,8 +690,8 @@ Make a new release to deploy to preprod environment:
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - export APP_URL=${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
     # azure volume secrets
-    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountname}')
-    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-egaproprod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountkey}')
+    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-${STARTUP}prod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountname}')
+    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-${STARTUP}prod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountkey}')
     - export CERTIFICATE_ENVIRONMENT=crt
     - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${STARTUP}.yml
     # app
