@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/SocialGouv/egapro/compare/v2.2.1...v2.3.0) (2019-12-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-piwik to v1.8.0 ([#332](https://github.com/SocialGouv/egapro/issues/332)) ([bae37d7](https://github.com/SocialGouv/egapro/commit/bae37d7))
+
+
+### Features
+
+* **integration tests:** ajout de tests end to end via cypress ([#327](https://github.com/SocialGouv/egapro/issues/327)) ([9629209](https://github.com/SocialGouv/egapro/commit/9629209))
+* **version:** ajout du numéro de version déployé dans le footer ([#339](https://github.com/SocialGouv/egapro/issues/339)) ([ab79127](https://github.com/SocialGouv/egapro/commit/ab79127))
+
+
+
+
+
 ## [2.2.1](https://github.com/SocialGouv/egapro/compare/v2.2.0...v2.2.1) (2019-11-26)
 
 
