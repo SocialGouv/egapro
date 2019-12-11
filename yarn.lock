@@ -3201,7 +3201,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@16.9.16","@types/react@*":
+"@types/react@*", "@types/react@16.9.16":
   version "16.9.16"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.16.tgz#4f12515707148b1f53a8eaa4341dae5dfefb066d"
   integrity sha512-dQ3wlehuBbYlfvRXfF5G+5TbZF3xqgkikK7DWAsQXe2KnzV+kjD4W2ea+ThCrKASZn9h98bjjPzoTYzfRqyBkw==
@@ -10422,10 +10422,10 @@ node-releases@^1.1.40:
   dependencies:
     semver "^6.3.0"
 
-nodemailer@6.4.1:
-  version "6.4.1"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.4.1.tgz#f70b40355b7b08f1f80344b353970a4f8f664370"
-  integrity sha512-mSQAzMim8XIC1DemK9TifDTIgASfoJEllG5aC1mEtZeZ+FQyrSOdGBRth6JRA1ERzHQCET3QHVSd9Kc6mh356g==
+nodemailer@6.4.2:
+  version "6.4.2"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.4.2.tgz#7147550e32cdc37453380ab78d2074533966090a"
+  integrity sha512-g0n4nH1ONGvqYo1v72uSWvF/MRNnnq1LzmSzXb/6EPF3LFb51akOhgG3K2+aETAsJx90/Q5eFNTntu4vBCwyQQ==
 
 nodemon@2.0.1:
   version "2.0.1"
