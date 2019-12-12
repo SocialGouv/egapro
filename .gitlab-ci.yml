@@ -6,6 +6,9 @@ include:
   - "/.gitlab-ci/.deploy-egapro-postgres.yml"
   - "/.gitlab-ci/.deploy-egapro-memcached.yml"
   - "/.gitlab-ci/.deploy-egapro-kinto.yml"
+  - project: SocialGouv/gitlab-ci-yml
+    file: /base_yarn_stage.yml
+    ref: boni
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -88,32 +91,34 @@ stages:
 ###########################################
 
 #
-.quality_stage: &quality_stage
-  stage: "Code Quality"
-  image: node:${NODE_VERSION}
-  before_script:
-    - yarn --frozen-lockfile
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-  script:
-    - yarn build
-    - yarn lint
-    - yarn test
-  when: manual
-  allow_failure: false
+#.quality_stage: &quality_stage
+#  stage: "Code Quality"
+#  image: node:${NODE_VERSION}
+#  before_script:
+#    - yarn --frozen-lockfile
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - node_modules/
+#  script:
+#    - yarn build
+#    - yarn lint
+#    - yarn test
+#  when: manual
+#  allow_failure: false
 #
 
 Code quality (dev):
-  <<: *quality_stage
+  stage: "Code Quality"
+  extends: .base_yarn_quality
   only:
     - branches
   except:
     - master
 
 Code quality (master):
-  <<: *quality_stage
+  stage: "Code Quality"
+  extends: .base_yarn_quality
   except:
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
@@ -123,7 +128,8 @@ Code quality (master):
 
 
 Code quality (preprod):
-  <<: *quality_stage
+  stage: "Code Quality"
+  extends: .base_yarn_quality
   only:
     - /^v.*/
 
