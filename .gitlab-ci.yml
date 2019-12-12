@@ -9,6 +9,9 @@ include:
   - project: SocialGouv/gitlab-ci-yml
     file: /base_yarn_stage.yml
     ref: boni
+  - project: SocialGouv/gitlab-ci-yml
+    file: /autodevops_simple_app.yml
+    ref: boni
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -115,8 +118,6 @@ Code quality (master):
   only:
     - master
 
-
-
 Code quality (preprod):
   <<: *quality_stage
   only:
@@ -170,16 +171,7 @@ Get Github id (preprod):
 #
 .create_namespace: &create_namespace
   stage: "Prepare"
-  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  script:
-    # Skip the job if the namespace exists
-    - "[[ $(kubectl get namespace ${K8S_NAMESPACE}) ]] && exit ${CI_JOB_SKIP_EXIT_CODE:-0}"
-    # Create namespace
-    - kubectl create namespace ${K8S_NAMESPACE}
-    - kubectl annotate namespace ${K8S_NAMESPACE} field.cattle.io/projectId=${RANCHER_PROJECT_ID}
-    - kubectl label namespace ${K8S_NAMESPACE} cert=wildcard
+  extends: .base_create_namespace_stage
 #
 
 Create namespace (dev):
