@@ -31,14 +31,14 @@ include:
 Register api image commit sha:
   <<: *register_stage
   variables:
-    CONTEXT: .
+    CONTEXT: packages/kinto
     DOCKERFILE_PATH: packages/api/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
 
 Register app image commit sha:
   <<: *register_stage
   variables:
-    CONTEXT: .
+    CONTEXT: packages/kinto
     DOCKERFILE_PATH: packages/app/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
 
