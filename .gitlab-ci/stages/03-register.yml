@@ -17,15 +17,15 @@ include:
 Register api image commit sha:
   <<: *register_stage
   variables:
-    CONTEXT: packages/kinto
-    DOCKERFILE_PATH: packages/api/Dockerfile
+    CONTEXT: .
+    DOCKER_BUILD_ARGS: -f packages/api/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
 
 Register app image commit sha:
   <<: *register_stage
   variables:
-    CONTEXT: packages/kinto
-    DOCKERFILE_PATH: packages/app/Dockerfile
+    CONTEXT: .
+    DOCKER_BUILD_ARGS: -f packages/app/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
 
 Register init kinto image commit sha:
