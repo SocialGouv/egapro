@@ -1,6 +1,7 @@
 ---
 
 include:
+  - /.gitlab-ci/stages/01-quality.yml
   - "/.gitlab-ci/.deploy-egapro-app.yml"
   - "/.gitlab-ci/.deploy-egapro-api.yml"
   - "/.gitlab-ci/.deploy-egapro-postgres.yml"
@@ -8,10 +9,7 @@ include:
   - "/.gitlab-ci/.deploy-egapro-kinto.yml"
   - /.gitlab-ci/variables.yml
   - project: SocialGouv/gitlab-ci-yml
-    file: /base_yarn_stage.yml
-    ref: master
-  - project: SocialGouv/gitlab-ci-yml
-    file: /autodevops_simple_app.yml
+    file: /base_create_namespace_stage.yml
     ref: master
 
 stages:
@@ -24,41 +22,6 @@ stages:
   - "Make a new release"
   - "Deploy to prod K8S"
   - "Restore prod backup"
-
-
-###########################################
-###            CODE QUALITY             ###
-###########################################
-
-#
-.quality_stage: &quality_stage
-  stage: "Code Quality"
-  extends:
-    - .base_yarn_quality
-    - .base_yarn_build
-  when: manual
-  allow_failure: false
-#
-
-Code quality (dev):
-  <<: *quality_stage
-  only:
-    - branches
-  except:
-    - master
-
-Code quality (master):
-  <<: *quality_stage
-  except:
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - master
-
-Code quality (preprod):
-  <<: *quality_stage
-  only:
-    - /^v.*/
 
 
 ############################################
