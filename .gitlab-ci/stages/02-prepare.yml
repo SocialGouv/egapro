@@ -1,0 +1,81 @@
+---
+
+include:
+  - project: SocialGouv/gitlab-ci-yml
+    file: /base_create_namespace_stage.yml
+    ref: master
+
+#
+.get_github_id_stage: &get_github_id_stage
+  stage: "Prepare"
+  image:
+    name: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
+  before_script:
+    - envsubst < /scripts/get-deploy-id.sh > /scripts/get-github-deploy-id.sh
+  script:
+    - sh /scripts/get-github-deploy-id.sh
+  artifacts:
+    paths:
+      - github_deploy_id
+#
+
+Get Github id (dev):
+  <<: *get_github_id_stage
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - master
+
+Get Github id (master):
+  <<: *get_github_id_stage
+  environment:
+    name: master
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
+  only:
+    - master
+
+Get Github id (preprod):
+  <<: *get_github_id_stage
+  environment:
+    name: preprod
+  only:
+    - /^v.*/
+
+#
+.create_namespace: &create_namespace
+  stage: "Prepare"
+  extends: .base_create_namespace_stage
+#
+
+Create namespace (dev):
+  <<: *create_namespace
+  before_script:
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - master
+
+Create namespace (master):
+  <<: *create_namespace
+  before_script:
+    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
+  only:
+    - master
+
+Create namespace (preprod):
+  <<: *create_namespace
+  before_script:
+    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
+
+...
