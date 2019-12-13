@@ -34,3 +34,5 @@ Code quality (preprod):
   <<: *quality_stage
   only:
     - /^v.*/
+
+...
