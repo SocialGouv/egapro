@@ -4,6 +4,10 @@ include:
   - /.gitlab-ci/variables.yml
   - /.gitlab-ci/stages/01-quality.yml
   - /.gitlab-ci/stages/02-prepare.yml
+  #
+  - project: SocialGouv/gitlab-ci-yml
+    file: /base_docker_kubectl_image_stage.yml
+    ref: master
   - "/.gitlab-ci/.deploy-egapro-app.yml"
   - "/.gitlab-ci/.deploy-egapro-api.yml"
   - "/.gitlab-ci/.deploy-egapro-postgres.yml"
