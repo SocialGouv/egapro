@@ -109,6 +109,7 @@ function Menu({
                 title="vos informations"
                 activeOnlyWhenExact={true}
               />
+              <h5 css={styles.menuTitle}>Calcul de l'index</h5>
               <CustomNavLink
                 to={`/simulateur/${code}/informations`}
                 title="informations simulation"
@@ -179,6 +180,9 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start"
+  }),
+  menuTitle: css({
+    marginBottom: 0
   }),
   menuTablet: css({
     flexDirection: "row",
