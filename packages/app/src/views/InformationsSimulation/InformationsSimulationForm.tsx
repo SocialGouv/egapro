@@ -218,7 +218,7 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
       >
-        Quel est le nom de la simulation (ex : nom_entreprise_date_declarant)
+        Quel est le nom de la simulation (ex : nom_entreprise_date)
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
