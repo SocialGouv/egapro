@@ -218,14 +218,12 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
       >
-        Quel est le nom de l'entreprise ?
+        Quel est le nom de la simulation (ex : nom_entreprise_date_declarant)
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
       </div>
-      <p css={styles.error}>
-        {error && "le nom de l'entreprise n’est pas valide"}
-      </p>
+      <p css={styles.error}>{error && "le nom n’est pas valide"}</p>
     </div>
   );
 }

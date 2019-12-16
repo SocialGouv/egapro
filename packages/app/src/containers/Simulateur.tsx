@@ -20,7 +20,7 @@ import IndicateurTrois from "../views/Indicateur3";
 import IndicateurDeuxTrois from "../views/Indicateur2et3";
 import IndicateurQuatre from "../views/Indicateur4";
 import IndicateurCinq from "../views/Indicateur5";
-import Informations from "../views/Informations";
+import InformationsSimulation from "../views/InformationsSimulation";
 import Recapitulatif from "../views/Recapitulatif";
 
 interface Props {
@@ -89,7 +89,11 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/informations"
         render={props => (
-          <Informations {...props} state={state} dispatch={dispatch} />
+          <InformationsSimulation
+            {...props}
+            state={state}
+            dispatch={dispatch}
+          />
         )}
       />
       <Route

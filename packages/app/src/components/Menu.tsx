@@ -111,7 +111,7 @@ function Menu({
               />
               <CustomNavLink
                 to={`/simulateur/${code}/informations`}
-                title="informations entreprise"
+                title="informations simulation"
                 label="et période de référence"
                 valid={informationsFormValidated}
               />

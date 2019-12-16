@@ -14,7 +14,7 @@ import InfoBloc from "../../components/InfoBloc";
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 
-import InformationsForm from "./InformationsForm";
+import InformationsForm from "./InformationsSimulationForm";
 
 interface Props extends RouteComponentProps {
   state: AppState;
