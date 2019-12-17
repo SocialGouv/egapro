@@ -46,9 +46,9 @@ describe("resetState", () => {
 // UPDATE ////////
 //////////////////
 
-describe("updateInformations", () => {
+describe("updateInformationsSimulation", () => {
   const action = {
-    type: "updateInformations" as "updateInformations",
+    type: "updateInformationsSimulation" as "updateInformationsSimulation",
     data: {
       nomEntreprise: "acme",
       trancheEffectifs: "251 à 999" as TrancheEffectifs,
@@ -657,9 +657,9 @@ describe("updateIndicateurCinq", () => {
 // VALIDATE //////
 //////////////////
 
-describe("validateInformations", () => {
+describe("validateInformationsSimulation", () => {
   const action = {
-    type: "validateInformations" as "validateInformations",
+    type: "validateInformationsSimulation" as "validateInformationsSimulation",
     valid: "Valid" as FormState
   };
 

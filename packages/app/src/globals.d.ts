@@ -66,11 +66,11 @@ export type ActionType =
       data: any;
     }
   | {
-      type: "updateInformations";
-      data: ActionInformationsData;
+      type: "updateInformationsSimulation";
+      data: ActionInformationsSimulationData;
     }
   | {
-      type: "validateInformations";
+      type: "validateInformationsSimulation";
       valid: FormState;
     }
   | {
@@ -153,7 +153,7 @@ export type ActionType =
       valid: FormState;
     };
 
-export type ActionInformationsData = {
+export type ActionInformationsSimulationData = {
   nomEntreprise: string;
   trancheEffectifs: TrancheEffectifs;
   debutPeriodeReference: string;

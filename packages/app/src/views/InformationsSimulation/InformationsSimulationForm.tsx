@@ -3,7 +3,11 @@ import { css, jsx } from "@emotion/core";
 import { Field, FieldMetaState, Form, useField } from "react-final-form";
 import createDecorator from "final-form-calculate";
 
-import { AppState, FormState, ActionInformationsData } from "../../globals";
+import {
+  AppState,
+  FormState,
+  ActionInformationsSimulationData
+} from "../../globals";
 
 import {
   mustBeDate,
@@ -100,17 +104,19 @@ const calculator = createDecorator(
 interface Props {
   informations: AppState["informations"];
   readOnly: boolean;
-  updateInformations: (data: ActionInformationsData) => void;
-  validateInformations: (valid: FormState) => void;
+  updateInformationsSimulation: (
+    data: ActionInformationsSimulationData
+  ) => void;
+  validateInformationsSimulation: (valid: FormState) => void;
 }
 
-function InformationsForm({
+function InformationsSimulationForm({
   informations,
   readOnly,
-  updateInformations,
-  validateInformations
+  updateInformationsSimulation,
+  validateInformationsSimulation
 }: Props) {
-  const initialValues: ActionInformationsData = {
+  const initialValues: ActionInformationsSimulationData = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
     debutPeriodeReference: informations.debutPeriodeReference,
@@ -125,7 +131,7 @@ function InformationsForm({
       finPeriodeReference
     } = formData;
 
-    updateInformations({
+    updateInformationsSimulation({
       nomEntreprise: nomEntreprise,
       trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
       debutPeriodeReference: debutPeriodeReference,
@@ -135,7 +141,7 @@ function InformationsForm({
 
   const onSubmit = (formData: any) => {
     saveForm(formData);
-    validateInformations("Valid");
+    validateInformationsSimulation("Valid");
   };
 
   return (
@@ -187,7 +193,9 @@ function InformationsForm({
               &emsp;
               {informations.formValidated === "Valid" && (
                 <p css={styles.edit}>
-                  <ActionLink onClick={() => validateInformations("None")}>
+                  <ActionLink
+                    onClick={() => validateInformationsSimulation("None")}
+                  >
                     modifier les données saisies
                   </ActionLink>
                 </p>
@@ -356,4 +364,4 @@ const styles = {
   })
 };
 
-export default InformationsForm;
+export default InformationsSimulationForm;

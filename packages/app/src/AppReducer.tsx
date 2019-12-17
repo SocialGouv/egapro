@@ -128,7 +128,7 @@ function AppReducer(
     return state;
   }
   switch (action.type) {
-    case "updateInformations": {
+    case "updateInformationsSimulation": {
       const {
         nomEntreprise,
         trancheEffectifs,
@@ -186,7 +186,7 @@ function AppReducer(
         }
       };
     }
-    case "validateInformations": {
+    case "validateInformationsSimulation": {
       return {
         ...state,
         informations: {

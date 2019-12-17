@@ -11,8 +11,8 @@ const actionInitiateState = {
   data: {}
 };
 
-const actionUpdateInformations = {
-  type: "updateInformations" as "updateInformations",
+const actionUpdateInformationsSimulation = {
+  type: "updateInformationsSimulation" as "updateInformationsSimulation",
   data: {
     nomEntreprise: "BigCorp",
     trancheEffectifs: "1000 et plus" as TrancheEffectifs,
@@ -415,7 +415,7 @@ const stateDefault = AppReducer(
                     AppReducer(
                       AppReducer(
                         AppReducer(undefined, actionInitiateState),
-                        actionUpdateInformations
+                        actionUpdateInformationsSimulation
                       ),
                       actionUpdateEffectif
                     ),
