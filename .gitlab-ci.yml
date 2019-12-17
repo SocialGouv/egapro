@@ -4,7 +4,7 @@ include:
   - /.gitlab-ci/variables.yml
 #  - /.gitlab-ci/stages/01-quality.yml
   - /.gitlab-ci/stages/02-prepare.yml
-#  - /.gitlab-ci/stages/03-register.yml
+  - /.gitlab-ci/stages/03-register.yml
   - /.gitlab-ci/stages/04-secret.yml
   - /.gitlab-ci/stages/05-deploy-dev.yml
   #
@@ -24,7 +24,7 @@ include:
 stages:
 #  - "Code Quality"
   - "Prepare"
-#  - "Registration"
+  - "Registration"
   - "Create secret hors prod"
   - "Deploy to hors prod K8S"
   - "Send Url to GitHub"
