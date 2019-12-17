@@ -14,17 +14,15 @@ deployment:
       memory: ${API_RESOURCE_MEMORY_REQUEST}
 
   livenessProbe:
-    httpGet:
-      path: /api/version
-      port: ${PORT}
+    path: /api/version
     initialDelaySeconds: 20
     periodSeconds: 10
+    port: ${PORT}
   readinessProbe:
-    httpGet:
-      path: /api/version
-      port: ${PORT}
+    path: /api/version
     initialDelaySeconds: 20
     periodSeconds: 10
+    port: ${PORT}
 
   env:
     - name: API_PORT
