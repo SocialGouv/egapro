@@ -7,41 +7,42 @@ import {
   AppState,
   FormState,
   ActionType,
-  ActionInformationsData
+  ActionInformationsSimulationData
 } from "../../globals";
 
 import InfoBloc from "../../components/InfoBloc";
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 
-import InformationsForm from "./InformationsSimulationForm";
+import InformationsSimulationForm from "./InformationsSimulationForm";
 
 interface Props extends RouteComponentProps {
   state: AppState;
   dispatch: (action: ActionType) => void;
 }
 
-function Informations({ state, dispatch }: Props) {
-  const updateInformations = useCallback(
-    (data: ActionInformationsData) =>
-      dispatch({ type: "updateInformations", data }),
+function InformationsSimulation({ state, dispatch }: Props) {
+  const updateInformationsSimulation = useCallback(
+    (data: ActionInformationsSimulationData) =>
+      dispatch({ type: "updateInformationsSimulation", data }),
     [dispatch]
   );
 
-  const validateInformations = useCallback(
-    (valid: FormState) => dispatch({ type: "validateInformations", valid }),
+  const validateInformationsSimulation = useCallback(
+    (valid: FormState) =>
+      dispatch({ type: "validateInformationsSimulation", valid }),
     [dispatch]
   );
 
   return (
-    <PageInformations>
+    <PageInformationsSimulation>
       <LayoutFormAndResult
         childrenForm={
-          <InformationsForm
+          <InformationsSimulationForm
             informations={state.informations}
             readOnly={state.informations.formValidated === "Valid"}
-            updateInformations={updateInformations}
-            validateInformations={validateInformations}
+            updateInformationsSimulation={updateInformationsSimulation}
+            validateInformationsSimulation={validateInformationsSimulation}
           />
         }
         childrenResult={null}
@@ -66,11 +67,11 @@ function Informations({ state, dispatch }: Props) {
             }
           />
         )}
-    </PageInformations>
+    </PageInformationsSimulation>
   );
 }
 
-function PageInformations({ children }: { children: ReactNode }) {
+function PageInformationsSimulation({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Information société et période de référence"
@@ -81,4 +82,4 @@ function PageInformations({ children }: { children: ReactNode }) {
   );
 }
 
-export default Informations;
+export default InformationsSimulation;

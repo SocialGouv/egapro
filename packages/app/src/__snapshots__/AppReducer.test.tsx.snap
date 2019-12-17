@@ -9263,7 +9263,7 @@ Object {
 
 exports[`updateIndicateurUnType nothing undefined state 1`] = `undefined`;
 
-exports[`updateInformations change complete state 1`] = `
+exports[`updateInformationsSimulation change complete state 1`] = `
 Object {
   "effectif": Object {
     "formValidated": "None",
@@ -9593,7 +9593,7 @@ Object {
 }
 `;
 
-exports[`updateInformations change default state 1`] = `
+exports[`updateInformationsSimulation change default state 1`] = `
 Object {
   "effectif": Object {
     "formValidated": "None",
@@ -9889,7 +9889,7 @@ Object {
 }
 `;
 
-exports[`updateInformations nothing undefined state 1`] = `undefined`;
+exports[`updateInformationsSimulation nothing undefined state 1`] = `undefined`;
 
 exports[`validateEffectif None with csp false invalid complete validate state 1`] = `
 Object {
@@ -17193,7 +17193,7 @@ Object {
 
 exports[`validateIndicateurUnCoefGroup Valid nothing undefined state 1`] = `undefined`;
 
-exports[`validateInformations change complete state 1`] = `
+exports[`validateInformationsSimulation change complete state 1`] = `
 Object {
   "effectif": Object {
     "formValidated": "None",
@@ -17523,7 +17523,7 @@ Object {
 }
 `;
 
-exports[`validateInformations change default state 1`] = `
+exports[`validateInformationsSimulation change default state 1`] = `
 Object {
   "effectif": Object {
     "formValidated": "None",
@@ -17819,4 +17819,4 @@ Object {
 }
 `;
 
-exports[`validateInformations nothing undefined state 1`] = `undefined`;
+exports[`validateInformationsSimulation nothing undefined state 1`] = `undefined`;

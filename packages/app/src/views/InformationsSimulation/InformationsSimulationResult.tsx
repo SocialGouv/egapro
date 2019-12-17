@@ -11,15 +11,15 @@ interface Props {
   trancheEffectifs: TrancheEffectifs;
   debutPeriodeReference: string;
   finPeriodeReference: string;
-  validateInformations: (valid: FormState) => void;
+  validateInformationsSimulation: (valid: FormState) => void;
 }
 
-function InformationsResult({
+function InformationsSimulationResult({
   nomEntreprise,
   trancheEffectifs,
   debutPeriodeReference,
   finPeriodeReference,
-  validateInformations
+  validateInformationsSimulation
 }: Props) {
   return (
     <div css={styles.container}>
@@ -33,7 +33,7 @@ function InformationsResult({
       />
 
       <p css={styles.edit}>
-        <ActionLink onClick={() => validateInformations("None")}>
+        <ActionLink onClick={() => validateInformationsSimulation("None")}>
           modifier les données saisies
         </ActionLink>
       </p>
@@ -53,4 +53,4 @@ const styles = {
   })
 };
 
-export default InformationsResult;
+export default InformationsSimulationResult;
