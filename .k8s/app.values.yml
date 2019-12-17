@@ -1,0 +1,40 @@
+image:
+  repository: ${CI_REGISTRY_IMAGE}/app
+  tag: ${IMAGE_TAG}
+
+deployment:
+
+  port: ${PORT}
+
+  resources:
+    limits:
+      cpu: ${APP_RESOURCE_CPU_LIMIT}
+      memory: ${APP_RESOURCE_MEMORY_LIMIT}
+    requests:
+      cpu: ${APP_RESOURCE_CPU_REQUEST}
+      memory: ${APP_RESOURCE_MEMORY_REQUEST}
+
+  livenessProbe:
+    path: /
+    periodSeconds: 10
+  readinessProbe:
+    path: /
+    periodSeconds: 10
+
+  env:
+    - name: REACT_APP_API_URL
+      value: "http://api:4000"
+
+ingress:
+  enabled: true
+  annotations:
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    kubernetes.io/ingress.class: "azure/application-gateway"
+  hosts:
+    - host: ${APP_URL}
+      paths:
+        - /
+  tls:
+    - hosts:
+        - ${APP_URL}
+      secretName: wildcard-crt
