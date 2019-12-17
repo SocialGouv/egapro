@@ -14,15 +14,19 @@ include:
 ############################################
 .deploy_app_stage: &deploy_app_stage
   stage: "Deploy to hors prod K8S"
-  extends: .base_deploy_nodejs_chart_stage
+  extends: .base_deploy_hpa_chart_stage
   dependencies: []
   variables:
     REGISTRY: $CI_REGISTRY_IMAGE
     IMAGE_TAG: $CI_COMMIT_SHA
     CONTEXT: app
+    PORT: ${APP_PORT}
+    VALUES_FILE: ./.k8s/app.values.yml
   before_script:
 #    - *resolve_env
-    - HOST=${FRONTEND_HOST}
+    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
+    - export APP_URL=${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
 
 Deploy app (dev):
   <<: *deploy_app_stage
