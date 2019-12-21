@@ -13,23 +13,6 @@ pp = pprint.PrettyPrinter(indent=4)
 # - gérer import champ de type date
 
 
-def parse(csv_path):
-    # TODO:
-    # --indent option
-    # --max option
-    result = []
-    with open(csv_path) as csv_file:
-        reader = csv.DictReader(csv_file)
-        count = 0
-        for row in reader:
-            if count >= 2:
-                break
-            result.append(processRow(row))
-            count = count + 1
-        # pp.pprint(result)
-        return json.dumps(result, indent=2)
-
-
 def toPath(record, path, value):
     parts = path.split(".")
     for index, part in enumerate(parts):
@@ -42,185 +25,159 @@ def toPath(record, path, value):
             return toPath(record[part], ".".join(parts[1:]), value)
 
 
-def importInformationsDeclarant(jsonRecord, row):
-    # Identification du déclarant pour tout contact ultérieur
-    toPath(jsonRecord, "informationsDeclarant.nom", row["Nom"])
-    toPath(jsonRecord, "informationsDeclarant.prenom", row["Prénom"])
-    toPath(jsonRecord, "informationsDeclarant.tel", row["telephone"])
-    toPath(jsonRecord, "informationsDeclarant.region", row["Reg"])
-    toPath(jsonRecord, "informationsDeclarant.departement", row["dpt"])
-    toPath(jsonRecord, "informationsDeclarant.adresse", row["Adr ets"])
-    toPath(jsonRecord, "informationsDeclarant.codePosal", row["CP"])
-    toPath(jsonRecord, "informationsDeclarant.commune", row["Commune"])
+class RowImporter(object):
+    def __init__(self, row):
+        self.row = row
+        self.record = {}
 
+    def __isValidValue(self, value):
+        return value != "" and value != "-"
 
-def importPeriodeDeReference(jsonRecord, row):
-    # Année et périmètre retenus pour le calcul et la publication des indicateurs
-    annee_indicateur = int(row["annee_indicateurs"])
-    toPath(jsonRecord, "informationsComplementaires.anneeDeclaration", annee_indicateur)
-    toPath(jsonRecord, "informationsComplementaires.structure", row["structure"])
-    toPath(jsonRecord, "informations.trancheEffectifs", row["tranche_effectif"])
-    date_debut_pr = row["date_debut_pr > Valeur date"]
-    if row["periode_ref"] == "ac":
-        # année civile: 31 décembre de l'année précédent "annee_indicateurs"
-        debutPeriodeReference = "01/01/" + str(annee_indicateur)
-        finPeriodeReference = "31/12/" + str(annee_indicateur)
-    elif date_debut_pr != "-":
-        # autre période: rajouter un an à "date_debut_pr"
-        debutPeriodeReference = date_debut_pr
-        finPeriodeReference = (datetime.strptime(date_debut_pr, "%d/%m/%Y") + timedelta(days=365)).strftime("%d/%m/%Y")
-    else:
-        # autre période de référence sans début spécifié: erreur
-        raise RuntimeError("Données de période de référence incohérentes")
-    toPath(jsonRecord, "informations.debutPeriodeReference", debutPeriodeReference)
-    toPath(jsonRecord, "informations.finPeriodeReference", finPeriodeReference)
-    toPath(jsonRecord, "effectifs.nombreSalariesTotal", int(row["nb_salaries > Valeur numérique"]))
+    def importField(self, csvFieldName, path, type=str):
+        value = self.get(csvFieldName)
+        if not value:
+            return
+        elif type != str:
+            try:
+                value = type(value)
+            except Exception as err:
+                raise ValueError("Couldn't cast {0} field value ('{1}') to {2}".format(csvFieldName, value, type))
+
+        return self.set(path, value)
+
+    def importFloatField(self, csvFieldName, path):
+        return self.importField(csvFieldName, path, type=float)
+
+    def importIntField(self, csvFieldName, path):
+        return self.importField(csvFieldName, path, type=int)
+
+    def get(self, csvFieldName):
+        if csvFieldName not in self.row:
+            raise KeyError("Row does not have a {0} field".format(csvFieldName))
+        if not self.__isValidValue(self.row[csvFieldName]):
+            return None
+        return self.row[csvFieldName]
+
+    def set(self, path, value):
+        if self.__isValidValue(value):
+            toPath(self.record, path, value)
+            return value
+
+    def toDict(self):
+        return self.record
+
+    def importPeriodeDeReference(self):
+        # Année et périmètre retenus pour le calcul et la publication des indicateurs
+        annee_indicateur = self.importIntField("annee_indicateurs", "informationsComplementaires.anneeDeclaration")
+        self.importField("structure", "informationsComplementaires.structure")
+        self.importField("tranche_effectif", "informations.trancheEffectifs")
+        date_debut_pr = self.importField("date_debut_pr > Valeur date", "informations.debutPeriodeReference")
+        if self.row["periode_ref"] == "ac":
+            # année civile: 31 décembre de l'année précédent "annee_indicateurs"
+            debutPeriodeReference = "01/01/" + str(annee_indicateur)
+            finPeriodeReference = "31/12/" + str(annee_indicateur)
+        elif date_debut_pr != "-":
+            # autre période: rajouter un an à "date_debut_pr"
+            debutPeriodeReference = date_debut_pr
+            finPeriodeReference = (datetime.strptime(date_debut_pr, "%d/%m/%Y") + timedelta(days=365)).strftime("%d/%m/%Y")
+        else:
+            # autre période de référence sans début spécifié: erreur
+            raise RuntimeError("Données de période de référence incohérentes.")
+        self.set("informations.debutPeriodeReference", debutPeriodeReference)
+        self.set("informations.finPeriodeReference", finPeriodeReference)
+        self.importIntField("nb_salaries > Valeur numérique", "effectifs.nombreSalariesTotal")
+
+    def importInformationsDeclarant(self):
+        # Identification du déclarant pour tout contact ultérieur
+        self.importField("Nom", "informationsDeclarant.nom")
+        self.importField("Prénom", "informationsDeclarant.prenom")
+        self.importField("telephone", "informationsDeclarant.tel")
+        self.importField("Reg", "informationsDeclarant.region")
+        self.importField("dpt", "informationsDeclarant.departement")
+        self.importField("Adr ets", "informationsDeclarant.adresse")
+        self.importField("CP", "informationsDeclarant.codePosal")
+        self.importField("Commune", "informationsDeclarant.commune")
+
+    def importEntreprise(self):
+        self.importField("RS_ets", "informationsEntreprise.nomEntreprise")
+        self.importField("SIREN_ets", "informationsEntreprise.siren")
+        self.importField("Code NAF", "informationsEntreprise.codeNaf")  # attention format
+
+    def importUES(self):
+        self.importField("nom_UES", "informationsEntreprise.nomUES")
+        self.importField("nom_ets_UES", "informationsEntreprise.nomsEntreprisesUES")
+        self.importField("SIREN_UES", "informationsEntreprise.sirenUES")
+        self.importField("Code NAF de cette entreprise", "informationsEntreprise.codeNAF")  # attention format
+        self.importIntField("Nb_ets_UES", "informationsEntreprise.nombresEntreprises")
+
+    def importNiveauResultat(self):
+        # Niveau de résultat de l'entreprise ou de l'UES
+        self.importField("date_publ_niv > Valeur date", "declaration.datePublication")
+        self.importField("site_internet_publ", "declaration.lienPublication")
+
+    def importIndicateur1(self):
+        # Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
+        # Quatre items possibles :
+        # - coef_niv: Par niveau ou coefficient hiérarchique en application de la classification de branche
+        # - amc: Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes
+        # - csp: Par catégorie socio-professionnelle
+        # - nc: L'indicateur n'est pas calculable
+        # Mapping:
+        # csp       -> indicateurUn.csp
+        # coef_nif  -> indicateurUn.coefficients
+        # nc et amc -> indicateurUn.autre
+        modalite = self.get("modalite_calc_tab1")
+        if modalite == "csp":
+            self.set("indicateurUn.csp", True)
+        elif modalite == "coefficients":
+            self.set("indicateurUn.coeffficients", True)
+        else:
+            self.set("indicateurUn.autre", True)
+        self.importField("date_consult_CSE > Valeur date", "indicateurUn.dateConsultationCSE")
+        self.importIntField("nb_coef_niv", "indicateurUn.nombreCoefficients")
+        # FIXME: pour le moment un bug de formattage de cellule nous empêche de
+        # connaître à quelle tranche d'âge correspond chaque chiffre dans la cellule
+        self.importFloatField("resultat_tab1", "indicateurUn.resultatFinal")
+        self.importField("population_favorable_tab1", "indicateurUn.sexeSurRepresente")
+        self.importIntField("nb_pt_obtenu_tab1", "indicateurUn.noteFinale")
 
 
 def processRow(row):
-    jsonRecord = {}
-    # "Date réponse > Valeur date": "data.dateReponse",
-    # "URL d'impression du répondant": "data.url",
-    # "e-mail_declarant": ("data.", str),
-    # "Confirmation du mail": ("data.", str),
+    importer = RowImporter(row)
+    importer.importInformationsDeclarant()
+    importer.importPeriodeDeReference()
+    importer.importEntreprise()
+    importer.importUES()
+    importer.importNiveauResultat()
+    importer.importIndicateur1()
+    return {"data": importer.toDict()}
 
-    importInformationsDeclarant(jsonRecord, row)
-    importPeriodeDeReference(jsonRecord, row)
 
-    # "RS_ets": ("data.informationsEntreprise.nomEntreprise", str),
-    # "SIREN_ets": ("data.informationsEntreprise.siren", str),
-    # "Code NAF": ("data.informationsEntreprise.codeNaf", str),
-    # "nom_UES": ("data.informationsEntreprise.nomUES", str),
-    # "nom_ets_UES": ("data.informationsEntreprise.nomsEntreprisesUES", str),
-    # "SIREN_UES": ("data.informationsEntreprise.sirenUES", str),
-    # "Code NAF de cette entreprise": ("data.informationsEntreprises.codeNAF", str),
-    # "Nb_ets_UES": ("data.informationsEntreprises.nombresEntreprises", str),
-    # "date_publ_niv > Valeur date": ("data.declaration.datePublication", str),
-    # "site_internet_publ": ("data.declaration.lienPublication", str),
-
+def parse(csv_path):
     # TODO:
-    # indicateur1.csp | indicateur1.coefficients | indicateur1.autre
-    # "modalite_calc_tab1": ("data.", str),
-    # "date_consult_CSE > Valeur date": ("data.indicateur1.dateConsultationCSE", str),
-    # "nb_coef_niv": ("data.indicateur1.nombreCoefficients", str),
-    # "motif_non_calc_tab1": ("data.indicateur1.nonCalculable", str),
-    # "precision_am_tab1": ("data.indicateur1.motifNonCalculablePrecision", str),
-
-    # TODO: we need to spread values over indicateur1.remunerationAnnuelle.0.(0|1|2|3)
-    # "Ou": ("data.indicateur1.remunerationAnnuelle[0].(0|1|2|3)", str),
-    # "Em": ("data.", str),
-    # "TAM": ("data.", str),
-    # "IC": ("data.", str),
-    # "niv01": ("data.", str),
-    # "niv02": ("data.", str),
-    # "niv03": ("data.", str),
-    # "niv04": ("data.", str),
-    # "niv05": ("data.", str),
-    # "niv06": ("data.", str),
-    # "niv07": ("data.", str),
-    # "niv08": ("data.", str),
-    # "niv09": ("data.", str),
-    # "niv10": ("data.", str),
-    # "niv11": ("data.", str),
-    # "niv12": ("data.", str),
-    # "niv13": ("data.", str),
-    # "niv14": ("data.", str),
-    # "niv15": ("data.", str),
-    # "niv16": ("data.", str),
-    # "niv17": ("data.", str),
-    # "niv18": ("data.", str),
-    # "niv19": ("data.", str),
-    # "niv20": ("data.", str),
-    # "niv21": ("data.", str),
-    # "niv22": ("data.", str),
-    # "niv23": ("data.", str),
-    # "niv24": ("data.", str),
-    # "niv25": ("data.", str),
-    # "niv26": ("data.", str),
-    # "niv27": ("data.", str),
-    # "niv28": ("data.", str),
-    # "niv29": ("data.", str),
-    # "niv30": ("data.", str),
-    # "niv31": ("data.", str),
-    # "niv32": ("data.", str),
-    # "niv33": ("data.", str),
-    # "niv34": ("data.", str),
-    # "niv35": ("data.", str),
-    # "niv36": ("data.", str),
-    # "niv37": ("data.", str),
-    # "niv38": ("data.", str),
-    # "niv39": ("data.", str),
-    # "niv40": ("data.", str),
-    # "niv41": ("data.", str),
-    # "niv42": ("data.", str),
-    # "niv43": ("data.", str),
-    # "niv44": ("data.", str),
-    # "niv45": ("data.", str),
-    # "niv46": ("data.", str),
-    # "niv47": ("data.", str),
-    # "niv48": ("data.", str),
-    # "niv49": ("data.", str),
-    # "niv50": ("data.", str),
-    # "resultat_tab1": ("data.", str),
-    # "population_favorable_tab1": ("data.", str),
-    # "nb_pt_obtenu_tab1": ("data.", str),
-    # "calculabilite_indic_tab2_sup250": ("data.", str),
-    # "motif_non_calc_tab2_sup250": ("data.", str),
-    # "precision_am_tab2_sup250": ("data.", str),
-    # "Ou_tab2_sup250": ("data.", str),
-    # "Em_tab2_sup250": ("data.", str),
-    # "TAM_tab2_sup250": ("data.", str),
-    # "IC_tab2_sup250": ("data.", str),
-    # "resultat_tab2_sup250": ("data.", str),
-    # "population_favorable_tab2_sup250": ("data.", str),
-    # "nb_pt_obtenu_tab2_sup250": ("data.", str),
-    # "prise_compte_mc_tab2_sup250": ("data.", str),
-    # "calculabilite_indic_tab3_sup250": ("data.", str),
-    # "motif_non_calc_tab3_sup250": ("data.", str),
-    # "precision_am_tab3_sup250": ("data.", str),
-    # "Ou_tab3_sup250": ("data.", str),
-    # "Em_tab3_sup250": ("data.", str),
-    # "TAM_tab3_sup250": ("data.", str),
-    # "IC_tab3_sup250": ("data.", str),
-    # "resultat_tab3_sup250": ("data.", str),
-    # "population_favorable_tab3_sup250": ("data.", str),
-    # "nb_pt_obtenu_tab3_sup250": ("data.", str),
-    # "prise_compte_mc_tab3_sup250": ("data.", str),
-    # "calculabilite_indic_tab4_sup250": ("data.", str),
-    # "motif_non_calc_tab4_sup250": ("data.", str),
-    # "precision_am_tab4_sup250": ("data.", str),
-    # "resultat_tab4_sup250": ("data.", str),
-    # "nb_pt_obtenu_tab4_sup250": ("data.", str),
-    # "calculabilite_indic_tab2_50-250": ("data.", str),
-    # "motif_non_calc_tab2_50-250": ("data.", str),
-    # "precision_am_tab2_50-250": ("data.", str),
-    # "resultat_pourcent_tab2_50-250": ("data.", str),
-    # "resultat_nb_sal_tab2_50-250": ("data.", str),
-    # "population_favorable_tab2_50-250": ("data.", str),
-    # "nb_pt_obtenu_tab2_50-250": ("data.", str),
-    # "prise_compte_mc_tab2_50-250": ("data.", str),
-    # "calculabilite_indic_tab4_50-250": ("data.", str),
-    # "motif_non_calc_tab4_50-250": ("data.", str),
-    # "precision_am_tab4_50-250": ("data.", str),
-    # "resultat_tab4_50-250": ("data.", str),
-    # "nb_pt_obtenu_tab4_50-250": ("data.", str),
-    # "resultat_tab5": ("data.", str),
-    # "sexe_sur_represente_tab5": ("data.", str),
-    # "nb_pt_obtenu_tab5": ("data.", str),
-    # "resultat_global_NbPtsMax": ("data.", str),
-    # "Indicateur 1": ("data.", str),
-    # "Indicateur 2": ("data.", str),
-    # "Indicateur 2 PourCent": ("data.", str),
-    # "Indicateur 2 ParSal": ("data.", str),
-    # "Indicateur 3": ("data.", str),
-    # "Indicateur 4": ("data.", str),
-    # "Indicateur 5": ("data.", str),
-    # "Nombre total de points obtenus": ("data.", str),
-    # "Nombre total de points pouvant être obtenus": ("data.", str),
-    # "Résultat final sur 100 points": ("data.", str),
-    # "mesures_correction": ("data.", str),
-
-    return {"data": jsonRecord}
+    # --indent option
+    # --max option
+    result = []
+    with open(csv_path) as csv_file:
+        reader = csv.DictReader(csv_file)
+        count_processed = 0
+        count_imported = 0
+        for index, row in enumerate(reader):
+            if count_processed >= 2:
+                break
+            try:
+                result.append(processRow(row))
+                count_imported = count_imported + 1
+            except KeyError as err:
+                print("Error importing line {0}: Missing key {1}".format(index, err))
+            except ValueError as err:
+                print("Error importing line {0}: {1}".format(index, err))
+            except RuntimeError as err:
+                print("Error importing line {0}: {1}".format(index, err))
+            count_processed = count_processed + 1
+        print("{0}/{1} records imported.".format(count_imported, count_processed))
+        # pp.pprint(result)
+        return json.dumps(result, indent=2)
 
 
 parser = argparse.ArgumentParser(description="Import Solen data into Kinto.")
