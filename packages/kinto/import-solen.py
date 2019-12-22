@@ -1,10 +1,10 @@
 import argparse
 import csv
-from datetime import datetime, timedelta
 import json
 import pprint
 
-pp = pprint.PrettyPrinter(indent=4)
+from datetime import datetime, timedelta
+from locale import atof, setlocale, LC_NUMERIC
 
 # TODO
 # - tu pourras valider que les champs Indicateur (1|2|3|...) (en fin du google
@@ -46,7 +46,8 @@ class RowImporter(object):
         return self.set(path, value)
 
     def importFloatField(self, csvFieldName, path):
-        return self.importField(csvFieldName, path, type=float)
+        # Note: we're using French locale aware `atof` for casting to float here
+        return self.importField(csvFieldName, path, type=atof)
 
     def importIntField(self, csvFieldName, path):
         return self.importField(csvFieldName, path, type=int)
@@ -85,7 +86,8 @@ class RowImporter(object):
             raise RuntimeError("Données de période de référence incohérentes.")
         self.set("informations.debutPeriodeReference", debutPeriodeReference)
         self.set("informations.finPeriodeReference", finPeriodeReference)
-        self.importIntField("nb_salaries > Valeur numérique", "effectifs.nombreSalariesTotal")
+        # FIXME: comment est-il possible d'avoir un nombre de salariés à virgule ?
+        self.importFloatField("nb_salaries > Valeur numérique", "effectifs.nombreSalariesTotal")
 
     def importInformationsDeclarant(self):
         # Identification du déclarant pour tout contact ultérieur
@@ -153,35 +155,46 @@ def processRow(row):
     return {"data": importer.toDict()}
 
 
-def parse(csv_path):
-    # TODO:
-    # --indent option
-    # --max option
+def checkLocale():
+    try:
+        setlocale(LC_NUMERIC, "fr_FR.UTF-8")
+    except Exception:
+        print("Impossible d'utiliser la locale fr_FR.UTF-8")
+        exit(1)
+
+
+def parse(args):
+    checkLocale()
+    log = []
     result = []
-    with open(csv_path) as csv_file:
+    with open(args.csv_path) as csv_file:
         reader = csv.DictReader(csv_file)
         count_processed = 0
         count_imported = 0
         for index, row in enumerate(reader):
-            if count_processed >= 2:
+            if args.max and count_processed >= args.max:
                 break
             try:
                 result.append(processRow(row))
                 count_imported = count_imported + 1
             except KeyError as err:
-                print("Error importing line {0}: Missing key {1}".format(index, err))
+                log.append("Error importing line {0}: Missing key {1}".format(index, err))
             except ValueError as err:
-                print("Error importing line {0}: {1}".format(index, err))
+                log.append("Error importing line {0}: {1}".format(index, err))
             except RuntimeError as err:
-                print("Error importing line {0}: {1}".format(index, err))
+                log.append("Error importing line {0}: {1}".format(index, err))
             count_processed = count_processed + 1
-        print("{0}/{1} records imported.".format(count_imported, count_processed))
-        # pp.pprint(result)
-        return json.dumps(result, indent=2)
+        log.append("{0}/{1} records imported.".format(count_imported, count_processed))
+    if args.show_json:
+        print(json.dumps(result, indent=args.indent))
+    for entry in log:
+        print(entry)
 
 
-parser = argparse.ArgumentParser(description="Import Solen data into Kinto.")
-parser.add_argument("csv_path", type=str, help="path to Solen CSV file")
-args = parser.parse_args()
+parser = argparse.ArgumentParser(description="Import des données Solen.")
+parser.add_argument("csv_path", type=str, help="chemin vers l'export CSV Solen")
+parser.add_argument("--indent", type=int, help="niveau d'indentation JSON", default=None)
+parser.add_argument("--max", type=int, help="nombre maximum de lignes à importer", default=None)
+parser.add_argument("--show-json", help="afficher la sortie JSON", action="store_true", default=False)
 
-print(parse(args.csv_path))
+parse(parser.parse_args())
