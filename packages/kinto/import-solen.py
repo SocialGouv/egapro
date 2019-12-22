@@ -171,7 +171,7 @@ class RowImporter(object):
             self.set("indicateurDeux.nonCalculable", False)
         self.importField("motif_non_calc_tab2_sup250", "indicateurDeux.motifNonCalculable")
         self.importField("precision_am_tab2_sup250", "indicateurDeux.motifNonCalculablePrecision")
-        # Taux d'augmentation par CSP
+        # Taux d'augmentation individuelle par CSP
         self.importFloatField("Ou_tab2_sup250", "indicateurDeux.tauxAugmentation[0].ecartTauxAugmentation")
         self.importFloatField("Em_tab2_sup250", "indicateurDeux.tauxAugmentation[1].ecartTauxAugmentation")
         self.importFloatField("TAM_tab2_sup250", "indicateurDeux.tauxAugmentation[2].ecartTauxAugmentation")
@@ -187,6 +187,34 @@ class RowImporter(object):
         elif priseEnCompte == "Non":
             self.set("indicateurDeux.mesuresCorrection", False)
 
+    def importIndicateurTrois(self):
+        # Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes pour
+        # les entreprises ou UES de plus de 250 salariés
+        # Calculabilité
+        calculable = self.get("calculabilite_indic_tab3_sup250")
+        # Note: certaines cellules sont vides, nous répercutons tel quel en omettant le champ si vide
+        if calculable == "Oui":
+            self.set("indicateurTrois.nonCalculable", True)
+        elif calculable == "Non":
+            self.set("indicateurTrois.nonCalculable", False)
+        self.importField("motif_non_calc_tab3_sup250", "indicateurTrois.motifNonCalculable")
+        self.importField("precision_am_tab3_sup250", "indicateurTrois.motifNonCalculablePrecision")
+        # Ecarts de taux de promotions par CSP
+        self.importField("Ou_tab3_sup250", "indicateurTrois.tauxPromotion[0].ecartTauxPromotion")
+        self.importField("Em_tab3_sup250", "indicateurTrois.tauxPromotion[1].ecartTauxPromotion")
+        self.importField("TAM_tab3_sup250", "indicateurTrois.tauxPromotion[2].ecartTauxPromotion")
+        self.importField("IC_tab3_sup250", "indicateurTrois.tauxPromotion[3].ecartTauxPromotion")
+        # Résultats
+        self.importFloatField("resultat_tab3_sup250", "indicateurTrois.resultatFinal")
+        self.importField("population_favorable_tab3_sup250", "indicateurTrois.sexeSurRepresente")
+        self.importIntField("nb_pt_obtenu_tab3_sup250", "indicateurTrois.noteFinale")
+        # Prise de mesures correctives
+        priseEnCompte = self.get("prise_compte_mc_tab3_sup250")
+        if priseEnCompte == "Oui":
+            self.set("indicateurTrois.mesuresCorrection", True)
+        elif priseEnCompte == "Non":
+            self.set("indicateurTrois.mesuresCorrection", False)
+
 
 def processRow(row):
     importer = RowImporter(row)
@@ -197,6 +225,7 @@ def processRow(row):
     importer.importNiveauResultat()
     importer.importIndicateurUn()
     importer.importIndicateurDeux()
+    importer.importIndicateurTrois()
     return {"data": importer.toDict()}
 
 
