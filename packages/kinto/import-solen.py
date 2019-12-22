@@ -89,7 +89,7 @@ class RowImporter(object):
         self.importField("structure", "informationsComplementaires.structure")
         self.importField("tranche_effectif", "informations.trancheEffectifs")
         date_debut_pr = self.importField("date_debut_pr > Valeur date", "informations.debutPeriodeReference")
-        if self.row["periode_ref"] == "ac":
+        if self.get("periode_ref") == "ac":
             # année civile: 31 décembre de l'année précédent "annee_indicateurs"
             debutPeriodeReference = "01/01/" + str(annee_indicateur)
             finPeriodeReference = "31/12/" + str(annee_indicateur)
@@ -160,22 +160,27 @@ class RowImporter(object):
         self.importIntField("nb_pt_obtenu_tab1", "indicateurUn.noteFinale")
 
     def importIndicateurDeux(self):
+        # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
+        # les femmes et les hommes pour les entreprises ou UES de plus de 250 salariés
+        # Calculabilité
         calculable = self.get("calculabilite_indic_tab2_sup250")
+        # Note: certaines cellules sont vides, nous répercutons tel quel en omettant le champ si vide
         if calculable == "Oui":
             self.set("indicateurDeux.nonCalculable", True)
-        else:
+        elif calculable == "Non":
             self.set("indicateurDeux.nonCalculable", False)
         self.importField("motif_non_calc_tab2_sup250", "indicateurDeux.motifNonCalculable")
         self.importField("precision_am_tab2_sup250", "indicateurDeux.motifNonCalculablePrecision")
-
+        # Taux d'augmentation par CSP
         self.importFloatField("Ou_tab2_sup250", "indicateurDeux.tauxAugmentation[0].ecartTauxAugmentation")
         self.importFloatField("Em_tab2_sup250", "indicateurDeux.tauxAugmentation[1].ecartTauxAugmentation")
         self.importFloatField("TAM_tab2_sup250", "indicateurDeux.tauxAugmentation[2].ecartTauxAugmentation")
         self.importFloatField("IC_tab2_sup250", "indicateurDeux.tauxAugmentation[3].ecartTauxAugmentation")
+        # Résultats
         self.importFloatField("resultat_tab2_sup250", "indicateurDeux.resultatFinal")
         self.importField("population_favorable_tab2_sup250", "indicateurDeux.sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab2_sup250", "indicateurDeux.noteFinale")
-
+        # Prise de mesures correctives
         priseEnCompte = self.get("prise_compte_mc_tab2_sup250")
         if priseEnCompte == "Oui":
             self.set("indicateurDeux.mesuresCorrection", True)
@@ -203,9 +208,39 @@ def checkLocale():
         exit(1)
 
 
+class printer:
+    HEADER = "\033[95m"
+    INFO = "\033[94m"
+    SUCCESS = "\033[92m"
+    WARNING = "\033[93m"
+    ERROR = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+    @staticmethod
+    def std(str):
+        print(str)
+
+    @staticmethod
+    def error(str):
+        print(f"{printer.ERROR}" + "✖  " + str + f"{printer.ENDC}")
+
+    @staticmethod
+    def info(str):
+        print(f"{printer.INFO}" + "🛈  " + str + f"{printer.ENDC}")
+
+    @staticmethod
+    def success(str):
+        print(f"{printer.SUCCESS}" + "✓  " + str + f"{printer.ENDC}")
+
+    @staticmethod
+    def warn(str):
+        print(f"{printer.WARNING}" + "⚠️  " + str + f"{printer.ENDC}")
+
+
 def parse(args):
     checkLocale()
-    log = []
     result = []
     with open(args.csv_path) as csv_file:
         reader = csv.DictReader(csv_file)
@@ -214,25 +249,31 @@ def parse(args):
         for index, row in enumerate(reader):
             if args.max and count_processed >= args.max:
                 break
+            if args.siren and row["SIREN_ets"] != args.siren and row["SIREN_UES"] != args.siren:
+                continue
             try:
                 result.append(processRow(row))
                 count_imported = count_imported + 1
             except KeyError as err:
-                log.append("Error importing line {0}: Missing key {1}".format(index, err))
+                printer.error("Error importing line {0}: Missing key {1}".format(index, err))
             except ValueError as err:
-                log.append("Error importing line {0}: {1}".format(index, err))
+                printer.error("Error importing line {0}: {1}".format(index, err))
             except RuntimeError as err:
-                log.append("Error importing line {0}: {1}".format(index, err))
+                printer.error("Error importing line {0}: {1}".format(index, err))
             count_processed = count_processed + 1
-        log.append("{0}/{1} records imported.".format(count_imported, count_processed))
     if args.show_json:
-        print(json.dumps(result, indent=args.indent))
-    for entry in log:
-        print(entry)
+        printer.std(json.dumps(result, indent=args.indent))
+    if args.siren and count_processed == 0:
+        printer.error("Aucune entrée trouvée pour le Siren " + args.siren)
+    else:
+        if count_processed == count_imported:
+            printer.info("Aucune erreur rencontrée.")
+        printer.success("{0}/{1} ligne(s) importée(s).".format(count_imported, count_processed))
 
 
 parser = argparse.ArgumentParser(description="Import des données Solen.")
 parser.add_argument("csv_path", type=str, help="chemin vers l'export CSV Solen")
+parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniquement")
 parser.add_argument("--indent", type=int, help="niveau d'indentation JSON", default=None)
 parser.add_argument("--max", type=int, help="nombre maximum de lignes à importer", default=None)
 parser.add_argument("--show-json", help="afficher la sortie JSON", action="store_true", default=False)
