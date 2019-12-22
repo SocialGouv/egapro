@@ -1,7 +1,7 @@
 import argparse
 import csv
 import json
-import pprint
+import re
 
 from datetime import datetime, timedelta
 from locale import atof, setlocale, LC_NUMERIC
@@ -12,17 +12,33 @@ from locale import atof, setlocale, LC_NUMERIC
 #   l'export solen ?
 # - gérer import champ de type date
 
+RE_ARRAY_INDEX = re.compile(r"^(\w+)\[(\d)\]$")
 
-def toPath(record, path, value):
+
+def toPath(struct, path, value, toIndex=None):
     parts = path.split(".")
     for index, part in enumerate(parts):
-        if index == len(parts) - 1:
-            record[part] = value
-            return record
+        arrayIndex = RE_ARRAY_INDEX.match(part)
+        if arrayIndex is not None:
+            (arrayName, partIndex) = arrayIndex.groups()
+            if arrayName not in struct:
+                struct[arrayName] = []
+            return toPath(struct[arrayName], ".".join(parts[1:]), value, toIndex=partIndex)
+        elif isinstance(struct, list) and toIndex is not None:
+            # FIXME: use toIndex to ensure insertion is done at the proper position in the list
+            remaining = ".".join(parts)
+            if remaining == "":
+                struct.append(value)
+            else:
+                struct.append(toPath({}, remaining, value))
+            return struct
+        elif index == len(parts) - 1:
+            struct[part] = value
+            return struct
         else:
-            if part not in record:
-                record[part] = {}
-            return toPath(record[part], ".".join(parts[1:]), value)
+            if part not in struct:
+                struct[part] = {}
+            return toPath(struct[part], ".".join(parts[1:]), value)
 
 
 class RowImporter(object):
@@ -117,7 +133,7 @@ class RowImporter(object):
         self.importField("date_publ_niv > Valeur date", "declaration.datePublication")
         self.importField("site_internet_publ", "declaration.lienPublication")
 
-    def importIndicateur1(self):
+    def importIndicateurUn(self):
         # Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
         # Quatre items possibles :
         # - coef_niv: Par niveau ou coefficient hiérarchique en application de la classification de branche
@@ -143,6 +159,29 @@ class RowImporter(object):
         self.importField("population_favorable_tab1", "indicateurUn.sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab1", "indicateurUn.noteFinale")
 
+    def importIndicateurDeux(self):
+        calculable = self.get("calculabilite_indic_tab2_sup250")
+        if calculable == "Oui":
+            self.set("indicateurDeux.nonCalculable", True)
+        else:
+            self.set("indicateurDeux.nonCalculable", False)
+        self.importField("motif_non_calc_tab2_sup250", "indicateurDeux.motifNonCalculable")
+        self.importField("precision_am_tab2_sup250", "indicateurDeux.motifNonCalculablePrecision")
+
+        self.importFloatField("Ou_tab2_sup250", "indicateurDeux.tauxAugmentation[0].ecartTauxAugmentation")
+        self.importFloatField("Em_tab2_sup250", "indicateurDeux.tauxAugmentation[1].ecartTauxAugmentation")
+        self.importFloatField("TAM_tab2_sup250", "indicateurDeux.tauxAugmentation[2].ecartTauxAugmentation")
+        self.importFloatField("IC_tab2_sup250", "indicateurDeux.tauxAugmentation[3].ecartTauxAugmentation")
+        self.importFloatField("resultat_tab2_sup250", "indicateurDeux.resultatFinal")
+        self.importField("population_favorable_tab2_sup250", "indicateurDeux.sexeSurRepresente")
+        self.importIntField("nb_pt_obtenu_tab2_sup250", "indicateurDeux.noteFinale")
+
+        priseEnCompte = self.get("prise_compte_mc_tab2_sup250")
+        if priseEnCompte == "Oui":
+            self.set("indicateurDeux.mesuresCorrection", True)
+        elif priseEnCompte == "Non":
+            self.set("indicateurDeux.mesuresCorrection", False)
+
 
 def processRow(row):
     importer = RowImporter(row)
@@ -151,7 +190,8 @@ def processRow(row):
     importer.importEntreprise()
     importer.importUES()
     importer.importNiveauResultat()
-    importer.importIndicateur1()
+    importer.importIndicateurUn()
+    importer.importIndicateurDeux()
     return {"data": importer.toDict()}
 
 
