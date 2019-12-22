@@ -12,8 +12,9 @@ $ pipenv run python import-solen.py <chemin_vers_solen.csv>
 ### Usage
 
 ```
-$ pipenv run python import-solen.py --help
-usage: import-solen.py [-h] [--indent INDENT] [--max MAX] [--show-json]
+$ pipenv run python import-solen.py --help                        
+usage: import-solen.py [-h] [--siren SIREN] [--indent INDENT] [--max MAX]
+                       [--show-json]
                        csv_path
 
 Import des données Solen.
@@ -23,6 +24,7 @@ positional arguments:
 
 optional arguments:
   -h, --help       show this help message and exit
+  --siren SIREN    importer le SIREN spécifié uniquement
   --indent INDENT  niveau d'indentation JSON
   --max MAX        nombre maximum de lignes à importer
   --show-json      afficher la sortie JSON
