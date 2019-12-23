@@ -62,8 +62,15 @@ class RowImporter(object):
 
         return self.set(path, value)
 
+    def importBooleanField(self, csvFieldName, path, negate=False):
+        # Note: si la valeur du champ n'est ni "Oui" no "Non", nous n'importons pas la donnée
+        if self.get(csvFieldName) == "Oui":
+            self.set(path, True if not negate else False)
+        elif self.get(csvFieldName) == "Non":
+            self.set(path, False if not negate else True)
+
     def importFloatField(self, csvFieldName, path):
-        # Note: we're using French locale aware `atof` for casting to float here
+        # Note: nous utilisons la notation décimale française, d'où l'utilisation de la fonction atof
         return self.importField(csvFieldName, path, type=atof)
 
     def importIntField(self, csvFieldName, path):
@@ -93,8 +100,8 @@ class RowImporter(object):
         date_debut_pr = self.importField("date_debut_pr > Valeur date", "informations.debutPeriodeReference")
         if self.get("periode_ref") == "ac":
             # année civile: 31 décembre de l'année précédent "annee_indicateurs"
-            debutPeriodeReference = "01/01/" + str(annee_indicateur)
-            finPeriodeReference = "31/12/" + str(annee_indicateur)
+            debutPeriodeReference = "01/01/" + str(annee_indicateur - 1)
+            finPeriodeReference = "31/12/" + str(annee_indicateur - 1)
         elif date_debut_pr != "-":
             # autre période: rajouter un an à "date_debut_pr"
             debutPeriodeReference = date_debut_pr
@@ -147,16 +154,27 @@ class RowImporter(object):
         # coef_nif  -> indicateurUn.coefficients
         # nc et amc -> indicateurUn.autre
         modalite = self.get("modalite_calc_tab1")
+        self.set("indicateurUn.csp", False)
+        self.set("indicateurUn.coefficients", False)
+        self.set("indicateurUn.autre", False)
+        self.set("indicateurUn.nonCalculable", False)
         if modalite == "csp":
             self.set("indicateurUn.csp", True)
         elif modalite == "coefficients":
-            self.set("indicateurUn.coeffficients", True)
-        else:
+            self.set("indicateurUn.coefficients", True)
+        elif modalite == "amc":
             self.set("indicateurUn.autre", True)
+        elif modalite == "nc":
+            self.set("indicateurUn.autre", True)
+            self.set("indicateurUn.nonCalculable", True)
         self.importField("date_consult_CSE > Valeur date", "indicateurUn.dateConsultationCSE")
         self.importIntField("nb_coef_niv", "indicateurUn.nombreCoefficients")
+        self.importField("motif_non_calc_tab1", "indicateurUn.motifNonCalculable")
+        self.importField("precision_am_tab1", "indicateurUn.motifNonCalculablePrecision")
         # FIXME: pour le moment un bug de formattage de cellule nous empêche de
         # connaître à quelle tranche d'âge correspond chaque chiffre dans la cellule
+        # TODO: import colonnes Ou Em, TAM, IC, niv01 à niv50
+        # Résultat
         self.importFloatField("resultat_tab1", "indicateurUn.resultatFinal")
         self.importField("population_favorable_tab1", "indicateurUn.sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab1", "indicateurUn.noteFinale")
@@ -165,12 +183,7 @@ class RowImporter(object):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
         # les femmes et les hommes pour les entreprises ou UES de plus de 250 salariés
         # Calculabilité
-        calculable = self.get("calculabilite_indic_tab2_sup250")
-        # Note: certaines cellules sont vides, nous répercutons tel quel en omettant le champ si vide
-        if calculable == "Oui":
-            self.set("indicateurDeux.nonCalculable", True)
-        elif calculable == "Non":
-            self.set("indicateurDeux.nonCalculable", False)
+        self.importBooleanField("calculabilite_indic_tab2_sup250", "indicateurDeux.nonCalculable", negate=True)
         self.importField("motif_non_calc_tab2_sup250", "indicateurDeux.motifNonCalculable")
         self.importField("precision_am_tab2_sup250", "indicateurDeux.motifNonCalculablePrecision")
         # Taux d'augmentation individuelle par CSP
@@ -183,22 +196,13 @@ class RowImporter(object):
         self.importField("population_favorable_tab2_sup250", "indicateurDeux.sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab2_sup250", "indicateurDeux.noteFinale")
         # Prise de mesures correctives
-        priseEnCompte = self.get("prise_compte_mc_tab2_sup250")
-        if priseEnCompte == "Oui":
-            self.set("indicateurDeux.mesuresCorrection", True)
-        elif priseEnCompte == "Non":
-            self.set("indicateurDeux.mesuresCorrection", False)
+        self.importBooleanField("prise_compte_mc_tab2_sup250", "indicateurDeux.mesuresCorrection")
 
     def importIndicateurTrois(self):
         # Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes pour
         # les entreprises ou UES de plus de 250 salariés
         # Calculabilité
-        calculable = self.get("calculabilite_indic_tab3_sup250")
-        # Note: certaines cellules sont vides, nous répercutons tel quel en omettant le champ si vide
-        if calculable == "Oui":
-            self.set("indicateurTrois.nonCalculable", True)
-        elif calculable == "Non":
-            self.set("indicateurTrois.nonCalculable", False)
+        self.importBooleanField("calculabilite_indic_tab3_sup250", "indicateurTrois.nonCalculable", negate=True)
         self.importField("motif_non_calc_tab3_sup250", "indicateurTrois.motifNonCalculable")
         self.importField("precision_am_tab3_sup250", "indicateurTrois.motifNonCalculablePrecision")
         # Ecarts de taux de promotions par CSP
@@ -211,11 +215,7 @@ class RowImporter(object):
         self.importField("population_favorable_tab3_sup250", "indicateurTrois.sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab3_sup250", "indicateurTrois.noteFinale")
         # Prise de mesures correctives
-        priseEnCompte = self.get("prise_compte_mc_tab3_sup250")
-        if priseEnCompte == "Oui":
-            self.set("indicateurTrois.mesuresCorrection", True)
-        elif priseEnCompte == "Non":
-            self.set("indicateurTrois.mesuresCorrection", False)
+        self.importBooleanField("prise_compte_mc_tab3_sup250", "indicateurTrois.mesuresCorrection")
 
 
 def processRow(row):
@@ -235,7 +235,7 @@ def checkLocale():
     try:
         setlocale(LC_NUMERIC, "fr_FR.UTF-8")
     except Exception:
-        print("Impossible d'utiliser la locale fr_FR.UTF-8")
+        print("Impossible d'utiliser la locale fr_FR.UTF-8 nécessaire à la conversion de décimaux en notation française ('19.2' et non '19,2')")
         exit(1)
 
 
