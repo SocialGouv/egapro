@@ -25,10 +25,10 @@ deployment:
 
   env:
     - name: REACT_APP_API_URL
-      value: "http://api:4000"
+      value: "http://api-hpa:4000"
 
 ingress:
-  enabled: true
+  enabled: false
   annotations:
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     kubernetes.io/ingress.class: "azure/application-gateway"
