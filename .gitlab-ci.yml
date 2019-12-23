@@ -22,7 +22,7 @@ include:
   - "/.gitlab-ci/.deploy-egapro-kinto.yml"
 
 stages:
-#  - "Code Quality"
+  - "Code Quality"
   - "Prepare"
   - "Registration"
   - "Create secret hors prod"
