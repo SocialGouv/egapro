@@ -17,8 +17,7 @@ RE_ARRAY_INDEX = re.compile(r"^(\w+)\[(\d)\]$")
 
 
 def toPath(struct, path, value, toIndex=None):
-    parts = path.split(".")
-    part, *remaining = parts
+    part, *remaining = path.split(".")
     arrayIndex = RE_ARRAY_INDEX.match(part)
     if arrayIndex is not None:
         (arrayName, arrayIndex) = arrayIndex.groups()
@@ -32,7 +31,7 @@ def toPath(struct, path, value, toIndex=None):
         else:
             struct.append(toPath({}, path, value))
         return struct
-    elif 0 == len(parts) - 1:
+    elif len(remaining) == 0:
         struct[part] = value
         return struct
     else:
