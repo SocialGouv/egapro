@@ -237,37 +237,6 @@ def checkLocale():
         exit(1)
 
 
-class printer:
-    HEADER = "\033[95m"
-    INFO = "\033[94m"
-    SUCCESS = "\033[92m"
-    WARNING = "\033[93m"
-    ERROR = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-
-    @staticmethod
-    def std(str):
-        print(str)
-
-    @staticmethod
-    def error(str):
-        print(f"{printer.ERROR}" + "✖  " + str + f"{printer.ENDC}")
-
-    @staticmethod
-    def info(str):
-        print(f"{printer.INFO}" + "🛈  " + str + f"{printer.ENDC}")
-
-    @staticmethod
-    def success(str):
-        print(f"{printer.SUCCESS}" + "✓  " + str + f"{printer.ENDC}")
-
-    @staticmethod
-    def warn(str):
-        print(f"{printer.WARNING}" + "⚠️  " + str + f"{printer.ENDC}")
-
-
 def parse(args):
     checkLocale()
     result = []
@@ -298,6 +267,37 @@ def parse(args):
         if count_processed == count_imported:
             printer.info("Aucune erreur rencontrée.")
         printer.success("{0}/{1} ligne(s) importée(s).".format(count_imported, count_processed))
+
+
+class printer:
+    HEADER = "\033[95m"
+    INFO = "\033[94m"
+    SUCCESS = "\033[92m"
+    WARNING = "\033[93m"
+    ERROR = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+    @staticmethod
+    def std(str):
+        print(str)
+
+    @staticmethod
+    def error(str):
+        print(f"{printer.ERROR}✖  {str}{printer.ENDC}")
+
+    @staticmethod
+    def info(str):
+        print(f"{printer.INFO}🛈  {str}{printer.ENDC}")
+
+    @staticmethod
+    def success(str):
+        print(f"{printer.SUCCESS}✓  {str}{printer.ENDC}")
+
+    @staticmethod
+    def warn(str):
+        print(f"{printer.WARNING}⚠️  {str}{printer.ENDC}")
 
 
 parser = argparse.ArgumentParser(description="Import des données Solen.")
