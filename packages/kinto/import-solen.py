@@ -81,11 +81,9 @@ class RowImporter(object):
             toPath(self.record, path, value)
             return value
 
-    def toDict(self):
-        return self.record
-
-    def extractId(self):
-        return self.get("URL d'impression du répondant").replace(SOLEN_URL_PREFIX, "")
+    def toKintoRecord(self):
+        solenId = self.get("URL d'impression du répondant").replace(SOLEN_URL_PREFIX, "")
+        return {"id": solenId, "data": self.record}
 
     def importPeriodeDeReference(self):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
@@ -230,10 +228,7 @@ def processRow(row):
     importer.importIndicateurUn()
     importer.importIndicateurDeux()
     importer.importIndicateurTrois()
-    return {
-        "id": importer.extractId(),
-        "data": importer.toDict(),
-    }
+    return importer.toKintoRecord()
 
 
 def checkLocale():
