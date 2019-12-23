@@ -18,28 +18,27 @@ RE_ARRAY_INDEX = re.compile(r"^(\w+)\[(\d)\]$")
 
 def toPath(struct, path, value, toIndex=None):
     parts = path.split(".")
-    for index, part in enumerate(parts):
-        arrayIndex = RE_ARRAY_INDEX.match(part)
-        if arrayIndex is not None:
-            (arrayName, partIndex) = arrayIndex.groups()
-            if arrayName not in struct:
-                struct[arrayName] = []
-            return toPath(struct[arrayName], ".".join(parts[1:]), value, toIndex=partIndex)
-        elif isinstance(struct, list) and toIndex is not None:
-            # FIXME: use toIndex to ensure insertion is done at the proper position in the list
-            remaining = ".".join(parts)
-            if remaining == "":
-                struct.append(value)
-            else:
-                struct.append(toPath({}, remaining, value))
-            return struct
-        elif index == len(parts) - 1:
-            struct[part] = value
-            return struct
+    part, *remaining = parts
+    arrayIndex = RE_ARRAY_INDEX.match(part)
+    if arrayIndex is not None:
+        (arrayName, arrayIndex) = arrayIndex.groups()
+        if arrayName not in struct:
+            struct[arrayName] = []
+        return toPath(struct[arrayName], ".".join(remaining), value, toIndex=arrayIndex)
+    elif isinstance(struct, list) and toIndex is not None:
+        # FIXME: use toIndex to ensure insertion is done at the proper position in the list
+        if path == "":
+            struct.append(value)
         else:
-            if part not in struct:
-                struct[part] = {}
-            return toPath(struct[part], ".".join(parts[1:]), value)
+            struct.append(toPath({}, path, value))
+        return struct
+    elif 0 == len(parts) - 1:
+        struct[part] = value
+        return struct
+    else:
+        if part not in struct:
+            struct[part] = {}
+        return toPath(struct[part], ".".join(remaining), value)
 
 
 class RowImporter(object):

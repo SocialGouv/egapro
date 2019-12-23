@@ -1,4 +1,4 @@
-EgaPRO Kinto
+Egapro Kinto
 ============
 
 ## Importer les données Solen
