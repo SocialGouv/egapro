@@ -12,6 +12,7 @@ from locale import atof, setlocale, LC_NUMERIC
 #   l'export solen ?
 # - gérer import champ de type date
 
+SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
 RE_ARRAY_INDEX = re.compile(r"^(\w+)\[(\d)\]$")
 
 
@@ -82,6 +83,9 @@ class RowImporter(object):
 
     def toDict(self):
         return self.record
+
+    def extractId(self):
+        return self.get("URL d'impression du répondant").replace(SOLEN_URL_PREFIX, "")
 
     def importPeriodeDeReference(self):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
@@ -226,7 +230,10 @@ def processRow(row):
     importer.importIndicateurUn()
     importer.importIndicateurDeux()
     importer.importIndicateurTrois()
-    return {"data": importer.toDict()}
+    return {
+        "id": importer.extractId(),
+        "data": importer.toDict(),
+    }
 
 
 def checkLocale():
