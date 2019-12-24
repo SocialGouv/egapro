@@ -1,0 +1,188 @@
+{
+  "data": {
+    "schema": {
+      "title": "Schema de simulation et déclaration egapro",
+      "definitions": {
+        "formValidated": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "effectif": {
+          "title": "Effectifs pris en compte pour le calcul",
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "nombreSalaries": {
+              "title": "nombre de salariés",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "tranchesAges": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "trancheAge": { "type": "integer" },
+                        "nombreSalariesFemmes": { "type": "number" },
+                        "nombreSalariesHommes": { "type": "number" }
+                      }
+                    }
+                  },
+                  "categorieSocioPro": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "indicateurUn": {
+          "title": "Indicateur 1",
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "csp": { "type": "boolean" },
+            "remunerationAnnuelle": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "categorieSocioPro": { "type": "integer" },
+                  "tranchesAges": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "trancheAge": { "type": "integer" },
+                        "remunerationAnnuelleBrutFemmes": { "type": "number" },
+                        "remunerationAnnuelleBrutHommes": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "coefficient": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "tranchesAges": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "trancheAge": { "type": "integer" },
+                        "nombreSalariesFemmes": { "type": "number" },
+                        "nombreSalariesHommes": { "type": "number" },
+                        "remunerationAnnuelleBrutFemmes": { "type": "number" },
+                        "remunerationAnnuelleBrutHommes": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "coefficientGroupFormValidated": { "type": "string" },
+            "coefficientEffectifFormValidated": { "type": "string" }
+          }
+        },
+        "informations": {
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "nomEntreprise": { "type": "string" },
+            "trancheEffectifs": {
+              "type": "string"
+            },
+            "finPeriodeReference": { "type": "string" },
+            "debutPeriodeReference": { "type": "string" }
+          }
+        },
+        "indicateurDeux": {
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "tauxAugmentation": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "categorieSocioPro": { "type": "integer" },
+                  "tauxAugmentationFemmes": { "type": "number" },
+                  "tauxAugmentationHommes": { "type": "number" }
+                }
+              }
+            },
+            "presenceAugmentation": { "type": "boolean" }
+          }
+        },
+        "indicateurTrois": {
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "tauxPromotion": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "categorieSocioPro": { "type": "integer" },
+                  "tauxPromotionFemmes": { "type": "number" },
+                  "tauxPromotionHommes": { "type": "number" }
+                }
+              }
+            },
+            "presencePromotion": { "type": "boolean" }
+          }
+        },
+        "indicateurDeuxTrois": {
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "periodeDeclaration": {
+              "type": "string"
+            },
+            "presenceAugmentationPromotion": { "type": "boolean" },
+            "nombreAugmentationPromotionFemmes": { "type": "integer" },
+            "nombreAugmentationPromotionHommes": { "type": "integer" }
+          }
+        },
+        "indicateurQuatre": {
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "presenceCongeMat": { "type": "boolean" },
+            "nombreSalarieesAugmentees": { "type": "integer" },
+            "nombreSalarieesPeriodeAugmentation": { "type": "integer" }
+          }
+        },
+        "indicateurCinq": {
+          "type": "object",
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "nombreSalariesFemmes": { "type": "integer" },
+            "nombreSalariesHommes": { "type": "integer" }
+          }
+        }
+      }
+    }
+  }
+}
