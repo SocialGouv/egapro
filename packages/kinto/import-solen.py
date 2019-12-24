@@ -12,6 +12,7 @@ from locale import atof, setlocale, LC_NUMERIC
 #   l'export solen ?
 # - gérer import champ de type date
 
+CELL_SKIPPABLE_VALUES = ["", "-", "non applicable", "non calculable"]
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
 RE_ARRAY_INDEX = re.compile(r"^(\w+)\[(\d)\]$")
 
@@ -45,9 +46,6 @@ class RowImporter(object):
         self.row = row
         self.record = {}
 
-    def __isValidValue(self, value):
-        return value != "" and value != "-"
-
     def importField(self, csvFieldName, path, type=str):
         value = self.get(csvFieldName)
         if not value:
@@ -77,12 +75,12 @@ class RowImporter(object):
     def get(self, csvFieldName):
         if csvFieldName not in self.row:
             raise KeyError("Row does not have a {0} field".format(csvFieldName))
-        if not self.__isValidValue(self.row[csvFieldName]):
+        if self.row[csvFieldName] in CELL_SKIPPABLE_VALUES:
             return None
         return self.row[csvFieldName]
 
     def set(self, path, value):
-        if self.__isValidValue(value):
+        if value not in CELL_SKIPPABLE_VALUES:
             toPath(self.record, path, value)
             return value
 
@@ -223,6 +221,16 @@ class RowImporter(object):
         # Prise de mesures correctives
         self.importBooleanField("prise_compte_mc_tab3_sup250", "indicateurTrois.mesuresCorrection")
 
+    def importNombreDePointsObtenus(self):
+        # Nombre de points obtenus  à chaque indicateur attribué automatiquement
+        self.importIntField("Indicateur 1", "declaration.indicateurUn")
+        self.importIntField("Indicateur 2", "declaration.indicateurDeux")
+        self.importIntField("Indicateur 2 PourCent", "declaration.indicateurDeuxTroisEcart")
+        self.importIntField("Indicateur 2 ParSal", "declaration.indicateurDeuxTroisNombreSalaries")
+        self.importIntField("Indicateur 3", "declaration.indicateurTrois")
+        self.importIntField("Indicateur 4", "declaration.indicateurQuatre")
+        self.importIntField("Indicateur 5", "declaration.indicateurCinq")
+
 
 def processRow(row):
     importer = RowImporter(row)
@@ -234,6 +242,8 @@ def processRow(row):
     importer.importIndicateurUn()
     importer.importIndicateurDeux()
     importer.importIndicateurTrois()
+
+    importer.importNombreDePointsObtenus()
     return importer.toKintoRecord()
 
 
