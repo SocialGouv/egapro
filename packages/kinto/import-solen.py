@@ -12,7 +12,7 @@ from locale import atof, setlocale, LC_NUMERIC
 #   l'export solen ?
 # - gérer import champ de type date
 
-CELL_SKIPPABLE_VALUES = ["", "-", "non applicable", "non calculable"]
+CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
 RE_ARRAY_INDEX = re.compile(r"^(\w+)\[(\d)\]$")
 
@@ -231,6 +231,12 @@ class RowImporter(object):
         self.importIntField("Indicateur 4", "declaration.indicateurQuatre")
         self.importIntField("Indicateur 5", "declaration.indicateurCinq")
 
+    def importNiveauDeResultatGlobal(self):
+        self.importIntField("Nombre total de points obtenus", "declaration.noteFinale")
+        self.importIntField("Nombre total de points pouvant être obtenus", "declaration.nombrePointsMax")
+        self.importIntField("Résultat final sur 100 points", "declaration.noteFinaleSur100")
+        self.importField("mesures_correction", "declaration.mesuresCorrection")
+
 
 def processRow(row):
     importer = RowImporter(row)
@@ -242,8 +248,9 @@ def processRow(row):
     importer.importIndicateurUn()
     importer.importIndicateurDeux()
     importer.importIndicateurTrois()
-
+    # ...
     importer.importNombreDePointsObtenus()
+    importer.importNiveauDeResultatGlobal()
     return importer.toKintoRecord()
 
 
