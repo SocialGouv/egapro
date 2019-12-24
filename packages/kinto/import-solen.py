@@ -94,7 +94,14 @@ class RowImporter(object):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
         annee_indicateur = self.importIntField("annee_indicateurs", "informationsComplementaires.anneeDeclaration")
         self.importField("structure", "informationsComplementaires.structure")
-        self.importField("tranche_effectif", "informations.trancheEffectifs")
+
+        # Compatibilité egapro de la tranche d'effectifs
+        tranche = self.get("tranche_effectif")
+        if tranche == "De 50 à 250 inclus":
+            tranche = "50 à 250"
+        self.set("informations.trancheEffectifs", tranche)
+
+        # Période de référence
         date_debut_pr = self.importField("date_debut_pr > Valeur date", "informations.debutPeriodeReference")
         if self.get("periode_ref") == "ac":
             # année civile: 31 décembre de l'année précédent "annee_indicateurs"
@@ -109,7 +116,8 @@ class RowImporter(object):
             raise RuntimeError("Données de période de référence incohérentes.")
         self.set("informations.debutPeriodeReference", debutPeriodeReference)
         self.set("informations.finPeriodeReference", finPeriodeReference)
-        # FIXME: comment est-il possible d'avoir un nombre de salariés à virgule ?
+
+        # Note: utilisation d'un nombre à virgule pour prendre en compte les temps partiels
         self.importFloatField("nb_salaries > Valeur numérique", "effectifs.nombreSalariesTotal")
 
     def importInformationsDeclarant(self):
