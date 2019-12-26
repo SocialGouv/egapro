@@ -3,6 +3,7 @@ import csv
 import dpath
 import json
 import re
+import sys
 
 from datetime import datetime, timedelta
 from locale import atof, setlocale, LC_NUMERIC
@@ -25,7 +26,7 @@ class RowImporter(object):
 
     def log(self, msg):
         if self.debug:
-            print(msg)
+            printer.std(msg)
 
     def importField(self, csvFieldName, path, type=str):
         value = self.get(csvFieldName)
@@ -138,9 +139,9 @@ class RowImporter(object):
         self.importField("date_publ_niv > Valeur date", "declaration/datePublication")
         self.importField("site_internet_publ", "declaration/lienPublication")
 
-    def setValeursTranche(self, column, path, fieldName):
-        columns = [column + " > -30", column + " > 30-39", column + " > 40-49", column + " > 50+"]
-        values = [self.get(col) for col in columns]
+    def setValeursTranche(self, niveau, path, fieldName):
+        niveaux = [niveau + " > -30", niveau + " > 30-39", niveau + " > 40-49", niveau + " > 50+"]
+        values = [self.get(col) for col in niveaux]
         tranches = [None, None, None, None]
         for index, value in enumerate(values):
             tranches[index] = {"trancheAge": index}
@@ -148,24 +149,22 @@ class RowImporter(object):
                 tranches[index][fieldName] = atof(value)
         self.set(path, {"tranchesAges": tranches})
 
-    def setValeursTranches(self, columns, path, fieldName, max=4):
-        for index, column in enumerate(columns):
-            if index + 1 > max:
-                break
+    def setValeursTranches(self, niveaux, path, fieldName):
+        for index, column in enumerate(niveaux):
             self.setValeursTranche(column, "{0}/{1}".format(path, index), fieldName)
 
     def importTranchesCsp(self):
         self.set("indicateurUn/remunerationAnnuelle", [])
-        self.setValeursTranches(["Ou", "Em", "TAM", "IC"], "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration", max=4)
+        self.setValeursTranches(["Ou", "Em", "TAM", "IC"], "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
 
     def importTranchesCoefficients(self):
         try:
             max = int(self.get("nb_coef_niv"))
         except Exception as err:
-            raise RuntimeError("Valeur nb_coef_niv non renseignée, indispensable pour une déclaratio par niveaux de coéfficients")
+            raise RuntimeError("Valeur nb_coef_niv non renseignée, indispensable pour une déclaration par niveaux de coefficients")
         self.set("indicateurUn/remunerationAnnuelle", [])
-        niveaux = ["niv{:02d}".format(niv) for niv in range(1, 51)]
-        self.setValeursTranches(niveaux, "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration", max=max)
+        niveaux = ["niv{:02d}".format(niv) for niv in range(1, max + 1)]
+        self.setValeursTranches(niveaux, "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
 
     def importIndicateurUn(self):
         # Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
@@ -196,9 +195,6 @@ class RowImporter(object):
         self.importIntField("nb_coef_niv", "indicateurUn/nombreCoefficients")
         self.importField("motif_non_calc_tab1", "indicateurUn/motifNonCalculable")
         self.importField("precision_am_tab1", "indicateurUn/motifNonCalculablePrecision")
-        # FIXME: pour le moment un bug de formattage de cellule nous empêche de
-        # connaître à quelle tranche d'âge correspond chaque chiffre dans la cellule
-        # TODO: import colonnes Ou Em, TAM, IC, niv01 à niv50
         if modalite == "csp":
             self.importTranchesCsp()
         elif modalite == "coef_niv":
@@ -246,6 +242,11 @@ class RowImporter(object):
         # Prise de mesures correctives
         self.importBooleanField("prise_compte_mc_tab3_sup250", "indicateurTrois/mesuresCorrection")
 
+    def importIndicateurCinq(self):
+        self.importIntField("resultat_tab5", "indicateurCinq/resultatFinal")
+        self.importField("sexe_sur_represente_tab5", "indicateurCinq/sexeSurRepresente")
+        self.importIntField("nb_pt_obtenu_tab5", "indicateurCinq/noteFinale")
+
     def importNombreDePointsObtenus(self):
         # Nombre de points obtenus  à chaque indicateur attribué automatiquement
         self.importIntField("Indicateur 1", "declaration/indicateurUn")
@@ -275,6 +276,7 @@ def processRow(row, debug=False):
     importer.importIndicateurDeux()
     importer.importIndicateurTrois()
     # ...
+    importer.importIndicateurCinq()
     importer.importNombreDePointsObtenus()
     importer.importNiveauDeResultatGlobal()
     return importer.toKintoRecord()
@@ -284,34 +286,43 @@ def checkLocale():
     try:
         setlocale(LC_NUMERIC, "fr_FR.UTF-8")
     except Exception:
-        print("Impossible d'utiliser la locale fr_FR.UTF-8 nécessaire à la conversion de décimaux en notation française ('19.2' et non '19,2')")
+        printer.error("Impossible d'utiliser la locale fr_FR.UTF-8 nécessaire à la conversion de décimaux en notation française ('19.2' et non '19,2')")
         exit(1)
+
+
+def getNbRows(csv_path):
+    with open(csv_path) as csv_file:
+        return len(list(csv.DictReader(csv_file)))
 
 
 def parse(args):
     checkLocale()
+    nb_rows = getNbRows(args.csv_path)
     result = []
     with open(args.csv_path) as csv_file:
         reader = csv.DictReader(csv_file)
         count_processed = 0
         count_imported = 0
         for index, row in enumerate(reader):
+            lineno = index + 1
             if args.max and count_processed >= args.max:
                 break
             if args.siren and row["SIREN_ets"] != args.siren and row["SIREN_UES"] != args.siren:
                 continue
             try:
-                result.append(processRow(row, debug=args.debug))
+                record = processRow(row, debug=args.debug)
+                result.append(record)
                 count_imported = count_imported + 1
             except KeyError as err:
-                printer.error("Error importing line {0}: Missing key {1}".format(index, err))
+                printer.error("Error importing line {0}: Missing key {1}".format(lineno, err))
             except ValueError as err:
-                printer.error("Error importing line {0}: {1}".format(index, err))
+                printer.error("Error importing line {0}: {1}".format(lineno, err))
             except RuntimeError as err:
-                printer.error("Error importing line {0}: {1}".format(index, err))
+                printer.error("Error importing line {0}: {1}".format(lineno, err))
             count_processed = count_processed + 1
-    if args.show_json:
-        printer.std(json.dumps(result, indent=args.indent))
+            if args.show_json:
+                printer.std(json.dumps(record, indent=args.indent))
+            printer.success(f"Ligne {lineno}/{nb_rows} importée avec succès.")
     if args.siren and count_processed == 0:
         printer.error("Aucune entrée trouvée pour le Siren " + args.siren)
     else:
@@ -321,6 +332,9 @@ def parse(args):
         else:
             printer.error("{0} erreur(s) rencontré(s)".format(count_processed - count_imported))
             printer.warn("{0}/{1} ligne(s) importée(s).".format(count_imported, count_processed))
+    if args.save_as:
+        with open(args.save_as, "a") as json_file:
+            json_file.write(json.dumps(result, indent=args.indent))
 
 
 class printer:
@@ -335,23 +349,28 @@ class printer:
 
     @staticmethod
     def std(str):
-        print(str)
+        sys.stdout.write(str + "\n")
+        sys.stdout.flush()
 
     @staticmethod
     def error(str):
-        print(f"{printer.ERROR}✖  {str}{printer.ENDC}")
+        sys.stderr.write(f"{printer.ERROR}✖  {str}{printer.ENDC}\n")
+        sys.stderr.flush()
 
     @staticmethod
     def info(str):
-        print(f"{printer.INFO}🛈  {str}{printer.ENDC}")
+        sys.stdout.write(f"{printer.INFO}🛈  {str}{printer.ENDC}\n")
+        sys.stdout.flush()
 
     @staticmethod
     def success(str):
-        print(f"{printer.SUCCESS}✓  {str}{printer.ENDC}")
+        sys.stdout.write(f"{printer.SUCCESS}✓  {str}{printer.ENDC}\n")
+        sys.stdout.flush()
 
     @staticmethod
     def warn(str):
-        print(f"{printer.WARNING}⚠️  {str}{printer.ENDC}")
+        sys.stdout.write(f"{printer.WARNING}⚠️  {str}{printer.ENDC}\n")
+        sys.stdout.flush()
 
 
 parser = argparse.ArgumentParser(description="Import des données Solen.")
@@ -361,5 +380,9 @@ parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniq
 parser.add_argument("--indent", type=int, help="niveau d'indentation JSON", default=None)
 parser.add_argument("--max", type=int, help="nombre maximum de lignes à importer", default=None)
 parser.add_argument("--show-json", help="afficher la sortie JSON", action="store_true", default=False)
+parser.add_argument("--save-as", type=str, help="sauvegarder la sortie JSON dans un fichier")
 
-parse(parser.parse_args())
+try:
+    parse(parser.parse_args())
+except KeyboardInterrupt:
+    printer.warn("Script d'import interrompu.")
