@@ -39,7 +39,7 @@ class RowImporter(object):
             try:
                 value = type(value)
             except Exception as err:
-                raise ValueError("Couldn't cast {0} field value ('{1}') to {2}".format(csvFieldName, value, type))
+                raise ValueError(f"Couldn't cast {csvFieldName} field value ('{value}') to {type}")
 
         return self.set(path, value)
 
@@ -59,13 +59,13 @@ class RowImporter(object):
 
     def get(self, csvFieldName):
         if csvFieldName not in self.row:
-            raise KeyError("Row does not have a {0} field".format(csvFieldName))
+            raise KeyError(f"Row does not have a {csvFieldName} field")
         if self.row[csvFieldName] in CELL_SKIPPABLE_VALUES:
             return None
         return self.row[csvFieldName]
 
     def set(self, path, value):
-        self.log("set {0} to {1}".format(path, value))
+        self.log(f"set {path} to {value}")
         if value not in CELL_SKIPPABLE_VALUES:
             try:
                 dpath.util.get(self.record, path)
@@ -73,7 +73,7 @@ class RowImporter(object):
             except Exception as err:
                 result = dpath.util.new(self.record, path, value)
             if result == 0:
-                raise RuntimeError("Unable to set {0} to {1}".format(path, value))
+                raise RuntimeError(f"Unable to set {path} to {value}")
             return value
 
     def toKintoRecord(self):
@@ -167,7 +167,7 @@ class RowImporter(object):
         value = self.get(niveau)
         if value is not None:
             categorie[fieldName] = atof(value)
-        self.set("{0}/{1}".format(path, index), categorie)
+        self.set(f"{path}/{index}", categorie)
 
     def setValeursEcarts(self, niveaux, path, fieldName):
         self.set(path, [])
