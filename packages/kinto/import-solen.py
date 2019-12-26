@@ -281,11 +281,11 @@ class RowImporter(object):
         self.importBooleanField("calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True)
         self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
         self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
-        self.importIntField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
+        self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
         self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
 
     def importIndicateurCinq(self):
-        self.importIntField("resultat_tab5", "indicateurCinq/resultatFinal")
+        self.importFloatField("resultat_tab5", "indicateurCinq/resultatFinal")
         self.importField("sexe_sur_represente_tab5", "indicateurCinq/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab5", "indicateurCinq/noteFinale")
 
@@ -300,7 +300,7 @@ class RowImporter(object):
         self.importIntField("Indicateur 5", "declaration/indicateurCinq")
 
     def importNiveauDeResultatGlobal(self):
-        self.importIntField("resultat_global_NbPtsMax", "declaration/noteMax")
+        self.importFloatField("resultat_global_NbPtsMax", "declaration/noteMax")
         self.importIntField("Nombre total de points obtenus", "declaration/noteFinale")
         self.importIntField("Nombre total de points pouvant être obtenus", "declaration/nombrePointsMax")
         self.importIntField("Résultat final sur 100 points", "declaration/noteFinaleSur100")
