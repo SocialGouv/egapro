@@ -142,7 +142,7 @@ class RowImporter(object):
         self.importField("date_publ_niv > Valeur date", "declaration/datePublication")
         self.importField("site_internet_publ", "declaration/lienPublication")
 
-    def setValeursTranche(self, niveau, path, index, fieldName):
+    def setValeursTranche(self, niveau, path, index, fieldName, custom=False):
         niveaux = [niveau + " > -30", niveau + " > 30-39", niveau + " > 40-49", niveau + " > 50+"]
         values = [self.get(col) for col in niveaux]
         tranches = [None, None, None, None]
@@ -150,12 +150,17 @@ class RowImporter(object):
             tranches[trancheIndex] = {"trancheAge": trancheIndex}
             if value is not None:
                 tranches[trancheIndex][fieldName] = atof(value)
-        self.set("{0}/{1}".format(path, index), {"tranchesAges": tranches, "categorieSocioPro": index})
+            payload = {"tranchesAges": tranches}
+            if custom:
+                payload["name"] = "niveau " + str(index + 1)
+            else:
+                payload["categorieSocioPro"] = index
+        self.set(f"{path}/{index}", payload)
 
-    def setValeursTranches(self, niveaux, path, fieldName):
+    def setValeursTranches(self, niveaux, path, fieldName, custom=False):
         self.set(path, [])
         for index, niveau in enumerate(niveaux):
-            self.setValeursTranche(niveau, path, index, fieldName)
+            self.setValeursTranche(niveau, path, index, fieldName, custom)
 
     def setValeursEcart(self, niveau, path, index, fieldName):
         categorie = {"categorieSocioPro": index}
@@ -178,7 +183,7 @@ class RowImporter(object):
         except Exception as err:
             raise RuntimeError("Valeur nb_coef_niv non renseignée, indispensable pour une déclaration par niveaux de coefficients")
         niveaux = ["niv{:02d}".format(niv) for niv in range(1, max + 1)]
-        self.setValeursTranches(niveaux, "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
+        self.setValeursTranches(niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True)
 
     def importIndicateurUn(self):
         # Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
@@ -193,7 +198,7 @@ class RowImporter(object):
         # nc et amc -> indicateurUn/autre
         modalite = self.get("modalite_calc_tab1")
         self.set("indicateurUn/csp", False)
-        self.set("indicateurUn/coefficients", False)
+        self.set("indicateurUn/coef", False)
         self.set("indicateurUn/autre", False)
         self.set("indicateurUn/nonCalculable", False)
         if modalite == "csp":
