@@ -7,13 +7,16 @@
   },
   "type": "object",
   "properties": {
+    "additionalProperties": false,
     "data": {
       "type": "object",
       "properties": {
+        "additionalProperties": false,
         "effectif": {
           "title": "Effectifs pris en compte pour le calcul",
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
@@ -23,11 +26,13 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "additionalProperties": false,
                   "tranchesAges": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
+                        "additionalProperties": false,
                         "trancheAge": { "type": "integer" },
                         "nombreSalariesFemmes": { "type": "number" },
                         "nombreSalariesHommes": { "type": "number" }
@@ -44,6 +49,7 @@
           "title": "Indicateur 1",
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
@@ -53,12 +59,14 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "additionalProperties": false,
                   "categorieSocioPro": { "type": "integer" },
                   "tranchesAges": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
+                        "additionalProperties": false,
                         "trancheAge": { "type": "integer" },
                         "remunerationAnnuelleBrutFemmes": { "type": "number" },
                         "remunerationAnnuelleBrutHommes": { "type": "number" }
@@ -73,12 +81,14 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "additionalProperties": false,
                   "name": { "type": "string" },
                   "tranchesAges": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
+                        "additionalProperties": false,
                         "trancheAge": { "type": "integer" },
                         "nombreSalariesFemmes": { "type": "number" },
                         "nombreSalariesHommes": { "type": "number" },
@@ -97,6 +107,7 @@
         "informations": {
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
@@ -111,6 +122,7 @@
         "indicateurDeux": {
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
@@ -119,6 +131,7 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "additionalProperties": false,
                   "categorieSocioPro": { "type": "integer" },
                   "tauxAugmentationFemmes": { "type": "number" },
                   "tauxAugmentationHommes": { "type": "number" }
@@ -131,6 +144,7 @@
         "indicateurTrois": {
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
@@ -139,6 +153,7 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "additionalProperties": false,
                   "categorieSocioPro": { "type": "integer" },
                   "tauxPromotionFemmes": { "type": "number" },
                   "tauxPromotionHommes": { "type": "number" }
@@ -151,6 +166,7 @@
         "indicateurDeuxTrois": {
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
@@ -165,6 +181,7 @@
         "indicateurQuatre": {
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
@@ -176,6 +193,7 @@
         "indicateurCinq": {
           "type": "object",
           "properties": {
+            "additionalProperties": false,
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
