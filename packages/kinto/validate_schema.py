@@ -15,7 +15,7 @@ validator = Draft7Validator(schema)
 # Make sure the schema isn't completely broken and doesn't validate anything
 validation_ok = False
 try:
-    validator.validate({"data": "foobar"}, schema)
+    validator.validate({"foobar": "baz"}, schema)
 except ValidationError as error:
     print("validation is validating :P")
     validation_ok = True
@@ -31,15 +31,19 @@ def parse(args):
 
         print(f"Validating {len(records)} records")
 
+        num_errors = 0
         for index, record in enumerate(records):
             try:
                 validator.validate(record, schema)
             except ValidationError as error:
+                print("====================")
                 print("Error while validating the following record")
                 print(record)
                 print(error)
+                num_errors += 1
             if index and not index % 100:
                 print(f"Validated {index} records")
+    print(f"Found a total of {num_errors} validation errors")
 
 
 parser = argparse.ArgumentParser(
