@@ -5,8 +5,11 @@ import json
 import re
 import sys
 
+
 from datetime import datetime, timedelta
 from locale import atof, setlocale, LC_NUMERIC
+from progress.bar import Bar
+
 
 # TODO
 # - tu pourras valider que les champs Indicateur (1|2|3|...) (en fin du google
@@ -298,6 +301,7 @@ def getNbRows(csv_path):
 def parse(args):
     checkLocale()
     nb_rows = getNbRows(args.csv_path)
+    bar = Bar("Importation des données", max=args.max if args.max is not None else nb_rows)
     result = []
     with open(args.csv_path) as csv_file:
         reader = csv.DictReader(csv_file)
@@ -322,7 +326,8 @@ def parse(args):
             count_processed = count_processed + 1
             if args.show_json:
                 printer.std(json.dumps(record, indent=args.indent))
-            printer.success(f"Ligne {lineno}/{nb_rows} importée avec succès.")
+            bar.next()
+        bar.finish()
     if args.siren and count_processed == 0:
         printer.error("Aucune entrée trouvée pour le Siren " + args.siren)
     else:
@@ -385,4 +390,5 @@ parser.add_argument("--save-as", type=str, help="sauvegarder la sortie JSON dans
 try:
     parse(parser.parse_args())
 except KeyboardInterrupt:
+    printer.std("")
     printer.warn("Script d'import interrompu.")
