@@ -381,7 +381,7 @@ def parse(args):
             for error in errors:
                 printer.error(error)
     if args.save_as:
-        with open(args.save_as, "a") as json_file:
+        with open(args.save_as, "w") as json_file:
             json_file.write(json.dumps(result, indent=args.indent))
             printer.success("Enregistrements JSON exportés dans " + args.save_as)
 
