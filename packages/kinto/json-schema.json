@@ -1,12 +1,13 @@
 {
-  "data": {
-    "schema": {
-      "title": "Schema de simulation et déclaration egapro",
-      "definitions": {
-        "formValidated": {
-          "type": "string"
-        }
-      },
+  "title": "Schema de simulation et déclaration egapro",
+  "definitions": {
+    "formValidated": {
+      "type": "string"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "data": {
       "type": "object",
       "properties": {
         "effectif": {
