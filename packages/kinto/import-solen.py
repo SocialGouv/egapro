@@ -234,16 +234,50 @@ class RowImporter(object):
         self.importField("motif_non_calc_tab3_sup250", "indicateurTrois/motifNonCalculable")
         self.importField("precision_am_tab3_sup250", "indicateurTrois/motifNonCalculablePrecision")
         # Ecarts de taux de promotions par CSP
-        self.importField("Ou_tab3_sup250", "indicateurTrois/tauxPromotion/0/ecartTauxPromotion")
-        self.importField("Em_tab3_sup250", "indicateurTrois/tauxPromotion/1/ecartTauxPromotion")
-        self.importField("TAM_tab3_sup250", "indicateurTrois/tauxPromotio/2/ecartTauxPromotion")
-        self.importField("IC_tab3_sup250", "indicateurTrois/tauxPromoti/3/ecartTauxPromotion")
+        self.importFloatField("Ou_tab3_sup250", "indicateurTrois/tauxPromotion/0/ecartTauxPromotion")
+        self.importFloatField("Em_tab3_sup250", "indicateurTrois/tauxPromotion/1/ecartTauxPromotion")
+        self.importFloatField("TAM_tab3_sup250", "indicateurTrois/tauxPromotio/2/ecartTauxPromotion")
+        self.importFloatField("IC_tab3_sup250", "indicateurTrois/tauxPromoti/3/ecartTauxPromotion")
         # Résultats
         self.importFloatField("resultat_tab3_sup250", "indicateurTrois/resultatFinal")
         self.importField("population_favorable_tab3_sup250", "indicateurTrois/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab3_sup250", "indicateurTrois/noteFinale")
         # Prise de mesures correctives
         self.importBooleanField("prise_compte_mc_tab3_sup250", "indicateurTrois/mesuresCorrection")
+
+    def importIndicateurDeuxTrois(self):
+        # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion)
+        # entre les femmes et les hommes pour les entreprises ou UES de 50 à 250 salariés
+        self.importBooleanField("calculabilite_indic_tab2_50-250", "indicateurDeuxTrois/nonCalculable", negate=True)
+        self.importField("motif_non_calc_tab2_50-250", "indicateurDeuxTrois/motifNonCalculable")
+        self.importField("precision_am_tab2_50-250", "indicateurDeuxTrois/motifNonCalculablePrecision")
+        # Résultats
+        self.importFloatField("resultat_nb_sal_tab2_50-250", "indicateurDeuxTrois/resultatFinalNombreSalaries")
+        self.importField("population_favorable_tab2_50-250", "indicateurDeuxTrois/sexeSurRepresente")
+        self.importIntField("nb_pt_obtenu_tab2_50-250", "indicateurDeuxTrois/noteFinale")
+        # Prise de mesures correctives
+        self.importBooleanField("prise_compte_mc_tab2_sup250", "indicateurDeuxTrois/mesuresCorrection")
+
+    def importIndicateurQuatre(self):
+        # Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une
+        # augmentation dans l'année suivant leur retour de congé de maternité
+        #
+        # Note: le fichier d'export Solen renseigne des jeux de colonnes distincts
+        # pour les entreprises de 50 à 250 salariés et les entreprises de plus de
+        # 250 salariés, mais nous les fusionnons ici.
+        #
+        # Import des données pour les entreprises +250
+        self.importBooleanField("calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True)
+        self.importField("motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable")
+        self.importField("precision_am_tab4_sup250", "indicateurQuatre/motifNonCalculablePrecision")
+        self.importIntField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
+        self.importIntField("nb_pt_obtenu_tab4_sup250", "indicateurQuatre/noteFinale")
+        # Import des données pour les entreprises 50-250
+        self.importBooleanField("calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True)
+        self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
+        self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
+        self.importIntField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
+        self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
 
     def importIndicateurCinq(self):
         self.importIntField("resultat_tab5", "indicateurCinq/resultatFinal")
@@ -278,7 +312,8 @@ def processRow(row, debug=False):
     importer.importIndicateurUn()
     importer.importIndicateurDeux()
     importer.importIndicateurTrois()
-    # ...
+    importer.importIndicateurDeuxTrois()
+    importer.importIndicateurQuatre()
     importer.importIndicateurCinq()
     importer.importNombreDePointsObtenus()
     importer.importNiveauDeResultatGlobal()
@@ -307,6 +342,7 @@ def parse(args):
         reader = csv.DictReader(csv_file)
         count_processed = 0
         count_imported = 0
+        errors = []
         for index, row in enumerate(reader):
             lineno = index + 1
             if args.max and count_processed >= args.max:
@@ -318,11 +354,9 @@ def parse(args):
                 result.append(record)
                 count_imported = count_imported + 1
             except KeyError as err:
-                printer.error("Error importing line {0}: Missing key {1}".format(lineno, err))
-            except ValueError as err:
-                printer.error("Error importing line {0}: {1}".format(lineno, err))
-            except RuntimeError as err:
-                printer.error("Error importing line {0}: {1}".format(lineno, err))
+                errors.append(f"Error importing line {lineno}: Champ introuvable {err}")
+            except Exception as err:
+                errors.append(f"Error importing line {lineno}: {err}")
             count_processed = count_processed + 1
             if args.show_json:
                 printer.std(json.dumps(record, indent=args.indent))
@@ -331,15 +365,15 @@ def parse(args):
     if args.siren and count_processed == 0:
         printer.error("Aucune entrée trouvée pour le Siren " + args.siren)
     else:
-        if count_processed == count_imported:
-            printer.info("Aucune erreur rencontrée.")
-            printer.success("{0}/{1} ligne(s) importée(s).".format(count_imported, count_processed))
-        else:
-            printer.error("{0} erreur(s) rencontré(s)".format(count_processed - count_imported))
-            printer.warn("{0}/{1} ligne(s) importée(s).".format(count_imported, count_processed))
+        printer.std(f"{count_imported}/{count_processed} ligne(s) importée(s).")
+        if len(errors) > 0:
+            printer.warn(f"{len(errors)} erreur(s) rencontré(s)")
+            for error in errors:
+                printer.error(error)
     if args.save_as:
         with open(args.save_as, "a") as json_file:
             json_file.write(json.dumps(result, indent=args.indent))
+            printer.success("Enregistrements JSON exportés dans " + args.save_as)
 
 
 class printer:
@@ -392,3 +426,4 @@ try:
 except KeyboardInterrupt:
     printer.std("")
     printer.warn("Script d'import interrompu.")
+    exit(1)
