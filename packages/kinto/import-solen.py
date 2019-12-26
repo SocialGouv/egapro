@@ -142,22 +142,34 @@ class RowImporter(object):
         self.importField("date_publ_niv > Valeur date", "declaration/datePublication")
         self.importField("site_internet_publ", "declaration/lienPublication")
 
-    def setValeursTranche(self, niveau, path, fieldName):
+    def setValeursTranche(self, niveau, path, index, fieldName):
         niveaux = [niveau + " > -30", niveau + " > 30-39", niveau + " > 40-49", niveau + " > 50+"]
         values = [self.get(col) for col in niveaux]
         tranches = [None, None, None, None]
-        for index, value in enumerate(values):
-            tranches[index] = {"trancheAge": index}
+        for trancheIndex, value in enumerate(values):
+            tranches[trancheIndex] = {"trancheAge": trancheIndex}
             if value is not None:
-                tranches[index][fieldName] = atof(value)
-        self.set(path, {"tranchesAges": tranches})
+                tranches[trancheIndex][fieldName] = atof(value)
+        self.set("{0}/{1}".format(path, index), {"tranchesAges": tranches, "categorieSocioPro": index})
 
     def setValeursTranches(self, niveaux, path, fieldName):
-        for index, column in enumerate(niveaux):
-            self.setValeursTranche(column, "{0}/{1}".format(path, index), fieldName)
+        self.set(path, [])
+        for index, niveau in enumerate(niveaux):
+            self.setValeursTranche(niveau, path, index, fieldName)
+
+    def setValeursEcart(self, niveau, path, index, fieldName):
+        categorie = {"categorieSocioPro": index}
+        value = self.get(niveau)
+        if value is not None:
+            categorie[fieldName] = atof(value)
+        self.set("{0}/{1}".format(path, index), categorie)
+
+    def setValeursEcarts(self, niveaux, path, fieldName):
+        self.set(path, [])
+        for index, niveau in enumerate(niveaux):
+            self.setValeursEcart(niveau, path, index, fieldName)
 
     def importTranchesCsp(self):
-        self.set("indicateurUn/remunerationAnnuelle", [])
         self.setValeursTranches(["Ou", "Em", "TAM", "IC"], "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
 
     def importTranchesCoefficients(self):
@@ -165,7 +177,6 @@ class RowImporter(object):
             max = int(self.get("nb_coef_niv"))
         except Exception as err:
             raise RuntimeError("Valeur nb_coef_niv non renseignée, indispensable pour une déclaration par niveaux de coefficients")
-        self.set("indicateurUn/remunerationAnnuelle", [])
         niveaux = ["niv{:02d}".format(niv) for niv in range(1, max + 1)]
         self.setValeursTranches(niveaux, "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
 
@@ -215,10 +226,7 @@ class RowImporter(object):
         self.importField("motif_non_calc_tab2_sup250", "indicateurDeux/motifNonCalculable")
         self.importField("precision_am_tab2_sup250", "indicateurDeux/motifNonCalculablePrecision")
         # Taux d'augmentation individuelle par CSP
-        self.importFloatField("Ou_tab2_sup250", "indicateurDeux/tauxAugmentation/0/ecartTauxAugmentation")
-        self.importFloatField("Em_tab2_sup250", "indicateurDeux/tauxAugmentation/1/ecartTauxAugmentation")
-        self.importFloatField("TAM_tab2_sup250", "indicateurDeux/tauxAugmentation/2/ecartTauxAugmentation")
-        self.importFloatField("IC_tab2_sup250", "indicateurDeux/tauxAugmentation/3/ecartTauxAugmentation")
+        self.setValeursEcarts(["Ou_tab2_sup250", "Em_tab2_sup250", "TAM_tab2_sup250", "IC_tab2_sup250"], "indicateurDeux/tauxAugmentation", "ecartTauxAugmentation")
         # Résultats
         self.importFloatField("resultat_tab2_sup250", "indicateurDeux/resultatFinal")
         self.importField("population_favorable_tab2_sup250", "indicateurDeux/sexeSurRepresente")
@@ -234,10 +242,7 @@ class RowImporter(object):
         self.importField("motif_non_calc_tab3_sup250", "indicateurTrois/motifNonCalculable")
         self.importField("precision_am_tab3_sup250", "indicateurTrois/motifNonCalculablePrecision")
         # Ecarts de taux de promotions par CSP
-        self.importFloatField("Ou_tab3_sup250", "indicateurTrois/tauxPromotion/0/ecartTauxPromotion")
-        self.importFloatField("Em_tab3_sup250", "indicateurTrois/tauxPromotion/1/ecartTauxPromotion")
-        self.importFloatField("TAM_tab3_sup250", "indicateurTrois/tauxPromotio/2/ecartTauxPromotion")
-        self.importFloatField("IC_tab3_sup250", "indicateurTrois/tauxPromoti/3/ecartTauxPromotion")
+        self.setValeursEcarts(["Ou_tab3_sup250", "Em_tab3_sup250", "TAM_tab3_sup250", "IC_tab3_sup250"], "indicateurTrois/tauxPromotion", "ecartTauxPromotion")
         # Résultats
         self.importFloatField("resultat_tab3_sup250", "indicateurTrois/resultatFinal")
         self.importField("population_favorable_tab3_sup250", "indicateurTrois/sexeSurRepresente")
@@ -270,7 +275,7 @@ class RowImporter(object):
         self.importBooleanField("calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True)
         self.importField("motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable")
         self.importField("precision_am_tab4_sup250", "indicateurQuatre/motifNonCalculablePrecision")
-        self.importIntField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
+        self.importFloatField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
         self.importIntField("nb_pt_obtenu_tab4_sup250", "indicateurQuatre/noteFinale")
         # Import des données pour les entreprises 50-250
         self.importBooleanField("calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True)
@@ -353,13 +358,13 @@ def parse(args):
                 record = processRow(row, debug=args.debug)
                 result.append(record)
                 count_imported = count_imported + 1
+                if args.show_json:
+                    printer.std(json.dumps(record, indent=args.indent))
             except KeyError as err:
                 errors.append(f"Error importing line {lineno}: Champ introuvable {err}")
             except Exception as err:
                 errors.append(f"Error importing line {lineno}: {err}")
             count_processed = count_processed + 1
-            if args.show_json:
-                printer.std(json.dumps(record, indent=args.indent))
             bar.next()
         bar.finish()
     if args.siren and count_processed == 0:
