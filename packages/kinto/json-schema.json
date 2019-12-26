@@ -2,7 +2,13 @@
   "title": "Schema de simulation et déclaration egapro",
   "definitions": {
     "formValidated": {
-      "type": "string"
+      "type": "string",
+      "enum": ["None", "Valid", "Invalid"]
+    },
+    "trancheAge": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
     }
   },
   "type": "object",
@@ -23,17 +29,23 @@
             "nombreSalaries": {
               "title": "nombre de salariés",
               "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
               "items": {
                 "type": "object",
                 "properties": {
                   "additionalProperties": false,
                   "tranchesAges": {
                     "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
                     "items": {
                       "type": "object",
                       "properties": {
                         "additionalProperties": false,
-                        "trancheAge": { "type": "integer" },
+                        "trancheAge": {
+                          "$ref": "#/definitions/trancheAge"
+                        },
                         "nombreSalariesFemmes": { "type": "number" },
                         "nombreSalariesHommes": { "type": "number" }
                       }
@@ -56,6 +68,8 @@
             "csp": { "type": "boolean" },
             "remunerationAnnuelle": {
               "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
               "items": {
                 "type": "object",
                 "properties": {
@@ -63,11 +77,15 @@
                   "categorieSocioPro": { "type": "integer" },
                   "tranchesAges": {
                     "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
                     "items": {
                       "type": "object",
                       "properties": {
                         "additionalProperties": false,
-                        "trancheAge": { "type": "integer" },
+                        "trancheAge": {
+                          "$ref": "#/definitions/trancheAge"
+                        },
                         "remunerationAnnuelleBrutFemmes": { "type": "number" },
                         "remunerationAnnuelleBrutHommes": { "type": "number" }
                       }
@@ -78,6 +96,8 @@
             },
             "coefficient": {
               "type": "array",
+              "minItems": 0,
+              "maxItems": 50,
               "items": {
                 "type": "object",
                 "properties": {
@@ -85,11 +105,15 @@
                   "name": { "type": "string" },
                   "tranchesAges": {
                     "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
                     "items": {
                       "type": "object",
                       "properties": {
                         "additionalProperties": false,
-                        "trancheAge": { "type": "integer" },
+                        "trancheAge": {
+                          "$ref": "#/definitions/trancheAge"
+                        },
                         "nombreSalariesFemmes": { "type": "number" },
                         "nombreSalariesHommes": { "type": "number" },
                         "remunerationAnnuelleBrutFemmes": { "type": "number" },
@@ -113,7 +137,8 @@
             },
             "nomEntreprise": { "type": "string" },
             "trancheEffectifs": {
-              "type": "string"
+              "type": "string",
+              "enum": ["50 à 250", "251 à 999", "1000 et plus", "Plus de 250"]
             },
             "finPeriodeReference": { "type": "string" },
             "debutPeriodeReference": { "type": "string" }
@@ -128,6 +153,8 @@
             },
             "tauxAugmentation": {
               "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
               "items": {
                 "type": "object",
                 "properties": {
@@ -150,6 +177,8 @@
             },
             "tauxPromotion": {
               "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
               "items": {
                 "type": "object",
                 "properties": {
