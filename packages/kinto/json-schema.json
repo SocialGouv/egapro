@@ -9,6 +9,10 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 3
+    },
+    "sexeSurRepresente": {
+      "type": "string",
+      "enum": ["Hommes", "Femmes"]
     }
   },
   "type": "object",
@@ -18,6 +22,22 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "informations": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "nomEntreprise": { "type": "string" },
+            "trancheEffectifs": {
+              "type": "string",
+              "enum": ["50 à 250", "251 à 999", "1000 et plus", "Plus de 250"]
+            },
+            "finPeriodeReference": { "type": "string" },
+            "debutPeriodeReference": { "type": "string" }
+          }
+        },
         "effectif": {
           "title": "Effectifs pris en compte pour le calcul",
           "type": "object",
@@ -54,7 +74,8 @@
                   "categorieSocioPro": { "type": "integer" }
                 }
               }
-            }
+            },
+            "nombreSalariesTotal": { "type": "number" }
           }
         },
         "indicateurUn": {
@@ -66,6 +87,11 @@
               "$ref": "#/definitions/formValidated"
             },
             "csp": { "type": "boolean" },
+            "coef": { "type": "boolean" },
+            "autre": { "type": "boolean" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
             "remunerationAnnuelle": {
               "type": "array",
               "minItems": 4,
@@ -87,13 +113,15 @@
                           "$ref": "#/definitions/trancheAge"
                         },
                         "remunerationAnnuelleBrutFemmes": { "type": "number" },
-                        "remunerationAnnuelleBrutHommes": { "type": "number" }
+                        "remunerationAnnuelleBrutHommes": { "type": "number" },
+                        "ecartTauxRemuneration": { "type": "number" }
                       }
                     }
                   }
                 }
               }
             },
+            "nombreCoefficients": { "type": "integer" },
             "coefficient": {
               "type": "array",
               "minItems": 0,
@@ -117,7 +145,8 @@
                         "nombreSalariesFemmes": { "type": "number" },
                         "nombreSalariesHommes": { "type": "number" },
                         "remunerationAnnuelleBrutFemmes": { "type": "number" },
-                        "remunerationAnnuelleBrutHommes": { "type": "number" }
+                        "remunerationAnnuelleBrutHommes": { "type": "number" },
+                        "ecartTauxRemuneration": { "type": "number" }
                       }
                     }
                   }
@@ -125,23 +154,13 @@
               }
             },
             "coefficientGroupFormValidated": { "type": "string" },
-            "coefficientEffectifFormValidated": { "type": "string" }
-          }
-        },
-        "informations": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "formValidated": {
-              "$ref": "#/definitions/formValidated"
+            "coefficientEffectifFormValidated": { "type": "string" },
+            "dateConsultationCSE": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
             },
-            "nomEntreprise": { "type": "string" },
-            "trancheEffectifs": {
-              "type": "string",
-              "enum": ["50 à 250", "251 à 999", "1000 et plus", "Plus de 250"]
-            },
-            "finPeriodeReference": { "type": "string" },
-            "debutPeriodeReference": { "type": "string" }
+            "noteFinale": { "type": "integer" }
           }
         },
         "indicateurDeux": {
@@ -161,11 +180,21 @@
                 "properties": {
                   "categorieSocioPro": { "type": "integer" },
                   "tauxAugmentationFemmes": { "type": "number" },
-                  "tauxAugmentationHommes": { "type": "number" }
+                  "tauxAugmentationHommes": { "type": "number" },
+                  "ecartTauxAugmentation": { "type": "number" }
                 }
               }
             },
-            "presenceAugmentation": { "type": "boolean" }
+            "presenceAugmentation": { "type": "boolean" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" },
+            "mesureCorrection": { "type": "boolean" }
           }
         },
         "indicateurTrois": {
@@ -185,11 +214,21 @@
                 "properties": {
                   "categorieSocioPro": { "type": "integer" },
                   "tauxPromotionFemmes": { "type": "number" },
-                  "tauxPromotionHommes": { "type": "number" }
+                  "tauxPromotionHommes": { "type": "number" },
+                  "ecartTauxPromotion": { "type": "number" }
                 }
               }
             },
-            "presencePromotion": { "type": "boolean" }
+            "presencePromotion": { "type": "boolean" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" },
+            "mesureCorrection": { "type": "boolean" }
           }
         },
         "indicateurDeuxTrois": {
@@ -204,7 +243,17 @@
             },
             "presenceAugmentationPromotion": { "type": "boolean" },
             "nombreAugmentationPromotionFemmes": { "type": "integer" },
-            "nombreAugmentationPromotionHommes": { "type": "integer" }
+            "nombreAugmentationPromotionHommes": { "type": "integer" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinalEcart": { "type": "number" },
+            "resultatFinalNombreSalaries": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" },
+            "mesureCorrection": { "type": "boolean" }
           }
         },
         "indicateurQuatre": {
@@ -216,7 +265,12 @@
             },
             "presenceCongeMat": { "type": "boolean" },
             "nombreSalarieesAugmentees": { "type": "integer" },
-            "nombreSalarieesPeriodeAugmentation": { "type": "integer" }
+            "nombreSalarieesPeriodeAugmentation": { "type": "integer" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "noteFinale": { "type": "integer" }
           }
         },
         "indicateurCinq": {
@@ -227,7 +281,12 @@
               "$ref": "#/definitions/formValidated"
             },
             "nombreSalariesFemmes": { "type": "integer" },
-            "nombreSalariesHommes": { "type": "integer" }
+            "nombreSalariesHommes": { "type": "integer" },
+            "resultatFinal": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" }
           }
         }
       }
