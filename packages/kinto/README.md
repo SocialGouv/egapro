@@ -9,6 +9,13 @@ Vous devez disposer de Python 3.6+ et `pipenv`.
 $ pipenv run python import-solen.py <chemin_vers_solen.csv>  
 ```
 
+ou bien, si vous souhaitez activer l'environnement projet de façon persistante :
+
+```
+$ pipenv shell
+$ python import-solen.py
+```
+
 ### Usage
 
 ```
