@@ -6,14 +6,14 @@ Egapro Kinto
 Vous devez disposer de Python 3.6+ et `pipenv`.
 
 ```
-$ pipenv run python import-solen.py <chemin_vers_solen.csv>  
+$ pipenv run python import-solen.py <chemin_vers_solen.csv>
 ```
 
 ou bien, si vous souhaitez activer l'environnement projet de façon persistante :
 
 ```
 $ pipenv shell
-$ python import-solen.py
+$ python import-solen.py <chemin_vers_solen.csv>
 ```
 
 ### Usage
@@ -37,4 +37,37 @@ optional arguments:
   --max MAX          nombre maximum de lignes à importer
   --show-json        afficher la sortie JSON
   --save-as SAVE_AS  sauvegarder la sortie JSON dans un fichier
+```
+
+#### Limiter le nombre de lignes traitées
+
+```
+$ python import-solen.py solen.csv --max=10
+```
+
+#### Importer une entreprise ou UES par son numéro SIREN
+
+```
+$ python import-solen.py solen.csv --siren=1234567890
+```
+
+#### Afficher la sortie JSON de l'import
+
+```
+$ python import-solen.py solen.csv --show-json --indent=2
+```
+
+Notez l'emploi de l'option `--indent` pour spécifier le niveau d'indentation JSON.
+
+#### Afficher la sortie de debug
+
+```
+$ python import-solen.py solen.csv --debug
+```
+
+#### Sauver la sortie JSON dans un fichier
+
+
+```
+$ python import-solen.py solen.csv --save-as=export.json
 ```
