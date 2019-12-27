@@ -46,9 +46,9 @@ class RowImporter(object):
     def importBooleanField(self, csvFieldName, path, negate=False):
         # Note: si la valeur du champ n'est ni "Oui" no "Non", nous n'importons pas la donnée
         if self.get(csvFieldName) == "Oui":
-            self.set(path, True if not negate else False)
+            return self.set(path, True if not negate else False)
         elif self.get(csvFieldName) == "Non":
-            self.set(path, False if not negate else True)
+            return self.set(path, False if not negate else True)
 
     def importFloatField(self, csvFieldName, path):
         # Note: nous utilisons la notation décimale française, d'où l'utilisation de la fonction atof
@@ -227,7 +227,8 @@ class RowImporter(object):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
         # les femmes et les hommes pour les entreprises ou UES de plus de 250 salariés
         # Calculabilité
-        self.importBooleanField("calculabilite_indic_tab2_sup250", "indicateurDeux/nonCalculable", negate=True)
+        nonCalculable = self.importBooleanField("calculabilite_indic_tab2_sup250", "indicateurDeux/nonCalculable", negate=True)
+        self.set("indicateurDeux/presenceAugmentation", not nonCalculable)
         self.importField("motif_non_calc_tab2_sup250", "indicateurDeux/motifNonCalculable")
         self.importField("precision_am_tab2_sup250", "indicateurDeux/motifNonCalculablePrecision")
         # Taux d'augmentation individuelle par CSP
@@ -243,7 +244,8 @@ class RowImporter(object):
         # Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes pour
         # les entreprises ou UES de plus de 250 salariés
         # Calculabilité
-        self.importBooleanField("calculabilite_indic_tab3_sup250", "indicateurTrois/nonCalculable", negate=True)
+        nonCalculable = self.importBooleanField("calculabilite_indic_tab3_sup250", "indicateurTrois/nonCalculable", negate=True)
+        self.set("indicateurDeuxTrois/presenceAugmentationPromotion", not nonCalculable)
         self.importField("motif_non_calc_tab3_sup250", "indicateurTrois/motifNonCalculable")
         self.importField("precision_am_tab3_sup250", "indicateurTrois/motifNonCalculablePrecision")
         # Ecarts de taux de promotions par CSP
@@ -258,7 +260,8 @@ class RowImporter(object):
     def importIndicateurDeuxTrois(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion)
         # entre les femmes et les hommes pour les entreprises ou UES de 50 à 250 salariés
-        self.importBooleanField("calculabilite_indic_tab2_50-250", "indicateurDeuxTrois/nonCalculable", negate=True)
+        nonCalculable = self.importBooleanField("calculabilite_indic_tab2_50-250", "indicateurDeuxTrois/nonCalculable", negate=True)
+        self.set("indicateurDeuxTrois/presenceAugmentationPromotion", not nonCalculable)
         self.importField("motif_non_calc_tab2_50-250", "indicateurDeuxTrois/motifNonCalculable")
         self.importField("precision_am_tab2_50-250", "indicateurDeuxTrois/motifNonCalculablePrecision")
         # Résultats
@@ -277,17 +280,19 @@ class RowImporter(object):
         # 250 salariés, mais nous les fusionnons ici.
         #
         # Import des données pour les entreprises +250
-        self.importBooleanField("calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True)
+        nonCalculableA = self.importBooleanField("calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True)
         self.importField("motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable")
         self.importField("precision_am_tab4_sup250", "indicateurQuatre/motifNonCalculablePrecision")
         self.importFloatField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
         self.importIntField("nb_pt_obtenu_tab4_sup250", "indicateurQuatre/noteFinale")
         # Import des données pour les entreprises 50-250
-        self.importBooleanField("calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True)
+        nonCalculableB = self.importBooleanField("calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True)
         self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
         self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
         self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
         self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
+        # Calculabilité combinée
+        self.set("indicateurQuatre/presenceCongeMat", not nonCalculableA or not nonCalculableB)
 
     def importIndicateurCinq(self):
         self.importFloatField("resultat_tab5", "indicateurCinq/resultatFinal")
