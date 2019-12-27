@@ -110,7 +110,7 @@ class RowImporter(object):
         self.set("informations/finPeriodeReference", finPeriodeReference)
 
         # Note: utilisation d'un nombre à virgule pour prendre en compte les temps partiels
-        self.importFloatField("nb_salaries > Valeur numérique", "effectifs/nombreSalariesTotal")
+        self.importFloatField("nb_salaries > Valeur numérique", "effectif/nombreSalariesTotal")
 
     def importInformationsDeclarant(self):
         # Identification du déclarant pour tout contact ultérieur
