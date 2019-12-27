@@ -4,7 +4,7 @@ import dpath
 import json
 import re
 import sys
-
+import tarfile
 
 from datetime import datetime, timedelta
 from locale import atof, setlocale, LC_NUMERIC
@@ -265,11 +265,12 @@ class RowImporter(object):
         self.importField("motif_non_calc_tab2_50-250", "indicateurDeuxTrois/motifNonCalculable")
         self.importField("precision_am_tab2_50-250", "indicateurDeuxTrois/motifNonCalculablePrecision")
         # Résultats
+        self.importFloatField("resultat_pourcent_tab2_50-250", "indicateurDeuxTrois/resultatFinalEcart")
         self.importFloatField("resultat_nb_sal_tab2_50-250", "indicateurDeuxTrois/resultatFinalNombreSalaries")
         self.importField("population_favorable_tab2_50-250", "indicateurDeuxTrois/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab2_50-250", "indicateurDeuxTrois/noteFinale")
         # Prise de mesures correctives
-        self.importBooleanField("prise_compte_mc_tab2_sup250", "indicateurDeuxTrois/mesuresCorrection")
+        self.importBooleanField("prise_compte_mc_tab2_50-250", "indicateurDeuxTrois/mesuresCorrection")
 
     def importIndicateurQuatre(self):
         # Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une
