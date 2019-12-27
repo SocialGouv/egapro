@@ -288,6 +288,59 @@
             },
             "noteFinale": { "type": "integer" }
           }
+        },
+        "informationsDeclarant": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "nom": { "type": "string" },
+            "prenom": { "type": "string" },
+            "tel": { "type": "string" },
+            "region": { "type": "string" },
+            "departement": { "type": "string" },
+            "adresse": { "type": "string" },
+            "codePostal": { "type": "string" },
+            "commune": { "type": "string" }
+          }
+        },
+        "informationsEntreprise": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "nomEntreprise": { "type": "string" },
+            "siren": { "type": "string" },
+            "codeNaf": { "type": "string" },
+            "nomUES": { "type": "string" },
+            "nomEntrepriseUES": { "type": "string" },
+            "sirenUES": { "type": "string" },
+            "codeNAF": { "type": "string" },
+            "nombresEntreprises": { "type": "integer" }
+          }
+        },
+        "informationsComplementaires": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "anneeDeclaration": { "type": "string" },
+            "structure": {
+              "type": "string",
+              "enum": ["Entreprise", "Unité Economique et Sociale (UES)"]
+            }
+          }
+        },
+        "declaration": {
+          "noteMax": { "type": "integer" },
+          "indicateurUn": { "type": "integer" },
+          "indicateurDeux": { "type": "integer" },
+          "indicateurDeuxTroisEcart": { "type": "number" },
+          "indicateurDeuxTroisNombreSalaries": { "type": "number" },
+          "indicateurTrois": { "type": "integer" },
+          "indicateurQuatre": { "type": "integer" },
+          "indicateurCinq": { "type": "integer" },
+          "noteFinale": { "type": "integer" },
+          "nombrePointsMax": { "type": "integer" },
+          "noteFinaleSur100": { "type": "integer" },
+          "mesuresCorrection": { "type": "boolean" }
         }
       }
     },
