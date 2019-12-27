@@ -130,7 +130,7 @@ class RowImporter(object):
 
     def importUES(self):
         self.importField("nom_UES", "informationsEntreprise/nomUES")
-        self.importField("nom_ets_UES", "informationsEntreprise/nomsEntreprisesUES")
+        self.importField("nom_ets_UES", "informationsEntreprise/nomEntrepriseUES")
         self.importField("SIREN_UES", "informationsEntreprise/sirenUES")
         self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNAF")  # attention format
         # FIXME: bug avec le champ "Nb_ets_UES" dans le nouveau format d'export fourni par Ponn,
