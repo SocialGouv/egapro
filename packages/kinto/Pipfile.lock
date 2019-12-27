@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "87e63d1ef0ee6cab64dbb42fccee8d82cfc6c8de49e33f96b7c0dfbcbfee8bdd"
+            "sha256": "3b91c1059c7624df566f9e7d29072a264b52e004bfd7fb4b3bf2d8405ff954bd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -22,6 +22,13 @@
                 "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"
             ],
             "version": "==19.3.0"
+        },
+        "dpath": {
+            "hashes": [
+                "sha256:0f635f49e88843a4a519aca1c599faee271730f818a81860827e7d7b4d40273f"
+            ],
+            "index": "pypi",
+            "version": "==1.4.2"
         },
         "importlib-metadata": {
             "hashes": [
@@ -45,6 +52,13 @@
                 "sha256:c833ef592a0324bcc6a60e48440da07645063c453880c9477ceb22490aec1564"
             ],
             "version": "==8.0.2"
+        },
+        "progress": {
+            "hashes": [
+                "sha256:69ecedd1d1bbe71bf6313d88d1e6c4d2957b7f1d4f71312c211257f7dae64372"
+            ],
+            "index": "pypi",
+            "version": "==1.5"
         },
         "pyrsistent": {
             "hashes": [

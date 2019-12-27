@@ -6,7 +6,9 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+dpath = "*"
 jsonschema = "*"
+progress = "*"
 
 [requires]
 python_version = "3.7"
