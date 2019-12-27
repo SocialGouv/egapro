@@ -41,6 +41,8 @@ def parse(args):
                 print(record)
                 print(error)
                 num_errors += 1
+                if args.fail_fast:
+                    exit(1)
             if index and not index % 100:
                 print(f"Validated {index} records")
     print(f"Found a total of {num_errors} validation errors")
@@ -51,6 +53,12 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument(
     "records_path", type=str, help="chemin vers l'export de la collection Kinto"
+)
+parser.add_argument(
+    "--fail-fast",
+    action="store_true",
+    help="stop at the first validation error",
+    default=False,
 )
 
 parse(parser.parse_args())
