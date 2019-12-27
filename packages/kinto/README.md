@@ -16,6 +16,20 @@ $ pipenv shell
 $ python import-solen.py <chemin_vers_solen.csv>
 ```
 
+### Préparation des données
+
+Vous devez disposer d'un export Solen, généralement fourni au format Excel (ex. `Export DGT 20191224.xlsx`), que vous devez exporter au format [CSV]. C'est le chemin vers cet export CSV qui devra être fourni à la ligne de commande.
+
+Généralement les options d'export CSV par défaut sont les bonnes, par exemple ici sur LibreOffice:
+
+![](https://i.imgur.com/Ar2n1rJ.png)
+
+Soit :
+
+- Jeu de caractères : UTF-8
+- Délimiteur de champs : `,` (virgule)
+- Séparateur de chaînes : `"` (guillement double)
+
 ### Usage
 
 ```
@@ -71,3 +85,5 @@ $ python import-solen.py solen.csv --debug
 ```
 $ python import-solen.py solen.csv --save-as=export.json
 ```
+
+[CSV]: https://fr.wikipedia.org/wiki/Comma-separated_values

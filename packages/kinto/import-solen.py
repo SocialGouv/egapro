@@ -429,12 +429,12 @@ class printer:
 
 parser = argparse.ArgumentParser(description="Import des données Solen.")
 parser.add_argument("csv_path", type=str, help="chemin vers l'export CSV Solen")
-parser.add_argument("--debug", help="afficher les messages de debug", action="store_true", default=False)
+parser.add_argument("-d", "--debug", help="afficher les messages de debug", action="store_true", default=False)
+parser.add_argument("-i", "--indent", type=int, help="niveau d'indentation JSON", default=None)
+parser.add_argument("-m", "--max", type=int, help="nombre maximum de lignes à importer", default=None)
+parser.add_argument("-j", "--show-json", help="afficher la sortie JSON", action="store_true", default=False)
+parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON dans un fichier")
 parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniquement")
-parser.add_argument("--indent", type=int, help="niveau d'indentation JSON", default=None)
-parser.add_argument("--max", type=int, help="nombre maximum de lignes à importer", default=None)
-parser.add_argument("--show-json", help="afficher la sortie JSON", action="store_true", default=False)
-parser.add_argument("--save-as", type=str, help="sauvegarder la sortie JSON dans un fichier")
 
 try:
     parse(parser.parse_args())
