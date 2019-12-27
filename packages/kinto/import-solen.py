@@ -7,29 +7,39 @@ import sys
 import tarfile
 
 from datetime import datetime, timedelta
+from jsonschema import Draft7Validator
+from jsonschema.exceptions import ValidationError
 from locale import atof, setlocale, LC_NUMERIC
 from progress.bar import Bar
-
-
-# TODO
-# - tu pourras valider que les champs Indicateur (1|2|3|...) (en fin du google
-#   sheet) sont bien exactement les mêmes que nb_pt_obtenu_tab(1|2|3|...) dans
-#   l'export solen ?
-# - gérer import champ de type date
 
 CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
 
 
 class RowImporter(object):
-    def __init__(self, row, debug=False):
+    def __init__(self, row, validator, debug=False):
         self.debug = debug
         self.row = row
+        self.validator = validator
         self.record = {}
 
     def log(self, msg):
         if self.debug:
             printer.std(msg)
+
+    def validate(self):
+        try:
+            self.validator.validate(self.toKintoRecord())
+        except ValidationError as err:
+            raise RuntimeError(
+                "\n   ".join(
+                    [
+                        f"Validation JSON échouée pour la directive '{err.validator}':",
+                        f"Message: {err.message}",
+                        f"Chemin: {'.'.join(list(err.path))}",
+                    ]
+                )
+            )
 
     def importField(self, csvFieldName, path, type=str):
         value = self.get(csvFieldName)
@@ -38,7 +48,7 @@ class RowImporter(object):
         elif type != str:
             try:
                 value = type(value)
-            except Exception as err:
+            except ValueError as err:
                 raise ValueError(f"Couldn't cast {csvFieldName} field value ('{value}') to {type}")
 
         return self.set(path, value)
@@ -70,7 +80,7 @@ class RowImporter(object):
             try:
                 dpath.util.get(self.record, path)
                 result = dpath.util.set(self.record, path, value)
-            except Exception as err:
+            except KeyError as err:
                 result = dpath.util.new(self.record, path, value)
             if result == 0:
                 raise RuntimeError(f"Unable to set {path} to {value}")
@@ -120,7 +130,7 @@ class RowImporter(object):
         self.importField("Reg", "informationsDeclarant/region")
         self.importField("dpt", "informationsDeclarant/departement")
         self.importField("Adr ets", "informationsDeclarant/adresse")
-        self.importField("CP", "informationsDeclarant/codePosal")
+        self.importField("CP", "informationsDeclarant/codePostal")
         self.importField("Commune", "informationsDeclarant/commune")
 
     def importEntreprise(self):
@@ -181,7 +191,9 @@ class RowImporter(object):
         try:
             max = int(self.get("nb_coef_niv"))
         except Exception as err:
-            raise RuntimeError("Valeur nb_coef_niv non renseignée, indispensable pour une déclaration par niveaux de coefficients")
+            raise RuntimeError(
+                "Valeur nb_coef_niv non renseignée, indispensable pour une déclaration par niveaux de coefficients"
+            )
         niveaux = ["niv{:02d}".format(niv) for niv in range(1, max + 1)]
         self.setValeursTranches(niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True)
 
@@ -204,7 +216,7 @@ class RowImporter(object):
         if modalite == "csp":
             self.set("indicateurUn/csp", True)
         elif modalite == "coef_niv":
-            self.set("indicateurUn/coefficients", True)
+            self.set("indicateurUn/coef", True)
         elif modalite == "amc":
             self.set("indicateurUn/autre", True)
         elif modalite == "nc":
@@ -232,7 +244,11 @@ class RowImporter(object):
         self.importField("motif_non_calc_tab2_sup250", "indicateurDeux/motifNonCalculable")
         self.importField("precision_am_tab2_sup250", "indicateurDeux/motifNonCalculablePrecision")
         # Taux d'augmentation individuelle par CSP
-        self.setValeursEcarts(["Ou_tab2_sup250", "Em_tab2_sup250", "TAM_tab2_sup250", "IC_tab2_sup250"], "indicateurDeux/tauxAugmentation", "ecartTauxAugmentation")
+        self.setValeursEcarts(
+            ["Ou_tab2_sup250", "Em_tab2_sup250", "TAM_tab2_sup250", "IC_tab2_sup250"],
+            "indicateurDeux/tauxAugmentation",
+            "ecartTauxAugmentation",
+        )
         # Résultats
         self.importFloatField("resultat_tab2_sup250", "indicateurDeux/resultatFinal")
         self.importField("population_favorable_tab2_sup250", "indicateurDeux/sexeSurRepresente")
@@ -249,7 +265,11 @@ class RowImporter(object):
         self.importField("motif_non_calc_tab3_sup250", "indicateurTrois/motifNonCalculable")
         self.importField("precision_am_tab3_sup250", "indicateurTrois/motifNonCalculablePrecision")
         # Ecarts de taux de promotions par CSP
-        self.setValeursEcarts(["Ou_tab3_sup250", "Em_tab3_sup250", "TAM_tab3_sup250", "IC_tab3_sup250"], "indicateurTrois/tauxPromotion", "ecartTauxPromotion")
+        self.setValeursEcarts(
+            ["Ou_tab3_sup250", "Em_tab3_sup250", "TAM_tab3_sup250", "IC_tab3_sup250"],
+            "indicateurTrois/tauxPromotion",
+            "ecartTauxPromotion",
+        )
         # Résultats
         self.importFloatField("resultat_tab3_sup250", "indicateurTrois/resultatFinal")
         self.importField("population_favorable_tab3_sup250", "indicateurTrois/sexeSurRepresente")
@@ -260,7 +280,9 @@ class RowImporter(object):
     def importIndicateurDeuxTrois(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion)
         # entre les femmes et les hommes pour les entreprises ou UES de 50 à 250 salariés
-        nonCalculable = self.importBooleanField("calculabilite_indic_tab2_50-250", "indicateurDeuxTrois/nonCalculable", negate=True)
+        nonCalculable = self.importBooleanField(
+            "calculabilite_indic_tab2_50-250", "indicateurDeuxTrois/nonCalculable", negate=True
+        )
         self.set("indicateurDeuxTrois/presenceAugmentationPromotion", not nonCalculable)
         self.importField("motif_non_calc_tab2_50-250", "indicateurDeuxTrois/motifNonCalculable")
         self.importField("precision_am_tab2_50-250", "indicateurDeuxTrois/motifNonCalculablePrecision")
@@ -317,31 +339,35 @@ class RowImporter(object):
         self.importIntField("Résultat final sur 100 points", "declaration/noteFinaleSur100")
         self.importField("mesures_correction", "declaration/mesuresCorrection")
 
-
-def processRow(row, debug=False):
-    importer = RowImporter(row, debug)
-    importer.importInformationsDeclarant()
-    importer.importPeriodeDeReference()
-    importer.importEntreprise()
-    importer.importUES()
-    importer.importNiveauResultat()
-    importer.importIndicateurUn()
-    importer.importIndicateurDeux()
-    importer.importIndicateurTrois()
-    importer.importIndicateurDeuxTrois()
-    importer.importIndicateurQuatre()
-    importer.importIndicateurCinq()
-    importer.importNombreDePointsObtenus()
-    importer.importNiveauDeResultatGlobal()
-    return importer.toKintoRecord()
+    def run(self):
+        self.importInformationsDeclarant()
+        self.importPeriodeDeReference()
+        self.importEntreprise()
+        self.importUES()
+        self.importNiveauResultat()
+        self.importIndicateurUn()
+        self.importIndicateurDeux()
+        self.importIndicateurTrois()
+        self.importIndicateurDeuxTrois()
+        self.importIndicateurQuatre()
+        self.importIndicateurCinq()
+        self.importNombreDePointsObtenus()
+        self.importNiveauDeResultatGlobal()
 
 
 def checkLocale():
     try:
         setlocale(LC_NUMERIC, "fr_FR.UTF-8")
     except Exception:
-        printer.error("Impossible d'utiliser la locale fr_FR.UTF-8 nécessaire à la conversion de décimaux en notation française ('19.2' et non '19,2')")
+        printer.error(
+            "Impossible d'utiliser la locale fr_FR.UTF-8 nécessaire à la conversion de décimaux en notation française ('19.2' et non '19,2')"
+        )
         exit(1)
+
+
+def initValidator(jsonschema_path):
+    with open(jsonschema_path, "r") as schema_file:
+        return Draft7Validator(json.load(schema_file))
 
 
 def getNbRows(csv_path):
@@ -351,6 +377,7 @@ def getNbRows(csv_path):
 
 def parse(args):
     checkLocale()
+    validator = initValidator("json-schema.json")
     nb_rows = getNbRows(args.csv_path)
     bar = Bar("Importation des données", max=args.max if args.max is not None else nb_rows)
     result = []
@@ -366,15 +393,21 @@ def parse(args):
             if args.siren and row["SIREN_ets"] != args.siren and row["SIREN_UES"] != args.siren:
                 continue
             try:
-                record = processRow(row, debug=args.debug)
+                importer = RowImporter(row, validator, args.debug)
+                importer.run()
+                record = importer.toKintoRecord()
                 result.append(record)
                 count_imported = count_imported + 1
                 if args.show_json:
                     printer.std(json.dumps(record, indent=args.indent))
+                if args.validate:
+                    importer.validate()
             except KeyError as err:
-                errors.append(f"Error importing line {lineno}: Champ introuvable {err}")
-            except Exception as err:
-                errors.append(f"Error importing line {lineno}: {err}")
+                errors.append(f"Erreur ligne {lineno} - Champ introuvable {err}")
+            except ValueError as err:
+                errors.append(f"Erreur ligne {lineno} - Valeur erronée {err}")
+            except RuntimeError as err:
+                errors.append(f"Erreur ligne {lineno}: {err}")
             count_processed = count_processed + 1
             bar.next()
         bar.finish()
@@ -435,6 +468,7 @@ parser.add_argument("-i", "--indent", type=int, help="niveau d'indentation JSON"
 parser.add_argument("-m", "--max", type=int, help="nombre maximum de lignes à importer", default=None)
 parser.add_argument("-j", "--show-json", help="afficher la sortie JSON", action="store_true", default=False)
 parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON dans un fichier")
+parser.add_argument("-v", "--validate", help="valider les enregistrements JSON", action="store_true", default=False)
 parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniquement")
 
 try:

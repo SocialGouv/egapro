@@ -33,24 +33,28 @@ Soit :
 ### Usage
 
 ```
-python import-solen.py --help
-usage: import-solen.py [-h] [--debug] [--siren SIREN] [--indent INDENT]
-                       [--max MAX] [--show-json] [--save-as SAVE_AS]
+$ python import-solen.py --help                                              
+usage: import-solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-s SAVE_AS] [-v]
+                       [--siren SIREN]
                        csv_path
 
 Import des données Solen.
 
 positional arguments:
-  csv_path           chemin vers l'export CSV Solen
+  csv_path              chemin vers l'export CSV Solen
 
 optional arguments:
-  -h, --help         show this help message and exit
-  --debug            afficher les messages de debug
-  --siren SIREN      importer le SIREN spécifié uniquement
-  --indent INDENT    niveau d'indentation JSON
-  --max MAX          nombre maximum de lignes à importer
-  --show-json        afficher la sortie JSON
-  --save-as SAVE_AS  sauvegarder la sortie JSON dans un fichier
+  -h, --help            show this help message and exit
+  -d, --debug           afficher les messages de debug
+  -i INDENT, --indent INDENT
+                        niveau d'indentation JSON
+  -m MAX, --max MAX     nombre maximum de lignes à importer
+  -j, --show-json       afficher la sortie JSON
+  -s SAVE_AS, --save-as SAVE_AS
+                        sauvegarder la sortie JSON dans un fichier
+  -v, --validate        valider les enregistrements JSON
+  --siren SIREN         importer le SIREN spécifié uniquement
+
 ```
 
 #### Limiter le nombre de lignes traitées
@@ -77,6 +81,14 @@ Notez l'emploi de l'option `--indent` pour spécifier le niveau d'indentation JS
 
 ```
 $ python import-solen.py solen.csv --debug
+```
+
+#### Valider les enregistrements JSON générés
+
+Cette commande validera chaque document JSON généré à partir d'un schema JSON. 
+
+```
+$ python import-solen.py --validate
 ```
 
 #### Sauver la sortie JSON dans un fichier

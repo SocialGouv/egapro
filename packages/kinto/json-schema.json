@@ -194,7 +194,7 @@
               "$ref": "#/definitions/sexeSurRepresente"
             },
             "noteFinale": { "type": "integer" },
-            "mesureCorrection": { "type": "boolean" }
+            "mesuresCorrection": { "type": "boolean" }
           }
         },
         "indicateurTrois": {
@@ -228,7 +228,7 @@
               "$ref": "#/definitions/sexeSurRepresente"
             },
             "noteFinale": { "type": "integer" },
-            "mesureCorrection": { "type": "boolean" }
+            "mesuresCorrection": { "type": "boolean" }
           }
         },
         "indicateurDeuxTrois": {
@@ -253,7 +253,7 @@
               "$ref": "#/definitions/sexeSurRepresente"
             },
             "noteFinale": { "type": "integer" },
-            "mesureCorrection": { "type": "boolean" }
+            "mesuresCorrection": { "type": "boolean" }
           }
         },
         "indicateurQuatre": {
@@ -321,7 +321,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "anneeDeclaration": { "type": "string" },
+            "anneeDeclaration": { "type": "integer" },
             "structure": {
               "type": "string",
               "enum": ["Entreprise", "Unité Economique et Sociale (UES)"]
