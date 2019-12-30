@@ -309,7 +309,7 @@ class RowImporter(object):
             )
             self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
             self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
-            self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
+            self.importIntField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
             self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
         else:
             # Import des données pour les entreprises 50-250
