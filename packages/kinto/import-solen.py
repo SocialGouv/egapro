@@ -2,6 +2,7 @@ import argparse
 import csv
 import dpath
 import json
+import kinto_http
 import re
 import sys
 import tarfile
@@ -9,11 +10,21 @@ import tarfile
 from datetime import datetime, timedelta
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
+from kinto_http.exceptions import KintoException
 from locale import atof, setlocale, LC_NUMERIC
 from progress.bar import Bar
 
+
+# Configuration de l'import CSV
 CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
+
+# Configuration de Kinto
+KINTO_URL = "http://localhost:8888/v1"
+KINTO_USER = "admin"
+KINTO_PASS = "passw0rd"
+KINTO_BUCKET = "egapro"
+KINTO_COLLECTION = "test-import"
 
 
 class RowImporter(object):
@@ -380,6 +391,28 @@ def initValidator(jsonschema_path):
         return Draft7Validator(json.load(schema_file))
 
 
+def initKintoClient(schema):
+    printer.info("Vérifications Kinto")
+    client = kinto_http.Client(server_url=KINTO_URL, auth=(KINTO_USER, KINTO_PASS))
+    info = client.server_info()
+    if "schema" not in info["capabilities"]:
+        printer.error("Le serveur Kinto ne supporte pas la validation par schéma.")
+        exit(1)
+    else:
+        printer.success("Validation de schéma activée.")
+    try:
+        coll = client.get_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET)
+        printer.success("La collection existe.")
+    except KintoException as err:
+        printer.warn("La collection n'existe pas, création")
+        try:
+            client.create_collection(id=KINTO_COLLECTION, data={"schema": schema}, bucket=KINTO_BUCKET)
+            printer.success("La collection a été crée.")
+        except KintoException as err:
+            printer.error(f"Impossible de créer la collection: {err}")
+    return client
+
+
 def getNbRows(csv_path):
     with open(csv_path) as csv_file:
         return len(list(csv.DictReader(csv_file)))
@@ -388,6 +421,7 @@ def getNbRows(csv_path):
 def parse(args):
     checkLocale()
     validator = initValidator("json-schema.json")
+    client = initKintoClient(validator.schema)
     nb_rows = getNbRows(args.csv_path)
     bar = Bar("Importation des données", max=args.max if args.max is not None else nb_rows)
     result = []
@@ -396,27 +430,30 @@ def parse(args):
         count_processed = 0
         count_imported = 0
         errors = []
-        for index, row in enumerate(reader):
-            lineno = index + 1
-            if args.max and count_processed >= args.max:
-                break
-            if args.siren and row["SIREN_ets"] != args.siren and row["SIREN_UES"] != args.siren:
-                continue
-            try:
-                importer = RowImporter(row, validator, args.debug)
-                record = importer.run(validate=args.validate)
-                result.append(record)
-                count_imported = count_imported + 1
-                if args.show_json:
-                    printer.std(json.dumps(record, indent=args.indent))
-            except KeyError as err:
-                errors.append(f"Erreur ligne {lineno} - Champ introuvable {err}")
-            except ValueError as err:
-                errors.append(f"Erreur ligne {lineno} - Valeur erronée {err}")
-            except RuntimeError as err:
-                errors.append(f"Erreur ligne {lineno}: {err}")
-            count_processed = count_processed + 1
-            bar.next()
+        with client.batch() as batch:
+            for index, row in enumerate(reader):
+                lineno = index + 1
+                if args.max and count_processed >= args.max:
+                    break
+                if args.siren and row["SIREN_ets"] != args.siren and row["SIREN_UES"] != args.siren:
+                    continue
+                try:
+                    importer = RowImporter(row, validator, args.debug)
+                    record = importer.run(validate=args.validate)
+                    result.append(record)
+                    count_imported = count_imported + 1
+                    if args.show_json:
+                        printer.std(json.dumps(record, indent=args.indent))
+                    # FIXME: use the real id when it's available again from CSV
+                    batch.create_record(bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record)
+                except KeyError as err:
+                    errors.append(f"Erreur ligne {lineno} - Champ introuvable {err}")
+                except ValueError as err:
+                    errors.append(f"Erreur ligne {lineno} - Valeur erronée {err}")
+                except RuntimeError as err:
+                    errors.append(f"Erreur ligne {lineno}: {err}")
+                count_processed = count_processed + 1
+                bar.next()
         bar.finish()
     if args.siren and count_processed == 0:
         printer.error("Aucune entrée trouvée pour le Siren " + args.siren)

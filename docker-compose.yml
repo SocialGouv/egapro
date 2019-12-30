@@ -53,6 +53,7 @@ services:
       KINTO_STORAGE_URL: postgresql://postgres:postgres@db/postgres
       KINTO_PERMISSION_BACKEND: kinto.core.permission.postgresql
       KINTO_PERMISSION_URL: postgresql://postgres:postgres@db/postgres
+      KINTO_EXPERIMENTAL_COLLECTION_SCHEMA_VALIDATION: 1
 
   init-kinto:
     build:

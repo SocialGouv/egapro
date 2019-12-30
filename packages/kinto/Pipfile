@@ -9,6 +9,7 @@ verify_ssl = true
 dpath = "*"
 jsonschema = "*"
 progress = "*"
+kinto-http = "*"
 
 [requires]
 python_version = "3.7"
