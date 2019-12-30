@@ -54,6 +54,9 @@ services:
       KINTO_PERMISSION_BACKEND: kinto.core.permission.postgresql
       KINTO_PERMISSION_URL: postgresql://postgres:postgres@db/postgres
       KINTO_EXPERIMENTAL_COLLECTION_SCHEMA_VALIDATION: 1
+      KINTO_BATCH_MAX_REQUESTS: 10000
+
+
 
   init-kinto:
     build:

@@ -33,9 +33,9 @@ Soit :
 ### Usage
 
 ```
-$ python import-solen.py --help                                              
+$ python import-solen.py --help                           
 usage: import-solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-s SAVE_AS] [-v]
-                       [--siren SIREN]
+                       [--siren SIREN] [-c]
                        csv_path
 
 Import des données Solen.
@@ -54,7 +54,8 @@ optional arguments:
                         sauvegarder la sortie JSON dans un fichier
   -v, --validate        valider les enregistrements JSON
   --siren SIREN         importer le SIREN spécifié uniquement
-
+  -c, --init-collection
+                        Vider et recréer la collection Kinto avant import
 ```
 
 #### Limiter le nombre de lignes traitées
@@ -85,7 +86,7 @@ $ python import-solen.py solen.csv --debug
 
 #### Valider les enregistrements JSON générés
 
-Cette commande validera chaque document JSON généré à partir d'un schema JSON. 
+Cette commande validera chaque document JSON généré à partir d'un schema JSON.
 
 ```
 $ python import-solen.py --validate
