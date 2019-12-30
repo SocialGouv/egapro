@@ -27,20 +27,6 @@ class RowImporter(object):
         if self.debug:
             printer.std(msg)
 
-    def validate(self):
-        try:
-            self.validator.validate(self.toKintoRecord())
-        except ValidationError as err:
-            raise RuntimeError(
-                "\n   ".join(
-                    [
-                        f"Validation JSON échouée pour la directive '{err.validator}':",
-                        f"Message: {err.message}",
-                        f"Chemin: {'.'.join(list(err.path))}",
-                    ]
-                )
-            )
-
     def importField(self, csvFieldName, path, type=str):
         value = self.get(csvFieldName)
         if not value:
@@ -86,11 +72,25 @@ class RowImporter(object):
                 raise RuntimeError(f"Unable to set {path} to {value}")
             return value
 
-    def toKintoRecord(self):
+    def toKintoRecord(self, validate=False):
         # FIXME: bug du nouveau format d'export fourni par Ponn, il manque le champ d'URL de déclaration
         # solenId = self.get("URL d'impression du répondant").replace(SOLEN_URL_PREFIX, "")
         # return {"id": solenId, "data": self.record}
-        return {"id": "fixme", "data": self.record}
+        kintoRecord = {"id": "fixme", "data": self.record}
+        if validate:
+            try:
+                self.validator.validate(kintoRecord)
+            except ValidationError as err:
+                raise RuntimeError(
+                    "\n   ".join(
+                        [
+                            f"Validation JSON échouée pour la directive '{err.validator}':",
+                            f"Message: {err.message}",
+                            f"Chemin: {'.'.join(list(err.path))}",
+                        ]
+                    )
+                )
+        return kintoRecord
 
     def importPeriodeDeReference(self):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
@@ -190,7 +190,7 @@ class RowImporter(object):
     def importTranchesCoefficients(self):
         try:
             max = int(self.get("nb_coef_niv"))
-        except Exception as err:
+        except (KeyError, ValueError) as err:
             raise RuntimeError(
                 "Valeur nb_coef_niv non renseignée, indispensable pour une déclaration par niveaux de coefficients"
             )
@@ -302,20 +302,25 @@ class RowImporter(object):
         # pour les entreprises de 50 à 250 salariés et les entreprises de plus de
         # 250 salariés, mais nous les fusionnons ici.
         #
-        # Import des données pour les entreprises +250
-        nonCalculableA = self.importBooleanField("calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True)
-        self.importField("motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable")
-        self.importField("precision_am_tab4_sup250", "indicateurQuatre/motifNonCalculablePrecision")
-        self.importFloatField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
-        self.importIntField("nb_pt_obtenu_tab4_sup250", "indicateurQuatre/noteFinale")
-        # Import des données pour les entreprises 50-250
-        nonCalculableB = self.importBooleanField("calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True)
-        self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
-        self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
-        self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
-        self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
-        # Calculabilité combinée
-        self.set("indicateurQuatre/presenceCongeMat", not nonCalculableA or not nonCalculableB)
+        if self.get("tranche_effectif") == "50 à 250":
+            # Import des données pour les entreprises +250
+            nonCalculable = self.importBooleanField(
+                "calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True
+            )
+            self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
+            self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
+            self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
+            self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
+        else:
+            # Import des données pour les entreprises 50-250
+            nonCalculable = self.importBooleanField(
+                "calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True
+            )
+            self.importField("motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable")
+            self.importField("precision_am_tab4_sup250", "indicateurQuatre/motifNonCalculablePrecision")
+            self.importFloatField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
+            self.importIntField("nb_pt_obtenu_tab4_sup250", "indicateurQuatre/noteFinale")
+        self.set("indicateurQuatre/presenceCongeMat", not nonCalculable)
 
     def importIndicateurCinq(self):
         self.importFloatField("resultat_tab5", "indicateurCinq/resultatFinal")
@@ -339,28 +344,33 @@ class RowImporter(object):
         self.importIntField("Résultat final sur 100 points", "declaration/noteFinaleSur100")
         self.importField("mesures_correction", "declaration/mesuresCorrection")
 
-    def run(self):
+    def run(self, validate=False):
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()
         self.importEntreprise()
         self.importUES()
         self.importNiveauResultat()
         self.importIndicateurUn()
-        self.importIndicateurDeux()
-        self.importIndicateurTrois()
-        self.importIndicateurDeuxTrois()
+        if self.get("tranche_effectif") == "50 à 250":
+            self.importIndicateurDeuxTrois()
+        else:
+            self.importIndicateurDeux()
+            self.importIndicateurTrois()
         self.importIndicateurQuatre()
         self.importIndicateurCinq()
         self.importNombreDePointsObtenus()
         self.importNiveauDeResultatGlobal()
 
+        return self.toKintoRecord(validate)
+
 
 def checkLocale():
     try:
         setlocale(LC_NUMERIC, "fr_FR.UTF-8")
-    except Exception:
+    except locale.Error:
         printer.error(
-            "Impossible d'utiliser la locale fr_FR.UTF-8 nécessaire à la conversion de décimaux en notation française ('19.2' et non '19,2')"
+            "Impossible d'utiliser la locale fr_FR.UTF-8 nécessaire à la "
+            "conversion de décimaux en notation française ('19.2' et non '19,2')"
         )
         exit(1)
 
@@ -394,14 +404,11 @@ def parse(args):
                 continue
             try:
                 importer = RowImporter(row, validator, args.debug)
-                importer.run()
-                record = importer.toKintoRecord()
+                record = importer.run(validate=args.validate)
                 result.append(record)
                 count_imported = count_imported + 1
                 if args.show_json:
                     printer.std(json.dumps(record, indent=args.indent))
-                if args.validate:
-                    importer.validate()
             except KeyError as err:
                 errors.append(f"Erreur ligne {lineno} - Champ introuvable {err}")
             except ValueError as err:
