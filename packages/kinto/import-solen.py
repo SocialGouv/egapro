@@ -432,6 +432,9 @@ def initKintoClient(schema, truncate=False):
     try:
         coll = client.get_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET)
         printer.success("La collection existe.")
+        if "schema" not in coll["data"]:
+            client.patch_collection(id=coll["data"]["id"], bucket=KINTO_BUCKET, changes={"schema": schema})
+            printer.info("Le schéma de validation JSON a été ajouté à la collection.")
     except KintoException as err:
         printer.warn("La collection n'existe pas, création")
         try:
