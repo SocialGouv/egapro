@@ -375,6 +375,27 @@ class RowImporter(object):
         return self.toKintoRecord(validate)
 
 
+def prompt(question, default="oui"):
+    valid = {"oui": True, "o": True, "non": False, "n": False}
+    if default is None:
+        choices = " [o/n] "
+    elif default == "oui":
+        choices = " [O/n] "
+    elif default == "non":
+        choices = " [o/N] "
+    else:
+        raise ValueError("Valeur par défaut invalide: '%s'" % default)
+    while True:
+        printer.std(question + choices)
+        choice = input().lower()
+        if default is not None and choice == "":
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            printer.warn("Répondez par 'oui' ou 'non' (ou 'o' ou 'n')")
+
+
 def checkLocale():
     try:
         setlocale(LC_NUMERIC, "fr_FR.UTF-8")
@@ -401,6 +422,9 @@ def initKintoClient(schema, truncate=False):
     else:
         printer.success("Validation de schéma activée.")
     if truncate:
+        if not prompt("Confimer la suppression et recréation de la collection existante ?", "non"):
+            printer.std("Commande annulée.")
+            exit(0)
         printer.warn("Suppression de la collection Kinto existante...")
         client.delete_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET)
         printer.success("La collection précédente a été supprimée.")
