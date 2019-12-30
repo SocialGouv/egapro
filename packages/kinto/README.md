@@ -106,8 +106,8 @@ $ python import-solen.py solen.csv --save-as=export.json
 Le script d'import lira les variables d'environnement suivantes pour se connecter à Kinto et procéder à l'importation des données :
 
 - `KINTO_SERVER`: (par défaut: `"http://localhost:8888/v1"`)
-- `KINTO_USER`: (par défaut: `"admin"`)
-- `KINTO_PASS`: (par défaut: `"passw0rd"`)
+- `KINTO_ADMIN_LOGIN`: (par défaut: `"admin"`)
+- `KINTO_ADMIN_PASSWORD`: (par défaut: `"passw0rd"`)
 - `KINTO_BUCKET`: (par défaut: `"egapro"`)
 - `KINTO_COLLECTION`: (par défaut: `"test-import"`)
 

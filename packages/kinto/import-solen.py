@@ -22,8 +22,8 @@ SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
 
 # Configuration de Kinto
 KINTO_SERVER = os.environ.get("KINTO_SERVER", "http://localhost:8888/v1")
-KINTO_USER = os.environ.get("KINTO_ADMIN_LOGIN", "admin")
-KINTO_PASS = os.environ.get("KINTO_ADMIN_PASSWORD", "passw0rd")
+KINTO_ADMIN_LOGIN = os.environ.get("KINTO_ADMIN_LOGIN", "admin")
+KINTO_ADMIN_PASSWORD = os.environ.get("KINTO_ADMIN_PASSWORD", "passw0rd")
 KINTO_BUCKET = os.environ.get("KINTO_BUCKET", "egapro")
 KINTO_COLLECTION = os.environ.get("KINTO_COLLECTION", "test-import")
 
@@ -415,7 +415,7 @@ def initValidator(jsonschema_path):
 
 def initKintoClient(schema, truncate=False):
     printer.info("Vérifications Kinto")
-    client = kinto_http.Client(server_url=KINTO_SERVER, auth=(KINTO_USER, KINTO_PASS))
+    client = kinto_http.Client(server_url=KINTO_SERVER, auth=(KINTO_ADMIN_LOGIN, KINTO_ADMIN_PASSWORD))
     info = client.server_info()
     if "schema" not in info["capabilities"]:
         printer.error("Le serveur Kinto ne supporte pas la validation par schéma.")
