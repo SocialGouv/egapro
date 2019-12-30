@@ -100,3 +100,19 @@ $ python import-solen.py solen.csv --save-as=export.json
 ```
 
 [CSV]: https://fr.wikipedia.org/wiki/Comma-separated_values
+
+#### Paramétrage d'accès à Kinto
+
+Le script d'import lira les variables d'environnement suivantes pour se connecter à Kinto et procéder à l'importation des données :
+
+- `KINTO_SERVER`: (par défaut: `"http://localhost:8888/v1"`)
+- `KINTO_USER`: (par défaut: `"admin"`)
+- `KINTO_PASS`: (par défaut: `"passw0rd"`)
+- `KINTO_BUCKET`: (par défaut: `"egapro"`)
+- `KINTO_COLLECTION`: (par défaut: `"test-import"`)
+
+Pour surcharger une variable d'environnement, vous pouvez les positionner devant la commande appelée :
+
+```
+$ KINTO_COLLECTION=ma-collection python import-solen.py solen.csv
+```

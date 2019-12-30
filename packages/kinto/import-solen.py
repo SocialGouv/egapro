@@ -3,6 +3,7 @@ import csv
 import dpath
 import json
 import kinto_http
+import os
 import re
 import sys
 import tarfile
@@ -20,11 +21,11 @@ CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
 
 # Configuration de Kinto
-KINTO_URL = "http://localhost:8888/v1"
-KINTO_USER = "admin"
-KINTO_PASS = "passw0rd"
-KINTO_BUCKET = "egapro"
-KINTO_COLLECTION = "test-import"
+KINTO_SERVER = os.environ.get("KINTO_SERVER", "http://localhost:8888/v1")
+KINTO_USER = os.environ.get("KINTO_ADMIN_LOGIN", "admin")
+KINTO_PASS = os.environ.get("KINTO_ADMIN_PASSWORD", "passw0rd")
+KINTO_BUCKET = os.environ.get("KINTO_BUCKET", "egapro")
+KINTO_COLLECTION = os.environ.get("KINTO_COLLECTION", "test-import")
 
 
 class RowImporter(object):
@@ -414,7 +415,7 @@ def initValidator(jsonschema_path):
 
 def initKintoClient(schema, truncate=False):
     printer.info("Vérifications Kinto")
-    client = kinto_http.Client(server_url=KINTO_URL, auth=(KINTO_USER, KINTO_PASS))
+    client = kinto_http.Client(server_url=KINTO_SERVER, auth=(KINTO_USER, KINTO_PASS))
     info = client.server_info()
     if "schema" not in info["capabilities"]:
         printer.error("Le serveur Kinto ne supporte pas la validation par schéma.")
@@ -472,7 +473,7 @@ def parse(args):
                 if args.show_json:
                     printer.std(json.dumps(record, indent=args.indent))
                 # FIXME: utiliser la véritable id lorsqu'elle sera disponible dans l'export CSV
-                # ici nous supprimons l'id pour éviter à kinto de checker l'exstence d'un record correspondant
+                # ici nous supprimons l'id pour éviter à kinto de checker l'existence d'un record correspondant
                 del record["id"]
                 batch.create_record(bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record)
             except KeyError as err:
