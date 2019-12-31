@@ -109,7 +109,7 @@ Le script d'import lira les variables d'environnement suivantes pour se connecte
 - `KINTO_ADMIN_LOGIN`: le nom d'utilisateur d'admin Kinto (par défaut: `"admin"`)
 - `KINTO_ADMIN_PASSWORD`: le mot de passe admin Kinto (par défaut: `"passw0rd"`)
 - `KINTO_BUCKET`: le nom du bucket Kinto (par défaut: `"egapro"`)
-- `KINTO_COLLECTION`: le nom de la collection Kinto (par défaut: `"test-import"`; pur un import en production, il conviendra de spécifier le nom de la collection de production)
+- `KINTO_COLLECTION`: le nom de la collection Kinto (par défaut: `"test-import"`; pour un import en production, il conviendra de spécifier le nom de la collection de production)
 
 Pour surcharger une variable d'environnement, vous pouvez les positionner devant la commande appelée :
 
