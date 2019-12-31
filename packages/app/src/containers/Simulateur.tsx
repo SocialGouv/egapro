@@ -20,6 +20,7 @@ import IndicateurTrois from "../views/Indicateur3";
 import IndicateurDeuxTrois from "../views/Indicateur2et3";
 import IndicateurQuatre from "../views/Indicateur4";
 import IndicateurCinq from "../views/Indicateur5";
+import InformationsEntreprise from "../views/InformationsEntreprise";
 import InformationsSimulation from "../views/InformationsSimulation";
 import Recapitulatif from "../views/Recapitulatif";
 
@@ -141,6 +142,16 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/recapitulatif"
         render={props => <Recapitulatif {...props} state={state} />}
+      />
+      <Route
+        path="/simulateur/:code/informations-entreprise"
+        render={props => (
+          <InformationsEntreprise
+            {...props}
+            state={state}
+            dispatch={dispatch}
+          />
+        )}
       />
     </Switch>
   );

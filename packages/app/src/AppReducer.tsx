@@ -109,6 +109,13 @@ const defaultState: AppState = {
     formValidated: "None",
     nombreSalariesHommes: undefined,
     nombreSalariesFemmes: undefined
+  },
+  informationsEntreprise: {
+    formValidated: "None",
+    nomEntreprise: "",
+    siren: "",
+    codeNaf: "",
+    adresse: ""
   }
 };
 
@@ -172,7 +179,11 @@ function AppReducer(
           indicateurCinq:
             state.indicateurCinq.formValidated === "Valid"
               ? { ...state.indicateurCinq, formValidated: "Invalid" }
-              : state.indicateurCinq
+              : state.indicateurCinq,
+          informationsEntreprise:
+            state.informationsEntreprise.formValidated === "Valid"
+              ? { ...state.informationsEntreprise, formValidated: "Invalid" }
+              : state.informationsEntreprise
         };
       }
       return {
@@ -416,6 +427,24 @@ function AppReducer(
         ...state,
         indicateurCinq: {
           ...state.indicateurCinq,
+          formValidated: action.valid
+        }
+      };
+    }
+    case "updateInformationsEntreprise": {
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
+          ...action.data
+        }
+      };
+    }
+    case "validateInformationsEntreprise": {
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
           formValidated: action.valid
         }
       };
