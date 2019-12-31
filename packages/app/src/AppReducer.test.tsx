@@ -653,6 +653,30 @@ describe("updateIndicateurCinq", () => {
   });
 });
 
+describe("updateInformationsEntreprise", () => {
+  const action = {
+    type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
+    data: {
+      nomEntreprise: "acme",
+      siren: "12345",
+      codeNaf: "6789",
+      adresse: "12 rue des perdrix, 12345 Montmorency"
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
 //////////////////
 // VALIDATE //////
 //////////////////
@@ -897,6 +921,25 @@ describe("validateIndicateurQuatre", () => {
 describe("validateIndicateurCinq", () => {
   const action = {
     type: "validateIndicateurCinq" as "validateIndicateurCinq",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("validateInformationsEntreprise", () => {
+  const action = {
+    type: "validateInformationsEntreprise" as "validateInformationsEntreprise",
     valid: "Valid" as FormState
   };
 
