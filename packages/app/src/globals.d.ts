@@ -46,6 +46,13 @@ export type AppState = {
     nombreSalariesHommes: number | undefined;
     nombreSalariesFemmes: number | undefined;
   };
+  informationsEntreprise: {
+    formValidated: FormState;
+    nomEntreprise: string;
+    siren: string;
+    codeNaf: string;
+    adresse: string;
+  };
 };
 
 export type PeriodeDeclaration =
@@ -151,6 +158,14 @@ export type ActionType =
   | {
       type: "validateIndicateurCinq";
       valid: FormState;
+    }
+  | {
+      type: "updateInformationsEntreprise";
+      data: ActionInformationsEntrepriseData;
+    }
+  | {
+      type: "validateInformationsEntreprise";
+      valid: FormState;
     };
 
 export type ActionInformationsSimulationData = {
@@ -214,6 +229,13 @@ export type ActionIndicateurQuatreData = {
 export type ActionIndicateurCinqData = {
   nombreSalariesHommes: number | undefined;
   nombreSalariesFemmes: number | undefined;
+};
+
+export type ActionInformationsEntrepriseData = {
+  nomEntreprise: string;
+  siren: string;
+  codeNaf: string;
+  adresse: string;
 };
 
 ////

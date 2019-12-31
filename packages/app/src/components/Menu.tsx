@@ -167,6 +167,11 @@ function Menu({
                 to={`/simulateur/${code}/recapitulatif`}
                 title="récapitulatif"
               />
+              <h5 css={styles.menuTitle}>Déclaration</h5>
+              <CustomNavLink
+                to={`/simulateur/${code}/informations-entreprise`}
+                title="informations Entreprise"
+              />
             </div>
           )}
         />
