@@ -17,6 +17,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries";
 import Page from "../../components/Page";
 import ActionBar from "../../components/ActionBar";
 import ButtonAction from "../../components/ButtonAction";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import RecapitulatifIndex from "./RecapitulatifIndex";
 import RecapitulatifInformations from "./RecapitulatifInformations";
@@ -203,6 +204,9 @@ function Recapitulatif({ state }: Props) {
         }
         noteIndicateurCinq={noteIndicateurCinq}
       />
+      <ActionBar>
+        <ButtonSimulatorLink to="/informations-entreprise" label="suivant" />
+      </ActionBar>
       <ActionBar>
         <ButtonAction
           label="imprimer"
