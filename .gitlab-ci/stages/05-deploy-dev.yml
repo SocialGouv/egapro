@@ -37,31 +37,31 @@ Deploy app (dev):
   except:
     - master
 
-Deploy app (master):
-  <<: *deploy_app_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  except:
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - master
-
-Deploy app (preprod):
-  <<: *deploy_app_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  variables:
-    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-  only:
-    - /^v.*/
-
-Deploy app (prod):
-  <<: *deploy_app_stage
-  only:
-    - master
-  environment:
-    name: prod
+#Deploy app (master):
+#  <<: *deploy_app_stage
+#  environment:
+#    name: ${DEV_NAMESPACE_ENVIRONMENT}
+#  except:
+#    variables:
+#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
+#  only:
+#    - master
+#
+#Deploy app (preprod):
+#  <<: *deploy_app_stage
+#  environment:
+#    name: ${DEV_NAMESPACE_ENVIRONMENT}
+#  variables:
+#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+#  only:
+#    - /^v.*/
+#
+#Deploy app (prod):
+#  <<: *deploy_app_stage
+#  only:
+#    - master
+#  environment:
+#    name: prod
 
 
 ############################################
@@ -91,31 +91,54 @@ Deploy api (dev):
   except:
     - master
 
-Deploy api (master):
-  <<: *deploy_api_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  except:
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - master
+#Deploy api (master):
+#  <<: *deploy_api_stage
+#  environment:
+#    name: ${DEV_NAMESPACE_ENVIRONMENT}
+#  except:
+#    variables:
+#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
+#  only:
+#    - master
+#
+#Deploy api (preprod):
+#  <<: *deploy_api_stage
+#  environment:
+#    name: ${DEV_NAMESPACE_ENVIRONMENT}
+#  variables:
+#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
+#  only:
+#    - /^v.*/
+#
+#Deploy api (prod):
+#  <<: *deploy_api_stage
+#  only:
+#    - master
+#  environment:
+#    name: prod
 
-Deploy api (preprod):
-  <<: *deploy_api_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
+
+
+
+############################################
+####               POSTGRES              ###
+############################################
+
+Deploy egapro/postgres (dev):
+  stage: "Deploy to hors prod K8S"
+  extends: .deploy-egapro-postgres-k8s-dev
   variables:
-    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-  only:
-    - /^v.*/
-
-Deploy api (prod):
-  <<: *deploy_api_stage
-  only:
-    - master
+    IMAGE_TAG: ${CI_COMMIT_SHA}
+    HELM_RENDER_ARGS: ""
+    CONTEXT: pg
   environment:
-    name: prod
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - master
+
+
 
 ############################################
 ####       DEPLOY TO HORS PROD K8S       ###
