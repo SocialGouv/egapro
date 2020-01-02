@@ -2,13 +2,19 @@
 
 #
 .deploy_egapro_memcached: &deploy_egapro_memcached
-  image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
+  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:0.20.0
   script:
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - envsubst < .k8s/memcached/values.yml > .k8s/memcached/values-${STARTUP}.yml
     - helm init --client-only
-    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-memcached --wait -f .k8s/memcached/values-${STARTUP}.yml stable/memcached --namespace ${K8S_NAMESPACE} --version ${MEMCACHED_CHART_VERSION}
-    - kubectl wait --for=condition=Ready pod -l component=memcached -n ${K8S_NAMESPACE} --timeout=600s
+    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
+    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
+    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
+    - helm just fetch "stable/memcached#3.1.0"
+    - envsubst < .k8s/memcached/values.yml > ./values.yaml
+    - helm just render ${CONTEXT}-${NAMESPACE_ENVIRONMENT} memcached
+      ${HELM_RENDER_ARGS}
+      --values ./values.yaml
+    - helm just apply ${CONTEXT}-${NAMESPACE_ENVIRONMENT}
   allow_failure: false
 #
 
@@ -16,11 +22,11 @@
   <<: *deploy_egapro_memcached
   before_script:
     - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-
-.deploy-egapro-memcached-k8s-master:
-  <<: *deploy_egapro_memcached
-
-.deploy-egapro-memcached-k8s-preprod:
-  <<: *deploy_egapro_memcached
+#
+#.deploy-egapro-memcached-k8s-master:
+#  <<: *deploy_egapro_memcached
+#
+#.deploy-egapro-memcached-k8s-preprod:
+#  <<: *deploy_egapro_memcached
 
 ...
