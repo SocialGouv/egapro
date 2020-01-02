@@ -2,6 +2,8 @@ import argparse
 import csv
 import dpath
 import json
+import kinto_http
+import os
 import re
 import sys
 import tarfile
@@ -9,11 +11,21 @@ import tarfile
 from datetime import datetime, timedelta
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
+from kinto_http.exceptions import KintoException
 from locale import atof, setlocale, LC_NUMERIC
 from progress.bar import Bar
 
+
+# Configuration de l'import CSV
 CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
+
+# Configuration de Kinto
+KINTO_SERVER = os.environ.get("KINTO_SERVER", "http://localhost:8888/v1")
+KINTO_ADMIN_LOGIN = os.environ.get("KINTO_ADMIN_LOGIN", "admin")
+KINTO_ADMIN_PASSWORD = os.environ.get("KINTO_ADMIN_PASSWORD", "passw0rd")
+KINTO_BUCKET = os.environ.get("KINTO_BUCKET", "egapro")
+KINTO_COLLECTION = os.environ.get("KINTO_COLLECTION", "test-import")
 
 
 class RowImporter(object):
@@ -364,6 +376,27 @@ class RowImporter(object):
         return self.toKintoRecord(validate)
 
 
+def prompt(question, default="oui"):
+    valid = {"oui": True, "o": True, "non": False, "n": False}
+    if default is None:
+        choices = " [o/n] "
+    elif default == "oui":
+        choices = " [O/n] "
+    elif default == "non":
+        choices = " [o/N] "
+    else:
+        raise ValueError("Valeur par défaut invalide: '%s'" % default)
+    while True:
+        printer.std(question + choices)
+        choice = input().lower()
+        if default is not None and choice == "":
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            printer.warn("Répondez par 'oui' ou 'non' (ou 'o' ou 'n')")
+
+
 def checkLocale():
     try:
         setlocale(LC_NUMERIC, "fr_FR.UTF-8")
@@ -380,6 +413,42 @@ def initValidator(jsonschema_path):
         return Draft7Validator(json.load(schema_file))
 
 
+def initKintoClient(schema, truncate=False):
+    printer.info("Vérifications Kinto")
+    client = kinto_http.Client(server_url=KINTO_SERVER, auth=(KINTO_ADMIN_LOGIN, KINTO_ADMIN_PASSWORD))
+    info = client.server_info()
+    if "schema" not in info["capabilities"]:
+        printer.error("Le serveur Kinto ne supporte pas la validation par schéma.")
+        exit(1)
+    else:
+        printer.success("Validation de schéma activée.")
+    if truncate:
+        if not prompt("Confimer la suppression et recréation de la collection existante ?", "non"):
+            printer.std("Commande annulée.")
+            exit(0)
+        printer.warn("Suppression de la collection Kinto existante...")
+        client.delete_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET)
+        printer.success("La collection précédente a été supprimée.")
+    try:
+        coll = client.get_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET)
+        printer.success("La collection existe.")
+    except KintoException as err:
+        printer.warn("La collection n'existe pas, création")
+        try:
+            coll = client.create_collection(id=KINTO_COLLECTION, data={"schema": schema}, bucket=KINTO_BUCKET)
+            printer.success("La collection a été crée.")
+        except KintoException as err:
+            printer.error(f"Impossible de créer la collection: {err}")
+    if "schema" not in coll["data"]:
+        try:
+            client.patch_collection(id=coll["data"]["id"], bucket=KINTO_BUCKET, changes={"schema": schema})
+            printer.info("Le schéma de validation JSON a été ajouté à la collection.")
+        except KintoException as err:
+            printer.error("Impossible d'ajouter le schéma de validation à la collection {coll['data']['id']}.")
+            exit(1)
+    return client
+
+
 def getNbRows(csv_path):
     with open(csv_path) as csv_file:
         return len(list(csv.DictReader(csv_file)))
@@ -388,10 +457,11 @@ def getNbRows(csv_path):
 def parse(args):
     checkLocale()
     validator = initValidator("json-schema.json")
+    client = initKintoClient(validator.schema, truncate=args.init_collection)
     nb_rows = getNbRows(args.csv_path)
     bar = Bar("Importation des données", max=args.max if args.max is not None else nb_rows)
     result = []
-    with open(args.csv_path) as csv_file:
+    with open(args.csv_path) as csv_file, client.batch() as batch:
         reader = csv.DictReader(csv_file)
         count_processed = 0
         count_imported = 0
@@ -409,6 +479,10 @@ def parse(args):
                 count_imported = count_imported + 1
                 if args.show_json:
                     printer.std(json.dumps(record, indent=args.indent))
+                # FIXME: utiliser la véritable id lorsqu'elle sera disponible dans l'export CSV
+                # ici nous supprimons l'id pour éviter à kinto de checker l'existence d'un record correspondant
+                del record["id"]
+                batch.create_record(bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record)
             except KeyError as err:
                 errors.append(f"Erreur ligne {lineno} - Champ introuvable {err}")
             except ValueError as err:
@@ -477,6 +551,9 @@ parser.add_argument("-j", "--show-json", help="afficher la sortie JSON", action=
 parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON dans un fichier")
 parser.add_argument("-v", "--validate", help="valider les enregistrements JSON", action="store_true", default=False)
 parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniquement")
+parser.add_argument(
+    "-c", "--init-collection", help="Vider et recréer la collection Kinto avant import", action="store_true", default=False
+)
 
 try:
     parse(parser.parse_args())

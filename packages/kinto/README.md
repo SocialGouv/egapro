@@ -33,9 +33,9 @@ Soit :
 ### Usage
 
 ```
-$ python import-solen.py --help                                              
+$ python import-solen.py --help                           
 usage: import-solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-s SAVE_AS] [-v]
-                       [--siren SIREN]
+                       [--siren SIREN] [-c]
                        csv_path
 
 Import des données Solen.
@@ -54,7 +54,8 @@ optional arguments:
                         sauvegarder la sortie JSON dans un fichier
   -v, --validate        valider les enregistrements JSON
   --siren SIREN         importer le SIREN spécifié uniquement
-
+  -c, --init-collection
+                        Vider et recréer la collection Kinto avant import
 ```
 
 #### Limiter le nombre de lignes traitées
@@ -85,7 +86,7 @@ $ python import-solen.py solen.csv --debug
 
 #### Valider les enregistrements JSON générés
 
-Cette commande validera chaque document JSON généré à partir d'un schema JSON. 
+Cette commande validera chaque document JSON généré à partir d'un schema JSON.
 
 ```
 $ python import-solen.py --validate
@@ -99,3 +100,19 @@ $ python import-solen.py solen.csv --save-as=export.json
 ```
 
 [CSV]: https://fr.wikipedia.org/wiki/Comma-separated_values
+
+#### Paramétrage d'accès à Kinto
+
+Le script d'import lira les variables d'environnement suivantes pour se connecter à Kinto et procéder à l'importation des données :
+
+- `KINTO_SERVER`: la racine URL du serveur Kinto (par défaut: `"http://localhost:8888/v1"`)
+- `KINTO_ADMIN_LOGIN`: le nom d'utilisateur d'admin Kinto (par défaut: `"admin"`)
+- `KINTO_ADMIN_PASSWORD`: le mot de passe admin Kinto (par défaut: `"passw0rd"`)
+- `KINTO_BUCKET`: le nom du bucket Kinto (par défaut: `"egapro"`)
+- `KINTO_COLLECTION`: le nom de la collection Kinto (par défaut: `"test-import"`; pour un import en production, il conviendra de spécifier le nom de la collection de production)
+
+Pour surcharger une variable d'environnement, vous pouvez les positionner devant la commande appelée :
+
+```
+$ KINTO_COLLECTION=ma-collection python import-solen.py solen.csv
+```
