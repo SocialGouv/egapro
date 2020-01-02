@@ -139,8 +139,8 @@ Deploy egapro/postgres (dev):
     - master
 
 
-###########################################
-####               MEMCACHED             ###
+############################################
+####              MEMCACHED              ###
 ############################################
 
 Deploy egapro/memcached (dev):
@@ -156,6 +156,21 @@ Deploy egapro/memcached (dev):
     - branches
   except:
     - master
+
+
+Deploy egapro/kinto (dev):
+  stage: "Deploy to hors prod K8S"
+  extends: .deploy-egapro-kinto-k8s-dev
+  variables:
+    IMAGE_TAG: ${CI_COMMIT_SHA}
+    PORT: ${KINTO_PORT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - master
+
 
 ############################################
 ####       DEPLOY TO HORS PROD K8S       ###
