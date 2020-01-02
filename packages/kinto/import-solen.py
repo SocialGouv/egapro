@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
 from kinto_http.exceptions import KintoException
+from kinto_http.patch_type import BasicPatch
 from locale import atof, setlocale, LC_NUMERIC
 from progress.bar import Bar
 
@@ -440,11 +441,15 @@ def initKintoClient(schema, truncate=False):
         except KintoException as err:
             printer.error(f"Impossible de créer la collection: {err}")
     if "schema" not in coll["data"]:
+        if not prompt(f"La collection {KINTO_COLLECTION} ne possède pas de schéma, voulez-vous l'ajouter ?", "non"):
+            printer.std("Commande annulée.")
+            exit(0)
         try:
-            client.patch_collection(id=coll["data"]["id"], bucket=KINTO_BUCKET, changes={"schema": schema})
+            client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=BasicPatch(data={"schema": schema}))
             printer.info("Le schéma de validation JSON a été ajouté à la collection.")
-        except KintoException as err:
-            printer.error("Impossible d'ajouter le schéma de validation à la collection {coll['data']['id']}.")
+        except (KintoException, TypeError, KeyError, ValueError) as err:
+            printer.error(f"Impossible d'ajouter le schéma de validation à la collection {KINTO_COLLECTION}:")
+            printer.error(err)
             exit(1)
     return client
 
