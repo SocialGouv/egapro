@@ -69,3 +69,7 @@ deployment:
           key: API_SENTRY_DSN
     - name: API_SENTRY_ENVIRONMENT
       value: "development"
+
+service:
+  port: ${PORT}
+  targetPort: ${PORT}
