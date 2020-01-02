@@ -10,7 +10,7 @@
     "functional-tests": "cd packages/app && yarn run functional-tests"
   },
   "devDependencies": {
-    "lerna": "3.20.1",
+    "lerna": "3.20.2",
     "wait-on": "3.3.0"
   },
   "workspaces": [
