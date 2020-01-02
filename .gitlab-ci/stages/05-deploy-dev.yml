@@ -130,7 +130,7 @@ Deploy egapro/postgres (dev):
   variables:
     IMAGE_TAG: ${CI_COMMIT_SHA}
     HELM_RENDER_ARGS: ""
-    CONTEXT: pg
+    CONTEXT: egapro
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   only:
@@ -139,6 +139,23 @@ Deploy egapro/postgres (dev):
     - master
 
 
+###########################################
+####               MEMCACHED             ###
+############################################
+
+Deploy egapro/memcached (dev):
+  stage: "Deploy to hors prod K8S"
+  extends: .deploy-egapro-memcached-k8s-dev
+  variables:
+    IMAGE_TAG: ${CI_COMMIT_SHA}
+    HELM_RENDER_ARGS: ""
+    CONTEXT: egapro
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - branches
+  except:
+    - master
 
 ############################################
 ####       DEPLOY TO HORS PROD K8S       ###

@@ -6,22 +6,16 @@
   script:
     - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-#    - envsubst < .k8s/postgres/values.yml > .k8s/postgres/values-${STARTUP}.yml
-#    - helm init --client-only
-#    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE} --version ${POSTGRES_CHART_VERSION}
-#    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
-#    script:
     - helm init --client-only
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
     - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
     - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
-#    - helm just fetch "socialgouv/hpa#2.11.0"
     - helm just fetch "stable/postgresql#6.5.6"
     - envsubst < .k8s/postgres/values.yml > ./values.yaml
-    - helm just render ${CONTEXT} postgresql
+    - helm just render ${CONTEXT}-${NAMESPACE_ENVIRONMENT}-pg postgresql
       ${HELM_RENDER_ARGS}
       --values ./values.yaml
-    - helm just apply ${CONTEXT}
+    - helm just apply ${CONTEXT}-${NAMESPACE_ENVIRONMENT}-pg
   allow_failure: false
 #
 
