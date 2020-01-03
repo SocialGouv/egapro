@@ -46,15 +46,12 @@ Deploy app (master):
   only:
     - egapro-auto-devops
 
-
-#Deploy app (preprod):
-#  <<: *deploy_app_stage
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
+Deploy app (preprod):
+  <<: *deploy_app_stage
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
 #
 #Deploy app (prod):
 #  <<: *deploy_app_stage
@@ -100,16 +97,12 @@ Deploy api (master):
   only:
     - egapro-auto-devops
 
-
-#
-#Deploy api (preprod):
-#  <<: *deploy_api_stage
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
+Deploy api (preprod):
+  <<: *deploy_api_stage
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  only:
+    - /^v.*/
 #
 #Deploy api (prod):
 #  <<: *deploy_api_stage
@@ -117,8 +110,6 @@ Deploy api (master):
 #    - master
 #  environment:
 #    name: prod
-
-
 
 
 ############################################
@@ -180,6 +171,30 @@ Deploy egapro/postgres (master):
   only:
     - egapro-auto-devops
 
+Deploy egapro/postgres (preprod):
+  stage: "Deploy to hors prod K8S"
+  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:0.20.0
+  variables:
+    IMAGE_TAG: ${CI_COMMIT_SHA}
+    HELM_RENDER_ARGS: ""
+    CONTEXT: egapro
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  script:
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - helm init --client-only
+    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
+    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
+    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
+    - helm just fetch "stable/postgresql#6.5.6"
+    - envsubst < .k8s/postgres/values.yml > ./values.yaml
+    - helm just render ${CONTEXT}-${BRANCH_HASH}-pg postgresql
+      ${HELM_RENDER_ARGS}
+      --values ./values.yaml
+    - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
+  only:
+    - /^v.*/
+
 
 ############################################
 ####              MEMCACHED             ####
@@ -237,6 +252,29 @@ Deploy egapro/memcached (master):
   only:
     - egapro-auto-devops
 
+Deploy egapro/memcached (preprod):
+  stage: "Deploy to hors prod K8S"
+  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:0.20.0
+  variables:
+    IMAGE_TAG: ${CI_COMMIT_SHA}
+    HELM_RENDER_ARGS: ""
+    CONTEXT: egapro
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  script:
+    - helm init --client-only
+    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
+    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
+    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
+    - helm just fetch "stable/memcached#3.1.0"
+    - envsubst < .k8s/memcached/values.yml > ./values.yaml
+    - helm just render ${CONTEXT}-${BRANCH_HASH} memcached
+      ${HELM_RENDER_ARGS}
+      --values ./values.yaml
+    - helm just apply ${CONTEXT}-${BRANCH_HASH}
+  only:
+    - /^v.*/
+
 
 ############################################
 ####                KINTO               ####
@@ -293,6 +331,30 @@ Deploy egapro/kinto (master):
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
     - egapro-auto-devops
+  allow_failure: false
+
+Deploy egapro/kinto (preprod):
+  stage: "Deploy to hors prod K8S"
+  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  variables:
+    IMAGE_TAG: ${CI_COMMIT_SHA}
+    PORT: ${KINTO_PORT}
+  environment:
+    name: ${DEV_NAMESPACE_ENVIRONMENT}
+  script:
+  - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
+  - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+  - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
+  - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
+  - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
+  - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
+  - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+  - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+  - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
+  #    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
+  #    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
+  only:
+    - /^v.*/
   allow_failure: false
 
 
