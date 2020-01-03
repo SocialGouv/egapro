@@ -65,12 +65,10 @@ Create namespace (master):
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
     - egapro-auto-devops
-#
-#Create namespace (preprod):
-#  <<: *create_namespace
-#  before_script:
-#    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
+
+Create namespace (preprod):
+  <<: *create_namespace
+  only:
+    - /^v.*/
 
 ...
