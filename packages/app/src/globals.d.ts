@@ -53,6 +53,17 @@ export type AppState = {
     codeNaf: string;
     adresse: string;
   };
+  informationsDeclarant: {
+    formValidated: FormState;
+    nom: string;
+    prenom: string;
+    tel: string;
+    region: string;
+    departement: string;
+    adresse: string;
+    codePostal: string;
+    commune: string;
+  };
 };
 
 export type PeriodeDeclaration =
@@ -166,6 +177,14 @@ export type ActionType =
   | {
       type: "validateInformationsEntreprise";
       valid: FormState;
+    }
+  | {
+      type: "updateInformationsDeclarant";
+      data: ActionInformationsDeclarantData;
+    }
+  | {
+      type: "validateInformationsDeclarant";
+      valid: FormState;
     };
 
 export type ActionInformationsSimulationData = {
@@ -229,6 +248,17 @@ export type ActionIndicateurQuatreData = {
 export type ActionIndicateurCinqData = {
   nombreSalariesHommes: number | undefined;
   nombreSalariesFemmes: number | undefined;
+};
+
+export type ActionInformationsDeclarantData = {
+  nom: string;
+  prenom: string;
+  tel: string;
+  region: string;
+  departement: string;
+  adresse: string;
+  codePostal: string;
+  commune: string;
 };
 
 export type ActionInformationsEntrepriseData = {
