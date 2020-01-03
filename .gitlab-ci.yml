@@ -17,6 +17,9 @@ include:
   - project: SocialGouv/gitlab-ci-yml
     file: /base_semantic_release_stage.yml
     ref: master
+  - project: SocialGouv/gitlab-ci-yml
+    file: /base_notify_github_stage.yml
+    ref: master
   #
   - "/.gitlab-ci/.deploy-egapro-app.yml"
   - "/.gitlab-ci/.deploy-egapro-api.yml"
@@ -30,7 +33,7 @@ stages:
   - "Registration"
   - "Create secret hors prod"
   - "Deploy to hors prod K8S"
-  - "Send Url to GitHub"
+  - "Notify Finished Deployment"
   - "Release"
   - "Deploy to prod K8S"
   - "Restore prod backup"
@@ -40,47 +43,69 @@ stages:
 #####         SEND URL TO GITHUB          ###
 #############################################
 
-.send_url_to_github_stage: &send_url_to_github_stage
-  stage: "Send Url to GitHub"
-  image: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
-  script:
-    - export DEPLOY_ID=$(cat github_deploy_id)
-    - envsubst < /scripts/send-url.sh > /scripts/send-url-to-github.sh
-    - sh /scripts/send-url-to-github.sh
-
-
-Send deployment url to Github (dev):
-  <<: *send_url_to_github_stage
+Notify Starting Deployment:
+  extends: .base_notify_pending_stage
+  stage: Deploy to hors prod K8S
   before_script:
-    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export URL=https://${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  only:
-    - branches
-  except:
-    - egapro-auto-devops
+    - export HOST="https://egapro-master.dev.fabrique.social.gouv.fr"
 
-Send deployment url to Github (master):
-  <<: *send_url_to_github_stage
+Notify Fail:
+  extends: .base_notify_fail_stage
+  stage: Notify Finished Deployment
   before_script:
-    - export URL=https://${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
-  environment:
-    name: ${MASTER_NAMESPACE_ENVIRONMENT}
-  except:
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - egapro-auto-devops
+    - export HOST="https://egapro-master.dev.fabrique.social.gouv.fr"
+  dependencies:
+    - Notify Starting Deployment
 
-Send deployment url to Github (preprod):
-  <<: *send_url_to_github_stage
+Notify Success:
+  extends: .base_notify_success_stage
+  stage: Notify Finished Deployment
   before_script:
-    - export URL=https://${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
-  environment:
-    name: ${PREPROD_NAMESPACE_ENVIRONMENT}
-  only:
-    - /^v.*/
+    - export HOST="https://egapro-master.dev.fabrique.social.gouv.fr"
+  dependencies:
+    - Notify Starting Deployment
+
+#.send_url_to_github_stage: &send_url_to_github_stage
+#  stage: "Send Url to GitHub"
+#  image: ${CI_REGISTRY}/${IMAGE_INFRA_BASE_NAME}/git-deploy:${INFRA_GIT_DEPLOY_VERSION}
+#  script:
+#    - export DEPLOY_ID=$(cat github_deploy_id)
+#    - envsubst < /scripts/send-url.sh > /scripts/send-url-to-github.sh
+#    - sh /scripts/send-url-to-github.sh
+#
+#
+#Send deployment url to Github (dev):
+#  <<: *send_url_to_github_stage
+#  before_script:
+#    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
+#    - export URL=https://${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
+#  environment:
+#    name: ${DEV_NAMESPACE_ENVIRONMENT}
+#  only:
+#    - branches
+#  except:
+#    - egapro-auto-devops
+#
+#Send deployment url to Github (master):
+#  <<: *send_url_to_github_stage
+#  before_script:
+#    - export URL=https://${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
+#  environment:
+#    name: ${MASTER_NAMESPACE_ENVIRONMENT}
+#  except:
+#    variables:
+#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
+#  only:
+#    - egapro-auto-devops
+#
+#Send deployment url to Github (preprod):
+#  <<: *send_url_to_github_stage
+#  before_script:
+#    - export URL=https://${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
+#  environment:
+#    name: ${PREPROD_NAMESPACE_ENVIRONMENT}
+#  only:
+#    - /^v.*/
 
 
 ############################################
