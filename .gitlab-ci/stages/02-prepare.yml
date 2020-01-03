@@ -26,7 +26,7 @@ Get Github id (dev):
   only:
     - branches
   except:
-    - master
+    - egapro-auto-devops
 
 Get Github id (master):
   <<: *get_github_id_stage
@@ -36,7 +36,7 @@ Get Github id (master):
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - master
+    - egapro-auto-devops
 
 Get Github id (preprod):
   <<: *get_github_id_stage
