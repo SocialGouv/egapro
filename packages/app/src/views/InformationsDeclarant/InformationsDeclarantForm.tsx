@@ -5,7 +5,7 @@ import { Form, useField } from "react-final-form";
 import {
   AppState,
   FormState,
-  ActionInformationsEntrepriseData
+  ActionInformationsDeclarantData
 } from "../../globals";
 
 import { required } from "../../utils/formHelpers";
@@ -32,58 +32,85 @@ const validate = (value: string) => {
 };
 
 const validateForm = ({
-  nomEntreprise,
-  siren,
-  codeNaf,
-  adresse
+  nom,
+  prenom,
+  tel,
+  region,
+  departement,
+  adresse,
+  codePostal,
+  commune
 }: {
-  nomEntreprise: string;
-  siren: string;
-  codeNaf: string;
+  nom: string;
+  prenom: string;
+  tel: string;
+  region: string;
+  departement: string;
   adresse: string;
+  codePostal: string;
+  commune: string;
 }) => ({
-  nomEntreprise: validate(nomEntreprise),
-  siren: validate(siren),
-  codeNaf: validate(codeNaf),
-  adresse: validate(adresse)
+  nom: validate(nom),
+  prenom: validate(prenom),
+  tel: validate(tel),
+  region: validate(region),
+  departement: validate(departement),
+  adresse: validate(adresse),
+  codePostal: validate(codePostal),
+  commune: validate(commune)
 });
 
 interface Props {
-  informationsEntreprise: AppState["informationsEntreprise"];
+  informationsDeclarant: AppState["informationsDeclarant"];
   readOnly: boolean;
-  updateInformationsEntreprise: (
-    data: ActionInformationsEntrepriseData
-  ) => void;
-  validateInformationsEntreprise: (valid: FormState) => void;
+  updateInformationsDeclarant: (data: ActionInformationsDeclarantData) => void;
+  validateInformationsDeclarant: (valid: FormState) => void;
 }
 
-function InformationsEntrepriseForm({
-  informationsEntreprise,
+function InformationsDeclarantForm({
+  informationsDeclarant,
   readOnly,
-  updateInformationsEntreprise,
-  validateInformationsEntreprise
+  updateInformationsDeclarant,
+  validateInformationsDeclarant
 }: Props) {
-  const initialValues: ActionInformationsEntrepriseData = {
-    nomEntreprise: informationsEntreprise.nomEntreprise,
-    siren: informationsEntreprise.siren,
-    codeNaf: informationsEntreprise.codeNaf,
-    adresse: informationsEntreprise.adresse
+  const initialValues: ActionInformationsDeclarantData = {
+    nom: informationsDeclarant.nom,
+    prenom: informationsDeclarant.prenom,
+    tel: informationsDeclarant.tel,
+    region: informationsDeclarant.region,
+    departement: informationsDeclarant.departement,
+    adresse: informationsDeclarant.adresse,
+    codePostal: informationsDeclarant.codePostal,
+    commune: informationsDeclarant.commune
   };
 
   const saveForm = (formData: any) => {
-    const { nomEntreprise, siren, codeNaf, adresse } = formData;
+    const {
+      nom,
+      prenom,
+      tel,
+      region,
+      departement,
+      adresse,
+      codePostal,
+      commune
+    } = formData;
 
-    updateInformationsEntreprise({
-      nomEntreprise: nomEntreprise,
-      siren: siren,
-      codeNaf: codeNaf,
-      adresse: adresse
+    updateInformationsDeclarant({
+      nom,
+      prenom,
+      tel,
+      region,
+      departement,
+      adresse,
+      codePostal,
+      commune
     });
   };
 
   const onSubmit = (formData: any) => {
     saveForm(formData);
-    validateInformationsEntreprise("Valid");
+    validateInformationsDeclarant("Valid");
   };
 
   return (
@@ -103,22 +130,63 @@ function InformationsEntrepriseForm({
           d'effectifs". Otherwise it would not re-update the menu when
           switching back to the original value */}
           <FormAutoSave saveForm={saveForm} onlyWhenDirty={false} />
-          <FieldNomEntreprise readOnly={readOnly} />
-          <FieldSiren readOnly={readOnly} />
-          <FieldCodeNaf readOnly={readOnly} />
-          <FieldAdresse readOnly={readOnly} />
 
+          <TextField
+            label="Nom du déclarant"
+            fieldName="nom"
+            errorText="le nom n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Prénom du déclarant"
+            fieldName="prenom"
+            errorText="le prénom n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Numéro de téléphone"
+            fieldName="tel"
+            errorText="le numéro de téléphone n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Région"
+            fieldName="region"
+            errorText="la région n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Département"
+            fieldName="departement"
+            errorText="le département n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Adresse"
+            fieldName="adresse"
+            errorText="l'adresse n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Code Postal"
+            fieldName="codePostal"
+            errorText="le code postal n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Commune"
+            fieldName="commune"
+            errorText="la commune n'est pas valide"
+            readOnly={readOnly}
+          />
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink
-                to="/informations-declarant"
-                label="suivant"
-              />
+              <ButtonSimulatorLink to="/TODO" label="suivant" />
               &emsp;
-              {informationsEntreprise.formValidated === "Valid" && (
+              {informationsDeclarant.formValidated === "Valid" && (
                 <p css={styles.edit}>
                   <ActionLink
-                    onClick={() => validateInformationsEntreprise("None")}
+                    onClick={() => validateInformationsDeclarant("None")}
                   >
                     modifier les données saisies
                   </ActionLink>
@@ -140,8 +208,18 @@ function InformationsEntrepriseForm({
   );
 }
 
-function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
-  const field = useField("nomEntreprise", { validate });
+function TextField({
+  errorText,
+  fieldName,
+  label,
+  readOnly
+}: {
+  errorText: string;
+  fieldName: string;
+  label: string;
+  readOnly: boolean;
+}) {
+  const field = useField(fieldName, { validate });
   const error = hasFieldError(field.meta);
 
   return (
@@ -150,78 +228,12 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
       >
-        Quel est le nom de l'entreprise ?
+        {label}
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
       </div>
-      <p css={styles.error}>
-        {error && "le nom de l'entreprise n’est pas valide"}
-      </p>
-    </div>
-  );
-}
-
-function FieldSiren({ readOnly }: { readOnly: boolean }) {
-  const field = useField("siren", { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Siren
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>
-        {error && "le Siren de l'entreprise n'est pas valide"}
-      </p>
-    </div>
-  );
-}
-
-function FieldCodeNaf({ readOnly }: { readOnly: boolean }) {
-  const field = useField("codeNaf", { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Code Naf
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>{error && "le code Naf n'est pas valide"}</p>
-    </div>
-  );
-}
-
-function FieldAdresse({ readOnly }: { readOnly: boolean }) {
-  const field = useField("adresse", { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Adresse
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>
-        {error && "l'adresse de l'entreprise n'est pas valide"}
-      </p>
+      <p css={styles.error}>{error && errorText}</p>
     </div>
   );
 }
@@ -282,4 +294,4 @@ const styles = {
   })
 };
 
-export default InformationsEntrepriseForm;
+export default InformationsDeclarantForm;
