@@ -4,9 +4,9 @@ apiVersion: v1
 metadata:
   name: kinto
   labels:
-    app: ${STARTUP}
+    app: ${PROJECT}
     component: kinto
-    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
+    namespace: ${PROJECT}-${BRANCH_HASH}
 spec:
   selector:
     component: kinto
