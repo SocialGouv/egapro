@@ -59,7 +59,7 @@ Create namespace (dev):
   only:
     - branches
   except:
-    - master
+    - egapro-auto-devops
 
 Create namespace (master):
   <<: *create_namespace
@@ -69,13 +69,13 @@ Create namespace (master):
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-    - master
-
-Create namespace (preprod):
-  <<: *create_namespace
-  before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
-  only:
-    - /^v.*/
+    - egapro-auto-devops
+#
+#Create namespace (preprod):
+#  <<: *create_namespace
+#  before_script:
+#    - export K8S_NAMESPACE=${STARTUP}-${PREPROD_NAMESPACE_ENVIRONMENT}
+#  only:
+#    - /^v.*/
 
 ...
