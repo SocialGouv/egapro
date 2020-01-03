@@ -28,10 +28,6 @@ Deploy app (dev):
   <<: *deploy_app_stage
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  before_script:
-    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - export HOST=${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
   only:
     - branches
   except:
@@ -42,13 +38,8 @@ Deploy app (master):
   <<: *deploy_app_stage
   variables:
     <<: *deploy_app_stage_variables
-    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - export HOST=${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
-    - cat .k8s/app.values.yml
   except:
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
@@ -92,9 +83,6 @@ Deploy api (dev):
   <<: *deploy_api_stage
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  before_script:
-    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -104,9 +92,6 @@ Deploy api (master):
   <<: *deploy_api_stage
   variables:
     <<: *deploy_api_stage_variables
-    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-  before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   except:
@@ -149,10 +134,7 @@ Deploy egapro/postgres (dev):
     CONTEXT: egapro
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  before_script:
-    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
   script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - helm init --client-only
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
@@ -160,10 +142,10 @@ Deploy egapro/postgres (dev):
     - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
     - helm just fetch "stable/postgresql#6.5.6"
     - envsubst < .k8s/postgres/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${NAMESPACE_ENVIRONMENT}-pg postgresql
+    - helm just render ${CONTEXT}-${BRANCH_HASH}-pg postgresql
       ${HELM_RENDER_ARGS}
       --values ./values.yaml
-    - helm just apply ${CONTEXT}-${NAMESPACE_ENVIRONMENT}-pg
+    - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
   only:
     - branches
   except:
@@ -178,11 +160,9 @@ Deploy egapro/postgres (master):
     IMAGE_TAG: ${CI_COMMIT_SHA}
     HELM_RENDER_ARGS: ""
     CONTEXT: egapro
-    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - helm init --client-only
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
@@ -190,10 +170,10 @@ Deploy egapro/postgres (master):
     - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
     - helm just fetch "stable/postgresql#6.5.6"
     - envsubst < .k8s/postgres/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${NAMESPACE_ENVIRONMENT}-pg postgresql
+    - helm just render ${CONTEXT}-${BRANCH_HASH}-pg postgresql
       ${HELM_RENDER_ARGS}
       --values ./values.yaml
-    - helm just apply ${CONTEXT}-${NAMESPACE_ENVIRONMENT}-pg
+    - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
   except:
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
@@ -214,20 +194,17 @@ Deploy egapro/memcached (dev):
     CONTEXT: egapro
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  before_script:
-    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
   script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - helm init --client-only
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
     - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
     - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
     - helm just fetch "stable/memcached#3.1.0"
     - envsubst < .k8s/memcached/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${NAMESPACE_ENVIRONMENT} memcached
+    - helm just render ${CONTEXT}-${BRANCH_HASH} memcached
       ${HELM_RENDER_ARGS}
       --values ./values.yaml
-    - helm just apply ${CONTEXT}-${NAMESPACE_ENVIRONMENT}
+    - helm just apply ${CONTEXT}-${BRANCH_HASH}
   only:
     - branches
   except:
@@ -241,24 +218,22 @@ Deploy egapro/memcached (master):
     IMAGE_TAG: ${CI_COMMIT_SHA}
     HELM_RENDER_ARGS: ""
     CONTEXT: egapro
-    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   except:
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - helm init --client-only
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
     - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
     - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
     - helm just fetch "stable/memcached#3.1.0"
     - envsubst < .k8s/memcached/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${NAMESPACE_ENVIRONMENT} memcached
+    - helm just render ${CONTEXT}-${BRANCH_HASH} memcached
       ${HELM_RENDER_ARGS}
       --values ./values.yaml
-    - helm just apply ${CONTEXT}-${NAMESPACE_ENVIRONMENT}
+    - helm just apply ${CONTEXT}-${BRANCH_HASH}
   only:
     - egapro-auto-devops
 
@@ -275,10 +250,7 @@ Deploy egapro/kinto (dev):
     PORT: ${KINTO_PORT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  before_script:
-    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
   script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
@@ -288,8 +260,8 @@ Deploy egapro/kinto (dev):
     - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
-    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
-    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
+#    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
+#    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
   only:
     - branches
   except:
@@ -302,11 +274,9 @@ Deploy egapro/kinto (master):
   variables:
     IMAGE_TAG: ${CI_COMMIT_SHA}
     PORT: ${KINTO_PORT}
-    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
     - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
@@ -316,8 +286,8 @@ Deploy egapro/kinto (master):
     - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
-    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
-    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
+#    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
+#    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
   except:
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/

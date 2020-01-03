@@ -262,7 +262,7 @@ master:
   tolerations: []
   podLabels:
     component: postgres
-    namespace: ${STARTUP}-${NAMESPACE_ENVIRONMENT}
+    namespace: ${PROJECT}-${BRANCH_HASH}
   podAnnotations: {}
   ## Additional PostgreSQL Master Volume mounts
   ##

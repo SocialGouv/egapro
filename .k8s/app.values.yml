@@ -40,17 +40,3 @@ ingress:
     - hosts:
         - ${APP_URL}
       secretName: wildcard-crt
-
-ingress:
-  enabled: true
-  annotations:
-    appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    kubernetes.io/ingress.class: "azure/application-gateway"
-  hosts:
-  - host: "siret2idcc.dev.fabrique.social.gouv.fr"
-    paths:
-    - /
-  tls:
-  - hosts:
-    - "siret2idcc.dev.fabrique.social.gouv.fr"
-    secretName: siret2idcc-certificate

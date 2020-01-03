@@ -53,9 +53,6 @@ include:
 
 Create namespace (dev):
   <<: *create_namespace
-  before_script:
-    - export NAMESPACE_ENVIRONMENT=${NAMESPACE_ENVIRONMENT:=$(printf "${CI_COMMIT_REF_NAME}" | sha1sum | cut -c1-5)}
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
   only:
     - branches
   except:
@@ -63,8 +60,6 @@ Create namespace (dev):
 
 Create namespace (master):
   <<: *create_namespace
-  before_script:
-    - export K8S_NAMESPACE=${STARTUP}-${MASTER_NAMESPACE_ENVIRONMENT}
   except:
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/

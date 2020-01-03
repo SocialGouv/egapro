@@ -16,12 +16,12 @@ spec:
           - name: KINTO_LOGIN
             valueFrom:
               secretKeyRef:
-                name: ${STARTUP}
+                name: ${PROJECT}
                 key: KINTO_ADMIN_LOGIN
           - name: KINTO_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: ${STARTUP}
+                name: ${PROJECT}
                 key: KINTO_ADMIN_PASSWORD
         resources:
           requests:

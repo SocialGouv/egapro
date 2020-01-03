@@ -39,6 +39,37 @@ stages:
   - "Restore prod backup"
 
 
+.resolve_env: &resolve_env |-
+  set -x
+
+  export BRANCH_NAME=${BRANCH_NAME:=$CI_COMMIT_REF_SLUG}
+  export HASH_SIZE=${HASH_SIZE:=7}
+  export K8S_PROJECT=${K8S_PROJECT:=$PROJECT}
+  BRANCH_NAME_HASHED=$( printf "${BRANCH_NAME}" | sha1sum | cut -c1-${HASH_SIZE} )
+  export BRANCH_HASH=${BRANCH_HASH:="$BRANCH_NAME_HASHED"}
+  export K8S_NAMESPACE="${PROJECT}-feature-${BRANCH_HASH}"
+
+  if [[ -n $PRODUCTION ]]; then
+    export BRANCH_HASH=prod
+    export K8S_NAMESPACE="${PROJECT}-${BRANCH_HASH}"
+    export DOMAIN="${PROJECT}.fabrique.social.gouv.fr"
+
+  elif [[ "${BRANCH_NAME}" = "egapro-auto-devops" ]]; then
+    export BRANCH_HASH=master
+    export K8S_NAMESPACE="${PROJECT}-${BRANCH_HASH}"
+    export DOMAIN="${PROJECT}-master.dev.fabrique.social.gouv.fr"
+
+  else
+    export DOMAIN="${BRANCH_HASH}-${PROJECT}.dev.fabrique.social.gouv.fr"
+  fi
+
+  export HOST="${DOMAIN}"
+
+  set +x
+
+before_script:
+  - *resolve_env
+
 #############################################
 #####         SEND URL TO GITHUB          ###
 #############################################
@@ -46,22 +77,16 @@ stages:
 Notify Starting Deployment:
   extends: .base_notify_pending_stage
   stage: Deploy to hors prod K8S
-  before_script:
-    - export HOST="https://egapro-master.dev.fabrique.social.gouv.fr"
 
 Notify Fail:
   extends: .base_notify_fail_stage
   stage: Notify Finished Deployment
-  before_script:
-    - export HOST="https://egapro-master.dev.fabrique.social.gouv.fr"
   dependencies:
     - Notify Starting Deployment
 
 Notify Success:
   extends: .base_notify_success_stage
   stage: Notify Finished Deployment
-  before_script:
-    - export HOST="https://egapro-master.dev.fabrique.social.gouv.fr"
   dependencies:
     - Notify Starting Deployment
 
