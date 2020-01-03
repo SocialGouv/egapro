@@ -125,11 +125,7 @@ function InformationsDeclarantForm({
     >
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
-          {/* pass `onlyWhenDirty={false}` because we want the form to always
-          auto save, as we update the left menu depending on the "tranche
-          d'effectifs". Otherwise it would not re-update the menu when
-          switching back to the original value */}
-          <FormAutoSave saveForm={saveForm} onlyWhenDirty={false} />
+          <FormAutoSave saveForm={saveForm} />
 
           <TextField
             label="Nom du déclarant"
