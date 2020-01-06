@@ -69,6 +69,12 @@ export type AppState = {
     dateConsultationCSE: string;
     anneeDeclaration: string;
   };
+  declaration: {
+    formValidated: FormState;
+    dateDeclaration: string;
+    datePublication: string;
+    lienPublication: string;
+  };
 };
 
 export type PeriodeDeclaration =
@@ -198,6 +204,14 @@ export type ActionType =
   | {
       type: "validateInformationsComplementaires";
       valid: FormState;
+    }
+  | {
+      type: "updateDeclaration";
+      data: ActionDeclarationData;
+    }
+  | {
+      type: "validateDeclaration";
+      valid: FormState;
     };
 
 export type ActionInformationsSimulationData = {
@@ -284,6 +298,11 @@ export type ActionInformationsDeclarantData = {
 export type ActionInformationsComplementairesData = {
   dateConsultationCSE: string;
   anneeDeclaration: string;
+};
+
+export type ActionDeclarationData = {
+  datePublication: string;
+  lienPublication: string;
 };
 
 ////
