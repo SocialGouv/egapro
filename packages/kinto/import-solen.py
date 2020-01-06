@@ -133,10 +133,8 @@ class RowImporter(object):
             finPeriodeReference = "31/12/" + str(annee_indicateur - 1)
         elif date_debut_pr != "-":
             # autre période: rajouter un an à "date_debut_pr"
-            debutPeriodeReference = date_debut_pr
-            finPeriodeReference = (datetime.strptime(date_debut_pr, DATE_FORMAT_INPUT) + timedelta(days=365)).strftime(
-                DATE_FORMAT_OUTPUT
-            )
+            (debutPeriodeReference, delta) = (date_debut_pr, timedelta(days=365))
+            finPeriodeReference = (datetime.strptime(date_debut_pr, DATE_FORMAT_INPUT) + delta).strftime(DATE_FORMAT_OUTPUT)
         else:
             # autre période de référence sans début spécifié: erreur
             raise RuntimeError("Données de période de référence incohérentes.")
@@ -150,6 +148,7 @@ class RowImporter(object):
         # Identification du déclarant pour tout contact ultérieur
         self.importField("Nom", "informationsDeclarant/nom")
         self.importField("Prénom", "informationsDeclarant/prenom")
+        self.importField("e-mail_declarant", "informationsDeclarant/email")
         self.importField("telephone", "informationsDeclarant/tel")
         self.importField("Reg", "informationsDeclarant/region")
         self.importField("dpt", "informationsDeclarant/departement")
