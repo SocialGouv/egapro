@@ -5,34 +5,15 @@ include:
     file: /base_yarn_stage.yml
     ref: master
 
-#
-.quality_stage: &quality_stage
+Code quality (dev):
   stage: "Code Quality"
   extends:
     - .base_yarn_quality
     - .base_yarn_build
   when: manual
-  allow_failure: false
-#
-
-Code quality (dev):
-  <<: *quality_stage
-  only:
-    - branches
-  except:
-    - master
-
-Code quality (master):
-  <<: *quality_stage
   except:
     variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - master
-
-Code quality (preprod):
-  <<: *quality_stage
-  only:
-    - /^v.*/
+      - $PRODUCTION
+  allow_failure: false
 
 ...

@@ -2,9 +2,6 @@
 
 include:
   - project: SocialGouv/gitlab-ci-yml
-    file: /base_deploy_nodejs_chart_stage.yml
-    ref: master
-  - project: SocialGouv/gitlab-ci-yml
     file: /base_deploy_hpa_chart_stage.yml
     ref: master
 
@@ -13,103 +10,43 @@ include:
 ####                APP                 ####
 ############################################
 
-.deploy_app_stage: &deploy_app_stage
+Deploy egapro/app (dev):
   stage: "Deploy to hors prod K8S"
   extends: .base_deploy_hpa_chart_stage
   dependencies: []
-  variables: &deploy_app_stage_variables
+  variables:
     REGISTRY: $CI_REGISTRY_IMAGE
     IMAGE_TAG: $CI_COMMIT_SHA
     CONTEXT: app
     PORT: ${APP_PORT}
     VALUES_FILE: ./.k8s/app.values.yml
-
-Deploy app (dev):
-  <<: *deploy_app_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  only:
-    - branches
-  except:
-    - egapro-auto-devops
-
-
-Deploy app (master):
-  <<: *deploy_app_stage
-  variables:
-    <<: *deploy_app_stage_variables
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   except:
     variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - egapro-auto-devops
-
-Deploy app (preprod):
-  <<: *deploy_app_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  only:
-    - /^v.*/
-#
-#Deploy app (prod):
-#  <<: *deploy_app_stage
-#  only:
-#    - master
-#  environment:
-#    name: prod
-
+      - $PRODUCTION
+  allow_failure: false
 
 ############################################
 ####                API                 ####
 ############################################
 
-.deploy_api_stage: &deploy_api_stage
+Deploy egapro/api (dev):
   stage: "Deploy to hors prod K8S"
   extends: .base_deploy_hpa_chart_stage
   dependencies: []
-  variables: &deploy_api_stage_variables
+  variables:
     REGISTRY: $CI_REGISTRY_IMAGE
     IMAGE_TAG: $CI_COMMIT_SHA
     CONTEXT: api
     PORT: ${API_PORT}
     VALUES_FILE: ./.k8s/api.values.yml
-
-Deploy api (dev):
-  <<: *deploy_api_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  only:
-    - branches
-  except:
-    - egapro-auto-devops
-
-Deploy api (master):
-  <<: *deploy_api_stage
-  variables:
-    <<: *deploy_api_stage_variables
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   except:
     variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - egapro-auto-devops
-
-Deploy api (preprod):
-  <<: *deploy_api_stage
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  only:
-    - /^v.*/
-#
-#Deploy api (prod):
-#  <<: *deploy_api_stage
-#  only:
-#    - master
-#  environment:
-#    name: prod
+      - $PRODUCTION
+  allow_failure: false
 
 
 ############################################
@@ -123,8 +60,6 @@ Deploy egapro/postgres (dev):
     IMAGE_TAG: ${CI_COMMIT_SHA}
     HELM_RENDER_ARGS: ""
     CONTEXT: egapro
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - helm init --client-only
@@ -137,63 +72,12 @@ Deploy egapro/postgres (dev):
       ${HELM_RENDER_ARGS}
       --values ./values.yaml
     - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
-  only:
-    - branches
-  except:
-    - egapro-auto-devops
-  allow_failure: false
-
-
-Deploy egapro/postgres (master):
-  stage: "Deploy to hors prod K8S"
-  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:0.20.0
-  variables:
-    IMAGE_TAG: ${CI_COMMIT_SHA}
-    HELM_RENDER_ARGS: ""
-    CONTEXT: egapro
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  script:
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - helm init --client-only
-    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
-    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
-    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
-    - helm just fetch "stable/postgresql#6.5.6"
-    - envsubst < .k8s/postgres/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${BRANCH_HASH}-pg postgresql
-      ${HELM_RENDER_ARGS}
-      --values ./values.yaml
-    - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
   except:
     variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - egapro-auto-devops
-
-Deploy egapro/postgres (preprod):
-  stage: "Deploy to hors prod K8S"
-  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:0.20.0
-  variables:
-    IMAGE_TAG: ${CI_COMMIT_SHA}
-    HELM_RENDER_ARGS: ""
-    CONTEXT: egapro
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  script:
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - helm init --client-only
-    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
-    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
-    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
-    - helm just fetch "stable/postgresql#6.5.6"
-    - envsubst < .k8s/postgres/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${BRANCH_HASH}-pg postgresql
-      ${HELM_RENDER_ARGS}
-      --values ./values.yaml
-    - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
-  only:
-    - /^v.*/
+    - $PRODUCTION
+  allow_failure: false
 
 
 ############################################
@@ -207,8 +91,6 @@ Deploy egapro/memcached (dev):
     IMAGE_TAG: ${CI_COMMIT_SHA}
     HELM_RENDER_ARGS: ""
     CONTEXT: egapro
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
     - helm init --client-only
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
@@ -220,60 +102,12 @@ Deploy egapro/memcached (dev):
       ${HELM_RENDER_ARGS}
       --values ./values.yaml
     - helm just apply ${CONTEXT}-${BRANCH_HASH}
-  only:
-    - branches
-  except:
-    - egapro-auto-devops
-  allow_failure: false
-
-Deploy egapro/memcached (master):
-  stage: "Deploy to hors prod K8S"
-  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:0.20.0
-  variables:
-    IMAGE_TAG: ${CI_COMMIT_SHA}
-    HELM_RENDER_ARGS: ""
-    CONTEXT: egapro
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
   except:
     variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  script:
-    - helm init --client-only
-    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
-    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
-    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
-    - helm just fetch "stable/memcached#3.1.0"
-    - envsubst < .k8s/memcached/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${BRANCH_HASH} memcached
-      ${HELM_RENDER_ARGS}
-      --values ./values.yaml
-    - helm just apply ${CONTEXT}-${BRANCH_HASH}
-  only:
-    - egapro-auto-devops
-
-Deploy egapro/memcached (preprod):
-  stage: "Deploy to hors prod K8S"
-  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:0.20.0
-  variables:
-    IMAGE_TAG: ${CI_COMMIT_SHA}
-    HELM_RENDER_ARGS: ""
-    CONTEXT: egapro
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  script:
-    - helm init --client-only
-    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
-    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
-    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
-    - helm just fetch "stable/memcached#3.1.0"
-    - envsubst < .k8s/memcached/values.yml > ./values.yaml
-    - helm just render ${CONTEXT}-${BRANCH_HASH} memcached
-      ${HELM_RENDER_ARGS}
-      --values ./values.yaml
-    - helm just apply ${CONTEXT}-${BRANCH_HASH}
-  only:
-    - /^v.*/
+      - $PRODUCTION
+  allow_failure: false
 
 
 ############################################
@@ -286,8 +120,6 @@ Deploy egapro/kinto (dev):
   variables:
     IMAGE_TAG: ${CI_COMMIT_SHA}
     PORT: ${KINTO_PORT}
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
   script:
     - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
@@ -300,271 +132,11 @@ Deploy egapro/kinto (dev):
     - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
 #    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
 #    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
-  only:
-    - branches
-  except:
-    - egapro-auto-devops
-  allow_failure: false
-
-Deploy egapro/kinto (master):
-  stage: "Deploy to hors prod K8S"
-  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
-  variables:
-    IMAGE_TAG: ${CI_COMMIT_SHA}
-    PORT: ${KINTO_PORT}
   environment:
     name: ${DEV_NAMESPACE_ENVIRONMENT}
-  script:
-    - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
-    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
-    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
-    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
-    - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
-    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
-#    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
   except:
     variables:
-      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-  only:
-    - egapro-auto-devops
+      - $PRODUCTION
   allow_failure: false
-
-Deploy egapro/kinto (preprod):
-  stage: "Deploy to hors prod K8S"
-  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
-  variables:
-    IMAGE_TAG: ${CI_COMMIT_SHA}
-    PORT: ${KINTO_PORT}
-  environment:
-    name: ${DEV_NAMESPACE_ENVIRONMENT}
-  script:
-  - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
-  - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
-  - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
-  - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
-  - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
-  - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
-  - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
-  - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
-  - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
-  #    - kubectl wait --for=condition=Ready pod -l component=kinto -n ${K8S_NAMESPACE} --timeout=600s
-  #    - kubectl wait --for=condition=complete job/init-kinto -n ${K8S_NAMESPACE} --timeout=600s
-  only:
-    - /^v.*/
-  allow_failure: false
-
-
-############################################
-####       DEPLOY TO HORS PROD K8S       ###
-############################################
-#
-##
-#.deploy_stage: &deploy_stage
-#  stage: "Deploy to hors prod K8S"
-#  variables: &deploy_stage_variables
-#    IMAGE_TAG: ${CI_COMMIT_SHA}
-#    LETS_ENCRYPT_ISSUER: "letsencrypt-staging"
-##
-#
-## Dev Environment
-#
-#Deploy egapro/app (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${APP_PORT}
-#    LIFETIME: "temporary"
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy egapro/api (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-api-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${API_PORT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy egapro/postgres (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy egapro/memcached (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-#Deploy egapro/kinto (dev):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-dev
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${KINTO_PORT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - branches
-#  except:
-#    - master
-#
-## Master Environment
-#
-#Deploy egapro/app (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-app-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${APP_PORT}
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  except:
-#    variables:
-#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-#  only:
-#    - master
-#
-#Deploy egapro/api (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-api-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    PORT: ${API_PORT}
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  except:
-#    variables:
-#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-#  only:
-#    - master
-#
-#Deploy egapro/postgres (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-postgres-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  except:
-#    variables:
-#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-#  only:
-#    - master
-#
-#Deploy egapro/memcached (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-memcached-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  except:
-#    variables:
-#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-#  only:
-#    - master
-#
-#Deploy egapro/kinto (master):
-#  <<: *deploy_stage
-#  extends: .deploy-egapro-kinto-k8s-master
-#  variables:
-#    <<: *deploy_stage_variables
-#    NAMESPACE_ENVIRONMENT: ${MASTER_NAMESPACE_ENVIRONMENT}
-#    PORT: ${KINTO_PORT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  except:
-#    variables:
-#      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
-#  only:
-#    - master
-#
-#
-## Preprod Environment
-#
-#Deploy egapro/app (preprod):
-#  extends: .deploy-egapro-app-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    PORT: ${APP_PORT}
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/api (preprod):
-#  extends: .deploy-egapro-api-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    PORT: ${API_PORT}
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/postgres (preprod):
-#  extends: .deploy-egapro-postgres-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/memcached (preprod):
-#  extends: .deploy-egapro-memcached-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
-#
-#Deploy egapro/kinto (preprod):
-#  extends: .deploy-egapro-kinto-k8s-preprod
-#  stage: "Deploy to hors prod K8S"
-#  variables:
-#    PORT: ${KINTO_PORT}
-#    NAMESPACE_ENVIRONMENT: ${PREPROD_NAMESPACE_ENVIRONMENT}
-#  environment:
-#    name: ${DEV_NAMESPACE_ENVIRONMENT}
-#  only:
-#    - /^v.*/
 
 ...
