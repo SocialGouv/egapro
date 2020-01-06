@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Field, FieldMetaState, Form, useField } from "react-final-form";
+import { Form, useField } from "react-final-form";
 import createDecorator from "final-form-calculate";
 
 import {
@@ -10,7 +10,6 @@ import {
 } from "../../globals";
 
 import {
-  mustBeDate,
   parseTrancheEffectifsFormValue,
   required,
   validateDate
