@@ -333,6 +333,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -670,6 +681,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -972,6 +994,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -1312,6 +1345,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -1614,6 +1658,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -1954,6 +2009,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -2256,6 +2322,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -2596,6 +2673,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -2898,6 +2986,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -3238,6 +3337,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -3540,6 +3650,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -3880,6 +4001,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -4182,6 +4314,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -4522,6 +4665,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -4824,6 +4978,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -5164,6 +5329,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -5500,6 +5676,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -5840,6 +6027,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -6176,6 +6374,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -6516,6 +6725,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -6852,6 +7072,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -7225,6 +7456,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -7562,6 +7804,17 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -7867,6 +8120,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -8169,6 +8433,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -8509,6 +8784,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -8811,6 +9097,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -9151,6 +9448,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -9454,6 +9762,17 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -9465,6 +9784,670 @@ Object {
 `;
 
 exports[`updateIndicateurUnType nothing undefined state 1`] = `undefined`;
+
+exports[`updateInformationsDeclarant change complete state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 23,
+            "nombreSalariesHommes": 32,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 12,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 34,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 21,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 63,
+            "nombreSalariesHommes": 25,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 52,
+            "nombreSalariesHommes": 62,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 18,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 27,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 14,
+            "nombreSalariesHommes": 15,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 4,
+            "nombreSalariesHommes": 5,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 6,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 10,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 13,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": 4,
+    "nombreSalariesHommes": 6,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": false,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": 2.2,
+        "tauxAugmentationHommes": 3.5,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": 1.3,
+        "tauxAugmentationHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": 8.02,
+        "tauxAugmentationHommes": 6.92,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": 12.15,
+        "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": 1,
+    "nombreAugmentationPromotionHommes": 2,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": false,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": 7,
+    "nombreSalarieesPeriodeAugmentation": 7,
+    "presenceCongeMat": false,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": false,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": 1.1,
+        "tauxPromotionHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": 0.3,
+        "tauxPromotionHommes": 2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": 2,
+        "tauxPromotionHommes": 3,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": 4,
+        "tauxPromotionHommes": 5.55,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [
+      Object {
+        "name": "Business Developers",
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 4,
+            "remunerationAnnuelleBrutFemmes": 25000,
+            "remunerationAnnuelleBrutHommes": 24000,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 2,
+            "nombreSalariesHommes": 6,
+            "remunerationAnnuelleBrutFemmes": 32000,
+            "remunerationAnnuelleBrutHommes": 32000,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 41000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 1,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 49000,
+            "remunerationAnnuelleBrutHommes": 51500,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 25500,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27500,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 31000,
+            "remunerationAnnuelleBrutHommes": 33000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 39000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 26000,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27000,
+            "remunerationAnnuelleBrutHommes": 29000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 34000,
+            "remunerationAnnuelleBrutHommes": 36000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 42000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 36000,
+            "remunerationAnnuelleBrutHommes": 38000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 37000,
+            "remunerationAnnuelleBrutHommes": 39000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 44000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 52000,
+            "remunerationAnnuelleBrutHommes": 56000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
+    "formValidated": "None",
+    "nomEntreprise": "BigCorp",
+    "trancheEffectifs": "1000 et plus",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "2 rue du mérou",
+    "codePostal": "34000",
+    "commune": "Montpellier",
+    "departement": "Hérault",
+    "formValidated": "None",
+    "nom": "Norris",
+    "prenom": "Chuck",
+    "region": "Languedoc-Roussillon",
+    "tel": "0102030405",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "",
+    "codeNaf": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "siren": "",
+  },
+}
+`;
+
+exports[`updateInformationsDeclarant change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": true,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "",
+    "finPeriodeReference": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "2 rue du mérou",
+    "codePostal": "34000",
+    "commune": "Montpellier",
+    "departement": "Hérault",
+    "formValidated": "None",
+    "nom": "Norris",
+    "prenom": "Chuck",
+    "region": "Languedoc-Roussillon",
+    "tel": "0102030405",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "",
+    "codeNaf": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "siren": "",
+  },
+}
+`;
+
+exports[`updateInformationsDeclarant nothing undefined state 1`] = `undefined`;
 
 exports[`updateInformationsEntreprise change complete state 1`] = `
 Object {
@@ -9793,6 +10776,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "12 rue des perdrix, 12345 Montmorency",
     "codeNaf": "6789",
@@ -10095,6 +11089,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "12 rue des perdrix, 12345 Montmorency",
@@ -10435,6 +11440,17 @@ Object {
     "nomEntreprise": "acme",
     "trancheEffectifs": "251 à 999",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -10737,6 +11753,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "acme",
     "trancheEffectifs": "251 à 999",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -11077,6 +12104,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -11413,6 +12451,17 @@ Object {
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -11751,6 +12800,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -12088,6 +13148,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -12390,6 +13461,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -12730,6 +13812,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -13032,6 +14125,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -13372,6 +14476,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -13674,6 +14789,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -14014,6 +15140,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -14316,6 +15453,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -14656,6 +15804,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -14958,6 +16117,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -15298,6 +16468,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -15600,6 +16781,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -15940,6 +17132,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -16242,6 +17445,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -16582,6 +17796,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -16919,6 +18144,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -17221,6 +18457,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -17561,6 +18808,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -17898,6 +19156,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -18201,6 +19470,17 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -18212,6 +19492,670 @@ Object {
 `;
 
 exports[`validateIndicateurUnCoefGroup Valid nothing undefined state 1`] = `undefined`;
+
+exports[`validateInformationsDeclarant change complete state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 23,
+            "nombreSalariesHommes": 32,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 12,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 34,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 21,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 63,
+            "nombreSalariesHommes": 25,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 52,
+            "nombreSalariesHommes": 62,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 18,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 27,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 14,
+            "nombreSalariesHommes": 15,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 4,
+            "nombreSalariesHommes": 5,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 6,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 10,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 13,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": 4,
+    "nombreSalariesHommes": 6,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": false,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": 2.2,
+        "tauxAugmentationHommes": 3.5,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": 1.3,
+        "tauxAugmentationHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": 8.02,
+        "tauxAugmentationHommes": 6.92,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": 12.15,
+        "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": 1,
+    "nombreAugmentationPromotionHommes": 2,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": false,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": 7,
+    "nombreSalarieesPeriodeAugmentation": 7,
+    "presenceCongeMat": false,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": false,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": 1.1,
+        "tauxPromotionHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": 0.3,
+        "tauxPromotionHommes": 2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": 2,
+        "tauxPromotionHommes": 3,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": 4,
+        "tauxPromotionHommes": 5.55,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [
+      Object {
+        "name": "Business Developers",
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 4,
+            "remunerationAnnuelleBrutFemmes": 25000,
+            "remunerationAnnuelleBrutHommes": 24000,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 2,
+            "nombreSalariesHommes": 6,
+            "remunerationAnnuelleBrutFemmes": 32000,
+            "remunerationAnnuelleBrutHommes": 32000,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 41000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 1,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 49000,
+            "remunerationAnnuelleBrutHommes": 51500,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 25500,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27500,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 31000,
+            "remunerationAnnuelleBrutHommes": 33000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 39000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 26000,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27000,
+            "remunerationAnnuelleBrutHommes": 29000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 34000,
+            "remunerationAnnuelleBrutHommes": 36000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 42000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 36000,
+            "remunerationAnnuelleBrutHommes": 38000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 37000,
+            "remunerationAnnuelleBrutHommes": 39000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 44000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 52000,
+            "remunerationAnnuelleBrutHommes": 56000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
+    "formValidated": "None",
+    "nomEntreprise": "BigCorp",
+    "trancheEffectifs": "1000 et plus",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "Valid",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "",
+    "codeNaf": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "siren": "",
+  },
+}
+`;
+
+exports[`validateInformationsDeclarant change default state 1`] = `
+Object {
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": true,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "",
+    "finPeriodeReference": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "Valid",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "",
+    "codeNaf": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "siren": "",
+  },
+}
+`;
+
+exports[`validateInformationsDeclarant nothing undefined state 1`] = `undefined`;
 
 exports[`validateInformationsEntreprise change complete state 1`] = `
 Object {
@@ -18540,6 +20484,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -18842,6 +20797,17 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",
@@ -19182,6 +21148,17 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
@@ -19484,6 +21461,17 @@ Object {
     "formValidated": "Valid",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
   },
   "informationsEntreprise": Object {
     "adresse": "",

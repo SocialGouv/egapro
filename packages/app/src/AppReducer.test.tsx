@@ -653,6 +653,34 @@ describe("updateIndicateurCinq", () => {
   });
 });
 
+describe("updateInformationsDeclarant", () => {
+  const action = {
+    type: "updateInformationsDeclarant" as "updateInformationsDeclarant",
+    data: {
+      nom: "Norris",
+      prenom: "Chuck",
+      tel: "0102030405",
+      region: "Languedoc-Roussillon",
+      departement: "Hérault",
+      adresse: "2 rue du mérou",
+      codePostal: "34000",
+      commune: "Montpellier"
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
 describe("updateInformationsEntreprise", () => {
   const action = {
     type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
@@ -921,6 +949,25 @@ describe("validateIndicateurQuatre", () => {
 describe("validateIndicateurCinq", () => {
   const action = {
     type: "validateIndicateurCinq" as "validateIndicateurCinq",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("validateInformationsDeclarant", () => {
+  const action = {
+    type: "validateInformationsDeclarant" as "validateInformationsDeclarant",
     valid: "Valid" as FormState
   };
 

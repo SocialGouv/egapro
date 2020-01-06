@@ -110,6 +110,17 @@ const defaultState: AppState = {
     nombreSalariesHommes: undefined,
     nombreSalariesFemmes: undefined
   },
+  informationsDeclarant: {
+    formValidated: "None",
+    nom: "",
+    prenom: "",
+    tel: "",
+    region: "",
+    departement: "",
+    adresse: "",
+    codePostal: "",
+    commune: ""
+  },
   informationsEntreprise: {
     formValidated: "None",
     nomEntreprise: "",
@@ -180,6 +191,10 @@ function AppReducer(
             state.indicateurCinq.formValidated === "Valid"
               ? { ...state.indicateurCinq, formValidated: "Invalid" }
               : state.indicateurCinq,
+          informationsDeclarant:
+            state.informationsDeclarant.formValidated === "Valid"
+              ? { ...state.informationsDeclarant, formValidated: "Invalid" }
+              : state.informationsDeclarant,
           informationsEntreprise:
             state.informationsEntreprise.formValidated === "Valid"
               ? { ...state.informationsEntreprise, formValidated: "Invalid" }
@@ -427,6 +442,24 @@ function AppReducer(
         ...state,
         indicateurCinq: {
           ...state.indicateurCinq,
+          formValidated: action.valid
+        }
+      };
+    }
+    case "updateInformationsDeclarant": {
+      return {
+        ...state,
+        informationsDeclarant: {
+          ...state.informationsDeclarant,
+          ...action.data
+        }
+      };
+    }
+    case "validateInformationsDeclarant": {
+      return {
+        ...state,
+        informationsDeclarant: {
+          ...state.informationsDeclarant,
           formValidated: action.valid
         }
       };
