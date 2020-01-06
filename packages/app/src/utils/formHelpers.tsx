@@ -90,5 +90,18 @@ export const mustBeDate = (value: string): boolean => {
   return parsed === undefined || parsed.toString() === "Invalid Date";
 };
 
+export const validateDate = (value: string) => {
+  const requiredError = required(value);
+  const mustBeDateError = mustBeDate(value);
+  if (!requiredError && !mustBeDateError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeDate: mustBeDateError
+    };
+  }
+};
+
 const regexpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const validateEmail = (email: string) => !regexpEmail.test(email);
