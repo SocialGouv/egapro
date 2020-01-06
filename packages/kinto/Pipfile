@@ -10,6 +10,8 @@ dpath = "*"
 jsonschema = "*"
 progress = "*"
 kinto-http = "*"
+pandas = "*"
+xlrd = "*"
 
 [requires]
 python_version = "3.7"
