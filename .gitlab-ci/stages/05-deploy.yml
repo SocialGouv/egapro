@@ -262,38 +262,53 @@ Restore egapro/postgres:
   stage: "Restore prod backup"
   image: ${CI_REGISTRY}/socialgouv/docker/helm:${HELM_VERSION}
   variables:
+    PRODUCTION: "true"
     ENABLE_PERSISTENT_VOLUME: "true"
+    HELM_RENDER_ARGS: ""
+    CONTEXT: egapro
     PORT: ${KINTO_PORT}
-  before_script:
+  script:
     # azure volume secrets
     - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-${PROJECT}prod-volume -n ${PROJECT}-secret -ojsonpath='{.data.azurestorageaccountname}')
     - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-${PROJECT}prod-volume -n ${PROJECT}-secret -ojsonpath='{.data.azurestorageaccountkey}')
     - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${PROJECT}.yml
-  script:
+    - kubectl apply -f .k8s/secret/secret-azure-volume-${PROJECT}.yml -n ${K8S_NAMESPACE}
     # delete old restore job, kinto and postgres
     - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
     - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
-    - kubectl delete sts ${PROJECT}-${BRANCH_HASH}-pg || true;
+    - kubectl delete sts ${PROJECT}-${BRANCH_HASH}-pg-postgresql -n ${K8S_NAMESPACE} || true;
     - kubectl delete pvc data-${PROJECT}-${BRANCH_HASH}-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
-    # Create azure volume secrets
-    - kubectl apply -f .k8s/secret/secret-azure-volume-${PROJECT}.yml -n ${K8S_NAMESPACE}
-#    # deploy clean postgres
-#    - helm init --client-only
-#    - helm upgrade --install ${STARTUP}-${NAMESPACE_ENVIRONMENT}-pg --wait -f .k8s/postgres/values-${STARTUP}.yml stable/postgresql --namespace ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
+    # deploy clean postgres
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${PROJECT} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - helm init --client-only
+    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
+    - curl -L https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0/helm-just-linux-2.11.0.tgz | tar -C $(helm home) -xzv
+    - helm repo add socialgouv https://github.com/SocialGouv/helm-charts/releases/download/v2.11.0
+    - helm just fetch "stable/postgresql#6.5.6"
+    - envsubst < .k8s/postgres/values.yml > ./values.yaml
+    - helm just render ${CONTEXT}-${BRANCH_HASH}-pg postgresql
+      ${HELM_RENDER_ARGS}
+      --values ./values.yaml
+    - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
+    - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
 #    # run restore job
-#    - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-${STARTUP}.yml
-#    - kubectl apply -f .k8s/postgres/restore-job-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
+    - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-${PROJECT}.yml
+    - kubectl apply -f .k8s/postgres/restore-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
 #    # deploy kinto
-#    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
-#    - kubectl wait --for=condition=complete job/init-kinto --timeout=600s -n ${K8S_NAMESPACE}
+    - export POSTGRESQL_USER=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
+    - export POSTGRESQL_PASSWORD=$(kubectl get secret ${STARTUP} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
+    - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${STARTUP}.yml
+    - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${STARTUP}.yml
+    - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${STARTUP}.yml
+    - kubectl delete job init-kinto -n ${K8S_NAMESPACE} || true;
+    - kubectl apply -f .k8s/kinto/deployment-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/service-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl apply -f .k8s/kinto/job-init-kinto-${STARTUP}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/init-kinto --timeout=600s -n ${K8S_NAMESPACE}
   environment:
     name: prod
-  except:
-    variables:
-      - $PRODUCTION
+  only:
+    - /^v.*/
   when: manual
 ...

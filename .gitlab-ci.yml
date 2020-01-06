@@ -136,7 +136,7 @@ Make a new release to deploy to preprod environment:
     variables:
       - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
   only:
-  - egapro-auto-devops
+    - egapro-auto-devops
   when: manual
 
 ###########################################
