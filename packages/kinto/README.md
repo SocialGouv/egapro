@@ -1,47 +1,36 @@
-Egapro Kinto
-============
+# Egapro Kinto
 
 ## Importer les données Solen
 
 Vous devez disposer de Python 3.6+ et `pipenv`.
 
 ```
-$ pipenv run python import-solen.py <chemin_vers_solen.csv>
+$ pipenv run python import-solen.py export-solen.xlsx
 ```
 
 ou bien, si vous souhaitez activer l'environnement projet de façon persistante :
 
 ```
 $ pipenv shell
-$ python import-solen.py <chemin_vers_solen.csv>
+$ python import-solen.py export-solen.xlsx
 ```
 
 ### Préparation des données
 
-Vous devez disposer d'un export Solen, généralement fourni au format Excel (ex. `Export DGT 20191224.xlsx`), que vous devez exporter au format [CSV]. C'est le chemin vers cet export CSV qui devra être fourni à la ligne de commande.
-
-Généralement les options d'export CSV par défaut sont les bonnes, par exemple ici sur LibreOffice:
-
-![](https://i.imgur.com/Ar2n1rJ.png)
-
-Soit :
-
-- Jeu de caractères : UTF-8
-- Délimiteur de champs : `,` (virgule)
-- Séparateur de chaînes : `"` (guillement double)
+Vous devez disposer d'un export Solen, généralement fourni au format Excel (ex. `Export DGT 20191224.xlsx`). C'est le chemin vers ce fichier qu'il faut passer à la ligne de commande.
 
 ### Usage
 
 ```
-$ python import-solen.py --help                           
+$ python import-solen.py --help
 usage: import-solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-s SAVE_AS] [-v]
-                       [--siren SIREN] [-c]
-                       csv_path
+                       [-r] [--siren SIREN] [-c]
+                       xls_path
 
 Import des données Solen.
 
 positional arguments:
-  csv_path              chemin vers l'export CSV Solen
+  xls_path              chemin vers l'export Excel Solen
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -53,35 +42,20 @@ optional arguments:
   -s SAVE_AS, --save-as SAVE_AS
                         sauvegarder la sortie JSON dans un fichier
   -v, --validate        valider les enregistrements JSON
+  -r, --dry-run         ne pas procéder à l'import dans Kinto
   --siren SIREN         importer le SIREN spécifié uniquement
   -c, --init-collection
                         Vider et recréer la collection Kinto avant import
 ```
 
-#### Limiter le nombre de lignes traitées
+Notez que les options sont cumulatives.
+
+#### Simuler l'import dans Kinto
+
+L'option `--dry-run` effectue une simulation d'import dans Kinto. Cette option permet de valider que le fichier Excel d'export est lu et interprété correctement, et que les données y figurant sont cohérentes. Cette option a beaucoup d'intérêt combinée à `--validate`.
 
 ```
-$ python import-solen.py solen.csv --max=10
-```
-
-#### Importer une entreprise ou UES par son numéro SIREN
-
-```
-$ python import-solen.py solen.csv --siren=1234567890
-```
-
-#### Afficher la sortie JSON de l'import
-
-```
-$ python import-solen.py solen.csv --show-json --indent=2
-```
-
-Notez l'emploi de l'option `--indent` pour spécifier le niveau d'indentation JSON.
-
-#### Afficher la sortie de debug
-
-```
-$ python import-solen.py solen.csv --debug
+$ python import-solen.py export-solen.xlsx --dry-run
 ```
 
 #### Valider les enregistrements JSON générés
@@ -89,17 +63,40 @@ $ python import-solen.py solen.csv --debug
 Cette commande validera chaque document JSON généré à partir d'un schema JSON.
 
 ```
-$ python import-solen.py --validate
+$ python import-solen.py export-solen.xlsx --validate
+```
+
+#### Limiter le nombre de lignes traitées
+
+```
+$ python import-solen.py export-solen.xlsx --max=10
+```
+
+#### Importer une entreprise ou UES par son numéro SIREN
+
+```
+$ python import-solen.py export-solen.xlsx --siren=1234567890
+```
+
+#### Afficher la sortie JSON de l'import
+
+```
+$ python import-solen.py export-solen.xlsx --show-json --indent=2
+```
+
+Notez l'emploi de l'option `--indent` pour spécifier le niveau d'indentation JSON.
+
+#### Afficher la sortie de debug
+
+```
+$ python import-solen.py export-solen.xlsx --debug
 ```
 
 #### Sauver la sortie JSON dans un fichier
 
-
 ```
-$ python import-solen.py solen.csv --save-as=export.json
+$ python import-solen.py export-solen.xlsx --save-as=export.json
 ```
-
-[CSV]: https://fr.wikipedia.org/wiki/Comma-separated_values
 
 #### Paramétrage d'accès à Kinto
 
@@ -114,5 +111,5 @@ Le script d'import lira les variables d'environnement suivantes pour se connecte
 Pour surcharger une variable d'environnement, vous pouvez les positionner devant la commande appelée :
 
 ```
-$ KINTO_COLLECTION=ma-collection python import-solen.py solen.csv
+$ KINTO_COLLECTION=ma-collection python import-solen.py export-solen.xlsx
 ```
