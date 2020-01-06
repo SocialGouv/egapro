@@ -9,12 +9,6 @@ import {
 } from "../../globals";
 
 import { mustBeDate, required, mustBeNumber } from "../../utils/formHelpers";
-import {
-  calendarYear,
-  dateToString,
-  parseDate,
-  Year
-} from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -111,7 +105,11 @@ function InformationsComplementairesForm({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
-          <FieldDateConsultationCSE readOnly={readOnly} />
+          <FieldDate
+            name="dateConsultationCSE"
+            label="Date de consultation du CSE"
+            readOnly={readOnly}
+          />
           <FieldAnneeDeclaration readOnly={readOnly} />
 
           {readOnly ? (
@@ -140,21 +138,6 @@ function InformationsComplementairesForm({
         </form>
       )}
     </Form>
-  );
-}
-
-function FieldDateConsultationCSE({ readOnly }: { readOnly: boolean }) {
-  const field = useField("dateConsultationCSE", { validate: validateDate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <FieldDate
-        name="dateConsultationCSE"
-        label="Date de consultation du CSE"
-        readOnly={readOnly}
-      />
-    </div>
   );
 }
 
