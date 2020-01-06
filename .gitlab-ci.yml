@@ -44,7 +44,6 @@ stages:
   export BRANCH_HASH=${BRANCH_HASH:="$BRANCH_NAME_HASHED"}
   export K8S_NAMESPACE="${PROJECT}-feature-${BRANCH_HASH}"
 
-  echo "${CI_COMMIT_TAG}"
 
   if [[ -n $PRODUCTION ]]; then
     export BRANCH_HASH=prod
@@ -175,15 +174,11 @@ Make a new release to deploy to preprod environment:
     POSTGRES_RESOURCE_CPU_REQUEST: "25m"
     POSTGRES_RESOURCE_MEMORY_REQUEST: "128Mi"
   before_script:
-    # set environment variables
-    - export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
-    - export K8S_NAMESPACE=${STARTUP}-${NAMESPACE_ENVIRONMENT}
-    - export APP_URL=${STARTUP}-${NAMESPACE_ENVIRONMENT}.${APP_DOMAIN_NAME}
     # azure volume secrets
-    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-${STARTUP}prod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountname}')
-    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-${STARTUP}prod-volume -n ${STARTUP}-secret -ojsonpath='{.data.azurestorageaccountkey}')
+    - export AZURE_STORAGE_ACCOUNT_NAME=$(kubectl get secret azure-${PROJECT}prod-volume -n ${PROJECT}-secret -ojsonpath='{.data.azurestorageaccountname}')
+    - export AZURE_STORAGE_ACCOUNT_KEY=$(kubectl get secret azure-${PROJECT}prod-volume -n ${PROJECT}-secret -ojsonpath='{.data.azurestorageaccountkey}')
     - export CERTIFICATE_ENVIRONMENT=crt
-    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${STARTUP}.yml
+    - envsubst < .k8s/secret/secret-azure-volume.yml > .k8s/secret/secret-azure-volume-${PROJECT}.yml
     # app
     - export PORT=${APP_PORT}
     - envsubst < .k8s/app/deployment.yml > .k8s/app/deployment-${STARTUP}.yml
