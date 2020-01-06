@@ -176,6 +176,10 @@ function Menu({
                 to={`/simulateur/${code}/informations-declarant`}
                 title="informations Déclarant"
               />
+              <CustomNavLink
+                to={`/simulateur/${code}/informations-complementaires`}
+                title="informations complémentaires"
+              />
             </div>
           )}
         />

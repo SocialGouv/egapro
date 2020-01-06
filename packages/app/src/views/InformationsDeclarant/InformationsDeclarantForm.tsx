@@ -177,7 +177,10 @@ function InformationsDeclarantForm({
           />
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/TODO" label="suivant" />
+              <ButtonSimulatorLink
+                to="/informations-complementaires"
+                label="suivant"
+              />
               &emsp;
               {informationsDeclarant.formValidated === "Valid" && (
                 <p css={styles.edit}>

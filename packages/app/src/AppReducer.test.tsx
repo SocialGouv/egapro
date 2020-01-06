@@ -653,6 +653,30 @@ describe("updateIndicateurCinq", () => {
   });
 });
 
+describe("updateInformationsEntreprise", () => {
+  const action = {
+    type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
+    data: {
+      nomEntreprise: "acme",
+      siren: "12345",
+      codeNaf: "6789",
+      adresse: "12 rue des perdrix, 12345 Montmorency"
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
 describe("updateInformationsDeclarant", () => {
   const action = {
     type: "updateInformationsDeclarant" as "updateInformationsDeclarant",
@@ -681,14 +705,12 @@ describe("updateInformationsDeclarant", () => {
   });
 });
 
-describe("updateInformationsEntreprise", () => {
+describe("updateInformationsComplementaires", () => {
   const action = {
-    type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
+    type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
     data: {
-      nomEntreprise: "acme",
-      siren: "12345",
-      codeNaf: "6789",
-      adresse: "12 rue des perdrix, 12345 Montmorency"
+      dateConsultationCSE: "01/02/2017",
+      anneeDeclaration: "2018"
     }
   };
 
@@ -965,6 +987,25 @@ describe("validateIndicateurCinq", () => {
   });
 });
 
+describe("validateInformationsEntreprise", () => {
+  const action = {
+    type: "validateInformationsEntreprise" as "validateInformationsEntreprise",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
 describe("validateInformationsDeclarant", () => {
   const action = {
     type: "validateInformationsDeclarant" as "validateInformationsDeclarant",
@@ -984,9 +1025,9 @@ describe("validateInformationsDeclarant", () => {
   });
 });
 
-describe("validateInformationsEntreprise", () => {
+describe("validateInformationsComplementaires", () => {
   const action = {
-    type: "validateInformationsEntreprise" as "validateInformationsEntreprise",
+    type: "validateInformationsComplementaires" as "validateInformationsComplementaires",
     valid: "Valid" as FormState
   };
 
