@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.3](https://github.com/SocialGouv/egapro/compare/v2.0.2...v2.0.3) (2020-01-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency date-fns to v2.7.0 ([#283](https://github.com/SocialGouv/egapro/issues/283)) ([14f3eee](https://github.com/SocialGouv/egapro/commit/14f3eee))
+* **deps:** update dependency final-form to v4.18.6 ([#282](https://github.com/SocialGouv/egapro/issues/282)) ([e2cf474](https://github.com/SocialGouv/egapro/commit/e2cf474))
+
+
+
+
+
 ## [2.0.2](https://github.com/SocialGouv/egapro/compare/v2.0.1...v2.0.2) (2019-11-05)
 
 
