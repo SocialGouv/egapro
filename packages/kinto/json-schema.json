@@ -295,6 +295,7 @@
           "properties": {
             "nom": { "type": "string" },
             "prenom": { "type": "string" },
+            "email": { "type": "string" },
             "tel": { "type": "string" },
             "region": { "type": "string" },
             "departement": { "type": "string" },

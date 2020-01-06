@@ -16,6 +16,7 @@ from jsonschema.exceptions import ValidationError
 from kinto_http.exceptions import KintoException
 from kinto_http.patch_type import BasicPatch
 from progress.bar import Bar
+from requests.exceptions import ConnectionError
 from xlrd.biffh import XLRDError
 
 # TODO:
@@ -37,7 +38,7 @@ KINTO_BUCKET = os.environ.get("KINTO_BUCKET", "egapro")
 KINTO_COLLECTION = os.environ.get("KINTO_COLLECTION", "test-import")
 
 
-class RowImporter(object):
+class RowProcessor(object):
     def __init__(self, row, validator, debug=False):
         if row is None:
             raise RuntimeError("Échec d'import d'une ligne vide.")
@@ -95,10 +96,7 @@ class RowImporter(object):
             return value
 
     def toKintoRecord(self, validate=False):
-        # FIXME: bug du nouveau format d'export fourni par Ponn, il manque le champ d'URL de déclaration
-        # solenId = self.get("URL d'impression du répondant").replace(SOLEN_URL_PREFIX, "")
-        # return {"id": solenId, "data": self.record}
-        kintoRecord = {"id": "fixme", "data": self.record}
+        kintoRecord = {"id": self.row["id"], "data": self.record}
         if validate:
             try:
                 self.validator.validate(kintoRecord)
@@ -458,23 +456,29 @@ class ExcelData(object):
 class KintoImporter(object):
     def __init__(self, schema, truncate=False, dryRun=False):
         self.toImport = []
-        self.dryRun = dryRun
+        self.schema = schema
         self.truncate = truncate
+        self.dryRun = dryRun
         if not dryRun:
-            self.setUp(schema, truncate=truncate)
+            self.client = self.setUp()
         else:
             self.client = None
 
     def setUp(self):
         printer.info("Vérifications Kinto")
         client = kinto_http.Client(server_url=KINTO_SERVER, auth=(KINTO_ADMIN_LOGIN, KINTO_ADMIN_PASSWORD))
-        info = client.server_info()
+        try:
+            info = client.server_info()
+        except ConnectionError as err:
+            printer.error(f"Connection au serveur Kinto impossible: {err}")
+            printer.info("Vérifiez la documentation pour paramétrer l'accès.")
+            exit(1)
         if "schema" not in info["capabilities"]:
             printer.error("Le serveur Kinto ne supporte pas la validation par schéma.")
             exit(1)
         else:
             printer.success("Validation de schéma activée.")
-        if truncate:
+        if self.truncate:
             if not prompt("Confimer la suppression et recréation de la collection existante ?", "non"):
                 printer.std("Commande annulée.")
                 exit(0)
@@ -487,7 +491,7 @@ class KintoImporter(object):
         except KintoException as err:
             printer.warn("La collection n'existe pas, création")
             try:
-                coll = client.create_collection(id=KINTO_COLLECTION, data={"schema": schema}, bucket=KINTO_BUCKET)
+                coll = client.create_collection(id=KINTO_COLLECTION, data={"schema": self.schema}, bucket=KINTO_BUCKET)
                 printer.success("La collection a été crée.")
             except KintoException as err:
                 printer.error(f"Impossible de créer la collection: {err}")
@@ -496,13 +500,13 @@ class KintoImporter(object):
                 printer.std("Commande annulée.")
                 exit(0)
             try:
-                client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=BasicPatch(data={"schema": schema}))
+                patch = BasicPatch(data={"schema": self.schema})
+                client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=patch)
                 printer.info("Le schéma de validation JSON a été ajouté à la collection.")
             except (KintoException, TypeError, KeyError, ValueError) as err:
                 printer.error(f"Impossible d'ajouter le schéma de validation à la collection {KINTO_COLLECTION}:")
                 printer.error(err)
                 exit(1)
-        self.client = client
         return client
 
     def add(self, record):
@@ -515,11 +519,9 @@ class KintoImporter(object):
             return
         with self.client.batch() as batch:
             for record in self.toImport:
-                # FIXME: utiliser la véritable id lorsqu'elle sera disponible dans l'export CSV
-                # ici nous supprimons l'id pour éviter à kinto de checker l'existence d'un record correspondant
-                del record["id"]
+                printer.info(f"Préparation de la déclaration id={record['id']}")
                 batch.create_record(bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record)
-        printer.success("Importation dans Kinto effectuée.")
+        printer.success("Importation effectuée.")
 
 
 def parse(args):
@@ -542,8 +544,7 @@ def parse(args):
         if args.siren and row["SIREN_ets"] != args.siren and row["SIREN_UES"] != args.siren:
             continue
         try:
-            rowImporter = RowImporter(row, validator, args.debug)
-            record = rowImporter.run(validate=args.validate)
+            record = RowProcessor(row, validator, args.debug).run(validate=args.validate)
             kintoImporter.add(record)
             count_imported = count_imported + 1
             if args.show_json:
@@ -569,6 +570,7 @@ def parse(args):
         with open(args.save_as, "w") as json_file:
             json_file.write(json.dumps(kintoImporter.toImport, indent=args.indent))
             printer.success("Enregistrements JSON exportés dans " + args.save_as)
+    kintoImporter.run()
 
 
 class printer:
