@@ -8,6 +8,12 @@ exports[`resetState reset undefined state 1`] = `undefined`;
 
 exports[`test state used for test before testing stateComplete 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -334,33 +340,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`test state used for test before testing stateCompleteAndValidate 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
+    "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "Valid",
     "nombreSalaries": Array [
@@ -687,33 +699,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
-    "formValidated": "None",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "Valid",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "Valid",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "Valid",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`test state used for test before testing stateDefault 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -1033,8 +1051,700 @@ Object {
 
 exports[`test state used for test before testing stateUndefined 1`] = `undefined`;
 
+exports[`updateDeclaration change complete state 1`] = `
+Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 23,
+            "nombreSalariesHommes": 32,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 12,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 34,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 21,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 63,
+            "nombreSalariesHommes": 25,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 52,
+            "nombreSalariesHommes": 62,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 18,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 27,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 14,
+            "nombreSalariesHommes": 15,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 4,
+            "nombreSalariesHommes": 5,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 6,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 10,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 13,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": 4,
+    "nombreSalariesHommes": 6,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": false,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": 2.2,
+        "tauxAugmentationHommes": 3.5,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": 1.3,
+        "tauxAugmentationHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": 8.02,
+        "tauxAugmentationHommes": 6.92,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": 12.15,
+        "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": 1,
+    "nombreAugmentationPromotionHommes": 2,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": false,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": 7,
+    "nombreSalarieesPeriodeAugmentation": 7,
+    "presenceCongeMat": false,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": false,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": 1.1,
+        "tauxPromotionHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": 0.3,
+        "tauxPromotionHommes": 2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": 2,
+        "tauxPromotionHommes": 3,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": 4,
+        "tauxPromotionHommes": 5.55,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [
+      Object {
+        "name": "Business Developers",
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 4,
+            "remunerationAnnuelleBrutFemmes": 25000,
+            "remunerationAnnuelleBrutHommes": 24000,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 2,
+            "nombreSalariesHommes": 6,
+            "remunerationAnnuelleBrutFemmes": 32000,
+            "remunerationAnnuelleBrutHommes": 32000,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 41000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 1,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 49000,
+            "remunerationAnnuelleBrutHommes": 51500,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 25500,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27500,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 31000,
+            "remunerationAnnuelleBrutHommes": 33000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 39000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 26000,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27000,
+            "remunerationAnnuelleBrutHommes": 29000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 34000,
+            "remunerationAnnuelleBrutHommes": 36000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 42000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 36000,
+            "remunerationAnnuelleBrutHommes": 38000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 37000,
+            "remunerationAnnuelleBrutHommes": 39000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 44000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 52000,
+            "remunerationAnnuelleBrutHommes": 56000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
+    "formValidated": "None",
+    "nomEntreprise": "BigCorp",
+    "trancheEffectifs": "1000 et plus",
+  },
+  "informationsComplementaires": Object {
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "None",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "None",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "None",
+    "nomEntreprise": "acme",
+    "siren": "1234",
+  },
+}
+`;
+
+exports[`updateDeclaration change default state 1`] = `
+Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": true,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "",
+    "finPeriodeReference": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "trancheEffectifs": "50 à 250",
+  },
+  "informationsComplementaires": Object {
+    "anneeDeclaration": "",
+    "dateConsultationCSE": "",
+    "formValidated": "None",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "",
+    "codeNaf": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "siren": "",
+  },
+}
+`;
+
+exports[`updateDeclaration nothing undefined state 1`] = `undefined`;
+
 exports[`updateEffectif change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -1361,33 +2071,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateEffectif change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -1709,6 +2425,12 @@ exports[`updateEffectif nothing undefined state 1`] = `undefined`;
 
 exports[`updateIndicateurCinq change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -2035,33 +2757,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurCinq change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -2383,6 +3111,12 @@ exports[`updateIndicateurCinq nothing undefined state 1`] = `undefined`;
 
 exports[`updateIndicateurDeux change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -2709,33 +3443,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurDeux change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -3057,6 +3797,12 @@ exports[`updateIndicateurDeux nothing undefined state 1`] = `undefined`;
 
 exports[`updateIndicateurDeuxTrois change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -3383,33 +4129,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurDeuxTrois change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -3731,6 +4483,12 @@ exports[`updateIndicateurDeuxTrois nothing undefined state 1`] = `undefined`;
 
 exports[`updateIndicateurQuatre change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -4057,33 +4815,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurQuatre change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -4405,6 +5169,12 @@ exports[`updateIndicateurQuatre nothing undefined state 1`] = `undefined`;
 
 exports[`updateIndicateurTrois change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -4731,33 +5501,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurTrois change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -5079,6 +5855,12 @@ exports[`updateIndicateurTrois nothing undefined state 1`] = `undefined`;
 
 exports[`updateIndicateurUnCoef Array<{name: string}> change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -5405,33 +6187,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurUnCoef Array<{name: string}> change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -5787,6 +6575,12 @@ exports[`updateIndicateurUnCoef Array<{name: string}> nothing undefined state 1`
 
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -6113,33 +6907,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -6495,6 +7295,12 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffe
 
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -6821,33 +7627,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -7203,6 +8015,12 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndi
 
 exports[`updateIndicateurUnCoefAddGroup change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -7562,33 +8380,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurUnCoefAddGroup change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -7944,6 +8768,12 @@ exports[`updateIndicateurUnCoefAddGroup nothing undefined state 1`] = `undefined
 
 exports[`updateIndicateurUnCoefDeleteGroup change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -8236,33 +9066,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurUnCoefDeleteGroup change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -8584,6 +9420,12 @@ exports[`updateIndicateurUnCoefDeleteGroup nothing undefined state 1`] = `undefi
 
 exports[`updateIndicateurUnCsp change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -8910,33 +9752,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurUnCsp change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -9258,6 +10106,12 @@ exports[`updateIndicateurUnCsp nothing undefined state 1`] = `undefined`;
 
 exports[`updateIndicateurUnType change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -9584,33 +10438,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateIndicateurUnType change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -9932,6 +10792,12 @@ exports[`updateIndicateurUnType nothing undefined state 1`] = `undefined`;
 
 exports[`updateInformationsComplementaires change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -10263,28 +11129,34 @@ Object {
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateInformationsComplementaires change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -10606,6 +11478,12 @@ exports[`updateInformationsComplementaires nothing undefined state 1`] = `undefi
 
 exports[`updateInformationsDeclarant change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -10932,8 +11810,8 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
@@ -10948,17 +11826,23 @@ Object {
     "tel": "0102030405",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateInformationsDeclarant change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -11280,6 +12164,12 @@ exports[`updateInformationsDeclarant nothing undefined state 1`] = `undefined`;
 
 exports[`updateInformationsEntreprise change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -11606,20 +12496,20 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
     "adresse": "12 rue des perdrix, 12345 Montmorency",
@@ -11633,6 +12523,12 @@ Object {
 
 exports[`updateInformationsEntreprise change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -11954,6 +12850,12 @@ exports[`updateInformationsEntreprise nothing undefined state 1`] = `undefined`;
 
 exports[`updateInformationsSimulation change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -12280,33 +13182,39 @@ Object {
     "trancheEffectifs": "251 à 999",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`updateInformationsSimulation change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -12626,8 +13534,700 @@ Object {
 
 exports[`updateInformationsSimulation nothing undefined state 1`] = `undefined`;
 
+exports[`validateDeclaration change complete state 1`] = `
+Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
+    "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+  },
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 23,
+            "nombreSalariesHommes": 32,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 12,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 34,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 21,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 63,
+            "nombreSalariesHommes": 25,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 52,
+            "nombreSalariesHommes": 62,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 18,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 27,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 14,
+            "nombreSalariesHommes": 15,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 4,
+            "nombreSalariesHommes": 5,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 6,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 7,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 7,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 10,
+            "nombreSalariesHommes": 8,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 13,
+            "nombreSalariesHommes": 13,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 16,
+            "nombreSalariesHommes": 19,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": 4,
+    "nombreSalariesHommes": 6,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": false,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": 2.2,
+        "tauxAugmentationHommes": 3.5,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": 1.3,
+        "tauxAugmentationHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": 8.02,
+        "tauxAugmentationHommes": 6.92,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": 12.15,
+        "tauxAugmentationHommes": 13.56,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": 1,
+    "nombreAugmentationPromotionHommes": 2,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": false,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": 7,
+    "nombreSalarieesPeriodeAugmentation": 7,
+    "presenceCongeMat": false,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": false,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": 1.1,
+        "tauxPromotionHommes": 2.2,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": 0.3,
+        "tauxPromotionHommes": 2,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": 2,
+        "tauxPromotionHommes": 3,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": 4,
+        "tauxPromotionHommes": 5.55,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [
+      Object {
+        "name": "Business Developers",
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 4,
+            "remunerationAnnuelleBrutFemmes": 25000,
+            "remunerationAnnuelleBrutHommes": 24000,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": 2,
+            "nombreSalariesHommes": 6,
+            "remunerationAnnuelleBrutFemmes": 32000,
+            "remunerationAnnuelleBrutHommes": 32000,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": 5,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 41000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": 1,
+            "nombreSalariesHommes": 3,
+            "remunerationAnnuelleBrutFemmes": 49000,
+            "remunerationAnnuelleBrutHommes": 51500,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 25500,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27500,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 23000,
+            "remunerationAnnuelleBrutHommes": 25000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 24000,
+            "remunerationAnnuelleBrutHommes": 26000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 31000,
+            "remunerationAnnuelleBrutHommes": 33000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 39000,
+            "remunerationAnnuelleBrutHommes": 43000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 26000,
+            "remunerationAnnuelleBrutHommes": 28000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 27000,
+            "remunerationAnnuelleBrutHommes": 29000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 34000,
+            "remunerationAnnuelleBrutHommes": 36000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 42000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": 36000,
+            "remunerationAnnuelleBrutHommes": 38000,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 37000,
+            "remunerationAnnuelleBrutHommes": 39000,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 44000,
+            "remunerationAnnuelleBrutHommes": 46000,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": 52000,
+            "remunerationAnnuelleBrutHommes": 56000,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "2019-01-01",
+    "finPeriodeReference": "2019-12-31",
+    "formValidated": "None",
+    "nomEntreprise": "BigCorp",
+    "trancheEffectifs": "1000 et plus",
+  },
+  "informationsComplementaires": Object {
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "None",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "None",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "None",
+    "nomEntreprise": "acme",
+    "siren": "1234",
+  },
+}
+`;
+
+exports[`validateDeclaration change default state 1`] = `
+Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "",
+    "formValidated": "Valid",
+    "lienPublication": "",
+  },
+  "effectif": Object {
+    "formValidated": "None",
+    "nombreSalaries": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "nombreSalariesFemmes": undefined,
+            "nombreSalariesHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "indicateurCinq": Object {
+    "formValidated": "None",
+    "nombreSalariesFemmes": undefined,
+    "nombreSalariesHommes": undefined,
+  },
+  "indicateurDeux": Object {
+    "formValidated": "None",
+    "presenceAugmentation": true,
+    "tauxAugmentation": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxAugmentationFemmes": undefined,
+        "tauxAugmentationHommes": undefined,
+      },
+    ],
+  },
+  "indicateurDeuxTrois": Object {
+    "formValidated": "None",
+    "nombreAugmentationPromotionFemmes": undefined,
+    "nombreAugmentationPromotionHommes": undefined,
+    "periodeDeclaration": "unePeriodeReference",
+    "presenceAugmentationPromotion": true,
+  },
+  "indicateurQuatre": Object {
+    "formValidated": "None",
+    "nombreSalarieesAugmentees": undefined,
+    "nombreSalarieesPeriodeAugmentation": undefined,
+    "presenceCongeMat": true,
+  },
+  "indicateurTrois": Object {
+    "formValidated": "None",
+    "presencePromotion": true,
+    "tauxPromotion": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tauxPromotionFemmes": undefined,
+        "tauxPromotionHommes": undefined,
+      },
+    ],
+  },
+  "indicateurUn": Object {
+    "coefficient": Array [],
+    "coefficientEffectifFormValidated": "None",
+    "coefficientGroupFormValidated": "None",
+    "csp": true,
+    "formValidated": "None",
+    "remunerationAnnuelle": Array [
+      Object {
+        "categorieSocioPro": 0,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 1,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 2,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+      Object {
+        "categorieSocioPro": 3,
+        "tranchesAges": Array [
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 0,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 1,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 2,
+          },
+          Object {
+            "remunerationAnnuelleBrutFemmes": undefined,
+            "remunerationAnnuelleBrutHommes": undefined,
+            "trancheAge": 3,
+          },
+        ],
+      },
+    ],
+  },
+  "informations": Object {
+    "debutPeriodeReference": "",
+    "finPeriodeReference": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "trancheEffectifs": "50 à 250",
+  },
+  "informationsComplementaires": Object {
+    "anneeDeclaration": "",
+    "dateConsultationCSE": "",
+    "formValidated": "None",
+  },
+  "informationsDeclarant": Object {
+    "adresse": "",
+    "codePostal": "",
+    "commune": "",
+    "departement": "",
+    "formValidated": "None",
+    "nom": "",
+    "prenom": "",
+    "region": "",
+    "tel": "",
+  },
+  "informationsEntreprise": Object {
+    "adresse": "",
+    "codeNaf": "",
+    "formValidated": "None",
+    "nomEntreprise": "",
+    "siren": "",
+  },
+}
+`;
+
+exports[`validateDeclaration nothing undefined state 1`] = `undefined`;
+
 exports[`validateEffectif None with csp false invalid complete validate state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
+    "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -12954,33 +14554,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
-    "formValidated": "None",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "Valid",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "Valid",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "Valid",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateEffectif None with csp false stateCompleteAndValidateCoef 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
+    "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "Valid",
     "nombreSalaries": Array [
@@ -13307,33 +14913,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
-    "formValidated": "None",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "Valid",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "Valid",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "Valid",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateEffectif None with csp true invalid complete validate state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
+    "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -13660,33 +15272,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
-    "formValidated": "None",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "Valid",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "Valid",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "Valid",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateEffectif Valid change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "Valid",
     "nombreSalaries": Array [
@@ -14013,33 +15631,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateEffectif Valid change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "Valid",
     "nombreSalaries": Array [
@@ -14361,6 +15985,12 @@ exports[`validateEffectif Valid nothing undefined state 1`] = `undefined`;
 
 exports[`validateIndicateurCinq change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -14687,33 +16317,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurCinq change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -15035,6 +16671,12 @@ exports[`validateIndicateurCinq nothing undefined state 1`] = `undefined`;
 
 exports[`validateIndicateurDeux change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -15361,33 +17003,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurDeux change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -15709,6 +17357,12 @@ exports[`validateIndicateurDeux nothing undefined state 1`] = `undefined`;
 
 exports[`validateIndicateurDeuxTrois change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -16035,33 +17689,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurDeuxTrois change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -16383,6 +18043,12 @@ exports[`validateIndicateurDeuxTrois nothing undefined state 1`] = `undefined`;
 
 exports[`validateIndicateurQuatre change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -16709,33 +18375,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurQuatre change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -17057,6 +18729,12 @@ exports[`validateIndicateurQuatre nothing undefined state 1`] = `undefined`;
 
 exports[`validateIndicateurTrois change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -17383,33 +19061,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurTrois change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -17731,6 +19415,12 @@ exports[`validateIndicateurTrois nothing undefined state 1`] = `undefined`;
 
 exports[`validateIndicateurUn change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -18057,33 +19747,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurUn change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -18405,6 +20101,12 @@ exports[`validateIndicateurUn nothing undefined state 1`] = `undefined`;
 
 exports[`validateIndicateurUnCoefEffectif None invalid complete validate state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
+    "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "Valid",
     "nombreSalaries": Array [
@@ -18731,33 +20433,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
-    "formValidated": "None",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "Valid",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "Valid",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "Valid",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurUnCoefEffectif Valid change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -19084,33 +20792,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurUnCoefEffectif Valid change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -19432,6 +21146,12 @@ exports[`validateIndicateurUnCoefEffectif Valid nothing undefined state 1`] = `u
 
 exports[`validateIndicateurUnCoefGroup None invalid complete validate state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
+    "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "Valid",
     "nombreSalaries": Array [
@@ -19758,33 +21478,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
-    "formValidated": "None",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
+    "formValidated": "Valid",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
+    "formValidated": "Valid",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
+    "formValidated": "Valid",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurUnCoefGroup Valid change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -20111,33 +21837,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateIndicateurUnCoefGroup Valid change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -20459,6 +22191,12 @@ exports[`validateIndicateurUnCoefGroup Valid nothing undefined state 1`] = `unde
 
 exports[`validateInformationsComplementaires change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -20785,33 +22523,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "Valid",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateInformationsComplementaires change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -21133,6 +22877,12 @@ exports[`validateInformationsComplementaires nothing undefined state 1`] = `unde
 
 exports[`validateInformationsDeclarant change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -21459,33 +23209,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "Valid",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateInformationsDeclarant change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -21807,6 +23563,12 @@ exports[`validateInformationsDeclarant nothing undefined state 1`] = `undefined`
 
 exports[`validateInformationsEntreprise change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -22133,33 +23895,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "Valid",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateInformationsEntreprise change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -22481,6 +24249,12 @@ exports[`validateInformationsEntreprise nothing undefined state 1`] = `undefined
 
 exports[`validateInformationsSimulation change complete state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "01/02/2020",
+    "formValidated": "None",
+    "lienPublication": "https://example.com",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
@@ -22807,33 +24581,39 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
-    "dateConsultationCSE": "",
+    "anneeDeclaration": "2020",
+    "dateConsultationCSE": "01/02/2019",
     "formValidated": "None",
   },
   "informationsDeclarant": Object {
-    "adresse": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
+    "adresse": "30 rue des alouettes",
+    "codePostal": "12345",
+    "commune": "Trifouilly",
+    "departement": "Drôme",
     "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "region": "",
-    "tel": "",
+    "nom": "Daffy",
+    "prenom": "Duck",
+    "region": "Auverge Rhône Alpes",
+    "tel": "0123456789",
   },
   "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
+    "adresse": "30 rue des alouettes",
+    "codeNaf": "5678",
     "formValidated": "None",
-    "nomEntreprise": "",
-    "siren": "",
+    "nomEntreprise": "acme",
+    "siren": "1234",
   },
 }
 `;
 
 exports[`validateInformationsSimulation change default state 1`] = `
 Object {
+  "declaration": Object {
+    "dateDeclaration": "",
+    "datePublication": "",
+    "formValidated": "None",
+    "lienPublication": "",
+  },
   "effectif": Object {
     "formValidated": "None",
     "nombreSalaries": Array [
