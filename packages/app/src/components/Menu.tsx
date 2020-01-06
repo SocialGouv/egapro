@@ -180,6 +180,10 @@ function Menu({
                 to={`/simulateur/${code}/informations-complementaires`}
                 title="informations complémentaires"
               />
+              <CustomNavLink
+                to={`/simulateur/${code}/declaration`}
+                title="déclaration"
+              />
             </div>
           )}
         />

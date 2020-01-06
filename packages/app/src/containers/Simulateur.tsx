@@ -12,8 +12,9 @@ import { useDebounceEffect } from "../utils/hooks";
 import ActivityIndicator from "../components/ActivityIndicator";
 import ErrorMessage from "../components/ErrorMessage";
 
-import HomeSimulateur from "../views/HomeSimulateur";
+import Declaration from "../views/Declaration";
 import Effectif from "../views/Effectif";
+import HomeSimulateur from "../views/HomeSimulateur";
 import IndicateurUn from "../views/Indicateur1";
 import IndicateurDeux from "../views/Indicateur2";
 import IndicateurTrois from "../views/Indicateur3";
@@ -169,6 +170,12 @@ function Simulateur({ code, state, dispatch }: Props) {
             state={state}
             dispatch={dispatch}
           />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/declaration"
+        render={props => (
+          <Declaration {...props} state={state} dispatch={dispatch} />
         )}
       />
     </Switch>

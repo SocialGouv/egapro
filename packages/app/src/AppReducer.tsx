@@ -1,4 +1,5 @@
 import deepmerge from "deepmerge";
+import { format } from "date-fns";
 import {
   AppState,
   ActionType,
@@ -132,6 +133,12 @@ const defaultState: AppState = {
     formValidated: "None",
     dateConsultationCSE: "",
     anneeDeclaration: ""
+  },
+  declaration: {
+    formValidated: "None",
+    dateDeclaration: "",
+    datePublication: "",
+    lienPublication: ""
   }
 };
 
@@ -210,7 +217,14 @@ function AppReducer(
                   ...state.informationsComplementaires,
                   formValidated: "Invalid"
                 }
-              : state.informationsComplementaires
+              : state.informationsComplementaires,
+          declaration:
+            state.declaration.formValidated === "Valid"
+              ? {
+                  ...state.declaration,
+                  formValidated: "Invalid"
+                }
+              : state.declaration
         };
       }
       return {
@@ -508,6 +522,30 @@ function AppReducer(
         ...state,
         informationsComplementaires: {
           ...state.informationsComplementaires,
+          formValidated: action.valid
+        }
+      };
+    }
+    case "updateDeclaration": {
+      return {
+        ...state,
+        declaration: {
+          ...state.declaration,
+          ...action.data
+        }
+      };
+    }
+    case "validateDeclaration": {
+      const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm");
+      return {
+        ...state,
+        declaration: {
+          ...state.declaration,
+          dateDeclaration:
+            // Automatically set the "dateDeclaration" to now.
+            action.valid === "Valid"
+              ? dateDeclaration
+              : state.declaration.dateDeclaration,
           formValidated: action.valid
         }
       };
