@@ -64,6 +64,11 @@ export type AppState = {
     codePostal: string;
     commune: string;
   };
+  informationsComplementaires: {
+    formValidated: FormState;
+    dateConsultationCSE: string;
+    anneeDeclaration: string;
+  };
 };
 
 export type PeriodeDeclaration =
@@ -185,6 +190,14 @@ export type ActionType =
   | {
       type: "validateInformationsDeclarant";
       valid: FormState;
+    }
+  | {
+      type: "updateInformationsComplementaires";
+      data: ActionInformationsComplementairesData;
+    }
+  | {
+      type: "validateInformationsComplementaires";
+      valid: FormState;
     };
 
 export type ActionInformationsSimulationData = {
@@ -250,6 +263,13 @@ export type ActionIndicateurCinqData = {
   nombreSalariesFemmes: number | undefined;
 };
 
+export type ActionInformationsEntrepriseData = {
+  nomEntreprise: string;
+  siren: string;
+  codeNaf: string;
+  adresse: string;
+};
+
 export type ActionInformationsDeclarantData = {
   nom: string;
   prenom: string;
@@ -261,11 +281,9 @@ export type ActionInformationsDeclarantData = {
   commune: string;
 };
 
-export type ActionInformationsEntrepriseData = {
-  nomEntreprise: string;
-  siren: string;
-  codeNaf: string;
-  adresse: string;
+export type ActionInformationsComplementairesData = {
+  dateConsultationCSE: string;
+  anneeDeclaration: string;
 };
 
 ////

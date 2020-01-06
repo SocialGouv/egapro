@@ -110,6 +110,13 @@ const defaultState: AppState = {
     nombreSalariesHommes: undefined,
     nombreSalariesFemmes: undefined
   },
+  informationsEntreprise: {
+    formValidated: "None",
+    nomEntreprise: "",
+    siren: "",
+    codeNaf: "",
+    adresse: ""
+  },
   informationsDeclarant: {
     formValidated: "None",
     nom: "",
@@ -121,12 +128,10 @@ const defaultState: AppState = {
     codePostal: "",
     commune: ""
   },
-  informationsEntreprise: {
+  informationsComplementaires: {
     formValidated: "None",
-    nomEntreprise: "",
-    siren: "",
-    codeNaf: "",
-    adresse: ""
+    dateConsultationCSE: "",
+    anneeDeclaration: ""
   }
 };
 
@@ -191,14 +196,21 @@ function AppReducer(
             state.indicateurCinq.formValidated === "Valid"
               ? { ...state.indicateurCinq, formValidated: "Invalid" }
               : state.indicateurCinq,
+          informationsEntreprise:
+            state.informationsEntreprise.formValidated === "Valid"
+              ? { ...state.informationsEntreprise, formValidated: "Invalid" }
+              : state.informationsEntreprise,
           informationsDeclarant:
             state.informationsDeclarant.formValidated === "Valid"
               ? { ...state.informationsDeclarant, formValidated: "Invalid" }
               : state.informationsDeclarant,
-          informationsEntreprise:
-            state.informationsEntreprise.formValidated === "Valid"
-              ? { ...state.informationsEntreprise, formValidated: "Invalid" }
-              : state.informationsEntreprise
+          informationsComplementaires:
+            state.informationsComplementaires.formValidated === "Valid"
+              ? {
+                  ...state.informationsComplementaires,
+                  formValidated: "Invalid"
+                }
+              : state.informationsComplementaires
         };
       }
       return {
@@ -446,6 +458,24 @@ function AppReducer(
         }
       };
     }
+    case "updateInformationsEntreprise": {
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
+          ...action.data
+        }
+      };
+    }
+    case "validateInformationsEntreprise": {
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
+          formValidated: action.valid
+        }
+      };
+    }
     case "updateInformationsDeclarant": {
       return {
         ...state,
@@ -464,20 +494,20 @@ function AppReducer(
         }
       };
     }
-    case "updateInformationsEntreprise": {
+    case "updateInformationsComplementaires": {
       return {
         ...state,
-        informationsEntreprise: {
-          ...state.informationsEntreprise,
+        informationsComplementaires: {
+          ...state.informationsComplementaires,
           ...action.data
         }
       };
     }
-    case "validateInformationsEntreprise": {
+    case "validateInformationsComplementaires": {
       return {
         ...state,
-        informationsEntreprise: {
-          ...state.informationsEntreprise,
+        informationsComplementaires: {
+          ...state.informationsComplementaires,
           formValidated: action.valid
         }
       };
