@@ -401,6 +401,46 @@ const actionUpdateIndicateurCinq = {
   }
 };
 
+const actionUpdateInformationsEntreprise = {
+  type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
+  data: {
+    nomEntreprise: "acme",
+    siren: "1234",
+    codeNaf: "5678",
+    adresse: "30 rue des alouettes"
+  }
+};
+
+const actionUpdateInformationsDeclarant = {
+  type: "updateInformationsDeclarant" as "updateInformationsDeclarant",
+  data: {
+    nom: "Daffy",
+    prenom: "Duck",
+    tel: "0123456789",
+    region: "Auverge Rhône Alpes",
+    departement: "Drôme",
+    adresse: "30 rue des alouettes",
+    codePostal: "12345",
+    commune: "Trifouilly"
+  }
+};
+
+const actionUpdateInformationsComplementaires = {
+  type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
+  data: {
+    dateConsultationCSE: "01/02/2019",
+    anneeDeclaration: "2020"
+  }
+};
+
+const actionUpdateDeclaration = {
+  type: "updateDeclaration" as "updateDeclaration",
+  data: {
+    datePublication: "01/02/2020",
+    lienPublication: "https://example.com"
+  }
+};
+
 // fast pipe, I miss you in JS…
 const stateDefault = AppReducer(
   AppReducer(
@@ -414,30 +454,42 @@ const stateDefault = AppReducer(
                   AppReducer(
                     AppReducer(
                       AppReducer(
-                        AppReducer(undefined, actionInitiateState),
-                        actionUpdateInformationsSimulation
+                        AppReducer(
+                          AppReducer(
+                            AppReducer(
+                              AppReducer(
+                                AppReducer(undefined, actionInitiateState),
+                                actionUpdateInformationsSimulation
+                              ),
+                              actionUpdateEffectif
+                            ),
+                            actionUpdateIndicateurUnCsp
+                          ),
+                          actionUpdateIndicateurUnCoefAddGroup
+                        ),
+                        actionUpdateIndicateurUnCoefName
                       ),
-                      actionUpdateEffectif
+                      actionUpdateIndicateurUnCoefNombreSalaries
                     ),
-                    actionUpdateIndicateurUnCsp
+                    actionUpdateIndicateurUnCoefRemuneration
                   ),
-                  actionUpdateIndicateurUnCoefAddGroup
+                  actionUpdateIndicateurDeux
                 ),
-                actionUpdateIndicateurUnCoefName
+                actionUpdateIndicateurTrois
               ),
-              actionUpdateIndicateurUnCoefNombreSalaries
+              actionUpdateIndicateurDeuxTrois
             ),
-            actionUpdateIndicateurUnCoefRemuneration
+            actionUpdateIndicateurQuatre
           ),
-          actionUpdateIndicateurDeux
+          actionUpdateIndicateurCinq
         ),
-        actionUpdateIndicateurTrois
+        actionUpdateInformationsEntreprise
       ),
-      actionUpdateIndicateurDeuxTrois
+      actionUpdateInformationsDeclarant
     ),
-    actionUpdateIndicateurQuatre
+    actionUpdateInformationsComplementaires
   ),
-  actionUpdateIndicateurCinq
+  actionUpdateDeclaration
 );
 
 export default stateDefault;

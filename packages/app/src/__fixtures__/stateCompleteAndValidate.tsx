@@ -53,7 +53,31 @@ const actionValidateIndicateurCinq = {
   valid: "Valid" as FormState
 };
 
-// fast pipe, I miss you in JS…
+const actionValidateInformationsEntreprise = {
+  type: "validateInformationsEntreprise" as "validateInformationsEntreprise",
+  valid: "Valid" as FormState
+};
+
+const actionValidateInformationsDeclarant = {
+  type: "validateInformationsDeclarant" as "validateInformationsDeclarant",
+  valid: "Valid" as FormState
+};
+
+const actionValidateInformationsComplementaires = {
+  type: "validateInformationsComplementaires" as "validateInformationsComplementaires",
+  valid: "Valid" as FormState
+};
+
+const actionValidateDeclaration = {
+  type: "validateDeclaration" as "validateDeclaration",
+  valid: "Valid" as FormState
+};
+
+// Mock the Date for tests
+const realDate = global.Date;
+// @ts-ignore
+global.Date = jest.fn(() => new realDate(1578393480399));
+
 const stateDefault = AppReducer(
   AppReducer(
     AppReducer(
@@ -64,26 +88,41 @@ const stateDefault = AppReducer(
               AppReducer(
                 AppReducer(
                   AppReducer(
-                    stateComplete,
-                    actionValidateInformationsSimulation
+                    AppReducer(
+                      AppReducer(
+                        AppReducer(
+                          AppReducer(
+                            stateComplete,
+                            actionValidateInformationsSimulation
+                          ),
+                          actionValidateEffectif
+                        ),
+                        actionValidateIndicateurUnCoefGroup
+                      ),
+                      actionValidateIndicateurUnCoefEffectif
+                    ),
+                    actionValidateIndicateurUn
                   ),
-                  actionValidateEffectif
+                  actionValidateIndicateurDeux
                 ),
-                actionValidateIndicateurUnCoefGroup
+                actionValidateIndicateurTrois
               ),
-              actionValidateIndicateurUnCoefEffectif
+              actionValidateIndicateurDeuxTrois
             ),
-            actionValidateIndicateurUn
+            actionValidateIndicateurQuatre
           ),
-          actionValidateIndicateurDeux
+          actionValidateIndicateurCinq
         ),
-        actionValidateIndicateurTrois
+        actionValidateInformationsEntreprise
       ),
-      actionValidateIndicateurDeuxTrois
+      actionValidateInformationsDeclarant
     ),
-    actionValidateIndicateurQuatre
+    actionValidateInformationsComplementaires
   ),
-  actionValidateIndicateurCinq
+  actionValidateDeclaration
 );
+
+// Restore the Date
+global.Date = realDate;
 
 export default stateDefault;

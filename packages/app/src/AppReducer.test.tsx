@@ -14,6 +14,19 @@ import stateCompleteAndValidate from "./__fixtures__/stateCompleteAndValidate";
 
 const stateUndefined = undefined;
 
+const realDate = global.Date;
+
+// Make sure we always get the same "new Date()" value for the AppReducer's
+// auto-calculated `dateDeclaration` in `validateDeclaration`
+beforeEach(() => {
+  // @ts-ignore
+  global.Date = jest.fn(() => new realDate(1578393480399));
+});
+
+afterEach(() => {
+  global.Date = realDate;
+});
+
 //////////////////
 // STATE /////////
 //////////////////
@@ -727,6 +740,28 @@ describe("updateInformationsComplementaires", () => {
   });
 });
 
+describe("updateDeclaration", () => {
+  const action = {
+    type: "updateDeclaration" as "updateDeclaration",
+    data: {
+      datePublication: "01/02/2020",
+      lienPublication: "https://example.com"
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
 //////////////////
 // VALIDATE //////
 //////////////////
@@ -1028,6 +1063,25 @@ describe("validateInformationsDeclarant", () => {
 describe("validateInformationsComplementaires", () => {
   const action = {
     type: "validateInformationsComplementaires" as "validateInformationsComplementaires",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("validateDeclaration", () => {
+  const action = {
+    type: "validateDeclaration" as "validateDeclaration",
     valid: "Valid" as FormState
   };
 
