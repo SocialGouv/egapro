@@ -407,7 +407,11 @@ const actionUpdateInformationsEntreprise = {
     nomEntreprise: "acme",
     siren: "1234",
     codeNaf: "5678",
-    adresse: "30 rue des alouettes"
+    region: "Auverge Rhône Alpes",
+    departement: "Drôme",
+    adresse: "30 rue des alouettes",
+    codePostal: "12345",
+    commune: "Trifouilly"
   }
 };
 
@@ -416,12 +420,7 @@ const actionUpdateInformationsDeclarant = {
   data: {
     nom: "Daffy",
     prenom: "Duck",
-    tel: "0123456789",
-    region: "Auverge Rhône Alpes",
-    departement: "Drôme",
-    adresse: "30 rue des alouettes",
-    codePostal: "12345",
-    commune: "Trifouilly"
+    tel: "0123456789"
   }
 };
 

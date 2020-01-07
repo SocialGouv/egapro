@@ -51,18 +51,17 @@ export type AppState = {
     nomEntreprise: string;
     siren: string;
     codeNaf: string;
+    region: string;
+    departement: string;
     adresse: string;
+    codePostal: string;
+    commune: string;
   };
   informationsDeclarant: {
     formValidated: FormState;
     nom: string;
     prenom: string;
     tel: string;
-    region: string;
-    departement: string;
-    adresse: string;
-    codePostal: string;
-    commune: string;
   };
   informationsComplementaires: {
     formValidated: FormState;
@@ -281,18 +280,17 @@ export type ActionInformationsEntrepriseData = {
   nomEntreprise: string;
   siren: string;
   codeNaf: string;
+  region: string;
+  departement: string;
   adresse: string;
+  codePostal: string;
+  commune: string;
 };
 
 export type ActionInformationsDeclarantData = {
   nom: string;
   prenom: string;
   tel: string;
-  region: string;
-  departement: string;
-  adresse: string;
-  codePostal: string;
-  commune: string;
 };
 
 export type ActionInformationsComplementairesData = {
