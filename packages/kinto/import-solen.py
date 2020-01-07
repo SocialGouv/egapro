@@ -517,17 +517,15 @@ class KintoImporter(object):
             except KintoException as err:
                 printer.error(f"Impossible de créer la collection: {err}")
         if "schema" not in coll["data"]:
-            if not prompt(f"La collection {KINTO_COLLECTION} ne possède pas de schéma, voulez-vous l'ajouter ?", "non"):
-                printer.std("Commande annulée.")
-                exit(0)
-            try:
-                patch = BasicPatch(data={"schema": self.schema})
-                client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=patch)
-                printer.info("Le schéma de validation JSON a été ajouté à la collection.")
-            except (KintoException, TypeError, KeyError, ValueError) as err:
-                printer.error(f"Impossible d'ajouter le schéma de validation à la collection {KINTO_COLLECTION}:")
-                printer.error(err)
-                exit(1)
+            if prompt(f"La collection {KINTO_COLLECTION} ne possède pas de schéma, voulez-vous l'ajouter ?", "non"):
+                try:
+                    patch = BasicPatch(data={"schema": self.schema})
+                    client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=patch)
+                    printer.info("Le schéma de validation JSON a été ajouté à la collection.")
+                except (KintoException, TypeError, KeyError, ValueError) as err:
+                    printer.error(f"Impossible d'ajouter le schéma de validation à la collection {KINTO_COLLECTION}:")
+                    printer.error(err)
+                    exit(1)
         return client
 
     def add(self, record):
