@@ -18,6 +18,7 @@ interface Props extends RouteComponentProps {
 
 function MainScrollView({ children, state, location }: Props) {
   const layoutType = useLayoutType();
+  console.log("layout type", layoutType);
 
   const menu = (
     <Menu
@@ -45,6 +46,18 @@ function MainScrollView({ children, state, location }: Props) {
       }
       indicateurCinqFormValidated={
         state ? state.indicateurCinq.formValidated : "None"
+      }
+      informationsEntrepriseFormValidated={
+        state ? state.informationsEntreprise.formValidated : "None"
+      }
+      informationsDeclarantFormValidated={
+        state ? state.informationsDeclarant.formValidated : "None"
+      }
+      informationsComplementairesFormValidated={
+        state ? state.informationsComplementaires.formValidated : "None"
+      }
+      declarationFormValidated={
+        state ? state.declaration.formValidated : "None"
       }
     />
   );
