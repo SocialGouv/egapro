@@ -10,9 +10,7 @@ exports[`test state used for test before testing stateComplete 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -342,7 +340,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -368,9 +368,7 @@ exports[`test state used for test before testing stateCompleteAndValidate 1`] = 
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "01/02/2020",
     "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -700,7 +698,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -726,9 +726,7 @@ exports[`test state used for test before testing stateDefault 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -1024,7 +1022,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -1384,7 +1384,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -1708,7 +1710,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -1736,9 +1740,7 @@ exports[`updateEffectif change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2068,7 +2070,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -2094,9 +2098,7 @@ exports[`updateEffectif change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2392,7 +2394,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -2420,9 +2424,7 @@ exports[`updateIndicateurCinq change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2752,7 +2754,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -2778,9 +2782,7 @@ exports[`updateIndicateurCinq change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3076,7 +3078,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -3104,9 +3108,7 @@ exports[`updateIndicateurDeux change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3436,7 +3438,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -3462,9 +3466,7 @@ exports[`updateIndicateurDeux change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3760,7 +3762,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -3788,9 +3792,7 @@ exports[`updateIndicateurDeuxTrois change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4120,7 +4122,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -4146,9 +4150,7 @@ exports[`updateIndicateurDeuxTrois change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4444,7 +4446,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -4472,9 +4476,7 @@ exports[`updateIndicateurQuatre change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4804,7 +4806,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -4830,9 +4834,7 @@ exports[`updateIndicateurQuatre change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5128,7 +5130,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -5156,9 +5160,7 @@ exports[`updateIndicateurTrois change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5488,7 +5490,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -5514,9 +5518,7 @@ exports[`updateIndicateurTrois change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5812,7 +5814,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -5840,9 +5844,7 @@ exports[`updateIndicateurUnCoef Array<{name: string}> change complete state 1`] 
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6172,7 +6174,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -6198,9 +6202,7 @@ exports[`updateIndicateurUnCoef Array<{name: string}> change default state 1`] =
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6530,7 +6532,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -6558,9 +6562,7 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffe
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6890,7 +6892,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -6916,9 +6920,7 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffe
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7248,7 +7250,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -7276,9 +7280,7 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndi
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7608,7 +7610,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -7634,9 +7638,7 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndi
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7966,7 +7968,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -7994,9 +7998,7 @@ exports[`updateIndicateurUnCoefAddGroup change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8359,7 +8361,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -8385,9 +8389,7 @@ exports[`updateIndicateurUnCoefAddGroup change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8717,7 +8719,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -8745,9 +8749,7 @@ exports[`updateIndicateurUnCoefDeleteGroup change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9043,7 +9045,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -9069,9 +9073,7 @@ exports[`updateIndicateurUnCoefDeleteGroup change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9367,7 +9369,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -9395,9 +9399,7 @@ exports[`updateIndicateurUnCsp change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9727,7 +9729,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -9753,9 +9757,7 @@ exports[`updateIndicateurUnCsp change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10051,7 +10053,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -10079,9 +10083,7 @@ exports[`updateIndicateurUnType change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10411,7 +10413,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -10437,9 +10441,7 @@ exports[`updateIndicateurUnType change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10735,7 +10737,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -10763,9 +10767,7 @@ exports[`updateInformationsComplementaires change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -11095,7 +11097,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2018",
     "dateConsultationCSE": "01/02/2017",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -11121,9 +11125,7 @@ exports[`updateInformationsComplementaires change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -11419,7 +11421,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2018",
     "dateConsultationCSE": "01/02/2017",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -11447,9 +11451,7 @@ exports[`updateInformationsDeclarant change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -11779,7 +11781,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "adresse": "2 rue du mérou",
@@ -11810,9 +11814,7 @@ exports[`updateInformationsDeclarant change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12108,7 +12110,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "adresse": "2 rue du mérou",
@@ -12141,9 +12145,7 @@ exports[`updateInformationsEntreprise change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12473,7 +12475,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -12499,9 +12503,7 @@ exports[`updateInformationsEntreprise change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12797,7 +12799,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -12825,9 +12829,7 @@ exports[`updateInformationsSimulation change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13157,7 +13159,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -13183,9 +13187,7 @@ exports[`updateInformationsSimulation change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13481,7 +13483,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -13509,9 +13513,7 @@ exports[`validateDeclaration change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "01/02/2020",
     "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13841,7 +13843,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -13867,9 +13871,7 @@ exports[`validateDeclaration change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "",
     "formValidated": "Valid",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14165,7 +14167,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -14193,9 +14197,7 @@ exports[`validateEffectif None with csp false invalid complete validate state 1`
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "01/02/2020",
     "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14525,7 +14527,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -14551,9 +14555,7 @@ exports[`validateEffectif None with csp false stateCompleteAndValidateCoef 1`] =
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "01/02/2020",
     "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -14883,7 +14885,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -14909,9 +14913,7 @@ exports[`validateEffectif None with csp true invalid complete validate state 1`]
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "01/02/2020",
     "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -15241,7 +15243,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -15267,9 +15271,7 @@ exports[`validateEffectif Valid change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -15599,7 +15601,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -15625,9 +15629,7 @@ exports[`validateEffectif Valid change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -15923,7 +15925,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -15951,9 +15955,7 @@ exports[`validateIndicateurCinq change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -16283,7 +16285,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -16309,9 +16313,7 @@ exports[`validateIndicateurCinq change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -16607,7 +16609,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -16635,9 +16639,7 @@ exports[`validateIndicateurDeux change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -16967,7 +16969,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -16993,9 +16997,7 @@ exports[`validateIndicateurDeux change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17291,7 +17293,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -17319,9 +17323,7 @@ exports[`validateIndicateurDeuxTrois change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17651,7 +17653,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -17677,9 +17681,7 @@ exports[`validateIndicateurDeuxTrois change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17975,7 +17977,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -18003,9 +18007,7 @@ exports[`validateIndicateurQuatre change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18335,7 +18337,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -18361,9 +18365,7 @@ exports[`validateIndicateurQuatre change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18659,7 +18661,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -18687,9 +18691,7 @@ exports[`validateIndicateurTrois change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19019,7 +19021,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -19045,9 +19049,7 @@ exports[`validateIndicateurTrois change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19343,7 +19345,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -19371,9 +19375,7 @@ exports[`validateIndicateurUn change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19703,7 +19705,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -19729,9 +19733,7 @@ exports[`validateIndicateurUn change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -20027,7 +20029,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -20055,9 +20059,7 @@ exports[`validateIndicateurUnCoefEffectif None invalid complete validate state 1
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "01/02/2020",
     "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -20387,7 +20389,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -20413,9 +20417,7 @@ exports[`validateIndicateurUnCoefEffectif Valid change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -20745,7 +20747,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -20771,9 +20775,7 @@ exports[`validateIndicateurUnCoefEffectif Valid change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -21069,7 +21071,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -21097,9 +21101,7 @@ exports[`validateIndicateurUnCoefGroup None invalid complete validate state 1`] 
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "datePublication": "01/02/2020",
     "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -21429,7 +21431,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -21455,9 +21459,7 @@ exports[`validateIndicateurUnCoefGroup Valid change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -21787,7 +21789,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -21813,9 +21817,7 @@ exports[`validateIndicateurUnCoefGroup Valid change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -22111,7 +22113,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -22139,9 +22143,7 @@ exports[`validateInformationsComplementaires change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -22471,7 +22473,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -22497,9 +22501,7 @@ exports[`validateInformationsComplementaires change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -22795,7 +22797,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "Valid",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -22823,9 +22827,7 @@ exports[`validateInformationsDeclarant change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -23155,7 +23157,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -23181,9 +23185,7 @@ exports[`validateInformationsDeclarant change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -23479,7 +23481,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "Valid",
@@ -23507,9 +23511,7 @@ exports[`validateInformationsEntreprise change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -23839,7 +23841,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -23865,9 +23869,7 @@ exports[`validateInformationsEntreprise change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24163,7 +24165,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -24191,9 +24195,7 @@ exports[`validateInformationsSimulation change complete state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "01/02/2020",
     "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24523,7 +24525,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "2020",
     "dateConsultationCSE": "01/02/2019",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",
@@ -24549,9 +24553,7 @@ exports[`validateInformationsSimulation change default state 1`] = `
 Object {
   "declaration": Object {
     "dateDeclaration": "",
-    "datePublication": "",
     "formValidated": "None",
-    "lienPublication": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24847,7 +24849,9 @@ Object {
   "informationsComplementaires": Object {
     "anneeDeclaration": "",
     "dateConsultationCSE": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "formValidated": "None",

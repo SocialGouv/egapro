@@ -67,12 +67,12 @@ export type AppState = {
     formValidated: FormState;
     dateConsultationCSE: string;
     anneeDeclaration: string;
+    datePublication: string;
+    lienPublication: string;
   };
   declaration: {
     formValidated: FormState;
     dateDeclaration: string;
-    datePublication: string;
-    lienPublication: string;
   };
 };
 
@@ -296,12 +296,11 @@ export type ActionInformationsDeclarantData = {
 export type ActionInformationsComplementairesData = {
   dateConsultationCSE: string;
   anneeDeclaration: string;
-};
-
-export type ActionDeclarationData = {
   datePublication: string;
   lienPublication: string;
 };
+
+export type ActionDeclarationData = {};
 
 ////
 

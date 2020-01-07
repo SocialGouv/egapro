@@ -131,13 +131,13 @@ const defaultState: AppState = {
   informationsComplementaires: {
     formValidated: "None",
     dateConsultationCSE: "",
-    anneeDeclaration: ""
+    anneeDeclaration: "",
+    datePublication: "",
+    lienPublication: ""
   },
   declaration: {
     formValidated: "None",
-    dateDeclaration: "",
-    datePublication: "",
-    lienPublication: ""
+    dateDeclaration: ""
   }
 };
 
