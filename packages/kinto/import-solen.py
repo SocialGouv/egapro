@@ -176,7 +176,7 @@ class RowProcessor(object):
     def importEntreprisesUES(self):
         uesData = self.get("__uesdata__")
         if uesData is None:
-            raise RuntimeError(f"Données UES absentes.")
+            raise RuntimeError(f"Données UES absentes pour le siren {row['SIREN_UES']}.")
         # Note: toutes les cellules pour UES001 sont vides, nous commençons à UES002
         columns2_99 = ["UES{:02d}".format(x) for x in range(2, 100)]
         columns100_500 = ["UES{:03d}".format(x) for x in range(100, 501)]

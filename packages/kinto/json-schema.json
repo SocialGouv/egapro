@@ -296,12 +296,7 @@
             "nom": { "type": "string" },
             "prenom": { "type": "string" },
             "email": { "type": "string" },
-            "tel": { "type": "string" },
-            "region": { "type": "string" },
-            "departement": { "type": "string" },
-            "adresse": { "type": "string" },
-            "codePostal": { "type": "string" },
-            "commune": { "type": "string" }
+            "tel": { "type": "string" }
           }
         },
         "informationsEntreprise": {
@@ -313,6 +308,11 @@
               "enum": ["Entreprise", "UES"]
             },
             "nomEntreprise": { "type": "string" },
+            "region": { "type": "string" },
+            "departement": { "type": "string" },
+            "adresse": { "type": "string" },
+            "codePostal": { "type": "string" },
+            "commune": { "type": "string" },
             "siren": { "type": "string" },
             "codeNaf": { "type": "string" },
             "nomUES": { "type": "string" },
@@ -323,7 +323,6 @@
             "entreprises": {
               "type": "array",
               "minItems": 2,
-              "maxItems": 500,
               "items": {
                 "type": "object",
                 "additionalProperties": false,
