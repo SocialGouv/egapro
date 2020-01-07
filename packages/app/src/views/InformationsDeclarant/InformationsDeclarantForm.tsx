@@ -33,15 +33,18 @@ const validate = (value: string) => {
 const validateForm = ({
   nom,
   prenom,
-  tel
+  tel,
+  email
 }: {
   nom: string;
   prenom: string;
   tel: string;
+  email: string;
 }) => ({
   nom: validate(nom),
   prenom: validate(prenom),
-  tel: validate(tel)
+  tel: validate(tel),
+  email: validate(email)
 });
 
 interface Props {
@@ -60,16 +63,18 @@ function InformationsDeclarantForm({
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
     prenom: informationsDeclarant.prenom,
-    tel: informationsDeclarant.tel
+    tel: informationsDeclarant.tel,
+    email: informationsDeclarant.email
   };
 
   const saveForm = (formData: any) => {
-    const { nom, prenom, tel } = formData;
+    const { nom, prenom, tel, email } = formData;
 
     updateInformationsDeclarant({
       nom,
       prenom,
-      tel
+      tel,
+      email
     });
   };
 
@@ -108,6 +113,12 @@ function InformationsDeclarantForm({
             label="Numéro de téléphone"
             fieldName="tel"
             errorText="le numéro de téléphone n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Email"
+            fieldName="email"
+            errorText="l'email n’est pas valide"
             readOnly={readOnly}
           />
           {readOnly ? (
