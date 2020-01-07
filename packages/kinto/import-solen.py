@@ -128,7 +128,6 @@ class RowProcessor(object):
     def importPeriodeDeReference(self):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
         annee_indicateur = self.importIntField("annee_indicateurs", "informationsComplementaires/anneeDeclaration")
-        self.importField("structure", "informationsComplementaires/structure")
 
         # Compatibilité egapro de la tranche d'effectifs
         tranche = self.get("tranche_effectif")
@@ -192,12 +191,14 @@ class RowProcessor(object):
 
     def importUES(self):
         if self.get("nom_UES") is None:
-            return
-        # Import des données de l'UES
-        self.importField("nom_UES", "informationsEntreprise/nomUES")
-        self.importField("nom_ets_UES", "informationsEntreprise/nomEntrepriseUES")
-        self.importField("SIREN_UES", "informationsEntreprise/sirenUES")
-        self.importEntreprisesUES()
+            self.set("informationsEntreprise/structure", "Entreprise")
+        else:
+            self.set("informationsEntreprise/structure", "UES")
+            # Import des données de l'UES
+            self.importField("nom_UES", "informationsEntreprise/nomUES")
+            self.importField("nom_ets_UES", "informationsEntreprise/nomEntrepriseUES")
+            self.importField("SIREN_UES", "informationsEntreprise/sirenUES")
+            self.importEntreprisesUES()
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES

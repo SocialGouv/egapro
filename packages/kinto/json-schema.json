@@ -308,6 +308,10 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "structure": {
+              "type": "string",
+              "enum": ["Entreprise", "UES"]
+            },
             "nomEntreprise": { "type": "string" },
             "siren": { "type": "string" },
             "codeNaf": { "type": "string" },
