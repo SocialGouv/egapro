@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Form, useField } from "react-final-form";
+import { Form } from "react-final-form";
 
 import {
   AppState,

@@ -8,7 +8,7 @@ import {
   ActionInformationsComplementairesData
 } from "../../globals";
 
-import { mustBeDate, required, mustBeNumber } from "../../utils/formHelpers";
+import { mustBeDate, required } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";

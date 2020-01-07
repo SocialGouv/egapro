@@ -11,7 +11,6 @@ import { useLayoutType } from "../components/GridContext";
 import { IconValid, IconInvalid } from "./Icons";
 import { useColumnsWidth } from "./GridContext";
 import { Fragment } from "react";
-import InformationsComplementaires from "../views/InformationsComplementaires";
 
 interface CustomNavLinkProps {
   title: string;
