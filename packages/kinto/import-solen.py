@@ -160,16 +160,16 @@ class RowProcessor(object):
         self.importField("Prénom", "informationsDeclarant/prenom")
         self.importField("e-mail_declarant", "informationsDeclarant/email")
         self.importField("telephone", "informationsDeclarant/tel")
-        self.importField("Reg", "informationsDeclarant/region")
-        self.importField("dpt", "informationsDeclarant/departement")
-        self.importField("Adr ets", "informationsDeclarant/adresse")
-        self.importField("CP", "informationsDeclarant/codePostal")
-        self.importField("Commune", "informationsDeclarant/commune")
 
     def importInformationsEntreprise(self):
         self.importField("RS_ets", "informationsEntreprise/nomEntreprise")
         self.importField("SIREN_ets", "informationsEntreprise/siren")
         self.importField("Code NAF", "informationsEntreprise/codeNaf")  # attention format
+        self.importField("Reg", "informationsEntreprise/region")
+        self.importField("dpt", "informationsEntreprise/departement")
+        self.importField("Adr ets", "informationsEntreprise/adresse")
+        self.importField("CP", "informationsEntreprise/codePostal")
+        self.importField("Commune", "informationsEntreprise/commune")
 
     def importEntreprisesUES(self):
         uesData = self.get("__uesdata__")
