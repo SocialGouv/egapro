@@ -17,7 +17,7 @@ $ python import-solen.py export-solen.xlsx
 
 ### Préparation des données
 
-Vous devez disposer d'un export Solen, généralement fourni au format Excel (ex. `Export DGT 20191224.xlsx`). C'est le chemin vers ce fichier qu'il faut passer à la ligne de commande.
+Vous devez disposer d'un export Solen, généralement fourni au format Excel fourni par la DGT (ex. `Export DGT 20191224.xlsx`), comportant deux feuillets, un avec les données, l'autre avec uniquement les données des UES. C'est le chemin vers ce fichier qu'il faut passer à la ligne de commande.
 
 ### Usage
 
