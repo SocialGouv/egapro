@@ -11,6 +11,7 @@ import { useLayoutType } from "../components/GridContext";
 import { IconValid, IconInvalid } from "./Icons";
 import { useColumnsWidth } from "./GridContext";
 import { Fragment } from "react";
+import InformationsComplementaires from "../views/InformationsComplementaires";
 
 interface CustomNavLinkProps {
   title: string;
@@ -70,6 +71,10 @@ interface Props {
   indicateurDeuxTroisFormValidated: FormState;
   indicateurQuatreFormValidated: FormState;
   indicateurCinqFormValidated: FormState;
+  informationsEntrepriseFormValidated: FormState;
+  informationsDeclarantFormValidated: FormState;
+  informationsComplementairesFormValidated: FormState;
+  declarationFormValidated: FormState;
 }
 
 function Menu({
@@ -81,7 +86,11 @@ function Menu({
   indicateurDeuxTroisFormValidated,
   indicateurTroisFormValidated,
   indicateurQuatreFormValidated,
-  indicateurCinqFormValidated
+  indicateurCinqFormValidated,
+  informationsEntrepriseFormValidated,
+  informationsDeclarantFormValidated,
+  informationsComplementairesFormValidated,
+  declarationFormValidated
 }: Props) {
   const width = useColumnsWidth(2);
   const layoutType = useLayoutType();
@@ -171,18 +180,22 @@ function Menu({
               <CustomNavLink
                 to={`/simulateur/${code}/informations-entreprise`}
                 title="informations Entreprise"
+                valid={informationsEntrepriseFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/informations-declarant`}
                 title="informations Déclarant"
+                valid={informationsDeclarantFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/informations-complementaires`}
                 title="informations complémentaires"
+                valid={informationsComplementairesFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/declaration`}
                 title="déclaration"
+                valid={declarationFormValidated}
               />
             </div>
           )}
