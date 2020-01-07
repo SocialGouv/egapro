@@ -10,6 +10,7 @@ import re
 import sys
 import tarfile
 
+from collections import OrderedDict
 from datetime import datetime, timedelta
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
@@ -445,26 +446,29 @@ class ExcelData(object):
         try:
             csvString = sheet.to_csv(float_format="%g")
             lines = [row for row in csv.DictReader(io.StringIO(csvString))]
-            return self.extractIds(lines)
+            return self.createDict(lines)
         except (AttributeError, KeyError, IndexError, TypeError, ValueError) as err:
             raise RuntimeError(f"Impossible de traiter la feuille de calcul {sheetName}: {err}")
 
-    def extractIds(self, source):
-        for index, row in enumerate(source):
+    def createDict(self, source):
+        dict = OrderedDict()
+        for row in source:
             solenId = row["URL d'impression du répondant"].replace(SOLEN_URL_PREFIX, "")
-            source[index]["id"] = solenId
-        return source
+            dict[solenId] = row
+            dict[solenId]["id"] = solenId
+        return dict
 
     def findUesById(self, id):
-        for row in self.ues:
-            if row["id"] == id:
-                return row
+        found = self.ues.get(id)
+        if not found:
+            printer.warn(f"Données UES non trouvées pour l'id {id}. Vérifiez la feuille {EXCEL_NOM_FEUILLE_UES}.")
+        return found
 
     def linkUes(self):
-        for index, row in enumerate(self.repondants):
+        for id, row in self.repondants.items():
             if row["structure"] == "Unité Economique et Sociale (UES)":
-                row["__uesdata__"] = self.findUesById(row["id"])
-                self.repondants[index] = row
+                row["__uesdata__"] = self.findUesById(id)
+                self.repondants[id] = row
 
     def getNbRepondants(self):
         return len(self.repondants)
@@ -548,13 +552,14 @@ def parse(args):
     except RuntimeError as err:
         printer.error(f"Erreur de traitement du fichier: {err}")
         exit(1)
-    nb_rows = len(excelData.repondants)
+    nb_rows = excelData.getNbRepondants()
     bar = Bar("Préparation des données", max=args.max if args.max is not None else nb_rows)
     kintoImporter = KintoImporter(validator.schema, truncate=args.init_collection, dryRun=args.dry_run)
     count_processed = 0
     count_imported = 0
     errors = []
-    for index, row in enumerate(excelData.repondants):
+    for index, key in enumerate(excelData.repondants):
+        row = excelData.repondants[key]
         lineno = index + 1
         if args.max and count_processed >= args.max:
             break
