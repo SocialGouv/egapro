@@ -21,6 +21,7 @@ from xlrd.biffh import XLRDError
 
 # TODO:
 # - exception perso pour les classes d'import
+# - empêcher l'import dans Kinto si tous les enregistrements ne valident pas
 
 # Configuration de l'import CSV
 CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
@@ -69,6 +70,16 @@ class RowProcessor(object):
             return self.set(path, True if not negate else False)
         elif self.get(csvFieldName) == "Non":
             return self.set(path, False if not negate else True)
+
+    def importDateField(self, csvFieldName, path):
+        date = self.get(csvFieldName)
+        if date is None:
+            return
+        try:
+            formatted = datetime.strptime(date, DATE_FORMAT_INPUT).strftime(DATE_FORMAT_OUTPUT)
+            return self.set(path, formatted)
+        except ValueError as err:
+            raise RuntimeError(f"Impossible de traiter la valeur date '{date}'.")
 
     def importFloatField(self, csvFieldName, path):
         return self.importField(csvFieldName, path, type=float)
@@ -170,7 +181,7 @@ class RowProcessor(object):
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES
-        self.importField("date_publ_niv > Valeur date", "declaration/datePublication")
+        self.importDateField("date_publ_niv > Valeur date", "declaration/datePublication")
         self.importField("site_internet_publ", "declaration/lienPublication")
 
     def setValeursTranche(self, niveau, path, index, fieldName, custom=False):
@@ -243,7 +254,7 @@ class RowProcessor(object):
         elif modalite == "nc":
             self.set("indicateurUn/autre", True)
             self.set("indicateurUn/nonCalculable", True)
-        self.importField("date_consult_CSE > Valeur date", "indicateurUn/dateConsultationCSE")
+        self.importDateField("date_consult_CSE > Valeur date", "indicateurUn/dateConsultationCSE")
         self.importIntField("nb_coef_niv", "indicateurUn/nombreCoefficients")
         self.importField("motif_non_calc_tab1", "indicateurUn/motifNonCalculable")
         self.importField("precision_am_tab1", "indicateurUn/motifNonCalculablePrecision")
@@ -366,6 +377,7 @@ class RowProcessor(object):
         self.importField("mesures_correction", "declaration/mesuresCorrection")
 
     def run(self, validate=False):
+        self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration")
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()
         self.importEntreprise()
