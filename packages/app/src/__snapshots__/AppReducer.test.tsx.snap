@@ -345,6 +345,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -703,6 +704,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -1027,6 +1029,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -1389,6 +1392,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -1715,6 +1719,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -2075,6 +2080,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -2399,6 +2405,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -2759,6 +2766,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -3083,6 +3091,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -3443,6 +3452,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -3767,6 +3777,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -4127,6 +4138,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -4451,6 +4463,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -4811,6 +4824,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -5135,6 +5149,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -5495,6 +5510,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -5819,6 +5835,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -6179,6 +6196,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -6537,6 +6555,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -6897,6 +6916,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -7255,6 +7275,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -7615,6 +7636,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -7973,6 +7995,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -8366,6 +8389,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -8724,6 +8748,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -9050,6 +9075,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -9374,6 +9400,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -9734,6 +9761,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -10058,6 +10086,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -10418,6 +10447,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -10742,6 +10772,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -11102,6 +11133,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -11426,6 +11458,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -11790,6 +11823,7 @@ Object {
     "codePostal": "34000",
     "commune": "Montpellier",
     "departement": "Hérault",
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Norris",
     "prenom": "Chuck",
@@ -12119,6 +12153,7 @@ Object {
     "codePostal": "34000",
     "commune": "Montpellier",
     "departement": "Hérault",
+    "email": "",
     "formValidated": "None",
     "nom": "Norris",
     "prenom": "Chuck",
@@ -12480,6 +12515,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -12804,6 +12840,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -13164,6 +13201,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -13488,6 +13526,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -13848,6 +13887,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -14172,6 +14212,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -14532,6 +14573,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -14890,6 +14932,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -15248,6 +15291,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -15606,6 +15650,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -15930,6 +15975,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -16290,6 +16336,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -16614,6 +16661,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -16974,6 +17022,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -17298,6 +17347,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -17658,6 +17708,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -17982,6 +18033,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -18342,6 +18394,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -18666,6 +18719,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -19026,6 +19080,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -19350,6 +19405,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -19710,6 +19766,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -20034,6 +20091,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -20394,6 +20452,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -20752,6 +20811,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -21076,6 +21136,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -21436,6 +21497,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -21794,6 +21856,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -22118,6 +22181,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -22478,6 +22542,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -22802,6 +22867,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -23162,6 +23228,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -23486,6 +23553,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "Valid",
     "nom": "",
     "prenom": "",
@@ -23846,6 +23914,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -24170,6 +24239,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",
@@ -24530,6 +24600,7 @@ Object {
     "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
+    "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
     "prenom": "Duck",
@@ -24854,6 +24925,7 @@ Object {
     "lienPublication": "",
   },
   "informationsDeclarant": Object {
+    "email": "",
     "formValidated": "None",
     "nom": "",
     "prenom": "",

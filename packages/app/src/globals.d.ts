@@ -62,6 +62,7 @@ export type AppState = {
     nom: string;
     prenom: string;
     tel: string;
+    email: string;
   };
   informationsComplementaires: {
     formValidated: FormState;
@@ -291,6 +292,7 @@ export type ActionInformationsDeclarantData = {
   nom: string;
   prenom: string;
   tel: string;
+  email: string;
 };
 
 export type ActionInformationsComplementairesData = {

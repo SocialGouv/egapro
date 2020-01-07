@@ -126,7 +126,8 @@ const defaultState: AppState = {
     formValidated: "None",
     nom: "",
     prenom: "",
-    tel: ""
+    tel: "",
+    email: ""
   },
   informationsComplementaires: {
     formValidated: "None",
