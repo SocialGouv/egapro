@@ -14,9 +14,8 @@ import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
-import Input, { hasFieldError } from "../../components/Input";
+import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import globalStyles from "../../utils/globalStyles";
 
 ///////////////////
 
@@ -34,30 +33,15 @@ const validate = (value: string) => {
 const validateForm = ({
   nom,
   prenom,
-  tel,
-  region,
-  departement,
-  adresse,
-  codePostal,
-  commune
+  tel
 }: {
   nom: string;
   prenom: string;
   tel: string;
-  region: string;
-  departement: string;
-  adresse: string;
-  codePostal: string;
-  commune: string;
 }) => ({
   nom: validate(nom),
   prenom: validate(prenom),
-  tel: validate(tel),
-  region: validate(region),
-  departement: validate(departement),
-  adresse: validate(adresse),
-  codePostal: validate(codePostal),
-  commune: validate(commune)
+  tel: validate(tel)
 });
 
 interface Props {
@@ -76,35 +60,16 @@ function InformationsDeclarantForm({
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
     prenom: informationsDeclarant.prenom,
-    tel: informationsDeclarant.tel,
-    region: informationsDeclarant.region,
-    departement: informationsDeclarant.departement,
-    adresse: informationsDeclarant.adresse,
-    codePostal: informationsDeclarant.codePostal,
-    commune: informationsDeclarant.commune
+    tel: informationsDeclarant.tel
   };
 
   const saveForm = (formData: any) => {
-    const {
-      nom,
-      prenom,
-      tel,
-      region,
-      departement,
-      adresse,
-      codePostal,
-      commune
-    } = formData;
+    const { nom, prenom, tel } = formData;
 
     updateInformationsDeclarant({
       nom,
       prenom,
-      tel,
-      region,
-      departement,
-      adresse,
-      codePostal,
-      commune
+      tel
     });
   };
 
@@ -145,36 +110,6 @@ function InformationsDeclarantForm({
             errorText="le numéro de téléphone n’est pas valide"
             readOnly={readOnly}
           />
-          <TextField
-            label="Région"
-            fieldName="region"
-            errorText="la région n’est pas valide"
-            readOnly={readOnly}
-          />
-          <TextField
-            label="Département"
-            fieldName="departement"
-            errorText="le département n’est pas valide"
-            readOnly={readOnly}
-          />
-          <TextField
-            label="Adresse"
-            fieldName="adresse"
-            errorText="l'adresse n’est pas valide"
-            readOnly={readOnly}
-          />
-          <TextField
-            label="Code Postal"
-            fieldName="codePostal"
-            errorText="le code postal n’est pas valide"
-            readOnly={readOnly}
-          />
-          <TextField
-            label="Commune"
-            fieldName="commune"
-            errorText="la commune n'est pas valide"
-            readOnly={readOnly}
-          />
           {readOnly ? (
             <ActionBar>
               <ButtonSimulatorLink
@@ -207,84 +142,10 @@ function InformationsDeclarantForm({
   );
 }
 
-function TextField({
-  errorText,
-  fieldName,
-  label,
-  readOnly
-}: {
-  errorText: string;
-  fieldName: string;
-  label: string;
-  readOnly: boolean;
-}) {
-  const field = useField(fieldName, { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        {label}
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>{error && errorText}</p>
-    </div>
-  );
-}
-
 const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
-  }),
-  formField: css({
-    marginBottom: 20
-  }),
-  label: css({
-    fontSize: 14,
-    fontWeight: "bold",
-    lineHeight: "17px"
-  }),
-  labelError: css({
-    color: globalStyles.colors.error
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex",
-    input: {
-      borderRadius: 4,
-      border: "1px solid"
-    },
-    "input[readonly]": { border: 0 }
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    textDecoration: "underline",
-    lineHeight: "15px"
-  }),
-  dates: css({
-    display: "flex",
-    justifyContent: "space-between"
-  }),
-  dateField: css({
-    marginTop: 5,
-    input: {
-      display: "flex",
-      fontSize: 14,
-      paddingLeft: 22,
-      paddingRight: 22,
-      height: 38,
-      marginTop: 5
-    }
   }),
   edit: css({
     marginTop: 14,

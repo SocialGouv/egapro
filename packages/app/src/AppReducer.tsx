@@ -116,18 +116,17 @@ const defaultState: AppState = {
     nomEntreprise: "",
     siren: "",
     codeNaf: "",
-    adresse: ""
-  },
-  informationsDeclarant: {
-    formValidated: "None",
-    nom: "",
-    prenom: "",
-    tel: "",
     region: "",
     departement: "",
     adresse: "",
     codePostal: "",
     commune: ""
+  },
+  informationsDeclarant: {
+    formValidated: "None",
+    nom: "",
+    prenom: "",
+    tel: ""
   },
   informationsComplementaires: {
     formValidated: "None",

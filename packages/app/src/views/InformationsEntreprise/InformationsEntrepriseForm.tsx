@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Form, useField } from "react-final-form";
+import { Form } from "react-final-form";
 
 import {
   AppState,
@@ -14,9 +14,8 @@ import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
-import Input, { hasFieldError } from "../../components/Input";
+import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import globalStyles from "../../utils/globalStyles";
 
 ///////////////////
 
@@ -35,17 +34,29 @@ const validateForm = ({
   nomEntreprise,
   siren,
   codeNaf,
-  adresse
+  region,
+  departement,
+  adresse,
+  codePostal,
+  commune
 }: {
   nomEntreprise: string;
   siren: string;
   codeNaf: string;
+  region: string;
+  departement: string;
   adresse: string;
+  codePostal: string;
+  commune: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
   codeNaf: validate(codeNaf),
-  adresse: validate(adresse)
+  region: validate(region),
+  departement: validate(departement),
+  adresse: validate(adresse),
+  codePostal: validate(codePostal),
+  commune: validate(commune)
 });
 
 interface Props {
@@ -67,17 +78,34 @@ function InformationsEntrepriseForm({
     nomEntreprise: informationsEntreprise.nomEntreprise,
     siren: informationsEntreprise.siren,
     codeNaf: informationsEntreprise.codeNaf,
-    adresse: informationsEntreprise.adresse
+    region: informationsEntreprise.region,
+    departement: informationsEntreprise.departement,
+    adresse: informationsEntreprise.adresse,
+    codePostal: informationsEntreprise.codePostal,
+    commune: informationsEntreprise.commune
   };
 
   const saveForm = (formData: any) => {
-    const { nomEntreprise, siren, codeNaf, adresse } = formData;
+    const {
+      nomEntreprise,
+      siren,
+      codeNaf,
+      region,
+      departement,
+      adresse,
+      codePostal,
+      commune
+    } = formData;
 
     updateInformationsEntreprise({
       nomEntreprise: nomEntreprise,
       siren: siren,
       codeNaf: codeNaf,
-      adresse: adresse
+      region,
+      departement,
+      adresse,
+      codePostal,
+      commune
     });
   };
 
@@ -99,10 +127,54 @@ function InformationsEntrepriseForm({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
-          <FieldNomEntreprise readOnly={readOnly} />
-          <FieldSiren readOnly={readOnly} />
-          <FieldCodeNaf readOnly={readOnly} />
-          <FieldAdresse readOnly={readOnly} />
+          <TextField
+            label="Nom de l'entreprise"
+            fieldName="nomEntreprise"
+            errorText="le nom de l'entreprise n'est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="siren"
+            fieldName="siren"
+            errorText="le Siren de l'entreprise n'est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="code NAF"
+            fieldName="codeNaf"
+            errorText="le code NAF n'est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Région"
+            fieldName="region"
+            errorText="la région n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Département"
+            fieldName="departement"
+            errorText="le département n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Adresse"
+            fieldName="adresse"
+            errorText="l'adresse n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Code Postal"
+            fieldName="codePostal"
+            errorText="le code postal n’est pas valide"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Commune"
+            fieldName="commune"
+            errorText="la commune n'est pas valide"
+            readOnly={readOnly}
+          />
 
           {readOnly ? (
             <ActionBar>
@@ -136,140 +208,10 @@ function InformationsEntrepriseForm({
   );
 }
 
-function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
-  const field = useField("nomEntreprise", { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Quel est le nom de l'entreprise ?
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>
-        {error && "le nom de l'entreprise n’est pas valide"}
-      </p>
-    </div>
-  );
-}
-
-function FieldSiren({ readOnly }: { readOnly: boolean }) {
-  const field = useField("siren", { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Siren
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>
-        {error && "le Siren de l'entreprise n'est pas valide"}
-      </p>
-    </div>
-  );
-}
-
-function FieldCodeNaf({ readOnly }: { readOnly: boolean }) {
-  const field = useField("codeNaf", { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Code Naf
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>{error && "le code Naf n'est pas valide"}</p>
-    </div>
-  );
-}
-
-function FieldAdresse({ readOnly }: { readOnly: boolean }) {
-  const field = useField("adresse", { validate });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Adresse
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>
-        {error && "l'adresse de l'entreprise n'est pas valide"}
-      </p>
-    </div>
-  );
-}
-
 const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
-  }),
-  formField: css({
-    marginBottom: 20
-  }),
-  label: css({
-    fontSize: 14,
-    fontWeight: "bold",
-    lineHeight: "17px"
-  }),
-  labelError: css({
-    color: globalStyles.colors.error
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex",
-    input: {
-      borderRadius: 4,
-      border: "1px solid"
-    },
-    "input[readonly]": { border: 0 }
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    textDecoration: "underline",
-    lineHeight: "15px"
-  }),
-  dates: css({
-    display: "flex",
-    justifyContent: "space-between"
-  }),
-  dateField: css({
-    marginTop: 5,
-    input: {
-      display: "flex",
-      fontSize: 14,
-      paddingLeft: 22,
-      paddingRight: 22,
-      height: 38,
-      marginTop: 5
-    }
   }),
   edit: css({
     marginTop: 14,
