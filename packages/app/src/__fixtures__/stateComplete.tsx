@@ -428,16 +428,15 @@ const actionUpdateInformationsComplementaires = {
   type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
   data: {
     dateConsultationCSE: "01/02/2019",
-    anneeDeclaration: "2020"
+    anneeDeclaration: "2020",
+    datePublication: "01/02/2020",
+    lienPublication: "https://example.com"
   }
 };
 
 const actionUpdateDeclaration = {
   type: "updateDeclaration" as "updateDeclaration",
-  data: {
-    datePublication: "01/02/2020",
-    lienPublication: "https://example.com"
-  }
+  data: {}
 };
 
 // fast pipe, I miss you in JS…

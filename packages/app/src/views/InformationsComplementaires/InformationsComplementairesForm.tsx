@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Form, useField } from "react-final-form";
+import { Form } from "react-final-form";
 
 import {
   AppState,
@@ -14,10 +14,9 @@ import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
-import Input, { hasFieldError } from "../../components/Input";
 import FieldDate from "../../components/FieldDate";
+import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import globalStyles from "../../utils/globalStyles";
 
 ///////////////////
 
@@ -34,28 +33,32 @@ const validateDate = (value: string) => {
   }
 };
 
-const validateAnneeDeclaration = (value: string) => {
+const validate = (value: string) => {
   const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  if (!requiredError && !mustBeNumberError) {
+  if (!requiredError) {
     return undefined;
   } else {
     return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError
+      required: requiredError
     };
   }
 };
 
 const validateForm = ({
   dateConsultationCSE,
-  anneeDeclaration
+  anneeDeclaration,
+  datePublication,
+  lienPublication
 }: {
   dateConsultationCSE: string;
   anneeDeclaration: string;
+  datePublication: string;
+  lienPublication: string;
 }) => ({
   dateConsultationCSE: validateDate(dateConsultationCSE),
-  anneeDeclaration: validateAnneeDeclaration(anneeDeclaration)
+  anneeDeclaration: validate(anneeDeclaration),
+  datePublication: validateDate(datePublication),
+  lienPublication: validate(lienPublication)
 });
 
 interface Props {
@@ -75,15 +78,24 @@ function InformationsComplementairesForm({
 }: Props) {
   const initialValues: ActionInformationsComplementairesData = {
     dateConsultationCSE: informationsComplementaires.dateConsultationCSE,
-    anneeDeclaration: informationsComplementaires.anneeDeclaration
+    anneeDeclaration: informationsComplementaires.anneeDeclaration,
+    datePublication: informationsComplementaires.datePublication,
+    lienPublication: informationsComplementaires.lienPublication
   };
 
   const saveForm = (formData: any) => {
-    const { dateConsultationCSE, anneeDeclaration } = formData;
+    const {
+      dateConsultationCSE,
+      anneeDeclaration,
+      datePublication,
+      lienPublication
+    } = formData;
 
     updateInformationsComplementaires({
       dateConsultationCSE,
-      anneeDeclaration
+      anneeDeclaration,
+      datePublication,
+      lienPublication
     });
   };
 
@@ -110,7 +122,23 @@ function InformationsComplementairesForm({
             label="Date de consultation du CSE"
             readOnly={readOnly}
           />
-          <FieldAnneeDeclaration readOnly={readOnly} />
+          <TextField
+            label="Année de déclaration"
+            fieldName="anneeDeclaration"
+            errorText="L'année de déclaration n'est pas valide"
+            readOnly={readOnly}
+          />
+          <FieldDate
+            name="datePublication"
+            label="Date de publication de cet index"
+            readOnly={readOnly}
+          />
+          <TextField
+            label="Lien de publication"
+            fieldName="lienPublication"
+            errorText="Le lien de publication n'est pas valide"
+            readOnly={readOnly}
+          />
 
           {readOnly ? (
             <ActionBar>
@@ -141,78 +169,10 @@ function InformationsComplementairesForm({
   );
 }
 
-function FieldAnneeDeclaration({ readOnly }: { readOnly: boolean }) {
-  const field = useField("anneeDeclaration", {
-    validate: validateAnneeDeclaration
-  });
-  const error = hasFieldError(field.meta);
-
-  return (
-    <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        Année de déclaration
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>
-        {error && "L'année de déclaration n'erst pas valide"}
-      </p>
-    </div>
-  );
-}
-
 const styles = {
   container: css({
     display: "flex",
     flexDirection: "column"
-  }),
-  formField: css({
-    marginBottom: 20
-  }),
-  label: css({
-    fontSize: 14,
-    fontWeight: "bold",
-    lineHeight: "17px"
-  }),
-  labelError: css({
-    color: globalStyles.colors.error
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex",
-    input: {
-      borderRadius: 4,
-      border: "1px solid"
-    },
-    "input[readonly]": { border: 0 }
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    textDecoration: "underline",
-    lineHeight: "15px"
-  }),
-  dates: css({
-    display: "flex",
-    justifyContent: "space-between"
-  }),
-  dateField: css({
-    marginTop: 5,
-    input: {
-      display: "flex",
-      fontSize: 14,
-      paddingLeft: 22,
-      paddingRight: 22,
-      height: 38,
-      marginTop: 5
-    }
   }),
   edit: css({
     marginTop: 14,
