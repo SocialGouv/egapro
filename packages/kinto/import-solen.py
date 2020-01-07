@@ -126,8 +126,6 @@ class RowProcessor(object):
         return kintoRecord
 
     def importPeriodeDeReference(self):
-        self.importDateField("date_consult_CSE > Valeur date", "informationsComplementaires/dateConsultationCSE")
-
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
         annee_indicateur = self.importIntField("annee_indicateurs", "informationsComplementaires/anneeDeclaration")
 
@@ -288,6 +286,7 @@ class RowProcessor(object):
         self.importFloatField("resultat_tab1", "indicateurUn/resultatFinal")
         self.importField("population_favorable_tab1", "indicateurUn/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab1", "indicateurUn/noteFinale")
+        self.importDateField("date_consult_CSE > Valeur date", "informationsComplementaires/dateConsultationCSE")
 
     def importIndicateurDeux(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
