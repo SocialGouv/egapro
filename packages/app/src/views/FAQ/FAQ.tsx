@@ -77,6 +77,34 @@ function FAQ({ closeMenu }: Props) {
                   render={() => <FAQHome />}
                 />
 
+                {/* TODO: move to FAQPaths when a dedicated content is added */}
+                <Route
+                  path={["/", "/simulateur/:code/informations-entreprise"]}
+                  exact
+                  render={() => <FAQHome />}
+                />
+
+                {/* TODO: move to FAQPaths when a dedicated content is added */}
+                <Route
+                  path={["/", "/simulateur/:code/informations-declarant"]}
+                  exact
+                  render={() => <FAQHome />}
+                />
+
+                {/* TODO: move to FAQPaths when a dedicated content is added */}
+                <Route
+                  path={["/", "/simulateur/:code/informations-complementaires"]}
+                  exact
+                  render={() => <FAQHome />}
+                />
+
+                {/* TODO: move to FAQPaths when a dedicated content is added */}
+                <Route
+                  path={["/", "/simulateur/:code/declaration"]}
+                  exact
+                  render={() => <FAQHome />}
+                />
+
                 <Route
                   exact
                   path="/section/:section"

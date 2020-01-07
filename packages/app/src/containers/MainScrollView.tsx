@@ -18,7 +18,6 @@ interface Props extends RouteComponentProps {
 
 function MainScrollView({ children, state, location }: Props) {
   const layoutType = useLayoutType();
-  console.log("layout type", layoutType);
 
   const menu = (
     <Menu
