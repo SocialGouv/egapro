@@ -315,7 +315,20 @@
             "nomEntrepriseUES": { "type": "string" },
             "sirenUES": { "type": "string" },
             "codeNAF": { "type": "string" },
-            "nombresEntreprises": { "type": "integer" }
+            "nombresEntreprises": { "type": "integer" },
+            "entreprises": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 500,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "nom": { "type": "string" },
+                  "siren": { "type": "string" }
+                }
+              }
+            }
           }
         },
         "informationsComplementaires": {

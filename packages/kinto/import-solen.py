@@ -167,18 +167,37 @@ class RowProcessor(object):
         self.importField("CP", "informationsDeclarant/codePostal")
         self.importField("Commune", "informationsDeclarant/commune")
 
-    def importEntreprise(self):
+    def importInformationsEntreprise(self):
         self.importField("RS_ets", "informationsEntreprise/nomEntreprise")
         self.importField("SIREN_ets", "informationsEntreprise/siren")
         self.importField("Code NAF", "informationsEntreprise/codeNaf")  # attention format
 
+    def importEntreprisesUES(self):
+        uesData = self.get("__uesdata__")
+        if uesData is None:
+            raise RuntimeError(f"Données UES absentes.")
+        # Note: toutes les cellules pour UES001 sont vides, nous commençons à UES002
+        columns2_99 = ["UES{:02d}".format(x) for x in range(2, 100)]
+        columns100_500 = ["UES{:03d}".format(x) for x in range(100, 501)]
+        columns = columns2_99 + columns100_500
+        entreprises = []
+        for column in columns:
+            value = uesData[column]
+            if value == "":
+                break
+            [raisonSociale, siren] = value.split("\n")
+            entreprises.append({"nom": raisonSociale, "siren": siren})
+        self.set("informationsEntreprise/nombresEntreprises", len(entreprises))
+        self.set("informationsEntreprise/entreprises", entreprises)
+
     def importUES(self):
+        if self.get("nom_UES") is None:
+            return
+        # Import des données de l'UES
         self.importField("nom_UES", "informationsEntreprise/nomUES")
         self.importField("nom_ets_UES", "informationsEntreprise/nomEntrepriseUES")
         self.importField("SIREN_UES", "informationsEntreprise/sirenUES")
-        self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNAF")  # attention format
-        # FIXME: on doit compter le nombre d'entreprises déclarées dans la feuille "BDD UES"
-        # self.importIntField("Nb_ets_UES", "informationsEntreprise/nombresEntreprises")
+        self.importEntreprisesUES()
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES
@@ -381,7 +400,7 @@ class RowProcessor(object):
         self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration")
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()
-        self.importEntreprise()
+        self.importInformationsEntreprise()
         self.importUES()
         self.importNiveauResultat()
         self.importIndicateurUn()
