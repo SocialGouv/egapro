@@ -177,8 +177,7 @@ class RowProcessor(object):
         self.importField("nom_ets_UES", "informationsEntreprise/nomEntrepriseUES")
         self.importField("SIREN_UES", "informationsEntreprise/sirenUES")
         self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNAF")  # attention format
-        # FIXME: bug avec le champ "Nb_ets_UES" dans le nouveau format d'export fourni par Ponn,
-        # contenant des dates au lieu de l'entier escompté
+        # FIXME: on doit compter le nombre d'entreprises déclarées dans la feuille "BDD UES"
         # self.importIntField("Nb_ets_UES", "informationsEntreprise/nombresEntreprises")
 
     def importNiveauResultat(self):
@@ -517,15 +516,16 @@ class KintoImporter(object):
             except KintoException as err:
                 printer.error(f"Impossible de créer la collection: {err}")
         if "schema" not in coll["data"]:
-            if prompt(f"La collection {KINTO_COLLECTION} ne possède pas de schéma, voulez-vous l'ajouter ?", "non"):
-                try:
-                    patch = BasicPatch(data={"schema": self.schema})
-                    client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=patch)
-                    printer.info("Le schéma de validation JSON a été ajouté à la collection.")
-                except (KintoException, TypeError, KeyError, ValueError) as err:
-                    printer.error(f"Impossible d'ajouter le schéma de validation à la collection {KINTO_COLLECTION}:")
-                    printer.error(err)
-                    exit(1)
+            printer.warn("La collection ne possède pas schéma de validation JSON.")
+            printer.info(f"Ajout du schéma à la collection {KINTO_COLLECTION}.")
+            try:
+                patch = BasicPatch(data={"schema": self.schema})
+                client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=patch)
+                printer.info("Le schéma de validation JSON a été ajouté à la collection.")
+            except (KintoException, TypeError, KeyError, ValueError) as err:
+                printer.error(f"Impossible d'ajouter le schéma de validation à la collection {KINTO_COLLECTION}:")
+                printer.error(err)
+                exit(1)
         return client
 
     def add(self, record):
