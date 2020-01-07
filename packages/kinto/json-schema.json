@@ -155,7 +155,6 @@
             },
             "coefficientGroupFormValidated": { "type": "string" },
             "coefficientEffectifFormValidated": { "type": "string" },
-            "dateConsultationCSE": { "type": "string" },
             "resultatFinal": { "type": "number" },
             "sexeSurRepresente": {
               "$ref": "#/definitions/sexeSurRepresente"
@@ -322,7 +321,6 @@
             "nombresEntreprises": { "type": "integer" },
             "entreprises": {
               "type": "array",
-              "minItems": 2,
               "items": {
                 "type": "object",
                 "additionalProperties": false,
@@ -342,7 +340,8 @@
             "structure": {
               "type": "string",
               "enum": ["Entreprise", "Unité Economique et Sociale (UES)"]
-            }
+            },
+            "dateConsultationCSE": { "type": "string" }
           }
         },
         "declaration": {

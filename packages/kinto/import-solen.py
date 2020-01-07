@@ -32,6 +32,7 @@ DATE_FORMAT_OUTPUT = "%d/%m/%Y"
 EXCEL_NOM_FEUILLE_REPONDANTS = "BDD REPONDANTS"
 EXCEL_NOM_FEUILLE_UES = "BDD UES"
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
+UES_KEY = "__uesdata__"
 
 # Configuration de Kinto
 KINTO_SERVER = os.environ.get("KINTO_SERVER", "http://localhost:8888/v1")
@@ -41,10 +42,18 @@ KINTO_BUCKET = os.environ.get("KINTO_BUCKET", "egapro")
 KINTO_COLLECTION = os.environ.get("KINTO_COLLECTION", "test-import")
 
 
+class ExcelDataError(RuntimeError):
+    pass
+
+
+class RowProcessorError(RuntimeError):
+    pass
+
+
 class RowProcessor(object):
     def __init__(self, row, validator, debug=False):
         if row is None:
-            raise RuntimeError("Échec d'import d'une ligne vide.")
+            raise RowProcessorError("Échec d'import d'une ligne vide.")
         self.debug = debug
         self.row = row
         self.validator = validator
@@ -62,7 +71,7 @@ class RowProcessor(object):
             try:
                 value = type(value)
             except ValueError as err:
-                raise ValueError(f"Couldn't cast {csvFieldName} field value ('{value}') to {type}")
+                raise RowProcessorError(f"Impossible de typer la valeur du champ {csvFieldName} ('{value}') en {type}")
 
         return self.set(path, value)
 
@@ -81,7 +90,7 @@ class RowProcessor(object):
             formatted = datetime.strptime(date, DATE_FORMAT_INPUT).strftime(DATE_FORMAT_OUTPUT)
             return self.set(path, formatted)
         except ValueError as err:
-            raise RuntimeError(f"Impossible de traiter la valeur date '{date}'.")
+            raise RowProcessorError(f"Impossible de traiter la valeur date '{date}'.")
 
     def importFloatField(self, csvFieldName, path):
         return self.importField(csvFieldName, path, type=float)
@@ -91,7 +100,7 @@ class RowProcessor(object):
 
     def get(self, csvFieldName):
         if csvFieldName not in self.row:
-            raise KeyError(f"Row does not have a {csvFieldName} field")
+            raise RowProcessorError(f"La ligne ne possède pas de champ '{csvFieldName}'.")
         if self.row[csvFieldName] in CELL_SKIPPABLE_VALUES:
             return None
         return self.row[csvFieldName]
@@ -105,7 +114,7 @@ class RowProcessor(object):
             except KeyError as err:
                 result = dpath.util.new(self.record, path, value)
             if result == 0:
-                raise RuntimeError(f"Unable to set {path} to {value}")
+                raise RowProcessorError(f"Impossible de créer le chemin {path} à la valeur {value}.")
             return value
 
     def toKintoRecord(self, validate=False):
@@ -114,10 +123,10 @@ class RowProcessor(object):
             try:
                 self.validator.validate(kintoRecord)
             except ValidationError as err:
-                raise RuntimeError(
+                raise RowProcessorError(
                     "\n   ".join(
                         [
-                            f"Validation JSON échouée pour la directive '{err.validator}':",
+                            f"Validation JSON échouée pour la directive '{err.validator}' :",
                             f"Message: {err.message}",
                             f"Chemin: {'.'.join(list(err.path))}",
                         ]
@@ -147,7 +156,15 @@ class RowProcessor(object):
             finPeriodeReference = (datetime.strptime(date_debut_pr, DATE_FORMAT_INPUT) + delta).strftime(DATE_FORMAT_OUTPUT)
         else:
             # autre période de référence sans début spécifié: erreur
-            raise RuntimeError("Données de période de référence incohérentes.")
+            raise RowProcessorError(
+                "\n   ".join(
+                    [
+                        "Données de période de référence incohérentes :",
+                        f"Date début: {date_debut_pr}",
+                        f"Année indicateur: {annee_indicateur}",
+                    ]
+                )
+            )
         self.set("informations/debutPeriodeReference", debutPeriodeReference)
         self.set("informations/finPeriodeReference", finPeriodeReference)
 
@@ -172,9 +189,12 @@ class RowProcessor(object):
         self.importField("Commune", "informationsEntreprise/commune")
 
     def importEntreprisesUES(self):
-        uesData = self.get("__uesdata__")
-        if uesData is None:
-            raise RuntimeError(f"Données UES absentes pour le siren {self.row['SIREN_UES']}.")
+        sirenUES = self.get("SIREN_UES")
+        try:
+            uesData = self.row[UES_KEY]
+        except KeyError:
+            # FIXME: certaines données UES ne sont pas importées, par ex. siren=352839401
+            raise RowProcessorError(f"Données UES absentes ou invalides pour l'entreprise dont le SIREN est {sirenUES}.")
         # Note: toutes les cellules pour UES001 sont vides, nous commençons à UES002
         columns2_99 = ["UES{:02d}".format(x) for x in range(2, 100)]
         columns100_500 = ["UES{:03d}".format(x) for x in range(100, 501)]
@@ -184,7 +204,18 @@ class RowProcessor(object):
             value = uesData[column]
             if value == "":
                 break
-            [raisonSociale, siren] = value.split("\n")
+            try:
+                [raisonSociale, siren] = value.split("\n")
+            except ValueError:
+                raise RowProcessorError(
+                    " ".join(
+                        [
+                            f"Impossible d'extraire les valeurs de la colonne '{column}' dans",
+                            f"la feuille '{EXCEL_NOM_FEUILLE_UES}' pour l'entreprise dont le ",
+                            f"SIREN est '{sirenUES}'.",
+                        ]
+                    )
+                )
             entreprises.append({"nom": raisonSociale, "siren": siren})
         self.set("informationsEntreprise/nombresEntreprises", len(entreprises))
         self.set("informationsEntreprise/entreprises", entreprises)
@@ -244,8 +275,8 @@ class RowProcessor(object):
         try:
             max = int(self.get("nb_coef_niv"))
         except (KeyError, ValueError) as err:
-            raise RuntimeError(
-                "Valeur nb_coef_niv non renseignée, indispensable pour une déclaration par niveaux de coefficients"
+            raise RowProcessorError(
+                "Valeur nb_coef_niv invalide ou non renseignée, indispensable pour une déclaration par niveaux de coefficients"
             )
         niveaux = ["niv{:02d}".format(niv) for niv in range(1, max + 1)]
         self.setValeursTranches(niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True)
@@ -453,7 +484,7 @@ class ExcelData(object):
                 dtype={"CP": str, "telephone": str, "SIREN_ets": str, "SIREN_UES": str},
             )
         except XLRDError as err:
-            raise RuntimeError(f"Le format du fichier {pathToExcelFile} n'a pu être interprété.")
+            raise ExcelDataError(f"Le format du fichier {pathToExcelFile} n'a pu être interprété.")
         self.repondants = self.importSheet(excel, EXCEL_NOM_FEUILLE_REPONDANTS)
         self.ues = self.importSheet(excel, EXCEL_NOM_FEUILLE_UES)
         self.linkUes()
@@ -461,13 +492,13 @@ class ExcelData(object):
     def importSheet(self, excel, sheetName):
         sheet = excel.get(sheetName)
         if sheet.empty:
-            raise RuntimeError(f"Feuille de calcul '{sheetName}' absente ou vide.")
+            raise ExcelDataError(f"Feuille de calcul '{sheetName}' absente ou vide.")
         try:
             csvString = sheet.to_csv(float_format="%g")
             lines = [row for row in csv.DictReader(io.StringIO(csvString))]
             return self.createDict(lines)
         except (AttributeError, KeyError, IndexError, TypeError, ValueError) as err:
-            raise RuntimeError(f"Impossible de traiter la feuille de calcul {sheetName}: {err}")
+            raise ExcelDataError(f"Impossible de traiter la feuille de calcul {sheetName}: {err}")
 
     def createDict(self, source):
         dict = OrderedDict()
@@ -485,8 +516,8 @@ class ExcelData(object):
 
     def linkUes(self):
         for id, row in self.repondants.items():
-            if row["structure"] == "Unité Economique et Sociale (UES)":
-                row["__uesdata__"] = self.findUesById(id)
+            if row["structure"] == "Unité Economique et Sociale (UES)" or row["nom_UES"] != "":
+                row[UES_KEY] = self.findUesById(id)
                 self.repondants[id] = row
 
     def getNbRepondants(self):
@@ -567,8 +598,8 @@ def parse(args):
     validator = initValidator("json-schema.json")
     try:
         excelData = ExcelData(args.xls_path)
-    except RuntimeError as err:
-        printer.error(f"Erreur de traitement du fichier: {err}")
+    except ExcelDataError as err:
+        printer.error(f"Erreur de traitement du fichier Excel: {err}")
         exit(1)
     nb_rows = excelData.getNbRepondants()
     bar = Bar("Préparation des données", max=args.max if args.max is not None else nb_rows)
@@ -576,9 +607,8 @@ def parse(args):
     count_processed = 0
     count_imported = 0
     errors = []
-    for index, key in enumerate(excelData.repondants):
-        row = excelData.repondants[key]
-        lineno = index + 1
+    for lineno, id in enumerate(excelData.repondants):
+        row = excelData.repondants[id]
         if args.max and count_processed >= args.max:
             break
         if args.siren and row["SIREN_ets"] != args.siren and row["SIREN_UES"] != args.siren:
@@ -589,12 +619,8 @@ def parse(args):
             count_imported = count_imported + 1
             if args.show_json:
                 printer.std(json.dumps(record, indent=args.indent))
-        except KeyError as err:
-            errors.append(f"Erreur ligne {lineno} - Champ introuvable {err}")
-        except ValueError as err:
-            errors.append(f"Erreur ligne {lineno} - Valeur erronée {err}")
-        except RuntimeError as err:
-            errors.append(f"Erreur ligne {lineno}: {err}")
+        except RowProcessorError as err:
+            errors.append(f"Erreur ligne {lineno} (id={id}): {err}")
         count_processed = count_processed + 1
         bar.next()
     bar.finish()
