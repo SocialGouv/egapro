@@ -23,6 +23,7 @@ from xlrd.biffh import XLRDError
 # - exception perso pour les classes d'import
 # - empêcher l'import dans Kinto si tous les enregistrements ne valident pas
 
+
 # Configuration de l'import CSV
 CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
 DATE_FORMAT_INPUT = "%Y-%m-%d %H:%M:%S"
@@ -426,7 +427,11 @@ def initValidator(jsonschema_path):
 class ExcelData(object):
     def __init__(self, pathToExcelFile):
         try:
-            excel = pandas.read_excel(pathToExcelFile, sheet_name=[EXCEL_NOM_FEUILLE_REPONDANTS, EXCEL_NOM_FEUILLE_UES])
+            excel = pandas.read_excel(
+                pathToExcelFile,
+                sheet_name=[EXCEL_NOM_FEUILLE_REPONDANTS, EXCEL_NOM_FEUILLE_UES],
+                dtype={"CP": str, "telephone": str, "SIREN_ets": str, "SIREN_UES": str},
+            )
         except XLRDError as err:
             raise RuntimeError(f"Le format du fichier {pathToExcelFile} n'a pu être interprété.")
         self.repondants = self.importSheet(excel, EXCEL_NOM_FEUILLE_REPONDANTS)
@@ -544,7 +549,7 @@ def parse(args):
         printer.error(f"Erreur de traitement du fichier: {err}")
         exit(1)
     nb_rows = len(excelData.repondants)
-    bar = Bar("Importation des données", max=args.max if args.max is not None else nb_rows)
+    bar = Bar("Préparation des données", max=args.max if args.max is not None else nb_rows)
     kintoImporter = KintoImporter(validator.schema, truncate=args.init_collection, dryRun=args.dry_run)
     count_processed = 0
     count_imported = 0
