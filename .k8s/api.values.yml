@@ -30,42 +30,42 @@ deployment:
     - name: KINTO_SERVER
       value: "kinto"
     - name: KINTO_BUCKET
-      value: "${STARTUP}"
+      value: "${PROJECT}"
     - name: KINTO_LOGIN
       valueFrom:
         secretKeyRef:
-          name: ${STARTUP}
+          name: ${PROJECT}
           key: KINTO_ADMIN_LOGIN
     - name: KINTO_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: ${STARTUP}
+          name: ${PROJECT}
           key: KINTO_ADMIN_PASSWORD
     - name: MAIL_USE_TLS
       value: "true"
     - name: MAIL_PORT
       value: "465"
     - name: MAIL_FROM
-      value: "Index EgaPro <contact@${STARTUP}.beta.gouv.fr>"
+      value: "Index EgaPro <contact@${PROJECT}.beta.gouv.fr>"
     - name: MAIL_HOST
       valueFrom:
         secretKeyRef:
-          name: ${STARTUP}
+          name: ${PROJECT}
           key: MAIL_HOST
     - name: MAIL_USERNAME
       valueFrom:
         secretKeyRef:
-          name: ${STARTUP}
+          name: ${PROJECT}
           key: MAIL_USERNAME
     - name: MAIL_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: ${STARTUP}
+          name: ${PROJECT}
           key: MAIL_PASSWORD
     - name: API_SENTRY_DSN
       valueFrom:
         secretKeyRef:
-          name: ${STARTUP}
+          name: ${PROJECT}
           key: API_SENTRY_DSN
     - name: API_SENTRY_ENVIRONMENT
       value: "development"

@@ -4,9 +4,9 @@ apiVersion: apps/v1
 metadata:
   name: kinto
   labels:
-    app: ${STARTUP}
+    app: ${PROJECT}
     component: kinto
-    namespace: ${STARTUP}-${BRANCH_HASH}
+    namespace: ${PROJECT}-${BRANCH_HASH}
 spec:
   replicas: 1
   selector:
@@ -15,9 +15,9 @@ spec:
   template:
     metadata:
       labels:
-        app: ${STARTUP}
+        app: ${PROJECT}
         component: kinto
-        namespace: ${STARTUP}-${BRANCH_HASH}
+        namespace: ${PROJECT}-${BRANCH_HASH}
     spec:
       containers:
       - name: kinto

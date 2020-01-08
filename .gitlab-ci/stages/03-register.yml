@@ -1,14 +1,9 @@
 ---
 
-include:
-  - project: SocialGouv/gitlab-ci-yml
-    file: /base_register_stage.yml
-    ref: master
-
 #
 .register_stage: &register_stage
   extends: .base_register_stage
-  stage: "Registration"
+  stage: Registration
   except:
     variables:
       - $PRODUCTION

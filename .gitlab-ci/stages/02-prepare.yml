@@ -1,16 +1,10 @@
 ---
 
-include:
-  - project: SocialGouv/gitlab-ci-yml
-    file: /base_create_namespace_stage.yml
-    ref: master
-
-Create namespace (dev):
-  stage: "Prepare"
+Create namespace:
+  stage: Prepare
   extends: .base_create_namespace_stage
   except:
     variables:
       - $PRODUCTION
-
 
 ...

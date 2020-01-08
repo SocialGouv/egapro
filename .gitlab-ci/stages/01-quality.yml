@@ -1,12 +1,7 @@
 ---
 
-include:
-  - project: SocialGouv/gitlab-ci-yml
-    file: /base_yarn_stage.yml
-    ref: master
-
-Code quality (dev):
-  stage: "Code Quality"
+Code quality:
+  stage: Code Quality
   extends:
     - .base_yarn_quality
     - .base_yarn_build
