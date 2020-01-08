@@ -31,6 +31,7 @@ DATE_FORMAT_INPUT = "%Y-%m-%d %H:%M:%S"
 DATE_FORMAT_OUTPUT = "%d/%m/%Y"
 EXCEL_NOM_FEUILLE_REPONDANTS = "BDD REPONDANTS"
 EXCEL_NOM_FEUILLE_UES = "BDD UES"
+NON_RENSEIGNE = "<non renseigné>"
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
 UES_KEY = "__uesdata__"
 
@@ -193,8 +194,7 @@ class RowProcessor(object):
         try:
             uesData = self.row[UES_KEY]
         except KeyError:
-            # FIXME: certaines données UES ne sont pas importées, par ex. siren=352839401
-            raise RowProcessorError(f"Données UES absentes ou invalides pour l'entreprise dont le SIREN est {sirenUES}.")
+            raise RowProcessorError(f"Données UES absentes ou invalides pour l'entreprise dont le SIREN est '{sirenUES}'.")
         # Note: toutes les cellules pour UES001 sont vides, nous commençons à UES002
         columns2_99 = ["UES{:02d}".format(x) for x in range(2, 100)]
         columns100_500 = ["UES{:03d}".format(x) for x in range(100, 501)]
@@ -204,14 +204,19 @@ class RowProcessor(object):
             value = uesData[column]
             if value == "":
                 break
-            try:
-                [raisonSociale, siren] = value.split("\n")
-            except ValueError:
+            split = value.strip().split("\n")
+            if len(split) == 2:
+                [raisonSociale, siren] = split
+            elif len(split) == 1 and split[0].isdigit():
+                (raisonSociale, siren) = (NON_RENSEIGNE, split[0])
+            elif len(split) == 1:
+                (raisonSociale, siren) = (split[0], NON_RENSEIGNE)
+            else:
                 raise RowProcessorError(
                     " ".join(
                         [
                             f"Impossible d'extraire les valeurs de la colonne '{column}' dans",
-                            f"la feuille '{EXCEL_NOM_FEUILLE_UES}' pour l'entreprise dont le ",
+                            f"la feuille '{EXCEL_NOM_FEUILLE_UES}' pour l'entreprise dont le",
                             f"SIREN est '{sirenUES}'.",
                         ]
                     )
