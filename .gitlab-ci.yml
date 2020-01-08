@@ -30,8 +30,12 @@ include:
     file: /base_semantic_release_stage.yml
     ref: master
   - project: SocialGouv/gitlab-ci-yml
+    file: /base_delete_useless_k8s_ns_stage.yml
+    ref: master
+  - project: SocialGouv/gitlab-ci-yml
     file: /base_notify_github_stage.yml
     ref: master
+
 
 variables:
   PROJECT: egapro
@@ -114,7 +118,8 @@ stages:
     export K8S_NAMESPACE="${PROJECT}"
     export DOMAIN="prod.${PROJECT}.fabrique.social.gouv.fr"
 
-  elif [[ "${BRANCH_NAME}" = "egapro-auto-devops" ]]; then
+  elif [[ "${BRANCH_NAME}" = "master" ]]; then
+    export MASTER=true
     export BRANCH_HASH=master
     export IMAGE_TAG=${CI_COMMIT_SHA}
     export K8S_NAMESPACE="${PROJECT}-${BRANCH_HASH}"
