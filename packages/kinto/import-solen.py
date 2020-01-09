@@ -33,6 +33,8 @@ EXCEL_NOM_FEUILLE_REPONDANTS = "BDD REPONDANTS"
 EXCEL_NOM_FEUILLE_UES = "BDD UES"
 NON_RENSEIGNE = "<non renseigné>"
 SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
+TRANCHE_50_250 = "De 50 à 250 inclus"
+TRANCHE_PLUS_DE_250 = "Plus de 250"
 UES_KEY = "__uesdata__"
 
 # Configuration de Kinto
@@ -52,6 +54,8 @@ class RowProcessorError(RuntimeError):
 
 
 class RowProcessor(object):
+    READ_FIELDS = set({})
+
     def __init__(self, row, validator, debug=False):
         if row is None:
             raise RowProcessorError("Échec d'import d'une ligne vide.")
@@ -104,6 +108,7 @@ class RowProcessor(object):
             raise RowProcessorError(f"La ligne ne possède pas de champ '{csvFieldName}'.")
         if self.row[csvFieldName] in CELL_SKIPPABLE_VALUES:
             return None
+        self.READ_FIELDS.add(csvFieldName)
         return self.row[csvFieldName]
 
     def set(self, path, value):
@@ -119,7 +124,7 @@ class RowProcessor(object):
             return value
 
     def toKintoRecord(self, validate=False):
-        kintoRecord = {"id": self.row["id"], "data": self.record}
+        kintoRecord = {"id": self.get("id"), "data": self.record}
         if validate:
             try:
                 self.validator.validate(kintoRecord)
@@ -139,11 +144,15 @@ class RowProcessor(object):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
         annee_indicateur = self.importIntField("annee_indicateurs", "informationsComplementaires/anneeDeclaration")
 
-        # Compatibilité egapro de la tranche d'effectifs
+        # Compatibilité egapro de la valeur de tranche d'effectifs
         tranche = self.get("tranche_effectif")
-        if tranche == "De 50 à 250 inclus":
-            tranche = "50 à 250"
-        self.set("informations/trancheEffectifs", tranche)
+        if tranche == TRANCHE_50_250:
+            trancheEgapro = "50 à 250"
+        elif tranche != TRANCHE_PLUS_DE_250:
+            raise RowProcessorError(
+                f"Tranche invalide: '{tranche}'; les valeurs supportées sont {TRANCHE_50_250} et {TRANCHE_PLUS_DE_250}."
+            )
+        self.set("informations/trancheEffectifs", trancheEgapro)
 
         # Période de référence
         date_debut_pr = self.importField("date_debut_pr > Valeur date", "informations/debutPeriodeReference")
@@ -226,6 +235,9 @@ class RowProcessor(object):
         self.set("informationsEntreprise/entreprises", entreprises)
 
     def importUES(self):
+        # Note: nous ne consommons pas le champ "structure" car il n'est pas fiable;
+        # certaines UES ont renseigné ce champ comme "Entreprise"... Le seul champ
+        # réellement discriminant semble être "nom_UES".
         if self.get("nom_UES") is None:
             self.set("informationsEntreprise/structure", "Entreprise")
         else:
@@ -233,6 +245,7 @@ class RowProcessor(object):
             # Import des données de l'UES
             self.importField("nom_UES", "informationsEntreprise/nomUES")
             self.importField("nom_ets_UES", "informationsEntreprise/nomEntrepriseUES")
+            self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNaf")
             self.importField("SIREN_UES", "informationsEntreprise/sirenUES")
             self.importEntreprisesUES()
 
@@ -391,17 +404,17 @@ class RowProcessor(object):
         # pour les entreprises de 50 à 250 salariés et les entreprises de plus de
         # 250 salariés, mais nous les fusionnons ici.
         #
-        if self.get("tranche_effectif") == "50 à 250":
-            # Import des données pour les entreprises +250
+        if self.get("tranche_effectif") == TRANCHE_50_250:
+            # Import des données pour les entreprises 50-250
             nonCalculable = self.importBooleanField(
                 "calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True
             )
             self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
             self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
-            self.importIntField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
+            self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
             self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
         else:
-            # Import des données pour les entreprises 50-250
+            # Import des données pour les entreprises 250+
             nonCalculable = self.importBooleanField(
                 "calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True
             )
@@ -441,7 +454,7 @@ class RowProcessor(object):
         self.importUES()
         self.importNiveauResultat()
         self.importIndicateurUn()
-        if self.get("tranche_effectif") == "50 à 250":
+        if self.get("tranche_effectif") == TRANCHE_50_250:
             self.importIndicateurDeuxTrois()
         else:
             self.importIndicateurDeux()
@@ -490,6 +503,7 @@ class ExcelData(object):
             )
         except XLRDError as err:
             raise ExcelDataError(f"Le format du fichier {pathToExcelFile} n'a pu être interprété.")
+        self.fields = {EXCEL_NOM_FEUILLE_REPONDANTS: set([]), EXCEL_NOM_FEUILLE_UES: set([])}
         self.repondants = self.importSheet(excel, EXCEL_NOM_FEUILLE_REPONDANTS)
         self.ues = self.importSheet(excel, EXCEL_NOM_FEUILLE_UES)
         self.linkUes()
@@ -500,8 +514,10 @@ class ExcelData(object):
             raise ExcelDataError(f"Feuille de calcul '{sheetName}' absente ou vide.")
         try:
             csvString = sheet.to_csv(float_format="%g")
-            lines = [row for row in csv.DictReader(io.StringIO(csvString))]
-            return self.createDict(lines)
+            reader = csv.DictReader(io.StringIO(csvString))
+            for field in reader.fieldnames:
+                self.fields[sheetName].add(field)
+            return self.createDict([row for row in reader])
         except (AttributeError, KeyError, IndexError, TypeError, ValueError) as err:
             raise ExcelDataError(f"Impossible de traiter la feuille de calcul {sheetName}: {err}")
 
@@ -629,6 +645,21 @@ def parse(args):
         count_processed = count_processed + 1
         bar.next()
     bar.finish()
+    if args.info:
+        for sheet, sheetFields in excelData.fields.items():
+            for sheetField in sheetFields:
+                used = False
+                # Ici nous excluons du rapport :
+                # - les champs vides
+                # - les champs niv01* à niv50* de la feuille répondants
+                # - les champs UES01 à UES500 de la feuille UES
+                if sheetField == "" or sheetField.startswith("niv") or sheetField.startswith("UES"):
+                    continue
+                elif sheetField in RowProcessor.READ_FIELDS:
+                    used = True
+                if not used:
+                    printer.warn(f"Le champ {sheetField} de la feuille {sheet} n'a jamais été consommé.")
+
     if args.siren and count_processed == 0:
         printer.error("Aucune entrée trouvée pour le Siren " + args.siren)
     else:
@@ -686,6 +717,7 @@ parser.add_argument("-d", "--debug", help="afficher les messages de debug", acti
 parser.add_argument("-i", "--indent", type=int, help="niveau d'indentation JSON", default=None)
 parser.add_argument("-m", "--max", type=int, help="nombre maximum de lignes à importer", default=None)
 parser.add_argument("-j", "--show-json", help="afficher la sortie JSON", action="store_true", default=False)
+parser.add_argument("-f", "--info", help="afficher les informations d'utilisation des champs", action="store_true", default=False)
 parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON dans un fichier")
 parser.add_argument("-v", "--validate", help="valider les enregistrements JSON", action="store_true", default=False)
 parser.add_argument("-r", "--dry-run", help="ne pas procéder à l'import dans Kinto", action="store_true", default=False)
