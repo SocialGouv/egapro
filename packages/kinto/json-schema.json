@@ -337,10 +337,6 @@
           "additionalProperties": false,
           "properties": {
             "anneeDeclaration": { "type": "integer" },
-            "structure": {
-              "type": "string",
-              "enum": ["Entreprise", "Unité Economique et Sociale (UES)"]
-            },
             "dateConsultationCSE": { "type": "string" }
           }
         },
