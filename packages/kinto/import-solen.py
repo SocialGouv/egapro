@@ -146,13 +146,14 @@ class RowProcessor(object):
 
         # Compatibilité egapro de la valeur de tranche d'effectifs
         tranche = self.get("tranche_effectif")
+        trancheEgapro = TRANCHE_PLUS_DE_250
         if tranche == TRANCHE_50_250:
-            tranche = "50 à 250"
+            trancheEgapro = "50 à 250"
         elif tranche != TRANCHE_PLUS_DE_250:
             raise RowProcessorError(
                 f"Tranche invalide: '{tranche}'; les valeurs supportées sont '{TRANCHE_50_250}' et '{TRANCHE_PLUS_DE_250}'."
             )
-        self.set("informations/trancheEffectifs", tranche)
+        self.set("informations/trancheEffectifs", trancheEgapro)
 
         # Période de référence
         date_debut_pr = self.importField("date_debut_pr > Valeur date", "informations/debutPeriodeReference")
