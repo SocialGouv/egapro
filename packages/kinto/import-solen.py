@@ -26,16 +26,16 @@ from xlrd.biffh import XLRDError
 
 
 # Configuration de l'import CSV
-CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]
-DATE_FORMAT_INPUT = "%Y-%m-%d %H:%M:%S"
-DATE_FORMAT_OUTPUT = "%d/%m/%Y"
-EXCEL_NOM_FEUILLE_REPONDANTS = "BDD REPONDANTS"
-EXCEL_NOM_FEUILLE_UES = "BDD UES"
-NON_RENSEIGNE = "<non renseigné>"
-SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
-TRANCHE_50_250 = "De 50 à 250 inclus"
-TRANCHE_PLUS_DE_250 = "Plus de 250"
-UES_KEY = "__uesdata__"
+CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]  # équivalents cellules vides
+DATE_FORMAT_INPUT = "%Y-%m-%d %H:%M:%S"  # format de date en entrée
+DATE_FORMAT_OUTPUT = "%d/%m/%Y"  # format de date en sortie
+EXCEL_NOM_FEUILLE_REPONDANTS = "BDD REPONDANTS"  # nom de feuille excel repondants
+EXCEL_NOM_FEUILLE_UES = "BDD UES"  # nom de feuille excel UES
+NON_RENSEIGNE = "<non renseigné>"  # valeur si champ requis absent
+SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="  # racine URL déclarations Solen
+TRANCHE_50_250 = "De 50 à 250 inclus"  # valeur champ structure 50<250
+TRANCHE_PLUS_DE_250 = "Plus de 250"  # valeur champ structure +250
+UES_KEY = "__uesdata__"  # nom clé données UES (interne)
 
 # Configuration de Kinto
 KINTO_SERVER = os.environ.get("KINTO_SERVER", "http://localhost:8888/v1")
@@ -76,7 +76,7 @@ class RowProcessor(object):
             try:
                 value = type(value)
             except ValueError as err:
-                raise RowProcessorError(f"Impossible de typer la valeur du champ {csvFieldName} ('{value}') en {type}")
+                raise RowProcessorError(f"Impossible de typer la valeur du champ '{csvFieldName}' ('{value}') en {type}")
 
         return self.set(path, value)
 
@@ -112,7 +112,7 @@ class RowProcessor(object):
         return self.row[csvFieldName]
 
     def set(self, path, value):
-        self.log(f"set {path} to {value}")
+        self.log(f"set '{path}' to '{value}'")
         if value not in CELL_SKIPPABLE_VALUES:
             try:
                 dpath.util.get(self.record, path)
@@ -120,7 +120,7 @@ class RowProcessor(object):
             except KeyError as err:
                 result = dpath.util.new(self.record, path, value)
             if result == 0:
-                raise RowProcessorError(f"Impossible de créer le chemin {path} à la valeur {value}.")
+                raise RowProcessorError(f"Impossible de créer le chemin '{path}' à la valeur '{value}'.")
             return value
 
     def toKintoRecord(self, validate=False):
@@ -150,7 +150,7 @@ class RowProcessor(object):
             tranche = "50 à 250"
         elif tranche != TRANCHE_PLUS_DE_250:
             raise RowProcessorError(
-                f"Tranche invalide: '{tranche}'; les valeurs supportées sont {TRANCHE_50_250} et {TRANCHE_PLUS_DE_250}."
+                f"Tranche invalide: '{tranche}'; les valeurs supportées sont '{TRANCHE_50_250}' et '{TRANCHE_PLUS_DE_250}'."
             )
         self.set("informations/trancheEffectifs", tranche)
 
@@ -290,11 +290,14 @@ class RowProcessor(object):
         self.setValeursTranches(["Ou", "Em", "TAM", "IC"], "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
 
     def importTranchesCoefficients(self):
+        raw_max = self.get("nb_coef_niv")
         try:
-            max = int(self.get("nb_coef_niv"))
-        except (KeyError, ValueError) as err:
+            max = int(raw_max)
+        except TypeError:
+            raise RowProcessorError(f"Impossible de prendre en charge une valeur 'nb_coef_niv' non-entière, ici '{raw_max}'.")
+        except (KeyError, ValueError):
             raise RowProcessorError(
-                "Valeur nb_coef_niv invalide ou non renseignée, indispensable pour une déclaration par niveaux de coefficients"
+                "Valeur 'nb_coef_niv' manquante ou invalide, indispensable pour une déclaration par niveaux de coefficients"
             )
         niveaux = ["niv{:02d}".format(niv) for niv in range(1, max + 1)]
         self.setValeursTranches(niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True)
@@ -476,7 +479,7 @@ def prompt(question, default="oui"):
     elif default == "non":
         choices = " [o/N] "
     else:
-        raise ValueError("Valeur par défaut invalide: '%s'" % default)
+        raise ValueError(f"Valeur par défaut invalide: '{default}'.")
     while True:
         printer.std(question + choices)
         choice = input().lower()
@@ -502,7 +505,7 @@ class ExcelData(object):
                 dtype={"CP": str, "telephone": str, "SIREN_ets": str, "SIREN_UES": str},
             )
         except XLRDError as err:
-            raise ExcelDataError(f"Le format du fichier {pathToExcelFile} n'a pu être interprété.")
+            raise ExcelDataError(f"Le format du fichier '{pathToExcelFile}' n'a pu être interprété.")
         self.fields = {EXCEL_NOM_FEUILLE_REPONDANTS: set([]), EXCEL_NOM_FEUILLE_UES: set([])}
         self.repondants = self.importSheet(excel, EXCEL_NOM_FEUILLE_REPONDANTS)
         self.ues = self.importSheet(excel, EXCEL_NOM_FEUILLE_UES)
@@ -519,7 +522,7 @@ class ExcelData(object):
                 self.fields[sheetName].add(field)
             return self.createDict([row for row in reader])
         except (AttributeError, KeyError, IndexError, TypeError, ValueError) as err:
-            raise ExcelDataError(f"Impossible de traiter la feuille de calcul {sheetName}: {err}")
+            raise ExcelDataError(f"Impossible de traiter la feuille de calcul '{sheetName}': {err}")
 
     def createDict(self, source):
         dict = OrderedDict()
