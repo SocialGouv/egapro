@@ -10,31 +10,31 @@ include:
   - /.gitlab-ci/stages/07-notify.yml
   - project: SocialGouv/gitlab-ci-yml
     file: /base_docker_kubectl_image_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_docker_helm_image_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_yarn_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_create_namespace_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_register_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_deploy_hpa_chart_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_semantic_release_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_delete_useless_k8s_ns_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
     file: /base_notify_github_stage.yml
-    ref: v4.5.4
+    ref: v4.6.0
 
 
 variables:

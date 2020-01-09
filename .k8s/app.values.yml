@@ -27,6 +27,10 @@ deployment:
     - name: REACT_APP_API_URL
       value: "http://api-hpa:4000"
 
+service:
+  port: ${PORT}
+  targetPort: ${PORT}
+
 ingress:
   enabled: true
   annotations:
@@ -35,7 +39,8 @@ ingress:
   hosts:
     - host: ${APP_URL}
       paths:
-        - /
+        - path: /
+          servicePort: ${PORT}
   tls:
     - hosts:
         - ${APP_URL}
