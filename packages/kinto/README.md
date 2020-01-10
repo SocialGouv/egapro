@@ -23,8 +23,8 @@ Vous devez disposer d'un export Solen, généralement fourni au format Excel fou
 
 ```
 $ python import-solen.py --help
-usage: import-solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-s SAVE_AS] [-v]
-                       [-r] [--siren SIREN] [-c]
+usage: import-solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-f] [-s SAVE_AS]
+                       [-v] [-r] [--siren SIREN] [-c]
                        xls_path
 
 Import des données Solen.
@@ -39,8 +39,9 @@ optional arguments:
                         niveau d'indentation JSON
   -m MAX, --max MAX     nombre maximum de lignes à importer
   -j, --show-json       afficher la sortie JSON
+  -f, --info            afficher les informations d'utilisation des champs
   -s SAVE_AS, --save-as SAVE_AS
-                        sauvegarder la sortie JSON dans un fichier
+                        sauvegarder la sortie JSON ou CSV dans un fichier
   -v, --validate        valider les enregistrements JSON
   -r, --dry-run         ne pas procéder à l'import dans Kinto
   --siren SIREN         importer le SIREN spécifié uniquement
@@ -96,6 +97,12 @@ $ python import-solen.py export-solen.xlsx --debug
 
 ```
 $ python import-solen.py export-solen.xlsx --save-as=export.json
+```
+
+#### Ré-exporter les données Excel importées en CSV en préservant la sémantique JSON Egapro
+
+```
+$ python import-solen.py export-solen.xlsx --save-as=export.csv
 ```
 
 #### Paramétrage d'accès à Kinto

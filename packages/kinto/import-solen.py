@@ -21,11 +21,10 @@ from requests.exceptions import ConnectionError
 from xlrd.biffh import XLRDError
 
 # TODO:
-# - exception perso pour les classes d'import
 # - empêcher l'import dans Kinto si tous les enregistrements ne valident pas
 
-
 # Configuration de l'import CSV
+
 CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]  # équivalents cellules vides
 DATE_FORMAT_INPUT = "%Y-%m-%d %H:%M:%S"  # format de date en entrée
 DATE_FORMAT_OUTPUT = "%d/%m/%Y"  # format de date en sortie
@@ -605,8 +604,7 @@ class KintoImporter(object):
         return client
 
     def add(self, record):
-        if not self.dryRun:
-            self.toImport.append(record)
+        self.toImport.append(record)
 
     def run(self):
         if self.dryRun:
@@ -620,6 +618,10 @@ class KintoImporter(object):
 
 
 def parse(args):
+    dryRun = args.dry_run
+    if args.save_as is not None:
+        printer.info("Export JSON demandé, sauvegarde dans Kinto désactivée.")
+        dryRun = True
     validator = initValidator("json-schema.json")
     try:
         excelData = ExcelData(args.xls_path)
@@ -628,7 +630,7 @@ def parse(args):
         exit(1)
     nb_rows = excelData.getNbRepondants()
     bar = Bar("Préparation des données", max=args.max if args.max is not None else nb_rows)
-    kintoImporter = KintoImporter(validator.schema, truncate=args.init_collection, dryRun=args.dry_run)
+    kintoImporter = KintoImporter(validator.schema, truncate=args.init_collection, dryRun=dryRun)
     count_processed = 0
     count_imported = 0
     errors = []
@@ -673,10 +675,39 @@ def parse(args):
             for error in errors:
                 printer.error(error)
     if args.save_as:
-        with open(args.save_as, "w") as json_file:
-            json_file.write(json.dumps(kintoImporter.toImport, indent=args.indent))
-            printer.success("Enregistrements JSON exportés dans " + args.save_as)
+        if args.save_as.endswith(".json"):
+            with open(args.save_as, "w") as json_file:
+                json_file.write(json.dumps(kintoImporter.toImport, indent=args.indent))
+            printer.success(f"Enregistrements JSON exportés dans le fichier '{args.save_as}'.")
+        elif args.save_as.endswith(".csv"):
+            flattenedJson = json.dumps([flattenJson(r) for r in kintoImporter.toImport])
+            data = pandas.read_json(io.StringIO(flattenedJson))
+            data.to_csv(args.save_as)
+            printer.success(f"Enregistrements CSV exportés dans le fichier '{args.save_as}'.")
+        else:
+            printer.error("Seuls les formats JSON et CSV sont supportés pour la sauvegarde.")
+            exit(1)
     kintoImporter.run()
+
+
+def flattenJson(b, prefix="", delim="/", val=None):
+    "See https://stackoverflow.com/a/57228641/330911"
+    if val is None:
+        val = {}
+    if isinstance(b, dict):
+        for j in b.keys():
+            flattenJson(b[j], prefix + delim + j, delim, val)
+    elif isinstance(b, list):
+        get = b
+        for j in range(len(get)):
+            key = str(j)
+            if isinstance(get[j], dict):
+                if "key" in get[j]:
+                    key = get[j]["key"]
+            flattenJson(get[j], prefix + delim + key, delim, val)
+    else:
+        val[prefix] = b
+    return val
 
 
 class printer:
@@ -722,7 +753,7 @@ parser.add_argument("-i", "--indent", type=int, help="niveau d'indentation JSON"
 parser.add_argument("-m", "--max", type=int, help="nombre maximum de lignes à importer", default=None)
 parser.add_argument("-j", "--show-json", help="afficher la sortie JSON", action="store_true", default=False)
 parser.add_argument("-f", "--info", help="afficher les informations d'utilisation des champs", action="store_true", default=False)
-parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON dans un fichier")
+parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON ou CSV dans un fichier")
 parser.add_argument("-v", "--validate", help="valider les enregistrements JSON", action="store_true", default=False)
 parser.add_argument("-r", "--dry-run", help="ne pas procéder à l'import dans Kinto", action="store_true", default=False)
 parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniquement")
