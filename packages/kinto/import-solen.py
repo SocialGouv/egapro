@@ -194,14 +194,27 @@ class RowProcessor(object):
         self.importField("e-mail_declarant", "informationsDeclarant/email")
         self.importField("telephone", "informationsDeclarant/tel")
 
-    def importInformationsEntreprise(self):
-        if self.get("nom_UES") is None:
-            # On importe les champs commun avec une UES si et seulement si nous
-            # ne sommes pas en présence d'une UES, pour éviter l'écrasement
-            # potentiel des données préalablement renseignées.
+    def importInformationsEntrepriseOuUES(self):
+        # Note: nous ne consommons pas le champ "structure" car il n'est pas fiable;
+        # certaines UES ont renseigné ce champ comme "Entreprise"... Le seul champ
+        # réellement discriminant semble être "nom_UES".
+        if self.get("nom_UES") is not None:
+            # Import des données de l'UES
+            self.set("informationsEntreprise/structure", "UES")
+            self.importField("nom_UES", "informationsEntreprise/nomUES")
+            self.importField("nom_ets_UES", "informationsEntreprise/nomEntreprise")
+            # Note: le code NAF d'une UES est stocké dans le champ "Code NAF de cette entreprise"
+            self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNaf")  # attention format
+            self.importField("SIREN_UES", "informationsEntreprise/siren")
+            self.importEntreprisesUES()
+        else:
+            self.set("informationsEntreprise/structure", "Entreprise")
             self.importField("RS_ets", "informationsEntreprise/nomEntreprise")
+            # Note: le champ "Code NAF" ne concerne que les entreprises classiques
             self.importField("Code NAF", "informationsEntreprise/codeNaf")  # attention format
             self.importField("SIREN_ets", "informationsEntreprise/siren")
+
+        # Champs communs Entreprise/UES
         self.importField("Reg", "informationsEntreprise/region")
         self.importField("dpt", "informationsEntreprise/departement")
         self.importField("Adr ets", "informationsEntreprise/adresse")
@@ -243,21 +256,6 @@ class RowProcessor(object):
             entreprises.append({"nom": raisonSociale, "siren": siren})
         self.set("informationsEntreprise/nombresEntreprises", len(entreprises))
         self.set("informationsEntreprise/entreprises", entreprises)
-
-    def importUES(self):
-        # Note: nous ne consommons pas le champ "structure" car il n'est pas fiable;
-        # certaines UES ont renseigné ce champ comme "Entreprise"... Le seul champ
-        # réellement discriminant semble être "nom_UES".
-        if self.get("nom_UES") is None:
-            self.set("informationsEntreprise/structure", "Entreprise")
-        else:
-            self.set("informationsEntreprise/structure", "UES")
-            # Import des données de l'UES
-            self.importField("nom_UES", "informationsEntreprise/nomUES")
-            self.importField("nom_ets_UES", "informationsEntreprise/nomEntreprise")
-            self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNaf")
-            self.importField("SIREN_UES", "informationsEntreprise/siren")
-            self.importEntreprisesUES()
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES
@@ -463,8 +461,7 @@ class RowProcessor(object):
         self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration", format=DATE_FORMAT_OUTPUT_HEURE)
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()
-        self.importInformationsEntreprise()
-        self.importUES()
+        self.importInformationsEntrepriseOuUES()
         self.importNiveauResultat()
         self.importIndicateurUn()
         if self.get("tranche_effectif") == TRANCHE_50_250:
