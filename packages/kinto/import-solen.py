@@ -450,6 +450,7 @@ class RowProcessor(object):
         self.importField("mesures_correction", "declaration/mesuresCorrection")
 
     def run(self, validate=False):
+        self.set("source", "solen")
         self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration")
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()

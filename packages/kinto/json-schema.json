@@ -22,6 +22,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "source": { "type": "string" },
         "informations": {
           "type": "object",
           "additionalProperties": false,
