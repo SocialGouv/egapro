@@ -56,6 +56,7 @@ export type AppState = {
     adresse: string;
     codePostal: string;
     commune: string;
+    structure: Structure;
   };
   informationsDeclarant: {
     formValidated: FormState;
@@ -85,6 +86,8 @@ export type PeriodeDeclaration =
 export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus";
 
 export type FormState = "None" | "Valid" | "Invalid";
+
+export type Structure = "Entreprise" | "Unité Economique et Sociale (UES)";
 
 export type ActionType =
   | {
@@ -286,6 +289,7 @@ export type ActionInformationsEntrepriseData = {
   adresse: string;
   codePostal: string;
   commune: string;
+  structure: Structure;
 };
 
 export type ActionInformationsDeclarantData = {

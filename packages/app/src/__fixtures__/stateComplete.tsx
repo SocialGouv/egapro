@@ -1,6 +1,7 @@
 import {
   CategorieSocioPro,
   PeriodeDeclaration,
+  Structure,
   TranchesAges,
   TrancheEffectifs
 } from "../globals.d";
@@ -411,7 +412,8 @@ const actionUpdateInformationsEntreprise = {
     departement: "Drôme",
     adresse: "30 rue des alouettes",
     codePostal: "12345",
-    commune: "Trifouilly"
+    commune: "Trifouilly",
+    structure: "Unité Economique et Sociale (UES)" as Structure
   }
 };
 

@@ -5,7 +5,8 @@ import { Form } from "react-final-form";
 import {
   AppState,
   FormState,
-  ActionInformationsEntrepriseData
+  ActionInformationsEntrepriseData,
+  Structure
 } from "../../globals";
 
 import { required } from "../../utils/formHelpers";
@@ -14,6 +15,7 @@ import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
+import RadioButtons from "../../components/RadioButtons";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
@@ -38,7 +40,8 @@ const validateForm = ({
   departement,
   adresse,
   codePostal,
-  commune
+  commune,
+  structure
 }: {
   nomEntreprise: string;
   siren: string;
@@ -48,6 +51,7 @@ const validateForm = ({
   adresse: string;
   codePostal: string;
   commune: string;
+  structure: Structure;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -56,7 +60,8 @@ const validateForm = ({
   departement: validate(departement),
   adresse: validate(adresse),
   codePostal: validate(codePostal),
-  commune: validate(commune)
+  commune: validate(commune),
+  structure: validate(structure)
 });
 
 interface Props {
@@ -82,7 +87,8 @@ function InformationsEntrepriseForm({
     departement: informationsEntreprise.departement,
     adresse: informationsEntreprise.adresse,
     codePostal: informationsEntreprise.codePostal,
-    commune: informationsEntreprise.commune
+    commune: informationsEntreprise.commune,
+    structure: informationsEntreprise.structure
   };
 
   const saveForm = (formData: any) => {
@@ -94,7 +100,8 @@ function InformationsEntrepriseForm({
       departement,
       adresse,
       codePostal,
-      commune
+      commune,
+      structure
     } = formData;
 
     updateInformationsEntreprise({
@@ -105,7 +112,8 @@ function InformationsEntrepriseForm({
       departement,
       adresse,
       codePostal,
-      commune
+      commune,
+      structure
     });
   };
 
@@ -174,6 +182,23 @@ function InformationsEntrepriseForm({
             fieldName="commune"
             errorText="la commune n'est pas valide"
             readOnly={readOnly}
+          />
+
+          <RadioButtons
+            fieldName="structure"
+            label="je déclare l'index en tant qu'"
+            value={informationsEntreprise.structure}
+            readOnly={readOnly}
+            choices={[
+              {
+                label: "entreprise",
+                value: "Entreprise"
+              },
+              {
+                label: "Unité Economique et Sociale (UES)",
+                value: "Unité Economique et Sociale (UES)"
+              }
+            ]}
           />
 
           {readOnly ? (

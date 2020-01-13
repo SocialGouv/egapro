@@ -120,7 +120,8 @@ const defaultState: AppState = {
     departement: "",
     adresse: "",
     codePostal: "",
-    commune: ""
+    commune: "",
+    structure: "Entreprise"
   },
   informationsDeclarant: {
     formValidated: "None",

@@ -361,6 +361,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -720,6 +721,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -1045,6 +1047,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -1408,6 +1411,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -1735,6 +1739,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -2096,6 +2101,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -2421,6 +2427,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -2782,6 +2789,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -3107,6 +3115,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -3468,6 +3477,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -3793,6 +3803,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -4154,6 +4165,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -4479,6 +4491,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -4840,6 +4853,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -5165,6 +5179,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -5526,6 +5541,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -5851,6 +5867,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -6212,6 +6229,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -6571,6 +6589,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -6932,6 +6951,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -7291,6 +7311,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -7652,6 +7673,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -8011,6 +8033,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -8405,6 +8428,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -8764,6 +8788,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -9091,6 +9116,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -9416,6 +9442,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -9777,6 +9804,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -10102,6 +10130,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -10463,6 +10492,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -10788,6 +10818,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -11149,6 +11180,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -11474,6 +11506,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -11828,6 +11861,7 @@ Object {
     "nom": "Norris",
     "prenom": "Chuck",
     "region": "Languedoc-Roussillon",
+    "structure": "Unité Economique et Sociale (UES)",
     "tel": "0102030405",
   },
   "informationsEntreprise": Object {
@@ -11840,6 +11874,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -12158,6 +12193,7 @@ Object {
     "nom": "Norris",
     "prenom": "Chuck",
     "region": "Languedoc-Roussillon",
+    "structure": "Unité Economique et Sociale (UES)",
     "tel": "0102030405",
   },
   "informationsEntreprise": Object {
@@ -12170,6 +12206,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -12531,6 +12568,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "12345",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -12856,6 +12894,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "",
     "siren": "12345",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -13217,6 +13256,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -13542,6 +13582,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -13903,6 +13944,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -14228,6 +14270,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -14589,6 +14632,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -14948,6 +14992,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -15307,6 +15352,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -15666,6 +15712,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -15991,6 +16038,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -16352,6 +16400,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -16677,6 +16726,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -17038,6 +17088,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -17363,6 +17414,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -17724,6 +17776,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -18049,6 +18102,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -18410,6 +18464,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -18735,6 +18790,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -19096,6 +19152,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -19421,6 +19478,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -19782,6 +19840,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -20107,6 +20166,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -20468,6 +20528,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -20827,6 +20888,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -21152,6 +21214,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -21513,6 +21576,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -21872,6 +21936,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -22197,6 +22262,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -22558,6 +22624,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -22883,6 +22950,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -23244,6 +23312,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -23569,6 +23638,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -23930,6 +24000,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -24255,6 +24326,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
@@ -24616,6 +24688,7 @@ Object {
     "nomEntreprise": "acme",
     "region": "Auverge Rhône Alpes",
     "siren": "1234",
+    "structure": "Unité Economique et Sociale (UES)",
   },
 }
 `;
@@ -24941,6 +25014,7 @@ Object {
     "nomEntreprise": "",
     "region": "",
     "siren": "",
+    "structure": "Entreprise",
   },
 }
 `;
