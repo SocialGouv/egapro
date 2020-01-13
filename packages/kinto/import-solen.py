@@ -195,9 +195,13 @@ class RowProcessor(object):
         self.importField("telephone", "informationsDeclarant/tel")
 
     def importInformationsEntreprise(self):
-        self.importField("RS_ets", "informationsEntreprise/nomEntreprise")
-        self.importField("SIREN_ets", "informationsEntreprise/siren")
-        self.importField("Code NAF", "informationsEntreprise/codeNaf")  # attention format
+        if self.get("nom_UES") is None:
+            # On importe les champs commun avec une UES si et seulement si nous
+            # ne sommes pas en présence d'une UES, pour éviter l'écrasement
+            # potentiel des données préalablement renseignées.
+            self.importField("RS_ets", "informationsEntreprise/nomEntreprise")
+            self.importField("Code NAF", "informationsEntreprise/codeNaf")  # attention format
+            self.importField("SIREN_ets", "informationsEntreprise/siren")
         self.importField("Reg", "informationsEntreprise/region")
         self.importField("dpt", "informationsEntreprise/departement")
         self.importField("Adr ets", "informationsEntreprise/adresse")
