@@ -69,7 +69,8 @@ function RadioButtons({ readOnly, fieldName, label, value, choices }: Props) {
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    marginBottom: 20
   }),
   headerLabel: css({
     marginBottom: 10

@@ -57,6 +57,7 @@ export type AppState = {
     codePostal: string;
     commune: string;
     structure: Structure;
+    nomUES: string;
   };
   informationsDeclarant: {
     formValidated: FormState;
@@ -290,6 +291,7 @@ export type ActionInformationsEntrepriseData = {
   codePostal: string;
   commune: string;
   structure: Structure;
+  nomUES: string;
 };
 
 export type ActionInformationsDeclarantData = {

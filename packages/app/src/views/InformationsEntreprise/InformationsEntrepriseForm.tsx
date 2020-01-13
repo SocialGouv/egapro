@@ -41,7 +41,8 @@ const validateForm = ({
   adresse,
   codePostal,
   commune,
-  structure
+  structure,
+  nomUES
 }: {
   nomEntreprise: string;
   siren: string;
@@ -52,6 +53,7 @@ const validateForm = ({
   codePostal: string;
   commune: string;
   structure: Structure;
+  nomUES: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -61,7 +63,8 @@ const validateForm = ({
   adresse: validate(adresse),
   codePostal: validate(codePostal),
   commune: validate(commune),
-  structure: validate(structure)
+  structure: validate(structure),
+  nomUES: validate(nomUES)
 });
 
 interface Props {
@@ -88,7 +91,8 @@ function InformationsEntrepriseForm({
     adresse: informationsEntreprise.adresse,
     codePostal: informationsEntreprise.codePostal,
     commune: informationsEntreprise.commune,
-    structure: informationsEntreprise.structure
+    structure: informationsEntreprise.structure,
+    nomUES: informationsEntreprise.nomUES
   };
 
   const saveForm = (formData: any) => {
@@ -101,7 +105,8 @@ function InformationsEntrepriseForm({
       adresse,
       codePostal,
       commune,
-      structure
+      structure,
+      nomUES
     } = formData;
 
     updateInformationsEntreprise({
@@ -113,7 +118,8 @@ function InformationsEntrepriseForm({
       adresse,
       codePostal,
       commune,
-      structure
+      structure,
+      nomUES
     });
   };
 
@@ -132,7 +138,7 @@ function InformationsEntrepriseForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, hasValidationErrors, submitFailed }) => (
+      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <TextField
@@ -187,7 +193,7 @@ function InformationsEntrepriseForm({
           <RadioButtons
             fieldName="structure"
             label="je déclare l'index en tant qu'"
-            value={informationsEntreprise.structure}
+            value={values.structure}
             readOnly={readOnly}
             choices={[
               {
@@ -200,6 +206,15 @@ function InformationsEntrepriseForm({
               }
             ]}
           />
+
+          {values.structure === "Unité Economique et Sociale (UES)" && (
+            <TextField
+              label="Nom de l'UES"
+              fieldName="nomUES"
+              errorText="le nom de l'UES n'est pas valide"
+              readOnly={readOnly}
+            />
+          )}
 
           {readOnly ? (
             <ActionBar>

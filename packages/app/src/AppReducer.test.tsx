@@ -702,7 +702,8 @@ describe("updateInformationsDeclarant", () => {
       adresse: "2 rue du mérou",
       codePostal: "34000",
       commune: "Montpellier",
-      structure: "Unité Economique et Sociale (UES)"
+      structure: "Unité Economique et Sociale (UES)",
+      nomUES: "foobar UES"
     }
   };
 
