@@ -22,6 +22,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "source": { "type": "string" },
         "informations": {
           "type": "object",
           "additionalProperties": false,
@@ -155,7 +156,6 @@
             },
             "coefficientGroupFormValidated": { "type": "string" },
             "coefficientEffectifFormValidated": { "type": "string" },
-            "dateConsultationCSE": { "type": "string" },
             "resultatFinal": { "type": "number" },
             "sexeSurRepresente": {
               "$ref": "#/definitions/sexeSurRepresente"
@@ -282,7 +282,7 @@
             },
             "nombreSalariesFemmes": { "type": "integer" },
             "nombreSalariesHommes": { "type": "integer" },
-            "resultatFinal": { "type": "number" },
+            "resultatFinal": { "type": "integer" },
             "sexeSurRepresente": {
               "$ref": "#/definitions/sexeSurRepresente"
             },
@@ -295,26 +295,40 @@
           "properties": {
             "nom": { "type": "string" },
             "prenom": { "type": "string" },
-            "tel": { "type": "string" },
-            "region": { "type": "string" },
-            "departement": { "type": "string" },
-            "adresse": { "type": "string" },
-            "codePostal": { "type": "string" },
-            "commune": { "type": "string" }
+            "email": { "type": "string" },
+            "tel": { "type": "string" }
           }
         },
         "informationsEntreprise": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "structure": {
+              "type": "string",
+              "enum": ["Entreprise", "UES"]
+            },
             "nomEntreprise": { "type": "string" },
+            "region": { "type": "string" },
+            "departement": { "type": "string" },
+            "adresse": { "type": "string" },
+            "codePostal": { "type": "string" },
+            "commune": { "type": "string" },
             "siren": { "type": "string" },
             "codeNaf": { "type": "string" },
             "nomUES": { "type": "string" },
-            "nomEntrepriseUES": { "type": "string" },
-            "sirenUES": { "type": "string" },
             "codeNAF": { "type": "string" },
-            "nombresEntreprises": { "type": "integer" }
+            "nombresEntreprises": { "type": "integer" },
+            "entreprises": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "nom": { "type": "string" },
+                  "siren": { "type": "string" }
+                }
+              }
+            }
           }
         },
         "informationsComplementaires": {
@@ -322,14 +336,11 @@
           "additionalProperties": false,
           "properties": {
             "anneeDeclaration": { "type": "integer" },
-            "structure": {
-              "type": "string",
-              "enum": ["Entreprise", "Unité Economique et Sociale (UES)"]
-            }
+            "dateConsultationCSE": { "type": "string" }
           }
         },
         "declaration": {
-          "noteMax": { "type": "integer" },
+          "dateDeclaration": { "type": "string" },
           "indicateurUn": { "type": "integer" },
           "indicateurDeux": { "type": "integer" },
           "indicateurDeuxTroisEcart": { "type": "number" },
