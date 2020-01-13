@@ -4,6 +4,7 @@ import dpath
 import io
 import json
 import kinto_http
+import math
 import os
 import pandas
 import re
@@ -99,8 +100,12 @@ class RowProcessor(object):
     def importFloatField(self, csvFieldName, path):
         return self.importField(csvFieldName, path, type=float)
 
-    def importIntField(self, csvFieldName, path):
-        return self.importField(csvFieldName, path, type=int)
+    def importIntField(self, csvFieldName, path, fromFloat=False):
+        if fromFloat:
+            type = lambda x: math.ceil(float(x))
+        else:
+            type = int
+        return self.importField(csvFieldName, path, type=type)
 
     def get(self, csvFieldName):
         if csvFieldName not in self.row:
@@ -428,7 +433,7 @@ class RowProcessor(object):
         self.set("indicateurQuatre/presenceCongeMat", not nonCalculable)
 
     def importIndicateurCinq(self):
-        self.importFloatField("resultat_tab5", "indicateurCinq/resultatFinal")
+        self.importIntField("resultat_tab5", "indicateurCinq/resultatFinal", fromFloat=True)
         self.importField("sexe_sur_represente_tab5", "indicateurCinq/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab5", "indicateurCinq/noteFinale")
 

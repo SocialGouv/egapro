@@ -282,7 +282,7 @@
             },
             "nombreSalariesFemmes": { "type": "integer" },
             "nombreSalariesHommes": { "type": "integer" },
-            "resultatFinal": { "type": "number" },
+            "resultatFinal": { "type": "integer" },
             "sexeSurRepresente": {
               "$ref": "#/definitions/sexeSurRepresente"
             },
