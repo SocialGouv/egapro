@@ -250,9 +250,9 @@ class RowProcessor(object):
             self.set("informationsEntreprise/structure", "UES")
             # Import des données de l'UES
             self.importField("nom_UES", "informationsEntreprise/nomUES")
-            self.importField("nom_ets_UES", "informationsEntreprise/nomEntrepriseUES")
+            self.importField("nom_ets_UES", "informationsEntreprise/nomEntreprise")
             self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNaf")
-            self.importField("SIREN_UES", "informationsEntreprise/sirenUES")
+            self.importField("SIREN_UES", "informationsEntreprise/siren")
             self.importEntreprisesUES()
 
     def importNiveauResultat(self):

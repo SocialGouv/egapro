@@ -316,8 +316,6 @@
             "siren": { "type": "string" },
             "codeNaf": { "type": "string" },
             "nomUES": { "type": "string" },
-            "nomEntrepriseUES": { "type": "string" },
-            "sirenUES": { "type": "string" },
             "codeNAF": { "type": "string" },
             "nombresEntreprises": { "type": "integer" },
             "entreprises": {
