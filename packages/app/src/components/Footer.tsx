@@ -48,14 +48,6 @@ function Footer() {
         >
           retrouvez le simulateur au format Excel
         </a>
-        <a
-          href="https://solen1.enquetes.social.gouv.fr/cgi-5/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
-          target="_blank"
-          rel="noopener noreferrer"
-          css={styles.link}
-        >
-          accédez au formulaire de déclaration
-        </a>
       </div>
 
       <div css={styles.footerInfo}>
