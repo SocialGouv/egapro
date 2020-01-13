@@ -413,7 +413,8 @@ const actionUpdateInformationsEntreprise = {
     adresse: "30 rue des alouettes",
     codePostal: "12345",
     commune: "Trifouilly",
-    structure: "Unité Economique et Sociale (UES)" as Structure
+    structure: "Unité Economique et Sociale (UES)" as Structure,
+    nomUES: "nom d'une UES"
   }
 };
 
