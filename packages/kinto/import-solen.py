@@ -29,6 +29,7 @@ from xlrd.biffh import XLRDError
 CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]  # équivalents cellules vides
 DATE_FORMAT_INPUT = "%Y-%m-%d %H:%M:%S"  # format de date en entrée
 DATE_FORMAT_OUTPUT = "%d/%m/%Y"  # format de date en sortie
+DATE_FORMAT_OUTPUT_HEURE = "%d/%m/%Y %H:%M"  # format de date avec heure en sortie
 EXCEL_NOM_FEUILLE_REPONDANTS = "BDD REPONDANTS"  # nom de feuille excel repondants
 EXCEL_NOM_FEUILLE_UES = "BDD UES"  # nom de feuille excel UES
 NON_RENSEIGNE = "<non renseigné>"  # valeur si champ requis absent
@@ -87,12 +88,12 @@ class RowProcessor(object):
         elif self.get(csvFieldName) == "Non":
             return self.set(path, False if not negate else True)
 
-    def importDateField(self, csvFieldName, path):
+    def importDateField(self, csvFieldName, path, format=DATE_FORMAT_OUTPUT):
         date = self.get(csvFieldName)
         if date is None:
             return
         try:
-            formatted = datetime.strptime(date, DATE_FORMAT_INPUT).strftime(DATE_FORMAT_OUTPUT)
+            formatted = datetime.strptime(date, DATE_FORMAT_INPUT).strftime(format)
             return self.set(path, formatted)
         except ValueError as err:
             raise RowProcessorError(f"Impossible de traiter la valeur date '{date}'.")
@@ -455,7 +456,7 @@ class RowProcessor(object):
 
     def run(self, validate=False):
         self.set("source", "solen")
-        self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration")
+        self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration", format=DATE_FORMAT_OUTPUT_HEURE)
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()
         self.importInformationsEntreprise()
