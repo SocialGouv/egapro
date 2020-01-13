@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.1](https://github.com/SocialGouv/egapro/compare/v2.3.0...v2.3.1) (2020-01-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nodemailer to v6.4.2 ([#357](https://github.com/SocialGouv/egapro/issues/357)) ([d38df25](https://github.com/SocialGouv/egapro/commit/d38df25))
+* **deps:** update dependency pino to v5.15.0 ([#361](https://github.com/SocialGouv/egapro/issues/361)) ([6ccbce7](https://github.com/SocialGouv/egapro/commit/6ccbce7))
+
+
+
+
+
 # [2.3.0](https://github.com/SocialGouv/egapro/compare/v2.2.1...v2.3.0) (2019-12-10)
 
 **Note:** Version bump only for package api

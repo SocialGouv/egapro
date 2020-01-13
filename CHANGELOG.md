@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.1](https://github.com/SocialGouv/egapro/compare/v2.3.0...v2.3.1) (2020-01-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @emotion/core to v10.0.27 ([#374](https://github.com/SocialGouv/egapro/issues/374)) ([67d52ec](https://github.com/SocialGouv/egapro/commit/67d52ec))
+* **deps:** update dependency @types/react-datepicker to v2.10.0 ([#377](https://github.com/SocialGouv/egapro/issues/377)) ([9907601](https://github.com/SocialGouv/egapro/commit/9907601))
+* **deps:** update dependency nodemailer to v6.4.2 ([#357](https://github.com/SocialGouv/egapro/issues/357)) ([d38df25](https://github.com/SocialGouv/egapro/commit/d38df25))
+* **deps:** update dependency pino to v5.15.0 ([#361](https://github.com/SocialGouv/egapro/issues/361)) ([6ccbce7](https://github.com/SocialGouv/egapro/commit/6ccbce7))
+* **liens vers solen:** suppression des liens direct vers SOLEN en faveur d'un lien vers le site du ministère ([ccf9a22](https://github.com/SocialGouv/egapro/commit/ccf9a22))
+
+
+
+
+
 # [2.3.0](https://github.com/SocialGouv/egapro/compare/v2.2.1...v2.3.0) (2019-12-10)
 
 
