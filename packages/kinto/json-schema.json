@@ -343,7 +343,6 @@
         },
         "declaration": {
           "dateDeclaration": { "type": "string" },
-          "noteMax": { "type": "integer" },
           "indicateurUn": { "type": "integer" },
           "indicateurDeux": { "type": "integer" },
           "indicateurDeuxTroisEcart": { "type": "number" },
