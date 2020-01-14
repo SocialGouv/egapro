@@ -9,7 +9,6 @@ import {
   AppState,
   FormState,
   ActionInformationsEntrepriseData,
-  EntrepriseUES,
   Structure
 } from "../../globals";
 
@@ -80,8 +79,6 @@ const validateForm = ({
 interface Props {
   informationsEntreprise: AppState["informationsEntreprise"];
   readOnly: boolean;
-  updateInformationsEntrepriseAddEntrepriseUES: () => void;
-  updateInformationsEntrepriseDeleteEntrepriseUES: (index: number) => void;
   updateInformationsEntreprise: (
     data: ActionInformationsEntrepriseData
   ) => void;
@@ -91,8 +88,6 @@ interface Props {
 function InformationsEntrepriseForm({
   informationsEntreprise,
   readOnly,
-  updateInformationsEntrepriseAddEntrepriseUES,
-  updateInformationsEntrepriseDeleteEntrepriseUES,
   updateInformationsEntreprise,
   validateInformationsEntreprise
 }: Props) {
@@ -261,7 +256,6 @@ function InformationsEntrepriseForm({
               />
               <FieldArray name="entreprisesUES">
                 {({ fields }) => {
-                  console.log("fields", fields);
                   return (
                     <Fragment>
                       {fields.map((entrepriseUES, index) => (
@@ -274,51 +268,48 @@ function InformationsEntrepriseForm({
                           readOnly={readOnly}
                         />
                       ))}
+                      {readOnly ? (
+                        <div css={styles.spacerAdd} />
+                      ) : (
+                        <ActionLink
+                          onClick={() => fields.push({ nom: "", siren: "" })}
+                          style={styles.add}
+                        >
+                          <div css={styles.addIcon}>
+                            <svg
+                              width="26"
+                              height="26"
+                              viewBox="0 0 26 26"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
+                                stroke="white"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </div>
+                          <span>ajouter une entreprise dans l'UES</span>
+                        </ActionLink>
+                      )}
+                      <Modal
+                        isOpen={indexEntrepriseToDelete !== undefined}
+                        onRequestClose={closeModal}
+                      >
+                        <ModalConfirmDelete
+                          closeModal={closeModal}
+                          deleteEntreprise={() => {
+                            indexEntrepriseToDelete !== undefined &&
+                              fields.remove(indexEntrepriseToDelete);
+                          }}
+                        />
+                      </Modal>
                     </Fragment>
                   );
                 }}
               </FieldArray>
-
-              {readOnly ? (
-                <div css={styles.spacerAdd} />
-              ) : (
-                <ActionLink
-                  onClick={updateInformationsEntrepriseAddEntrepriseUES}
-                  style={styles.add}
-                >
-                  <div css={styles.addIcon}>
-                    <svg
-                      width="26"
-                      height="26"
-                      viewBox="0 0 26 26"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-                  <span>ajouter une entreprise dans l'UES</span>
-                </ActionLink>
-              )}
-              <Modal
-                isOpen={indexEntrepriseToDelete !== undefined}
-                onRequestClose={closeModal}
-              >
-                <ModalConfirmDelete
-                  closeModal={closeModal}
-                  deleteEntreprise={() => {
-                    indexEntrepriseToDelete !== undefined &&
-                      updateInformationsEntrepriseDeleteEntrepriseUES(
-                        indexEntrepriseToDelete
-                      );
-                  }}
-                />
-              </Modal>
             </Fragment>
           )}
 
