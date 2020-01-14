@@ -202,13 +202,6 @@ export type ActionType =
       valid: FormState;
     }
   | {
-      type: "updateInformationsEntrepriseAddEntrepriseUES";
-    }
-  | {
-      type: "updateInformationsEntrepriseDeleteEntrepriseUES";
-      index: number;
-    }
-  | {
       type: "updateInformationsDeclarant";
       data: ActionInformationsDeclarantData;
     }

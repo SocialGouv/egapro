@@ -33,20 +33,6 @@ function InformationsEntreprise({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const updateInformationsEntrepriseAddEntrepriseUES = useCallback(
-    () => dispatch({ type: "updateInformationsEntrepriseAddEntrepriseUES" }),
-    [dispatch]
-  );
-
-  const updateInformationsEntrepriseDeleteEntrepriseUES = useCallback(
-    (index: number) =>
-      dispatch({
-        type: "updateInformationsEntrepriseDeleteEntrepriseUES",
-        index
-      }),
-    [dispatch]
-  );
-
   return (
     <PageInformationsEntreprise>
       <LayoutFormAndResult
@@ -55,12 +41,6 @@ function InformationsEntreprise({ state, dispatch }: Props) {
             informationsEntreprise={state.informationsEntreprise}
             readOnly={state.informationsEntreprise.formValidated === "Valid"}
             updateInformationsEntreprise={updateInformationsEntreprise}
-            updateInformationsEntrepriseAddEntrepriseUES={
-              updateInformationsEntrepriseAddEntrepriseUES
-            }
-            updateInformationsEntrepriseDeleteEntrepriseUES={
-              updateInformationsEntrepriseDeleteEntrepriseUES
-            }
             validateInformationsEntreprise={validateInformationsEntreprise}
           />
         }
