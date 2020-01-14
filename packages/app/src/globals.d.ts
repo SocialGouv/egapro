@@ -60,6 +60,7 @@ export type AppState = {
     nomUES: string;
     effectifGlobalFemmes: number | undefined;
     effectifGlobalHommes: number | undefined;
+    entreprisesUES: Array<EntrepriseUES>;
   };
   informationsDeclarant: {
     formValidated: FormState;
@@ -91,6 +92,11 @@ export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus";
 export type FormState = "None" | "Valid" | "Invalid";
 
 export type Structure = "Entreprise" | "Unité Economique et Sociale (UES)";
+
+export interface EntrepriseUES {
+  nom: string;
+  siren: string;
+}
 
 export type ActionType =
   | {
@@ -196,6 +202,13 @@ export type ActionType =
       valid: FormState;
     }
   | {
+      type: "updateInformationsEntrepriseAddEntrepriseUES";
+    }
+  | {
+      type: "updateInformationsEntrepriseDeleteEntrepriseUES";
+      index: number;
+    }
+  | {
       type: "updateInformationsDeclarant";
       data: ActionInformationsDeclarantData;
     }
@@ -296,6 +309,7 @@ export type ActionInformationsEntrepriseData = {
   nomUES: string;
   effectifGlobalFemmes: number | undefined;
   effectifGlobalHommes: number | undefined;
+  entreprisesUES: Array<EntrepriseUES>;
 };
 
 export type ActionInformationsDeclarantData = {

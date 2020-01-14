@@ -4,6 +4,7 @@ import {
   AppState,
   ActionType,
   CategorieSocioPro,
+  EntrepriseUES,
   TranchesAges,
   PeriodeDeclaration
 } from "./globals.d";
@@ -62,6 +63,11 @@ const dataIndicateurTrois = mapEnum(
     tauxPromotionHommes: undefined
   })
 );
+
+const dataInformationsEntrepriseUES: EntrepriseUES = {
+  nom: "",
+  siren: ""
+};
 
 const defaultState: AppState = {
   informations: {
@@ -124,7 +130,8 @@ const defaultState: AppState = {
     structure: "Entreprise",
     nomUES: "",
     effectifGlobalFemmes: undefined,
-    effectifGlobalHommes: undefined
+    effectifGlobalHommes: undefined,
+    entreprisesUES: []
   },
   informationsDeclarant: {
     formValidated: "None",
@@ -491,6 +498,36 @@ function AppReducer(
         informationsEntreprise: {
           ...state.informationsEntreprise,
           formValidated: action.valid
+        }
+      };
+    }
+    case "updateInformationsEntrepriseAddEntrepriseUES": {
+      const newEntrepriseUES = { ...dataInformationsEntrepriseUES }; // Clone to avoid mutable issues
+      const entreprisesUES = [
+        ...state.informationsEntreprise.entreprisesUES,
+        newEntrepriseUES
+      ];
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
+          entreprisesUES
+        }
+      };
+    }
+    case "updateInformationsEntrepriseDeleteEntrepriseUES": {
+      const entreprisesUES = [
+        ...state.informationsEntreprise.entreprisesUES.slice(0, action.index),
+        ...state.informationsEntreprise.entreprisesUES.slice(
+          action.index + 1,
+          state.informationsEntreprise.entreprisesUES.length
+        )
+      ];
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
+          entreprisesUES
         }
       };
     }

@@ -1,13 +1,19 @@
 /** @jsx jsx */
+import { Fragment, useState } from "react";
 import { css, jsx } from "@emotion/core";
+import arrayMutators from "final-form-arrays";
 import { Form } from "react-final-form";
+import { FieldArray } from "react-final-form-arrays";
 
 import {
   AppState,
   FormState,
   ActionInformationsEntrepriseData,
+  EntrepriseUES,
   Structure
 } from "../../globals";
+
+import globalStyles from "../../utils/globalStyles";
 
 import { required } from "../../utils/formHelpers";
 
@@ -16,9 +22,12 @@ import ActionLink from "../../components/ActionLink";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
+import InputField from "./components/EntrepriseUESInputField";
+import ModalConfirmDelete from "./components/EntrepriseUESModalConfirmDelete";
 import RadioButtons from "../../components/RadioButtons";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import { Modal } from "../../components/ModalContext";
 
 ///////////////////
 
@@ -55,8 +64,6 @@ const validateForm = ({
   commune: string;
   structure: Structure;
   nomUES: string;
-  effectifGlobalFemmes: number | undefined;
-  effectifGlobalHommes: number | undefined;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -73,6 +80,8 @@ const validateForm = ({
 interface Props {
   informationsEntreprise: AppState["informationsEntreprise"];
   readOnly: boolean;
+  updateInformationsEntrepriseAddEntrepriseUES: () => void;
+  updateInformationsEntrepriseDeleteEntrepriseUES: (index: number) => void;
   updateInformationsEntreprise: (
     data: ActionInformationsEntrepriseData
   ) => void;
@@ -82,6 +91,8 @@ interface Props {
 function InformationsEntrepriseForm({
   informationsEntreprise,
   readOnly,
+  updateInformationsEntrepriseAddEntrepriseUES,
+  updateInformationsEntrepriseDeleteEntrepriseUES,
   updateInformationsEntreprise,
   validateInformationsEntreprise
 }: Props) {
@@ -97,7 +108,8 @@ function InformationsEntrepriseForm({
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
     effectifGlobalFemmes: informationsEntreprise.effectifGlobalFemmes,
-    effectifGlobalHommes: informationsEntreprise.effectifGlobalHommes
+    effectifGlobalHommes: informationsEntreprise.effectifGlobalHommes,
+    entreprisesUES: informationsEntreprise.entreprisesUES
   };
 
   const saveForm = (formData: any) => {
@@ -113,7 +125,8 @@ function InformationsEntrepriseForm({
       structure,
       nomUES,
       effectifGlobalFemmes,
-      effectifGlobalHommes
+      effectifGlobalHommes,
+      entreprisesUES
     } = formData;
 
     updateInformationsEntreprise({
@@ -128,7 +141,8 @@ function InformationsEntrepriseForm({
       structure,
       nomUES,
       effectifGlobalFemmes,
-      effectifGlobalHommes
+      effectifGlobalHommes,
+      entreprisesUES
     });
   };
 
@@ -137,9 +151,20 @@ function InformationsEntrepriseForm({
     validateInformationsEntreprise("Valid");
   };
 
+  const [indexEntrepriseToDelete, setIndexEntrepriseToDelete] = useState<
+    number | undefined
+  >(undefined);
+  const confirmEntrepriseToDelete = (index: number) =>
+    setIndexEntrepriseToDelete(index);
+  const closeModal = () => setIndexEntrepriseToDelete(undefined);
+
   return (
     <Form
       onSubmit={onSubmit}
+      mutators={{
+        // potentially other mutators could be merged here
+        ...arrayMutators
+      }}
       initialValues={initialValues}
       validate={validateForm}
       // mandatory to not change user inputs
@@ -199,9 +224,19 @@ function InformationsEntrepriseForm({
             readOnly={readOnly}
           />
 
+          <FieldInputsMenWomen
+            name="effectif global de l'entreprise ou UES"
+            readOnly={readOnly}
+            calculable={true}
+            calculableNumber={0}
+            mask="number"
+            femmeFieldName="effectifGlobalFemmes"
+            hommeFieldName="effectifGlobalHommes"
+          />
+
           <RadioButtons
             fieldName="structure"
-            label="je déclare l'index en tant qu'"
+            label="je déclare l'index en tant que"
             value={values.structure}
             readOnly={readOnly}
             choices={[
@@ -217,23 +252,75 @@ function InformationsEntrepriseForm({
           />
 
           {values.structure === "Unité Economique et Sociale (UES)" && (
-            <TextField
-              label="Nom de l'UES"
-              fieldName="nomUES"
-              errorText="le nom de l'UES n'est pas valide"
-              readOnly={readOnly}
-            />
-          )}
+            <Fragment>
+              <TextField
+                label="Nom de l'UES"
+                fieldName="nomUES"
+                errorText="le nom de l'UES n'est pas valide"
+                readOnly={readOnly}
+              />
+              <FieldArray name="entreprisesUES">
+                {({ fields }) => {
+                  console.log("fields", fields);
+                  return (
+                    <Fragment>
+                      {fields.map((entrepriseUES, index) => (
+                        <InputField
+                          key={entrepriseUES}
+                          nom={`${entrepriseUES}.nom`}
+                          siren={`${entrepriseUES}.siren`}
+                          index={index}
+                          deleteEntrepriseUES={confirmEntrepriseToDelete}
+                          readOnly={readOnly}
+                        />
+                      ))}
+                    </Fragment>
+                  );
+                }}
+              </FieldArray>
 
-          <FieldInputsMenWomen
-            name="effectif global de l'entreprise ou UES"
-            readOnly={readOnly}
-            calculable={true}
-            calculableNumber={0}
-            mask="number"
-            femmeFieldName="effectifGlobalFemmes"
-            hommeFieldName="effectifGlobalHommes"
-          />
+              {readOnly ? (
+                <div css={styles.spacerAdd} />
+              ) : (
+                <ActionLink
+                  onClick={updateInformationsEntrepriseAddEntrepriseUES}
+                  style={styles.add}
+                >
+                  <div css={styles.addIcon}>
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 26 26"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+                  <span>ajouter une entreprise dans l'UES</span>
+                </ActionLink>
+              )}
+              <Modal
+                isOpen={indexEntrepriseToDelete !== undefined}
+                onRequestClose={closeModal}
+              >
+                <ModalConfirmDelete
+                  closeModal={closeModal}
+                  deleteEntreprise={() => {
+                    indexEntrepriseToDelete !== undefined &&
+                      updateInformationsEntrepriseDeleteEntrepriseUES(
+                        indexEntrepriseToDelete
+                      );
+                  }}
+                />
+              </Modal>
+            </Fragment>
+          )}
 
           {readOnly ? (
             <ActionBar>
@@ -276,6 +363,27 @@ const styles = {
     marginTop: 14,
     marginBottom: 14,
     textAlign: "center"
+  }),
+  add: css({
+    display: "flex",
+    alignItems: "center",
+    marginTop: 46 - 18 - 5,
+    textDecoration: "none"
+  }),
+  addIcon: css({
+    width: 32,
+    height: 32,
+    marginRight: 16,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: globalStyles.colors.default,
+    borderRadius: 16
+  }),
+  spacerAdd: css({
+    height: 32,
+    marginTop: 46 - 18 - 5
   })
 };
 

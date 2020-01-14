@@ -3,6 +3,7 @@ import {
   TranchesAges,
   FormState,
   PeriodeDeclaration,
+  Structure,
   TrancheEffectifs
 } from "./globals.d";
 
@@ -673,7 +674,16 @@ describe("updateInformationsEntreprise", () => {
       nomEntreprise: "acme",
       siren: "12345",
       codeNaf: "6789",
-      adresse: "12 rue des perdrix, 12345 Montmorency"
+      region: "Languedoc-Roussillon",
+      departement: "Hérault",
+      adresse: "2 rue du mérou",
+      codePostal: "34000",
+      commune: "Montpellier",
+      structure: "Unité Economique et Sociale (UES)" as Structure,
+      nomUES: "foobar UES",
+      effectifGlobalFemmes: 10,
+      effectifGlobalHommes: 11,
+      entreprisesUES: [{ nom: "entreprise 1", siren: "12345" }]
     }
   };
 
@@ -697,15 +707,7 @@ describe("updateInformationsDeclarant", () => {
       nom: "Norris",
       prenom: "Chuck",
       tel: "0102030405",
-      region: "Languedoc-Roussillon",
-      departement: "Hérault",
-      adresse: "2 rue du mérou",
-      codePostal: "34000",
-      commune: "Montpellier",
-      structure: "Unité Economique et Sociale (UES)",
-      nomUES: "foobar UES",
-      effectifGlobalFemmes: 10,
-      effectifGlobalHommes: 11
+      email: "foo@bar.com"
     }
   };
 
@@ -727,7 +729,9 @@ describe("updateInformationsComplementaires", () => {
     type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
     data: {
       dateConsultationCSE: "01/02/2017",
-      anneeDeclaration: "2018"
+      anneeDeclaration: "2018",
+      datePublication: "01/02/2020",
+      lienPublication: "https://example.com"
     }
   };
 
