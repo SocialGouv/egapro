@@ -154,25 +154,24 @@ except solen.AppError as err:
         print("- {error}")
 ```
 
-## La classe `App`
+## La classe `App(xls_path, max=None, siren=None, debug=False, progress=False, usePrompt=False, logger=None)`
 
 Le constructeur de la classe `solen.App` accepte principalement les mêmes arguments que la ligne de commande :
 
-### Arguments requis
+#### Arguments requis
 
-- `logger`: le logger, permettant d'intercepter et éventuellement traiter les messages applicatifs. Un exemple de logger est fourni dans l'exemple au-dessus.
 - `xls_path`: le chemin absolu vers le fichier Excel à traiter.
 
-### Arguments optionnels
+#### Arguments optionnels
 
 - `max`: le nombre maximum d'enregistrements à importer (par défaut: `None`)
 - `siren`: ne traiter que la déclaration associée au numéro SIREN spécifié (par défaut: `None`)
 - `debug`: afficher des messages de débogage supplémentaires (par défaut: `False`)
 - `progress`: Afficher une barre de progression (utile uniquement en ligne de commande; par défaut: `False`)
 - `usePrompt`: Demande confirmation à l'utilisateur pour les opérations dangereuses (utile uniquement en ligne de commande; par défaut: `False`)
-- `logger`: Utiliser un logger spécifique (voir documentation ci-après; default: `None`)
+- `logger`: un logger spécifique, permettant d'intercepter et éventuellement traiter les messages applicatifs (voir documentation ci-après; default: `None`)
 
-#### La méthode `App#importIntoKinto(init_collection=False, dryRun=False)`
+### La méthode `App#importIntoKinto(init_collection=False, dryRun=False)`
 
 Importe les données Solen Excel dans Kinto.
 
@@ -181,11 +180,11 @@ Options:
 - `init_collection`: initialiser la collection Kinto cible (par défaut: `False`)
 - `dryRun`: simuler l'importation effective dans Kinto (par défaut: `False`)
 
-#### La méthode `App#toCSV()`
+### La méthode `App#toCSV()`
 
 Retourne une chaîne CSV des enregistrements calculés.
 
-#### La méthode `App#toJSON(indent=None)`
+### La méthode `App#toJSON(indent=None)`
 
 Retourne une chaîne CSV des enregistrements calculés.
 
@@ -193,11 +192,11 @@ Options:
 
 - `indent`: indenter la sortie JSON au niveau spécifié (par défaut: `None`)
 
-#### La méthode `App#getStats()`
+### La méthode `App#getStats()`
 
 Retourne des informations supplémentaires sur les données Excel analysées.
 
-#### Utilisation d'un _logger_ spécifique
+### Utilisation d'un _logger_ spécifique
 
 Un logger est un objet destiné à recevoir et traiter les messages applicatifs lors des opérations d'import. Il vous est possible de définir un logger particulier pour intercepter et traiter ces messages en surchargeant la classe `solen.BaseLogger` et en implémentant les méthodes ad-hoc:
 
