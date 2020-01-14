@@ -703,7 +703,9 @@ describe("updateInformationsDeclarant", () => {
       codePostal: "34000",
       commune: "Montpellier",
       structure: "Unité Economique et Sociale (UES)",
-      nomUES: "foobar UES"
+      nomUES: "foobar UES",
+      effectifGlobalFemmes: 10,
+      effectifGlobalHommes: 11
     }
   };
 

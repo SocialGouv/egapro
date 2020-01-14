@@ -13,6 +13,7 @@ import { required } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import RadioButtons from "../../components/RadioButtons";
@@ -54,6 +55,8 @@ const validateForm = ({
   commune: string;
   structure: Structure;
   nomUES: string;
+  effectifGlobalFemmes: number | undefined;
+  effectifGlobalHommes: number | undefined;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -92,7 +95,9 @@ function InformationsEntrepriseForm({
     codePostal: informationsEntreprise.codePostal,
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
-    nomUES: informationsEntreprise.nomUES
+    nomUES: informationsEntreprise.nomUES,
+    effectifGlobalFemmes: informationsEntreprise.effectifGlobalFemmes,
+    effectifGlobalHommes: informationsEntreprise.effectifGlobalHommes
   };
 
   const saveForm = (formData: any) => {
@@ -106,7 +111,9 @@ function InformationsEntrepriseForm({
       codePostal,
       commune,
       structure,
-      nomUES
+      nomUES,
+      effectifGlobalFemmes,
+      effectifGlobalHommes
     } = formData;
 
     updateInformationsEntreprise({
@@ -119,7 +126,9 @@ function InformationsEntrepriseForm({
       codePostal,
       commune,
       structure,
-      nomUES
+      nomUES,
+      effectifGlobalFemmes,
+      effectifGlobalHommes
     });
   };
 
@@ -215,6 +224,16 @@ function InformationsEntrepriseForm({
               readOnly={readOnly}
             />
           )}
+
+          <FieldInputsMenWomen
+            name="effectif global de l'entreprise ou UES"
+            readOnly={readOnly}
+            calculable={true}
+            calculableNumber={0}
+            mask="number"
+            femmeFieldName="effectifGlobalFemmes"
+            hommeFieldName="effectifGlobalHommes"
+          />
 
           {readOnly ? (
             <ActionBar>
