@@ -13,6 +13,7 @@ import tarfile
 
 from collections import OrderedDict
 from datetime import datetime, timedelta
+from itertools import islice
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
 from kinto_http.exceptions import KintoException
@@ -98,8 +99,27 @@ class ConsoleLogger(BaseLogger):
         sys.stdout.flush()
 
 
+class NoLogger(BaseLogger):
+    def std(self, str):
+        pass
+
+    def error(self, str):
+        pass
+
+    def info(self, str):
+        pass
+
+    def success(self, str):
+        pass
+
+    def warn(self, str):
+        pass
+
+
 class AppError(RuntimeError):
-    pass
+    def __init__(self, message, errors=None):
+        super().__init__(message)
+        self.errors = errors if errors is not None else []
 
 
 class ExcelDataError(RuntimeError):
@@ -189,21 +209,20 @@ class RowProcessor(object):
                 raise RowProcessorError(f"Impossible de créer le chemin '{path}' à la valeur '{value}'.")
             return value
 
-    def toKintoRecord(self, validate=False):
+    def toKintoRecord(self):
         kintoRecord = {"id": self.get("id"), "data": self.record}
-        if validate:
-            try:
-                self.validator.validate(kintoRecord)
-            except ValidationError as err:
-                raise RowProcessorError(
-                    "\n   ".join(
-                        [
-                            f"Validation JSON échouée pour la directive '{err.validator}' :",
-                            f"Message: {err.message}",
-                            f"Chemin: {'.'.join(list(err.path))}",
-                        ]
-                    )
+        try:
+            self.validator.validate(kintoRecord)
+        except ValidationError as err:
+            raise RowProcessorError(
+                "\n   ".join(
+                    [
+                        f"Validation JSON échouée pour la directive '{err.validator}' :",
+                        f"Message: {err.message}",
+                        f"Chemin: {'.'.join(list(err.path))}",
+                    ]
                 )
+            )
         return kintoRecord
 
     def importPeriodeDeReference(self):
@@ -517,7 +536,7 @@ class RowProcessor(object):
         self.importIntField("Résultat final sur 100 points", "declaration/noteFinaleSur100")
         self.importField("mesures_correction", "declaration/mesuresCorrection")
 
-    def run(self, validate=False):
+    def run(self):
         self.set("source", "solen")
         self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration", format=DATE_FORMAT_OUTPUT_HEURE)
         self.importInformationsDeclarant()
@@ -535,7 +554,7 @@ class RowProcessor(object):
         self.importNombreDePointsObtenus()
         self.importNiveauDeResultatGlobal()
 
-        return self.toKintoRecord(validate)
+        return self.toKintoRecord()
 
 
 def prompt(logger, question, default="oui"):
@@ -618,8 +637,9 @@ class ExcelData(object):
 
 
 class KintoImporter(object):
-    def __init__(self, logger, schema, truncate=False, dryRun=False):
+    def __init__(self, logger, schema, truncate=False, dryRun=False, usePrompt=False):
         self.toImport = []
+        self.usePrompt = usePrompt
         self.schema = schema
         self.truncate = truncate
         self.dryRun = dryRun
@@ -643,7 +663,9 @@ class KintoImporter(object):
         else:
             self.logger.success("Validation de schéma activée.")
         if self.truncate:
-            if not prompt(self.logger, "Confimer la suppression et recréation de la collection existante ?", "non"):
+            if self.usePrompt and not prompt(
+                self.logger, "Confimer la suppression et recréation de la collection existante ?", "non"
+            ):
                 raise KintoImporterError("Commande annulée.")
             self.logger.warn("Suppression de la collection Kinto existante...")
             client.delete_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET)
@@ -675,125 +697,100 @@ class KintoImporter(object):
         self.toImport.append(record)
 
     def run(self):
-        if self.dryRun:
-            self.logger.info("Importation dans Kinto évitée suite à l'emploi du drapeau --dry-run.")
-            return
         with self.client.batch() as batch:
             for record in self.toImport:
-                self.logger.info(f"Préparation de la déclaration id={record['id']}")
+                self.logger.info(f"Ajout de la déclaration id={record['id']} au batch d'import.")
                 batch.create_record(bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record)
-        self.logger.success("Importation effectuée.")
 
 
 class App(object):
-    def __init__(
-        self,
-        logger,
-        xls_path,
-        dry_run=False,
-        save_as=None,
-        init_collection=False,
-        max=None,
-        siren=None,
-        debug=False,
-        validate=False,
-        show_json=False,
-        indent=None,
-        info=False,
-        showProgress=False,
-    ):
-        self.logger = logger
+    def __init__(self, xls_path, max=None, siren=None, debug=False, progress=False, usePrompt=False, logger=None):
+        # arguments positionnels requis
         self.xls_path = xls_path
-        self.dry_run = dry_run
-        self.save_as = save_as
-        self.init_collection = init_collection
+        # options
         self.max = max
         self.siren = siren
         self.debug = debug
-        self.validate = validate
-        self.show_json = show_json
-        self.indent = indent
-        self.info = info
-        self.showProgress = showProgress
-
-    def run(self):
-        dryRun = self.dry_run
-        if self.save_as is not None:
-            self.logger.info("Export JSON demandé, sauvegarde dans Kinto désactivée.")
-            dryRun = True
-        validator = initValidator("json-schema.json")
+        self.progress = progress
+        self.usePrompt = usePrompt
+        self.logger = logger if logger else NoLogger()
+        # initialisation des flags de lecture des champs CSV
+        RowProcessor.READ_FIELDS = set({})
+        # propriétés calculées de l'instance
+        self.validator = initValidator("json-schema.json")
         try:
-            excelData = ExcelData(self.logger, self.xls_path)
+            self.excelData = ExcelData(self.logger, self.xls_path)
         except ExcelDataError as err:
-            raise AppError(f"Erreur de traitement du fichier Excel: {err}")
-        nb_rows = excelData.getNbRepondants()
-        try:
-            kintoImporter = KintoImporter(self.logger, validator.schema, truncate=self.init_collection, dryRun=dryRun)
-        except KintoImporterError as err:
-            raise AppError(f"Erreur lors de l'initialisation de Kinto: {err}")
-        count_processed = 0
-        count_imported = 0
+            raise AppError(f"Erreur de traitement du fichier '{xls_path}': {err}")
+        self.nb_rows = self.excelData.getNbRepondants()
+        self.records = self.__prepareRecords(max=max, siren=siren)
+
+    def __prepareRecords(self, max=None, siren=None):
         errors = []
-        if self.showProgress:
-            bar = Bar("Préparation des données", max=self.max if self.max is not None else nb_rows)
-        for lineno, id in enumerate(excelData.repondants):
-            row = excelData.repondants[id]
-            if self.max and count_processed >= self.max:
-                break
-            if self.siren and row["SIREN_ets"] != self.siren and row["SIREN_UES"] != self.siren:
-                continue
+        records = []
+        rows = self.excelData.repondants
+        if max is not None:
+            rows = OrderedDict(islice(rows.items(), max))
+        elif siren is not None:
+            rows = OrderedDict(filter(lambda r: r["SIREN_ets"] == siren or r["SIREN_UES"] == siren, rows.items()))
+        if not bool(rows):  # test d'un OrderedDict vide https://stackoverflow.com/a/23177452/330911
+            raise AppError(f"Aucune déclaration trouvée pour les critères siren={siren} et max={max}.")
+        if self.progress:
+            bar = Bar("Préparation des enregistrements Kinto", max=max if max is not None else self.nb_rows)
+        for lineno, id in enumerate(rows):
             try:
-                record = RowProcessor(self.logger, row, validator, self.debug).run(validate=self.validate)
-                kintoImporter.add(record)
-                count_imported = count_imported + 1
-                if self.show_json:
-                    self.logger.std(json.dumps(record, indent=self.indent))
+                records.append(RowProcessor(self.logger, rows[id], self.validator, self.debug).run())
             except RowProcessorError as err:
                 errors.append(f"Erreur ligne {lineno} (id={id}): {err}")
-            count_processed = count_processed + 1
-            if self.showProgress:
+            if self.progress:
                 bar.next()
-        if self.showProgress:
+        if self.progress:
             bar.finish()
-        if self.info:
-            for sheet, sheetFields in excelData.fields.items():
-                for sheetField in sheetFields:
-                    used = False
-                    # Ici nous excluons du rapport :
-                    # - les champs vides
-                    # - les champs niv01* à niv50* de la feuille répondants
-                    # - les champs UES01 à UES500 de la feuille UES
-                    if sheetField == "" or sheetField.startswith("niv") or sheetField.startswith("UES"):
-                        continue
-                    elif sheetField in RowProcessor.READ_FIELDS:
-                        used = True
-                    if not used:
-                        self.logger.warn(f"Le champ {sheetField} de la feuille {sheet} n'a jamais été consommé.")
+        if len(errors) > 0:
+            raise AppError("Erreur(s) rencontrée(s) lors de la préparation des enregistrements Kinto", errors=errors)
+        return records
 
-        if self.siren and count_processed == 0:
-            self.logger.error("Aucune entrée trouvée pour le Siren " + self.siren)
-        else:
-            self.logger.std(f"{count_imported}/{count_processed} ligne(s) importée(s).")
-            if len(errors) > 0:
-                self.logger.warn(f"{len(errors)} erreur(s) rencontré(s)")
-                for error in errors:
-                    self.logger.error(error)
-        if self.save_as:
-            if self.save_as.endswith(".json"):
-                with open(self.save_as, "w") as json_file:
-                    json_file.write(json.dumps(kintoImporter.toImport, indent=self.indent))
-                self.logger.success(f"Enregistrements JSON exportés dans le fichier '{self.save_as}'.")
-            elif self.save_as.endswith(".csv"):
-                flattenedJson = json.dumps([flattenJson(r) for r in kintoImporter.toImport])
-                data = pandas.read_json(io.StringIO(flattenedJson))
-                data.to_csv(self.save_as)
-                self.logger.success(f"Enregistrements CSV exportés dans le fichier '{self.save_as}'.")
-            else:
-                raise AppError("Seuls les formats JSON et CSV sont supportés pour la sauvegarde.")
+    def importIntoKinto(self, init_collection=False, dryRun=False):
+        try:
+            kintoImporter = KintoImporter(
+                self.logger, self.validator.schema, truncate=init_collection, dryRun=dryRun, usePrompt=self.usePrompt
+            )
+        except KintoImporterError as err:
+            raise AppError(f"Erreur lors de l'initialisation Kinto: {err}")
+        for record in self.records:
+            kintoImporter.add(record)
         try:
             kintoImporter.run()
         except KintoImporterError as err:
             raise AppError(f"Erreur lors de l'importation Kinto: {err}")
+
+    def toCSV(self):
+        "Retourne les enregistrements Kinto concordants générés comme chaîne CSV."
+        flattenedJson = json.dumps([flattenJson(r) for r in self.records])
+        data = pandas.read_json(io.StringIO(flattenedJson))
+        return data.to_csv()
+
+    def toJSON(self, indent=None):
+        "Retourne les enregistrements Kinto concordants générés comme chaîne JSON."
+        return json.dumps(self.records, indent=indent)
+
+    def getStats(self):
+        "Retourne des informations sur l'utilisation des champs Excel dans l'import."
+        messages = []
+        for sheet, sheetFields in self.excelData.fields.items():
+            for sheetField in sheetFields:
+                used = False
+                # Ici nous excluons du rapport :
+                # - les champs vides
+                # - les champs niv01* à niv50* de la feuille répondants
+                # - les champs UES01 à UES500 de la feuille UES
+                if sheetField == "" or sheetField.startswith("niv") or sheetField.startswith("UES"):
+                    continue
+                elif sheetField in RowProcessor.READ_FIELDS:
+                    used = True
+                if not used:
+                    messages.append(f"Le champ '{sheetField}' de la feuille '{sheet}' n'a jamais été consommé.")
+        return messages
 
 
 def flattenJson(b, prefix="", delim="/", val=None):
@@ -827,8 +824,8 @@ if __name__ == "__main__":
         "-f", "--info", help="afficher les informations d'utilisation des champs", action="store_true", default=False
     )
     parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON ou CSV dans un fichier")
-    parser.add_argument("-v", "--validate", help="valider les enregistrements JSON", action="store_true", default=False)
     parser.add_argument("-r", "--dry-run", help="ne pas procéder à l'import dans Kinto", action="store_true", default=False)
+    parser.add_argument("-p", "--progress", help="afficher une barre de progression", action="store_true", default=False)
     parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniquement")
     parser.add_argument(
         "-c", "--init-collection", help="Vider et recréer la collection Kinto avant import", action="store_true", default=False
@@ -836,10 +833,41 @@ if __name__ == "__main__":
 
     logger = ConsoleLogger()
     try:
-        args = parser.parse_args()._get_kwargs()
-        App(logger, **dict(args), showProgress=True).run()
+        args = parser.parse_args()
+        app = App(
+            args.xls_path, max=args.max, siren=args.siren, debug=args.debug, progress=args.progress, usePrompt=True, logger=logger
+        )
+
+        if args.show_json:
+            logger.std(json.dumps(app.records, indent=args.indent))
+
+        if args.info:
+            logger.info("Informations complémentaires sur l'extraction des données Excel :")
+            for message in app.getStats():
+                logger.info(message)
+
+        if args.save_as:
+            if args.save_as.endswith(".json"):
+                with open(args.save_as, "w") as json_file:
+                    json_file.write(app.toJSON(indent=args.indent))
+                logger.success(f"Enregistrements JSON exportés dans le fichier '{args.save_as}'.")
+            elif args.save_as.endswith(".csv"):
+                with open(args.save_as, "w") as csv_file:
+                    csv_file.write(app.toCSV())
+                logger.success(f"Enregistrements CSV exportés dans le fichier '{args.save_as}'.")
+            else:
+                raise AppError("Seuls les formats JSON et CSV sont supportés pour la sauvegarde.")
+
+        if not args.dry_run:
+            logger.info("Importation dans Kinto (cela peut prendre plusieurs minutes)...")
+            app.importIntoKinto(init_collection=args.init_collection)
+            logger.success("Importation effectuée.")
+
     except AppError as err:
         logger.error(err)
+        for error in err.errors:
+            logger.error(error)
+
     except KeyboardInterrupt:
         logger.std("")
         logger.warn("Script d'import interrompu.")
