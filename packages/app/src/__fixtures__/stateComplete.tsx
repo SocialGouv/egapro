@@ -238,10 +238,6 @@ const actionUpdateIndicateurUnCsp = {
   }
 };
 
-const actionUpdateIndicateurUnCoefAddGroup = {
-  type: "updateIndicateurUnCoefAddGroup" as "updateIndicateurUnCoefAddGroup"
-};
-
 const actionUpdateIndicateurUnCoefName = {
   type: "updateIndicateurUnCoef" as "updateIndicateurUnCoef",
   data: {
@@ -416,7 +412,11 @@ const actionUpdateInformationsEntreprise = {
     structure: "Unité Economique et Sociale (UES)" as Structure,
     nomUES: "nom d'une UES",
     effectifGlobalFemmes: 100,
-    effectifGlobalHommes: 111
+    effectifGlobalHommes: 111,
+    entreprisesUES: [
+      { nom: "entreprise 1", siren: "12345" },
+      { nom: "entreprise 2", siren: "67890" }
+    ]
   }
 };
 
@@ -461,15 +461,12 @@ const stateDefault = AppReducer(
                         AppReducer(
                           AppReducer(
                             AppReducer(
-                              AppReducer(
-                                AppReducer(undefined, actionInitiateState),
-                                actionUpdateInformationsSimulation
-                              ),
-                              actionUpdateEffectif
+                              AppReducer(undefined, actionInitiateState),
+                              actionUpdateInformationsSimulation
                             ),
-                            actionUpdateIndicateurUnCsp
+                            actionUpdateEffectif
                           ),
-                          actionUpdateIndicateurUnCoefAddGroup
+                          actionUpdateIndicateurUnCsp
                         ),
                         actionUpdateIndicateurUnCoefName
                       ),
