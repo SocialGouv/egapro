@@ -1,8 +1,10 @@
 # Egapro Kinto
 
-## Importer les données Solen
+## Prérequis
 
 Vous devez disposer de Python 3.6+ et `pipenv`.
+
+## Importer les données Solen en ligne de commande
 
 ```
 $ pipenv run python solen.py export-solen.xlsx
@@ -17,7 +19,12 @@ $ python solen.py export-solen.xlsx
 
 ### Préparation des données
 
-Vous devez disposer d'un export Solen, généralement fourni au format Excel fourni par la DGT (ex. `Export DGT 20191224.xlsx`), comportant deux feuillets, un avec les données, l'autre avec uniquement les données des UES. C'est le chemin vers ce fichier qu'il faut passer à la ligne de commande.
+Vous devez disposer d'un export Solen, généralement fourni par Laëtita C. (DGT) au format Excel (ex. `Export DGT 20191224.xlsx`), comportant deux feuilles :
+
+- La première, "BDD REPONDANTS" avec les données de déclaration pour toutes les entreprises et UES;
+- l'autre, "BDD UES", avec uniquement les données de déclaration spécifiques aux UES.
+
+C'est le chemin vers ce fichier qu'il faut passer à la ligne de commande.
 
 ### Usage
 
@@ -120,3 +127,67 @@ Pour surcharger une variable d'environnement, vous pouvez les positionner devant
 ```
 $ KINTO_COLLECTION=ma-collection python solen.py export-solen.xlsx
 ```
+
+## Utilisation de l'API Python
+
+Le fichier `solen.py`, s'il peut être utilisé en ligne de commande comme vu précédemment, peut être importé depuis d'autres scripts Python.
+
+Par exemple, pour importer un fichier Excel et procéder à son import dans Kinto, vous pouvez écrire :
+
+```python
+import solen
+
+
+class Logger(solen.BaseLogger):
+    def __init__(self):
+        self.messages = []
+
+    def std(self, str):
+        self.messages.append(str)
+
+    def error(self, str):
+        self.messages.append(f"Erreur : {str}")
+
+    def info(self, str):
+        self.messages.append(f"Info : {str}")
+
+    def success(self, str):
+        self.messages.append(f"Succès : {str}")
+
+    def warn(self, str):
+        self.messages.append(f"Avertissement : {str}")
+
+
+logger = Logger()
+
+try:
+    # générer et valider la première déclaration au format JSON
+    app = solen.App(logger, "export20200102.xlsx", dry_run=True, max=1, validate=True)
+    app.run()
+except solen.AppError as err:
+    print(f"Import échoué : {err}")
+
+# Consultation des messages applicatifs
+print(logger.messages)
+```
+
+Le constructeur de la classe `solen.App` accepte principalement les mêmes arguments que la ligne de commande :
+
+### Arguments requis
+
+- `logger`: le logger, permettant d'intercepter et éventuellement traiter les messages applicatifs. Un exemple de logger est fourni dans l'exemple au-dessus.
+- `xls_path`: le chemin absolu vers le fichier Excel à traiter.
+
+### Arguments optionnels
+
+- `dry_run`: simuler l'importation effective dans Kinto (par défaut: `False`)
+- `save_as`: exporter les résultats traités dans un fichier CSV ou JSON (par défaut: `None`)
+- `init_collection`: initialiser la collection Kinto cible (par défaut: `False`)
+- `max`: le nombre maximum d'enregistrements à importer (par défaut: `None`)
+- `siren`: ne traiter que la déclaration associée au numéro SIREN spécifié (par défaut: `None`)
+- `debug`: afficher des messages de débogage supplémentaires (par défaut: `False`)
+- `validate`: valider la conformité des enregistrements JSON générés (par défaut: `False`)
+- `show_json`: afficher les enregistrements JSON générés (par défaut: `False`)
+- `indent`: indenter la sortie JSON au niveau spécifié (par défaut: `None`)
+- `info`: afficher des informations supplémentaires sur les données Excel analysées (par défaut: `False`)
+- `showProgress`: Afficher une barre de progression (utile uniquement en ligne de commande; par défaut: `False`)
