@@ -5,14 +5,14 @@
 Vous devez disposer de Python 3.6+ et `pipenv`.
 
 ```
-$ pipenv run python import-solen.py export-solen.xlsx
+$ pipenv run python solen.py export-solen.xlsx
 ```
 
 ou bien, si vous souhaitez activer l'environnement projet de façon persistante :
 
 ```
 $ pipenv shell
-$ python import-solen.py export-solen.xlsx
+$ python solen.py export-solen.xlsx
 ```
 
 ### Préparation des données
@@ -22,8 +22,8 @@ Vous devez disposer d'un export Solen, généralement fourni au format Excel fou
 ### Usage
 
 ```
-$ python import-solen.py --help
-usage: import-solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-f] [-s SAVE_AS]
+$ python solen.py --help
+usage: solen.py [-h] [-d] [-i INDENT] [-m MAX] [-j] [-f] [-s SAVE_AS]
                        [-v] [-r] [--siren SIREN] [-c]
                        xls_path
 
@@ -56,7 +56,7 @@ Notez que les options sont cumulatives.
 L'option `--dry-run` effectue une simulation d'import dans Kinto. Cette option permet de valider que le fichier Excel d'export est lu et interprété correctement, et que les données y figurant sont cohérentes. Cette option a beaucoup d'intérêt combinée à `--validate`.
 
 ```
-$ python import-solen.py export-solen.xlsx --dry-run
+$ python solen.py export-solen.xlsx --dry-run
 ```
 
 #### Valider les enregistrements JSON générés
@@ -64,25 +64,25 @@ $ python import-solen.py export-solen.xlsx --dry-run
 Cette commande validera chaque document JSON généré à partir d'un schema JSON.
 
 ```
-$ python import-solen.py export-solen.xlsx --validate
+$ python solen.py export-solen.xlsx --validate
 ```
 
 #### Limiter le nombre de lignes traitées
 
 ```
-$ python import-solen.py export-solen.xlsx --max=10
+$ python solen.py export-solen.xlsx --max=10
 ```
 
 #### Importer une entreprise ou UES par son numéro SIREN
 
 ```
-$ python import-solen.py export-solen.xlsx --siren=1234567890
+$ python solen.py export-solen.xlsx --siren=1234567890
 ```
 
 #### Afficher la sortie JSON de l'import
 
 ```
-$ python import-solen.py export-solen.xlsx --show-json --indent=2
+$ python solen.py export-solen.xlsx --show-json --indent=2
 ```
 
 Notez l'emploi de l'option `--indent` pour spécifier le niveau d'indentation JSON.
@@ -90,19 +90,19 @@ Notez l'emploi de l'option `--indent` pour spécifier le niveau d'indentation JS
 #### Afficher la sortie de debug
 
 ```
-$ python import-solen.py export-solen.xlsx --debug
+$ python solen.py export-solen.xlsx --debug
 ```
 
 #### Sauver la sortie JSON dans un fichier
 
 ```
-$ python import-solen.py export-solen.xlsx --save-as=export.json
+$ python solen.py export-solen.xlsx --save-as=export.json
 ```
 
 #### Ré-exporter les données Excel importées en CSV en préservant la sémantique JSON Egapro
 
 ```
-$ python import-solen.py export-solen.xlsx --save-as=export.csv
+$ python solen.py export-solen.xlsx --save-as=export.csv
 ```
 
 #### Paramétrage d'accès à Kinto
@@ -118,5 +118,5 @@ Le script d'import lira les variables d'environnement suivantes pour se connecte
 Pour surcharger une variable d'environnement, vous pouvez les positionner devant la commande appelée :
 
 ```
-$ KINTO_COLLECTION=ma-collection python import-solen.py export-solen.xlsx
+$ KINTO_COLLECTION=ma-collection python solen.py export-solen.xlsx
 ```

@@ -797,10 +797,11 @@ parser.add_argument(
     "-c", "--init-collection", help="Vider et recréer la collection Kinto avant import", action="store_true", default=False
 )
 
-try:
-    parse(parser.parse_args())
-except KeyboardInterrupt:
-    logger = ConsoleLogger()
-    logger.std("")
-    logger.warn("Script d'import interrompu.")
-    exit(1)
+if __name__ == "__main__":
+    try:
+        parse(parser.parse_args())
+    except KeyboardInterrupt:
+        logger = ConsoleLogger()
+        logger.std("")
+        logger.warn("Script d'import interrompu.")
+        exit(1)
