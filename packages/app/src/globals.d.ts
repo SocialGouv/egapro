@@ -58,6 +58,8 @@ export type AppState = {
     commune: string;
     structure: Structure;
     nomUES: string;
+    effectifGlobalFemmes: number | undefined;
+    effectifGlobalHommes: number | undefined;
   };
   informationsDeclarant: {
     formValidated: FormState;
@@ -292,6 +294,8 @@ export type ActionInformationsEntrepriseData = {
   commune: string;
   structure: Structure;
   nomUES: string;
+  effectifGlobalFemmes: number | undefined;
+  effectifGlobalHommes: number | undefined;
 };
 
 export type ActionInformationsDeclarantData = {

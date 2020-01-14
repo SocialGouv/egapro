@@ -122,7 +122,9 @@ const defaultState: AppState = {
     codePostal: "",
     commune: "",
     structure: "Entreprise",
-    nomUES: ""
+    nomUES: "",
+    effectifGlobalFemmes: undefined,
+    effectifGlobalHommes: undefined
   },
   informationsDeclarant: {
     formValidated: "None",

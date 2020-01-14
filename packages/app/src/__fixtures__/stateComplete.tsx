@@ -414,7 +414,9 @@ const actionUpdateInformationsEntreprise = {
     codePostal: "12345",
     commune: "Trifouilly",
     structure: "Unité Economique et Sociale (UES)" as Structure,
-    nomUES: "nom d'une UES"
+    nomUES: "nom d'une UES",
+    effectifGlobalFemmes: 100,
+    effectifGlobalHommes: 111
   }
 };
 
