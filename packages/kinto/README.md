@@ -6,6 +6,8 @@ Vous devez disposer de Python 3.6+ et `pipenv`.
 
 ## Importer les données Solen en ligne de commande
 
+![screecast de démo](https://i.imgur.com/bIZVY5u.gif)
+
 ```
 $ pipenv run python solen.py export-solen.xlsx
 ```
