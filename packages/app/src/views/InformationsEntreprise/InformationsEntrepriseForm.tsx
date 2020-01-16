@@ -14,7 +14,11 @@ import {
 
 import globalStyles from "../../utils/globalStyles";
 
-import { parseIntFormValue, required } from "../../utils/formHelpers";
+import {
+  parseIntFormValue,
+  required,
+  parseIntStateValue
+} from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -73,7 +77,10 @@ const validateForm = ({
   codePostal: validate(codePostal),
   commune: validate(commune),
   structure: validate(structure),
-  nomUES: validate(nomUES)
+  nomUES:
+    structure === "Unité Economique et Sociale (UES)"
+      ? validate(nomUES)
+      : undefined
 });
 
 interface Props {
@@ -91,7 +98,7 @@ function InformationsEntrepriseForm({
   updateInformationsEntreprise,
   validateInformationsEntreprise
 }: Props) {
-  const initialValues: ActionInformationsEntrepriseData = {
+  const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
     siren: informationsEntreprise.siren,
     codeNaf: informationsEntreprise.codeNaf,
@@ -102,8 +109,12 @@ function InformationsEntrepriseForm({
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
-    effectifGlobalFemmes: informationsEntreprise.effectifGlobalFemmes,
-    effectifGlobalHommes: informationsEntreprise.effectifGlobalHommes,
+    effectifGlobalFemmes: parseIntStateValue(
+      informationsEntreprise.effectifGlobalFemmes
+    ),
+    effectifGlobalHommes: parseIntStateValue(
+      informationsEntreprise.effectifGlobalHommes
+    ),
     entreprisesUES: informationsEntreprise.entreprisesUES
   };
 
