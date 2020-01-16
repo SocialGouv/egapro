@@ -324,8 +324,6 @@
             "nomUES": { "type": "string" },
             "codeNAF": { "type": "string" },
             "nombresEntreprises": { "type": "integer" },
-            "effectifGlobalHommes": { "type": "integer" },
-            "effectifGlobalFemmes": { "type": "integer" },
             "entreprisesUES": {
               "type": "array",
               "items": {
