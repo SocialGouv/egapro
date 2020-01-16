@@ -14,7 +14,7 @@ import {
 
 import globalStyles from "../../utils/globalStyles";
 
-import { required } from "../../utils/formHelpers";
+import { parseIntFormValue, required } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -135,8 +135,8 @@ function InformationsEntrepriseForm({
       commune,
       structure,
       nomUES,
-      effectifGlobalFemmes,
-      effectifGlobalHommes,
+      effectifGlobalFemmes: parseIntFormValue(effectifGlobalFemmes),
+      effectifGlobalHommes: parseIntFormValue(effectifGlobalHommes),
       entreprisesUES
     });
   };
