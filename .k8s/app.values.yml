@@ -44,4 +44,9 @@ ingress:
   tls:
     - hosts:
         - ${APP_URL}
-      secretName: wildcard-crt
+      secretName: egapro-crt
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 1
