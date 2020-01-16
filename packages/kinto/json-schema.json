@@ -293,6 +293,9 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
             "nom": { "type": "string" },
             "prenom": { "type": "string" },
             "email": { "type": "string" },
@@ -303,6 +306,9 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
             "structure": {
               "type": "string",
               "enum": ["Entreprise", "UES"]
@@ -335,6 +341,9 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
             "anneeDeclaration": { "type": "integer" },
             "dateConsultationCSE": { "type": "string" }
           }
