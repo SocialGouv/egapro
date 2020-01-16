@@ -8,7 +8,13 @@ import {
   ActionInformationsComplementairesData
 } from "../../globals";
 
-import { mustBeDate, required } from "../../utils/formHelpers";
+import {
+  mustBeDate,
+  mustBeNumber,
+  required,
+  parseIntFormValue,
+  parseIntStateValue
+} from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -44,6 +50,16 @@ const validate = (value: string) => {
   }
 };
 
+const validateInt = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  if (!requiredError && !mustBeNumberError) {
+    return undefined;
+  } else {
+    return { required: requiredError, mustBeNumber: mustBeNumberError };
+  }
+};
+
 const validateForm = ({
   dateConsultationCSE,
   anneeDeclaration,
@@ -56,7 +72,7 @@ const validateForm = ({
   lienPublication: string;
 }) => ({
   dateConsultationCSE: validateDate(dateConsultationCSE),
-  anneeDeclaration: validate(anneeDeclaration),
+  anneeDeclaration: validateInt(anneeDeclaration),
   datePublication: validateDate(datePublication),
   lienPublication: validate(lienPublication)
 });
@@ -76,9 +92,11 @@ function InformationsComplementairesForm({
   updateInformationsComplementaires,
   validateInformationsComplementaires
 }: Props) {
-  const initialValues: ActionInformationsComplementairesData = {
+  const initialValues = {
     dateConsultationCSE: informationsComplementaires.dateConsultationCSE,
-    anneeDeclaration: informationsComplementaires.anneeDeclaration,
+    anneeDeclaration: parseIntStateValue(
+      informationsComplementaires.anneeDeclaration
+    ),
     datePublication: informationsComplementaires.datePublication,
     lienPublication: informationsComplementaires.lienPublication
   };
@@ -93,7 +111,7 @@ function InformationsComplementairesForm({
 
     updateInformationsComplementaires({
       dateConsultationCSE,
-      anneeDeclaration,
+      anneeDeclaration: parseIntFormValue(anneeDeclaration),
       datePublication,
       lienPublication
     });
