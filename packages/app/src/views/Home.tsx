@@ -132,7 +132,7 @@ function Home({ history, location, dispatch }: Props) {
             </p>
 
             <a
-              href="https://solen1.enquetes.social.gouv.fr/cgi-5/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
+              href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/questions-reponses-sur-le-calcul-de-l-index-de-l-egalite"
               target="_blank"
               rel="noopener noreferrer"
               css={styles.button}

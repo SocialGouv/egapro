@@ -1,0 +1,361 @@
+{
+  "title": "Schema de simulation et déclaration egapro",
+  "definitions": {
+    "formValidated": {
+      "type": "string",
+      "enum": ["None", "Valid", "Invalid"]
+    },
+    "trancheAge": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "sexeSurRepresente": {
+      "type": "string",
+      "enum": ["Hommes", "Femmes"]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": { "type": "string" },
+        "informations": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "nomEntreprise": { "type": "string" },
+            "trancheEffectifs": {
+              "type": "string",
+              "enum": ["50 à 250", "251 à 999", "1000 et plus", "Plus de 250"]
+            },
+            "finPeriodeReference": { "type": "string" },
+            "debutPeriodeReference": { "type": "string" }
+          }
+        },
+        "effectif": {
+          "title": "Effectifs pris en compte pour le calcul",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "nombreSalaries": {
+              "title": "nombre de salariés",
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tranchesAges": {
+                    "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "trancheAge": {
+                          "$ref": "#/definitions/trancheAge"
+                        },
+                        "nombreSalariesFemmes": { "type": "number" },
+                        "nombreSalariesHommes": { "type": "number" }
+                      }
+                    }
+                  },
+                  "categorieSocioPro": { "type": "integer" }
+                }
+              }
+            },
+            "nombreSalariesTotal": { "type": "number" }
+          }
+        },
+        "indicateurUn": {
+          "title": "Indicateur 1",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "csp": { "type": "boolean" },
+            "coef": { "type": "boolean" },
+            "autre": { "type": "boolean" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "remunerationAnnuelle": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "categorieSocioPro": { "type": "integer" },
+                  "tranchesAges": {
+                    "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "trancheAge": {
+                          "$ref": "#/definitions/trancheAge"
+                        },
+                        "remunerationAnnuelleBrutFemmes": { "type": "number" },
+                        "remunerationAnnuelleBrutHommes": { "type": "number" },
+                        "ecartTauxRemuneration": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "nombreCoefficients": { "type": "integer" },
+            "coefficient": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 50,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": { "type": "string" },
+                  "tranchesAges": {
+                    "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "trancheAge": {
+                          "$ref": "#/definitions/trancheAge"
+                        },
+                        "nombreSalariesFemmes": { "type": "number" },
+                        "nombreSalariesHommes": { "type": "number" },
+                        "remunerationAnnuelleBrutFemmes": { "type": "number" },
+                        "remunerationAnnuelleBrutHommes": { "type": "number" },
+                        "ecartTauxRemuneration": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "coefficientGroupFormValidated": { "type": "string" },
+            "coefficientEffectifFormValidated": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" }
+          }
+        },
+        "indicateurDeux": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "tauxAugmentation": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "categorieSocioPro": { "type": "integer" },
+                  "tauxAugmentationFemmes": { "type": "number" },
+                  "tauxAugmentationHommes": { "type": "number" },
+                  "ecartTauxAugmentation": { "type": "number" }
+                }
+              }
+            },
+            "presenceAugmentation": { "type": "boolean" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" },
+            "mesuresCorrection": { "type": "boolean" }
+          }
+        },
+        "indicateurTrois": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "tauxPromotion": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "categorieSocioPro": { "type": "integer" },
+                  "tauxPromotionFemmes": { "type": "number" },
+                  "tauxPromotionHommes": { "type": "number" },
+                  "ecartTauxPromotion": { "type": "number" }
+                }
+              }
+            },
+            "presencePromotion": { "type": "boolean" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" },
+            "mesuresCorrection": { "type": "boolean" }
+          }
+        },
+        "indicateurDeuxTrois": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "periodeDeclaration": {
+              "type": "string"
+            },
+            "presenceAugmentationPromotion": { "type": "boolean" },
+            "nombreAugmentationPromotionFemmes": { "type": "integer" },
+            "nombreAugmentationPromotionHommes": { "type": "integer" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinalEcart": { "type": "number" },
+            "resultatFinalNombreSalaries": { "type": "number" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" },
+            "mesuresCorrection": { "type": "boolean" }
+          }
+        },
+        "indicateurQuatre": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "presenceCongeMat": { "type": "boolean" },
+            "nombreSalarieesAugmentees": { "type": "integer" },
+            "nombreSalarieesPeriodeAugmentation": { "type": "integer" },
+            "nonCalculable": { "type": "boolean" },
+            "motifNonCalculable": { "type": "string" },
+            "motifNonCalculablePrecision": { "type": "string" },
+            "resultatFinal": { "type": "number" },
+            "noteFinale": { "type": "integer" }
+          }
+        },
+        "indicateurCinq": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "nombreSalariesFemmes": { "type": "integer" },
+            "nombreSalariesHommes": { "type": "integer" },
+            "resultatFinal": { "type": "integer" },
+            "sexeSurRepresente": {
+              "$ref": "#/definitions/sexeSurRepresente"
+            },
+            "noteFinale": { "type": "integer" }
+          }
+        },
+        "informationsDeclarant": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "nom": { "type": "string" },
+            "prenom": { "type": "string" },
+            "email": { "type": "string" },
+            "tel": { "type": "string" }
+          }
+        },
+        "informationsEntreprise": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "structure": {
+              "type": "string",
+              "enum": ["Entreprise", "UES"]
+            },
+            "nomEntreprise": { "type": "string" },
+            "region": { "type": "string" },
+            "departement": { "type": "string" },
+            "adresse": { "type": "string" },
+            "codePostal": { "type": "string" },
+            "commune": { "type": "string" },
+            "siren": { "type": "string" },
+            "codeNaf": { "type": "string" },
+            "nomUES": { "type": "string" },
+            "codeNAF": { "type": "string" },
+            "nombresEntreprises": { "type": "integer" },
+            "entreprises": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "nom": { "type": "string" },
+                  "siren": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "informationsComplementaires": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "anneeDeclaration": { "type": "integer" },
+            "dateConsultationCSE": { "type": "string" }
+          }
+        },
+        "declaration": {
+          "dateDeclaration": { "type": "string" },
+          "indicateurUn": { "type": "integer" },
+          "indicateurDeux": { "type": "integer" },
+          "indicateurDeuxTroisEcart": { "type": "number" },
+          "indicateurDeuxTroisNombreSalaries": { "type": "number" },
+          "indicateurTrois": { "type": "integer" },
+          "indicateurQuatre": { "type": "integer" },
+          "indicateurCinq": { "type": "integer" },
+          "noteFinale": { "type": "integer" },
+          "nombrePointsMax": { "type": "integer" },
+          "noteFinaleSur100": { "type": "integer" },
+          "mesuresCorrection": { "type": "boolean" }
+        }
+      }
+    },
+    "last_modified": { "type": "integer" },
+    "id": { "type": "string" }
+  }
+}
