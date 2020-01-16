@@ -53,8 +53,8 @@ function InformationsDeclarant({ state, dispatch }: Props) {
 function PageInformationsDeclarant({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Information société"
-      tagline="Renseignez le nom de votre entreprise, ainsi que son Siren, CodeNaf et adresse"
+      title="Informations déclarant"
+      tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email"
     >
       {children}
     </Page>
