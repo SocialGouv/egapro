@@ -339,8 +339,8 @@ class RowProcessor(object):
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES
-        self.importDateField("date_publ_niv > Valeur date", "declaration/datePublication")
-        self.importField("site_internet_publ", "declaration/lienPublication")
+        self.importDateField("date_publ_niv > Valeur date", "informationsComplementaires/datePublication")
+        self.importField("site_internet_publ", "informationsComplementaires/lienPublication")
 
     def setValeursTranche(self, niveau, path, index, fieldName, custom=False):
         niveaux = [niveau + " > -30", niveau + " > 30-39", niveau + " > 40-49", niveau + " > 50+"]

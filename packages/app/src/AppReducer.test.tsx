@@ -729,7 +729,7 @@ describe("updateInformationsComplementaires", () => {
     type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
     data: {
       dateConsultationCSE: "01/02/2017",
-      anneeDeclaration: "2018",
+      anneeDeclaration: 2018,
       datePublication: "01/02/2020",
       lienPublication: "https://example.com"
     }

@@ -338,7 +338,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -711,7 +711,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "Valid",
@@ -1050,7 +1050,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -1418,7 +1418,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -1759,7 +1759,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -2125,7 +2125,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -2464,7 +2464,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -2830,7 +2830,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -3169,7 +3169,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -3535,7 +3535,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -3874,7 +3874,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -4240,7 +4240,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -4579,7 +4579,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -4945,7 +4945,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -5284,7 +5284,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -5650,7 +5650,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -5989,7 +5989,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -6355,7 +6355,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -6728,7 +6728,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -7094,7 +7094,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -7467,7 +7467,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -7833,7 +7833,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -8206,7 +8206,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -8605,7 +8605,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -8978,7 +8978,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -9310,7 +9310,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -9649,7 +9649,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -10015,7 +10015,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -10354,7 +10354,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -10720,7 +10720,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -11059,7 +11059,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -11425,7 +11425,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2018",
+    "anneeDeclaration": 2018,
     "dateConsultationCSE": "01/02/2017",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -11764,7 +11764,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2018",
+    "anneeDeclaration": 2018,
     "dateConsultationCSE": "01/02/2017",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -12130,7 +12130,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -12469,7 +12469,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -12835,7 +12835,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -13170,7 +13170,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -13541,7 +13541,7 @@ Object {
     "trancheEffectifs": "251 à 999",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -13880,7 +13880,7 @@ Object {
     "trancheEffectifs": "251 à 999",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -14246,7 +14246,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -14585,7 +14585,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -14951,7 +14951,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "Valid",
@@ -15324,7 +15324,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "Valid",
@@ -15697,7 +15697,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "Valid",
@@ -16070,7 +16070,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -16409,7 +16409,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -16775,7 +16775,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -17114,7 +17114,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -17480,7 +17480,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -17819,7 +17819,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -18185,7 +18185,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -18524,7 +18524,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -18890,7 +18890,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -19229,7 +19229,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -19595,7 +19595,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -19934,7 +19934,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -20300,7 +20300,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -20639,7 +20639,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -21005,7 +21005,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "Valid",
@@ -21378,7 +21378,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -21717,7 +21717,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -22083,7 +22083,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "Valid",
@@ -22456,7 +22456,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -22795,7 +22795,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -23161,7 +23161,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "Valid",
@@ -23500,7 +23500,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "Valid",
@@ -23866,7 +23866,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -24205,7 +24205,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -24571,7 +24571,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -24910,7 +24910,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
@@ -25276,7 +25276,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "2020",
+    "anneeDeclaration": 2020,
     "dateConsultationCSE": "01/02/2019",
     "datePublication": "01/02/2020",
     "formValidated": "None",
@@ -25615,7 +25615,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsComplementaires": Object {
-    "anneeDeclaration": "",
+    "anneeDeclaration": undefined,
     "dateConsultationCSE": "",
     "datePublication": "",
     "formValidated": "None",
