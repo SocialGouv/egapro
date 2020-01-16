@@ -434,7 +434,7 @@ const actionUpdateInformationsComplementaires = {
   type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
   data: {
     dateConsultationCSE: "01/02/2019",
-    anneeDeclaration: "2020",
+    anneeDeclaration: 2020,
     datePublication: "01/02/2020",
     lienPublication: "https://example.com"
   }

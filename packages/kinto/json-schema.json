@@ -347,7 +347,9 @@
               "$ref": "#/definitions/formValidated"
             },
             "anneeDeclaration": { "type": "integer" },
-            "dateConsultationCSE": { "type": "string" }
+            "dateConsultationCSE": { "type": "string" },
+            "datePublication": { "type": "string" },
+            "lienPublication": { "type": "string" }
           }
         },
         "declaration": {
