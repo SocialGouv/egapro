@@ -349,6 +349,12 @@
           }
         },
         "declaration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
           "dateDeclaration": { "type": "string" },
           "indicateurUn": { "type": "integer" },
           "indicateurDeux": { "type": "integer" },
@@ -362,6 +368,7 @@
           "noteFinaleSur100": { "type": "integer" },
           "mesuresCorrection": { "type": "boolean" }
         }
+      }
       }
     },
     "last_modified": { "type": "integer" },
