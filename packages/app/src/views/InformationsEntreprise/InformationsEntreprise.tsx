@@ -53,8 +53,8 @@ function InformationsEntreprise({ state, dispatch }: Props) {
 function PageInformationsEntreprise({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Information société"
-      tagline="Renseignez le nom de votre entreprise, ainsi que son Siren, CodeNaf et adresse"
+      title="Informations entreprise"
+      tagline="Renseignez le nom de votre entreprise, ainsi que son Siren, code Naf et adresse"
     >
       {children}
     </Page>

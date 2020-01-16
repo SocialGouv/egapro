@@ -178,12 +178,12 @@ function Menu({
               <h5 css={styles.menuTitle}>Déclaration</h5>
               <CustomNavLink
                 to={`/simulateur/${code}/informations-entreprise`}
-                title="informations Entreprise"
+                title="informations entreprise"
                 valid={informationsEntrepriseFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/informations-declarant`}
-                title="informations Déclarant"
+                title="informations déclarant"
                 valid={informationsDeclarantFormValidated}
               />
               <CustomNavLink
