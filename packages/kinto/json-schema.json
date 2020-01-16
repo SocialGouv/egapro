@@ -311,7 +311,7 @@
             },
             "structure": {
               "type": "string",
-              "enum": ["Entreprise", "UES"]
+              "enum": ["Entreprise", "Unité Economique et Sociale (UES)"]
             },
             "nomEntreprise": { "type": "string" },
             "region": { "type": "string" },
@@ -325,6 +325,7 @@
             "codeNAF": { "type": "string" },
             "nombresEntreprises": { "type": "integer" },
             "entreprises": {
+            "entreprisesUES": {
               "type": "array",
               "items": {
                 "type": "object",
@@ -355,20 +356,20 @@
             "formValidated": {
               "$ref": "#/definitions/formValidated"
             },
-          "dateDeclaration": { "type": "string" },
-          "indicateurUn": { "type": "integer" },
-          "indicateurDeux": { "type": "integer" },
-          "indicateurDeuxTroisEcart": { "type": "number" },
-          "indicateurDeuxTroisNombreSalaries": { "type": "number" },
-          "indicateurTrois": { "type": "integer" },
-          "indicateurQuatre": { "type": "integer" },
-          "indicateurCinq": { "type": "integer" },
-          "noteFinale": { "type": "integer" },
-          "nombrePointsMax": { "type": "integer" },
-          "noteFinaleSur100": { "type": "integer" },
-          "mesuresCorrection": { "type": "boolean" }
+            "dateDeclaration": { "type": "string" },
+            "indicateurUn": { "type": "integer" },
+            "indicateurDeux": { "type": "integer" },
+            "indicateurDeuxTroisEcart": { "type": "number" },
+            "indicateurDeuxTroisNombreSalaries": { "type": "number" },
+            "indicateurTrois": { "type": "integer" },
+            "indicateurQuatre": { "type": "integer" },
+            "indicateurCinq": { "type": "integer" },
+            "noteFinale": { "type": "integer" },
+            "nombrePointsMax": { "type": "integer" },
+            "noteFinaleSur100": { "type": "integer" },
+            "mesuresCorrection": { "type": "boolean" }
+          }
         }
-      }
       }
     },
     "last_modified": { "type": "integer" },
