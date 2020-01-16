@@ -200,7 +200,7 @@ class RowProcessor(object):
         # réellement discriminant semble être "nom_UES".
         if self.get("nom_UES") is not None:
             # Import des données de l'UES
-            self.set("informationsEntreprise/structure", "UES")
+            self.set("informationsEntreprise/structure", "Unité Economique et Sociale (UES)")
             self.importField("nom_UES", "informationsEntreprise/nomUES")
             self.importField("nom_ets_UES", "informationsEntreprise/nomEntreprise")
             # Note: le code NAF d'une UES est stocké dans le champ "Code NAF de cette entreprise"
@@ -255,7 +255,7 @@ class RowProcessor(object):
                 )
             entreprises.append({"nom": raisonSociale, "siren": siren})
         self.set("informationsEntreprise/nombresEntreprises", len(entreprises))
-        self.set("informationsEntreprise/entreprises", entreprises)
+        self.set("informationsEntreprise/entreprisesUES", entreprises)
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES
