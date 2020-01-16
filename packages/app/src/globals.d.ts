@@ -72,7 +72,7 @@ export type AppState = {
   informationsComplementaires: {
     formValidated: FormState;
     dateConsultationCSE: string;
-    anneeDeclaration: string;
+    anneeDeclaration: number | undefined;
     datePublication: string;
     lienPublication: string;
   };
@@ -314,7 +314,7 @@ export type ActionInformationsDeclarantData = {
 
 export type ActionInformationsComplementairesData = {
   dateConsultationCSE: string;
-  anneeDeclaration: string;
+  anneeDeclaration: number | undefined;
   datePublication: string;
   lienPublication: string;
 };
