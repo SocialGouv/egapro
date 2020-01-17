@@ -10,6 +10,7 @@ import {
   ActionDeclarationData
 } from "../../globals";
 
+import InfoBloc from "../../components/InfoBloc";
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 
@@ -32,6 +33,31 @@ function Declaration({ state, dispatch }: Props) {
     [dispatch]
   );
 
+  // tous les formulaires ne sont pas encore validés
+  if (
+    state.informations.formValidated !== "Valid" ||
+    state.indicateurUn.formValidated !== "Valid" ||
+    (state.indicateurDeux.formValidated !== "Valid" &&
+      state.informations.trancheEffectifs !== "50 à 250") ||
+    (state.indicateurTrois.formValidated !== "Valid" &&
+      state.informations.trancheEffectifs !== "50 à 250") ||
+    (state.indicateurDeuxTrois.formValidated !== "Valid" &&
+      state.informations.trancheEffectifs === "50 à 250") ||
+    state.indicateurQuatre.formValidated !== "Valid" ||
+    state.indicateurCinq.formValidated !== "Valid" ||
+    state.informationsEntreprise.formValidated !== "Valid" ||
+    state.informationsDeclarant.formValidated !== "Valid" ||
+    state.informationsComplementaires.formValidated !== "Valid"
+  ) {
+    return (
+      <PageDeclaration>
+        <InfoBloc
+          title="vous devez renseigner tous les indicateurs ainsi que les informations avant de pouvoir valider"
+          text="Vous devez renseigner tous les indicateurs ainsi que les informations avant de pouvoir valider votre déclaration"
+        />
+      </PageDeclaration>
+    );
+  }
   return (
     <PageDeclaration>
       <LayoutFormAndResult
