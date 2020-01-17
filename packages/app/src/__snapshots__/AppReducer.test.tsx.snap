@@ -14623,7 +14623,7 @@ exports[`validateEffectif None with csp false invalid complete validate state 1`
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "formValidated": "Valid",
+    "formValidated": "Invalid",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -15369,7 +15369,7 @@ exports[`validateEffectif None with csp true invalid complete validate state 1`]
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "formValidated": "Valid",
+    "formValidated": "Invalid",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -20677,7 +20677,7 @@ exports[`validateIndicateurUnCoefEffectif None invalid complete validate state 1
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "formValidated": "Valid",
+    "formValidated": "Invalid",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -21755,7 +21755,7 @@ exports[`validateIndicateurUnCoefGroup None invalid complete validate state 1`] 
 Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
-    "formValidated": "Valid",
+    "formValidated": "Invalid",
   },
   "effectif": Object {
     "formValidated": "Valid",
