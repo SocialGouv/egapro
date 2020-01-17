@@ -54,8 +54,7 @@ const validateForm = ({
   adresse,
   codePostal,
   commune,
-  structure,
-  nomUES
+  structure
 }: {
   nomEntreprise: string;
   siren: string;
@@ -66,7 +65,6 @@ const validateForm = ({
   codePostal: string;
   commune: string;
   structure: Structure;
-  nomUES: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -76,11 +74,7 @@ const validateForm = ({
   adresse: validate(adresse),
   codePostal: validate(codePostal),
   commune: validate(commune),
-  structure: validate(structure),
-  nomUES:
-    structure === "Unité Economique et Sociale (UES)"
-      ? validate(nomUES)
-      : undefined
+  structure: validate(structure)
 });
 
 interface Props {
@@ -260,7 +254,7 @@ function InformationsEntrepriseForm({
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <Fragment>
               <TextField
-                label="Nom de l'UES"
+                label="Nom de l'UES (optionnel)"
                 fieldName="nomUES"
                 errorText="le nom de l'UES n'est pas valide"
                 readOnly={readOnly}
