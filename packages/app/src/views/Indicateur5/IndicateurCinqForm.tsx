@@ -58,26 +58,15 @@ const valueValidateForCalculator = (value: string) => {
   return validate(value) === undefined;
 };
 
-const calculator = createDecorator(
-  {
-    field: "nombreSalariesFemmes",
-    updates: {
-      nombreSalariesHommes: (femmesValue, { nombreSalariesHommes }: any) =>
-        valueValidateForCalculator(femmesValue)
-          ? parseIntStateValue(10 - parseIntFormValue(femmesValue))
-          : nombreSalariesHommes
-    }
-  },
-  {
-    field: "nombreSalariesHommes",
-    updates: {
-      nombreSalariesFemmes: (hommesValue, { nombreSalariesFemmes }: any) =>
-        valueValidateForCalculator(hommesValue)
-          ? parseIntStateValue(10 - parseIntFormValue(hommesValue))
-          : nombreSalariesFemmes
-    }
+const calculator = createDecorator({
+  field: "nombreSalariesFemmes",
+  updates: {
+    nombreSalariesHommes: (femmesValue, { nombreSalariesHommes }: any) =>
+      valueValidateForCalculator(femmesValue)
+        ? parseIntStateValue(10 - parseIntFormValue(femmesValue))
+        : nombreSalariesHommes
   }
-);
+});
 
 ///////////////////
 
@@ -140,7 +129,7 @@ function IndicateurCinqForm({
             <FieldInput
               fieldName="nombreSalariesHommes"
               label="nombre d’hommes parmi les 10 plus hauts salaires"
-              readOnly={readOnly}
+              readOnly={true}
               theme="hommes"
             />
           </BlocFormLight>
