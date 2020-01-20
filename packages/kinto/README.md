@@ -6,7 +6,7 @@ Vous devez disposer de Python 3.6+ et `pipenv`.
 
 ## Importer les données Solen en ligne de commande
 
-![screecast de démo](https://i.imgur.com/bIZVY5u.gif)
+![screencast de démo](https://i.imgur.com/bIZVY5u.gif)
 
 ```
 $ pipenv run python solen.py export-solen.xlsx
@@ -188,7 +188,7 @@ Retourne une chaîne CSV des enregistrements calculés.
 
 ### La méthode `App#toJSON(indent=None)`
 
-Retourne une chaîne CSV des enregistrements calculés.
+Retourne une chaîne JSON des enregistrements calculés.
 
 Options:
 
