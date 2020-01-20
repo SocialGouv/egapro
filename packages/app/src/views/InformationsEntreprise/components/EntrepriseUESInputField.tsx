@@ -5,7 +5,9 @@ import { useField } from "react-final-form";
 import { required } from "../../../utils/formHelpers";
 import globalStyles from "../../../utils/globalStyles";
 
-import Input, { hasFieldError } from "../../../components/Input";
+import { hasFieldError } from "../../../components/Input";
+import FieldSiren from "../../../components/FieldSiren";
+import TextField from "../../../components/TextField";
 import ActionLink from "../../../components/ActionLink";
 
 const validate = (value: string) => {
@@ -53,28 +55,27 @@ function InputField({
         {`Entreprise ${index + 1}`}
       </label>
 
-      {readOnly ? (
-        <div css={styles.fieldRow}>
-          <div css={styles.fakeInput}>{nomField.input.value}</div>
-          <div css={styles.fakeInput}>{sirenField.input.value}</div>
-        </div>
-      ) : (
-        <div css={styles.fieldRow}>
-          <Input field={nomField} placeholder="Nom de cette entreprise" />
-          <Input field={sirenField} placeholder="SIREN de cette entreprise" />
+      <div css={styles.fieldRow}>
+        <TextField
+          label="Nom de l'entreprise"
+          fieldName={nom}
+          readOnly={readOnly}
+          errorText="le nom n'est pas valide"
+        />
+        <FieldSiren
+          label="Siren de l'entreprise"
+          name={siren}
+          readOnly={readOnly}
+        />
+        {!readOnly && (
           <ActionLink
             onClick={() => deleteEntrepriseUES(index)}
             style={styles.delete}
           >
-            supprimer l'entreprise
+            x
           </ActionLink>
-        </div>
-      )}
-
-      <p css={styles.error}>
-        {(nomError || sirenError) &&
-          "vous devez donner un nom à cette entreprise"}
-      </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -91,17 +92,12 @@ const styles = {
     color: globalStyles.colors.error
   }),
   fieldRow: css({
-    height: 38,
+    height: 100,
     marginTop: 5,
-    marginBottom: 5,
     display: "flex"
   }),
   delete: css({
-    flexShrink: 0,
-    alignSelf: "flex-end",
-    marginLeft: globalStyles.grid.gutterWidth,
-    fontSize: 12,
-    lineHeight: "15px"
+    marginLeft: globalStyles.grid.gutterWidth
   }),
   error: css({
     height: 18,
@@ -109,20 +105,6 @@ const styles = {
     fontSize: 12,
     fontStyle: "italic",
     lineHeight: "15px"
-  }),
-
-  fakeInput: css({
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: "auto",
-    paddingLeft: 23,
-    paddingRight: 23,
-
-    backgroundColor: "white",
-    borderRadius: 5,
-
-    fontSize: 14,
-    lineHeight: "38px"
   })
 };
 
