@@ -10,8 +10,10 @@ import {
   ActionInformationsComplementairesData
 } from "../../globals";
 
+import InfoBloc from "../../components/InfoBloc";
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 import InformationsComplementairesForm from "./InformationsComplementairesForm";
 
@@ -32,6 +34,21 @@ function InformationsComplementaires({ state, dispatch }: Props) {
       dispatch({ type: "validateInformationsComplementaires", valid }),
     [dispatch]
   );
+  if (state.indicateurUn.formValidated !== "Valid") {
+    return (
+      <PageInformationsComplementaires>
+        <InfoBloc
+          title="vous devez renseigner l'indicateur écart de rémunérations avant de pouvoir renseigner ces informations"
+          text={
+            <TextSimulatorLink
+              to="/indicateur1"
+              label="renseigner les informations"
+            />
+          }
+        />
+      </PageInformationsComplementaires>
+    );
+  }
 
   return (
     <PageInformationsComplementaires>
@@ -39,6 +56,7 @@ function InformationsComplementaires({ state, dispatch }: Props) {
         childrenForm={
           <InformationsComplementairesForm
             informationsComplementaires={state.informationsComplementaires}
+            indicateurUnParCSP={state.indicateurUn.csp}
             readOnly={
               state.informationsComplementaires.formValidated === "Valid"
             }
