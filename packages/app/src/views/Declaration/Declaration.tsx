@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useCallback, ReactNode } from "react";
+import { useCallback, Fragment, ReactNode } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import {
@@ -10,11 +10,20 @@ import {
   ActionDeclarationData
 } from "../../globals";
 
+import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
+import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
+import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
+import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
+import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
+import { calculNoteIndex } from "../../utils/calculsEgaProIndex";
+
 import InfoBloc from "../../components/InfoBloc";
 import Page from "../../components/Page";
 import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 
 import DeclarationForm from "./DeclarationForm";
+import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -58,16 +67,72 @@ function Declaration({ state, dispatch }: Props) {
       </PageDeclaration>
     );
   }
+
+  const {
+    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
+    noteIndicateurUn
+  } = calculIndicateurUn(state);
+
+  const {
+    effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
+    noteIndicateurDeux
+  } = calculIndicateurDeux(state);
+
+  const {
+    effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
+    noteIndicateurTrois
+  } = calculIndicateurTrois(state);
+
+  const {
+    effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
+    noteIndicateurDeuxTrois
+  } = calculIndicateurDeuxTrois(state);
+
+  const { noteIndicateurQuatre } = calculIndicateurQuatre(state);
+
+  const { noteIndicateurCinq } = calculIndicateurCinq(state);
+
+  const trancheEffectifs = state.informations.trancheEffectifs;
+
+  const allIndicateurValid =
+    (state.indicateurUn.formValidated === "Valid" ||
+      !effectifsIndicateurUnCalculable) &&
+    (trancheEffectifs !== "50 à 250"
+      ? (state.indicateurDeux.formValidated === "Valid" ||
+          !effectifsIndicateurDeuxCalculable) &&
+        (state.indicateurTrois.formValidated === "Valid" ||
+          !effectifsIndicateurTroisCalculable)
+      : state.indicateurDeuxTrois.formValidated === "Valid" ||
+        !effectifsIndicateurDeuxTroisCalculable) &&
+    state.indicateurQuatre.formValidated === "Valid" &&
+    state.indicateurCinq.formValidated === "Valid";
+
+  const { noteIndex, totalPointCalculable } = calculNoteIndex(
+    trancheEffectifs,
+    noteIndicateurUn,
+    noteIndicateurDeux,
+    noteIndicateurTrois,
+    noteIndicateurDeuxTrois,
+    noteIndicateurQuatre,
+    noteIndicateurCinq
+  );
   return (
     <PageDeclaration>
       <LayoutFormAndResult
         childrenForm={
-          <DeclarationForm
-            declaration={state.declaration}
-            readOnly={state.declaration.formValidated === "Valid"}
-            updateDeclaration={updateDeclaration}
-            validateDeclaration={validateDeclaration}
-          />
+          <Fragment>
+            <RecapitulatifIndex
+              allIndicateurValid={allIndicateurValid}
+              noteIndex={noteIndex}
+              totalPointCalculable={totalPointCalculable}
+            />
+            <DeclarationForm
+              declaration={state.declaration}
+              readOnly={state.declaration.formValidated === "Valid"}
+              updateDeclaration={updateDeclaration}
+              validateDeclaration={validateDeclaration}
+            />
+          </Fragment>
         }
         childrenResult={null}
       />
