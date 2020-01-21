@@ -123,8 +123,6 @@ const defaultState: AppState = {
     commune: "",
     structure: "Entreprise",
     nomUES: "",
-    effectifGlobalFemmes: undefined,
-    effectifGlobalHommes: undefined,
     entreprisesUES: []
   },
   informationsDeclarant: {

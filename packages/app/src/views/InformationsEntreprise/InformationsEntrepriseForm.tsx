@@ -14,15 +14,10 @@ import {
 
 import globalStyles from "../../utils/globalStyles";
 
-import {
-  parseIntFormValue,
-  required,
-  parseIntStateValue
-} from "../../utils/formHelpers";
+import { required } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import FieldSiren from "../../components/FieldSiren";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
@@ -110,12 +105,6 @@ function InformationsEntrepriseForm({
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
-    effectifGlobalFemmes: parseIntStateValue(
-      informationsEntreprise.effectifGlobalFemmes
-    ),
-    effectifGlobalHommes: parseIntStateValue(
-      informationsEntreprise.effectifGlobalHommes
-    ),
     entreprisesUES: informationsEntreprise.entreprisesUES
   };
 
@@ -131,8 +120,6 @@ function InformationsEntrepriseForm({
       commune,
       structure,
       nomUES,
-      effectifGlobalFemmes,
-      effectifGlobalHommes,
       entreprisesUES
     } = formData;
 
@@ -147,8 +134,6 @@ function InformationsEntrepriseForm({
       commune,
       structure,
       nomUES,
-      effectifGlobalFemmes: parseIntFormValue(effectifGlobalFemmes),
-      effectifGlobalHommes: parseIntFormValue(effectifGlobalHommes),
       entreprisesUES
     });
   };
@@ -224,16 +209,6 @@ function InformationsEntrepriseForm({
             fieldName="commune"
             errorText="la commune n'est pas valide"
             readOnly={readOnly}
-          />
-
-          <FieldInputsMenWomen
-            name="effectif global de l'entreprise ou UES"
-            readOnly={readOnly}
-            calculable={true}
-            calculableNumber={0}
-            mask="number"
-            femmeFieldName="effectifGlobalFemmes"
-            hommeFieldName="effectifGlobalHommes"
           />
 
           <RadioButtons

@@ -357,8 +357,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -730,8 +728,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -1069,8 +1065,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -1437,8 +1431,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -1778,8 +1770,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -2144,8 +2134,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -2483,8 +2471,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -2849,8 +2835,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -3188,8 +3172,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -3554,8 +3536,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -3893,8 +3873,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -4259,8 +4237,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -4598,8 +4574,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -4964,8 +4938,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -5303,8 +5275,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -5669,8 +5639,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -6008,8 +5976,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -6374,8 +6340,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -6747,8 +6711,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -7113,8 +7075,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -7486,8 +7446,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -7852,8 +7810,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -8225,8 +8181,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -8624,8 +8578,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -8997,8 +8949,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -9329,8 +9279,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -9668,8 +9616,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -10034,8 +9980,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -10373,8 +10317,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -10739,8 +10681,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -11078,8 +11018,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -11444,8 +11382,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -11783,8 +11719,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -12149,8 +12083,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -12488,8 +12420,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -12854,8 +12784,6 @@ Object {
     "codePostal": "34000",
     "commune": "Montpellier",
     "departement": "Hérault",
-    "effectifGlobalFemmes": 10,
-    "effectifGlobalHommes": 11,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -13189,8 +13117,6 @@ Object {
     "codePostal": "34000",
     "commune": "Montpellier",
     "departement": "Hérault",
-    "effectifGlobalFemmes": 10,
-    "effectifGlobalHommes": 11,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -13560,8 +13486,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -13899,8 +13823,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -14265,8 +14187,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -14604,8 +14524,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -14970,8 +14888,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -15343,8 +15259,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -15716,8 +15630,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -16089,8 +16001,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -16428,8 +16338,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -16794,8 +16702,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -17133,8 +17039,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -17499,8 +17403,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -17838,8 +17740,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -18204,8 +18104,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -18543,8 +18441,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -18909,8 +18805,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -19248,8 +19142,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -19614,8 +19506,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -19953,8 +19843,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -20319,8 +20207,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -20658,8 +20544,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -21024,8 +20908,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -21397,8 +21279,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -21736,8 +21616,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -22102,8 +21980,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -22475,8 +22351,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -22814,8 +22688,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -23180,8 +23052,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -23519,8 +23389,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -23885,8 +23753,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -24224,8 +24090,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",
@@ -24590,8 +24454,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -24929,8 +24791,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "Valid",
     "nomEntreprise": "",
@@ -25295,8 +25155,6 @@ Object {
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
-    "effectifGlobalFemmes": 100,
-    "effectifGlobalHommes": 111,
     "entreprisesUES": Array [
       Object {
         "nom": "entreprise 1",
@@ -25634,8 +25492,6 @@ Object {
     "codePostal": "",
     "commune": "",
     "departement": "",
-    "effectifGlobalFemmes": undefined,
-    "effectifGlobalHommes": undefined,
     "entreprisesUES": Array [],
     "formValidated": "None",
     "nomEntreprise": "",

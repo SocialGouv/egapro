@@ -681,8 +681,6 @@ describe("updateInformationsEntreprise", () => {
       commune: "Montpellier",
       structure: "Unité Economique et Sociale (UES)" as Structure,
       nomUES: "foobar UES",
-      effectifGlobalFemmes: 10,
-      effectifGlobalHommes: 11,
       entreprisesUES: [{ nom: "entreprise 1", siren: "12345" }]
     }
   };
