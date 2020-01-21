@@ -60,22 +60,34 @@ const validateInt = (value: string) => {
   }
 };
 
-const validateForm = ({
-  dateConsultationCSE,
-  anneeDeclaration,
-  datePublication,
-  lienPublication
-}: {
+interface validateFormParams {
   dateConsultationCSE: string;
   anneeDeclaration: string;
   datePublication: string;
   lienPublication: string;
-}) => ({
-  dateConsultationCSE: validateDate(dateConsultationCSE),
-  anneeDeclaration: validateInt(anneeDeclaration),
-  datePublication: validateDate(datePublication),
-  lienPublication: validate(lienPublication)
-});
+}
+
+const validateForm = (parCSP: boolean) => {
+  // Closure sur parCSP : validateForm est appelé avec le param "parCSP" et
+  // renvoie une fonction de validation de formulaire
+  const _validateForm = ({
+    dateConsultationCSE,
+    anneeDeclaration,
+    datePublication,
+    lienPublication
+  }: {
+    dateConsultationCSE: string;
+    anneeDeclaration: string;
+    datePublication: string;
+    lienPublication: string;
+  }) => ({
+    dateConsultationCSE: parCSP ? undefined : validateDate(dateConsultationCSE),
+    anneeDeclaration: validateInt(anneeDeclaration),
+    datePublication: validateDate(datePublication),
+    lienPublication: validate(lienPublication)
+  });
+  return _validateForm;
+};
 
 interface Props {
   informationsComplementaires: AppState["informationsComplementaires"];
@@ -128,7 +140,7 @@ function InformationsComplementairesForm({
     <Form
       onSubmit={onSubmit}
       initialValues={initialValues}
-      validate={validateForm}
+      validate={validateForm(indicateurUnParCSP)}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
