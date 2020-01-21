@@ -29,11 +29,13 @@ function CodeNaf({
           >
             {label}
           </label>
-          <div css={styles.fieldRow}>
-            {readOnly ? (
+          {readOnly ? (
+            <div css={styles.fieldRow}>
               <div css={styles.fakeInput}>{input.value}</div>
-            ) : (
-              <Fragment>
+            </div>
+          ) : (
+            <Fragment>
+              <div css={styles.fieldRow}>
                 <select {...input}>
                   {listeCodeNaf.map((codeNaf: string) => (
                     <option value={codeNaf} key={codeNaf}>
@@ -41,10 +43,14 @@ function CodeNaf({
                     </option>
                   ))}
                 </select>
-                {meta.error && meta.touched && <span>{meta.error}</span>}
-              </Fragment>
-            )}
-          </div>
+              </div>
+              {meta.error && meta.touched && (
+                <p css={styles.error}>
+                  veuillez sélectionner un code NAF dans la liste
+                </p>
+              )}
+            </Fragment>
+          )}
         </div>
       )}
     </Field>
@@ -99,6 +105,7 @@ const styles = {
 export default CodeNaf;
 
 const listeCodeNaf = [
+  "",
   "01.11Z - Culture de céréales (à l'exception du riz), de légumineuses et de graines oléagineuses",
   "01.12Z - Culture du riz",
   "01.13Z - Culture de légumes, de melons, de racines et de tubercules",
