@@ -79,6 +79,7 @@ const validateForm = ({
 
 interface Props {
   informationsComplementaires: AppState["informationsComplementaires"];
+  indicateurUnParCSP: boolean;
   readOnly: boolean;
   updateInformationsComplementaires: (
     data: ActionInformationsComplementairesData
@@ -88,6 +89,7 @@ interface Props {
 
 function InformationsComplementairesForm({
   informationsComplementaires,
+  indicateurUnParCSP,
   readOnly,
   updateInformationsComplementaires,
   validateInformationsComplementaires
@@ -135,11 +137,13 @@ function InformationsComplementairesForm({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
-          <FieldDate
-            name="dateConsultationCSE"
-            label="Date de consultation du CSE"
-            readOnly={readOnly}
-          />
+          {!indicateurUnParCSP && (
+            <FieldDate
+              name="dateConsultationCSE"
+              label="Date de consultation du CSE"
+              readOnly={readOnly}
+            />
+          )}
           <TextField
             label="Année de déclaration"
             fieldName="anneeDeclaration"
