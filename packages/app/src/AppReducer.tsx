@@ -398,6 +398,13 @@ function AppReducer(
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, formValidated: action.valid },
+        informationsComplementaires: {
+          ...state.informationsComplementaires,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.informationsComplementaires.formValidated
+        },
         declaration: {
           ...state.declaration,
           formValidated:
