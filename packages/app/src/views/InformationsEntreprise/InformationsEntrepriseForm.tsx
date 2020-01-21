@@ -18,6 +18,7 @@ import { required } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
+import FieldSiren from "../../components/FieldSiren";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import InputField from "./components/EntrepriseUESInputField";
@@ -172,12 +173,7 @@ function InformationsEntrepriseForm({
             errorText="le nom de l'entreprise n'est pas valide"
             readOnly={readOnly}
           />
-          <TextField
-            label="siren"
-            fieldName="siren"
-            errorText="le Siren de l'entreprise n'est pas valide"
-            readOnly={readOnly}
-          />
+          <FieldSiren label="siren" name="siren" readOnly={readOnly} />
           <TextField
             label="code NAF"
             fieldName="codeNaf"
