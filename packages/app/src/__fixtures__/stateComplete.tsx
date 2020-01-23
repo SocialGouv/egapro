@@ -404,7 +404,7 @@ const actionUpdateInformationsEntreprise = {
     nomEntreprise: "acme",
     siren: "1234",
     codeNaf: "5678",
-    region: "Auverge Rhône Alpes",
+    region: "Auvergne-Rhône-Alpes",
     departement: "Drôme",
     adresse: "30 rue des alouettes",
     codePostal: "12345",
