@@ -8,7 +8,7 @@ import {
   ActionInformationsDeclarantData
 } from "../../globals";
 
-import { required } from "../../utils/formHelpers";
+import { required, validateEmail } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -44,7 +44,7 @@ const validateForm = ({
   nom: validate(nom),
   prenom: validate(prenom),
   tel: validate(tel),
-  email: validate(email)
+  email: validateEmail(email) ? { invalid: true } : undefined
 });
 
 interface Props {
