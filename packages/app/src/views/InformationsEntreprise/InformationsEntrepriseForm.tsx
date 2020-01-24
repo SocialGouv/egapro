@@ -25,6 +25,7 @@ import FormSubmit from "../../components/FormSubmit";
 import InputField from "./components/EntrepriseUESInputField";
 import ModalConfirmDelete from "./components/EntrepriseUESModalConfirmDelete";
 import RadioButtons from "../../components/RadioButtons";
+import RegionsDepartements from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 import { Modal } from "../../components/ModalContext";
@@ -176,16 +177,9 @@ function InformationsEntrepriseForm({
           />
           <FieldSiren label="SIREN" name="siren" readOnly={readOnly} />
           <CodeNaf label="Code NAF" name="codeNaf" readOnly={readOnly} />
-          <TextField
-            label="Région"
-            fieldName="region"
-            errorText="la région n’est pas valide"
-            readOnly={readOnly}
-          />
-          <TextField
-            label="Département"
-            fieldName="departement"
-            errorText="le département n’est pas valide"
+          <RegionsDepartements
+            nameRegion="region"
+            nameDepartement="departement"
             readOnly={readOnly}
           />
           <TextField
