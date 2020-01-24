@@ -14,7 +14,12 @@ import {
 
 import globalStyles from "../../utils/globalStyles";
 
-import { required } from "../../utils/formHelpers";
+import {
+  mustBeNumber,
+  parseIntFormValue,
+  parseIntStateValue,
+  required
+} from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -43,6 +48,22 @@ const validate = (value: string) => {
   }
 };
 
+const validateNombreEntreprises = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  const mustBeAtLeastTwoError =
+    !requiredError && !mustBeNumberError && Number(value) < 2;
+  if (!requiredError && !mustBeNumberError && !mustBeAtLeastTwoError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeNumber: mustBeNumberError,
+      mustBeAtLeastTwo: mustBeAtLeastTwoError
+    };
+  }
+};
+
 const validateForm = ({
   nomEntreprise,
   siren,
@@ -53,7 +74,8 @@ const validateForm = ({
   codePostal,
   commune,
   structure,
-  nomUES
+  nomUES,
+  nombreEntreprises
 }: {
   nomEntreprise: string;
   siren: string;
@@ -65,6 +87,7 @@ const validateForm = ({
   commune: string;
   structure: Structure;
   nomUES: string;
+  nombreEntreprises: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -78,6 +101,10 @@ const validateForm = ({
   nomUES:
     structure === "Unité Economique et Sociale (UES)"
       ? validate(nomUES)
+      : undefined,
+  nombreEntreprises:
+    structure === "Unité Economique et Sociale (UES)"
+      ? validateNombreEntreprises(nombreEntreprises)
       : undefined
 });
 
@@ -107,6 +134,9 @@ function InformationsEntrepriseForm({
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
+    nombreEntreprises: parseIntStateValue(
+      informationsEntreprise.nombreEntreprises
+    ),
     entreprisesUES: informationsEntreprise.entreprisesUES
   };
 
@@ -122,6 +152,7 @@ function InformationsEntrepriseForm({
       commune,
       structure,
       nomUES,
+      nombreEntreprises,
       entreprisesUES
     } = formData;
 
@@ -136,6 +167,7 @@ function InformationsEntrepriseForm({
       commune,
       structure,
       nomUES,
+      nombreEntreprises: parseIntFormValue(nombreEntreprises),
       entreprisesUES
     });
   };
@@ -169,6 +201,23 @@ function InformationsEntrepriseForm({
       {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
+          <RadioButtons
+            fieldName="structure"
+            label="je déclare l'index en tant que"
+            value={values.structure}
+            readOnly={readOnly}
+            choices={[
+              {
+                label: "entreprise",
+                value: "Entreprise"
+              },
+              {
+                label: "Unité Economique et Sociale (UES)",
+                value: "Unité Economique et Sociale (UES)"
+              }
+            ]}
+          />
+
           <TextField
             label="Nom de l'entreprise"
             fieldName="nomEntreprise"
@@ -201,29 +250,18 @@ function InformationsEntrepriseForm({
             readOnly={readOnly}
           />
 
-          <RadioButtons
-            fieldName="structure"
-            label="je déclare l'index en tant que"
-            value={values.structure}
-            readOnly={readOnly}
-            choices={[
-              {
-                label: "entreprise",
-                value: "Entreprise"
-              },
-              {
-                label: "Unité Economique et Sociale (UES)",
-                value: "Unité Economique et Sociale (UES)"
-              }
-            ]}
-          />
-
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <Fragment>
               <TextField
                 label="Nom de l'UES"
                 fieldName="nomUES"
                 errorText="le nom de l'UES n'est pas valide"
+                readOnly={readOnly}
+              />
+              <TextField
+                label="Nombre d'entreprises dans l'UES"
+                fieldName="nombreEntreprises"
+                errorText="le nombre d'entreprises dans l'UES doit être un nombre supérieur ou égal à 2"
                 readOnly={readOnly}
               />
               <FieldArray name="entreprisesUES">
