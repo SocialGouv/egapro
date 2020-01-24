@@ -8,7 +8,7 @@ import {
   ActionInformationsDeclarantData
 } from "../../globals";
 
-import { required, validateEmail } from "../../utils/formHelpers";
+import { mustBeNumber, required, validateEmail } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -30,6 +30,21 @@ const validate = (value: string) => {
   }
 };
 
+const validateTel = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  const mustBe10DigitsError = value && value.length !== 10;
+  if (!requiredError && !mustBeNumberError && !mustBe10DigitsError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeNumber: mustBeNumberError,
+      mustBe10Digits: mustBe10DigitsError
+    };
+  }
+};
+
 const validateForm = ({
   nom,
   prenom,
@@ -43,7 +58,7 @@ const validateForm = ({
 }) => ({
   nom: validate(nom),
   prenom: validate(prenom),
-  tel: validate(tel),
+  tel: validateTel(tel),
   email: validateEmail(email) ? { invalid: true } : undefined
 });
 
@@ -112,7 +127,7 @@ function InformationsDeclarantForm({
           <TextField
             label="Numéro de téléphone"
             fieldName="tel"
-            errorText="le numéro de téléphone n’est pas valide"
+            errorText="le numéro de téléphone doit être composé de 10 chiffres"
             readOnly={readOnly}
           />
           <TextField
