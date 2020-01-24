@@ -1,4 +1,5 @@
 /** @jsx jsx */
+import { useState, ChangeEvent } from "react";
 import { css, jsx } from "@emotion/core";
 import { Field } from "react-final-form";
 
@@ -7,6 +8,9 @@ import { EntrepriseUES } from "../globals";
 import globalStyles from "../utils/globalStyles";
 
 import { mustBeNumber, required } from "../utils/formHelpers";
+
+import ModalConfirmDelete from "../views/InformationsEntreprise/components/EntrepriseUESModalConfirmDelete";
+import { Modal } from "./ModalContext";
 
 export const validate = (value: string) => {
   const requiredError = required(value);
@@ -37,6 +41,15 @@ function NombreEntreprises({
   readOnly: boolean;
   entreprisesUES: Array<EntrepriseUES>;
 }) {
+  const [changeEvent, setChangeEvent] = useState<
+    { input: any; event: ChangeEvent<any> } | undefined
+  >(undefined);
+  const confirmChangeEvent = (input: any, event: ChangeEvent<any>) => {
+    event.persist();
+    setChangeEvent({ input, event });
+  };
+  const closeModal = () => setChangeEvent(undefined);
+
   return (
     <Field name={fieldName} validate={validate}>
       {({ input, meta }) => (
@@ -65,17 +78,26 @@ function NombreEntreprises({
                   : Number(newValue);
                 if (
                   validate(newValue) !== undefined || // Si invalide, sera bloqué au niveau de la validation du champ dans RFF
-                  newSize >= entreprisesUES.length ||
-                  window.confirm(
-                    `Êtes-vous sûr de vouloir réduire le nombre d'entreprises dans l'UES à ${newSize} et perdre toutes les entreprises supplémentaires ?`
-                  )
+                  newSize >= entreprisesUES.length
                 ) {
-                  input.onChange(event); // pass event through to RFF
+                  input.onChange(event);
+                } else {
+                  confirmChangeEvent(input, event);
                 }
               }}
             />
           </div>
           {meta.error && meta.touched && <p css={styles.error}>{errorText}</p>}
+          <Modal isOpen={changeEvent !== undefined} onRequestClose={closeModal}>
+            <ModalConfirmDelete
+              closeModal={closeModal}
+              sendChangeEvent={() => {
+                // TODO : the event isn't properly fired, the value doesn't change
+                changeEvent !== undefined &&
+                  changeEvent.input.onChange(changeEvent.event);
+              }}
+            />
+          </Modal>
         </div>
       )}
     </Field>

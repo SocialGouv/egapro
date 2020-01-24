@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
 import arrayMutators from "final-form-arrays";
 import { Form } from "react-final-form";
@@ -29,7 +29,6 @@ import FieldSiren from "../../components/FieldSiren";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import InputField from "./components/EntrepriseUESInputField";
-import ModalConfirmDelete from "./components/EntrepriseUESModalConfirmDelete";
 import NombreEntreprises, {
   validate as validateNombreEntreprises
 } from "../../components/NombreEntreprises";
@@ -37,7 +36,6 @@ import RadioButtons from "../../components/RadioButtons";
 import RegionsDepartements from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import { Modal } from "../../components/ModalContext";
 
 ///////////////////
 
@@ -185,13 +183,6 @@ function InformationsEntrepriseForm({
     validateInformationsEntreprise("Valid");
   };
 
-  const [indexEntrepriseToDelete, setIndexEntrepriseToDelete] = useState<
-    number | undefined
-  >(undefined);
-  const confirmEntrepriseToDelete = (index: number) =>
-    setIndexEntrepriseToDelete(index);
-  const closeModal = () => setIndexEntrepriseToDelete(undefined);
-
   return (
     <Form
       onSubmit={onSubmit}
@@ -284,48 +275,9 @@ function InformationsEntrepriseForm({
                           nom={`${entrepriseUES}.nom`}
                           siren={`${entrepriseUES}.siren`}
                           index={index}
-                          deleteEntrepriseUES={confirmEntrepriseToDelete}
                           readOnly={readOnly}
                         />
                       ))}
-                      {readOnly ? (
-                        <div css={styles.spacerAdd} />
-                      ) : (
-                        <ActionLink
-                          onClick={() => fields.push({ nom: "", siren: "" })}
-                          style={styles.add}
-                        >
-                          <div css={styles.addIcon}>
-                            <svg
-                              width="26"
-                              height="26"
-                              viewBox="0 0 26 26"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
-                                stroke="white"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                              />
-                            </svg>
-                          </div>
-                          <span>ajouter une entreprise dans l'UES</span>
-                        </ActionLink>
-                      )}
-                      <Modal
-                        isOpen={indexEntrepriseToDelete !== undefined}
-                        onRequestClose={closeModal}
-                      >
-                        <ModalConfirmDelete
-                          closeModal={closeModal}
-                          deleteEntreprise={() => {
-                            indexEntrepriseToDelete !== undefined &&
-                              fields.remove(indexEntrepriseToDelete);
-                          }}
-                        />
-                      </Modal>
                     </Fragment>
                   );
                 }}

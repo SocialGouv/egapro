@@ -14,10 +14,10 @@ import {
 
 function ModalConfirmDelete({
   closeModal,
-  deleteEntreprise
+  sendChangeEvent
 }: {
   closeModal: () => void;
-  deleteEntreprise: () => void;
+  sendChangeEvent: () => void;
 }) {
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
@@ -31,20 +31,20 @@ function ModalConfirmDelete({
 
         <div>
           <p css={styles.blocTitle}>
-            Êtes vous sûr de vouloir supprimer cette entreprise de l'UES ?
+            {`Êtes-vous sûr de vouloir réduire le nombre d'entreprises dans l'UES ?`}
           </p>
           <p css={styles.blocText}>
-            toutes les données renseignées pour cette entreprise seront effacées
+            toutes les données renseignées pour ces entreprise seront effacées
             définitivement.
           </p>
 
           <div css={styles.actionBar}>
             <ButtonAction
               onClick={() => {
-                deleteEntreprise();
+                sendChangeEvent();
                 closeModal();
               }}
-              label="supprimer"
+              label="confirmer et supprimer les données"
             />
             <div css={styles.spacerActionBarModal} />
             <ActionLink onClick={closeModal}>annuler</ActionLink>
