@@ -3,19 +3,20 @@ import { Fragment, useState } from "react";
 import { css, jsx } from "@emotion/core";
 import arrayMutators from "final-form-arrays";
 import { Form } from "react-final-form";
+import createDecorator from "final-form-calculate";
 import { FieldArray } from "react-final-form-arrays";
 
 import {
   AppState,
   FormState,
   ActionInformationsEntrepriseData,
-  Structure
+  Structure,
+  EntrepriseUES
 } from "../../globals";
 
 import globalStyles from "../../utils/globalStyles";
 
 import {
-  mustBeNumber,
   parseIntFormValue,
   parseIntStateValue,
   required
@@ -29,6 +30,9 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import InputField from "./components/EntrepriseUESInputField";
 import ModalConfirmDelete from "./components/EntrepriseUESModalConfirmDelete";
+import NombreEntreprises, {
+  validate as validateNombreEntreprises
+} from "../../components/NombreEntreprises";
 import RadioButtons from "../../components/RadioButtons";
 import RegionsDepartements from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
@@ -44,22 +48,6 @@ const validate = (value: string) => {
   } else {
     return {
       required: requiredError
-    };
-  }
-};
-
-const validateNombreEntreprises = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  const mustBeAtLeastTwoError =
-    !requiredError && !mustBeNumberError && Number(value) < 2;
-  if (!requiredError && !mustBeNumberError && !mustBeAtLeastTwoError) {
-    return undefined;
-  } else {
-    return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError,
-      mustBeAtLeastTwo: mustBeAtLeastTwoError
     };
   }
 };
@@ -101,12 +89,32 @@ const validateForm = ({
   nomUES:
     structure === "Unité Economique et Sociale (UES)"
       ? validate(nomUES)
-      : undefined,
-  nombreEntreprises:
-    structure === "Unité Economique et Sociale (UES)"
-      ? validateNombreEntreprises(nombreEntreprises)
       : undefined
 });
+
+const calculator = createDecorator({
+  field: "nombreEntreprises",
+  updates: {
+    entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
+      adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES)
+  }
+});
+
+const adaptEntreprisesUESSize = (
+  nombreEntreprises: string,
+  entreprisesUES: Array<EntrepriseUES>
+) => {
+  if (validateNombreEntreprises(nombreEntreprises) === undefined) {
+    const newSize = Number(nombreEntreprises);
+    while (newSize > entreprisesUES.length) {
+      // Augmenter la taille de l'array si nécessaire
+      entreprisesUES.push({ nom: "", siren: "" });
+    }
+    // Réduire la taille de l'array si nécessaire
+    entreprisesUES.length = newSize;
+  }
+  return entreprisesUES;
+};
 
 interface Props {
   informationsEntreprise: AppState["informationsEntreprise"];
@@ -193,6 +201,7 @@ function InformationsEntrepriseForm({
       }}
       initialValues={initialValues}
       validate={validateForm}
+      decorators={[calculator]}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
@@ -258,10 +267,11 @@ function InformationsEntrepriseForm({
                 errorText="le nom de l'UES n'est pas valide"
                 readOnly={readOnly}
               />
-              <TextField
-                label="Nombre d'entreprises dans l'UES"
+              <NombreEntreprises
                 fieldName="nombreEntreprises"
+                label="Nombre d'entreprises dans l'UES"
                 errorText="le nombre d'entreprises dans l'UES doit être un nombre supérieur ou égal à 2"
+                entreprisesUES={informationsEntreprise.entreprisesUES}
                 readOnly={readOnly}
               />
               <FieldArray name="entreprisesUES">
