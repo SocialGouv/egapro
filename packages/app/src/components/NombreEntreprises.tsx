@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useState, ChangeEvent } from "react";
+import { useState } from "react";
 import { css, jsx } from "@emotion/core";
 import { Field } from "react-final-form";
 
@@ -32,23 +32,24 @@ function NombreEntreprises({
   errorText,
   fieldName,
   label,
-  readOnly,
-  entreprisesUES
+  entreprisesUES,
+  newNombreEntreprises,
+  readOnly
 }: {
   errorText: string;
   fieldName: string;
   label: string;
-  readOnly: boolean;
   entreprisesUES: Array<EntrepriseUES>;
+  newNombreEntreprises: (fieldName: string, newValue: string) => undefined;
+  readOnly: boolean;
 }) {
-  const [changeEvent, setChangeEvent] = useState<
-    { input: any; event: ChangeEvent<any> } | undefined
-  >(undefined);
-  const confirmChangeEvent = (input: any, event: ChangeEvent<any>) => {
-    event.persist();
-    setChangeEvent({ input, event });
+  const [newValue, setNewValue] = useState<string | undefined>(undefined);
+  const confirmChangeEvent = (newValue: string) => {
+    setNewValue(newValue);
   };
-  const closeModal = () => setChangeEvent(undefined);
+  const closeModal = () => {
+    setNewValue(undefined);
+  };
 
   return (
     <Field name={fieldName} validate={validate}>
@@ -82,19 +83,19 @@ function NombreEntreprises({
                 ) {
                   input.onChange(event);
                 } else {
-                  confirmChangeEvent(input, event);
+                  confirmChangeEvent(event.target.value);
                 }
               }}
             />
           </div>
           {meta.error && meta.touched && <p css={styles.error}>{errorText}</p>}
-          <Modal isOpen={changeEvent !== undefined} onRequestClose={closeModal}>
+          <Modal isOpen={newValue !== undefined} onRequestClose={closeModal}>
             <ModalConfirmDelete
               closeModal={closeModal}
               sendChangeEvent={() => {
-                // TODO : the event isn't properly fired, the value doesn't change
-                changeEvent !== undefined &&
-                  changeEvent.input.onChange(changeEvent.event);
+                if (newValue !== undefined) {
+                  newNombreEntreprises(fieldName, newValue);
+                }
               }}
             />
           </Modal>

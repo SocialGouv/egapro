@@ -34,7 +34,7 @@ function ModalConfirmDelete({
             {`Êtes-vous sûr de vouloir réduire le nombre d'entreprises dans l'UES ?`}
           </p>
           <p css={styles.blocText}>
-            toutes les données renseignées pour ces entreprise seront effacées
+            toutes les données renseignées pour ces entreprises seront effacées
             définitivement.
           </p>
 

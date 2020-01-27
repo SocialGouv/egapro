@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
+import { MutableState, Tools } from "final-form";
 import arrayMutators from "final-form-arrays";
 import { Form } from "react-final-form";
 import createDecorator from "final-form-calculate";
@@ -183,11 +184,22 @@ function InformationsEntrepriseForm({
     validateInformationsEntreprise("Valid");
   };
 
+  // Form mutator utilisé par le composant NombreEntreprise pour ne changer la
+  // valeur du state qu'une fois la confirmation validée
+  const newNombreEntreprises = (
+    [name, newValue]: [string, string],
+    state: MutableState<any>,
+    { changeValue }: Tools<any>
+  ) => {
+    changeValue(state, name, () => newValue);
+  };
+
   return (
     <Form
       onSubmit={onSubmit}
       mutators={{
         // potentially other mutators could be merged here
+        newNombreEntreprises,
         ...arrayMutators
       }}
       initialValues={initialValues}
@@ -198,7 +210,7 @@ function InformationsEntrepriseForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
@@ -263,6 +275,7 @@ function InformationsEntrepriseForm({
                 label="Nombre d'entreprises dans l'UES"
                 errorText="le nombre d'entreprises dans l'UES doit être un nombre supérieur ou égal à 2"
                 entreprisesUES={informationsEntreprise.entreprisesUES}
+                newNombreEntreprises={form.mutators.newNombreEntreprises}
                 readOnly={readOnly}
               />
               <FieldArray name="entreprisesUES">
