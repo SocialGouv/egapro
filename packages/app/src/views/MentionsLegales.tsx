@@ -16,8 +16,8 @@ function MentionsLegales({ history, location, dispatch }: Props) {
       <div css={styles.content}>
         <h2 css={styles.title}>Editeur de la Plateforme</h2>
         <p>
-          La Plateforme EgaPro est éditée par l’Incubateur des Ministères
-          sociaux situé :
+          Index Egapro est édité par la Fabrique Numérique des Ministères
+          sociaux situés à :
           <br />
           Tour Mirabeau
           <br />
@@ -31,8 +31,8 @@ function MentionsLegales({ history, location, dispatch }: Props) {
         <p>Yves Struillou.</p>
         <h2 css={styles.title}>Hébergement de la Plateforme</h2>
         <p>
-          Ce site est hébergé en propre parle Ministère des Affaires sociales et
-          de la Santé :<br />
+          Ce site est hébergé au :
+          <br />
           Ministère des Affaires sociales et de la Santé
           <br />
           14 avenue Duquesne
