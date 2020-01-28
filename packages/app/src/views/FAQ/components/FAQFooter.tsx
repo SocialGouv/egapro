@@ -18,6 +18,12 @@ function FAQFooter() {
             Contactez votre référent égapro
           </a>
         </span>
+        <br />
+        <span css={styles.text}>
+          <a href="tel:+33800009110" css={styles.infoLink}>
+            Allô Index Egapro : 0 800 009 110
+          </a>
+        </span>
       </div>
     </div>
   );
