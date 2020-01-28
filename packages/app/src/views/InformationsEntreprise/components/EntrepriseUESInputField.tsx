@@ -8,7 +8,6 @@ import globalStyles from "../../../utils/globalStyles";
 import { hasFieldError } from "../../../components/Input";
 import FieldSiren from "../../../components/FieldSiren";
 import TextField from "../../../components/TextField";
-import ActionLink from "../../../components/ActionLink";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -24,13 +23,11 @@ function InputField({
   nom,
   siren,
   index,
-  deleteEntrepriseUES,
   readOnly
 }: {
   nom: string;
   siren: string;
   index: number;
-  deleteEntrepriseUES: (index: number) => void;
   readOnly: boolean;
 }) {
   const nomField = useField(nom, {
@@ -67,14 +64,6 @@ function InputField({
           name={siren}
           readOnly={readOnly}
         />
-        {!readOnly && (
-          <ActionLink
-            onClick={() => deleteEntrepriseUES(index)}
-            style={styles.delete}
-          >
-            x
-          </ActionLink>
-        )}
       </div>
     </div>
   );

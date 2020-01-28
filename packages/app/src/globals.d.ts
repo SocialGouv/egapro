@@ -58,6 +58,7 @@ export type AppState = {
     commune: string;
     structure: Structure;
     nomUES: string;
+    nombreEntreprises: number | undefined;
     entreprisesUES: Array<EntrepriseUES>;
   };
   informationsDeclarant: {
@@ -298,6 +299,7 @@ export type ActionInformationsEntrepriseData = {
   commune: string;
   structure: Structure;
   nomUES: string;
+  nombreEntreprises: number | undefined;
   entreprisesUES: Array<EntrepriseUES>;
 };
 

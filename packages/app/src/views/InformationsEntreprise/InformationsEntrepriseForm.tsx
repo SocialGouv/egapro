@@ -1,20 +1,27 @@
 /** @jsx jsx */
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
+import { MutableState, Tools } from "final-form";
 import arrayMutators from "final-form-arrays";
 import { Form } from "react-final-form";
+import createDecorator from "final-form-calculate";
 import { FieldArray } from "react-final-form-arrays";
 
 import {
   AppState,
   FormState,
   ActionInformationsEntrepriseData,
-  Structure
+  Structure,
+  EntrepriseUES
 } from "../../globals";
 
 import globalStyles from "../../utils/globalStyles";
 
-import { required } from "../../utils/formHelpers";
+import {
+  parseIntFormValue,
+  parseIntStateValue,
+  required
+} from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -23,12 +30,13 @@ import FieldSiren from "../../components/FieldSiren";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import InputField from "./components/EntrepriseUESInputField";
-import ModalConfirmDelete from "./components/EntrepriseUESModalConfirmDelete";
+import NombreEntreprises, {
+  validate as validateNombreEntreprises
+} from "../../components/NombreEntreprises";
 import RadioButtons from "../../components/RadioButtons";
 import RegionsDepartements from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import { Modal } from "../../components/ModalContext";
 
 ///////////////////
 
@@ -53,7 +61,8 @@ const validateForm = ({
   codePostal,
   commune,
   structure,
-  nomUES
+  nomUES,
+  nombreEntreprises
 }: {
   nomEntreprise: string;
   siren: string;
@@ -65,6 +74,7 @@ const validateForm = ({
   commune: string;
   structure: Structure;
   nomUES: string;
+  nombreEntreprises: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -80,6 +90,30 @@ const validateForm = ({
       ? validate(nomUES)
       : undefined
 });
+
+const calculator = createDecorator({
+  field: "nombreEntreprises",
+  updates: {
+    entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
+      adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES)
+  }
+});
+
+const adaptEntreprisesUESSize = (
+  nombreEntreprises: string,
+  entreprisesUES: Array<EntrepriseUES>
+) => {
+  if (validateNombreEntreprises(nombreEntreprises) === undefined) {
+    const newSize = Number(nombreEntreprises);
+    while (newSize > entreprisesUES.length) {
+      // Augmenter la taille de l'array si nécessaire
+      entreprisesUES.push({ nom: "", siren: "" });
+    }
+    // Réduire la taille de l'array si nécessaire
+    entreprisesUES.length = newSize;
+  }
+  return entreprisesUES;
+};
 
 interface Props {
   informationsEntreprise: AppState["informationsEntreprise"];
@@ -107,6 +141,9 @@ function InformationsEntrepriseForm({
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
+    nombreEntreprises: parseIntStateValue(
+      informationsEntreprise.nombreEntreprises
+    ),
     entreprisesUES: informationsEntreprise.entreprisesUES
   };
 
@@ -122,6 +159,7 @@ function InformationsEntrepriseForm({
       commune,
       structure,
       nomUES,
+      nombreEntreprises,
       entreprisesUES
     } = formData;
 
@@ -136,6 +174,7 @@ function InformationsEntrepriseForm({
       commune,
       structure,
       nomUES,
+      nombreEntreprises: parseIntFormValue(nombreEntreprises),
       entreprisesUES
     });
   };
@@ -145,30 +184,52 @@ function InformationsEntrepriseForm({
     validateInformationsEntreprise("Valid");
   };
 
-  const [indexEntrepriseToDelete, setIndexEntrepriseToDelete] = useState<
-    number | undefined
-  >(undefined);
-  const confirmEntrepriseToDelete = (index: number) =>
-    setIndexEntrepriseToDelete(index);
-  const closeModal = () => setIndexEntrepriseToDelete(undefined);
+  // Form mutator utilisé par le composant NombreEntreprise pour ne changer la
+  // valeur du state qu'une fois la confirmation validée
+  const newNombreEntreprises = (
+    [name, newValue]: [string, string],
+    state: MutableState<any>,
+    { changeValue }: Tools<any>
+  ) => {
+    changeValue(state, name, () => newValue);
+  };
 
   return (
     <Form
       onSubmit={onSubmit}
       mutators={{
         // potentially other mutators could be merged here
+        newNombreEntreprises,
         ...arrayMutators
       }}
       initialValues={initialValues}
       validate={validateForm}
+      decorators={[calculator]}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
+          <RadioButtons
+            fieldName="structure"
+            label="je déclare l'index en tant que"
+            value={values.structure}
+            readOnly={readOnly}
+            choices={[
+              {
+                label: "entreprise",
+                value: "Entreprise"
+              },
+              {
+                label: "Unité Economique et Sociale (UES)",
+                value: "Unité Economique et Sociale (UES)"
+              }
+            ]}
+          />
+
           <TextField
             label="Nom de l'entreprise"
             fieldName="nomEntreprise"
@@ -201,29 +262,20 @@ function InformationsEntrepriseForm({
             readOnly={readOnly}
           />
 
-          <RadioButtons
-            fieldName="structure"
-            label="je déclare l'index en tant que"
-            value={values.structure}
-            readOnly={readOnly}
-            choices={[
-              {
-                label: "entreprise",
-                value: "Entreprise"
-              },
-              {
-                label: "Unité Economique et Sociale (UES)",
-                value: "Unité Economique et Sociale (UES)"
-              }
-            ]}
-          />
-
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <Fragment>
               <TextField
                 label="Nom de l'UES"
                 fieldName="nomUES"
                 errorText="le nom de l'UES n'est pas valide"
+                readOnly={readOnly}
+              />
+              <NombreEntreprises
+                fieldName="nombreEntreprises"
+                label="Nombre d'entreprises composant l'UES"
+                errorText="le nombre d'entreprises composant l'UES doit être un nombre supérieur ou égal à 2"
+                entreprisesUES={informationsEntreprise.entreprisesUES}
+                newNombreEntreprises={form.mutators.newNombreEntreprises}
                 readOnly={readOnly}
               />
               <FieldArray name="entreprisesUES">
@@ -236,48 +288,9 @@ function InformationsEntrepriseForm({
                           nom={`${entrepriseUES}.nom`}
                           siren={`${entrepriseUES}.siren`}
                           index={index}
-                          deleteEntrepriseUES={confirmEntrepriseToDelete}
                           readOnly={readOnly}
                         />
                       ))}
-                      {readOnly ? (
-                        <div css={styles.spacerAdd} />
-                      ) : (
-                        <ActionLink
-                          onClick={() => fields.push({ nom: "", siren: "" })}
-                          style={styles.add}
-                        >
-                          <div css={styles.addIcon}>
-                            <svg
-                              width="26"
-                              height="26"
-                              viewBox="0 0 26 26"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
-                                stroke="white"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                              />
-                            </svg>
-                          </div>
-                          <span>ajouter une entreprise dans l'UES</span>
-                        </ActionLink>
-                      )}
-                      <Modal
-                        isOpen={indexEntrepriseToDelete !== undefined}
-                        onRequestClose={closeModal}
-                      >
-                        <ModalConfirmDelete
-                          closeModal={closeModal}
-                          deleteEntreprise={() => {
-                            indexEntrepriseToDelete !== undefined &&
-                              fields.remove(indexEntrepriseToDelete);
-                          }}
-                        />
-                      </Modal>
                     </Fragment>
                   );
                 }}

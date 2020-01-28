@@ -323,7 +323,7 @@
             "codeNaf": { "type": "string" },
             "nomUES": { "type": "string" },
             "codeNAF": { "type": "string" },
-            "nombresEntreprises": { "type": "integer" },
+            "nombreEntreprises": { "type": "integer" },
             "entreprisesUES": {
               "type": "array",
               "items": {

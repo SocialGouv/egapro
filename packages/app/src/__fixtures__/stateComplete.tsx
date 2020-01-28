@@ -411,6 +411,7 @@ const actionUpdateInformationsEntreprise = {
     commune: "Trifouilly",
     structure: "Unité Economique et Sociale (UES)" as Structure,
     nomUES: "nom d'une UES",
+    nombreEntreprises: 2,
     entreprisesUES: [
       { nom: "entreprise 1", siren: "12345" },
       { nom: "entreprise 2", siren: "67890" }

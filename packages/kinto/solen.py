@@ -334,7 +334,7 @@ class RowProcessor(object):
                     )
                 )
             entreprises.append({"nom": raisonSociale, "siren": siren})
-        self.set("informationsEntreprise/nombresEntreprises", len(entreprises))
+        self.set("informationsEntreprise/nombreEntreprises", len(entreprises))
         self.set("informationsEntreprise/entreprisesUES", entreprises)
 
     def importNiveauResultat(self):
