@@ -101,7 +101,10 @@ const styles = {
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: "0%",
-    position: "relative"
+    position: "relative",
+    "@media print": {
+      display: "block"
+    }
   }),
   scroll: css({
     display: "flex",
@@ -142,7 +145,10 @@ const styles = {
     flexShrink: 0,
     flexBasis: "auto",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    "@media print": {
+      display: "block"
+    }
   })
 };
 
