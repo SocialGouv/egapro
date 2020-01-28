@@ -18,6 +18,7 @@ import {
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
+import AnneeDeclaration from "../../components/AnneeDeclaration";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import FieldDate from "../../components/FieldDate";
@@ -156,10 +157,9 @@ function InformationsComplementairesForm({
               readOnly={readOnly}
             />
           )}
-          <TextField
+          <AnneeDeclaration
             label="Année de déclaration"
-            fieldName="anneeDeclaration"
-            errorText="L'année de déclaration n'est pas valide"
+            name="anneeDeclaration"
             readOnly={readOnly}
           />
           <FieldDate
