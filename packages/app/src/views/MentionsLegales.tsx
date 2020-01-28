@@ -28,7 +28,7 @@ function MentionsLegales({ history, location, dispatch }: Props) {
           Tél : 01 40 56 60 00
         </p>
         <h2 css={styles.title}>Directeur de la publication</h2>
-        <p>Yves Struillou.</p>
+        <p>Yves Struillou</p>
         <h2 css={styles.title}>Hébergement de la Plateforme</h2>
         <p>
           Ce site est hébergé au :
@@ -82,19 +82,19 @@ const styles = {
     fontSize: 18,
     lineHeight: "22px",
     fontWeight: "bold",
-    marginTop: 60,
+    marginTop: 30,
     marginLeft: 0,
     marginRight: 0,
-    marginBottom: 30
+    marginBottom: 20
   }),
   subtitle: css({
     fontSize: 16,
     lineHeight: "22px",
     fontWeight: "bold",
-    marginTop: 60,
+    marginTop: 20,
     marginLeft: 0,
     marginRight: 0,
-    marginBottom: 30
+    marginBottom: 10
   })
 };
 
