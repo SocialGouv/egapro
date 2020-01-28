@@ -272,8 +272,8 @@ function InformationsEntrepriseForm({
               />
               <NombreEntreprises
                 fieldName="nombreEntreprises"
-                label="Nombre d'entreprises dans l'UES"
-                errorText="le nombre d'entreprises dans l'UES doit être un nombre supérieur ou égal à 2"
+                label="Nombre d'entreprises composant l'UES"
+                errorText="le nombre d'entreprises composant l'UES doit être un nombre supérieur ou égal à 2"
                 entreprisesUES={informationsEntreprise.entreprisesUES}
                 newNombreEntreprises={form.mutators.newNombreEntreprises}
                 readOnly={readOnly}
