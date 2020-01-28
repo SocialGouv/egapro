@@ -26,12 +26,7 @@ function AnneeDeclaration({
     .map((_item, index) => Number(2019 + index).toString())
     .reverse();
   return (
-    <Field
-      name={name}
-      validate={required}
-      component="select"
-      initialValue={Number(currentYear).toString()}
-    >
+    <Field name={name} validate={required} component="select">
       {({ input, meta }) => (
         <div css={styles.formField}>
           <label
@@ -51,6 +46,7 @@ function AnneeDeclaration({
             <Fragment>
               <div css={styles.fieldRow}>
                 <select {...input}>
+                  <option />
                   {yearList.map((year: string) => (
                     <option value={year} key={year}>
                       {year}
