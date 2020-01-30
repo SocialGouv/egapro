@@ -12,9 +12,9 @@ interface Props extends RouteComponentProps {
 
 function MentionsLegales({ history, location, dispatch }: Props) {
   return (
-    <Page title="Mentions légales de EgaPro">
+    <Page title="Mentions légales d'Index Egapro">
       <div css={styles.content}>
-        <h2 css={styles.title}>Editeur de la Plateforme</h2>
+        <h2 css={styles.title}>Editeur de la plateforme</h2>
         <p>
           Index Egapro est édité par la Fabrique Numérique des Ministères
           sociaux situés à :
@@ -29,7 +29,7 @@ function MentionsLegales({ history, location, dispatch }: Props) {
         </p>
         <h2 css={styles.title}>Directeur de la publication</h2>
         <p>Yves Struillou</p>
-        <h2 css={styles.title}>Hébergement de la Plateforme</h2>
+        <h2 css={styles.title}>Hébergement de la plateforme</h2>
         <p>
           Ce site est hébergé au :
           <br />
