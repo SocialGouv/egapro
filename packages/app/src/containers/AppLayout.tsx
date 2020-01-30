@@ -11,6 +11,7 @@ import Header from "../components/Header";
 
 import FAQ from "../views/FAQ";
 import Home from "../views/Home";
+import MentionsLegales from "../views/MentionsLegales";
 import PageNotFound from "../views/PageNotFound";
 
 import Simulateur from "./Simulateur";
@@ -49,6 +50,13 @@ function AppLayout({ state, dispatch }: Props) {
                 }
               }) => (
                 <Simulateur code={code} state={state} dispatch={dispatch} />
+              )}
+            />
+            <Route
+              path="/mentions-legales"
+              exact
+              render={props => (
+                <MentionsLegales {...props} dispatch={dispatch} />
               )}
             />
             <Route component={PageNotFound} />
