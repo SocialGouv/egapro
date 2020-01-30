@@ -230,8 +230,21 @@ function InformationsEntrepriseForm({
             ]}
           />
 
+          {values.structure === "Unité Economique et Sociale (UES)" && (
+            <TextField
+              label="Nom de l'UES"
+              fieldName="nomUES"
+              errorText="le nom de l'UES n'est pas valide"
+              readOnly={readOnly}
+            />
+          )}
+
           <TextField
-            label="Nom de l'entreprise"
+            label={
+              values.structure === "Unité Economique et Sociale (UES)"
+                ? "Nom de l'entreprise déclarant pour le compte de l'UES"
+                : "Nom de l'entreprise"
+            }
             fieldName="nomEntreprise"
             errorText="le nom de l'entreprise n'est pas valide"
             readOnly={readOnly}
@@ -264,12 +277,6 @@ function InformationsEntrepriseForm({
 
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <Fragment>
-              <TextField
-                label="Nom de l'UES"
-                fieldName="nomUES"
-                errorText="le nom de l'UES n'est pas valide"
-                readOnly={readOnly}
-              />
               <NombreEntreprises
                 fieldName="nombreEntreprises"
                 label="Nombre d'entreprises composant l'UES"
