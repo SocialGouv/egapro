@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Link } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 import Logo from "./Logo";
@@ -40,6 +41,9 @@ function Footer() {
       </div>
 
       <div css={styles.footerLinks}>
+        <Link to="/mentions-legales" css={styles.link}>
+          mentions légales
+        </Link>
         <a
           href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/questions-reponses-sur-le-calcul-de-l-index-de-l-egalite"
           target="_blank"
