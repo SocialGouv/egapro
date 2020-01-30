@@ -142,6 +142,7 @@ const defaultState: AppState = {
   },
   declaration: {
     formValidated: "None",
+    mesuresCorrection: "",
     dateDeclaration: ""
   }
 };

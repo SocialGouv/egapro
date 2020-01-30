@@ -8,10 +8,12 @@ import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
+import MesuresCorrection from "../../components/MesuresCorrection";
 
 ///////////////////
 interface Props {
   declaration: AppState["declaration"];
+  noteIndex: number | undefined;
   readOnly: boolean;
   updateDeclaration: (data: ActionDeclarationData) => void;
   validateDeclaration: (valid: FormState) => void;
@@ -19,18 +21,20 @@ interface Props {
 
 function DeclarationForm({
   declaration,
+  noteIndex,
   readOnly,
   updateDeclaration,
   validateDeclaration
 }: Props) {
-  const initialValues: ActionDeclarationData = {};
+  const initialValues: ActionDeclarationData = {
+    mesuresCorrection: declaration.mesuresCorrection
+  };
 
   const saveForm = (formData: any) => {
-    const { datePublication, lienPublication } = formData;
+    const { mesuresCorrection } = formData;
 
     updateDeclaration({
-      datePublication,
-      lienPublication
+      mesuresCorrection
     });
   };
 
@@ -51,6 +55,14 @@ function DeclarationForm({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
+
+          {noteIndex !== undefined && noteIndex < 75 && (
+            <MesuresCorrection
+              label="Mesures de corrections prévues à l'article D. 1142-5"
+              name="mesuresCorrection"
+              readOnly={readOnly}
+            />
+          )}
 
           {readOnly ? (
             <ActionBar>

@@ -77,6 +77,7 @@ export type AppState = {
   };
   declaration: {
     formValidated: FormState;
+    mesuresCorrection: string;
     dateDeclaration: string;
   };
 };
@@ -317,7 +318,9 @@ export type ActionInformationsComplementairesData = {
   lienPublication: string;
 };
 
-export type ActionDeclarationData = {};
+export type ActionDeclarationData = {
+  mesuresCorrection: string;
+};
 
 ////
 

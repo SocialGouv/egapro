@@ -129,6 +129,7 @@ function Declaration({ state, dispatch }: Props) {
             />
             <DeclarationForm
               declaration={state.declaration}
+              noteIndex={noteIndex}
               readOnly={state.declaration.formValidated === "Valid"}
               updateDeclaration={updateDeclaration}
               validateDeclaration={validateDeclaration}

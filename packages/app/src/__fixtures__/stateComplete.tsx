@@ -441,7 +441,7 @@ const actionUpdateInformationsComplementaires = {
 
 const actionUpdateDeclaration = {
   type: "updateDeclaration" as "updateDeclaration",
-  data: {}
+  data: { mesuresCorrection: "mmo" }
 };
 
 // fast pipe, I miss you in JS…

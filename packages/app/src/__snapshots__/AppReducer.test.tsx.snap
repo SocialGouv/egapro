@@ -11,6 +11,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -383,6 +384,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Valid",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -755,6 +757,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -1088,6 +1091,7 @@ Object {
     "datePublication": "01/02/2020",
     "formValidated": "None",
     "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -1462,6 +1466,7 @@ Object {
     "datePublication": "01/02/2020",
     "formValidated": "None",
     "lienPublication": "https://example.com",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -1793,6 +1798,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2165,6 +2171,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2496,6 +2503,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2868,6 +2876,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3199,6 +3208,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3571,6 +3581,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3902,6 +3913,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4274,6 +4286,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4605,6 +4618,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4977,6 +4991,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5308,6 +5323,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5680,6 +5696,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6011,6 +6028,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6383,6 +6401,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6748,6 +6767,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7120,6 +7140,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7485,6 +7506,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7857,6 +7879,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8222,6 +8245,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8627,6 +8651,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8992,6 +9017,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9330,6 +9356,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9661,6 +9688,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10033,6 +10061,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10364,6 +10393,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10736,6 +10766,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -11067,6 +11098,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -11440,6 +11472,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -11772,6 +11805,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12144,6 +12178,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12475,6 +12510,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12843,6 +12879,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13179,6 +13216,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13551,6 +13589,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13882,6 +13921,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Valid",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14254,6 +14294,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Valid",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14585,6 +14626,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Invalid",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14957,6 +14999,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Valid",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -15329,6 +15372,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Invalid",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -15701,6 +15745,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -16073,6 +16118,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -16404,6 +16450,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -16776,6 +16823,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17107,6 +17155,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17479,6 +17528,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17810,6 +17860,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18182,6 +18233,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18513,6 +18565,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18885,6 +18938,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19216,6 +19270,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19588,6 +19643,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19919,6 +19975,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -20291,6 +20348,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -20622,6 +20680,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Invalid",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -20994,6 +21053,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -21366,6 +21426,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -21697,6 +21758,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "07/01/2020 10:38",
     "formValidated": "Invalid",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -22069,6 +22131,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -22441,6 +22504,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -22772,6 +22836,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -23144,6 +23209,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -23475,6 +23541,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -23847,6 +23914,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24178,6 +24246,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24550,6 +24619,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24881,6 +24951,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -25253,6 +25324,7 @@ Object {
   "declaration": Object {
     "dateDeclaration": "",
     "formValidated": "None",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
