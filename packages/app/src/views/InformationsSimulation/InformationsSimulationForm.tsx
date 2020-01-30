@@ -164,7 +164,7 @@ function InformationsSimulationForm({
 
           <RadioLabels
             fieldName="trancheEffectifs"
-            label="Quelle est la tranche d'effectifs de l'entreprise ?"
+            label="Quelle est la tranche d'effectifs de l'entreprise ou de l'UES ?"
             choices={[
               {
                 label: "Entre 50 et 250",
