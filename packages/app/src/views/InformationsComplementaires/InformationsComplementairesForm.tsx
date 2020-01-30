@@ -8,17 +8,10 @@ import {
   ActionInformationsComplementairesData
 } from "../../globals";
 
-import {
-  mustBeDate,
-  mustBeNumber,
-  required,
-  parseIntFormValue,
-  parseIntStateValue
-} from "../../utils/formHelpers";
+import { mustBeDate, required } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
-import AnneeDeclaration from "../../components/AnneeDeclaration";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import FieldDate from "../../components/FieldDate";
@@ -51,39 +44,19 @@ const validate = (value: string) => {
   }
 };
 
-const validateInt = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  if (!requiredError && !mustBeNumberError) {
-    return undefined;
-  } else {
-    return { required: requiredError, mustBeNumber: mustBeNumberError };
-  }
-};
-
-interface validateFormParams {
-  dateConsultationCSE: string;
-  anneeDeclaration: string;
-  datePublication: string;
-  lienPublication: string;
-}
-
 const validateForm = (parCSP: boolean) => {
   // Closure sur parCSP : validateForm est appelé avec le param "parCSP" et
   // renvoie une fonction de validation de formulaire
   const _validateForm = ({
     dateConsultationCSE,
-    anneeDeclaration,
     datePublication,
     lienPublication
   }: {
     dateConsultationCSE: string;
-    anneeDeclaration: string;
     datePublication: string;
     lienPublication: string;
   }) => ({
     dateConsultationCSE: parCSP ? undefined : validateDate(dateConsultationCSE),
-    anneeDeclaration: validateInt(anneeDeclaration),
     datePublication: validateDate(datePublication),
     lienPublication: validate(lienPublication)
   });
@@ -109,24 +82,15 @@ function InformationsComplementairesForm({
 }: Props) {
   const initialValues = {
     dateConsultationCSE: informationsComplementaires.dateConsultationCSE,
-    anneeDeclaration: parseIntStateValue(
-      informationsComplementaires.anneeDeclaration
-    ),
     datePublication: informationsComplementaires.datePublication,
     lienPublication: informationsComplementaires.lienPublication
   };
 
   const saveForm = (formData: any) => {
-    const {
-      dateConsultationCSE,
-      anneeDeclaration,
-      datePublication,
-      lienPublication
-    } = formData;
+    const { dateConsultationCSE, datePublication, lienPublication } = formData;
 
     updateInformationsComplementaires({
       dateConsultationCSE,
-      anneeDeclaration: parseIntFormValue(anneeDeclaration),
       datePublication,
       lienPublication
     });
@@ -157,11 +121,6 @@ function InformationsComplementairesForm({
               readOnly={readOnly}
             />
           )}
-          <AnneeDeclaration
-            label="Année de déclaration"
-            name="anneeDeclaration"
-            readOnly={readOnly}
-          />
           <FieldDate
             name="datePublication"
             label="Date de publication de cet index"

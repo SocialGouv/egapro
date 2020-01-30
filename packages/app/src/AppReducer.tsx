@@ -68,6 +68,7 @@ const defaultState: AppState = {
     formValidated: "None",
     nomEntreprise: "",
     trancheEffectifs: "50 à 250",
+    anneeDeclaration: undefined,
     debutPeriodeReference: "",
     finPeriodeReference: ""
   },
@@ -136,7 +137,6 @@ const defaultState: AppState = {
   informationsComplementaires: {
     formValidated: "None",
     dateConsultationCSE: "",
-    anneeDeclaration: undefined,
     datePublication: "",
     lienPublication: ""
   },
@@ -166,6 +166,7 @@ function AppReducer(
       const {
         nomEntreprise,
         trancheEffectifs,
+        anneeDeclaration,
         debutPeriodeReference,
         finPeriodeReference
       } = action.data;
@@ -175,6 +176,7 @@ function AppReducer(
           informations: {
             ...state.informations,
             nomEntreprise,
+            anneeDeclaration,
             trancheEffectifs,
             debutPeriodeReference,
             finPeriodeReference
@@ -237,6 +239,7 @@ function AppReducer(
           ...state.informations,
           nomEntreprise,
           trancheEffectifs,
+          anneeDeclaration,
           debutPeriodeReference,
           finPeriodeReference
         }
