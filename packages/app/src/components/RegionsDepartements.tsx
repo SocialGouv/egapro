@@ -60,6 +60,7 @@ function RegionsDepartements({
             name={nameDepartement}
             validate={(departement: string, { region }: any) => {
               return required(departement) ||
+                regionsDepartements[region] === undefined ||
                 !regionsDepartements[region].includes(departement)
                 ? true
                 : undefined;
