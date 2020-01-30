@@ -10,6 +10,9 @@ import {
 } from "../../globals";
 
 import {
+  mustBeNumber,
+  parseIntFormValue,
+  parseIntStateValue,
   parseTrancheEffectifsFormValue,
   required,
   validateDate
@@ -18,6 +21,7 @@ import { calendarYear, Year } from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
+import AnneeDeclaration from "../../components/AnneeDeclaration";
 import FieldDate from "../../components/FieldDate";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
@@ -39,16 +43,29 @@ const validate = (value: string) => {
   }
 };
 
+const validateInt = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  if (!requiredError && !mustBeNumberError) {
+    return undefined;
+  } else {
+    return { required: requiredError, mustBeNumber: mustBeNumberError };
+  }
+};
+
 const validateForm = ({
   nomEntreprise,
+  anneeDeclaration,
   debutPeriodeReference,
   finPeriodeReference
 }: {
   nomEntreprise: string;
+  anneeDeclaration: string;
   debutPeriodeReference: string;
   finPeriodeReference: string;
 }) => ({
   nomEntreprise: validate(nomEntreprise),
+  anneeDeclaration: validateInt(anneeDeclaration),
   debutPeriodeReference: validateDate(debutPeriodeReference)
 });
 
@@ -94,9 +111,10 @@ function InformationsSimulationForm({
   updateInformationsSimulation,
   validateInformationsSimulation
 }: Props) {
-  const initialValues: ActionInformationsSimulationData = {
+  const initialValues = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
+    anneeDeclaration: parseIntStateValue(informations.anneeDeclaration),
     debutPeriodeReference: informations.debutPeriodeReference,
     finPeriodeReference: informations.finPeriodeReference
   };
@@ -105,6 +123,7 @@ function InformationsSimulationForm({
     const {
       nomEntreprise,
       trancheEffectifs,
+      anneeDeclaration,
       debutPeriodeReference,
       finPeriodeReference
     } = formData;
@@ -112,6 +131,7 @@ function InformationsSimulationForm({
     updateInformationsSimulation({
       nomEntreprise: nomEntreprise,
       trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
+      anneeDeclaration: parseIntFormValue(anneeDeclaration),
       debutPeriodeReference: debutPeriodeReference,
       finPeriodeReference: finPeriodeReference
     });
@@ -160,6 +180,12 @@ function InformationsSimulationForm({
               }
             ]}
             value={values.trancheEffectifs}
+            readOnly={readOnly}
+          />
+
+          <AnneeDeclaration
+            label="Année au titre de laquelle vous transmettez vos indicateurs"
+            name="anneeDeclaration"
             readOnly={readOnly}
           />
 

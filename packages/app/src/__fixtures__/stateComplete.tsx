@@ -17,6 +17,7 @@ const actionUpdateInformationsSimulation = {
   data: {
     nomEntreprise: "BigCorp",
     trancheEffectifs: "1000 et plus" as TrancheEffectifs,
+    anneeDeclaration: 2020,
     debutPeriodeReference: "2019-01-01",
     finPeriodeReference: "2019-12-31"
   }
@@ -433,7 +434,6 @@ const actionUpdateInformationsComplementaires = {
   type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
   data: {
     dateConsultationCSE: "01/02/2019",
-    anneeDeclaration: 2020,
     datePublication: "01/02/2020",
     lienPublication: "https://example.com"
   }

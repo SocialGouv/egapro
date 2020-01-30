@@ -227,7 +227,7 @@ class RowProcessor(object):
 
     def importPeriodeDeReference(self):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
-        annee_indicateur = self.importIntField("annee_indicateurs", "informationsComplementaires/anneeDeclaration")
+        annee_indicateur = self.importIntField("annee_indicateurs", "informations/anneeDeclaration")
 
         # Compatibilité egapro de la valeur de tranche d'effectifs
         tranche = self.get("tranche_effectif")
