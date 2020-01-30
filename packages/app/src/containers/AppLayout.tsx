@@ -11,7 +11,6 @@ import Header from "../components/Header";
 
 import FAQ from "../views/FAQ";
 import Home from "../views/Home";
-import Legal from "../views/Legal";
 import PageNotFound from "../views/PageNotFound";
 
 import Simulateur from "./Simulateur";
@@ -41,11 +40,6 @@ function AppLayout({ state, dispatch }: Props) {
               path="/"
               exact
               render={props => <Home {...props} dispatch={dispatch} />}
-            />
-            <Route
-              path="/mentions-legales"
-              exact
-              render={props => <Legal {...props} dispatch={dispatch} />}
             />
             <Route
               path="/simulateur/:code"
