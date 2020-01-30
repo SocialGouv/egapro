@@ -34,7 +34,7 @@ function RecapitulatifIndex({
               </p>
               <p
                 css={styles.blocTextDetail}
-              >{`${totalPoint} points obtenus sur un maximum de ${totalPointCalculable}`}</p>
+              >{`${totalPoint} points sur un maximum de ${totalPointCalculable} pouvant être obtenus`}</p>
             </div>
           </InfoBloc>
         ) : (
