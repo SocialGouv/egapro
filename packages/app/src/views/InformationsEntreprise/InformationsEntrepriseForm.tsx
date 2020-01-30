@@ -18,6 +18,7 @@ import {
 import globalStyles from "../../utils/globalStyles";
 
 import {
+  mustBeNumber,
   parseIntFormValue,
   parseIntStateValue,
   required
@@ -47,6 +48,21 @@ const validate = (value: string) => {
   } else {
     return {
       required: requiredError
+    };
+  }
+};
+
+const validateCodePostal = (value: string) => {
+  const requiredError = required(value);
+  const mustBeNumberError = mustBeNumber(value);
+  const mustBe5DigitsError = value && value.length !== 5;
+  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+      mustBeNumber: mustBeNumberError,
+      mustBe5Digits: mustBe5DigitsError
     };
   }
 };
@@ -82,7 +98,7 @@ const validateForm = ({
   region: validate(region),
   departement: validate(departement),
   adresse: validate(adresse),
-  codePostal: validate(codePostal),
+  codePostal: validateCodePostal(codePostal),
   commune: validate(commune),
   structure: validate(structure),
   nomUES:
