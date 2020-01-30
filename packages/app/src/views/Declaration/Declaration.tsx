@@ -107,7 +107,7 @@ function Declaration({ state, dispatch }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
-  const { noteIndex, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,
@@ -124,6 +124,7 @@ function Declaration({ state, dispatch }: Props) {
             <RecapitulatifIndex
               allIndicateurValid={allIndicateurValid}
               noteIndex={noteIndex}
+              totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
             />
             <DeclarationForm

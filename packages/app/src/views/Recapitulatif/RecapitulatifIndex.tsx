@@ -10,12 +10,14 @@ import globalStyles from "../../utils/globalStyles";
 interface Props {
   allIndicateurValid: boolean;
   noteIndex: number | undefined;
+  totalPoint: number;
   totalPointCalculable: number;
 }
 
 function RecapitulatifIndex({
   allIndicateurValid,
   noteIndex,
+  totalPoint,
   totalPointCalculable
 }: Props) {
   const layoutType = useLayoutType();
@@ -32,7 +34,7 @@ function RecapitulatifIndex({
               </p>
               <p
                 css={styles.blocTextDetail}
-              >{`nombre de points maximum pouvant être obtenus était de ${totalPointCalculable}`}</p>
+              >{`${totalPoint} points obtenus sur un maximum de ${totalPointCalculable}`}</p>
             </div>
           </InfoBloc>
         ) : (
