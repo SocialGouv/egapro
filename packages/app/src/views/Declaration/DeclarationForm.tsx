@@ -1,4 +1,5 @@
 /** @jsx jsx */
+import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
 import { Form } from "react-final-form";
 
@@ -86,17 +87,22 @@ function DeclarationForm({
               readOnly={readOnly}
             />
           )}
-          <FieldDate
-            name="datePublication"
-            label="Date de publication de cet index"
-            readOnly={readOnly}
-          />
-          <Textarea
-            label="Adresse du site internet de publication ou précision des modalités de publicité"
-            fieldName="lienPublication"
-            errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
-            readOnly={readOnly}
-          />
+
+          {noteIndex !== undefined && noteIndex >= 75 && (
+            <Fragment>
+              <FieldDate
+                name="datePublication"
+                label="Date de publication de cet index"
+                readOnly={readOnly}
+              />
+              <Textarea
+                label="Adresse du site internet de publication ou précision des modalités de publicité"
+                fieldName="lienPublication"
+                errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
+                readOnly={readOnly}
+              />
+            </Fragment>
+          )}
 
           {readOnly ? (
             <ActionBar>

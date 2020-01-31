@@ -42,31 +42,6 @@ function Declaration({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  // tous les formulaires ne sont pas encore validés
-  if (
-    state.informations.formValidated !== "Valid" ||
-    state.indicateurUn.formValidated !== "Valid" ||
-    (state.indicateurDeux.formValidated !== "Valid" &&
-      state.informations.trancheEffectifs !== "50 à 250") ||
-    (state.indicateurTrois.formValidated !== "Valid" &&
-      state.informations.trancheEffectifs !== "50 à 250") ||
-    (state.indicateurDeuxTrois.formValidated !== "Valid" &&
-      state.informations.trancheEffectifs === "50 à 250") ||
-    state.indicateurQuatre.formValidated !== "Valid" ||
-    state.indicateurCinq.formValidated !== "Valid" ||
-    state.informationsEntreprise.formValidated !== "Valid" ||
-    state.informationsDeclarant.formValidated !== "Valid"
-  ) {
-    return (
-      <PageDeclaration>
-        <InfoBloc
-          title="vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
-          text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes"
-        />
-      </PageDeclaration>
-    );
-  }
-
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
     noteIndicateurUn
@@ -115,6 +90,23 @@ function Declaration({ state, dispatch }: Props) {
     noteIndicateurQuatre,
     noteIndicateurCinq
   );
+
+  // tous les formulaires ne sont pas encore validés
+  if (
+    !allIndicateurValid ||
+    state.informationsEntreprise.formValidated !== "Valid" ||
+    state.informationsDeclarant.formValidated !== "Valid"
+  ) {
+    return (
+      <PageDeclaration>
+        <InfoBloc
+          title="vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
+          text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes"
+        />
+      </PageDeclaration>
+    );
+  }
+
   return (
     <PageDeclaration>
       <LayoutFormAndResult
