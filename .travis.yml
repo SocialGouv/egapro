@@ -28,6 +28,9 @@ jobs:
   include:
     - stage: Build
       <<: *node_stage
+      before_script:
+        # CF https://github.com/facebook/jest/issues/3254#issuecomment-297214395
+        - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
       script:
         - yarn build
         - yarn lint
