@@ -15,7 +15,7 @@ import ActionLink from "../../components/ActionLink";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import FieldDate from "../../components/FieldDate";
-import TextField from "../../components/TextField";
+import Textarea from "../../components/Textarea";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 ///////////////////
@@ -126,10 +126,10 @@ function InformationsComplementairesForm({
             label="Date de publication de cet index"
             readOnly={readOnly}
           />
-          <TextField
-            label="Lien de publication"
+          <Textarea
+            label="Adresse du site internet de publication ou précision des modalités de publicité"
             fieldName="lienPublication"
-            errorText="Le lien de publication n'est pas valide"
+            errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
             readOnly={readOnly}
           />
 
