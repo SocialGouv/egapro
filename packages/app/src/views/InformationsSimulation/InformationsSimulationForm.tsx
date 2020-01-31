@@ -244,7 +244,8 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
   return (
     <div>
       <label css={styles.label}>
-        Sur quelle période souhaitez-vous faire votre déclaration ?
+        Quelle est la période de référence choisie pour le calcul de votre Index
+        ?
       </label>
       <div css={styles.dates}>
         <FieldDate
