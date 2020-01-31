@@ -295,7 +295,7 @@ function InformationsEntrepriseForm({
             <Fragment>
               <NombreEntreprises
                 fieldName="nombreEntreprises"
-                label="Nombre d'entreprises composant l'UES"
+                label="Nombre d'entreprises composant l'UES (le déclarant compris)"
                 errorText="le nombre d'entreprises composant l'UES doit être un nombre supérieur ou égal à 2"
                 entreprisesUES={informationsEntreprise.entreprisesUES}
                 newNombreEntreprises={form.mutators.newNombreEntreprises}

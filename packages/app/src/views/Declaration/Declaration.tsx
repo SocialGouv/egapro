@@ -61,8 +61,8 @@ function Declaration({ state, dispatch }: Props) {
     return (
       <PageDeclaration>
         <InfoBloc
-          title="vous devez renseigner tous les indicateurs ainsi que les informations avant de pouvoir valider"
-          text="Vous devez renseigner tous les indicateurs ainsi que les informations avant de pouvoir valider votre déclaration"
+          title="vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
+          text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes"
         />
       </PageDeclaration>
     );
