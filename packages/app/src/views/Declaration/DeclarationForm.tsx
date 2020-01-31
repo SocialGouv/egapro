@@ -88,7 +88,7 @@ function DeclarationForm({
             />
           )}
 
-          {noteIndex !== undefined && noteIndex >= 75 && (
+          {noteIndex !== undefined && (
             <Fragment>
               <FieldDate
                 name="datePublication"
