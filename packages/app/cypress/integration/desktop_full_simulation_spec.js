@@ -37,6 +37,7 @@ describe("The Home Page on desktop", function() {
     cy.get("span")
       .contains("Entre 50 et 250")
       .click();
+    cy.get("select[name=anneeDeclaration]").select("2020");
     cy.get("input[name=debutPeriodeReference]").type("26/11/2019");
     cy.get("input[name=finPeriodeReference]").should(
       "have.value",
