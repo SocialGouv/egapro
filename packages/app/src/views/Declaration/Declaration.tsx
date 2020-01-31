@@ -24,6 +24,7 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 
 import DeclarationForm from "./DeclarationForm";
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
+import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -103,6 +104,80 @@ function Declaration({ state, dispatch }: Props) {
           title="vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
           text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes"
         />
+        <h2>Les formulaires suivants ne sont pas validés</h2>
+        <ul>
+          {state.indicateurUn.formValidated !== "Valid" &&
+            effectifsIndicateurUnCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur1"
+                  label="l'indicateur écart de rémunération"
+                />
+              </li>
+            )}
+          {trancheEffectifs !== "50 à 250" &&
+            state.indicateurDeux.formValidated !== "Valid" &&
+            effectifsIndicateurDeuxCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur2"
+                  label="l'indicateur écart de de taux d'augmentations"
+                />
+              </li>
+            )}
+          {trancheEffectifs !== "50 à 250" &&
+            state.indicateurTrois.formValidated !== "Valid" &&
+            effectifsIndicateurTroisCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur3"
+                  label="l'indicateur écart de de taux de promotions"
+                />
+              </li>
+            )}
+          {trancheEffectifs === "50 à 250" &&
+            state.indicateurDeuxTrois.formValidated !== "Valid" &&
+            effectifsIndicateurDeuxTroisCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur2et3"
+                  label="l'indicateur écart de de taux d'augmentations"
+                />
+              </li>
+            )}
+          {state.indicateurQuatre.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/indicateur4"
+                label="l'indicateur retour de congé maternité"
+              />
+            </li>
+          )}
+          {state.indicateurCinq.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/indicateur5"
+                label="l'indicateur hautes rémunérations"
+              />
+            </li>
+          )}
+          {state.informationsEntreprise.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/informations-entreprise"
+                label="les informations entreprise/UES"
+              />
+            </li>
+          )}
+          {state.informationsDeclarant.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/informations-declarant"
+                label="les informations déclarant"
+              />
+            </li>
+          )}
+        </ul>
       </PageDeclaration>
     );
   }
