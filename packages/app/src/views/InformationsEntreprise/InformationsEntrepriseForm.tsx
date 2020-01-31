@@ -258,8 +258,8 @@ function InformationsEntrepriseForm({
           <TextField
             label={
               values.structure === "Unité Economique et Sociale (UES)"
-                ? "Nom de l'entreprise déclarant pour le compte de l'UES"
-                : "Nom de l'entreprise"
+                ? "Raison sociale de l'entreprise déclarant pour le compte de l'UES"
+                : "Raison sociale de l'entreprise"
             }
             fieldName="nomEntreprise"
             errorText="le nom de l'entreprise n'est pas valide"
