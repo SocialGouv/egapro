@@ -21,7 +21,6 @@ import IndicateurTrois from "../views/Indicateur3";
 import IndicateurDeuxTrois from "../views/Indicateur2et3";
 import IndicateurQuatre from "../views/Indicateur4";
 import IndicateurCinq from "../views/Indicateur5";
-import InformationsComplementaires from "../views/InformationsComplementaires";
 import InformationsEntreprise from "../views/InformationsEntreprise";
 import InformationsDeclarant from "../views/InformationsDeclarant";
 import InformationsSimulation from "../views/InformationsSimulation";
@@ -160,16 +159,6 @@ function Simulateur({ code, state, dispatch }: Props) {
         path="/simulateur/:code/informations-declarant"
         render={props => (
           <InformationsDeclarant {...props} state={state} dispatch={dispatch} />
-        )}
-      />
-      <Route
-        path="/simulateur/:code/informations-complementaires"
-        render={props => (
-          <InformationsComplementaires
-            {...props}
-            state={state}
-            dispatch={dispatch}
-          />
         )}
       />
       <Route

@@ -63,11 +63,6 @@ const actionValidateInformationsDeclarant = {
   valid: "Valid" as FormState
 };
 
-const actionValidateInformationsComplementaires = {
-  type: "validateInformationsComplementaires" as "validateInformationsComplementaires",
-  valid: "Valid" as FormState
-};
-
 const actionValidateDeclaration = {
   type: "validateDeclaration" as "validateDeclaration",
   valid: "Valid" as FormState
@@ -91,33 +86,30 @@ const stateDefault = AppReducer(
                     AppReducer(
                       AppReducer(
                         AppReducer(
-                          AppReducer(
-                            stateComplete,
-                            actionValidateInformationsSimulation
-                          ),
-                          actionValidateEffectif
+                          stateComplete,
+                          actionValidateInformationsSimulation
                         ),
-                        actionValidateIndicateurUnCoefGroup
+                        actionValidateEffectif
                       ),
-                      actionValidateIndicateurUnCoefEffectif
+                      actionValidateIndicateurUnCoefGroup
                     ),
-                    actionValidateIndicateurUn
+                    actionValidateIndicateurUnCoefEffectif
                   ),
-                  actionValidateIndicateurDeux
+                  actionValidateIndicateurUn
                 ),
-                actionValidateIndicateurTrois
+                actionValidateIndicateurDeux
               ),
-              actionValidateIndicateurDeuxTrois
+              actionValidateIndicateurTrois
             ),
-            actionValidateIndicateurQuatre
+            actionValidateIndicateurDeuxTrois
           ),
-          actionValidateIndicateurCinq
+          actionValidateIndicateurQuatre
         ),
-        actionValidateInformationsEntreprise
+        actionValidateIndicateurCinq
       ),
-      actionValidateInformationsDeclarant
+      actionValidateInformationsEntreprise
     ),
-    actionValidateInformationsComplementaires
+    actionValidateInformationsDeclarant
   ),
   actionValidateDeclaration
 );

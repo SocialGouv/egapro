@@ -66,6 +66,7 @@ describe("updateInformationsSimulation", () => {
     data: {
       nomEntreprise: "acme",
       trancheEffectifs: "251 à 999" as TrancheEffectifs,
+      anneeDeclaration: 2018,
       debutPeriodeReference: "2019-10-15",
       finPeriodeReference: "2020-10-14"
     }
@@ -722,34 +723,12 @@ describe("updateInformationsDeclarant", () => {
   });
 });
 
-describe("updateInformationsComplementaires", () => {
-  const action = {
-    type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
-    data: {
-      dateConsultationCSE: "01/02/2017",
-      anneeDeclaration: 2018,
-      datePublication: "01/02/2020",
-      lienPublication: "https://example.com"
-    }
-  };
-
-  test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
-  });
-
-  test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
-  });
-
-  test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
-  });
-});
-
 describe("updateDeclaration", () => {
   const action = {
     type: "updateDeclaration" as "updateDeclaration",
     data: {
+      mesuresCorrection: "mmo",
+      dateConsultationCSE: "01/02/2017",
       datePublication: "01/02/2020",
       lienPublication: "https://example.com"
     }
@@ -1050,25 +1029,6 @@ describe("validateInformationsEntreprise", () => {
 describe("validateInformationsDeclarant", () => {
   const action = {
     type: "validateInformationsDeclarant" as "validateInformationsDeclarant",
-    valid: "Valid" as FormState
-  };
-
-  test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
-  });
-
-  test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
-  });
-
-  test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
-  });
-});
-
-describe("validateInformationsComplementaires", () => {
-  const action = {
-    type: "validateInformationsComplementaires" as "validateInformationsComplementaires",
     valid: "Valid" as FormState
   };
 

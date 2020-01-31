@@ -55,8 +55,7 @@ function Declaration({ state, dispatch }: Props) {
     state.indicateurQuatre.formValidated !== "Valid" ||
     state.indicateurCinq.formValidated !== "Valid" ||
     state.informationsEntreprise.formValidated !== "Valid" ||
-    state.informationsDeclarant.formValidated !== "Valid" ||
-    state.informationsComplementaires.formValidated !== "Valid"
+    state.informationsDeclarant.formValidated !== "Valid"
   ) {
     return (
       <PageDeclaration>
@@ -130,6 +129,7 @@ function Declaration({ state, dispatch }: Props) {
             <DeclarationForm
               declaration={state.declaration}
               noteIndex={noteIndex}
+              indicateurUnParCSP={state.indicateurUn.csp}
               readOnly={state.declaration.formValidated === "Valid"}
               updateDeclaration={updateDeclaration}
               validateDeclaration={validateDeclaration}

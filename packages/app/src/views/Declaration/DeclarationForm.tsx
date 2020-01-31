@@ -6,14 +6,17 @@ import { AppState, FormState, ActionDeclarationData } from "../../globals";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
+import FieldDate from "../../components/FieldDate";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
+import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
 
 ///////////////////
 interface Props {
   declaration: AppState["declaration"];
   noteIndex: number | undefined;
+  indicateurUnParCSP: boolean;
   readOnly: boolean;
   updateDeclaration: (data: ActionDeclarationData) => void;
   validateDeclaration: (valid: FormState) => void;
@@ -22,19 +25,31 @@ interface Props {
 function DeclarationForm({
   declaration,
   noteIndex,
+  indicateurUnParCSP,
   readOnly,
   updateDeclaration,
   validateDeclaration
 }: Props) {
-  const initialValues: ActionDeclarationData = {
-    mesuresCorrection: declaration.mesuresCorrection
+  const initialValues = {
+    mesuresCorrection: declaration.mesuresCorrection,
+    dateConsultationCSE: declaration.dateConsultationCSE,
+    datePublication: declaration.datePublication,
+    lienPublication: declaration.lienPublication
   };
 
   const saveForm = (formData: any) => {
-    const { mesuresCorrection } = formData;
+    const {
+      mesuresCorrection,
+      dateConsultationCSE,
+      datePublication,
+      lienPublication
+    } = formData;
 
     updateDeclaration({
-      mesuresCorrection
+      mesuresCorrection,
+      dateConsultationCSE,
+      datePublication,
+      lienPublication
     });
   };
 
@@ -63,6 +78,25 @@ function DeclarationForm({
               readOnly={readOnly}
             />
           )}
+
+          {!indicateurUnParCSP && (
+            <FieldDate
+              name="dateConsultationCSE"
+              label="Date de consultation du CSE"
+              readOnly={readOnly}
+            />
+          )}
+          <FieldDate
+            name="datePublication"
+            label="Date de publication de cet index"
+            readOnly={readOnly}
+          />
+          <Textarea
+            label="Adresse du site internet de publication ou précision des modalités de publicité"
+            fieldName="lienPublication"
+            errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
+            readOnly={readOnly}
+          />
 
           {readOnly ? (
             <ActionBar>

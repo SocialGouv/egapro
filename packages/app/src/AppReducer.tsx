@@ -134,15 +134,12 @@ const defaultState: AppState = {
     tel: "",
     email: ""
   },
-  informationsComplementaires: {
-    formValidated: "None",
-    dateConsultationCSE: "",
-    datePublication: "",
-    lienPublication: ""
-  },
   declaration: {
     formValidated: "None",
     mesuresCorrection: "",
+    dateConsultationCSE: "",
+    datePublication: "",
+    lienPublication: "",
     dateDeclaration: ""
   }
 };
@@ -218,13 +215,6 @@ function AppReducer(
             state.informationsDeclarant.formValidated === "Valid"
               ? { ...state.informationsDeclarant, formValidated: "Invalid" }
               : state.informationsDeclarant,
-          informationsComplementaires:
-            state.informationsComplementaires.formValidated === "Valid"
-              ? {
-                  ...state.informationsComplementaires,
-                  formValidated: "Invalid"
-                }
-              : state.informationsComplementaires,
           declaration:
             state.declaration.formValidated === "Valid"
               ? {
@@ -403,13 +393,6 @@ function AppReducer(
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, formValidated: action.valid },
-        informationsComplementaires: {
-          ...state.informationsComplementaires,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.informationsComplementaires.formValidated
-        },
         declaration: {
           ...state.declaration,
           formValidated:
@@ -596,31 +579,6 @@ function AppReducer(
         ...state,
         informationsDeclarant: {
           ...state.informationsDeclarant,
-          formValidated: action.valid
-        },
-        declaration: {
-          ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated
-        }
-      };
-    }
-    case "updateInformationsComplementaires": {
-      return {
-        ...state,
-        informationsComplementaires: {
-          ...state.informationsComplementaires,
-          ...action.data
-        }
-      };
-    }
-    case "validateInformationsComplementaires": {
-      return {
-        ...state,
-        informationsComplementaires: {
-          ...state.informationsComplementaires,
           formValidated: action.valid
         },
         declaration: {

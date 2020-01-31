@@ -430,18 +430,14 @@ const actionUpdateInformationsDeclarant = {
   }
 };
 
-const actionUpdateInformationsComplementaires = {
-  type: "updateInformationsComplementaires" as "updateInformationsComplementaires",
+const actionUpdateDeclaration = {
+  type: "updateDeclaration" as "updateDeclaration",
   data: {
+    mesuresCorrection: "mmo",
     dateConsultationCSE: "01/02/2019",
     datePublication: "01/02/2020",
     lienPublication: "https://example.com"
   }
-};
-
-const actionUpdateDeclaration = {
-  type: "updateDeclaration" as "updateDeclaration",
-  data: { mesuresCorrection: "mmo" }
 };
 
 // fast pipe, I miss you in JS…
@@ -459,35 +455,32 @@ const stateDefault = AppReducer(
                       AppReducer(
                         AppReducer(
                           AppReducer(
-                            AppReducer(
-                              AppReducer(undefined, actionInitiateState),
-                              actionUpdateInformationsSimulation
-                            ),
-                            actionUpdateEffectif
+                            AppReducer(undefined, actionInitiateState),
+                            actionUpdateInformationsSimulation
                           ),
-                          actionUpdateIndicateurUnCsp
+                          actionUpdateEffectif
                         ),
-                        actionUpdateIndicateurUnCoefName
+                        actionUpdateIndicateurUnCsp
                       ),
-                      actionUpdateIndicateurUnCoefNombreSalaries
+                      actionUpdateIndicateurUnCoefName
                     ),
-                    actionUpdateIndicateurUnCoefRemuneration
+                    actionUpdateIndicateurUnCoefNombreSalaries
                   ),
-                  actionUpdateIndicateurDeux
+                  actionUpdateIndicateurUnCoefRemuneration
                 ),
-                actionUpdateIndicateurTrois
+                actionUpdateIndicateurDeux
               ),
-              actionUpdateIndicateurDeuxTrois
+              actionUpdateIndicateurTrois
             ),
-            actionUpdateIndicateurQuatre
+            actionUpdateIndicateurDeuxTrois
           ),
-          actionUpdateIndicateurCinq
+          actionUpdateIndicateurQuatre
         ),
-        actionUpdateInformationsEntreprise
+        actionUpdateIndicateurCinq
       ),
-      actionUpdateInformationsDeclarant
+      actionUpdateInformationsEntreprise
     ),
-    actionUpdateInformationsComplementaires
+    actionUpdateInformationsDeclarant
   ),
   actionUpdateDeclaration
 );
