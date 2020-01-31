@@ -184,7 +184,7 @@ function InformationsSimulationForm({
           />
 
           <AnneeDeclaration
-            label="Année au titre de laquelle vous transmettez vos indicateurs"
+            label="Année au titre de laquelle les indicateurs sont calculés"
             name="anneeDeclaration"
             readOnly={readOnly}
           />
