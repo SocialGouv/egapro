@@ -53,7 +53,10 @@ function RecapitulatifInformations({
 
   return (
     <div css={[styles.container, css({ width })]}>
-      <DataDisplay header="Année de déclaration" data={anneeDeclaration} />
+      <DataDisplay
+        header="Année au titre de laquelle les indicateurs sont calculés"
+        data={anneeDeclaration}
+      />
 
       <DataDisplay header="Periode de référence">
         <div css={styles.dates}>
