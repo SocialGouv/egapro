@@ -42,7 +42,7 @@ function RecapitulatifIndex({
             <div>
               <p css={styles.blocText}>
                 Vos indicateurs représentent moins de 75 points, votre index ne
-                peut-être calculé.
+                peut être calculé.
               </p>
               <p
                 css={styles.blocTextDetail}
