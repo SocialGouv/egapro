@@ -11,18 +11,20 @@ interface Props {
   hasValidationErrors: boolean;
   errorMessage?: string;
   loading?: boolean;
+  label?: string;
 }
 
 function FormSubmit({
   submitFailed,
   hasValidationErrors,
   errorMessage,
-  loading = false
+  loading = false,
+  label = "valider"
 }: Props) {
   return (
     <div css={styles.container}>
       <ButtonSubmit
-        label="valider"
+        label={label}
         outline={hasValidationErrors}
         error={submitFailed && hasValidationErrors}
         loading={loading}

@@ -122,6 +122,7 @@ function DeclarationForm({
                 hasValidationErrors={hasValidationErrors}
                 submitFailed={submitFailed}
                 errorMessage="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
+                label="déclarer"
               />
             </ActionBar>
           )}
