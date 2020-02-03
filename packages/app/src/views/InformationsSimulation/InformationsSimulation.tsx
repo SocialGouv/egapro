@@ -74,8 +74,8 @@ function InformationsSimulation({ state, dispatch }: Props) {
 function PageInformationsSimulation({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Information société ou UES et période de référence"
-      tagline="Renseignez le nom et la tranche d'effectifs de votre entreprise ou UES, ainsi que la période de référence."
+      title="Informations calcul et période de référence"
+      tagline="Renseignez la tranche d'effectifs de votre entreprise ou UES, l'année au titre de laquelle les indicateurs sont calculés ainsi que la période de référence."
     >
       {children}
     </Page>

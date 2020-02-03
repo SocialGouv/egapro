@@ -118,7 +118,7 @@ function Menu({
               <h5 css={styles.menuTitle}>Calcul de l'index</h5>
               <CustomNavLink
                 to={`/simulateur/${code}/informations`}
-                title="informations simulation"
+                title="informations calcul"
                 label="et période de référence"
                 valid={informationsFormValidated}
               />
