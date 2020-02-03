@@ -24,6 +24,7 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 
 import DeclarationForm from "./DeclarationForm";
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
+import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -41,32 +42,6 @@ function Declaration({ state, dispatch }: Props) {
     (valid: FormState) => dispatch({ type: "validateDeclaration", valid }),
     [dispatch]
   );
-
-  // tous les formulaires ne sont pas encore validés
-  if (
-    state.informations.formValidated !== "Valid" ||
-    state.indicateurUn.formValidated !== "Valid" ||
-    (state.indicateurDeux.formValidated !== "Valid" &&
-      state.informations.trancheEffectifs !== "50 à 250") ||
-    (state.indicateurTrois.formValidated !== "Valid" &&
-      state.informations.trancheEffectifs !== "50 à 250") ||
-    (state.indicateurDeuxTrois.formValidated !== "Valid" &&
-      state.informations.trancheEffectifs === "50 à 250") ||
-    state.indicateurQuatre.formValidated !== "Valid" ||
-    state.indicateurCinq.formValidated !== "Valid" ||
-    state.informationsEntreprise.formValidated !== "Valid" ||
-    state.informationsDeclarant.formValidated !== "Valid" ||
-    state.informationsComplementaires.formValidated !== "Valid"
-  ) {
-    return (
-      <PageDeclaration>
-        <InfoBloc
-          title="vous devez renseigner tous les indicateurs ainsi que les informations avant de pouvoir valider"
-          text="Vous devez renseigner tous les indicateurs ainsi que les informations avant de pouvoir valider votre déclaration"
-        />
-      </PageDeclaration>
-    );
-  }
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
@@ -107,7 +82,7 @@ function Declaration({ state, dispatch }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
-  const { noteIndex, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,
@@ -116,6 +91,97 @@ function Declaration({ state, dispatch }: Props) {
     noteIndicateurQuatre,
     noteIndicateurCinq
   );
+
+  // tous les formulaires ne sont pas encore validés
+  if (
+    !allIndicateurValid ||
+    state.informationsEntreprise.formValidated !== "Valid" ||
+    state.informationsDeclarant.formValidated !== "Valid"
+  ) {
+    return (
+      <PageDeclaration>
+        <InfoBloc
+          title="vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
+          text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes"
+        />
+        <h2>Les formulaires suivants ne sont pas validés</h2>
+        <ul>
+          {state.indicateurUn.formValidated !== "Valid" &&
+            effectifsIndicateurUnCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur1"
+                  label="l'indicateur écart de rémunération"
+                />
+              </li>
+            )}
+          {trancheEffectifs !== "50 à 250" &&
+            state.indicateurDeux.formValidated !== "Valid" &&
+            effectifsIndicateurDeuxCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur2"
+                  label="l'indicateur écart de de taux d'augmentations"
+                />
+              </li>
+            )}
+          {trancheEffectifs !== "50 à 250" &&
+            state.indicateurTrois.formValidated !== "Valid" &&
+            effectifsIndicateurTroisCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur3"
+                  label="l'indicateur écart de de taux de promotions"
+                />
+              </li>
+            )}
+          {trancheEffectifs === "50 à 250" &&
+            state.indicateurDeuxTrois.formValidated !== "Valid" &&
+            effectifsIndicateurDeuxTroisCalculable && (
+              <li>
+                <TextSimulatorLink
+                  to="/indicateur2et3"
+                  label="l'indicateur écart de de taux d'augmentations"
+                />
+              </li>
+            )}
+          {state.indicateurQuatre.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/indicateur4"
+                label="l'indicateur retour de congé maternité"
+              />
+            </li>
+          )}
+          {state.indicateurCinq.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/indicateur5"
+                label="l'indicateur hautes rémunérations"
+              />
+            </li>
+          )}
+          {state.informationsEntreprise.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/informations-entreprise"
+                label="les informations entreprise/UES"
+              />
+            </li>
+          )}
+          {state.informationsDeclarant.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/informations-declarant"
+                label="les informations déclarant"
+              />
+            </li>
+          )}
+        </ul>
+      </PageDeclaration>
+    );
+  }
+
   return (
     <PageDeclaration>
       <LayoutFormAndResult
@@ -124,10 +190,13 @@ function Declaration({ state, dispatch }: Props) {
             <RecapitulatifIndex
               allIndicateurValid={allIndicateurValid}
               noteIndex={noteIndex}
+              totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
             />
             <DeclarationForm
               declaration={state.declaration}
+              noteIndex={noteIndex}
+              indicateurUnParCSP={state.indicateurUn.csp}
               readOnly={state.declaration.formValidated === "Valid"}
               updateDeclaration={updateDeclaration}
               validateDeclaration={validateDeclaration}
@@ -144,7 +213,7 @@ function PageDeclaration({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Déclaration"
-      tagline="Une fois toutes les informations fournies dans les différents formulaires, validez votre déclaration"
+      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration"
     >
       {children}
     </Page>

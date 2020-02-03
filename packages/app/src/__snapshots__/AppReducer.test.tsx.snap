@@ -9,8 +9,12 @@ exports[`resetState reset undefined state 1`] = `undefined`;
 exports[`test state used for test before testing stateComplete 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -337,12 +341,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -381,8 +379,12 @@ Object {
 exports[`test state used for test before testing stateCompleteAndValidate 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -709,12 +711,6 @@ Object {
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -753,8 +749,12 @@ Object {
 exports[`test state used for test before testing stateDefault 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -1048,12 +1048,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -1084,10 +1078,12 @@ exports[`test state used for test before testing stateUndefined 1`] = `undefined
 exports[`updateDeclaration change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2017",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
     "formValidated": "None",
     "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -1414,12 +1410,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -1458,10 +1448,12 @@ Object {
 exports[`updateDeclaration change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2017",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
     "formValidated": "None",
     "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -1755,12 +1747,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -1791,8 +1777,12 @@ exports[`updateDeclaration nothing undefined state 1`] = `undefined`;
 exports[`updateEffectif change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2119,12 +2109,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -2163,8 +2147,12 @@ Object {
 exports[`updateEffectif change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2458,12 +2446,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -2494,8 +2476,12 @@ exports[`updateEffectif nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurCinq change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -2822,12 +2808,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -2866,8 +2846,12 @@ Object {
 exports[`updateIndicateurCinq change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3161,12 +3145,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -3197,8 +3175,12 @@ exports[`updateIndicateurCinq nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurDeux change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3525,12 +3507,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -3569,8 +3545,12 @@ Object {
 exports[`updateIndicateurDeux change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -3864,12 +3844,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -3900,8 +3874,12 @@ exports[`updateIndicateurDeux nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurDeuxTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4228,12 +4206,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -4272,8 +4244,12 @@ Object {
 exports[`updateIndicateurDeuxTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4567,12 +4543,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -4603,8 +4573,12 @@ exports[`updateIndicateurDeuxTrois nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurQuatre change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -4931,12 +4905,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -4975,8 +4943,12 @@ Object {
 exports[`updateIndicateurQuatre change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5270,12 +5242,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -5306,8 +5272,12 @@ exports[`updateIndicateurQuatre nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5634,12 +5604,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -5678,8 +5642,12 @@ Object {
 exports[`updateIndicateurTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -5973,12 +5941,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -6009,8 +5971,12 @@ exports[`updateIndicateurTrois nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurUnCoef Array<{name: string}> change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6337,12 +6303,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -6381,8 +6341,12 @@ Object {
 exports[`updateIndicateurUnCoef Array<{name: string}> change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -6710,12 +6674,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -6746,8 +6704,12 @@ exports[`updateIndicateurUnCoef Array<{name: string}> nothing undefined state 1`
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7074,12 +7036,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -7118,8 +7074,12 @@ Object {
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7447,12 +7407,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -7483,8 +7437,12 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffe
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -7811,12 +7769,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -7855,8 +7807,12 @@ Object {
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8184,12 +8140,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -8220,8 +8170,12 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndi
 exports[`updateIndicateurUnCoefAddGroup change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8581,12 +8535,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -8625,8 +8573,12 @@ Object {
 exports[`updateIndicateurUnCoefAddGroup change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -8954,12 +8906,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -8990,8 +8936,12 @@ exports[`updateIndicateurUnCoefAddGroup nothing undefined state 1`] = `undefined
 exports[`updateIndicateurUnCoefDeleteGroup change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9284,12 +9234,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -9328,8 +9272,12 @@ Object {
 exports[`updateIndicateurUnCoefDeleteGroup change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9623,12 +9571,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -9659,8 +9601,12 @@ exports[`updateIndicateurUnCoefDeleteGroup nothing undefined state 1`] = `undefi
 exports[`updateIndicateurUnCsp change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -9987,12 +9933,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -10031,8 +9971,12 @@ Object {
 exports[`updateIndicateurUnCsp change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10326,12 +10270,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -10362,8 +10300,12 @@ exports[`updateIndicateurUnCsp nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurUnType change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -10690,12 +10632,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -10734,8 +10670,12 @@ Object {
 exports[`updateIndicateurUnType change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -11029,12 +10969,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -11062,716 +10996,15 @@ Object {
 
 exports[`updateIndicateurUnType nothing undefined state 1`] = `undefined`;
 
-exports[`updateInformationsComplementaires change complete state 1`] = `
-Object {
-  "declaration": Object {
-    "dateDeclaration": "",
-    "formValidated": "None",
-  },
-  "effectif": Object {
-    "formValidated": "None",
-    "nombreSalaries": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 23,
-            "nombreSalariesHommes": 32,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 12,
-            "nombreSalariesHommes": 13,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 34,
-            "nombreSalariesHommes": 7,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 5,
-            "nombreSalariesHommes": 21,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 63,
-            "nombreSalariesHommes": 25,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 52,
-            "nombreSalariesHommes": 62,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 16,
-            "nombreSalariesHommes": 18,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 27,
-            "nombreSalariesHommes": 19,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 14,
-            "nombreSalariesHommes": 15,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 4,
-            "nombreSalariesHommes": 5,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 6,
-            "nombreSalariesHommes": 8,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 7,
-            "nombreSalariesHommes": 7,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 7,
-            "nombreSalariesHommes": 8,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 10,
-            "nombreSalariesHommes": 8,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 13,
-            "nombreSalariesHommes": 13,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 16,
-            "nombreSalariesHommes": 19,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "indicateurCinq": Object {
-    "formValidated": "None",
-    "nombreSalariesFemmes": 4,
-    "nombreSalariesHommes": 6,
-  },
-  "indicateurDeux": Object {
-    "formValidated": "None",
-    "presenceAugmentation": false,
-    "tauxAugmentation": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationFemmes": 2.2,
-        "tauxAugmentationHommes": 3.5,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationFemmes": 1.3,
-        "tauxAugmentationHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationFemmes": 8.02,
-        "tauxAugmentationHommes": 6.92,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationFemmes": 12.15,
-        "tauxAugmentationHommes": 13.56,
-      },
-    ],
-  },
-  "indicateurDeuxTrois": Object {
-    "formValidated": "None",
-    "nombreAugmentationPromotionFemmes": 1,
-    "nombreAugmentationPromotionHommes": 2,
-    "periodeDeclaration": "unePeriodeReference",
-    "presenceAugmentationPromotion": false,
-  },
-  "indicateurQuatre": Object {
-    "formValidated": "None",
-    "nombreSalarieesAugmentees": 7,
-    "nombreSalarieesPeriodeAugmentation": 7,
-    "presenceCongeMat": false,
-  },
-  "indicateurTrois": Object {
-    "formValidated": "None",
-    "presencePromotion": false,
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
-  },
-  "indicateurUn": Object {
-    "coefficient": Array [
-      Object {
-        "name": "Business Developers",
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 5,
-            "nombreSalariesHommes": 4,
-            "remunerationAnnuelleBrutFemmes": 25000,
-            "remunerationAnnuelleBrutHommes": 24000,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 2,
-            "nombreSalariesHommes": 6,
-            "remunerationAnnuelleBrutFemmes": 32000,
-            "remunerationAnnuelleBrutHommes": 32000,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 5,
-            "nombreSalariesHommes": 3,
-            "remunerationAnnuelleBrutFemmes": 41000,
-            "remunerationAnnuelleBrutHommes": 43000,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 1,
-            "nombreSalariesHommes": 3,
-            "remunerationAnnuelleBrutFemmes": 49000,
-            "remunerationAnnuelleBrutHommes": 51500,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-    "coefficientEffectifFormValidated": "None",
-    "coefficientGroupFormValidated": "None",
-    "csp": true,
-    "formValidated": "None",
-    "remunerationAnnuelle": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 23000,
-            "remunerationAnnuelleBrutHommes": 25000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 24000,
-            "remunerationAnnuelleBrutHommes": 26000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 25500,
-            "remunerationAnnuelleBrutHommes": 26000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 27500,
-            "remunerationAnnuelleBrutHommes": 28000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 23000,
-            "remunerationAnnuelleBrutHommes": 25000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 24000,
-            "remunerationAnnuelleBrutHommes": 26000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 31000,
-            "remunerationAnnuelleBrutHommes": 33000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 39000,
-            "remunerationAnnuelleBrutHommes": 43000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 26000,
-            "remunerationAnnuelleBrutHommes": 28000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 27000,
-            "remunerationAnnuelleBrutHommes": 29000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 34000,
-            "remunerationAnnuelleBrutHommes": 36000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 42000,
-            "remunerationAnnuelleBrutHommes": 46000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 36000,
-            "remunerationAnnuelleBrutHommes": 38000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 37000,
-            "remunerationAnnuelleBrutHommes": 39000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 44000,
-            "remunerationAnnuelleBrutHommes": 46000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 52000,
-            "remunerationAnnuelleBrutHommes": 56000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "informations": Object {
-    "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
-    "finPeriodeReference": "2019-12-31",
-    "formValidated": "None",
-    "nomEntreprise": "BigCorp",
-    "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "anneeDeclaration": 2018,
-    "dateConsultationCSE": "01/02/2017",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
-  },
-  "informationsDeclarant": Object {
-    "email": "daffy.duck@example.com",
-    "formValidated": "None",
-    "nom": "Daffy",
-    "prenom": "Duck",
-    "tel": "0123456789",
-  },
-  "informationsEntreprise": Object {
-    "adresse": "30 rue des alouettes",
-    "codeNaf": "5678",
-    "codePostal": "12345",
-    "commune": "Trifouilly",
-    "departement": "Drôme",
-    "entreprisesUES": Array [
-      Object {
-        "nom": "entreprise 1",
-        "siren": "12345",
-      },
-      Object {
-        "nom": "entreprise 2",
-        "siren": "67890",
-      },
-    ],
-    "formValidated": "None",
-    "nomEntreprise": "acme",
-    "nomUES": "nom d'une UES",
-    "nombreEntreprises": 2,
-    "region": "Auvergne-Rhône-Alpes",
-    "siren": "1234",
-    "structure": "Unité Economique et Sociale (UES)",
-  },
-}
-`;
-
-exports[`updateInformationsComplementaires change default state 1`] = `
-Object {
-  "declaration": Object {
-    "dateDeclaration": "",
-    "formValidated": "None",
-  },
-  "effectif": Object {
-    "formValidated": "None",
-    "nombreSalaries": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "indicateurCinq": Object {
-    "formValidated": "None",
-    "nombreSalariesFemmes": undefined,
-    "nombreSalariesHommes": undefined,
-  },
-  "indicateurDeux": Object {
-    "formValidated": "None",
-    "presenceAugmentation": true,
-    "tauxAugmentation": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-    ],
-  },
-  "indicateurDeuxTrois": Object {
-    "formValidated": "None",
-    "nombreAugmentationPromotionFemmes": undefined,
-    "nombreAugmentationPromotionHommes": undefined,
-    "periodeDeclaration": "unePeriodeReference",
-    "presenceAugmentationPromotion": true,
-  },
-  "indicateurQuatre": Object {
-    "formValidated": "None",
-    "nombreSalarieesAugmentees": undefined,
-    "nombreSalarieesPeriodeAugmentation": undefined,
-    "presenceCongeMat": true,
-  },
-  "indicateurTrois": Object {
-    "formValidated": "None",
-    "presencePromotion": true,
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-    ],
-  },
-  "indicateurUn": Object {
-    "coefficient": Array [],
-    "coefficientEffectifFormValidated": "None",
-    "coefficientGroupFormValidated": "None",
-    "csp": true,
-    "formValidated": "None",
-    "remunerationAnnuelle": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "informations": Object {
-    "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
-    "finPeriodeReference": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "trancheEffectifs": "50 à 250",
-  },
-  "informationsComplementaires": Object {
-    "anneeDeclaration": 2018,
-    "dateConsultationCSE": "01/02/2017",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
-  },
-  "informationsDeclarant": Object {
-    "email": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "tel": "",
-  },
-  "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "entreprisesUES": Array [],
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "nomUES": "",
-    "nombreEntreprises": undefined,
-    "region": "",
-    "siren": "",
-    "structure": "Entreprise",
-  },
-}
-`;
-
-exports[`updateInformationsComplementaires nothing undefined state 1`] = `undefined`;
-
 exports[`updateInformationsDeclarant change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12098,12 +11331,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "foo@bar.com",
@@ -12142,8 +11369,12 @@ Object {
 exports[`updateInformationsDeclarant change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12437,12 +11668,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "foo@bar.com",
     "formValidated": "None",
@@ -12473,8 +11698,12 @@ exports[`updateInformationsDeclarant nothing undefined state 1`] = `undefined`;
 exports[`updateInformationsEntreprise change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -12802,12 +12031,6 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
-  },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
     "formValidated": "None",
@@ -12841,8 +12064,12 @@ Object {
 exports[`updateInformationsEntreprise change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13136,12 +12363,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -13177,8 +12398,12 @@ exports[`updateInformationsEntreprise nothing undefined state 1`] = `undefined`;
 exports[`updateInformationsSimulation change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13499,18 +12724,12 @@ Object {
     ],
   },
   "informations": Object {
-    "anneeDeclaration": undefined,
+    "anneeDeclaration": 2018,
     "debutPeriodeReference": "2019-10-15",
     "finPeriodeReference": "2020-10-14",
     "formValidated": "None",
     "nomEntreprise": "acme",
     "trancheEffectifs": "251 à 999",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -13549,8 +12768,12 @@ Object {
 exports[`updateInformationsSimulation change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -13837,18 +13060,12 @@ Object {
     ],
   },
   "informations": Object {
-    "anneeDeclaration": undefined,
+    "anneeDeclaration": 2018,
     "debutPeriodeReference": "2019-10-15",
     "finPeriodeReference": "2020-10-14",
     "formValidated": "None",
     "nomEntreprise": "acme",
     "trancheEffectifs": "251 à 999",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "email": "",
@@ -13880,8 +13097,12 @@ exports[`updateInformationsSimulation nothing undefined state 1`] = `undefined`;
 exports[`validateDeclaration change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14208,12 +13429,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -14252,8 +13467,12 @@ Object {
 exports[`validateDeclaration change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "",
     "formValidated": "Valid",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14547,12 +13766,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -14583,8 +13796,12 @@ exports[`validateDeclaration nothing undefined state 1`] = `undefined`;
 exports[`validateEffectif None with csp false invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
     "formValidated": "Invalid",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -14911,12 +14128,6 @@ Object {
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -14955,8 +14166,12 @@ Object {
 exports[`validateEffectif None with csp false stateCompleteAndValidateCoef 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
     "formValidated": "Valid",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -15284,12 +14499,6 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "Valid",
-    "lienPublication": "https://example.com",
-  },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
@@ -15327,8 +14536,12 @@ Object {
 exports[`validateEffectif None with csp true invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
     "formValidated": "Invalid",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -15655,12 +14868,6 @@ Object {
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "Valid",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -15699,8 +14906,12 @@ Object {
 exports[`validateEffectif Valid change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -16027,12 +15238,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -16071,8 +15276,12 @@ Object {
 exports[`validateEffectif Valid change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -16366,12 +15575,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -16402,8 +15605,12 @@ exports[`validateEffectif Valid nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurCinq change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -16730,12 +15937,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -16774,8 +15975,12 @@ Object {
 exports[`validateIndicateurCinq change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17069,12 +16274,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -17105,8 +16304,12 @@ exports[`validateIndicateurCinq nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurDeux change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17433,12 +16636,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -17477,8 +16674,12 @@ Object {
 exports[`validateIndicateurDeux change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -17772,12 +16973,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -17808,8 +17003,12 @@ exports[`validateIndicateurDeux nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurDeuxTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18136,12 +17335,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -18180,8 +17373,12 @@ Object {
 exports[`validateIndicateurDeuxTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18475,12 +17672,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -18511,8 +17702,12 @@ exports[`validateIndicateurDeuxTrois nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurQuatre change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -18839,12 +18034,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -18883,8 +18072,12 @@ Object {
 exports[`validateIndicateurQuatre change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19178,12 +18371,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -19214,8 +18401,12 @@ exports[`validateIndicateurQuatre nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19542,12 +18733,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -19586,8 +18771,12 @@ Object {
 exports[`validateIndicateurTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -19881,12 +19070,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -19917,8 +19100,12 @@ exports[`validateIndicateurTrois nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurUn change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -20246,12 +19433,6 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
-  },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
     "formValidated": "None",
@@ -20289,8 +19470,12 @@ Object {
 exports[`validateIndicateurUn change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -20584,12 +19769,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -20620,8 +19799,12 @@ exports[`validateIndicateurUn nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurUnCoefEffectif None invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
     "formValidated": "Invalid",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -20949,12 +20132,6 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "Valid",
-    "lienPublication": "https://example.com",
-  },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
@@ -20992,8 +20169,12 @@ Object {
 exports[`validateIndicateurUnCoefEffectif Valid change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -21321,12 +20502,6 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
-  },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
     "formValidated": "None",
@@ -21364,8 +20539,12 @@ Object {
 exports[`validateIndicateurUnCoefEffectif Valid change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -21659,12 +20838,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -21695,8 +20868,12 @@ exports[`validateIndicateurUnCoefEffectif Valid nothing undefined state 1`] = `u
 exports[`validateIndicateurUnCoefGroup None invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
+    "datePublication": "01/02/2020",
     "formValidated": "Invalid",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "Valid",
@@ -22024,12 +21201,6 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "Valid",
-    "lienPublication": "https://example.com",
-  },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
@@ -22067,8 +21238,12 @@ Object {
 exports[`validateIndicateurUnCoefGroup Valid change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -22395,12 +21570,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -22439,8 +21608,12 @@ Object {
 exports[`validateIndicateurUnCoefGroup Valid change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -22734,12 +21907,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -22767,714 +21934,15 @@ Object {
 
 exports[`validateIndicateurUnCoefGroup Valid nothing undefined state 1`] = `undefined`;
 
-exports[`validateInformationsComplementaires change complete state 1`] = `
-Object {
-  "declaration": Object {
-    "dateDeclaration": "",
-    "formValidated": "None",
-  },
-  "effectif": Object {
-    "formValidated": "None",
-    "nombreSalaries": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 23,
-            "nombreSalariesHommes": 32,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 12,
-            "nombreSalariesHommes": 13,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 34,
-            "nombreSalariesHommes": 7,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 5,
-            "nombreSalariesHommes": 21,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 63,
-            "nombreSalariesHommes": 25,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 52,
-            "nombreSalariesHommes": 62,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 16,
-            "nombreSalariesHommes": 18,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 27,
-            "nombreSalariesHommes": 19,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 14,
-            "nombreSalariesHommes": 15,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 4,
-            "nombreSalariesHommes": 5,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 6,
-            "nombreSalariesHommes": 8,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 7,
-            "nombreSalariesHommes": 7,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 7,
-            "nombreSalariesHommes": 8,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 10,
-            "nombreSalariesHommes": 8,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 13,
-            "nombreSalariesHommes": 13,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 16,
-            "nombreSalariesHommes": 19,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "indicateurCinq": Object {
-    "formValidated": "None",
-    "nombreSalariesFemmes": 4,
-    "nombreSalariesHommes": 6,
-  },
-  "indicateurDeux": Object {
-    "formValidated": "None",
-    "presenceAugmentation": false,
-    "tauxAugmentation": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationFemmes": 2.2,
-        "tauxAugmentationHommes": 3.5,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationFemmes": 1.3,
-        "tauxAugmentationHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationFemmes": 8.02,
-        "tauxAugmentationHommes": 6.92,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationFemmes": 12.15,
-        "tauxAugmentationHommes": 13.56,
-      },
-    ],
-  },
-  "indicateurDeuxTrois": Object {
-    "formValidated": "None",
-    "nombreAugmentationPromotionFemmes": 1,
-    "nombreAugmentationPromotionHommes": 2,
-    "periodeDeclaration": "unePeriodeReference",
-    "presenceAugmentationPromotion": false,
-  },
-  "indicateurQuatre": Object {
-    "formValidated": "None",
-    "nombreSalarieesAugmentees": 7,
-    "nombreSalarieesPeriodeAugmentation": 7,
-    "presenceCongeMat": false,
-  },
-  "indicateurTrois": Object {
-    "formValidated": "None",
-    "presencePromotion": false,
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
-  },
-  "indicateurUn": Object {
-    "coefficient": Array [
-      Object {
-        "name": "Business Developers",
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": 5,
-            "nombreSalariesHommes": 4,
-            "remunerationAnnuelleBrutFemmes": 25000,
-            "remunerationAnnuelleBrutHommes": 24000,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": 2,
-            "nombreSalariesHommes": 6,
-            "remunerationAnnuelleBrutFemmes": 32000,
-            "remunerationAnnuelleBrutHommes": 32000,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": 5,
-            "nombreSalariesHommes": 3,
-            "remunerationAnnuelleBrutFemmes": 41000,
-            "remunerationAnnuelleBrutHommes": 43000,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": 1,
-            "nombreSalariesHommes": 3,
-            "remunerationAnnuelleBrutFemmes": 49000,
-            "remunerationAnnuelleBrutHommes": 51500,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-    "coefficientEffectifFormValidated": "None",
-    "coefficientGroupFormValidated": "None",
-    "csp": true,
-    "formValidated": "None",
-    "remunerationAnnuelle": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 23000,
-            "remunerationAnnuelleBrutHommes": 25000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 24000,
-            "remunerationAnnuelleBrutHommes": 26000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 25500,
-            "remunerationAnnuelleBrutHommes": 26000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 27500,
-            "remunerationAnnuelleBrutHommes": 28000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 23000,
-            "remunerationAnnuelleBrutHommes": 25000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 24000,
-            "remunerationAnnuelleBrutHommes": 26000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 31000,
-            "remunerationAnnuelleBrutHommes": 33000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 39000,
-            "remunerationAnnuelleBrutHommes": 43000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 26000,
-            "remunerationAnnuelleBrutHommes": 28000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 27000,
-            "remunerationAnnuelleBrutHommes": 29000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 34000,
-            "remunerationAnnuelleBrutHommes": 36000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 42000,
-            "remunerationAnnuelleBrutHommes": 46000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": 36000,
-            "remunerationAnnuelleBrutHommes": 38000,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 37000,
-            "remunerationAnnuelleBrutHommes": 39000,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 44000,
-            "remunerationAnnuelleBrutHommes": 46000,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": 52000,
-            "remunerationAnnuelleBrutHommes": 56000,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "informations": Object {
-    "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
-    "finPeriodeReference": "2019-12-31",
-    "formValidated": "None",
-    "nomEntreprise": "BigCorp",
-    "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "Valid",
-    "lienPublication": "https://example.com",
-  },
-  "informationsDeclarant": Object {
-    "email": "daffy.duck@example.com",
-    "formValidated": "None",
-    "nom": "Daffy",
-    "prenom": "Duck",
-    "tel": "0123456789",
-  },
-  "informationsEntreprise": Object {
-    "adresse": "30 rue des alouettes",
-    "codeNaf": "5678",
-    "codePostal": "12345",
-    "commune": "Trifouilly",
-    "departement": "Drôme",
-    "entreprisesUES": Array [
-      Object {
-        "nom": "entreprise 1",
-        "siren": "12345",
-      },
-      Object {
-        "nom": "entreprise 2",
-        "siren": "67890",
-      },
-    ],
-    "formValidated": "None",
-    "nomEntreprise": "acme",
-    "nomUES": "nom d'une UES",
-    "nombreEntreprises": 2,
-    "region": "Auvergne-Rhône-Alpes",
-    "siren": "1234",
-    "structure": "Unité Economique et Sociale (UES)",
-  },
-}
-`;
-
-exports[`validateInformationsComplementaires change default state 1`] = `
-Object {
-  "declaration": Object {
-    "dateDeclaration": "",
-    "formValidated": "None",
-  },
-  "effectif": Object {
-    "formValidated": "None",
-    "nombreSalaries": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "nombreSalariesFemmes": undefined,
-            "nombreSalariesHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "indicateurCinq": Object {
-    "formValidated": "None",
-    "nombreSalariesFemmes": undefined,
-    "nombreSalariesHommes": undefined,
-  },
-  "indicateurDeux": Object {
-    "formValidated": "None",
-    "presenceAugmentation": true,
-    "tauxAugmentation": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxAugmentationFemmes": undefined,
-        "tauxAugmentationHommes": undefined,
-      },
-    ],
-  },
-  "indicateurDeuxTrois": Object {
-    "formValidated": "None",
-    "nombreAugmentationPromotionFemmes": undefined,
-    "nombreAugmentationPromotionHommes": undefined,
-    "periodeDeclaration": "unePeriodeReference",
-    "presenceAugmentationPromotion": true,
-  },
-  "indicateurQuatre": Object {
-    "formValidated": "None",
-    "nombreSalarieesAugmentees": undefined,
-    "nombreSalarieesPeriodeAugmentation": undefined,
-    "presenceCongeMat": true,
-  },
-  "indicateurTrois": Object {
-    "formValidated": "None",
-    "presencePromotion": true,
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": undefined,
-        "tauxPromotionHommes": undefined,
-      },
-    ],
-  },
-  "indicateurUn": Object {
-    "coefficient": Array [],
-    "coefficientEffectifFormValidated": "None",
-    "coefficientGroupFormValidated": "None",
-    "csp": true,
-    "formValidated": "None",
-    "remunerationAnnuelle": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tranchesAges": Array [
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 0,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 1,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 2,
-          },
-          Object {
-            "remunerationAnnuelleBrutFemmes": undefined,
-            "remunerationAnnuelleBrutHommes": undefined,
-            "trancheAge": 3,
-          },
-        ],
-      },
-    ],
-  },
-  "informations": Object {
-    "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
-    "finPeriodeReference": "",
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "trancheEffectifs": "50 à 250",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "Valid",
-    "lienPublication": "",
-  },
-  "informationsDeclarant": Object {
-    "email": "",
-    "formValidated": "None",
-    "nom": "",
-    "prenom": "",
-    "tel": "",
-  },
-  "informationsEntreprise": Object {
-    "adresse": "",
-    "codeNaf": "",
-    "codePostal": "",
-    "commune": "",
-    "departement": "",
-    "entreprisesUES": Array [],
-    "formValidated": "None",
-    "nomEntreprise": "",
-    "nomUES": "",
-    "nombreEntreprises": undefined,
-    "region": "",
-    "siren": "",
-    "structure": "Entreprise",
-  },
-}
-`;
-
-exports[`validateInformationsComplementaires nothing undefined state 1`] = `undefined`;
-
 exports[`validateInformationsDeclarant change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -23801,12 +22269,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -23845,8 +22307,12 @@ Object {
 exports[`validateInformationsDeclarant change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24140,12 +22606,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "Valid",
@@ -24176,8 +22636,12 @@ exports[`validateInformationsDeclarant nothing undefined state 1`] = `undefined`
 exports[`validateInformationsEntreprise change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24504,12 +22968,6 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
   },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
@@ -24548,8 +23006,12 @@ Object {
 exports[`validateInformationsEntreprise change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -24843,12 +23305,6 @@ Object {
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
-  },
   "informationsDeclarant": Object {
     "email": "",
     "formValidated": "None",
@@ -24879,8 +23335,12 @@ exports[`validateInformationsEntreprise nothing undefined state 1`] = `undefined
 exports[`validateInformationsSimulation change complete state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
+    "datePublication": "01/02/2020",
     "formValidated": "None",
+    "lienPublication": "https://example.com",
+    "mesuresCorrection": "mmo",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -25208,12 +23668,6 @@ Object {
     "nomEntreprise": "BigCorp",
     "trancheEffectifs": "1000 et plus",
   },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "01/02/2019",
-    "datePublication": "01/02/2020",
-    "formValidated": "None",
-    "lienPublication": "https://example.com",
-  },
   "informationsDeclarant": Object {
     "email": "daffy.duck@example.com",
     "formValidated": "None",
@@ -25251,8 +23705,12 @@ Object {
 exports[`validateInformationsSimulation change default state 1`] = `
 Object {
   "declaration": Object {
+    "dateConsultationCSE": "",
     "dateDeclaration": "",
+    "datePublication": "",
     "formValidated": "None",
+    "lienPublication": "",
+    "mesuresCorrection": "",
   },
   "effectif": Object {
     "formValidated": "None",
@@ -25545,12 +24003,6 @@ Object {
     "formValidated": "Valid",
     "nomEntreprise": "",
     "trancheEffectifs": "50 à 250",
-  },
-  "informationsComplementaires": Object {
-    "dateConsultationCSE": "",
-    "datePublication": "",
-    "formValidated": "None",
-    "lienPublication": "",
   },
   "informationsDeclarant": Object {
     "email": "",

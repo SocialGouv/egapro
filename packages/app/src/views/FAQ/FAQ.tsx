@@ -93,13 +93,6 @@ function FAQ({ closeMenu }: Props) {
 
                 {/* TODO: move to FAQPaths when a dedicated content is added */}
                 <Route
-                  path={["/", "/simulateur/:code/informations-complementaires"]}
-                  exact
-                  render={() => <FAQHome />}
-                />
-
-                {/* TODO: move to FAQPaths when a dedicated content is added */}
-                <Route
                   path={["/", "/simulateur/:code/declaration"]}
                   exact
                   render={() => <FAQHome />}

@@ -50,12 +50,18 @@ function IndicateurQuatre({ state, dispatch }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     !indicateurCalculable
   ) {
+    const messageNonCalculable =
+      state.indicateurQuatre.presenceCongeMat &&
+      state.indicateurQuatre.nombreSalarieesPeriodeAugmentation !== undefined &&
+      state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
+        ? "car pas de congé maternité pendant qu'il y a eu une ou des augmentations salariales."
+        : "car il n’y a pas eu de retour de congé maternité pendant la période de référence.";
     return (
       <PageIndicateurQuatre>
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car il n’y a pas eu de retour de congé maternité pendant la période de référence."
+            text={messageNonCalculable}
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurQuatre("None")}>

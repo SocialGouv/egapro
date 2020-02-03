@@ -69,14 +69,12 @@ export type AppState = {
     tel: string;
     email: string;
   };
-  informationsComplementaires: {
+  declaration: {
     formValidated: FormState;
+    mesuresCorrection: string;
     dateConsultationCSE: string;
     datePublication: string;
     lienPublication: string;
-  };
-  declaration: {
-    formValidated: FormState;
     dateDeclaration: string;
   };
 };
@@ -209,14 +207,6 @@ export type ActionType =
       valid: FormState;
     }
   | {
-      type: "updateInformationsComplementaires";
-      data: ActionInformationsComplementairesData;
-    }
-  | {
-      type: "validateInformationsComplementaires";
-      valid: FormState;
-    }
-  | {
       type: "updateDeclaration";
       data: ActionDeclarationData;
     }
@@ -311,13 +301,12 @@ export type ActionInformationsDeclarantData = {
   email: string;
 };
 
-export type ActionInformationsComplementairesData = {
+export type ActionDeclarationData = {
+  mesuresCorrection: string;
   dateConsultationCSE: string;
   datePublication: string;
   lienPublication: string;
 };
-
-export type ActionDeclarationData = {};
 
 ////
 

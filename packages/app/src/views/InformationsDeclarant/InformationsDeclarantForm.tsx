@@ -138,10 +138,7 @@ function InformationsDeclarantForm({
           />
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink
-                to="/informations-complementaires"
-                label="suivant"
-              />
+              <ButtonSimulatorLink to="/declaration" label="suivant" />
               &emsp;
               {informationsDeclarant.formValidated === "Valid" && (
                 <p css={styles.edit}>

@@ -72,7 +72,6 @@ interface Props {
   indicateurCinqFormValidated: FormState;
   informationsEntrepriseFormValidated: FormState;
   informationsDeclarantFormValidated: FormState;
-  informationsComplementairesFormValidated: FormState;
   declarationFormValidated: FormState;
 }
 
@@ -88,7 +87,6 @@ function Menu({
   indicateurCinqFormValidated,
   informationsEntrepriseFormValidated,
   informationsDeclarantFormValidated,
-  informationsComplementairesFormValidated,
   declarationFormValidated
 }: Props) {
   const width = useColumnsWidth(2);
@@ -120,7 +118,7 @@ function Menu({
               <h5 css={styles.menuTitle}>Calcul de l'index</h5>
               <CustomNavLink
                 to={`/simulateur/${code}/informations`}
-                title="informations simulation"
+                title="informations calcul"
                 label="et période de référence"
                 valid={informationsFormValidated}
               />
@@ -178,18 +176,13 @@ function Menu({
               <h5 css={styles.menuTitle}>Déclaration</h5>
               <CustomNavLink
                 to={`/simulateur/${code}/informations-entreprise`}
-                title="informations entreprise"
+                title="informations entreprise/UES"
                 valid={informationsEntrepriseFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/informations-declarant`}
                 title="informations déclarant"
                 valid={informationsDeclarantFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/informations-complementaires`}
-                title="informations complémentaires"
-                valid={informationsComplementairesFormValidated}
               />
               <CustomNavLink
                 to={`/simulateur/${code}/declaration`}

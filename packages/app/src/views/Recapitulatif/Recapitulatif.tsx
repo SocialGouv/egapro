@@ -101,7 +101,7 @@ function Recapitulatif({ state }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
-  const { noteIndex, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,
@@ -121,6 +121,7 @@ function Recapitulatif({ state }: Props) {
       <RecapitulatifInformations
         informationsFormValidated={state.informations.formValidated}
         trancheEffectifs={state.informations.trancheEffectifs}
+        anneeDeclaration={state.informations.anneeDeclaration}
         debutPeriodeReference={state.informations.debutPeriodeReference}
         finPeriodeReference={state.informations.finPeriodeReference}
         nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
@@ -128,6 +129,7 @@ function Recapitulatif({ state }: Props) {
       <RecapitulatifIndex
         allIndicateurValid={allIndicateurValid}
         noteIndex={noteIndex}
+        totalPoint={totalPoint}
         totalPointCalculable={totalPointCalculable}
       />
       <RecapitulatifIndicateurUn

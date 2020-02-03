@@ -1,4 +1,5 @@
 /** @jsx jsx */
+import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
 import { Form } from "react-final-form";
 
@@ -6,12 +7,17 @@ import { AppState, FormState, ActionDeclarationData } from "../../globals";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
+import FieldDate from "../../components/FieldDate";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
+import Textarea from "../../components/Textarea";
+import MesuresCorrection from "../../components/MesuresCorrection";
 
 ///////////////////
 interface Props {
   declaration: AppState["declaration"];
+  noteIndex: number | undefined;
+  indicateurUnParCSP: boolean;
   readOnly: boolean;
   updateDeclaration: (data: ActionDeclarationData) => void;
   validateDeclaration: (valid: FormState) => void;
@@ -19,16 +25,30 @@ interface Props {
 
 function DeclarationForm({
   declaration,
+  noteIndex,
+  indicateurUnParCSP,
   readOnly,
   updateDeclaration,
   validateDeclaration
 }: Props) {
-  const initialValues: ActionDeclarationData = {};
+  const initialValues = {
+    mesuresCorrection: declaration.mesuresCorrection,
+    dateConsultationCSE: declaration.dateConsultationCSE,
+    datePublication: declaration.datePublication,
+    lienPublication: declaration.lienPublication
+  };
 
   const saveForm = (formData: any) => {
-    const { datePublication, lienPublication } = formData;
+    const {
+      mesuresCorrection,
+      dateConsultationCSE,
+      datePublication,
+      lienPublication
+    } = formData;
 
     updateDeclaration({
+      mesuresCorrection,
+      dateConsultationCSE,
       datePublication,
       lienPublication
     });
@@ -51,6 +71,38 @@ function DeclarationForm({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
+
+          {noteIndex !== undefined && noteIndex < 75 && (
+            <MesuresCorrection
+              label="Mesures de corrections prévues à l'article D. 1142-5"
+              name="mesuresCorrection"
+              readOnly={readOnly}
+            />
+          )}
+
+          {!indicateurUnParCSP && (
+            <FieldDate
+              name="dateConsultationCSE"
+              label="Date de consultation du CSE"
+              readOnly={readOnly}
+            />
+          )}
+
+          {noteIndex !== undefined && (
+            <Fragment>
+              <FieldDate
+                name="datePublication"
+                label="Date de publication de cet index"
+                readOnly={readOnly}
+              />
+              <Textarea
+                label="Adresse du site internet de publication ou précision des modalités de publicité"
+                fieldName="lienPublication"
+                errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
+                readOnly={readOnly}
+              />
+            </Fragment>
+          )}
 
           {readOnly ? (
             <ActionBar>

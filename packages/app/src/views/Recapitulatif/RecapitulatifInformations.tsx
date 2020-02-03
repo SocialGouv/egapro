@@ -11,6 +11,7 @@ import { useColumnsWidth, useLayoutType } from "../../components/GridContext";
 interface Props {
   informationsFormValidated: FormState;
   trancheEffectifs: TrancheEffectifs;
+  anneeDeclaration: number | undefined;
   debutPeriodeReference: string;
   finPeriodeReference: string;
   nombreSalaries: number | undefined;
@@ -19,6 +20,7 @@ interface Props {
 function RecapitulatifInformations({
   informationsFormValidated,
   trancheEffectifs,
+  anneeDeclaration,
   debutPeriodeReference,
   finPeriodeReference,
   nombreSalaries
@@ -51,9 +53,10 @@ function RecapitulatifInformations({
 
   return (
     <div css={[styles.container, css({ width })]}>
-      <DataDisplay header="Effectifs" data={nombreSalaries} />
-
-      <DataDisplay header="Tranche de déclaration" data={trancheEffectifs} />
+      <DataDisplay
+        header="Année au titre de laquelle les indicateurs sont calculés"
+        data={anneeDeclaration}
+      />
 
       <DataDisplay header="Periode de référence">
         <div css={styles.dates}>
@@ -66,6 +69,16 @@ function RecapitulatifInformations({
           </div>
         </div>
       </DataDisplay>
+
+      <DataDisplay
+        header="Tranche d'effectifs de l'entreprise ou de l'UES"
+        data={trancheEffectifs}
+      />
+
+      <DataDisplay
+        header="Nombre de salariés pris en compte pour le calcul de l'indicateur"
+        data={nombreSalaries}
+      />
     </div>
   );
 }

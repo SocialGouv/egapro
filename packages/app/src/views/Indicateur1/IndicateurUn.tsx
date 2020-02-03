@@ -88,7 +88,7 @@ function PageIndicateurUn({ children }: { children: ReactNode }) {
     <Page
       title="Indicateur écart de rémunération"
       tagline={[
-        "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE ) et par tranche d’âge."
+        "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE) et par tranche d’âge."
       ]}
     >
       {children}

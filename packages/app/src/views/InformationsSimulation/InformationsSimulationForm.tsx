@@ -164,7 +164,7 @@ function InformationsSimulationForm({
 
           <RadioLabels
             fieldName="trancheEffectifs"
-            label="Quelle est la tranche d'effectifs de l'entreprise ?"
+            label="Quelle est la tranche d'effectifs de l'entreprise ou de l'UES ?"
             choices={[
               {
                 label: "Entre 50 et 250",
@@ -184,7 +184,7 @@ function InformationsSimulationForm({
           />
 
           <AnneeDeclaration
-            label="Année au titre de laquelle vous transmettez vos indicateurs"
+            label="Année au titre de laquelle les indicateurs sont calculés"
             name="anneeDeclaration"
             readOnly={readOnly}
           />
@@ -244,7 +244,8 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
   return (
     <div>
       <label css={styles.label}>
-        Sur quelle période souhaitez-vous faire votre déclaration ?
+        Quelle est la période de référence choisie pour le calcul de votre Index
+        ?
       </label>
       <div css={styles.dates}>
         <FieldDate
