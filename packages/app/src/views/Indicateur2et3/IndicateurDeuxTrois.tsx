@@ -121,7 +121,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car il n’y a pas eu d'augmentation promotion durant la période de référence."
+            text="car il n’y a pas eu d'augmentation durant la période de référence."
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>
