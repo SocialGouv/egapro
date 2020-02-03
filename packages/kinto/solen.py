@@ -420,7 +420,8 @@ class RowProcessor(object):
         self.importField("precision_am_tab1", "indicateurUn/motifNonCalculablePrecision")
         if modalite == "csp":
             self.importTranchesCsp()
-        elif modalite == "coef_niv":
+        elif modalite != "nc":
+            # Que ce soit par coefficients ou "autre" (amc) le résultat est le même
             self.importTranchesCoefficients()
         # Résultat
         self.importFloatField("resultat_tab1", "indicateurUn/resultatFinal")
