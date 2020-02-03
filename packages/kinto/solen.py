@@ -339,8 +339,8 @@ class RowProcessor(object):
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES
-        self.importDateField("date_publ_niv > Valeur date", "informationsComplementaires/datePublication")
-        self.importField("site_internet_publ", "informationsComplementaires/lienPublication")
+        self.importDateField("date_publ_niv > Valeur date", "declaration/datePublication")
+        self.importField("site_internet_publ", "declaration/lienPublication")
 
     def setValeursTranche(self, niveau, path, index, fieldName, custom=False):
         niveaux = [niveau + " > -30", niveau + " > 30-39", niveau + " > 40-49", niveau + " > 50+"]
@@ -427,7 +427,7 @@ class RowProcessor(object):
         self.importFloatField("resultat_tab1", "indicateurUn/resultatFinal")
         self.importField("population_favorable_tab1", "indicateurUn/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab1", "indicateurUn/noteFinale")
-        self.importDateField("date_consult_CSE > Valeur date", "informationsComplementaires/dateConsultationCSE")
+        self.importDateField("date_consult_CSE > Valeur date", "declaration/dateConsultationCSE")
 
     def importIndicateurDeux(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
