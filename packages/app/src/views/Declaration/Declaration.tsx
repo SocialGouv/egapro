@@ -205,7 +205,18 @@ function Declaration({ state, dispatch }: Props) {
         totalPoint,
         totalPointCalculable
       }),
-    [dispatch, indicateurUnData, indicateurDeuxData]
+    [
+      dispatch,
+      indicateurUnData,
+      indicateurDeuxData,
+      indicateurTroisData,
+      indicateurDeuxTroisData,
+      indicateurQuatreData,
+      indicateurCinqData,
+      noteIndex,
+      totalPoint,
+      totalPointCalculable
+    ]
   );
 
   // tous les formulaires ne sont pas encore validés
