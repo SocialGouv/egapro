@@ -65,7 +65,15 @@ const actionValidateInformationsDeclarant = {
 
 const actionValidateDeclaration = {
   type: "validateDeclaration" as "validateDeclaration",
-  valid: "Valid" as FormState
+  valid: "Valid" as FormState,
+  indicateurUnData: {
+    nombreCoefficients: 6,
+    motifNonCalculable: "",
+    motifNonCalculablePrecision: "",
+    resultatFinal: 8.0,
+    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteFinale: 31
+  }
 };
 
 // Mock the Date for tests

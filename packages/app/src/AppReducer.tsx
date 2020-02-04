@@ -603,6 +603,13 @@ function AppReducer(
       const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm");
       return {
         ...state,
+        indicateurUn:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurUn,
+                ...action.indicateurUnData
+              }
+            : state.indicateurUn,
         declaration: {
           ...state.declaration,
           dateDeclaration:

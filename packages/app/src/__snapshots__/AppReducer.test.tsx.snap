@@ -601,6 +601,10 @@ Object {
     "coefficientGroupFormValidated": "Valid",
     "csp": true,
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -703,6 +707,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": 2020,
@@ -12385,7 +12391,7 @@ Object {
     "formValidated": "None",
     "nomEntreprise": "acme",
     "nomUES": "foobar UES",
-    "nombreEntreprises": undefined,
+    "nombreEntreprises": 2,
     "region": "Languedoc-Roussillon",
     "siren": "12345",
     "structure": "Unité Economique et Sociale (UES)",
@@ -13319,6 +13325,10 @@ Object {
     "coefficientGroupFormValidated": "None",
     "csp": true,
     "formValidated": "None",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -13421,6 +13431,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": 2020,
@@ -13655,6 +13667,10 @@ Object {
     "coefficientGroupFormValidated": "None",
     "csp": true,
     "formValidated": "None",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -13757,6 +13773,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": undefined,
@@ -14018,6 +14036,10 @@ Object {
     "coefficientGroupFormValidated": "Valid",
     "csp": false,
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -14120,6 +14142,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": 2020,
@@ -14388,6 +14412,10 @@ Object {
     "coefficientGroupFormValidated": "Valid",
     "csp": false,
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -14490,6 +14518,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": 2020,
@@ -14758,6 +14788,10 @@ Object {
     "coefficientGroupFormValidated": "Valid",
     "csp": true,
     "formValidated": "Invalid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -14860,6 +14894,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": 2020,
@@ -20021,6 +20057,10 @@ Object {
     "coefficientGroupFormValidated": "Valid",
     "csp": true,
     "formValidated": "Invalid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -20123,6 +20163,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": 2020,
@@ -21090,6 +21132,10 @@ Object {
     "coefficientGroupFormValidated": "None",
     "csp": true,
     "formValidated": "Invalid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "nombreCoefficients": 6,
+    "noteFinale": 31,
     "remunerationAnnuelle": Array [
       Object {
         "categorieSocioPro": 0,
@@ -21192,6 +21238,8 @@ Object {
         ],
       },
     ],
+    "resultatFinal": 8,
+    "sexeSurRepresente": "femmes",
   },
   "informations": Object {
     "anneeDeclaration": 2020,

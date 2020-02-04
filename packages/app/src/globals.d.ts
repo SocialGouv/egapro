@@ -213,6 +213,7 @@ export type ActionType =
   | {
       type: "validateDeclaration";
       valid: FormState;
+      indicateurUnData: DeclarationIndicateurUnData;
     };
 
 export type ActionInformationsSimulationData = {
@@ -244,6 +245,15 @@ export type ActionIndicateurUnCoefData = {
     | Array<{
         tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
       }>;
+};
+
+export type DeclarationIndicateurUnData = {
+  nombreCoefficients: Number | undefined;
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
 };
 
 export type ActionIndicateurDeuxData = {

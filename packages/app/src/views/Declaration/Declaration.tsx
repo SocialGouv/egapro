@@ -7,7 +7,8 @@ import {
   AppState,
   FormState,
   ActionType,
-  ActionDeclarationData
+  ActionDeclarationData,
+  DeclarationIndicateurUnData
 } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
@@ -38,13 +39,10 @@ function Declaration({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const validateDeclaration = useCallback(
-    (valid: FormState) => dispatch({ type: "validateDeclaration", valid }),
-    [dispatch]
-  );
-
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
+    indicateurEcartRemuneration,
+    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn
   } = calculIndicateurUn(state);
 
@@ -81,6 +79,28 @@ function Declaration({ state, dispatch }: Props) {
         !effectifsIndicateurDeuxTroisCalculable) &&
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
+
+  const indicateurUnData: DeclarationIndicateurUnData = {
+    nombreCoefficients: state.indicateurUn.csp
+      ? undefined
+      : state.indicateurUn.coefficient.length,
+    motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartRemuneration,
+    sexeSurRepresente: indicateurUnSexeSurRepresente,
+    noteFinale: noteIndicateurUn
+  };
+
+  const validateDeclaration = useCallback(
+    (valid: FormState) =>
+      dispatch({
+        type: "validateDeclaration",
+        valid,
+        indicateurUnData
+      }),
+    [dispatch, indicateurUnData]
+  );
 
   const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
     trancheEffectifs,

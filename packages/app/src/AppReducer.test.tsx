@@ -682,6 +682,7 @@ describe("updateInformationsEntreprise", () => {
       commune: "Montpellier",
       structure: "Unité Economique et Sociale (UES)" as Structure,
       nomUES: "foobar UES",
+      nombreEntreprises: 2,
       entreprisesUES: [{ nom: "entreprise 1", siren: "12345" }]
     }
   };
@@ -1048,7 +1049,15 @@ describe("validateInformationsDeclarant", () => {
 describe("validateDeclaration", () => {
   const action = {
     type: "validateDeclaration" as "validateDeclaration",
-    valid: "Valid" as FormState
+    valid: "Valid" as FormState,
+    indicateurUnData: {
+      nombreCoefficients: 6,
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 8.0,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 31
+    }
   };
 
   test("nothing undefined state", () => {
