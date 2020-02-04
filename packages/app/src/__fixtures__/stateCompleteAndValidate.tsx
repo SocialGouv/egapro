@@ -109,7 +109,10 @@ const actionValidateDeclaration = {
     resultatFinal: 4.0,
     sexeSurRepresente: "hommes" as undefined | "egalite" | "femmes" | "hommes",
     noteFinale: 10
-  }
+  },
+  noteIndex: 78,
+  totalPoint: 66,
+  totalPointCalculable: 85
 };
 
 // Mock the Date for tests

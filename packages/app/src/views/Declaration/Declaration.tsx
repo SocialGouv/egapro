@@ -180,6 +180,16 @@ function Declaration({ state, dispatch }: Props) {
     noteFinale: noteIndicateurCinq
   };
 
+  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
+    trancheEffectifs,
+    noteIndicateurUn,
+    noteIndicateurDeux,
+    noteIndicateurTrois,
+    noteIndicateurDeuxTrois,
+    noteIndicateurQuatre,
+    noteIndicateurCinq
+  );
+
   const validateDeclaration = useCallback(
     (valid: FormState) =>
       dispatch({
@@ -190,19 +200,12 @@ function Declaration({ state, dispatch }: Props) {
         indicateurTroisData,
         indicateurDeuxTroisData,
         indicateurQuatreData,
-        indicateurCinqData
+        indicateurCinqData,
+        noteIndex,
+        totalPoint,
+        totalPointCalculable
       }),
     [dispatch, indicateurUnData, indicateurDeuxData]
-  );
-
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
-    trancheEffectifs,
-    noteIndicateurUn,
-    noteIndicateurDeux,
-    noteIndicateurTrois,
-    noteIndicateurDeuxTrois,
-    noteIndicateurQuatre,
-    noteIndicateurCinq
   );
 
   // tous les formulaires ne sont pas encore validés

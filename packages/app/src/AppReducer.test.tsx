@@ -1097,7 +1097,10 @@ describe("validateDeclaration", () => {
         | "femmes"
         | "hommes",
       noteFinale: 10
-    }
+    },
+    noteIndex: 78,
+    totalPoint: 66,
+    totalPointCalculable: 85
   };
 
   test("nothing undefined state", () => {

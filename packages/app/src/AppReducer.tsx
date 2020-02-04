@@ -140,7 +140,10 @@ const defaultState: AppState = {
     dateConsultationCSE: "",
     datePublication: "",
     lienPublication: "",
-    dateDeclaration: ""
+    dateDeclaration: "",
+    noteIndex: undefined,
+    totalPoint: 0,
+    totalPointCalculable: 0
   }
 };
 
@@ -652,6 +655,18 @@ function AppReducer(
             action.valid === "Valid"
               ? dateDeclaration
               : state.declaration.dateDeclaration,
+          noteIndex:
+            action.valid === "Valid"
+              ? action.noteIndex
+              : state.declaration.noteIndex,
+          totalPoint:
+            action.valid === "Valid"
+              ? action.totalPoint
+              : state.declaration.totalPoint,
+          totalPointCalculable:
+            action.valid === "Valid"
+              ? action.totalPointCalculable
+              : state.declaration.totalPointCalculable,
           formValidated: action.valid
         }
       };

@@ -76,6 +76,9 @@ export type AppState = {
     datePublication: string;
     lienPublication: string;
     dateDeclaration: string;
+    noteIndex: number | undefined;
+    totalPoint: number;
+    totalPointCalculable: number;
   };
 };
 
@@ -219,6 +222,9 @@ export type ActionType =
       indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData;
       indicateurQuatreData: DeclarationIndicateurQuatreData;
       indicateurCinqData: DeclarationIndicateurCinqData;
+      noteIndex: number | undefined;
+      totalPoint: number;
+      totalPointCalculable: number;
     };
 
 export type ActionInformationsSimulationData = {
