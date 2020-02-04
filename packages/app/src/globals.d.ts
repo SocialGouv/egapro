@@ -216,6 +216,7 @@ export type ActionType =
       indicateurUnData: DeclarationIndicateurUnData;
       indicateurDeuxData: DeclarationIndicateurDeuxData;
       indicateurTroisData: DeclarationIndicateurTroisData;
+      indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData;
     };
 
 export type ActionInformationsSimulationData = {
@@ -291,6 +292,16 @@ export type ActionIndicateurDeuxTroisData = {
   nombreAugmentationPromotionFemmes: number | undefined;
   nombreAugmentationPromotionHommes: number | undefined;
   periodeDeclaration: PeriodeDeclaration;
+};
+
+export type DeclarationIndicateurDeuxTroisData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinalEcart: Number | undefined;
+  resultatFinalNombreSalaries: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
 };
 
 export type DateInterval = {

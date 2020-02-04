@@ -1073,6 +1073,15 @@ describe("validateDeclaration", () => {
       sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
       noteFinale: 15,
       mesuresCorrection: false
+    },
+    indicateurDeuxTroisData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinalEcart: 25,
+      resultatFinalNombreSalaries: 5,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 25,
+      mesuresCorrection: false
     }
   };
 
