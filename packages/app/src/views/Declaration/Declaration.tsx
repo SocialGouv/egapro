@@ -12,7 +12,8 @@ import {
   DeclarationIndicateurDeuxData,
   DeclarationIndicateurTroisData,
   DeclarationIndicateurDeuxTroisData,
-  DeclarationIndicateurQuatreData
+  DeclarationIndicateurQuatreData,
+  DeclarationIndicateurCinqData
 } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
@@ -80,7 +81,11 @@ function Declaration({ state, dispatch }: Props) {
     noteIndicateurQuatre
   } = calculIndicateurQuatre(state);
 
-  const { noteIndicateurCinq } = calculIndicateurCinq(state);
+  const {
+    indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
+    indicateurNombreSalariesSexeSousRepresente,
+    noteIndicateurCinq
+  } = calculIndicateurCinq(state);
 
   const trancheEffectifs = state.informations.trancheEffectifs;
 
@@ -164,6 +169,17 @@ function Declaration({ state, dispatch }: Props) {
     noteFinale: noteIndicateurQuatre
   };
 
+  const indicateurCinqData: DeclarationIndicateurCinqData = {
+    resultatFinal: indicateurNombreSalariesSexeSousRepresente,
+    sexeSurRepresente:
+      indicateurCinqSexeSousRepresente === "femmes"
+        ? "hommes"
+        : indicateurCinqSexeSousRepresente === "hommes"
+        ? "femmes"
+        : indicateurCinqSexeSousRepresente,
+    noteFinale: noteIndicateurCinq
+  };
+
   const validateDeclaration = useCallback(
     (valid: FormState) =>
       dispatch({
@@ -173,7 +189,8 @@ function Declaration({ state, dispatch }: Props) {
         indicateurDeuxData,
         indicateurTroisData,
         indicateurDeuxTroisData,
-        indicateurQuatreData
+        indicateurQuatreData,
+        indicateurCinqData
       }),
     [dispatch, indicateurUnData, indicateurDeuxData]
   );

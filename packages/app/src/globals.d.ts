@@ -218,6 +218,7 @@ export type ActionType =
       indicateurTroisData: DeclarationIndicateurTroisData;
       indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData;
       indicateurQuatreData: DeclarationIndicateurQuatreData;
+      indicateurCinqData: DeclarationIndicateurCinqData;
     };
 
 export type ActionInformationsSimulationData = {
@@ -326,6 +327,12 @@ export type DeclarationIndicateurQuatreData = {
 export type ActionIndicateurCinqData = {
   nombreSalariesHommes: number | undefined;
   nombreSalariesFemmes: number | undefined;
+};
+
+export type DeclarationIndicateurCinqData = {
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "egalite" | "femmes" | "hommes";
+  noteFinale: Number | undefined;
 };
 
 export type ActionInformationsEntrepriseData = {

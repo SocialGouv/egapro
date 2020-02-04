@@ -495,6 +495,9 @@ Object {
     "formValidated": "Valid",
     "nombreSalariesFemmes": 4,
     "nombreSalariesHommes": 6,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "Valid",
@@ -13242,6 +13245,9 @@ Object {
     "formValidated": "None",
     "nombreSalariesFemmes": 4,
     "nombreSalariesHommes": 6,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "None",
@@ -13641,6 +13647,9 @@ Object {
     "formValidated": "None",
     "nombreSalariesFemmes": undefined,
     "nombreSalariesHommes": undefined,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "None",
@@ -13999,6 +14008,9 @@ Object {
     "formValidated": "Valid",
     "nombreSalariesFemmes": 4,
     "nombreSalariesHommes": 6,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "Invalid",
@@ -14398,6 +14410,9 @@ Object {
     "formValidated": "Valid",
     "nombreSalariesFemmes": 4,
     "nombreSalariesHommes": 6,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "Valid",
@@ -14797,6 +14812,9 @@ Object {
     "formValidated": "Valid",
     "nombreSalariesFemmes": 4,
     "nombreSalariesHommes": 6,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "Invalid",
@@ -20089,6 +20107,9 @@ Object {
     "formValidated": "Valid",
     "nombreSalariesFemmes": 4,
     "nombreSalariesHommes": 6,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "Valid",
@@ -21187,6 +21208,9 @@ Object {
     "formValidated": "Valid",
     "nombreSalariesFemmes": 4,
     "nombreSalariesHommes": 6,
+    "noteFinale": 10,
+    "resultatFinal": 4,
+    "sexeSurRepresente": "hommes",
   },
   "indicateurDeux": Object {
     "formValidated": "Valid",

@@ -104,6 +104,11 @@ const actionValidateDeclaration = {
     motifNonCalculablePrecision: "",
     resultatFinal: 80.0,
     noteFinale: 0
+  },
+  indicateurCinqData: {
+    resultatFinal: 4.0,
+    sexeSurRepresente: "hommes" as undefined | "egalite" | "femmes" | "hommes",
+    noteFinale: 10
   }
 };
 
