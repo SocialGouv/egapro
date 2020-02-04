@@ -11,7 +11,8 @@ import {
   DeclarationIndicateurUnData,
   DeclarationIndicateurDeuxData,
   DeclarationIndicateurTroisData,
-  DeclarationIndicateurDeuxTroisData
+  DeclarationIndicateurDeuxTroisData,
+  DeclarationIndicateurQuatreData
 } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
@@ -74,7 +75,10 @@ function Declaration({ state, dispatch }: Props) {
     noteIndicateurDeuxTrois
   } = calculIndicateurDeuxTrois(state);
 
-  const { noteIndicateurQuatre } = calculIndicateurQuatre(state);
+  const {
+    indicateurEcartNombreSalarieesAugmentees,
+    noteIndicateurQuatre
+  } = calculIndicateurQuatre(state);
 
   const { noteIndicateurCinq } = calculIndicateurCinq(state);
 
@@ -148,6 +152,18 @@ function Declaration({ state, dispatch }: Props) {
     mesuresCorrection: indicateurDeuxTroisCorrectionMeasure
   };
 
+  const indicateurQuatreData: DeclarationIndicateurQuatreData = {
+    motifNonCalculable: state.indicateurQuatre.presenceCongeMat
+      ? state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
+        ? "absaugpdtcm"
+        : ""
+      : "absretcm",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartNombreSalarieesAugmentees,
+    noteFinale: noteIndicateurQuatre
+  };
+
   const validateDeclaration = useCallback(
     (valid: FormState) =>
       dispatch({
@@ -156,7 +172,8 @@ function Declaration({ state, dispatch }: Props) {
         indicateurUnData,
         indicateurDeuxData,
         indicateurTroisData,
-        indicateurDeuxTroisData
+        indicateurDeuxTroisData,
+        indicateurQuatreData
       }),
     [dispatch, indicateurUnData, indicateurDeuxData]
   );

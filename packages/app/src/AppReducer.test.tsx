@@ -1082,6 +1082,12 @@ describe("validateDeclaration", () => {
       sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
       noteFinale: 25,
       mesuresCorrection: false
+    },
+    indicateurQuatreData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 80.0,
+      noteFinale: 0
     }
   };
 

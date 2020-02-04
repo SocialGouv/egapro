@@ -217,6 +217,7 @@ export type ActionType =
       indicateurDeuxData: DeclarationIndicateurDeuxData;
       indicateurTroisData: DeclarationIndicateurTroisData;
       indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData;
+      indicateurQuatreData: DeclarationIndicateurQuatreData;
     };
 
 export type ActionInformationsSimulationData = {
@@ -313,6 +314,13 @@ export type ActionIndicateurQuatreData = {
   presenceCongeMat: boolean;
   nombreSalarieesPeriodeAugmentation: number | undefined;
   nombreSalarieesAugmentees: number | undefined;
+};
+
+export type DeclarationIndicateurQuatreData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  noteFinale: Number | undefined;
 };
 
 export type ActionIndicateurCinqData = {

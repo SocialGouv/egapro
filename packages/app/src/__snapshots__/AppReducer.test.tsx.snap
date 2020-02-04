@@ -544,9 +544,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": 7,
     "nombreSalarieesPeriodeAugmentation": 7,
+    "noteFinale": 0,
     "presenceCongeMat": false,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
@@ -13287,9 +13291,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": 7,
     "nombreSalarieesPeriodeAugmentation": 7,
+    "noteFinale": 0,
     "presenceCongeMat": false,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "None",
@@ -13682,9 +13690,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "None",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": undefined,
     "nombreSalarieesPeriodeAugmentation": undefined,
+    "noteFinale": 0,
     "presenceCongeMat": true,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "None",
@@ -14036,9 +14048,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": 7,
     "nombreSalarieesPeriodeAugmentation": 7,
+    "noteFinale": 0,
     "presenceCongeMat": false,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "Invalid",
@@ -14431,9 +14447,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": 7,
     "nombreSalarieesPeriodeAugmentation": 7,
+    "noteFinale": 0,
     "presenceCongeMat": false,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
@@ -14826,9 +14846,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": 7,
     "nombreSalarieesPeriodeAugmentation": 7,
+    "noteFinale": 0,
     "presenceCongeMat": false,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "Invalid",
@@ -20114,9 +20138,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": 7,
     "nombreSalarieesPeriodeAugmentation": 7,
+    "noteFinale": 0,
     "presenceCongeMat": false,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
@@ -21208,9 +21236,13 @@ Object {
   },
   "indicateurQuatre": Object {
     "formValidated": "Valid",
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
     "nombreSalarieesAugmentees": 7,
     "nombreSalarieesPeriodeAugmentation": 7,
+    "noteFinale": 0,
     "presenceCongeMat": false,
+    "resultatFinal": 80,
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
