@@ -8,7 +8,8 @@ import {
   FormState,
   ActionType,
   ActionDeclarationData,
-  DeclarationIndicateurUnData
+  DeclarationIndicateurUnData,
+  DeclarationIndicateurDeuxData
 } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
@@ -48,6 +49,9 @@ function Declaration({ state, dispatch }: Props) {
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
+    indicateurEcartAugmentation,
+    indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
+    correctionMeasure: indicateurDeuxCorrectionMeasure,
     noteIndicateurDeux
   } = calculIndicateurDeux(state);
 
@@ -92,14 +96,29 @@ function Declaration({ state, dispatch }: Props) {
     noteFinale: noteIndicateurUn
   };
 
+  const indicateurDeuxData: DeclarationIndicateurDeuxData = {
+    motifNonCalculable: !effectifsIndicateurDeuxCalculable
+      ? "egvi40pcet"
+      : state.indicateurDeux.presenceAugmentation
+      ? ""
+      : "absaugi",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartAugmentation,
+    sexeSurRepresente: indicateurDeuxSexeSurRepresente,
+    noteFinale: noteIndicateurDeux,
+    mesuresCorrection: indicateurDeuxCorrectionMeasure
+  };
+
   const validateDeclaration = useCallback(
     (valid: FormState) =>
       dispatch({
         type: "validateDeclaration",
         valid,
-        indicateurUnData
+        indicateurUnData,
+        indicateurDeuxData
       }),
-    [dispatch, indicateurUnData]
+    [dispatch, indicateurUnData, indicateurDeuxData]
   );
 
   const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(

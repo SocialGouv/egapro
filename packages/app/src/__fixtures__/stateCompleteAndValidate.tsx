@@ -73,6 +73,14 @@ const actionValidateDeclaration = {
     resultatFinal: 8.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 31
+  },
+  indicateurDeuxData: {
+    motifNonCalculable: "",
+    motifNonCalculablePrecision: "",
+    resultatFinal: 5.0,
+    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteFinale: 10,
+    mesuresCorrection: false
   }
 };
 

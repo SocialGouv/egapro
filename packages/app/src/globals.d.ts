@@ -214,6 +214,7 @@ export type ActionType =
       type: "validateDeclaration";
       valid: FormState;
       indicateurUnData: DeclarationIndicateurUnData;
+      indicateurDeuxData: DeclarationIndicateurDeuxData;
     };
 
 export type ActionInformationsSimulationData = {
@@ -259,6 +260,15 @@ export type DeclarationIndicateurUnData = {
 export type ActionIndicateurDeuxData = {
   presenceAugmentation: boolean;
   tauxAugmentation: Array<GroupeIndicateurDeux>;
+};
+
+export type DeclarationIndicateurDeuxData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
 };
 
 export type ActionIndicateurTroisData = {
