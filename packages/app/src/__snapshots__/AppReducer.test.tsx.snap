@@ -543,7 +543,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": false,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
@@ -13273,7 +13279,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "None",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": false,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
@@ -13655,7 +13667,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "None",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": true,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
@@ -13996,7 +14014,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "Invalid",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": false,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
@@ -14378,7 +14402,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": false,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
@@ -14760,7 +14790,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "Invalid",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": false,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
@@ -20035,7 +20071,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": false,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
@@ -21116,7 +21158,13 @@ Object {
   },
   "indicateurTrois": Object {
     "formValidated": "Valid",
+    "mesuresCorrection": false,
+    "motifNonCalculable": "",
+    "motifNonCalculablePrecision": "",
+    "noteFinale": 15,
     "presencePromotion": false,
+    "resultatFinal": 3,
+    "sexeSurRepresente": "femmes",
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,

@@ -617,6 +617,13 @@ function AppReducer(
                 ...action.indicateurDeuxData
               }
             : state.indicateurDeux,
+        indicateurTrois:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurTrois,
+                ...action.indicateurTroisData
+              }
+            : state.indicateurTrois,
         declaration: {
           ...state.declaration,
           dateDeclaration:

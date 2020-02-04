@@ -9,7 +9,8 @@ import {
   ActionType,
   ActionDeclarationData,
   DeclarationIndicateurUnData,
-  DeclarationIndicateurDeuxData
+  DeclarationIndicateurDeuxData,
+  DeclarationIndicateurTroisData
 } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
@@ -57,6 +58,9 @@ function Declaration({ state, dispatch }: Props) {
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
+    indicateurEcartPromotion,
+    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
+    correctionMeasure: indicateurTroisCorrectionMeasure,
     noteIndicateurTrois
   } = calculIndicateurTrois(state);
 
@@ -110,13 +114,28 @@ function Declaration({ state, dispatch }: Props) {
     mesuresCorrection: indicateurDeuxCorrectionMeasure
   };
 
+  const indicateurTroisData: DeclarationIndicateurTroisData = {
+    motifNonCalculable: !effectifsIndicateurTroisCalculable
+      ? "egvi40pcet"
+      : state.indicateurTrois.presencePromotion
+      ? ""
+      : "absprom",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartPromotion,
+    sexeSurRepresente: indicateurTroisSexeSurRepresente,
+    noteFinale: noteIndicateurTrois,
+    mesuresCorrection: indicateurTroisCorrectionMeasure
+  };
+
   const validateDeclaration = useCallback(
     (valid: FormState) =>
       dispatch({
         type: "validateDeclaration",
         valid,
         indicateurUnData,
-        indicateurDeuxData
+        indicateurDeuxData,
+        indicateurTroisData
       }),
     [dispatch, indicateurUnData, indicateurDeuxData]
   );

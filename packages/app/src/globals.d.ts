@@ -215,6 +215,7 @@ export type ActionType =
       valid: FormState;
       indicateurUnData: DeclarationIndicateurUnData;
       indicateurDeuxData: DeclarationIndicateurDeuxData;
+      indicateurTroisData: DeclarationIndicateurTroisData;
     };
 
 export type ActionInformationsSimulationData = {
@@ -274,6 +275,15 @@ export type DeclarationIndicateurDeuxData = {
 export type ActionIndicateurTroisData = {
   presencePromotion: boolean;
   tauxPromotion: Array<GroupeIndicateurTrois>;
+};
+
+export type DeclarationIndicateurTroisData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
 };
 
 export type ActionIndicateurDeuxTroisData = {
