@@ -83,7 +83,7 @@ function DeclarationForm({
           {!indicateurUnParCSP && (
             <FieldDate
               name="dateConsultationCSE"
-              label="Date de consultation du CSE"
+              label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
               readOnly={readOnly}
             />
           )}
