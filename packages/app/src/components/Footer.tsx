@@ -49,11 +49,9 @@ function Footer() {
         >
           retrouvez le simulateur au format Excel
         </a>
-        <br />
         <Link to="/mentions-legales" css={styles.link}>
           mentions légales
         </Link>
-        <br />
         <Link to="/cgu" css={styles.link}>
           conditions générales d'utilisation
         </Link>
