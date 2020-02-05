@@ -131,7 +131,7 @@ function Menu({
               <CustomNavLink
                 to={`/simulateur/${code}/indicateur1`}
                 title="indicateur"
-                label="écart de rémunérations"
+                label="écart de rémunération"
                 valid={indicateurUnFormValidated}
               />
               {(trancheEffectifs !== "50 à 250" && (
@@ -139,13 +139,13 @@ function Menu({
                   <CustomNavLink
                     to={`/simulateur/${code}/indicateur2`}
                     title="indicateur"
-                    label="écart de taux d'augmentations"
+                    label="écart de taux d'augmentation"
                     valid={indicateurDeuxFormValidated}
                   />
                   <CustomNavLink
                     to={`/simulateur/${code}/indicateur3`}
                     title="indicateur"
-                    label="écart de taux de promotions"
+                    label="écart de taux de promotion"
                     valid={indicateurTroisFormValidated}
                   />
                 </Fragment>
@@ -153,7 +153,7 @@ function Menu({
                 <CustomNavLink
                   to={`/simulateur/${code}/indicateur2et3`}
                   title="indicateur"
-                  label="écart de taux d'augmentations"
+                  label="écart de taux d'augmentation"
                   valid={indicateurDeuxTroisFormValidated}
                 />
               )}
