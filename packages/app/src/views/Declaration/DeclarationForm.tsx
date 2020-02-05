@@ -96,7 +96,7 @@ function DeclarationForm({
                 readOnly={readOnly}
               />
               <Textarea
-                label="Adresse du site internet de publication ou précision des modalités de publicité"
+                label="Adresse du site internet de publication ou à défaut précision des modalités de publicité"
                 fieldName="lienPublication"
                 errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
                 readOnly={readOnly}
