@@ -76,6 +76,9 @@ export type AppState = {
     datePublication: string;
     lienPublication: string;
     dateDeclaration: string;
+    noteIndex: number | undefined;
+    totalPoint: number;
+    totalPointCalculable: number;
   };
 };
 
@@ -213,6 +216,15 @@ export type ActionType =
   | {
       type: "validateDeclaration";
       valid: FormState;
+      indicateurUnData: DeclarationIndicateurUnData;
+      indicateurDeuxData: DeclarationIndicateurDeuxData;
+      indicateurTroisData: DeclarationIndicateurTroisData;
+      indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData;
+      indicateurQuatreData: DeclarationIndicateurQuatreData;
+      indicateurCinqData: DeclarationIndicateurCinqData;
+      noteIndex: number | undefined;
+      totalPoint: number;
+      totalPointCalculable: number;
     };
 
 export type ActionInformationsSimulationData = {
@@ -246,9 +258,27 @@ export type ActionIndicateurUnCoefData = {
       }>;
 };
 
+export type DeclarationIndicateurUnData = {
+  nombreCoefficients: Number | undefined;
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+};
+
 export type ActionIndicateurDeuxData = {
   presenceAugmentation: boolean;
   tauxAugmentation: Array<GroupeIndicateurDeux>;
+};
+
+export type DeclarationIndicateurDeuxData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
 };
 
 export type ActionIndicateurTroisData = {
@@ -256,11 +286,30 @@ export type ActionIndicateurTroisData = {
   tauxPromotion: Array<GroupeIndicateurTrois>;
 };
 
+export type DeclarationIndicateurTroisData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
+};
+
 export type ActionIndicateurDeuxTroisData = {
   presenceAugmentationPromotion: boolean;
   nombreAugmentationPromotionFemmes: number | undefined;
   nombreAugmentationPromotionHommes: number | undefined;
   periodeDeclaration: PeriodeDeclaration;
+};
+
+export type DeclarationIndicateurDeuxTroisData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinalEcart: Number | undefined;
+  resultatFinalNombreSalaries: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
 };
 
 export type DateInterval = {
@@ -274,9 +323,22 @@ export type ActionIndicateurQuatreData = {
   nombreSalarieesAugmentees: number | undefined;
 };
 
+export type DeclarationIndicateurQuatreData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  noteFinale: Number | undefined;
+};
+
 export type ActionIndicateurCinqData = {
   nombreSalariesHommes: number | undefined;
   nombreSalariesFemmes: number | undefined;
+};
+
+export type DeclarationIndicateurCinqData = {
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "egalite" | "femmes" | "hommes";
+  noteFinale: Number | undefined;
 };
 
 export type ActionInformationsEntrepriseData = {

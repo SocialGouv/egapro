@@ -7,7 +7,13 @@ import {
   AppState,
   FormState,
   ActionType,
-  ActionDeclarationData
+  ActionDeclarationData,
+  DeclarationIndicateurUnData,
+  DeclarationIndicateurDeuxData,
+  DeclarationIndicateurTroisData,
+  DeclarationIndicateurDeuxTroisData,
+  DeclarationIndicateurQuatreData,
+  DeclarationIndicateurCinqData
 } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
@@ -38,34 +44,48 @@ function Declaration({ state, dispatch }: Props) {
     [dispatch]
   );
 
-  const validateDeclaration = useCallback(
-    (valid: FormState) => dispatch({ type: "validateDeclaration", valid }),
-    [dispatch]
-  );
-
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
+    indicateurEcartRemuneration,
+    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
     noteIndicateurUn
   } = calculIndicateurUn(state);
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
+    indicateurEcartAugmentation,
+    indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
+    correctionMeasure: indicateurDeuxCorrectionMeasure,
     noteIndicateurDeux
   } = calculIndicateurDeux(state);
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
+    indicateurEcartPromotion,
+    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
+    correctionMeasure: indicateurTroisCorrectionMeasure,
     noteIndicateurTrois
   } = calculIndicateurTrois(state);
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
+    indicateurEcartAugmentationPromotion,
+    indicateurEcartNombreEquivalentSalaries,
+    indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
     noteIndicateurDeuxTrois
   } = calculIndicateurDeuxTrois(state);
 
-  const { noteIndicateurQuatre } = calculIndicateurQuatre(state);
+  const {
+    indicateurEcartNombreSalarieesAugmentees,
+    noteIndicateurQuatre
+  } = calculIndicateurQuatre(state);
 
-  const { noteIndicateurCinq } = calculIndicateurCinq(state);
+  const {
+    indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
+    indicateurNombreSalariesSexeSousRepresente,
+    noteIndicateurCinq
+  } = calculIndicateurCinq(state);
 
   const trancheEffectifs = state.informations.trancheEffectifs;
 
@@ -82,6 +102,84 @@ function Declaration({ state, dispatch }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
+  const indicateurUnData: DeclarationIndicateurUnData = {
+    nombreCoefficients: state.indicateurUn.csp
+      ? undefined
+      : state.indicateurUn.coefficient.length,
+    motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartRemuneration,
+    sexeSurRepresente: indicateurUnSexeSurRepresente,
+    noteFinale: noteIndicateurUn
+  };
+
+  const indicateurDeuxData: DeclarationIndicateurDeuxData = {
+    motifNonCalculable: !effectifsIndicateurDeuxCalculable
+      ? "egvi40pcet"
+      : state.indicateurDeux.presenceAugmentation
+      ? ""
+      : "absaugi",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartAugmentation,
+    sexeSurRepresente: indicateurDeuxSexeSurRepresente,
+    noteFinale: noteIndicateurDeux,
+    mesuresCorrection: indicateurDeuxCorrectionMeasure
+  };
+
+  const indicateurTroisData: DeclarationIndicateurTroisData = {
+    motifNonCalculable: !effectifsIndicateurTroisCalculable
+      ? "egvi40pcet"
+      : state.indicateurTrois.presencePromotion
+      ? ""
+      : "absprom",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartPromotion,
+    sexeSurRepresente: indicateurTroisSexeSurRepresente,
+    noteFinale: noteIndicateurTrois,
+    mesuresCorrection: indicateurTroisCorrectionMeasure
+  };
+
+  const indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData = {
+    motifNonCalculable: !effectifsIndicateurDeuxTroisCalculable
+      ? "etsno5f5h"
+      : state.indicateurDeuxTrois.presenceAugmentationPromotion
+      ? ""
+      : "absaugi",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinalEcart: indicateurEcartAugmentationPromotion,
+    resultatFinalNombreSalaries: indicateurEcartNombreEquivalentSalaries,
+    sexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    noteFinale: noteIndicateurDeuxTrois,
+    mesuresCorrection: indicateurDeuxTroisCorrectionMeasure
+  };
+
+  const indicateurQuatreData: DeclarationIndicateurQuatreData = {
+    motifNonCalculable: state.indicateurQuatre.presenceCongeMat
+      ? state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
+        ? "absaugpdtcm"
+        : ""
+      : "absretcm",
+    // TODO: demander le motif de non calculabilité si "autre" ?
+    motifNonCalculablePrecision: "",
+    resultatFinal: indicateurEcartNombreSalarieesAugmentees,
+    noteFinale: noteIndicateurQuatre
+  };
+
+  const indicateurCinqData: DeclarationIndicateurCinqData = {
+    resultatFinal: indicateurNombreSalariesSexeSousRepresente,
+    sexeSurRepresente:
+      indicateurCinqSexeSousRepresente === "femmes"
+        ? "hommes"
+        : indicateurCinqSexeSousRepresente === "hommes"
+        ? "femmes"
+        : indicateurCinqSexeSousRepresente,
+    noteFinale: noteIndicateurCinq
+  };
+
   const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
@@ -90,6 +188,35 @@ function Declaration({ state, dispatch }: Props) {
     noteIndicateurDeuxTrois,
     noteIndicateurQuatre,
     noteIndicateurCinq
+  );
+
+  const validateDeclaration = useCallback(
+    (valid: FormState) =>
+      dispatch({
+        type: "validateDeclaration",
+        valid,
+        indicateurUnData,
+        indicateurDeuxData,
+        indicateurTroisData,
+        indicateurDeuxTroisData,
+        indicateurQuatreData,
+        indicateurCinqData,
+        noteIndex,
+        totalPoint,
+        totalPointCalculable
+      }),
+    [
+      dispatch,
+      indicateurUnData,
+      indicateurDeuxData,
+      indicateurTroisData,
+      indicateurDeuxTroisData,
+      indicateurQuatreData,
+      indicateurCinqData,
+      noteIndex,
+      totalPoint,
+      totalPointCalculable
+    ]
   );
 
   // tous les formulaires ne sont pas encore validés

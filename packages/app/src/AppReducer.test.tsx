@@ -682,6 +682,7 @@ describe("updateInformationsEntreprise", () => {
       commune: "Montpellier",
       structure: "Unité Economique et Sociale (UES)" as Structure,
       nomUES: "foobar UES",
+      nombreEntreprises: 2,
       entreprisesUES: [{ nom: "entreprise 1", siren: "12345" }]
     }
   };
@@ -1048,7 +1049,58 @@ describe("validateInformationsDeclarant", () => {
 describe("validateDeclaration", () => {
   const action = {
     type: "validateDeclaration" as "validateDeclaration",
-    valid: "Valid" as FormState
+    valid: "Valid" as FormState,
+    indicateurUnData: {
+      nombreCoefficients: 6,
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 8.0,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 31
+    },
+    indicateurDeuxData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 5.0,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 10,
+      mesuresCorrection: false
+    },
+    indicateurTroisData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 3.0,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 15,
+      mesuresCorrection: false
+    },
+    indicateurDeuxTroisData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinalEcart: 25,
+      resultatFinalNombreSalaries: 5,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 25,
+      mesuresCorrection: false
+    },
+    indicateurQuatreData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 80.0,
+      noteFinale: 0
+    },
+    indicateurCinqData: {
+      resultatFinal: 4.0,
+      sexeSurRepresente: "hommes" as
+        | undefined
+        | "egalite"
+        | "femmes"
+        | "hommes",
+      noteFinale: 10
+    },
+    noteIndex: 78,
+    totalPoint: 66,
+    totalPointCalculable: 85
   };
 
   test("nothing undefined state", () => {

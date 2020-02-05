@@ -65,7 +65,54 @@ const actionValidateInformationsDeclarant = {
 
 const actionValidateDeclaration = {
   type: "validateDeclaration" as "validateDeclaration",
-  valid: "Valid" as FormState
+  valid: "Valid" as FormState,
+  indicateurUnData: {
+    nombreCoefficients: 6,
+    motifNonCalculable: "",
+    motifNonCalculablePrecision: "",
+    resultatFinal: 8.0,
+    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteFinale: 31
+  },
+  indicateurDeuxData: {
+    motifNonCalculable: "",
+    motifNonCalculablePrecision: "",
+    resultatFinal: 5.0,
+    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteFinale: 10,
+    mesuresCorrection: false
+  },
+  indicateurTroisData: {
+    motifNonCalculable: "",
+    motifNonCalculablePrecision: "",
+    resultatFinal: 3.0,
+    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteFinale: 15,
+    mesuresCorrection: false
+  },
+  indicateurDeuxTroisData: {
+    motifNonCalculable: "",
+    motifNonCalculablePrecision: "",
+    resultatFinalEcart: 25,
+    resultatFinalNombreSalaries: 5,
+    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteFinale: 25,
+    mesuresCorrection: false
+  },
+  indicateurQuatreData: {
+    motifNonCalculable: "",
+    motifNonCalculablePrecision: "",
+    resultatFinal: 80.0,
+    noteFinale: 0
+  },
+  indicateurCinqData: {
+    resultatFinal: 4.0,
+    sexeSurRepresente: "hommes" as undefined | "egalite" | "femmes" | "hommes",
+    noteFinale: 10
+  },
+  noteIndex: 78,
+  totalPoint: 66,
+  totalPointCalculable: 85
 };
 
 // Mock the Date for tests

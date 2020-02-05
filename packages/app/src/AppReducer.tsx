@@ -140,7 +140,10 @@ const defaultState: AppState = {
     dateConsultationCSE: "",
     datePublication: "",
     lienPublication: "",
-    dateDeclaration: ""
+    dateDeclaration: "",
+    noteIndex: undefined,
+    totalPoint: 0,
+    totalPointCalculable: 0
   }
 };
 
@@ -603,6 +606,48 @@ function AppReducer(
       const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm");
       return {
         ...state,
+        indicateurUn:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurUn,
+                ...action.indicateurUnData
+              }
+            : state.indicateurUn,
+        indicateurDeux:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurDeux,
+                ...action.indicateurDeuxData
+              }
+            : state.indicateurDeux,
+        indicateurTrois:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurTrois,
+                ...action.indicateurTroisData
+              }
+            : state.indicateurTrois,
+        indicateurDeuxTrois:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurDeuxTrois,
+                ...action.indicateurDeuxTroisData
+              }
+            : state.indicateurDeuxTrois,
+        indicateurQuatre:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurQuatre,
+                ...action.indicateurQuatreData
+              }
+            : state.indicateurQuatre,
+        indicateurCinq:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurCinq,
+                ...action.indicateurCinqData
+              }
+            : state.indicateurCinq,
         declaration: {
           ...state.declaration,
           dateDeclaration:
@@ -610,6 +655,18 @@ function AppReducer(
             action.valid === "Valid"
               ? dateDeclaration
               : state.declaration.dateDeclaration,
+          noteIndex:
+            action.valid === "Valid"
+              ? action.noteIndex
+              : state.declaration.noteIndex,
+          totalPoint:
+            action.valid === "Valid"
+              ? action.totalPoint
+              : state.declaration.totalPoint,
+          totalPointCalculable:
+            action.valid === "Valid"
+              ? action.totalPointCalculable
+              : state.declaration.totalPointCalculable,
           formValidated: action.valid
         }
       };
