@@ -121,7 +121,7 @@ function Declaration({ state, dispatch }: Props) {
               <li>
                 <TextSimulatorLink
                   to="/indicateur2"
-                  label="l'indicateur écart de de taux d'augmentations"
+                  label="l'indicateur écart de taux d'augmentations"
                 />
               </li>
             )}
@@ -131,7 +131,7 @@ function Declaration({ state, dispatch }: Props) {
               <li>
                 <TextSimulatorLink
                   to="/indicateur3"
-                  label="l'indicateur écart de de taux de promotions"
+                  label="l'indicateur écart de taux de promotions"
                 />
               </li>
             )}
@@ -141,7 +141,7 @@ function Declaration({ state, dispatch }: Props) {
               <li>
                 <TextSimulatorLink
                   to="/indicateur2et3"
-                  label="l'indicateur écart de de taux d'augmentations"
+                  label="l'indicateur écart de taux d'augmentations"
                 />
               </li>
             )}
