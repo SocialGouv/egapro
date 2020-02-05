@@ -54,7 +54,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
       state.indicateurQuatre.presenceCongeMat &&
       state.indicateurQuatre.nombreSalarieesPeriodeAugmentation !== undefined &&
       state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
-        ? "car pas de congé maternité pendant qu'il y a eu une ou des augmentations salariales."
+        ? "car il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité"
         : "car il n’y a pas eu de retour de congé maternité pendant la période de référence.";
     return (
       <PageIndicateurQuatre>

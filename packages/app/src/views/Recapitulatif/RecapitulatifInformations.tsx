@@ -76,7 +76,7 @@ function RecapitulatifInformations({
       />
 
       <DataDisplay
-        header="Nombre de salariés pris en compte pour le calcul de l'indicateur"
+        header="Nombre de salariés pris en compte pour le calcul de l'index"
         data={nombreSalaries}
       />
     </div>

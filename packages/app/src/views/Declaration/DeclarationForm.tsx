@@ -74,7 +74,7 @@ function DeclarationForm({
 
           {noteIndex !== undefined && noteIndex < 75 && (
             <MesuresCorrection
-              label="Mesures de corrections prévues à l'article D. 1142-5"
+              label="Mesures de correction prévues à l'article D. 1142-5"
               name="mesuresCorrection"
               readOnly={readOnly}
             />
@@ -83,7 +83,7 @@ function DeclarationForm({
           {!indicateurUnParCSP && (
             <FieldDate
               name="dateConsultationCSE"
-              label="Date de consultation du CSE"
+              label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
               readOnly={readOnly}
             />
           )}
@@ -96,7 +96,7 @@ function DeclarationForm({
                 readOnly={readOnly}
               />
               <Textarea
-                label="Adresse du site internet de publication ou précision des modalités de publicité"
+                label="Adresse du site internet de publication ou à défaut précision des modalités de publicité"
                 fieldName="lienPublication"
                 errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
                 readOnly={readOnly}

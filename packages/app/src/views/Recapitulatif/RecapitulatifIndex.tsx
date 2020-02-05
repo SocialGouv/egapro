@@ -41,8 +41,8 @@ function RecapitulatifIndex({
           <InfoBloc title="Index égalité femmes-hommes">
             <div>
               <p css={styles.blocText}>
-                Vos indicateurs représentent moins de 75 points, votre index ne
-                peut être calculé.
+                Vos indicateurs calculables représentent moins de 75 points,
+                votre Index ne peut être calculé.
               </p>
               <p
                 css={styles.blocTextDetail}

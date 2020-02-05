@@ -141,7 +141,7 @@ function IndicateurDeux({ state, dispatch }: Props) {
 function PageIndicateurDeux({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur écart de taux d’augmentations individuelles hors promotion"
+      title="Indicateur écart de taux d’augmentation individuelle hors promotion"
       tagline="Le pourcentage de femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."
     >
       {children}
