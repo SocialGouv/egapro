@@ -68,6 +68,7 @@ export type AppState = {
     prenom: string;
     tel: string;
     email: string;
+    acceptationCGU: boolean;
   };
   declaration: {
     formValidated: FormState;
@@ -299,6 +300,7 @@ export type ActionInformationsDeclarantData = {
   prenom: string;
   tel: string;
   email: string;
+  acceptationCGU: boolean;
 };
 
 export type ActionDeclarationData = {

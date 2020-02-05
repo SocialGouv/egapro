@@ -426,7 +426,8 @@ const actionUpdateInformationsDeclarant = {
     nom: "Daffy",
     prenom: "Duck",
     tel: "0123456789",
-    email: "daffy.duck@example.com"
+    email: "daffy.duck@example.com",
+    acceptationCGU: true
   }
 };
 

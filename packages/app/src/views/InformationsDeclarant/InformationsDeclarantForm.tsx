@@ -1,6 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Form } from "react-final-form";
+import { Field, Form } from "react-final-form";
+import { Link } from "react-router-dom";
+
+import globalStyles from "../../utils/globalStyles";
 
 import {
   AppState,
@@ -49,17 +52,20 @@ const validateForm = ({
   nom,
   prenom,
   tel,
-  email
+  email,
+  acceptationCGU
 }: {
   nom: string;
   prenom: string;
   tel: string;
   email: string;
+  acceptationCGU: boolean;
 }) => ({
   nom: validate(nom),
   prenom: validate(prenom),
   tel: validateTel(tel),
-  email: validateEmail(email) ? { invalid: true } : undefined
+  email: validateEmail(email) ? { invalid: true } : undefined,
+  acceptationCGU: acceptationCGU ? undefined : { invalid: true }
 });
 
 interface Props {
@@ -79,17 +85,19 @@ function InformationsDeclarantForm({
     nom: informationsDeclarant.nom,
     prenom: informationsDeclarant.prenom,
     tel: informationsDeclarant.tel,
-    email: informationsDeclarant.email
+    email: informationsDeclarant.email,
+    acceptationCGU: informationsDeclarant.acceptationCGU
   };
 
   const saveForm = (formData: any) => {
-    const { nom, prenom, tel, email } = formData;
+    const { nom, prenom, tel, email, acceptationCGU } = formData;
 
     updateInformationsDeclarant({
       nom,
       prenom,
       tel,
-      email
+      email,
+      acceptationCGU
     });
   };
 
@@ -136,6 +144,21 @@ function InformationsDeclarantForm({
             errorText="l'email n’est pas valide"
             readOnly={readOnly}
           />
+          <Field name="acceptationCGU" component="input" type="checkbox">
+            {({ input, meta }: { input: any; meta: any }) => (
+              <label>
+                <input {...input} disabled={readOnly} /> J'accepte l'utilisation
+                de mes données à caractère personnel pour réaliser des
+                statistiques et pour vérifier la validité de ma déclaration.
+                Pour en savoir plus sur l'usage des données à caractère
+                personnel, vous pouvez consulter nos{" "}
+                <Link to="/cgu">Conditions Générales d'Utilisation</Link>
+                {meta.error && meta.touched && (
+                  <p css={styles.error}>veuillez accepter les CGUs</p>
+                )}
+              </label>
+            )}
+          </Field>
           {readOnly ? (
             <ActionBar>
               <ButtonSimulatorLink to="/declaration" label="suivant" />
@@ -174,6 +197,13 @@ const styles = {
     marginTop: 14,
     marginBottom: 14,
     textAlign: "center"
+  }),
+  error: css({
+    height: 18,
+    color: globalStyles.colors.error,
+    fontSize: 12,
+    textDecoration: "underline",
+    lineHeight: "15px"
   })
 };
 

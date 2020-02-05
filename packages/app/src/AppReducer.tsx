@@ -132,7 +132,8 @@ const defaultState: AppState = {
     nom: "",
     prenom: "",
     tel: "",
-    email: ""
+    email: "",
+    acceptationCGU: false
   },
   declaration: {
     formValidated: "None",

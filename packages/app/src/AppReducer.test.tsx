@@ -706,7 +706,8 @@ describe("updateInformationsDeclarant", () => {
       nom: "Norris",
       prenom: "Chuck",
       tel: "0102030405",
-      email: "foo@bar.com"
+      email: "foo@bar.com",
+      acceptationCGU: true
     }
   };
 
