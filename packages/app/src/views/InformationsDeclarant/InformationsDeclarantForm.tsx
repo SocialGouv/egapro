@@ -146,12 +146,12 @@ function InformationsDeclarantForm({
           />
           <Field name="acceptationCGU" component="input" type="checkbox">
             {({ input, meta }: { input: any; meta: any }) => (
-              <label>
+              <label css={styles.label}>
                 <input {...input} disabled={readOnly} /> J'accepte l'utilisation
                 de mes données à caractère personnel pour réaliser des
                 statistiques et pour vérifier la validité de ma déclaration.
-                Pour en savoir plus sur l'usage des données à caractère
-                personnel, vous pouvez consulter nos{" "}
+                Pour en savoir plus sur l'usage de ces données, vous pouvez
+                consulter nos{" "}
                 <Link to="/cgu">Conditions Générales d'Utilisation</Link>
                 {meta.error && meta.touched && (
                   <p css={styles.error}>veuillez accepter les CGUs</p>
@@ -197,6 +197,9 @@ const styles = {
     marginTop: 14,
     marginBottom: 14,
     textAlign: "center"
+  }),
+  label: css({
+    fontSize: 14
   }),
   error: css({
     height: 18,

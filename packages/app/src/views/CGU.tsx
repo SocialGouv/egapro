@@ -42,11 +42,12 @@ function CGU({ history, location, dispatch }: Props) {
         <p>
           Index Egapro a mis en place un simulateur en ligne grâce auquel tout
           utilisateur, sans se créer de compte, peut remplir des informations
-          concernant son entreprise afin de calculer son Index et de connaître
-          les écarts de salaire entre hommes et femmes au sein de sa structure.
-          Dans le cadre du remplissage de ce formulaire, l’utilisateur a la
+          concernant son entreprise afin de calculer son Index et connaître les
+          écarts de salaire entre hommes et femmes au sein de sa structure. Dans
+          le cadre du remplissage de ce formulaire, l’utilisateur a la
           possibilité de renseigner son adresse email afin d’enregistrer les
-          données fournies et de remplir sa déclaration plus tard.
+          données fournies et de continuer son calcul et sa déclaration plus
+          tard.
           <br />
           <br />
           Index Egapro propose également un formulaire de déclaration de cet
@@ -117,7 +118,7 @@ function CGU({ history, location, dispatch }: Props) {
           Les responsables de traitement sont Yves Struillou et Hélène Brisset.
           <br />
           <br />
-          Le délégué à la protection des données est « DPO » : Danièla PARROT,{" "}
+          Le délégué à la protection des données est « DPD » : Danièla PARROT,{" "}
           <a href="mailto:dpd-minsociaux@sg.social.gouv.fr?subject=RGPD : protection des données sur Index Egapro">
             dpd-minsociaux@sg.social.gouv.fr
           </a>
@@ -143,9 +144,9 @@ function CGU({ history, location, dispatch }: Props) {
         <h3 css={styles.subtitle}>Finalités</h3>
         <p>
           Ces données sont nécessaires et proportionnées pour la réalisation de
-          la mission de la Plateforme. Elles permettent de calculer les écarts
-          de rémunération femmes-hommes au sein des entreprises, et de réaliser
-          les déclarations qui en sont issues.
+          la mission de la Plateforme. Elles permettent de calculer l'index au
+          sein des entreprises, et de réaliser les déclarations qui en sont
+          issues.
         </p>
         <h3 css={styles.subtitle}>Bases juridiques</h3>
         <p>
@@ -237,9 +238,10 @@ function CGU({ history, location, dispatch }: Props) {
           <br />
           <br />
           En raison de l’obligation de sécurité et de confidentialité dans le
-          traitement des données à caractère personnel qui incombe à EgaPro,
-          votre demande sera uniquement traitée si vous rapportez la preuve de
-          votre identité. Pour vous aider dans votre démarche, vous trouverez{" "}
+          traitement des données à caractère personnel qui incombe à Index
+          Egapro, votre demande sera uniquement traitée si vous rapportez la
+          preuve de votre identité. Pour vous aider dans votre démarche, vous
+          trouverez{" "}
           <a href="https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces">
             ici
           </a>
