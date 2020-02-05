@@ -9,6 +9,7 @@ import globalStyles from "../utils/globalStyles";
 import { useLayoutType } from "../components/GridContext";
 import Header from "../components/Header";
 
+import CGU from "../views/CGU";
 import FAQ from "../views/FAQ";
 import Home from "../views/Home";
 import MentionsLegales from "../views/MentionsLegales";
@@ -58,6 +59,11 @@ function AppLayout({ state, dispatch }: Props) {
               render={props => (
                 <MentionsLegales {...props} dispatch={dispatch} />
               )}
+            />
+            <Route
+              path="/cgu"
+              exact
+              render={props => <CGU {...props} dispatch={dispatch} />}
             />
             <Route component={PageNotFound} />
           </Switch>
