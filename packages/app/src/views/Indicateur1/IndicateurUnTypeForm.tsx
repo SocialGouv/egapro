@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useCallback, Fragment } from "react";
+import { useCallback } from "react";
 import { Form } from "react-final-form";
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals.d";
 
