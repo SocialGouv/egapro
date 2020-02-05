@@ -14,6 +14,8 @@ export type AppState = {
   indicateurUn: {
     formValidated: FormState;
     csp: boolean;
+    coef: boolean;
+    autre: boolean;
     remunerationAnnuelle: Array<GroupeIndicateurUn>;
     coefficientGroupFormValidated: FormState;
     coefficientEffectifFormValidated: FormState;
@@ -242,6 +244,8 @@ export type ActionEffectifData = {
 
 export type ActionIndicateurUnTypeData = {
   csp: boolean;
+  coef: boolean;
+  autre: boolean;
 };
 
 export type ActionIndicateurUnCspData = {

@@ -25,7 +25,7 @@ interface Props extends RouteComponentProps {
 }
 
 function IndicateurUn({ state, dispatch }: Props) {
-  const { csp } = state.indicateurUn;
+  const { csp, coef, autre } = state.indicateurUn;
   const readOnly = state.indicateurUn.formValidated === "Valid";
 
   // le formulaire d'effectif n'est pas validé
@@ -73,7 +73,13 @@ function IndicateurUn({ state, dispatch }: Props) {
 
   return (
     <PageIndicateurUn>
-      <IndicateurUnTypeForm csp={csp} readOnly={readOnly} dispatch={dispatch} />
+      <IndicateurUnTypeForm
+        csp={csp}
+        coef={coef}
+        autre={autre}
+        readOnly={readOnly}
+        dispatch={dispatch}
+      />
       {csp ? (
         <IndicateurUnCsp state={state} dispatch={dispatch} />
       ) : (

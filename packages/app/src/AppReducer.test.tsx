@@ -210,7 +210,7 @@ describe("updateEffectif", () => {
 describe("updateIndicateurUnType", () => {
   const action = {
     type: "updateIndicateurUnType" as "updateIndicateurUnType",
-    data: { csp: false }
+    data: { csp: false, coef: false, autre: false }
   };
 
   test("nothing undefined state", () => {
@@ -806,7 +806,7 @@ describe("validateEffectif", () => {
   describe("None with csp false", () => {
     const actionUpdateIndicateurUnType = {
       type: "updateIndicateurUnType" as "updateIndicateurUnType",
-      data: { csp: false }
+      data: { csp: false, coef: false, autre: false }
     };
 
     const stateCompleteAndValidateCoef = AppReducer(

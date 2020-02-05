@@ -195,6 +195,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -595,6 +597,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -975,6 +979,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -1308,6 +1314,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -1682,6 +1690,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -2015,6 +2025,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -2389,6 +2401,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -2722,6 +2736,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -3096,6 +3112,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -3429,6 +3447,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -3803,6 +3823,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -4136,6 +4158,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -4510,6 +4534,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -4843,6 +4869,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -5217,6 +5245,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -5550,6 +5580,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -5924,6 +5956,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -6257,6 +6291,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Commercial",
@@ -6631,6 +6667,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Commercial",
@@ -6998,6 +7036,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -7372,6 +7412,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "",
@@ -7739,6 +7781,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -8113,6 +8157,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "",
@@ -8480,6 +8526,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -8887,6 +8935,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "",
@@ -9254,6 +9304,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -9594,6 +9646,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -9927,6 +9981,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -10301,6 +10357,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -10634,6 +10692,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -11008,6 +11068,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -11341,6 +11403,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -11715,6 +11779,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -12048,6 +12114,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -12418,6 +12486,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -12756,6 +12826,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -13130,6 +13202,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -13489,6 +13563,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -13895,6 +13971,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -14260,6 +14338,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -14666,6 +14746,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -15072,6 +15154,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -15452,6 +15536,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -15826,6 +15912,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -16159,6 +16247,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -16533,6 +16623,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -16866,6 +16958,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -17240,6 +17334,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -17573,6 +17669,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -17947,6 +18045,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -18280,6 +18380,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -18654,6 +18756,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -18987,6 +19091,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -19361,6 +19467,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -19694,6 +19802,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -20068,6 +20178,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -20427,6 +20539,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -20807,6 +20921,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -21181,6 +21297,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "Valid",
     "coefficientGroupFormValidated": "None",
@@ -21540,6 +21658,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -21920,6 +22040,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -22294,6 +22416,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "Valid",
@@ -22627,6 +22751,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -23001,6 +23127,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -23334,6 +23462,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -23708,6 +23838,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",
@@ -24041,6 +24173,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [
       Object {
         "name": "Business Developers",
@@ -24415,6 +24549,8 @@ Object {
     ],
   },
   "indicateurUn": Object {
+    "autre": false,
+    "coef": false,
     "coefficient": Array [],
     "coefficientEffectifFormValidated": "None",
     "coefficientGroupFormValidated": "None",

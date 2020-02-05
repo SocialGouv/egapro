@@ -413,7 +413,6 @@ class RowProcessor(object):
         elif modalite == "amc":
             self.set("indicateurUn/autre", True)
         elif modalite == "nc":
-            self.set("indicateurUn/autre", True)
             self.set("indicateurUn/nonCalculable", True)
         self.importIntField("nb_coef_niv", "indicateurUn/nombreCoefficients")
         self.importField("motif_non_calc_tab1", "indicateurUn/motifNonCalculable")
