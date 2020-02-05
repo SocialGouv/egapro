@@ -35,6 +35,7 @@
               "type": "string",
               "enum": ["50 à 250", "251 à 999", "1000 et plus", "Plus de 250"]
             },
+            "anneeDeclaration": { "type": "integer" },
             "finPeriodeReference": { "type": "string" },
             "debutPeriodeReference": { "type": "string" }
           }
@@ -337,19 +338,6 @@
             }
           }
         },
-        "informationsComplementaires": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "formValidated": {
-              "$ref": "#/definitions/formValidated"
-            },
-            "anneeDeclaration": { "type": "integer" },
-            "dateConsultationCSE": { "type": "string" },
-            "datePublication": { "type": "string" },
-            "lienPublication": { "type": "string" }
-          }
-        },
         "declaration": {
           "type": "object",
           "additionalProperties": false,
@@ -358,6 +346,9 @@
               "$ref": "#/definitions/formValidated"
             },
             "dateDeclaration": { "type": "string" },
+            "dateConsultationCSE": { "type": "string" },
+            "datePublication": { "type": "string" },
+            "lienPublication": { "type": "string" },
             "indicateurUn": { "type": "integer" },
             "indicateurDeux": { "type": "integer" },
             "indicateurDeuxTroisEcart": { "type": "number" },
@@ -368,7 +359,10 @@
             "noteFinale": { "type": "integer" },
             "nombrePointsMax": { "type": "integer" },
             "noteFinaleSur100": { "type": "integer" },
-            "mesuresCorrection": { "type": "boolean" }
+            "mesuresCorrection": {
+              "type": "string",
+              "enum": ["mmo", "me", "mne"]
+            }
           }
         }
       }
