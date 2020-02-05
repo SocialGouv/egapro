@@ -4,35 +4,40 @@ import { useCallback, Fragment } from "react";
 import { Form } from "react-final-form";
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals.d";
 
-import {
-  parseBooleanFormValue,
-  parseBooleanStateValue
-} from "../../utils/formHelpers";
-
 import FormAutoSave from "../../components/FormAutoSave";
-import RadiosBoolean from "../../components/RadiosBoolean";
+import RadioButtons from "../../components/RadioButtons";
 
 interface Props {
   csp: boolean;
+  coef: boolean;
+  autre: boolean;
   readOnly: boolean;
   dispatch: (action: ActionType) => void;
 }
 
-function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
+function IndicateurUnTypeForm({ csp, coef, autre, readOnly, dispatch }: Props) {
   const updateIndicateurUnType = useCallback(
     (data: ActionIndicateurUnTypeData) =>
       dispatch({ type: "updateIndicateurUnType", data }),
     [dispatch]
   );
 
-  const initialValues = { csp: parseBooleanStateValue(csp) };
+  const initialValues = {
+    modaliteDeclaration: coef ? "coef" : autre ? "autre" : "csp"
+  };
 
   const saveForm = (formData: any) => {
-    const { csp: cspFormData } = formData;
-
-    if (cspFormData !== csp) {
-      updateIndicateurUnType({ csp: parseBooleanFormValue(cspFormData) });
+    const { modaliteDeclaration } = formData;
+    let [csp, coef, autre] = [false, false, false];
+    if (modaliteDeclaration === "coef") {
+      coef = true;
+    } else if (modaliteDeclaration === "autre") {
+      autre = true;
+    } else {
+      csp = true;
     }
+
+    updateIndicateurUnType({ csp, coef, autre });
   };
 
   return (
@@ -40,22 +45,28 @@ function IndicateurUnTypeForm({ csp, readOnly, dispatch }: Props) {
       {({ handleSubmit, values }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
-          <RadiosBoolean
-            fieldName="csp"
-            value={values.csp}
+          <RadioButtons
+            fieldName="modaliteDeclaration"
+            label="Modalités de calcul de l'indicateur relatif à l'écart de rémunération
+          entre les femmes et les hommes"
+            value={values.modaliteDeclaration}
             readOnly={readOnly}
-            labelTrue={
-              <Fragment>
-                je renseigne par{" "}
-                <strong>Catégories Socio-Professionnelles</strong>
-              </Fragment>
-            }
-            labelFalse={
-              <Fragment>
-                je renseigne par{" "}
-                <strong>Niveaux ou coefficients hiérarchiques</strong>
-              </Fragment>
-            }
+            choices={[
+              {
+                label: "Par catégorie socio-professionnelle",
+                value: "csp"
+              },
+              {
+                label:
+                  "Par niveau ou coefficient hiérarchique en application de la classification de branche",
+                value: "coef"
+              },
+              {
+                label:
+                  "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
+                value: "autre"
+              }
+            ]}
           />
         </form>
       )}
