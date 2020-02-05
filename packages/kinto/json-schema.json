@@ -300,7 +300,8 @@
             "nom": { "type": "string" },
             "prenom": { "type": "string" },
             "email": { "type": "string" },
-            "tel": { "type": "string" }
+            "tel": { "type": "string" },
+            "acceptationCGU": { "type": "boolean" }
           }
         },
         "informationsEntreprise": {

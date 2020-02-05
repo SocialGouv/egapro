@@ -346,6 +346,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -751,6 +752,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
@@ -1090,6 +1092,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -1456,6 +1459,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -1795,6 +1799,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -2161,6 +2166,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -2500,6 +2506,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -2866,6 +2873,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -3205,6 +3213,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -3571,6 +3580,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -3910,6 +3920,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -4276,6 +4287,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -4615,6 +4627,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -4981,6 +4994,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -5320,6 +5334,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -5686,6 +5701,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -6025,6 +6041,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -6391,6 +6408,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -6764,6 +6782,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -7130,6 +7149,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -7503,6 +7523,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -7869,6 +7890,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -8242,6 +8264,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -8641,6 +8664,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -9014,6 +9038,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -9346,6 +9371,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -9685,6 +9711,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -10051,6 +10078,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -10390,6 +10418,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -10756,6 +10785,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -11095,6 +11125,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -11461,6 +11492,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "foo@bar.com",
     "formValidated": "None",
     "nom": "Norris",
@@ -11800,6 +11832,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "foo@bar.com",
     "formValidated": "None",
     "nom": "Norris",
@@ -12166,6 +12199,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -12501,6 +12535,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -12872,6 +12907,7 @@ Object {
     "trancheEffectifs": "251 à 999",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -13211,6 +13247,7 @@ Object {
     "trancheEffectifs": "251 à 999",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -13609,6 +13646,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -13980,6 +14018,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -14378,6 +14417,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
@@ -14783,6 +14823,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
@@ -15188,6 +15229,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
@@ -15561,6 +15603,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -15900,6 +15943,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -16266,6 +16310,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -16605,6 +16650,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -16971,6 +17017,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -17310,6 +17357,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -17676,6 +17724,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -18015,6 +18064,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -18381,6 +18431,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -18720,6 +18771,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -19086,6 +19138,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -19425,6 +19478,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -19791,6 +19845,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -20130,6 +20185,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -20528,6 +20584,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
@@ -20901,6 +20958,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -21240,6 +21298,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -21638,6 +21697,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
@@ -22011,6 +22071,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -22350,6 +22411,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -22716,6 +22778,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "Valid",
     "nom": "Daffy",
@@ -23055,6 +23118,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "Valid",
     "nom": "",
@@ -23421,6 +23485,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -23760,6 +23825,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
@@ -24126,6 +24192,7 @@ Object {
     "trancheEffectifs": "1000 et plus",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": true,
     "email": "daffy.duck@example.com",
     "formValidated": "None",
     "nom": "Daffy",
@@ -24465,6 +24532,7 @@ Object {
     "trancheEffectifs": "50 à 250",
   },
   "informationsDeclarant": Object {
+    "acceptationCGU": false,
     "email": "",
     "formValidated": "None",
     "nom": "",
