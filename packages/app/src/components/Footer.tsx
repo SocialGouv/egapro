@@ -89,7 +89,7 @@ function Footer() {
 const styles = {
   footer: css({
     backgroundColor: "#FFF",
-    height: 80,
+    height: 120,
     marginTop: 54,
     flexShrink: 0,
     display: "flex",
