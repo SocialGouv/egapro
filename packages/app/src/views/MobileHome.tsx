@@ -22,7 +22,8 @@ function MobileHome({ openMenu }: Props) {
       </h1>
 
       <p css={styles.subtitle}>
-        L’outil de calcul de votre index égalité professionnelle Femmes- Hommes
+        L’outil de calcul et de déclaration de votre index égalité
+        professionnelle Femmes- Hommes
       </p>
 
       <p css={styles.para}>
@@ -36,16 +37,11 @@ function MobileHome({ openMenu }: Props) {
         progression. Lorsque des disparités salariales sont constatées, des
         mesures de correction doivent être prises.
       </p>
-      <p css={styles.para}>
-        Avec l'outil de simulation en ligne, calculez votre Index de façon
-        simple et rapide, tout en profitant de l’aide sur les détails du calcul
-        de chaque indicateur et sur les questions les plus fréquemment posées.
-      </p>
 
       <div css={styles.info}>
         <p css={[styles.para, styles.noMargin]}>
-          Le calcul de l'index nécessite un affichage plus grand. Mais vous
-          pouvez accéder à toute l'aide en ligne et à la FAQ.
+          Le calcul et la déclaration de l'index nécessitent un affichage plus
+          grand. Mais vous pouvez accéder à toute l'aide en ligne et à la FAQ.
         </p>
       </div>
 

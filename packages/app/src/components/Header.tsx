@@ -37,8 +37,8 @@ function Header() {
           Index Egapro
         </Link>
         <p css={styles.subtitle}>
-          L’outil de calcul de votre index égalité professionnelle Femmes-
-          Hommes
+          L’outil de calcul et de déclaration de votre index égalité
+          professionnelle Femmes- Hommes
         </p>
       </div>
     </header>
