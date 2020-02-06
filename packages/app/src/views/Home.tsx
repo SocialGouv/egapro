@@ -50,95 +50,77 @@ function Home({ history, location, dispatch }: Props) {
       title="Bienvenue sur Index Egapro"
       tagline={[
         "L’Index d'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
-        "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
-        "Avec Index Egapro, calculez votre index de façon simple et rapide, tout en profitant de l’aide sur les détails du calcul de chaque indicateur et sur les questions les plus fréquemment posées."
+        "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises."
       ]}
     >
-      <div css={styles.action}>
-        <ButtonAction
-          onClick={onClick}
-          label="commencer le calcul"
-          disabled={loading}
-          loading={loading}
-        />
-      </div>
       <div css={styles.content}>
         <h2 css={styles.title}>
-          Comment calculer l’index égalité femmes-hommes ?
+          Comment calculer et déclarer l’index égalité femmes-hommes ?
         </h2>
 
-        <div css={styles.bloc}>
-          <div css={styles.blocImage}>
-            <div css={[styles.image, styles.illustrationData]} />
-          </div>
+        <div css={styles.twoColumns}>
+          <div css={styles.bloc}>
+            <div css={styles.blocImage}>
+              <div css={[styles.image, styles.illustrationSimulator]} />
+            </div>
 
-          <div css={styles.blocContent}>
-            <span css={styles.blocContentStep}>Étape 1</span>
-            <span css={styles.blocContentTitle}>
-              Consolidation des données nécessaires au calcul
-            </span>
-            <p css={styles.blocContentBody}>
-              Afin de procéder à la simulation, les entreprises doivent extraire
-              des données relatives à leurs salariés. Grâce à Index Egapro, une
-              aide est disponible pour chacun des indicateurs . Si l’entreprise
-              décide de ne pas utiliser le simulateur, elle peut tout de même
-              consulter l'aide et la FAQ mise à disposition à droite de votre
-              écran.
-            </p>
-          </div>
-        </div>
+            <div css={styles.blocContent}>
+              <span css={styles.blocContentStep}>Choix 1</span>
+              <span css={styles.blocContentTitle}>
+                Calcul et déclaration de l'index
+              </span>
+              <p css={styles.blocContentBody}>
+                Vous pouvez calculer votre index égalité professionnelle F/H sur
+                Index Egapro et le déclarer, si vous le souhaitez, suite au
+                calcul.
+              </p>
 
-        <div css={styles.bloc}>
-          <div css={styles.blocImage}>
-            <div css={[styles.image, styles.illustrationSimulator]} />
-          </div>
-
-          <div css={styles.blocContent}>
-            <span css={styles.blocContentStep}>Étape 2</span>
-            <span css={styles.blocContentTitle}>Calcul de l'index</span>
-            <p css={styles.blocContentBody}>
-              L’entreprise saisit les données et Index Egapro calcule
-              automatiquement les indicateurs et la note finale.
-            </p>
-
-            <div css={styles.buttonAction}>
-              <ButtonAction
-                onClick={onClick}
-                label="commencer le calcul"
-                disabled={loading}
-                loading={loading}
-              />
+              <div css={styles.buttonAction}>
+                <ButtonAction
+                  onClick={onClick}
+                  label="commencer le calcul"
+                  disabled={loading}
+                  loading={loading}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div css={styles.bloc}>
-          <div css={styles.blocImage}>
-            <div css={[styles.image, styles.illustrationPublish]} />
-          </div>
+          <div css={styles.bloc}>
+            <div css={styles.blocImage}>
+              <div css={[styles.image, styles.illustrationPublish]} />
+            </div>
 
-          <div css={styles.blocContent}>
-            <span css={styles.blocContentStep}>Étape 3</span>
-            <span css={styles.blocContentTitle}>
-              Déclaration et publication de l’index
-            </span>
-            <p css={styles.blocContentBody}>
-              Enfin, l’entreprise doit déclarer ses résultats, selon le délai
-              imparti, dans l’outil SOLEN. Afin de faciliter la déclaration,
-              Index Egapro affiche à la fin du calcul une page avec toutes les
-              informations à déclarer. L’entreprise peut également télécharger
-              son récapitulatif pour le publier sur son site internet ou
-              l’envoyer au CSE.
-            </p>
-
-            <a
-              href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/questions-reponses-sur-le-calcul-de-l-index-de-l-egalite"
-              target="_blank"
-              rel="noopener noreferrer"
-              css={styles.button}
-            >
-              <Button label="accéder à la déclaration" />
-            </a>
+            <div css={styles.blocContent}>
+              <span css={styles.blocContentStep}>Choix 2</span>
+              <span css={styles.blocContentTitle}>
+                Déclaration directe de l'index
+              </span>
+              <p css={styles.blocContentBody}>
+                Vous pouvez déclarer votre index égalité professionnelle F/H
+                calculé par ailleurs directement sur Solen :
+                <ul>
+                  <li>
+                    <a
+                      href="https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/SF?P=1162z26z2z-1z-1z91BD660965"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Index 2020 au titre de l’année 2019
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://solen1.enquetes.social.gouv.fr/cgi-4/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Index 2019 au titre de l’année 2018
+                    </a>
+                  </li>
+                </ul>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -156,16 +138,20 @@ const styles = {
     fontSize: 18,
     lineHeight: "22px",
     fontWeight: "bold",
-    marginTop: 60,
     marginLeft: 0,
-    marginRight: 0,
-    marginBottom: 30
+    marginRight: 0
   }),
 
+  twoColumns: css({
+    display: "flex",
+    flexDirection: "row"
+  }),
   bloc: css({
     display: "flex",
-    flexDirection: "row",
-    marginBottom: 50
+    flexDirection: "column",
+    marginBottom: 50,
+    padding: 10,
+    width: "50%"
   }),
   blocImage: css({
     width: 300,
@@ -199,7 +185,6 @@ const styles = {
     flexBasis: 0,
     display: "flex",
     flexDirection: "column",
-    marginLeft: 24,
     paddingTop: 10,
     paddingBottom: 10
   }),
