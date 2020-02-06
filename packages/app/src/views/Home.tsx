@@ -74,7 +74,7 @@ function Home({ history, location, dispatch }: Props) {
                 calcul.
               </p>
 
-              <div css={styles.buttonAction}>
+              <div>
                 <ButtonAction
                   onClick={onClick}
                   label="commencer le calcul"
@@ -128,10 +128,6 @@ function Home({ history, location, dispatch }: Props) {
 }
 
 const styles = {
-  action: css({
-    display: "flex",
-    flexDirection: "row"
-  }),
   content: css({}),
   title: css({
     fontSize: 18,
@@ -146,8 +142,6 @@ const styles = {
     flexDirection: "row"
   }),
   bloc: css({
-    display: "flex",
-    flexDirection: "column",
     marginBottom: 50,
     padding: 10,
     width: "50%"
@@ -188,12 +182,14 @@ const styles = {
     paddingBottom: 10
   }),
   blocContentStep: css({
+    display: "inline-block",
     fontSize: 12,
     lineHeight: "15px",
     fontWeight: "bold",
     textTransform: "uppercase"
   }),
   blocContentTitle: css({
+    display: "inline-block",
     fontSize: 18,
     lineHeight: "22px",
     textTransform: "uppercase",
@@ -209,11 +205,7 @@ const styles = {
   blocContentInfo: css({
     fontSize: 14,
     lineHeight: "17px",
-    fontStyle: "italic",
-    alignSelf: "flex-end"
-  }),
-  buttonAction: css({
-    alignSelf: "flex-start"
+    fontStyle: "italic"
   }),
   button: css({
     display: "inline-flex",
