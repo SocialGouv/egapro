@@ -8,7 +8,6 @@ import { postIndicatorsDatas } from "../utils/api";
 
 import Page from "../components/Page";
 import ButtonAction from "../components/ButtonAction";
-import Button from "../components/Button";
 import ErrorMessage from "../components/ErrorMessage";
 import globalStyles from "../utils/globalStyles";
 
