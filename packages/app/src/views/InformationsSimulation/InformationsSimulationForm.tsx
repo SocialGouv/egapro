@@ -17,7 +17,7 @@ import {
   required,
   validateDate
 } from "../../utils/formHelpers";
-import { calendarYear, Year } from "../../utils/helpers";
+import { calendarYear, parseDate, Year } from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -63,11 +63,22 @@ const validateForm = ({
   anneeDeclaration: string;
   debutPeriodeReference: string;
   finPeriodeReference: string;
-}) => ({
-  nomEntreprise: validate(nomEntreprise),
-  anneeDeclaration: validateInt(anneeDeclaration),
-  debutPeriodeReference: validateDate(debutPeriodeReference)
-});
+}) => {
+  const parsedFinPeriodeReference = parseDate(finPeriodeReference);
+  return {
+    nomEntreprise: validate(nomEntreprise),
+    anneeDeclaration: validateInt(anneeDeclaration),
+    debutPeriodeReference: validateDate(debutPeriodeReference),
+    finPeriodeReference:
+      parsedFinPeriodeReference !== undefined &&
+      parsedFinPeriodeReference.getFullYear().toString() === anneeDeclaration
+        ? undefined
+        : {
+            correspondanceAnneeDeclaration:
+              "L'année de fin de période de référence doit correspondre à l'année au titre de laquelle les indicateurs sont calculés"
+          }
+  };
+};
 
 const valueValidateForCalculator = (value: string) => {
   return validateDate(value) === undefined;
