@@ -196,6 +196,10 @@ function Recapitulatif({ state }: Props) {
         indicateurEcartNombreSalarieesAugmentees={
           indicateurEcartNombreSalarieesAugmentees
         }
+        presenceCongeMat={state.indicateurQuatre.presenceCongeMat}
+        nombreSalarieesPeriodeAugmentation={
+          state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
+        }
         noteIndicateurQuatre={noteIndicateurQuatre}
       />
       <RecapitulatifIndicateurCinq
