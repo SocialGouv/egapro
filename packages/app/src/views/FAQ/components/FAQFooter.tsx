@@ -52,8 +52,7 @@ const styles = {
   }),
   infoLink: {
     color: globalStyles.colors.default,
-    textDecoration: "underline",
-    marginLeft: 8
+    textDecoration: "underline"
   },
   alloEgapro: {
     backgroundImage: `url(${AlloEgaproBackgroundImage})`,
@@ -64,7 +63,6 @@ const styles = {
     fontFamily: "arial",
     fontWeight: "bold" as "bold",
     fontSize: 20,
-    marginLeft: 8,
     marginTop: 10,
     padding: "10px 50px 10px 13px",
     textDecoration: "none",
