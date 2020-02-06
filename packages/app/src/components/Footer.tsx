@@ -55,6 +55,9 @@ function Footer() {
         <Link to="/cgu" css={styles.link}>
           conditions générales d'utilisation
         </Link>
+        <Link to="/politique-confidentialite" css={styles.link}>
+          politique de confidentialité
+        </Link>
       </div>
 
       <div css={styles.footerInfo}>
