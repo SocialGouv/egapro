@@ -55,7 +55,9 @@ function FieldDate({
       </div>
       <p css={styles.error}>
         {error &&
-          (mustBeDateError
+          (field.meta.error.correspondanceAnneeDeclaration
+            ? field.meta.error.correspondanceAnneeDeclaration
+            : mustBeDateError
             ? "ce champ doit contenir une date au format jj/mm/aaaa"
             : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
       </p>
