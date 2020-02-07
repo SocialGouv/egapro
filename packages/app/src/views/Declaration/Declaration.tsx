@@ -235,8 +235,8 @@ function Declaration({ state, dispatch }: Props) {
         <h2>Les formulaires suivants ne sont pas validés</h2>
         <ul>
           {state.indicateurUn.formValidated !== "Valid" &&
-            !effectifsIndicateurUnCalculable &&
-            !state.indicateurUn.csp && (
+            ((!effectifsIndicateurUnCalculable && !state.indicateurUn.csp) ||
+              effectifsIndicateurUnCalculable) && (
               <li>
                 <TextSimulatorLink
                   to="/indicateur1"
