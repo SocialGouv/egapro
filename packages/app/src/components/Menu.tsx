@@ -37,7 +37,7 @@ function CustomNavLink({
           to={to}
           css={[
             styles.link,
-            layoutType === "tablet" && styles.linkTablet,
+            layoutType === "tablet" && styles.itemTablet,
             match && styles.activeLink
           ]}
         >
@@ -107,88 +107,121 @@ function Menu({
               params: { code }
             }
           }) => (
-            <div
-              css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}
-            >
-              <CustomNavLink
-                to={`/simulateur/${code}`}
-                title="vos informations"
-                activeOnlyWhenExact={true}
-              />
-              <h5 css={styles.menuTitle}>Calcul de l'index</h5>
-              <CustomNavLink
-                to={`/simulateur/${code}/informations`}
-                title="informations calcul"
-                label="et période de référence"
-                valid={informationsFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/effectifs`}
-                title="effectifs"
-                label="pris en compte"
-                valid={effectifFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/indicateur1`}
-                title="indicateur"
-                label="écart de rémunération"
-                valid={indicateurUnFormValidated}
-              />
-              {(trancheEffectifs !== "50 à 250" && (
-                <Fragment>
+            <div css={styles.menuWrapper}>
+              <div
+                css={[
+                  styles.menu,
+                  layoutType === "tablet" && styles.menuTablet
+                ]}
+              >
+                <CustomNavLink
+                  to={`/simulateur/${code}`}
+                  title="vos informations"
+                  activeOnlyWhenExact={true}
+                />
+              </div>
+              <div
+                css={[
+                  styles.menu,
+                  layoutType === "tablet" && styles.menuTablet
+                ]}
+              >
+                <h5
+                  css={[
+                    styles.menuTitle,
+                    layoutType === "tablet" && styles.itemTablet
+                  ]}
+                >
+                  Calcul de l'index
+                </h5>
+                <CustomNavLink
+                  to={`/simulateur/${code}/informations`}
+                  title="informations calcul"
+                  label="et période de référence"
+                  valid={informationsFormValidated}
+                />
+                <CustomNavLink
+                  to={`/simulateur/${code}/effectifs`}
+                  title="effectifs"
+                  label="pris en compte"
+                  valid={effectifFormValidated}
+                />
+                <CustomNavLink
+                  to={`/simulateur/${code}/indicateur1`}
+                  title="indicateur"
+                  label="écart de rémunération"
+                  valid={indicateurUnFormValidated}
+                />
+                {(trancheEffectifs !== "50 à 250" && (
+                  <Fragment>
+                    <CustomNavLink
+                      to={`/simulateur/${code}/indicateur2`}
+                      title="indicateur"
+                      label="écart de taux d'augmentation"
+                      valid={indicateurDeuxFormValidated}
+                    />
+                    <CustomNavLink
+                      to={`/simulateur/${code}/indicateur3`}
+                      title="indicateur"
+                      label="écart de taux de promotion"
+                      valid={indicateurTroisFormValidated}
+                    />
+                  </Fragment>
+                )) || (
                   <CustomNavLink
-                    to={`/simulateur/${code}/indicateur2`}
+                    to={`/simulateur/${code}/indicateur2et3`}
                     title="indicateur"
                     label="écart de taux d'augmentation"
-                    valid={indicateurDeuxFormValidated}
+                    valid={indicateurDeuxTroisFormValidated}
                   />
-                  <CustomNavLink
-                    to={`/simulateur/${code}/indicateur3`}
-                    title="indicateur"
-                    label="écart de taux de promotion"
-                    valid={indicateurTroisFormValidated}
-                  />
-                </Fragment>
-              )) || (
+                )}
                 <CustomNavLink
-                  to={`/simulateur/${code}/indicateur2et3`}
+                  to={`/simulateur/${code}/indicateur4`}
                   title="indicateur"
-                  label="écart de taux d'augmentation"
-                  valid={indicateurDeuxTroisFormValidated}
+                  label="retour congé maternité"
+                  valid={indicateurQuatreFormValidated}
                 />
-              )}
-              <CustomNavLink
-                to={`/simulateur/${code}/indicateur4`}
-                title="indicateur"
-                label="retour congé maternité"
-                valid={indicateurQuatreFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/indicateur5`}
-                title="indicateur"
-                label="hautes rémunérations"
-                valid={indicateurCinqFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/recapitulatif`}
-                title="récapitulatif"
-              />
-              <h5 css={styles.menuTitle}>Déclaration</h5>
-              <CustomNavLink
-                to={`/simulateur/${code}/informations-entreprise`}
-                title="informations entreprise/UES"
-                valid={informationsEntrepriseFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/informations-declarant`}
-                title="informations déclarant"
-                valid={informationsDeclarantFormValidated}
-              />
-              <CustomNavLink
-                to={`/simulateur/${code}/declaration`}
-                title="déclaration"
-                valid={declarationFormValidated}
-              />
+                <CustomNavLink
+                  to={`/simulateur/${code}/indicateur5`}
+                  title="indicateur"
+                  label="hautes rémunérations"
+                  valid={indicateurCinqFormValidated}
+                />
+                <CustomNavLink
+                  to={`/simulateur/${code}/recapitulatif`}
+                  title="récapitulatif"
+                />
+              </div>
+              <div
+                css={[
+                  styles.menu,
+                  layoutType === "tablet" && styles.menuTablet
+                ]}
+              >
+                <h5
+                  css={[
+                    styles.menuTitle,
+                    layoutType === "tablet" && styles.itemTablet
+                  ]}
+                >
+                  Déclaration
+                </h5>
+                <CustomNavLink
+                  to={`/simulateur/${code}/informations-entreprise`}
+                  title="informations entreprise/UES"
+                  valid={informationsEntrepriseFormValidated}
+                />
+                <CustomNavLink
+                  to={`/simulateur/${code}/informations-declarant`}
+                  title="informations déclarant"
+                  valid={informationsDeclarantFormValidated}
+                />
+                <CustomNavLink
+                  to={`/simulateur/${code}/declaration`}
+                  title="déclaration"
+                  valid={declarationFormValidated}
+                />
+              </div>
             </div>
           )}
         />
@@ -198,21 +231,28 @@ function Menu({
 }
 
 const styles = {
+  menuWrapper: css({
+    display: "flex",
+    flexDirection: "column"
+  }),
   menu: css({
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start"
   }),
   menuTitle: css({
+    paddingTop: 7,
+    paddingBottom: 7,
     marginBottom: 0
   }),
   menuTablet: css({
     flexDirection: "row",
     alignItems: "stretch",
-    height: 44,
-    borderBottom: "1px solid #EFECEF",
     paddingLeft: globalStyles.grid.gutterWidth,
-    backgroundColor: "white"
+    backgroundColor: "white",
+    ":last-child": {
+      borderBottom: "1px solid #EFECEF"
+    }
   }),
   link: css({
     paddingTop: 7,
@@ -225,13 +265,11 @@ const styles = {
       color: globalStyles.colors.primary
     }
   }),
-  linkTablet: css({
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
+  itemTablet: css({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    margin: "0 15px 0 0",
     justifyContent: "center"
   }),
   activeLink: css({
