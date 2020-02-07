@@ -51,7 +51,10 @@ function CustomNavLink({
                 <IconInvalid />
               </div>
             ) : null}
-            <span>{title}</span>
+            <span>
+              {title}
+              {label && layoutType !== "desktop" && ` ${label}`}
+            </span>
           </div>
           {label && layoutType === "desktop" && <span>{label}</span>}
         </Link>
