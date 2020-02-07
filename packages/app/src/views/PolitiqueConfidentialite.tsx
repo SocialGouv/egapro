@@ -27,21 +27,21 @@ function CGU({ history, location, dispatch }: Props) {
         <h2 css={styles.title}>Données personnelles traitées</h2>
         <p>
           La présente Plateforme traite les données personnelles suivantes :
-          <ul>
-            <li>
-              Pour les simples visiteurs : nature des opérations, date et heure
-              de l'opération.
-            </li>
-            <li>
-              Pour les utilisateurs du simulateur : nature des opérations, date
-              et heure de l'opération.
-            </li>
-            <li>
-              Pour les utilisateurs du formulaire de déclaration : adresse
-              email, nom, prénom, numéro de téléphone.
-            </li>
-          </ul>
         </p>
+        <ul>
+          <li>
+            Pour les simples visiteurs : nature des opérations, date et heure de
+            l'opération.
+          </li>
+          <li>
+            Pour les utilisateurs du simulateur : nature des opérations, date et
+            heure de l'opération.
+          </li>
+          <li>
+            Pour les utilisateurs du formulaire de déclaration : adresse email,
+            nom, prénom, numéro de téléphone.
+          </li>
+        </ul>
         <h2 css={styles.title}>Finalités</h2>
         <p>
           Ces données sont nécessaires et proportionnées pour la réalisation de
@@ -61,19 +61,19 @@ function CGU({ history, location, dispatch }: Props) {
           consentement des personnes concernées.
         </p>
         <h2 css={styles.title}>Duré de conservation</h2>
+        <ul>
+          <li>
+            Pour les cookies : 13 mois maximum, ou jusqu'au retrait du
+            consentement de la personne concernée.
+          </li>
+          <li>Pour l'hébergeur : 12 mois (LCEN).</li>
+          <li>
+            Pour les données des utilisateurs du simulateur et du formulaire de
+            déclaration : la durée de conservation des données par
+            l'administration est de 3 ans.
+          </li>
+        </ul>
         <p>
-          <ul>
-            <li>
-              Pour les cookies : 13 mois maximum, ou jusqu'au retrait du
-              consentement de la personne concernée.
-            </li>
-            <li>Pour l'hébergeur : 12 mois (LCEN).</li>
-            <li>
-              Pour les données des utilisateurs du simulateur et du formulaire
-              de déclaration : la durée de conservation des données par
-              l'administration est de 3 ans.
-            </li>
-          </ul>
           Passés ces délais de conservation, les responsables de traitement
           s’engagent à supprimer définitivement les données des personnes
           concernées.
@@ -90,48 +90,48 @@ function CGU({ history, location, dispatch }: Props) {
           <br />
           <br />
           Les moyens de sécurisation suivants ont notamment été mis en oeuvre :
-          <ul>
-            <li>Pare feu système ;</li>
-            <li>Pare feu applicatif (WAF) ;</li>
-            <li>Chiffrement des flux reseaux via certificat SSL ;</li>
-            <li>Disque dur chiffré ;</li>
-            <li>Services isolés dans des containers ;</li>
-            <li>Gestion des journaux ;</li>
-            <li>Monitoring Azure ;</li>
-            <li>Administration et monitoring centralisés des accès ;</li>
-            <li>
-              Accès aux ressources via clés SSH (pas de mot de passe post
-              installation) ;
-            </li>
-            <li>
-              Sauvegarde des bases de données via solution de stockage Azure ;
-            </li>
-            <li>
-              Accès aux données reservé aux membres de l'entité (hors
-              restitution applicative publique des données) ;
-            </li>
-            <li>
-              Accès aux données uniquement via un outil d'édition sécurisé (SSL
-              + mot de passe) avec utilisation de comptes nominatifs.
-            </li>
-          </ul>
         </p>
+        <ul>
+          <li>Pare feu système ;</li>
+          <li>Pare feu applicatif (WAF) ;</li>
+          <li>Chiffrement des flux reseaux via certificat SSL ;</li>
+          <li>Disque dur chiffré ;</li>
+          <li>Services isolés dans des containers ;</li>
+          <li>Gestion des journaux ;</li>
+          <li>Monitoring Azure ;</li>
+          <li>Administration et monitoring centralisés des accès ;</li>
+          <li>
+            Accès aux ressources via clés SSH (pas de mot de passe post
+            installation) ;
+          </li>
+          <li>
+            Sauvegarde des bases de données via solution de stockage Azure ;
+          </li>
+          <li>
+            Accès aux données reservé aux membres de l'entité (hors restitution
+            applicative publique des données) ;
+          </li>
+          <li>
+            Accès aux données uniquement via un outil d'édition sécurisé (SSL +
+            mot de passe) avec utilisation de comptes nominatifs.
+          </li>
+        </ul>
         <h2 css={styles.title}>Droits des personnes concernées</h2>
         <p>
           Vous disposez des droits suivants concernant vos données à caractère
           personnel :
-          <ul>
-            <li>
-              Droit d’information, d’accès et de communication des données ;
-            </li>
-            <li>
-              Droit de rectification et le cas échéant de suppression des
-              données ;
-            </li>
-            <li>
-              Droit d’opposition au traitement de données, le cas échéant.
-            </li>
-          </ul>
+        </p>
+        <ul>
+          <li>
+            Droit d’information, d’accès et de communication des données ;
+          </li>
+          <li>
+            Droit de rectification et le cas échéant de suppression des
+            données ;
+          </li>
+          <li>Droit d’opposition au traitement de données, le cas échéant.</li>
+        </ul>
+        <p>
           Vous pouvez exercer ces droits en écrivant à{" "}
           <a href="mailto:dpd-minsociaux@sg.social.gouv.fr">
             dpd-minsociaux@sg.social.gouv.fr
@@ -183,31 +183,30 @@ function CGU({ history, location, dispatch }: Props) {
           la mise en œuvre par ses sous-traitants de garanties adéquates et du
           respect de conditions strictes de confidentialité, d’usage et de
           protection des données.
-          <br />
-          <br />
-          <table css={styles.table}>
-            <thead>
-              <tr>
-                <th>Partenaire</th>
-                <th>Pays destinataire</th>
-                <th>Traitement réalisé</th>
-                <th>Garanties</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Microsoft Azure</td>
-                <td>France</td>
-                <td>Hébergement</td>
-                <td>
-                  <a href="https://privacy.microsoft.com/fr-fr/privacystatement">
-                    https://privacy.microsoft.com/fr-fr/privacystatement
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </p>
+        <br />
+        <table css={styles.table}>
+          <thead>
+            <tr>
+              <th>Partenaire</th>
+              <th>Pays destinataire</th>
+              <th>Traitement réalisé</th>
+              <th>Garanties</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Microsoft Azure</td>
+              <td>France</td>
+              <td>Hébergement</td>
+              <td>
+                <a href="https://privacy.microsoft.com/fr-fr/privacystatement">
+                  https://privacy.microsoft.com/fr-fr/privacystatement
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <h2 css={styles.title}>Cookies</h2>
         <p>
           Index Egapro, en tant qu’éditeurs de la présente Plateforme, pourra
@@ -224,20 +223,22 @@ function CGU({ history, location, dispatch }: Props) {
           Certains cookies permettent d’établir des mesures statistiques de
           fréquentation et d’utilisation du site pouvant être utilisées à des
           fins de suivi et d’amélioration du service :
-          <ul>
-            <li>
-              Les données collectées ne sont pas recoupées avec d’autres
-              traitements.
-            </li>
-            <li>
-              Le cookie déposé sert uniquement à la production de statistiques
-              anonymes.
-            </li>
-            <li>
-              Le cookie ne permet pas de suivre la navigation de l’internaute
-              sur d’autres sites
-            </li>
-          </ul>
+        </p>
+        <ul>
+          <li>
+            Les données collectées ne sont pas recoupées avec d’autres
+            traitements.
+          </li>
+          <li>
+            Le cookie déposé sert uniquement à la production de statistiques
+            anonymes.
+          </li>
+          <li>
+            Le cookie ne permet pas de suivre la navigation de l’internaute sur
+            d’autres sites
+          </li>
+        </ul>
+        <p>
           La mesure d’audience (nombre de visites, pages consultées) est
           réalisée par un outil libre intitulé Matomo spécifiquement paramétré,
           respectant les conditions d’exemption du consentement de l’internaute
