@@ -91,7 +91,8 @@ function Declaration({ state, dispatch }: Props) {
 
   const allIndicateurValid =
     (state.indicateurUn.formValidated === "Valid" ||
-      !effectifsIndicateurUnCalculable) &&
+      // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
+      (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
     (trancheEffectifs !== "50 à 250"
       ? (state.indicateurDeux.formValidated === "Valid" ||
           !effectifsIndicateurDeuxCalculable) &&
@@ -234,7 +235,8 @@ function Declaration({ state, dispatch }: Props) {
         <h2>Les formulaires suivants ne sont pas validés</h2>
         <ul>
           {state.indicateurUn.formValidated !== "Valid" &&
-            effectifsIndicateurUnCalculable && (
+            !effectifsIndicateurUnCalculable &&
+            !state.indicateurUn.csp && (
               <li>
                 <TextSimulatorLink
                   to="/indicateur1"
