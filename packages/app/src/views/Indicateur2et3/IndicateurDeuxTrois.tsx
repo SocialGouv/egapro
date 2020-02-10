@@ -274,7 +274,7 @@ export function AdditionalInfo({
         )}
       </p>
       {correctionMeasure && (
-        <p>{messageMesureCorrection(indicateurSexeSurRepresente)}</p>
+        <p>{messageMesureCorrection(indicateurSexeSurRepresente, "35/35")}</p>
       )}
     </div>
   );

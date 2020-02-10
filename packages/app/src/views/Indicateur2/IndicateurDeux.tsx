@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core";
 import { useCallback, ReactNode } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
@@ -24,6 +24,8 @@ import {
 
 import IndicateurDeuxForm from "./IndicateurDeuxForm";
 import IndicateurDeuxResult from "./IndicateurDeuxResult";
+
+import { messageMesureCorrection } from "../../utils/helpers";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -134,6 +136,11 @@ function IndicateurDeux({ state, dispatch }: Props) {
           )
         }
       />
+      {state.indicateurDeux.formValidated === "Valid" && correctionMeasure && (
+        <div css={styles.additionalInfo}>
+          <p>{messageMesureCorrection(indicateurSexeSurRepresente, "20/20")}</p>
+        </div>
+      )}
     </PageIndicateurDeux>
   );
 }
@@ -148,5 +155,17 @@ function PageIndicateurDeux({ children }: { children: ReactNode }) {
     </Page>
   );
 }
+
+const styles = {
+  additionalInfo: css({
+    color: "#61676F",
+    fontSize: 14,
+    fontStyle: "italic",
+    maxWidth: 500,
+    "& > p": {
+      marginBottom: 30
+    }
+  })
+};
 
 export default IndicateurDeux;
