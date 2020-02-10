@@ -106,7 +106,7 @@ function RecapitulatifIndicateurDeuxTrois({
               ? noteIndicateurDeuxTrois
               : "--") + "/35",
           secondLineInfo: correctionMeasure
-            ? "mesures de correction prises en compte"
+            ? "** mesures de correction prises en compte"
             : undefined,
           indicateurSexeSurRepresente
         }}
@@ -126,6 +126,7 @@ function RecapitulatifIndicateurDeuxTrois({
         results={results}
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
         plusPetitNombreSalaries={plusPetitNombreSalaries}
+        correctionMeasure={correctionMeasure}
       />
     </div>
   );

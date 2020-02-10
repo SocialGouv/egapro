@@ -27,7 +27,8 @@ import {
 } from "../../components/SimulatorLink";
 import {
   messageEcartNombreEquivalentSalaries,
-  displayPercent
+  displayPercent,
+  messageMesureCorrection
 } from "../../utils/helpers";
 
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm";
@@ -189,6 +190,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
           results={results}
           indicateurSexeSurRepresente={indicateurSexeSurRepresente}
           plusPetitNombreSalaries={plusPetitNombreSalaries}
+          correctionMeasure={correctionMeasure}
         />
       )}
     </PageIndicateurDeuxTrois>
@@ -248,10 +250,12 @@ export const getResults = (
 export function AdditionalInfo({
   indicateurSexeSurRepresente,
   plusPetitNombreSalaries,
+  correctionMeasure,
   results
 }: {
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   plusPetitNombreSalaries: "hommes" | "femmes" | undefined;
+  correctionMeasure: boolean;
   results: Results;
 }) {
   return (
@@ -269,6 +273,9 @@ export function AdditionalInfo({
           plusPetitNombreSalaries
         )}
       </p>
+      {correctionMeasure && (
+        <p>{messageMesureCorrection(indicateurSexeSurRepresente)}</p>
+      )}
     </div>
   );
 }
