@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 
 import { FormState } from "../../globals.d";
 
