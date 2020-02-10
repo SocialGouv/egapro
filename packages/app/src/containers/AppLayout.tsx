@@ -98,6 +98,7 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
+    overflow: "auto",
     background:
       "linear-gradient(180deg, #FFFFFF 79px, rgba(255, 255, 255, 0) 79px, #FFFFFF 100%), #EFF0FA",
     "@media print": {
