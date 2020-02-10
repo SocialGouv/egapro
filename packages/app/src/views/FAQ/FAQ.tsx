@@ -177,6 +177,7 @@ const styles = {
     paddingRight: 29,
     paddingLeft: 29,
     paddingTop: 26,
+    position: "relative",
     "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
       // Only target IE11
       display: "block"
