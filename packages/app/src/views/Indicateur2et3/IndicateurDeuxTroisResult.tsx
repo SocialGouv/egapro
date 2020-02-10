@@ -37,7 +37,7 @@ function IndicateurDeuxTroisResult({
         }
         secondLineInfo={
           correctionMeasure
-            ? "mesures de correction prises en compte"
+            ? "** mesures de correction prises en compte"
             : undefined
         }
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
