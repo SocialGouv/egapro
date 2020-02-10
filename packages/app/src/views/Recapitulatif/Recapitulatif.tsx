@@ -90,7 +90,8 @@ function Recapitulatif({ state }: Props) {
 
   const allIndicateurValid =
     (state.indicateurUn.formValidated === "Valid" ||
-      !effectifsIndicateurUnCalculable) &&
+      // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
+      (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
     (trancheEffectifs !== "50 à 250"
       ? (state.indicateurDeux.formValidated === "Valid" ||
           !effectifsIndicateurDeuxCalculable) &&
@@ -138,6 +139,7 @@ function Recapitulatif({ state }: Props) {
         effectifEtEcartRemuParTranche={effectifEtEcartRemuParTranche}
         indicateurEcartRemuneration={indicateurEcartRemuneration}
         indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
+        indicateurUnParCSP={state.indicateurUn.csp}
         noteIndicateurUn={noteIndicateurUn}
       />
       {(trancheEffectifs !== "50 à 250" && (

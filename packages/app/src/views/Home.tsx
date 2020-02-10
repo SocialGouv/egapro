@@ -97,7 +97,7 @@ function Home({ history, location, dispatch }: Props) {
               </span>
               <p css={styles.blocContentBody}>
                 Vous pouvez déclarer votre index égalité professionnelle F/H
-                calculé par ailleurs directement sur Solen :
+                calculé par ailleurs directement via les formulaires suivants :
                 <ul>
                   <li>
                     <a
