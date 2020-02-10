@@ -1,4 +1,4 @@
-/* css={styles.buttonAction}* @jsx jsx */
+/** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import React, { Fragment } from "react";
 
