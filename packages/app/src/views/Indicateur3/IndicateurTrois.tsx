@@ -141,7 +141,13 @@ function IndicateurTrois({ state, dispatch }: Props) {
       />
       {state.indicateurTrois.formValidated === "Valid" && correctionMeasure && (
         <div css={styles.additionalInfo}>
-          <p>{messageMesureCorrection(indicateurSexeSurRepresente, "15/15")}</p>
+          <p>
+            {messageMesureCorrection(
+              indicateurSexeSurRepresente,
+              "de promotions",
+              "15/15"
+            )}
+          </p>
         </div>
       )}
     </PageIndicateurTrois>

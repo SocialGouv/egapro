@@ -274,7 +274,13 @@ export function AdditionalInfo({
         )}
       </p>
       {correctionMeasure && (
-        <p>{messageMesureCorrection(indicateurSexeSurRepresente, "35/35")}</p>
+        <p>
+          {messageMesureCorrection(
+            indicateurSexeSurRepresente,
+            "d'augmentations",
+            "35/35"
+          )}
+        </p>
       )}
     </div>
   );
