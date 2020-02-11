@@ -262,7 +262,10 @@ export function AdditionalInfo({
     <div css={styles.additionalInfo}>
       <p>
         {results.worst.label} <strong>{results.worst.result}</strong>, la note
-        obtenue est de <strong>{results.worst.note}/35</strong>
+        obtenue{" "}
+        {correctionMeasure &&
+          "avant prise en compte des mesures de correction "}
+        est de <strong>{results.worst.note}/35</strong>
         <br />
         {results.worst.note < results.best.note &&
           "cette note n'a pas été retenue dans le calcul de votre index car elle est la moins favorable"}
