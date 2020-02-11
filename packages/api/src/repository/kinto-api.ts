@@ -40,7 +40,6 @@ const api = async (url: string, options: RequestInit) => {
 const apiCount = async (url: string, options: RequestInit) => {
   logger.info(`[kinto-api] count for ${url}`);
   const response = await fetch(url, options);
-  console.log(">>>>>>>>>response in apiCount", response.headers.raw());
   return response.headers.get("total-objects");
 };
 
