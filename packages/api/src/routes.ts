@@ -4,7 +4,8 @@ import {
   getIndicatorsData,
   sendEmail,
   updateIndicatorsData,
-  versionController
+  versionController,
+  getStatsData
 } from "./controller";
 
 const routeOptions: Router.IRouterOptions = {
@@ -17,3 +18,4 @@ router.post("/indicators-datas", createIndicatorsData);
 router.put("/indicators-datas/:id", updateIndicatorsData);
 router.get("/indicators-datas/:id", getIndicatorsData);
 router.post("/indicators-datas/:id/emails", sendEmail);
+router.get("/stats", getStatsData);

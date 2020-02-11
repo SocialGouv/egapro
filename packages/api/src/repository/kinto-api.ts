@@ -15,7 +15,10 @@ const bucket = `${configuration.kintoURL}/buckets/${configuration.kintoBucket}`;
 const collections = (name: string) => bucket + `/collections/${name}`;
 const records = (name: string) => collections(name) + "/records";
 
-const requestOptions = (method: "GET" | "POST" | "PUT", body?: any) => {
+const requestOptions = (
+  method: "GET" | "POST" | "PUT" | "HEAD",
+  body?: any
+) => {
   const options: any = {
     headers,
     method
@@ -34,18 +37,28 @@ const api = async (url: string, options: RequestInit) => {
   return response.json();
 };
 
+const apiCount = async (url: string, options: RequestInit) => {
+  logger.info(`[kinto-api] count for ${url}`);
+  const response = await fetch(url, options);
+  console.log(">>>>>>>>>response in apiCount", response.headers.raw());
+  return response.headers.get("total-objects");
+};
+
 export const collection: CollectionFn = <T>(name: string) => ({
   add: (record: T) =>
     api(records(name), requestOptions("POST", { data: record })),
   one: (id: string) => api(`${records(name)}/${id}`, requestOptions("GET")),
   update: (id: string, record: T) =>
-    api(`${records(name)}/${id}`, requestOptions("PUT", { data: record }))
+    api(`${records(name)}/${id}`, requestOptions("PUT", { data: record })),
+  count: (filter: string) =>
+    apiCount(`${records(name)}?${filter}`, requestOptions("HEAD"))
 });
 
 export interface KintoCollection<T> {
   add: (record: T) => Promise<KintoResult<T>>;
   update: (id: string, record: T) => Promise<KintoResult<T>>;
   one: (id: string) => Promise<KintoResult<T>>;
+  count: (filter: string) => Promise<string | null>;
 }
 
 export interface KintoResult<T> {
