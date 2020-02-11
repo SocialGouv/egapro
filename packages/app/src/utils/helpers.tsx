@@ -160,11 +160,12 @@ export const messageEcartNombreEquivalentSalaries = (
 
 export const messageMesureCorrection = (
   sexeSurRepresente: undefined | "femmes" | "hommes",
+  ecartDe: string,
   noteMax: string
 ) => {
   return sexeSurRepresente === "femmes"
-    ? `** L’écart d’augmentation est en faveur des femmes tandis que l’écart de rémunération est en faveur des hommes, donc l’écart d’augmentation est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
+    ? `** L’écart de taux ${ecartDe} est en faveur des femmes tandis que l’écart de rémunération est en faveur des hommes, donc l’écart de taux ${ecartDe} est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
     : sexeSurRepresente === "hommes"
-    ? `** L’écart d’augmentation est en faveur des hommes tandis que l’écart de rémunération est en faveur des femmes, donc l’écart d’augmentation est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
+    ? `** L’écart de taux ${ecartDe} est en faveur des hommes tandis que l’écart de rémunération est en faveur des femmes, donc l’écart de taux ${ecartDe} est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
     : "";
 };
