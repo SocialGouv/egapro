@@ -46,11 +46,11 @@ const apiCount = async (url: string, options: RequestInit) => {
 export const collection: CollectionFn = <T>(name: string) => ({
   add: (record: T) =>
     api(records(name), requestOptions("POST", { data: record })),
+  count: (filter: string) =>
+    apiCount(`${records(name)}?${filter}`, requestOptions("HEAD")),
   one: (id: string) => api(`${records(name)}/${id}`, requestOptions("GET")),
   update: (id: string, record: T) =>
-    api(`${records(name)}/${id}`, requestOptions("PUT", { data: record })),
-  count: (filter: string) =>
-    apiCount(`${records(name)}?${filter}`, requestOptions("HEAD"))
+    api(`${records(name)}/${id}`, requestOptions("PUT", { data: record }))
 });
 
 export interface KintoCollection<T> {

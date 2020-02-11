@@ -5,10 +5,10 @@ const get = () => {
   return statsDataRepository.get();
 };
 
-export interface statsDataService {
+export interface StatsDataService {
   get: () => Promise<StatsData>;
 }
 
-export const statsDataService: statsDataService = {
+export const statsDataService: StatsDataService = {
   get
 };

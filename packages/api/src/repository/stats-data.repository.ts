@@ -6,7 +6,7 @@ const kintoCollection: KintoCollection<StatsData> = collection<StatsData>(
 );
 
 const countParTrancheEffectif = async (trancheEffectifs: string) => {
-  return await kintoCollection.count(
+  return kintoCollection.count(
     `data.declaration.formValidated=Valid&data.informations.trancheEffectifs=${encodeURI(
       trancheEffectifs
     )}`
@@ -20,9 +20,9 @@ const get: () => Promise<StatsData> = async () => {
     countParTrancheEffectif("1000 et plus")
   ]);
   return {
-    "50 à 250": count50a250,
+    "1000 et plus": count1000etPlus,
     "251 à 999": count251a999,
-    "1000 et plus": count1000etPlus
+    "50 à 250": count50a250
   };
 };
 

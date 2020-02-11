@@ -2,10 +2,10 @@ import * as Router from "koa-router";
 import {
   createIndicatorsData,
   getIndicatorsData,
+  getStatsData,
   sendEmail,
   updateIndicatorsData,
-  versionController,
-  getStatsData
+  versionController
 } from "./controller";
 
 const routeOptions: Router.IRouterOptions = {
