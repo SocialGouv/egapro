@@ -12,7 +12,11 @@ export const calculNoteIndex = (
   noteIndicateurDeuxTrois: number | undefined,
   noteIndicateurQuatre: number | undefined,
   noteIndicateurCinq: number | undefined
-): { noteIndex: number | undefined; totalPointCalculable: number } => {
+): {
+  noteIndex: number | undefined;
+  totalPoint: number;
+  totalPointCalculable: number;
+} => {
   const noteIndicateurUnPointCalculable =
     noteIndicateurUn !== undefined ? 40 : 0;
   const noteIndicateurDeuxPointCalculable =
@@ -26,6 +30,14 @@ export const calculNoteIndex = (
   const noteIndicateurCinqPointCalculable =
     noteIndicateurCinq !== undefined ? 10 : 0;
 
+  const totalPoint =
+    (noteIndicateurUn || 0) +
+    (trancheEffectifs !== "50 à 250"
+      ? (noteIndicateurDeux || 0) + (noteIndicateurTrois || 0)
+      : noteIndicateurDeuxTrois || 0) +
+    (noteIndicateurQuatre || 0) +
+    (noteIndicateurCinq || 0);
+
   const totalPointCalculable =
     noteIndicateurUnPointCalculable +
     (trancheEffectifs !== "50 à 250"
@@ -37,22 +49,16 @@ export const calculNoteIndex = (
   if (totalPointCalculable < 75) {
     return {
       noteIndex: undefined,
+      totalPoint,
       totalPointCalculable
     };
   }
-
-  const totalPoint =
-    (noteIndicateurUn || 0) +
-    (trancheEffectifs !== "50 à 250"
-      ? (noteIndicateurDeux || 0) + (noteIndicateurTrois || 0)
-      : noteIndicateurDeuxTrois || 0) +
-    (noteIndicateurQuatre || 0) +
-    (noteIndicateurCinq || 0);
 
   const noteIndex = Math.round((totalPoint * 100) / totalPointCalculable);
 
   return {
     noteIndex,
+    totalPoint,
     totalPointCalculable
   };
 };

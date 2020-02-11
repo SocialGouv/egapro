@@ -1,4 +1,5 @@
 import deepmerge from "deepmerge";
+import { format } from "date-fns";
 import {
   AppState,
   ActionType,
@@ -67,6 +68,7 @@ const defaultState: AppState = {
     formValidated: "None",
     nomEntreprise: "",
     trancheEffectifs: "50 à 250",
+    anneeDeclaration: undefined,
     debutPeriodeReference: "",
     finPeriodeReference: ""
   },
@@ -77,6 +79,8 @@ const defaultState: AppState = {
   indicateurUn: {
     formValidated: "None",
     csp: true,
+    coef: false,
+    autre: false,
     remunerationAnnuelle: dataIndicateurUnCsp,
     coefficientGroupFormValidated: "None",
     coefficientEffectifFormValidated: "None",
@@ -109,6 +113,40 @@ const defaultState: AppState = {
     formValidated: "None",
     nombreSalariesHommes: undefined,
     nombreSalariesFemmes: undefined
+  },
+  informationsEntreprise: {
+    formValidated: "None",
+    nomEntreprise: "",
+    siren: "",
+    codeNaf: "",
+    region: "",
+    departement: "",
+    adresse: "",
+    codePostal: "",
+    commune: "",
+    structure: "Entreprise",
+    nomUES: "",
+    nombreEntreprises: undefined,
+    entreprisesUES: []
+  },
+  informationsDeclarant: {
+    formValidated: "None",
+    nom: "",
+    prenom: "",
+    tel: "",
+    email: "",
+    acceptationCGU: false
+  },
+  declaration: {
+    formValidated: "None",
+    mesuresCorrection: "",
+    dateConsultationCSE: "",
+    datePublication: "",
+    lienPublication: "",
+    dateDeclaration: "",
+    noteIndex: undefined,
+    totalPoint: 0,
+    totalPointCalculable: 0
   }
 };
 
@@ -128,10 +166,11 @@ function AppReducer(
     return state;
   }
   switch (action.type) {
-    case "updateInformations": {
+    case "updateInformationsSimulation": {
       const {
         nomEntreprise,
         trancheEffectifs,
+        anneeDeclaration,
         debutPeriodeReference,
         finPeriodeReference
       } = action.data;
@@ -141,6 +180,7 @@ function AppReducer(
           informations: {
             ...state.informations,
             nomEntreprise,
+            anneeDeclaration,
             trancheEffectifs,
             debutPeriodeReference,
             finPeriodeReference
@@ -172,7 +212,22 @@ function AppReducer(
           indicateurCinq:
             state.indicateurCinq.formValidated === "Valid"
               ? { ...state.indicateurCinq, formValidated: "Invalid" }
-              : state.indicateurCinq
+              : state.indicateurCinq,
+          informationsEntreprise:
+            state.informationsEntreprise.formValidated === "Valid"
+              ? { ...state.informationsEntreprise, formValidated: "Invalid" }
+              : state.informationsEntreprise,
+          informationsDeclarant:
+            state.informationsDeclarant.formValidated === "Valid"
+              ? { ...state.informationsDeclarant, formValidated: "Invalid" }
+              : state.informationsDeclarant,
+          declaration:
+            state.declaration.formValidated === "Valid"
+              ? {
+                  ...state.declaration,
+                  formValidated: "Invalid"
+                }
+              : state.declaration
         };
       }
       return {
@@ -181,17 +236,25 @@ function AppReducer(
           ...state.informations,
           nomEntreprise,
           trancheEffectifs,
+          anneeDeclaration,
           debutPeriodeReference,
           finPeriodeReference
         }
       };
     }
-    case "validateInformations": {
+    case "validateInformationsSimulation": {
       return {
         ...state,
         informations: {
           ...state.informations,
           formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
         }
       };
     }
@@ -223,7 +286,11 @@ function AppReducer(
           indicateurDeuxTrois:
             state.indicateurDeuxTrois.formValidated === "Valid"
               ? { ...state.indicateurDeuxTrois, formValidated: "Invalid" }
-              : state.indicateurDeuxTrois
+              : state.indicateurDeuxTrois,
+          declaration:
+            state.declaration.formValidated === "Valid"
+              ? { ...state.declaration, formValidated: "Invalid" }
+              : state.declaration
         };
       }
       return {
@@ -232,10 +299,10 @@ function AppReducer(
       };
     }
     case "updateIndicateurUnType": {
-      const { csp } = action.data;
+      const { csp, coef, autre } = action.data;
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, csp }
+        indicateurUn: { ...state.indicateurUn, csp, coef, autre }
       };
     }
     case "updateIndicateurUnCsp": {
@@ -297,6 +364,13 @@ function AppReducer(
             state.indicateurUn.formValidated === "Valid"
               ? "Invalid"
               : state.indicateurUn.formValidated
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
         }
       };
     }
@@ -311,13 +385,27 @@ function AppReducer(
             state.indicateurUn.formValidated === "Valid"
               ? "Invalid"
               : state.indicateurUn.formValidated
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
         }
       };
     }
     case "validateIndicateurUn": {
       return {
         ...state,
-        indicateurUn: { ...state.indicateurUn, formValidated: action.valid }
+        indicateurUn: { ...state.indicateurUn, formValidated: action.valid },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
+        }
       };
     }
     case "updateIndicateurDeux": {
@@ -334,7 +422,17 @@ function AppReducer(
     case "validateIndicateurDeux": {
       return {
         ...state,
-        indicateurDeux: { ...state.indicateurDeux, formValidated: action.valid }
+        indicateurDeux: {
+          ...state.indicateurDeux,
+          formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
+        }
       };
     }
     case "updateIndicateurTrois": {
@@ -354,6 +452,13 @@ function AppReducer(
         indicateurTrois: {
           ...state.indicateurTrois,
           formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
         }
       };
     }
@@ -381,6 +486,13 @@ function AppReducer(
         indicateurDeuxTrois: {
           ...state.indicateurDeuxTrois,
           formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
         }
       };
     }
@@ -399,6 +511,13 @@ function AppReducer(
         indicateurQuatre: {
           ...state.indicateurQuatre,
           formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
         }
       };
     }
@@ -416,6 +535,141 @@ function AppReducer(
         ...state,
         indicateurCinq: {
           ...state.indicateurCinq,
+          formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
+        }
+      };
+    }
+    case "updateInformationsEntreprise": {
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
+          ...action.data
+        }
+      };
+    }
+    case "validateInformationsEntreprise": {
+      return {
+        ...state,
+        informationsEntreprise: {
+          ...state.informationsEntreprise,
+          formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
+        }
+      };
+    }
+    case "updateInformationsDeclarant": {
+      return {
+        ...state,
+        informationsDeclarant: {
+          ...state.informationsDeclarant,
+          ...action.data
+        }
+      };
+    }
+    case "validateInformationsDeclarant": {
+      return {
+        ...state,
+        informationsDeclarant: {
+          ...state.informationsDeclarant,
+          formValidated: action.valid
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated:
+            action.valid === "None"
+              ? "Invalid"
+              : state.declaration.formValidated
+        }
+      };
+    }
+    case "updateDeclaration": {
+      return {
+        ...state,
+        declaration: {
+          ...state.declaration,
+          ...action.data
+        }
+      };
+    }
+    case "validateDeclaration": {
+      const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm");
+      return {
+        ...state,
+        indicateurUn:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurUn,
+                ...action.indicateurUnData
+              }
+            : state.indicateurUn,
+        indicateurDeux:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurDeux,
+                ...action.indicateurDeuxData
+              }
+            : state.indicateurDeux,
+        indicateurTrois:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurTrois,
+                ...action.indicateurTroisData
+              }
+            : state.indicateurTrois,
+        indicateurDeuxTrois:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurDeuxTrois,
+                ...action.indicateurDeuxTroisData
+              }
+            : state.indicateurDeuxTrois,
+        indicateurQuatre:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurQuatre,
+                ...action.indicateurQuatreData
+              }
+            : state.indicateurQuatre,
+        indicateurCinq:
+          action.valid === "Valid"
+            ? {
+                ...state.indicateurCinq,
+                ...action.indicateurCinqData
+              }
+            : state.indicateurCinq,
+        declaration: {
+          ...state.declaration,
+          dateDeclaration:
+            // Automatically set the "dateDeclaration" to now.
+            action.valid === "Valid"
+              ? dateDeclaration
+              : state.declaration.dateDeclaration,
+          noteIndex:
+            action.valid === "Valid"
+              ? action.noteIndex
+              : state.declaration.noteIndex,
+          totalPoint:
+            action.valid === "Valid"
+              ? action.totalPoint
+              : state.declaration.totalPoint,
+          totalPointCalculable:
+            action.valid === "Valid"
+              ? action.totalPointCalculable
+              : state.declaration.totalPointCalculable,
           formValidated: action.valid
         }
       };

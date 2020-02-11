@@ -227,7 +227,7 @@ class RowProcessor(object):
 
     def importPeriodeDeReference(self):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
-        annee_indicateur = self.importIntField("annee_indicateurs", "informationsComplementaires/anneeDeclaration")
+        annee_indicateur = self.importIntField("annee_indicateurs", "informations/anneeDeclaration")
 
         # Compatibilité egapro de la valeur de tranche d'effectifs
         tranche = self.get("tranche_effectif")
@@ -280,7 +280,7 @@ class RowProcessor(object):
         # réellement discriminant semble être "nom_UES".
         if self.get("nom_UES") is not None:
             # Import des données de l'UES
-            self.set("informationsEntreprise/structure", "UES")
+            self.set("informationsEntreprise/structure", "Unité Economique et Sociale (UES)")
             self.importField("nom_UES", "informationsEntreprise/nomUES")
             self.importField("nom_ets_UES", "informationsEntreprise/nomEntreprise")
             # Note: le code NAF d'une UES est stocké dans le champ "Code NAF de cette entreprise"
@@ -334,8 +334,8 @@ class RowProcessor(object):
                     )
                 )
             entreprises.append({"nom": raisonSociale, "siren": siren})
-        self.set("informationsEntreprise/nombresEntreprises", len(entreprises))
-        self.set("informationsEntreprise/entreprises", entreprises)
+        self.set("informationsEntreprise/nombreEntreprises", len(entreprises))
+        self.set("informationsEntreprise/entreprisesUES", entreprises)
 
     def importNiveauResultat(self):
         # Niveau de résultat de l'entreprise ou de l'UES
@@ -413,20 +413,20 @@ class RowProcessor(object):
         elif modalite == "amc":
             self.set("indicateurUn/autre", True)
         elif modalite == "nc":
-            self.set("indicateurUn/autre", True)
             self.set("indicateurUn/nonCalculable", True)
         self.importIntField("nb_coef_niv", "indicateurUn/nombreCoefficients")
         self.importField("motif_non_calc_tab1", "indicateurUn/motifNonCalculable")
         self.importField("precision_am_tab1", "indicateurUn/motifNonCalculablePrecision")
         if modalite == "csp":
             self.importTranchesCsp()
-        elif modalite == "coef_niv":
+        elif modalite != "nc":
+            # Que ce soit par coefficients ou "autre" (amc) le résultat est le même
             self.importTranchesCoefficients()
         # Résultat
         self.importFloatField("resultat_tab1", "indicateurUn/resultatFinal")
         self.importField("population_favorable_tab1", "indicateurUn/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab1", "indicateurUn/noteFinale")
-        self.importDateField("date_consult_CSE > Valeur date", "informationsComplementaires/dateConsultationCSE")
+        self.importDateField("date_consult_CSE > Valeur date", "declaration/dateConsultationCSE")
 
     def importIndicateurDeux(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre

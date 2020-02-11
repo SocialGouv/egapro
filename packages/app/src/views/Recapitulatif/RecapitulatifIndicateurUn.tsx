@@ -29,6 +29,7 @@ interface Props {
     | Array<effectifEtEcartRemuGroupCoef>;
   indicateurEcartRemuneration: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
+  indicateurUnParCSP: boolean;
   noteIndicateurUn: number | undefined;
 }
 
@@ -38,14 +39,30 @@ function RecapitulatifIndicateurUn({
   effectifEtEcartRemuParTranche,
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
+  indicateurUnParCSP,
   noteIndicateurUn
 }: Props) {
   if (!effectifsIndicateurUnCalculable) {
+    const messageCalculParCSP = indicateurUnParCSP ? (
+      undefined
+    ) : (
+      <TextSimulatorLink
+        to="/indicateur1"
+        label="Vous devez calculer par CSP"
+      />
+    );
     return (
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur écart de rémunération entre les femmes et les hommes"
-          text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."
+          text={
+            <Fragment>
+              Malheureusement votre indicateur n’est pas calculable car
+              l’ensemble des groupes valables (c’est-à-dire comptant au moins 3
+              femmes et 3 hommes), représentent moins de 40% des effectifs.{" "}
+              {messageCalculParCSP}
+            </Fragment>
+          }
         />
       </div>
     );

@@ -1,6 +1,7 @@
 import {
   CategorieSocioPro,
   PeriodeDeclaration,
+  Structure,
   TranchesAges,
   TrancheEffectifs
 } from "../globals.d";
@@ -11,11 +12,12 @@ const actionInitiateState = {
   data: {}
 };
 
-const actionUpdateInformations = {
-  type: "updateInformations" as "updateInformations",
+const actionUpdateInformationsSimulation = {
+  type: "updateInformationsSimulation" as "updateInformationsSimulation",
   data: {
     nomEntreprise: "BigCorp",
     trancheEffectifs: "1000 et plus" as TrancheEffectifs,
+    anneeDeclaration: 2020,
     debutPeriodeReference: "2019-01-01",
     finPeriodeReference: "2019-12-31"
   }
@@ -237,10 +239,6 @@ const actionUpdateIndicateurUnCsp = {
   }
 };
 
-const actionUpdateIndicateurUnCoefAddGroup = {
-  type: "updateIndicateurUnCoefAddGroup" as "updateIndicateurUnCoefAddGroup"
-};
-
 const actionUpdateIndicateurUnCoefName = {
   type: "updateIndicateurUnCoef" as "updateIndicateurUnCoef",
   data: {
@@ -401,6 +399,48 @@ const actionUpdateIndicateurCinq = {
   }
 };
 
+const actionUpdateInformationsEntreprise = {
+  type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
+  data: {
+    nomEntreprise: "acme",
+    siren: "1234",
+    codeNaf: "5678",
+    region: "Auvergne-Rhône-Alpes",
+    departement: "Drôme",
+    adresse: "30 rue des alouettes",
+    codePostal: "12345",
+    commune: "Trifouilly",
+    structure: "Unité Economique et Sociale (UES)" as Structure,
+    nomUES: "nom d'une UES",
+    nombreEntreprises: 2,
+    entreprisesUES: [
+      { nom: "entreprise 1", siren: "12345" },
+      { nom: "entreprise 2", siren: "67890" }
+    ]
+  }
+};
+
+const actionUpdateInformationsDeclarant = {
+  type: "updateInformationsDeclarant" as "updateInformationsDeclarant",
+  data: {
+    nom: "Daffy",
+    prenom: "Duck",
+    tel: "0123456789",
+    email: "daffy.duck@example.com",
+    acceptationCGU: true
+  }
+};
+
+const actionUpdateDeclaration = {
+  type: "updateDeclaration" as "updateDeclaration",
+  data: {
+    mesuresCorrection: "mmo",
+    dateConsultationCSE: "01/02/2019",
+    datePublication: "01/02/2020",
+    lienPublication: "https://example.com"
+  }
+};
+
 // fast pipe, I miss you in JS…
 const stateDefault = AppReducer(
   AppReducer(
@@ -414,30 +454,36 @@ const stateDefault = AppReducer(
                   AppReducer(
                     AppReducer(
                       AppReducer(
-                        AppReducer(undefined, actionInitiateState),
-                        actionUpdateInformations
+                        AppReducer(
+                          AppReducer(
+                            AppReducer(undefined, actionInitiateState),
+                            actionUpdateInformationsSimulation
+                          ),
+                          actionUpdateEffectif
+                        ),
+                        actionUpdateIndicateurUnCsp
                       ),
-                      actionUpdateEffectif
+                      actionUpdateIndicateurUnCoefName
                     ),
-                    actionUpdateIndicateurUnCsp
+                    actionUpdateIndicateurUnCoefNombreSalaries
                   ),
-                  actionUpdateIndicateurUnCoefAddGroup
+                  actionUpdateIndicateurUnCoefRemuneration
                 ),
-                actionUpdateIndicateurUnCoefName
+                actionUpdateIndicateurDeux
               ),
-              actionUpdateIndicateurUnCoefNombreSalaries
+              actionUpdateIndicateurTrois
             ),
-            actionUpdateIndicateurUnCoefRemuneration
+            actionUpdateIndicateurDeuxTrois
           ),
-          actionUpdateIndicateurDeux
+          actionUpdateIndicateurQuatre
         ),
-        actionUpdateIndicateurTrois
+        actionUpdateIndicateurCinq
       ),
-      actionUpdateIndicateurDeuxTrois
+      actionUpdateInformationsEntreprise
     ),
-    actionUpdateIndicateurQuatre
+    actionUpdateInformationsDeclarant
   ),
-  actionUpdateIndicateurCinq
+  actionUpdateDeclaration
 );
 
 export default stateDefault;

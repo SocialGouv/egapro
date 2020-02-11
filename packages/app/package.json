@@ -1,6 +1,6 @@
 {
   "name": "app",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
@@ -17,7 +17,7 @@
     "date-fns": "2.9.0",
     "deepmerge": "4.2.2",
     "express": "4.17.1",
-    "final-form": "4.18.6",
+    "final-form": "4.18.7",
     "final-form-arrays": "3.0.2",
     "final-form-calculate": "1.3.1",
     "fuse.js": "3.4.6",
@@ -36,14 +36,14 @@
     "text-mask-addons": "3.8.0"
   },
   "devDependencies": {
-    "@types/jest": "24.9.0",
-    "@types/node": "12.12.24",
-    "@types/react": "16.9.17",
-    "@types/react-dom": "16.9.4",
+    "@types/jest": "25.1.0",
+    "@types/node": "12.12.25",
+    "@types/react": "16.9.19",
+    "@types/react-dom": "16.9.5",
     "@types/react-router-dom": "5.1.3",
-    "cypress": "3.8.2",
-    "typescript": "3.7.4",
-    "wait-on": "3.3.0"
+    "cypress": "3.8.3",
+    "typescript": "3.7.5",
+    "wait-on": "4.0.0"
   },
   "eslintConfig": {
     "extends": "react-app"

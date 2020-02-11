@@ -46,6 +46,15 @@ function MainScrollView({ children, state, location }: Props) {
       indicateurCinqFormValidated={
         state ? state.indicateurCinq.formValidated : "None"
       }
+      informationsEntrepriseFormValidated={
+        state ? state.informationsEntreprise.formValidated : "None"
+      }
+      informationsDeclarantFormValidated={
+        state ? state.informationsDeclarant.formValidated : "None"
+      }
+      declarationFormValidated={
+        state ? state.declaration.formValidated : "None"
+      }
     />
   );
 
@@ -89,7 +98,10 @@ const styles = {
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: "0%",
-    position: "relative"
+    position: "relative",
+    "@media print": {
+      display: "block"
+    }
   }),
   scroll: css({
     display: "flex",
@@ -130,7 +142,10 @@ const styles = {
     flexShrink: 0,
     flexBasis: "auto",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    "@media print": {
+      display: "block"
+    }
   })
 };
 

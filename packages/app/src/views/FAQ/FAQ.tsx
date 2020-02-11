@@ -72,7 +72,34 @@ function FAQ({ closeMenu }: Props) {
             >
               <Switch location={locationFAQ}>
                 <Route
-                  path={["/", "/simulateur/:code"]}
+                  path={[
+                    "/",
+                    "/simulateur/:code",
+                    "/mentions-legales",
+                    "/cgu",
+                    "/politique-confidentialite"
+                  ]}
+                  exact
+                  render={() => <FAQHome />}
+                />
+
+                {/* TODO: move to FAQPaths when a dedicated content is added */}
+                <Route
+                  path={["/", "/simulateur/:code/informations-entreprise"]}
+                  exact
+                  render={() => <FAQHome />}
+                />
+
+                {/* TODO: move to FAQPaths when a dedicated content is added */}
+                <Route
+                  path={["/", "/simulateur/:code/informations-declarant"]}
+                  exact
+                  render={() => <FAQHome />}
+                />
+
+                {/* TODO: move to FAQPaths when a dedicated content is added */}
+                <Route
+                  path={["/", "/simulateur/:code/declaration"]}
                   exact
                   render={() => <FAQHome />}
                 />
@@ -150,6 +177,7 @@ const styles = {
     paddingRight: 29,
     paddingLeft: 29,
     paddingTop: 26,
+    position: "relative",
     "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
       // Only target IE11
       display: "block"

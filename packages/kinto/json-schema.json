@@ -35,6 +35,7 @@
               "type": "string",
               "enum": ["50 à 250", "251 à 999", "1000 et plus", "Plus de 250"]
             },
+            "anneeDeclaration": { "type": "integer" },
             "finPeriodeReference": { "type": "string" },
             "debutPeriodeReference": { "type": "string" }
           }
@@ -293,19 +294,26 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
             "nom": { "type": "string" },
             "prenom": { "type": "string" },
             "email": { "type": "string" },
-            "tel": { "type": "string" }
+            "tel": { "type": "string" },
+            "acceptationCGU": { "type": "boolean" }
           }
         },
         "informationsEntreprise": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
             "structure": {
               "type": "string",
-              "enum": ["Entreprise", "UES"]
+              "enum": ["Entreprise", "Unité Economique et Sociale (UES)"]
             },
             "nomEntreprise": { "type": "string" },
             "region": { "type": "string" },
@@ -317,8 +325,8 @@
             "codeNaf": { "type": "string" },
             "nomUES": { "type": "string" },
             "codeNAF": { "type": "string" },
-            "nombresEntreprises": { "type": "integer" },
-            "entreprises": {
+            "nombreEntreprises": { "type": "integer" },
+            "entreprisesUES": {
               "type": "array",
               "items": {
                 "type": "object",
@@ -331,27 +339,32 @@
             }
           }
         },
-        "informationsComplementaires": {
+        "declaration": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "anneeDeclaration": { "type": "integer" },
-            "dateConsultationCSE": { "type": "string" }
+            "formValidated": {
+              "$ref": "#/definitions/formValidated"
+            },
+            "dateDeclaration": { "type": "string" },
+            "dateConsultationCSE": { "type": "string" },
+            "datePublication": { "type": "string" },
+            "lienPublication": { "type": "string" },
+            "indicateurUn": { "type": "integer" },
+            "indicateurDeux": { "type": "integer" },
+            "indicateurDeuxTroisEcart": { "type": "number" },
+            "indicateurDeuxTroisNombreSalaries": { "type": "number" },
+            "indicateurTrois": { "type": "integer" },
+            "indicateurQuatre": { "type": "integer" },
+            "indicateurCinq": { "type": "integer" },
+            "noteFinale": { "type": "integer" },
+            "nombrePointsMax": { "type": "integer" },
+            "noteFinaleSur100": { "type": "integer" },
+            "mesuresCorrection": {
+              "type": "string",
+              "enum": ["mmo", "me", "mne"]
+            }
           }
-        },
-        "declaration": {
-          "dateDeclaration": { "type": "string" },
-          "indicateurUn": { "type": "integer" },
-          "indicateurDeux": { "type": "integer" },
-          "indicateurDeuxTroisEcart": { "type": "number" },
-          "indicateurDeuxTroisNombreSalaries": { "type": "number" },
-          "indicateurTrois": { "type": "integer" },
-          "indicateurQuatre": { "type": "integer" },
-          "indicateurCinq": { "type": "integer" },
-          "noteFinale": { "type": "integer" },
-          "nombrePointsMax": { "type": "integer" },
-          "noteFinaleSur100": { "type": "integer" },
-          "mesuresCorrection": { "type": "boolean" }
         }
       }
     },

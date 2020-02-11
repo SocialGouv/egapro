@@ -25,7 +25,7 @@ interface Props extends RouteComponentProps {
 }
 
 function IndicateurUn({ state, dispatch }: Props) {
-  const { csp } = state.indicateurUn;
+  const { csp, coef, autre } = state.indicateurUn;
   const readOnly = state.indicateurUn.formValidated === "Valid";
 
   // le formulaire d'effectif n'est pas validé
@@ -73,7 +73,13 @@ function IndicateurUn({ state, dispatch }: Props) {
 
   return (
     <PageIndicateurUn>
-      <IndicateurUnTypeForm csp={csp} readOnly={readOnly} dispatch={dispatch} />
+      <IndicateurUnTypeForm
+        csp={csp}
+        coef={coef}
+        autre={autre}
+        readOnly={readOnly}
+        dispatch={dispatch}
+      />
       {csp ? (
         <IndicateurUnCsp state={state} dispatch={dispatch} />
       ) : (
@@ -88,7 +94,7 @@ function PageIndicateurUn({ children }: { children: ReactNode }) {
     <Page
       title="Indicateur écart de rémunération"
       tagline={[
-        "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE ) et par tranche d’âge."
+        "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE) et par tranche d’âge."
       ]}
     >
       {children}

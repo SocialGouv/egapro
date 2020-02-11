@@ -27,7 +27,8 @@ import {
 } from "../../components/SimulatorLink";
 import {
   messageEcartNombreEquivalentSalaries,
-  displayPercent
+  displayPercent,
+  messageMesureCorrection
 } from "../../utils/helpers";
 
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm";
@@ -121,7 +122,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
         <div>
           <InfoBloc
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car il n’y a pas eu de promotion durant la période de référence."
+            text="car il n’y a pas eu d'augmentation durant la période de référence."
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>
@@ -189,6 +190,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
           results={results}
           indicateurSexeSurRepresente={indicateurSexeSurRepresente}
           plusPetitNombreSalaries={plusPetitNombreSalaries}
+          correctionMeasure={correctionMeasure}
         />
       )}
     </PageIndicateurDeuxTrois>
@@ -198,7 +200,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
 function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur écart de taux d'augmentations"
+      title="Indicateur écart de taux d'augmentation"
       tagline="Le nombre de femmes et d’hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
     >
       {children}
@@ -248,10 +250,12 @@ export const getResults = (
 export function AdditionalInfo({
   indicateurSexeSurRepresente,
   plusPetitNombreSalaries,
+  correctionMeasure,
   results
 }: {
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   plusPetitNombreSalaries: "hommes" | "femmes" | undefined;
+  correctionMeasure: boolean;
   results: Results;
 }) {
   return (
@@ -269,6 +273,9 @@ export function AdditionalInfo({
           plusPetitNombreSalaries
         )}
       </p>
+      {correctionMeasure && (
+        <p>{messageMesureCorrection(indicateurSexeSurRepresente, "35/35")}</p>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ export type AppState = {
     formValidated: FormState;
     nomEntreprise: string;
     trancheEffectifs: TrancheEffectifs;
+    anneeDeclaration: number | undefined;
     debutPeriodeReference: string;
     finPeriodeReference: string;
   };
@@ -13,6 +14,8 @@ export type AppState = {
   indicateurUn: {
     formValidated: FormState;
     csp: boolean;
+    coef: boolean;
+    autre: boolean;
     remunerationAnnuelle: Array<GroupeIndicateurUn>;
     coefficientGroupFormValidated: FormState;
     coefficientEffectifFormValidated: FormState;
@@ -46,6 +49,40 @@ export type AppState = {
     nombreSalariesHommes: number | undefined;
     nombreSalariesFemmes: number | undefined;
   };
+  informationsEntreprise: {
+    formValidated: FormState;
+    nomEntreprise: string;
+    siren: string;
+    codeNaf: string;
+    region: string;
+    departement: string;
+    adresse: string;
+    codePostal: string;
+    commune: string;
+    structure: Structure;
+    nomUES: string;
+    nombreEntreprises: number | undefined;
+    entreprisesUES: Array<EntrepriseUES>;
+  };
+  informationsDeclarant: {
+    formValidated: FormState;
+    nom: string;
+    prenom: string;
+    tel: string;
+    email: string;
+    acceptationCGU: boolean;
+  };
+  declaration: {
+    formValidated: FormState;
+    mesuresCorrection: string;
+    dateConsultationCSE: string;
+    datePublication: string;
+    lienPublication: string;
+    dateDeclaration: string;
+    noteIndex: number | undefined;
+    totalPoint: number;
+    totalPointCalculable: number;
+  };
 };
 
 export type PeriodeDeclaration =
@@ -57,6 +94,13 @@ export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus";
 
 export type FormState = "None" | "Valid" | "Invalid";
 
+export type Structure = "Entreprise" | "Unité Economique et Sociale (UES)";
+
+export interface EntrepriseUES {
+  nom: string;
+  siren: string;
+}
+
 export type ActionType =
   | {
       type: "resetState";
@@ -66,11 +110,11 @@ export type ActionType =
       data: any;
     }
   | {
-      type: "updateInformations";
-      data: ActionInformationsData;
+      type: "updateInformationsSimulation";
+      data: ActionInformationsSimulationData;
     }
   | {
-      type: "validateInformations";
+      type: "validateInformationsSimulation";
       valid: FormState;
     }
   | {
@@ -151,11 +195,45 @@ export type ActionType =
   | {
       type: "validateIndicateurCinq";
       valid: FormState;
+    }
+  | {
+      type: "updateInformationsEntreprise";
+      data: ActionInformationsEntrepriseData;
+    }
+  | {
+      type: "validateInformationsEntreprise";
+      valid: FormState;
+    }
+  | {
+      type: "updateInformationsDeclarant";
+      data: ActionInformationsDeclarantData;
+    }
+  | {
+      type: "validateInformationsDeclarant";
+      valid: FormState;
+    }
+  | {
+      type: "updateDeclaration";
+      data: ActionDeclarationData;
+    }
+  | {
+      type: "validateDeclaration";
+      valid: FormState;
+      indicateurUnData: DeclarationIndicateurUnData;
+      indicateurDeuxData: DeclarationIndicateurDeuxData;
+      indicateurTroisData: DeclarationIndicateurTroisData;
+      indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData;
+      indicateurQuatreData: DeclarationIndicateurQuatreData;
+      indicateurCinqData: DeclarationIndicateurCinqData;
+      noteIndex: number | undefined;
+      totalPoint: number;
+      totalPointCalculable: number;
     };
 
-export type ActionInformationsData = {
+export type ActionInformationsSimulationData = {
   nomEntreprise: string;
   trancheEffectifs: TrancheEffectifs;
+  anneeDeclaration: number | undefined;
   debutPeriodeReference: string;
   finPeriodeReference: string;
 };
@@ -166,6 +244,8 @@ export type ActionEffectifData = {
 
 export type ActionIndicateurUnTypeData = {
   csp: boolean;
+  coef: boolean;
+  autre: boolean;
 };
 
 export type ActionIndicateurUnCspData = {
@@ -183,9 +263,27 @@ export type ActionIndicateurUnCoefData = {
       }>;
 };
 
+export type DeclarationIndicateurUnData = {
+  nombreCoefficients: Number | undefined;
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+};
+
 export type ActionIndicateurDeuxData = {
   presenceAugmentation: boolean;
   tauxAugmentation: Array<GroupeIndicateurDeux>;
+};
+
+export type DeclarationIndicateurDeuxData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
 };
 
 export type ActionIndicateurTroisData = {
@@ -193,11 +291,30 @@ export type ActionIndicateurTroisData = {
   tauxPromotion: Array<GroupeIndicateurTrois>;
 };
 
+export type DeclarationIndicateurTroisData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
+};
+
 export type ActionIndicateurDeuxTroisData = {
   presenceAugmentationPromotion: boolean;
   nombreAugmentationPromotionFemmes: number | undefined;
   nombreAugmentationPromotionHommes: number | undefined;
   periodeDeclaration: PeriodeDeclaration;
+};
+
+export type DeclarationIndicateurDeuxTroisData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinalEcart: Number | undefined;
+  resultatFinalNombreSalaries: Number | undefined;
+  sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+  mesuresCorrection: boolean;
 };
 
 export type DateInterval = {
@@ -211,9 +328,52 @@ export type ActionIndicateurQuatreData = {
   nombreSalarieesAugmentees: number | undefined;
 };
 
+export type DeclarationIndicateurQuatreData = {
+  motifNonCalculable: string;
+  motifNonCalculablePrecision: string;
+  resultatFinal: Number | undefined;
+  noteFinale: Number | undefined;
+};
+
 export type ActionIndicateurCinqData = {
   nombreSalariesHommes: number | undefined;
   nombreSalariesFemmes: number | undefined;
+};
+
+export type DeclarationIndicateurCinqData = {
+  resultatFinal: Number | undefined;
+  sexeSurRepresente: undefined | "egalite" | "femmes" | "hommes";
+  noteFinale: Number | undefined;
+};
+
+export type ActionInformationsEntrepriseData = {
+  nomEntreprise: string;
+  siren: string;
+  codeNaf: string;
+  region: string;
+  departement: string;
+  adresse: string;
+  codePostal: string;
+  commune: string;
+  structure: Structure;
+  nomUES: string;
+  nombreEntreprises: number | undefined;
+  entreprisesUES: Array<EntrepriseUES>;
+};
+
+export type ActionInformationsDeclarantData = {
+  nom: string;
+  prenom: string;
+  tel: string;
+  email: string;
+  acceptationCGU: boolean;
+};
+
+export type ActionDeclarationData = {
+  mesuresCorrection: string;
+  dateConsultationCSE: string;
+  datePublication: string;
+  lienPublication: string;
 };
 
 ////

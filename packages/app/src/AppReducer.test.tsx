@@ -3,6 +3,7 @@ import {
   TranchesAges,
   FormState,
   PeriodeDeclaration,
+  Structure,
   TrancheEffectifs
 } from "./globals.d";
 
@@ -13,6 +14,19 @@ import stateComplete from "./__fixtures__/stateComplete";
 import stateCompleteAndValidate from "./__fixtures__/stateCompleteAndValidate";
 
 const stateUndefined = undefined;
+
+const realDate = global.Date;
+
+// Make sure we always get the same "new Date()" value for the AppReducer's
+// auto-calculated `dateDeclaration` in `validateDeclaration`
+beforeEach(() => {
+  // @ts-ignore
+  global.Date = jest.fn(() => new realDate(1578393480399));
+});
+
+afterEach(() => {
+  global.Date = realDate;
+});
 
 //////////////////
 // STATE /////////
@@ -46,12 +60,13 @@ describe("resetState", () => {
 // UPDATE ////////
 //////////////////
 
-describe("updateInformations", () => {
+describe("updateInformationsSimulation", () => {
   const action = {
-    type: "updateInformations" as "updateInformations",
+    type: "updateInformationsSimulation" as "updateInformationsSimulation",
     data: {
       nomEntreprise: "acme",
       trancheEffectifs: "251 à 999" as TrancheEffectifs,
+      anneeDeclaration: 2018,
       debutPeriodeReference: "2019-10-15",
       finPeriodeReference: "2020-10-14"
     }
@@ -195,7 +210,7 @@ describe("updateEffectif", () => {
 describe("updateIndicateurUnType", () => {
   const action = {
     type: "updateIndicateurUnType" as "updateIndicateurUnType",
-    data: { csp: false }
+    data: { csp: false, coef: false, autre: false }
   };
 
   test("nothing undefined state", () => {
@@ -653,13 +668,94 @@ describe("updateIndicateurCinq", () => {
   });
 });
 
+describe("updateInformationsEntreprise", () => {
+  const action = {
+    type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
+    data: {
+      nomEntreprise: "acme",
+      siren: "12345",
+      codeNaf: "6789",
+      region: "Languedoc-Roussillon",
+      departement: "Hérault",
+      adresse: "2 rue du mérou",
+      codePostal: "34000",
+      commune: "Montpellier",
+      structure: "Unité Economique et Sociale (UES)" as Structure,
+      nomUES: "foobar UES",
+      nombreEntreprises: 2,
+      entreprisesUES: [{ nom: "entreprise 1", siren: "12345" }]
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("updateInformationsDeclarant", () => {
+  const action = {
+    type: "updateInformationsDeclarant" as "updateInformationsDeclarant",
+    data: {
+      nom: "Norris",
+      prenom: "Chuck",
+      tel: "0102030405",
+      email: "foo@bar.com",
+      acceptationCGU: true
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("updateDeclaration", () => {
+  const action = {
+    type: "updateDeclaration" as "updateDeclaration",
+    data: {
+      mesuresCorrection: "mmo",
+      dateConsultationCSE: "01/02/2017",
+      datePublication: "01/02/2020",
+      lienPublication: "https://example.com"
+    }
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
 //////////////////
 // VALIDATE //////
 //////////////////
 
-describe("validateInformations", () => {
+describe("validateInformationsSimulation", () => {
   const action = {
-    type: "validateInformations" as "validateInformations",
+    type: "validateInformationsSimulation" as "validateInformationsSimulation",
     valid: "Valid" as FormState
   };
 
@@ -710,7 +806,7 @@ describe("validateEffectif", () => {
   describe("None with csp false", () => {
     const actionUpdateIndicateurUnType = {
       type: "updateIndicateurUnType" as "updateIndicateurUnType",
-      data: { csp: false }
+      data: { csp: false, coef: false, autre: false }
     };
 
     const stateCompleteAndValidateCoef = AppReducer(
@@ -898,6 +994,114 @@ describe("validateIndicateurCinq", () => {
   const action = {
     type: "validateIndicateurCinq" as "validateIndicateurCinq",
     valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("validateInformationsEntreprise", () => {
+  const action = {
+    type: "validateInformationsEntreprise" as "validateInformationsEntreprise",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("validateInformationsDeclarant", () => {
+  const action = {
+    type: "validateInformationsDeclarant" as "validateInformationsDeclarant",
+    valid: "Valid" as FormState
+  };
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toMatchSnapshot();
+  });
+
+  test("change default state", () => {
+    expect(AppReducer(stateDefault, action)).toMatchSnapshot();
+  });
+
+  test("change complete state", () => {
+    expect(AppReducer(stateComplete, action)).toMatchSnapshot();
+  });
+});
+
+describe("validateDeclaration", () => {
+  const action = {
+    type: "validateDeclaration" as "validateDeclaration",
+    valid: "Valid" as FormState,
+    indicateurUnData: {
+      nombreCoefficients: 6,
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 8.0,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 31
+    },
+    indicateurDeuxData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 5.0,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 10,
+      mesuresCorrection: false
+    },
+    indicateurTroisData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 3.0,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 15,
+      mesuresCorrection: false
+    },
+    indicateurDeuxTroisData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinalEcart: 25,
+      resultatFinalNombreSalaries: 5,
+      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      noteFinale: 25,
+      mesuresCorrection: false
+    },
+    indicateurQuatreData: {
+      motifNonCalculable: "",
+      motifNonCalculablePrecision: "",
+      resultatFinal: 80.0,
+      noteFinale: 0
+    },
+    indicateurCinqData: {
+      resultatFinal: 4.0,
+      sexeSurRepresente: "hommes" as
+        | undefined
+        | "egalite"
+        | "femmes"
+        | "hommes",
+      noteFinale: 10
+    },
+    noteIndex: 78,
+    totalPoint: 66,
+    totalPointCalculable: 85
   };
 
   test("nothing undefined state", () => {

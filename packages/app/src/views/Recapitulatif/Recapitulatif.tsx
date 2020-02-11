@@ -17,6 +17,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries";
 import Page from "../../components/Page";
 import ActionBar from "../../components/ActionBar";
 import ButtonAction from "../../components/ButtonAction";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 import RecapitulatifIndex from "./RecapitulatifIndex";
 import RecapitulatifInformations from "./RecapitulatifInformations";
@@ -89,7 +90,8 @@ function Recapitulatif({ state }: Props) {
 
   const allIndicateurValid =
     (state.indicateurUn.formValidated === "Valid" ||
-      !effectifsIndicateurUnCalculable) &&
+      // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
+      (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
     (trancheEffectifs !== "50 à 250"
       ? (state.indicateurDeux.formValidated === "Valid" ||
           !effectifsIndicateurDeuxCalculable) &&
@@ -100,7 +102,7 @@ function Recapitulatif({ state }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
-  const { noteIndex, totalPointCalculable } = calculNoteIndex(
+  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
     trancheEffectifs,
     noteIndicateurUn,
     noteIndicateurDeux,
@@ -120,6 +122,7 @@ function Recapitulatif({ state }: Props) {
       <RecapitulatifInformations
         informationsFormValidated={state.informations.formValidated}
         trancheEffectifs={state.informations.trancheEffectifs}
+        anneeDeclaration={state.informations.anneeDeclaration}
         debutPeriodeReference={state.informations.debutPeriodeReference}
         finPeriodeReference={state.informations.finPeriodeReference}
         nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
@@ -127,6 +130,7 @@ function Recapitulatif({ state }: Props) {
       <RecapitulatifIndex
         allIndicateurValid={allIndicateurValid}
         noteIndex={noteIndex}
+        totalPoint={totalPoint}
         totalPointCalculable={totalPointCalculable}
       />
       <RecapitulatifIndicateurUn
@@ -135,6 +139,7 @@ function Recapitulatif({ state }: Props) {
         effectifEtEcartRemuParTranche={effectifEtEcartRemuParTranche}
         indicateurEcartRemuneration={indicateurEcartRemuneration}
         indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
+        indicateurUnParCSP={state.indicateurUn.csp}
         noteIndicateurUn={noteIndicateurUn}
       />
       {(trancheEffectifs !== "50 à 250" && (
@@ -193,6 +198,10 @@ function Recapitulatif({ state }: Props) {
         indicateurEcartNombreSalarieesAugmentees={
           indicateurEcartNombreSalarieesAugmentees
         }
+        presenceCongeMat={state.indicateurQuatre.presenceCongeMat}
+        nombreSalarieesPeriodeAugmentation={
+          state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
+        }
         noteIndicateurQuatre={noteIndicateurQuatre}
       />
       <RecapitulatifIndicateurCinq
@@ -203,6 +212,9 @@ function Recapitulatif({ state }: Props) {
         }
         noteIndicateurCinq={noteIndicateurCinq}
       />
+      <ActionBar>
+        <ButtonSimulatorLink to="/informations-entreprise" label="suivant" />
+      </ActionBar>
       <ActionBar>
         <ButtonAction
           label="imprimer"
@@ -218,6 +230,7 @@ function Recapitulatif({ state }: Props) {
         href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
         target="_blank"
         rel="noopener noreferrer"
+        css={styles.monAvis}
       >
         <img
           src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg"
@@ -233,6 +246,11 @@ const styles = {
   info: css({
     marginLeft: 4,
     fontSize: 12
+  }),
+  monAvis: css({
+    "@media print": {
+      display: "none"
+    }
   })
 };
 

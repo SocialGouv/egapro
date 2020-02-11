@@ -9,8 +9,11 @@ import globalStyles from "../utils/globalStyles";
 import { useLayoutType } from "../components/GridContext";
 import Header from "../components/Header";
 
+import CGU from "../views/CGU";
 import FAQ from "../views/FAQ";
 import Home from "../views/Home";
+import MentionsLegales from "../views/MentionsLegales";
+import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite";
 import PageNotFound from "../views/PageNotFound";
 
 import Simulateur from "./Simulateur";
@@ -51,6 +54,25 @@ function AppLayout({ state, dispatch }: Props) {
                 <Simulateur code={code} state={state} dispatch={dispatch} />
               )}
             />
+            <Route
+              path="/mentions-legales"
+              exact
+              render={props => (
+                <MentionsLegales {...props} dispatch={dispatch} />
+              )}
+            />
+            <Route
+              path="/cgu"
+              exact
+              render={props => <CGU {...props} dispatch={dispatch} />}
+            />
+            <Route
+              path="/politique-confidentialite"
+              exact
+              render={props => (
+                <PolitiqueConfidentialite {...props} dispatch={dispatch} />
+              )}
+            />
             <Route component={PageNotFound} />
           </Switch>
         </MainScrollView>
@@ -76,6 +98,7 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
+    overflow: "auto",
     background:
       "linear-gradient(180deg, #FFFFFF 79px, rgba(255, 255, 255, 0) 79px, #FFFFFF 100%), #EFF0FA",
     "@media print": {

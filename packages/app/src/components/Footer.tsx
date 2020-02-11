@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import { Link } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 import Logo from "./Logo";
@@ -48,6 +49,15 @@ function Footer() {
         >
           retrouvez le simulateur au format Excel
         </a>
+        <Link to="/mentions-legales" css={styles.link}>
+          mentions légales
+        </Link>
+        <Link to="/cgu" css={styles.link}>
+          conditions générales d'utilisation
+        </Link>
+        <Link to="/politique-confidentialite" css={styles.link}>
+          politique de confidentialité
+        </Link>
       </div>
 
       <div css={styles.footerInfo}>
@@ -82,7 +92,7 @@ function Footer() {
 const styles = {
   footer: css({
     backgroundColor: "#FFF",
-    height: 80,
+    height: 120,
     marginTop: 54,
     flexShrink: 0,
     display: "flex",

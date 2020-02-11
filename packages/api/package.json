@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "main": "index.js",
   "author": "Incubateur des Ministères Sociaux <dsi-incubateur@sg.social.gouv.fr> (https://incubateur.social.gouv.fr)",
   "license": "Apache-2.0",
@@ -19,31 +19,31 @@
     "dotenv": "8.2.0",
     "koa": "2.11.0",
     "koa-bodyparser": "4.2.1",
-    "koa-router": "7.4.0",
+    "koa-router": "8.0.6",
     "node-fetch": "2.6.0",
     "nodemailer": "6.4.2",
     "pino": "5.16.0"
   },
   "devDependencies": {
     "@sentry/types": "5.11.0",
-    "@socialgouv/tslint-config-recommended": "0.14.0",
+    "@socialgouv/tslint-config-recommended": "0.15.0",
     "@types/btoa": "1.2.3",
     "@types/dotenv": "6.1.1",
-    "@types/jest": "24.9.0",
+    "@types/jest": "25.1.0",
     "@types/koa": "2.11.0",
     "@types/koa-bodyparser": "4.3.0",
     "@types/koa-router": "7.4.0",
     "@types/koa__cors": "3.0.1",
-    "@types/node": "12.12.24",
+    "@types/node": "12.12.25",
     "@types/node-fetch": "2.5.4",
     "@types/nodemailer": "6.4.0",
     "@types/pino": "5.15.3",
     "jest": "24.9.0",
     "nodemon": "2.0.2",
     "prettier": "1.19.1",
-    "ts-jest": "24.3.0",
+    "ts-jest": "25.0.0",
     "ts-node": "8.6.2",
     "tslint": "5.20.1",
-    "typescript": "3.7.4"
+    "typescript": "3.7.5"
   }
 }

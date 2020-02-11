@@ -1,35 +1,34 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Field, FieldMetaState, Form, useField } from "react-final-form";
+import { Form, useField } from "react-final-form";
 import createDecorator from "final-form-calculate";
 
-import { AppState, FormState, ActionInformationsData } from "../../globals";
+import {
+  AppState,
+  FormState,
+  ActionInformationsSimulationData
+} from "../../globals";
 
 import {
-  mustBeDate,
+  mustBeNumber,
+  parseIntFormValue,
+  parseIntStateValue,
   parseTrancheEffectifsFormValue,
-  required
+  required,
+  validateDate
 } from "../../utils/formHelpers";
-import {
-  calendarYear,
-  dateToString,
-  parseDate,
-  Year
-} from "../../utils/helpers";
+import { calendarYear, parseDate, Year } from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
+import AnneeDeclaration from "../../components/AnneeDeclaration";
+import FieldDate from "../../components/FieldDate";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Input, { hasFieldError } from "../../components/Input";
 import RadioLabels from "../../components/RadioLabels";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 import globalStyles from "../../utils/globalStyles";
-
-import DatePicker, { registerLocale } from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import fr from "date-fns/locale/fr";
-registerLocale("fr", fr);
 
 ///////////////////
 
@@ -44,31 +43,42 @@ const validate = (value: string) => {
   }
 };
 
-const validateDate = (value: string) => {
+const validateInt = (value: string) => {
   const requiredError = required(value);
-  const mustBeDateError = mustBeDate(value);
-  if (!requiredError && !mustBeDateError) {
+  const mustBeNumberError = mustBeNumber(value);
+  if (!requiredError && !mustBeNumberError) {
     return undefined;
   } else {
-    return {
-      required: requiredError,
-      mustBeDate: mustBeDateError
-    };
+    return { required: requiredError, mustBeNumber: mustBeNumberError };
   }
 };
 
 const validateForm = ({
   nomEntreprise,
+  anneeDeclaration,
   debutPeriodeReference,
   finPeriodeReference
 }: {
   nomEntreprise: string;
+  anneeDeclaration: string;
   debutPeriodeReference: string;
   finPeriodeReference: string;
-}) => ({
-  nomEntreprise: validate(nomEntreprise),
-  debutPeriodeReference: validateDate(debutPeriodeReference)
-});
+}) => {
+  const parsedFinPeriodeReference = parseDate(finPeriodeReference);
+  return {
+    nomEntreprise: validate(nomEntreprise),
+    anneeDeclaration: validateInt(anneeDeclaration),
+    debutPeriodeReference: validateDate(debutPeriodeReference),
+    finPeriodeReference:
+      parsedFinPeriodeReference !== undefined &&
+      parsedFinPeriodeReference.getFullYear().toString() === anneeDeclaration
+        ? undefined
+        : {
+            correspondanceAnneeDeclaration:
+              "L'année de fin de période de référence doit correspondre à l'année au titre de laquelle les indicateurs sont calculés"
+          }
+  };
+};
 
 const valueValidateForCalculator = (value: string) => {
   return validateDate(value) === undefined;
@@ -100,19 +110,22 @@ const calculator = createDecorator(
 interface Props {
   informations: AppState["informations"];
   readOnly: boolean;
-  updateInformations: (data: ActionInformationsData) => void;
-  validateInformations: (valid: FormState) => void;
+  updateInformationsSimulation: (
+    data: ActionInformationsSimulationData
+  ) => void;
+  validateInformationsSimulation: (valid: FormState) => void;
 }
 
-function InformationsForm({
+function InformationsSimulationForm({
   informations,
   readOnly,
-  updateInformations,
-  validateInformations
+  updateInformationsSimulation,
+  validateInformationsSimulation
 }: Props) {
-  const initialValues: ActionInformationsData = {
+  const initialValues = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
+    anneeDeclaration: parseIntStateValue(informations.anneeDeclaration),
     debutPeriodeReference: informations.debutPeriodeReference,
     finPeriodeReference: informations.finPeriodeReference
   };
@@ -121,13 +134,15 @@ function InformationsForm({
     const {
       nomEntreprise,
       trancheEffectifs,
+      anneeDeclaration,
       debutPeriodeReference,
       finPeriodeReference
     } = formData;
 
-    updateInformations({
+    updateInformationsSimulation({
       nomEntreprise: nomEntreprise,
       trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
+      anneeDeclaration: parseIntFormValue(anneeDeclaration),
       debutPeriodeReference: debutPeriodeReference,
       finPeriodeReference: finPeriodeReference
     });
@@ -135,7 +150,7 @@ function InformationsForm({
 
   const onSubmit = (formData: any) => {
     saveForm(formData);
-    validateInformations("Valid");
+    validateInformationsSimulation("Valid");
   };
 
   return (
@@ -160,7 +175,7 @@ function InformationsForm({
 
           <RadioLabels
             fieldName="trancheEffectifs"
-            label="Quelle est la tranche d'effectifs de l'entreprise ?"
+            label="Quelle est la tranche d'effectifs de l'entreprise ou de l'UES ?"
             choices={[
               {
                 label: "Entre 50 et 250",
@@ -179,6 +194,12 @@ function InformationsForm({
             readOnly={readOnly}
           />
 
+          <AnneeDeclaration
+            label="Année au titre de laquelle les indicateurs sont calculés"
+            name="anneeDeclaration"
+            readOnly={readOnly}
+          />
+
           <FieldPeriodeReference readOnly={readOnly} />
 
           {readOnly ? (
@@ -187,7 +208,9 @@ function InformationsForm({
               &emsp;
               {informations.formValidated === "Valid" && (
                 <p css={styles.edit}>
-                  <ActionLink onClick={() => validateInformations("None")}>
+                  <ActionLink
+                    onClick={() => validateInformationsSimulation("None")}
+                  >
                     modifier les données saisies
                   </ActionLink>
                 </p>
@@ -218,14 +241,12 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
       >
-        Quel est le nom de l'entreprise ?
+        Quel est le nom de la simulation (ex : nom_entreprise_date)
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
       </div>
-      <p css={styles.error}>
-        {error && "le nom de l'entreprise n’est pas valide"}
-      </p>
+      <p css={styles.error}>{error && "le nom n’est pas valide"}</p>
     </div>
   );
 }
@@ -234,7 +255,8 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
   return (
     <div>
       <label css={styles.label}>
-        Sur quelle période souhaitez-vous faire votre déclaration ?
+        Quelle est la période de référence choisie pour le calcul de votre Index
+        ?
       </label>
       <div css={styles.dates}>
         <FieldDate
@@ -248,56 +270,6 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
           readOnly={readOnly}
         />
       </div>
-    </div>
-  );
-}
-
-const hasMustBeDateError = (meta: FieldMetaState<string>) =>
-  meta.error && meta.touched && meta.error.mustBeDate;
-
-function FieldDate({
-  name,
-  label,
-  readOnly
-}: {
-  name: string;
-  label: string;
-  readOnly: boolean;
-}) {
-  const field = useField(name, { validate: validateDate });
-  const error = hasFieldError(field.meta);
-  const mustBeDateError = hasMustBeDateError(field.meta);
-
-  return (
-    <div css={styles.dateField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
-        {label}
-      </label>
-      <div css={styles.fieldRow}>
-        <Field name={name} validate={validateDate}>
-          {props => (
-            <DatePicker
-              locale="fr"
-              dateFormat="dd/MM/yyyy"
-              selected={parseDate(props.input.value)}
-              onChange={date =>
-                date ? props.input.onChange(dateToString(date)) : ""
-              }
-              readOnly={readOnly}
-              name={name}
-            />
-          )}
-        </Field>
-      </div>
-      <p css={styles.error}>
-        {error &&
-          (mustBeDateError
-            ? "ce champ doit contenir une date au format jj/mm/aaaa"
-            : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
-      </p>
     </div>
   );
 }
@@ -340,17 +312,6 @@ const styles = {
     display: "flex",
     justifyContent: "space-between"
   }),
-  dateField: css({
-    marginTop: 5,
-    input: {
-      display: "flex",
-      fontSize: 14,
-      paddingLeft: 22,
-      paddingRight: 22,
-      height: 38,
-      marginTop: 5
-    }
-  }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
@@ -358,4 +319,4 @@ const styles = {
   })
 };
 
-export default InformationsForm;
+export default InformationsSimulationForm;

@@ -12,15 +12,18 @@ import { useDebounceEffect } from "../utils/hooks";
 import ActivityIndicator from "../components/ActivityIndicator";
 import ErrorMessage from "../components/ErrorMessage";
 
-import HomeSimulateur from "../views/HomeSimulateur";
+import Declaration from "../views/Declaration";
 import Effectif from "../views/Effectif";
+import HomeSimulateur from "../views/HomeSimulateur";
 import IndicateurUn from "../views/Indicateur1";
 import IndicateurDeux from "../views/Indicateur2";
 import IndicateurTrois from "../views/Indicateur3";
 import IndicateurDeuxTrois from "../views/Indicateur2et3";
 import IndicateurQuatre from "../views/Indicateur4";
 import IndicateurCinq from "../views/Indicateur5";
-import Informations from "../views/Informations";
+import InformationsEntreprise from "../views/InformationsEntreprise";
+import InformationsDeclarant from "../views/InformationsDeclarant";
+import InformationsSimulation from "../views/InformationsSimulation";
 import Recapitulatif from "../views/Recapitulatif";
 
 interface Props {
@@ -89,7 +92,11 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/informations"
         render={props => (
-          <Informations {...props} state={state} dispatch={dispatch} />
+          <InformationsSimulation
+            {...props}
+            state={state}
+            dispatch={dispatch}
+          />
         )}
       />
       <Route
@@ -137,6 +144,28 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/recapitulatif"
         render={props => <Recapitulatif {...props} state={state} />}
+      />
+      <Route
+        path="/simulateur/:code/informations-entreprise"
+        render={props => (
+          <InformationsEntreprise
+            {...props}
+            state={state}
+            dispatch={dispatch}
+          />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/informations-declarant"
+        render={props => (
+          <InformationsDeclarant {...props} state={state} dispatch={dispatch} />
+        )}
+      />
+      <Route
+        path="/simulateur/:code/declaration"
+        render={props => (
+          <Declaration {...props} state={state} dispatch={dispatch} />
+        )}
       />
     </Switch>
   );
