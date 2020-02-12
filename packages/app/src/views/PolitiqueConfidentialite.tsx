@@ -244,6 +244,13 @@ function CGU({ history, location, dispatch }: Props) {
           respectant les conditions d’exemption du consentement de l’internaute
           définies par la recommandation « Cookies » de la Commission nationale
           informatique et libertés (CNIL).
+          <br />
+          <br />
+          Vous pouvez tout de même désactiver cet outil :
+          <iframe
+            css={styles.iframe}
+            src="https://matomo.fabrique.social.gouv.fr/index.php?module=CoreAdminHome&action=optOut&language=fr&backgroundColor=&fontColor=&fontSize=&fontFamily="
+          ></iframe>
         </p>
         <h2 css={styles.title}>Mise à jour des conditions d’utilisation</h2>
         <p>
@@ -272,6 +279,9 @@ const styles = {
     thead: {
       backgroundColor: "#ccc"
     }
+  }),
+  iframe: css({
+    width: 600
   })
 };
 
