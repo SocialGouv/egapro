@@ -249,6 +249,7 @@ function CGU({ history, location, dispatch }: Props) {
           Vous pouvez tout de même désactiver cet outil :
           <iframe
             css={styles.iframe}
+            title="désactivez Matomo"
             src="https://matomo.fabrique.social.gouv.fr/index.php?module=CoreAdminHome&action=optOut&language=fr&backgroundColor=&fontColor=&fontSize=&fontFamily="
           ></iframe>
         </p>
