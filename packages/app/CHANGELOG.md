@@ -3,6 +3,63 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.4.1](https://github.com/SocialGouv/egapro/compare/v2.4.0...v2.4.1) (2020-02-11)
+
+
+### Bug Fixes
+
+* **declaration:** forcer la déclaration de l'indicateur 1 par CSP si il n'est pas calculable par coefficient ([#515](https://github.com/SocialGouv/egapro/issues/515)) ([9e84ce5](https://github.com/SocialGouv/egapro/commit/9e84ce5))
+* **layout:** amélioration du layout tablet ([#516](https://github.com/SocialGouv/egapro/issues/516)) ([cb8e3c2](https://github.com/SocialGouv/egapro/commit/cb8e3c2))
+* **layout:** suppression d'un warning sur un <ul> dans un <p> ([0ae3bd0](https://github.com/SocialGouv/egapro/commit/0ae3bd0))
+* **layout:** suppression de plusieurs warnings sur des <ul> et <table> dans un <p> ([64d3636](https://github.com/SocialGouv/egapro/commit/64d3636))
+
+
+
+
+
+# [2.4.0](https://github.com/SocialGouv/egapro/compare/v2.3.1...v2.4.0) (2020-02-06)
+
+
+### Bug Fixes
+
+* **declaration:** changement de la home pour parler de la déclaration ([#508](https://github.com/SocialGouv/egapro/issues/508)) ([3b9afe1](https://github.com/SocialGouv/egapro/commit/3b9afe1))
+* **declaration:** charte graphique correcte pour le numéro "allô Index Egapro" ([#506](https://github.com/SocialGouv/egapro/issues/506)) ([972a511](https://github.com/SocialGouv/egapro/commit/972a511))
+* **declaration:** datePublication et lienPublication déplacés dans informationsComplementaires ([#424](https://github.com/SocialGouv/egapro/issues/424)) ([d4b76e0](https://github.com/SocialGouv/egapro/commit/d4b76e0))
+* **declaration:** fix typo ([573ca38](https://github.com/SocialGouv/egapro/commit/573ca38))
+* **declaration:** impression de la totalité du récapitulatif ([#467](https://github.com/SocialGouv/egapro/issues/467)) ([62f4663](https://github.com/SocialGouv/egapro/commit/62f4663))
+* **declaration:** ne pas demander le nom de l'UES si la structure est Entreprise ([#426](https://github.com/SocialGouv/egapro/issues/426)) ([99a434b](https://github.com/SocialGouv/egapro/commit/99a434b))
+* **declaration:** permettre la validation de "informations complémentaires" si la date de consultation du CSE n'est pas demandée ([#450](https://github.com/SocialGouv/egapro/issues/450)) ([3b05327](https://github.com/SocialGouv/egapro/commit/3b05327))
+* **declaration:** prise en compte des retours de la DGT (ter) ([#501](https://github.com/SocialGouv/egapro/issues/501)) ([1c110e3](https://github.com/SocialGouv/egapro/commit/1c110e3))
+* **declaration:** renommage du bouton de la déclaration de 'valider' en 'déclarer' ([e475204](https://github.com/SocialGouv/egapro/commit/e475204))
+* **declaration:** suppression des champs des effectifs globaux ([#439](https://github.com/SocialGouv/egapro/issues/439)) ([38372f1](https://github.com/SocialGouv/egapro/commit/38372f1))
+* **deps:** update dependency final-form to v4.18.7 ([#461](https://github.com/SocialGouv/egapro/issues/461)) ([5b86181](https://github.com/SocialGouv/egapro/commit/5b86181))
+* **indicateur5:** ne demander qu'une seule donnée et calculer l'autre automatiquement ([#445](https://github.com/SocialGouv/egapro/issues/445)) ([a2be1c6](https://github.com/SocialGouv/egapro/commit/a2be1c6))
+* **tests:** fix inotify watch ([#490](https://github.com/SocialGouv/egapro/issues/490)) ([6cf2a0a](https://github.com/SocialGouv/egapro/commit/6cf2a0a))
+* **website:** changement du titre en Index Egapro ([6ed9b73](https://github.com/SocialGouv/egapro/commit/6ed9b73))
+
+
+### Features
+
+* **declaration:** affichage de l'index global sur la page de déclaration ([#446](https://github.com/SocialGouv/egapro/issues/446)) ([b090eea](https://github.com/SocialGouv/egapro/commit/b090eea))
+* **declaration:** ajout de la donnée calculée dans kinto ([#495](https://github.com/SocialGouv/egapro/issues/495)) ([0fd67c0](https://github.com/SocialGouv/egapro/commit/0fd67c0))
+* **declaration:** ajout du champ "nombre d'entreprises" pour les UES ([#465](https://github.com/SocialGouv/egapro/issues/465)) ([e00e20a](https://github.com/SocialGouv/egapro/commit/e00e20a))
+* **declaration:** ajout du numéro "Allô Index Egapro" ([#470](https://github.com/SocialGouv/egapro/issues/470)) ([9e747aa](https://github.com/SocialGouv/egapro/commit/9e747aa))
+* **declaration:** l'année de déclaration se choisit dans une liste déroulante ([#474](https://github.com/SocialGouv/egapro/issues/474)) ([622e579](https://github.com/SocialGouv/egapro/commit/622e579))
+* **declaration:** le champ codeNaf est une liste de choix ([#454](https://github.com/SocialGouv/egapro/issues/454)) ([b99ad07](https://github.com/SocialGouv/egapro/commit/b99ad07))
+* **declaration:** les champs région et département sont des listes de choix ([#459](https://github.com/SocialGouv/egapro/issues/459)) ([1dd4efd](https://github.com/SocialGouv/egapro/commit/1dd4efd))
+* **declaration:** ne demande la date de consultation du CSE que si indicateur 1 pas par CSP ([#443](https://github.com/SocialGouv/egapro/issues/443)) ([6aa9015](https://github.com/SocialGouv/egapro/commit/6aa9015))
+* **declaration:** rajout d'une modalité "autre" à la déclaration de l'indicateur 1 ([#499](https://github.com/SocialGouv/egapro/issues/499)) ([c998453](https://github.com/SocialGouv/egapro/commit/c998453))
+* **declaration:** une déclaration ne peut être validée qu'une fois que tous les indicateurs ont été validés ([#428](https://github.com/SocialGouv/egapro/issues/428)) ([34af657](https://github.com/SocialGouv/egapro/commit/34af657))
+* **declaration:** validation des SIRENs ([#447](https://github.com/SocialGouv/egapro/issues/447)) ([d76f7f5](https://github.com/SocialGouv/egapro/commit/d76f7f5))
+* **declaration:** validation du format de l'adresse email ([#458](https://github.com/SocialGouv/egapro/issues/458)) ([473eb63](https://github.com/SocialGouv/egapro/commit/473eb63))
+* **declaration:** validation du format du numéro de téléphone ([#463](https://github.com/SocialGouv/egapro/issues/463)) ([68f0b99](https://github.com/SocialGouv/egapro/commit/68f0b99))
+* **RGPD:** ajout d'une page 'mentions légales' ([#473](https://github.com/SocialGouv/egapro/issues/473)) ([ab531a6](https://github.com/SocialGouv/egapro/commit/ab531a6))
+* **RGPD:** conformité RGPD ([#483](https://github.com/SocialGouv/egapro/issues/483)) ([d04b17f](https://github.com/SocialGouv/egapro/commit/d04b17f))
+
+
+
+
+
 ## [2.3.1](https://github.com/SocialGouv/egapro/compare/v2.3.0...v2.3.1) (2020-01-13)
 
 

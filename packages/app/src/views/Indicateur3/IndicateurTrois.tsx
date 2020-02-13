@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core";
 import { useCallback, ReactNode } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
@@ -24,6 +24,8 @@ import {
 
 import IndicateurTroisForm from "./IndicateurTroisForm";
 import IndicateurTroisResult from "./IndicateurTroisResult";
+
+import { messageMesureCorrection } from "../../utils/helpers";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -137,6 +139,17 @@ function IndicateurTrois({ state, dispatch }: Props) {
           )
         }
       />
+      {state.indicateurTrois.formValidated === "Valid" && correctionMeasure && (
+        <div css={styles.additionalInfo}>
+          <p>
+            {messageMesureCorrection(
+              indicateurSexeSurRepresente,
+              "de promotions",
+              "15/15"
+            )}
+          </p>
+        </div>
+      )}
     </PageIndicateurTrois>
   );
 }
@@ -151,5 +164,17 @@ function PageIndicateurTrois({ children }: { children: ReactNode }) {
     </Page>
   );
 }
+
+const styles = {
+  additionalInfo: css({
+    color: "#61676F",
+    fontSize: 14,
+    fontStyle: "italic",
+    maxWidth: 500,
+    "& > p": {
+      marginBottom: 30
+    }
+  })
+};
 
 export default IndicateurTrois;

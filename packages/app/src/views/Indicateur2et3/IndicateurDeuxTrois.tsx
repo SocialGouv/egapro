@@ -27,7 +27,8 @@ import {
 } from "../../components/SimulatorLink";
 import {
   messageEcartNombreEquivalentSalaries,
-  displayPercent
+  displayPercent,
+  messageMesureCorrection
 } from "../../utils/helpers";
 
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm";
@@ -189,6 +190,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
           results={results}
           indicateurSexeSurRepresente={indicateurSexeSurRepresente}
           plusPetitNombreSalaries={plusPetitNombreSalaries}
+          correctionMeasure={correctionMeasure}
         />
       )}
     </PageIndicateurDeuxTrois>
@@ -248,17 +250,22 @@ export const getResults = (
 export function AdditionalInfo({
   indicateurSexeSurRepresente,
   plusPetitNombreSalaries,
+  correctionMeasure,
   results
 }: {
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   plusPetitNombreSalaries: "hommes" | "femmes" | undefined;
+  correctionMeasure: boolean;
   results: Results;
 }) {
   return (
     <div css={styles.additionalInfo}>
       <p>
         {results.worst.label} <strong>{results.worst.result}</strong>, la note
-        obtenue est de <strong>{results.worst.note}/35</strong>
+        obtenue{" "}
+        {correctionMeasure &&
+          "avant prise en compte des mesures de correction "}
+        est de <strong>{results.worst.note}/35</strong>
         <br />
         {results.worst.note < results.best.note &&
           "cette note n'a pas été retenue dans le calcul de votre index car elle est la moins favorable"}
@@ -269,6 +276,15 @@ export function AdditionalInfo({
           plusPetitNombreSalaries
         )}
       </p>
+      {correctionMeasure && (
+        <p>
+          {messageMesureCorrection(
+            indicateurSexeSurRepresente,
+            "d'augmentations",
+            "35/35"
+          )}
+        </p>
+      )}
     </div>
   );
 }
