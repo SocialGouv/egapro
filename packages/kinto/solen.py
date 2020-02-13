@@ -909,9 +909,8 @@ class App(object):
                     rows.items(),
                 )
             )
-        if not bool(
-            rows
-        ):  # test d'un OrderedDict vide https://stackoverflow.com/a/23177452/330911
+        if not bool(rows):
+            # test d'un OrderedDict vide https://stackoverflow.com/a/23177452/330911
             raise AppError(
                 f"Aucune déclaration trouvée pour les critères siren={siren} et max={max}."
             )
