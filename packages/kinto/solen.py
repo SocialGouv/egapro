@@ -732,7 +732,7 @@ class App(object):
         if max is not None:
             rows = OrderedDict(islice(rows.items(), max))
         elif siren is not None:
-            rows = OrderedDict(filter(lambda r: r["SIREN_ets"] == siren or r["SIREN_UES"] == siren, rows.items()))
+            rows = OrderedDict(filter(lambda r: r[1]["SIREN_ets"] == siren or r[1]["SIREN_UES"] == siren, rows.items()))
         if not bool(rows):  # test d'un OrderedDict vide https://stackoverflow.com/a/23177452/330911
             raise AppError(f"Aucune déclaration trouvée pour les critères siren={siren} et max={max}.")
         if self.progress:
