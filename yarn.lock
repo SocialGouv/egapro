@@ -3238,10 +3238,10 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
   integrity sha512-ewFXqrQHlFsgc09MK5jP5iR7vumV/BYayNC6PgJO2LPe8vrnNFyjQjSppfEngITi0qvfKtzFvgKymGheFM9UOA==
 
-"@types/react-datepicker@2.10.0":
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/@types/react-datepicker/-/react-datepicker-2.10.0.tgz#702f107d5e6e4b8396765b9da8cb5fed0cbb07ea"
-  integrity sha512-w12xVGUf0jjwlRHC86YvatB6Iz/D1zj4sMQLelDEQDg4xBxN7WpnJHldLqwcThyimQFIv4XO97KX9Jh2vnFRVA==
+"@types/react-datepicker@2.11.0":
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/@types/react-datepicker/-/react-datepicker-2.11.0.tgz#aa6faa66de17b0ff96bc0af9d5d2506d5dd99703"
+  integrity sha512-eagG8BE3TFgPYyZb2/hG4+2delLH9z/4OWzT7wuTCKLHDDXIXgvkb2O2cW8q4/wuqnTnMxo+vl3vgPTENkofzw==
   dependencies:
     "@types/react" "*"
     date-fns "^2.0.1"
@@ -12506,10 +12506,10 @@ react-app-polyfill@1.0.5, react-app-polyfill@^1.0.5:
     regenerator-runtime "^0.13.3"
     whatwg-fetch "^3.0.0"
 
-react-datepicker@2.11.0:
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/react-datepicker/-/react-datepicker-2.11.0.tgz#61aa79750856f91ee452f296d91b9ae4ebbacb4d"
-  integrity sha512-eyaLRTX4CaMnW4HW34gYmG4cT/3R9vyAIEAQ1SSWKBO77pTs6RfxUzbLRKOheyIlQM7BmXhLGOxq80vvlCb09w==
+react-datepicker@2.12.1:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/react-datepicker/-/react-datepicker-2.12.1.tgz#de37cc6cda4fd47153a618090a7628da1c6c97d0"
+  integrity sha512-Y5xIim/tzHZ0M+bo6EAZZX5KZ7ov+N6VceSM981bS9dNDoD+ezUAT1/DpeSRXxmFBrNnd5dW4BhlgE36ZzkfLQ==
   dependencies:
     classnames "^2.2.6"
     date-fns "^2.0.1"
