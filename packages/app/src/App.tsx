@@ -56,7 +56,7 @@ function App() {
   return (
     <Router history={piwik.connectToHistory(history)}>
       <GridProvider>
-        {new Date() < new Date("2020-02-19 14:00:00") && (
+        {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
           <div css={styles.bannerWrapper}>
             <InfoBloc
               title="Interruption de service programmée"
