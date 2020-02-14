@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { useState, ReactNode } from "react";
 
 import globalStyles from "../utils/globalStyles";
 
@@ -11,25 +11,44 @@ interface Props {
   title: string;
   text?: ReactNode;
   icon?: "warning" | "cross" | null;
+  additionalCss?: any;
+  closeButton?: boolean;
 }
 
-function InfoBloc({ title, text, icon = "warning" }: Props) {
+function InfoBloc({
+  title,
+  text,
+  icon = "warning",
+  additionalCss,
+  closeButton = false
+}: Props) {
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
-  return (
-    <div css={[styles.bloc, css({ width })]}>
-      {icon === null ? null : (
-        <div css={styles.blocIcon}>
-          {icon === "cross" ? <IconCircleCross /> : <IconWarning />}
-        </div>
-      )}
+  const [isBlocVisible, setIsBlocVisible] = useState(true);
+  const discardBloc = () => setIsBlocVisible(false);
 
-      <div>
-        <p css={styles.blocTitle}>{title}</p>
-        {text && <p css={styles.blocText}>{text}</p>}
+  if (isBlocVisible) {
+    return (
+      <div css={[styles.bloc, css({ width }), additionalCss]}>
+        {icon === null ? null : (
+          <div css={styles.blocIcon}>
+            {icon === "cross" ? <IconCircleCross /> : <IconWarning />}
+          </div>
+        )}
+
+        <div css={styles.textWrapper}>
+          <p css={styles.blocTitle}>{title}</p>
+          {text && <p css={styles.blocText}>{text}</p>}
+        </div>
+        {closeButton && (
+          <button css={styles.buttonClose} onClick={discardBloc}>
+            x
+          </button>
+        )}
       </div>
-    </div>
-  );
+    );
+  }
+  return null;
 }
 
 const styles = {
@@ -38,7 +57,8 @@ const styles = {
     display: "flex",
     alignItems: "center",
     border: `2px solid ${globalStyles.colors.primary}`,
-    borderRadius: 5
+    borderRadius: 5,
+    position: "relative"
   }),
   blocTitle: css({
     fontSize: 18,
@@ -49,11 +69,21 @@ const styles = {
     marginRight: 22,
     color: globalStyles.colors.primary
   },
+  textWrapper: {
+    flexGrow: 1
+  },
   blocText: css({
     marginTop: 4,
     fontSize: 14,
     lineHeight: "17px",
     color: globalStyles.colors.primary
+  }),
+  buttonClose: css({
+    backgroundColor: "inherit",
+    border: 0,
+    color: globalStyles.colors.primary,
+    cursor: "pointer",
+    padding: 10
   })
 };
 
