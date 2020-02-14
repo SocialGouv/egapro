@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.6.0](https://github.com/SocialGouv/egapro/compare/v2.5.0...v2.6.0) (2020-02-14)
+
+
+### Bug Fixes
+
+* **declaration:** afficher une ligne de moins que le nombre d'entreprises composant l'UES dans le formulaire "informations entreprise/UES" ([#528](https://github.com/SocialGouv/egapro/issues/528)) ([8bd3b0e](https://github.com/SocialGouv/egapro/commit/8bd3b0e))
+* **deps:** update dependency koa-router to v8.0.7 ([#502](https://github.com/SocialGouv/egapro/issues/502)) ([39a2f8e](https://github.com/SocialGouv/egapro/commit/39a2f8e))
+* **deps:** update dependency react-app-polyfill to v1.0.6 ([#488](https://github.com/SocialGouv/egapro/issues/488)) ([8e06ce8](https://github.com/SocialGouv/egapro/commit/8e06ce8))
+* **deps:** update dependency react-datepicker to v2.12.1 ([#510](https://github.com/SocialGouv/egapro/issues/510)) ([7296f10](https://github.com/SocialGouv/egapro/commit/7296f10))
+* **deps:** update dependency react-scripts to v3.3.1 ([#489](https://github.com/SocialGouv/egapro/issues/489)) ([f2a2457](https://github.com/SocialGouv/egapro/commit/f2a2457))
+* **deps:** update sentry monorepo ([#477](https://github.com/SocialGouv/egapro/issues/477)) ([7584c4d](https://github.com/SocialGouv/egapro/commit/7584c4d))
+
+
+### Features
+
+* **declaration:** affichage d'un bandeau pour prévenir d'une interruption de service ([#526](https://github.com/SocialGouv/egapro/issues/526)) ([b830ba5](https://github.com/SocialGouv/egapro/commit/b830ba5))
+* **declaration:** ajout de l'iframe de désactivation de matomo dans la politique de confidentialité ([#522](https://github.com/SocialGouv/egapro/issues/522)) ([a8ae5cf](https://github.com/SocialGouv/egapro/commit/a8ae5cf))
+
+
+
+
+
 # [2.5.0](https://github.com/SocialGouv/egapro/compare/v2.4.1...v2.5.0) (2020-02-11)
 
 

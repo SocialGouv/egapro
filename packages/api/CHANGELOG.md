@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.6.0](https://github.com/SocialGouv/egapro/compare/v2.5.0...v2.6.0) (2020-02-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency koa-router to v8.0.7 ([#502](https://github.com/SocialGouv/egapro/issues/502)) ([39a2f8e](https://github.com/SocialGouv/egapro/commit/39a2f8e))
+* **deps:** update sentry monorepo ([#477](https://github.com/SocialGouv/egapro/issues/477)) ([7584c4d](https://github.com/SocialGouv/egapro/commit/7584c4d))
+
+
+
+
+
 # [2.5.0](https://github.com/SocialGouv/egapro/compare/v2.4.1...v2.5.0) (2020-02-11)
 
 
