@@ -302,14 +302,10 @@ function InformationsEntrepriseForm({
                 newNombreEntreprises={form.mutators.newNombreEntreprises}
                 readOnly={readOnly}
               />
-              <h3>Saisie des informations des entreprises composant l'UES </h3>
-              <p>
-                ne pas inclure le déclarant qui a déjà renseigné son nom
-                d'entreprise et SIREN ci-dessus
-                <br />
-                <br />
-              </p>
-
+              <h3>
+                Saisie des informations des entreprises composant l'UES (ne pas
+                inclure l'entreprise déclarante)
+              </h3>
               <FieldArray name="entreprisesUES">
                 {({ fields }) => {
                   return (
