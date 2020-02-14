@@ -7,6 +7,7 @@ import globalStyles from "../utils/globalStyles";
 import { useColumnsWidth, useLayoutType } from "./GridContext";
 
 import Logo from "./Logo";
+import InfoBloc from "./InfoBloc";
 
 function Header() {
   const width = useColumnsWidth(2);
@@ -40,6 +41,14 @@ function Header() {
           L’outil de calcul et de déclaration de votre index égalité
           professionnelle Femmes- Hommes
         </p>
+      </div>
+      <div css={styles.bannerWrapper}>
+        <InfoBloc
+          title="Interruption de service programmée"
+          text="Le service sera indisponible le mercredi 19 février à partir de 12h30"
+          additionalCss={styles.banner}
+          closeButton={true}
+        />
       </div>
     </header>
   );
@@ -95,6 +104,18 @@ const styles = {
   subtitle: css({
     fontFamily: "'Gabriela', serif",
     fontSize: 12
+  }),
+  bannerWrapper: css({
+    position: "fixed",
+    left: 0,
+    top: 30,
+    width: "100%",
+    zIndex: 1000
+  }),
+  banner: css({
+    backgroundColor: "#fff",
+    margin: "10px auto",
+    width: "70%"
   })
 };
 
