@@ -42,14 +42,16 @@ function Header() {
           professionnelle Femmes- Hommes
         </p>
       </div>
-      <div css={styles.bannerWrapper}>
-        <InfoBloc
-          title="Interruption de service programmée"
-          text="Le service sera indisponible le mercredi 19 février à partir de 12h30"
-          additionalCss={styles.banner}
-          closeButton={true}
-        />
-      </div>
+      {new Date() < new Date("2020-02-19 14:00:00") && (
+        <div css={styles.bannerWrapper}>
+          <InfoBloc
+            title="Interruption de service programmée"
+            text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
+            additionalCss={styles.banner}
+            closeButton={true}
+          />
+        </div>
+      )}
     </header>
   );
 }
