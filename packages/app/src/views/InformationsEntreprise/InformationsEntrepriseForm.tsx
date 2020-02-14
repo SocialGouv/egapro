@@ -120,7 +120,8 @@ const adaptEntreprisesUESSize = (
   entreprisesUES: Array<EntrepriseUES>
 ) => {
   if (validateNombreEntreprises(nombreEntreprises) === undefined) {
-    const newSize = Number(nombreEntreprises);
+    // Il faut une entreprise à déclarer de moins vu que l'entreprise déclarant pour le compte de l'UES a déjà renseigné ses infos
+    const newSize = Number(nombreEntreprises) - 1;
     while (newSize > entreprisesUES.length) {
       // Augmenter la taille de l'array si nécessaire
       entreprisesUES.push({ nom: "", siren: "" });
@@ -301,6 +302,10 @@ function InformationsEntrepriseForm({
                 newNombreEntreprises={form.mutators.newNombreEntreprises}
                 readOnly={readOnly}
               />
+              <h3>
+                Saisie des informations des entreprises composant l'UES (ne pas
+                inclure l'entreprise déclarante)
+              </h3>
               <FieldArray name="entreprisesUES">
                 {({ fields }) => {
                   return (
