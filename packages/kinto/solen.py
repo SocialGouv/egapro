@@ -364,18 +364,6 @@ class RowProcessor(object):
         for index, niveau in enumerate(niveaux):
             self.setValeursTranche(niveau, path, index, fieldName, custom)
 
-    def setValeursEcart(self, niveau, path, index, fieldName):
-        categorie = {"categorieSocioPro": index}
-        value = self.get(niveau)
-        if value is not None:
-            categorie[fieldName] = float(value)
-        self.set(f"{path}/{index}", categorie)
-
-    def setValeursEcarts(self, niveaux, path, fieldName):
-        self.set(path, [])
-        for index, niveau in enumerate(niveaux):
-            self.setValeursEcart(niveau, path, index, fieldName)
-
     def importTranchesCsp(self):
         self.setValeursTranches(["Ou", "Em", "TAM", "IC"], "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
 
@@ -429,6 +417,18 @@ class RowProcessor(object):
         self.importField("population_favorable_tab1", "indicateurUn/sexeSurRepresente")
         self.importIntField("nb_pt_obtenu_tab1", "indicateurUn/noteFinale")
         self.importDateField("date_consult_CSE > Valeur date", "declaration/dateConsultationCSE")
+
+    def setValeursEcart(self, niveau, path, index, fieldName):
+        categorie = {"categorieSocioPro": index}
+        value = self.get(niveau)
+        if value is not None:
+            categorie[fieldName] = float(value)
+        self.set(f"{path}/{index}", categorie)
+
+    def setValeursEcarts(self, niveaux, path, fieldName):
+        self.set(path, [])
+        for index, niveau in enumerate(niveaux):
+            self.setValeursEcart(niveau, path, index, fieldName)
 
     def importIndicateurDeux(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
