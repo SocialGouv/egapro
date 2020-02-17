@@ -241,15 +241,17 @@ class RowProcessor(object):
         self.set("informations/trancheEffectifs", trancheEgapro)
 
         # Période de référence
-        date_debut_pr = self.importField("date_debut_pr > Valeur date", "informations/debutPeriodeReference")
+        debut_pr = self.get("date_debut_pr > Valeur date")
         if self.get("periode_ref") == "ac":
             # année civile: 31 décembre de l'année précédent "annee_indicateurs"
             debutPeriodeReference = "01/01/" + str(annee_indicateur - 1)
             finPeriodeReference = "31/12/" + str(annee_indicateur - 1)
-        elif date_debut_pr != "-":
+        elif debut_pr != "-":
             # autre période: rajouter un an à "date_debut_pr"
-            (debutPeriodeReference, delta) = (date_debut_pr, timedelta(days=365))
-            finPeriodeReference = (datetime.strptime(date_debut_pr, DATE_FORMAT_INPUT) + delta).strftime(DATE_FORMAT_OUTPUT)
+            date_debut_pr = datetime.strptime(debut_pr, DATE_FORMAT_INPUT)
+            delta = timedelta(days=365)
+            debutPeriodeReference = date_debut_pr.strftime(DATE_FORMAT_OUTPUT)
+            finPeriodeReference = (date_debut_pr + delta).strftime(DATE_FORMAT_OUTPUT)
         else:
             # autre période de référence sans début spécifié: erreur
             raise RowProcessorError(
