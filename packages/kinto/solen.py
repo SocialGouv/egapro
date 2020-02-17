@@ -415,7 +415,7 @@ class RowProcessor(object):
         # Résultat
         self.importFloatField("resultat_tab1", "indicateurUn/resultatFinal")
         self.importField("population_favorable_tab1", "indicateurUn/sexeSurRepresente")
-        self.importIntField("nb_pt_obtenu_tab1", "indicateurUn/noteFinale")
+        self.importIntField("Indicateur 1", "indicateurUn/noteFinale")
         self.importDateField("date_consult_CSE > Valeur date", "declaration/dateConsultationCSE")
 
     def setValeursEcart(self, niveau, path, index, fieldName):
@@ -447,9 +447,7 @@ class RowProcessor(object):
         # Résultats
         self.importFloatField("resultat_tab2_sup250", "indicateurDeux/resultatFinal")
         self.importField("population_favorable_tab2_sup250", "indicateurDeux/sexeSurRepresente")
-        self.importIntField("nb_pt_obtenu_tab2_sup250", "indicateurDeux/noteFinale")
-        # Prise de mesures correctives
-        self.importBooleanField("prise_compte_mc_tab2_sup250", "indicateurDeux/mesuresCorrection")
+        self.importIntField("Indicateur 2", "indicateurDeux/noteFinale")
 
     def importIndicateurTrois(self):
         # Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes pour
@@ -468,9 +466,7 @@ class RowProcessor(object):
         # Résultats
         self.importFloatField("resultat_tab3_sup250", "indicateurTrois/resultatFinal")
         self.importField("population_favorable_tab3_sup250", "indicateurTrois/sexeSurRepresente")
-        self.importIntField("nb_pt_obtenu_tab3_sup250", "indicateurTrois/noteFinale")
-        # Prise de mesures correctives
-        self.importBooleanField("prise_compte_mc_tab3_sup250", "indicateurTrois/mesuresCorrection")
+        self.importIntField("Indicateur 3", "indicateurTrois/noteFinale")
 
     def importIndicateurDeuxTrois(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion)
@@ -485,9 +481,9 @@ class RowProcessor(object):
         self.importFloatField("resultat_pourcent_tab2_50-250", "indicateurDeuxTrois/resultatFinalEcart")
         self.importFloatField("resultat_nb_sal_tab2_50-250", "indicateurDeuxTrois/resultatFinalNombreSalaries")
         self.importField("population_favorable_tab2_50-250", "indicateurDeuxTrois/sexeSurRepresente")
-        self.importIntField("nb_pt_obtenu_tab2_50-250", "indicateurDeuxTrois/noteFinale")
-        # Prise de mesures correctives
-        self.importBooleanField("prise_compte_mc_tab2_50-250", "indicateurDeuxTrois/mesuresCorrection")
+        self.importIntField("Indicateur 2", "indicateurDeuxTrois/noteFinale")
+        self.importIntField("Indicateur 2 PourCent", "indicateurDeuxTrois/noteEcart")
+        self.importIntField("Indicateur 2 ParSal", "indicateurDeuxTrois/noteNombreSalaries")
 
     def importIndicateurQuatre(self):
         # Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une
@@ -505,7 +501,6 @@ class RowProcessor(object):
             self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
             self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
             self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
-            self.importIntField("nb_pt_obtenu_tab4_50-250", "indicateurQuatre/noteFinale")
         else:
             # Import des données pour les entreprises 250+
             nonCalculable = self.importBooleanField(
@@ -514,23 +509,13 @@ class RowProcessor(object):
             self.importField("motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable")
             self.importField("precision_am_tab4_sup250", "indicateurQuatre/motifNonCalculablePrecision")
             self.importFloatField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
-            self.importIntField("nb_pt_obtenu_tab4_sup250", "indicateurQuatre/noteFinale")
+        self.importIntField("Indicateur 4", "indicateurQuatre/noteFinale")
         self.set("indicateurQuatre/presenceCongeMat", not nonCalculable)
 
     def importIndicateurCinq(self):
         self.importIntField("resultat_tab5", "indicateurCinq/resultatFinal", fromFloat=True)
         self.importField("sexe_sur_represente_tab5", "indicateurCinq/sexeSurRepresente")
-        self.importIntField("nb_pt_obtenu_tab5", "indicateurCinq/noteFinale")
-
-    def importNombreDePointsObtenus(self):
-        # Nombre de points obtenus  à chaque indicateur attribué automatiquement
-        self.importIntField("Indicateur 1", "declaration/indicateurUn")
-        self.importIntField("Indicateur 2", "declaration/indicateurDeux")
-        self.importIntField("Indicateur 2 PourCent", "declaration/indicateurDeuxTroisEcart")
-        self.importIntField("Indicateur 2 ParSal", "declaration/indicateurDeuxTroisNombreSalaries")
-        self.importIntField("Indicateur 3", "declaration/indicateurTrois")
-        self.importIntField("Indicateur 4", "declaration/indicateurQuatre")
-        self.importIntField("Indicateur 5", "declaration/indicateurCinq")
+        self.importIntField("Indicateur 5", "indicateurCinq/noteFinale")
 
     def importNiveauDeResultatGlobal(self):
         self.importIntField("Nombre total de points obtenus", "declaration/noteFinale")
@@ -553,7 +538,6 @@ class RowProcessor(object):
             self.importIndicateurTrois()
         self.importIndicateurQuatre()
         self.importIndicateurCinq()
-        self.importNombreDePointsObtenus()
         self.importNiveauDeResultatGlobal()
 
         return self.toKintoRecord()
