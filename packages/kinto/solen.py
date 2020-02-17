@@ -457,7 +457,7 @@ class RowProcessor(object):
         # les entreprises ou UES de plus de 250 salariés
         # Calculabilité
         nonCalculable = self.importBooleanField("calculabilite_indic_tab3_sup250", "indicateurTrois/nonCalculable", negate=True)
-        self.set("indicateurDeuxTrois/presenceAugmentationPromotion", not nonCalculable)
+        self.set("indicateurTrois/presencePromotion", not nonCalculable)
         self.importField("motif_non_calc_tab3_sup250", "indicateurTrois/motifNonCalculable")
         self.importField("precision_am_tab3_sup250", "indicateurTrois/motifNonCalculablePrecision")
         # Ecarts de taux de promotions par CSP
