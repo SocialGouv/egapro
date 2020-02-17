@@ -254,6 +254,8 @@
               "$ref": "#/definitions/sexeSurRepresente"
             },
             "noteFinale": { "type": "integer" },
+            "noteEcart": { "type": "integer" },
+            "noteNombreSalaries": { "type": "integer" },
             "mesuresCorrection": { "type": "boolean" }
           }
         },
