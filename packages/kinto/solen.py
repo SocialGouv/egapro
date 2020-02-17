@@ -339,8 +339,8 @@ class RowProcessor(object):
         self.set("informationsEntreprise/nombreEntreprises", len(entreprises) + 1)
         self.set("informationsEntreprise/entreprisesUES", entreprises)
 
-    def importNiveauResultat(self):
-        # Niveau de résultat de l'entreprise ou de l'UES
+    def importPublicationResultat(self):
+        # Publication de résultat de l'entreprise ou de l'UES
         self.importDateField("date_publ_niv > Valeur date", "declaration/datePublication")
         self.importField("site_internet_publ", "declaration/lienPublication")
 
@@ -544,7 +544,7 @@ class RowProcessor(object):
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()
         self.importInformationsEntrepriseOuUES()
-        self.importNiveauResultat()
+        self.importPublicationResultat()
         self.importIndicateurUn()
         if self.get("tranche_effectif") == TRANCHE_50_250:
             self.importIndicateurDeuxTrois()
