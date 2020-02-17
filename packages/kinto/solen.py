@@ -277,24 +277,24 @@ class RowProcessor(object):
         self.importField("telephone", "informationsDeclarant/tel")
 
     def importInformationsEntrepriseOuUES(self):
-        # Note: nous ne consommons pas le champ "structure" car il n'est pas fiable;
-        # certaines UES ont renseigné ce champ comme "Entreprise"... Le seul champ
-        # réellement discriminant semble être "nom_UES".
-        if self.get("nom_UES") is not None:
-            # Import des données de l'UES
-            self.set("informationsEntreprise/structure", "Unité Economique et Sociale (UES)")
-            self.importField("nom_UES", "informationsEntreprise/nomUES")
-            self.importField("nom_ets_UES", "informationsEntreprise/nomEntreprise")
-            # Note: le code NAF d'une UES est stocké dans le champ "Code NAF de cette entreprise"
-            self.importField("Code NAF de cette entreprise", "informationsEntreprise/codeNaf")  # attention format
-            self.importField("SIREN_UES", "informationsEntreprise/siren")
-            self.importEntreprisesUES()
+        structure = self.importField("structure", "informationsEntreprise/structure")
+        self.importField("nom_UES", "informationsEntreprise/nomUES")
+        # Certaines déclarations ont mal renseigné la structure, donc on essaie
+        # d'importer le plus de données possible
+        if structure == "Entreprise":
+            nom_entreprise = self.get("RS_ets") or self.get("nom_ets_UES")
+            code_naf = self.get("Code NAF") or self.get("Code NAF de cette entreprise")
+            siren = self.get("SIREN_ets") or self.get("SIREN_UES")
         else:
-            self.set("informationsEntreprise/structure", "Entreprise")
-            self.importField("RS_ets", "informationsEntreprise/nomEntreprise")
-            # Note: le champ "Code NAF" ne concerne que les entreprises classiques
-            self.importField("Code NAF", "informationsEntreprise/codeNaf")  # attention format
-            self.importField("SIREN_ets", "informationsEntreprise/siren")
+            nom_entreprise = self.get("nom_ets_UES") or self.get("RS_ets") 
+            code_naf = self.get("Code NAF de cette entreprise") or self.get("Code NAF")
+            siren = self.get("SIREN_UES") or self.get("SIREN_ets")
+        nom_entreprise and self.set("informationsEntreprise/nomEntreprise", nom_entreprise)
+        code_naf and self.set("informationsEntreprise/codeNaf", code_naf)
+        siren and self.set("informationsEntreprise/siren", siren)
+
+        # Import des données de l'UES
+        self.importEntreprisesUES()
 
         # Champs communs Entreprise/UES
         self.importField("Reg", "informationsEntreprise/region")
@@ -305,10 +305,9 @@ class RowProcessor(object):
 
     def importEntreprisesUES(self):
         sirenUES = self.get("SIREN_UES")
-        try:
-            uesData = self.row[UES_KEY]
-        except KeyError:
-            raise RowProcessorError(f"Données UES absentes ou invalides pour l'entreprise dont le SIREN est '{sirenUES}'.")
+        uesData = self.row.get(UES_KEY)
+        if not uesData:
+            return 
         # Note: toutes les cellules pour UES001 sont vides, nous commençons à UES002
         columns2_99 = ["UES{:02d}".format(x) for x in range(2, 100)]
         columns100_500 = ["UES{:03d}".format(x) for x in range(100, 501)]
