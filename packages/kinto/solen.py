@@ -498,18 +498,6 @@ class RowProcessor(object):
         for index, niveau in enumerate(niveaux):
             self.setValeursEcart(niveau, path, index, fieldName)
 
-    def setValeursEcart(self, niveau, path, index, fieldName):
-        categorie = {"categorieSocioPro": index}
-        value = self.get(niveau)
-        if value is not None:
-            categorie[fieldName] = float(value)
-        self.set(f"{path}/{index}", categorie)
-
-    def setValeursEcarts(self, niveaux, path, fieldName):
-        self.set(path, [])
-        for index, niveau in enumerate(niveaux):
-            self.setValeursEcart(niveau, path, index, fieldName)
-
     def importIndicateurDeux(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
         # les femmes et les hommes pour les entreprises ou UES de plus de 250 salariés
