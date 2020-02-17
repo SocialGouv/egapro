@@ -334,7 +334,8 @@ class RowProcessor(object):
                     )
                 )
             entreprises.append({"nom": raisonSociale, "siren": siren})
-        self.set("informationsEntreprise/nombreEntreprises", len(entreprises))
+        # Ajouter l'entreprise déclarante pour l'UES au nombre d'entreprises de l'UES
+        self.set("informationsEntreprise/nombreEntreprises", len(entreprises) + 1)
         self.set("informationsEntreprise/entreprisesUES", entreprises)
 
     def importNiveauResultat(self):
