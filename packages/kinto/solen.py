@@ -444,11 +444,6 @@ class RowProcessor(object):
                 "Valeur 'nb_coef_niv' manquante ou invalide, indispensable pour une déclaration par niveaux de coefficients"
             )
         niveaux = ["niv{:02d}".format(niv) for niv in range(1, nb_coef + 1)]
-        self.setValeursTranches(
-            niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True
-        )
-
-    def importIndicateurUn(self):
         # Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
         # - coef_niv: Par niveau ou coefficient hiérarchique en application de la classification de branche
         # - amc: Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes
