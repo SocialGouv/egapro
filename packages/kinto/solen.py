@@ -380,16 +380,16 @@ class RowProcessor(object):
         self.setValeursTranches(["Ou", "Em", "TAM", "IC"], "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
 
     def importTranchesCoefficients(self):
-        raw_max = self.get("nb_coef_niv")
+        nb_coef_raw = self.get("nb_coef_niv")
         try:
-            max = int(raw_max)
+            nb_coef = int(nb_coef_raw)
         except TypeError:
-            raise RowProcessorError(f"Impossible de prendre en charge une valeur 'nb_coef_niv' non-entière, ici '{raw_max}'.")
+            raise RowProcessorError(f"Impossible de prendre en charge une valeur 'nb_coef_niv' non-entière, ici '{nb_coef_raw}'.")
         except (KeyError, ValueError):
             raise RowProcessorError(
                 "Valeur 'nb_coef_niv' manquante ou invalide, indispensable pour une déclaration par niveaux de coefficients"
             )
-        niveaux = ["niv{:02d}".format(niv) for niv in range(1, max + 1)]
+        niveaux = ["niv{:02d}".format(niv) for niv in range(1, nb_coef + 1)]
         self.setValeursTranches(niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True)
 
     def importIndicateurUn(self):
