@@ -1,0 +1,63 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restore-backup
+spec:
+  template:
+    spec:
+      containers:
+        - name: restore-backup
+          image: postgres:${POSTGRES_JOB_VERSION}
+          command:
+            - sh
+          args:
+            - -c
+            - psql -U postgres -f /mnt/data/$(cat /mnt/data/LATEST)
+          resources:
+            requests:
+              cpu: ${POSTGRES_RESOURCE_CPU_REQUEST}
+              memory: ${POSTGRES_RESOURCE_MEMORY_REQUEST}
+            limits:
+              cpu: ${POSTGRES_RESOURCE_CPU_LIMIT}
+              memory: ${POSTGRES_RESOURCE_MEMORY_LIMIT}
+          env:
+            - name: PGUSER
+              value: postgres
+            - name: PGHOST
+              value: ${PROJECT}-${BRANCH_HASH}-pg-postgresql
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ${PROJECT}
+                  key: POSTGRES_EGAPRO_PASSWORD
+          volumeMounts:
+            - mountPath: "/mnt/data"
+              name: volume
+      restartPolicy: Never
+      volumes:
+        - name: volume
+          azureFile:
+            secretName: azure-storage
+            shareName: ${PROJECT}-backup-restore
+            readOnly: false
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:${POSTGRES_JOB_VERSION}
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 20m
+              memory: 32Mi
+          command:
+            - sh
+            - -c
+            - |
+              retry=120; # 5s * (12 * 10) = 10min
+              while ! pg_isready -h ${PROJECT}-${BRANCH_HASH}-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
+                do
+                  echo "Waiting for Postgres to go Green ($(( retry )))" ; sleep 5s ; done ;
+              echo Ready;

@@ -1,0 +1,14 @@
+---
+
+Code quality:
+  stage: Code Quality
+  extends:
+    - .base_yarn_quality
+    - .base_yarn_build
+  when: manual
+  except:
+    variables:
+      - $PRODUCTION
+  allow_failure: false
+
+...

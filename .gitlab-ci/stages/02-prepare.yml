@@ -1,0 +1,10 @@
+---
+
+Create namespace:
+  stage: Prepare
+  extends: .base_create_namespace_stage
+  except:
+    variables:
+      - $PRODUCTION
+
+...

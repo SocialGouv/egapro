@@ -1,0 +1,12 @@
+---
+
+Make a new release to deploy to preprod environment:
+  extends: .base_semantic_release_stage
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^chore\(release.*/
+  only:
+    - master
+  when: manual
+
+...
