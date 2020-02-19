@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.6.0](https://github.com/SocialGouv/egapro/compare/v2.5.0...v2.6.0) (2020-02-14)
+
+
+### Bug Fixes
+
+* **declaration:** afficher une ligne de moins que le nombre d'entreprises composant l'UES dans le formulaire "informations entreprise/UES" ([#528](https://github.com/SocialGouv/egapro/issues/528)) ([8bd3b0e](https://github.com/SocialGouv/egapro/commit/8bd3b0e))
+* **deps:** update dependency react-app-polyfill to v1.0.6 ([#488](https://github.com/SocialGouv/egapro/issues/488)) ([8e06ce8](https://github.com/SocialGouv/egapro/commit/8e06ce8))
+* **deps:** update dependency react-datepicker to v2.12.1 ([#510](https://github.com/SocialGouv/egapro/issues/510)) ([7296f10](https://github.com/SocialGouv/egapro/commit/7296f10))
+* **deps:** update dependency react-scripts to v3.3.1 ([#489](https://github.com/SocialGouv/egapro/issues/489)) ([f2a2457](https://github.com/SocialGouv/egapro/commit/f2a2457))
+
+
+### Features
+
+* **declaration:** affichage d'un bandeau pour prévenir d'une interruption de service ([#526](https://github.com/SocialGouv/egapro/issues/526)) ([b830ba5](https://github.com/SocialGouv/egapro/commit/b830ba5))
+* **declaration:** ajout de l'iframe de désactivation de matomo dans la politique de confidentialité ([#522](https://github.com/SocialGouv/egapro/issues/522)) ([a8ae5cf](https://github.com/SocialGouv/egapro/commit/a8ae5cf))
+
+
+
+
+
+## [2.4.1](https://github.com/SocialGouv/egapro/compare/v2.4.0...v2.4.1) (2020-02-11)
+
+
+### Bug Fixes
+
+* **declaration:** forcer la déclaration de l'indicateur 1 par CSP si il n'est pas calculable par coefficient ([#515](https://github.com/SocialGouv/egapro/issues/515)) ([9e84ce5](https://github.com/SocialGouv/egapro/commit/9e84ce5))
+* **layout:** amélioration du layout tablet ([#516](https://github.com/SocialGouv/egapro/issues/516)) ([cb8e3c2](https://github.com/SocialGouv/egapro/commit/cb8e3c2))
+* **layout:** suppression d'un warning sur un <ul> dans un <p> ([0ae3bd0](https://github.com/SocialGouv/egapro/commit/0ae3bd0))
+* **layout:** suppression de plusieurs warnings sur des <ul> et <table> dans un <p> ([64d3636](https://github.com/SocialGouv/egapro/commit/64d3636))
+
+
+
+
+
 # [2.4.0](https://github.com/SocialGouv/egapro/compare/v2.3.1...v2.4.0) (2020-02-06)
 
 
