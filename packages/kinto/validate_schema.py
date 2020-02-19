@@ -27,7 +27,18 @@ if not validation_ok:
 
 def parse(args):
     with open(args.records_path) as records_file:
-        records = json.load(records_file)["data"]
+        if args.as_list:
+            records = json.load(records_file)
+        else:
+            try:
+                records = json.load(records_file)["data"]
+            except TypeError:
+                print(
+                    "The file doesn't look like a standard Kinto response "
+                    "(with the record list being in a `data` key in a dict)."
+                )
+                print("Did you mean to pass the '--as-list' parameter?")
+                raise
 
         print(f"Validating {len(records)} records")
 
@@ -58,6 +69,12 @@ parser.add_argument(
     "--fail-fast",
     action="store_true",
     help="stop at the first validation error",
+    default=False,
+)
+parser.add_argument(
+    "--as-list",
+    action="store_true",
+    help="the list of records isn't 'under' a `data` key in a dict (not a Kinto response)",
     default=False,
 )
 
