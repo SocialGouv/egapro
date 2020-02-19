@@ -1,0 +1,33 @@
+---
+
+#
+.register_stage: &register_stage
+  extends: .base_register_stage
+  stage: Registration
+  except:
+    variables:
+      - $PRODUCTION
+#
+
+Register api image:
+  <<: *register_stage
+  variables:
+    CONTEXT: .
+    DOCKER_BUILD_ARGS: -f packages/api/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
+
+Register app image:
+  <<: *register_stage
+  variables:
+    CONTEXT: .
+    DOCKER_BUILD_ARGS: -f packages/app/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
+
+Register init kinto image:
+  <<: *register_stage
+  variables:
+    CONTEXT: packages/kinto
+    DOCKERFILE_PATH: packages/kinto/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
+
+...

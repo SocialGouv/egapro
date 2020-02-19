@@ -1,0 +1,33 @@
+---
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: init-kinto
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      containers:
+      - image: ${CI_REGISTRY_IMAGE}/kinto:${IMAGE_TAG}
+        name: init-kinto
+        env:
+          - name: KINTO_SERVER
+            value: "kinto"
+          - name: KINTO_LOGIN
+            valueFrom:
+              secretKeyRef:
+                name: ${PROJECT}
+                key: KINTO_ADMIN_LOGIN
+          - name: KINTO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ${PROJECT}
+                key: KINTO_ADMIN_PASSWORD
+        resources:
+          requests:
+            cpu: ${INIT_KINTO_RESOURCE_CPU_REQUEST}
+            memory: ${INIT_KINTO_RESOURCE_MEMORY_REQUEST}
+          limits:
+            cpu: ${INIT_KINTO_RESOURCE_CPU_LIMIT}
+            memory: ${INIT_KINTO_RESOURCE_MEMORY_LIMIT}
+      restartPolicy: Never
