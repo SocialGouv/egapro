@@ -27,14 +27,22 @@ from xlrd.biffh import XLRDError
 
 # Configuration de l'import CSV
 
-CELL_SKIPPABLE_VALUES = ["", "-", "NC", "non applicable", "non calculable"]  # équivalents cellules vides
+CELL_SKIPPABLE_VALUES = [
+    "",
+    "-",
+    "NC",
+    "non applicable",
+    "non calculable",
+]  # équivalents cellules vides
 DATE_FORMAT_INPUT = "%Y-%m-%d %H:%M:%S"  # format de date en entrée
 DATE_FORMAT_OUTPUT = "%d/%m/%Y"  # format de date en sortie
 DATE_FORMAT_OUTPUT_HEURE = "%d/%m/%Y %H:%M"  # format de date avec heure en sortie
 EXCEL_NOM_FEUILLE_REPONDANTS = "BDD REPONDANTS"  # nom de feuille excel repondants
 EXCEL_NOM_FEUILLE_UES = "BDD UES"  # nom de feuille excel UES
 NON_RENSEIGNE = "<non renseigné>"  # valeur si champ requis absent
-SOLEN_URL_PREFIX = "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="  # racine URL déclarations Solen
+SOLEN_URL_PREFIX = (
+    "https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P="
+)  # racine URL déclarations Solen
 TRANCHE_50_250 = "De 50 à 250 inclus"  # valeur champ structure 50<250
 TRANCHE_PLUS_DE_250 = "Plus de 250"  # valeur champ structure +250
 UES_KEY = "__uesdata__"  # nom clé données UES (interne)
@@ -158,7 +166,9 @@ class RowProcessor(object):
             try:
                 value = type(value)
             except ValueError as err:
-                raise RowProcessorError(f"Impossible de typer la valeur du champ '{csvFieldName}' ('{value}') en {type}")
+                raise RowProcessorError(
+                    f"Impossible de typer la valeur du champ '{csvFieldName}' ('{value}') en {type}"
+                )
 
         return self.set(path, value)
 
@@ -191,7 +201,9 @@ class RowProcessor(object):
 
     def get(self, csvFieldName):
         if csvFieldName not in self.row:
-            raise RowProcessorError(f"La ligne ne possède pas de champ '{csvFieldName}'.")
+            raise RowProcessorError(
+                f"La ligne ne possède pas de champ '{csvFieldName}'."
+            )
         if self.row[csvFieldName] in CELL_SKIPPABLE_VALUES:
             return None
         self.READ_FIELDS.add(csvFieldName)
@@ -206,7 +218,9 @@ class RowProcessor(object):
             except KeyError as err:
                 result = dpath.util.new(self.record, path, value)
             if result == 0:
-                raise RowProcessorError(f"Impossible de créer le chemin '{path}' à la valeur '{value}'.")
+                raise RowProcessorError(
+                    f"Impossible de créer le chemin '{path}' à la valeur '{value}'."
+                )
             return value
 
     def toKintoRecord(self):
@@ -227,7 +241,9 @@ class RowProcessor(object):
 
     def importPeriodeDeReference(self):
         # Année et périmètre retenus pour le calcul et la publication des indicateurs
-        annee_indicateur = self.importIntField("annee_indicateurs", "informations/anneeDeclaration")
+        annee_indicateur = self.importIntField(
+            "annee_indicateurs", "informations/anneeDeclaration"
+        )
 
         # Compatibilité egapro de la valeur de tranche d'effectifs
         tranche = self.get("tranche_effectif")
@@ -267,7 +283,9 @@ class RowProcessor(object):
         self.set("informations/finPeriodeReference", finPeriodeReference)
 
         # Note: utilisation d'un nombre à virgule pour prendre en compte les temps partiels
-        self.importFloatField("nb_salaries > Valeur numérique", "effectif/nombreSalariesTotal")
+        self.importFloatField(
+            "nb_salaries > Valeur numérique", "effectif/nombreSalariesTotal"
+        )
 
     def importInformationsDeclarant(self):
         # Identification du déclarant pour tout contact ultérieur
@@ -286,10 +304,12 @@ class RowProcessor(object):
             code_naf = self.get("Code NAF") or self.get("Code NAF de cette entreprise")
             siren = self.get("SIREN_ets") or self.get("SIREN_UES")
         else:
-            nom_entreprise = self.get("nom_ets_UES") or self.get("RS_ets") 
+            nom_entreprise = self.get("nom_ets_UES") or self.get("RS_ets")
             code_naf = self.get("Code NAF de cette entreprise") or self.get("Code NAF")
             siren = self.get("SIREN_UES") or self.get("SIREN_ets")
-        nom_entreprise and self.set("informationsEntreprise/nomEntreprise", nom_entreprise)
+        nom_entreprise and self.set(
+            "informationsEntreprise/nomEntreprise", nom_entreprise
+        )
         code_naf and self.set("informationsEntreprise/codeNaf", code_naf)
         siren and self.set("informationsEntreprise/siren", siren)
 
@@ -307,7 +327,7 @@ class RowProcessor(object):
         sirenUES = self.get("SIREN_UES")
         uesData = self.row.get(UES_KEY)
         if not uesData:
-            return 
+            return
         # Note: toutes les cellules pour UES001 sont vides, nous commençons à UES002
         columns2_99 = ["UES{:02d}".format(x) for x in range(2, 100)]
         columns100_500 = ["UES{:03d}".format(x) for x in range(100, 501)]
@@ -341,11 +361,18 @@ class RowProcessor(object):
 
     def importPublicationResultat(self):
         # Publication de résultat de l'entreprise ou de l'UES
-        self.importDateField("date_publ_niv > Valeur date", "declaration/datePublication")
+        self.importDateField(
+            "date_publ_niv > Valeur date", "declaration/datePublication"
+        )
         self.importField("site_internet_publ", "declaration/lienPublication")
 
     def setValeursTranche(self, niveau, path, index, fieldName, custom=False):
-        niveaux = [niveau + " > -30", niveau + " > 30-39", niveau + " > 40-49", niveau + " > 50+"]
+        niveaux = [
+            niveau + " > -30",
+            niveau + " > 30-39",
+            niveau + " > 40-49",
+            niveau + " > 50+",
+        ]
         values = [self.get(col) for col in niveaux]
         tranches = [None, None, None, None]
         for trancheIndex, value in enumerate(values):
@@ -365,20 +392,28 @@ class RowProcessor(object):
             self.setValeursTranche(niveau, path, index, fieldName, custom)
 
     def importTranchesCsp(self):
-        self.setValeursTranches(["Ou", "Em", "TAM", "IC"], "indicateurUn/remunerationAnnuelle", "ecartTauxRemuneration")
+        self.setValeursTranches(
+            ["Ou", "Em", "TAM", "IC"],
+            "indicateurUn/remunerationAnnuelle",
+            "ecartTauxRemuneration",
+        )
 
     def importTranchesCoefficients(self):
         nb_coef_raw = self.get("nb_coef_niv")
         try:
             nb_coef = int(nb_coef_raw)
         except TypeError:
-            raise RowProcessorError(f"Impossible de prendre en charge une valeur 'nb_coef_niv' non-entière, ici '{nb_coef_raw}'.")
+            raise RowProcessorError(
+                f"Impossible de prendre en charge une valeur 'nb_coef_niv' non-entière, ici '{nb_coef_raw}'."
+            )
         except (KeyError, ValueError):
             raise RowProcessorError(
                 "Valeur 'nb_coef_niv' manquante ou invalide, indispensable pour une déclaration par niveaux de coefficients"
             )
         niveaux = ["niv{:02d}".format(niv) for niv in range(1, nb_coef + 1)]
-        self.setValeursTranches(niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True)
+        self.setValeursTranches(
+            niveaux, "indicateurUn/coefficient", "ecartTauxRemuneration", custom=True
+        )
 
     def importIndicateurUn(self):
         # Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
@@ -406,7 +441,9 @@ class RowProcessor(object):
             self.set("indicateurUn/nonCalculable", True)
         self.importIntField("nb_coef_niv", "indicateurUn/nombreCoefficients")
         self.importField("motif_non_calc_tab1", "indicateurUn/motifNonCalculable")
-        self.importField("precision_am_tab1", "indicateurUn/motifNonCalculablePrecision")
+        self.importField(
+            "precision_am_tab1", "indicateurUn/motifNonCalculablePrecision"
+        )
         if modalite == "csp":
             self.importTranchesCsp()
         elif modalite != "nc":
@@ -416,7 +453,9 @@ class RowProcessor(object):
         self.importFloatField("resultat_tab1", "indicateurUn/resultatFinal")
         self.importField("population_favorable_tab1", "indicateurUn/sexeSurRepresente")
         self.importIntField("Indicateur 1", "indicateurUn/noteFinale")
-        self.importDateField("date_consult_CSE > Valeur date", "declaration/dateConsultationCSE")
+        self.importDateField(
+            "date_consult_CSE > Valeur date", "declaration/dateConsultationCSE"
+        )
 
     def setValeursEcart(self, niveau, path, index, fieldName):
         categorie = {"categorieSocioPro": index}
@@ -434,10 +473,18 @@ class RowProcessor(object):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre
         # les femmes et les hommes pour les entreprises ou UES de plus de 250 salariés
         # Calculabilité
-        nonCalculable = self.importBooleanField("calculabilite_indic_tab2_sup250", "indicateurDeux/nonCalculable", negate=True)
+        nonCalculable = self.importBooleanField(
+            "calculabilite_indic_tab2_sup250",
+            "indicateurDeux/nonCalculable",
+            negate=True,
+        )
         self.set("indicateurDeux/presenceAugmentation", not nonCalculable)
-        self.importField("motif_non_calc_tab2_sup250", "indicateurDeux/motifNonCalculable")
-        self.importField("precision_am_tab2_sup250", "indicateurDeux/motifNonCalculablePrecision")
+        self.importField(
+            "motif_non_calc_tab2_sup250", "indicateurDeux/motifNonCalculable"
+        )
+        self.importField(
+            "precision_am_tab2_sup250", "indicateurDeux/motifNonCalculablePrecision"
+        )
         # Taux d'augmentation individuelle par CSP
         self.setValeursEcarts(
             ["Ou_tab2_sup250", "Em_tab2_sup250", "TAM_tab2_sup250", "IC_tab2_sup250"],
@@ -446,17 +493,27 @@ class RowProcessor(object):
         )
         # Résultats
         self.importFloatField("resultat_tab2_sup250", "indicateurDeux/resultatFinal")
-        self.importField("population_favorable_tab2_sup250", "indicateurDeux/sexeSurRepresente")
+        self.importField(
+            "population_favorable_tab2_sup250", "indicateurDeux/sexeSurRepresente"
+        )
         self.importIntField("Indicateur 2", "indicateurDeux/noteFinale")
 
     def importIndicateurTrois(self):
         # Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes pour
         # les entreprises ou UES de plus de 250 salariés
         # Calculabilité
-        nonCalculable = self.importBooleanField("calculabilite_indic_tab3_sup250", "indicateurTrois/nonCalculable", negate=True)
+        nonCalculable = self.importBooleanField(
+            "calculabilite_indic_tab3_sup250",
+            "indicateurTrois/nonCalculable",
+            negate=True,
+        )
         self.set("indicateurTrois/presencePromotion", not nonCalculable)
-        self.importField("motif_non_calc_tab3_sup250", "indicateurTrois/motifNonCalculable")
-        self.importField("precision_am_tab3_sup250", "indicateurTrois/motifNonCalculablePrecision")
+        self.importField(
+            "motif_non_calc_tab3_sup250", "indicateurTrois/motifNonCalculable"
+        )
+        self.importField(
+            "precision_am_tab3_sup250", "indicateurTrois/motifNonCalculablePrecision"
+        )
         # Ecarts de taux de promotions par CSP
         self.setValeursEcarts(
             ["Ou_tab3_sup250", "Em_tab3_sup250", "TAM_tab3_sup250", "IC_tab3_sup250"],
@@ -465,25 +522,43 @@ class RowProcessor(object):
         )
         # Résultats
         self.importFloatField("resultat_tab3_sup250", "indicateurTrois/resultatFinal")
-        self.importField("population_favorable_tab3_sup250", "indicateurTrois/sexeSurRepresente")
+        self.importField(
+            "population_favorable_tab3_sup250", "indicateurTrois/sexeSurRepresente"
+        )
         self.importIntField("Indicateur 3", "indicateurTrois/noteFinale")
 
     def importIndicateurDeuxTrois(self):
         # Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion)
         # entre les femmes et les hommes pour les entreprises ou UES de 50 à 250 salariés
         nonCalculable = self.importBooleanField(
-            "calculabilite_indic_tab2_50-250", "indicateurDeuxTrois/nonCalculable", negate=True
+            "calculabilite_indic_tab2_50-250",
+            "indicateurDeuxTrois/nonCalculable",
+            negate=True,
         )
         self.set("indicateurDeuxTrois/presenceAugmentationPromotion", not nonCalculable)
-        self.importField("motif_non_calc_tab2_50-250", "indicateurDeuxTrois/motifNonCalculable")
-        self.importField("precision_am_tab2_50-250", "indicateurDeuxTrois/motifNonCalculablePrecision")
+        self.importField(
+            "motif_non_calc_tab2_50-250", "indicateurDeuxTrois/motifNonCalculable"
+        )
+        self.importField(
+            "precision_am_tab2_50-250",
+            "indicateurDeuxTrois/motifNonCalculablePrecision",
+        )
         # Résultats
-        self.importFloatField("resultat_pourcent_tab2_50-250", "indicateurDeuxTrois/resultatFinalEcart")
-        self.importFloatField("resultat_nb_sal_tab2_50-250", "indicateurDeuxTrois/resultatFinalNombreSalaries")
-        self.importField("population_favorable_tab2_50-250", "indicateurDeuxTrois/sexeSurRepresente")
+        self.importFloatField(
+            "resultat_pourcent_tab2_50-250", "indicateurDeuxTrois/resultatFinalEcart"
+        )
+        self.importFloatField(
+            "resultat_nb_sal_tab2_50-250",
+            "indicateurDeuxTrois/resultatFinalNombreSalaries",
+        )
+        self.importField(
+            "population_favorable_tab2_50-250", "indicateurDeuxTrois/sexeSurRepresente"
+        )
         self.importIntField("Indicateur 2", "indicateurDeuxTrois/noteFinale")
         self.importIntField("Indicateur 2 PourCent", "indicateurDeuxTrois/noteEcart")
-        self.importIntField("Indicateur 2 ParSal", "indicateurDeuxTrois/noteNombreSalaries")
+        self.importIntField(
+            "Indicateur 2 ParSal", "indicateurDeuxTrois/noteNombreSalaries"
+        )
 
     def importIndicateurQuatre(self):
         # Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une
@@ -496,36 +571,64 @@ class RowProcessor(object):
         if self.get("tranche_effectif") == TRANCHE_50_250:
             # Import des données pour les entreprises 50-250
             nonCalculable = self.importBooleanField(
-                "calculabilite_indic_tab4_50-250", "indicateurQuatre/nonCalculable", negate=True
+                "calculabilite_indic_tab4_50-250",
+                "indicateurQuatre/nonCalculable",
+                negate=True,
             )
-            self.importField("motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable")
-            self.importField("precision_am_tab4_50-250", "indicateurQuatre/motifNonCalculablePrecision")
-            self.importFloatField("resultat_tab4_50-250", "indicateurQuatre/resultatFinal")
+            self.importField(
+                "motif_non_calc_tab4_50-250", "indicateurQuatre/motifNonCalculable"
+            )
+            self.importField(
+                "precision_am_tab4_50-250",
+                "indicateurQuatre/motifNonCalculablePrecision",
+            )
+            self.importFloatField(
+                "resultat_tab4_50-250", "indicateurQuatre/resultatFinal"
+            )
         else:
             # Import des données pour les entreprises 250+
             nonCalculable = self.importBooleanField(
-                "calculabilite_indic_tab4_sup250", "indicateurQuatre/nonCalculable", negate=True
+                "calculabilite_indic_tab4_sup250",
+                "indicateurQuatre/nonCalculable",
+                negate=True,
             )
-            self.importField("motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable")
-            self.importField("precision_am_tab4_sup250", "indicateurQuatre/motifNonCalculablePrecision")
-            self.importFloatField("resultat_tab4_sup250", "indicateurQuatre/resultatFinal")
+            self.importField(
+                "motif_non_calc_tab4_sup250", "indicateurQuatre/motifNonCalculable"
+            )
+            self.importField(
+                "precision_am_tab4_sup250",
+                "indicateurQuatre/motifNonCalculablePrecision",
+            )
+            self.importFloatField(
+                "resultat_tab4_sup250", "indicateurQuatre/resultatFinal"
+            )
         self.importIntField("Indicateur 4", "indicateurQuatre/noteFinale")
         self.set("indicateurQuatre/presenceCongeMat", not nonCalculable)
 
     def importIndicateurCinq(self):
-        self.importIntField("resultat_tab5", "indicateurCinq/resultatFinal", fromFloat=True)
+        self.importIntField(
+            "resultat_tab5", "indicateurCinq/resultatFinal", fromFloat=True
+        )
         self.importField("sexe_sur_represente_tab5", "indicateurCinq/sexeSurRepresente")
         self.importIntField("Indicateur 5", "indicateurCinq/noteFinale")
 
     def importNiveauDeResultatGlobal(self):
         self.importIntField("Nombre total de points obtenus", "declaration/noteFinale")
-        self.importIntField("Nombre total de points pouvant être obtenus", "declaration/nombrePointsMax")
-        self.importIntField("Résultat final sur 100 points", "declaration/noteFinaleSur100")
+        self.importIntField(
+            "Nombre total de points pouvant être obtenus", "declaration/nombrePointsMax"
+        )
+        self.importIntField(
+            "Résultat final sur 100 points", "declaration/noteFinaleSur100"
+        )
         self.importField("mesures_correction", "declaration/mesuresCorrection")
 
     def run(self):
         self.set("source", "solen")
-        self.importDateField("Date réponse > Valeur date", "declaration/dateDeclaration", format=DATE_FORMAT_OUTPUT_HEURE)
+        self.importDateField(
+            "Date réponse > Valeur date",
+            "declaration/dateDeclaration",
+            format=DATE_FORMAT_OUTPUT_HEURE,
+        )
         self.importInformationsDeclarant()
         self.importPeriodeDeReference()
         self.importInformationsEntrepriseOuUES()
@@ -579,8 +682,13 @@ class ExcelData(object):
                 dtype={"CP": str, "telephone": str, "SIREN_ets": str, "SIREN_UES": str},
             )
         except XLRDError as err:
-            raise ExcelDataError(f"Le format du fichier '{pathToExcelFile}' n'a pu être interprété.")
-        self.fields = {EXCEL_NOM_FEUILLE_REPONDANTS: set([]), EXCEL_NOM_FEUILLE_UES: set([])}
+            raise ExcelDataError(
+                f"Le format du fichier '{pathToExcelFile}' n'a pu être interprété."
+            )
+        self.fields = {
+            EXCEL_NOM_FEUILLE_REPONDANTS: set([]),
+            EXCEL_NOM_FEUILLE_UES: set([]),
+        }
         self.repondants = self.importSheet(excel, EXCEL_NOM_FEUILLE_REPONDANTS)
         self.ues = self.importSheet(excel, EXCEL_NOM_FEUILLE_UES)
         self.linkUes()
@@ -596,7 +704,9 @@ class ExcelData(object):
                 self.fields[sheetName].add(field)
             return self.createDict([row for row in reader])
         except (AttributeError, KeyError, IndexError, TypeError, ValueError) as err:
-            raise ExcelDataError(f"Impossible de traiter la feuille de calcul '{sheetName}': {err}")
+            raise ExcelDataError(
+                f"Impossible de traiter la feuille de calcul '{sheetName}': {err}"
+            )
 
     def createDict(self, source):
         dict = OrderedDict()
@@ -609,12 +719,17 @@ class ExcelData(object):
     def findUesById(self, id):
         found = self.ues.get(id)
         if not found:
-            self.logger.warn(f"Données UES non trouvées pour l'id {id}. Vérifiez la feuille {EXCEL_NOM_FEUILLE_UES}.")
+            self.logger.warn(
+                f"Données UES non trouvées pour l'id {id}. Vérifiez la feuille {EXCEL_NOM_FEUILLE_UES}."
+            )
         return found
 
     def linkUes(self):
         for id, row in self.repondants.items():
-            if row["structure"] == "Unité Economique et Sociale (UES)" or row["nom_UES"] != "":
+            if (
+                row["structure"] == "Unité Economique et Sociale (UES)"
+                or row["nom_UES"] != ""
+            ):
                 row[UES_KEY] = self.findUesById(id)
                 self.repondants[id] = row
 
@@ -637,7 +752,9 @@ class KintoImporter(object):
 
     def setUp(self):
         self.logger.info("Vérifications Kinto")
-        client = kinto_http.Client(server_url=KINTO_SERVER, auth=(KINTO_ADMIN_LOGIN, KINTO_ADMIN_PASSWORD))
+        client = kinto_http.Client(
+            server_url=KINTO_SERVER, auth=(KINTO_ADMIN_LOGIN, KINTO_ADMIN_PASSWORD)
+        )
         try:
             info = client.server_info()
         except ConnectionError as err:
@@ -645,12 +762,16 @@ class KintoImporter(object):
                 f"Connection au serveur Kinto impossible: {err}. Vérifiez la documentation pour paramétrer l'accès."
             )
         if "schema" not in info["capabilities"]:
-            raise KintoImporterError("Le serveur Kinto ne supporte pas la validation par schéma.")
+            raise KintoImporterError(
+                "Le serveur Kinto ne supporte pas la validation par schéma."
+            )
         else:
             self.logger.success("Validation de schéma activée.")
         if self.truncate:
             if self.usePrompt and not prompt(
-                self.logger, "Confimer la suppression et recréation de la collection existante ?", "non"
+                self.logger,
+                "Confimer la suppression et recréation de la collection existante ?",
+                "non",
             ):
                 raise KintoImporterError("Commande annulée.")
             self.logger.warn("Suppression de la collection Kinto existante...")
@@ -662,17 +783,27 @@ class KintoImporter(object):
         except KintoException as err:
             self.logger.warn("La collection n'existe pas, création")
             try:
-                coll = client.create_collection(id=KINTO_COLLECTION, data={"schema": self.schema}, bucket=KINTO_BUCKET)
+                coll = client.create_collection(
+                    id=KINTO_COLLECTION,
+                    data={"schema": self.schema},
+                    bucket=KINTO_BUCKET,
+                )
                 self.logger.success("La collection a été crée.")
             except KintoException as err:
-                raise KintoImporterError(f"Impossible de créer la collection {KINTO_BUCKET}/{KINTO_COLLECTION}: {err}")
+                raise KintoImporterError(
+                    f"Impossible de créer la collection {KINTO_BUCKET}/{KINTO_COLLECTION}: {err}"
+                )
         if "schema" not in coll["data"]:
             self.logger.warn("La collection ne possède pas schéma de validation JSON.")
             self.logger.info(f"Ajout du schéma à la collection {KINTO_COLLECTION}.")
             try:
                 patch = BasicPatch(data={"schema": self.schema})
-                client.patch_collection(id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=patch)
-                self.logger.info("Le schéma de validation JSON a été ajouté à la collection.")
+                client.patch_collection(
+                    id=KINTO_COLLECTION, bucket=KINTO_BUCKET, changes=patch
+                )
+                self.logger.info(
+                    "Le schéma de validation JSON a été ajouté à la collection."
+                )
             except (KintoException, TypeError, KeyError, ValueError) as err:
                 raise KintoImporterError(
                     f"Impossible d'ajouter le schéma de validation à la collection {KINTO_COLLECTION}: {err}"
@@ -685,12 +816,25 @@ class KintoImporter(object):
     def run(self):
         with self.client.batch() as batch:
             for record in self.toImport:
-                self.logger.info(f"Ajout de la déclaration id={record['id']} au batch d'import.")
-                batch.create_record(bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record)
+                self.logger.info(
+                    f"Ajout de la déclaration id={record['id']} au batch d'import."
+                )
+                batch.create_record(
+                    bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record
+                )
 
 
 class App(object):
-    def __init__(self, xls_path, max=None, siren=None, debug=False, progress=False, usePrompt=False, logger=None):
+    def __init__(
+        self,
+        xls_path,
+        max=None,
+        siren=None,
+        debug=False,
+        progress=False,
+        usePrompt=False,
+        logger=None,
+    ):
         # arguments positionnels requis
         self.xls_path = xls_path
         # options
@@ -718,14 +862,30 @@ class App(object):
         if max is not None:
             rows = OrderedDict(islice(rows.items(), max))
         elif siren is not None:
-            rows = OrderedDict(filter(lambda r: r[1]["SIREN_ets"] == siren or r[1]["SIREN_UES"] == siren, rows.items()))
-        if not bool(rows):  # test d'un OrderedDict vide https://stackoverflow.com/a/23177452/330911
-            raise AppError(f"Aucune déclaration trouvée pour les critères siren={siren} et max={max}.")
+            rows = OrderedDict(
+                filter(
+                    lambda r: r[1]["SIREN_ets"] == siren or r[1]["SIREN_UES"] == siren,
+                    rows.items(),
+                )
+            )
+        if not bool(
+            rows
+        ):  # test d'un OrderedDict vide https://stackoverflow.com/a/23177452/330911
+            raise AppError(
+                f"Aucune déclaration trouvée pour les critères siren={siren} et max={max}."
+            )
         if self.progress:
-            bar = Bar("Préparation des enregistrements Kinto", max=max if max is not None else self.nb_rows)
+            bar = Bar(
+                "Préparation des enregistrements Kinto",
+                max=max if max is not None else self.nb_rows,
+            )
         for lineno, id in enumerate(rows):
             try:
-                records.append(RowProcessor(self.logger, rows[id], self.validator, self.debug).run())
+                records.append(
+                    RowProcessor(
+                        self.logger, rows[id], self.validator, self.debug
+                    ).run()
+                )
             except RowProcessorError as err:
                 errors.append(f"Erreur ligne {lineno} (id={id}): {err}")
             if self.progress:
@@ -733,13 +893,20 @@ class App(object):
         if self.progress:
             bar.finish()
         if len(errors) > 0:
-            raise AppError("Erreur(s) rencontrée(s) lors de la préparation des enregistrements Kinto", errors=errors)
+            raise AppError(
+                "Erreur(s) rencontrée(s) lors de la préparation des enregistrements Kinto",
+                errors=errors,
+            )
         return records
 
     def importIntoKinto(self, init_collection=False, dryRun=False):
         try:
             kintoImporter = KintoImporter(
-                self.logger, self.validator.schema, truncate=init_collection, dryRun=dryRun, usePrompt=self.usePrompt
+                self.logger,
+                self.validator.schema,
+                truncate=init_collection,
+                dryRun=dryRun,
+                usePrompt=self.usePrompt,
             )
         except KintoImporterError as err:
             raise AppError(f"Erreur lors de l'initialisation Kinto: {err}")
@@ -770,12 +937,18 @@ class App(object):
                 # - les champs vides
                 # - les champs niv01* à niv50* de la feuille répondants
                 # - les champs UES01 à UES500 de la feuille UES
-                if sheetField == "" or sheetField.startswith("niv") or sheetField.startswith("UES"):
+                if (
+                    sheetField == ""
+                    or sheetField.startswith("niv")
+                    or sheetField.startswith("UES")
+                ):
                     continue
                 elif sheetField in RowProcessor.READ_FIELDS:
                     used = True
                 if not used:
-                    messages.append(f"Le champ '{sheetField}' de la feuille '{sheet}' n'a jamais été consommé.")
+                    messages.append(
+                        f"Le champ '{sheetField}' de la feuille '{sheet}' n'a jamais été consommé."
+                    )
         return messages
 
 
@@ -802,33 +975,88 @@ def flattenJson(b, prefix="", delim="/", val=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Import des données Solen.")
     parser.add_argument("xls_path", type=str, help="chemin vers l'export Excel Solen")
-    parser.add_argument("-d", "--debug", help="afficher les messages de debug", action="store_true", default=False)
-    parser.add_argument("-i", "--indent", type=int, help="niveau d'indentation JSON", default=None)
-    parser.add_argument("-m", "--max", type=int, help="nombre maximum de lignes à importer", default=None)
-    parser.add_argument("-j", "--show-json", help="afficher la sortie JSON", action="store_true", default=False)
     parser.add_argument(
-        "-f", "--info", help="afficher les informations d'utilisation des champs", action="store_true", default=False
+        "-d",
+        "--debug",
+        help="afficher les messages de debug",
+        action="store_true",
+        default=False,
     )
-    parser.add_argument("-s", "--save-as", type=str, help="sauvegarder la sortie JSON ou CSV dans un fichier")
-    parser.add_argument("-r", "--dry-run", help="ne pas procéder à l'import dans Kinto", action="store_true", default=False)
-    parser.add_argument("-p", "--progress", help="afficher une barre de progression", action="store_true", default=False)
-    parser.add_argument("--siren", type=str, help="importer le SIREN spécifié uniquement")
     parser.add_argument(
-        "-c", "--init-collection", help="Vider et recréer la collection Kinto avant import", action="store_true", default=False
+        "-i", "--indent", type=int, help="niveau d'indentation JSON", default=None
+    )
+    parser.add_argument(
+        "-m",
+        "--max",
+        type=int,
+        help="nombre maximum de lignes à importer",
+        default=None,
+    )
+    parser.add_argument(
+        "-j",
+        "--show-json",
+        help="afficher la sortie JSON",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-f",
+        "--info",
+        help="afficher les informations d'utilisation des champs",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-s",
+        "--save-as",
+        type=str,
+        help="sauvegarder la sortie JSON ou CSV dans un fichier",
+    )
+    parser.add_argument(
+        "-r",
+        "--dry-run",
+        help="ne pas procéder à l'import dans Kinto",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-p",
+        "--progress",
+        help="afficher une barre de progression",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--siren", type=str, help="importer le SIREN spécifié uniquement"
+    )
+    parser.add_argument(
+        "-c",
+        "--init-collection",
+        help="Vider et recréer la collection Kinto avant import",
+        action="store_true",
+        default=False,
     )
 
     logger = ConsoleLogger()
     try:
         args = parser.parse_args()
         app = App(
-            args.xls_path, max=args.max, siren=args.siren, debug=args.debug, progress=args.progress, usePrompt=True, logger=logger
+            args.xls_path,
+            max=args.max,
+            siren=args.siren,
+            debug=args.debug,
+            progress=args.progress,
+            usePrompt=True,
+            logger=logger,
         )
 
         if args.show_json:
             logger.std(json.dumps(app.records, indent=args.indent))
 
         if args.info:
-            logger.info("Informations complémentaires sur l'extraction des données Excel :")
+            logger.info(
+                "Informations complémentaires sur l'extraction des données Excel :"
+            )
             for message in app.getStats():
                 logger.info(message)
 
@@ -836,16 +1064,24 @@ if __name__ == "__main__":
             if args.save_as.endswith(".json"):
                 with open(args.save_as, "w") as json_file:
                     json_file.write(app.toJSON(indent=args.indent))
-                logger.success(f"Enregistrements JSON exportés dans le fichier '{args.save_as}'.")
+                logger.success(
+                    f"Enregistrements JSON exportés dans le fichier '{args.save_as}'."
+                )
             elif args.save_as.endswith(".csv"):
                 with open(args.save_as, "w") as csv_file:
                     csv_file.write(app.toCSV())
-                logger.success(f"Enregistrements CSV exportés dans le fichier '{args.save_as}'.")
+                logger.success(
+                    f"Enregistrements CSV exportés dans le fichier '{args.save_as}'."
+                )
             else:
-                raise AppError("Seuls les formats JSON et CSV sont supportés pour la sauvegarde.")
+                raise AppError(
+                    "Seuls les formats JSON et CSV sont supportés pour la sauvegarde."
+                )
 
         if not args.dry_run:
-            logger.info("Importation dans Kinto (cela peut prendre plusieurs minutes)...")
+            logger.info(
+                "Importation dans Kinto (cela peut prendre plusieurs minutes)..."
+            )
             app.importIntoKinto(init_collection=args.init_collection)
             logger.success("Importation effectuée.")
 
