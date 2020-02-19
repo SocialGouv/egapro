@@ -45,6 +45,10 @@ spec:
             value: "kinto.core.permission.postgresql"
           - name: KINTO_PERMISSION_URL
             value: "postgresql://${POSTGRESQL_USER}:${POSTGRESQL_PASSWORD}@${PROJECT}-${BRANCH_HASH}-pg-postgresql/postgres"
+          - name: KINTO_EXPERIMENTAL_COLLECTION_SCHEMA_VALIDATION
+            value: "1"
+          - name: KINTO_BATCH_MAX_REQUESTS
+            value: "10000"
       initContainers:
       - name: wait-for-postgres
         image: postgres:${POSTGRES_JOB_VERSION}
