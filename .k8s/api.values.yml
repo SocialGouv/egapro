@@ -77,6 +77,6 @@ service:
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 2
+  maxReplicas: 10
   targetCPUAverageUtilizationPercentage: 80
   targetMemoryAverageUtilizationPercentage: 80
