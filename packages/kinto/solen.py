@@ -172,8 +172,17 @@ class RowProcessor(object):
 
         return self.set(path, value)
 
+    def importSexeSurRepresente(self, csvFieldName, path):
+        # Note: si la valeur du champ n'est ni "Femmes" ni "Hommes" ni "Egalite", nous n'importons pas la donnée
+        if self.get(csvFieldName) == "Femmes":
+            return self.set(path, "femmes")
+        elif self.get(csvFieldName) == "Hommes":
+            return self.set(path, "hommes")
+        elif self.get(csvFieldName) == "Egalite":
+            return self.set(path, "egalite")
+
     def importBooleanField(self, csvFieldName, path, negate=False):
-        # Note: si la valeur du champ n'est ni "Oui" no "Non", nous n'importons pas la donnée
+        # Note: si la valeur du champ n'est ni "Oui" ni "Non", nous n'importons pas la donnée
         if self.get(csvFieldName) == "Oui":
             return self.set(path, True if not negate else False)
         elif self.get(csvFieldName) == "Non":
@@ -451,7 +460,9 @@ class RowProcessor(object):
             self.importTranchesCoefficients()
         # Résultat
         self.importFloatField("resultat_tab1", "indicateurUn/resultatFinal")
-        self.importField("population_favorable_tab1", "indicateurUn/sexeSurRepresente")
+        self.importSexeSurRepresente(
+            "population_favorable_tab1", "indicateurUn/sexeSurRepresente"
+        )
         self.importIntField("Indicateur 1", "indicateurUn/noteFinale")
         self.importDateField(
             "date_consult_CSE > Valeur date", "declaration/dateConsultationCSE"
@@ -493,7 +504,7 @@ class RowProcessor(object):
         )
         # Résultats
         self.importFloatField("resultat_tab2_sup250", "indicateurDeux/resultatFinal")
-        self.importField(
+        self.importSexeSurRepresente(
             "population_favorable_tab2_sup250", "indicateurDeux/sexeSurRepresente"
         )
         self.importIntField("Indicateur 2", "indicateurDeux/noteFinale")
@@ -522,7 +533,7 @@ class RowProcessor(object):
         )
         # Résultats
         self.importFloatField("resultat_tab3_sup250", "indicateurTrois/resultatFinal")
-        self.importField(
+        self.importSexeSurRepresente(
             "population_favorable_tab3_sup250", "indicateurTrois/sexeSurRepresente"
         )
         self.importIntField("Indicateur 3", "indicateurTrois/noteFinale")
@@ -551,7 +562,7 @@ class RowProcessor(object):
             "resultat_nb_sal_tab2_50-250",
             "indicateurDeuxTrois/resultatFinalNombreSalaries",
         )
-        self.importField(
+        self.importSexeSurRepresente(
             "population_favorable_tab2_50-250", "indicateurDeuxTrois/sexeSurRepresente"
         )
         self.importIntField("Indicateur 2", "indicateurDeuxTrois/noteFinale")
@@ -609,7 +620,9 @@ class RowProcessor(object):
         self.importIntField(
             "resultat_tab5", "indicateurCinq/resultatFinal", fromFloat=True
         )
-        self.importField("sexe_sur_represente_tab5", "indicateurCinq/sexeSurRepresente")
+        self.importSexeSurRepresente(
+            "sexe_sur_represente_tab5", "indicateurCinq/sexeSurRepresente"
+        )
         self.importIntField("Indicateur 5", "indicateurCinq/noteFinale")
 
     def importNiveauDeResultatGlobal(self):
