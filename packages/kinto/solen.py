@@ -633,6 +633,9 @@ class RowProcessor(object):
         )
         self.importIntField("Résultat final sur 100 points", "declaration/noteIndex")
         self.importField("mesures_correction", "declaration/mesuresCorrection")
+        # Valeur artificielle: dans egapro c'est le critère principal qui
+        # permet de filtrer les déclarations par rapport aux simples simulations
+        self.set("declaration/formValidated", "Valid")
 
     def run(self):
         self.set("source", "solen")
