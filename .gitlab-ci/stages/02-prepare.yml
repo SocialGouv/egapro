@@ -13,6 +13,7 @@ Backup before deploy to prod:
   script:
     - kubectl delete job 	backup-job -n ${K8S_NAMESPACE} || true;
     - kubectl apply -f .k8s/postgres/backup-job.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/backup-job --timeout=600s -n ${K8S_NAMESPACE}
   environment:
     name: ${PROD_ENVIRONMENT_NAME}
   only:
