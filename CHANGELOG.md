@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.7.1](https://github.com/SocialGouv/egapro/compare/v2.7.0...v2.7.1) (2020-02-20)
+
+
+### Bug Fixes
+
+* commit version during release stage ([#542](https://github.com/SocialGouv/egapro/issues/542)) ([4536215](https://github.com/SocialGouv/egapro/commit/4536215)), closes [#310](https://github.com/SocialGouv/egapro/issues/310) [#310](https://github.com/SocialGouv/egapro/issues/310) [#481](https://github.com/SocialGouv/egapro/issues/481)
+
+
+
+
+
 # [2.6.0](https://github.com/SocialGouv/egapro/compare/v2.5.0...v2.6.0) (2020-02-14)
 
 

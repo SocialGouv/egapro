@@ -27,9 +27,6 @@ include:
     file: /base_deploy_hpa_chart_stage.yml
     ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
-    file: /base_semantic_release_stage.yml
-    ref: v4.6.0
-  - project: SocialGouv/gitlab-ci-yml
     file: /base_delete_useless_k8s_ns_stage.yml
     ref: v4.6.0
   - project: SocialGouv/gitlab-ci-yml
@@ -78,7 +75,7 @@ variables:
   KINTO_RESOURCE_MEMORY_REQUEST: "128Mi"
   # Quotas job init Kinto
   INIT_KINTO_RESOURCE_CPU_LIMIT: "20m"
-  INIT_KINTO_RESOURCE_MEMORY_LIMIT: "16Mi"
+  INIT_KINTO_RESOURCE_MEMORY_LIMIT: "64Mi"
   INIT_KINTO_RESOURCE_CPU_REQUEST: "10m"
   INIT_KINTO_RESOURCE_MEMORY_REQUEST: "8Mi"
   # Quotas Memcached
