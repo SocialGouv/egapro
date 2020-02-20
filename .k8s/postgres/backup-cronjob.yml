@@ -1,0 +1,66 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: backup-cron
+spec:
+  schedule: "0 */4 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup-cron
+            image: postgres:11-alpine
+            command: ["/bin/bash"]
+            args:
+              - -c
+              - |
+                export TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S");
+                echo "egapro_$TIMESTAMP.dump" > /data/LATEST;
+                pg_dumpall -c -h egapro-prod-pg-postgresql -U egapro > /data/egapro_$TIMESTAMP.dump;
+                echo "backup egapro_$TIMESTAMP.dump completed";
+            resources:
+              requests:
+                cpu: 100m
+                memory: 200Mi
+              limits:
+                cpu: 100
+                memory: 200Mi
+            env:
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: egapro
+                    key: POSTGRES_EGAPRO_PASSWORD
+            volumeMounts:
+              - mountPath: "/data"
+                name: volume
+          restartPolicy: OnFailure
+          volumes:
+            - name: volume
+              azureFile:
+                secretName: azure-storage
+                shareName: egapro-backup-restore
+                readOnly: false
+          initContainers:
+            - name: wait-for-postgres
+              image: postgres:11-alpine
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  cpu: 5m
+                  memory: 16Mi
+                limits:
+                  cpu: 20m
+                  memory: 32Mi
+              command:
+                - sh
+                - -c
+                - |
+                  retry=120; # 5s * (12 * 10) = 10min
+                  while ! pg_isready -h egapro-prod-pg-postgresql > /dev/null 2> /dev/null && [[ $(( retry-- )) -gt 0 ]];
+                    do
+                      echo "Waiting for Postgres to go Green ($(( retry )))" ; sleep 5s ; done ;
+                  echo Ready;
+...
