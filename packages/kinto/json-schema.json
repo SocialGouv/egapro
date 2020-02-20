@@ -364,7 +364,7 @@
             "noteIndex": { "type": "integer" },
             "mesuresCorrection": {
               "type": "string",
-              "enum": ["mmo", "me", "mne"]
+              "enum": ["", "mmo", "me", "mne"]
             }
           }
         }
