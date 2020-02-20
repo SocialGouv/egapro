@@ -12,7 +12,7 @@
     },
     "sexeSurRepresente": {
       "type": "string",
-      "enum": ["hommes", "femmes"]
+      "enum": ["hommes", "femmes", "egalite"]
     }
   },
   "type": "object",
