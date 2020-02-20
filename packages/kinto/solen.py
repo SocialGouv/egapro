@@ -613,13 +613,12 @@ class RowProcessor(object):
         self.importIntField("Indicateur 5", "indicateurCinq/noteFinale")
 
     def importNiveauDeResultatGlobal(self):
-        self.importIntField("Nombre total de points obtenus", "declaration/noteFinale")
+        self.importIntField("Nombre total de points obtenus", "declaration/totalPoint")
         self.importIntField(
-            "Nombre total de points pouvant être obtenus", "declaration/nombrePointsMax"
+            "Nombre total de points pouvant être obtenus",
+            "declaration/TotalPointCalculable",
         )
-        self.importIntField(
-            "Résultat final sur 100 points", "declaration/noteFinaleSur100"
-        )
+        self.importIntField("Résultat final sur 100 points", "declaration/noteIndex")
         self.importField("mesures_correction", "declaration/mesuresCorrection")
 
     def run(self):

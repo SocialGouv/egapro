@@ -359,9 +359,9 @@
             "indicateurTrois": { "type": "integer" },
             "indicateurQuatre": { "type": "integer" },
             "indicateurCinq": { "type": "integer" },
-            "noteFinale": { "type": "integer" },
-            "nombrePointsMax": { "type": "integer" },
-            "noteFinaleSur100": { "type": "integer" },
+            "totalPoint": { "type": "integer" },
+            "totalPointCalculable": { "type": "integer" },
+            "noteIndex": { "type": "integer" },
             "mesuresCorrection": {
               "type": "string",
               "enum": ["mmo", "me", "mne"]
