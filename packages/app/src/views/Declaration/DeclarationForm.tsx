@@ -12,10 +12,13 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
+import {sendSuccessEmail} from "../../utils/api";
 
 ///////////////////
 interface Props {
+  code: string;
   declaration: AppState["declaration"];
+  informationsDeclarant: AppState["informationsDeclarant"];
   noteIndex: number | undefined;
   indicateurUnParCSP: boolean;
   readOnly: boolean;
@@ -24,6 +27,7 @@ interface Props {
 }
 
 function DeclarationForm({
+  code,
   declaration,
   noteIndex,
   indicateurUnParCSP,
@@ -57,6 +61,7 @@ function DeclarationForm({
   const onSubmit = (formData: any) => {
     saveForm(formData);
     validateDeclaration("Valid");
+    sendSuccessEmail(code);
   };
 
   return (

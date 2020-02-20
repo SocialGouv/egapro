@@ -1,6 +1,8 @@
 import * as Koa from "koa";
 import { IndicatorsData } from "../model";
 import { Email, emailService, indicatorsDataService } from "../service";
+import { successEmail } from "../templates";
+import { stringReplacer } from "../util/replace-in-string";
 
 export const createIndicatorsData = async (ctx: Koa.Context) => {
   const record: IndicatorsData = await indicatorsDataService.add();
@@ -46,7 +48,7 @@ export const getIndicatorsData = async (ctx: Koa.Context) => {
   }
 };
 
-export const sendEmail = async (ctx: Koa.Context) => {
+export const sendStartEmail = async (ctx: Koa.Context) => {
   const id: string = ctx.params.id;
   const emailAddress: string = ctx.request.body.email;
   const record = await indicatorsDataService.one(id);
@@ -57,7 +59,7 @@ export const sendEmail = async (ctx: Koa.Context) => {
       message: `indicators_data with id ${id} does not exist`
     };
   } else {
-    const email: Email = buildEmail(record.id, emailAddress);
+    const email: Email = buildStartEmail(record.id, emailAddress);
     const response = await emailService.sendEmail(email);
     if (response.messageId) {
       ctx.status = 204;
@@ -68,9 +70,59 @@ export const sendEmail = async (ctx: Koa.Context) => {
   }
 };
 
-function buildEmail(id: string, emailAddress: string) {
-  const subject: string =
-    "Calcul de l’index égalité professionnelle femmes-hommes";
+export const sendSuccessEmail = async (ctx: Koa.Context) => {
+  const id: string = ctx.params.id;
+  const record = await indicatorsDataService.one(id);
+  ctx.type = "application/json";
+  if (!record || !record.id) {
+    ctx.status = 400;
+    ctx.body = {
+      message: `indicators_data with id ${id} does not exist`
+    };
+  } else {
+    const companyName = record.data.informationsEntreprise.nomEntreprise || "";
+    const anneeDeclaration = record.data.informations.anneeDeclaration || "";
+    const emailAddress = record.data.informationsDeclarant.email;
+    const email: Email = buildSuccessEmail(
+      record.id,
+      companyName,
+      emailAddress,
+      anneeDeclaration
+    );
+    const response = await emailService.sendEmail(email);
+    if (response.messageId) {
+      ctx.status = 204;
+    } else {
+      ctx.status = 400;
+      ctx.body = {};
+    }
+  }
+};
+
+interface EmailTarget {
+  email: string;
+  name: string;
+}
+
+interface EmailHeader {
+  bcc: EmailTarget[];
+  cci: EmailTarget[];
+  subject: string;
+  to: EmailTarget[];
+}
+
+function buildEmailHeader(emailAddress: string): EmailHeader {
+  const subject = "Calcul de l’index égalité professionnelle femmes-hommes";
+
+  return {
+    bcc: [],
+    cci: [],
+    subject,
+    to: [{ email: emailAddress, name: emailAddress }]
+  };
+}
+
+function buildStartEmail(id: string, emailAddress: string): Email {
   const body: string = `Bonjour,
 
 Vous avez commencé votre calcul de l’Index de l’égalité professionnelle femmes-hommes.
@@ -83,10 +135,28 @@ Bien cordialement,
 
 Direction Générale du Travail`;
   return {
-    bcc: [],
-    bodyText: body,
-    cci: [],
-    subject,
-    to: [{ email: emailAddress, name: emailAddress }]
+    ...buildEmailHeader(emailAddress),
+    bodyText: body
+  };
+}
+
+function buildSuccessEmail(
+  id: string,
+  companyName: string,
+  emailAddress: string,
+  anneeIndicateur: string
+): Email {
+  return {
+    ...buildEmailHeader(emailAddress),
+    bodyText: stringReplacer(successEmail.text, {
+      anneeIndicateur,
+      companyName,
+      id
+    }),
+    html: stringReplacer(successEmail.html, {
+      anneeIndicateur,
+      companyName,
+      id
+    })
   };
 }

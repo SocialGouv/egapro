@@ -164,7 +164,7 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/declaration"
         render={props => (
-          <Declaration {...props} state={state} dispatch={dispatch} />
+          <Declaration {...props} code={code}state={state} dispatch={dispatch} />
         )}
       />
     </Switch>
