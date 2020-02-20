@@ -68,8 +68,12 @@
                         "trancheAge": {
                           "$ref": "#/definitions/trancheAge"
                         },
-                        "nombreSalariesFemmes": { "type": "number" },
-                        "nombreSalariesHommes": { "type": "number" }
+                        "nombreSalariesFemmes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        },
+                        "nombreSalariesHommes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        }
                       }
                     }
                   },
@@ -144,8 +148,12 @@
                         "trancheAge": {
                           "$ref": "#/definitions/trancheAge"
                         },
-                        "nombreSalariesFemmes": { "type": "number" },
-                        "nombreSalariesHommes": { "type": "number" },
+                        "nombreSalariesFemmes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        },
+                        "nombreSalariesHommes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        },
                         "remunerationAnnuelleBrutFemmes": { "type": "number" },
                         "remunerationAnnuelleBrutHommes": { "type": "number" },
                         "ecartTauxRemuneration": { "type": "number" }
@@ -267,8 +275,12 @@
               "$ref": "#/definitions/formValidated"
             },
             "presenceCongeMat": { "type": "boolean" },
-            "nombreSalarieesAugmentees": { "type": "integer" },
-            "nombreSalarieesPeriodeAugmentation": { "type": "integer" },
+            "nombreSalarieesAugmentees": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }]
+            },
+            "nombreSalarieesPeriodeAugmentation": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }]
+            },
             "nonCalculable": { "type": "boolean" },
             "motifNonCalculable": { "type": "string" },
             "motifNonCalculablePrecision": { "type": "string" },
