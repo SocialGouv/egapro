@@ -1,6 +1,6 @@
 import argparse
 import csv
-import dpath
+import dpath.util
 import io
 import json
 import kinto_http
@@ -936,7 +936,13 @@ class App(object):
         "Retourne les enregistrements Kinto concordants générés comme chaîne CSV."
         flattenedJson = json.dumps([flattenJson(r) for r in self.records])
         data = pandas.read_json(io.StringIO(flattenedJson))
-        return data.to_csv()
+        return data.to_csv(index=False)
+
+    def toXLSX(self, save_as):
+        "Retourne les enregistrements Kinto concordants générés comme fichier XLSX."
+        flattenedJson = json.dumps([flattenJson(r) for r in self.records])
+        data = pandas.read_json(io.StringIO(flattenedJson))
+        return data.to_excel(save_as, index=False)
 
     def toJSON(self, indent=None):
         "Retourne les enregistrements Kinto concordants générés comme chaîne JSON."
@@ -1025,7 +1031,7 @@ if __name__ == "__main__":
         "-s",
         "--save-as",
         type=str,
-        help="sauvegarder la sortie JSON ou CSV dans un fichier",
+        help="sauvegarder la sortie JSON, CSV ou XLSX dans un fichier",
     )
     parser.add_argument(
         "-r",
@@ -1088,9 +1094,14 @@ if __name__ == "__main__":
                 logger.success(
                     f"Enregistrements CSV exportés dans le fichier '{args.save_as}'."
                 )
+            elif args.save_as.endswith(".xlsx"):
+                app.toXLSX(args.save_as)
+                logger.success(
+                    f"Enregistrements XLSX exportés dans le fichier '{args.save_as}'."
+                )
             else:
                 raise AppError(
-                    "Seuls les formats JSON et CSV sont supportés pour la sauvegarde."
+                    "Seuls les formats JSON, CSV et XLSX sont supportés pour la sauvegarde."
                 )
 
         if not args.dry_run:
