@@ -1,0 +1,27 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kinto-hpa
+  labels:
+    app.kubernetes.io/name: kinto
+    app.kubernetes.io/instance: hpa
+spec:
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        averageUtilization: 80
+        type: Utilization
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kinto
