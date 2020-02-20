@@ -629,7 +629,7 @@ class RowProcessor(object):
         self.importIntField("Nombre total de points obtenus", "declaration/totalPoint")
         self.importIntField(
             "Nombre total de points pouvant être obtenus",
-            "declaration/TotalPointCalculable",
+            "declaration/totalPointCalculable",
         )
         self.importIntField("Résultat final sur 100 points", "declaration/noteIndex")
         self.importField("mesures_correction", "declaration/mesuresCorrection")
