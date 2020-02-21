@@ -48,6 +48,8 @@ export const collection: CollectionFn = <T>(name: string) => ({
     api(records(name), requestOptions("POST", { data: record })),
   count: (filter: string) =>
     apiCount(`${records(name)}?${filter}`, requestOptions("HEAD")),
+  find: (filter: string) =>
+    api(`${records(name)}/?${filter}`, requestOptions("GET")),
   one: (id: string) => api(`${records(name)}/${id}`, requestOptions("GET")),
   update: (id: string, record: T) =>
     api(`${records(name)}/${id}`, requestOptions("PUT", { data: record }))
@@ -58,6 +60,7 @@ export interface KintoCollection<T> {
   update: (id: string, record: T) => Promise<KintoResult<T>>;
   one: (id: string) => Promise<KintoResult<T>>;
   count: (filter: string) => Promise<string | null>;
+  find: (filter: string) => Promise<KintoResult<T>>;
 }
 
 export interface KintoResult<T> {

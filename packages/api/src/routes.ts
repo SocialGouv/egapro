@@ -2,6 +2,7 @@ import * as Router from "koa-router";
 import {
   createIndicatorsData,
   getIndicatorsData,
+  searchIndicatorsData,
   getStatsData,
   sendStartEmail,
   sendSuccessEmail,
@@ -21,3 +22,4 @@ router.get("/indicators-datas/:id", getIndicatorsData);
 router.post("/indicators-datas/:id/emails", sendStartEmail);
 router.post("/indicators-datas/:id/success-email", sendSuccessEmail);
 router.get("/stats", getStatsData);
+router.get("/search-indicators-data", searchIndicatorsData);

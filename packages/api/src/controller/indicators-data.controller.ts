@@ -48,6 +48,13 @@ export const getIndicatorsData = async (ctx: Koa.Context) => {
   }
 };
 
+export const searchIndicatorsData = async (ctx: Koa.Context) => {
+  const companyName: string = ctx.query.companyName;
+  const record = await indicatorsDataService.find({ companyName });
+  ctx.status = 200;
+  ctx.body = record;
+};
+
 export const sendStartEmail = async (ctx: Koa.Context) => {
   const id: string = ctx.params.id;
   const emailAddress: string = ctx.request.body.email;
