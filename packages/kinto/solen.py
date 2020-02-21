@@ -269,8 +269,8 @@ class RowProcessor(object):
         debut_pr = self.get("date_debut_pr > Valeur date")
         if self.get("periode_ref") == "ac":
             # année civile: 31 décembre de l'année précédent "annee_indicateurs"
-            debutPeriodeReference = "01/01/" + str(annee_indicateur - 1)
-            finPeriodeReference = "31/12/" + str(annee_indicateur - 1)
+            debutPeriodeReference = "01/01/" + str(annee_indicateur)
+            finPeriodeReference = "31/12/" + str(annee_indicateur)
         elif debut_pr != "-":
             # autre période: rajouter un an à "date_debut_pr"
             date_debut_pr = datetime.strptime(debut_pr, DATE_FORMAT_INPUT)
