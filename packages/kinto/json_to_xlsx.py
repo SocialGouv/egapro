@@ -58,6 +58,10 @@ def get_headers_columns(data):
     """Return a tuple of lists of (header_names, column_names) that we want in the export."""
     interesting_cols = (
         [
+            (
+                "URL de déclaration",
+                "URL de déclaration",
+            ),  # Built from /data/id, see below
             ("Date réponse", "/data/declaration/dateDeclaration"),
             ("e-mail_declarant", "/data/informationsDeclarant/email"),
             ("Nom", "/data/informationsDeclarant/nom"),
@@ -232,7 +236,11 @@ if __name__ == "__main__":
     flattened_json = json.dumps([flatten_json(r) for r in parsed_json])
     print("Loading the JSON with pandas")
     data = pandas.read_json(io.StringIO(flattened_json))
-    print("Writing the XLSX to", args.xlsx_output)
+    print("Adding a 'URL de déclaration' column based on the ID")
+    data["URL de déclaration"] = (
+        "https://index-egapro.travail.gouv.fr/simulateur/" + data["/id"]
+    )
     headers, columns = get_headers_columns(data)
+    print("Writing the XLSX to", args.xlsx_output)
     data[columns].to_excel(args.xlsx_output, index=False, header=headers)
     print("Done")
