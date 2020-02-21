@@ -19,6 +19,7 @@ import PageNotFound from "../views/PageNotFound";
 import Simulateur from "./Simulateur";
 import MainScrollView from "./MainScrollView";
 import MobileLayout from "./MobileLayout";
+import ConsulterIndex from "../views/ConsulterIndex";
 
 interface Props {
   state: AppState | undefined;
@@ -72,6 +73,10 @@ function AppLayout({ state, dispatch }: Props) {
               render={props => (
                 <PolitiqueConfidentialite {...props} dispatch={dispatch} />
               )}
+            />
+            <Route
+              path="/consulter-index"
+              render={() => (<ConsulterIndex />)}
             />
             <Route component={PageNotFound} />
           </Switch>

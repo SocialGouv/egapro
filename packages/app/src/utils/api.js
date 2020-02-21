@@ -71,3 +71,9 @@ export const putIndicatorsDatas = (id, data) =>
 
 export const sendEmailIndicatorsDatas = (id, email) =>
   postResource(`/indicators-datas/${id}/emails`, { email });
+
+export const findIndicatorsDataForRaisonSociale = (raisonSociale, { token }) => {
+  const encodedToken = encodeURIComponent(token);
+  const encodedRaisonSociale = encodeURIComponent(raisonSociale);
+  return getResource(`/auth/indicators-datas?token=${encodedToken}&partialCompanyName=${encodedRaisonSociale}`);
+};
