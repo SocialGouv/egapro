@@ -63,11 +63,5 @@ parser.add_argument(
     help="stop at the first validation error",
     default=False,
 )
-parser.add_argument(
-    "--as-list",
-    action="store_true",
-    help="the list of records isn't 'under' a `data` key in a dict (not a Kinto response)",
-    default=False,
-)
 
 parse(parser.parse_args())
