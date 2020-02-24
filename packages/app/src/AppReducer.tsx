@@ -29,7 +29,8 @@ const dataIndicateurUnCsp = mapEnum(
     tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
       trancheAge,
       remunerationAnnuelleBrutFemmes: undefined,
-      remunerationAnnuelleBrutHommes: undefined
+      remunerationAnnuelleBrutHommes: undefined,
+      ecartTauxRemuneration: undefined
     }))
   })
 );
@@ -41,7 +42,8 @@ const dataIndicateurUnCoefGroup = {
     nombreSalariesFemmes: undefined,
     nombreSalariesHommes: undefined,
     remunerationAnnuelleBrutFemmes: undefined,
-    remunerationAnnuelleBrutHommes: undefined
+    remunerationAnnuelleBrutHommes: undefined,
+    ecartTauxRemuneration: undefined
   }))
 };
 
