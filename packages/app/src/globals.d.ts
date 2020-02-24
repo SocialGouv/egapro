@@ -322,6 +322,8 @@ export type DeclarationIndicateurDeuxTroisData = {
   resultatFinalEcart: Number | undefined;
   resultatFinalNombreSalaries: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteEcart: Number | undefined;
+  noteNombreSalaries: Number | undefined;
   noteFinale: Number | undefined;
   mesuresCorrection: boolean;
 };
