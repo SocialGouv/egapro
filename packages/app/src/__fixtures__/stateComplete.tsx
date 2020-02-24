@@ -375,22 +375,26 @@ const actionUpdateIndicateurTrois = {
       {
         categorieSocioPro: CategorieSocioPro.Ouvriers,
         tauxPromotionFemmes: 1.1,
-        tauxPromotionHommes: 2.2
+        tauxPromotionHommes: 2.2,
+        ecartTauxPromotion: undefined
       },
       {
         categorieSocioPro: CategorieSocioPro.Employes,
         tauxPromotionFemmes: 0.3,
-        tauxPromotionHommes: 2.0
+        tauxPromotionHommes: 2.0,
+        ecartTauxPromotion: undefined
       },
       {
         categorieSocioPro: CategorieSocioPro.Techniciens,
         tauxPromotionFemmes: 2,
-        tauxPromotionHommes: 3
+        tauxPromotionHommes: 3,
+        ecartTauxPromotion: undefined
       },
       {
         categorieSocioPro: CategorieSocioPro.Cadres,
         tauxPromotionFemmes: 4,
-        tauxPromotionHommes: 5.55
+        tauxPromotionHommes: 5.55,
+        ecartTauxPromotion: undefined
       }
     ]
   }
