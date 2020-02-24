@@ -91,6 +91,7 @@ const actionValidateDeclaration = {
   indicateurTroisData: {
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
+    tauxPromotion: [],
     resultatFinal: 3.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 15,

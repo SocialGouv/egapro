@@ -178,21 +178,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -577,28 +581,7 @@ Object {
     "presencePromotion": false,
     "resultatFinal": 3,
     "sexeSurRepresente": "femmes",
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
+    "tauxPromotion": Array [],
   },
   "indicateurUn": Object {
     "autre": false,
@@ -831,21 +814,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -1186,21 +1173,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -1586,21 +1577,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -1941,21 +1936,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -2341,21 +2340,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -2696,21 +2699,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -3096,21 +3103,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -3447,21 +3458,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -3843,21 +3858,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -4198,21 +4217,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -4598,21 +4621,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -4953,21 +4980,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -5353,21 +5384,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -6463,21 +6498,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -6863,21 +6902,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -7256,21 +7299,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -7656,21 +7703,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -8049,21 +8100,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -8449,21 +8504,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -8842,21 +8901,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -9279,21 +9342,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -9672,21 +9739,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -10034,21 +10105,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -10389,21 +10464,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -10773,21 +10852,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -11112,21 +11195,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -11512,21 +11599,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -11867,21 +11958,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -12267,21 +12362,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -12622,21 +12721,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -13018,21 +13121,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -13378,21 +13485,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -13778,21 +13889,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -14159,21 +14274,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -14591,21 +14710,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -14951,28 +15074,7 @@ Object {
     "presencePromotion": false,
     "resultatFinal": 3,
     "sexeSurRepresente": "femmes",
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
+    "tauxPromotion": Array [],
   },
   "indicateurUn": Object {
     "autre": false,
@@ -15204,28 +15306,7 @@ Object {
     "presencePromotion": false,
     "resultatFinal": 3,
     "sexeSurRepresente": "femmes",
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
+    "tauxPromotion": Array [],
   },
   "indicateurUn": Object {
     "autre": false,
@@ -15457,28 +15538,7 @@ Object {
     "presencePromotion": false,
     "resultatFinal": 3,
     "sexeSurRepresente": "femmes",
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
+    "tauxPromotion": Array [],
   },
   "indicateurUn": Object {
     "autre": false,
@@ -15711,21 +15771,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -16111,21 +16175,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -16466,21 +16534,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -16866,21 +16938,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -17221,21 +17297,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -17621,21 +17701,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -17976,21 +18060,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -18376,21 +18464,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -18731,21 +18823,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -19131,21 +19227,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -19486,21 +19586,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -19886,21 +19990,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -20241,21 +20349,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -20641,21 +20753,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -20995,28 +21111,7 @@ Object {
     "presencePromotion": false,
     "resultatFinal": 3,
     "sexeSurRepresente": "femmes",
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
+    "tauxPromotion": Array [],
   },
   "indicateurUn": Object {
     "autre": false,
@@ -21249,21 +21344,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -21649,21 +21748,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -22003,28 +22106,7 @@ Object {
     "presencePromotion": false,
     "resultatFinal": 3,
     "sexeSurRepresente": "femmes",
-    "tauxPromotion": Array [
-      Object {
-        "categorieSocioPro": 0,
-        "tauxPromotionFemmes": 1.1,
-        "tauxPromotionHommes": 2.2,
-      },
-      Object {
-        "categorieSocioPro": 1,
-        "tauxPromotionFemmes": 0.3,
-        "tauxPromotionHommes": 2,
-      },
-      Object {
-        "categorieSocioPro": 2,
-        "tauxPromotionFemmes": 2,
-        "tauxPromotionHommes": 3,
-      },
-      Object {
-        "categorieSocioPro": 3,
-        "tauxPromotionFemmes": 4,
-        "tauxPromotionHommes": 5.55,
-      },
-    ],
+    "tauxPromotion": Array [],
   },
   "indicateurUn": Object {
     "autre": false,
@@ -22257,21 +22339,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -22657,21 +22743,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -23012,21 +23102,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -23412,21 +23506,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -23767,21 +23865,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -24167,21 +24269,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
@@ -24522,21 +24628,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 1.1,
         "tauxPromotionHommes": 2.2,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 0.3,
         "tauxPromotionHommes": 2,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 2,
         "tauxPromotionHommes": 3,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": 4,
         "tauxPromotionHommes": 5.55,
       },
@@ -24922,21 +25032,25 @@ Object {
     "tauxPromotion": Array [
       Object {
         "categorieSocioPro": 0,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 1,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 2,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
       Object {
         "categorieSocioPro": 3,
+        "ecartTauxPromotion": undefined,
         "tauxPromotionFemmes": undefined,
         "tauxPromotionHommes": undefined,
       },
