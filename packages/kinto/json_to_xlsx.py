@@ -99,7 +99,7 @@ def get_headers_columns(data):
         + [
             (
                 f"{CSP} > {tranche_age}",
-                f"/data/indicateurUn/coefficient/{index_csp}/tranchesAges/{index_tranche_age}/ecartTauxRemuneration",
+                f"/data/indicateurUn/remunerationAnnuelle/{index_csp}/tranchesAges/{index_tranche_age}/ecartTauxRemuneration",
             )
             for (index_csp, CSP) in enumerate(["Ou", "Em", "TAM", "IC"])
             for (index_tranche_age, tranche_age) in enumerate(
