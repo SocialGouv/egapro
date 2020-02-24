@@ -302,6 +302,7 @@ export type ActionIndicateurTroisData = {
 export type DeclarationIndicateurTroisData = {
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
+  tauxPromotion: Array<GroupeIndicateurTrois>;
   resultatFinal: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
   noteFinale: Number | undefined;
