@@ -13,7 +13,8 @@ import {
   DeclarationIndicateurTroisData,
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
-  DeclarationIndicateurCinqData
+  DeclarationIndicateurCinqData,
+  DeclarationEffectifData
 } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
@@ -31,6 +32,7 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 import DeclarationForm from "./DeclarationForm";
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
+import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 interface Props extends RouteComponentProps {
   state: AppState;
@@ -43,6 +45,14 @@ function Declaration({ state, dispatch }: Props) {
       dispatch({ type: "updateDeclaration", data }),
     [dispatch]
   );
+
+  const {
+    totalNombreSalariesHomme,
+    totalNombreSalariesFemme
+  } = totalNombreSalaries(state.effectif.nombreSalaries);
+
+  const nombreSalariesTotal =
+    totalNombreSalariesFemme + totalNombreSalariesHomme;
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
@@ -102,6 +112,10 @@ function Declaration({ state, dispatch }: Props) {
         !effectifsIndicateurDeuxTroisCalculable) &&
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
+
+  const effectifData: DeclarationEffectifData = {
+    nombreSalariesTotal
+  };
 
   const indicateurUnData: DeclarationIndicateurUnData = {
     nombreCoefficients: state.indicateurUn.csp
@@ -196,6 +210,7 @@ function Declaration({ state, dispatch }: Props) {
       dispatch({
         type: "validateDeclaration",
         valid,
+        effectifData,
         indicateurUnData,
         indicateurDeuxData,
         indicateurTroisData,
@@ -208,6 +223,7 @@ function Declaration({ state, dispatch }: Props) {
       }),
     [
       dispatch,
+      effectifData,
       indicateurUnData,
       indicateurDeuxData,
       indicateurTroisData,
