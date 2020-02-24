@@ -103,6 +103,8 @@ const actionValidateDeclaration = {
     resultatFinalEcart: 25,
     resultatFinalNombreSalaries: 5,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteEcart: 25,
+    noteNombreSalaries: 5,
     noteFinale: 25,
     mesuresCorrection: false
   },

@@ -27,22 +27,30 @@ describe("calculNote", () => {
     ).toEqual({ node: undefined, correctionMeasure: false });
     expect(calculNote(1, undefined, undefined, undefined, undefined)).toEqual({
       note: undefined,
-      correctionMeasure: false
+      correctionMeasure: false,
+      noteEcartTaux: 35,
+      noteEcartNombreSalaries: undefined
     });
     expect(calculNote(undefined, 1, undefined, undefined, undefined)).toEqual({
       note: undefined,
-      correctionMeasure: false
+      correctionMeasure: false,
+      noteEcartTaux: undefined,
+      noteEcartNombreSalaries: 35
     });
   });
 
   test("test max of both notes", () => {
     expect(calculNote(15, 0, undefined, undefined, undefined)).toEqual({
       note: 35,
-      correctionMeasure: false
+      correctionMeasure: false,
+      noteEcartTaux: 0,
+      noteEcartNombreSalaries: 35
     });
     expect(calculNote(0, 15, undefined, undefined, undefined)).toEqual({
       note: 35,
-      correctionMeasure: false
+      correctionMeasure: false,
+      noteEcartTaux: 35,
+      noteEcartNombreSalaries: 0
     });
   });
 
@@ -50,35 +58,45 @@ describe("calculNote", () => {
     test("note indicator 1 is 40 so no correction measure", () => {
       expect(calculNote(2.1, 2.1, 40, "femmes", "hommes")).toEqual({
         note: 25,
-        correctionMeasure: false
+        correctionMeasure: false,
+        noteEcartTaux: 25,
+        noteEcartNombreSalaries: 25
       });
     });
 
     test("overrepresented sex is same on indicator 1 & 2et3 so no correction measure", () => {
       expect(calculNote(8.1, 8.1, 36, "hommes", "hommes")).toEqual({
         note: 15,
-        correctionMeasure: false
+        correctionMeasure: false,
+        noteEcartTaux: 15,
+        noteEcartNombreSalaries: 15
       });
     });
 
     test("correction measure for men", () => {
       expect(calculNote(2.1, 2.1, 39, "femmes", "hommes")).toEqual({
         note: 35,
-        correctionMeasure: true
+        correctionMeasure: true,
+        noteEcartTaux: 25,
+        noteEcartNombreSalaries: 25
       });
     });
 
     test("correction measure for women", () => {
       expect(calculNote(8.1, 8.1, 36, "hommes", "femmes")).toEqual({
         note: 35,
-        correctionMeasure: true
+        correctionMeasure: true,
+        noteEcartTaux: 15,
+        noteEcartNombreSalaries: 15
       });
     });
 
     test("note indicator 1 is 0", () => {
       expect(calculNote(8.1, 8.1, 0, "hommes", "femmes")).toEqual({
         note: 35,
-        correctionMeasure: true
+        correctionMeasure: true,
+        noteEcartTaux: 15,
+        noteEcartNombreSalaries: 15
       });
     });
   });
