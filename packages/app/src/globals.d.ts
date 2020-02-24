@@ -219,6 +219,7 @@ export type ActionType =
   | {
       type: "validateDeclaration";
       valid: FormState;
+      effectifData: DeclarationEffectifData;
       indicateurUnData: DeclarationIndicateurUnData;
       indicateurDeuxData: DeclarationIndicateurDeuxData;
       indicateurTroisData: DeclarationIndicateurTroisData;
@@ -240,6 +241,10 @@ export type ActionInformationsSimulationData = {
 
 export type ActionEffectifData = {
   nombreSalaries: Array<GroupeEffectif>;
+};
+
+export type DeclarationEffectifData = {
+  nombreSalariesTotal: Number;
 };
 
 export type ActionIndicateurUnTypeData = {
