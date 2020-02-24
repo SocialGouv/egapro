@@ -73,6 +73,8 @@ const actionValidateDeclaration = {
     nombreCoefficients: 6,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
+    remunerationAnnuelle: [],
+    coefficient: [],
     resultatFinal: 8.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 31
