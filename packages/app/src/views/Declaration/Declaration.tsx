@@ -89,6 +89,8 @@ function Declaration({ state, dispatch }: Props) {
     indicateurEcartAugmentationPromotion,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    noteEcartTaux: noteEcart,
+    noteEcartNombreSalaries: noteNombreSalaries,
     correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
     noteIndicateurDeuxTrois
   } = calculIndicateurDeuxTrois(state);
@@ -187,6 +189,8 @@ function Declaration({ state, dispatch }: Props) {
     resultatFinalEcart: indicateurEcartAugmentationPromotion,
     resultatFinalNombreSalaries: indicateurEcartNombreEquivalentSalaries,
     sexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    noteEcart,
+    noteNombreSalaries,
     noteFinale: noteIndicateurDeuxTrois,
     mesuresCorrection: indicateurDeuxTroisCorrectionMeasure
   };

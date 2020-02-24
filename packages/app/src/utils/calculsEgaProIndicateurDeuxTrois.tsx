@@ -105,7 +105,18 @@ export const calculNote = (
   noteIndicateurUn: number | undefined,
   indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
   indicateurDeuxTroisSexeSurRepresente: "hommes" | "femmes" | undefined
-): { note: number | undefined; correctionMeasure: boolean } => {
+): {
+  note: number | undefined;
+  correctionMeasure: boolean;
+  noteEcartTaux: number | undefined;
+  noteEcartNombreSalaries: number | undefined;
+} => {
+  const noteEcartTaux =
+    ecartTaux !== undefined ? calculBarem(ecartTaux) : undefined;
+  const noteEcartNombreSalaries =
+    ecartNombreSalaries !== undefined
+      ? calculBarem(ecartNombreSalaries)
+      : undefined;
   if (
     noteIndicateurUn !== undefined &&
     noteIndicateurUn < 40 &&
@@ -113,16 +124,29 @@ export const calculNote = (
     indicateurDeuxTroisSexeSurRepresente &&
     indicateurUnSexeSurRepresente !== indicateurDeuxTroisSexeSurRepresente
   ) {
-    return { note: barem[0], correctionMeasure: true };
+    return {
+      note: barem[0],
+      correctionMeasure: true,
+      noteEcartTaux,
+      noteEcartNombreSalaries
+    };
   }
-  if (ecartTaux === undefined || ecartNombreSalaries === undefined) {
-    return { note: undefined, correctionMeasure: false };
+  if (noteEcartTaux === undefined || noteEcartNombreSalaries === undefined) {
+    return {
+      note: undefined,
+      correctionMeasure: false,
+      noteEcartTaux,
+      noteEcartNombreSalaries
+    };
   }
-  const noteEcartTaux = calculBarem(ecartTaux);
-  const noteEcartNombreSalaries = calculBarem(ecartNombreSalaries);
 
   const note = Math.max(noteEcartTaux, noteEcartNombreSalaries);
-  return { note, correctionMeasure: false };
+  return {
+    note,
+    correctionMeasure: false,
+    noteEcartTaux,
+    noteEcartNombreSalaries
+  };
 };
 
 /////////
@@ -192,7 +216,12 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
   } = calculIndicateurUn(state);
 
   // // NOTE
-  const { note: noteIndicateurDeuxTrois, correctionMeasure } = calculNote(
+  const {
+    note: noteIndicateurDeuxTrois,
+    correctionMeasure,
+    noteEcartTaux,
+    noteEcartNombreSalaries
+  } = calculNote(
     indicateurEcartAugmentationPromotionAbsolute,
     indicateurEcartNombreEquivalentSalaries,
     noteIndicateurUn,
@@ -206,6 +235,8 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
     indicateurEcartAugmentationPromotion: indicateurEcartAugmentationPromotionAbsolute,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente,
+    noteEcartTaux,
+    noteEcartNombreSalaries,
     noteIndicateurDeuxTrois,
     correctionMeasure,
     tauxAugmentationPromotionHommes,
