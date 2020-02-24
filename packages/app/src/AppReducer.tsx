@@ -62,7 +62,8 @@ const dataIndicateurTrois = mapEnum(
   (categorieSocioPro: CategorieSocioPro) => ({
     categorieSocioPro,
     tauxPromotionFemmes: undefined,
-    tauxPromotionHommes: undefined
+    tauxPromotionHommes: undefined,
+    ecartTauxPromotion: undefined
   })
 );
 
