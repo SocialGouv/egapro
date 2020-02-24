@@ -33,11 +33,12 @@ import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 
 interface Props extends RouteComponentProps {
+  code: string;
   state: AppState;
   dispatch: (action: ActionType) => void;
 }
 
-function Declaration({ state, dispatch }: Props) {
+function Declaration({ code, state, dispatch }: Props) {
   const updateDeclaration = useCallback(
     (data: ActionDeclarationData) =>
       dispatch({ type: "updateDeclaration", data }),
@@ -323,7 +324,9 @@ function Declaration({ state, dispatch }: Props) {
               totalPointCalculable={totalPointCalculable}
             />
             <DeclarationForm
+              code={code}
               declaration={state.declaration}
+              informationsDeclarant={state.informationsDeclarant}
               noteIndex={noteIndex}
               indicateurUnParCSP={state.indicateurUn.csp}
               readOnly={state.declaration.formValidated === "Valid"}
