@@ -52,7 +52,8 @@ const dataIndicateurDeux = mapEnum(
   (categorieSocioPro: CategorieSocioPro) => ({
     categorieSocioPro,
     tauxAugmentationFemmes: undefined,
-    tauxAugmentationHommes: undefined
+    tauxAugmentationHommes: undefined,
+    ecartTauxAugmentation: undefined
   })
 );
 
