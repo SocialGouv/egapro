@@ -21,7 +21,9 @@ import calculIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCoef,
   calculEcartTauxRemunerationParTrancheAgeCSP
 } from "../../utils/calculsEgaProIndicateurUn";
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurDeux, {
+  calculEcartTauxAugmentationParCSP
+} from "../../utils/calculsEgaProIndicateurDeux";
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
@@ -147,6 +149,9 @@ function Declaration({ code, state, dispatch }: Props) {
       : "absaugi",
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
+    tauxAugmentation: calculEcartTauxAugmentationParCSP(
+      state.indicateurDeux.tauxAugmentation
+    ),
     resultatFinal: indicateurEcartAugmentation,
     sexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteFinale: noteIndicateurDeux,
