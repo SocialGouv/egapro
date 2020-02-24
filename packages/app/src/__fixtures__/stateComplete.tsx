@@ -342,22 +342,26 @@ const actionUpdateIndicateurDeux = {
       {
         categorieSocioPro: CategorieSocioPro.Ouvriers,
         tauxAugmentationFemmes: 2.2,
-        tauxAugmentationHommes: 3.5
+        tauxAugmentationHommes: 3.5,
+        ecartTauxAugmentation: undefined
       },
       {
         categorieSocioPro: CategorieSocioPro.Employes,
         tauxAugmentationFemmes: 1.3,
-        tauxAugmentationHommes: 2.2
+        tauxAugmentationHommes: 2.2,
+        ecartTauxAugmentation: undefined
       },
       {
         categorieSocioPro: CategorieSocioPro.Techniciens,
         tauxAugmentationFemmes: 8.02,
-        tauxAugmentationHommes: 6.92
+        tauxAugmentationHommes: 6.92,
+        ecartTauxAugmentation: undefined
       },
       {
         categorieSocioPro: CategorieSocioPro.Cadres,
         tauxAugmentationFemmes: 12.15,
-        tauxAugmentationHommes: 13.56
+        tauxAugmentationHommes: 13.56,
+        ecartTauxAugmentation: undefined
       }
     ]
   }

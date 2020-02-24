@@ -287,6 +287,7 @@ export type ActionIndicateurDeuxData = {
 export type DeclarationIndicateurDeuxData = {
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
+  tauxAugmentation: Array<GroupeIndicateurDeux>;
   resultatFinal: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
   noteFinale: Number | undefined;
@@ -440,6 +441,7 @@ export interface GroupeIndicateurDeux {
   categorieSocioPro: CategorieSocioPro;
   tauxAugmentationFemmes: number | undefined;
   tauxAugmentationHommes: number | undefined;
+  ecartTauxAugmentation: number | undefined;
 }
 
 export interface GroupeIndicateurTrois {

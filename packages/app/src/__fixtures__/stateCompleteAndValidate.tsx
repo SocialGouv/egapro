@@ -82,6 +82,7 @@ const actionValidateDeclaration = {
   indicateurDeuxData: {
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
+    tauxAugmentation: [],
     resultatFinal: 5.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 10,
