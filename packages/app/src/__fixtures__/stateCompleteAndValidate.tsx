@@ -66,6 +66,9 @@ const actionValidateInformationsDeclarant = {
 const actionValidateDeclaration = {
   type: "validateDeclaration" as "validateDeclaration",
   valid: "Valid" as FormState,
+  effectifData: {
+    nombreSalariesTotal: 52
+  },
   indicateurUnData: {
     nombreCoefficients: 6,
     motifNonCalculable: "",
