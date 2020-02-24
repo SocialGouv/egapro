@@ -131,6 +131,8 @@ Deploy postgres (prod):
     POSTGRES_RESOURCE_MEMORY_REQUEST: "512Mi"
   environment:
     name: ${PROD_ENVIRONMENT_NAME}
+  after_script:
+    - kubectl apply -f .k8s/postgres/backup-cronjob.yml -n ${K8S_NAMESPACE}
   only:
     refs:
       - triggers
