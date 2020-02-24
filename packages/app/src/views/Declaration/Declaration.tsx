@@ -24,7 +24,9 @@ import calculIndicateurUn, {
 import calculIndicateurDeux, {
   calculEcartTauxAugmentationParCSP
 } from "../../utils/calculsEgaProIndicateurDeux";
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
+import calculIndicateurTrois, {
+  calculEcartTauxPromotionParCSP
+} from "../../utils/calculsEgaProIndicateurTrois";
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
@@ -165,6 +167,9 @@ function Declaration({ state, dispatch }: Props) {
       : "absprom",
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
+    tauxPromotion: calculEcartTauxPromotionParCSP(
+      state.indicateurTrois.tauxPromotion
+    ),
     resultatFinal: indicateurEcartPromotion,
     sexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteFinale: noteIndicateurTrois,
