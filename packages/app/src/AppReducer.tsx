@@ -609,6 +609,13 @@ function AppReducer(
       const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm");
       return {
         ...state,
+        effectif:
+          action.valid === "Valid"
+            ? {
+                ...state.effectif,
+                ...action.effectifData
+              }
+            : state.effectif,
         indicateurUn:
           action.valid === "Valid"
             ? {
