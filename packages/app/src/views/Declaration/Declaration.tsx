@@ -17,7 +17,10 @@ import {
   DeclarationEffectifData
 } from "../../globals";
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
+import calculIndicateurUn, {
+  calculEcartTauxRemunerationParTrancheAgeCoef,
+  calculEcartTauxRemunerationParTrancheAgeCSP
+} from "../../utils/calculsEgaProIndicateurUn";
 import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
@@ -124,6 +127,12 @@ function Declaration({ state, dispatch }: Props) {
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
+    remunerationAnnuelle: calculEcartTauxRemunerationParTrancheAgeCSP(
+      state.indicateurUn.remunerationAnnuelle
+    ),
+    coefficient: calculEcartTauxRemunerationParTrancheAgeCoef(
+      state.indicateurUn.coefficient
+    ),
     resultatFinal: indicateurEcartRemuneration,
     sexeSurRepresente: indicateurUnSexeSurRepresente,
     noteFinale: noteIndicateurUn

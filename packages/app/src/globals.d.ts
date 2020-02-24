@@ -272,6 +272,8 @@ export type DeclarationIndicateurUnData = {
   nombreCoefficients: Number | undefined;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
+  remunerationAnnuelle: Array<GroupeIndicateurUn>;
+  coefficient: Array<GroupeCoefficient>;
   resultatFinal: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
   noteFinale: Number | undefined;
@@ -412,6 +414,7 @@ export interface GroupTranchesAgesIndicateurUn {
   trancheAge: TranchesAges;
   remunerationAnnuelleBrutFemmes: number | undefined;
   remunerationAnnuelleBrutHommes: number | undefined;
+  ecartTauxRemuneration: number | undefined;
 }
 
 export interface GroupeIndicateurUn {
@@ -425,6 +428,7 @@ export interface GroupTranchesAgesCoefficient {
   nombreSalariesHommes: number | undefined;
   remunerationAnnuelleBrutFemmes: number | undefined;
   remunerationAnnuelleBrutHommes: number | undefined;
+  ecartTauxRemuneration: number | undefined;
 }
 
 export interface GroupeCoefficient {

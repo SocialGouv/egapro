@@ -141,22 +141,26 @@ const actionUpdateIndicateurUnCsp = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 23000,
-            remunerationAnnuelleBrutHommes: 25000
+            remunerationAnnuelleBrutHommes: 25000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 24000,
-            remunerationAnnuelleBrutHommes: 26000
+            remunerationAnnuelleBrutHommes: 26000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 25500,
-            remunerationAnnuelleBrutHommes: 26000
+            remunerationAnnuelleBrutHommes: 26000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 27500,
-            remunerationAnnuelleBrutHommes: 28000
+            remunerationAnnuelleBrutHommes: 28000,
+            ecartTauxRemuneration: undefined
           }
         ]
       },
@@ -166,22 +170,26 @@ const actionUpdateIndicateurUnCsp = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 23000,
-            remunerationAnnuelleBrutHommes: 25000
+            remunerationAnnuelleBrutHommes: 25000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 24000,
-            remunerationAnnuelleBrutHommes: 26000
+            remunerationAnnuelleBrutHommes: 26000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 31000,
-            remunerationAnnuelleBrutHommes: 33000
+            remunerationAnnuelleBrutHommes: 33000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 39000,
-            remunerationAnnuelleBrutHommes: 43000
+            remunerationAnnuelleBrutHommes: 43000,
+            ecartTauxRemuneration: undefined
           }
         ]
       },
@@ -191,22 +199,26 @@ const actionUpdateIndicateurUnCsp = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 26000,
-            remunerationAnnuelleBrutHommes: 28000
+            remunerationAnnuelleBrutHommes: 28000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 27000,
-            remunerationAnnuelleBrutHommes: 29000
+            remunerationAnnuelleBrutHommes: 29000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 34000,
-            remunerationAnnuelleBrutHommes: 36000
+            remunerationAnnuelleBrutHommes: 36000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 42000,
-            remunerationAnnuelleBrutHommes: 46000
+            remunerationAnnuelleBrutHommes: 46000,
+            ecartTauxRemuneration: undefined
           }
         ]
       },
@@ -216,22 +228,26 @@ const actionUpdateIndicateurUnCsp = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 36000,
-            remunerationAnnuelleBrutHommes: 38000
+            remunerationAnnuelleBrutHommes: 38000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 37000,
-            remunerationAnnuelleBrutHommes: 39000
+            remunerationAnnuelleBrutHommes: 39000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 44000,
-            remunerationAnnuelleBrutHommes: 46000
+            remunerationAnnuelleBrutHommes: 46000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 52000,
-            remunerationAnnuelleBrutHommes: 56000
+            remunerationAnnuelleBrutHommes: 56000,
+            ecartTauxRemuneration: undefined
           }
         ]
       }
@@ -291,22 +307,26 @@ const actionUpdateIndicateurUnCoefRemuneration = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 25000,
-            remunerationAnnuelleBrutHommes: 24000
+            remunerationAnnuelleBrutHommes: 24000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 32000,
-            remunerationAnnuelleBrutHommes: 32000
+            remunerationAnnuelleBrutHommes: 32000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 41000,
-            remunerationAnnuelleBrutHommes: 43000
+            remunerationAnnuelleBrutHommes: 43000,
+            ecartTauxRemuneration: undefined
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 49000,
-            remunerationAnnuelleBrutHommes: 51500
+            remunerationAnnuelleBrutHommes: 51500,
+            ecartTauxRemuneration: undefined
           }
         ]
       }
