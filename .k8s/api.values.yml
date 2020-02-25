@@ -42,7 +42,7 @@ deployment:
           name: ${PROJECT}
           key: KINTO_ADMIN_PASSWORD
     - name: MAIL_USE_TLS
-      value: "true"
+      value: ${API_MAIL_USE_TLS}
     - name: MAIL_PORT
       value: "465"
     - name: MAIL_FROM

@@ -74,6 +74,7 @@ Deploy api (prod):
     CONTEXT: api
     PORT: ${API_PORT}
     VALUES_FILE: ./.k8s/api.values.yml
+    API_MAIL_USE_TLS: '"true"'
     API_RESOURCE_CPU_LIMIT: "250m"
     API_RESOURCE_MEMORY_LIMIT: "256Mi"
     API_RESOURCE_CPU_REQUEST: "250m"
