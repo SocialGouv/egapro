@@ -1,16 +1,19 @@
-# Requires the following environment variables to be set (from the rancher secrets)
-# - $AZURE_STORAGE_ACCOUNT_NAME the azure file storage account name
-# - $AZURE_STORAGE_ACCOUNT_KEY the azure file storage account key
-# - $AZURE_STORAGE_ACCOUNT_NAME_EXPORT the azure file storage account name to upload the final exported file
-# - $AZURE_STORAGE_ACCOUNT_KEY_EXPORT the azure file storage account key to upload the final exported file
-# - $PGPASSWORD the preprod posgresql password
-# - $PG_PROD_PASSWORD the prod posgresql password
-# - $KINTO_ADMIN_PASSWORD the kinto password for the "admin" user
+# Requires an env file with the following environment variables to be set (from the rancher secrets)
+# - AZURE_STORAGE_ACCOUNT_NAME the azure file storage account name
+# - AZURE_STORAGE_ACCOUNT_KEY the azure file storage account key
+# - AZURE_STORAGE_ACCOUNT_NAME_EXPORT the azure file storage account name to upload the final exported file
+# - AZURE_STORAGE_ACCOUNT_KEY_EXPORT the azure file storage account key to upload the final exported file
+# - PGPASSWORD the preprod posgresql password
+# - PG_PROD_PASSWORD the prod posgresql password
+# - KINTO_ADMIN_PASSWORD the kinto password for the "admin" user
 
 # It also requires the following files:
 # - latest SOLEN export files in /tmp/solen_export_*.xlsx
 
 set -e
+
+# export the env variables listed at the top of this file
+. ./env
 
 echo ">>> APT UPDATE"
 apt update
@@ -79,9 +82,11 @@ echo '{"data": {"password": "'$KINTO_ADMIN_PASSWORD'"}}' | http PUT http://kinto
 
 cd egapro/packages/kinto/
 
+echo ">>> INSTALLING PYTHON DEPENDENCIES"
+pipenv install
+
 for solen_export in /tmp/solen_export_*.xlsx; do
     echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: $solen_export"
-    pipenv install
     KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas pipenv run python solen.py $solen_export --progress
 done
 
@@ -89,7 +94,7 @@ echo ">>> DUMPING DECLARATIONS TO /tmp/dump_declarations_records.json"
 KINTO_SERVER=http://kinto:8888/v1 pipenv run python dump_records.py /tmp/dump_declarations_records.json
 
 echo ">>> CONVERTING /tmp/dump_declarations_records.json TO /tmp/dump_declarations_records.xlsx"
-KINTO_SERVER=http://kinto:8888/v1 pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
+pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
 
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.json"
