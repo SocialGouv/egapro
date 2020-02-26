@@ -77,9 +77,10 @@ echo ">>> RESTORE THE ORIGINAL KINTO ADMIN PASSWORD"
 echo '{"data": {"password": "'$KINTO_ADMIN_PASSWORD'"}}' | http PUT http://kinto:8888/v1/accounts/admin --verbose --auth 'admin:passw0rd'
 
 
+cd egapro/packages/kinto/
+
 for solen_export in /tmp/solen_export_*.xlsx; do
     echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: $solen_export"
-    cd egapro/packages/kinto/
     pipenv install
     KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas pipenv run python solen.py $solen_export --progress
 done
