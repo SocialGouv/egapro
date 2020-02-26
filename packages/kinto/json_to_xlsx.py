@@ -88,13 +88,14 @@ def get_headers_columns(data):
         + [
             ("date_publ_niv", "/data/declaration/datePublication"),
             ("site_internet_publ", "/data/declaration/lienPublication"),
+            ("calculabilite_indic_tab1", "/data/indicateurUn/nonCalculable"),
+            ("motif_non_calc_tab1", "/data/indicateurUn/motifNonCalculable"),
+            ("precision_am_tab1", "/data/indicateurUn/motifNonCalculablePrecision"),
             ("modalite_calc_tab1_csp", "/data/indicateurUn/csp"),
             ("modalite_calc_tab1_coef_branche", "/data/indicateurUn/coef"),
             ("modalite_calc_tab1_coef_autre", "/data/indicateurUn/autre"),
             ("date_consult_CSE", "/data/declaration/dateConsultationCSE"),
             ("nb_coef_niv", "/data/indicateurUn/nombreCoefficients"),
-            ("motif_non_calc_tab1", "/data/indicateurUn/nonCalculable"),
-            ("precision_am_tab1", "/data/indicateurUn/motifNonCalculablePrecision"),
         ]
         + [
             (
