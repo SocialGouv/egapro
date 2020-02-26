@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f24afbfbdd656d8aacaef58da9862a264c68ac392109396a9898006854ff988f"
+            "sha256": "f27366448d55bb4ae74e469aafb02b2d39cff241ba2cb5b28aa8f3d7a50d697d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -44,12 +44,6 @@
             "index": "pypi",
             "version": "==2.0.1"
         },
-        "et-xmlfile": {
-            "hashes": [
-                "sha256:614d9722d572f6246302c4491846d2c393c199cfa4edc9af593437691683335b"
-            ],
-            "version": "==1.0.1"
-        },
         "idna": {
             "hashes": [
                 "sha256:7588d1c14ae4c77d74036e8c22ff447b26d0fde8f007354fd48a7814db15b7cb",
@@ -64,13 +58,6 @@
             ],
             "markers": "python_version < '3.8'",
             "version": "==1.5.0"
-        },
-        "jdcal": {
-            "hashes": [
-                "sha256:1abf1305fce18b4e8aa248cf8fe0c56ce2032392bc64bbd61b5dff2a19ec8bba",
-                "sha256:472872e096eb8df219c23f2689fc336668bdb43d194094b5cc1707e1640acfc8"
-            ],
-            "version": "==1.4.1"
         },
         "jsonschema": {
             "hashes": [
@@ -113,13 +100,6 @@
                 "sha256:f3d0a94ad151870978fb93538e95411c83899c9dc63e6fb65542f769568ecfa5"
             ],
             "version": "==1.18.1"
-        },
-        "openpyxl": {
-            "hashes": [
-                "sha256:547a9fc6aafcf44abe358b89ed4438d077e9d92e4f182c87e2dc294186dc4b64"
-            ],
-            "index": "pypi",
-            "version": "==3.0.3"
         },
         "pandas": {
             "hashes": [
@@ -204,6 +184,14 @@
             ],
             "index": "pypi",
             "version": "==1.2.0"
+        },
+        "xlsxwriter": {
+            "hashes": [
+                "sha256:488e1988ab16ff3a9cd58c7656d0a58f8abe46ee58b98eecea78c022db28656b",
+                "sha256:97ab487b81534415c5313154203f3e8a637d792b1e6a8201e8f7f71da0203c2a"
+            ],
+            "index": "pypi",
+            "version": "==1.2.8"
         },
         "zipp": {
             "hashes": [

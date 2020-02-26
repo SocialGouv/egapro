@@ -13,7 +13,7 @@ kinto-http = "*"
 pandas = "*"
 xlrd = "*"
 requests = "*"
-openpyxl = "*"
+xlsxwriter = "*"
 
 [requires]
 python_version = "3.7"
