@@ -209,8 +209,24 @@ def get_headers_columns(data):
     )
     print("List of interesting columns to export: (alias_name, json_name)")
     pprint(interesting_cols)
-    headers = [header for header, _column in interesting_cols]
-    columns = [column for _header, column in interesting_cols]
+    import_cols = [
+        (header, column)
+        for header, column in interesting_cols
+        if column in data.columns
+    ]
+    if len(import_cols) != len(interesting_cols):
+        print(
+            "!!!!! those columns are 'interesting' but not found in the input file! !!!!!"
+        )
+        pprint(
+            [
+                column
+                for _header, column in interesting_cols
+                if column not in data.columns
+            ]
+        )
+    headers = [header for header, _column in import_cols]
+    columns = [column for _header, column in import_cols]
     return (headers, columns)
 
 
