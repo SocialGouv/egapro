@@ -45,6 +45,9 @@ SOLEN_URL_PREFIX = (
 )  # racine URL déclarations Solen
 TRANCHE_50_250 = "De 50 à 250 inclus"  # valeur champ structure 50<250
 TRANCHE_PLUS_DE_250 = "Plus de 250"  # valeur champ structure +250
+# Les deux champs suivants ne sont présents que dans le nouvel export de solen pour l'année 2020 (année indicateur 2019)
+TRANCHE_251_999 = "De 251 à 999 inclus"  # valeur champ structure 251<999
+TRANCHE_PLUS_DE_1000 = "De 1000 ou plus"  # valeur champ structure +1000
 UES_KEY = "__uesdata__"  # nom clé données UES (interne)
 
 # Configuration de Kinto
@@ -259,9 +262,13 @@ class RowProcessor(object):
         trancheEgapro = TRANCHE_PLUS_DE_250
         if tranche == TRANCHE_50_250:
             trancheEgapro = "50 à 250"
+        elif tranche == TRANCHE_251_999:
+            trancheEgapro = "251 à 999"
+        elif tranche == TRANCHE_PLUS_DE_1000:
+            trancheEgapro = "1000 et plus"
         elif tranche != TRANCHE_PLUS_DE_250:
             raise RowProcessorError(
-                f"Tranche invalide: '{tranche}'; les valeurs supportées sont '{TRANCHE_50_250}' et '{TRANCHE_PLUS_DE_250}'."
+                f"Tranche invalide: '{tranche}'; les valeurs supportées sont '{TRANCHE_50_250}', '{TRANCHE_PLUS_DE_250}', '{TRANCHE_251_999}' et '{TRANCHE_PLUS_DE_1000}'."
             )
         self.set("informations/trancheEffectifs", trancheEgapro)
 
