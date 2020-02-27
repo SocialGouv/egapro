@@ -255,10 +255,12 @@ if __name__ == "__main__":
     print("Loading the JSON with pandas")
     data = pandas.read_json(io.StringIO(flattened_json))
     print("Adding a source of 'egapro' for records without a source")
-    data["/data/source"].fillna("egapro")
+    data["/data/source"] = data.apply(
+        lambda d: "egapro" if d["/data/source"] != "solen" else "solen", axis=1
+    )
     print("Adding a 'URL de déclaration' column based on the ID")
     data["URL de déclaration"] = (
-        "https://index-egapro.travail.gouv.fr/simulateur/" + data["/id"]
+        "'https://index-egapro.travail.gouv.fr/simulateur/" + data["/id"]
     )
     headers, columns = get_headers_columns(data)
     print("Writing the XLSX to", args.xlsx_output)
