@@ -255,7 +255,7 @@ if __name__ == "__main__":
     print("Loading the JSON with pandas")
     data = pandas.read_json(io.StringIO(flattened_json))
     print("Adding a source of 'egapro' for records without a source")
-    data["source"] = data["source"] if data["source"] else "egapro"
+    data["/data/source"].fillna("egapro")
     print("Adding a 'URL de déclaration' column based on the ID")
     data["URL de déclaration"] = (
         "https://index-egapro.travail.gouv.fr/simulateur/" + data["/id"]
