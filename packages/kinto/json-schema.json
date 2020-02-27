@@ -22,7 +22,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "source": { "type": "string" },
+        "source": { "type": "string", "enum": ["solen", "egapro"] },
         "informations": {
           "type": "object",
           "additionalProperties": false,

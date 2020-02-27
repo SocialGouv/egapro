@@ -58,6 +58,7 @@ def get_headers_columns(data):
     """Return a tuple of lists of (header_names, column_names) that we want in the export."""
     interesting_cols = (
         [
+            ("source", "/data/source"),
             (
                 "URL de déclaration",
                 "URL de déclaration",
@@ -253,6 +254,8 @@ if __name__ == "__main__":
     flattened_json = json.dumps([flatten_json(r) for r in parsed_json])
     print("Loading the JSON with pandas")
     data = pandas.read_json(io.StringIO(flattened_json))
+    print("Adding a source of 'egapro' for records without a source")
+    data["source"] = if not data["source"] then "egapro" else data["source"]
     print("Adding a 'URL de déclaration' column based on the ID")
     data["URL de déclaration"] = (
         "https://index-egapro.travail.gouv.fr/simulateur/" + data["/id"]
