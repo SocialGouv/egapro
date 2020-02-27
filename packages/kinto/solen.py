@@ -1129,6 +1129,7 @@ if __name__ == "__main__":
         logger.error(err)
         for error in err.errors:
             logger.error(error)
+        exit(1)
 
     except KeyboardInterrupt:
         logger.std("")
