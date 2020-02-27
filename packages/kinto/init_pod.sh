@@ -6,9 +6,18 @@
 # - PGPASSWORD the preprod posgresql password
 # - PG_PROD_PASSWORD the prod posgresql password
 # - KINTO_ADMIN_PASSWORD the kinto password for the "admin" user
-
-# It also requires the following files:
-# - latest SOLEN export files in /tmp/solen_export_*.xlsx
+#
+# It also requires the solen export files to be in the "exports" azure file share ...
+# - DNUM - EXPORT SOLEN 2019.xlsx
+# - DNUM - EXPORT SOLEN 2020.xlsx
+#
+# ... and the latest kinto prod backups in the "egapro-backup-restore" azure file share
+# - LATEST (contains the filename off the latest dump)
+# - the latest dump itself
+#
+# The script will then upload the final exports to the "exports" azure file share
+# - dump_declarations_records.json
+# - dump_declarations_records.xlsx
 
 set -e
 
@@ -44,8 +53,8 @@ az storage file download \
     --account-name $AZURE_STORAGE_ACCOUNT_NAME \
     --account-key $AZURE_STORAGE_ACCOUNT_KEY \
     --share-name "egapro-backup-restore" \
-    -p LATEST \
-    --dest /tmp/
+    -p "LATEST" \
+    --dest "/tmp/"
 
 export DUMP_NAME=$(cat /tmp/LATEST)
 
@@ -55,8 +64,8 @@ if [ ! -f "/tmp/$DUMP_NAME" ]; then
         --account-name $AZURE_STORAGE_ACCOUNT_NAME \
         --account-key $AZURE_STORAGE_ACCOUNT_KEY \
         --share-name "egapro-backup-restore" \
-        -p $DUMP_NAME \
-        --dest /tmp/
+        -p "$DUMP_NAME" \
+        --dest "/tmp/"
 fi
 
 
@@ -80,6 +89,23 @@ echo ">>> RESTORE THE ORIGINAL KINTO ADMIN PASSWORD"
 echo '{"data": {"password": "'$KINTO_ADMIN_PASSWORD'"}}' | http PUT http://kinto:8888/v1/accounts/admin --verbose --auth 'admin:passw0rd'
 
 
+echo ">>> DOWNLOADING 'DNUM - EXPORT SOLEN 2019.xlsx'"
+az storage file download \
+        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
+        --share-name "exports" \
+        -p "DNUM - EXPORT SOLEN 2019.xlsx" \
+        --dest "/tmp/solen_export_2019.xlsx"
+
+echo ">>> DOWNLOADING 'DNUM - EXPORT SOLEN 2020.xlsx'"
+az storage file download \
+        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
+        --share-name "exports" \
+        -p "DNUM - EXPORT SOLEN 2020.xlsx" \
+        --dest "/tmp/solen_export_2020.xlsx"
+
+
 cd egapro/packages/kinto/
 
 echo ">>> INSTALLING PYTHON DEPENDENCIES"
@@ -100,13 +126,13 @@ pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_
 echo ">>> UPLOADING /tmp/dump_declarations_records.json"
 az storage file upload \
         --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT== \
+        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
         --share-name "exports" \
-        --source /tmp/dump_declarations_records.json
+        --source "/tmp/dump_declarations_records.json"
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.xlsx"
 az storage file upload \
         --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT== \
+        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
         --share-name "exports" \
-        --source /tmp/dump_declarations_records.xlsx
+        --source "/tmp/dump_declarations_records.xlsx"
