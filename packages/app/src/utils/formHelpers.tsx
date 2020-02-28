@@ -4,7 +4,7 @@ import {
   percentageToFraction
 } from "./helpers";
 
-import { PeriodeDeclaration, TrancheEffectifs } from "../globals.d";
+import { PeriodeDeclaration, TrancheEffectifs } from "../globals";
 
 // INT PARSE
 

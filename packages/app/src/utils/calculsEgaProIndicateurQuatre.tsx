@@ -1,4 +1,4 @@
-import { AppState } from "../globals.d";
+import { AppState } from "../globals";
 
 import { roundDecimal } from "./helpers";
 

@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { RouteComponentProps } from "react-router-dom";
 
-import { FAQSectionType } from "../../globals.d";
+import { FAQSectionType } from "../../globals";
 import globalStyles from "../../utils/globalStyles";
 
 import FAQTitle from "./components/FAQTitle";

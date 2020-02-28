@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { useEffect, ReactNode } from "react";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 
-import { AppState } from "../globals.d";
+import { AppState } from "../globals";
 
 import { useLayoutType } from "../components/GridContext";
 import ModalProvider from "../components/ModalContext";

@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { useEffect, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
-import { AppState, ActionType } from "../globals.d";
+import { AppState, ActionType } from "../globals";
 
 import globalStyles from "../utils/globalStyles";
 import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api";

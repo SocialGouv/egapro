@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { useState } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
-import { ActionType } from "../globals.d";
+import { ActionType } from "../globals";
 import { postIndicatorsDatas } from "../utils/api";
 
 import Page from "../components/Page";

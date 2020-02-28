@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { Form } from "react-final-form";
-import { FormState, ActionIndicateurDeuxData } from "../../globals.d";
+import { FormState, ActionIndicateurDeuxData } from "../../globals";
 
 import {
   // calculTotalEffectifsEtTauxAugmentation,

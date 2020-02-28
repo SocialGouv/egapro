@@ -2,11 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 import { Form } from "react-final-form";
-import {
-  AppState,
-  FormState,
-  ActionIndicateurQuatreData
-} from "../../globals.d";
+import { AppState, FormState, ActionIndicateurQuatreData } from "../../globals";
 
 import {
   parseIntFormValue,

@@ -7,7 +7,7 @@ import {
   ActionType,
   FormState,
   ActionEffectifData
-} from "../../globals.d";
+} from "../../globals";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 import Page from "../../components/Page";
