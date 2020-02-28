@@ -7,7 +7,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "functional-tests": "cypress run"
+    "functional-tests": "cypress run",
+    "migrate": "ts-node -O '{\"module\": \"commonjs\"}' src/migrations/533-initial-migrations.ts"
   },
   "proxy": "http://localhost:4000",
   "dependencies": {
@@ -47,6 +48,8 @@
     "@types/react-router-dom": "5.1.3",
     "@types/react-table": "7.0.11",
     "cypress": "4.1.0",
+    "kinto-http": "^4.7.3",
+    "ts-node": "^8.6.2",
     "typescript": "3.8.3",
     "wait-on": "4.0.1"
   },
