@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-import { FormState } from "../../globals.d";
+import { FormState } from "../../globals";
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers";
 
 import ResultBubble from "../../components/ResultBubble";

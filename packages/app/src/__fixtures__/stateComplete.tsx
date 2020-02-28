@@ -4,7 +4,7 @@ import {
   Structure,
   TranchesAges,
   TrancheEffectifs
-} from "../globals.d";
+} from "../globals";
 import AppReducer from "../AppReducer";
 
 const actionInitiateState = {

@@ -1,4 +1,4 @@
-import { AppState } from "../globals.d";
+import { AppState } from "../globals";
 
 function clamp(num: number, min: number, max: number) {
   return Math.min(max, Math.max(min, num));

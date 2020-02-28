@@ -5,7 +5,7 @@ import {
   PeriodeDeclaration,
   Structure,
   TrancheEffectifs
-} from "./globals.d";
+} from "./globals";
 
 import AppReducer from "./AppReducer";
 

@@ -1,4 +1,4 @@
-import { FAQPart, FAQSection } from "../globals.d";
+import { FAQPart, FAQSection } from "../globals";
 
 export const faqData: FAQPart = {
   champApplication: {

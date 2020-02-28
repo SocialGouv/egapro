@@ -6,7 +6,7 @@ import {
   GroupeIndicateurUn,
   GroupeCoefficient,
   GroupTranchesAgesIndicateurUn
-} from "../globals.d";
+} from "../globals";
 
 import { roundDecimal } from "./helpers";
 

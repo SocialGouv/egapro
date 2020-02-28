@@ -8,7 +8,7 @@ import {
   FormState,
   ActionType,
   ActionIndicateurTroisData
-} from "../../globals.d";
+} from "../../globals";
 
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
 

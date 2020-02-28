@@ -6,7 +6,7 @@ import {
   TranchesAges,
   GroupTranchesAgesIndicateurUn,
   FormState
-} from "../../globals.d";
+} from "../../globals";
 
 import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
 

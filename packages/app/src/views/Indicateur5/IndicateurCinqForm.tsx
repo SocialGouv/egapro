@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { Form } from "react-final-form";
 import createDecorator from "final-form-calculate";
 
-import { AppState, FormState, ActionIndicateurCinqData } from "../../globals.d";
+import { AppState, FormState, ActionIndicateurCinqData } from "../../globals";
 
 import {
   parseIntFormValue,

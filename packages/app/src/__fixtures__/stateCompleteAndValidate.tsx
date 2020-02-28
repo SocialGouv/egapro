@@ -1,4 +1,4 @@
-import { FormState } from "../globals.d";
+import { FormState } from "../globals";
 import AppReducer from "../AppReducer";
 
 import stateComplete from "./stateComplete";

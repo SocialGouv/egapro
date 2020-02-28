@@ -6,7 +6,7 @@ import {
   CategorieSocioPro,
   TranchesAges,
   PeriodeDeclaration
-} from "./globals.d";
+} from "./globals";
 import mapEnum from "./utils/mapEnum";
 import { overwriteMerge, combineMerge } from "./utils/merge";
 

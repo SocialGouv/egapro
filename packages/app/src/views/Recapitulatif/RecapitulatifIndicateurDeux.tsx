@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
-import { FormState, CategorieSocioPro } from "../../globals.d";
+import { FormState, CategorieSocioPro } from "../../globals";
 
 import {
   displayNameCategorieSocioPro,

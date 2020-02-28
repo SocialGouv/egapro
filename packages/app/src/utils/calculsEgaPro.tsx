@@ -1,4 +1,4 @@
-import { GroupTranchesAgesEffectif } from "../globals.d";
+import { GroupTranchesAgesEffectif } from "../globals";
 
 import { roundDecimal } from "./helpers";
 
