@@ -1,3 +1,4 @@
+#!/bin/sh
 # Requires an env file with the following environment variables to be set (from the rancher secrets)
 # - AZURE_STORAGE_ACCOUNT_NAME the azure file storage account name
 # - AZURE_STORAGE_ACCOUNT_KEY the azure file storage account key
@@ -18,6 +19,9 @@
 # The script will then upload the final exports to the "exports" azure file share
 # - dump_declarations_records.json
 # - dump_declarations_records.xlsx
+
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+echo ">>> RUNNING SCRIPT" `date`
 
 set -e
 
@@ -110,18 +114,18 @@ az storage file download \
 cd egapro/packages/kinto/
 
 echo ">>> INSTALLING PYTHON DEPENDENCIES"
-pipenv install
+/usr/local/bin/pipenv install
 
 for solen_export in /tmp/solen_export_*.xlsx; do
     echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: $solen_export"
-    KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas pipenv run python solen.py $solen_export --progress
+    KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /usr/local/bin/pipenv run python solen.py $solen_export --progress
 done
 
 echo ">>> DUMPING DECLARATIONS TO /tmp/dump_declarations_records.json"
-KINTO_SERVER=http://kinto:8888/v1 pipenv run python dump_records.py /tmp/dump_declarations_records.json
+KINTO_SERVER=http://kinto:8888/v1 /usr/local/bin/pipenv run python dump_records.py /tmp/dump_declarations_records.json
 
 echo ">>> CONVERTING /tmp/dump_declarations_records.json TO /tmp/dump_declarations_records.xlsx"
-pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
+/usr/local/bin/pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
 
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.json"
@@ -137,3 +141,10 @@ az storage file upload \
         --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
         --share-name "exports" \
         --source "/tmp/dump_declarations_records.xlsx"
+
+echo ">>> DONE!"
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+echo
+echo
+echo
+echo
