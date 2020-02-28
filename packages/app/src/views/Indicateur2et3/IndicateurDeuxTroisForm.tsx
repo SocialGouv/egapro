@@ -6,7 +6,7 @@ import {
   ActionIndicateurDeuxTroisData,
   PeriodeDeclaration,
   GroupeEffectif
-} from "../../globals.d";
+} from "../../globals";
 
 import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";

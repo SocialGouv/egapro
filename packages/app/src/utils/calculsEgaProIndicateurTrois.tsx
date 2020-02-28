@@ -3,7 +3,7 @@ import {
   CategorieSocioPro,
   GroupeEffectif,
   GroupeIndicateurTrois
-} from "../globals.d";
+} from "../globals";
 
 import { roundDecimal } from "./helpers";
 

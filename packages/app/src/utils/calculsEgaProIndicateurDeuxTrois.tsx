@@ -1,4 +1,4 @@
-import { AppState } from "../globals.d";
+import { AppState } from "../globals";
 
 import calculIndicateurUn from "./calculsEgaProIndicateurUn";
 import { roundDecimal } from "./helpers";
