@@ -37,6 +37,10 @@ if [ ! -f "/usr/local/bin/pipenv" ]; then
 fi
 
 echo ">>> GIT CLONE EGAPRO"
+if [ ! -d "/root/egapro" ]; then
+    git clone https://github.com/SocialGouv/egapro
+fi
+
 if [ -d "/root/egapro" ]; then
     cd egapro
     git checkout 523-amelioration-import-solen
@@ -44,9 +48,6 @@ if [ -d "/root/egapro" ]; then
     cd ..
 fi
 
-if [ ! -d "/root/egapro" ]; then
-    git clone https://github.com/SocialGouv/egapro
-fi
 
 echo ">>> DOWNLOAD 'LATEST' FILE CONTAINING LATEST DUMP NAME"
 az storage file download \
