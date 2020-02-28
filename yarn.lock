@@ -9567,6 +9567,14 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.2.tgz#01146b36a6218e64e58f3a8d66de5d7fc6f6d051"
   integrity sha512-s5kLOcnH0XqDO+FvuaLX8DDjZ18CGFk7VygH40QoKPUQhW4e2rvM0rwUq0t8IQDOwYSeLK01U90OjzBTme2QqA==
 
+kinto-http@^4.7.3:
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/kinto-http/-/kinto-http-4.7.3.tgz#d6083ce167daff710b2db13d9774c2cecb6537e9"
+  integrity sha512-1BA8HdG0+cnYJFjsrx8H/j3xEVVNFHSmIDUqwVCHo4D8nLtNeIi9S3IqHLoMYikid7yfPteys66BGNg4EX59DA==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    uuid "^3.0.1"
+
 kleur@^3.0.2:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
