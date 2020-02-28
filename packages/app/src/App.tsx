@@ -5,7 +5,7 @@ import { Router } from "react-router-dom";
 import ReactPiwik from "react-piwik";
 import { createBrowserHistory } from "history";
 
-import { ActionType } from "./globals.d";
+import { ActionType } from "./globals";
 import AppReducer from "./AppReducer";
 
 import GridProvider from "./components/GridContext";

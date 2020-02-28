@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
-import { FormState, TranchesAges } from "../../globals.d";
+import { FormState, TranchesAges } from "../../globals";
 import {
   effectifEtEcartRemuGroupCsp,
   effectifEtEcartRemuGroupCoef

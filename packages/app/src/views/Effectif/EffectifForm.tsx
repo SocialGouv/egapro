@@ -6,7 +6,7 @@ import {
   FormState,
   GroupTranchesAgesEffectif,
   ActionEffectifData
-} from "../../globals.d";
+} from "../../globals";
 
 import { displayNameCategorieSocioPro } from "../../utils/helpers";
 

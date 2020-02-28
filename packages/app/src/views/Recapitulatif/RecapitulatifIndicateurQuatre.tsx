@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 
-import { FormState } from "../../globals.d";
+import { FormState } from "../../globals";
 
 import { displayPercent } from "../../utils/helpers";
 

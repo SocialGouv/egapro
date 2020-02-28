@@ -6,7 +6,7 @@ import {
   parseISO
 } from "date-fns";
 
-import { TranchesAges, CategorieSocioPro } from "../globals.d";
+import { TranchesAges, CategorieSocioPro } from "../globals";
 
 export function displayNameTranchesAges(trancheAge: TranchesAges): string {
   switch (trancheAge) {
