@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Route, Switch } from "react-router-dom";
 
-import { AppState, ActionType } from "../globals.d";
+import { AppState, ActionType } from "../globals";
 
 import globalStyles from "../utils/globalStyles";
 
