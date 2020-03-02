@@ -126,10 +126,10 @@ Deploy postgres (prod):
   variables:
     <<: *deploy_postgres_variables
     ENABLE_PERSISTENT_VOLUME: "true"
-    POSTGRES_RESOURCE_CPU_LIMIT: "500m"
-    POSTGRES_RESOURCE_MEMORY_LIMIT: "512Mi"
-    POSTGRES_RESOURCE_CPU_REQUEST: "500m"
-    POSTGRES_RESOURCE_MEMORY_REQUEST: "512Mi"
+    POSTGRES_RESOURCE_CPU_LIMIT: "1000m"
+    POSTGRES_RESOURCE_MEMORY_LIMIT: "1Gi"
+    POSTGRES_RESOURCE_CPU_REQUEST: "1000m"
+    POSTGRES_RESOURCE_MEMORY_REQUEST: "1Gi"
   environment:
     name: ${PROD_ENVIRONMENT_NAME}
   after_script:
@@ -210,7 +210,6 @@ Deploy memcached (prod):
     - kubectl apply -f .k8s/kinto/deployment-${PROJECT}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-${PROJECT}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/job-init-kinto-${PROJECT}.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/hpa.yml -n ${K8S_NAMESPACE}
 #
 
 Deploy kinto:
@@ -226,9 +225,9 @@ Deploy kinto (prod):
   variables:
     <<: *deploy_kinto_variables
     KINTO_RESOURCE_CPU_LIMIT: "1000m"
-    KINTO_RESOURCE_MEMORY_LIMIT: "1Gi"
+    KINTO_RESOURCE_MEMORY_LIMIT: "2Gi"
     KINTO_RESOURCE_CPU_REQUEST: "1000m"
-    KINTO_RESOURCE_MEMORY_REQUEST: "1Gi"
+    KINTO_RESOURCE_MEMORY_REQUEST: "2Gi"
     INIT_KINTO_RESOURCE_CPU_LIMIT: "20m"
     INIT_KINTO_RESOURCE_MEMORY_LIMIT: "64Mi"
     INIT_KINTO_RESOURCE_CPU_REQUEST: "20m"
@@ -278,9 +277,9 @@ Restore postgres:
     POSTGRES_RESOURCE_CPU_REQUEST: "1000m"
     POSTGRES_RESOURCE_MEMORY_REQUEST: "1Gi"
     KINTO_RESOURCE_CPU_LIMIT: "1000m"
-    KINTO_RESOURCE_MEMORY_LIMIT: "1Gi"
+    KINTO_RESOURCE_MEMORY_LIMIT: "2Gi"
     KINTO_RESOURCE_CPU_REQUEST: "1000m"
-    KINTO_RESOURCE_MEMORY_REQUEST: "1Gi"
+    KINTO_RESOURCE_MEMORY_REQUEST: "2Gi"
     INIT_KINTO_RESOURCE_CPU_LIMIT: "20m"
     INIT_KINTO_RESOURCE_MEMORY_LIMIT: "64Mi"
     INIT_KINTO_RESOURCE_CPU_REQUEST: "20m"
