@@ -210,7 +210,6 @@ Deploy memcached (prod):
     - kubectl apply -f .k8s/kinto/deployment-${PROJECT}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/service-${PROJECT}.yml -n ${K8S_NAMESPACE}
     - kubectl apply -f .k8s/kinto/job-init-kinto-${PROJECT}.yml -n ${K8S_NAMESPACE}
-    - kubectl apply -f .k8s/kinto/hpa.yml -n ${K8S_NAMESPACE}
 #
 
 Deploy kinto:
