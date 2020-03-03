@@ -1,5 +1,5 @@
 #!/bin/sh
-# Requires an env file with the following environment variables to be set (from the rancher secrets)
+# Requires an "/root/env" file with the following environment variables to be set (from the rancher secrets)
 # - AZURE_STORAGE_ACCOUNT_NAME the azure file storage account name
 # - AZURE_STORAGE_ACCOUNT_KEY the azure file storage account key
 # - AZURE_STORAGE_ACCOUNT_NAME_EXPORT the azure file storage account name to upload the final exported file
@@ -7,6 +7,9 @@
 # - PGPASSWORD the preprod posgresql password
 # - PG_PROD_PASSWORD the prod posgresql password
 # - KINTO_ADMIN_PASSWORD the kinto password for the "admin" user
+# - ES_ID the ID of the elasticsearch cloud ID
+# - ES_USERNAME the elasticsearch username
+# - ES_PASSWORD the elasticsearch password
 #
 # It also requires the solen export files to be in the "exports" azure file share ...
 # - DNUM - EXPORT SOLEN 2019.xlsx
@@ -32,6 +35,11 @@ echo ">>> APT UPDATE"
 apt update
 apt install -y vim python3 python3-pip wget curl httpie git postgresql-client
 
+# Install nodejs
+curl -sL https://deb.nodesource.com/setup_13.x | bash -
+apt-get install -y nodejs
+
+# Install azure cli
 if [ ! -f "/usr/bin/az" ]; then
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 fi
@@ -47,7 +55,7 @@ fi
 
 if [ -d "/root/egapro" ]; then
     cd egapro
-    git checkout 523-amelioration-import-solen
+    git checkout script-init_pod-preprod-consolidation-donnees
     git pull
     cd ..
 fi
@@ -141,6 +149,9 @@ az storage file upload \
         --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
         --share-name "exports" \
         --source "/tmp/dump_declarations_records.xlsx"
+
+echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
+JSON_DUMP_FILE=/tmp/dump_declarations_records.json node index_elasticsearch.js
 
 echo ">>> DONE!"
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
