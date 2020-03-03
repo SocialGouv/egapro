@@ -39,6 +39,23 @@
     /* Safari, Android, iOS */
       url("fonts/cabin/cabin-v14-latin-regular.svg#Cabin") format("svg"); /* Legacy iOS */
 }
+
+/* open-sans - latin */
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: bold;
+  src: url("fonts/open-sans/open-sans-bold.ttf") format("truetype");
+}
+
+/* noto-sans - latin */
+@font-face {
+  font-family: "Noto Sans";
+  font-style: normal;
+  font-weight: bold;
+  src: url("fonts/open-sans/noto-sans-bold.ttf") format("truetype");
+}
+
 /* ***** */
 
 * {
