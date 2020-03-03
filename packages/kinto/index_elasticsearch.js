@@ -131,6 +131,7 @@ const startIndexing = async documents => {
   });
 };
 
+console.log("Indexing the file", process.env.JSON_DUMP_FILENAME);
 const documents = require(process.env.JSON_DUMP_FILENAME);
 
 const isIndexable = record =>
