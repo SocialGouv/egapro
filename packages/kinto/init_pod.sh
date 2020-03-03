@@ -150,8 +150,11 @@ az storage file upload \
         --share-name "exports" \
         --source "/tmp/dump_declarations_records.xlsx"
 
+echo ">>> INSTALLING NODE DEPENDENCIES"
+/usr/bin/npm install @elastic/elasticsearch
+
 echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
-JSON_DUMP_FILE=/tmp/dump_declarations_records.json node index_elasticsearch.js
+JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.js
 
 echo ">>> DONE!"
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
