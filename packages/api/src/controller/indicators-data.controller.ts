@@ -1,5 +1,7 @@
 import * as Koa from "koa";
+import { pick } from "lodash";
 import { IndicatorsData } from "../model";
+import { request } from "../repository/elastic-search";
 import { Email, emailService, indicatorsDataService } from "../service";
 import { successEmail } from "../templates";
 import { stringReplacer } from "../util/replace-in-string";
@@ -50,9 +52,23 @@ export const getIndicatorsData = async (ctx: Koa.Context) => {
 
 export const searchIndicatorsData = async (ctx: Koa.Context) => {
   const companyName: string = ctx.query.companyName;
-  const record = await indicatorsDataService.find({ companyName });
+  const record = await request(companyName);
+  const response = record.map((data: IndicatorsData) =>
+    pick(data, [
+      "id",
+      "data.informationsEntreprise.entreprisesUES",
+      "data.informationsEntreprise.nomEntreprise",
+      "data.informationsEntreprise.siren",
+      "data.informationsEntreprise.structure",
+      "data.informationsEntreprise.nomUES",
+      "data.informationsEntreprise.region",
+      "data.informationsEntreprise.departement",
+      "data.informations.anneeDeclaration",
+      "data.declaration.noteIndex"
+    ])
+  );
   ctx.status = 200;
-  ctx.body = record;
+  ctx.body = response;
 };
 
 export const sendStartEmail = async (ctx: Koa.Context) => {

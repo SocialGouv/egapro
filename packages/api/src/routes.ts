@@ -2,8 +2,8 @@ import * as Router from "koa-router";
 import {
   createIndicatorsData,
   getIndicatorsData,
-  searchIndicatorsData,
   getStatsData,
+  searchIndicatorsData,
   sendStartEmail,
   sendSuccessEmail,
   updateIndicatorsData,
