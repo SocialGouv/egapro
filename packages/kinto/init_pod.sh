@@ -70,7 +70,7 @@ if [ ! -f "/tmp/$DUMP_NAME" ]; then
         --account-key $AZURE_STORAGE_ACCOUNT_KEY \
         --share-name "egapro-backup-restore" \
         -p "$DUMP_NAME" \
-        --dest "/tmp/"
+        --dest "/tmp/latest_dump.sql"
 fi
 
 
@@ -86,7 +86,7 @@ PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c
 PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "DROP ROLE egapro"
 set -e
 # Restore the prod DB
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -f /tmp/$DUMP_NAME
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -f /tmp/latest_dump.sql
 # Change the password back
 PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
 
