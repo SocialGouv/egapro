@@ -12,5 +12,8 @@
     "btoa": "1.2.1",
     "dotenv": "8.2.0",
     "node-fetch": "2.6.0"
+  },
+  "devDependencies": {
+    "@elastic/elasticsearch": "^7.6.0"
   }
 }
