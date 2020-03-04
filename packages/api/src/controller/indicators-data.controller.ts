@@ -52,9 +52,11 @@ export const getIndicatorsData = async (ctx: Koa.Context) => {
 
 export const searchIndicatorsData = async (ctx: Koa.Context) => {
   const companyName: string = ctx.query.companyName;
-  const record = await request(companyName);
-  const response = record.map((data: IndicatorsData) =>
-    pick(data, [
+  const size: number = +ctx.query.size;
+  const from: number = +ctx.query.from;
+  const { data, total } = await request(companyName, { size, from });
+  const response = data.map((indicatorsData: IndicatorsData) =>
+    pick(indicatorsData, [
       "id",
       "data.informationsEntreprise.entreprisesUES",
       "data.informationsEntreprise.nomEntreprise",
@@ -68,7 +70,10 @@ export const searchIndicatorsData = async (ctx: Koa.Context) => {
     ])
   );
   ctx.status = 200;
-  ctx.body = response;
+  ctx.body = {
+    data: response,
+    total
+  };
 };
 
 export const sendStartEmail = async (ctx: Koa.Context) => {

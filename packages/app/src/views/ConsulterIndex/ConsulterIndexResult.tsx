@@ -1,66 +1,132 @@
 /** @jsx jsx */
-import { FC } from "react";
+import {FC, useEffect} from "react";
 import { css, jsx } from "@emotion/core";
 import {FetchedIndicatorsData} from "./ConsulterIndex";
 import {AppState} from "../../globals";
+import {
+  ColumnInstance,
+  Row,
+  TableInstance,
+  usePagination,
+  UsePaginationInstanceProps,
+  UsePaginationOptions,
+  UsePaginationState,
+  useTable,
+  UseTableOptions
+} from "react-table";
+import Pagination from "./Pagination";
 
 interface ConsulterIndexResultProps {
-  indicatorsData: FetchedIndicatorsData[]
+  indicatorsData: FetchedIndicatorsData[];
+  onPageChange: (index: number) => void;
+  dataSize: number;
 }
-
-const Cell:FC = ({ children }) => (
-  <td css={styles.cell}>{children}</td>
-);
-
-const HeaderCell:FC = ({ children }) => (
-  <th css={styles.cell}>{children}</th>
-);
 
 const formatUESList = (informationsEntreprise: AppState["informationsEntreprise"]) =>
   informationsEntreprise.entreprisesUES?.map(({ nom, siren}) => `${nom} (${siren})`)
     ?.join(", ") || "";
 
-const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({ indicatorsData }) => (
-  <table css={styles.table}>
-    <thead>
-      <tr>
-        <HeaderCell>Raison Sociale</HeaderCell>
-        <HeaderCell>SIREN</HeaderCell>
-        <HeaderCell>Année</HeaderCell>
-        <HeaderCell>Note</HeaderCell>
-        <HeaderCell>Structure</HeaderCell>
-        <HeaderCell>Nom UES</HeaderCell>
-        <HeaderCell>Entreprises UES (SIREN)</HeaderCell>
-        <HeaderCell>Région</HeaderCell>
-        <HeaderCell>Département</HeaderCell>
-      </tr>
-    </thead>
-    <tbody>
+const columns = [{
+    Header: "Raison Sociale",
+    accessor: "data.informationsEntreprise.nomEntreprise"
+  }, {
+  Header: "SIREN",
+  accessor: "data.informationsEntreprise.siren"
+},{
+  Header: "Année",
+  accessor: "data.informations.anneeDeclaration"
+},{
+  Header: "Note",
+  accessor: ({ data : { declaration } }: FetchedIndicatorsData) => (declaration?.noteIndex || "NC")
+},{
+  Header: "Structure",
+  accessor: "data.informationsEntreprise.structure"
+}, {
+  Header: "Nom UES",
+  accessor: "data.informationsEntreprise.nomUES"
+}, {
+  Header: "Entreprises UES (SIREN)",
+  accessor: (indicatorData: FetchedIndicatorsData) => formatUESList(indicatorData.data.informationsEntreprise)
+},{
+  Header: "Région",
+  accessor: "data.informationsEntreprise.region"
+},{
+  Header: "Département",
+  accessor: "data.informationsEntreprise.departement"
+}];
+
+const pageSize = 10;
+
+const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
+   dataSize,
+   indicatorsData ,
+   onPageChange
+}) => {
+  const pageCount = Math.floor((dataSize - 1) / pageSize) + 1;
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    nextPage,
+    page,
+    prepareRow,
+    previousPage,
+    state
+  } = useTable(
     {
-      indicatorsData.map(({
-        id,
-        data: {
-         informations,
-         informationsEntreprise,
-         declaration
+      columns,
+      data: indicatorsData,
+      manualPagination: true,
+      initialState: { pageSize },
+      pageCount
+    } as UseTableOptions<FetchedIndicatorsData> & UsePaginationOptions<FetchedIndicatorsData>,
+    usePagination
+  ) as TableInstance<FetchedIndicatorsData> & UsePaginationInstanceProps<FetchedIndicatorsData>;
+
+  const { pageIndex } = state as UsePaginationState<FetchedIndicatorsData>;
+
+  useEffect(() => {
+    onPageChange(pageIndex);
+  }, [pageIndex, onPageChange])
+
+  return (
+    <div>
+      <Pagination
+        pageIndex={pageIndex}
+        pageCount={pageCount}
+        previousPage={previousPage}
+        nextPage={nextPage}
+      />
+      <table {...getTableProps()} css={styles.table}>
+        <thead>
+        <tr>
+          {headerGroups[0].headers.map((column: ColumnInstance<FetchedIndicatorsData>) => (
+            <th css={styles.cell} {...column.getHeaderProps()}>{column.Header}</th>
+          ))}
+        </tr>
+        </thead>
+        <tbody {...getTableBodyProps()}>
+        {
+          page.map((row: Row<FetchedIndicatorsData>) => {
+            prepareRow(row);
+            return (<tr {...row.getRowProps()}>
+              {row.cells.map(cell => <td css={styles.cell} {...cell.getCellProps()}>
+                {cell.render("Cell")}
+              </td>)}
+            </tr>)}
+          )
         }
-      }: FetchedIndicatorsData) => (
-        <tr key={id}>
-          <Cell>{informationsEntreprise.nomEntreprise}</Cell>
-          <Cell>{informationsEntreprise.siren}</Cell>
-          <Cell>{informations.anneeDeclaration}</Cell>
-          <Cell>{declaration?.noteIndex || "NC"}</Cell>
-          <Cell>{informationsEntreprise.structure}</Cell>
-          <Cell>{informationsEntreprise.nomUES}</Cell>
-          <Cell>{formatUESList(informationsEntreprise)}</Cell>
-          <Cell>{informationsEntreprise.region}</Cell>
-          <Cell>{informationsEntreprise.departement}</Cell>
-        </tr>)
-      )
-    }
-    </tbody>
-  </table>
-);
+        </tbody>
+      </table>
+      <Pagination
+        pageIndex={pageIndex}
+        pageCount={pageCount}
+        previousPage={previousPage}
+        nextPage={nextPage}
+      />
+    </div>
+  );
+};
 
 const padding = "10px";
 

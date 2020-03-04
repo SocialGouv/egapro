@@ -1,30 +1,17 @@
 /** @jsx jsx */
 import {FC, MouseEventHandler} from "react";
 import {IconSearch} from "../Icons";
-import {css, jsx} from "@emotion/core";
-import {GREEN} from "./colors";
+import {jsx} from "@emotion/core";
+import Button from "./Button";
 
 interface SearchButtonProps {
   onClick: MouseEventHandler
 }
 
 const SearchButton: FC<SearchButtonProps> = ({ onClick }) => (
-  <button onClick={onClick} css={styles.searchButton}>
+  <Button onClick={onClick}>
     <IconSearch/>
-  </button>
+  </Button>
 );
-
-const styles = {
-  searchButton: css({
-    color: "white",
-    backgroundColor: GREEN,
-    cursor: "pointer",
-    border: 0,
-    ":hover": {
-      filter: "brightness(120%)"
-    }
-  })
-};
-
 
 export default SearchButton;

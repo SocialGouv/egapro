@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import * as React from "react";
-import {useCallback, useState} from "react";
+import {useCallback,useState} from "react";
 import {css, jsx} from "@emotion/core";
-import {useInputValueChangeHandler} from "../../utils/hooks";
+import {useDebounceEffect, useInputValueChangeHandler} from "../../utils/hooks";
 import {findIndicatorsDataForRaisonSociale} from "../../utils/api";
 import {AppState} from "../../globals";
 import Field from "../../components/MinistereTravail/Field";
@@ -24,23 +24,42 @@ export interface FetchedIndicatorsData {
   }
 }
 
+const PAGE_SIZE = 10;
+
 const ConsulterIndex: React.FC = () => {
   const [raisonSociale, setRaisonSociale] = useState("");
   const [lastResearch, setLastResearch] = useState("");
   const [indicatorsData, setIndicatorsData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [dataSize, setDataSize] = useState(0);
 
   const handleRaisonSocialChange = useInputValueChangeHandler(setRaisonSociale);
 
   const search = useCallback((event) => {
     event.preventDefault();
-    if (raisonSociale.length > 0) {
-      setLastResearch(raisonSociale);
-      findIndicatorsDataForRaisonSociale(raisonSociale)
-        .then(({ jsonBody }) => {
-          setIndicatorsData(jsonBody);
-        });
-    }
-  }, [raisonSociale, setIndicatorsData, setLastResearch]);
+    setLastResearch(raisonSociale);
+    setCurrentPage(0);
+  }, [raisonSociale, setLastResearch]);
+
+  useDebounceEffect(
+    currentPage,
+    300,
+    (debouncedCurrentPage) => {
+      if (lastResearch.length > 0) {
+        findIndicatorsDataForRaisonSociale(
+          lastResearch,
+          {
+            size: PAGE_SIZE,
+            from: PAGE_SIZE * debouncedCurrentPage
+          }
+        ).then(({ jsonBody: { total, data } }) => {
+            setIndicatorsData(data);
+            setDataSize(total);
+          });
+      }
+    },
+    [lastResearch, setIndicatorsData, setLastResearch, setDataSize]
+  );
 
   return (<div css={styles.body}>
     <div css={styles.logoWrapper}>
@@ -65,7 +84,11 @@ const ConsulterIndex: React.FC = () => {
     }
     {
       indicatorsData.length > 0 &&
-        <ConsulterIndexResult indicatorsData={indicatorsData}/>
+        <ConsulterIndexResult
+          indicatorsData={indicatorsData}
+          dataSize={dataSize}
+          onPageChange={setCurrentPage}
+        />
     }
     <div css={styles.downloadSection}>
       <div css={styles.downloadAlign}>
