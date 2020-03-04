@@ -1,13 +1,13 @@
 /** @jsx jsx */
 import * as React from "react";
-import {useCallback,useState} from "react";
+import {useCallback, useMemo, useState} from "react";
 import {css, jsx} from "@emotion/core";
 import {useDebounceEffect, useInputValueChangeHandler} from "../../utils/hooks";
 import {findIndicatorsDataForRaisonSociale} from "../../utils/api";
 import {AppState} from "../../globals";
 import Field from "../../components/MinistereTravail/Field";
 import SearchButton from "../../components/MinistereTravail/SearchButton";
-import ConsulterIndexResult from "./ConsulterIndexResult";
+import ConsulterIndexResult, { SortOption } from "./ConsulterIndexResult";
 import SearchResultHeaderText from "./SearchResultHeaderText";
 import LogoIndex from "./LogoIndex";
 import {TEXT, TITLE} from "../../components/MinistereTravail/colors";
@@ -32,6 +32,7 @@ const ConsulterIndex: React.FC = () => {
   const [indicatorsData, setIndicatorsData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [dataSize, setDataSize] = useState(0);
+  const [sortBy, setSortBy] = useState<SortOption | undefined>();
 
   const handleRaisonSocialChange = useInputValueChangeHandler(setRaisonSociale);
 
@@ -41,16 +42,23 @@ const ConsulterIndex: React.FC = () => {
     setCurrentPage(0);
   }, [raisonSociale, setLastResearch]);
 
+  const searchParams = useMemo(() => ({
+    sortBy,
+    currentPage
+  }), [sortBy, currentPage]);
+
   useDebounceEffect(
-    currentPage,
+    searchParams,
     300,
-    (debouncedCurrentPage) => {
+    ({ sortBy: debouncedSortBy, currentPage: debouncedCurrentPage }) => {
       if (lastResearch.length > 0) {
         findIndicatorsDataForRaisonSociale(
           lastResearch,
           {
             size: PAGE_SIZE,
-            from: PAGE_SIZE * debouncedCurrentPage
+            from: PAGE_SIZE * debouncedCurrentPage,
+            order: debouncedSortBy?.order || "",
+            sortBy: debouncedSortBy?.field || ""
           }
         ).then(({ jsonBody: { total, data } }) => {
             setIndicatorsData(data);
@@ -88,6 +96,7 @@ const ConsulterIndex: React.FC = () => {
           indicatorsData={indicatorsData}
           dataSize={dataSize}
           onPageChange={setCurrentPage}
+          onSortByChange={setSortBy}
         />
     }
     <div css={styles.downloadSection}>

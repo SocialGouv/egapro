@@ -75,7 +75,9 @@ export const sendEmailIndicatorsDatas = (id, email) =>
 export const sendSuccessEmail = (id) =>
   postResource(`/indicators-datas/${id}/success-email`, {});
 
-export const findIndicatorsDataForRaisonSociale = (raisonSociale, { size, from }) => {
+export const findIndicatorsDataForRaisonSociale = (raisonSociale, { size, from, sortBy, order }) => {
   const encodedRaisonSociale = encodeURIComponent(raisonSociale);
-  return getResource(`/search-indicators-data?companyName=${encodedRaisonSociale}&size=${size}&from=${from}`);
+  return getResource(
+    `/search-indicators-data?companyName=${encodedRaisonSociale}&size=${size}&from=${from}&sortBy=${sortBy}&order=${order}`
+  );
 };

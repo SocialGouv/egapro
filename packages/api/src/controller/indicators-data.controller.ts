@@ -50,11 +50,25 @@ export const getIndicatorsData = async (ctx: Koa.Context) => {
   }
 };
 
+// interface SearchIndicatorsDataQuery {
+//   companyName: string;
+//   size: string;
+//   from: string;
+//
+// }
+
 export const searchIndicatorsData = async (ctx: Koa.Context) => {
   const companyName: string = ctx.query.companyName;
   const size: number = +ctx.query.size;
   const from: number = +ctx.query.from;
-  const { data, total } = await request(companyName, { size, from });
+  const sortBy: string = ctx.query.sortBy;
+  const order: string = ctx.query.order;
+  const { data, total } = await request(companyName, {
+    from,
+    order,
+    size,
+    sortBy
+  });
   const response = data.map((indicatorsData: IndicatorsData) =>
     pick(indicatorsData, [
       "id",

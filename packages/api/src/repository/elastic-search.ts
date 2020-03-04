@@ -12,6 +12,8 @@ const client = new Client({
 interface ElasticRequestOptions {
   size?: number;
   from?: number;
+  sortBy?: string;
+  order?: string;
 }
 
 interface RequestResult {
@@ -21,9 +23,10 @@ interface RequestResult {
 
 export const request = async (
   nomEntreprise: string,
-  { size = 10, from = 0 }: ElasticRequestOptions
+  { size = 10, from = 0, sortBy, order = "asc" }: ElasticRequestOptions
 ): Promise<RequestResult> => {
   try {
+    const sort = sortBy ? [{ [`${sortBy}.raw`]: { order } }] : [];
     const response = await client.search({
       body: {
         from,
@@ -34,9 +37,10 @@ export const request = async (
             }
           }
         },
-        size
+        size,
+        sort
       },
-      index: "declarations"
+      index: process.env.ELASTIC_SEARCH_INDEX || "declarations"
     });
     const {
       total: { value: total },
