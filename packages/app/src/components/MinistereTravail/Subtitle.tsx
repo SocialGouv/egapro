@@ -13,7 +13,9 @@ const Subtitle: FC = ({ children }) => (
 const subtitleStyle = css({
   fontFamily: "Open Sans",
   fontSize: "1em",
-  color: TEXT
+  color: TEXT,
+  marginTop: "10px",
+  marginBottom: "10px"
 });
 
 export default Subtitle;

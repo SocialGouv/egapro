@@ -206,11 +206,11 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
       />
       <div>
         <Subtitle>
-          A noter : la note pour l’année 2019 peut ne pas être disponible à date pour les raisons suivantes :
-          changement d’effectif de l’entreprise recherchée, index non transmis, vérifications en cours
+          NC = Non Calculable
         </Subtitle>
         <Subtitle>
-          NC signifie Non Calculable
+          A noter : la note pour l’année 2019 peut ne pas être disponible à date pour les raisons suivantes :
+          changement d’effectif de l’entreprise recherchée, index non transmis, vérifications en cours
         </Subtitle>
       </div>
     </div>
