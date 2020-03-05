@@ -1,4 +1,6 @@
 const { Client } = require("@elastic/elasticsearch");
+const isAfter = require("date-fns/isAfter");
+const parse = require("date-fns/parse");
 
 // write permissions
 const client = new Client({
@@ -64,7 +66,7 @@ async function createIndex({ client, indexName, mappings }) {
                 autocomplete: {
                   type: "custom",
                   tokenizer: "standard",
-                  filter: ["asciifolding","lowercase", "autocomplete_filter"]
+                  filter: ["asciifolding", "lowercase", "autocomplete_filter"]
                 },
                 search_autocomplete: {
                   type: "custom",
@@ -144,13 +146,55 @@ const startIndexing = async documents => {
 };
 
 console.log("Indexing the file", process.env.JSON_DUMP_FILENAME);
+
 const documents = require(process.env.JSON_DUMP_FILENAME);
 
-const isIndexable = record =>
+const isPublicEffectif = record =>
   record.data.informations &&
   (record.data.informations.trancheEffectifs === "1000 et plus" ||
     (record.data.informations.anneeDeclaration === 2018 &&
       record.data.informations.trancheEffectifs === "Plus de 250" &&
       record.data.effectif.nombreSalariesTotal > 1000));
 
-startIndexing(documents.filter(isIndexable));
+const parseFrenchDate = dateString =>
+  parse(dateString, "dd/MM/yyyy HH:mm", new Date(), {
+    locale: "fr"
+  });
+
+const isLatestRecord = (record, index, collection) => {
+  // find same declarations (siren, annee)
+  const similars = collection
+    .filter(record2 => record2.id !== record.id)
+    .filter(
+      record2 =>
+        record2.data.informationsEntreprise.siren ===
+        record.data.informationsEntreprise.siren
+    )
+    .filter(
+      record2 =>
+        record2.data.informations.anneeDeclaration ===
+        record.data.informations.anneeDeclaration
+    );
+  if (similars.length) {
+    // check if there are other in the future
+    const futureDeclarations = similars.filter(record2 =>
+      isAfter(
+        parseFrenchDate(record2.data.declaration.dateDeclaration),
+        parseFrenchDate(record.data.declaration.dateDeclaration)
+      )
+    );
+    if (futureDeclarations.length) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const indexableDocuments = documents
+  .filter(isPublicEffectif)
+  .filter(isLatestRecord);
+
+console.log("documents: ", documents.length);
+console.log("indexableDocuments:", indexableDocuments.length);
+
+startIndexing(indexableDocuments);
