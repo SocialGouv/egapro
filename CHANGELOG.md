@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.9.0](https://github.com/SocialGouv/egapro/compare/v2.8.0...v2.9.0) (2020-03-05)
+
+
+### Features
+
+* consulter index UI fixes ([c9a032f](https://github.com/SocialGouv/egapro/commit/c9a032f))
+
+
+
+
+
 # [2.8.0](https://github.com/SocialGouv/egapro/compare/v2.7.1...v2.8.0) (2020-02-27)
 
 
