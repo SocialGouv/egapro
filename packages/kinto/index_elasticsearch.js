@@ -1,4 +1,5 @@
 const { Client } = require("@elastic/elasticsearch");
+const fs = require("fs");
 
 // write permissions
 const client = new Client({
@@ -8,6 +9,8 @@ const client = new Client({
     password: process.env.ES_PASSWORD
   }
 });
+
+console.log(process.env.ES_ID, process.env.ES_USERNAME, process.env.ES_PASSWORD);
 
 const declarationsMapping = {
   properties: {
@@ -19,14 +22,13 @@ const declarationsMapping = {
             nomEntreprise: {
               type: "text",
               analyzer: "autocomplete",
-              search_analyzer: "standard"
-            },
-            // We make a raw copy of the field to be able to sort it fast
-            fields: {
-              raw: {
-                "type": "keyword"
+              search_analyzer: "standard",
+              fields: {
+                raw: {
+                  type: "keyword"
+                }
               }
-            }
+            },
           }
         }
       }
@@ -44,6 +46,7 @@ async function createIndex({ client, indexName, mappings }) {
       console.log("index delete", error);
     }
   }
+  console.log(indexName);
   try {
     await client.indices.create({
       index: indexName,
@@ -76,6 +79,7 @@ async function createIndex({ client, indexName, mappings }) {
     console.log(`Index ${indexName} created.`);
   } catch (error) {
     console.log("index create", error);
+    console.log(error.meta.body.error);
   }
 }
 
