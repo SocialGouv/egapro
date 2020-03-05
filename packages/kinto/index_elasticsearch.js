@@ -20,6 +20,12 @@ const declarationsMapping = {
               type: "text",
               analyzer: "autocomplete",
               search_analyzer: "standard"
+            },
+            // We make a raw copy of the field to be able to sort it fast
+            fields: {
+              raw: {
+                "type": "keyword"
+              }
             }
           }
         }
