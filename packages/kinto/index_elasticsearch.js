@@ -10,8 +10,6 @@ const client = new Client({
   }
 });
 
-console.log(process.env.ES_ID, process.env.ES_USERNAME, process.env.ES_PASSWORD);
-
 const declarationsMapping = {
   properties: {
     data: {
