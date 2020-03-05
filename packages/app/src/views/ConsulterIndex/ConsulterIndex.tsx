@@ -10,9 +10,10 @@ import SearchButton from "../../components/MinistereTravail/SearchButton";
 import ConsulterIndexResult, { SortOption } from "./ConsulterIndexResult";
 import SearchResultHeaderText from "./SearchResultHeaderText";
 import LogoIndex from "./LogoIndex";
-import {TEXT, TITLE} from "../../components/MinistereTravail/colors";
+import {TITLE} from "../../components/MinistereTravail/colors";
 import DownloadButton from "./DownloadButton";
 import SocialNetworksLinks from "./SocialNetworksLinks";
+import Subtitle from "../../components/MinistereTravail/Subtitle";
 
 
 export interface FetchedIndicatorsData {
@@ -76,11 +77,11 @@ const ConsulterIndex: React.FC = () => {
     <h2 css={styles.title}>
       Retrouvez l'Index égalité professionnelle F/H publié par les entreprises de plus de 1000 salariés.
     </h2>
-    <p css={styles.subtitle}>
+    <Subtitle>
       Dans une volonté de transparence et d'avancée sociale pour toutes et tous, le Ministère
       du Travail a décidé de faciliter l'accès aux informations des entreprises qui publient leur
-      index depuis plus d'1 an.
-    </p>
+      index depuis plus d'un an.
+    </Subtitle>
     <form css={styles.searchFieldWrapper} onSubmit={search}>
       <Field value={raisonSociale} placeholder="Raison Sociale" onChange={handleRaisonSocialChange}/>
       <SearchButton onClick={search}/>
@@ -108,13 +109,22 @@ const ConsulterIndex: React.FC = () => {
       </div>
     </div>
     <div>
-      <p css={styles.subtitle}>
+      <Subtitle>
         Porté par la loi « Pour la liberté de choisir son avenir personnel » du 5 septembre
         2018, l'Index d'égalité professionnelle a été conçu pour faire progresser au sein
         des entreprises l'égalité salariale entre les hommes et les femmes.
-      </p>
+      </Subtitle>
+    </div>
+    <div css={styles.spacer}></div>
+    <div>
+
     </div>
     <div css={styles.socialNetworks}>
+      <div>
+        <Subtitle>
+          Si vous constatez une information erronée, merci d’adresser un email à : <a href="mailto: index@travail.gouv.fr">index@travail.gouv.fr</a>
+        </Subtitle>
+      </div>
       <SocialNetworksLinks />
     </div>
   </div>);
@@ -122,7 +132,7 @@ const ConsulterIndex: React.FC = () => {
 
 const styles = {
   logoWrapper: css({
-    marginBottom: "50px"
+    marginBottom: "30px"
   }),
   searchFieldWrapper: css({
     display: "flex",
@@ -134,17 +144,15 @@ const styles = {
   }),
   body: css({
     backgroundColor: "white",
-    padding: "30px"
+    padding: "30px",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "auto"
   }),
   title: css({
     fontFamily: "Noto Sans",
     fontWeight: "normal",
     color: TITLE
-  }),
-  subtitle: css({
-    fontFamily: "Open Sans",
-    fontSize: "1em",
-    color: TEXT
   }),
   downloadSection: css({
     display: "flex",
@@ -162,8 +170,11 @@ const styles = {
   }),
   socialNetworks: css({
     display: "flex",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     marginTop: "40px"
+  }),
+  spacer: css({
+    flexGrow: 1
   })
 };
 

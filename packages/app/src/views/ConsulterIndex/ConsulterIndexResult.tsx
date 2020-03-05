@@ -22,6 +22,7 @@ import {
   UseTableOptions
 } from "react-table";
 import Pagination from "./Pagination";
+import Subtitle from "../../components/MinistereTravail/Subtitle";
 
 export interface SortOption {
   field: string;
@@ -203,6 +204,15 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
         previousPage={previousPage}
         nextPage={nextPage}
       />
+      <div>
+        <Subtitle>
+          A noter : la note pour l’année 2019 peut ne pas être disponible à date pour les raisons suivantes :
+          changement d’effectif de l’entreprise recherchée, index non transmis, vérifications en cours
+        </Subtitle>
+        <Subtitle>
+          NC signifie Non Calculable
+        </Subtitle>
+      </div>
     </div>
   );
 };
@@ -212,7 +222,8 @@ const padding = "10px";
 const styles = {
   table: css({
     border: "1px solid black",
-    borderCollapse: "collapse"
+    borderCollapse: "collapse",
+    width: "100%"
   }),
   headerCell: css({
     border: "1px solid black",
