@@ -27,14 +27,8 @@ const update: (record: IndicatorsData) => Promise<IndicatorsData> = async (
   return kintoResult.data;
 };
 
-const find = async (query: string) => {
-  const kintoResult = await kintoCollection.find(query);
-  return kintoResult.data;
-};
-
 export const indicatorsDataRepository = {
   add,
-  find,
   one,
   update
 };
