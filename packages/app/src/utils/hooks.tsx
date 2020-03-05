@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import {useState, useEffect, useCallback, ChangeEvent, ChangeEventHandler} from "react";
 
 export function useDebounce(value: any, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -30,4 +30,13 @@ export function useDebounceEffect(
     debouncedValue,
     memoizedCallback
   ]);
+}
+
+export function useInputValueChangeHandler(
+  setter: (value: string) => void
+): ChangeEventHandler<HTMLInputElement> {
+  return useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setter(value);
+  },[setter])
 }

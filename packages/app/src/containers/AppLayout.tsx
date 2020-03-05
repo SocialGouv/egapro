@@ -19,6 +19,7 @@ import PageNotFound from "../views/PageNotFound";
 import Simulateur from "./Simulateur";
 import MainScrollView from "./MainScrollView";
 import MobileLayout from "./MobileLayout";
+import ConsulterIndex from "../views/ConsulterIndex";
 
 interface Props {
   state: AppState | undefined;
@@ -28,64 +29,71 @@ interface Props {
 function AppLayout({ state, dispatch }: Props) {
   const layoutType = useLayoutType();
 
-  if (layoutType === "mobile") {
-    return <MobileLayout />;
-  }
-
   return (
     <div css={styles.layout}>
-      <div css={styles.leftColumn}>
-        <Header />
+      <Switch>
+        <Route
+          path="/consulter-index"
+          render={() => (<ConsulterIndex />)}
+        />
+        <Route render={() => (
+          layoutType === "mobile" ?
+            <MobileLayout /> :
+            <div css={styles.horizontalLayout}>
+              <div css={styles.leftColumn}>
+                <Header />
+                <MainScrollView state={state}>
+                  <Switch>
+                    <Route
+                      path="/"
+                      exact
+                      render={props => <Home {...props} dispatch={dispatch} />}
+                    />
+                    <Route
+                      path="/simulateur/:code"
+                      render={({
+                                 match: {
+                                   params: { code }
+                                 }
+                               }) => (
+                        <Simulateur code={code} state={state} dispatch={dispatch} />
+                      )}
+                    />
+                    <Route
+                      path="/mentions-legales"
+                      exact
+                      render={props => (
+                        <MentionsLegales {...props} dispatch={dispatch} />
+                      )}
+                    />
+                    <Route
+                      path="/cgu"
+                      exact
+                      render={props => <CGU {...props} dispatch={dispatch} />}
+                    />
+                    <Route
+                      path="/politique-confidentialite"
+                      exact
+                      render={props => (
+                        <PolitiqueConfidentialite {...props} dispatch={dispatch} />
+                      )}
+                    />
+                    <Route component={PageNotFound} />
+                  </Switch>
+                </MainScrollView>
+              </div>
 
-        <MainScrollView state={state}>
-          <Switch>
-            <Route
-              path="/"
-              exact
-              render={props => <Home {...props} dispatch={dispatch} />}
-            />
-            <Route
-              path="/simulateur/:code"
-              render={({
-                match: {
-                  params: { code }
-                }
-              }) => (
-                <Simulateur code={code} state={state} dispatch={dispatch} />
-              )}
-            />
-            <Route
-              path="/mentions-legales"
-              exact
-              render={props => (
-                <MentionsLegales {...props} dispatch={dispatch} />
-              )}
-            />
-            <Route
-              path="/cgu"
-              exact
-              render={props => <CGU {...props} dispatch={dispatch} />}
-            />
-            <Route
-              path="/politique-confidentialite"
-              exact
-              render={props => (
-                <PolitiqueConfidentialite {...props} dispatch={dispatch} />
-              )}
-            />
-            <Route component={PageNotFound} />
-          </Switch>
-        </MainScrollView>
-      </div>
-
-      <div
-        css={[
-          styles.rightColumn,
-          layoutType === "tablet" && styles.rightColumnTablet
-        ]}
-      >
-        <FAQ />
-      </div>
+              <div
+                  css={[
+                    styles.rightColumn,
+                    layoutType === "tablet" && styles.rightColumnTablet
+                  ]}
+                >
+                  <FAQ />
+              </div>
+            </div>
+        )}/>
+      </Switch>
     </div>
   );
 }
@@ -142,6 +150,9 @@ const styles = {
   }),
   rightColumnTablet: css({
     width: 320
+  }),
+  horizontalLayout: css({
+    display: "flex"
   })
 };
 
