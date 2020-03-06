@@ -16,6 +16,7 @@ spec:
             export TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S");
             echo "egapro_$TIMESTAMP.dump" > /data/LATEST;
             pg_dumpall -c -h egapro-prod-pg-postgresql -U egapro > /data/egapro_$TIMESTAMP.dump;
+            sync;
             echo "backup egapro_$TIMESTAMP.dump completed";
         resources:
           requests:
