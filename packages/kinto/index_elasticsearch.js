@@ -19,7 +19,7 @@ const declarationsMapping = {
             nomEntreprise: {
               type: "text",
               analyzer: "autocomplete",
-              search_analyzer: "standard",
+              search_analyzer: "search_autocomplete",
               fields: {
                 raw: {
                   type: "keyword"
@@ -64,7 +64,12 @@ async function createIndex({ client, indexName, mappings }) {
                 autocomplete: {
                   type: "custom",
                   tokenizer: "standard",
-                  filter: ["lowercase", "autocomplete_filter"]
+                  filter: ["asciifolding","lowercase", "autocomplete_filter"]
+                },
+                search_autocomplete: {
+                  type: "custom",
+                  tokenizer: "standard",
+                  filter: ["asciifolding", "lowercase"]
                 }
               }
             }
