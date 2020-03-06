@@ -151,10 +151,29 @@ az storage file upload \
         --source "/tmp/dump_declarations_records.xlsx"
 
 echo ">>> INSTALLING NODE DEPENDENCIES"
-/usr/bin/npm install @elastic/elasticsearch
+/usr/bin/npm install @elastic/elasticsearch xlsx
 
 echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
 JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.js
+
+echo ">>> EXPORTING THE DECLARATIONS FROM THE COMPANIES WITH 1000+ EMPLOYEES IN /tmp/dump_declarations_records_1000.(xlsx|csvc)"
+JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node prepare-xlsx-1000.js
+
+echo ">>> UPLOADING /tmp/dump_declarations_records_1000.xlsx"
+az storage blob upload \
+        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
+        --container-name public \
+        --name "index-egalite-hf.xlsx" \
+        --file "/tmp/dump_declarations_records_1000.xlsx"
+
+echo ">>> UPLOADING /tmp/dump_declarations_records_1000.csv"
+az storage blob upload \
+        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
+        --container-name public \
+        --name "index-egalite-hf.csv" \
+        --file "/tmp/dump_declarations_records_1000.csv"
 
 echo ">>> DONE!"
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"

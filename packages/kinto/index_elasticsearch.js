@@ -1,5 +1,4 @@
 const { Client } = require("@elastic/elasticsearch");
-const fs = require("fs");
 
 // write permissions
 const client = new Client({
@@ -26,7 +25,7 @@ const declarationsMapping = {
                   type: "keyword"
                 }
               }
-            },
+            }
           }
         }
       }
