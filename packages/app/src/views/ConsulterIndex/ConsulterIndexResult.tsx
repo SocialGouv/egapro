@@ -29,13 +29,6 @@ export interface SortOption {
   order: "asc" | "desc"
 }
 
-interface ConsulterIndexResultProps {
-  indicatorsData: FetchedIndicatorsData[];
-  onPageChange: (index: number) => void;
-  onSortByChange: (sortBy?: SortOption) => void;
-  dataSize: number;
-}
-
 const formatUESList = (informationsEntreprise: AppState["informationsEntreprise"]) =>
   informationsEntreprise.entreprisesUES?.map(({ nom, siren}) => `${nom} (${siren})`)
     ?.join(", ") || "";
@@ -120,16 +113,26 @@ type AggregatedColumn =
   & ColumnInstance<FetchedIndicatorsData>
   & UseSortByColumnProps<FetchedIndicatorsData>
 
+interface ConsulterIndexResultProps {
+  currentPage: number;
+  dataSize: number;
+  indicatorsData: FetchedIndicatorsData[];
+  onPageChange: (index: number) => void;
+  onSortByChange: (sortBy?: SortOption) => void;
+}
+
 const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
-   dataSize,
-   indicatorsData ,
-   onPageChange,
-   onSortByChange
+  currentPage,
+  dataSize,
+  indicatorsData ,
+  onPageChange,
+  onSortByChange
 }) => {
   const pageCount = Math.floor((dataSize - 1) / pageSize) + 1;
   const {
     getTableProps,
     getTableBodyProps,
+    gotoPage,
     headerGroups,
     nextPage,
     page,
@@ -143,7 +146,9 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
       disableMultiSort: true,
       manualPagination: true,
       manualSortBy: true,
-      initialState: { pageSize },
+      initialState: {
+        pageSize
+      },
       pageCount
     } as AggregatedUseTableOptions,
     useSortBy,
@@ -151,11 +156,14 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
   ) as AggregatedTableInstance;
 
   const { pageIndex, sortBy } = state as AggregatedTableState;
-  console.log(sortBy);
 
   useEffect(() => {
     onPageChange(pageIndex);
   }, [pageIndex, onPageChange]);
+
+  useEffect(() => {
+    gotoPage(currentPage);
+  }, [currentPage, gotoPage])
 
   useEffect(() => {
     const sortByElement = sortBy[0];
@@ -172,7 +180,7 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
   return (
     <div>
       <Pagination
-        pageIndex={pageIndex}
+        pageIndex={currentPage}
         pageCount={pageCount}
         previousPage={previousPage}
         nextPage={nextPage}
@@ -199,7 +207,7 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
         </tbody>
       </table>
       <Pagination
-        pageIndex={pageIndex}
+        pageIndex={currentPage}
         pageCount={pageCount}
         previousPage={previousPage}
         nextPage={nextPage}

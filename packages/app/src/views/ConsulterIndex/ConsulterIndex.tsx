@@ -14,6 +14,7 @@ import {TITLE} from "../../components/MinistereTravail/colors";
 import DownloadButton from "./DownloadButton";
 import SocialNetworksLinks from "./SocialNetworksLinks";
 import Subtitle from "../../components/MinistereTravail/Subtitle";
+import CsvUpdateDate from "./CsvUpdateDate";
 
 
 export interface FetchedIndicatorsData {
@@ -45,16 +46,21 @@ const ConsulterIndex: React.FC = () => {
 
   const searchParams = useMemo(() => ({
     sortBy,
-    currentPage
-  }), [sortBy, currentPage]);
+    currentPage,
+    lastResearch
+  }), [sortBy, currentPage, lastResearch]);
 
   useDebounceEffect(
     searchParams,
     300,
-    ({ sortBy: debouncedSortBy, currentPage: debouncedCurrentPage }) => {
-      if (lastResearch.length > 0) {
+    ({
+       sortBy: debouncedSortBy,
+       currentPage: debouncedCurrentPage,
+       lastResearch: debouncedLastResearch
+    }) => {
+      if (debouncedLastResearch.length > 0) {
         findIndicatorsDataForRaisonSociale(
-          lastResearch,
+          debouncedLastResearch,
           {
             size: PAGE_SIZE,
             from: PAGE_SIZE * debouncedCurrentPage,
@@ -67,12 +73,14 @@ const ConsulterIndex: React.FC = () => {
           });
       }
     },
-    [lastResearch, setIndicatorsData, setLastResearch, setDataSize]
+    [setIndicatorsData, setLastResearch, setDataSize]
   );
 
   return (<div css={styles.body}>
     <div css={styles.logoWrapper}>
-      <LogoIndex />
+      <a href="/consulter-index">
+        <LogoIndex />
+      </a>
     </div>
     <h2 css={styles.title}>
       Retrouvez l'Index égalité professionnelle F/H publié par les entreprises de plus de 1000 salariés.
@@ -94,6 +102,7 @@ const ConsulterIndex: React.FC = () => {
     {
       indicatorsData.length > 0 &&
         <ConsulterIndexResult
+          currentPage={currentPage}
           indicatorsData={indicatorsData}
           dataSize={dataSize}
           onPageChange={setCurrentPage}
@@ -102,7 +111,7 @@ const ConsulterIndex: React.FC = () => {
     }
     <div css={styles.downloadSection}>
       <div css={styles.downloadAlign}>
-        <div css={styles.downloadText}>Télécharger l'intégralité des données</div>
+        <div css={styles.downloadText}>Télécharger l'intégralité des données au <CsvUpdateDate/></div>
         <div>
           <DownloadButton/>
         </div>
@@ -114,10 +123,6 @@ const ConsulterIndex: React.FC = () => {
         2018, l'Index d'égalité professionnelle a été conçu pour faire progresser au sein
         des entreprises l'égalité salariale entre les hommes et les femmes.
       </Subtitle>
-    </div>
-    <div css={styles.spacer}></div>
-    <div>
-
     </div>
     <div css={styles.socialNetworks}>
       <div>
@@ -145,8 +150,6 @@ const styles = {
   body: css({
     backgroundColor: "white",
     padding: "30px",
-    display: "flex",
-    flexDirection: "column",
     overflow: "auto"
   }),
   title: css({
@@ -172,9 +175,6 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     marginTop: "40px"
-  }),
-  spacer: css({
-    flexGrow: 1
   })
 };
 
