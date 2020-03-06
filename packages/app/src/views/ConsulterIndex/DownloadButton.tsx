@@ -3,7 +3,7 @@ import {css, jsx} from "@emotion/core";
 import downloadUrl from "./download.png";
 
 const DownloadButton = () => (
-  <a href="./index-egalite-hf.csv" target="_blank" css={styles.downloadButton} download>
+  <a href="https://egaproprod.blob.core.windows.net/public/index-egalite-hf.csv" target="_blank" css={styles.downloadButton} download>
     <img css={styles.downloadImage} alt="Télécharger" src={downloadUrl} />
   </a>
 );
