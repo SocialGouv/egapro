@@ -123,10 +123,6 @@ const ConsulterIndex: React.FC = () => {
         des entreprises l'égalité salariale entre les hommes et les femmes.
       </Subtitle>
     </div>
-    <div css={styles.spacer}></div>
-    <div>
-
-    </div>
     <div css={styles.socialNetworks}>
       <div>
         <Subtitle>
@@ -153,8 +149,6 @@ const styles = {
   body: css({
     backgroundColor: "white",
     padding: "30px",
-    display: "flex",
-    flexDirection: "column",
     overflow: "auto"
   }),
   title: css({
@@ -180,9 +174,6 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     marginTop: "40px"
-  }),
-  spacer: css({
-    flexGrow: 1
   })
 };
 
