@@ -77,7 +77,9 @@ const ConsulterIndex: React.FC = () => {
 
   return (<div css={styles.body}>
     <div css={styles.logoWrapper}>
-      <LogoIndex />
+      <a href="/consulter-index">
+        <LogoIndex />
+      </a>
     </div>
     <h2 css={styles.title}>
       Retrouvez l'Index égalité professionnelle F/H publié par les entreprises de plus de 1000 salariés.
