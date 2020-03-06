@@ -45,16 +45,21 @@ const ConsulterIndex: React.FC = () => {
 
   const searchParams = useMemo(() => ({
     sortBy,
-    currentPage
-  }), [sortBy, currentPage]);
+    currentPage,
+    lastResearch
+  }), [sortBy, currentPage, lastResearch]);
 
   useDebounceEffect(
     searchParams,
     300,
-    ({ sortBy: debouncedSortBy, currentPage: debouncedCurrentPage }) => {
-      if (lastResearch.length > 0) {
+    ({
+       sortBy: debouncedSortBy,
+       currentPage: debouncedCurrentPage,
+       lastResearch: debouncedLastResearch
+    }) => {
+      if (debouncedLastResearch.length > 0) {
         findIndicatorsDataForRaisonSociale(
-          lastResearch,
+          debouncedLastResearch,
           {
             size: PAGE_SIZE,
             from: PAGE_SIZE * debouncedCurrentPage,
@@ -67,7 +72,7 @@ const ConsulterIndex: React.FC = () => {
           });
       }
     },
-    [lastResearch, setIndicatorsData, setLastResearch, setDataSize]
+    [setIndicatorsData, setLastResearch, setDataSize]
   );
 
   return (<div css={styles.body}>
@@ -94,6 +99,7 @@ const ConsulterIndex: React.FC = () => {
     {
       indicatorsData.length > 0 &&
         <ConsulterIndexResult
+          currentPage={currentPage}
           indicatorsData={indicatorsData}
           dataSize={dataSize}
           onPageChange={setCurrentPage}
