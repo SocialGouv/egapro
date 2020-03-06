@@ -14,6 +14,7 @@ import {TITLE} from "../../components/MinistereTravail/colors";
 import DownloadButton from "./DownloadButton";
 import SocialNetworksLinks from "./SocialNetworksLinks";
 import Subtitle from "../../components/MinistereTravail/Subtitle";
+import CsvUpdateDate from "./CsvUpdateDate";
 
 
 export interface FetchedIndicatorsData {
@@ -110,7 +111,7 @@ const ConsulterIndex: React.FC = () => {
     }
     <div css={styles.downloadSection}>
       <div css={styles.downloadAlign}>
-        <div css={styles.downloadText}>Télécharger l'intégralité des données</div>
+        <div css={styles.downloadText}>Télécharger l'intégralité des données au <CsvUpdateDate/></div>
         <div>
           <DownloadButton/>
         </div>
