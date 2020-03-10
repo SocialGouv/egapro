@@ -40,7 +40,7 @@ services:
     image: library/memcached
 
   kinto-server:
-    image: kinto/kinto-server
+    image: kinto/kinto-server:13.6.3
     links:
       - db
       - cache
@@ -55,8 +55,6 @@ services:
       KINTO_PERMISSION_URL: postgresql://postgres:postgres@db/postgres
       KINTO_EXPERIMENTAL_COLLECTION_SCHEMA_VALIDATION: 1
       KINTO_BATCH_MAX_REQUESTS: 10000
-
-
 
   init-kinto:
     build:

@@ -1,29 +1,31 @@
 /** @jsx jsx */
 import * as React from "react";
-import {useCallback, useMemo, useState} from "react";
-import {css, jsx} from "@emotion/core";
-import {useDebounceEffect, useInputValueChangeHandler} from "../../utils/hooks";
-import {findIndicatorsDataForRaisonSociale} from "../../utils/api";
-import {AppState} from "../../globals";
+import { useCallback, useMemo, useState } from "react";
+import { css, jsx } from "@emotion/core";
+import {
+  useDebounceEffect,
+  useInputValueChangeHandler
+} from "../../utils/hooks";
+import { findIndicatorsDataForRaisonSociale } from "../../utils/api";
+import { AppState } from "../../globals";
 import Field from "../../components/MinistereTravail/Field";
 import SearchButton from "../../components/MinistereTravail/SearchButton";
 import ConsulterIndexResult, { SortOption } from "./ConsulterIndexResult";
 import SearchResultHeaderText from "./SearchResultHeaderText";
 import LogoIndex from "./LogoIndex";
-import {TITLE} from "../../components/MinistereTravail/colors";
+import { TITLE } from "../../components/MinistereTravail/colors";
 import DownloadButton from "./DownloadButton";
 import SocialNetworksLinks from "./SocialNetworksLinks";
 import Subtitle from "../../components/MinistereTravail/Subtitle";
 import CsvUpdateDate from "./CsvUpdateDate";
 
-
 export interface FetchedIndicatorsData {
-  id: string,
+  id: string;
   data: {
     informations: AppState["informations"];
     declaration: AppState["declaration"];
     informationsEntreprise: AppState["informationsEntreprise"];
-  }
+  };
 }
 
 const PAGE_SIZE = 10;
@@ -38,69 +40,80 @@ const ConsulterIndex: React.FC = () => {
 
   const handleRaisonSocialChange = useInputValueChangeHandler(setRaisonSociale);
 
-  const search = useCallback((event) => {
-    event.preventDefault();
-    setLastResearch(raisonSociale);
-    setCurrentPage(0);
-  }, [raisonSociale, setLastResearch]);
+  const search = useCallback(
+    event => {
+      event.preventDefault();
+      setLastResearch(raisonSociale);
+      setCurrentPage(0);
+    },
+    [raisonSociale, setLastResearch]
+  );
 
-  const searchParams = useMemo(() => ({
-    sortBy,
-    currentPage,
-    lastResearch
-  }), [sortBy, currentPage, lastResearch]);
+  const searchParams = useMemo(
+    () => ({
+      sortBy,
+      currentPage,
+      lastResearch
+    }),
+    [sortBy, currentPage, lastResearch]
+  );
 
   useDebounceEffect(
     searchParams,
     300,
     ({
-       sortBy: debouncedSortBy,
-       currentPage: debouncedCurrentPage,
-       lastResearch: debouncedLastResearch
+      sortBy: debouncedSortBy,
+      currentPage: debouncedCurrentPage,
+      lastResearch: debouncedLastResearch
     }) => {
       if (debouncedLastResearch.length > 0) {
-        findIndicatorsDataForRaisonSociale(
-          debouncedLastResearch,
-          {
-            size: PAGE_SIZE,
-            from: PAGE_SIZE * debouncedCurrentPage,
-            order: debouncedSortBy?.order || "",
-            sortBy: debouncedSortBy?.field || ""
-          }
-        ).then(({ jsonBody: { total, data } }) => {
-            setIndicatorsData(data);
-            setDataSize(total);
-          });
+        findIndicatorsDataForRaisonSociale(debouncedLastResearch, {
+          size: PAGE_SIZE,
+          from: PAGE_SIZE * debouncedCurrentPage,
+          order: (debouncedSortBy && debouncedSortBy.order) || "",
+          sortBy: (debouncedSortBy && debouncedSortBy.field) || ""
+        }).then(({ jsonBody: { total, data } }) => {
+          setIndicatorsData(data);
+          setDataSize(total);
+        });
       }
     },
     [setIndicatorsData, setLastResearch, setDataSize]
   );
 
-  return (<div css={styles.body}>
-    <div css={styles.logoWrapper}>
-      <a href="/consulter-index">
-        <LogoIndex />
-      </a>
-    </div>
-    <h2 css={styles.title}>
-      Retrouvez l'Index égalité professionnelle F/H publié par les entreprises de plus de 1000 salariés.
-    </h2>
-    <Subtitle>
-      Dans une volonté de transparence et d'avancée sociale pour toutes et tous, le Ministère
-      du Travail a décidé de faciliter l'accès aux informations des entreprises qui publient leur
-      index depuis plus d'un an.
-    </Subtitle>
-    <form css={styles.searchFieldWrapper} onSubmit={search}>
-      <Field value={raisonSociale} placeholder="Raison Sociale" onChange={handleRaisonSocialChange}/>
-      <SearchButton onClick={search}/>
-    </form>
+  return (
+    <div css={styles.body}>
+      <div css={styles.logoWrapper}>
+        <a href="/consulter-index">
+          <LogoIndex />
+        </a>
+      </div>
+      <h2 css={styles.title}>
+        Retrouvez l'Index égalité professionnelle F/H publié par les entreprises
+        de plus de 1000 salariés.
+      </h2>
+      <Subtitle>
+        Dans une volonté de transparence et d'avancée sociale pour toutes et
+        tous, le Ministère du Travail a décidé de faciliter l'accès aux
+        informations des entreprises qui publient leur index depuis plus d'un
+        an.
+      </Subtitle>
+      <form css={styles.searchFieldWrapper} onSubmit={search}>
+        <Field
+          value={raisonSociale}
+          placeholder="Raison Sociale"
+          onChange={handleRaisonSocialChange}
+        />
+        <SearchButton onClick={search} />
+      </form>
 
-    {
-      lastResearch &&
-        <SearchResultHeaderText searchResults={indicatorsData} searchTerms={lastResearch} />
-    }
-    {
-      indicatorsData.length > 0 &&
+      {lastResearch && (
+        <SearchResultHeaderText
+          searchResults={indicatorsData}
+          searchTerms={lastResearch}
+        />
+      )}
+      {indicatorsData.length > 0 && (
         <ConsulterIndexResult
           currentPage={currentPage}
           indicatorsData={indicatorsData}
@@ -108,31 +121,37 @@ const ConsulterIndex: React.FC = () => {
           onPageChange={setCurrentPage}
           onSortByChange={setSortBy}
         />
-    }
-    <div css={styles.downloadSection}>
-      <div css={styles.downloadAlign}>
-        <div css={styles.downloadText}>Télécharger l'intégralité des données au <CsvUpdateDate/></div>
-        <div>
-          <DownloadButton/>
+      )}
+      <div css={styles.downloadSection}>
+        <div css={styles.downloadAlign}>
+          <div css={styles.downloadText}>
+            Télécharger l'intégralité des données au <CsvUpdateDate />
+          </div>
+          <div>
+            <DownloadButton />
+          </div>
         </div>
       </div>
-    </div>
-    <div>
-      <Subtitle>
-        Porté par la loi « Pour la liberté de choisir son avenir personnel » du 5 septembre
-        2018, l'Index d'égalité professionnelle a été conçu pour faire progresser au sein
-        des entreprises l'égalité salariale entre les hommes et les femmes.
-      </Subtitle>
-    </div>
-    <div css={styles.socialNetworks}>
       <div>
         <Subtitle>
-          Si vous constatez une information erronée, merci d’adresser un email à : <a href="mailto: index@travail.gouv.fr">index@travail.gouv.fr</a>
+          Porté par la loi « Pour la liberté de choisir son avenir personnel »
+          du 5 septembre 2018, l'Index d'égalité professionnelle a été conçu
+          pour faire progresser au sein des entreprises l'égalité salariale
+          entre les hommes et les femmes.
         </Subtitle>
       </div>
-      <SocialNetworksLinks />
+      <div css={styles.socialNetworks}>
+        <div>
+          <Subtitle>
+            Si vous constatez une information erronée, merci d’adresser un email
+            à :{" "}
+            <a href="mailto: index@travail.gouv.fr">index@travail.gouv.fr</a>
+          </Subtitle>
+        </div>
+        <SocialNetworksLinks />
+      </div>
     </div>
-  </div>);
+  );
 };
 
 const styles = {
@@ -169,7 +188,7 @@ const styles = {
     flexDirection: "column"
   }),
   downloadText: css({
-    marginBottom: "10px",
+    marginBottom: "10px"
   }),
   socialNetworks: css({
     display: "flex",
