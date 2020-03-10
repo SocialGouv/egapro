@@ -1,14 +1,6 @@
 import { Client } from "@elastic/elasticsearch";
 import { IndicatorsData } from "../model";
 
-const client = new Client({
-  auth: {
-    password: process.env.ELASTIC_SEARCH_PASSWORD || "",
-    username: process.env.ELASTIC_SEARCH_USER || ""
-  },
-  node: process.env.ELASTIC_SEARCH_URL || ""
-});
-
 interface ElasticRequestOptions {
   size?: number;
   from?: number;
@@ -27,6 +19,14 @@ export const request = async (
 ): Promise<RequestResult> => {
   try {
     const sort = sortBy ? [{ [`${sortBy}.raw`]: { order } }] : [];
+    const client = new Client({
+      auth: {
+        password: process.env.ELASTIC_SEARCH_PASSWORD || "",
+        username: process.env.ELASTIC_SEARCH_USER || ""
+      },
+      node: process.env.ELASTIC_SEARCH_URL || ""
+    });
+
     const response = await client.search({
       body: {
         from,
