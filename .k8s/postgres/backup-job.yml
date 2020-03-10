@@ -14,10 +14,15 @@ spec:
           - -c
           - |
             export TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S");
-            echo "egapro_$TIMESTAMP.dump" > /data/LATEST;
-            pg_dumpall -c -h egapro-prod-pg-postgresql -U egapro > /data/egapro_$TIMESTAMP.dump;
+            export FILENAME=egapro_$TIMESTAMP.dump;
+            pg_dumpall -c -h egapro-prod-pg-postgresql -U egapro > /tmp/${FILENAME};
+            md5sum /tmp/${FILENAME} | awk '{print $1}' > /tmp/${FILENAME}.md5;
+            cp /tmp/${FILENAME} /data/${FILENAME};
+            cp /tmp/${FILENAME}.md5 /data/${FILENAME}.md5;
+            echo "${FILENAME}" > /data/LATEST;
+            rm /tmp/${FILENAME}{,.md5};
             sync;
-            echo "backup egapro_$TIMESTAMP.dump completed";
+            echo "backup ${FILENAME} completed. md5sum of file is $(cat /data/${FILENAME}.md5)";
         resources:
           requests:
             cpu: 100m
