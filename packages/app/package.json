@@ -40,7 +40,7 @@
     "text-mask-addons": "3.8.0"
   },
   "devDependencies": {
-    "@types/jest": "25.1.2",
+    "@types/jest": "25.1.4",
     "@types/node": "12.12.29",
     "@types/react": "16.9.23",
     "@types/react-dom": "16.9.5",
