@@ -1,8 +1,8 @@
 /** @jsx jsx */
-import {FC, useEffect} from "react";
+import { FC, useEffect } from "react";
 import { css, jsx } from "@emotion/core";
-import {FetchedIndicatorsData} from "./ConsulterIndex";
-import {AppState} from "../../globals";
+import { FetchedIndicatorsData } from "./ConsulterIndex";
+import { AppState } from "../../globals";
 import {
   ColumnInstance,
   Row,
@@ -26,15 +26,20 @@ import Subtitle from "../../components/MinistereTravail/Subtitle";
 
 export interface SortOption {
   field: string;
-  order: "asc" | "desc"
+  order: "asc" | "desc";
 }
 
-const formatUESList = (informationsEntreprise: AppState["informationsEntreprise"]) =>
-  informationsEntreprise.entreprisesUES?.map(({ nom, siren}) => `${nom} (${siren})`)
-    ?.join(", ") || "";
+const formatUESList = (
+  informationsEntreprise: AppState["informationsEntreprise"]
+) =>
+  informationsEntreprise.entreprisesUES
+    ? informationsEntreprise.entreprisesUES
+        .map(({ nom, siren }) => `${nom} (${siren})`)
+        .join(", ")
+    : "";
 
 interface HeaderCellProps extends TableHeaderProps {
-  column: AggregatedColumn
+  column: AggregatedColumn;
 }
 
 const HeaderCell: FC<HeaderCellProps> = ({ column }) => {
@@ -47,71 +52,80 @@ const HeaderCell: FC<HeaderCellProps> = ({ column }) => {
     sortClass.push(styles.sortedAsc);
   }
   return (
-    <th css={[styles.cell].concat(sortClass)}
-        {...column.getHeaderProps(column.getSortByToggleProps)}
+    <th
+      css={[styles.cell].concat(sortClass)}
+      {...column.getHeaderProps(column.getSortByToggleProps)}
     >
       {column.render("Header")}
     </th>
   );
 };
 
-const columns = [{
+const columns = [
+  {
     Header: "Raison\xa0Sociale",
     accessor: "data.informationsEntreprise.nomEntreprise"
-  }, {
-  Header: "SIREN",
-  accessor: "data.informationsEntreprise.siren",
-  disableSortBy: true
-},{
-  Header: "Année",
-  accessor: "data.informations.anneeDeclaration",
-  disableSortBy: true
-},{
-  Header: "Note",
-  accessor: ({ data : { declaration } }: FetchedIndicatorsData) => (declaration?.noteIndex || "NC"),
-  disableSortBy: true
-},{
-  Header: "Structure",
-  accessor: "data.informationsEntreprise.structure",
-  disableSortBy: true
-}, {
-  Header: "Nom UES",
-  accessor: "data.informationsEntreprise.nomUES",
-  disableSortBy: true
-}, {
-  Header: "Entreprises UES (SIREN)",
-  accessor: (indicatorData: FetchedIndicatorsData) => formatUESList(indicatorData.data.informationsEntreprise),
-  disableSortBy: true
-},{
-  Header: "Région",
-  accessor: "data.informationsEntreprise.region",
-  disableSortBy: true
-},{
-  Header: "Département",
-  accessor: "data.informationsEntreprise.departement",
-  disableSortBy: true
-}];
+  },
+  {
+    Header: "SIREN",
+    accessor: "data.informationsEntreprise.siren",
+    disableSortBy: true
+  },
+  {
+    Header: "Année",
+    accessor: "data.informations.anneeDeclaration",
+    disableSortBy: true
+  },
+  {
+    Header: "Note",
+    accessor: ({ data: { declaration } }: FetchedIndicatorsData) =>
+      (declaration && declaration.noteIndex) || "NC",
+    disableSortBy: true
+  },
+  {
+    Header: "Structure",
+    accessor: "data.informationsEntreprise.structure",
+    disableSortBy: true
+  },
+  {
+    Header: "Nom UES",
+    accessor: "data.informationsEntreprise.nomUES",
+    disableSortBy: true
+  },
+  {
+    Header: "Entreprises UES (SIREN)",
+    accessor: (indicatorData: FetchedIndicatorsData) =>
+      formatUESList(indicatorData.data.informationsEntreprise),
+    disableSortBy: true
+  },
+  {
+    Header: "Région",
+    accessor: "data.informationsEntreprise.region",
+    disableSortBy: true
+  },
+  {
+    Header: "Département",
+    accessor: "data.informationsEntreprise.departement",
+    disableSortBy: true
+  }
+];
 
 const pageSize = 10;
 
-type AggregatedUseTableOptions =
-  & UseTableOptions<FetchedIndicatorsData>
-  & UsePaginationOptions<FetchedIndicatorsData>
-  & UseSortByOptions<FetchedIndicatorsData>;
+type AggregatedUseTableOptions = UseTableOptions<FetchedIndicatorsData> &
+  UsePaginationOptions<FetchedIndicatorsData> &
+  UseSortByOptions<FetchedIndicatorsData>;
 
-type AggregatedTableInstance =
-  & TableInstance<FetchedIndicatorsData>
-  & UsePaginationInstanceProps<FetchedIndicatorsData>
-  & UseSortByInstanceProps<FetchedIndicatorsData>;
+type AggregatedTableInstance = TableInstance<FetchedIndicatorsData> &
+  UsePaginationInstanceProps<FetchedIndicatorsData> &
+  UseSortByInstanceProps<FetchedIndicatorsData>;
 
-type AggregatedTableState =
-  & TableState<FetchedIndicatorsData>
-  & UsePaginationState<FetchedIndicatorsData>
-  & UseSortByState<FetchedIndicatorsData>;
+type AggregatedTableState = TableState<FetchedIndicatorsData> &
+  UsePaginationState<FetchedIndicatorsData> &
+  UseSortByState<FetchedIndicatorsData>;
 
-type AggregatedColumn =
-  & ColumnInstance<FetchedIndicatorsData>
-  & UseSortByColumnProps<FetchedIndicatorsData>
+type AggregatedColumn = ColumnInstance<FetchedIndicatorsData> &
+  UseSortByColumnProps<FetchedIndicatorsData>;
 
 interface ConsulterIndexResultProps {
   currentPage: number;
@@ -124,7 +138,7 @@ interface ConsulterIndexResultProps {
 const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
   currentPage,
   dataSize,
-  indicatorsData ,
+  indicatorsData,
   onPageChange,
   onSortByChange
 }) => {
@@ -163,7 +177,7 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
 
   useEffect(() => {
     gotoPage(currentPage);
-  }, [currentPage, gotoPage])
+  }, [currentPage, gotoPage]);
 
   useEffect(() => {
     const sortByElement = sortBy[0];
@@ -187,23 +201,25 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
       />
       <table {...getTableProps()} css={styles.table}>
         <thead>
-        <tr>
-          {(headerGroups[0].headers as AggregatedColumn[]).map((column) => (
-            <HeaderCell key={column.getHeaderProps().key} column={column} />
-          ))}
-        </tr>
+          <tr>
+            {(headerGroups[0].headers as AggregatedColumn[]).map(column => (
+              <HeaderCell key={column.getHeaderProps().key} column={column} />
+            ))}
+          </tr>
         </thead>
         <tbody {...getTableBodyProps()}>
-        {
-          page.map((row: Row<FetchedIndicatorsData>) => {
+          {page.map((row: Row<FetchedIndicatorsData>) => {
             prepareRow(row);
-            return (<tr {...row.getRowProps()}>
-              {row.cells.map(cell => <td css={styles.cell} {...cell.getCellProps()}>
-                {cell.render("Cell")}
-              </td>)}
-            </tr>)}
-          )
-        }
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map(cell => (
+                  <td css={styles.cell} {...cell.getCellProps()}>
+                    {cell.render("Cell")}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <Pagination
@@ -213,12 +229,11 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
         nextPage={nextPage}
       />
       <div>
+        <Subtitle>NC = Non Calculable</Subtitle>
         <Subtitle>
-          NC = Non Calculable
-        </Subtitle>
-        <Subtitle>
-          A noter : la note pour l’année 2019 peut ne pas être disponible à date pour les raisons suivantes :
-          changement d’effectif de l’entreprise recherchée, index non transmis, vérifications en cours
+          A noter : la note pour l’année 2019 peut ne pas être disponible à date
+          pour les raisons suivantes : changement d’effectif de l’entreprise
+          recherchée, index non transmis, vérifications en cours
         </Subtitle>
       </div>
     </div>
