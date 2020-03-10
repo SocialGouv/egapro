@@ -33,7 +33,7 @@
     "@types/btoa": "1.2.3",
     "@types/dotenv": "6.1.1",
     "@types/jest": "25.1.4",
-    "@types/koa": "2.11.1",
+    "@types/koa": "2.11.2",
     "@types/koa-bodyparser": "4.3.0",
     "@types/koa-router": "7.4.0",
     "@types/koa__cors": "3.0.1",
