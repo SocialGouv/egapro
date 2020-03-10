@@ -24,7 +24,7 @@
     "lodash": "4.17.15",
     "node-fetch": "2.6.0",
     "nodemailer": "6.4.4",
-    "pino": "5.16.0",
+    "pino": "5.17.0",
     "react-table": "7.0.0-rc.16"
   },
   "devDependencies": {
@@ -41,7 +41,7 @@
     "@types/node": "12.12.29",
     "@types/node-fetch": "2.5.5",
     "@types/nodemailer": "6.4.0",
-    "@types/pino": "5.15.5",
+    "@types/pino": "5.17.0",
     "@types/react-table": "7.0.9",
     "jest": "24.9.0",
     "nodemon": "2.0.2",
