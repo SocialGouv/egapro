@@ -48,7 +48,7 @@
     "@types/react-table": "7.0.9",
     "cypress": "4.0.1",
     "typescript": "3.8.3",
-    "wait-on": "4.0.0"
+    "wait-on": "4.0.1"
   },
   "eslintConfig": {
     "extends": "react-app"
