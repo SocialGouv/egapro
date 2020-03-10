@@ -9,15 +9,15 @@
     "start": "docker-compose up kinto-server init-kinto"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^7.6.0",
-    "@types/lodash": "^4.14.149",
+    "@elastic/elasticsearch": "7.6.0",
+    "@types/lodash": "4.14.149",
     "btoa": "1.2.1",
     "dotenv": "8.2.0",
-    "lodash": "^4.17.15",
+    "lodash": "4.17.15",
     "node-fetch": "2.6.0",
-    "react-table": "^7.0.0-rc.16"
+    "react-table": "7.0.0-rc.16"
   },
   "devDependencies": {
-    "@types/react-table": "^7.0.9"
+    "@types/react-table": "7.0.9"
   }
 }
