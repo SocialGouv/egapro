@@ -15,9 +15,9 @@
     "dotenv": "8.2.0",
     "lodash": "4.17.15",
     "node-fetch": "2.6.0",
-    "react-table": "7.0.0-rc.16"
+    "react-table": "7.0.0"
   },
   "devDependencies": {
-    "@types/react-table": "7.0.9"
+    "@types/react-table": "7.0.10"
   }
 }
