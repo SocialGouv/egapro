@@ -89,7 +89,7 @@ def get_headers_columns(data):
         + [
             ("date_publ_niv", "/data/declaration/datePublication"),
             ("site_internet_publ", "/data/declaration/lienPublication"),
-            ("calculabilite_indic_tab1", "/data/indicateurUn/nonCalculable"),
+            ("indic1_non_calculable", "/data/indicateurUn/nonCalculable"),
             ("motif_non_calc_tab1", "/data/indicateurUn/motifNonCalculable"),
             ("precision_am_tab1", "/data/indicateurUn/motifNonCalculablePrecision"),
             ("modalite_calc_tab1_csp", "/data/indicateurUn/csp"),
@@ -121,7 +121,7 @@ def get_headers_columns(data):
         + [
             ("resultat_tab1", "/data/indicateurUn/resultatFinal"),
             ("population_favorable_tab1", "/data/indicateurUn/sexeSurRepresente"),
-            ("calculabilite_indic_tab2_sup250", "/data/indicateurDeux/nonCalculable"),
+            ("indic2_sup250_non_calculable", "/data/indicateurDeux/nonCalculable"),
             ("motif_non_calc_tab2_sup250", "/data/indicateurDeux/motifNonCalculable"),
             (
                 "precision_am_tab2_sup250",
@@ -141,7 +141,7 @@ def get_headers_columns(data):
                 "population_favorable_tab2_sup250",
                 "/data/indicateurDeux/sexeSurRepresente",
             ),
-            ("calculabilite_indic_tab3_sup250", "/data/indicateurTrois/nonCalculable"),
+            ("indic3_sup250_non_calculable", "/data/indicateurTrois/nonCalculable"),
             ("motif_non_calc_tab3_sup250", "/data/indicateurTrois/motifNonCalculable"),
             (
                 "precision_am_tab3_sup250",
@@ -161,10 +161,7 @@ def get_headers_columns(data):
                 "population_favorable_tab3_sup250",
                 "/data/indicateurTrois/sexeSurRepresente",
             ),
-            (
-                "calculabilite_indic_tab2_50-250",
-                "/data/indicateurDeuxTrois/nonCalculable",
-            ),
+            ("indic2_50-250_non_calculable", "/data/indicateurDeuxTrois/nonCalculable"),
             (
                 "motif_non_calc_tab2_50-250",
                 "/data/indicateurDeuxTrois/motifNonCalculable",
@@ -185,7 +182,7 @@ def get_headers_columns(data):
                 "population_favorable_tab2_50-250",
                 "/data/indicateurDeuxTrois/sexeSurRepresente",
             ),
-            ("calculabilite_indic_tab4", "/data/indicateurQuatre/nonCalculable"),
+            ("indic4_non_calculable", "/data/indicateurQuatre/nonCalculable"),
             ("motif_non_calc_tab4", "/data/indicateurQuatre/motifNonCalculable"),
             ("precision_am_tab4", "/data/indicateurQuatre/motifNonCalculablePrecision"),
             ("resultat_tab4", "/data/indicateurQuatre/resultatFinal"),
