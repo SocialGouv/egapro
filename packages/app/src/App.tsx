@@ -56,6 +56,7 @@ function App() {
   return (
     <Router history={piwik.connectToHistory(history)}>
       <GridProvider>
+        {/* TODO: update the following date and message when there's another announcement */}
         {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
           <div css={styles.bannerWrapper}>
             <InfoBloc

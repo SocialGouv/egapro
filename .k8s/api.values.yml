@@ -42,7 +42,7 @@ deployment:
           name: ${PROJECT}
           key: KINTO_ADMIN_PASSWORD
     - name: MAIL_USE_TLS
-      value: "true"
+      value: ${API_MAIL_USE_TLS}
     - name: MAIL_PORT
       value: "465"
     - name: MAIL_FROM
@@ -67,6 +67,21 @@ deployment:
         secretKeyRef:
           name: ${PROJECT}
           key: API_SENTRY_DSN
+    - name: ELASTIC_SEARCH_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: ${PROJECT}
+          key: ELASTIC_SEARCH_PASSWORD
+    - name: ELASTIC_SEARCH_URL
+      valueFrom:
+        secretKeyRef:
+          name: ${PROJECT}
+          key: ELASTIC_SEARCH_URL
+    - name: ELASTIC_SEARCH_USER
+      valueFrom:
+        secretKeyRef:
+          name: ${PROJECT}
+          key: ELASTIC_SEARCH_USER
     - name: API_SENTRY_ENVIRONMENT
       value: "development"
 

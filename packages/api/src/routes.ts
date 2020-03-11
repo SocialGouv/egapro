@@ -3,7 +3,9 @@ import {
   createIndicatorsData,
   getIndicatorsData,
   getStatsData,
-  sendEmail,
+  searchIndicatorsData,
+  sendStartEmail,
+  sendSuccessEmail,
   updateIndicatorsData,
   versionController
 } from "./controller";
@@ -17,5 +19,7 @@ router.get("/version", versionController.get);
 router.post("/indicators-datas", createIndicatorsData);
 router.put("/indicators-datas/:id", updateIndicatorsData);
 router.get("/indicators-datas/:id", getIndicatorsData);
-router.post("/indicators-datas/:id/emails", sendEmail);
+router.post("/indicators-datas/:id/emails", sendStartEmail);
+router.post("/indicators-datas/:id/success-email", sendSuccessEmail);
 router.get("/stats", getStatsData);
+router.get("/search-indicators-data", searchIndicatorsData);

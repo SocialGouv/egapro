@@ -13,6 +13,7 @@ export interface Email {
   cci: EmailAddress[];
   subject: string;
   bodyText: string;
+  html?: string;
 }
 
 const transporter = createTransport({
@@ -43,7 +44,8 @@ export const emailService: EmailService = {
         .map((r: EmailAddress) => `${r.name} <${r.email}>`)
         .join(","),
       subject: email.subject,
-      text: email.bodyText
+      text: email.bodyText,
+      html: email.html
     };
     return transporter.sendMail(message);
   }

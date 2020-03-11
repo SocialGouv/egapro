@@ -10,28 +10,28 @@ include:
   - /.gitlab-ci/stages/07-notify.yml
   - project: SocialGouv/gitlab-ci-yml
     file: /base_docker_kubectl_image_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
   - project: SocialGouv/gitlab-ci-yml
     file: /base_docker_helm_image_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
   - project: SocialGouv/gitlab-ci-yml
     file: /base_yarn_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
   - project: SocialGouv/gitlab-ci-yml
     file: /base_create_namespace_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
   - project: SocialGouv/gitlab-ci-yml
     file: /base_register_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
   - project: SocialGouv/gitlab-ci-yml
     file: /base_deploy_hpa_chart_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
   - project: SocialGouv/gitlab-ci-yml
     file: /base_delete_useless_k8s_ns_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
   - project: SocialGouv/gitlab-ci-yml
     file: /base_notify_github_stage.yml
-    ref: v4.6.0
+    ref: v9.1.1
 
 
 variables:
@@ -63,6 +63,7 @@ variables:
   API_RESOURCE_MEMORY_LIMIT: "96Mi"
   API_RESOURCE_CPU_REQUEST: "5m"
   API_RESOURCE_MEMORY_REQUEST: "80Mi"
+  API_MAIL_USE_TLS: '"false"'
   # Quotas app
   APP_RESOURCE_CPU_LIMIT: "50m"
   APP_RESOURCE_MEMORY_LIMIT: "128Mi"
@@ -70,7 +71,7 @@ variables:
   APP_RESOURCE_MEMORY_REQUEST: "128Mi"
   # Quotas Kinto
   KINTO_RESOURCE_CPU_LIMIT: "100m"
-  KINTO_RESOURCE_MEMORY_LIMIT: "200Mi"
+  KINTO_RESOURCE_MEMORY_LIMIT: "256Mi"
   KINTO_RESOURCE_CPU_REQUEST: "10m"
   KINTO_RESOURCE_MEMORY_REQUEST: "128Mi"
   # Quotas job init Kinto

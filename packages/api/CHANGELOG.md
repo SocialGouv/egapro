@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.9.1](https://github.com/SocialGouv/egapro/compare/v2.9.0...v2.9.1) (2020-03-06)
+
+**Note:** Version bump only for package api
+
+
+
+
+
+# [2.9.0](https://github.com/SocialGouv/egapro/compare/v2.8.0...v2.9.0) (2020-03-05)
+
+
+### Features
+
+* consulter index UI fixes ([c9a032f](https://github.com/SocialGouv/egapro/commit/c9a032f))
+
+
+
+
+
+# [2.8.0](https://github.com/SocialGouv/egapro/compare/v2.7.1...v2.8.0) (2020-02-27)
+
+
+### Bug Fixes
+
+* fix email templates not being loaded on build version ([#556](https://github.com/SocialGouv/egapro/issues/556)) ([28f11e4](https://github.com/SocialGouv/egapro/commit/28f11e4))
+
+
+### Features
+
+* **declaration:** envoi d'un email de confirmation de la déclaration ([#551](https://github.com/SocialGouv/egapro/issues/551)) ([1d9af47](https://github.com/SocialGouv/egapro/commit/1d9af47))
+
+
+
+
+
 ## [2.7.1](https://github.com/SocialGouv/egapro/compare/v2.7.0...v2.7.1) (2020-02-20)
 
 **Note:** Version bump only for package api
