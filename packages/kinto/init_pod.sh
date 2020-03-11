@@ -152,7 +152,7 @@ az storage file upload \
         --source "/tmp/dump_declarations_records.xlsx"
 
 echo ">>> INSTALLING NODE DEPENDENCIES"
-/usr/bin/npm install @elastic/elasticsearch xlsx convert-array-to-csv
+/usr/bin/npm install
 
 echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
 JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.js
