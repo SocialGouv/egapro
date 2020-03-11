@@ -18,6 +18,8 @@
     "react-table": "7.0.0"
   },
   "devDependencies": {
-    "@types/react-table": "7.0.12"
+    "@types/react-table": "7.0.12",
+    "convert-array-to-csv": "^1.0.10",
+    "xlsx": "^0.15.5"
   }
 }
