@@ -40,7 +40,7 @@ services:
     image: library/memcached
 
   kinto-server:
-    image: kinto/kinto-server:13.6.3
+    image: kinto/kinto-server
     links:
       - db
       - cache
