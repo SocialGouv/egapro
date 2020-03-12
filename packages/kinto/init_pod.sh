@@ -4,6 +4,7 @@
 # - AZURE_STORAGE_ACCOUNT_KEY the azure file storage account key
 # - AZURE_STORAGE_ACCOUNT_NAME_EXPORT the azure file storage account name to upload the final exported file
 # - AZURE_STORAGE_ACCOUNT_KEY_EXPORT the azure file storage account key to upload the final exported file
+# - AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB the azure blob storage account name to upload the .csv and .xlsx exports of the declarations from the companies with 1000+ employees
 # - AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB the azure blob storage account key to upload the .csv and .xlsx exports of the declarations from the companies with 1000+ employees
 # - PGPASSWORD the preprod posgresql password
 # - PG_PROD_PASSWORD the prod posgresql password
@@ -162,7 +163,7 @@ JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node prepare-xlsx-1000.js
 
 echo ">>> UPLOADING /tmp/dump_declarations_records_1000.xlsx"
 az storage blob upload \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME \
+        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
         --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
         --container-name public \
         --name "index-egalite-hf.xlsx" \
@@ -170,7 +171,7 @@ az storage blob upload \
 
 echo ">>> UPLOADING /tmp/dump_declarations_records_1000.csv"
 az storage blob upload \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME \
+        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
         --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
         --container-name public \
         --name "index-egalite-hf.csv" \
