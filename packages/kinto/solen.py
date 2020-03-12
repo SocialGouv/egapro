@@ -848,7 +848,7 @@ class KintoImporter(object):
                 self.logger.info(
                     f"Ajout de la déclaration id={record['id']} au batch d'import."
                 )
-                batch.create_record(
+                batch.update_record(
                     bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record
                 )
 
