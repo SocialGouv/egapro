@@ -253,7 +253,12 @@ if __name__ == "__main__":
     data = pandas.read_json(io.StringIO(flattened_json))
     print("Adding a source of 'egapro' for records without a source")
     data["/data/source"] = data.apply(
-        lambda d: "egapro" if d["/data/source"] != "solen" else "solen", axis=1
+        lambda d: (
+            "egapro"
+            if (d["/data/source"] != "solen-2019" and d["/data/source"] != "solen-2020")
+            else d["/data/source"]
+        ),
+        axis=1,
     )
     print("Adding a 'URL de déclaration' column based on the ID")
     data["URL de déclaration"] = (
