@@ -12,7 +12,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "7.6.0",
+    "@elastic/elasticsearch": "7.6.1",
     "@koa/cors": "3.0.0",
     "@sentry/node": "5.14.1",
     "@types/btoa": "1.2.3",
