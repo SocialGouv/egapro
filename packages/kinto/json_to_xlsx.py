@@ -260,9 +260,15 @@ if __name__ == "__main__":
         ),
         axis=1,
     )
-    print("Adding a 'URL de déclaration' column based on the ID")
-    data["URL de déclaration"] = (
-        "'https://index-egapro.travail.gouv.fr/simulateur/" + data["/id"]
+    print("Adding a 'URL de déclaration' column based on the ID and the source")
+    data["URL de déclaration"] = data["/id"]
+    data["URL de déclaration"] = data.apply(
+        lambda d: (
+            "'https://index-egapro.travail.gouv.fr/simulateur/" + d["/id"]
+            if d["/data/source"] == "egapro"
+            else "'https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/P?P=" + d["/id"]
+        ),
+        axis=1,
     )
     headers, columns = get_headers_columns(data)
     print("Writing the XLSX to", args.xlsx_output)
