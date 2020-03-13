@@ -148,7 +148,8 @@ class RowProcessorError(RuntimeError):
 class RowProcessor(object):
     READ_FIELDS = set({})
 
-    def __init__(self, logger, row, validator, debug=False):
+    def __init__(self, solen_year, logger, row, validator, debug=False):
+        self.solen_year = solen_year
         self.logger = logger
         if row is None:
             raise RowProcessorError("Échec d'import d'une ligne vide.")
@@ -652,7 +653,7 @@ class RowProcessor(object):
         self.set("declaration/formValidated", "Valid")
 
     def run(self):
-        self.set("source", "solen")
+        self.set("source", f"solen-{self.solen_year}")
         self.importDateField(
             "Date réponse > Valeur date",
             "declaration/dateDeclaration",
@@ -857,6 +858,7 @@ class App(object):
     def __init__(
         self,
         xls_path,
+        solen_year,
         max=None,
         siren=None,
         debug=False,
@@ -866,6 +868,7 @@ class App(object):
     ):
         # arguments positionnels requis
         self.xls_path = xls_path
+        self.solen_year = solen_year
         # options
         self.max = max
         self.siren = siren
@@ -912,7 +915,11 @@ class App(object):
             try:
                 records.append(
                     RowProcessor(
-                        self.logger, rows[id], self.validator, self.debug
+                        self.solen_year,
+                        self.logger,
+                        rows[id],
+                        self.validator,
+                        self.debug,
                     ).run()
                 )
             except RowProcessorError as err:
@@ -1011,6 +1018,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Import des données Solen.")
     parser.add_argument("xls_path", type=str, help="chemin vers l'export Excel Solen")
     parser.add_argument(
+        "solen_year", type=str, help="année correspondant à l'export solen"
+    )
+    parser.add_argument(
         "-d",
         "--debug",
         help="afficher les messages de debug",
@@ -1077,6 +1087,7 @@ if __name__ == "__main__":
         args = parser.parse_args()
         app = App(
             args.xls_path,
+            args.solen_year,
             max=args.max,
             siren=args.siren,
             debug=args.debug,
