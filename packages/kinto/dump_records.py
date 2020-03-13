@@ -39,7 +39,7 @@ if __name__ == "__main__":
     if not args.all:
         filters["data.declaration.formValidated"] = "Valid"
     records = client.get_records(
-        bucket="egapro", collection="indicators_datas", **filters
+        bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, **filters
     )
     print("Number of records", len(records))
     with open(args.dump_file_path, "w") as dump_file:
