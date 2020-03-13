@@ -24,6 +24,12 @@
 # The script will then upload the final exports to the "exports" azure file share
 # - dump_declarations_records.json
 # - dump_declarations_records.xlsx
+#
+# For convenience, this script maybe be run at regular intervals using a cronjob:
+# $ apt install cron vim procps
+# $ /etc/init.d/cron start
+# $ crontab -e
+#       0 */2 * * * /root/init_pod.sh > /tmp/init_pod.sh.log 2>&1
 
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo ">>> RUNNING SCRIPT" `date`
