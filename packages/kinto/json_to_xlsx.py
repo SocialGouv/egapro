@@ -39,11 +39,11 @@ def get_ues_cols(data):
     ues_cols_name_and_siren = [
         [
             (
-                f"UES {index_ues} > Nom Entreprise",
+                f"UES_{index_ues}_Nom_Entreprise",
                 f"/data/informationsEntreprise/entreprisesUES/{index_ues}/nom",
             ),
             (
-                f"UES {index_ues} > SIREN",
+                f"UES_{index_ues}_Siren",
                 f"/data/informationsEntreprise/entreprisesUES/{index_ues}/siren",
             ),
         ]
@@ -59,150 +59,150 @@ def get_headers_columns(data):
     interesting_cols = (
         [
             ("source", "/data/source"),
-            (
-                "URL de déclaration",
-                "URL de déclaration",
-            ),  # Built from /data/id, see below
-            ("Date réponse", "/data/declaration/dateDeclaration"),
-            ("e-mail_declarant", "/data/informationsDeclarant/email"),
+            ("URL_declaration", "URL_declaration"),  # Built from /data/id, see below
+            ("Date_reponse", "/data/declaration/dateDeclaration"),
+            ("Email_declarant", "/data/informationsDeclarant/email"),
             ("Nom", "/data/informationsDeclarant/nom"),
-            ("Prénom", "/data/informationsDeclarant/prenom"),
-            ("telephone", "/data/informationsDeclarant/tel"),
-            ("Reg", "/data/informationsEntreprise/region"),
-            ("dpt", "/data/informationsEntreprise/departement"),
-            ("Adr ets", "/data/informationsEntreprise/adresse"),
+            ("Prenom", "/data/informationsDeclarant/prenom"),
+            ("Telephone", "/data/informationsDeclarant/tel"),
+            ("Region", "/data/informationsEntreprise/region"),
+            ("Departement", "/data/informationsEntreprise/departement"),
+            ("Adresse", "/data/informationsEntreprise/adresse"),
             ("CP", "/data/informationsEntreprise/codePostal"),
             ("Commune", "/data/informationsEntreprise/commune"),
-            ("annee_indicateurs", "/data/informations/anneeDeclaration"),
-            ("structure", "/data/informationsEntreprise/structure"),
-            ("tranche_effectif", "/data/informations/trancheEffectifs"),
-            ("date_debut_periode", "/data/informations/debutPeriodeReference"),
-            ("date_fin_periode", "/data/informations/finPeriodeReference"),
-            ("nb_salaries", "/data/effectif/nombreSalariesTotal"),
-            ("Nom Entreprise", "/data/informationsEntreprise/nomEntreprise"),
+            ("Annee_indicateurs", "/data/informations/anneeDeclaration"),
+            ("Structure", "/data/informationsEntreprise/structure"),
+            ("Tranche_effectif", "/data/informations/trancheEffectifs"),
+            ("Date_debut_periode", "/data/informations/debutPeriodeReference"),
+            ("Date_fin_periode", "/data/informations/finPeriodeReference"),
+            ("Nb_salaries", "/data/effectif/nombreSalariesTotal"),
+            ("Nom_Entreprise", "/data/informationsEntreprise/nomEntreprise"),
             ("SIREN", "/data/informationsEntreprise/siren"),
-            ("Code NAF", "/data/informationsEntreprise/codeNaf"),
-            ("nom_UES", "/data/informationsEntreprise/nomUES"),
+            ("Code_NAF", "/data/informationsEntreprise/codeNaf"),
+            ("Nom_UES", "/data/informationsEntreprise/nomUES"),
             ("Nb_ets_UES", "/data/informationsEntreprise/nombreEntreprises"),
         ]
         + get_ues_cols(data)
         + [
-            ("date_publ_niv", "/data/declaration/datePublication"),
-            ("site_internet_publ", "/data/declaration/lienPublication"),
-            ("indic1_non_calculable", "/data/indicateurUn/nonCalculable"),
-            ("motif_non_calc_tab1", "/data/indicateurUn/motifNonCalculable"),
-            ("precision_am_tab1", "/data/indicateurUn/motifNonCalculablePrecision"),
-            ("modalite_calc_tab1_csp", "/data/indicateurUn/csp"),
-            ("modalite_calc_tab1_coef_branche", "/data/indicateurUn/coef"),
-            ("modalite_calc_tab1_coef_autre", "/data/indicateurUn/autre"),
-            ("date_consult_CSE", "/data/declaration/dateConsultationCSE"),
-            ("nb_coef_niv", "/data/indicateurUn/nombreCoefficients"),
+            ("Date_publication", "/data/declaration/datePublication"),
+            ("Site_internet_publication", "/data/declaration/lienPublication"),
+            ("Indic1_non_calculable", "/data/indicateurUn/nonCalculable"),
+            ("Indic1_motif_non_calculable", "/data/indicateurUn/motifNonCalculable"),
+            (
+                "Indic1_precision_autre_motif",
+                "/data/indicateurUn/motifNonCalculablePrecision",
+            ),
+            ("Indic1_modalite_calc_csp", "/data/indicateurUn/csp"),
+            ("Indic1_modalite_calc_coef_branche", "/data/indicateurUn/coef"),
+            ("Indic1_modalite_calc_coef_autre", "/data/indicateurUn/autre"),
+            ("Indic1_date_consult_CSE", "/data/declaration/dateConsultationCSE"),
+            ("Indic1_nb_coef_niv", "/data/indicateurUn/nombreCoefficients"),
         ]
         + [
             (
-                f"{CSP} > {tranche_age}",
+                f"Indic1_{CSP}_{tranche_age}",
                 f"/data/indicateurUn/remunerationAnnuelle/{index_csp}/tranchesAges/{index_tranche_age}/ecartTauxRemuneration",
             )
-            for (index_csp, CSP) in enumerate(["Ou", "Em", "TAM", "IC"])
+            for (index_csp, CSP) in enumerate(["Ouv", "Emp", "TAM", "IC"])
             for (index_tranche_age, tranche_age) in enumerate(
-                ["-30", "30-39", "40-49", "50+"]
+                ["30", "30-39", "40-49", "50"]
             )
         ]
         + [
             (
-                f"niv {index_coef} > {tranche_age}",
+                f"Indic1_Niv{index_coef}_{tranche_age}",
                 f"/data/indicateurUn/coefficient/{index_coef}/tranchesAges/{index_tranche_age}/ecartTauxRemuneration",
             )
             for index_coef in range(get_num_coefficient(data))
             for (index_tranche_age, tranche_age) in enumerate(
-                ["-30", "30-39", "40-49", "50+"]
+                ["30", "30-39", "40-49", "50"]
             )
         ]
         + [
-            ("resultat_tab1", "/data/indicateurUn/resultatFinal"),
-            ("population_favorable_tab1", "/data/indicateurUn/sexeSurRepresente"),
-            ("indic2_sup250_non_calculable", "/data/indicateurDeux/nonCalculable"),
-            ("motif_non_calc_tab2_sup250", "/data/indicateurDeux/motifNonCalculable"),
+            ("Indic1_resultat", "/data/indicateurUn/resultatFinal"),
+            ("Indic1_population_favorable", "/data/indicateurUn/sexeSurRepresente"),
+            ("Indic2_non_calculable", "/data/indicateurDeux/nonCalculable"),
+            ("Indic2_motif_non_calculable", "/data/indicateurDeux/motifNonCalculable"),
             (
-                "precision_am_tab2_sup250",
+                "Indic2_precision_autre_motif",
                 "/data/indicateurDeux/motifNonCalculablePrecision",
             ),
         ]
         + [
             (
-                f"{CSP}_tab2_sup250",
+                f"Indic2_{CSP}",
                 f"/data/indicateurDeux/tauxAugmentation/{index_csp}/ecartTauxAugmentation",
             )
-            for (index_csp, CSP) in enumerate(["Ou", "Em", "TAM", "IC"])
+            for (index_csp, CSP) in enumerate(["Ouv", "Emp", "TAM", "IC"])
         ]
         + [
-            ("resultat_tab2_sup250", "/data/indicateurDeux/resultatFinal"),
+            ("Indic2_resultat", "/data/indicateurDeux/resultatFinal"),
+            ("Indic2_population_favorable", "/data/indicateurDeux/sexeSurRepresente"),
+            ("Indic3_non_calculable", "/data/indicateurTrois/nonCalculable"),
+            ("Indic3_motif_non_calculable", "/data/indicateurTrois/motifNonCalculable"),
             (
-                "population_favorable_tab2_sup250",
-                "/data/indicateurDeux/sexeSurRepresente",
-            ),
-            ("indic3_sup250_non_calculable", "/data/indicateurTrois/nonCalculable"),
-            ("motif_non_calc_tab3_sup250", "/data/indicateurTrois/motifNonCalculable"),
-            (
-                "precision_am_tab3_sup250",
+                "Indic3_precision_autre_motif",
                 "/data/indicateurTrois/motifNonCalculablePrecision",
             ),
         ]
         + [
             (
-                f"{CSP}_tab3_sup250",
+                f"Indic3_{CSP}",
                 f"/data/indicateurTrois/tauxPromotion/{index_csp}/ecartTauxPromotion",
             )
-            for (index_csp, CSP) in enumerate(["Ou", "Em", "TAM", "IC"])
+            for (index_csp, CSP) in enumerate(["Ouv", "Emp", "TAM", "IC"])
         ]
         + [
-            ("resultat_tab3_sup250", "/data/indicateurTrois/resultatFinal"),
+            ("Indic3_resultat", "/data/indicateurTrois/resultatFinal"),
+            ("Indic3_population_favorable", "/data/indicateurTrois/sexeSurRepresente"),
+            ("Indic2et3_non_calculable", "/data/indicateurDeuxTrois/nonCalculable"),
             (
-                "population_favorable_tab3_sup250",
-                "/data/indicateurTrois/sexeSurRepresente",
-            ),
-            ("indic2_50-250_non_calculable", "/data/indicateurDeuxTrois/nonCalculable"),
-            (
-                "motif_non_calc_tab2_50-250",
+                "Indic2et3_motif_non_calculable",
                 "/data/indicateurDeuxTrois/motifNonCalculable",
             ),
             (
-                "precision_am_tab2_50-250",
+                "Indic2et3_precision_autre_motif",
                 "/data/indicateurDeuxTrois/motifNonCalculablePrecision",
             ),
             (
-                "resultat_pourcent_tab2_50-250",
+                "Indic2et3_resultat_pourcent",
                 "/data/indicateurDeuxTrois/resultatFinalEcart",
             ),
             (
-                "resultat_nb_sal_tab2_50-250",
+                "Indic2et3_resultat_nb_sal",
                 "/data/indicateurDeuxTrois/resultatFinalNombreSalaries",
             ),
             (
-                "population_favorable_tab2_50-250",
+                "Indic2et3_population_favorable",
                 "/data/indicateurDeuxTrois/sexeSurRepresente",
             ),
-            ("indic4_non_calculable", "/data/indicateurQuatre/nonCalculable"),
-            ("motif_non_calc_tab4", "/data/indicateurQuatre/motifNonCalculable"),
-            ("precision_am_tab4", "/data/indicateurQuatre/motifNonCalculablePrecision"),
-            ("resultat_tab4", "/data/indicateurQuatre/resultatFinal"),
-            ("resultat_tab5", "/data/indicateurCinq/resultatFinal"),
-            ("sexe_sur_represente_tab5", "/data/indicateurCinq/sexeSurRepresente"),
-            ("Indicateur 1", "/data/indicateurUn/noteFinale"),
-            ("Indicateur 2", "/data/indicateurDeux/noteFinale"),
-            ("Indicateur 2et3", "/data/indicateurDeuxTrois/noteFinale"),
-            ("Indicateur 2et3 PourCent", "/data/indicateurDeuxTrois/noteEcart"),
-            ("Indicateur 2et3 ParSal", "/data/indicateurDeuxTrois/noteNombreSalaries"),
-            ("Indicateur 3", "/data/indicateurTrois/noteFinale"),
-            ("Indicateur 4", "/data/indicateurQuatre/noteFinale"),
-            ("Indicateur 5", "/data/indicateurCinq/noteFinale"),
-            ("Nombre total de points obtenus", "/data/declaration/totalPoint"),
+            ("Indic4_non_calculable", "/data/indicateurQuatre/nonCalculable"),
             (
-                "Nombre total de points pouvant être obtenus",
+                "Indic4_motif_non_calculable",
+                "/data/indicateurQuatre/motifNonCalculable",
+            ),
+            (
+                "Indic4_precision_autre_motif",
+                "/data/indicateurQuatre/motifNonCalculablePrecision",
+            ),
+            ("Indic4_resultat", "/data/indicateurQuatre/resultatFinal"),
+            ("Indic5_resultat", "/data/indicateurCinq/resultatFinal"),
+            ("Indic5_sexe_sur_represente", "/data/indicateurCinq/sexeSurRepresente"),
+            ("Indicateur_1", "/data/indicateurUn/noteFinale"),
+            ("Indicateur_2", "/data/indicateurDeux/noteFinale"),
+            ("Indicateur_2et3", "/data/indicateurDeuxTrois/noteFinale"),
+            ("Indicateur_2et3_PourCent", "/data/indicateurDeuxTrois/noteEcart"),
+            ("Indicateur_2et3_ParSal", "/data/indicateurDeuxTrois/noteNombreSalaries"),
+            ("Indicateur_3", "/data/indicateurTrois/noteFinale"),
+            ("Indicateur_4", "/data/indicateurQuatre/noteFinale"),
+            ("Indicateur_5", "/data/indicateurCinq/noteFinale"),
+            ("Nombre_total_points obtenus", "/data/declaration/totalPoint"),
+            (
+                "Nombre_total_points_pouvant_etre_obtenus",
                 "/data/declaration/totalPointCalculable",
             ),
-            ("Résultat final sur 100 points", "/data/declaration/noteIndex"),
-            ("mesures_correction", "/data/declaration/mesuresCorrection"),
+            ("Resultat_final_sur_100_points", "/data/declaration/noteIndex"),
+            ("Mesures_correction", "/data/declaration/mesuresCorrection"),
         ]
     )
     print("List of interesting columns to export: (alias_name, json_name)")
@@ -261,8 +261,8 @@ if __name__ == "__main__":
         axis=1,
     )
     print("Adding a 'URL de déclaration' column based on the ID and the source")
-    data["URL de déclaration"] = data["/id"]
-    data["URL de déclaration"] = data.apply(
+    data["URL_declaration"] = data["/id"]
+    data["URL_declaration"] = data.apply(
         lambda d: (
             "'https://index-egapro.travail.gouv.fr/simulateur/" + d["/id"]
             if d["/data/source"] == "egapro"
