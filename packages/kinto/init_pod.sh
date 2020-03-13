@@ -132,10 +132,11 @@ cd egapro/packages/kinto/
 echo ">>> INSTALLING PYTHON DEPENDENCIES"
 /usr/local/bin/pipenv install
 
-for solen_export in /tmp/solen_export_*.xlsx; do
-    echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: $solen_export"
-    KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /usr/local/bin/pipenv run python solen.py $solen_export --progress
-done
+echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2019.xlsx"
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /usr/local/bin/pipenv run python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
+
+echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2020.xlsx"
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /usr/local/bin/pipenv run python solen.py /tmp/solen_export_2020.xlsx 2020 --progress
 
 echo ">>> DUMPING DECLARATIONS TO /tmp/dump_declarations_records.json"
 KINTO_SERVER=http://kinto:8888/v1 /usr/local/bin/pipenv run python dump_records.py /tmp/dump_declarations_records.json
