@@ -12,7 +12,7 @@ import sys
 import tarfile
 
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from itertools import islice
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
@@ -289,9 +289,18 @@ class RowProcessor(object):
         elif debut_pr != "-":
             # autre période: rajouter un an à "date_debut_pr"
             date_debut_pr = datetime.strptime(debut_pr, DATE_FORMAT_INPUT)
-            delta = timedelta(days=365)
+            one_day = timedelta(days=1)
             debutPeriodeReference = date_debut_pr.strftime(DATE_FORMAT_OUTPUT)
-            finPeriodeReference = (date_debut_pr + delta).strftime(DATE_FORMAT_OUTPUT)
+            try:
+                # One year later, but one day before: 01-01-2019 -> 31-12-2019
+                finPeriodeReference = (
+                    date_debut_pr.replace(year=date_debut_pr.year + 1) - one_day
+                ).strftime(DATE_FORMAT_OUTPUT)
+            except ValueError:
+                # Special case for the month of february which doesn't always have the same number of days
+                finPeriodeReference = date_debut_pr + (
+                    date(date_debut_pr.year + 1, 3, 1) - date(date_debut_pr.year, 3, 1)
+                )
         else:
             # autre période de référence sans début spécifié: erreur
             raise RowProcessorError(
