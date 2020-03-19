@@ -49,6 +49,7 @@
     "@types/react-table": "7.0.12",
     "cypress": "4.2.0",
     "kinto-http": "^4.7.3",
+    "node-fetch": "^2.6.0",
     "ts-node": "^8.6.2",
     "typescript": "3.8.3",
     "wait-on": "4.0.1"
