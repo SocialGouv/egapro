@@ -12,7 +12,7 @@
     },
     "sexeSurRepresente": {
       "type": "string",
-      "enum": ["Hommes", "Femmes"]
+      "enum": ["hommes", "femmes", "egalite"]
     }
   },
   "type": "object",
@@ -22,7 +22,10 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "source": { "type": "string" },
+        "source": {
+          "type": "string",
+          "enum": ["solen-2019", "solen-2020", "egapro"]
+        },
         "informations": {
           "type": "object",
           "additionalProperties": false,
@@ -68,8 +71,12 @@
                         "trancheAge": {
                           "$ref": "#/definitions/trancheAge"
                         },
-                        "nombreSalariesFemmes": { "type": "number" },
-                        "nombreSalariesHommes": { "type": "number" }
+                        "nombreSalariesFemmes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        },
+                        "nombreSalariesHommes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        }
                       }
                     }
                   },
@@ -144,8 +151,12 @@
                         "trancheAge": {
                           "$ref": "#/definitions/trancheAge"
                         },
-                        "nombreSalariesFemmes": { "type": "number" },
-                        "nombreSalariesHommes": { "type": "number" },
+                        "nombreSalariesFemmes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        },
+                        "nombreSalariesHommes": {
+                          "anyOf": [{ "type": "integer" }, { "type": "null" }]
+                        },
                         "remunerationAnnuelleBrutFemmes": { "type": "number" },
                         "remunerationAnnuelleBrutHommes": { "type": "number" },
                         "ecartTauxRemuneration": { "type": "number" }
@@ -254,6 +265,8 @@
               "$ref": "#/definitions/sexeSurRepresente"
             },
             "noteFinale": { "type": "integer" },
+            "noteEcart": { "type": "integer" },
+            "noteNombreSalaries": { "type": "integer" },
             "mesuresCorrection": { "type": "boolean" }
           }
         },
@@ -265,8 +278,12 @@
               "$ref": "#/definitions/formValidated"
             },
             "presenceCongeMat": { "type": "boolean" },
-            "nombreSalarieesAugmentees": { "type": "integer" },
-            "nombreSalarieesPeriodeAugmentation": { "type": "integer" },
+            "nombreSalarieesAugmentees": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }]
+            },
+            "nombreSalarieesPeriodeAugmentation": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }]
+            },
             "nonCalculable": { "type": "boolean" },
             "motifNonCalculable": { "type": "string" },
             "motifNonCalculablePrecision": { "type": "string" },
@@ -357,18 +374,19 @@
             "indicateurTrois": { "type": "integer" },
             "indicateurQuatre": { "type": "integer" },
             "indicateurCinq": { "type": "integer" },
-            "noteFinale": { "type": "integer" },
-            "nombrePointsMax": { "type": "integer" },
-            "noteFinaleSur100": { "type": "integer" },
+            "totalPoint": { "type": "integer" },
+            "totalPointCalculable": { "type": "integer" },
+            "noteIndex": { "type": "integer" },
             "mesuresCorrection": {
               "type": "string",
-              "enum": ["mmo", "me", "mne"]
+              "enum": ["", "mmo", "me", "mne"]
             }
           }
         }
       }
     },
     "last_modified": { "type": "integer" },
-    "id": { "type": "string" }
+    "id": { "type": "string" },
+    "schema": { "type": "integer" }
   }
 }

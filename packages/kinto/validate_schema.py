@@ -27,7 +27,10 @@ if not validation_ok:
 
 def parse(args):
     with open(args.records_path) as records_file:
-        records = json.load(records_file)["data"]
+        records = json.load(records_file)
+        if type(records) == dict:
+            # It's an export from a HTTP request to Kinto, which returns a json object with a "data" attribute.
+            records = records["data"]
 
         print(f"Validating {len(records)} records")
 
