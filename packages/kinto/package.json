@@ -9,7 +9,7 @@
     "start": "docker-compose up kinto-server init-kinto"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "7.6.0",
+    "@elastic/elasticsearch": "7.6.1",
     "@types/lodash": "4.14.149",
     "btoa": "1.2.1",
     "dotenv": "8.2.0",
@@ -18,6 +18,6 @@
     "react-table": "7.0.0"
   },
   "devDependencies": {
-    "@types/react-table": "7.0.11"
+    "@types/react-table": "7.0.12"
   }
 }
