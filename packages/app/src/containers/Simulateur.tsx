@@ -14,7 +14,9 @@ import ErrorMessage from "../components/ErrorMessage";
 
 import Declaration from "../views/Declaration";
 import Effectif from "../views/Effectif";
-import HomeSimulateur from "../views/HomeSimulateur";
+import HomeSimulateur, {
+  HomeSimulateurRouteComponentProps
+} from "../views/HomeSimulateur";
 import IndicateurUn from "../views/Indicateur1";
 import IndicateurDeux from "../views/Indicateur2";
 import IndicateurTrois from "../views/Indicateur3";
@@ -87,7 +89,10 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/"
         exact
-        render={props => <HomeSimulateur {...props} code={code} />}
+        render={props => {
+          const foo = props as HomeSimulateurRouteComponentProps;
+          return <HomeSimulateur {...foo} code={code} />;
+        }}
       />
       <Route
         path="/simulateur/:code/informations"
