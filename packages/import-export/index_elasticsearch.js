@@ -1,4 +1,6 @@
 const { Client } = require("@elastic/elasticsearch");
+const isAfter = require("date-fns/isAfter");
+const parse = require("date-fns/parse");
 
 // write permissions
 const client = new Client({
@@ -64,7 +66,7 @@ async function createIndex({ client, indexName, mappings }) {
                 autocomplete: {
                   type: "custom",
                   tokenizer: "standard",
-                  filter: ["asciifolding","lowercase", "autocomplete_filter"]
+                  filter: ["asciifolding", "lowercase", "autocomplete_filter"]
                 },
                 search_autocomplete: {
                   type: "custom",
@@ -109,17 +111,11 @@ const startIndexing = async documents => {
     doc
   ]);
 
-  //  console.log("body", body);
   try {
     const res = await client.bulk({ refresh: true, body });
-    //console.log("res", res);
   } catch (e) {
     console.log("e", e.meta.body.error);
   }
-
-  // if (bulkResponse.errors) {
-  //   console.log(bulkResponse.errors);
-  // }
 
   // update aliases
   console.log("Updating aliases");
@@ -144,13 +140,47 @@ const startIndexing = async documents => {
 };
 
 console.log("Indexing the file", process.env.JSON_DUMP_FILENAME);
+
 const documents = require(process.env.JSON_DUMP_FILENAME);
 
-const isIndexable = record =>
+const isPublicEffectif = record =>
   record.data.informations &&
   (record.data.informations.trancheEffectifs === "1000 et plus" ||
     (record.data.informations.anneeDeclaration === 2018 &&
       record.data.informations.trancheEffectifs === "Plus de 250" &&
       record.data.effectif.nombreSalariesTotal > 1000));
 
-startIndexing(documents.filter(isIndexable));
+const parseFrenchDate = dateString =>
+  parse(dateString, "dd/MM/yyyy HH:mm", new Date(), {
+    locale: "fr"
+  });
+
+const getLatestRecords = collection =>
+  Object.values(
+    collection.reduce((acc, record) => {
+      const siren = record.data.informationsEntreprise.siren;
+      const anneeDeclaration = record.data.informations.anneeDeclaration;
+      const key = `${siren}:${anneeDeclaration}`;
+      if (!acc[key]) {
+        acc[key] = record;
+        return acc;
+      }
+      const existingDateDeclaration = parseFrenchDate(
+        acc[key].data.declaration.dateDeclaration
+      );
+      const newDateDeclaration = parseFrenchDate(
+        record.data.declaration.dateDeclaration
+      );
+      if (isAfter(newDateDeclaration, existingDateDeclaration)) {
+        acc[key] = record;
+      }
+      return acc;
+    }, {})
+  );
+
+const indexableDocuments = getLatestRecords(documents.filter(isPublicEffectif));
+
+console.log("documents: ", documents.length);
+console.log("indexableDocuments:", indexableDocuments.length);
+
+startIndexing(indexableDocuments);
