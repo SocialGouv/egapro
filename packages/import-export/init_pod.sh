@@ -1,5 +1,5 @@
 #!/bin/sh
-# Requires the following environment variables to be set (from the rancher secrets)
+# Requires an "/root/env" file with the following environment variables to be set (from the rancher secrets)
 # - AZURE_STORAGE_ACCOUNT_NAME the azure file storage account name
 # - AZURE_STORAGE_ACCOUNT_KEY the azure file storage account key
 # - AZURE_STORAGE_ACCOUNT_NAME_EXPORT the azure file storage account name to upload the final exported file
@@ -12,8 +12,6 @@
 # - ES_ID the ID of the elasticsearch cloud ID
 # - ES_USERNAME the elasticsearch username
 # - ES_PASSWORD the elasticsearch password
-# And the following environments variables that aren't secrets
-# - POSTGRESQL_SERVER the adress of the "local" postgresql server to use
 #
 # It also requires the solen export files to be in the "exports" azure file share ...
 # - DNUM - EXPORT SOLEN 2019.xlsx
@@ -33,11 +31,13 @@
 # $ crontab -e
 #       0 */2 * * * /root/init_pod.sh > /tmp/init_pod.sh.log 2>&1
 
-
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo ">>> RUNNING SCRIPT" `date`
 
 set -e
+
+# export the env variables listed at the top of this file
+. ./env
 
 echo ">>> APT UPDATE"
 apt update
@@ -93,18 +93,18 @@ fi
 echo ">>> RESTORING LATEST BACKUP: $DUMP_NAME"
 # Change the preprod postgres user's password to be the prod's one (needed for the restore)
 set +e
-psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER USER postgres WITH PASSWORD '$PG_PROD_PASSWORD'"
+psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER USER postgres WITH PASSWORD '$PG_PROD_PASSWORD'"
 # Cleanup some stuff that will prevent the restore
-PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "DROP DATABASE egapro"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER DATABASE template1 OWNER TO postgres"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER DATABASE postgres OWNER TO postgres"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "DROP OWNED BY egapro"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "DROP ROLE egapro"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "DROP DATABASE egapro"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER DATABASE template1 OWNER TO postgres"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER DATABASE postgres OWNER TO postgres"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "DROP OWNED BY egapro"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "DROP ROLE egapro"
 set -e
 # Restore the prod DB
-PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -f /tmp/latest_dump.sql
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -f /tmp/latest_dump.sql
 # Change the password back
-PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
 
 echo ">>> RESTORE THE ORIGINAL KINTO ADMIN PASSWORD"
 echo '{"data": {"password": "'$KINTO_ADMIN_PASSWORD'"}}' | http PUT http://kinto:8888/v1/accounts/admin --verbose --auth 'admin:passw0rd'
