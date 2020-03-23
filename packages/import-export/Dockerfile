@@ -3,8 +3,23 @@ FROM debian:stable-slim
 ARG POSTGRESQL_SERVER
 ENV POSTGRESQL_SERVER=${POSTGRESQL_SERVER}
 
-COPY . /app
-WORKDIR /app
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    httpie \
+    postgresql-client \
+    python3 \
+    python3-pip \
+    vim \
+    wget
 
-RUN ["chmod", "+x", "./init_pod.sh"]
-ENTRYPOINT ["./init_pod.sh"]
+# Install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_13.x | bash - && apt-get install -y nodejs
+# Install azure cli
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+RUN pip3 install pipenv
+
+COPY ./import-export.sh /import-export.sh
+
+RUN ["chmod", "+x", "./import-export.sh"]
+ENTRYPOINT ["./import-export.sh"]
