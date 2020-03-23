@@ -30,5 +30,5 @@ const update: (record: IndicatorsData) => Promise<IndicatorsData> = async (
 export const indicatorsDataRepository = {
   add,
   one,
-  update
+  update,
 };

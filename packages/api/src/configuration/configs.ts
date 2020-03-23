@@ -53,5 +53,5 @@ export const getConfiguration = (env: typeof process.env) => ({
   mailPassword: asString(env, `MAIL_PASSWORD`, ""),
   mailPort: asNumber(env, `MAIL_PORT`, 465),
   mailUseTLS: asBoolean(env, `MAIL_USE_TLS`, true),
-  mailUsername: asString(env, `MAIL_USERNAME`, "")
+  mailUsername: asString(env, `MAIL_USERNAME`, ""),
 });

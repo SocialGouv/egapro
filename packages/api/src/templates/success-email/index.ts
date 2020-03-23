@@ -49,7 +49,7 @@ Merci de ne pas répondre à ce message qui a été généré automatiquement pa
 
 const template: Template = {
   html,
-  text
+  text,
 };
 
 export default template;

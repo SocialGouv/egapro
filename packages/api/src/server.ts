@@ -12,7 +12,7 @@ if (!!configuration.apiSentryDsn) {
   Sentry.init({
     debug: true,
     dsn: configuration.apiSentryDsn,
-    environment: configuration.apiSentryEnvironment
+    environment: configuration.apiSentryEnvironment,
   });
 }
 

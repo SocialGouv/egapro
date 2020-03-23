@@ -8,7 +8,7 @@ const headers = {
   Authorization:
     "Basic " +
     btoa(`${configuration.kintoLogin}:${configuration.kintoPassword}`),
-  "Content-Type": "application/json"
+  "Content-Type": "application/json",
 };
 
 const bucket = `${configuration.kintoURL}/buckets/${configuration.kintoBucket}`;
@@ -21,7 +21,7 @@ const requestOptions = (
 ) => {
   const options: any = {
     headers,
-    method
+    method,
   };
   if (body) {
     options.body = JSON.stringify(body);
@@ -50,7 +50,7 @@ export const collection: CollectionFn = <T>(name: string) => ({
     apiCount(`${records(name)}?${filter}`, requestOptions("HEAD")),
   one: (id: string) => api(`${records(name)}/${id}`, requestOptions("GET")),
   update: (id: string, record: T) =>
-    api(`${records(name)}/${id}`, requestOptions("PUT", { data: record }))
+    api(`${records(name)}/${id}`, requestOptions("PUT", { data: record })),
 });
 
 export interface KintoCollection<T> {
