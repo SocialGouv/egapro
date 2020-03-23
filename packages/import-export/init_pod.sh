@@ -127,7 +127,7 @@ az storage file download \
         --dest "/tmp/solen_export_2020.xlsx"
 
 
-cd egapro/packages/kinto/
+cd egapro/packages/import-export/
 
 echo ">>> INSTALLING PYTHON DEPENDENCIES"
 /usr/local/bin/pipenv install
