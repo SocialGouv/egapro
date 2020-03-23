@@ -15,8 +15,8 @@ spec:
               cpu: 100m
               memory: 200Mi
             limits:
-              cpu: 1000m
-              memory: 900Mi
+              cpu: 3000m
+              memory: 7000Mi
           env:
             - name: PGPASSWORD
               valueFrom:
@@ -85,7 +85,7 @@ spec:
                   key: ES_PASSWORD
             - name: POSTGRESQL_SERVER
               value: ${PROJECT}-${BRANCH_HASH}-pg-postgresql
-      restartPolicy: OnFailure
+      restartPolicy: Never
       initContainers:
         - name: wait-for-kinto
           image: alpine:latest
