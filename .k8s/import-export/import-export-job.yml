@@ -85,6 +85,8 @@ spec:
                   key: ES_PASSWORD
             - name: POSTGRESQL_SERVER
               value: ${PROJECT}-${BRANCH_HASH}-pg-postgresql
+            - name: BRANCH_NAME
+              value: ${BRANCH_NAME}
       restartPolicy: Never
       initContainers:
         - name: wait-for-kinto

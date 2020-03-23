@@ -3,6 +3,9 @@ FROM debian:stable-slim
 ARG POSTGRESQL_SERVER
 ENV POSTGRESQL_SERVER=${POSTGRESQL_SERVER}
 
+ARG BRANCH_NAME
+ENV BRANCH_NAME=${BRANCH_NAME}
+
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -19,7 +22,11 @@ RUN curl -sL https://deb.nodesource.com/setup_13.x | bash - && apt-get install -
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 RUN pip3 install pipenv
 
-COPY ./import-export.sh /import-export.sh
 
-RUN ["chmod", "+x", "./import-export.sh"]
-ENTRYPOINT ["./import-export.sh"]
+# Clone egapro, then checkout the proper branch to run the script
+ENTRYPOINT git clone https://github.com/SocialGouv/egapro && \
+    cd egapro && \
+    git checkout ${BRANCH_NAME} && \
+    git pull && \
+    chmod +x packages/import-export/import-export.sh && \
+    packages/import-export/import-export.sh

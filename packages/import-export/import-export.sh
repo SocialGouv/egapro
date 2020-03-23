@@ -14,6 +14,7 @@
 # - ES_PASSWORD the elasticsearch password
 # And the following environments variables that aren't secrets
 # - POSTGRESQL_SERVER the adress of the "local" postgresql server to use
+# - BRANCH_NAME the name of the git branch to pull to get the import-export.sh scripts and others used here.
 #
 # It also requires the solen export files to be in the "exports" azure file share ...
 # - DNUM - EXPORT SOLEN 2019.xlsx
@@ -32,19 +33,6 @@ echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo ">>> RUNNING SCRIPT" `date`
 
 set -e
-
-echo ">>> GIT CLONE EGAPRO"
-if [ ! -d "egapro/" ]; then
-    git clone https://github.com/SocialGouv/egapro
-fi
-
-if [ -d "egapro/" ]; then
-    cd egapro
-    git checkout init-pod-kube
-    git pull
-    cd ..
-fi
-
 
 echo ">>> DOWNLOAD 'LATEST' FILE CONTAINING LATEST DUMP NAME"
 az storage file download \
