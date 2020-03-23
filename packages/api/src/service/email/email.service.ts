@@ -24,8 +24,8 @@ const transporter = createTransport({
   auth: {
     user: configuration.mailUsername,
     // tslint:disable-next-line: object-literal-sort-keys
-    pass: configuration.mailPassword
-  }
+    pass: configuration.mailPassword,
+  },
 });
 
 export interface EmailService {
@@ -45,8 +45,8 @@ export const emailService: EmailService = {
         .join(","),
       subject: email.subject,
       text: email.bodyText,
-      html: email.html
+      html: email.html,
     };
     return transporter.sendMail(message);
-  }
+  },
 };

@@ -10,5 +10,5 @@ export interface StatsDataService {
 }
 
 export const statsDataService: StatsDataService = {
-  get
+  get,
 };

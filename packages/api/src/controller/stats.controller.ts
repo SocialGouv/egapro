@@ -10,7 +10,7 @@ export const getStatsData = async (ctx: Koa.Context) => {
   } else {
     ctx.status = 400;
     ctx.body = {
-      message: "could not retrieve stats"
+      message: "could not retrieve stats",
     };
   }
 };

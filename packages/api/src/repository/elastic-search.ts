@@ -22,9 +22,9 @@ export const request = async (
     const client = new Client({
       auth: {
         password: process.env.ELASTIC_SEARCH_PASSWORD || "",
-        username: process.env.ELASTIC_SEARCH_USER || ""
+        username: process.env.ELASTIC_SEARCH_USER || "",
       },
-      node: process.env.ELASTIC_SEARCH_URL || ""
+      node: process.env.ELASTIC_SEARCH_URL || "",
     });
 
     const response = await client.search({
@@ -33,22 +33,22 @@ export const request = async (
         query: {
           match: {
             "data.informationsEntreprise.nomEntreprise": {
-              query: nomEntreprise
-            }
-          }
+              query: nomEntreprise,
+            },
+          },
         },
         size,
-        sort
+        sort,
       },
-      index: process.env.ELASTIC_SEARCH_INDEX || "declarations"
+      index: process.env.ELASTIC_SEARCH_INDEX || "declarations",
     });
     const {
       total: { value: total },
-      hits
+      hits,
     } = response.body.hits;
     return {
       data: hits.map(({ _source }: { _source: any }) => _source),
-      total
+      total,
     };
   } catch (error) {
     return { data: [], total: 0 };

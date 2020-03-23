@@ -3,7 +3,7 @@ import { indicatorsDataRepository } from "../../repository";
 
 const add = () => {
   const record: IndicatorsData = {
-    data: {}
+    data: {},
   };
   return indicatorsDataRepository.add(record);
 };
@@ -25,5 +25,5 @@ export interface IndicatorsDataService {
 export const indicatorsDataService: IndicatorsDataService = {
   add,
   one,
-  update
+  update,
 };
