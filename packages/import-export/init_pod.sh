@@ -57,15 +57,15 @@ if [ ! -f "/usr/local/bin/pipenv" ]; then
 fi
 
 echo ">>> GIT CLONE EGAPRO"
-if [ ! -d "/root/egapro" ]; then
-  git clone https://github.com/SocialGouv/egapro
+if [ ! -d "egapro/" ]; then
+    git clone https://github.com/SocialGouv/egapro
 fi
 
-if [ -d "/root/egapro" ]; then
-  cd egapro
-  git checkout init-pod-kube
-  git pull
-  cd ..
+if [ -d "egapro/" ]; then
+    cd egapro
+    git checkout init-pod-kube
+    git pull
+    cd ..
 fi
 
 
