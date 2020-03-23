@@ -63,7 +63,7 @@ fi
 
 if [ -d "/root/egapro" ]; then
   cd egapro
-  git checkout script-init_pod-preprod-consolidation-donnees
+  git checkout init-pod-kube
   git pull
   cd ..
 fi
