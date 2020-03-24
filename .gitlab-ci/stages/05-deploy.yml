@@ -1,5 +1,4 @@
 ---
-
 Notify Starting Deployment:
   extends: .base_notify_pending_stage
   stage: Deploy
@@ -51,7 +50,6 @@ Deploy app (prod):
     variables:
       - $PRODUCTION
 
-
 ############################################
 ####                API                 ####
 ############################################
@@ -90,7 +88,6 @@ Deploy api (prod):
       - triggers
     variables:
       - $PRODUCTION
-
 
 ############################################
 ####              POSTGRES              ####
@@ -145,7 +142,6 @@ Deploy postgres (prod):
     variables:
       - $PRODUCTION
 
-
 ############################################
 ####              MEMCACHED             ####
 ############################################
@@ -194,7 +190,6 @@ Deploy memcached (prod):
       - triggers
     variables:
       - $PRODUCTION
-
 
 ############################################
 ####                KINTO               ####
@@ -247,6 +242,24 @@ Deploy kinto (prod):
     variables:
       - $PRODUCTION
 
+###########################################
+###            IMPORT-EXPORT            ###
+###########################################
+
+Import Solen to consolidated export:
+  stage: Deploy
+  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  dependencies: []
+  when: manual
+  only:
+    refs:
+      - tags
+  except:
+    variables:
+      - $PRODUCTION
+  script:
+    - envsubst < .k8s/import-export/import-export.yml > .k8s/kinto/import-export-${PROJECT}.yml
+    - kubectl apply -f .k8s/import-export/import-export-${PROJECT}.yml -n ${K8S_NAMESPACE}
 
 ###########################################
 ###          DEPLOY TO PROD K8S         ###
@@ -318,11 +331,11 @@ Restore postgres:
       --values ./values.yaml
     - helm just apply ${CONTEXT}-${BRANCH_HASH}-pg
     - kubectl wait --for=condition=Ready pod -l component=postgres -n ${K8S_NAMESPACE} --timeout=600s
-#    # run restore job
+    #    # run restore job
     - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-${PROJECT}.yml
     - kubectl apply -f .k8s/postgres/restore-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
-#    # deploy kinto
+    #    # deploy kinto
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${PROJECT}.yml
     - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${PROJECT}.yml
     - envsubst < .k8s/kinto/job-init-kinto.yml > .k8s/kinto/job-init-kinto-${PROJECT}.yml
@@ -337,5 +350,3 @@ Restore postgres:
     refs:
       - tags
   when: manual
-
-...
