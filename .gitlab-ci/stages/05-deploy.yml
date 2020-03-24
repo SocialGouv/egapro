@@ -258,8 +258,8 @@ Import Solen to consolidated export:
     variables:
       - $PRODUCTION
   script:
-    - envsubst < .k8s/import-export/import-export.yml > .k8s/kinto/import-export-${PROJECT}.yml
-    - kubectl apply -f .k8s/import-export/import-export-${PROJECT}.yml -n ${K8S_NAMESPACE}
+    - envsubst < .k8s/import-export/import-export-job.yml > .k8s/kinto/import-export-job-${PROJECT}.yml
+    - kubectl apply -f .k8s/import-export/import-export-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
 
 ###########################################
 ###          DEPLOY TO PROD K8S         ###
