@@ -7,19 +7,16 @@ ARG BRANCH_NAME
 ENV BRANCH_NAME=${BRANCH_NAME}
 
 RUN apt-get update && apt-get install -y \
-    curl \
     git \
-    httpie \
     postgresql-client \
     python3 \
-    python3-pip \
-    vim \
-    wget
+    python3-pip
 
 # Install nodejs
 RUN curl -sL https://deb.nodesource.com/setup_13.x | bash - && apt-get install -y nodejs
 # Install azure cli
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+# Install pipenv
 RUN pip3 install pipenv
 
 
