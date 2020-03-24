@@ -305,6 +305,7 @@ Restore postgres:
     - kubectl apply -f .k8s/secret/secret-azure-volume-${PROJECT}.yml -n ${K8S_NAMESPACE}
     # delete old restore job, kinto and postgres
     - kubectl delete job restore-backup -n ${K8S_NAMESPACE} || true;
+    - kubectl delete job import-export -n ${K8S_NAMESPACE} || true;
     - kubectl delete deploy kinto -n ${K8S_NAMESPACE} || true;
     - kubectl delete sts ${PROJECT}-${BRANCH_HASH}-pg-postgresql -n ${K8S_NAMESPACE} || true;
     - kubectl delete pvc data-${PROJECT}-${BRANCH_HASH}-pg-postgresql-0 -n ${K8S_NAMESPACE} || true;
@@ -322,6 +323,10 @@ Restore postgres:
     - envsubst < .k8s/postgres/restore-job.yml > .k8s/postgres/restore-job-${PROJECT}.yml
     - kubectl apply -f .k8s/postgres/restore-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=complete job/restore-backup --timeout=600s -n ${K8S_NAMESPACE}
+    #    # run import-export
+    - envsubst < .k8s/import-export/import-export-job.yml > .k8s/import-export/import-export-job-${PROJECT}.yml
+    - kubectl apply -f .k8s/import-export/import-export-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/import-export --timeout=-1s -n ${K8S_NAMESPACE}
 #    # deploy kinto
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${PROJECT}.yml
     - envsubst < .k8s/kinto/service.yml > .k8s/kinto/service-${PROJECT}.yml
