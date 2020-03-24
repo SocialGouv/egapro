@@ -7,6 +7,7 @@ ARG BRANCH_NAME
 ENV BRANCH_NAME=${BRANCH_NAME}
 
 RUN apt-get update && apt-get install -y \
+    curl \
     git \
     postgresql-client \
     python3 \
