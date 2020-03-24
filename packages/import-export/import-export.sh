@@ -72,7 +72,7 @@ PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -f /tmp/late
 PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
 
 echo ">>> RESTORE THE ORIGINAL KINTO ADMIN PASSWORD"
-echo '{"data": {"password": "'$KINTO_ADMIN_PASSWORD'"}}' | http PUT http://kinto:8888/v1/accounts/admin --verbose --auth 'admin:passw0rd'
+curl -X PUT -H "Content-Type: application/json" -d "{\"data\": {\"password\": \"$KINTO_ADMIN_PASSWORD\"}}" --user 'admin:passw0rd' http://kinto:8888/v1/accounts/admin
 
 
 echo ">>> DOWNLOADING 'DNUM - EXPORT SOLEN 2019.xlsx'"
