@@ -251,9 +251,9 @@ Import Solen to consolidated export:
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   dependencies: []
   when: manual
-  only:
-    refs:
-      - tags
+  # only:
+  #   refs:
+  #     - tags
   except:
     variables:
       - $PRODUCTION
