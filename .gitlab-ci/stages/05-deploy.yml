@@ -254,6 +254,8 @@ Import Solen to consolidated export:
   # only:
   #   refs:
   #     - tags
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
   except:
     variables:
       - $PRODUCTION
