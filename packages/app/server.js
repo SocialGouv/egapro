@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 const app = express();
-const proxy = require("http-proxy-middleware");
+const { createProxyMiddleware: proxy } = require('http-proxy-middleware');
 
 const apiURL = process.env.REACT_APP_API_URL;
 if (apiURL) {
