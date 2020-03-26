@@ -36,7 +36,7 @@ Lint:
     variables:
       - $PRODUCTION
 
-Test:
+Test api:
   extends: .base_yarn_script
   except:
     variables:
@@ -46,7 +46,19 @@ Test:
   needs:
     - Install
   script:
-    - yarn coverage
+    - yarn workspace api test
+
+Test app:
+  extends: .base_yarn_script
+  except:
+    variables:
+      - $PRODUCTION
+  dependencies:
+    - Install
+  needs:
+    - Install
+  script:
+    - yarn workspace app test
 
 Build:
   extends: .base_yarn_script
