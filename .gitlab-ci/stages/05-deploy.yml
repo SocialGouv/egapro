@@ -221,6 +221,21 @@ Deploy kinto:
     variables:
       - $PRODUCTION
 
+Deploy kinto (preprod):
+  <<: *deploy_kinto
+  #TODO: uncomment the following "only" when it's been tested so it only deploys on preprod
+  # only:
+  #   refs:
+  #     - tags
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  except:
+    variables:
+      - $PRODUCTION
+  after_script:
+    - envsubst < .k8s/import-export/import-export-cronjob.yml > .k8s/import-export/import-export-cronjob-${PROJECT}.yml
+    - kubectl apply -f .k8s/import-export/import-export-cronjob-${PROJECT}.yml -n ${K8S_NAMESPACE}
+
 Deploy kinto (prod):
   <<: *deploy_kinto
   variables:
@@ -250,6 +265,7 @@ Import Solen to consolidated export:
   image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/kubectl:0.29.0
   dependencies: []
   when: manual
+  #TODO: uncomment the following "only" when it's been tested so it only deploys on preprod
   # only:
   #   refs:
   #     - tags
