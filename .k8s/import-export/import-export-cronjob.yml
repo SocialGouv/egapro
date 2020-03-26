@@ -1,11 +1,8 @@
 ---
-include:
-  - /.k8s/import-export/import-export-job.yml
-
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: backup-cron
+  name: import-export-cron
 spec:
   schedule: "0 */2 * * *"
   jobTemplate:
