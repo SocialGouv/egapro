@@ -198,8 +198,7 @@ Deploy memcached (prod):
 #
 .deploy_kinto: &deploy_kinto
   stage: Deploy
-  dependencies: []
-  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/kubectl:0.29.0
   variables: &deploy_kinto_variables
     PORT: ${KINTO_PORT}
   script:
@@ -248,7 +247,7 @@ Deploy kinto (prod):
 
 Import Solen to consolidated export:
   stage: Deploy
-  image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
+  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/kubectl:0.29.0
   dependencies: []
   when: manual
   # only:
