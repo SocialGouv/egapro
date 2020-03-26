@@ -1,7 +1,7 @@
 ---
 
 #
-.register_stage: &register_stage
+.register_stage:
   extends: .base_register_stage
   stage: Registration
   except:
@@ -10,7 +10,7 @@
 #
 
 Register api image:
-  <<: *register_stage
+  extends: .register_stage
   variables:
     CONTEXT: ./packages/api
     DOCKER_BUILD_ARGS: >-
@@ -18,7 +18,7 @@ Register api image:
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
 
 Register app image:
-  <<: *register_stage
+  extends: .register_stage
   variables:
     CONTEXT: ./packages/app
     DOCKER_BUILD_ARGS: >-
@@ -26,7 +26,7 @@ Register app image:
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
 
 Register init kinto image:
-  <<: *register_stage
+  extends: .register_stage
   variables:
     CONTEXT: packages/kinto
     DOCKERFILE_PATH: packages/kinto/Dockerfile

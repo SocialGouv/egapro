@@ -11,9 +11,10 @@ COPY package.json yarn.lock /app/
 RUN yarn --production --frozen-lockfile --cache-folder /dev/shm/yarn
 
 COPY ./src /app/src
+COPY ./scripts /app/scripts
 
 USER node
 
 ENV NODE_ENV=production
 
-ENTRYPOINT ["./scripts/entrypoint.sh"]
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]
