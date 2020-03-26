@@ -1,14 +1,20 @@
-ARG NODE_VERSION=10-alpine
+FROM node:10.15.3-alpine
 
-FROM node:${NODE_VERSION}
+WORKDIR /app
 
 ENV KINTO_SERVER=kinto-server
 ENV KINTO_ADMIN_LOGIN=admin
 ENV KINTO_ADMIN_PASSWORD=passw0rd
 
-COPY . /app
-WORKDIR /app
-RUN yarn
+COPY package.json yarn.lock /app/
 
-RUN ["chmod", "+x", "./scripts/entrypoint.sh"]
-ENTRYPOINT ["./scripts/entrypoint.sh"]
+RUN yarn --production --frozen-lockfile --cache-folder /dev/shm/yarn
+
+COPY ./src /app/src
+COPY ./scripts /app/scripts
+
+USER node
+
+ENV NODE_ENV=production
+
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]

@@ -12,6 +12,8 @@ Ajouter le fichier `.env` à la racine du projet:
 
 ```bash
 cp .env.sample .env
+cp yarn.lock packages/api
+cp yarn.lock packages/app
 ```
 
 Y modifier les variables d'environnement nécessaires, comme par exemple les

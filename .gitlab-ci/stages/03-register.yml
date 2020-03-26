@@ -1,30 +1,43 @@
 ---
 
 #
-.register_stage: &register_stage
+.register_stage:
   extends: .base_register_stage
   stage: Registration
   except:
     variables:
       - $PRODUCTION
+  before_script:
+    - cp yarn.lock ${CONTEXT}
+
 #
 
 Register api image:
-  <<: *register_stage
+  extends: .register_stage
+  needs:
+    - Build api
+  dependencies:
+    - Build api
   variables:
-    CONTEXT: .
-    DOCKER_BUILD_ARGS: -f packages/api/Dockerfile
+    CONTEXT: ./packages/api
+    DOCKER_BUILD_ARGS: >-
+      --shm-size 256M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
 
 Register app image:
-  <<: *register_stage
+  extends: .register_stage
+  needs:
+    - Build app
+  dependencies:
+    - Build app
   variables:
-    CONTEXT: .
-    DOCKER_BUILD_ARGS: -f packages/app/Dockerfile
+    CONTEXT: ./packages/app
+    DOCKER_BUILD_ARGS: >-
+      --shm-size 512M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
 
 Register init kinto image:
-  <<: *register_stage
+  extends: .register_stage
   variables:
     CONTEXT: packages/kinto
     DOCKERFILE_PATH: packages/kinto/Dockerfile

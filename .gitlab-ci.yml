@@ -41,6 +41,8 @@ variables:
   DEV_ENVIRONMENT_NAME: "egapro-dev"
   PROD_ENVIRONMENT_NAME: "prod"
   ENABLE_PERSISTENT_VOLUME: "false"
+  GIT_STRATEGY: fetch
+  GIT_DEPTH: 5
   # Docker Image Version
   DOCKER_VERSION: "18.06"
   NODE_VERSION: "10"
@@ -92,7 +94,6 @@ variables:
 stages:
   - Install
   - Code Quality
-  - Prepare
   - Registration
   - Create Secret
   - Deploy
