@@ -1,14 +1,48 @@
 ---
 
-Code quality:
-  stage: Code Quality
-  extends:
-    - .base_yarn_quality
-    - .base_yarn_build
-  when: manual
+Install:
+  extends: .base_yarn
   except:
     variables:
       - $PRODUCTION
-  allow_failure: false
+
+Lint:
+  extends: .base_yarn_script
+  except:
+    variables:
+      - $PRODUCTION
+  dependencies:
+    - Install
+  needs:
+    - Install
+  script:
+    - yarn lint
+  except:
+    variables:
+      - $PRODUCTION
+
+Test:
+  extends: .base_yarn_script
+  except:
+    variables:
+      - $PRODUCTION
+  dependencies:
+    - Install
+  needs:
+    - Install
+  script:
+    - yarn coverage
+
+Build:
+  extends: .base_yarn_script
+  except:
+    variables:
+      - $PRODUCTION
+  dependencies:
+    - Install
+  needs:
+    - Install
+  script:
+    - yarn build
 
 ...
