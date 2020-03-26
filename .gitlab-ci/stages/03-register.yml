@@ -44,4 +44,11 @@ Register init kinto image:
       --shm-size 128M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
 
+Register import-export image:
+  <<: *register_stage
+  variables:
+    CONTEXT: packages/import-export
+    DOCKERFILE_PATH: packages/import-export/Dockerfile
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/import-export
+
 ...

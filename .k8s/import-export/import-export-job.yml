@@ -8,8 +8,7 @@ spec:
     spec:
       containers:
         - name: import-export-job
-          # image: ${CI_REGISTRY_IMAGE}/import-export:${IMAGE_TAG}
-          image: magopian2/egapro-import-export:latest
+          image: ${CI_REGISTRY_IMAGE}/import-export:${IMAGE_TAG}
           resources:
             requests:
               cpu: 100m
