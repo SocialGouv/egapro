@@ -201,7 +201,7 @@ Deploy memcached (prod):
   image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/kubectl:0.29.0
   variables: &deploy_kinto_variables
     PORT: ${KINTO_PORT}
-  script:
+  script: &deploy_kinto_script
     - export POSTGRESQL_USER=$(kubectl get secret ${PROJECT} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_USER}' | base64 --decode)
     - export POSTGRESQL_PASSWORD=$(kubectl get secret ${PROJECT} -n ${K8S_NAMESPACE} -o jsonpath='{.data.POSTGRES_EGAPRO_PASSWORD}' | base64 --decode)
     - envsubst < .k8s/kinto/deployment.yml > .k8s/kinto/deployment-${PROJECT}.yml
@@ -232,7 +232,8 @@ Deploy kinto (preprod):
   except:
     variables:
       - $PRODUCTION
-  after_script:
+  script:
+    <<: *deploy_kinto_script
     - envsubst < .k8s/import-export/import-export-cronjob.yml > .k8s/import-export/import-export-cronjob-${PROJECT}.yml
     - kubectl apply -f .k8s/import-export/import-export-cronjob-${PROJECT}.yml -n ${K8S_NAMESPACE}
 
