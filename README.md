@@ -45,6 +45,19 @@ yarn start
 
 Et le site est accessible sur http://localhost:3000
 
+## Tests
+
+### Integration
+
+```bash
+$ yarn start
+#
+# In another terminal
+$ cd optional/e2e
+$ yarn
+$ yarn test
+```
+
 ## End Points
 
 | Action | API                                | body                          | Réponse                      |
