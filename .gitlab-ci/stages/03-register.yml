@@ -27,9 +27,9 @@ Register api image:
 Register app image:
   extends: .register_stage
   needs:
-    - Build api
+    - Build app
   dependencies:
-    - Build api
+    - Build app
   variables:
     CONTEXT: ./packages/app
     DOCKER_BUILD_ARGS: >-
