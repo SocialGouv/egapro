@@ -59,6 +59,10 @@ Build app:
     - Install
   script:
     - yarn workspace app build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - packages/app/build
 
 Build api:
   extends: .base_yarn_script
@@ -71,5 +75,9 @@ Build api:
     - Install
   script:
     - yarn workspace api build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - packages/api/dist
 
 ...
