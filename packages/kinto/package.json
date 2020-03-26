@@ -12,6 +12,7 @@
     "@elastic/elasticsearch": "7.6.1",
     "@types/lodash": "4.14.149",
     "btoa": "1.2.1",
+    "date-fns": "^2.10.0",
     "dotenv": "8.2.0",
     "lodash": "4.17.15",
     "node-fetch": "2.6.0",
