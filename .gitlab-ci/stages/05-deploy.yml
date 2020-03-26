@@ -24,6 +24,8 @@ Deploy app:
     CONTEXT: app
     PORT: ${APP_PORT}
     VALUES_FILE: ./.k8s/app.values.yml
+    HELM_RENDER_ARGS: >-
+      --set autoscaling.enabled=false
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   except:
@@ -61,6 +63,8 @@ Deploy api:
     CONTEXT: api
     PORT: ${API_PORT}
     VALUES_FILE: ./.k8s/api.values.yml
+    HELM_RENDER_ARGS: >-
+      --set autoscaling.enabled=false
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   except:
