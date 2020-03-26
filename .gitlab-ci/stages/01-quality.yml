@@ -2,6 +2,7 @@
 
 Install:
   extends: .base_yarn
+  interruptible: true
   except:
     variables:
       - $PRODUCTION
