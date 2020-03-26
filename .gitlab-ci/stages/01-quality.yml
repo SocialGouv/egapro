@@ -9,9 +9,10 @@ Install:
     key: ${CI_COMMIT_REF_NAME}-${CI_JOB_NAME}
     paths:
       - yarn
-      - node_modules
-      - packages/api/node_modules
-      - packages/app/node_modules
+      # The full cache is too big for minio T_T
+      # - node_modules
+      # - packages/api/node_modules
+      # - packages/app/node_modules
   artifacts:
     expire_in: 1 day
     paths:
