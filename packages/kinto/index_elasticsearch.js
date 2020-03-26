@@ -161,38 +161,24 @@ const parseFrenchDate = dateString =>
     locale: "fr"
   });
 
-const isLatestRecord = (record, index, collection) => {
-  // find same declarations (siren, annee)
-  const similars = collection
-    .filter(record2 => record2.id !== record.id)
-    .filter(
-      record2 =>
-        record2.data.informationsEntreprise.siren ===
-        record.data.informationsEntreprise.siren
-    )
-    .filter(
-      record2 =>
-        record2.data.informations.anneeDeclaration ===
-        record.data.informations.anneeDeclaration
-    );
-  if (similars.length) {
-    // check if there are other in the future
-    const futureDeclarations = similars.filter(record2 =>
-      isAfter(
-        parseFrenchDate(record2.data.declaration.dateDeclaration),
-        parseFrenchDate(record.data.declaration.dateDeclaration)
-      )
-    );
-    if (futureDeclarations.length) {
-      return false;
+const getLatestRecords = (collection) =>
+  Object.values(collection.reduce((acc, record) => {
+    const siren = record.data.informationsEntreprise.siren;
+    const anneeDeclaration = record.data.informations.anneeDeclaration;
+    const key = `${siren}:${anneeDeclaration}`;
+    if (!acc[key]) {
+      acc[key] = record;
+      return acc;
     }
-  }
-  return true;
-};
+    const existingDateDeclaration = parseFrenchDate(acc[key].data.declaration.dateDeclaration);
+    const newDateDeclaration = parseFrenchDate(record.data.declaration.dateDeclaration);
+    if (isAfter(newDateDeclaration, existingDateDeclaration)) {
+      acc[key] = record;
+    }
+    return acc;
+  }, {}));
 
-const indexableDocuments = documents
-  .filter(isPublicEffectif)
-  .filter(isLatestRecord);
+const indexableDocuments = getLatestRecords(documents.filter(isPublicEffectif));
 
 console.log("documents: ", documents.length);
 console.log("indexableDocuments:", indexableDocuments.length);
