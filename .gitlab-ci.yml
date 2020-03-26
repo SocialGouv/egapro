@@ -112,7 +112,7 @@ stages:
   export K8S_NAMESPACE="${PROJECT}-feature-${BRANCH_HASH}"
 
 
-  if [[ -n $PRODUCTION ]]; then
+  if [[ -n "${PRODUCTION+x}" ]]; then
     export BRANCH_HASH=prod
     export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     export K8S_NAMESPACE="${PROJECT}"
@@ -141,5 +141,14 @@ stages:
 
 before_script:
   - *resolve_env
+
+Notify Success:
+  extends: .base_notify_success_stage
+  stage: Notify Finished Deployment
+  dependencies:
+    - Notify Starting Deployment
+  before_script:
+    - *resolve_env
+    - export HOST="https://${DOMAIN}"
 
 ...
