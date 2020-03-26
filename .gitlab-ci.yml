@@ -90,6 +90,7 @@ variables:
   POSTGRES_RESOURCE_MEMORY_REQUEST: "128Mi"
 
 stages:
+  - Install
   - Code Quality
   - Prepare
   - Registration
