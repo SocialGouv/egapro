@@ -12,15 +12,17 @@
 Register api image:
   <<: *register_stage
   variables:
-    CONTEXT: .
-    DOCKER_BUILD_ARGS: -f packages/api/Dockerfile
+    CONTEXT: ./packages/api
+    DOCKER_BUILD_ARGS: >-
+      --shm-size 256M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/api
 
 Register app image:
   <<: *register_stage
   variables:
-    CONTEXT: .
-    DOCKER_BUILD_ARGS: -f packages/app/Dockerfile
+    CONTEXT: ./packages/app
+    DOCKER_BUILD_ARGS: >-
+      --shm-size 512M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/app
 
 Register init kinto image:
