@@ -18,14 +18,9 @@ git:
   cache:
     yarn: true
     directories:
-      # NOTE(douglasduteil): explicit cache ${HOME}/.cache for cypress
-      # Needed for the Cypress binary
-      # see https://docs.cypress.io/guides/guides/continuous-integration.html#Travis
-      - ${HOME}/.cache
       - nodes_modules
       - packages/api/nodes_modules
       - packages/app/nodes_modules
-      - optional/e2e/node_modules
   before_install:
     - curl -o- -L https://yarnpkg.com/install.sh | bash
     - export PATH="$HOME/.yarn/bin:$PATH"
