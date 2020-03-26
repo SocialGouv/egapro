@@ -37,9 +37,10 @@ jobs:
         - yarn coverage
         # The following is for the functional tests
         - cp .env.sample .env && yarn start &
-        - yarn run wait-on http://localhost:4000/api/version
-        - yarn run wait-on http://localhost:3000
-        - yarn functional-tests
+        - cd optional/e2e
+        - yarn wait-on http://localhost:4000/api/version
+        - yarn wait-on http://localhost:3000
+        - yarn test
       after_script:
         - npx codecov
 
