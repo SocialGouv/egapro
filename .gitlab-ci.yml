@@ -92,7 +92,6 @@ variables:
 stages:
   - Install
   - Code Quality
-  - Prepare
   - Registration
   - Create Secret
   - Deploy
