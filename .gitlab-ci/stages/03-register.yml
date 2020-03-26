@@ -11,6 +11,8 @@
 
 Register api image:
   extends: .register_stage
+  dependencies:
+    - Build api
   variables:
     CONTEXT: ./packages/api
     DOCKER_BUILD_ARGS: >-
@@ -19,6 +21,8 @@ Register api image:
 
 Register app image:
   extends: .register_stage
+  dependencies:
+    - Build app
   variables:
     CONTEXT: ./packages/app
     DOCKER_BUILD_ARGS: >-

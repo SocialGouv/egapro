@@ -48,7 +48,7 @@ Test:
   script:
     - yarn coverage
 
-Build:
+Build app:
   extends: .base_yarn_script
   except:
     variables:
@@ -58,6 +58,18 @@ Build:
   needs:
     - Install
   script:
-    - yarn build
+    - yarn workspace app build
+
+Build api:
+  extends: .base_yarn_script
+  except:
+    variables:
+      - $PRODUCTION
+  dependencies:
+    - Install
+  needs:
+    - Install
+  script:
+    - yarn workspace api build
 
 ...
