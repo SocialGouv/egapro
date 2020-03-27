@@ -1,17 +1,11 @@
 ---
 
-Notify Starting Deployment:
-  extends: .base_notify_pending_stage
-  stage: Deploy
-
-#
 .deploy_with_hpa_chart: &deploy_with_hpa_chart
   stage: Deploy
   extends: .base_deploy_hpa_chart_stage
   dependencies: []
   variables: &deploy_with_hpa_chart_variables
     REGISTRY: $CI_REGISTRY_IMAGE
-#
 
 ############################################
 ####                APP                 ####
