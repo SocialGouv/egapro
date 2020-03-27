@@ -34,65 +34,72 @@ function AppLayout({ state, dispatch }: Props) {
       <Switch>
         <Route
           path="/consulter-index"
-          render={() => (<ConsulterIndex />)}
+          render={() => {
+            document.title = "Consultation Index Egapro";
+            return <ConsulterIndex />
+          }}
         />
-        <Route render={() => (
-          layoutType === "mobile" ?
-            <MobileLayout /> :
-            <div css={styles.horizontalLayout}>
-              <div css={styles.leftColumn}>
-                <Header />
-                <MainScrollView state={state}>
-                  <Switch>
-                    <Route
-                      path="/"
-                      exact
-                      render={props => <Home {...props} dispatch={dispatch} />}
-                    />
-                    <Route
-                      path="/simulateur/:code"
-                      render={({
-                                 match: {
-                                   params: { code }
-                                 }
-                               }) => (
-                        <Simulateur code={code} state={state} dispatch={dispatch} />
-                      )}
-                    />
-                    <Route
-                      path="/mentions-legales"
-                      exact
-                      render={props => (
-                        <MentionsLegales {...props} dispatch={dispatch} />
-                      )}
-                    />
-                    <Route
-                      path="/cgu"
-                      exact
-                      render={props => <CGU {...props} dispatch={dispatch} />}
-                    />
-                    <Route
-                      path="/politique-confidentialite"
-                      exact
-                      render={props => (
-                        <PolitiqueConfidentialite {...props} dispatch={dispatch} />
-                      )}
-                    />
-                    <Route component={PageNotFound} />
-                  </Switch>
-                </MainScrollView>
-              </div>
+        <Route render={() => {
+          document.title = "Index Egapro";
 
-              <div
-                  css={[
-                    styles.rightColumn,
-                    layoutType === "tablet" && styles.rightColumnTablet
-                  ]}
-                >
-                  <FAQ />
+          return (
+            layoutType === "mobile" ?
+              <MobileLayout /> :
+              <div css={styles.horizontalLayout}>
+                <div css={styles.leftColumn}>
+                  <Header />
+                  <MainScrollView state={state}>
+                    <Switch>
+                      <Route
+                        path="/"
+                        exact
+                        render={props => <Home {...props} dispatch={dispatch} />}
+                      />
+                      <Route
+                        path="/simulateur/:code"
+                        render={({
+                                   match: {
+                                     params: { code }
+                                   }
+                                 }) => (
+                          <Simulateur code={code} state={state} dispatch={dispatch} />
+                        )}
+                      />
+                      <Route
+                        path="/mentions-legales"
+                        exact
+                        render={props => (
+                          <MentionsLegales {...props} dispatch={dispatch} />
+                        )}
+                      />
+                      <Route
+                        path="/cgu"
+                        exact
+                        render={props => <CGU {...props} dispatch={dispatch} />}
+                      />
+                      <Route
+                        path="/politique-confidentialite"
+                        exact
+                        render={props => (
+                          <PolitiqueConfidentialite {...props} dispatch={dispatch} />
+                        )}
+                      />
+                      <Route component={PageNotFound} />
+                    </Switch>
+                  </MainScrollView>
+                </div>
+
+                <div
+                    css={[
+                      styles.rightColumn,
+                      layoutType === "tablet" && styles.rightColumnTablet
+                    ]}
+                  >
+                    <FAQ />
+                </div>
               </div>
-            </div>
-        )}/>
+          );
+        }}/>
       </Switch>
     </div>
   );
