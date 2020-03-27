@@ -1,12 +1,5 @@
 ---
 
-Create namespace:
-  stage: Registration
-  extends: .base_create_namespace_stage
-  except:
-    variables:
-      - $PRODUCTION
-
 Backup before deploy to prod:
   stage: Registration
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}

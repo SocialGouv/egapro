@@ -70,17 +70,17 @@ deployment:
     - name: ELASTIC_SEARCH_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: ${PROJECT}
+          name: elastic
           key: ELASTIC_SEARCH_PASSWORD
     - name: ELASTIC_SEARCH_URL
       valueFrom:
         secretKeyRef:
-          name: ${PROJECT}
+          name: elastic
           key: ELASTIC_SEARCH_URL
     - name: ELASTIC_SEARCH_USER
       valueFrom:
         secretKeyRef:
-          name: ${PROJECT}
+          name: elastic
           key: ELASTIC_SEARCH_USER
     - name: API_SENTRY_ENVIRONMENT
       value: "development"

@@ -4,10 +4,9 @@ include:
   - /.gitlab-ci/stages/01-quality.yml
   - /.gitlab-ci/stages/02-prepare.yml
   - /.gitlab-ci/stages/03-register.yml
-  - /.gitlab-ci/stages/04-secret.yml
-  - /.gitlab-ci/stages/05-deploy.yml
-  - /.gitlab-ci/stages/06-release.yml
-  - /.gitlab-ci/stages/07-notify.yml
+  - /.gitlab-ci/stages/04-deploy.yml
+  - /.gitlab-ci/stages/05-release.yml
+  - /.gitlab-ci/stages/06-notify.yml
   - project: SocialGouv/gitlab-ci-yml
     file: /base_docker_kubectl_image_stage.yml
     ref: v10.0.0
@@ -95,7 +94,6 @@ stages:
   - Install
   - Code Quality
   - Registration
-  - Create Secret
   - Deploy
   - Release
   - Notify Finished Deployment
@@ -150,5 +148,23 @@ Notify Success:
   before_script:
     - *resolve_env
     - export HOST="https://${DOMAIN}"
+
+Create namespace:
+  stage: Registration
+  extends: .base_create_namespace_stage
+  except:
+    variables:
+      - $PRODUCTION
+  after_script:
+    - *resolve_env
+    #
+    # Create egapro secret
+    - envsubst < ./.k8s/secret/secret-dev.yml > ./secret.yml
+    - kubectl apply -f ./secret.yml -n ${K8S_NAMESPACE} || true
+
+    #
+    # Copy elastic secret
+    - kubectl get secret elastic --namespace=${PROJECT}-secret -o yaml |
+      kubectl apply --namespace=${K8S_NAMESPACE} -f -
 
 ...
