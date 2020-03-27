@@ -1,5 +1,4 @@
 ---
-
 include:
   - /.gitlab-ci/stages/01-quality.yml
   - /.gitlab-ci/stages/02-prepare.yml
@@ -32,7 +31,6 @@ include:
   - project: SocialGouv/gitlab-ci-yml
     file: /base_notify_github_stage.yml
     ref: v10.0.0
-
 
 variables:
   PROJECT: egapro
@@ -72,8 +70,8 @@ variables:
   APP_RESOURCE_CPU_REQUEST: "5m"
   APP_RESOURCE_MEMORY_REQUEST: "128Mi"
   # Quotas Kinto
-  KINTO_RESOURCE_CPU_LIMIT: "100m"
-  KINTO_RESOURCE_MEMORY_LIMIT: "256Mi"
+  KINTO_RESOURCE_CPU_LIMIT: "1000m"
+  KINTO_RESOURCE_MEMORY_LIMIT: "2Gi"
   KINTO_RESOURCE_CPU_REQUEST: "10m"
   KINTO_RESOURCE_MEMORY_REQUEST: "128Mi"
   # Quotas job init Kinto
@@ -86,8 +84,9 @@ variables:
   MEMCACHED_RESOURCE_MEMORY_LIMIT: "64Mi"
   MEMCACHED_RESOURCE_CPU_REQUEST: "10m"
   MEMCACHED_RESOURCE_MEMORY_REQUEST: "32Mi"
-  POSTGRES_RESOURCE_CPU_LIMIT: "50m"
-  POSTGRES_RESOURCE_MEMORY_LIMIT: "256Mi"
+  # Quotas Postgres
+  POSTGRES_RESOURCE_CPU_LIMIT: "1000m"
+  POSTGRES_RESOURCE_MEMORY_LIMIT: "1Gi"
   POSTGRES_RESOURCE_CPU_REQUEST: "25m"
   POSTGRES_RESOURCE_MEMORY_REQUEST: "128Mi"
 
@@ -99,7 +98,6 @@ stages:
   - Deploy
   - Release
   - Notify Finished Deployment
-
 
 .resolve_env: &resolve_env |-
   set -x
