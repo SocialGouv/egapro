@@ -148,6 +148,15 @@ const ConsulterIndex: React.FC = () => {
             <a href="mailto: index@travail.gouv.fr">index@travail.gouv.fr</a>
           </Subtitle>
         </div>
+        <div>
+          <Subtitle>
+            <a
+              href="https://voxusagers.numerique.gouv.fr/Demarches/2442?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+            >
+              Donnez-nous votre avis
+            </a>
+          </Subtitle>
+        </div>
         <SocialNetworksLinks />
       </div>
     </div>
