@@ -24,6 +24,8 @@ Deploy app:
     CONTEXT: app
     PORT: ${APP_PORT}
     VALUES_FILE: ./.k8s/app.values.yml
+    HELM_RENDER_ARGS: >-
+      --set autoscaling.enabled=false
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   except:
@@ -61,6 +63,8 @@ Deploy api:
     CONTEXT: api
     PORT: ${API_PORT}
     VALUES_FILE: ./.k8s/api.values.yml
+    HELM_RENDER_ARGS: >-
+      --set autoscaling.enabled=false
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   except:
@@ -95,6 +99,7 @@ Deploy api (prod):
 #
 .deploy_postgres: &deploy_postgres
   stage: "Deploy"
+  dependencies: []
   image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:${HELM_VERSION}
   variables: &deploy_postgres_variables
     HELM_RENDER_ARGS: ""
@@ -148,6 +153,7 @@ Deploy postgres (prod):
 #
 .deploy_memcached: &deploy_memcached
   stage: "Deploy"
+  dependencies: []
   image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:${HELM_VERSION}
   variables: &deploy_memcached_variables
     HELM_RENDER_ARGS: ""
@@ -197,6 +203,7 @@ Deploy memcached (prod):
 #
 .deploy_kinto: &deploy_kinto
   stage: Deploy
+  dependencies: []
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   variables: &deploy_kinto_variables
     PORT: ${KINTO_PORT}
@@ -265,6 +272,7 @@ Deploy to production:
 
 Restore postgres:
   stage: Deploy
+  dependencies: []
   image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/helm:${HELM_VERSION}
   variables:
     HELM_RENDER_ARGS: ""

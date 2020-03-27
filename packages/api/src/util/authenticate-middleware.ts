@@ -5,7 +5,7 @@ interface AuthenticateOptions {
 }
 
 export const authenticate = ({
-  token
+  token,
 }: AuthenticateOptions): Koa.Middleware => (ctx, next) => {
   if (token === "" || token === undefined) {
     ctx.throw(501, "Server token is not set");

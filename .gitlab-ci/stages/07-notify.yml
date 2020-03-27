@@ -6,12 +6,6 @@ Notify Fail:
   dependencies:
     - Notify Starting Deployment
 
-Notify Success:
-  extends: .base_notify_success_stage
-  stage: Notify Finished Deployment
-  dependencies:
-    - Notify Starting Deployment
-
 Delete useless k8s namespaces:
   extends: .base_delete_useless_k8s_ns_stage
 

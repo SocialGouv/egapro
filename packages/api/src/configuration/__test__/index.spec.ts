@@ -15,7 +15,7 @@ const validEnv = {
   MAIL_PASSWORD: "MAIL_PASSWORD",
   MAIL_PORT: "465",
   MAIL_USERNAME: "MAIL_USERNAME",
-  MAIL_USE_TLS: "true"
+  MAIL_USE_TLS: "true",
 };
 
 it("should return the env configuration", () => {

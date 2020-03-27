@@ -1,4 +1,4 @@
 *records.json
 *.csv
 *.xlsx
-exports
+yarn.lock

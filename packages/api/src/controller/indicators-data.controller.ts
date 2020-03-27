@@ -24,7 +24,7 @@ export const updateIndicatorsData = async (ctx: Koa.Context) => {
   if (record.id !== id) {
     ctx.status = 422;
     ctx.body = {
-      message: `body.id not equal to id in params `
+      message: `body.id not equal to id in params `,
     };
   } else {
     const updatedRecord: IndicatorsData = await indicatorsDataService.update(
@@ -45,7 +45,7 @@ export const getIndicatorsData = async (ctx: Koa.Context) => {
   } else {
     ctx.status = 400;
     ctx.body = {
-      message: `indicators_data with id ${id} does not exist`
+      message: `indicators_data with id ${id} does not exist`,
     };
   }
 };
@@ -67,7 +67,7 @@ export const searchIndicatorsData = async (ctx: Koa.Context) => {
     from,
     order,
     size,
-    sortBy
+    sortBy,
   });
   const response = data.map((indicatorsData: IndicatorsData) =>
     pick(indicatorsData, [
@@ -80,13 +80,13 @@ export const searchIndicatorsData = async (ctx: Koa.Context) => {
       "data.informationsEntreprise.region",
       "data.informationsEntreprise.departement",
       "data.informations.anneeDeclaration",
-      "data.declaration.noteIndex"
+      "data.declaration.noteIndex",
     ])
   );
   ctx.status = 200;
   ctx.body = {
     data: response,
-    total
+    total,
   };
 };
 
@@ -98,7 +98,7 @@ export const sendStartEmail = async (ctx: Koa.Context) => {
   if (!record || !record.id) {
     ctx.status = 400;
     ctx.body = {
-      message: `indicators_data with id ${id} does not exist`
+      message: `indicators_data with id ${id} does not exist`,
     };
   } else {
     const email: Email = buildStartEmail(record.id, emailAddress);
@@ -119,7 +119,7 @@ export const sendSuccessEmail = async (ctx: Koa.Context) => {
   if (!record || !record.id) {
     ctx.status = 400;
     ctx.body = {
-      message: `indicators_data with id ${id} does not exist`
+      message: `indicators_data with id ${id} does not exist`,
     };
   } else {
     const companyName = record.data.informationsEntreprise.nomEntreprise || "";
@@ -160,7 +160,7 @@ function buildEmailHeader(emailAddress: string): EmailHeader {
     bcc: [],
     cci: [],
     subject,
-    to: [{ email: emailAddress, name: emailAddress }]
+    to: [{ email: emailAddress, name: emailAddress }],
   };
 }
 
@@ -178,7 +178,7 @@ Bien cordialement,
 Direction Générale du Travail`;
   return {
     ...buildEmailHeader(emailAddress),
-    bodyText: body
+    bodyText: body,
   };
 }
 
@@ -193,12 +193,12 @@ function buildSuccessEmail(
     bodyText: stringReplacer(successEmail.text, {
       anneeIndicateur,
       companyName,
-      id
+      id,
     }),
     html: stringReplacer(successEmail.html, {
       anneeIndicateur,
       companyName,
-      id
-    })
+      id,
+    }),
   };
 }

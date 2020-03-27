@@ -7,11 +7,11 @@ import {
   sendStartEmail,
   sendSuccessEmail,
   updateIndicatorsData,
-  versionController
+  versionController,
 } from "./controller";
 
 const routeOptions: Router.IRouterOptions = {
-  prefix: "/api"
+  prefix: "/api",
 };
 
 export const router = new Router(routeOptions);

@@ -1,11 +1,11 @@
 ---
-version: "3.2"
+version: "3.5"
 
 services:
   egapro-frontend:
     build:
-      context: .
-      dockerfile: ./packages/app/Dockerfile
+      context: ./packages/app
+      shm_size: 512M
     env_file: .env
     environment:
       REACT_APP_API_URL: http://egapro-api:4000
@@ -18,8 +18,8 @@ services:
 
   egapro-api:
     build:
-      context: .
-      dockerfile: ./packages/api/Dockerfile
+      context: ./packages/api
+      shm_size: 256M
     env_file: .env
     environment:
       KINTO_SERVER: kinto-server

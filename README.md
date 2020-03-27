@@ -12,6 +12,8 @@ Ajouter le fichier `.env` à la racine du projet:
 
 ```bash
 cp .env.sample .env
+cp yarn.lock packages/api
+cp yarn.lock packages/app
 ```
 
 Y modifier les variables d'environnement nécessaires, comme par exemple les
@@ -44,6 +46,19 @@ yarn start
 ```
 
 Et le site est accessible sur http://localhost:3000
+
+## Tests
+
+### Integration
+
+```bash
+$ yarn start
+#
+# In another terminal
+$ cd optional/e2e
+$ yarn
+$ yarn test
+```
 
 ## End Points
 

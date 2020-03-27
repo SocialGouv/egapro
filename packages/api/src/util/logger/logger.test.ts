@@ -17,7 +17,7 @@ describe("test the output of the logger", () => {
     sentry.captureException = jest.fn();
     // Mock the `configuration` module to fake an `apiSentryDsn`.
     jest.mock("../../configuration", () => ({
-      configuration: { apiSentryDsn: "some sentry dsn" }
+      configuration: { apiSentryDsn: "some sentry dsn" },
     }));
     // Only now require the logger module so it uses the mocks.
     logger = require("./").logger;

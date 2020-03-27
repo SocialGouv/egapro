@@ -1,14 +1,14 @@
 ---
 
 Create namespace:
-  stage: Prepare
+  stage: Registration
   extends: .base_create_namespace_stage
   except:
     variables:
       - $PRODUCTION
 
 Backup before deploy to prod:
-  stage: Prepare
+  stage: Registration
   image: ${CI_REGISTRY}/socialgouv/docker/kubectl:${KUBECTL_VERSION}
   script:
     - kubectl delete job 	backup-job -n ${K8S_NAMESPACE} || true;
