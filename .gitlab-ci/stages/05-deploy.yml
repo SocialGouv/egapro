@@ -283,8 +283,10 @@ Import Solen to consolidated export:
     variables:
       - $PRODUCTION
   script:
+    - kubectl delete job import-export -n ${K8S_NAMESPACE} || true;
     - envsubst < .k8s/import-export/import-export-job.yml > .k8s/import-export/import-export-job-${PROJECT}.yml
     - kubectl apply -f .k8s/import-export/import-export-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/import-export --timeout=180000s -n ${K8S_NAMESPACE}
 
 ###########################################
 ###          DEPLOY TO PROD K8S         ###
@@ -375,5 +377,3 @@ Restore postgres:
     refs:
       - tags
   when: manual
-
-...
