@@ -44,4 +44,10 @@ Register init kinto image:
       --shm-size 128M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
 
+Register import-export image:
+  extends: .register_stage
+  variables:
+    CONTEXT: packages/import-export
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/import-export
+
 ...

@@ -117,7 +117,6 @@ const startIndexing = async documents => {
     console.log("e", e.meta.body.error);
   }
 
-
   // update aliases
   console.log("Updating aliases");
   await client.indices.updateAliases({
@@ -156,22 +155,28 @@ const parseFrenchDate = dateString =>
     locale: "fr"
   });
 
-const getLatestRecords = (collection) =>
-  Object.values(collection.reduce((acc, record) => {
-    const siren = record.data.informationsEntreprise.siren;
-    const anneeDeclaration = record.data.informations.anneeDeclaration;
-    const key = `${siren}:${anneeDeclaration}`;
-    if (!acc[key]) {
-      acc[key] = record;
+const getLatestRecords = collection =>
+  Object.values(
+    collection.reduce((acc, record) => {
+      const siren = record.data.informationsEntreprise.siren;
+      const anneeDeclaration = record.data.informations.anneeDeclaration;
+      const key = `${siren}:${anneeDeclaration}`;
+      if (!acc[key]) {
+        acc[key] = record;
+        return acc;
+      }
+      const existingDateDeclaration = parseFrenchDate(
+        acc[key].data.declaration.dateDeclaration
+      );
+      const newDateDeclaration = parseFrenchDate(
+        record.data.declaration.dateDeclaration
+      );
+      if (isAfter(newDateDeclaration, existingDateDeclaration)) {
+        acc[key] = record;
+      }
       return acc;
-    }
-    const existingDateDeclaration = parseFrenchDate(acc[key].data.declaration.dateDeclaration);
-    const newDateDeclaration = parseFrenchDate(record.data.declaration.dateDeclaration);
-    if (isAfter(newDateDeclaration, existingDateDeclaration)) {
-      acc[key] = record;
-    }
-    return acc;
-  }, {}));
+    }, {})
+  );
 
 const indexableDocuments = getLatestRecords(documents.filter(isPublicEffectif));
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Requires an "/root/env" file with the following environment variables to be set (from the rancher secrets)
+# Requires the following environment variables to be set (from the rancher secrets)
 # - AZURE_STORAGE_ACCOUNT_NAME the azure file storage account name
 # - AZURE_STORAGE_ACCOUNT_KEY the azure file storage account key
 # - AZURE_STORAGE_ACCOUNT_NAME_EXPORT the azure file storage account name to upload the final exported file
@@ -12,6 +12,9 @@
 # - ES_ID the ID of the elasticsearch cloud ID
 # - ES_USERNAME the elasticsearch username
 # - ES_PASSWORD the elasticsearch password
+# And the following environments variables that aren't secrets
+# - POSTGRESQL_SERVER the adress of the "local" postgresql server to use
+# - BRANCH_NAME the name of the git branch to pull to get the import-export.sh scripts and others used here.
 #
 # It also requires the solen export files to be in the "exports" azure file share ...
 # - DNUM - EXPORT SOLEN 2019.xlsx
@@ -24,50 +27,12 @@
 # The script will then upload the final exports to the "exports" azure file share
 # - dump_declarations_records.json
 # - dump_declarations_records.xlsx
-#
-# For convenience, this script maybe be run at regular intervals using a cronjob:
-# $ apt install cron vim procps
-# $ /etc/init.d/cron start
-# $ crontab -e
-#       0 */2 * * * /root/init_pod.sh > /tmp/init_pod.sh.log 2>&1
+
 
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo ">>> RUNNING SCRIPT" `date`
 
 set -e
-
-# export the env variables listed at the top of this file
-. ./env
-
-echo ">>> APT UPDATE"
-apt update
-apt install -y vim python3 python3-pip wget curl httpie git postgresql-client
-
-# Install nodejs
-curl -sL https://deb.nodesource.com/setup_13.x | bash -
-apt-get install -y nodejs
-
-# Install azure cli
-if [ ! -f "/usr/bin/az" ]; then
-  curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-fi
-
-if [ ! -f "/usr/local/bin/pipenv" ]; then
-  pip3 install pipenv
-fi
-
-echo ">>> GIT CLONE EGAPRO"
-if [ ! -d "/root/egapro" ]; then
-  git clone https://github.com/SocialGouv/egapro
-fi
-
-if [ -d "/root/egapro" ]; then
-  cd egapro
-  git checkout script-init_pod-preprod-consolidation-donnees
-  git pull
-  cd ..
-fi
-
 
 echo ">>> DOWNLOAD 'LATEST' FILE CONTAINING LATEST DUMP NAME"
 az storage file download \
@@ -93,21 +58,21 @@ fi
 echo ">>> RESTORING LATEST BACKUP: $DUMP_NAME"
 # Change the preprod postgres user's password to be the prod's one (needed for the restore)
 set +e
-psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER USER postgres WITH PASSWORD '$PG_PROD_PASSWORD'"
+psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER USER postgres WITH PASSWORD '$PG_PROD_PASSWORD'"
 # Cleanup some stuff that will prevent the restore
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "DROP DATABASE egapro"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER DATABASE template1 OWNER TO postgres"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER DATABASE postgres OWNER TO postgres"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "DROP OWNED BY egapro"
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "DROP ROLE egapro"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "DROP DATABASE egapro"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER DATABASE template1 OWNER TO postgres"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER DATABASE postgres OWNER TO postgres"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "DROP OWNED BY egapro"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "DROP ROLE egapro"
 set -e
 # Restore the prod DB
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -f /tmp/latest_dump.sql
+PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -f /tmp/latest_dump.sql
 # Change the password back
-PGPASSWORD=$PG_PROD_PASSWORD psql -h egapro-preprod-pg-postgresql -U postgres -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
+PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
 
 echo ">>> RESTORE THE ORIGINAL KINTO ADMIN PASSWORD"
-echo '{"data": {"password": "'$KINTO_ADMIN_PASSWORD'"}}' | http PUT http://kinto:8888/v1/accounts/admin --verbose --auth 'admin:passw0rd'
+curl -X PUT -H "Content-Type: application/json" -d "{\"data\": {\"password\": \"$KINTO_ADMIN_PASSWORD\"}}" --user 'admin:passw0rd' http://kinto:8888/v1/accounts/admin
 
 
 echo ">>> DOWNLOADING 'DNUM - EXPORT SOLEN 2019.xlsx'"
@@ -127,22 +92,22 @@ az storage file download \
   --dest "/tmp/solen_export_2020.xlsx"
 
 
-cd egapro/packages/kinto/
+cd packages/import-export/
 
 echo ">>> INSTALLING PYTHON DEPENDENCIES"
-/usr/local/bin/pipenv install
+/app/venv/bin/pipenv install
 
 echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2019.xlsx"
-KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /usr/local/bin/pipenv run python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /app/venv/bin/pipenv run python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
 
 echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2020.xlsx"
-KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /usr/local/bin/pipenv run python solen.py /tmp/solen_export_2020.xlsx 2020 --progress
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /app/venv/bin/pipenv run python solen.py /tmp/solen_export_2020.xlsx 2020 --progress
 
 echo ">>> DUMPING DECLARATIONS TO /tmp/dump_declarations_records.json"
-KINTO_SERVER=http://kinto:8888/v1 /usr/local/bin/pipenv run python dump_records.py /tmp/dump_declarations_records.json
+KINTO_SERVER=http://kinto:8888/v1 /app/venv/bin/pipenv run python dump_records.py /tmp/dump_declarations_records.json
 
 echo ">>> CONVERTING /tmp/dump_declarations_records.json TO /tmp/dump_declarations_records.xlsx"
-/usr/local/bin/pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
+/app/venv/bin/pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
 
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.json"
