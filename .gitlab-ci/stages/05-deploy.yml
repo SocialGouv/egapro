@@ -223,10 +223,9 @@ Deploy kinto:
 
 Deploy kinto (preprod):
   <<: *deploy_kinto
-  #TODO: uncomment the following "only" when it's been tested so it only deploys on preprod
-  # only:
-  #   refs:
-  #     - tags
+  only:
+    refs:
+      - tags
   environment:
     name: ${DEV_ENVIRONMENT_NAME}
   except:
