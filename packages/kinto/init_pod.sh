@@ -49,44 +49,44 @@ apt-get install -y nodejs
 
 # Install azure cli
 if [ ! -f "/usr/bin/az" ]; then
-    curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+  curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 fi
 
 if [ ! -f "/usr/local/bin/pipenv" ]; then
-    pip3 install pipenv
+  pip3 install pipenv
 fi
 
 echo ">>> GIT CLONE EGAPRO"
 if [ ! -d "/root/egapro" ]; then
-    git clone https://github.com/SocialGouv/egapro
+  git clone https://github.com/SocialGouv/egapro
 fi
 
 if [ -d "/root/egapro" ]; then
-    cd egapro
-    git checkout script-init_pod-preprod-consolidation-donnees
-    git pull
-    cd ..
+  cd egapro
+  git checkout script-init_pod-preprod-consolidation-donnees
+  git pull
+  cd ..
 fi
 
 
 echo ">>> DOWNLOAD 'LATEST' FILE CONTAINING LATEST DUMP NAME"
 az storage file download \
-    --account-name $AZURE_STORAGE_ACCOUNT_NAME \
-    --account-key $AZURE_STORAGE_ACCOUNT_KEY \
-    --share-name "egapro-backup-restore" \
-    -p "LATEST" \
-    --dest "/tmp/"
+  --account-name $AZURE_STORAGE_ACCOUNT_NAME \
+  --account-key $AZURE_STORAGE_ACCOUNT_KEY \
+  --share-name "egapro-backup-restore" \
+  -p "LATEST" \
+  --dest "/tmp/"
 
 export DUMP_NAME=$(cat /tmp/LATEST)
 
 echo ">>> DOWNLOADING LATEST BACKUP: $DUMP_NAME"
 if [ ! -f "/tmp/$DUMP_NAME" ]; then
-    az storage file download \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY \
-        --share-name "egapro-backup-restore" \
-        -p "$DUMP_NAME" \
-        --dest "/tmp/latest_dump.sql"
+  az storage file download \
+    --account-name $AZURE_STORAGE_ACCOUNT_NAME \
+    --account-key $AZURE_STORAGE_ACCOUNT_KEY \
+    --share-name "egapro-backup-restore" \
+    -p "$DUMP_NAME" \
+    --dest "/tmp/latest_dump.sql"
 fi
 
 
@@ -112,19 +112,19 @@ echo '{"data": {"password": "'$KINTO_ADMIN_PASSWORD'"}}' | http PUT http://kinto
 
 echo ">>> DOWNLOADING 'DNUM - EXPORT SOLEN 2019.xlsx'"
 az storage file download \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
-        --share-name "exports" \
-        -p "DNUM - EXPORT SOLEN 2019.xlsx" \
-        --dest "/tmp/solen_export_2019.xlsx"
+  --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+  --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
+  --share-name "exports" \
+  -p "DNUM - EXPORT SOLEN 2019.xlsx" \
+  --dest "/tmp/solen_export_2019.xlsx"
 
 echo ">>> DOWNLOADING 'DNUM - EXPORT SOLEN 2020.xlsx'"
 az storage file download \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
-        --share-name "exports" \
-        -p "DNUM - EXPORT SOLEN 2020.xlsx" \
-        --dest "/tmp/solen_export_2020.xlsx"
+  --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+  --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
+  --share-name "exports" \
+  -p "DNUM - EXPORT SOLEN 2020.xlsx" \
+  --dest "/tmp/solen_export_2020.xlsx"
 
 
 cd egapro/packages/kinto/
@@ -147,17 +147,17 @@ echo ">>> CONVERTING /tmp/dump_declarations_records.json TO /tmp/dump_declaratio
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.json"
 az storage file upload \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
-        --share-name "exports" \
-        --source "/tmp/dump_declarations_records.json"
+  --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+  --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
+  --share-name "exports" \
+  --source "/tmp/dump_declarations_records.json"
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.xlsx"
 az storage file upload \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
-        --share-name "exports" \
-        --source "/tmp/dump_declarations_records.xlsx"
+  --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
+  --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
+  --share-name "exports" \
+  --source "/tmp/dump_declarations_records.xlsx"
 
 echo ">>> INSTALLING NODE DEPENDENCIES"
 /usr/bin/npm install
@@ -170,19 +170,19 @@ JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node prepare-xlsx-1000.js
 
 echo ">>> UPLOADING /tmp/dump_declarations_records_1000.xlsx"
 az storage blob upload \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
-        --container-name public \
-        --name "index-egalite-hf.xlsx" \
-        --file "/tmp/dump_declarations_records_1000.xlsx"
+  --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
+  --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
+  --container-name public \
+  --name "index-egalite-hf.xlsx" \
+  --file "/tmp/dump_declarations_records_1000.xlsx"
 
 echo ">>> UPLOADING /tmp/dump_declarations_records_1000.csv"
 az storage blob upload \
-        --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
-        --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
-        --container-name public \
-        --name "index-egalite-hf.csv" \
-        --file "/tmp/dump_declarations_records_1000.csv"
+  --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
+  --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
+  --container-name public \
+  --name "index-egalite-hf.csv" \
+  --file "/tmp/dump_declarations_records_1000.csv"
 
 echo ">>> DONE!"
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
