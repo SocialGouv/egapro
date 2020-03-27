@@ -4,6 +4,7 @@ kind: CronJob
 metadata:
   name: import-export-cron
 spec:
+  # Run every two hours
   schedule: "0 */2 * * *"
   jobTemplate:
     spec:
@@ -105,12 +106,11 @@ spec:
                 - sh
                 - -c
                 - |
-                  while ! nc -z kinto 8888;
-                          do
-                            echo sleeping;
-                            sleep 1;
-                          done;
-                          echo Connected!;
+                  while ! nc -z kinto 8888; do
+                    echo sleeping;
+                    sleep 1;
+                  done;
+                  echo Connected!;
       backoffLimit: 1
 
 ...

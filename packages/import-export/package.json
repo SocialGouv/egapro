@@ -1,14 +1,12 @@
 {
   "name": "import-export",
   "version": "2.9.1",
-  "main": "index.js",
   "author": "Incubateur des Ministères Sociaux <dsi-incubateur@sg.social.gouv.fr> (https://incubateur.social.gouv.fr)",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {},
   "dependencies": {
     "@elastic/elasticsearch": "7.6.1",
-    "@types/lodash": "4.14.149",
     "btoa": "1.2.1",
     "date-fns": "^2.10.0",
     "dotenv": "8.2.0",
@@ -17,6 +15,7 @@
     "react-table": "7.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "4.14.149",
     "@types/react-table": "7.0.12",
     "convert-array-to-csv": "^1.0.10",
     "xlsx": "^0.15.5"
