@@ -111,17 +111,12 @@ const startIndexing = async documents => {
     doc
   ]);
 
-  //  console.log("body", body);
   try {
     const res = await client.bulk({ refresh: true, body });
-    //console.log("res", res);
   } catch (e) {
     console.log("e", e.meta.body.error);
   }
 
-  // if (bulkResponse.errors) {
-  //   console.log(bulkResponse.errors);
-  // }
 
   // update aliases
   console.log("Updating aliases");
