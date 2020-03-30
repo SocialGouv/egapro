@@ -39,7 +39,8 @@ Register app image:
 Register init kinto image:
   extends: .register_stage
   variables:
-    CONTEXT: packages/kinto
+    CONTEXT: ./
+    DOCKERFILE: ./packages/kinto/Dockerfile
     DOCKER_BUILD_ARGS: >-
       --shm-size 128M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
