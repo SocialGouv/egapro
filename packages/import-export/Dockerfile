@@ -34,6 +34,5 @@ ENTRYPOINT git clone https://github.com/SocialGouv/egapro && \
     cd egapro && \
     git fetch && \
     git checkout ${BRANCH_NAME} && \
-    git pull && \
     chmod +x packages/import-export/import-export.sh && \
     packages/import-export/import-export.sh
