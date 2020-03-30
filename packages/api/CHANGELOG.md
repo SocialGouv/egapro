@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.9.2](https://github.com/SocialGouv/egapro/compare/v2.9.1...v2.9.2) (2020-03-30)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([#577](https://github.com/SocialGouv/egapro/issues/577)) ([d157773](https://github.com/SocialGouv/egapro/commit/d157773))
+* **deps:** update dependency @elastic/elasticsearch to v7.6.1 ([#594](https://github.com/SocialGouv/egapro/issues/594)) ([35194f0](https://github.com/SocialGouv/egapro/commit/35194f0))
+* **deps:** update dependency koa-bodyparser to v4.3.0 ([#618](https://github.com/SocialGouv/egapro/issues/618)) ([cd695ce](https://github.com/SocialGouv/egapro/commit/cd695ce))
+* **deps:** update dependency koa-router to v8.0.8 ([#531](https://github.com/SocialGouv/egapro/issues/531)) ([ffbf0aa](https://github.com/SocialGouv/egapro/commit/ffbf0aa))
+* **deps:** update dependency nodemailer to v6.4.4 ([#553](https://github.com/SocialGouv/egapro/issues/553)) ([909df2e](https://github.com/SocialGouv/egapro/commit/909df2e))
+* **deps:** update dependency nodemailer to v6.4.5 ([#586](https://github.com/SocialGouv/egapro/issues/586)) ([7bad02d](https://github.com/SocialGouv/egapro/commit/7bad02d))
+* **deps:** update dependency nodemailer to v6.4.6 ([#610](https://github.com/SocialGouv/egapro/issues/610)) ([2dc8cc4](https://github.com/SocialGouv/egapro/commit/2dc8cc4))
+* **deps:** update dependency pino to v5.17.0 ([#581](https://github.com/SocialGouv/egapro/issues/581)) ([cc5a88f](https://github.com/SocialGouv/egapro/commit/cc5a88f))
+* **deps:** update dependency react-table to v7.0.0 ([#585](https://github.com/SocialGouv/egapro/issues/585)) ([6299e43](https://github.com/SocialGouv/egapro/commit/6299e43))
+* **deps:** update sentry monorepo to v5.13.2 ([#543](https://github.com/SocialGouv/egapro/issues/543)) ([ed733e6](https://github.com/SocialGouv/egapro/commit/ed733e6))
+* fix search being too wide ([#574](https://github.com/SocialGouv/egapro/issues/574)) ([be29f3e](https://github.com/SocialGouv/egapro/commit/be29f3e))
+* **deps:** update sentry monorepo to v5.14.0 ([#587](https://github.com/SocialGouv/egapro/issues/587)) ([7857208](https://github.com/SocialGouv/egapro/commit/7857208))
+* **deps:** update sentry monorepo to v5.14.1 ([#590](https://github.com/SocialGouv/egapro/issues/590)) ([20c240c](https://github.com/SocialGouv/egapro/commit/20c240c))
+* **deps:** update sentry monorepo to v5.14.2 ([#593](https://github.com/SocialGouv/egapro/issues/593)) ([cd06db4](https://github.com/SocialGouv/egapro/commit/cd06db4))
+* **deps:** update sentry monorepo to v5.15.0 ([#609](https://github.com/SocialGouv/egapro/issues/609)) ([d568fb6](https://github.com/SocialGouv/egapro/commit/d568fb6))
+* **egapro:** suppression de l'utilisation du conditional chaining (pas compatible react-scripts) ([#583](https://github.com/SocialGouv/egapro/issues/583)) ([e804d8e](https://github.com/SocialGouv/egapro/commit/e804d8e))
+
+
+
+
+
 ## [2.9.1](https://github.com/SocialGouv/egapro/compare/v2.9.0...v2.9.1) (2020-03-06)
 
 **Note:** Version bump only for package api

@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.9.2](https://github.com/SocialGouv/egapro/compare/v2.9.1...v2.9.2) (2020-03-30)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([#577](https://github.com/SocialGouv/egapro/issues/577)) ([d157773](https://github.com/SocialGouv/egapro/commit/d157773))
+* **deps:** update dependency @elastic/elasticsearch to v7.6.1 ([#594](https://github.com/SocialGouv/egapro/issues/594)) ([35194f0](https://github.com/SocialGouv/egapro/commit/35194f0))
+* **deps:** update dependency react-table to v7.0.0 ([#585](https://github.com/SocialGouv/egapro/issues/585)) ([6299e43](https://github.com/SocialGouv/egapro/commit/6299e43))
+* **import:** amélioration de l'import solen ([#524](https://github.com/SocialGouv/egapro/issues/524)) ([0addf1d](https://github.com/SocialGouv/egapro/commit/0addf1d))
+
+
+
+
+
 ## [2.9.1](https://github.com/SocialGouv/egapro/compare/v2.9.0...v2.9.1) (2020-03-06)
 
 **Note:** Version bump only for package kinto

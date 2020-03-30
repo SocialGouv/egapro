@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.9.2](https://github.com/SocialGouv/egapro/compare/v2.9.1...v2.9.2) (2020-03-30)
+
+
+### Bug Fixes
+
+* **app:** utilisation de createProxyMiddleware suite à maj de ht… ([#626](https://github.com/SocialGouv/egapro/issues/626)) ([f811bf9](https://github.com/SocialGouv/egapro/commit/f811bf9))
+* **deps:** pin dependencies ([#577](https://github.com/SocialGouv/egapro/issues/577)) ([d157773](https://github.com/SocialGouv/egapro/commit/d157773))
+* **deps:** update dependency @elastic/elasticsearch to v7.6.1 ([#594](https://github.com/SocialGouv/egapro/issues/594)) ([35194f0](https://github.com/SocialGouv/egapro/commit/35194f0))
+* **deps:** update dependency @emotion/core to v10.0.28 ([#579](https://github.com/SocialGouv/egapro/issues/579)) ([68fe52b](https://github.com/SocialGouv/egapro/commit/68fe52b))
+* **deps:** update dependency date-fns to v2.10.0 ([#561](https://github.com/SocialGouv/egapro/issues/561)) ([78b9d96](https://github.com/SocialGouv/egapro/commit/78b9d96))
+* **deps:** update dependency date-fns to v2.11.0 ([#595](https://github.com/SocialGouv/egapro/issues/595)) ([26a6c0c](https://github.com/SocialGouv/egapro/commit/26a6c0c))
+* **deps:** update dependency fuse.js to v3.6.1 ([#580](https://github.com/SocialGouv/egapro/issues/580)) ([7ecd0b8](https://github.com/SocialGouv/egapro/commit/7ecd0b8))
+* **deps:** update dependency http-proxy-middleware to v0.21.0 ([#532](https://github.com/SocialGouv/egapro/issues/532)) ([264e8fb](https://github.com/SocialGouv/egapro/commit/264e8fb))
+* **deps:** update dependency http-proxy-middleware to v1 ([#535](https://github.com/SocialGouv/egapro/issues/535)) ([ebf3aad](https://github.com/SocialGouv/egapro/commit/ebf3aad))
+* **deps:** update dependency http-proxy-middleware to v1.0.2 ([#598](https://github.com/SocialGouv/egapro/issues/598)) ([99f33d2](https://github.com/SocialGouv/egapro/commit/99f33d2))
+* **deps:** update dependency http-proxy-middleware to v1.0.3 ([#600](https://github.com/SocialGouv/egapro/issues/600)) ([5aac745](https://github.com/SocialGouv/egapro/commit/5aac745))
+* **deps:** update dependency react-datepicker to v2.14.0 ([#552](https://github.com/SocialGouv/egapro/issues/552)) ([4537cc2](https://github.com/SocialGouv/egapro/commit/4537cc2))
+* **deps:** update dependency react-datepicker to v2.14.1 ([#614](https://github.com/SocialGouv/egapro/issues/614)) ([3fcc723](https://github.com/SocialGouv/egapro/commit/3fcc723))
+* **deps:** update dependency react-scripts to v3.4.0 ([#529](https://github.com/SocialGouv/egapro/issues/529)) ([93e3e22](https://github.com/SocialGouv/egapro/commit/93e3e22))
+* **deps:** update dependency react-table to v7.0.0 ([#585](https://github.com/SocialGouv/egapro/issues/585)) ([6299e43](https://github.com/SocialGouv/egapro/commit/6299e43))
+* modification du title de la page de consultation en Consultation Index Egapro ([#634](https://github.com/SocialGouv/egapro/issues/634)) ([f7a6490](https://github.com/SocialGouv/egapro/commit/f7a6490))
+* **deps:** update react monorepo to v16.13.0 ([#582](https://github.com/SocialGouv/egapro/issues/582)) ([bdb5085](https://github.com/SocialGouv/egapro/commit/bdb5085))
+* **deps:** update react monorepo to v16.13.1 ([#608](https://github.com/SocialGouv/egapro/issues/608)) ([b628504](https://github.com/SocialGouv/egapro/commit/b628504))
+* **egapro:** suppression de l'utilisation du conditional chaining (pas compatible react-scripts) ([#583](https://github.com/SocialGouv/egapro/issues/583)) ([e804d8e](https://github.com/SocialGouv/egapro/commit/e804d8e))
+
+
+
+
+
 ## [2.9.1](https://github.com/SocialGouv/egapro/compare/v2.9.0...v2.9.1) (2020-03-06)
 
 **Note:** Version bump only for package app
