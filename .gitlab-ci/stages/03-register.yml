@@ -44,6 +44,7 @@ Register init kinto image:
     DOCKER_BUILD_ARGS: >-
       --shm-size 128M
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/kinto
+  before_script:
 
 Register import-export image:
   extends: .register_stage
