@@ -58,7 +58,8 @@ services:
 
   init-kinto:
     build:
-      context: ./packages/kinto/
+      context: ./
+      dockerfile: ./packages/kinto/Dockerfile
       shm_size: 128M
     env_file: .env
     links:
