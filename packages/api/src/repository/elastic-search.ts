@@ -33,6 +33,7 @@ export const request = async (
         query: {
           match: {
             "data.informationsEntreprise.nomEntreprise": {
+              operator: "and",
               query: nomEntreprise,
             },
           },
