@@ -32,7 +32,8 @@ RUN set -ex \
 # Clone egapro, then checkout the proper branch to run the script
 ENTRYPOINT git clone https://github.com/SocialGouv/egapro && \
     cd egapro && \
-    git checkout ${BRANCH_NAME} && \
+    git fetch && \
+    git checkout --track origin/${BRANCH_NAME} && \
     git pull && \
     chmod +x packages/import-export/import-export.sh && \
     packages/import-export/import-export.sh
