@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.9.4](https://github.com/SocialGouv/egapro/compare/v2.9.3...v2.9.4) (2020-03-30)
+
+
+### Bug Fixes
+
+* **docker:** fix local docker-compose ([#637](https://github.com/SocialGouv/egapro/issues/637)) ([5a4f1f3](https://github.com/SocialGouv/egapro/commit/5a4f1f3))
+
+
+
+
+
 ## [2.9.3](https://github.com/SocialGouv/egapro/compare/v2.9.2...v2.9.3) (2020-03-30)
 
 **Note:** Version bump only for package kinto
