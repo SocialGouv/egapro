@@ -48,7 +48,7 @@ jobs:
 
         - cd optional/e2e
         - yarn --frozen-lockfile
-        - yarn wait-on http://localhost:4000/api/version
+        - yarn wait-on http://admin:passw0rd@localhost:8888/v1/buckets/egapro
         - yarn wait-on http://localhost:3000
         - yarn test
       after_script:
