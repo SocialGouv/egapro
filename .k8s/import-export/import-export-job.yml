@@ -85,7 +85,7 @@ spec:
             - name: POSTGRESQL_SERVER
               value: ${PROJECT}-${BRANCH_HASH}-pg-postgresql
             - name: BRANCH_NAME
-              value: ${BRANCH_NAME}
+              value: ${CI_COMMIT_REF_NAME}
       restartPolicy: Never
       initContainers:
         - name: wait-for-kinto
