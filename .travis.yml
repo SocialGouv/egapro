@@ -44,7 +44,6 @@ jobs:
         - cp .env.sample .env &&
           cp yarn.lock packages/api &&
           cp yarn.lock packages/app &&
-          cp yarn.lock packages/kinto &&
           yarn start &
 
         - cd optional/e2e
