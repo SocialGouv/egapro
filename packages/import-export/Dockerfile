@@ -2,15 +2,17 @@ FROM mcr.microsoft.com/azure-cli:2.3.0
 
 WORKDIR /app
 
-COPY ./import-export.sh /app/import-export.sh
-COPY ./frozen-requirements.txt /app/frozen-requirements.txt
-COPY ./solen.py /app/solen.py
-COPY ./json-schema.json /app/json-schema.json
-COPY ./dump_records.py /app/dump_records.py
-COPY ./json_to_xlsx.py /app/json_to_xlsx.py
-COPY ./package.json /app/package.json
-COPY ./index_elasticsearch.js /app/index_elasticsearch.js
-COPY ./prepare-xlsx-1000.js /app/prepare-xlsx-1000.js
+COPY \
+  ./dump_records.py \
+  ./frozen-requirements.txt \
+  ./import-export.sh \
+  ./index_elasticsearch.js \
+  ./json_to_xlsx.py \
+  ./json-schema.json \
+  ./package.json \
+  ./prepare-xlsx-1000.js \
+  ./solen.py \
+  /app/
 
 RUN set -ex \
   \
