@@ -1,0 +1,8 @@
+dpath
+jsonschema
+progress
+kinto-http
+pandas
+xlrd
+requests
+xlsxwriter
