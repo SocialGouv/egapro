@@ -34,6 +34,12 @@ echo ">>> RUNNING SCRIPT" `date`
 
 set -e
 
+echo ">>> INSTALLING PYTHON DEPENDENCIES"
+/app/venv/bin/pip install -r frozen-requirements.txt
+
+echo ">>> INSTALLING NODE DEPENDENCIES"
+yarn --frozen-lockfile
+
 echo ">>> DOWNLOAD 'LATEST' FILE CONTAINING LATEST DUMP NAME"
 az storage file download \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME \
@@ -91,10 +97,6 @@ az storage file download \
   -p "DNUM - EXPORT SOLEN 2020.xlsx" \
   --dest "/tmp/solen_export_2020.xlsx"
 
-
-echo ">>> INSTALLING PYTHON DEPENDENCIES"
-/app/venv/bin/pip install -r frozen-requirements.txt
-
 echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2019.xlsx"
 KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /app/venv/bin/python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
 
@@ -121,9 +123,6 @@ az storage file upload \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
   --share-name "exports" \
   --source "/tmp/dump_declarations_records.xlsx"
-
-echo ">>> INSTALLING NODE DEPENDENCIES"
-yarn --frozen-lockfile
 
 echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
 JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.js
