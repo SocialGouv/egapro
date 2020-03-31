@@ -92,22 +92,20 @@ az storage file download \
   --dest "/tmp/solen_export_2020.xlsx"
 
 
-cd packages/import-export/
-
 echo ">>> INSTALLING PYTHON DEPENDENCIES"
-/app/venv/bin/pipenv install
+pipenv install
 
 echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2019.xlsx"
-KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /app/venv/bin/pipenv run python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas pipenv run python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
 
 echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2020.xlsx"
-KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /app/venv/bin/pipenv run python solen.py /tmp/solen_export_2020.xlsx 2020 --progress
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas pipenv run python solen.py /tmp/solen_export_2020.xlsx 2020 --progress
 
 echo ">>> DUMPING DECLARATIONS TO /tmp/dump_declarations_records.json"
-KINTO_SERVER=http://kinto:8888/v1 /app/venv/bin/pipenv run python dump_records.py /tmp/dump_declarations_records.json
+KINTO_SERVER=http://kinto:8888/v1 pipenv run python dump_records.py /tmp/dump_declarations_records.json
 
 echo ">>> CONVERTING /tmp/dump_declarations_records.json TO /tmp/dump_declarations_records.xlsx"
-/app/venv/bin/pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
+pipenv run python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
 
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.json"
@@ -125,7 +123,7 @@ az storage file upload \
   --source "/tmp/dump_declarations_records.xlsx"
 
 echo ">>> INSTALLING NODE DEPENDENCIES"
-/usr/bin/npm install
+npm install
 
 echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
 JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.js

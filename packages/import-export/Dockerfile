@@ -3,6 +3,15 @@ FROM mcr.microsoft.com/azure-cli:2.3.0
 WORKDIR /app
 
 COPY ./import-export.sh /app/import-export.sh
+COPY ./Pipfile /app/Pipfile
+COPY ./Pipfile.lock /app/Pipfile.lock
+COPY ./solen.py /app/solen.py
+COPY ./json-schema.json /app/json-schema.json
+COPY ./dump_records.py /app/dump_records.py
+COPY ./json_to_xlsx.py /app/json_to_xlsx.py
+COPY ./package.json /app/package.json
+COPY ./index_elasticsearch.js /app/index_elasticsearch.js
+COPY ./prepare-xlsx-1000.js /app/prepare-xlsx-1000.js
 
 RUN set -ex \
   \
@@ -10,6 +19,6 @@ RUN set -ex \
   \
   && pip install pipenv \
   \
-  && apk add --no-cache nodejs=~12
+  && apk add --no-cache nodejs=~12 npm=~6
 
 ENTRYPOINT ["/app/import-export.sh"]
