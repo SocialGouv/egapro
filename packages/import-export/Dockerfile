@@ -24,6 +24,8 @@ RUN set -ex \
     python3 \
     python3-venv \
   \
+  # pip
+  && python3 -m venv /app/venv \
   # node and yarn
   && curl -sL https://deb.nodesource.com/setup_13.x | bash - && apt-get install -y nodejs \
   && curl -o- -L https://yarnpkg.com/install.sh | bash \

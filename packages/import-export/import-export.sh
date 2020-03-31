@@ -93,19 +93,19 @@ az storage file download \
 
 
 echo ">>> INSTALLING PYTHON DEPENDENCIES"
-pip install -r frozen-requirements.txt
+/app/venv/bin/pip install -r frozen-requirements.txt
 
 echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2019.xlsx"
-KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /app/venv/bin/python solen.py /tmp/solen_export_2019.xlsx 2019 --progress
 
 echo ">>> IMPORTING XLSX EXPORT FROM SOLEN: /tmp/solen_export_2020.xlsx"
-KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas python solen.py /tmp/solen_export_2020.xlsx 2020 --progress
+KINTO_SERVER=http://kinto:8888/v1 KINTO_COLLECTION=indicators_datas /app/venv/bin/python solen.py /tmp/solen_export_2020.xlsx 2020 --progress
 
 echo ">>> DUMPING DECLARATIONS TO /tmp/dump_declarations_records.json"
-KINTO_SERVER=http://kinto:8888/v1 python dump_records.py /tmp/dump_declarations_records.json
+KINTO_SERVER=http://kinto:8888/v1 /app/venv/bin/python dump_records.py /tmp/dump_declarations_records.json
 
 echo ">>> CONVERTING /tmp/dump_declarations_records.json TO /tmp/dump_declarations_records.xlsx"
-python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
+/app/venv/bin/python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
 
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.json"
