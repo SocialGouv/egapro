@@ -17,7 +17,8 @@ RUN set -ex \
   \
   && apk add --no-cache postgresql-client=~12 \
   \
-  && pip install pipenv \
+  && apk add --no-cache python3=~3.8 \
+  && pip3.8 install pipenv \
   \
   && apk add --no-cache nodejs=~12 npm=~12
 
