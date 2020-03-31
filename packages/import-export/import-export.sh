@@ -123,7 +123,7 @@ az storage file upload \
   --source "/tmp/dump_declarations_records.xlsx"
 
 echo ">>> INSTALLING NODE DEPENDENCIES"
-npm install
+yarn --frozen-lockfile
 
 echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
 JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.js

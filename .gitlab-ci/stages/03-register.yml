@@ -49,7 +49,9 @@ Register init kinto image:
 Register import-export image:
   extends: .register_stage
   variables:
-    CONTEXT: packages/import-export
+    CONTEXT: ./
+    DOCKER_BUILD_ARGS: >-
+      -f ./packages/import-export/Dockerfile
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/import-export
 
 ...

@@ -1,3 +1,7 @@
+# This Dockerfile must be built from the root folder to give access to the yarn.lock file:
+# in the egapro/ folder:
+# $ docker build -f packages/kinto/Dockerfile .
+
 FROM node:10.15.3-alpine
 
 WORKDIR /app
