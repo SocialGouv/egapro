@@ -3,8 +3,7 @@ FROM mcr.microsoft.com/azure-cli:2.3.0
 WORKDIR /app
 
 COPY ./import-export.sh /app/import-export.sh
-COPY ./Pipfile /app/Pipfile
-COPY ./Pipfile.lock /app/Pipfile.lock
+COPY ./frozen-requirements.txt /app/frozen-requirements.txt
 COPY ./solen.py /app/solen.py
 COPY ./json-schema.json /app/json-schema.json
 COPY ./dump_records.py /app/dump_records.py
@@ -16,9 +15,6 @@ COPY ./prepare-xlsx-1000.js /app/prepare-xlsx-1000.js
 RUN set -ex \
   \
   && apk add --no-cache postgresql-client=~12 \
-  \
-  && apk add --no-cache python3=~3.8 \
-  && pip3.8 install pipenv \
   \
   && apk add --no-cache nodejs=~12 npm=~12
 
