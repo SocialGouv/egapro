@@ -32,7 +32,6 @@ RUN set -ex \
   && curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
   \
   # cleanup
-  && apt-get remove --purge -y curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
