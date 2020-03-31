@@ -1,22 +1,18 @@
-# This Dockerfile must be built from the root folder to give access to the yarn.lock file:
-# in the egapro/ folder:
-# $ docker build -f packages/import-export/Dockerfile .
-
 FROM debian:stable-slim
 
 WORKDIR /app
 
 COPY \
   ./yarn.lock \
-  ./packages/import-export/dump_records.py \
-  ./packages/import-export/frozen-requirements.txt \
-  ./packages/import-export/import-export.sh \
-  ./packages/import-export/index_elasticsearch.js \
-  ./packages/import-export/json-schema.json \
-  ./packages/import-export/json_to_xlsx.py \
-  ./packages/import-export/package.json \
-  ./packages/import-export/prepare-xlsx-1000.js \
-  ./packages/import-export/solen.py \
+  ./dump_records.py \
+  ./frozen-requirements.txt \
+  ./import-export.sh \
+  ./index_elasticsearch.js \
+  ./json-schema.json \
+  ./json_to_xlsx.py \
+  ./package.json \
+  ./prepare-xlsx-1000.js \
+  ./solen.py \
   /app/
 
 RUN set -ex \
