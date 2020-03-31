@@ -19,6 +19,6 @@ RUN set -ex \
   \
   && pip install pipenv \
   \
-  && apk add --no-cache nodejs=~12 npm=~6
+  && apk add --no-cache nodejs=~12 npm=~12
 
 ENTRYPOINT ["/app/import-export.sh"]
