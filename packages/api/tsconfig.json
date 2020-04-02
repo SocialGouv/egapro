@@ -16,8 +16,7 @@
     "rootDir": "src",
     "sourceMap": true,
     "strict": true,
-    "target": "esnext",
-    "types": ["jest"]
+    "target": "esnext"
   },
   "files": ["./src/server.ts"]
 }
