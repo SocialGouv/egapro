@@ -8,7 +8,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "functional-tests": "cypress run",
-    "migrate": "ts-node -O '{\"module\": \"commonjs\"}' src/migrations/533-initial-migrations.ts"
+    "migrate": "ts-node -O '{\"module\": \"commonjs\"}' src/migrations/*.ts"
   },
   "proxy": "http://localhost:4000",
   "dependencies": {
