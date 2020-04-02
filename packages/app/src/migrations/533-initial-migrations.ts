@@ -11,8 +11,15 @@ import {
 global.fetch = fetch;
 
 async function migrate() {
-  const credentials = Buffer.from("admin:passw0rd").toString("base64");
+  await migrateTotalNombreSalaries();
 
+  await migrateEcartTauxRemunerationCSP();
+
+  await migrateEcartTauxRemunerationCoef();
+}
+
+async function getData(filters: { [key: string]: string | boolean | number }) {
+  const credentials = Buffer.from("admin:passw0rd").toString("base64");
   const client = new KintoClient("http://localhost:8888/v1", {
     headers: {
       Authorization: "Basic " + credentials
@@ -22,64 +29,92 @@ async function migrate() {
   let { data, hasNextPage, next } = await client
     .bucket("egapro")
     .collection("indicators_datas")
-    .listRecords({
-      filters: {
-        "has_data.effectif.nombreSalariesTotal": false,
-        "data.declaration.formValidated": "Valid"
-      }
-    });
+    .listRecords({ filters });
   while (hasNextPage) {
     const result = await next();
     data = data.concat(result.data);
     hasNextPage = result.hasNextPage;
   }
+  return [data, client.bucket("egapro").collection("indicators_datas")];
+}
+
+async function migrateTotalNombreSalaries() {
+  console.log(">>> updating data.effectif.totalNombreSalaries");
+  const [data, updateRecords] = await getData({
+    "has_data.effectif.nombreSalariesTotal": false,
+    "data.declaration.formValidated": "Valid"
+  });
   console.log("number of records to migrate", data.length);
 
-  data.map((dataWrapper: any) => {
-    let record = dataWrapper.data;
-    console.log("data", record.effectif);
+  updateRecords.batch((batch: any) => {
+    data.map(({ data: record }: any) => {
+      const {
+        totalNombreSalariesHomme,
+        totalNombreSalariesFemme
+      } = totalNombreSalaries(record.effectif.nombreSalaries);
+      const total =
+        totalNombreSalariesHomme !== undefined &&
+        totalNombreSalariesFemme !== undefined
+          ? totalNombreSalariesHomme + totalNombreSalariesFemme
+          : undefined;
+      record = {
+        ...record,
+        effectif: { ...record.effectif, totalNombreSalaries: total }
+      };
+      // TODO: uncomment
+      // batch.updateRecord(record);
+    });
+  });
+}
 
-    console.log(">>> updating data.effectif.totalNombreSalaries");
-    const {
-      totalNombreSalariesHomme,
-      totalNombreSalariesFemme
-    } = totalNombreSalaries(record.effectif.nombreSalaries);
-    const total =
-      totalNombreSalariesHomme !== undefined &&
-      totalNombreSalariesFemme !== undefined
-        ? totalNombreSalariesHomme + totalNombreSalariesFemme
-        : undefined;
-    record = {
-      ...record,
-      effectif: { ...record.effectif, totalNombreSalaries: total }
-    };
+async function migrateEcartTauxRemunerationCSP() {
+  console.log(
+    ">>> updating data.indicateurUn.remunerationAnnuelle.[].ecartTauxRemuneration"
+  );
+  const [data, updateRecords] = await getData({
+    "has_data.effectif.nombreSalariesTotal": false,
+    "data.declaration.formValidated": "Valid"
+  });
+  console.log("number of records to migrate", data.length);
 
-    console.log(
-      ">>> updating data.indicateurUn.remunerationAnnuelle.[].ecartTauxRemuneration"
-    );
-    const remunerationAnnuelle = calculEcartTauxRemunerationParTrancheAgeCSP(
-      record.indicateurUn.remunerationAnnuelle
-    );
-    record = {
-      ...record,
-      indicateurUn: { ...record.indicateurUn, remunerationAnnuelle }
-    };
+  updateRecords.batch((batch: any) => {
+    data.map(({ data: record }: any) => {
+      const remunerationAnnuelle = calculEcartTauxRemunerationParTrancheAgeCSP(
+        record.indicateurUn.remunerationAnnuelle
+      );
+      record = {
+        ...record,
+        indicateurUn: { ...record.indicateurUn, remunerationAnnuelle }
+      };
+      // TODO: uncomment
+      // batch.updateRecord(record);
+    });
+  });
+}
 
-    console.log(
-      ">>> updating data.indicateurUn.coefficient.x.ecartTauxRemuneration"
-    );
-    const coefficient = calculEcartTauxRemunerationParTrancheAgeCoef(
-      record.indicateurUn.coefficient
-    );
-    record = {
-      ...record,
-      indicateurUn: { ...record.indicateurUn, coefficient }
-    };
+async function migrateEcartTauxRemunerationCoef() {
+  console.log(
+    ">>> updating data.indicateurUn.coefficient.x.ecartTauxRemuneration"
+  );
+  const [data, updateRecords] = await getData({
+    "has_data.effectif.nombreSalariesTotal": false,
+    "data.declaration.formValidated": "Valid"
+  });
+  console.log("number of records to migrate", data.length);
 
-    console.log("updated record", record);
+  updateRecords.batch((batch: any) => {
+    data.map(({ data: record }: any) => {
+      const coefficient = calculEcartTauxRemunerationParTrancheAgeCoef(
+        record.indicateurUn.coefficient
+      );
+      record = {
+        ...record,
+        indicateurUn: { ...record.indicateurUn, coefficient }
+      };
+      // TODO: uncomment
+      // batch.updateRecord(record);
+    });
   });
 }
 
 migrate();
-
-export default migrate;
