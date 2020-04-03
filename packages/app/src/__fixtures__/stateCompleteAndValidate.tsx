@@ -71,6 +71,7 @@ const actionValidateDeclaration = {
   },
   indicateurUnData: {
     nombreCoefficients: 6,
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     remunerationAnnuelle: [],
@@ -80,6 +81,7 @@ const actionValidateDeclaration = {
     noteFinale: 31
   },
   indicateurDeuxData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     tauxAugmentation: [],
@@ -89,6 +91,7 @@ const actionValidateDeclaration = {
     mesuresCorrection: false
   },
   indicateurTroisData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     tauxPromotion: [],
@@ -98,6 +101,7 @@ const actionValidateDeclaration = {
     mesuresCorrection: false
   },
   indicateurDeuxTroisData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     resultatFinalEcart: 25,
@@ -109,6 +113,7 @@ const actionValidateDeclaration = {
     mesuresCorrection: false
   },
   indicateurQuatreData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     resultatFinal: 80.0,

@@ -270,6 +270,7 @@ export type ActionIndicateurUnCoefData = {
 
 export type DeclarationIndicateurUnData = {
   nombreCoefficients: Number | undefined;
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   remunerationAnnuelle: Array<GroupeIndicateurUn>;
@@ -285,6 +286,7 @@ export type ActionIndicateurDeuxData = {
 };
 
 export type DeclarationIndicateurDeuxData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   tauxAugmentation: Array<GroupeIndicateurDeux>;
@@ -300,6 +302,7 @@ export type ActionIndicateurTroisData = {
 };
 
 export type DeclarationIndicateurTroisData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   tauxPromotion: Array<GroupeIndicateurTrois>;
@@ -317,6 +320,7 @@ export type ActionIndicateurDeuxTroisData = {
 };
 
 export type DeclarationIndicateurDeuxTroisData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   resultatFinalEcart: Number | undefined;
@@ -340,6 +344,7 @@ export type ActionIndicateurQuatreData = {
 };
 
 export type DeclarationIndicateurQuatreData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   resultatFinal: Number | undefined;

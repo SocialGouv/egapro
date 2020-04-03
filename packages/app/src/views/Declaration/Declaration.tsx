@@ -97,6 +97,7 @@ function Declaration({ code, state, dispatch }: Props) {
   } = calculIndicateurDeuxTrois(state);
 
   const {
+    indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre
   } = calculIndicateurQuatre(state);
@@ -131,6 +132,7 @@ function Declaration({ code, state, dispatch }: Props) {
     nombreCoefficients: state.indicateurUn.csp
       ? undefined
       : state.indicateurUn.coefficient.length,
+    nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
@@ -146,6 +148,7 @@ function Declaration({ code, state, dispatch }: Props) {
   };
 
   const indicateurDeuxData: DeclarationIndicateurDeuxData = {
+    nonCalculable: !effectifsIndicateurDeuxCalculable,
     motifNonCalculable: !effectifsIndicateurDeuxCalculable
       ? "egvi40pcet"
       : state.indicateurDeux.presenceAugmentation
@@ -163,6 +166,7 @@ function Declaration({ code, state, dispatch }: Props) {
   };
 
   const indicateurTroisData: DeclarationIndicateurTroisData = {
+    nonCalculable: !effectifsIndicateurTroisCalculable,
     motifNonCalculable: !effectifsIndicateurTroisCalculable
       ? "egvi40pcet"
       : state.indicateurTrois.presencePromotion
@@ -180,6 +184,7 @@ function Declaration({ code, state, dispatch }: Props) {
   };
 
   const indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData = {
+    nonCalculable: !effectifsIndicateurDeuxTroisCalculable,
     motifNonCalculable: !effectifsIndicateurDeuxTroisCalculable
       ? "etsno5f5h"
       : state.indicateurDeuxTrois.presenceAugmentationPromotion
@@ -197,6 +202,7 @@ function Declaration({ code, state, dispatch }: Props) {
   };
 
   const indicateurQuatreData: DeclarationIndicateurQuatreData = {
+    nonCalculable: !indicateurQuatreCalculable,
     motifNonCalculable: state.indicateurQuatre.presenceCongeMat
       ? state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
         ? "absaugpdtcm"

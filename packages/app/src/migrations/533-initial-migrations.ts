@@ -2,10 +2,14 @@
 import KintoClient from "kinto-http";
 import fetch from "node-fetch";
 import totalNombreSalaries from "../utils/totalNombreSalaries";
-import {
+import calculIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCSP,
   calculEcartTauxRemunerationParTrancheAgeCoef
 } from "../utils/calculsEgaProIndicateurUn";
+import calculIndicateurDeux from "../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurTrois from "../utils/calculsEgaProIndicateurTrois";
+import calculIndicateurDeuxTrois from "../utils/calculsEgaProIndicateurDeuxTrois";
+import calculIndicateurQuatre from "../utils/calculsEgaProIndicateurQuatre";
 
 // @ts-ignore
 global.fetch = fetch;
@@ -17,6 +21,7 @@ async function migrate() {
   await migrateTotalNombreSalaries(data);
   await migrateEcartTauxRemunerationCSP(data);
   await migrateEcartTauxRemunerationCoef(data);
+  await migrateNonCalculable(data);
 
   console.log(">>> Sending the batch of updates");
   const result = await batchUpdate((batch: any) => {
@@ -95,6 +100,52 @@ async function migrateEcartTauxRemunerationCoef(records: Array<object>) {
     record.data = {
       ...record.data,
       indicateurUn: { ...record.data.indicateurUn, coefficient }
+    };
+  });
+  return records;
+}
+
+async function migrateNonCalculable(records: Array<object>) {
+  console.log(">>> updating data.indicateurX.nonCalculable");
+
+  records.map((record: any) => {
+    const {
+      effectifsIndicateurCalculable: indicateurUnCalculable
+    } = calculIndicateurUn(record.data);
+    const {
+      effectifsIndicateurCalculable: indicateurDeuxCalculable
+    } = calculIndicateurDeux(record.data);
+    const {
+      effectifsIndicateurCalculable: indicateurTroisCalculable
+    } = calculIndicateurTrois(record.data);
+    const {
+      effectifsIndicateurCalculable: indicateurDeuxTroisCalculable
+    } = calculIndicateurDeuxTrois(record.data);
+    const {
+      indicateurCalculable: indicateurQuatreCalculable
+    } = calculIndicateurQuatre(record.data);
+    record.data = {
+      ...record.data,
+      indicateurUn: {
+        ...record.data.indicateurUn,
+        nonCalculable: !indicateurUnCalculable
+      },
+      indicateurDeux: {
+        ...record.data.indicateurDeux,
+        nonCalculable: !indicateurDeuxCalculable
+      },
+      indicateurTrois: {
+        ...record.data.indicateurTrois,
+        nonCalculable: !indicateurTroisCalculable
+      },
+      indicateurDeuxTrois: {
+        ...record.data.indicateurDeuxTrois,
+        nonCalculable: !indicateurDeuxTroisCalculable
+      },
+      indicateurQuatre: {
+        ...record.data.indicateurQuatre,
+        nonCalculable: !indicateurQuatreCalculable
+      }
     };
   });
   return records;
