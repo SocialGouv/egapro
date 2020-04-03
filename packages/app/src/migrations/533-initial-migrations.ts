@@ -11,16 +11,16 @@ import {
 global.fetch = fetch;
 
 async function migrate() {
-  const [data, updateRecords] = await getData();
+  const [data, batchUpdate] = await getData();
+  console.log("Nombre d'enregistrements à migrer", data.length);
 
   await migrateTotalNombreSalaries(data);
   await migrateEcartTauxRemunerationCSP(data);
   await migrateEcartTauxRemunerationCoef(data);
 
   console.log(">>> Sending the batch of updates");
-  updateRecords.batch((batch: any) => {
-    // TODO: uncomment
-    // data.map(batch.updateRecord);
+  const result = await batchUpdate((batch: any) => {
+    data.map((record: any) => batch.updateRecord(record));
   });
 }
 
@@ -31,75 +31,73 @@ async function getData() {
       Authorization: "Basic " + credentials
     }
   });
+  const collection = client.bucket("egapro").collection("indicators_datas");
 
-  let { data, hasNextPage, next } = await client
-    .bucket("egapro")
-    .collection("indicators_datas")
-    .listRecords({
-      filters: {
-        "data.declaration.formValidated": "Valid"
-      }
-    });
+  let { data, hasNextPage, next } = await collection.listRecords({
+    filters: {
+      "data.declaration.formValidated": "Valid"
+    }
+  });
   while (hasNextPage) {
     const result = await next();
     data = data.concat(result.data);
     hasNextPage = result.hasNextPage;
   }
-  return [data, client.bucket("egapro").collection("indicators_datas")];
+  return [data, collection.batch.bind(collection)];
 }
 
-async function migrateTotalNombreSalaries(data: Array<object>) {
+async function migrateTotalNombreSalaries(records: Array<any>) {
   console.log(">>> updating data.effectif.totalNombreSalaries");
-  data.map(({ data: record }: any) => {
+  records.map((record: any) => {
     const {
       totalNombreSalariesHomme,
       totalNombreSalariesFemme
-    } = totalNombreSalaries(record.effectif.nombreSalaries);
+    } = totalNombreSalaries(record.data.effectif.nombreSalaries);
     const total =
       totalNombreSalariesHomme !== undefined &&
       totalNombreSalariesFemme !== undefined
         ? totalNombreSalariesHomme + totalNombreSalariesFemme
         : undefined;
-    record = {
-      ...record,
-      effectif: { ...record.effectif, totalNombreSalaries: total }
+    record.data = {
+      ...record.data,
+      effectif: { ...record.data.effectif, totalNombreSalaries: total }
     };
   });
-  return data;
+  return records;
 }
 
-async function migrateEcartTauxRemunerationCSP(data: Array<object>) {
+async function migrateEcartTauxRemunerationCSP(records: Array<object>) {
   console.log(
     ">>> updating data.indicateurUn.remunerationAnnuelle.[].ecartTauxRemuneration"
   );
 
-  data.map(({ data: record }: any) => {
+  records.map((record: any) => {
     const remunerationAnnuelle = calculEcartTauxRemunerationParTrancheAgeCSP(
-      record.indicateurUn.remunerationAnnuelle
+      record.data.indicateurUn.remunerationAnnuelle
     );
-    record = {
-      ...record,
-      indicateurUn: { ...record.indicateurUn, remunerationAnnuelle }
+    record.data = {
+      ...record.data,
+      indicateurUn: { ...record.data.indicateurUn, remunerationAnnuelle }
     };
   });
-  return data;
+  return records;
 }
 
-async function migrateEcartTauxRemunerationCoef(data: Array<object>) {
+async function migrateEcartTauxRemunerationCoef(records: Array<object>) {
   console.log(
     ">>> updating data.indicateurUn.coefficient.x.ecartTauxRemuneration"
   );
 
-  data.map(({ data: record }: any) => {
+  records.map((record: any) => {
     const coefficient = calculEcartTauxRemunerationParTrancheAgeCoef(
-      record.indicateurUn.coefficient
+      record.data.indicateurUn.coefficient
     );
-    record = {
-      ...record,
-      indicateurUn: { ...record.indicateurUn, coefficient }
+    record.data = {
+      ...record.data,
+      indicateurUn: { ...record.data.indicateurUn, coefficient }
     };
   });
-  return data;
+  return records;
 }
 
 migrate();
