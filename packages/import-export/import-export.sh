@@ -137,7 +137,7 @@ az storage blob upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
   --container-name public \
-  --name "index-egalite-hf$ENV_SUFFIX.xlsx" \
+  --name "index-egalite-fh$ENV_SUFFIX.xlsx" \
   --file "/tmp/dump_declarations_records_1000.xlsx"
 
 echo ">>> UPLOADING /tmp/dump_declarations_records_1000.csv"
@@ -145,7 +145,7 @@ az storage blob upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
   --container-name public \
-  --name "index-egalite-hf$ENV_SUFFIX.csv" \
+  --name "index-egalite-fh$ENV_SUFFIX.csv" \
   --file "/tmp/dump_declarations_records_1000.csv"
 
 echo ">>> DONE!"
