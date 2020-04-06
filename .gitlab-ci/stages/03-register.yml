@@ -1,5 +1,4 @@
 ---
-
 #
 .register_stage:
   extends: .base_register_stage
@@ -51,5 +50,3 @@ Register import-export image:
   variables:
     CONTEXT: packages/import-export
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/import-export
-
-...

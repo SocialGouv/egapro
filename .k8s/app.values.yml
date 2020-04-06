@@ -3,7 +3,6 @@ image:
   tag: ${IMAGE_TAG}
 
 deployment:
-
   port: ${PORT}
 
   resources:
@@ -26,6 +25,8 @@ deployment:
   env:
     - name: REACT_APP_API_URL
       value: "http://api-hpa:4000"
+    - name: ENV_SUFFIX
+      value: ${ENV_SUFFIX}
 
 service:
   port: ${PORT}

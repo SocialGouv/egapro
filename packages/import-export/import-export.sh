@@ -14,7 +14,7 @@
 # - ES_PASSWORD the elasticsearch password
 # And the following environments variables that aren't secrets
 # - POSTGRESQL_SERVER the adress of the "local" postgresql server to use
-# - BRANCH_NAME the name of the git branch to pull to get the import-export.sh scripts and others used here.
+# - ENV_SUFFIX which is either empty (on prod and preprod) or the BRANCH_HASH
 #
 # It also requires the solen export files to be in the "exports" azure file share ...
 # - DNUM - EXPORT SOLEN 2019.xlsx
@@ -115,14 +115,16 @@ az storage file upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
   --share-name "exports" \
-  --source "/tmp/dump_declarations_records.json"
+  --source "/tmp/dump_declarations_records.json" \
+  --path "dump_declarations_records$ENV_SUFFIX.json"
 
 echo ">>> UPLOADING /tmp/dump_declarations_records.xlsx"
 az storage file upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
   --share-name "exports" \
-  --source "/tmp/dump_declarations_records.xlsx"
+  --source "/tmp/dump_declarations_records.xlsx" \
+  --path "dump_declarations_records$ENV_SUFFIX.xlsx"
 
 echo ">>> INDEXING /tmp/dump_declarations_records.json in ElasticSearch"
 JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.js
@@ -135,7 +137,7 @@ az storage blob upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
   --container-name public \
-  --name "index-egalite-hf.xlsx" \
+  --name "index-egalite-hf$ENV_SUFFIX.xlsx" \
   --file "/tmp/dump_declarations_records_1000.xlsx"
 
 echo ">>> UPLOADING /tmp/dump_declarations_records_1000.csv"
@@ -143,7 +145,7 @@ az storage blob upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
   --container-name public \
-  --name "index-egalite-hf.csv" \
+  --name "index-egalite-hf$ENV_SUFFIX.csv" \
   --file "/tmp/dump_declarations_records_1000.csv"
 
 echo ">>> DONE!"
