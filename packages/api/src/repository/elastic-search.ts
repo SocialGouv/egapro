@@ -27,6 +27,7 @@ export const request = async (
       node: process.env.ELASTIC_SEARCH_URL || "",
     });
 
+    const envSuffix = process.env.ENV_SUFFIX || "";
     const response = await client.search({
       body: {
         from,
@@ -41,7 +42,7 @@ export const request = async (
         size,
         sort,
       },
-      index: process.env.ELASTIC_SEARCH_INDEX || "declarations",
+      index: process.env.ELASTIC_SEARCH_INDEX || `declarations${envSuffix}`,
     });
     const {
       total: { value: total },

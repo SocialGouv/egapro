@@ -84,6 +84,8 @@ deployment:
           key: ELASTIC_SEARCH_USER
     - name: API_SENTRY_ENVIRONMENT
       value: "development"
+    - name: ENV_SUFFIX
+      value: ${ENV_SUFFIX}
 
 service:
   port: ${PORT}

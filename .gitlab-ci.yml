@@ -115,22 +115,26 @@ stages:
     export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     export K8S_NAMESPACE="${PROJECT}"
     export DOMAIN="index-egapro.travail.gouv.fr"
+    export ENV_SUFFIX=""
 
   elif [[ "${BRANCH_NAME}" = "master" ]]; then
     export BRANCH_HASH=master
     export IMAGE_TAG=${CI_COMMIT_SHA}
     export K8S_NAMESPACE="${PROJECT}-${BRANCH_HASH}"
     export DOMAIN="${PROJECT}-master.dev.fabrique.social.gouv.fr"
+    export ENV_SUFFIX="-${BRANCH_HASH}"
 
   elif [[ -n "${CI_COMMIT_TAG}" ]]; then
     export BRANCH_HASH=preprod;
     export IMAGE_TAG=$(printf "${CI_COMMIT_TAG}" | sed "s/^v//")
     export K8S_NAMESPACE="${PROJECT}-${BRANCH_HASH}"
     export DOMAIN="${PROJECT}-preprod.dev.fabrique.social.gouv.fr"
+    export ENV_SUFFIX=""
 
   else
     export IMAGE_TAG=${CI_COMMIT_SHA}
     export DOMAIN="${BRANCH_HASH}-${PROJECT}.dev.fabrique.social.gouv.fr"
+    export ENV_SUFFIX="-${BRANCH_HASH}"
   fi
 
   export HOST="${DOMAIN}"
@@ -148,5 +152,3 @@ Notify Success:
   before_script:
     - *resolve_env
     - export HOST="https://${DOMAIN}"
-
-...

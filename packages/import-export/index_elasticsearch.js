@@ -87,7 +87,8 @@ async function createIndex({ client, indexName, mappings }) {
   }
 }
 
-const INDEX_NAME = "declarations";
+const envSuffix = process.env.ENV_SUFFIX || "";
+const INDEX_NAME = `declarations${envSuffix}`;
 
 const startIndexing = async documents => {
   const ts = Date.now();
