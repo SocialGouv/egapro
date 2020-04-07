@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Switch, Route, Link } from "react-router-dom";
 
-import { FormState, TrancheEffectifs } from "../globals.d";
+import { FormState, TrancheEffectifs } from "../globals";
 
 import globalStyles from "../utils/globalStyles";
 

@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { useCallback } from "react";
 import { Form } from "react-final-form";
-import { ActionIndicateurUnTypeData, ActionType } from "../../globals.d";
+import { ActionIndicateurUnTypeData, ActionType } from "../../globals";
 
 import FormAutoSave from "../../components/FormAutoSave";
 import RadioButtons from "../../components/RadioButtons";

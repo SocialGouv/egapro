@@ -3,7 +3,7 @@ import {
   CategorieSocioPro,
   GroupeEffectif,
   GroupeIndicateurDeux
-} from "../globals.d";
+} from "../globals";
 
 import { roundDecimal } from "./helpers";
 
@@ -56,6 +56,20 @@ export interface effectifEtEcartAugmentGroup extends effectifGroup {
   tauxAugmentationHommes: number | undefined;
   ecartTauxAugmentation: number | undefined;
 }
+
+// Ajout de l'écart d'augmentation dans les données par CSP
+export const calculEcartTauxAugmentationParCSP = (
+  tauxAugmentation: Array<GroupeIndicateurDeux>
+) =>
+  tauxAugmentation.map(categorie => {
+    return {
+      ...categorie,
+      ecartTauxAugmentation: calculEcartTauxAugmentation(
+        categorie.tauxAugmentationFemmes || 0,
+        categorie.tauxAugmentationHommes || 0
+      )
+    };
+  });
 
 export const calculEffectifsEtEcartAugmentParCategorieSocioPro = (
   dataEffectif: Array<GroupeEffectif>,

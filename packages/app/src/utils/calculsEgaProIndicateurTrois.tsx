@@ -3,7 +3,7 @@ import {
   CategorieSocioPro,
   GroupeEffectif,
   GroupeIndicateurTrois
-} from "../globals.d";
+} from "../globals";
 
 import { roundDecimal } from "./helpers";
 
@@ -52,6 +52,20 @@ export interface effectifEtEcartPromoGroup extends effectifGroup {
   tauxPromotionHommes: number | undefined;
   ecartTauxPromotion: number | undefined;
 }
+
+// Ajout de l'écart de promotion dans les données par CSP
+export const calculEcartTauxPromotionParCSP = (
+  tauxPromotion: Array<GroupeIndicateurTrois>
+) =>
+  tauxPromotion.map(categorie => {
+    return {
+      ...categorie,
+      ecartTauxPromotion: calculEcartTauxPromotion(
+        categorie.tauxPromotionFemmes || 0,
+        categorie.tauxPromotionHommes || 0
+      )
+    };
+  });
 
 export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
   dataEffectif: Array<GroupeEffectif>,

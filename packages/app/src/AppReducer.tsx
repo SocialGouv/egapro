@@ -6,7 +6,7 @@ import {
   CategorieSocioPro,
   TranchesAges,
   PeriodeDeclaration
-} from "./globals.d";
+} from "./globals";
 import mapEnum from "./utils/mapEnum";
 import { overwriteMerge, combineMerge } from "./utils/merge";
 
@@ -29,7 +29,8 @@ const dataIndicateurUnCsp = mapEnum(
     tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
       trancheAge,
       remunerationAnnuelleBrutFemmes: undefined,
-      remunerationAnnuelleBrutHommes: undefined
+      remunerationAnnuelleBrutHommes: undefined,
+      ecartTauxRemuneration: undefined
     }))
   })
 );
@@ -41,7 +42,8 @@ const dataIndicateurUnCoefGroup = {
     nombreSalariesFemmes: undefined,
     nombreSalariesHommes: undefined,
     remunerationAnnuelleBrutFemmes: undefined,
-    remunerationAnnuelleBrutHommes: undefined
+    remunerationAnnuelleBrutHommes: undefined,
+    ecartTauxRemuneration: undefined
   }))
 };
 
@@ -50,7 +52,8 @@ const dataIndicateurDeux = mapEnum(
   (categorieSocioPro: CategorieSocioPro) => ({
     categorieSocioPro,
     tauxAugmentationFemmes: undefined,
-    tauxAugmentationHommes: undefined
+    tauxAugmentationHommes: undefined,
+    ecartTauxAugmentation: undefined
   })
 );
 
@@ -59,7 +62,8 @@ const dataIndicateurTrois = mapEnum(
   (categorieSocioPro: CategorieSocioPro) => ({
     categorieSocioPro,
     tauxPromotionFemmes: undefined,
-    tauxPromotionHommes: undefined
+    tauxPromotionHommes: undefined,
+    ecartTauxPromotion: undefined
   })
 );
 
@@ -609,6 +613,13 @@ function AppReducer(
       const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm");
       return {
         ...state,
+        effectif:
+          action.valid === "Valid"
+            ? {
+                ...state.effectif,
+                ...action.effectifData
+              }
+            : state.effectif,
         indicateurUn:
           action.valid === "Valid"
             ? {

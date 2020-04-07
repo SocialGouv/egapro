@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { ReactNode } from "react";
 import { Form } from "react-final-form";
-import { FormState, GroupTranchesAgesEffectif } from "../../globals.d";
+import { FormState, GroupTranchesAgesEffectif } from "../../globals";
 
 import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
 import { displayInt } from "../../utils/helpers";

@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
+import { StaticContext } from "react-router";
 import { Route, Switch, RouteComponentProps } from "react-router-dom";
 
 import { useLayoutType } from "../../components/GridContext";
@@ -26,8 +27,18 @@ const FAQPaths: { [key: string]: string } = {
   recapitulatif: "/section/resultat"
 };
 
+type LocationState = {
+  faq?: string;
+};
+
+type FAQRouteComponentProps = RouteComponentProps<
+  {},
+  StaticContext,
+  LocationState
+>;
+
 function mapDefaultPathnameToFAQPathname(
-  location: RouteComponentProps["location"]
+  location: FAQRouteComponentProps["location"]
 ) {
   if (location.state && location.state.faq) {
     return location.state.faq;
@@ -51,7 +62,8 @@ function FAQ({ closeMenu }: Props) {
   const layoutType = useLayoutType();
   return (
     <Route
-      render={({ location }) => {
+      render={route => {
+        const location = (route as FAQRouteComponentProps).location;
         const locationFAQ = {
           pathname: mapDefaultPathnameToFAQPathname(location),
           search: "",

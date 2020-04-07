@@ -219,6 +219,7 @@ export type ActionType =
   | {
       type: "validateDeclaration";
       valid: FormState;
+      effectifData: DeclarationEffectifData;
       indicateurUnData: DeclarationIndicateurUnData;
       indicateurDeuxData: DeclarationIndicateurDeuxData;
       indicateurTroisData: DeclarationIndicateurTroisData;
@@ -240,6 +241,10 @@ export type ActionInformationsSimulationData = {
 
 export type ActionEffectifData = {
   nombreSalaries: Array<GroupeEffectif>;
+};
+
+export type DeclarationEffectifData = {
+  nombreSalariesTotal: Number;
 };
 
 export type ActionIndicateurUnTypeData = {
@@ -265,8 +270,11 @@ export type ActionIndicateurUnCoefData = {
 
 export type DeclarationIndicateurUnData = {
   nombreCoefficients: Number | undefined;
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
+  remunerationAnnuelle: Array<GroupeIndicateurUn>;
+  coefficient: Array<GroupeCoefficient>;
   resultatFinal: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
   noteFinale: Number | undefined;
@@ -278,8 +286,10 @@ export type ActionIndicateurDeuxData = {
 };
 
 export type DeclarationIndicateurDeuxData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
+  tauxAugmentation: Array<GroupeIndicateurDeux>;
   resultatFinal: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
   noteFinale: Number | undefined;
@@ -292,8 +302,10 @@ export type ActionIndicateurTroisData = {
 };
 
 export type DeclarationIndicateurTroisData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
+  tauxPromotion: Array<GroupeIndicateurTrois>;
   resultatFinal: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
   noteFinale: Number | undefined;
@@ -308,11 +320,14 @@ export type ActionIndicateurDeuxTroisData = {
 };
 
 export type DeclarationIndicateurDeuxTroisData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   resultatFinalEcart: Number | undefined;
   resultatFinalNombreSalaries: Number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
+  noteEcart: Number | undefined;
+  noteNombreSalaries: Number | undefined;
   noteFinale: Number | undefined;
   mesuresCorrection: boolean;
 };
@@ -329,6 +344,7 @@ export type ActionIndicateurQuatreData = {
 };
 
 export type DeclarationIndicateurQuatreData = {
+  nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   resultatFinal: Number | undefined;
@@ -407,6 +423,7 @@ export interface GroupTranchesAgesIndicateurUn {
   trancheAge: TranchesAges;
   remunerationAnnuelleBrutFemmes: number | undefined;
   remunerationAnnuelleBrutHommes: number | undefined;
+  ecartTauxRemuneration: number | undefined;
 }
 
 export interface GroupeIndicateurUn {
@@ -420,6 +437,7 @@ export interface GroupTranchesAgesCoefficient {
   nombreSalariesHommes: number | undefined;
   remunerationAnnuelleBrutFemmes: number | undefined;
   remunerationAnnuelleBrutHommes: number | undefined;
+  ecartTauxRemuneration: number | undefined;
 }
 
 export interface GroupeCoefficient {
@@ -431,6 +449,7 @@ export interface GroupeIndicateurDeux {
   categorieSocioPro: CategorieSocioPro;
   tauxAugmentationFemmes: number | undefined;
   tauxAugmentationHommes: number | undefined;
+  ecartTauxAugmentation: number | undefined;
 }
 
 export interface GroupeIndicateurTrois {

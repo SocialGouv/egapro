@@ -1,4 +1,4 @@
-import { FormState } from "../globals.d";
+import { FormState } from "../globals";
 import AppReducer from "../AppReducer";
 
 import stateComplete from "./stateComplete";
@@ -66,40 +66,54 @@ const actionValidateInformationsDeclarant = {
 const actionValidateDeclaration = {
   type: "validateDeclaration" as "validateDeclaration",
   valid: "Valid" as FormState,
+  effectifData: {
+    nombreSalariesTotal: 52
+  },
   indicateurUnData: {
     nombreCoefficients: 6,
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
+    remunerationAnnuelle: [],
+    coefficient: [],
     resultatFinal: 8.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 31
   },
   indicateurDeuxData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
+    tauxAugmentation: [],
     resultatFinal: 5.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 10,
     mesuresCorrection: false
   },
   indicateurTroisData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
+    tauxPromotion: [],
     resultatFinal: 3.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 15,
     mesuresCorrection: false
   },
   indicateurDeuxTroisData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     resultatFinalEcart: 25,
     resultatFinalNombreSalaries: 5,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    noteEcart: 25,
+    noteNombreSalaries: 5,
     noteFinale: 25,
     mesuresCorrection: false
   },
   indicateurQuatreData: {
+    nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     resultatFinal: 80.0,

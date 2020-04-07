@@ -13,12 +13,20 @@ import {
   DeclarationIndicateurTroisData,
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
-  DeclarationIndicateurCinqData
+  DeclarationIndicateurCinqData,
+  DeclarationEffectifData
 } from "../../globals";
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois";
+import calculIndicateurUn, {
+  calculEcartTauxRemunerationParTrancheAgeCoef,
+  calculEcartTauxRemunerationParTrancheAgeCSP
+} from "../../utils/calculsEgaProIndicateurUn";
+import calculIndicateurDeux, {
+  calculEcartTauxAugmentationParCSP
+} from "../../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurTrois, {
+  calculEcartTauxPromotionParCSP
+} from "../../utils/calculsEgaProIndicateurTrois";
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
@@ -31,6 +39,7 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult";
 import DeclarationForm from "./DeclarationForm";
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
+import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
 interface Props extends RouteComponentProps {
   code: string;
@@ -44,6 +53,14 @@ function Declaration({ code, state, dispatch }: Props) {
       dispatch({ type: "updateDeclaration", data }),
     [dispatch]
   );
+
+  const {
+    totalNombreSalariesHomme,
+    totalNombreSalariesFemme
+  } = totalNombreSalaries(state.effectif.nombreSalaries);
+
+  const nombreSalariesTotal =
+    totalNombreSalariesFemme + totalNombreSalariesHomme;
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
@@ -73,11 +90,14 @@ function Declaration({ code, state, dispatch }: Props) {
     indicateurEcartAugmentationPromotion,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    noteEcartTaux: noteEcart,
+    noteEcartNombreSalaries: noteNombreSalaries,
     correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
     noteIndicateurDeuxTrois
   } = calculIndicateurDeuxTrois(state);
 
   const {
+    indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
     noteIndicateurQuatre
   } = calculIndicateurQuatre(state);
@@ -104,19 +124,31 @@ function Declaration({ code, state, dispatch }: Props) {
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid";
 
+  const effectifData: DeclarationEffectifData = {
+    nombreSalariesTotal
+  };
+
   const indicateurUnData: DeclarationIndicateurUnData = {
     nombreCoefficients: state.indicateurUn.csp
       ? undefined
       : state.indicateurUn.coefficient.length,
+    nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
+    remunerationAnnuelle: calculEcartTauxRemunerationParTrancheAgeCSP(
+      state.indicateurUn.remunerationAnnuelle
+    ),
+    coefficient: calculEcartTauxRemunerationParTrancheAgeCoef(
+      state.indicateurUn.coefficient
+    ),
     resultatFinal: indicateurEcartRemuneration,
     sexeSurRepresente: indicateurUnSexeSurRepresente,
     noteFinale: noteIndicateurUn
   };
 
   const indicateurDeuxData: DeclarationIndicateurDeuxData = {
+    nonCalculable: !effectifsIndicateurDeuxCalculable,
     motifNonCalculable: !effectifsIndicateurDeuxCalculable
       ? "egvi40pcet"
       : state.indicateurDeux.presenceAugmentation
@@ -124,6 +156,9 @@ function Declaration({ code, state, dispatch }: Props) {
       : "absaugi",
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
+    tauxAugmentation: calculEcartTauxAugmentationParCSP(
+      state.indicateurDeux.tauxAugmentation
+    ),
     resultatFinal: indicateurEcartAugmentation,
     sexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteFinale: noteIndicateurDeux,
@@ -131,6 +166,7 @@ function Declaration({ code, state, dispatch }: Props) {
   };
 
   const indicateurTroisData: DeclarationIndicateurTroisData = {
+    nonCalculable: !effectifsIndicateurTroisCalculable,
     motifNonCalculable: !effectifsIndicateurTroisCalculable
       ? "egvi40pcet"
       : state.indicateurTrois.presencePromotion
@@ -138,6 +174,9 @@ function Declaration({ code, state, dispatch }: Props) {
       : "absprom",
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
+    tauxPromotion: calculEcartTauxPromotionParCSP(
+      state.indicateurTrois.tauxPromotion
+    ),
     resultatFinal: indicateurEcartPromotion,
     sexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteFinale: noteIndicateurTrois,
@@ -145,6 +184,7 @@ function Declaration({ code, state, dispatch }: Props) {
   };
 
   const indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData = {
+    nonCalculable: !effectifsIndicateurDeuxTroisCalculable,
     motifNonCalculable: !effectifsIndicateurDeuxTroisCalculable
       ? "etsno5f5h"
       : state.indicateurDeuxTrois.presenceAugmentationPromotion
@@ -155,11 +195,14 @@ function Declaration({ code, state, dispatch }: Props) {
     resultatFinalEcart: indicateurEcartAugmentationPromotion,
     resultatFinalNombreSalaries: indicateurEcartNombreEquivalentSalaries,
     sexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    noteEcart,
+    noteNombreSalaries,
     noteFinale: noteIndicateurDeuxTrois,
     mesuresCorrection: indicateurDeuxTroisCorrectionMeasure
   };
 
   const indicateurQuatreData: DeclarationIndicateurQuatreData = {
+    nonCalculable: !indicateurQuatreCalculable,
     motifNonCalculable: state.indicateurQuatre.presenceCongeMat
       ? state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
         ? "absaugpdtcm"
@@ -197,6 +240,7 @@ function Declaration({ code, state, dispatch }: Props) {
       dispatch({
         type: "validateDeclaration",
         valid,
+        effectifData,
         indicateurUnData,
         indicateurDeuxData,
         indicateurTroisData,
@@ -209,6 +253,7 @@ function Declaration({ code, state, dispatch }: Props) {
       }),
     [
       dispatch,
+      effectifData,
       indicateurUnData,
       indicateurDeuxData,
       indicateurTroisData,

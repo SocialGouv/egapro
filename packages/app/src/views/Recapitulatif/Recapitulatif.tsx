@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { Fragment } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
-import { AppState } from "../../globals.d";
+import { AppState } from "../../globals";
 
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn";
 import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";

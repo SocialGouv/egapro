@@ -6,7 +6,7 @@ import {
   GroupeIndicateurUn,
   GroupeCoefficient,
   GroupTranchesAgesIndicateurUn
-} from "../globals.d";
+} from "../globals";
 
 import { roundDecimal } from "./helpers";
 
@@ -146,6 +146,43 @@ export interface tmpGroupTranchesAgesCoef {
   remunerationAnnuelleBrutFemmes: number | undefined;
   remunerationAnnuelleBrutHommes: number | undefined;
 }
+
+// Ajout de l'écart de rémunération moyenne dans les données "par niveau" (CSP ou coefficient) de l'indicateur
+export const calculEcartTauxRemunerationParTrancheAgeCSP = (
+  remunerationAnnuelle: Array<GroupeIndicateurUn>
+) =>
+  remunerationAnnuelle.map(categorie => {
+    return {
+      ...categorie,
+      tranchesAges: categorie.tranchesAges.map(trancheAge => {
+        return {
+          ...trancheAge,
+          ecartTauxRemuneration: calculEcartRemunerationMoyenne(
+            trancheAge.remunerationAnnuelleBrutFemmes || 0,
+            trancheAge.remunerationAnnuelleBrutHommes || 0
+          )
+        };
+      })
+    };
+  });
+
+export const calculEcartTauxRemunerationParTrancheAgeCoef = (
+  coefficient: Array<GroupeCoefficient>
+) =>
+  coefficient.map(niveau => {
+    return {
+      ...niveau,
+      tranchesAges: niveau.tranchesAges.map(trancheAge => {
+        return {
+          ...trancheAge,
+          ecartTauxRemuneration: calculEcartRemunerationMoyenne(
+            trancheAge.remunerationAnnuelleBrutFemmes || 0,
+            trancheAge.remunerationAnnuelleBrutHommes || 0
+          )
+        };
+      })
+    };
+  });
 
 export const calculEffectifsEtEcartRemuParTrancheAgeCsp = (
   dataEffectif: Array<GroupeEffectif>,

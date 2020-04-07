@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { useRef, useState, useEffect } from "react";
+import { StaticContext } from "react-router";
 import { RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
@@ -14,7 +15,17 @@ import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
 import ModalEmail from "./ModalEmail";
 
-interface Props extends RouteComponentProps {
+type LocationState = {
+  openModalEmail?: boolean;
+};
+
+export type HomeSimulateurRouteComponentProps = RouteComponentProps<
+  {},
+  StaticContext,
+  LocationState
+>;
+
+interface Props extends HomeSimulateurRouteComponentProps {
   code: string;
 }
 
