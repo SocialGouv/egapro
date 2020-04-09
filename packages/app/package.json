@@ -31,7 +31,7 @@
     "react-app-polyfill": "1.0.6",
     "react-datepicker": "2.14.1",
     "react-dom": "16.13.1",
-    "react-final-form": "6.3.0",
+    "react-final-form": "6.4.0",
     "react-final-form-arrays": "3.1.1",
     "react-piwik": "1.8.0",
     "react-router-dom": "5.1.2",
