@@ -1,13 +1,13 @@
 /** @jsx jsx */
-import {FC, MouseEventHandler} from "react";
-import {css, jsx} from "@emotion/core";
-import {GREEN} from "./colors";
+import { FC, MouseEventHandler } from "react";
+import { css, jsx } from "@emotion/core";
+import { GREEN } from "./colors";
 
 interface SearchButtonProps {
-  onClick: MouseEventHandler
+  onClick: MouseEventHandler;
 }
 
-const SearchButton: FC<SearchButtonProps> = ({ onClick, children }) => (
+const Button: FC<SearchButtonProps> = ({ onClick, children }) => (
   <button onClick={onClick} css={styles.searchButton}>
     {children}
   </button>
@@ -25,5 +25,4 @@ const styles = {
   })
 };
 
-
-export default SearchButton;
+export default Button;
