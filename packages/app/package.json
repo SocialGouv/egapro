@@ -53,7 +53,7 @@
     "node-fetch": "^2.6.0",
     "ts-node": "^8.6.2",
     "typescript": "3.8.3",
-    "wait-on": "4.0.1"
+    "wait-on": "4.0.2"
   },
   "eslintConfig": {
     "extends": "react-app"
