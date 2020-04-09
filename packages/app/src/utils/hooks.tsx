@@ -1,4 +1,10 @@
-import {useState, useEffect, useCallback, ChangeEvent, ChangeEventHandler} from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  ChangeEvent,
+  ChangeEventHandler
+} from "react";
 
 export function useDebounce(value: any, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -35,8 +41,48 @@ export function useDebounceEffect(
 export function useInputValueChangeHandler(
   setter: (value: string) => void
 ): ChangeEventHandler<HTMLInputElement> {
-  return useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setter(value);
-  },[setter])
+  return useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setter(value);
+    },
+    [setter]
+  );
+}
+
+interface UseDataFetchingResult<SearchResult> {
+  result: SearchResult;
+  loading: boolean;
+}
+
+export function useDataFetching<SearchResult, SearchParams, DebouncedParams>(
+  fetchFunction: (
+    params: SearchParams,
+    debouncedParams: DebouncedParams
+  ) => Promise<SearchResult>,
+  params: SearchParams,
+  debouncedParams: DebouncedParams,
+  delay: number
+): UseDataFetchingResult<SearchResult | null> {
+  const [result, setResult] = useState<SearchResult | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  useEffect(() => {
+    setLoading(true);
+  }, [params, debouncedParams]);
+  useDebounceEffect(
+    debouncedParams,
+    delay,
+    debouncedParams => {
+      fetchFunction(params, debouncedParams).then(fetchedResults => {
+        setResult(fetchedResults);
+        setLoading(false);
+      });
+    },
+    [fetchFunction, params]
+  );
+
+  return {
+    result,
+    loading
+  };
 }
