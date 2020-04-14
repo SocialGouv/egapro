@@ -145,6 +145,7 @@ const ConsulterIndex: React.FC = () => {
             <a href="mailto: index@travail.gouv.fr">index@travail.gouv.fr</a>
           </Subtitle>
         </div>
+        <div css={styles.socialNetworksSpacing} />
         <div>
           <Subtitle>
             <a href="https://voxusagers.numerique.gouv.fr/Demarches/2442?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48">
@@ -152,11 +153,14 @@ const ConsulterIndex: React.FC = () => {
             </a>
           </Subtitle>
         </div>
+        <div css={styles.socialNetworksSpacing}/>
         <SocialNetworksLinks />
       </div>
     </div>
   );
 };
+
+const smallerScreenMediaQuery = "@media only screen and (max-width: 950px)";
 
 const styles = {
   logoWrapper: css({
@@ -197,7 +201,18 @@ const styles = {
   socialNetworks: css({
     display: "flex",
     justifyContent: "space-between",
-    marginTop: "40px"
+    marginTop: "40px",
+    [smallerScreenMediaQuery]: {
+      flexDirection: "column",
+      alignItems: "center"
+    }
+  }),
+  socialNetworksSpacing: css({
+    display: "none",
+    height: "12px",
+    [smallerScreenMediaQuery]: {
+      display: "block"
+    }
   })
 };
 
