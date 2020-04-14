@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { FC, useEffect } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { css, jsx } from "@emotion/core";
 import { FetchedIndicatorsData } from "./ConsulterIndex";
 import { AppState } from "../../globals";
@@ -61,10 +61,59 @@ const HeaderCell: FC<HeaderCellProps> = ({ column }) => {
   );
 };
 
-const columns = [
+// Highlighting is done in the front-end because elastic search highlighting with ngram tokens is buggy.
+const highlightText = (text: string, highlightedTerm: string, key: string): (string|JSX.Element)[] => {
+  // Replacing characters with accents by all the possibilities in a regex
+  // Ex: highlightText("élément", "el", "key")
+  // <em>él</em>ement
+  const rawRegexWithAccent = highlightedTerm
+    .replace(/[eéèë]/gi, "[eéèë]")
+    .replace(/[iï]/gi, "[iï]")
+    .replace(/[aà]/gi, "[aà]")
+    .replace(/[cç]/gi, "[cç]");
+
+  // We generate a regex that match the searched characters
+  const regex = new RegExp(rawRegexWithAccent, "gi");
+
+  // We get all the samples that match the regex
+  const matches = text.match(regex) || [];
+
+  // We split the string to get only the unsearched parts.
+  const splitText = text.split(regex);
+
+  // We aggregate the matched and unmatched samples
+  // ex:
+  // text = "element"
+  // searchTerm = "em"
+  //
+  // matches = ["em"] splitText = ["el", "ent"].
+  // we return ["el", <em>em</em>, "ent"]
+  return splitText.reduce(
+    (acc, textChunk, index) =>
+      index < splitText.length - 1 ?
+        acc.concat([textChunk, <em css={styles.highlight} key={`${key}-${index}`}>{matches[index]}</em>]) :
+        acc.concat([textChunk]),
+    [] as (string|JSX.Element)[]);
+};
+
+const makeColumns = (searchedTerm: string) => ([
   {
     Header: "Raison\xa0Sociale",
-    accessor: "data.informationsEntreprise.nomEntreprise"
+    accessor: ({
+        data: {
+          informationsEntreprise: {
+            nomEntreprise
+          }
+        }
+      }: FetchedIndicatorsData,
+      index: number,
+    ) => (
+      <span>
+        {
+          highlightText(nomEntreprise, searchedTerm, `raison-sociale-${index}`)
+        }
+      </span>
+    )
   },
   {
     Header: "SIREN",
@@ -108,7 +157,7 @@ const columns = [
     accessor: "data.informationsEntreprise.departement",
     disableSortBy: true
   }
-];
+]);
 
 const pageSize = 10;
 
@@ -131,6 +180,7 @@ interface ConsulterIndexResultProps {
   currentPage: number;
   dataSize: number;
   indicatorsData: FetchedIndicatorsData[];
+  searchTerm: string;
   onPageChange: (index: number) => void;
   onSortByChange: (sortBy?: SortOption) => void;
 }
@@ -139,10 +189,12 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
   currentPage,
   dataSize,
   indicatorsData,
+  searchTerm,
   onPageChange,
   onSortByChange
 }) => {
   const pageCount = Math.floor((dataSize - 1) / pageSize) + 1;
+  const columns = useMemo(() => makeColumns(searchTerm), [searchTerm]);
   const {
     getTableProps,
     getTableBodyProps,
@@ -273,7 +325,11 @@ const styles = {
       content: "\\2193";
       padding-left: 6px;
     }
-  `
+  `,
+  highlight: css({
+    fontWeight: "bold",
+    fontStyle: "normal"
+  })
 };
 
 export default ConsulterIndexResult;
