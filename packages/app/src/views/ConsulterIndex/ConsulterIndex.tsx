@@ -2,14 +2,9 @@
 import * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { css, jsx } from "@emotion/core";
-import {
-  useDebounceEffect,
-  useInputValueChangeHandler
-} from "../../utils/hooks";
+import { useDebounceEffect } from "../../utils/hooks";
 import { findIndicatorsDataForRaisonSociale } from "../../utils/api";
 import { AppState } from "../../globals";
-import Field from "../../components/MinistereTravail/Field";
-import SearchButton from "../../components/MinistereTravail/SearchButton";
 import ConsulterIndexResult, { SortOption } from "./ConsulterIndexResult";
 import SearchResultHeaderText from "./SearchResultHeaderText";
 import LogoIndex from "./LogoIndex";
@@ -18,6 +13,7 @@ import DownloadButton from "./DownloadButton";
 import SocialNetworksLinks from "./SocialNetworksLinks";
 import Subtitle from "../../components/MinistereTravail/Subtitle";
 import CsvUpdateDate from "./CsvUpdateDate";
+import SearchBox from "../../components/MinistereTravail/SearchBox";
 
 export interface FetchedIndicatorsData {
   id: string;
@@ -31,22 +27,18 @@ export interface FetchedIndicatorsData {
 const PAGE_SIZE = 10;
 
 const ConsulterIndex: React.FC = () => {
-  const [raisonSociale, setRaisonSociale] = useState("");
   const [lastResearch, setLastResearch] = useState("");
   const [indicatorsData, setIndicatorsData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [dataSize, setDataSize] = useState(0);
   const [sortBy, setSortBy] = useState<SortOption | undefined>();
 
-  const handleRaisonSocialChange = useInputValueChangeHandler(setRaisonSociale);
-
   const search = useCallback(
-    event => {
-      event.preventDefault();
+    raisonSociale => {
       setLastResearch(raisonSociale);
       setCurrentPage(0);
     },
-    [raisonSociale, setLastResearch]
+    [setLastResearch]
   );
 
   const searchParams = useMemo(
@@ -98,14 +90,9 @@ const ConsulterIndex: React.FC = () => {
         informations des entreprises qui publient leur index depuis plus d'un
         an.
       </Subtitle>
-      <form css={styles.searchFieldWrapper} onSubmit={search}>
-        <Field
-          value={raisonSociale}
-          placeholder="Raison Sociale"
-          onChange={handleRaisonSocialChange}
-        />
-        <SearchButton onClick={search} />
-      </form>
+      <div css={styles.searchFieldWrapper}>
+        <SearchBox onSearch={search} placeholder="Raison Sociale" />
+      </div>
 
       {lastResearch && (
         <SearchResultHeaderText
