@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { css, jsx } from "@emotion/core";
-import { useDebounceEffect } from "../../utils/hooks";
+import { useDataFetching } from "../../utils/hooks";
 import { findIndicatorsDataForRaisonSociale } from "../../utils/api";
 import { AppState } from "../../globals";
 import ConsulterIndexResult, { SortOption } from "./ConsulterIndexResult";
@@ -24,13 +24,37 @@ export interface FetchedIndicatorsData {
   };
 }
 
+interface SearchParams {
+  lastResearch: string;
+}
+
+interface DebouncedSearchParams {
+  sortBy: SortOption | undefined;
+  currentPage: number;
+}
+
+interface SearchResult {
+  total: number;
+  data: FetchedIndicatorsData[];
+}
+
+const fetchData = (
+  { lastResearch }: SearchParams,
+  { sortBy, currentPage }: DebouncedSearchParams
+): Promise<SearchResult> => {
+  return findIndicatorsDataForRaisonSociale(lastResearch, {
+    size: PAGE_SIZE,
+    from: PAGE_SIZE * currentPage,
+    order: (sortBy && sortBy.order) || "",
+    sortBy: (sortBy && sortBy.field) || ""
+  }).then(({ jsonBody: { total, data } }) => ({ total, data }));
+};
+
 const PAGE_SIZE = 10;
 
 const ConsulterIndex: React.FC = () => {
   const [lastResearch, setLastResearch] = useState("");
-  const [indicatorsData, setIndicatorsData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [dataSize, setDataSize] = useState(0);
   const [sortBy, setSortBy] = useState<SortOption | undefined>();
 
   const search = useCallback(
@@ -41,37 +65,21 @@ const ConsulterIndex: React.FC = () => {
     [setLastResearch]
   );
 
-  const searchParams = useMemo(
-    () => ({
-      sortBy,
-      currentPage,
-      lastResearch
-    }),
-    [sortBy, currentPage, lastResearch]
+  const searchParams = useMemo(() => ({ lastResearch }), [lastResearch]);
+  const debouncedSearchParams = useMemo(() => ({ sortBy, currentPage }), [
+    sortBy,
+    currentPage
+  ]);
+
+  const { result, loading } = useDataFetching(
+    fetchData,
+    searchParams,
+    debouncedSearchParams,
+    300
   );
 
-  useDebounceEffect(
-    searchParams,
-    300,
-    ({
-      sortBy: debouncedSortBy,
-      currentPage: debouncedCurrentPage,
-      lastResearch: debouncedLastResearch
-    }) => {
-      if (debouncedLastResearch.length > 0) {
-        findIndicatorsDataForRaisonSociale(debouncedLastResearch, {
-          size: PAGE_SIZE,
-          from: PAGE_SIZE * debouncedCurrentPage,
-          order: (debouncedSortBy && debouncedSortBy.order) || "",
-          sortBy: (debouncedSortBy && debouncedSortBy.field) || ""
-        }).then(({ jsonBody: { total, data } }) => {
-          setIndicatorsData(data);
-          setDataSize(total);
-        });
-      }
-    },
-    [setIndicatorsData, setLastResearch, setDataSize]
-  );
+  const dataSize = (result && result.total) || 0;
+  const indicatorsData = (result && result.data) || [];
 
   return (
     <div css={styles.body}>
@@ -98,6 +106,7 @@ const ConsulterIndex: React.FC = () => {
         <SearchResultHeaderText
           searchResults={indicatorsData}
           searchTerms={lastResearch}
+          loading={loading}
         />
       )}
       {indicatorsData.length > 0 && (
@@ -137,9 +146,7 @@ const ConsulterIndex: React.FC = () => {
         </div>
         <div>
           <Subtitle>
-            <a
-              href="https://voxusagers.numerique.gouv.fr/Demarches/2442?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-            >
+            <a href="https://voxusagers.numerique.gouv.fr/Demarches/2442?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48">
               Donnez-nous votre avis
             </a>
           </Subtitle>
