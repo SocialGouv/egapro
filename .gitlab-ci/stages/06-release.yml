@@ -1,5 +1,4 @@
 ---
-
 Make a new release and deploy to preprod environment:
   stage: Release
   image: node:${NODE_VERSION}
@@ -53,4 +52,22 @@ Import Solen to consolidated export:
     - kubectl apply -f .k8s/import-export/import-export-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
     - kubectl wait --for=condition=complete job/import-export-job --timeout=180000s -n ${K8S_NAMESPACE}
 
-...
+###########################################
+###            DATA-MIGRATION           ###
+###########################################
+
+Migrate the data to the latest version:
+  stage: Release
+  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/kubectl:0.29.0
+  dependencies: []
+  when: manual
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  except:
+    variables:
+      - $PRODUCTION
+  script:
+    - kubectl delete job migrate-data-job -n ${K8S_NAMESPACE} || true;
+    - envsubst < .k8s/migrate-data/migrate-data-job.yml > .k8s/migrate-data/migrate-data-job-${PROJECT}.yml
+    - kubectl apply -f .k8s/migrate-data/migrate-data-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/migrate-data-job --timeout=180000s -n ${K8S_NAMESPACE}
