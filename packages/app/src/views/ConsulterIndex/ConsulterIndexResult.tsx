@@ -98,6 +98,7 @@ const highlightText = (text: string, highlightedTerm: string, key: string): (str
 
 const makeColumns = (searchedTerm: string) => ([
   {
+    id: "data.informationsEntreprise.nomEntreprise",
     Header: "Raison\xa0Sociale",
     accessor: ({
         data: {
