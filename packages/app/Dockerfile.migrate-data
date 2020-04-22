@@ -1,0 +1,15 @@
+FROM node:10.15.3-alpine
+
+WORKDIR /app
+
+COPY package.json yarn.lock /app/
+
+RUN yarn --frozen-lockfile
+
+COPY ./ ./
+
+USER node
+
+ENV NODE_ENV=production
+
+CMD ["yarn", "run", "migrate"]

@@ -8,16 +8,17 @@ spec:
     spec:
       containers:
         - name: migrate-data-job
-          image: ${CI_REGISTRY_IMAGE}/app:${IMAGE_TAG}
-          command: ["sh"]
-          args: ["-c", "yarn && yarn run migrate"]
+          image: ${CI_REGISTRY_IMAGE}/migrate-data:${IMAGE_TAG}
+          # command: ["sh"]
+          # args:
+          #   ["-c", "yarn --production --frozen-lockfile && yarn run migrate"]
           resources:
             requests:
               cpu: 250m
               memory: 256Mi
             limits:
               cpu: 1000m
-              memory: 256Mi
+              memory: 1000Mi
           envFrom:
             - secretRef:
                 name: egapro

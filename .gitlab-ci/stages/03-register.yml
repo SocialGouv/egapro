@@ -50,3 +50,11 @@ Register import-export image:
   variables:
     CONTEXT: packages/import-export
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/import-export
+
+Register migrate-data image:
+  extends: .register_stage
+  variables:
+    DOCKER_BUILD_ARGS: >-
+      -f ./packages/app/Dockerfile.migrate-data
+    CONTEXT: packages/app
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/migrate-data
