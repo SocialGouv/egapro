@@ -252,7 +252,7 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
         nextPage={nextPage}
       />
       <table {...getTableProps()} css={styles.table}>
-        <thead>
+        <thead css={styles.header}>
           <tr>
             {(headerGroups[0].headers as AggregatedColumn[]).map(column => (
               <HeaderCell key={column.getHeaderProps().key} column={column} />
@@ -263,10 +263,11 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
           {page.map((row: Row<FetchedIndicatorsData>) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()}>
+              <tr {...row.getRowProps()} css={styles.row}>
                 {row.cells.map(cell => (
-                  <td css={styles.cell} {...cell.getCellProps()}>
+                  <td data-title={cell.column.Header} css={styles.cell} {...cell.getCellProps()}>
                     {cell.render("Cell")}
+                    {console.log(cell)}
                   </td>
                 ))}
               </tr>
@@ -293,20 +294,52 @@ const ConsulterIndexResult: FC<ConsulterIndexResultProps> = ({
 };
 
 const padding = "10px";
+const border =  "1px solid black";
+
+const smallScreenMediaQuery = "@media only screen and (max-width: 950px)";
 
 const styles = {
   table: css({
-    border: "1px solid black",
+    border,
     borderCollapse: "collapse",
-    width: "100%"
+    width: "100%",
+    [smallScreenMediaQuery]: {
+      display: "block"
+    }
+  }),
+  header: css({
+    [smallScreenMediaQuery]: {
+      display: "block",
+      position: "fixed",
+      top: "-9999px",
+      left: "-9999px"
+    },
   }),
   headerCell: css({
-    border: "1px solid black",
-    padding
+    border,
+    padding,
+    [smallScreenMediaQuery]: {
+      display: "block",
+    },
   }),
   cell: css({
-    border: "1px solid black",
-    padding
+    border,
+    padding,
+    [smallScreenMediaQuery]: {
+      display: "block",
+      border: "none",
+      ":before": {
+        content: "attr(data-title)",
+        fontWeight: "bold",
+        paddingRight: "10px"
+      }
+    }
+  }),
+  row: css({
+    [smallScreenMediaQuery]: {
+      display: "block",
+      border
+    }
   }),
   sortable: css`
     :after {
