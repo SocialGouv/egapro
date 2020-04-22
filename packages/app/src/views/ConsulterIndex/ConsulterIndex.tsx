@@ -114,6 +114,7 @@ const ConsulterIndex: React.FC = () => {
           currentPage={currentPage}
           indicatorsData={indicatorsData}
           dataSize={dataSize}
+          searchTerm={lastResearch}
           onPageChange={setCurrentPage}
           onSortByChange={setSortBy}
         />
