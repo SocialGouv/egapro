@@ -9,9 +9,6 @@ spec:
       containers:
         - name: migrate-data-job
           image: ${CI_REGISTRY_IMAGE}/migrate-data:${IMAGE_TAG}
-          # command: ["sh"]
-          # args:
-          #   ["-c", "yarn --production --frozen-lockfile && yarn run migrate"]
           resources:
             requests:
               cpu: 250m
