@@ -2,6 +2,8 @@ FROM node:10.15.3-alpine
 
 WORKDIR /app
 
+ENV KINTO_URL=http://kinto:8888/v1
+
 COPY packages/app/package.json yarn.lock /app/
 
 RUN yarn --frozen-lockfile --cache-folder /dev/shm/yarn 

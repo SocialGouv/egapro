@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import totalNombreSalaries from "../utils/totalNombreSalaries";
 import calculIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCSP,
-  calculEcartTauxRemunerationParTrancheAgeCoef
+  calculEcartTauxRemunerationParTrancheAgeCoef,
 } from "../utils/calculsEgaProIndicateurUn";
 import calculIndicateurDeux from "../utils/calculsEgaProIndicateurDeux";
 import calculIndicateurTrois from "../utils/calculsEgaProIndicateurTrois";
@@ -13,6 +13,15 @@ import calculIndicateurQuatre from "../utils/calculsEgaProIndicateurQuatre";
 
 // @ts-ignore
 global.fetch = fetch;
+
+if (!process.env.KINTO_URL) {
+  console.log(
+    "Error: this script needs an env variable named KINTO_URL with the url to the kinto server, like http://localhost:8888/v1"
+  );
+  process.exit();
+} else {
+  console.log("Using the following kinto server:", process.env.KINTO_URL);
+}
 
 async function migrate() {
   const [data, batchUpdate] = await getData();
@@ -31,17 +40,17 @@ async function migrate() {
 
 async function getData() {
   const credentials = Buffer.from("admin:passw0rd").toString("base64");
-  const client = new KintoClient("http://localhost:8888/v1", {
+  const client = new KintoClient(process.env.KINTO_URL, {
     headers: {
-      Authorization: "Basic " + credentials
-    }
+      Authorization: "Basic " + credentials,
+    },
   });
   const collection = client.bucket("egapro").collection("indicators_datas");
 
   let { data, hasNextPage, next } = await collection.listRecords({
     filters: {
-      "data.declaration.formValidated": "Valid"
-    }
+      "data.declaration.formValidated": "Valid",
+    },
   });
   while (hasNextPage) {
     const result = await next();
@@ -56,7 +65,7 @@ async function migrateTotalNombreSalaries(records: Array<any>) {
   records.map((record: any) => {
     const {
       totalNombreSalariesHomme,
-      totalNombreSalariesFemme
+      totalNombreSalariesFemme,
     } = totalNombreSalaries(record.data.effectif.nombreSalaries);
     const total =
       totalNombreSalariesHomme !== undefined &&
@@ -65,7 +74,7 @@ async function migrateTotalNombreSalaries(records: Array<any>) {
         : undefined;
     record.data = {
       ...record.data,
-      effectif: { ...record.data.effectif, totalNombreSalaries: total }
+      effectif: { ...record.data.effectif, totalNombreSalaries: total },
     };
   });
   return records;
@@ -82,7 +91,7 @@ async function migrateEcartTauxRemunerationCSP(records: Array<object>) {
     );
     record.data = {
       ...record.data,
-      indicateurUn: { ...record.data.indicateurUn, remunerationAnnuelle }
+      indicateurUn: { ...record.data.indicateurUn, remunerationAnnuelle },
     };
   });
   return records;
@@ -99,7 +108,7 @@ async function migrateEcartTauxRemunerationCoef(records: Array<object>) {
     );
     record.data = {
       ...record.data,
-      indicateurUn: { ...record.data.indicateurUn, coefficient }
+      indicateurUn: { ...record.data.indicateurUn, coefficient },
     };
   });
   return records;
@@ -110,42 +119,42 @@ async function migrateNonCalculable(records: Array<object>) {
 
   records.map((record: any) => {
     const {
-      effectifsIndicateurCalculable: indicateurUnCalculable
+      effectifsIndicateurCalculable: indicateurUnCalculable,
     } = calculIndicateurUn(record.data);
     const {
-      effectifsIndicateurCalculable: indicateurDeuxCalculable
+      effectifsIndicateurCalculable: indicateurDeuxCalculable,
     } = calculIndicateurDeux(record.data);
     const {
-      effectifsIndicateurCalculable: indicateurTroisCalculable
+      effectifsIndicateurCalculable: indicateurTroisCalculable,
     } = calculIndicateurTrois(record.data);
     const {
-      effectifsIndicateurCalculable: indicateurDeuxTroisCalculable
+      effectifsIndicateurCalculable: indicateurDeuxTroisCalculable,
     } = calculIndicateurDeuxTrois(record.data);
     const {
-      indicateurCalculable: indicateurQuatreCalculable
+      indicateurCalculable: indicateurQuatreCalculable,
     } = calculIndicateurQuatre(record.data);
     record.data = {
       ...record.data,
       indicateurUn: {
         ...record.data.indicateurUn,
-        nonCalculable: !indicateurUnCalculable
+        nonCalculable: !indicateurUnCalculable,
       },
       indicateurDeux: {
         ...record.data.indicateurDeux,
-        nonCalculable: !indicateurDeuxCalculable
+        nonCalculable: !indicateurDeuxCalculable,
       },
       indicateurTrois: {
         ...record.data.indicateurTrois,
-        nonCalculable: !indicateurTroisCalculable
+        nonCalculable: !indicateurTroisCalculable,
       },
       indicateurDeuxTrois: {
         ...record.data.indicateurDeuxTrois,
-        nonCalculable: !indicateurDeuxTroisCalculable
+        nonCalculable: !indicateurDeuxTroisCalculable,
       },
       indicateurQuatre: {
         ...record.data.indicateurQuatre,
-        nonCalculable: !indicateurQuatreCalculable
-      }
+        nonCalculable: !indicateurQuatreCalculable,
+      },
     };
   });
   return records;
