@@ -16,9 +16,19 @@ spec:
             limits:
               cpu: 1000m
               memory: 1000Mi
-          envFrom:
-            - secretRef:
-                name: egapro
+          env:
+            - name: KINTO_SERVER
+              value: "kinto"
+            - name: KINTO_LOGIN
+              valueFrom:
+                secretKeyRef:
+                  name: ${PROJECT}
+                  key: KINTO_ADMIN_LOGIN
+            - name: KINTO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ${PROJECT}
+                  key: KINTO_ADMIN_PASSWORD
       restartPolicy: Never
       initContainers:
         - name: wait-for-kinto

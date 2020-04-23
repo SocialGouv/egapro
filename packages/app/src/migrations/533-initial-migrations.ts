@@ -14,13 +14,15 @@ import calculIndicateurQuatre from "../utils/calculsEgaProIndicateurQuatre";
 // @ts-ignore
 global.fetch = fetch;
 
-if (!process.env.KINTO_URL) {
+const KINTO_URL = `http://${process.env.KINTO_SERVER}:8888/v1`;
+
+if (!process.env.KINTO_SERVER) {
   console.log(
-    "Error: this script needs an env variable named KINTO_URL with the url to the kinto server, like http://localhost:8888/v1"
+    "Error: this script needs an env variable named KINTO_SERVER with the url to the kinto server, like 'localhost' or 'kinto-server'"
   );
   process.exit();
 } else {
-  console.log("Using the following kinto server:", process.env.KINTO_URL);
+  console.log("Using the following kinto server URL:", KINTO_URL);
 }
 
 async function migrate() {
@@ -39,8 +41,10 @@ async function migrate() {
 }
 
 async function getData() {
-  const credentials = Buffer.from("admin:passw0rd").toString("base64");
-  const client = new KintoClient(process.env.KINTO_URL, {
+  const credentials = Buffer.from(
+    `${process.env.KINTO_LOGIN}:${process.env.KINTO_PASSWORD}`
+  ).toString("base64");
+  const client = new KintoClient(KINTO_URL, {
     headers: {
       Authorization: "Basic " + credentials,
     },
