@@ -26,21 +26,12 @@ if (!process.env.KINTO_SERVER) {
 }
 
 async function migrate() {
-  const [data, batchUpdate] = await getData();
-  console.log("Nombre d'enregistrements à migrer", data.length);
-
-  await migrateTotalNombreSalaries(data);
-  await migrateEcartTauxRemunerationCSP(data);
-  await migrateEcartTauxRemunerationCoef(data);
-  await migrateNonCalculable(data);
-
-  console.log(">>> Sending the batch of updates");
-  const result = await batchUpdate((batch: any) => {
-    data.map((record: any) => batch.updateRecord(record));
-  });
+  console.log(">>> Migrating the data");
+  const migratedRecords = await migrateData();
+  console.log(">>> Finished migrating", migratedRecords, "records");
 }
 
-async function getData() {
+async function migrateData() {
   const credentials = Buffer.from(
     `${process.env.KINTO_LOGIN}:${process.env.KINTO_PASSWORD}`
   ).toString("base64");
@@ -56,12 +47,29 @@ async function getData() {
       "data.declaration.formValidated": "Valid",
     },
   });
-  while (hasNextPage) {
+  let count = 0;
+  while (true) {
+    console.log(">>> Processing a page of data");
+
+    await migrateTotalNombreSalaries(data);
+    await migrateEcartTauxRemunerationCSP(data);
+    await migrateEcartTauxRemunerationCoef(data);
+    await migrateNonCalculable(data);
+
+    count += data.length;
+    console.log(">>> Sending a batch of updates:", data.length, "records");
+    await collection.batch((batch: any) => {
+      data.map((record: any) => batch.updateRecord(record));
+    });
+
+    if (!hasNextPage) {
+      break;
+    }
     const result = await next();
-    data = data.concat(result.data);
+    data = result.data;
     hasNextPage = result.hasNextPage;
   }
-  return [data, collection.batch.bind(collection)];
+  return count;
 }
 
 async function migrateTotalNombreSalaries(records: Array<any>) {
