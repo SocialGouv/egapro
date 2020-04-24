@@ -49,7 +49,7 @@ async function migrateData() {
   });
   let count = 0;
   while (true) {
-    console.log(">>> Processing a page of data");
+    console.log(">>> Processing a page of data:", data.length, "records");
 
     await migrateTotalNombreSalaries(data);
     await migrateEcartTauxRemunerationCSP(data);
@@ -75,19 +75,28 @@ async function migrateData() {
 async function migrateTotalNombreSalaries(records: Array<any>) {
   console.log(">>> updating data.effectif.totalNombreSalaries");
   records.map((record: any) => {
-    const {
-      totalNombreSalariesHomme,
-      totalNombreSalariesFemme,
-    } = totalNombreSalaries(record.data.effectif.nombreSalaries);
-    const total =
-      totalNombreSalariesHomme !== undefined &&
-      totalNombreSalariesFemme !== undefined
-        ? totalNombreSalariesHomme + totalNombreSalariesFemme
-        : undefined;
-    record.data = {
-      ...record.data,
-      effectif: { ...record.data.effectif, totalNombreSalaries: total },
-    };
+    try {
+      const {
+        totalNombreSalariesHomme,
+        totalNombreSalariesFemme,
+      } = totalNombreSalaries(record.data.effectif.nombreSalaries);
+      const total =
+        totalNombreSalariesHomme !== undefined &&
+        totalNombreSalariesFemme !== undefined
+          ? totalNombreSalariesHomme + totalNombreSalariesFemme
+          : undefined;
+      record.data = {
+        ...record.data,
+        effectif: { ...record.data.effectif, totalNombreSalaries: total },
+      };
+    } catch (error) {
+      console.log(
+        "error while processing record",
+        record.id,
+        ". Error:",
+        error
+      );
+    }
   });
   return records;
 }
@@ -98,13 +107,22 @@ async function migrateEcartTauxRemunerationCSP(records: Array<object>) {
   );
 
   records.map((record: any) => {
-    const remunerationAnnuelle = calculEcartTauxRemunerationParTrancheAgeCSP(
-      record.data.indicateurUn.remunerationAnnuelle
-    );
-    record.data = {
-      ...record.data,
-      indicateurUn: { ...record.data.indicateurUn, remunerationAnnuelle },
-    };
+    try {
+      const remunerationAnnuelle = calculEcartTauxRemunerationParTrancheAgeCSP(
+        record.data.indicateurUn.remunerationAnnuelle
+      );
+      record.data = {
+        ...record.data,
+        indicateurUn: { ...record.data.indicateurUn, remunerationAnnuelle },
+      };
+    } catch (error) {
+      console.log(
+        "error while processing record",
+        record.id,
+        ". Error:",
+        error
+      );
+    }
   });
   return records;
 }
@@ -115,13 +133,22 @@ async function migrateEcartTauxRemunerationCoef(records: Array<object>) {
   );
 
   records.map((record: any) => {
-    const coefficient = calculEcartTauxRemunerationParTrancheAgeCoef(
-      record.data.indicateurUn.coefficient
-    );
-    record.data = {
-      ...record.data,
-      indicateurUn: { ...record.data.indicateurUn, coefficient },
-    };
+    try {
+      const coefficient = calculEcartTauxRemunerationParTrancheAgeCoef(
+        record.data.indicateurUn.coefficient
+      );
+      record.data = {
+        ...record.data,
+        indicateurUn: { ...record.data.indicateurUn, coefficient },
+      };
+    } catch (error) {
+      console.log(
+        "error while processing record",
+        record.id,
+        ". Error:",
+        error
+      );
+    }
   });
   return records;
 }
@@ -130,44 +157,53 @@ async function migrateNonCalculable(records: Array<object>) {
   console.log(">>> updating data.indicateurX.nonCalculable");
 
   records.map((record: any) => {
-    const {
-      effectifsIndicateurCalculable: indicateurUnCalculable,
-    } = calculIndicateurUn(record.data);
-    const {
-      effectifsIndicateurCalculable: indicateurDeuxCalculable,
-    } = calculIndicateurDeux(record.data);
-    const {
-      effectifsIndicateurCalculable: indicateurTroisCalculable,
-    } = calculIndicateurTrois(record.data);
-    const {
-      effectifsIndicateurCalculable: indicateurDeuxTroisCalculable,
-    } = calculIndicateurDeuxTrois(record.data);
-    const {
-      indicateurCalculable: indicateurQuatreCalculable,
-    } = calculIndicateurQuatre(record.data);
-    record.data = {
-      ...record.data,
-      indicateurUn: {
-        ...record.data.indicateurUn,
-        nonCalculable: !indicateurUnCalculable,
-      },
-      indicateurDeux: {
-        ...record.data.indicateurDeux,
-        nonCalculable: !indicateurDeuxCalculable,
-      },
-      indicateurTrois: {
-        ...record.data.indicateurTrois,
-        nonCalculable: !indicateurTroisCalculable,
-      },
-      indicateurDeuxTrois: {
-        ...record.data.indicateurDeuxTrois,
-        nonCalculable: !indicateurDeuxTroisCalculable,
-      },
-      indicateurQuatre: {
-        ...record.data.indicateurQuatre,
-        nonCalculable: !indicateurQuatreCalculable,
-      },
-    };
+    try {
+      const {
+        effectifsIndicateurCalculable: indicateurUnCalculable,
+      } = calculIndicateurUn(record.data);
+      const {
+        effectifsIndicateurCalculable: indicateurDeuxCalculable,
+      } = calculIndicateurDeux(record.data);
+      const {
+        effectifsIndicateurCalculable: indicateurTroisCalculable,
+      } = calculIndicateurTrois(record.data);
+      const {
+        effectifsIndicateurCalculable: indicateurDeuxTroisCalculable,
+      } = calculIndicateurDeuxTrois(record.data);
+      const {
+        indicateurCalculable: indicateurQuatreCalculable,
+      } = calculIndicateurQuatre(record.data);
+      record.data = {
+        ...record.data,
+        indicateurUn: {
+          ...record.data.indicateurUn,
+          nonCalculable: !indicateurUnCalculable,
+        },
+        indicateurDeux: {
+          ...record.data.indicateurDeux,
+          nonCalculable: !indicateurDeuxCalculable,
+        },
+        indicateurTrois: {
+          ...record.data.indicateurTrois,
+          nonCalculable: !indicateurTroisCalculable,
+        },
+        indicateurDeuxTrois: {
+          ...record.data.indicateurDeuxTrois,
+          nonCalculable: !indicateurDeuxTroisCalculable,
+        },
+        indicateurQuatre: {
+          ...record.data.indicateurQuatre,
+          nonCalculable: !indicateurQuatreCalculable,
+        },
+      };
+    } catch (error) {
+      console.log(
+        "error while processing record",
+        record.id,
+        ". Error:",
+        error
+      );
+    }
   });
   return records;
 }
