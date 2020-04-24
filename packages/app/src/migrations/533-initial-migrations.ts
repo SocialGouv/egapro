@@ -45,6 +45,7 @@ async function migrateData() {
   let { data, hasNextPage, next } = await collection.listRecords({
     filters: {
       "data.declaration.formValidated": "Valid",
+      "data.source": "egapro",
     },
   });
   let count = 0;
