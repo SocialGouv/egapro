@@ -65,6 +65,11 @@ spec:
             - name: KINTO_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
+                  name: egapro
+                  key: KINTO_ADMIN_PASSWORD
+            - name: KINTO_PROD_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
                   name: egapro-preprod-import-export
                   key: KINTO_ADMIN_PASSWORD
             - name: ES_ID

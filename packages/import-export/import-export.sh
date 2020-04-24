@@ -9,6 +9,7 @@
 # - PGPASSWORD the preprod posgresql password
 # - PG_PROD_PASSWORD the prod posgresql password
 # - KINTO_ADMIN_PASSWORD the kinto password for the "admin" user
+# - KINTO_PROD_ADMIN_PASSWORD the kinto password for the "admin" user on production
 # - ES_ID the ID of the elasticsearch cloud ID
 # - ES_USERNAME the elasticsearch username
 # - ES_PASSWORD the elasticsearch password
@@ -78,7 +79,11 @@ PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -f /tmp/late
 PGPASSWORD=$PG_PROD_PASSWORD psql -h $POSTGRESQL_SERVER -U postgres -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
 
 echo ">>> RESTORE THE ORIGINAL KINTO ADMIN PASSWORD"
-curl -X PUT -H "Content-Type: application/json" -d "{\"data\": {\"password\": \"$KINTO_ADMIN_PASSWORD\"}}" --user 'admin:passw0rd' http://kinto:8888/v1/accounts/admin
+STATUSCODE=$(curl --silent --write-out "%{http_code}" --fail --output /dev/null -X PUT -H "Content-Type: application/json" -d "{\"data\": {\"password\": \"$KINTO_ADMIN_PASSWORD\"}}" --user admin:$KINTO_PROD_ADMIN_PASSWORD http://kinto:8888/v1/accounts/admin)
+if test $STATUSCODE -ne 200; then
+  echo "Failure while restoring the original kinto admin password:" $STATUSCODE
+  exit 1
+fi
 
 
 echo ">>> DOWNLOADING 'DNUM - EXPORT SOLEN 2019.xlsx'"
@@ -110,7 +115,7 @@ echo ">>> CONVERTING /tmp/dump_declarations_records.json TO /tmp/dump_declaratio
 /app/venv/bin/python json_to_xlsx.py /tmp/dump_declarations_records.json /tmp/dump_declarations_records.xlsx
 
 
-echo ">>> UPLOADING /tmp/dump_declarations_records.json"
+echo ">>> UPLOADING /tmp/dump_declarations_records.json as dump_declarations_records$ENV_SUFFIX.json"
 az storage file upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
@@ -118,7 +123,7 @@ az storage file upload \
   --source "/tmp/dump_declarations_records.json" \
   --path "dump_declarations_records$ENV_SUFFIX.json"
 
-echo ">>> UPLOADING /tmp/dump_declarations_records.xlsx"
+echo ">>> UPLOADING /tmp/dump_declarations_records.xlsx as dump_declarations_records$ENV_SUFFIX.xlsx"
 az storage file upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT \
@@ -132,7 +137,7 @@ JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node index_elasticsearch.
 echo ">>> EXPORTING THE DECLARATIONS FROM THE COMPANIES WITH 1000+ EMPLOYEES IN /tmp/dump_declarations_records_1000.(xlsx|csvc)"
 JSON_DUMP_FILENAME=/tmp/dump_declarations_records.json node prepare-xlsx-1000.js
 
-echo ">>> UPLOADING /tmp/dump_declarations_records_1000.xlsx"
+echo ">>> UPLOADING /tmp/dump_declarations_records_1000.xlsx as index-egalite-hf$ENV_SUFFIX.xlsx"
 az storage blob upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
@@ -140,7 +145,7 @@ az storage blob upload \
   --name "index-egalite-hf$ENV_SUFFIX.xlsx" \
   --file "/tmp/dump_declarations_records_1000.xlsx"
 
-echo ">>> UPLOADING /tmp/dump_declarations_records_1000.csv"
+echo ">>> UPLOADING /tmp/dump_declarations_records_1000.csv as index-egalite-hf$ENV_SUFFIX.csv"
 az storage blob upload \
   --account-name $AZURE_STORAGE_ACCOUNT_NAME_EXPORT_BLOB \
   --account-key $AZURE_STORAGE_ACCOUNT_KEY_EXPORT_BLOB \
