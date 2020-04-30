@@ -72,7 +72,7 @@ Build app:
     - Install
   script:
     - echo $ENV_SUFFIX
-    - REACT_APP_ENV_SUFFIX=${ENV_SUFFIX} yarn workspace app build
+    - REACT_APP_ENV_SUFFIX=${ENV_SUFFIX} REACT_APP_HOST=${HOST} yarn workspace app build
   artifacts:
     expire_in: 1 day
     paths:
