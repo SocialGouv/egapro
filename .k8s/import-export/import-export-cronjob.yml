@@ -13,6 +13,7 @@ spec:
           containers:
             - name: import-export-job
               image: ${CI_REGISTRY_IMAGE}/import-export:${IMAGE_TAG}
+              command: ["/app/import.sh && /app/export.sh"]
               resources:
                 requests:
                   cpu: 100m

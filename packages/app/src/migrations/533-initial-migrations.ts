@@ -20,7 +20,7 @@ if (!process.env.KINTO_SERVER) {
   console.log(
     "Error: this script needs an env variable named KINTO_SERVER with the url to the kinto server, like 'localhost' or 'kinto-server'"
   );
-  process.exit();
+  process.exit(1);
 } else {
   console.log("Using the following kinto server URL:", KINTO_URL);
 }

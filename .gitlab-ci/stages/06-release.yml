@@ -29,10 +29,10 @@ Make a new release and deploy to preprod environment:
   when: manual
 
 ###########################################
-###            IMPORT-EXPORT            ###
+###               IMPORT                ###
 ###########################################
 
-Import Solen to consolidated export:
+Import Solen data:
   stage: Release
   image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/kubectl:0.29.0
   dependencies: []
@@ -47,10 +47,34 @@ Import Solen to consolidated export:
     variables:
       - $PRODUCTION
   script:
-    - kubectl delete job import-export-job -n ${K8S_NAMESPACE} || true;
-    - envsubst < .k8s/import-export/import-export-job.yml > .k8s/import-export/import-export-job-${PROJECT}.yml
-    - kubectl apply -f .k8s/import-export/import-export-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
-    - kubectl wait --for=condition=complete job/import-export-job --timeout=180000s -n ${K8S_NAMESPACE}
+    - kubectl delete job import-job -n ${K8S_NAMESPACE} || true;
+    - envsubst < .k8s/import-export/import-job.yml > .k8s/import-export/import-job-${PROJECT}.yml
+    - kubectl apply -f .k8s/import-export/import-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/import-job --timeout=180000s -n ${K8S_NAMESPACE}
+
+###########################################
+###               EXPORT                ###
+###########################################
+
+Export consolidated data:
+  stage: Release
+  image: registry.gitlab.factory.social.gouv.fr/socialgouv/docker/kubectl:0.29.0
+  dependencies: []
+  when: manual
+  #TODO: uncomment the following "only" when it's been tested so it only deploys on preprod
+  # only:
+  #   refs:
+  #     - tags
+  environment:
+    name: ${DEV_ENVIRONMENT_NAME}
+  except:
+    variables:
+      - $PRODUCTION
+  script:
+    - kubectl delete job export-job -n ${K8S_NAMESPACE} || true;
+    - envsubst < .k8s/import-export/export-job.yml > .k8s/import-export/export-job-${PROJECT}.yml
+    - kubectl apply -f .k8s/import-export/export-job-${PROJECT}.yml -n ${K8S_NAMESPACE}
+    - kubectl wait --for=condition=complete job/export-job --timeout=180000s -n ${K8S_NAMESPACE}
 
 ###########################################
 ###            DATA-MIGRATION           ###
