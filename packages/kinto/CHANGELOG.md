@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.10.0](https://github.com/SocialGouv/egapro/compare/v2.9.5...v2.10.0) (2020-05-04)
+
+**Note:** Version bump only for package kinto
+
+
+
+
+
 ## [2.9.5](https://github.com/SocialGouv/egapro/compare/v2.9.4...v2.9.5) (2020-04-01)
 
 **Note:** Version bump only for package kinto

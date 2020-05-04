@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.10.0](https://github.com/SocialGouv/egapro/compare/v2.9.5...v2.10.0) (2020-05-04)
+
+
+### Bug Fixes
+
+* fix aucun résultats affiché lors du chargement ([#650](https://github.com/SocialGouv/egapro/issues/650)) ([ad24082](https://github.com/SocialGouv/egapro/commit/ad2408228e695c3ab508b4227f8afe6bae6f41e4))
+* fix sorting with highligted elements ([#681](https://github.com/SocialGouv/egapro/issues/681)) ([7f0f359](https://github.com/SocialGouv/egapro/commit/7f0f35945261aed7272c4a554f29665767160063))
+
+
+### Features
+
+* **import-export:** ajout d'un "ENV_SUFFIX" pour permettre le déploiement en dev de l'import-export et indexing elasticsearch ([#647](https://github.com/SocialGouv/egapro/issues/647)) ([5c9a059](https://github.com/SocialGouv/egapro/commit/5c9a059e5342b9296565ffe38119c25fa0914d1e))
+* add social networks metadata ([#683](https://github.com/SocialGouv/egapro/issues/683)) ([36faa70](https://github.com/SocialGouv/egapro/commit/36faa7013818835de2a0a75fa3a74231f57baab4))
+* add user feedback button ([#635](https://github.com/SocialGouv/egapro/issues/635)) ([d953435](https://github.com/SocialGouv/egapro/commit/d95343574cefd2624fa49b0a448714107569bf44))
+* ajout responsive à la page consulter index ([#679](https://github.com/SocialGouv/egapro/issues/679)) ([1963574](https://github.com/SocialGouv/egapro/commit/1963574b78c6db36dc574da90fea55a2383560e3))
+* highlight searched terms in consulter index page ([#678](https://github.com/SocialGouv/egapro/issues/678)) ([b964ccf](https://github.com/SocialGouv/egapro/commit/b964ccf418e31b1f4cf7ee21a25f8f3847a94a2e))
+* mise à jour de l'input de recherche sur la page de consultation ([#649](https://github.com/SocialGouv/egapro/issues/649)) ([3586212](https://github.com/SocialGouv/egapro/commit/358621219f4cef163cd4c4a95549770d1444ddaa))
+* **migration:** Migration des données dans le pipeline gitlab ([#680](https://github.com/SocialGouv/egapro/issues/680)) ([df0fef8](https://github.com/SocialGouv/egapro/commit/df0fef87e4a38da5bde6cde0b4a446cae5433c2f))
+
+
+
+
+
 ## [2.9.5](https://github.com/SocialGouv/egapro/compare/v2.9.4...v2.9.5) (2020-04-01)
 
 **Note:** Version bump only for package app

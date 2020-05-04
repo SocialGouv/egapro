@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.10.0](https://github.com/SocialGouv/egapro/compare/v2.9.5...v2.10.0) (2020-05-04)
+
+
+### Features
+
+* **import-export:** ajout d'un "ENV_SUFFIX" pour permettre le déploiement en dev de l'import-export et indexing elasticsearch ([#647](https://github.com/SocialGouv/egapro/issues/647)) ([5c9a059](https://github.com/SocialGouv/egapro/commit/5c9a059e5342b9296565ffe38119c25fa0914d1e))
+
+
+
+
+
 ## [2.9.5](https://github.com/SocialGouv/egapro/compare/v2.9.4...v2.9.5) (2020-04-01)
 
 **Note:** Version bump only for package api
