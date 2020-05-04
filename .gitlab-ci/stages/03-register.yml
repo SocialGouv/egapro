@@ -50,3 +50,13 @@ Register import-export image:
   variables:
     CONTEXT: packages/import-export
     IMAGE_NAME: ${CI_REGISTRY_IMAGE}/import-export
+
+Register migrate-data image:
+  extends: .register_stage
+  variables:
+    CONTEXT: ./
+    DOCKER_BUILD_ARGS: >-
+      --shm-size 512M
+      -f ./packages/app/Dockerfile.migrate-data
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}/migrate-data
+  before_script:

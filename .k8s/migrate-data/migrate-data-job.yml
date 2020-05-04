@@ -1,0 +1,53 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate-data-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: migrate-data-job
+          image: ${CI_REGISTRY_IMAGE}/migrate-data:${IMAGE_TAG}
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 4000Mi
+          env:
+            - name: KINTO_SERVER
+              value: "kinto"
+            - name: KINTO_LOGIN
+              valueFrom:
+                secretKeyRef:
+                  name: ${PROJECT}
+                  key: KINTO_ADMIN_LOGIN
+            - name: KINTO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ${PROJECT}
+                  key: KINTO_ADMIN_PASSWORD
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-kinto
+          image: alpine:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 20m
+              memory: 32Mi
+          command:
+            - sh
+            - -c
+            - |
+              while ! nc -z kinto 8888; do
+                echo sleeping;
+                sleep 1;
+              done;
+              echo Connected!;
+  backoffLimit: 1

@@ -1,0 +1,20 @@
+FROM node:10.15.3-alpine
+
+WORKDIR /app
+
+ENV KINTO_SERVER=kinto-server
+ENV KINTO_LOGIN=admin
+ENV KINTO_PASSWORD=passw0rd
+
+COPY packages/app/package.json yarn.lock /app/
+
+RUN yarn --frozen-lockfile --cache-folder /dev/shm/yarn 
+
+COPY packages/app/src /app/src
+COPY packages/app/tsconfig.json /app/
+
+USER node
+
+ENV NODE_ENV=production
+
+CMD ["yarn", "run", "migrate"]
