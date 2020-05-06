@@ -5,7 +5,7 @@ import { Form } from "react-final-form";
 import {
   TranchesAges,
   GroupTranchesAgesIndicateurUn,
-  FormState
+  FormState,
 } from "../../globals";
 
 import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
@@ -57,8 +57,8 @@ const groupByCategorieSocioPro = (
           ...acc,
           [id]: {
             ...el,
-            tranchesAges: [...el.tranchesAges, otherAttr]
-          }
+            tranchesAges: [...el.tranchesAges, otherAttr],
+          },
         };
       } else {
         return {
@@ -66,8 +66,8 @@ const groupByCategorieSocioPro = (
           [id]: {
             id,
             name,
-            tranchesAges: [otherAttr]
-          }
+            tranchesAges: [otherAttr],
+          },
         };
       }
     },
@@ -88,7 +88,7 @@ function IndicateurUnFormRaw({
   readOnly,
   updateIndicateurUn,
   validateIndicateurUn,
-  nextLink
+  nextLink,
 }: Props) {
   const initialValues = {
     remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
@@ -107,12 +107,12 @@ function IndicateurUnFormRaw({
               ),
               remunerationAnnuelleBrutHommes: parseIntStateValue(
                 remunerationAnnuelleBrutHommes
-              )
+              ),
             };
           }
-        )
+        ),
       })
-    )
+    ),
   };
 
   const saveForm = (formData: any) => {
@@ -123,7 +123,7 @@ function IndicateurUnFormRaw({
           ({
             remunerationAnnuelleBrutFemmes,
             remunerationAnnuelleBrutHommes,
-            trancheAge
+            trancheAge,
           }: any) => {
             return {
               trancheAge,
@@ -132,10 +132,10 @@ function IndicateurUnFormRaw({
               ),
               remunerationAnnuelleBrutHommes: parseIntFormValue(
                 remunerationAnnuelleBrutHommes
-              )
+              ),
             };
           }
-        )
+        ),
       })
     );
     updateIndicateurUn(remunerationAnnuelle);
@@ -163,7 +163,7 @@ function IndicateurUnFormRaw({
               {
                 id,
                 name,
-                tranchesAges
+                tranchesAges,
               }: {
                 id: any;
                 name: string;
@@ -219,8 +219,8 @@ function IndicateurUnFormRaw({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
-  })
+    flexDirection: "column",
+  }),
 };
 
 export default IndicateurUnFormRaw;
