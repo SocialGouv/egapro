@@ -5,7 +5,7 @@ import {
   FormState,
   ActionIndicateurDeuxTroisData,
   PeriodeDeclaration,
-  GroupeEffectif
+  GroupeEffectif,
 } from "../../globals";
 
 import globalStyles from "../../utils/globalStyles";
@@ -24,13 +24,13 @@ import {
   parseIntStateValue,
   parseBooleanFormValue,
   parseBooleanStateValue,
-  parsePeriodeDeclarationFormValue
+  parsePeriodeDeclarationFormValue,
 } from "../../utils/formHelpers";
 import {
   calendarYear,
   dateToString,
   parseDate,
-  Year
+  Year,
 } from "../../utils/helpers";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
@@ -55,7 +55,7 @@ function IndicateurDeuxTroisForm({
   nombreSalaries,
   readOnly,
   updateIndicateurDeuxTrois,
-  validateIndicateurDeuxTrois
+  validateIndicateurDeuxTrois,
 }: Props) {
   const initialValues = {
     presenceAugmentationPromotion: parseBooleanStateValue(
@@ -67,7 +67,7 @@ function IndicateurDeuxTroisForm({
     nombreAugmentationPromotionHommes: parseIntStateValue(
       nombreAugmentationPromotionHommes
     ),
-    periodeDeclaration: periodeDeclaration
+    periodeDeclaration: periodeDeclaration,
   };
 
   const saveForm = (formData: any) => {
@@ -87,7 +87,7 @@ function IndicateurDeuxTroisForm({
       presenceAugmentationPromotion,
       nombreAugmentationPromotionFemmes,
       nombreAugmentationPromotionHommes,
-      periodeDeclaration
+      periodeDeclaration,
     });
   };
 
@@ -109,7 +109,7 @@ function IndicateurDeuxTroisForm({
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommes,
-    totalNombreSalariesFemme: totalNombreSalariesFemmes
+    totalNombreSalariesFemme: totalNombreSalariesFemmes,
   } = totalNombreSalaries(nombreSalaries);
 
   const validateEffectifs = (value: string, maxNum: number): boolean => {
@@ -173,16 +173,16 @@ function IndicateurDeuxTroisForm({
             choices={[
               {
                 label: `Période de référence de l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
-                value: "unePeriodeReference"
+                value: "unePeriodeReference",
               },
               {
                 label: `Période de référence de 2 ans (du ${twoYears} au ${dateFinPeriodeReference})`,
-                value: "deuxPeriodesReference"
+                value: "deuxPeriodesReference",
               },
               {
                 label: `Période de référence de 3 ans (du ${threeYears} au ${dateFinPeriodeReference})`,
-                value: "troisPeriodesReference"
-              }
+                value: "troisPeriodesReference",
+              },
             ]}
           />
 
@@ -245,7 +245,7 @@ function IndicateurDeuxTroisForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   spacer: css({
     marginTop: "2em",
