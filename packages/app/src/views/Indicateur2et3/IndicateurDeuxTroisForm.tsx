@@ -8,6 +8,8 @@ import {
   GroupeEffectif
 } from "../../globals";
 
+import globalStyles from "../../utils/globalStyles";
+
 import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
 import RadiosBoolean from "../../components/RadiosBoolean";
@@ -115,16 +117,52 @@ function IndicateurDeuxTroisForm({
     return intValue === undefined || intValue <= maxNum;
   };
 
+  const validateAugmentation = (value: string): boolean => {
+    const intValue = parseIntFormValue(value);
+    return intValue === undefined || intValue > 0;
+  };
+
+  const validateForm = ({
+    presenceAugmentationPromotion,
+    nombreAugmentationPromotionFemmes,
+    nombreAugmentationPromotionHommes,
+  }: {
+    presenceAugmentationPromotion: string;
+    nombreAugmentationPromotionFemmes: string;
+    nombreAugmentationPromotionHommes: string;
+  }) => {
+    if (presenceAugmentationPromotion === "false") {
+      return undefined;
+    }
+    if (
+      validateAugmentation(nombreAugmentationPromotionFemmes) ||
+      validateAugmentation(nombreAugmentationPromotionHommes)
+    ) {
+      return undefined;
+    }
+    return {
+      presenceAugmentationPromotion:
+        "Il ne peut pas y avoir eu des augmentations et 0 salariés augmentés",
+    };
+  };
+
   return (
     <Form
       onSubmit={onSubmit}
+      validate={validateForm}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({
+        handleSubmit,
+        values,
+        hasValidationErrors,
+        errors,
+        submitFailed,
+      }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
@@ -179,6 +217,9 @@ function IndicateurDeuxTroisForm({
                     : "Le nombre d'hommes ne peut pas être supérieur aux effectifs";
                 }}
               />
+              <div css={styles.formValidationErrors}>
+                {errors.presenceAugmentationPromotion}
+              </div>
             </BlocForm>
           )}
 
@@ -207,8 +248,15 @@ const styles = {
     flexDirection: "column"
   }),
   spacer: css({
-    marginTop: "2em"
-  })
+    marginTop: "2em",
+  }),
+  formValidationErrors: css({
+    color: globalStyles.colors.error,
+    borderColor: globalStyles.colors.error,
+    fontSize: 12,
+    fontStyle: "italic",
+    lineHeight: "12px",
+  }),
 };
 
 export default IndicateurDeuxTroisForm;
