@@ -78,6 +78,11 @@ const groupByCategorieSocioPro = (
   return Object.entries(tmpArray).map(([id, tranchesAges]) => tranchesAges);
 };
 
+const validateRemuneration = (value: string): string | undefined => {
+  const intValue = parseIntFormValue(value);
+  return intValue > 0 ? undefined : "La rémunération doit être supérieure à 0";
+};
+
 function IndicateurUnFormRaw({
   ecartRemuParTrancheAge,
   readOnly,
@@ -183,6 +188,8 @@ function IndicateurUnFormRaw({
                           mask="number"
                           femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
                           hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                          customValidateFemmes={validateRemuneration}
+                          customValidateHommes={validateRemuneration}
                         />
                       );
                     }
