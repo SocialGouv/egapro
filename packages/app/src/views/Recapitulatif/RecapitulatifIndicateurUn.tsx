@@ -5,14 +5,14 @@ import { Fragment } from "react";
 import { FormState, TranchesAges } from "../../globals";
 import {
   effectifEtEcartRemuGroupCsp,
-  effectifEtEcartRemuGroupCoef
+  effectifEtEcartRemuGroupCoef,
 } from "../../utils/calculsEgaProIndicateurUn";
 
 import {
   displayNameTranchesAges,
   displayNameCategorieSocioPro,
   displayPercent,
-  displaySexeSurRepresente
+  displaySexeSurRepresente,
 } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
@@ -47,9 +47,7 @@ function RecapitulatifIndicateurUn({
   noteIndicateurUn,
 }: Props) {
   if (!effectifsIndicateurUnCalculable) {
-    const messageCalculParCSP = indicateurUnParCSP ? (
-      undefined
-    ) : (
+    const messageCalculParCSP = indicateurUnParCSP ? undefined : (
       <TextSimulatorLink
         to="/indicateur1"
         label="Vous devez calculer par CSP"
@@ -103,7 +101,7 @@ function RecapitulatifIndicateurUn({
           ? {
               id: el.categorieSocioPro,
               name: displayNameCategorieSocioPro(el.categorieSocioPro),
-              ...el
+              ...el,
             }
           : el;
       if (index % 4 === 0) {
@@ -130,7 +128,7 @@ function RecapitulatifIndicateurUn({
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
-          indicateurSexeSurRepresente
+          indicateurSexeSurRepresente,
         }}
       >
         <RowLabelFull
@@ -147,10 +145,9 @@ function RecapitulatifIndicateurUn({
             displayNameTranchesAges(TranchesAges.MoinsDe30ans),
             displayNameTranchesAges(TranchesAges.De30a39ans),
             displayNameTranchesAges(TranchesAges.De40a49ans),
-            displayNameTranchesAges(TranchesAges.PlusDe50ans)
+            displayNameTranchesAges(TranchesAges.PlusDe50ans),
           ]}
         />
-
         {groupEffectifEtEcartRemuParTranche.map(
           (
             effectifEtEcartRemuParTranche: Array<{
@@ -166,7 +163,7 @@ function RecapitulatifIndicateurUn({
                 effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne,
                 effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne,
                 effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne,
-                effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
+                effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne,
               ]}
               asPercent={true}
             />

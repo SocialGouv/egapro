@@ -40,7 +40,7 @@ function Recapitulatif({ state }: Props) {
     effectifEtEcartRemuParTranche,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn
+    noteIndicateurUn,
   } = calculIndicateurUn(state);
 
   const {
@@ -50,7 +50,7 @@ function Recapitulatif({ state }: Props) {
     indicateurEcartAugmentation,
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteIndicateurDeux,
-    correctionMeasure: correctionMeasureIndicateurDeux
+    correctionMeasure: correctionMeasureIndicateurDeux,
   } = calculIndicateurDeux(state);
 
   const {
@@ -60,7 +60,7 @@ function Recapitulatif({ state }: Props) {
     indicateurEcartPromotion,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteIndicateurTrois,
-    correctionMeasure: correctionMeasureIndicateurTrois
+    correctionMeasure: correctionMeasureIndicateurTrois,
   } = calculIndicateurTrois(state);
 
   const {
@@ -73,19 +73,19 @@ function Recapitulatif({ state }: Props) {
     correctionMeasure: correctionMeasureIndicateurDeuxTrois,
     tauxAugmentationPromotionHommes,
     tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries
+    plusPetitNombreSalaries,
   } = calculIndicateurDeuxTrois(state);
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre
+    noteIndicateurQuatre,
   } = calculIndicateurQuatre(state);
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq
+    noteIndicateurCinq,
   } = calculIndicateurCinq(state);
 
   const allIndicateurValid =
@@ -114,7 +114,7 @@ function Recapitulatif({ state }: Props) {
 
   const {
     totalNombreSalariesHomme,
-    totalNombreSalariesFemme
+    totalNombreSalariesFemme,
   } = totalNombreSalaries(state.effectif.nombreSalaries);
 
   return (
@@ -247,13 +247,13 @@ function Recapitulatif({ state }: Props) {
 const styles = {
   info: css({
     marginLeft: 4,
-    fontSize: 12
+    fontSize: 12,
   }),
   monAvis: css({
     "@media print": {
-      display: "none"
-    }
-  })
+      display: "none",
+    },
+  }),
 };
 
 export default Recapitulatif;
