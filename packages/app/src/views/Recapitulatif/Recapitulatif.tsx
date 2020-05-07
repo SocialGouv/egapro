@@ -140,6 +140,8 @@ function Recapitulatif({ state }: Props) {
         indicateurEcartRemuneration={indicateurEcartRemuneration}
         indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
         indicateurUnParCSP={state.indicateurUn.csp}
+        indicateurUnParCoef={state.indicateurUn.coef}
+        indicateurUnParAutre={state.indicateurUn.autre}
         noteIndicateurUn={noteIndicateurUn}
       />
       {(trancheEffectifs !== "50 à 250" && (
