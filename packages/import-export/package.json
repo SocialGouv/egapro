@@ -17,7 +17,7 @@
   "devDependencies": {
     "@types/lodash": "4.14.149",
     "@types/react-table": "7.0.12",
-    "convert-array-to-csv": "^1.0.10",
+    "convert-array-to-csv": "^1.0.12",
     "xlsx": "^0.15.5"
   }
 }
