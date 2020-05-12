@@ -2196,6 +2196,11 @@
   dependencies:
     any-observable "^0.3.0"
 
+"@scarf/scarf@^1.0.4":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@scarf/scarf/-/scarf-1.0.5.tgz#accee0bce88a9047672f7c8faf3cada59c996b81"
+  integrity sha512-9WKaGVpQH905Aqkk+BczFEeLQxS07rl04afFRPUG9IcSlOwmo5EVVuuNu0d4M9LMYucObvK0LoAe+5HfMW2QhQ==
+
 "@sentry/apm@5.15.0":
   version "5.15.0"
   resolved "https://registry.yarnpkg.com/@sentry/apm/-/apm-5.15.0.tgz#76972fce07793a28203704f3aaf6b7916d07d562"
@@ -2714,10 +2719,10 @@
     "@types/history" "*"
     "@types/react" "*"
 
-"@types/react-table@7.0.12":
-  version "7.0.12"
-  resolved "https://registry.yarnpkg.com/@types/react-table/-/react-table-7.0.12.tgz#cb57c8dfb110f8c2d0f04b9d44a70f9235a13b27"
-  integrity sha512-x/8nFrCjr1ySs51pkHsDQz3t+nW94qS/M9mpyLoweJNd9YKFzJ2mbVcUshfcMOyR1/UR+6lfz2EKA1lzOoJz+w==
+"@types/react-table@7.0.17":
+  version "7.0.17"
+  resolved "https://registry.yarnpkg.com/@types/react-table/-/react-table-7.0.17.tgz#95628adcebcbd4c66f6da33d9177b82436822052"
+  integrity sha512-4C5w0FQTfE/jwAl1qI58ndOL9SEqfVQN8JP+SggPXpKUzwy/7Gmat7OgjITkw+VQ85tCySRFif3HBqo04h0mDA==
   dependencies:
     "@types/react" "*"
 
@@ -12108,10 +12113,12 @@ react-scripts@3.4.0:
   optionalDependencies:
     fsevents "2.1.2"
 
-react-table@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.0.0.tgz#3297e454cbffe916626b184f5394d7e7e098fa36"
-  integrity sha512-/RKUYLuqrupUs0qHdjdQLmgwdQ9mgXPnpshqv2T+OQUGhTu0XuLXVc6GOIywemXNf6qjL3dj81O6zALLK74Emw==
+react-table@7.0.5:
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.0.5.tgz#619c069dc585bb1dbfaa2ad4384de8d267267054"
+  integrity sha512-zm6NvcHlg3r4E4le6ESXKneaHEpPHAZJn+FAZDCleS0++JEKs1rPq9AtHMcZmiiqxKkerM4wco9mH2ztaX0zYQ==
+  dependencies:
+    "@scarf/scarf" "^1.0.4"
 
 react-text-mask@5.4.3:
   version "5.4.3"
