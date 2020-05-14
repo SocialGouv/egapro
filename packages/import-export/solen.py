@@ -777,7 +777,9 @@ class ExcelData(object):
 
 
 class KintoImporter(object):
-    def __init__(self, logger, schema, truncate=False, dryRun=False, usePrompt=False):
+    def __init__(
+        self, logger, schema, truncate=False, dryRun=False, usePrompt=False, debug=False
+    ):
         self.toImport = []
         self.usePrompt = usePrompt
         self.schema = schema
@@ -788,6 +790,7 @@ class KintoImporter(object):
             self.client = self.setUp()
         else:
             self.client = None
+        self.debug = debug
 
     def setUp(self):
         self.logger.info("Vérifications Kinto")
@@ -855,9 +858,10 @@ class KintoImporter(object):
     def run(self):
         with self.client.batch() as batch:
             for record in self.toImport:
-                self.logger.info(
-                    f"Ajout de la déclaration id={record['id']} au batch d'import."
-                )
+                if self.debug:
+                    self.logger.info(
+                        f"Ajout de la déclaration id={record['id']} au batch d'import."
+                    )
                 batch.update_record(
                     bucket=KINTO_BUCKET, collection=KINTO_COLLECTION, data=record
                 )
@@ -952,6 +956,7 @@ class App(object):
                 truncate=init_collection,
                 dryRun=dryRun,
                 usePrompt=self.usePrompt,
+                debug=self.debug,
             )
         except KintoImporterError as err:
             raise AppError(f"Erreur lors de l'initialisation Kinto: {err}")
