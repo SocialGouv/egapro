@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.10.1](https://github.com/SocialGouv/egapro/compare/v2.10.0...v2.10.1) (2020-05-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-scripts to v3.4.1 ([#612](https://github.com/SocialGouv/egapro/issues/612)) ([9205531](https://github.com/SocialGouv/egapro/commit/92055312638edb8aa6dfd038b8ae9acd9c06382b))
+
+
+
+
+
 # [2.10.0](https://github.com/SocialGouv/egapro/compare/v2.9.5...v2.10.0) (2020-05-04)
 
 

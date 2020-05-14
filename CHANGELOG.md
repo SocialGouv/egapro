@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.10.1](https://github.com/SocialGouv/egapro/compare/v2.10.0...v2.10.1) (2020-05-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-scripts to v3.4.1 ([#612](https://github.com/SocialGouv/egapro/issues/612)) ([9205531](https://github.com/SocialGouv/egapro/commit/92055312638edb8aa6dfd038b8ae9acd9c06382b))
+* **import solen:** message d'erreur explicite ([5f197e3](https://github.com/SocialGouv/egapro/commit/5f197e36ae057decc9899d0d4d104c89058c638f))
+* **import-export-cronjob:** fix secrets ([ab9d1f9](https://github.com/SocialGouv/egapro/commit/ab9d1f950c196f7f2546a6550e8ac6d7c9fbaece))
+
+
+
+
+
 # [2.10.0](https://github.com/SocialGouv/egapro/compare/v2.9.5...v2.10.0) (2020-05-04)
 
 

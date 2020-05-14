@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.10.1](https://github.com/SocialGouv/egapro/compare/v2.10.0...v2.10.1) (2020-05-14)
+
+
+### Bug Fixes
+
+* **import solen:** message d'erreur explicite ([5f197e3](https://github.com/SocialGouv/egapro/commit/5f197e36ae057decc9899d0d4d104c89058c638f))
+
+
+
+
+
 # [2.10.0](https://github.com/SocialGouv/egapro/compare/v2.9.5...v2.10.0) (2020-05-04)
 
 
