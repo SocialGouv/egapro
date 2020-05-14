@@ -722,7 +722,7 @@ class ExcelData(object):
             )
         except XLRDError as err:
             raise ExcelDataError(
-                f"Le format du fichier '{pathToExcelFile}' n'a pu être interprété."
+                f"Le format du fichier '{pathToExcelFile}' n'a pu être interprété: {err}"
             )
         self.fields = {
             EXCEL_NOM_FEUILLE_REPONDANTS: set([]),
