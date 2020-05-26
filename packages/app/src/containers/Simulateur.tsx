@@ -15,7 +15,7 @@ import ErrorMessage from "../components/ErrorMessage";
 import Declaration from "../views/Declaration";
 import Effectif from "../views/Effectif";
 import HomeSimulateur, {
-  HomeSimulateurRouteComponentProps
+  HomeSimulateurRouteComponentProps,
 } from "../views/HomeSimulateur";
 import IndicateurUn from "../views/Indicateur1";
 import IndicateurDeux from "../views/Indicateur2";
@@ -46,7 +46,7 @@ function Simulateur({ code, state, dispatch }: Props) {
         setLoading(false);
         dispatch({ type: "initiateState", data: jsonBody.data });
       })
-      .catch(error => {
+      .catch((error) => {
         setLoading(false);
         const errorMessage =
           (error.jsonBody && error.jsonBody.message) ||
@@ -58,9 +58,9 @@ function Simulateur({ code, state, dispatch }: Props) {
   useDebounceEffect(
     state,
     2000,
-    debouncedState => {
+    (debouncedState) => {
       if (debouncedState) {
-        putIndicatorsDatas(code, debouncedState).catch(error => {
+        putIndicatorsDatas(code, debouncedState).catch((error) => {
           setLoading(false);
           const errorMessage =
             (error.jsonBody && error.jsonBody.message) ||
@@ -89,14 +89,14 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/"
         exact
-        render={props => {
+        render={(props) => {
           const foo = props as HomeSimulateurRouteComponentProps;
           return <HomeSimulateur {...foo} code={code} />;
         }}
       />
       <Route
         path="/simulateur/:code/informations"
-        render={props => (
+        render={(props) => (
           <InformationsSimulation
             {...props}
             state={state}
@@ -106,53 +106,53 @@ function Simulateur({ code, state, dispatch }: Props) {
       />
       <Route
         path="/simulateur/:code/effectifs"
-        render={props => (
+        render={(props) => (
           <Effectif {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/indicateur1"
-        render={props => (
+        render={(props) => (
           <IndicateurUn {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/indicateur2"
-        render={props => (
+        render={(props) => (
           <IndicateurDeux {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/indicateur3"
-        render={props => (
+        render={(props) => (
           <IndicateurTrois {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/indicateur2et3"
-        render={props => (
+        render={(props) => (
           <IndicateurDeuxTrois {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/indicateur4"
-        render={props => (
+        render={(props) => (
           <IndicateurQuatre {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/indicateur5"
-        render={props => (
+        render={(props) => (
           <IndicateurCinq {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/recapitulatif"
-        render={props => <Recapitulatif {...props} state={state} />}
+        render={(props) => <Recapitulatif {...props} state={state} />}
       />
       <Route
         path="/simulateur/:code/informations-entreprise"
-        render={props => (
+        render={(props) => (
           <InformationsEntreprise
             {...props}
             state={state}
@@ -162,14 +162,19 @@ function Simulateur({ code, state, dispatch }: Props) {
       />
       <Route
         path="/simulateur/:code/informations-declarant"
-        render={props => (
+        render={(props) => (
           <InformationsDeclarant {...props} state={state} dispatch={dispatch} />
         )}
       />
       <Route
         path="/simulateur/:code/declaration"
-        render={props => (
-          <Declaration {...props} code={code}state={state} dispatch={dispatch} />
+        render={(props) => (
+          <Declaration
+            {...props}
+            code={code}
+            state={state}
+            dispatch={dispatch}
+          />
         )}
       />
     </Switch>
@@ -179,8 +184,8 @@ function Simulateur({ code, state, dispatch }: Props) {
 const styles = {
   viewLoading: css({
     margin: "auto",
-    alignSelf: "center"
-  })
+    alignSelf: "center",
+  }),
 };
 
 export default Simulateur;
