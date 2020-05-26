@@ -23,15 +23,15 @@ function Home({ history, location, dispatch }: Props) {
     setLoading(true);
     dispatch({ type: "resetState" });
 
-    postIndicatorsDatas({})
+    postIndicatorsDatas({ data: {} })
       .then(({ jsonBody: { id } }) => {
         setLoading(false);
         history.push(`/simulateur/${id}`, {
           ...(location.state && location.state),
-          openModalEmail: true
+          openModalEmail: true,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         setLoading(false);
         const errorMessage =
           (error.jsonBody && error.jsonBody.message) ||
@@ -49,7 +49,7 @@ function Home({ history, location, dispatch }: Props) {
       title="Bienvenue sur Index Egapro"
       tagline={[
         "L’Index d'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
-        "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises."
+        "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
       ]}
     >
       <div css={styles.content}>
@@ -134,23 +134,23 @@ const styles = {
     lineHeight: "22px",
     fontWeight: "bold",
     marginLeft: 0,
-    marginRight: 0
+    marginRight: 0,
   }),
 
   twoColumns: css({
     display: "flex",
-    flexDirection: "row"
+    flexDirection: "row",
   }),
   bloc: css({
     marginBottom: 50,
     padding: 10,
-    width: "50%"
+    width: "50%",
   }),
   blocImage: css({
     width: 300,
     height: 205,
     flexShrink: 0,
-    position: "relative"
+    position: "relative",
   }),
 
   image: css({
@@ -160,16 +160,16 @@ const styles = {
     bottom: 0,
     left: -globalStyles.grid.gutterWidth,
     backgroundRepeat: "no-repeat",
-    backgroundSize: "contain"
+    backgroundSize: "contain",
   }),
   illustrationData: css({
-    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-data.svg)`
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-data.svg)`,
   }),
   illustrationSimulator: css({
-    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-simulator.svg)`
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-simulator.svg)`,
   }),
   illustrationPublish: css({
-    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-publish.svg)`
+    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-publish.svg)`,
   }),
 
   blocContent: css({
@@ -179,38 +179,38 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     paddingTop: 10,
-    paddingBottom: 10
+    paddingBottom: 10,
   }),
   blocContentStep: css({
     display: "inline-block",
     fontSize: 12,
     lineHeight: "15px",
     fontWeight: "bold",
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   }),
   blocContentTitle: css({
     display: "inline-block",
     fontSize: 18,
     lineHeight: "22px",
     textTransform: "uppercase",
-    marginBottom: 14
+    marginBottom: 14,
   }),
   blocContentBody: css({
     fontSize: 14,
     lineHeight: "17px",
     marginBottom: "auto",
-    paddingBottom: 10
+    paddingBottom: 10,
   }),
 
   blocContentInfo: css({
     fontSize: 14,
     lineHeight: "17px",
-    fontStyle: "italic"
+    fontStyle: "italic",
   }),
   button: css({
     display: "inline-flex",
-    textDecoration: "none"
-  })
+    textDecoration: "none",
+  }),
 };
 
 export default Home;
