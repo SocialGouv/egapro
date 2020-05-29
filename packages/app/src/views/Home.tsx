@@ -23,7 +23,7 @@ function Home({ history, location, dispatch }: Props) {
     setLoading(true);
     dispatch({ type: "resetState" });
 
-    postIndicatorsDatas({ data: {} })
+    postIndicatorsDatas({})
       .then(({ jsonBody: { id } }) => {
         setLoading(false);
         history.push(`/simulateur/${id}`, {
