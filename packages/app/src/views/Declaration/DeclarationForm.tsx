@@ -12,7 +12,6 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
-import {sendSuccessEmail} from "../../utils/api";
 
 ///////////////////
 interface Props {
@@ -61,7 +60,6 @@ function DeclarationForm({
   const onSubmit = (formData: any) => {
     saveForm(formData);
     validateDeclaration("Valid");
-    sendSuccessEmail(code);
   };
 
   return (

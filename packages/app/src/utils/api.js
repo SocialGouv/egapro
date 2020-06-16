@@ -69,9 +69,6 @@ export const putIndicatorsDatas = (id, data) =>
 export const sendEmailIndicatorsDatas = (id, email) =>
   postResource(`/simulation/${id}/send-code`, { email });
 
-export const sendSuccessEmail = (id) =>
-  postResource(`/indicators-datas/${id}/success-email`, {});
-
 export const findIndicatorsDataForRaisonSociale = (
   raisonSociale,
   { size, from, sortBy, order }
