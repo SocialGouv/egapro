@@ -8880,13 +8880,12 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-kinto-http@^4.7.3:
-  version "4.7.3"
-  resolved "https://registry.yarnpkg.com/kinto-http/-/kinto-http-4.7.3.tgz#d6083ce167daff710b2db13d9774c2cecb6537e9"
-  integrity sha512-1BA8HdG0+cnYJFjsrx8H/j3xEVVNFHSmIDUqwVCHo4D8nLtNeIi9S3IqHLoMYikid7yfPteys66BGNg4EX59DA==
+kinto-http@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/kinto-http/-/kinto-http-5.1.1.tgz#75af2b74885d48664ea8e1af6fe25d567c9e4961"
+  integrity sha512-Hg1Yqc/HgmMHv2VFAxHoXp91hVbOZeymQG7/qoniRndUHJ4p7bUkzYEZ/1lDnWxmkziI1zoU0w6d0dHEVaJ5Tg==
   dependencies:
-    "@babel/runtime" "^7.0.0"
-    uuid "^3.0.1"
+    uuid "^7.0.0"
 
 kleur@^3.0.3:
   version "3.0.3"
@@ -14359,6 +14358,11 @@ uuid@^3.0.1, uuid@^3.3.2:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
+
+uuid@^7.0.0:
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-7.0.3.tgz#c5c9f2c8cf25dc0a372c4df1441c41f5bd0c680b"
+  integrity sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==
 
 v8-compile-cache@^2.0.3:
   version "2.1.0"
