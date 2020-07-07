@@ -75,6 +75,6 @@ export const findIndicatorsDataForRaisonSociale = (
 ) => {
   const encodedRaisonSociale = encodeURIComponent(raisonSociale);
   return getResource(
-    `/search-indicators-data?companyName=${encodedRaisonSociale}&size=${size}&from=${from}&sortBy=${sortBy}&order=${order}`
+    `/search?q=${encodedRaisonSociale}&size=${size}&from=${from}&sortBy=${sortBy}&order=${order}`
   );
 };

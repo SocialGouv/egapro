@@ -98,13 +98,11 @@ const highlightText = (text: string, highlightedTerm: string, key: string): (str
 
 const makeColumns = (searchedTerm: string) => ([
   {
-    id: "data.informationsEntreprise.nomEntreprise",
+    id: "informationsEntreprise.nomEntreprise",
     Header: "Raison\xa0Sociale",
     accessor: ({
-        data: {
-          informationsEntreprise: {
-            nomEntreprise
-          }
+        informationsEntreprise: {
+          nomEntreprise
         }
       }: FetchedIndicatorsData,
       index: number,
@@ -118,44 +116,44 @@ const makeColumns = (searchedTerm: string) => ([
   },
   {
     Header: "SIREN",
-    accessor: "data.informationsEntreprise.siren",
+    accessor: "informationsEntreprise.siren",
     disableSortBy: true
   },
   {
     Header: "Année",
-    accessor: "data.informations.anneeDeclaration",
+    accessor: "informations.anneeDeclaration",
     disableSortBy: true
   },
   {
     Header: "Note",
-    accessor: ({ data: { declaration } }: FetchedIndicatorsData) =>
+    accessor: ({ declaration }: FetchedIndicatorsData) =>
       (declaration && declaration.noteIndex) || "NC",
     disableSortBy: true
   },
   {
     Header: "Structure",
-    accessor: "data.informationsEntreprise.structure",
+    accessor: "informationsEntreprise.structure",
     disableSortBy: true
   },
   {
     Header: "Nom UES",
-    accessor: "data.informationsEntreprise.nomUES",
+    accessor: "informationsEntreprise.nomUES",
     disableSortBy: true
   },
   {
     Header: "Entreprises UES (SIREN)",
     accessor: (indicatorData: FetchedIndicatorsData) =>
-      formatUESList(indicatorData.data.informationsEntreprise),
+      formatUESList(indicatorData.informationsEntreprise),
     disableSortBy: true
   },
   {
     Header: "Région",
-    accessor: "data.informationsEntreprise.region",
+    accessor: "informationsEntreprise.region",
     disableSortBy: true
   },
   {
     Header: "Département",
-    accessor: "data.informationsEntreprise.departement",
+    accessor: "informationsEntreprise.departement",
     disableSortBy: true
   }
 ]);

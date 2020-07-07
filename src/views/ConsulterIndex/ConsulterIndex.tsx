@@ -17,11 +17,9 @@ import SearchBox from "../../components/MinistereTravail/SearchBox";
 
 export interface FetchedIndicatorsData {
   id: string;
-  data: {
-    informations: AppState["informations"];
-    declaration: AppState["declaration"];
-    informationsEntreprise: AppState["informationsEntreprise"];
-  };
+  informations: AppState["informations"];
+  declaration: AppState["declaration"];
+  informationsEntreprise: AppState["informationsEntreprise"];
 }
 
 interface SearchParams {
