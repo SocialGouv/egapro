@@ -10,7 +10,7 @@
     "btoa": "1.2.1",
     "date-fns": "^2.10.0",
     "dotenv": "8.2.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "node-fetch": "2.6.0",
     "react-table": "7.0.0"
   },
