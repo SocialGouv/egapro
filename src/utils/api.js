@@ -44,6 +44,7 @@ function fetchResource(method, pathname, body) {
     headers: body ? commonContentHeaders : commonHeaders,
     body: body ? JSON.stringify(body) : undefined,
   };
+  requestObj.credentials = "include";
   let origin = "/api";
   if(window.location.href.includes('localhost:')) {
     origin = "http://127.0.0.1:2626";
