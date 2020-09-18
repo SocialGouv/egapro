@@ -6,18 +6,18 @@
   "private": true,
   "scripts": {},
   "dependencies": {
-    "@elastic/elasticsearch": "7.6.1",
+    "@elastic/elasticsearch": "7.9.0",
     "btoa": "1.2.1",
-    "date-fns": "^2.10.0",
+    "date-fns": "^2.16.1",
     "dotenv": "8.2.0",
     "lodash": "4.17.19",
     "node-fetch": "2.6.0",
-    "react-table": "7.0.0"
+    "react-table": "7.5.1"
   },
   "devDependencies": {
     "@types/lodash": "4.14.149",
     "@types/react-table": "7.0.12",
     "convert-array-to-csv": "^1.0.10",
-    "xlsx": "^0.15.5"
+    "xlsx": "^0.16.7"
   }
 }

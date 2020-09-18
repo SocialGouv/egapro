@@ -12,27 +12,27 @@
     "test": "jest"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "7.6.1",
-    "@koa/cors": "3.0.0",
-    "@sentry/node": "5.15.0",
+    "@elastic/elasticsearch": "7.9.0",
+    "@koa/cors": "3.1.0",
+    "@sentry/node": "5.24.2",
     "@types/btoa": "1.2.3",
     "btoa": "1.2.1",
     "dotenv": "8.2.0",
-    "koa": "2.11.0",
+    "koa": "2.13.0",
     "koa-bodyparser": "4.3.0",
     "koa-router": "8.0.8",
     "lodash": "4.17.19",
     "node-fetch": "2.6.0",
     "nodemailer": "6.4.6",
     "pino": "5.17.0",
-    "react-table": "7.0.0"
+    "react-table": "7.5.1"
   },
   "devDependencies": {
-    "@sentry/types": "5.15.0",
-    "@socialgouv/tslint-config-recommended": "0.19.0",
+    "@sentry/types": "5.24.2",
+    "@socialgouv/tslint-config-recommended": "0.35.0",
     "@types/btoa": "1.2.3",
     "@types/dotenv": "6.1.1",
-    "@types/jest": "25.1.4",
+    "@types/jest": "25.2.3",
     "@types/koa": "2.11.2",
     "@types/koa-bodyparser": "4.3.0",
     "@types/koa-router": "7.4.0",
@@ -41,14 +41,14 @@
     "@types/node": "12.12.31",
     "@types/node-fetch": "2.5.5",
     "@types/nodemailer": "6.4.0",
-    "@types/pino": "5.17.0",
+    "@types/pino": "5.20.0",
     "@types/react-table": "7.0.12",
     "jest": "24.9.0",
     "nodemon": "2.0.2",
-    "prettier": "2.0.2",
-    "ts-jest": "25.2.1",
-    "ts-node": "8.8.1",
+    "prettier": "2.1.2",
+    "ts-jest": "25.5.1",
+    "ts-node": "8.10.2",
     "tslint": "6.1.0",
-    "typescript": "3.8.3"
+    "typescript": "3.9.7"
   }
 }

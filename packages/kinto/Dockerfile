@@ -2,7 +2,7 @@
 # in the egapro/ folder:
 # $ docker build -f packages/kinto/Dockerfile .
 
-FROM node:10.15.3-alpine
+FROM node:10.22.1-alpine
 
 WORKDIR /app
 
