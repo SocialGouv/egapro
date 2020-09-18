@@ -52,7 +52,7 @@
     "kinto-http": "^4.7.3",
     "node-fetch": "^2.6.0",
     "ts-node": "^8.6.2",
-    "typescript": "3.8.3",
+    "typescript": "4.0.3",
     "wait-on": "4.0.1"
   },
   "eslintConfig": {
