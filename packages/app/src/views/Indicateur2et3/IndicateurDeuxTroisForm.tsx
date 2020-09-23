@@ -5,8 +5,10 @@ import {
   FormState,
   ActionIndicateurDeuxTroisData,
   PeriodeDeclaration,
-  GroupeEffectif
+  GroupeEffectif,
 } from "../../globals";
+
+import globalStyles from "../../utils/globalStyles";
 
 import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
@@ -22,13 +24,13 @@ import {
   parseIntStateValue,
   parseBooleanFormValue,
   parseBooleanStateValue,
-  parsePeriodeDeclarationFormValue
+  parsePeriodeDeclarationFormValue,
 } from "../../utils/formHelpers";
 import {
   calendarYear,
   dateToString,
   parseDate,
-  Year
+  Year,
 } from "../../utils/helpers";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
@@ -53,7 +55,7 @@ function IndicateurDeuxTroisForm({
   nombreSalaries,
   readOnly,
   updateIndicateurDeuxTrois,
-  validateIndicateurDeuxTrois
+  validateIndicateurDeuxTrois,
 }: Props) {
   const initialValues = {
     presenceAugmentationPromotion: parseBooleanStateValue(
@@ -65,7 +67,7 @@ function IndicateurDeuxTroisForm({
     nombreAugmentationPromotionHommes: parseIntStateValue(
       nombreAugmentationPromotionHommes
     ),
-    periodeDeclaration: periodeDeclaration
+    periodeDeclaration: periodeDeclaration,
   };
 
   const saveForm = (formData: any) => {
@@ -85,7 +87,7 @@ function IndicateurDeuxTroisForm({
       presenceAugmentationPromotion,
       nombreAugmentationPromotionFemmes,
       nombreAugmentationPromotionHommes,
-      periodeDeclaration
+      periodeDeclaration,
     });
   };
 
@@ -107,7 +109,7 @@ function IndicateurDeuxTroisForm({
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommes,
-    totalNombreSalariesFemme: totalNombreSalariesFemmes
+    totalNombreSalariesFemme: totalNombreSalariesFemmes,
   } = totalNombreSalaries(nombreSalaries);
 
   const validateEffectifs = (value: string, maxNum: number): boolean => {
@@ -115,16 +117,52 @@ function IndicateurDeuxTroisForm({
     return intValue === undefined || intValue <= maxNum;
   };
 
+  const validateAugmentation = (value: string): boolean => {
+    const intValue = parseIntFormValue(value);
+    return intValue === undefined || intValue > 0;
+  };
+
+  const validateForm = ({
+    presenceAugmentationPromotion,
+    nombreAugmentationPromotionFemmes,
+    nombreAugmentationPromotionHommes,
+  }: {
+    presenceAugmentationPromotion: string;
+    nombreAugmentationPromotionFemmes: string;
+    nombreAugmentationPromotionHommes: string;
+  }) => {
+    if (presenceAugmentationPromotion === "false") {
+      return undefined;
+    }
+    if (
+      validateAugmentation(nombreAugmentationPromotionFemmes) ||
+      validateAugmentation(nombreAugmentationPromotionHommes)
+    ) {
+      return undefined;
+    }
+    return {
+      presenceAugmentationPromotion:
+        "Il ne peut pas y avoir eu des augmentations et 0 salariés augmentés",
+    };
+  };
+
   return (
     <Form
       onSubmit={onSubmit}
+      validate={validateForm}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({
+        handleSubmit,
+        values,
+        hasValidationErrors,
+        errors,
+        submitFailed,
+      }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
@@ -135,16 +173,16 @@ function IndicateurDeuxTroisForm({
             choices={[
               {
                 label: `Période de référence de l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
-                value: "unePeriodeReference"
+                value: "unePeriodeReference",
               },
               {
                 label: `Période de référence de 2 ans (du ${twoYears} au ${dateFinPeriodeReference})`,
-                value: "deuxPeriodesReference"
+                value: "deuxPeriodesReference",
               },
               {
                 label: `Période de référence de 3 ans (du ${threeYears} au ${dateFinPeriodeReference})`,
-                value: "troisPeriodesReference"
-              }
+                value: "troisPeriodesReference",
+              },
             ]}
           />
 
@@ -179,6 +217,9 @@ function IndicateurDeuxTroisForm({
                     : "Le nombre d'hommes ne peut pas être supérieur aux effectifs";
                 }}
               />
+              <div css={styles.formValidationErrors}>
+                {errors.presenceAugmentationPromotion}
+              </div>
             </BlocForm>
           )}
 
@@ -204,11 +245,18 @@ function IndicateurDeuxTroisForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   spacer: css({
-    marginTop: "2em"
-  })
+    marginTop: "2em",
+  }),
+  formValidationErrors: css({
+    color: globalStyles.colors.error,
+    borderColor: globalStyles.colors.error,
+    fontSize: 12,
+    fontStyle: "italic",
+    lineHeight: "12px",
+  }),
 };
 
 export default IndicateurDeuxTroisForm;
