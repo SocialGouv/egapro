@@ -1,8 +1,12 @@
 import argparse
 import io
 import json
+import os
 import pandas
 from pprint import pprint
+
+
+DEBUG = os.environ.get("DEBUG", False)
 
 
 def flatten_json(b, prefix="", delim="/", val=None):
@@ -205,8 +209,9 @@ def get_headers_columns(data):
             ("Mesures_correction", "/data/declaration/mesuresCorrection"),
         ]
     )
-    print("List of interesting columns to export: (alias_name, json_name)")
-    pprint(interesting_cols)
+    if DEBUG:
+        print("List of interesting columns to export: (alias_name, json_name)")
+        pprint(interesting_cols)
     import_cols = [
         (header, column)
         for header, column in interesting_cols
