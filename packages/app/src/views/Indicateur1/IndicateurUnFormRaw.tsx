@@ -5,7 +5,7 @@ import { Form } from "react-final-form";
 import {
   TranchesAges,
   GroupTranchesAgesIndicateurUn,
-  FormState
+  FormState,
 } from "../../globals";
 
 import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
@@ -57,8 +57,8 @@ const groupByCategorieSocioPro = (
           ...acc,
           [id]: {
             ...el,
-            tranchesAges: [...el.tranchesAges, otherAttr]
-          }
+            tranchesAges: [...el.tranchesAges, otherAttr],
+          },
         };
       } else {
         return {
@@ -66,8 +66,8 @@ const groupByCategorieSocioPro = (
           [id]: {
             id,
             name,
-            tranchesAges: [otherAttr]
-          }
+            tranchesAges: [otherAttr],
+          },
         };
       }
     },
@@ -78,12 +78,17 @@ const groupByCategorieSocioPro = (
   return Object.entries(tmpArray).map(([id, tranchesAges]) => tranchesAges);
 };
 
+const validateRemuneration = (value: string): string | undefined => {
+  const intValue = parseIntFormValue(value);
+  return intValue > 0 ? undefined : "La rémunération doit être supérieure à 0";
+};
+
 function IndicateurUnFormRaw({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
   validateIndicateurUn,
-  nextLink
+  nextLink,
 }: Props) {
   const initialValues = {
     remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
@@ -102,12 +107,12 @@ function IndicateurUnFormRaw({
               ),
               remunerationAnnuelleBrutHommes: parseIntStateValue(
                 remunerationAnnuelleBrutHommes
-              )
+              ),
             };
           }
-        )
+        ),
       })
-    )
+    ),
   };
 
   const saveForm = (formData: any) => {
@@ -118,7 +123,7 @@ function IndicateurUnFormRaw({
           ({
             remunerationAnnuelleBrutFemmes,
             remunerationAnnuelleBrutHommes,
-            trancheAge
+            trancheAge,
           }: any) => {
             return {
               trancheAge,
@@ -127,10 +132,10 @@ function IndicateurUnFormRaw({
               ),
               remunerationAnnuelleBrutHommes: parseIntFormValue(
                 remunerationAnnuelleBrutHommes
-              )
+              ),
             };
           }
-        )
+        ),
       })
     );
     updateIndicateurUn(remunerationAnnuelle);
@@ -158,7 +163,7 @@ function IndicateurUnFormRaw({
               {
                 id,
                 name,
-                tranchesAges
+                tranchesAges,
               }: {
                 id: any;
                 name: string;
@@ -183,6 +188,8 @@ function IndicateurUnFormRaw({
                           mask="number"
                           femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
                           hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                          customValidateFemmes={validateRemuneration}
+                          customValidateHommes={validateRemuneration}
                         />
                       );
                     }
@@ -212,8 +219,8 @@ function IndicateurUnFormRaw({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
-  })
+    flexDirection: "column",
+  }),
 };
 
 export default IndicateurUnFormRaw;
