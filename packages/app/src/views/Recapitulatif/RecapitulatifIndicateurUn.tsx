@@ -5,14 +5,14 @@ import { Fragment } from "react";
 import { FormState, TranchesAges } from "../../globals";
 import {
   effectifEtEcartRemuGroupCsp,
-  effectifEtEcartRemuGroupCoef
+  effectifEtEcartRemuGroupCoef,
 } from "../../utils/calculsEgaProIndicateurUn";
 
 import {
   displayNameTranchesAges,
   displayNameCategorieSocioPro,
   displayPercent,
-  displaySexeSurRepresente
+  displaySexeSurRepresente,
 } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
@@ -30,6 +30,8 @@ interface Props {
   indicateurEcartRemuneration: number | undefined;
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
   indicateurUnParCSP: boolean;
+  indicateurUnParCoef: boolean;
+  indicateurUnParAutre: boolean;
   noteIndicateurUn: number | undefined;
 }
 
@@ -40,12 +42,12 @@ function RecapitulatifIndicateurUn({
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
   indicateurUnParCSP,
-  noteIndicateurUn
+  indicateurUnParCoef,
+  indicateurUnParAutre,
+  noteIndicateurUn,
 }: Props) {
   if (!effectifsIndicateurUnCalculable) {
-    const messageCalculParCSP = indicateurUnParCSP ? (
-      undefined
-    ) : (
+    const messageCalculParCSP = indicateurUnParCSP ? undefined : (
       <TextSimulatorLink
         to="/indicateur1"
         label="Vous devez calculer par CSP"
@@ -99,7 +101,7 @@ function RecapitulatifIndicateurUn({
           ? {
               id: el.categorieSocioPro,
               name: displayNameCategorieSocioPro(el.categorieSocioPro),
-              ...el
+              ...el,
             }
           : el;
       if (index % 4 === 0) {
@@ -126,13 +128,13 @@ function RecapitulatifIndicateurUn({
           secondLineLabel: "votre note obtenue est",
           secondLineData:
             (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
-          indicateurSexeSurRepresente
+          indicateurSexeSurRepresente,
         }}
       >
         <RowLabelFull
           label={
             <Fragment>
-              écart de rémunération par csp
+              écart de rémunération
               <br />
               (avant seuil de pertinence)
             </Fragment>
@@ -143,10 +145,9 @@ function RecapitulatifIndicateurUn({
             displayNameTranchesAges(TranchesAges.MoinsDe30ans),
             displayNameTranchesAges(TranchesAges.De30a39ans),
             displayNameTranchesAges(TranchesAges.De40a49ans),
-            displayNameTranchesAges(TranchesAges.PlusDe50ans)
+            displayNameTranchesAges(TranchesAges.PlusDe50ans),
           ]}
         />
-
         {groupEffectifEtEcartRemuParTranche.map(
           (
             effectifEtEcartRemuParTranche: Array<{
@@ -162,13 +163,26 @@ function RecapitulatifIndicateurUn({
                 effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne,
                 effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne,
                 effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne,
-                effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
+                effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne,
               ]}
               asPercent={true}
             />
           )
         )}
       </RecapBloc>
+      <div css={styles.additionalInfo}>
+        <p>
+          Modalités de calcul de l'indicateur relatif à l'écart de rémunération
+          entre les femmes et les hommes par{" "}
+          <strong>
+            {(indicateurUnParCSP && "catégorie socio-professionnelle") ||
+              (indicateurUnParCoef &&
+                "niveau ou coefficient hiérarchique en application de la classification de branche") ||
+              (indicateurUnParAutre &&
+                "niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes")}
+          </strong>
+        </p>
+      </div>
     </div>
   );
 }
@@ -178,8 +192,17 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginTop: 22,
-    marginBottom: 22
-  })
+    marginBottom: 22,
+  }),
+  additionalInfo: css({
+    color: "#61676F",
+    fontSize: 14,
+    fontStyle: "italic",
+    maxWidth: 500,
+    "& > p": {
+      marginBottom: 30,
+    },
+  }),
 };
 
 export default RecapitulatifIndicateurUn;
