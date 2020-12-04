@@ -131,7 +131,7 @@ const ConsulterIndex: React.FC = () => {
       </div>
       <div>
         <Subtitle>
-          Porté par la loi « Pour la liberté de choisir son avenir personnel »
+          Porté par la loi « Pour la liberté de choisir son avenir professionnel »
           du 5 septembre 2018, l'Index d'égalité professionnelle a été conçu
           pour faire progresser au sein des entreprises l'égalité salariale
           entre les hommes et les femmes.
