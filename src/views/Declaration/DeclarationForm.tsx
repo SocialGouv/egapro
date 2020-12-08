@@ -77,7 +77,7 @@ function DeclarationForm({
 
           {noteIndex !== undefined && noteIndex < 75 && (
             <MesuresCorrection
-              label="Mesures de correction prévues à l'article D. 1142-5"
+              label="Mesures de correction prévues à l'article D. 1142-6"
               name="mesuresCorrection"
               readOnly={readOnly}
             />
