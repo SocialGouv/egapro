@@ -18,6 +18,8 @@ import FormSubmit from "../../components/FormSubmit";
 
 import { displayNameTranchesAges } from "../../utils/helpers";
 
+const valueAboveZero = (value: string) => Number(value) > 0 ? undefined : "La rémunération moyenne ne peut être nulle";
+
 interface remunerationGroup {
   id: any;
   name: string;
@@ -183,6 +185,8 @@ function IndicateurUnFormRaw({
                           mask="number"
                           femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
                           hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                          customValidateFemmes={valueAboveZero}
+                          customValidateHommes={valueAboveZero}
                         />
                       );
                     }
