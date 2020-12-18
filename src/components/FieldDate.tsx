@@ -1,4 +1,5 @@
 /** @jsx jsx */
+import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
 import { useField, Field, FieldMetaState } from "react-final-form";
 import { hasFieldError } from "./Input";
@@ -15,6 +16,12 @@ registerLocale("fr", fr);
 
 const hasMustBeDateError = (meta: FieldMetaState<string>) =>
   meta.error && meta.touched && meta.error.mustBeDate;
+
+const displayMetaErrors = (error: {[key: string]: string}) =>
+  (<Fragment>{
+    Object.keys(error).map(key => error[key]).join(", ")
+  }
+  </Fragment>)
 
 function FieldDate({
   name,
@@ -55,8 +62,8 @@ function FieldDate({
       </div>
       <p css={styles.error}>
         {error &&
-          (field.meta.error.correspondanceAnneeDeclaration
-            ? field.meta.error.correspondanceAnneeDeclaration
+          (field.meta.error
+            ? displayMetaErrors(field.meta.error)
             : mustBeDateError
             ? "ce champ doit contenir une date au format jj/mm/aaaa"
             : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
