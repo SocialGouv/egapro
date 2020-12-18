@@ -8,6 +8,7 @@ import { postIndicatorsDatas } from "../utils/api";
 
 import Page from "../components/Page";
 import ButtonAction from "../components/ButtonAction";
+import ButtonLink from "../components/ButtonLink";
 import ErrorMessage from "../components/ErrorMessage";
 import globalStyles from "../utils/globalStyles";
 
@@ -97,28 +98,15 @@ function Home({ history, location, dispatch }: Props) {
               </span>
               <p css={styles.blocContentBody}>
                 Vous pouvez déclarer votre index égalité professionnelle F/H
-                calculé par ailleurs directement via les formulaires suivants :
+                calculé par ailleurs directement via le formulaire suivant :
               </p>
-              <ul>
-                <li>
-                  <a
-                    href="https://solen1.enquetes.social.gouv.fr/cgi-bin/HE/SF?P=1162z26z2z-1z-1z91BD660965"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Index 2020 au titre de l’année 2019
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://solen1.enquetes.social.gouv.fr/cgi-4/HE/SF?P=1162z18z2z-1z-1zFD0365AA36"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Index 2019 au titre de l’année 2018
-                  </a>
-                </li>
-              </ul>
+
+              <div>
+                <ButtonLink
+                  label="déclarer directement"
+                  to="/declaration/"
+                />
+              </div>
             </div>
           </div>
         </div>
