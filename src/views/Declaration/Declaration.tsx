@@ -374,6 +374,7 @@ function Declaration({ code, state, dispatch }: Props) {
               informationsDeclarant={state.informationsDeclarant}
               noteIndex={noteIndex}
               indicateurUnParCSP={state.indicateurUn.csp}
+              finPeriodeReference={state.informations.finPeriodeReference}
               readOnly={state.declaration.formValidated === "Valid"}
               updateDeclaration={updateDeclaration}
               validateDeclaration={validateDeclaration}

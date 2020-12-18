@@ -12,6 +12,29 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
+import { parseDate } from "../../utils/helpers";
+
+const validateForm = (finPeriodeReference: string) => {
+  return ({
+    datePublication
+  }: {
+    datePublication: string;
+  }) => {
+    const parsedDatePublication = parseDate(datePublication);
+    const parsedFinPeriodeReference = parseDate(finPeriodeReference);
+    return {
+      datePublication:
+        parsedDatePublication !== undefined &&
+        parsedFinPeriodeReference !== undefined &&
+        parsedDatePublication > parsedFinPeriodeReference
+          ? undefined
+          : {
+              correspondanceFinPeriodeReference:
+                `La date ne peux précéder la fin de la période de référence (${finPeriodeReference})`
+            }
+    };
+  };
+};
 
 ///////////////////
 interface Props {
@@ -20,6 +43,7 @@ interface Props {
   informationsDeclarant: AppState["informationsDeclarant"];
   noteIndex: number | undefined;
   indicateurUnParCSP: boolean;
+  finPeriodeReference: string;
   readOnly: boolean;
   updateDeclaration: (data: ActionDeclarationData) => void;
   validateDeclaration: (valid: FormState) => void;
@@ -30,6 +54,7 @@ function DeclarationForm({
   declaration,
   noteIndex,
   indicateurUnParCSP,
+  finPeriodeReference,
   readOnly,
   updateDeclaration,
   validateDeclaration
@@ -65,6 +90,7 @@ function DeclarationForm({
   return (
     <Form
       onSubmit={onSubmit}
+      validate={validateForm(finPeriodeReference)}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -91,7 +117,7 @@ function DeclarationForm({
             />
           )}
 
-          {noteIndex !== undefined && (
+          {noteIndex !== undefined && noteIndex >= 75 && (
             <Fragment>
               <FieldDate
                 name="datePublication"
