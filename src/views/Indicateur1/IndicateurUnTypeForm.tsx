@@ -68,6 +68,11 @@ function IndicateurUnTypeForm({ csp, coef, autre, readOnly, dispatch }: Props) {
               }
             ]}
           />
+          {values.modaliteDeclaration !== "csp" ?
+            <p>Si vous choisissez cette option, la consultation du CSE est obligatoire.<br />
+              La date de consultation vous sera demandée au moment de la déclaration</p>
+            : ""
+          }
         </form>
       )}
     </Form>
