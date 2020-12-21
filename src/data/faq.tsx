@@ -522,7 +522,7 @@ export const faqData: FAQPart = {
         reponse: [
           "La note globale de l’Index doit être publiée sur le site internet de l'entreprise, lorsqu'il en existe un (y compris lorsque l’entreprise fait partie d’un groupe ou d’une UES). Une publication sur le site Intranet de l'entreprise n'est donc pas suffisante.",
           "La note globale pourra être publiée sur son site de présentation, il n'est pas pour autant obligatoire qu'elle figure sur la page d'accueil. ",
-          "A défaut de site internet propre à l'entreprise, l'Index doit être publié sur le site du groupe (ou de l'UES) auquel l'entreprise appartient, s'il en existe un.",
+          "À défaut de site internet propre à l'entreprise, l'Index doit être publié sur le site du groupe (ou de l'UES) auquel l'entreprise appartient, s'il en existe un.",
           "S'il n'y a aucun site Internet (au niveau de l'entreprise, du groupe ou de l'UES), la note globale sera portée à la connaissance des salariés par tout moyen (courrier papier ou électronique, affichage...).",
           "L'employeur devra, dans tous les cas, communiquer aux services de l'inspection du travail et au CSE, en même temps que ses résultats, le lien du site internet sur lequel est publié son Index."
         ]
@@ -560,7 +560,7 @@ export const faqData: FAQPart = {
       },
       {
         question:
-          "A quelle date doit être publié l’Index d’une entreprise qui n’a actuellement aucun salarié et se verra transférer plus de 50 salariés au 1er mars 2020 ?",
+          "À quelle date doit être publié l’Index d’une entreprise qui n’a actuellement aucun salarié et se verra transférer plus de 50 salariés au 1er mars 2020 ?",
         reponse: [
           "Il convient de dissocier l’assujettissement à l’obligation de publier l’Index et la période de référence. Dans le cas présent, l’entreprise aura l’obligation de publier l’Index au 1er mars 2020. En revanche, à défaut de données sur douze mois consécutifs, son Index ne sera pas calculable à cette date. Elle devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5)."
         ]
