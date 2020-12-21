@@ -37,7 +37,7 @@ function Button({
   );
 }
 
-const styles = {
+export const styles = {
   button: css({
     display: "flex",
     alignItems: "center",

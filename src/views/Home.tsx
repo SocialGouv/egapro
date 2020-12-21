@@ -8,7 +8,7 @@ import { postIndicatorsDatas } from "../utils/api";
 
 import Page from "../components/Page";
 import ButtonAction from "../components/ButtonAction";
-import ButtonLink from "../components/ButtonLink";
+import { styles as buttonStyles } from "../components/Button";
 import ErrorMessage from "../components/ErrorMessage";
 import globalStyles from "../utils/globalStyles";
 
@@ -101,11 +101,8 @@ function Home({ history, location, dispatch }: Props) {
                 calculé par ailleurs directement via le formulaire suivant :
               </p>
 
-              <div>
-                <ButtonLink
-                  label="déclarer directement"
-                  to="/declaration/"
-                />
+              <div css={styles.buttonWrapper}>
+                <a href="/declaration/" css={[buttonStyles.button, styles.linkButton]}>déclarer directement</a>
               </div>
             </div>
           </div>
@@ -195,8 +192,10 @@ const styles = {
     lineHeight: "17px",
     fontStyle: "italic",
   }),
-  button: css({
-    display: "inline-flex",
+  buttonWrapper: css({
+    display: "flex",
+  }),
+  linkButton: css({
     textDecoration: "none",
   }),
 };
