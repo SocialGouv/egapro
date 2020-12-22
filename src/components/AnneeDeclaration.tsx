@@ -32,7 +32,7 @@ function AnneeDeclaration({
   // TODO: supprimer cette ligne et repasser au code ci-dessus, ou alors
   // supprimer l'année au titre de laquelle les indicateurs sont calculés, et
   // utiliser l'année de la date de fin de la période de référence.
-  const yearList = ["2019", "2018"];
+  const yearList = ["2020", "2019", "2018"];
   return (
     <Field name={name} validate={required} component="select">
       {({ input, meta }) => (
