@@ -36,6 +36,7 @@ import NombreEntreprises, {
 } from "../../components/NombreEntreprises";
 import RadioButtons from "../../components/RadioButtons";
 import RegionsDepartements from "../../components/RegionsDepartements";
+import { departementCode } from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
@@ -52,17 +53,21 @@ const validate = (value: string) => {
   }
 };
 
-const validateCodePostal = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  const mustBe5DigitsError = value && value.length !== 5;
-  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError) {
+const validateCodePostal = (codePostal: string, departement: string) => {
+  const dptCode = departementCode[departement];
+  if (!dptCode) return undefined;
+  const requiredError = required(codePostal);
+  const mustBeNumberError = mustBeNumber(codePostal);
+  const mustBe5DigitsError = codePostal && codePostal.length !== 5;
+  const mustBeInDepartementError = codePostal && !codePostal.startsWith(dptCode);
+  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError && !mustBeInDepartementError) {
     return undefined;
   } else {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
-      mustBe5Digits: mustBe5DigitsError
+      mustBe5Digits: mustBe5DigitsError,
+      mustBeInDepartementError: mustBeInDepartementError
     };
   }
 };
@@ -98,7 +103,7 @@ const validateForm = ({
   region: validate(region),
   departement: validate(departement),
   adresse: validate(adresse),
-  codePostal: validateCodePostal(codePostal),
+  codePostal: validateCodePostal(codePostal, departement),
   commune: validate(commune),
   structure: validate(structure),
   nomUES:
