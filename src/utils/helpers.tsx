@@ -179,7 +179,21 @@ const toISOString = (date: string) => {
 };
 
 export const formatDataForAPI = (id: string, data: AppState) => {
-  // Déclaration
+  // Indicateurs
+  const output = {
+    id,
+    source: "simulateur",
+    déclaration: getDeclaration(data),
+    déclarant: getDeclarant(data),
+    entreprise: getEntreprise(data),
+    indicateurs: getIndicateurs(data),
+  };
+
+  return output;
+};
+
+// Déclaration
+const getDeclaration = (data: AppState): any => {
   const declaration: any = {
     publication: {
       date: toISOString(data.declaration.datePublication),
@@ -200,14 +214,22 @@ export const formatDataForAPI = (id: string, data: AppState) => {
   if (data.declaration.mesuresCorrection) {
     declaration.mesures_correctives = data.declaration.mesuresCorrection;
   }
-  // Déclarant
+  return declaration;
+};
+
+// Déclarant
+const getDeclarant = (data: AppState): any => {
   const declarant: any = {
     prénom: data.informationsDeclarant.prenom,
     nom: data.informationsDeclarant.nom,
     téléphone: data.informationsDeclarant.tel,
     email: data.informationsDeclarant.email,
   };
-  // Entreprise
+  return declarant;
+};
+
+// Entreprise
+const getEntreprise = (data: AppState): any => {
   const entreprise: any = {
     raison_sociale: data.informationsEntreprise.nomEntreprise,
     siren: data.informationsEntreprise.siren,
@@ -218,6 +240,7 @@ export const formatDataForAPI = (id: string, data: AppState) => {
     code_postal: data.informationsEntreprise.codePostal,
     code_naf: data.informationsEntreprise.codeNaf.split(" ")[0], // Only get the code like "01.22Z"
     effectif: {
+      // @ts-ignore
       total: data.effectif.nombreSalariesTotal,
       tranche:
         data.informations.trancheEffectifs === "50 à 250"
@@ -235,15 +258,124 @@ export const formatDataForAPI = (id: string, data: AppState) => {
       ),
     };
   }
-  // Indicateurs
-  const output = {
-    id,
-    source: "simulateur",
-    déclaration: declaration,
-    déclarant: declarant,
-    entreprise: entreprise,
-    indicateurs: {},
-  };
+  return entreprise;
+};
 
-  return output;
+// Indicateurs
+const getIndicateurs = (data: AppState): any => {
+  const indicateurs: any = {
+    rémunérations: getIndicateur1(data),
+    augmentations: getIndicateur2(data),
+    promotions: getIndicateur3(data),
+    augmentations_et_promotions: getIndicateur2et3(data),
+    congés_maternité: getIndicateur4(data),
+    hautes_rémunérations: getIndicateur5(data),
+  };
+  return indicateurs;
+};
+
+// Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
+const getIndicateur1 = (data: AppState): any => {
+  // @ts-ignore
+  const motif = data.indicateurUn.motifNonCalculable;
+  if (motif) {
+    // @ts-ignore
+    return { non_calculable: motif };
+  }
+  // @ts-ignore
+  const resultat = data.indicateurUn.resultatFinal;
+  const indicateur1: any = {
+    mode: data.indicateurUn.csp
+      ? "csp"
+      : data.indicateurUn.coef
+      ? "niveau_branche"
+      : "niveau_autre",
+    résultat: resultat,
+    // @ts-ignore
+    note: data.indicateurUn.noteFinale,
+  };
+  // @ts-ignore
+  const sexeSurRepresente = data.indicateurUn.sexeSurRepresente;
+  if (sexeSurRepresente) {
+    indicateur1.population_favorable = sexeSurRepresente;
+  }
+  if (indicateur1.mode !== "csp") {
+    indicateur1.date_consultation_cse = data.declaration.dateConsultationCSE;
+    indicateur1.catégories = data.indicateurUn.coefficient.map((coef) => ({
+      nom: coef.name,
+      tranches: {
+        ":29": coef.tranchesAges[0].ecartTauxRemuneration,
+        "30:39": coef.tranchesAges[1].ecartTauxRemuneration,
+        "40:49": coef.tranchesAges[2].ecartTauxRemuneration,
+        "50:": coef.tranchesAges[3].ecartTauxRemuneration,
+      },
+    }));
+  } else {
+    const csp = ["ouv", "emp", "tam", "ic"];
+    indicateur1.catégories = data.indicateurUn.remunerationAnnuelle.map(
+      (coef, index) => ({
+        nom: csp[index],
+        tranches: {
+          ":29": coef.tranchesAges[0].ecartTauxRemuneration,
+          "30:39": coef.tranchesAges[1].ecartTauxRemuneration,
+          "40:49": coef.tranchesAges[2].ecartTauxRemuneration,
+          "50:": coef.tranchesAges[3].ecartTauxRemuneration,
+        },
+      })
+    );
+  }
+  return indicateur1;
+};
+
+// Indicateur 2 relatif à l'écart de taux d'augmentations individuelles(hors promotion) entre les femmes et les homme
+const getIndicateur2 = (data: AppState): any => {
+  const indicateur2: any = {};
+  // non_calculable: egvi40pcet|absaugi|am # Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
+  // résultat: number
+  // population_favorable: femmes|hommes|egalite
+  // =note: integer
+  // catégories: [?number, ?number, ?number, ?number]
+  return indicateur2;
+};
+
+// Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes
+const getIndicateur3 = (data: AppState): any => {
+  const indicateur3: any = {};
+  // non_calculable: egvi40pcet|absprom|am
+  // résultat: number
+  // population_favorable: femmes|hommes|egalite
+  // =note: integer
+  // catégories: [?number, ?number, ?number, ?number]
+  return indicateur3;
+};
+
+// Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins
+const getIndicateur2et3 = (data: AppState): any => {
+  const indicateur2et3: any = {};
+  // non_calculable: egvi40pcet|absaugi|etsno5f5h|am # Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
+  // résultat: number
+  // =note: integer
+  // résultat_nombre_salariés: number
+  // =note_en_pourcentage: number
+  // =note_nombre_salariés: number
+  // population_favorable: femmes|hommes|egalite
+  return indicateur2et3;
+};
+
+// Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
+const getIndicateur4 = (data: AppState): any => {
+  const indicateur4: any = {};
+  // non_calculable: absrcm|absaugpdtcm|am
+  // résultat: "0.0:100"
+  // =note: integer
+  return indicateur4;
+};
+
+// Indicateur 5 relatif au nombre de salariés du sexe sous- représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
+const getIndicateur5 = (data: AppState): any => {
+  const indicateur5 = {};
+  // résultat: "0:5"  # Nombre de 0 à 5 du sexe sous représenté parmi les 10 plus hautes rémunérations
+  // population_favorable: femmes|hommes|egalite
+  // =note: integer
+  return indicateur5;
 };

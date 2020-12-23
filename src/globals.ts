@@ -10,7 +10,6 @@ export type AppState = {
   effectif: {
     formValidated: FormState;
     nombreSalaries: Array<GroupeEffectif>;
-    nombreSalariesTotal: number | undefined;
   };
   indicateurUn: {
     formValidated: FormState;

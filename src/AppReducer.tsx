@@ -79,7 +79,6 @@ const defaultState: AppState = {
   effectif: {
     formValidated: "None",
     nombreSalaries: dataEffectif,
-    nombreSalariesTotal: undefined,
   },
   indicateurUn: {
     formValidated: "None",
