@@ -61,6 +61,7 @@ interface Props {
   readOnly: boolean;
   updateDeclaration: (data: ActionDeclarationData) => void;
   validateDeclaration: (valid: FormState) => void;
+  apiError: string | undefined;
 }
 
 function DeclarationForm({
@@ -71,13 +72,14 @@ function DeclarationForm({
   finPeriodeReference,
   readOnly,
   updateDeclaration,
-  validateDeclaration
+  validateDeclaration,
+  apiError,
 }: Props) {
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
     dateConsultationCSE: declaration.dateConsultationCSE,
     datePublication: declaration.datePublication,
-    lienPublication: declaration.lienPublication
+    lienPublication: declaration.lienPublication,
   };
 
   const saveForm = (formData: any) => {
@@ -85,14 +87,14 @@ function DeclarationForm({
       mesuresCorrection,
       dateConsultationCSE,
       datePublication,
-      lienPublication
+      lienPublication,
     } = formData;
 
     updateDeclaration({
       mesuresCorrection,
       dateConsultationCSE,
       datePublication,
-      lienPublication
+      lienPublication,
     });
   };
 
@@ -147,7 +149,9 @@ function DeclarationForm({
             </Fragment>
           )}
 
-          {readOnly ? (
+          {apiError ? (
+            <p css={styles.error}>{apiError}</p>
+          ) : readOnly ? (
             <ActionBar>
               Votre déclaration est maintenant finalisée, en date du{" "}
               {declaration.dateDeclaration}. &emsp;
@@ -162,9 +166,12 @@ function DeclarationForm({
           ) : (
             <ActionBar>
               <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
+                hasValidationErrors={hasValidationErrors || Boolean(apiError)}
+                submitFailed={submitFailed || Boolean(apiError)}
+                errorMessage={
+                  apiError ||
+                  "Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
+                }
                 label="déclarer"
               />
             </ActionBar>
@@ -178,13 +185,20 @@ function DeclarationForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
-    textAlign: "center"
-  })
+    textAlign: "center",
+  }),
+  error: css({
+    backgroundColor: "#900",
+    borderRadius: "4px",
+    color: "white",
+    fontWeight: "bold",
+    padding: "1em",
+  }),
 };
 
 export default DeclarationForm;

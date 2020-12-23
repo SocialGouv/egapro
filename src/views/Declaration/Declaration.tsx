@@ -14,18 +14,18 @@ import {
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
   DeclarationIndicateurCinqData,
-  DeclarationEffectifData
+  DeclarationEffectifData,
 } from "../../globals";
 
 import calculIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCoef,
-  calculEcartTauxRemunerationParTrancheAgeCSP
+  calculEcartTauxRemunerationParTrancheAgeCSP,
 } from "../../utils/calculsEgaProIndicateurUn";
 import calculIndicateurDeux, {
-  calculEcartTauxAugmentationParCSP
+  calculEcartTauxAugmentationParCSP,
 } from "../../utils/calculsEgaProIndicateurDeux";
 import calculIndicateurTrois, {
-  calculEcartTauxPromotionParCSP
+  calculEcartTauxPromotionParCSP,
 } from "../../utils/calculsEgaProIndicateurTrois";
 import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois";
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
@@ -45,9 +45,10 @@ interface Props extends RouteComponentProps {
   code: string;
   state: AppState;
   dispatch: (action: ActionType) => void;
+  apiError: string | undefined;
 }
 
-function Declaration({ code, state, dispatch }: Props) {
+function Declaration({ code, state, dispatch, apiError }: Props) {
   const updateDeclaration = useCallback(
     (data: ActionDeclarationData) =>
       dispatch({ type: "updateDeclaration", data }),
@@ -56,7 +57,7 @@ function Declaration({ code, state, dispatch }: Props) {
 
   const {
     totalNombreSalariesHomme,
-    totalNombreSalariesFemme
+    totalNombreSalariesFemme,
   } = totalNombreSalaries(state.effectif.nombreSalaries);
 
   const nombreSalariesTotal =
@@ -66,7 +67,7 @@ function Declaration({ code, state, dispatch }: Props) {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn
+    noteIndicateurUn,
   } = calculIndicateurUn(state);
 
   const {
@@ -74,7 +75,7 @@ function Declaration({ code, state, dispatch }: Props) {
     indicateurEcartAugmentation,
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     correctionMeasure: indicateurDeuxCorrectionMeasure,
-    noteIndicateurDeux
+    noteIndicateurDeux,
   } = calculIndicateurDeux(state);
 
   const {
@@ -82,7 +83,7 @@ function Declaration({ code, state, dispatch }: Props) {
     indicateurEcartPromotion,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     correctionMeasure: indicateurTroisCorrectionMeasure,
-    noteIndicateurTrois
+    noteIndicateurTrois,
   } = calculIndicateurTrois(state);
 
   const {
@@ -93,19 +94,19 @@ function Declaration({ code, state, dispatch }: Props) {
     noteEcartTaux: noteEcart,
     noteEcartNombreSalaries: noteNombreSalaries,
     correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
-    noteIndicateurDeuxTrois
+    noteIndicateurDeuxTrois,
   } = calculIndicateurDeuxTrois(state);
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre
+    noteIndicateurQuatre,
   } = calculIndicateurQuatre(state);
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq
+    noteIndicateurCinq,
   } = calculIndicateurCinq(state);
 
   const trancheEffectifs = state.informations.trancheEffectifs;
@@ -125,7 +126,7 @@ function Declaration({ code, state, dispatch }: Props) {
     state.indicateurCinq.formValidated === "Valid";
 
   const effectifData: DeclarationEffectifData = {
-    nombreSalariesTotal
+    nombreSalariesTotal,
   };
 
   const indicateurUnData: DeclarationIndicateurUnData = {
@@ -144,7 +145,7 @@ function Declaration({ code, state, dispatch }: Props) {
     ),
     resultatFinal: indicateurEcartRemuneration,
     sexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteFinale: noteIndicateurUn
+    noteFinale: noteIndicateurUn,
   };
 
   const indicateurDeuxData: DeclarationIndicateurDeuxData = {
@@ -162,7 +163,7 @@ function Declaration({ code, state, dispatch }: Props) {
     resultatFinal: indicateurEcartAugmentation,
     sexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteFinale: noteIndicateurDeux,
-    mesuresCorrection: indicateurDeuxCorrectionMeasure
+    mesuresCorrection: indicateurDeuxCorrectionMeasure,
   };
 
   const indicateurTroisData: DeclarationIndicateurTroisData = {
@@ -180,7 +181,7 @@ function Declaration({ code, state, dispatch }: Props) {
     resultatFinal: indicateurEcartPromotion,
     sexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteFinale: noteIndicateurTrois,
-    mesuresCorrection: indicateurTroisCorrectionMeasure
+    mesuresCorrection: indicateurTroisCorrectionMeasure,
   };
 
   const indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData = {
@@ -198,7 +199,7 @@ function Declaration({ code, state, dispatch }: Props) {
     noteEcart,
     noteNombreSalaries,
     noteFinale: noteIndicateurDeuxTrois,
-    mesuresCorrection: indicateurDeuxTroisCorrectionMeasure
+    mesuresCorrection: indicateurDeuxTroisCorrectionMeasure,
   };
 
   const indicateurQuatreData: DeclarationIndicateurQuatreData = {
@@ -211,7 +212,7 @@ function Declaration({ code, state, dispatch }: Props) {
     // TODO: demander le motif de non calculabilité si "autre" ?
     motifNonCalculablePrecision: "",
     resultatFinal: indicateurEcartNombreSalarieesAugmentees,
-    noteFinale: noteIndicateurQuatre
+    noteFinale: noteIndicateurQuatre,
   };
 
   const indicateurCinqData: DeclarationIndicateurCinqData = {
@@ -222,7 +223,7 @@ function Declaration({ code, state, dispatch }: Props) {
         : indicateurCinqSexeSousRepresente === "hommes"
         ? "femmes"
         : indicateurCinqSexeSousRepresente,
-    noteFinale: noteIndicateurCinq
+    noteFinale: noteIndicateurCinq,
   };
 
   const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
@@ -236,21 +237,24 @@ function Declaration({ code, state, dispatch }: Props) {
   );
 
   const validateDeclaration = useCallback(
-    (valid: FormState) =>
-      dispatch({
-        type: "validateDeclaration",
-        valid,
-        effectifData,
-        indicateurUnData,
-        indicateurDeuxData,
-        indicateurTroisData,
-        indicateurDeuxTroisData,
-        indicateurQuatreData,
-        indicateurCinqData,
-        noteIndex,
-        totalPoint,
-        totalPointCalculable
-      }),
+    (valid: FormState) => {
+      if (!apiError) {
+        return dispatch({
+          type: "validateDeclaration",
+          valid,
+          effectifData,
+          indicateurUnData,
+          indicateurDeuxData,
+          indicateurTroisData,
+          indicateurDeuxTroisData,
+          indicateurQuatreData,
+          indicateurCinqData,
+          noteIndex,
+          totalPoint,
+          totalPointCalculable,
+        });
+      }
+    },
     [
       dispatch,
       effectifData,
@@ -262,7 +266,8 @@ function Declaration({ code, state, dispatch }: Props) {
       indicateurCinqData,
       noteIndex,
       totalPoint,
-      totalPointCalculable
+      totalPointCalculable,
+      apiError,
     ]
   );
 
@@ -378,6 +383,7 @@ function Declaration({ code, state, dispatch }: Props) {
               readOnly={state.declaration.formValidated === "Valid"}
               updateDeclaration={updateDeclaration}
               validateDeclaration={validateDeclaration}
+              apiError={apiError}
             />
           </Fragment>
         }

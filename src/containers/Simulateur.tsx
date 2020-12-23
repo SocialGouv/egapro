@@ -39,6 +39,7 @@ function Simulateur({ code, state, dispatch }: Props) {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   );
+  const [apiError, setApiError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setLoading(true);
@@ -50,11 +51,11 @@ function Simulateur({ code, state, dispatch }: Props) {
       })
       .catch((error) => {
         setLoading(false);
-        const errorMessage =
+        const message =
           error.jsonBody && error.jsonBody.error
             ? `Les données de votre déclaration n'ont pû être récupérées : ${error.jsonBody.error}`
             : "Erreur lors de la récupération des données";
-        setErrorMessage(errorMessage);
+        setErrorMessage(message);
       });
   }, [code, dispatch]);
 
@@ -63,17 +64,25 @@ function Simulateur({ code, state, dispatch }: Props) {
     2000,
     (debouncedState) => {
       if (debouncedState) {
-        putIndicatorsDatas(code, debouncedState).catch((error) => {
-          setLoading(false);
-          const errorMessage =
-            error.jsonBody && error.jsonBody.error
-              ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
-              : "Erreur lors de la sauvegarde des données";
-          setErrorMessage(errorMessage);
-        });
+        putIndicatorsDatas(code, debouncedState)
+          .then(() => {
+            setApiError(undefined);
+          })
+          .catch((error) => {
+            setLoading(false);
+            const message =
+              error.jsonBody && error.jsonBody.error
+                ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
+                : "Erreur lors de la sauvegarde des données";
+            if (error.response.status === 422) {
+              setApiError(message);
+            } else {
+              setErrorMessage(message);
+            }
+          });
       }
     },
-    [code]
+    [code, JSON.stringify(state)]
   );
 
   if (!loading && errorMessage) {
@@ -178,6 +187,7 @@ function Simulateur({ code, state, dispatch }: Props) {
             code={code}
             state={state}
             dispatch={dispatch}
+            apiError={apiError}
           />
         )}
       />
