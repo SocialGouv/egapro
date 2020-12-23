@@ -195,24 +195,26 @@ export const formatDataForAPI = (id: string, data: AppState) => {
 // Déclaration
 const getDeclaration = (data: AppState): any => {
   const declaration: any = {
-    publication: {
-      date: toISOString(data.declaration.datePublication),
-    },
     année_indicateurs: data.informations.anneeDeclaration,
     fin_période_référence: toISOString(data.informations.finPeriodeReference),
     points: data.declaration.totalPoint,
     points_calculables: data.declaration.totalPointCalculable,
   };
-  if (data.declaration.lienPublication.startsWith("http")) {
-    declaration.publication.url = data.declaration.lienPublication;
-  } else {
-    declaration.publication.modalités = data.declaration.lienPublication;
-  }
-  if (data.declaration.noteIndex) {
-    declaration.index = data.declaration.noteIndex;
-  }
-  if (data.declaration.mesuresCorrection) {
-    declaration.mesures_correctives = data.declaration.mesuresCorrection;
+  const index = data.declaration.noteIndex;
+  if (index) {
+    declaration.index = index;
+    if (index < 75) {
+      declaration.mesures_correctives = data.declaration.mesuresCorrection;
+    }
+
+    declaration.publication = {
+      date: toISOString(data.declaration.datePublication),
+    };
+    if (data.declaration.lienPublication.startsWith("http")) {
+      declaration.publication.url = data.declaration.lienPublication;
+    } else {
+      declaration.publication.modalités = data.declaration.lienPublication;
+    }
   }
   return declaration;
 };
