@@ -265,12 +265,15 @@ const getEntreprise = (data: AppState): any => {
 const getIndicateurs = (data: AppState): any => {
   const indicateurs: any = {
     rémunérations: getIndicateur1(data),
-    augmentations: getIndicateur2(data),
-    promotions: getIndicateur3(data),
-    augmentations_et_promotions: getIndicateur2et3(data),
     congés_maternité: getIndicateur4(data),
     hautes_rémunérations: getIndicateur5(data),
   };
+  if (data.informations.trancheEffectifs === "50 à 250") {
+    indicateurs.augmentations_et_promotions = getIndicateur2et3(data);
+  } else {
+    indicateurs.augmentations = getIndicateur2(data);
+    indicateurs.promotions = getIndicateur3(data);
+  }
   return indicateurs;
 };
 
@@ -279,18 +282,16 @@ const getIndicateur1 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurUn.motifNonCalculable;
   if (motif) {
-    // @ts-ignore
     return { non_calculable: motif };
   }
-  // @ts-ignore
-  const resultat = data.indicateurUn.resultatFinal;
   const indicateur1: any = {
     mode: data.indicateurUn.csp
       ? "csp"
       : data.indicateurUn.coef
       ? "niveau_branche"
       : "niveau_autre",
-    résultat: resultat,
+    // @ts-ignore
+    résultat: data.indicateurUn.resultatFinal,
     // @ts-ignore
     note: data.indicateurUn.noteFinale,
   };
@@ -329,12 +330,26 @@ const getIndicateur1 = (data: AppState): any => {
 
 // Indicateur 2 relatif à l'écart de taux d'augmentations individuelles(hors promotion) entre les femmes et les homme
 const getIndicateur2 = (data: AppState): any => {
-  const indicateur2: any = {};
-  // non_calculable: egvi40pcet|absaugi|am # Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
-  // résultat: number
-  // population_favorable: femmes|hommes|egalite
-  // =note: integer
-  // catégories: [?number, ?number, ?number, ?number]
+  // @ts-ignore
+  const motif = data.indicateurDeux.motifNonCalculable;
+  if (motif) {
+    return { non_calculable: motif };
+  }
+  // @ts-ignore
+  const indicateur2: any = {
+    // @ts-ignore
+    résultat: data.indicateurDeux.resultatFinal,
+    // @ts-ignore
+    note: data.indicateurDeux.noteFinale,
+    catégories: data.indicateurDeux.tauxAugmentation.map(
+      (cat) => cat.ecartTauxAugmentation
+    ),
+  };
+  // @ts-ignore
+  const sexeSurRepresente = data.indicateurDeux.sexeSurRepresente;
+  if (sexeSurRepresente) {
+    indicateur2.population_favorable = sexeSurRepresente;
+  }
   return indicateur2;
 };
 
