@@ -3,10 +3,11 @@ import {
   addDays,
   format,
   parse as rootParse,
-  parseISO
+  parseISO,
 } from "date-fns";
+import { regionCode, departementCode } from "../components/RegionsDepartements";
 
-import { TranchesAges, CategorieSocioPro } from "../globals";
+import { TranchesAges, CategorieSocioPro, AppState } from "../globals";
 
 export function displayNameTranchesAges(trancheAge: TranchesAges): string {
   switch (trancheAge) {
@@ -94,7 +95,7 @@ export function dateToString(date: Date | undefined): string {
 
 export enum Year {
   Add,
-  Subtract
+  Subtract,
 }
 
 // Return a date that is exactly one year later or before:
@@ -168,4 +169,81 @@ export const messageMesureCorrection = (
     : sexeSurRepresente === "hommes"
     ? `** L’écart de taux ${ecartDe} est en faveur des hommes tandis que l’écart de rémunération est en faveur des femmes, donc l’écart de taux ${ecartDe} est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
     : "";
+};
+
+// Format the data from the AppReducer to be compatible with the API new format
+
+const toISOString = (date: string) => {
+  const parsed = parseDate(date);
+  return parsed ? parsed.toISOString().slice(0, 10) : undefined;
+};
+
+export const formatDataForAPI = (id: string, data: AppState) => {
+  // Déclaration
+  const declaration: any = {
+    publication: {
+      date: toISOString(data.declaration.datePublication),
+    },
+    année_indicateurs: data.informations.anneeDeclaration,
+    fin_période_référence: toISOString(data.informations.finPeriodeReference),
+    points: data.declaration.totalPoint,
+    points_calculables: data.declaration.totalPointCalculable,
+  };
+  if (data.declaration.lienPublication.startsWith("http")) {
+    declaration.publication.url = data.declaration.lienPublication;
+  } else {
+    declaration.publication.modalités = data.declaration.lienPublication;
+  }
+  if (data.declaration.noteIndex) {
+    declaration.index = data.declaration.noteIndex;
+  }
+  if (data.declaration.mesuresCorrection) {
+    declaration.mesures_correctives = data.declaration.mesuresCorrection;
+  }
+  // Déclarant
+  const declarant: any = {
+    prénom: data.informationsDeclarant.prenom,
+    nom: data.informationsDeclarant.nom,
+    téléphone: data.informationsDeclarant.tel,
+    email: data.informationsDeclarant.email,
+  };
+  // Entreprise
+  const entreprise: any = {
+    raison_sociale: data.informationsEntreprise.nomEntreprise,
+    siren: data.informationsEntreprise.siren,
+    région: regionCode[data.informationsEntreprise.region],
+    département: departementCode[data.informationsEntreprise.departement],
+    adresse: data.informationsEntreprise.adresse,
+    commune: data.informationsEntreprise.commune,
+    code_postal: data.informationsEntreprise.codePostal,
+    code_naf: data.informationsEntreprise.codeNaf.split(" ")[0], // Only get the code like "01.22Z"
+    effectif: {
+      total: data.effectif.nombreSalariesTotal,
+      tranche:
+        data.informations.trancheEffectifs === "50 à 250"
+          ? "50:250"
+          : data.informations.trancheEffectifs === "251 à 999"
+          ? "251:999"
+          : "1000:",
+    },
+  };
+  if (data.informationsEntreprise.nomUES) {
+    entreprise.ues = {
+      nom: data.informationsEntreprise.nomUES,
+      entreprises: data.informationsEntreprise.entreprisesUES.map(
+        ({ nom, siren }) => ({ raison_sociale: nom, siren })
+      ),
+    };
+  }
+  // Indicateurs
+  const output = {
+    id,
+    source: "simulateur",
+    déclaration: declaration,
+    déclarant: declarant,
+    entreprise: entreprise,
+    indicateurs: {},
+  };
+
+  return output;
 };

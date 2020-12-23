@@ -10,6 +10,7 @@ export type AppState = {
   effectif: {
     formValidated: FormState;
     nombreSalaries: Array<GroupeEffectif>;
+    nombreSalariesTotal: number | undefined;
   };
   indicateurUn: {
     formValidated: FormState;
@@ -244,7 +245,7 @@ export type ActionEffectifData = {
 };
 
 export type DeclarationEffectifData = {
-  nombreSalariesTotal: Number;
+  nombreSalariesTotal: number;
 };
 
 export type ActionIndicateurUnTypeData = {

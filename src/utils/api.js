@@ -46,7 +46,7 @@ function fetchResource(method, pathname, body) {
   };
   requestObj.credentials = "include";
   let origin = "/api";
-  if(window.location.href.includes('localhost:')) {
+  if (window.location.href.includes("localhost:")) {
     origin = "http://127.0.0.1:2626";
   }
 
@@ -65,6 +65,12 @@ export const postIndicatorsDatas = (data) => postResource("/simulation", data);
 
 export const putIndicatorsDatas = (id, data) =>
   putResource(`/simulation/${id}`, { id, data });
+
+export const putDeclaration = (data) =>
+  putResource(
+    `/declaration/${data.entreprise.siren}/${data.déclaration.année_indicateurs}`,
+    data
+  );
 
 // KILL THIS ENDPOINT
 export const sendEmailIndicatorsDatas = (id, email) =>

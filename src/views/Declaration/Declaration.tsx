@@ -40,6 +40,8 @@ import DeclarationForm from "./DeclarationForm";
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
+import { putDeclaration } from "../../utils/api";
+import { formatDataForAPI } from "../../utils/helpers";
 
 interface Props extends RouteComponentProps {
   code: string;
@@ -239,7 +241,7 @@ function Declaration({ code, state, dispatch, apiError }: Props) {
   const validateDeclaration = useCallback(
     (valid: FormState) => {
       if (!apiError) {
-        return dispatch({
+        dispatch({
           type: "validateDeclaration",
           valid,
           effectifData,
@@ -253,6 +255,11 @@ function Declaration({ code, state, dispatch, apiError }: Props) {
           totalPoint,
           totalPointCalculable,
         });
+        if (valid === "Valid") {
+          // TODO : catch errors and display as apiError
+          const data = formatDataForAPI(code, state);
+          putDeclaration(data);
+        }
       }
     },
     [
@@ -268,6 +275,8 @@ function Declaration({ code, state, dispatch, apiError }: Props) {
       totalPoint,
       totalPointCalculable,
       apiError,
+      code,
+      state,
     ]
   );
 
