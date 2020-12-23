@@ -36,7 +36,9 @@ interface Props {
 
 function Simulateur({ code, state, dispatch }: Props) {
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -49,8 +51,9 @@ function Simulateur({ code, state, dispatch }: Props) {
       .catch((error) => {
         setLoading(false);
         const errorMessage =
-          (error.jsonBody && error.jsonBody.message) ||
-          "Erreur lors de la récupération des données";
+          error.jsonBody && error.jsonBody.error
+            ? `Les données de votre déclaration n'ont pû être récupérées : ${error.jsonBody.error}`
+            : "Erreur lors de la récupération des données";
         setErrorMessage(errorMessage);
       });
   }, [code, dispatch]);
@@ -63,8 +66,9 @@ function Simulateur({ code, state, dispatch }: Props) {
         putIndicatorsDatas(code, debouncedState).catch((error) => {
           setLoading(false);
           const errorMessage =
-            (error.jsonBody && error.jsonBody.message) ||
-            "Erreur lors de la sauvegarde des données";
+            error.jsonBody && error.jsonBody.error
+              ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
+              : "Erreur lors de la sauvegarde des données";
           setErrorMessage(errorMessage);
         });
       }
