@@ -12,13 +12,27 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
+import { required } from "../../utils/formHelpers";
 import { parseDate } from "../../utils/helpers";
+
+const validate = (value: string) => {
+  const requiredError = required(value);
+  if (!requiredError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+    };
+  }
+};
 
 const validateForm = (finPeriodeReference: string) => {
   return ({
-    datePublication
+    datePublication,
+    lienPublication,
   }: {
     datePublication: string;
+    lienPublication: string;
   }) => {
     const parsedDatePublication = parseDate(datePublication);
     const parsedFinPeriodeReference = parseDate(finPeriodeReference);
@@ -29,9 +43,9 @@ const validateForm = (finPeriodeReference: string) => {
         parsedDatePublication > parsedFinPeriodeReference
           ? undefined
           : {
-              correspondanceFinPeriodeReference:
-                `La date ne peux précéder la fin de la période de référence (${finPeriodeReference})`
-            }
+              correspondanceFinPeriodeReference: `La date ne peux précéder la fin de la période de référence (${finPeriodeReference})`,
+            },
+      lienPublication: validate(lienPublication),
     };
   };
 };
