@@ -380,14 +380,29 @@ const getIndicateur3 = (data: AppState): any => {
 
 // Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins
 const getIndicateur2et3 = (data: AppState): any => {
-  const indicateur2et3: any = {};
-  // non_calculable: egvi40pcet|absaugi|etsno5f5h|am # Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)
-  // résultat: number
-  // =note: integer
-  // résultat_nombre_salariés: number
-  // =note_en_pourcentage: number
-  // =note_nombre_salariés: number
-  // population_favorable: femmes|hommes|egalite
+  // @ts-ignore
+  const motif = data.indicateurDeuxTrois.motifNonCalculable;
+  if (motif) {
+    return { non_calculable: motif };
+  }
+  const indicateur2et3: any = {
+    // @ts-ignore
+    résultat: data.indicateurDeuxTrois.resultatFinalEcart,
+    // @ts-ignore
+    note_en_pourcentage: data.indicateurDeuxTrois.noteEcart,
+    résultat_nombre_salariés:
+      // @ts-ignore
+      data.indicateurDeuxTrois.resultatFinalNombreSalaries,
+    // @ts-ignore
+    note_nombre_salariés: data.indicateurDeuxTrois.noteNombreSalaries,
+    // @ts-ignore
+    note: data.indicateurDeuxTrois.noteFinale,
+  };
+  // @ts-ignore
+  const sexeSurRepresente = data.indicateurDeuxTrois.sexeSurRepresente;
+  if (sexeSurRepresente) {
+    indicateur2et3.population_favorable = sexeSurRepresente;
+  }
   return indicateur2et3;
 };
 
