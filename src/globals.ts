@@ -456,6 +456,7 @@ export interface GroupeIndicateurTrois {
   categorieSocioPro: CategorieSocioPro;
   tauxPromotionFemmes: number | undefined;
   tauxPromotionHommes: number | undefined;
+  ecartTauxPromotion: number | undefined;
 }
 
 ////////////

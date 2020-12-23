@@ -355,12 +355,26 @@ const getIndicateur2 = (data: AppState): any => {
 
 // Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes
 const getIndicateur3 = (data: AppState): any => {
-  const indicateur3: any = {};
-  // non_calculable: egvi40pcet|absprom|am
-  // résultat: number
-  // population_favorable: femmes|hommes|egalite
-  // =note: integer
-  // catégories: [?number, ?number, ?number, ?number]
+  // @ts-ignore
+  const motif = data.indicateurTrois.motifNonCalculable;
+  if (motif) {
+    return { non_calculable: motif };
+  }
+  // @ts-ignore
+  const indicateur3: any = {
+    // @ts-ignore
+    résultat: data.indicateurTrois.resultatFinal,
+    // @ts-ignore
+    note: data.indicateurTrois.noteFinale,
+    catégories: data.indicateurTrois.tauxPromotion.map(
+      (cat) => cat.ecartTauxPromotion
+    ),
+  };
+  // @ts-ignore
+  const sexeSurRepresente = data.indicateurTrois.sexeSurRepresente;
+  if (sexeSurRepresente) {
+    indicateur3.population_favorable = sexeSurRepresente;
+  }
   return indicateur3;
 };
 
