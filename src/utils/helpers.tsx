@@ -175,7 +175,7 @@ export const messageMesureCorrection = (
 
 const toISOString = (date: string) => {
   const parsed = parseDate(date);
-  return parsed ? parsed.toISOString().slice(0, 10) : undefined;
+  return parsed ? format(parsed, "yyyy-MM-dd") : undefined;
 };
 
 export const formatDataForAPI = (id: string, data: AppState) => {
