@@ -10,21 +10,22 @@ import { useColumnsWidth, useLayoutType } from "./GridContext";
 function Footer() {
   const width = useColumnsWidth(2);
   const layoutType = useLayoutType();
-  const version = process.env.VERSION || require("../../package.json").version;
+  const version =
+    process.env.REACT_APP_VERSION || require("../../package.json").version;
 
   return (
     <footer
       css={[
         styles.footer,
         layoutType === "desktop" &&
-          css({ marginLeft: -(width + globalStyles.grid.gutterWidth) })
+          css({ marginLeft: -(width + globalStyles.grid.gutterWidth) }),
       ]}
     >
       <div
         css={[
           styles.footerLeft,
           layoutType === "desktop" && css({ width }),
-          styles.footerLeftPrint
+          styles.footerLeftPrint,
         ]}
       >
         <a
@@ -33,7 +34,7 @@ function Footer() {
           rel="noopener noreferrer"
           css={[
             styles.containerLogo,
-            layoutType === "desktop" && styles.containerLogoDesktop
+            layoutType === "desktop" && styles.containerLogoDesktop,
           ]}
         >
           <Logo />
@@ -76,7 +77,7 @@ function Footer() {
             donnez-nous votre avis
           </a>
           <a
-            href={`https://github.com/SocialGouv/egapro/tree/v${version}`}
+            href={`https://github.com/SocialGouv/egapro/tree/${version}`}
             target="_blank"
             rel="noopener noreferrer"
             css={styles.infoLink}
@@ -100,8 +101,8 @@ const styles = {
     alignItems: "center",
     borderTop: "1px solid #EFECEF",
     "@media print": {
-      display: "none"
-    }
+      display: "none",
+    },
   }),
   footerLeft: css({
     display: "flex",
@@ -109,22 +110,22 @@ const styles = {
     marginLeft: globalStyles.grid.gutterWidth,
     marginRight: globalStyles.grid.gutterWidth,
     "@media print": {
-      marginLeft: 0
-    }
+      marginLeft: 0,
+    },
   }),
   footerLeftPrint: css({
     "@media print": {
-      width: "auto"
-    }
+      width: "auto",
+    },
   }),
   containerLogo: css({
     marginLeft: "auto",
     marginRight: 0,
     textDecoration: "none",
-    color: "currentColor"
+    color: "currentColor",
   }),
   containerLogoDesktop: css({
-    marginRight: 25
+    marginRight: 25,
   }),
 
   footerLinks: { display: "flex", flexDirection: "column" as "column" },
@@ -133,7 +134,7 @@ const styles = {
     lineHeight: "11px",
     color: globalStyles.colors.default,
     textDecoration: "underline",
-    margin: "2px 0"
+    margin: "2px 0",
   },
 
   footerInfo: {
@@ -143,18 +144,18 @@ const styles = {
     display: "flex",
     flexDirection: "column" as "column",
     textAlign: "right" as "right",
-    marginRight: globalStyles.grid.gutterWidth
+    marginRight: globalStyles.grid.gutterWidth,
   },
   info: {
     fontSize: 12,
     lineHeight: "15px",
-    marginBottom: 4
+    marginBottom: 4,
   },
   infoLink: {
     color: globalStyles.colors.default,
     textDecoration: "underline",
-    marginLeft: 8
-  }
+    marginLeft: 8,
+  },
 };
 
 export default Footer;
