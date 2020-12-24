@@ -413,7 +413,7 @@ const getIndicateur4 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurQuatre.motifNonCalculable;
   if (motif) {
-    return { non_calculable: motif };
+    return { non_calculable: motif.replace("absretcm", "absrcm") };
   }
   const indicateur4: any = {
     // @ts-ignore
