@@ -299,7 +299,7 @@ const getIndicateur1 = (data: AppState): any => {
   };
   // @ts-ignore
   const sexeSurRepresente = data.indicateurUn.sexeSurRepresente;
-  if (sexeSurRepresente) {
+  if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur1.population_favorable = sexeSurRepresente;
   }
   if (indicateur1.mode !== "csp") {
@@ -349,7 +349,7 @@ const getIndicateur2 = (data: AppState): any => {
   };
   // @ts-ignore
   const sexeSurRepresente = data.indicateurDeux.sexeSurRepresente;
-  if (sexeSurRepresente) {
+  if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur2.population_favorable = sexeSurRepresente;
   }
   return indicateur2;
@@ -374,7 +374,7 @@ const getIndicateur3 = (data: AppState): any => {
   };
   // @ts-ignore
   const sexeSurRepresente = data.indicateurTrois.sexeSurRepresente;
-  if (sexeSurRepresente) {
+  if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur3.population_favorable = sexeSurRepresente;
   }
   return indicateur3;
@@ -402,7 +402,7 @@ const getIndicateur2et3 = (data: AppState): any => {
   };
   // @ts-ignore
   const sexeSurRepresente = data.indicateurDeuxTrois.sexeSurRepresente;
-  if (sexeSurRepresente) {
+  if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur2et3.population_favorable = sexeSurRepresente;
   }
   return indicateur2et3;
