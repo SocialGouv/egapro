@@ -1,7 +1,7 @@
 import {
   fractionToPercentage,
   parseDate,
-  percentageToFraction
+  percentageToFraction,
 } from "./helpers";
 
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals";
@@ -87,7 +87,10 @@ export const maxNumber = (value: string, max: number): boolean =>
 
 export const mustBeDate = (value: string): boolean => {
   const parsed = parseDate(value);
-  return parsed === undefined || parsed.toString() === "Invalid Date";
+  return (
+    parsed === undefined ||
+    parsed.toString() === "ce champ doit contenir une date au format jj/mm/aaaa"
+  );
 };
 
 export const validateDate = (value: string) => {
@@ -98,7 +101,7 @@ export const validateDate = (value: string) => {
   } else {
     return {
       required: requiredError,
-      mustBeDate: mustBeDateError
+      mustBeDate: mustBeDateError,
     };
   }
 };

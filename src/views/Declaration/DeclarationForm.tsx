@@ -43,7 +43,7 @@ const validateForm = (finPeriodeReference: string) => {
         parsedDatePublication > parsedFinPeriodeReference
           ? undefined
           : {
-              correspondanceFinPeriodeReference: `La date ne peux précéder la fin de la période de référence (${finPeriodeReference})`,
+              correspondanceFinPeriodeReference: `La date ne peut précéder la fin de la période de référence (${finPeriodeReference})`,
             },
       lienPublication: validate(lienPublication),
     };

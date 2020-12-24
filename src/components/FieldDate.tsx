@@ -14,19 +14,18 @@ import "react-datepicker/dist/react-datepicker.css";
 import fr from "date-fns/locale/fr";
 registerLocale("fr", fr);
 
-const hasMustBeDateError = (meta: FieldMetaState<string>) =>
-  meta.error && meta.touched && meta.error.mustBeDate;
-
-const displayMetaErrors = (error: {[key: string]: string}) =>
-  (<Fragment>{
-    Object.keys(error).map(key => error[key]).join(", ")
-  }
-  </Fragment>)
+const displayMetaErrors = (error: { [key: string]: string }) => (
+  <Fragment>
+    {Object.keys(error)
+      .map((key) => error[key])
+      .join(", ")}
+  </Fragment>
+);
 
 function FieldDate({
   name,
   label,
-  readOnly
+  readOnly,
 }: {
   name: string;
   label: string;
@@ -34,7 +33,6 @@ function FieldDate({
 }) {
   const field = useField(name, { validate: validateDate });
   const error = hasFieldError(field.meta);
-  const mustBeDateError = hasMustBeDateError(field.meta);
 
   return (
     <div css={styles.dateField}>
@@ -46,12 +44,12 @@ function FieldDate({
       </label>
       <div css={styles.fieldRow}>
         <Field name={name} validate={validateDate}>
-          {props => (
+          {(props) => (
             <DatePicker
               locale="fr"
               dateFormat="dd/MM/yyyy"
               selected={parseDate(props.input.value)}
-              onChange={date =>
+              onChange={(date) =>
                 date ? props.input.onChange(dateToString(date)) : ""
               }
               readOnly={readOnly}
@@ -60,14 +58,7 @@ function FieldDate({
           )}
         </Field>
       </div>
-      <p css={styles.error}>
-        {error &&
-          (field.meta.error
-            ? displayMetaErrors(field.meta.error)
-            : mustBeDateError
-            ? "ce champ doit contenir une date au format jj/mm/aaaa"
-            : "ce champ n’est pas valide, renseignez une date au format jj/mm/aaaa")}
-      </p>
+      <p css={styles.error}>{error && displayMetaErrors(field.meta.error)}</p>
     </div>
   );
 }
@@ -81,16 +72,16 @@ const styles = {
       paddingLeft: 22,
       paddingRight: 22,
       height: 38,
-      marginTop: 5
-    }
+      marginTop: 5,
+    },
   }),
   label: css({
     fontSize: 14,
     fontWeight: "bold",
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   labelError: css({
-    color: globalStyles.colors.error
+    color: globalStyles.colors.error,
   }),
   fieldRow: css({
     height: 38,
@@ -99,17 +90,17 @@ const styles = {
     display: "flex",
     input: {
       borderRadius: 4,
-      border: "1px solid"
+      border: "1px solid",
     },
-    "input[readonly]": { border: 0 }
+    "input[readonly]": { border: 0 },
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     textDecoration: "underline",
-    lineHeight: "15px"
-  })
+    lineHeight: "15px",
+  }),
 };
 
 export default FieldDate;
