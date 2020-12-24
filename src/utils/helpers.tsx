@@ -426,9 +426,21 @@ const getIndicateur4 = (data: AppState): any => {
 
 // Indicateur 5 relatif au nombre de salariés du sexe sous- représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
 const getIndicateur5 = (data: AppState): any => {
-  const indicateur5 = {};
-  // résultat: "0:5"  # Nombre de 0 à 5 du sexe sous représenté parmi les 10 plus hautes rémunérations
-  // population_favorable: femmes|hommes|egalite
-  // =note: integer
+  // @ts-ignore
+  const motif = data.indicateurCinq.motifNonCalculable;
+  if (motif) {
+    return { non_calculable: motif };
+  }
+  const indicateur5: any = {
+    // @ts-ignore
+    résultat: data.indicateurCinq.resultatFinal,
+    // @ts-ignore
+    note: data.indicateurCinq.noteFinale,
+  };
+  // @ts-ignore
+  const sexeSurRepresente = data.indicateurCinq.sexeSurRepresente;
+  if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
+    indicateur5.population_favorable = sexeSurRepresente;
+  }
   return indicateur5;
 };
