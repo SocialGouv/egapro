@@ -82,7 +82,7 @@ function Simulateur({ code, state, dispatch }: Props) {
           });
       }
     },
-    [code, JSON.stringify(state)]
+    [code]
   );
 
   if (!loading && errorMessage) {
