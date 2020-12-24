@@ -16,5 +16,5 @@ release: build
 	git branch -d deploy
 
 release-prod: release
-	git tag `date +"%Y.%m.%d"` deploy
+	git tag `date +"%Y.%m.%d"` origin/deploy
 	git push --tags
