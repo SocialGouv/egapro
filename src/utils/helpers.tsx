@@ -410,10 +410,17 @@ const getIndicateur2et3 = (data: AppState): any => {
 
 // Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
 const getIndicateur4 = (data: AppState): any => {
-  const indicateur4: any = {};
-  // non_calculable: absrcm|absaugpdtcm|am
-  // résultat: "0.0:100"
-  // =note: integer
+  // @ts-ignore
+  const motif = data.indicateurQuatre.motifNonCalculable;
+  if (motif) {
+    return { non_calculable: motif };
+  }
+  const indicateur4: any = {
+    // @ts-ignore
+    résultat: data.indicateurQuatre.resultatFinal,
+    // @ts-ignore
+    note: data.indicateurQuatre.noteFinale,
+  };
   return indicateur4;
 };
 
