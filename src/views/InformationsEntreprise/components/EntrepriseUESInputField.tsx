@@ -6,8 +6,10 @@ import { required } from "../../../utils/formHelpers";
 import globalStyles from "../../../utils/globalStyles";
 
 import { hasFieldError } from "../../../components/Input";
+import { validateSiren as baseValidateSiren } from "../../../components/FieldSiren";
 import FieldSiren from "../../../components/FieldSiren";
 import TextField from "../../../components/TextField";
+import { EntrepriseUES } from "../../../globals";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -19,11 +21,26 @@ const validate = (value: string) => {
   }
 };
 
+const validateSiren = (value: string, allValues: any) => {
+  const sirenInvalidError = baseValidateSiren(value);
+  if (sirenInvalidError) {
+    return sirenInvalidError;
+  }
+  let sirenList = allValues.entreprisesUES.map(
+    (entreprise: EntrepriseUES) => entreprise.siren
+  );
+  sirenList.push(allValues.siren);
+  if (sirenList.filter((siren: string) => siren === value).length >= 2) {
+    return { duplicate: true };
+  }
+  return undefined;
+};
+
 function InputField({
   nom,
   siren,
   index,
-  readOnly
+  readOnly,
 }: {
   nom: string;
   siren: string;
@@ -32,14 +49,14 @@ function InputField({
 }) {
   const nomField = useField(nom, {
     validate,
-    parse: value => value,
-    format: value => value
+    parse: (value) => value,
+    format: (value) => value,
   });
   const nomError = hasFieldError(nomField.meta);
   const sirenField = useField(siren, {
-    validate,
-    parse: value => value,
-    format: value => value
+    validate: validateSiren,
+    parse: (value) => value,
+    format: (value) => value,
   });
   const sirenError = hasFieldError(sirenField.meta);
 
@@ -71,30 +88,30 @@ function InputField({
 
 const styles = {
   inputField: css({
-    alignSelf: "stretch"
+    alignSelf: "stretch",
   }),
   label: css({
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   labelError: css({
-    color: globalStyles.colors.error
+    color: globalStyles.colors.error,
   }),
   fieldRow: css({
     height: 100,
     marginTop: 5,
-    display: "flex"
+    display: "flex",
   }),
   delete: css({
-    marginLeft: globalStyles.grid.gutterWidth
+    marginLeft: globalStyles.grid.gutterWidth,
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     fontStyle: "italic",
-    lineHeight: "15px"
-  })
+    lineHeight: "15px",
+  }),
 };
 
 export default InputField;

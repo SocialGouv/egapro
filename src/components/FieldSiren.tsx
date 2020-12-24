@@ -44,7 +44,7 @@ export const validateSiren = (value: string) => {
   } else {
     return {
       required: requiredError,
-      mustBeSiren: mustBeSirenError
+      mustBeSiren: mustBeSirenError,
     };
   }
 };
@@ -52,7 +52,7 @@ export const validateSiren = (value: string) => {
 function FieldSiren({
   name,
   label,
-  readOnly
+  readOnly,
 }: {
   name: string;
   label: string;
@@ -72,25 +72,30 @@ function FieldSiren({
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
       </div>
-      <p css={styles.error}>
-        {error &&
-          "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"}
-      </p>
+      {error && (
+        <p css={styles.error}>
+          {(field.meta.error.mustBeSiren &&
+            "ce champ n'est pas un numéro SIREN valide") ||
+            (field.meta.error.duplicate &&
+              "ce numéro SIREN est déjà utilisé") ||
+            "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"}
+        </p>
+      )}
     </div>
   );
 }
 
 const styles = {
   formField: css({
-    marginBottom: 20
+    marginBottom: 20,
   }),
   label: css({
     fontSize: 14,
     fontWeight: "bold",
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   labelError: css({
-    color: globalStyles.colors.error
+    color: globalStyles.colors.error,
   }),
   fieldRow: css({
     height: 38,
@@ -99,17 +104,17 @@ const styles = {
     display: "flex",
     input: {
       borderRadius: 4,
-      border: "1px solid"
+      border: "1px solid",
     },
-    "input[readonly]": { border: 0 }
+    "input[readonly]": { border: 0 },
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     textDecoration: "underline",
-    lineHeight: "15px"
-  })
+    lineHeight: "15px",
+  }),
 };
 
 export default FieldSiren;
