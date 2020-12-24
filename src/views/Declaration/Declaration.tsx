@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useCallback, Fragment, ReactNode } from "react";
+import { useCallback, Fragment, ReactNode, useState, useEffect } from "react";
 import { RouteComponentProps } from "react-router-dom";
 
 import {
@@ -40,15 +40,19 @@ import DeclarationForm from "./DeclarationForm";
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
+import { putDeclaration, putIndicatorsDatas } from "../../utils/api";
+import { formatDataForAPI } from "../../utils/helpers";
 
 interface Props extends RouteComponentProps {
   code: string;
   state: AppState;
   dispatch: (action: ActionType) => void;
-  apiError: string | undefined;
 }
 
-function Declaration({ code, state, dispatch, apiError }: Props) {
+function Declaration({ code, state, dispatch }: Props) {
+  const [declaring, setDeclaring] = useState(false);
+  const [apiError, setApiError] = useState<string | undefined>(undefined);
+
   const updateDeclaration = useCallback(
     (data: ActionDeclarationData) =>
       dispatch({ type: "updateDeclaration", data }),
@@ -238,6 +242,11 @@ function Declaration({ code, state, dispatch, apiError }: Props) {
 
   const validateDeclaration = useCallback(
     (valid: FormState) => {
+      if (valid === "Valid") {
+        setDeclaring(true);
+      } else {
+        setDeclaring(false);
+      }
       if (!apiError) {
         return dispatch({
           type: "validateDeclaration",
@@ -270,6 +279,38 @@ function Declaration({ code, state, dispatch, apiError }: Props) {
       apiError,
     ]
   );
+
+  useEffect(() => {
+    if (declaring) {
+      const data = formatDataForAPI(code, state);
+      putIndicatorsDatas(code, state)
+        .then(() => {
+          putDeclaration(data)
+            .then(() => {
+              setApiError(undefined);
+              setDeclaring(false);
+            })
+            .catch((error) => {
+              setDeclaring(false);
+              const message =
+                error.jsonBody && error.jsonBody.error
+                  ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
+                  : "Erreur lors de la sauvegarde des données";
+              setApiError(message);
+              validateDeclaration("None");
+            });
+        })
+        .catch((error) => {
+          setDeclaring(false);
+          const message =
+            error.jsonBody && error.jsonBody.error
+              ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
+              : "Erreur lors de la sauvegarde des données";
+          setApiError(message);
+          validateDeclaration("None");
+        });
+    }
+  }, [code, declaring, state, validateDeclaration]);
 
   // tous les formulaires ne sont pas encore validés
   if (
@@ -379,10 +420,13 @@ function Declaration({ code, state, dispatch, apiError }: Props) {
               noteIndex={noteIndex}
               indicateurUnParCSP={state.indicateurUn.csp}
               finPeriodeReference={state.informations.finPeriodeReference}
-              readOnly={state.declaration.formValidated === "Valid"}
+              readOnly={
+                state.declaration.formValidated === "Valid" && !declaring
+              }
               updateDeclaration={updateDeclaration}
               validateDeclaration={validateDeclaration}
               apiError={apiError}
+              declaring={declaring}
             />
           </Fragment>
         }

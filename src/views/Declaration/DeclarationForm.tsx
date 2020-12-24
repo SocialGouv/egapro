@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment, useEffect } from "react";
+import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
 import { Form } from "react-final-form";
 
@@ -13,8 +13,7 @@ import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
 import { required } from "../../utils/formHelpers";
-import { formatDataForAPI, parseDate } from "../../utils/helpers";
-import { putDeclaration } from "../../utils/api";
+import { parseDate } from "../../utils/helpers";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -62,6 +61,7 @@ interface Props {
   updateDeclaration: (data: ActionDeclarationData) => void;
   validateDeclaration: (valid: FormState) => void;
   apiError: string | undefined;
+  declaring: boolean;
 }
 
 function DeclarationForm({
@@ -74,6 +74,7 @@ function DeclarationForm({
   updateDeclaration,
   validateDeclaration,
   apiError,
+  declaring,
 }: Props) {
   const declaration = state.declaration;
   const initialValues = {
@@ -103,14 +104,6 @@ function DeclarationForm({
     saveForm(formData);
     validateDeclaration("Valid");
   };
-
-  useEffect(() => {
-    if (state.declaration.formValidated === "Valid") {
-      // TODO : catch errors and display as apiError
-      const data = formatDataForAPI(code, state);
-      putDeclaration(data);
-    }
-  }, [code, state]);
 
   return (
     <Form
@@ -158,9 +151,7 @@ function DeclarationForm({
             </Fragment>
           )}
 
-          {apiError ? (
-            <p css={styles.error}>{apiError}</p>
-          ) : readOnly ? (
+          {readOnly ? (
             <ActionBar>
               Votre déclaration est maintenant finalisée, en date du{" "}
               {declaration.dateDeclaration}. &emsp;
@@ -182,6 +173,7 @@ function DeclarationForm({
                   "Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
                 }
                 label="déclarer"
+                loading={declaring}
               />
             </ActionBar>
           )}

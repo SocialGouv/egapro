@@ -39,7 +39,6 @@ function Simulateur({ code, state, dispatch }: Props) {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   );
-  const [apiError, setApiError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setLoading(true);
@@ -64,22 +63,14 @@ function Simulateur({ code, state, dispatch }: Props) {
     2000,
     (debouncedState) => {
       if (debouncedState) {
-        putIndicatorsDatas(code, debouncedState)
-          .then(() => {
-            setApiError(undefined);
-          })
-          .catch((error) => {
-            setLoading(false);
-            const message =
-              error.jsonBody && error.jsonBody.error
-                ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
-                : "Erreur lors de la sauvegarde des données";
-            if (error.response.status === 422) {
-              setApiError(message);
-            } else {
-              setErrorMessage(message);
-            }
-          });
+        putIndicatorsDatas(code, debouncedState).catch((error) => {
+          setLoading(false);
+          const message =
+            error.jsonBody && error.jsonBody.error
+              ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
+              : "Erreur lors de la sauvegarde des données";
+          setErrorMessage(message);
+        });
       }
     },
     [code]
@@ -187,7 +178,6 @@ function Simulateur({ code, state, dispatch }: Props) {
             code={code}
             state={state}
             dispatch={dispatch}
-            apiError={apiError}
           />
         )}
       />
