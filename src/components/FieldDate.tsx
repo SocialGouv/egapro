@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
-import { useField, Field, FieldMetaState } from "react-final-form";
+import { useField, Field } from "react-final-form";
 import { hasFieldError } from "./Input";
 
 import globalStyles from "../utils/globalStyles";
