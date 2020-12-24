@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { css, jsx } from "@emotion/core";
 import { Form } from "react-final-form";
 
@@ -13,7 +13,8 @@ import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
 import { required } from "../../utils/formHelpers";
-import { parseDate } from "../../utils/helpers";
+import { formatDataForAPI, parseDate } from "../../utils/helpers";
+import { putDeclaration } from "../../utils/api";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -53,8 +54,7 @@ const validateForm = (finPeriodeReference: string) => {
 ///////////////////
 interface Props {
   code: string;
-  declaration: AppState["declaration"];
-  informationsDeclarant: AppState["informationsDeclarant"];
+  state: AppState;
   noteIndex: number | undefined;
   indicateurUnParCSP: boolean;
   finPeriodeReference: string;
@@ -66,7 +66,7 @@ interface Props {
 
 function DeclarationForm({
   code,
-  declaration,
+  state,
   noteIndex,
   indicateurUnParCSP,
   finPeriodeReference,
@@ -75,6 +75,7 @@ function DeclarationForm({
   validateDeclaration,
   apiError,
 }: Props) {
+  const declaration = state.declaration;
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
     dateConsultationCSE: declaration.dateConsultationCSE,
@@ -102,6 +103,14 @@ function DeclarationForm({
     saveForm(formData);
     validateDeclaration("Valid");
   };
+
+  useEffect(() => {
+    if (state.declaration.formValidated === "Valid") {
+      // TODO : catch errors and display as apiError
+      const data = formatDataForAPI(code, state);
+      putDeclaration(data);
+    }
+  }, [code, state]);
 
   return (
     <Form
