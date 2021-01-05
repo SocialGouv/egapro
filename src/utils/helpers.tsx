@@ -303,7 +303,7 @@ const getIndicateur1 = (data: AppState): any => {
     indicateur1.population_favorable = sexeSurRepresente;
   }
   if (indicateur1.mode !== "csp") {
-    indicateur1.date_consultation_cse = data.declaration.dateConsultationCSE;
+    indicateur1.date_consultation_cse = toISOString(data.declaration.dateConsultationCSE);
     indicateur1.catégories = data.indicateurUn.coefficient.map((coef) => ({
       nom: coef.name,
       tranches: {
