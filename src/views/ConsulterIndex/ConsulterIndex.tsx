@@ -40,6 +40,9 @@ const fetchData = (
   { lastResearch }: SearchParams,
   { sortBy, currentPage }: DebouncedSearchParams
 ): Promise<SearchResult> => {
+  if (lastResearch === "") {
+    return Promise.resolve({total: 0, data: []});
+  }
   return findIndicatorsDataForRaisonSociale(lastResearch, {
     size: PAGE_SIZE,
     from: PAGE_SIZE * currentPage,
