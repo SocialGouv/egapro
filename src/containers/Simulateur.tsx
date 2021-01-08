@@ -5,6 +5,8 @@ import { Route, Switch } from "react-router-dom";
 
 import { AppState, ActionType } from "../globals";
 
+import { logToSentry } from "../utils/helpers";
+
 import globalStyles from "../utils/globalStyles";
 import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api";
 import { useDebounceEffect } from "../utils/hooks";
@@ -70,6 +72,7 @@ function Simulateur({ code, state, dispatch }: Props) {
               ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
               : "Erreur lors de la sauvegarde des données";
           setErrorMessage(message);
+          logToSentry(error, debouncedState);
         });
       }
     },

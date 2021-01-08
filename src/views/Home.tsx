@@ -5,6 +5,7 @@ import { RouteComponentProps } from "react-router-dom";
 
 import { ActionType } from "../globals";
 import { postIndicatorsDatas } from "../utils/api";
+import { logToSentry } from "../utils/helpers";
 
 import Page from "../components/Page";
 import ButtonAction from "../components/ButtonAction";
@@ -38,6 +39,7 @@ function Home({ history, location, dispatch }: Props) {
           (error.jsonBody && error.jsonBody.message) ||
           "Erreur lors de la récupération du code";
         setErrorMessage(errorMessage);
+        logToSentry(error, undefined);
       });
   };
 

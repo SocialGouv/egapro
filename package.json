@@ -13,6 +13,7 @@
   "proxy": "http://localhost:4000",
   "dependencies": {
     "@emotion/core": "10.0.28",
+    "@sentry/react": "^5.29.2",
     "@types/lodash": "4.14.149",
     "@types/react-datepicker": "2.11.0",
     "@types/react-text-mask": "5.4.6",

@@ -41,7 +41,7 @@ import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 import { putDeclaration, putIndicatorsDatas } from "../../utils/api";
-import { formatDataForAPI } from "../../utils/helpers";
+import { formatDataForAPI, logToSentry } from "../../utils/helpers";
 
 interface Props extends RouteComponentProps {
   code: string;
@@ -298,6 +298,7 @@ function Declaration({ code, state, dispatch }: Props) {
                   : "Erreur lors de la sauvegarde des données";
               setApiError(message);
               validateDeclaration("None");
+              logToSentry(error, data);
             });
         })
         .catch((error) => {
@@ -308,6 +309,7 @@ function Declaration({ code, state, dispatch }: Props) {
               : "Erreur lors de la sauvegarde des données";
           setApiError(message);
           validateDeclaration("None");
+          logToSentry(error, data);
         });
     }
   }, [code, declaring, state, validateDeclaration]);

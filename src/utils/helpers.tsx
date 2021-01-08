@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react"
 import {
   addYears,
   addDays,
@@ -444,3 +445,14 @@ const getIndicateur5 = (data: AppState): any => {
   }
   return indicateur5;
 };
+
+
+/* SENTRY */
+export function logToSentry(error: any, data: any) {
+  if (process.env.REACT_APP_SENTRY_DSN) {
+    console.log("sending log to sentry");
+    Sentry.captureException(error, {
+      extra: data
+    });
+  }
+}
