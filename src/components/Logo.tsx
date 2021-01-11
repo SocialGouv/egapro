@@ -11,7 +11,6 @@ function Logo({ layout = "default" }: { layout?: "default" | "mobile" }) {
         src={process.env.PUBLIC_URL + "/marianne.png"}
         alt="Ministère du Travail"
       />
-      <span css={styles.text}>Ministère du Travail</span>
     </div>
   );
 }
@@ -30,8 +29,7 @@ const styles = {
   }),
   image: css({
     display: "block",
-    width: 76,
-    height: 46,
+    width: 90,
     border: "solid black 1px"
   }),
   imageMobile: css({
