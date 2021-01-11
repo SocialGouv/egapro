@@ -43,7 +43,7 @@ function Footer() {
 
       <div css={styles.footerLinks}>
         <a
-          href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/questions-reponses-sur-le-calcul-de-l-index-de-l-egalite"
+          href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/index-egalite-professionnelle-femmes-hommes"
           target="_blank"
           rel="noopener noreferrer"
           css={styles.link}
