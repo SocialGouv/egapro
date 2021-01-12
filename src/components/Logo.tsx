@@ -8,7 +8,7 @@ function Logo({ layout = "default" }: { layout?: "default" | "mobile" }) {
     >
       <img
         css={[styles.image, layout === "mobile" && styles.imageMobile]}
-        src={process.env.PUBLIC_URL + "/marianne.png"}
+        src={process.env.PUBLIC_URL + "/marianne.svg"}
         alt="Ministère du Travail"
       />
     </div>
@@ -30,7 +30,6 @@ const styles = {
   image: css({
     display: "block",
     width: 90,
-    border: "solid black 1px"
   }),
   imageMobile: css({
     width: 60,
