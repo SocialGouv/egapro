@@ -18,7 +18,6 @@ const actionUpdateInformationsSimulation = {
     nomEntreprise: "BigCorp",
     trancheEffectifs: "1000 et plus" as TrancheEffectifs,
     anneeDeclaration: 2020,
-    debutPeriodeReference: "2019-01-01",
     finPeriodeReference: "2019-12-31"
   }
 };

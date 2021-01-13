@@ -3,6 +3,7 @@ import { css, jsx } from "@emotion/core";
 import { Fragment, ReactNode } from "react";
 
 import { FormState, TrancheEffectifs } from "../../globals";
+import { calendarYear, Year } from "../../utils/helpers";
 
 import InfoBloc from "../../components/InfoBloc";
 import { TextSimulatorLink } from "../../components/SimulatorLink";
@@ -12,7 +13,6 @@ interface Props {
   informationsFormValidated: FormState;
   trancheEffectifs: TrancheEffectifs;
   anneeDeclaration: number | undefined;
-  debutPeriodeReference: string;
   finPeriodeReference: string;
   nombreSalaries: number | undefined;
 }
@@ -21,7 +21,6 @@ function RecapitulatifInformations({
   informationsFormValidated,
   trancheEffectifs,
   anneeDeclaration,
-  debutPeriodeReference,
   finPeriodeReference,
   nombreSalaries
 }: Props) {
@@ -61,7 +60,7 @@ function RecapitulatifInformations({
       <DataDisplay header="Periode de référence">
         <div css={styles.dates}>
           <div css={styles.dateField}>
-            <DataDisplay header="Date de début" data={debutPeriodeReference} />
+            <DataDisplay header="Date de début" data={calendarYear(finPeriodeReference, Year.Subtract, 1)} />
           </div>
 
           <div css={styles.dateField}>

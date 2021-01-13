@@ -73,7 +73,6 @@ const defaultState: AppState = {
     nomEntreprise: "",
     trancheEffectifs: "50 à 250",
     anneeDeclaration: undefined,
-    debutPeriodeReference: "",
     finPeriodeReference: "",
   },
   effectif: {
@@ -175,7 +174,6 @@ function AppReducer(
         nomEntreprise,
         trancheEffectifs,
         anneeDeclaration,
-        debutPeriodeReference,
         finPeriodeReference,
       } = action.data;
       if (trancheEffectifs !== state.informations.trancheEffectifs) {
@@ -186,7 +184,6 @@ function AppReducer(
             nomEntreprise,
             anneeDeclaration,
             trancheEffectifs,
-            debutPeriodeReference,
             finPeriodeReference,
           },
           effectif:
@@ -241,7 +238,6 @@ function AppReducer(
           nomEntreprise,
           trancheEffectifs,
           anneeDeclaration,
-          debutPeriodeReference,
           finPeriodeReference,
         },
       };

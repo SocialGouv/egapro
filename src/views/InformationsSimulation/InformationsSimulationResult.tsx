@@ -2,6 +2,7 @@
 import { css, jsx } from "@emotion/core";
 
 import { FormState, TrancheEffectifs } from "../../globals";
+import { calendarYear, Year } from "../../utils/helpers";
 
 import ResultBubble from "../../components/ResultBubble";
 import ActionLink from "../../components/ActionLink";
@@ -9,7 +10,6 @@ import ActionLink from "../../components/ActionLink";
 interface Props {
   nomEntreprise: string;
   trancheEffectifs: TrancheEffectifs;
-  debutPeriodeReference: string;
   finPeriodeReference: string;
   validateInformationsSimulation: (valid: FormState) => void;
 }
@@ -17,7 +17,6 @@ interface Props {
 function InformationsSimulationResult({
   nomEntreprise,
   trancheEffectifs,
-  debutPeriodeReference,
   finPeriodeReference,
   validateInformationsSimulation
 }: Props) {
@@ -28,7 +27,7 @@ function InformationsSimulationResult({
         firstLineData={nomEntreprise}
         firstLineInfo={`votre tranche d'effectifs: ${trancheEffectifs}`}
         secondLineLabel="votre période de référence est"
-        secondLineData={`${debutPeriodeReference} au ${finPeriodeReference}`}
+        secondLineData={`${calendarYear(finPeriodeReference, Year.Subtract, 1)} au ${finPeriodeReference}`}
         indicateurSexeSurRepresente="hommes"
       />
 

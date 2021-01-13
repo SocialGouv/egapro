@@ -369,7 +369,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -608,7 +607,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
@@ -974,7 +972,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -1371,7 +1368,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -1737,7 +1733,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -2134,7 +2129,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -2500,7 +2494,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -2897,7 +2890,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -3263,7 +3255,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -3656,7 +3647,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -4018,7 +4008,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -4415,7 +4404,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -4781,7 +4769,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -5178,7 +5165,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -5544,7 +5530,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -5937,7 +5922,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -6299,7 +6283,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -6696,7 +6679,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -7100,7 +7082,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -7497,7 +7478,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -7901,7 +7881,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -8298,7 +8277,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -8702,7 +8680,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -9136,7 +9113,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -9540,7 +9516,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -9899,7 +9874,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -10265,7 +10239,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -10646,7 +10619,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -10996,7 +10968,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -11393,7 +11364,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -11759,7 +11729,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -12156,7 +12125,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -12522,7 +12490,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -12919,7 +12886,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -13281,7 +13247,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -13683,7 +13648,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2018,
-    "debutPeriodeReference": "2019-10-15",
     "finPeriodeReference": "2020-10-14",
     "formValidated": "None",
     "nomEntreprise": "acme",
@@ -14049,7 +14013,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2018,
-    "debutPeriodeReference": "2019-10-15",
     "finPeriodeReference": "2020-10-14",
     "formValidated": "None",
     "nomEntreprise": "acme",
@@ -14478,7 +14441,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -14876,7 +14838,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -15108,7 +15069,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
@@ -15347,7 +15307,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
@@ -15586,7 +15545,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
@@ -15990,7 +15948,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -16356,7 +16313,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -16753,7 +16709,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -17119,7 +17074,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -17516,7 +17470,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -17882,7 +17835,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -18279,7 +18231,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -18645,7 +18596,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -19042,7 +18992,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -19408,7 +19357,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -19805,7 +19753,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -20171,7 +20118,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -20568,7 +20514,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -20934,7 +20879,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -21166,7 +21110,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
@@ -21570,7 +21513,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -21936,7 +21878,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -22168,7 +22109,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
@@ -22572,7 +22512,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -22938,7 +22877,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -23335,7 +23273,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -23701,7 +23638,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -24098,7 +24034,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "None",
     "nomEntreprise": "BigCorp",
@@ -24464,7 +24399,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "None",
     "nomEntreprise": "",
@@ -24861,7 +24795,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": 2020,
-    "debutPeriodeReference": "2019-01-01",
     "finPeriodeReference": "2019-12-31",
     "formValidated": "Valid",
     "nomEntreprise": "BigCorp",
@@ -25227,7 +25160,6 @@ Object {
   },
   "informations": Object {
     "anneeDeclaration": undefined,
-    "debutPeriodeReference": "",
     "finPeriodeReference": "",
     "formValidated": "Valid",
     "nomEntreprise": "",

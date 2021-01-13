@@ -4,7 +4,6 @@ export type AppState = {
     nomEntreprise: string;
     trancheEffectifs: TrancheEffectifs;
     anneeDeclaration: number | undefined;
-    debutPeriodeReference: string;
     finPeriodeReference: string;
   };
   effectif: {
@@ -235,7 +234,6 @@ export type ActionInformationsSimulationData = {
   nomEntreprise: string;
   trancheEffectifs: TrancheEffectifs;
   anneeDeclaration: number | undefined;
-  debutPeriodeReference: string;
   finPeriodeReference: string;
 };
 

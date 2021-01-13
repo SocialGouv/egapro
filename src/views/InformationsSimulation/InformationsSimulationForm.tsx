@@ -1,12 +1,11 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { Form, useField } from "react-final-form";
-import createDecorator from "final-form-calculate";
 
 import {
   AppState,
   FormState,
-  ActionInformationsSimulationData
+  ActionInformationsSimulationData,
 } from "../../globals";
 
 import {
@@ -15,9 +14,8 @@ import {
   parseIntStateValue,
   parseTrancheEffectifsFormValue,
   required,
-  validateDate
 } from "../../utils/formHelpers";
-import { calendarYear, parseDate, Year } from "../../utils/helpers";
+import { parseDate } from "../../utils/helpers";
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
@@ -38,7 +36,7 @@ const validate = (value: string) => {
     return undefined;
   } else {
     return {
-      required: requiredError
+      required: requiredError,
     };
   }
 };
@@ -56,56 +54,26 @@ const validateInt = (value: string) => {
 const validateForm = ({
   nomEntreprise,
   anneeDeclaration,
-  debutPeriodeReference,
-  finPeriodeReference
+  finPeriodeReference,
 }: {
   nomEntreprise: string;
   anneeDeclaration: string;
-  debutPeriodeReference: string;
   finPeriodeReference: string;
 }) => {
   const parsedFinPeriodeReference = parseDate(finPeriodeReference);
   return {
     nomEntreprise: validate(nomEntreprise),
     anneeDeclaration: validateInt(anneeDeclaration),
-    debutPeriodeReference: validateDate(debutPeriodeReference),
     finPeriodeReference:
       parsedFinPeriodeReference !== undefined &&
       parsedFinPeriodeReference.getFullYear().toString() === anneeDeclaration
         ? undefined
         : {
             correspondanceAnneeDeclaration:
-              "L'année de fin de période de référence doit correspondre à l'année au titre de laquelle les indicateurs sont calculés"
-          }
+              "L'année de fin de période de référence doit correspondre à l'année au titre de laquelle les indicateurs sont calculés",
+          },
   };
 };
-
-const valueValidateForCalculator = (value: string) => {
-  return validateDate(value) === undefined;
-};
-
-const calculator = createDecorator(
-  {
-    field: "debutPeriodeReference",
-    updates: {
-      finPeriodeReference: (dateDebut, { finPeriodeReference }: any) => {
-        return valueValidateForCalculator(dateDebut)
-          ? calendarYear(dateDebut, Year.Add, 1)
-          : finPeriodeReference;
-      }
-    }
-  },
-  {
-    field: "finPeriodeReference",
-    updates: {
-      debutPeriodeReference: (dateFin, { debutPeriodeReference }: any) => {
-        return valueValidateForCalculator(dateFin)
-          ? calendarYear(dateFin, Year.Subtract, 1)
-          : debutPeriodeReference;
-      }
-    }
-  }
-);
 
 interface Props {
   informations: AppState["informations"];
@@ -120,14 +88,13 @@ function InformationsSimulationForm({
   informations,
   readOnly,
   updateInformationsSimulation,
-  validateInformationsSimulation
+  validateInformationsSimulation,
 }: Props) {
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
     anneeDeclaration: parseIntStateValue(informations.anneeDeclaration),
-    debutPeriodeReference: informations.debutPeriodeReference,
-    finPeriodeReference: informations.finPeriodeReference
+    finPeriodeReference: informations.finPeriodeReference,
   };
 
   const saveForm = (formData: any) => {
@@ -135,16 +102,14 @@ function InformationsSimulationForm({
       nomEntreprise,
       trancheEffectifs,
       anneeDeclaration,
-      debutPeriodeReference,
-      finPeriodeReference
+      finPeriodeReference,
     } = formData;
 
     updateInformationsSimulation({
       nomEntreprise: nomEntreprise,
       trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
       anneeDeclaration: parseIntFormValue(anneeDeclaration),
-      debutPeriodeReference: debutPeriodeReference,
-      finPeriodeReference: finPeriodeReference
+      finPeriodeReference: finPeriodeReference,
     });
   };
 
@@ -157,7 +122,6 @@ function InformationsSimulationForm({
     <Form
       onSubmit={onSubmit}
       initialValues={initialValues}
-      decorators={[calculator]}
       validate={validateForm}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -179,16 +143,16 @@ function InformationsSimulationForm({
             choices={[
               {
                 label: "Entre 50 et 250",
-                value: "50 à 250"
+                value: "50 à 250",
               },
               {
                 label: "Entre 251 et 999",
-                value: "251 à 999"
+                value: "251 à 999",
               },
               {
                 label: "1000 et plus",
-                value: "1000 et plus"
-              }
+                value: "1000 et plus",
+              },
             ]}
             value={values.trancheEffectifs}
             readOnly={readOnly}
@@ -260,11 +224,6 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
       </label>
       <div css={styles.dates}>
         <FieldDate
-          name="debutPeriodeReference"
-          label="Date de début (jj/mm/aaaa)"
-          readOnly={readOnly}
-        />
-        <FieldDate
           name="finPeriodeReference"
           label="Date de fin (jj/mm/aaaa)"
           readOnly={readOnly}
@@ -277,18 +236,18 @@ function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   formField: css({
-    marginBottom: 20
+    marginBottom: 20,
   }),
   label: css({
     fontSize: 14,
     fontWeight: "bold",
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   labelError: css({
-    color: globalStyles.colors.error
+    color: globalStyles.colors.error,
   }),
   fieldRow: css({
     height: 38,
@@ -297,26 +256,26 @@ const styles = {
     display: "flex",
     input: {
       borderRadius: 4,
-      border: "1px solid"
+      border: "1px solid",
     },
-    "input[readonly]": { border: 0 }
+    "input[readonly]": { border: 0 },
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     textDecoration: "underline",
-    lineHeight: "15px"
+    lineHeight: "15px",
   }),
   dates: css({
     display: "flex",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
-    textAlign: "center"
-  })
+    textAlign: "center",
+  }),
 };
 
 export default InformationsSimulationForm;

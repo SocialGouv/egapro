@@ -67,7 +67,6 @@ describe("updateInformationsSimulation", () => {
       nomEntreprise: "acme",
       trancheEffectifs: "251 à 999" as TrancheEffectifs,
       anneeDeclaration: 2018,
-      debutPeriodeReference: "2019-10-15",
       finPeriodeReference: "2020-10-14"
     }
   };
