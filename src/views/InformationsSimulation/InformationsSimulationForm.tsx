@@ -27,6 +27,7 @@ import Input, { hasFieldError } from "../../components/Input";
 import RadioLabels from "../../components/RadioLabels";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 import globalStyles from "../../utils/globalStyles";
+import ButtonAction from "../../components/ButtonAction";
 
 ///////////////////
 
@@ -106,10 +107,10 @@ function InformationsSimulationForm({
     } = formData;
 
     updateInformationsSimulation({
-      nomEntreprise: nomEntreprise,
+      nomEntreprise,
       trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
       anneeDeclaration: parseIntFormValue(anneeDeclaration),
-      finPeriodeReference: finPeriodeReference,
+      finPeriodeReference,
     });
   };
 
@@ -127,8 +128,21 @@ function InformationsSimulationForm({
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
+      mutators={{
+        selectEndOfYear: (args, state, utils) => {
+          const anneeDeclaration = parseIntFormValue(
+            (state.formState.values as any).anneeDeclaration
+          );
+          if (!anneeDeclaration) return;
+          utils.changeValue(
+            state,
+            "finPeriodeReference",
+            () => `31/12/${anneeDeclaration}`
+          );
+        },
+      }}
     >
-      {({ handleSubmit, hasValidationErrors, submitFailed, values }) => (
+      {({ form, handleSubmit, hasValidationErrors, submitFailed, values }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           {/* pass `onlyWhenDirty={false}` because we want the form to always
           auto save, as we update the left menu depending on the "tranche
@@ -164,7 +178,10 @@ function InformationsSimulationForm({
             readOnly={readOnly}
           />
 
-          <FieldPeriodeReference readOnly={readOnly} />
+          <FieldPeriodeReference
+            readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
+            onClick={form.mutators.selectEndOfYear}
+          />
 
           {readOnly ? (
             <ActionBar>
@@ -215,18 +232,25 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
   );
 }
 
-function FieldPeriodeReference({ readOnly }: { readOnly: boolean }) {
+function FieldPeriodeReference({
+  readOnly,
+  onClick,
+}: {
+  readOnly: boolean;
+  onClick: () => void;
+}) {
   return (
     <div>
       <label css={styles.label}>
-        Quelle est la période de référence choisie pour le calcul de votre Index
-        ?
+        Date de fin de la période de référence choisie pour le calcul de votre
+        Index (jj/mm/aaaa)
       </label>
       <div css={styles.dates}>
-        <FieldDate
-          name="finPeriodeReference"
-          label="Date de fin (jj/mm/aaaa)"
-          readOnly={readOnly}
+        <FieldDate name="finPeriodeReference" readOnly={readOnly} label="" />
+        <ButtonAction
+          label="sélectionner la fin de l'année civile"
+          onClick={onClick}
+          outline={readOnly}
         />
       </div>
     </div>
@@ -270,6 +294,7 @@ const styles = {
   dates: css({
     display: "flex",
     justifyContent: "space-between",
+    "> *": { width: "48% !important" },
   }),
   edit: css({
     marginTop: 14,
