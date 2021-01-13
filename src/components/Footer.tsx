@@ -63,7 +63,7 @@ function Footer() {
 
       <div css={styles.footerInfo}>
         <em style={styles.info}>
-          L’outil Index Egapro a été développé par les équipes de la fabrique numérique
+          Index Egapro a été développé par les équipes de la fabrique numérique
           des ministères sociaux
         </em>
         <span style={styles.info}>
