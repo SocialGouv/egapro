@@ -11,7 +11,7 @@ import {
   required,
   mustBeNumber,
   minNumber,
-  maxNumber
+  maxNumber,
 } from "../../utils/formHelpers";
 
 import { BlocFormLight } from "../../components/BlocForm";
@@ -24,11 +24,13 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 const validate = (value: string) => {
   const requiredError = required(value);
   const mustBeNumberError = mustBeNumber(value);
+  const mustBeIntegerError = !Number.isInteger(Number(value));
   const minNumberError = minNumber(value, 0);
   const maxNumberError = maxNumber(value, 10);
   if (
     !requiredError &&
     !mustBeNumberError &&
+    !mustBeIntegerError &&
     !minNumberError &&
     !maxNumberError
   ) {
@@ -37,21 +39,22 @@ const validate = (value: string) => {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
+      mustBeInteger: mustBeIntegerError,
       minNumber: minNumberError,
-      maxNumber: maxNumberError
+      maxNumber: maxNumberError,
     };
   }
 };
 
 const validateForm = ({
   nombreSalariesFemmes,
-  nombreSalariesHommes
+  nombreSalariesHommes,
 }: {
   nombreSalariesFemmes: string;
   nombreSalariesHommes: string;
 }) => ({
   nombreSalariesFemmes: validate(nombreSalariesFemmes),
-  nombreSalariesHommes: validate(nombreSalariesHommes)
+  nombreSalariesHommes: validate(nombreSalariesHommes),
 });
 
 const valueValidateForCalculator = (value: string) => {
@@ -64,8 +67,8 @@ const calculator = createDecorator({
     nombreSalariesHommes: (femmesValue, { nombreSalariesHommes }: any) =>
       valueValidateForCalculator(femmesValue)
         ? parseIntStateValue(10 - parseIntFormValue(femmesValue))
-        : nombreSalariesHommes
-  }
+        : nombreSalariesHommes,
+  },
 });
 
 ///////////////////
@@ -81,7 +84,7 @@ function IndicateurCinqForm({
   indicateurCinq,
   readOnly,
   updateIndicateurCinq,
-  validateIndicateurCinq
+  validateIndicateurCinq,
 }: Props) {
   const initialValues = {
     nombreSalariesHommes: parseIntStateValue(
@@ -89,7 +92,7 @@ function IndicateurCinqForm({
     ),
     nombreSalariesFemmes: parseIntStateValue(
       indicateurCinq.nombreSalariesFemmes
-    )
+    ),
   };
 
   const saveForm = (formData: any) => {
@@ -97,7 +100,7 @@ function IndicateurCinqForm({
 
     updateIndicateurCinq({
       nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes),
-      nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes)
+      nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes),
     });
   };
 
@@ -123,12 +126,12 @@ function IndicateurCinqForm({
           <BlocFormLight>
             <FieldInput
               fieldName="nombreSalariesFemmes"
-              label="nombre de femmes parmi les 10 plus hauts salaires"
+              label="nombre (entier) de femmes parmi les 10 plus hauts salaires"
               readOnly={readOnly}
             />
             <FieldInput
               fieldName="nombreSalariesHommes"
-              label="nombre d’hommes parmi les 10 plus hauts salaires"
+              label="nombre (entier) d’hommes parmi les 10 plus hauts salaires"
               readOnly={true}
               theme="hommes"
             />
@@ -156,8 +159,8 @@ function IndicateurCinqForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
-  })
+    flexDirection: "column",
+  }),
 };
 
 export default IndicateurCinqForm;

@@ -8,6 +8,9 @@ import { CellHead, Cell } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
 import { IconValid, IconInvalid } from "./Icons";
 
+const hasIntegerInputError = (meta: FieldMetaState<string>) =>
+  meta.error && meta.touched && meta.error.mustBeInteger;
+
 const hasMinMaxInputError = (meta: FieldMetaState<string>) =>
   meta.error && meta.touched && (meta.error.minNumber || meta.error.maxNumber);
 
@@ -24,6 +27,7 @@ interface Props {
 function FieldInput({ fieldName, label, readOnly, theme = "femmes" }: Props) {
   const field = useField(fieldName);
   const error = hasFieldError(field.meta);
+  const integerError = hasIntegerInputError(field.meta);
   const minMaxError = hasMinMaxInputError(field.meta);
   const previousFieldError = hasPreviousFieldInputError(field.meta);
 
@@ -49,7 +53,7 @@ function FieldInput({ fieldName, label, readOnly, theme = "femmes" }: Props) {
           <Cell
             style={[
               styles.cellEmpty,
-              theme === "hommes" ? styles.cellEmptyMen : styles.cellEmptyWomen
+              theme === "hommes" ? styles.cellEmptyMen : styles.cellEmptyWomen,
             ]}
           >
             {field.input.value}
@@ -62,7 +66,11 @@ function FieldInput({ fieldName, label, readOnly, theme = "femmes" }: Props) {
         )}
       </div>
       {error &&
-        (minMaxError ? (
+        (integerError ? (
+          <div css={styles.error}>
+            ce champ doit contenir une valeur entière, sans virgule
+          </div>
+        ) : minMaxError ? (
           <div css={styles.error}>
             ce champ doit contenir une valeur entre 0 et 10
           </div>
@@ -88,12 +96,12 @@ const styles = {
     flexDirection: "column",
     alignItems: "stretch",
     height: HEIGHT,
-    marginTop: MARGIN_TOP
+    marginTop: MARGIN_TOP,
   }),
   row: css({
     display: "flex",
     flexDirection: "row",
-    alignItems: "flex-end"
+    alignItems: "flex-end",
   }),
   cellHead: css({
     height: 29,
@@ -101,36 +109,36 @@ const styles = {
     display: "flex",
     alignItems: "flex-end",
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
-    fontSize: 14
+    fontSize: 14,
   }),
   cellHeadInner: css({
     display: "flex",
-    alignItems: "baseline"
+    alignItems: "baseline",
   }),
   cellHeadError: css({
     color: globalStyles.colors.error,
-    borderColor: "transparent"
+    borderColor: "transparent",
   }),
   cellHeadIcon: css({
-    marginRight: 5
+    marginRight: 5,
   }),
   cellMen: css({
-    borderColor: globalStyles.colors.men
+    borderColor: globalStyles.colors.men,
   }),
   cellWomen: css({
-    borderColor: globalStyles.colors.women
+    borderColor: globalStyles.colors.women,
   }),
   cellEmpty: css({
     height: 22,
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   }),
   cellEmptyMen: css({
-    color: globalStyles.colors.men
+    color: globalStyles.colors.men,
   }),
   cellEmptyWomen: css({
-    color: globalStyles.colors.women
+    color: globalStyles.colors.women,
   }),
   error: css({
     display: "flex",
@@ -141,8 +149,8 @@ const styles = {
     fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
-    borderBottom: `solid ${globalStyles.colors.error} 1px`
-  })
+    borderBottom: `solid ${globalStyles.colors.error} 1px`,
+  }),
 };
 
 export default FieldInput;
