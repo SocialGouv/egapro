@@ -74,7 +74,8 @@ export const parseTrancheEffectifsFormValue = (
 
 // VALIDATION
 
-export const required = (value: string): boolean => (value ? false : true);
+export const required = (value: string): boolean | string =>
+  value ? false : "Ce champ ne peut être vide";
 
 export const mustBeNumber = (value: string): boolean =>
   Number.isNaN(Number(value));
@@ -85,12 +86,12 @@ export const minNumber = (value: string, min: number): boolean =>
 export const maxNumber = (value: string, max: number): boolean =>
   Number(value) > max;
 
-export const mustBeDate = (value: string): boolean => {
+export const mustBeDate = (value: string): boolean | string => {
   const parsed = parseDate(value);
-  return (
-    parsed === undefined ||
+  return parsed === undefined ||
     parsed.toString() === "ce champ doit contenir une date au format jj/mm/aaaa"
-  );
+    ? "Ce champ doit contenir une date au format jj/mm/aaaa"
+    : false;
 };
 
 export const validateDate = (value: string) => {

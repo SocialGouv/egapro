@@ -27,13 +27,10 @@ const validate = (value: string) => {
 };
 
 const validateForm = (finPeriodeReference: string) => {
-  return ({
-    datePublication,
-    lienPublication,
-  }: {
-    datePublication: string;
-    lienPublication: string;
-  }) => {
+  return ({ datePublication }: { datePublication: string }) => {
+    // Make sure we don't invalidate the form if the field `datePublication`
+    // isn't present on the form (because the index can't be calculated).
+    if (!datePublication) return;
     const parsedDatePublication = parseDate(datePublication);
     const parsedFinPeriodeReference = parseDate(finPeriodeReference);
     return {
@@ -45,7 +42,6 @@ const validateForm = (finPeriodeReference: string) => {
           : {
               correspondanceFinPeriodeReference: `La date ne peut précéder la fin de la période de référence (${finPeriodeReference})`,
             },
-      lienPublication: validate(lienPublication),
     };
   };
 };
