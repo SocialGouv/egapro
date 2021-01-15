@@ -12,19 +12,7 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
-import { required } from "../../utils/formHelpers";
 import { parseDate } from "../../utils/helpers";
-
-const validate = (value: string) => {
-  const requiredError = required(value);
-  if (!requiredError) {
-    return undefined;
-  } else {
-    return {
-      required: requiredError,
-    };
-  }
-};
 
 const validateForm = (finPeriodeReference: string) => {
   return ({ datePublication }: { datePublication: string }) => {
