@@ -298,7 +298,12 @@ function Declaration({ code, state, dispatch }: Props) {
                   : "Erreur lors de la sauvegarde des données";
               setApiError(message);
               validateDeclaration("None");
-              logToSentry(error, data);
+              if (error.response.status !== 403) {
+                // Don't log on 403 because it's n expected error:
+                // "Votre déclaration ne peut être validée : Cette déclaration a déjà
+                // été créée par un autre utilisateur".
+                logToSentry(error, data);
+              }
             });
         })
         .catch((error) => {
