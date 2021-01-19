@@ -91,7 +91,8 @@ const ConsulterIndex: React.FC = () => {
       </div>
       <h2 css={styles.title}>
         Retrouvez l'Index égalité professionnelle F/H publié par les entreprises
-        de plus de 1000 salariés.
+        de plus de 1000 salariés et, depuis 2020, également les entreprises
+        de plus de 250 salariés.
       </h2>
       <Subtitle>
         Dans une volonté de transparence et d'avancée sociale pour toutes et
