@@ -25,7 +25,7 @@ function RecapitulatifIndex({
   return (
     <div css={[styles.indexBloc, css({ width })]}>
       {allIndicateurValid ? (
-        noteIndex ? (
+        noteIndex !== undefined ? (
           <InfoBloc title="Index égalité femmes-hommes" icon={null}>
             <div>
               <p css={[styles.blocText, styles.blocTextResult]}>
