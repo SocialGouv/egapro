@@ -16,7 +16,7 @@ function CGU({ history, location, dispatch }: Props) {
       <div css={styles.content}>
         <h2 css={styles.title}>Responsable de traitement</h2>
         <p>
-          Les responsables de traitement sont Yves Struillou et Hélène Brisset.
+          Les responsables de traitement sont Pierre Ramain et Hélène Brisset.
           <br />
           <br />
           Le délégué à la protection des données est « DPD » : Danièla PARROT,{" "}

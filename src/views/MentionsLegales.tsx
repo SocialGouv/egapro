@@ -28,7 +28,7 @@ function MentionsLegales({ history, location, dispatch }: Props) {
           Tél : 01 40 56 60 00
         </p>
         <h2 css={styles.title}>Directeur de la publication</h2>
-        <p>Yves Struillou</p>
+        <p>Pierre Ramain</p>
         <h2 css={styles.title}>Hébergement de la plateforme</h2>
         <p>
           Ce site est hébergé au :
