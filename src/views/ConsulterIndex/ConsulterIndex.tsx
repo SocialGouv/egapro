@@ -90,15 +90,13 @@ const ConsulterIndex: React.FC = () => {
         </a>
       </div>
       <h2 css={styles.title}>
-        Retrouvez l'Index égalité professionnelle F/H publié par les entreprises
-        de plus de 1000 salariés et, depuis 2020, également les entreprises
-        de plus de 250 salariés.
+        Retrouvez l'Index égalité professionnelle F/H publié par les
+        entreprises de plus de 250 salariés.
       </h2>
       <Subtitle>
         Dans une volonté de transparence et d'avancée sociale pour toutes et
         tous, le Ministère du Travail a décidé de faciliter l'accès aux
-        informations des entreprises qui publient leur index depuis plus d'un
-        an.
+        informations des entreprises qui publient leur index depuis 2019.
       </Subtitle>
       <div css={styles.searchFieldWrapper}>
         <SearchBox onSearch={search} placeholder="Raison Sociale" />
