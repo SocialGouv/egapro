@@ -6,7 +6,7 @@ import { FormState, ActionIndicateurTroisData } from "../../globals";
 import {
   // calculTotalEffectifsEtTauxPromotion,
   // calculEcartTauxPromotion,
-  effectifEtEcartPromoGroup
+  effectifEtEcartPromoGroup,
 } from "../../utils/calculsEgaProIndicateurTrois";
 
 import BlocForm from "../../components/BlocForm";
@@ -21,12 +21,40 @@ import {
   parseFloatFormValue,
   parseFloatStateValue,
   parseBooleanFormValue,
-  parseBooleanStateValue
+  parseBooleanStateValue,
 } from "../../utils/formHelpers";
 import {
-  displayNameCategorieSocioPro
+  displayNameCategorieSocioPro,
   // displayFractionPercent
 } from "../../utils/helpers";
+
+const validateForm = ({
+  tauxPromotion,
+  presencePromotion,
+}: {
+  tauxPromotion: Array<{
+    tauxPromotionFemmes: string;
+    tauxPromotionHommes: string;
+  }>;
+  presencePromotion: string;
+}) => {
+  if (presencePromotion === "false") {
+    return undefined;
+  }
+  const allInputs = tauxPromotion.flatMap(
+    ({ tauxPromotionFemmes, tauxPromotionHommes }) => [
+      tauxPromotionFemmes,
+      tauxPromotionHommes,
+    ]
+  );
+  if (allInputs.every((input) => input === "0" || input === "")) {
+    return {
+      notAll0:
+        "Tous les champs ne peuvent pas être à 0 si il y a eu des promotions",
+    };
+  }
+  return;
+};
 
 interface Props {
   ecartPromoParCategorieSocioPro: Array<effectifEtEcartPromoGroup>;
@@ -41,7 +69,7 @@ function IndicateurTroisForm({
   presencePromotion,
   readOnly,
   updateIndicateurTrois,
-  validateIndicateurTrois
+  validateIndicateurTrois,
 }: Props) {
   const initialValues = {
     presencePromotion: parseBooleanStateValue(presencePromotion),
@@ -49,9 +77,9 @@ function IndicateurTroisForm({
       ({ tauxPromotionFemmes, tauxPromotionHommes, ...otherProps }: any) => ({
         ...otherProps,
         tauxPromotionFemmes: parseFloatStateValue(tauxPromotionFemmes),
-        tauxPromotionHommes: parseFloatStateValue(tauxPromotionHommes)
+        tauxPromotionHommes: parseFloatStateValue(tauxPromotionHommes),
       })
-    )
+    ),
   };
 
   const saveForm = (formData: any) => {
@@ -60,16 +88,16 @@ function IndicateurTroisForm({
       ({
         categorieSocioPro,
         tauxPromotionFemmes,
-        tauxPromotionHommes
+        tauxPromotionHommes,
       }: any) => ({
         categorieSocioPro,
         tauxPromotionFemmes: parseFloatFormValue(tauxPromotionFemmes),
-        tauxPromotionHommes: parseFloatFormValue(tauxPromotionHommes)
+        tauxPromotionHommes: parseFloatFormValue(tauxPromotionHommes),
       })
     );
     updateIndicateurTrois({
       tauxPromotion,
-      presencePromotion
+      presencePromotion,
     });
   };
 
@@ -110,13 +138,20 @@ function IndicateurTroisForm({
   return (
     <Form
       onSubmit={onSubmit}
+      validate={validateForm}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({
+        handleSubmit,
+        values,
+        hasValidationErrors,
+        errors,
+        submitFailed,
+      }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadiosBoolean
@@ -163,7 +198,11 @@ function IndicateurTroisForm({
               <FormSubmit
                 hasValidationErrors={hasValidationErrors}
                 submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                errorMessage={
+                  errors.notAll0
+                    ? errors.notAll0
+                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                }
               />
             </ActionBar>
           )}
@@ -176,8 +215,8 @@ function IndicateurTroisForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
-  })
+    flexDirection: "column",
+  }),
 };
 
 export default IndicateurTroisForm;

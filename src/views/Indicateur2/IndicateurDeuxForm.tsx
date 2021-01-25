@@ -6,7 +6,7 @@ import { FormState, ActionIndicateurDeuxData } from "../../globals";
 import {
   // calculTotalEffectifsEtTauxAugmentation,
   // calculEcartTauxAugmentation,
-  effectifEtEcartAugmentGroup
+  effectifEtEcartAugmentGroup,
 } from "../../utils/calculsEgaProIndicateurDeux";
 
 import BlocForm from "../../components/BlocForm";
@@ -21,12 +21,40 @@ import {
   parseFloatFormValue,
   parseFloatStateValue,
   parseBooleanFormValue,
-  parseBooleanStateValue
+  parseBooleanStateValue,
 } from "../../utils/formHelpers";
 import {
-  displayNameCategorieSocioPro
+  displayNameCategorieSocioPro,
   // displayFractionPercent
 } from "../../utils/helpers";
+
+const validateForm = ({
+  tauxAugmentation,
+  presenceAugmentation,
+}: {
+  tauxAugmentation: Array<{
+    tauxAugmentationFemmes: string;
+    tauxAugmentationHommes: string;
+  }>;
+  presenceAugmentation: string;
+}) => {
+  if (presenceAugmentation === "false") {
+    return undefined;
+  }
+  const allInputs = tauxAugmentation.flatMap(
+    ({ tauxAugmentationFemmes, tauxAugmentationHommes }) => [
+      tauxAugmentationFemmes,
+      tauxAugmentationHommes,
+    ]
+  );
+  if (allInputs.every((input) => input === "0" || input === "")) {
+    return {
+      notAll0:
+        "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
+    };
+  }
+  return;
+};
 
 interface Props {
   ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>;
@@ -41,7 +69,7 @@ function IndicateurDeuxForm({
   presenceAugmentation,
   readOnly,
   updateIndicateurDeux,
-  validateIndicateurDeux
+  validateIndicateurDeux,
 }: Props) {
   const initialValues = {
     presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
@@ -53,9 +81,9 @@ function IndicateurDeuxForm({
       }: any) => ({
         ...otherProps,
         tauxAugmentationFemmes: parseFloatStateValue(tauxAugmentationFemmes),
-        tauxAugmentationHommes: parseFloatStateValue(tauxAugmentationHommes)
+        tauxAugmentationHommes: parseFloatStateValue(tauxAugmentationHommes),
       })
-    )
+    ),
   };
 
   const saveForm = (formData: any) => {
@@ -66,16 +94,16 @@ function IndicateurDeuxForm({
       ({
         categorieSocioPro,
         tauxAugmentationFemmes,
-        tauxAugmentationHommes
+        tauxAugmentationHommes,
       }: any) => ({
         categorieSocioPro,
         tauxAugmentationFemmes: parseFloatFormValue(tauxAugmentationFemmes),
-        tauxAugmentationHommes: parseFloatFormValue(tauxAugmentationHommes)
+        tauxAugmentationHommes: parseFloatFormValue(tauxAugmentationHommes),
       })
     );
     updateIndicateurDeux({
       tauxAugmentation,
-      presenceAugmentation
+      presenceAugmentation,
     });
   };
 
@@ -116,13 +144,20 @@ function IndicateurDeuxForm({
   return (
     <Form
       onSubmit={onSubmit}
+      validate={validateForm}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({
+        handleSubmit,
+        values,
+        hasValidationErrors,
+        errors,
+        submitFailed,
+      }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadiosBoolean
@@ -169,7 +204,11 @@ function IndicateurDeuxForm({
               <FormSubmit
                 hasValidationErrors={hasValidationErrors}
                 submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                errorMessage={
+                  errors.notAll0
+                    ? errors.notAll0
+                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                }
               />
             </ActionBar>
           )}
@@ -182,8 +221,8 @@ function IndicateurDeuxForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
-  })
+    flexDirection: "column",
+  }),
 };
 
 export default IndicateurDeuxForm;
