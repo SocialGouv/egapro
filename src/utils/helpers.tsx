@@ -280,6 +280,13 @@ const getIndicateurs = (data: AppState): any => {
   return indicateurs;
 };
 
+const asPercentage = (value : number | undefined) => {
+  // Return `33` for "33%" (which is passed in as a value of 0.33)
+  if (value !== undefined) {
+    return value * 100
+  }
+};
+
 // Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
 const getIndicateur1 = (data: AppState): any => {
   // @ts-ignore
@@ -308,10 +315,10 @@ const getIndicateur1 = (data: AppState): any => {
     indicateur1.catégories = data.indicateurUn.coefficient.map((coef) => ({
       nom: coef.name,
       tranches: {
-        ":29": coef.tranchesAges[0].ecartTauxRemuneration,
-        "30:39": coef.tranchesAges[1].ecartTauxRemuneration,
-        "40:49": coef.tranchesAges[2].ecartTauxRemuneration,
-        "50:": coef.tranchesAges[3].ecartTauxRemuneration,
+        ":29": asPercentage(coef.tranchesAges[0].ecartTauxRemuneration),
+        "30:39": asPercentage(coef.tranchesAges[1].ecartTauxRemuneration),
+        "40:49": asPercentage(coef.tranchesAges[2].ecartTauxRemuneration),
+        "50:": asPercentage(coef.tranchesAges[3].ecartTauxRemuneration),
       },
     }));
   } else {
@@ -320,10 +327,10 @@ const getIndicateur1 = (data: AppState): any => {
       (coef, index) => ({
         nom: csp[index],
         tranches: {
-          ":29": coef.tranchesAges[0].ecartTauxRemuneration,
-          "30:39": coef.tranchesAges[1].ecartTauxRemuneration,
-          "40:49": coef.tranchesAges[2].ecartTauxRemuneration,
-          "50:": coef.tranchesAges[3].ecartTauxRemuneration,
+          ":29": asPercentage(coef.tranchesAges[0].ecartTauxRemuneration),
+          "30:39": asPercentage(coef.tranchesAges[1].ecartTauxRemuneration),
+          "40:49": asPercentage(coef.tranchesAges[2].ecartTauxRemuneration),
+          "50:": asPercentage(coef.tranchesAges[3].ecartTauxRemuneration),
         },
       })
     );
@@ -345,7 +352,7 @@ const getIndicateur2 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurDeux.noteFinale,
     catégories: data.indicateurDeux.tauxAugmentation.map(
-      (cat) => cat.ecartTauxAugmentation
+      (cat) => asPercentage(cat.ecartTauxAugmentation)
     ),
   };
   // @ts-ignore
@@ -370,7 +377,7 @@ const getIndicateur3 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurTrois.noteFinale,
     catégories: data.indicateurTrois.tauxPromotion.map(
-      (cat) => cat.ecartTauxPromotion
+      (cat) => asPercentage(cat.ecartTauxPromotion)
     ),
   };
   // @ts-ignore
