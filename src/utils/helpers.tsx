@@ -253,7 +253,7 @@ const getEntreprise = (data: AppState): any => {
           : "1000:",
     },
   };
-  if (data.informationsEntreprise.nomUES) {
+  if (data.informationsEntreprise.structure !== "Entreprise") {
     entreprise.ues = {
       nom: data.informationsEntreprise.nomUES,
       entreprises: data.informationsEntreprise.entreprisesUES.map(
