@@ -54,8 +54,11 @@ const validate = (value: string) => {
 };
 
 const validateCodePostal = (codePostal: string, departement: string) => {
-  const dptCode = departementCode[departement];
+  let dptCode = departementCode[departement];
   if (!dptCode) return undefined;
+  if (["2A", "2B"].includes(dptCode)) {
+    dptCode = "20";
+  }
   const requiredError = required(codePostal);
   const mustBeNumberError = mustBeNumber(codePostal);
   const mustBe5DigitsError = codePostal && codePostal.length !== 5;
@@ -232,7 +235,7 @@ function InformationsEntrepriseForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ form, handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
@@ -287,7 +290,15 @@ function InformationsEntrepriseForm({
           <TextField
             label="Code Postal"
             fieldName="codePostal"
-            errorText="le code postal n’est pas valide"
+            errorText={
+              errors.codePostal && (
+                errors.codePostal.required ||
+                errors.codePostal.mustBeNumber ||
+                errors.codePostal.mustBe5Digits
+              )
+              ? "le code postal doit être composé de 5 chiffres"
+              : `le code postal ne correspond pas au département choisi (${departementCode[values.departement]})`
+            }
             readOnly={readOnly}
           />
           <TextField
