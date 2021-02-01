@@ -1,0 +1,34 @@
+name: EgaPro
+
+# List your code repos
+repositories:
+  frontend: https://github.com/SocialGouv/egapro
+  api: https://github.com/SocialGouv/egapro-api
+  declaration: https://github.com/SocialGouv/egapro-declaration
+
+# List all docs links
+documentation:
+
+# List all the tools used by the team
+tools:
+  ticketing: https://github.com/SocialGouv/egapro/issues
+  sentry: https://sentry.fabrique.social.gouv.fr/incubateur/egapro
+  matomo: https://matomo.fabrique.social.gouv.fr
+  smtp: tipimail
+
+# Overall technical stack
+stack:
+  frontend:
+    - TypeScript
+    - Create-react-app
+  api:
+    - Python
+    - PostgreSQL
+  declaration:
+    - Jekyll
+    - JavaScript
+  tests:
+    - Jest unit tests (frontend)
+    - PyTest (api)
+  ci:
+    - VMs
