@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react"
+import * as Sentry from "@sentry/react";
 import {
   addYears,
   addDays,
@@ -211,10 +211,10 @@ const getDeclaration = (data: AppState): any => {
     declaration.publication = {
       date: toISOString(data.declaration.datePublication),
     };
-    if (data.declaration.lienPublication.startsWith("http")) {
+    if (data.declaration.publicationSurSiteInternet) {
       declaration.publication.url = data.declaration.lienPublication;
     } else {
-      declaration.publication.modalités = data.declaration.lienPublication;
+      declaration.publication.modalités = data.declaration.modalitesPublication;
     }
   }
   return declaration;
@@ -280,10 +280,10 @@ const getIndicateurs = (data: AppState): any => {
   return indicateurs;
 };
 
-const asPercentage = (value : number | undefined) => {
+const asPercentage = (value: number | undefined) => {
   // Return `33` for "33%" (which is passed in as a value of 0.33)
   if (value !== undefined) {
-    return value * 100
+    return value * 100;
   }
 };
 
@@ -311,7 +311,9 @@ const getIndicateur1 = (data: AppState): any => {
     indicateur1.population_favorable = sexeSurRepresente;
   }
   if (indicateur1.mode !== "csp") {
-    indicateur1.date_consultation_cse = toISOString(data.declaration.dateConsultationCSE);
+    indicateur1.date_consultation_cse = toISOString(
+      data.declaration.dateConsultationCSE
+    );
     indicateur1.catégories = data.indicateurUn.coefficient.map((coef) => ({
       nom: coef.name,
       tranches: {
@@ -351,8 +353,8 @@ const getIndicateur2 = (data: AppState): any => {
     résultat: data.indicateurDeux.resultatFinal,
     // @ts-ignore
     note: data.indicateurDeux.noteFinale,
-    catégories: data.indicateurDeux.tauxAugmentation.map(
-      (cat) => asPercentage(cat.ecartTauxAugmentation)
+    catégories: data.indicateurDeux.tauxAugmentation.map((cat) =>
+      asPercentage(cat.ecartTauxAugmentation)
     ),
   };
   // @ts-ignore
@@ -376,8 +378,8 @@ const getIndicateur3 = (data: AppState): any => {
     résultat: data.indicateurTrois.resultatFinal,
     // @ts-ignore
     note: data.indicateurTrois.noteFinale,
-    catégories: data.indicateurTrois.tauxPromotion.map(
-      (cat) => asPercentage(cat.ecartTauxPromotion)
+    catégories: data.indicateurTrois.tauxPromotion.map((cat) =>
+      asPercentage(cat.ecartTauxPromotion)
     ),
   };
   // @ts-ignore
@@ -453,12 +455,11 @@ const getIndicateur5 = (data: AppState): any => {
   return indicateur5;
 };
 
-
 /* SENTRY */
 export function logToSentry(error: any, data: any) {
   if (process.env.REACT_APP_SENTRY_DSN) {
     Sentry.captureException(error, {
-      extra: data
+      extra: data,
     });
   }
 }

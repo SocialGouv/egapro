@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
-import { Form } from "react-final-form";
+import { Form, useField } from "react-final-form";
 
 import { AppState, FormState, ActionDeclarationData } from "../../globals";
 
@@ -13,6 +13,25 @@ import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
 import { parseDate } from "../../utils/helpers";
+import RadiosBoolean from "../../components/RadiosBoolean";
+import {
+  parseBooleanFormValue,
+  parseBooleanStateValue,
+  required,
+} from "../../utils/formHelpers";
+import Input, { hasFieldError } from "../../components/Input";
+import globalStyles from "../../utils/globalStyles";
+
+const validate = (value: string) => {
+  const requiredError = required(value);
+  if (!requiredError) {
+    return undefined;
+  } else {
+    return {
+      required: requiredError,
+    };
+  }
+};
 
 const validateForm = (finPeriodeReference: string) => {
   return ({ datePublication }: { datePublication: string }) => {
@@ -65,7 +84,11 @@ function DeclarationForm({
     mesuresCorrection: declaration.mesuresCorrection,
     dateConsultationCSE: declaration.dateConsultationCSE,
     datePublication: declaration.datePublication,
+    publicationSurSiteInternet: parseBooleanStateValue(
+      declaration.publicationSurSiteInternet
+    ),
     lienPublication: declaration.lienPublication,
+    modalitesPublication: declaration.modalitesPublication,
   };
 
   const saveForm = (formData: any) => {
@@ -73,14 +96,20 @@ function DeclarationForm({
       mesuresCorrection,
       dateConsultationCSE,
       datePublication,
+      publicationSurSiteInternet,
       lienPublication,
+      modalitesPublication,
     } = formData;
 
     updateDeclaration({
       mesuresCorrection,
       dateConsultationCSE,
       datePublication,
+      publicationSurSiteInternet: parseBooleanFormValue(
+        publicationSurSiteInternet
+      ),
       lienPublication,
+      modalitesPublication,
     });
   };
 
@@ -99,7 +128,7 @@ function DeclarationForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, hasValidationErrors, submitFailed }) => (
+      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
 
@@ -126,12 +155,29 @@ function DeclarationForm({
                 label="Date de publication de cet index"
                 readOnly={readOnly}
               />
-              <Textarea
-                label="Adresse du site internet de publication ou à défaut précision des modalités de publicité"
-                fieldName="lienPublication"
-                errorText="Veuillez entrer une adresse internet ou préciser les modalités de publicité"
+              <p>
+                Avez-vous un site internet pour pour publier le niveau de
+                résultat obtenu ?
+              </p>
+              <RadiosBoolean
+                fieldName="publicationSurSiteInternet"
+                value={values.publicationSurSiteInternet}
                 readOnly={readOnly}
+                labelTrue="oui"
+                labelFalse="non"
               />
+              <div css={styles.siteOrModalites}>
+                {values.publicationSurSiteInternet === "true" ? (
+                  <FieldSiteInternet readOnly={readOnly} />
+                ) : (
+                  <Textarea
+                    label="Précision des modalités de publicité"
+                    fieldName="modalitesPublication"
+                    errorText="Veuillez préciser les modalités de publicité"
+                    readOnly={readOnly}
+                  />
+                )}
+              </div>
             </Fragment>
           )}
 
@@ -167,10 +213,57 @@ function DeclarationForm({
   );
 }
 
+function FieldSiteInternet({ readOnly }: { readOnly: boolean }) {
+  const field = useField("lienPublication", { validate });
+  const error = hasFieldError(field.meta);
+
+  return (
+    <div css={styles.formField}>
+      <label
+        css={[styles.label, error && styles.labelError]}
+        htmlFor={field.input.name}
+      >
+        Adresse du site internet de publication du niveau de résultat obtenu
+      </label>
+      <div css={styles.fieldRow}>
+        <Input field={field} readOnly={readOnly} />
+      </div>
+      <p css={styles.error}>
+        {error && "veuillez entrer une adresse internet"}
+      </p>
+    </div>
+  );
+}
+
 const styles = {
   container: css({
     display: "flex",
     flexDirection: "column",
+  }),
+  formField: css({
+    marginBottom: 20,
+  }),
+  label: css({
+    fontSize: 14,
+    fontWeight: "bold",
+    lineHeight: "17px",
+  }),
+  labelError: css({
+    color: globalStyles.colors.error,
+  }),
+  siteOrModalites: css({
+    marginTop: 20,
+  }),
+  fieldRow: css({
+    height: 38,
+    marginTop: 5,
+    marginBottom: 5,
+    display: "flex",
+    input: {
+      borderRadius: 4,
+      border: "1px solid",
+    },
+    "input[readonly]": { border: 0 },
   }),
   edit: css({
     marginTop: 14,
@@ -178,11 +271,10 @@ const styles = {
     textAlign: "center",
   }),
   error: css({
-    backgroundColor: "#900",
-    borderRadius: "4px",
-    color: "white",
-    fontWeight: "bold",
-    padding: "1em",
+    color: globalStyles.colors.error,
+    fontSize: 12,
+    textDecoration: "underline",
+    lineHeight: "15px",
   }),
 };
 

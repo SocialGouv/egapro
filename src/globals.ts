@@ -76,7 +76,9 @@ export type AppState = {
     mesuresCorrection: string;
     dateConsultationCSE: string;
     datePublication: string;
+    publicationSurSiteInternet: boolean;
     lienPublication: string;
+    modalitesPublication: string;
     dateDeclaration: string;
     noteIndex: number | undefined;
     totalPoint: number;
@@ -387,7 +389,9 @@ export type ActionDeclarationData = {
   mesuresCorrection: string;
   dateConsultationCSE: string;
   datePublication: string;
+  publicationSurSiteInternet: boolean;
   lienPublication: string;
+  modalitesPublication: string;
 };
 
 ////

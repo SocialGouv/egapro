@@ -464,7 +464,9 @@ const actionUpdateDeclaration = {
     mesuresCorrection: "mmo",
     dateConsultationCSE: "01/02/2019",
     datePublication: "01/02/2020",
-    lienPublication: "https://example.com"
+    publicationSurSiteInternet: true,
+    lienPublication: "https://example.com",
+    modalitesPublication: "",
   }
 };
 
