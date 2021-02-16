@@ -23,7 +23,7 @@ function MobileHome({ openMenu }: Props) {
 
       <p css={styles.subtitle}>
         L’outil de calcul et de déclaration de votre index égalité
-        professionnelle Femmes- Hommes
+        professionnelle Femmes-Hommes
       </p>
 
       <p css={styles.para}>
