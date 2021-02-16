@@ -156,8 +156,8 @@ function DeclarationForm({
                 readOnly={readOnly}
               />
               <p>
-                Avez-vous un site internet pour pour publier le niveau de
-                résultat obtenu ?
+                Avez-vous un site internet pour publier le niveau de résultat
+                obtenu&nbsp;?
               </p>
               <RadiosBoolean
                 fieldName="publicationSurSiteInternet"
@@ -171,7 +171,7 @@ function DeclarationForm({
                   <FieldSiteInternet readOnly={readOnly} />
                 ) : (
                   <Textarea
-                    label="Précision des modalités de publicité"
+                    label="Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
                     fieldName="modalitesPublication"
                     errorText="Veuillez préciser les modalités de publicité"
                     readOnly={readOnly}
