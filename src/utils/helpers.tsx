@@ -354,7 +354,10 @@ const getIndicateur2 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurDeux.noteFinale,
     catégories: data.indicateurDeux.tauxAugmentation.map((cat) =>
-      asPercentage(cat.ecartTauxAugmentation)
+      (cat.tauxAugmentationFemmes !== undefined &&
+        cat.tauxAugmentationHommes !== undefined)
+        ? asPercentage(cat.ecartTauxAugmentation)
+        : null
     ),
   };
   // @ts-ignore
@@ -379,7 +382,10 @@ const getIndicateur3 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurTrois.noteFinale,
     catégories: data.indicateurTrois.tauxPromotion.map((cat) =>
-      asPercentage(cat.ecartTauxPromotion)
+      (cat.tauxPromotionFemmes !== undefined &&
+        cat.tauxPromotionHommes !== undefined)
+        ? asPercentage(cat.ecartTauxPromotion)
+        : null
     ),
   };
   // @ts-ignore
