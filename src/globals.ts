@@ -76,7 +76,7 @@ export type AppState = {
     mesuresCorrection: string;
     dateConsultationCSE: string;
     datePublication: string;
-    publicationSurSiteInternet: boolean;
+    publicationSurSiteInternet: boolean | undefined;
     lienPublication: string;
     modalitesPublication: string;
     dateDeclaration: string;
@@ -389,7 +389,7 @@ export type ActionDeclarationData = {
   mesuresCorrection: string;
   dateConsultationCSE: string;
   datePublication: string;
-  publicationSurSiteInternet: boolean;
+  publicationSurSiteInternet: boolean | undefined;
   lienPublication: string;
   modalitesPublication: string;
 };
@@ -400,14 +400,14 @@ export enum TranchesAges {
   MoinsDe30ans,
   De30a39ans,
   De40a49ans,
-  PlusDe50ans
+  PlusDe50ans,
 }
 
 export enum CategorieSocioPro {
   Ouvriers,
   Employes,
   Techniciens,
-  Cadres
+  Cadres,
 }
 
 export interface GroupTranchesAgesEffectif {

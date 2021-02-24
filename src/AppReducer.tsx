@@ -144,7 +144,7 @@ const defaultState: AppState = {
     formValidated: "None",
     mesuresCorrection: "",
     dateConsultationCSE: "",
-    publicationSurSiteInternet: true,
+    publicationSurSiteInternet: undefined,
     datePublication: "",
     lienPublication: "",
     modalitesPublication: "",

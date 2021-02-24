@@ -34,7 +34,13 @@ const validate = (value: string) => {
 };
 
 const validateForm = (finPeriodeReference: string) => {
-  return ({ datePublication }: { datePublication: string }) => {
+  return ({
+    datePublication,
+    publicationSurSiteInternet,
+  }: {
+    datePublication: string;
+    publicationSurSiteInternet: string | undefined;
+  }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
     if (!datePublication) return;
@@ -49,6 +55,10 @@ const validateForm = (finPeriodeReference: string) => {
           : {
               correspondanceFinPeriodeReference: `La date ne peut précéder la fin de la période de référence (${finPeriodeReference})`,
             },
+      publicationSurSiteInternet:
+        publicationSurSiteInternet !== undefined
+          ? undefined
+          : "Il vous faut sélectionner un mode de publication",
     };
   };
 };
@@ -84,9 +94,10 @@ function DeclarationForm({
     mesuresCorrection: declaration.mesuresCorrection,
     dateConsultationCSE: declaration.dateConsultationCSE,
     datePublication: declaration.datePublication,
-    publicationSurSiteInternet: parseBooleanStateValue(
-      declaration.publicationSurSiteInternet
-    ),
+    publicationSurSiteInternet:
+      declaration.publicationSurSiteInternet !== undefined
+        ? parseBooleanStateValue(declaration.publicationSurSiteInternet)
+        : undefined,
     lienPublication: declaration.lienPublication,
     modalitesPublication: declaration.modalitesPublication,
   };
@@ -105,9 +116,10 @@ function DeclarationForm({
       mesuresCorrection,
       dateConsultationCSE,
       datePublication,
-      publicationSurSiteInternet: parseBooleanFormValue(
-        publicationSurSiteInternet
-      ),
+      publicationSurSiteInternet:
+        publicationSurSiteInternet !== undefined
+          ? parseBooleanFormValue(publicationSurSiteInternet)
+          : undefined,
       lienPublication,
       modalitesPublication,
     });
@@ -128,7 +140,13 @@ function DeclarationForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({
+        handleSubmit,
+        values,
+        hasValidationErrors,
+        errors,
+        submitFailed,
+      }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
 
@@ -156,7 +174,7 @@ function DeclarationForm({
                 readOnly={readOnly}
               />
               <p>
-                Avez-vous un site internet pour publier le niveau de résultat
+                Avez-vous un site Internet pour publier le niveau de résultat
                 obtenu&nbsp;?
               </p>
               <RadiosBoolean
@@ -166,17 +184,24 @@ function DeclarationForm({
                 labelTrue="oui"
                 labelFalse="non"
               />
-              <div css={styles.siteOrModalites}>
-                {values.publicationSurSiteInternet === "true" ? (
-                  <FieldSiteInternet readOnly={readOnly} />
-                ) : (
-                  <Textarea
-                    label="Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
-                    fieldName="modalitesPublication"
-                    errorText="Veuillez préciser les modalités de publicité"
-                    readOnly={readOnly}
-                  />
+              {submitFailed &&
+                hasValidationErrors &&
+                errors &&
+                errors.publicationSurSiteInternet && (
+                  <p css={styles.error}>{errors.publicationSurSiteInternet}</p>
                 )}
+              <div css={styles.siteOrModalites}>
+                {values.publicationSurSiteInternet !== undefined &&
+                  (values.publicationSurSiteInternet === "true" ? (
+                    <FieldSiteInternet readOnly={readOnly} />
+                  ) : (
+                    <Textarea
+                      label="Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
+                      fieldName="modalitesPublication"
+                      errorText="Veuillez préciser les modalités de publicité"
+                      readOnly={readOnly}
+                    />
+                  ))}
               </div>
             </Fragment>
           )}

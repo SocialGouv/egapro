@@ -9,11 +9,11 @@ function RadioField({
   fieldName,
   label,
   value,
-  disabled
+  disabled,
 }: {
   fieldName: string;
   label: ReactNode;
-  value: string;
+  value: string | undefined;
   disabled: boolean;
 }) {
   const { input } = useField(fieldName, { type: "radio", value });
@@ -29,7 +29,7 @@ function RadioField({
 interface Props {
   readOnly: boolean;
   fieldName: string;
-  value: string;
+  value: string | undefined;
   labelTrue: ReactNode;
   labelFalse: ReactNode;
 }
@@ -39,7 +39,7 @@ function RadiosBoolean({
   fieldName,
   value,
   labelTrue,
-  labelFalse
+  labelFalse,
 }: Props) {
   return (
     <div css={styles.container}>
@@ -54,7 +54,7 @@ function RadiosBoolean({
       <div
         css={[
           styles.radioFieldFalse,
-          readOnly && value === "true" && styles.radioFieldDisabled
+          readOnly && value === "true" && styles.radioFieldDisabled,
         ]}
       >
         <RadioField
@@ -77,13 +77,13 @@ const styles = {
   label: css({
     display: "flex",
     fontSize: 14,
-    cursor: "pointer"
+    cursor: "pointer",
   }),
   labelText: css({
-    lineHeight: "16px"
+    lineHeight: "16px",
   }),
   radio: css({
-    display: "none"
+    display: "none",
   }),
   fakeRadio: css({
     width: 16,
@@ -92,19 +92,17 @@ const styles = {
     marginRight: 6,
     borderRadius: 8,
     backgroundColor: "white",
-    border: `solid ${globalStyles.colors.default} 1px`
+    border: `solid ${globalStyles.colors.default} 1px`,
   }),
   fakeRadioChecked: css({
-    backgroundImage: `radial-gradient(${globalStyles.colors.default} 0%, ${
-      globalStyles.colors.default
-    } 3px, #FFF 3px)`
+    backgroundImage: `radial-gradient(${globalStyles.colors.default} 0%, ${globalStyles.colors.default} 3px, #FFF 3px)`,
   }),
   radioFieldFalse: css({
-    marginTop: 9
+    marginTop: 9,
   }),
   radioFieldDisabled: css({
-    visibility: "hidden"
-  })
+    visibility: "hidden",
+  }),
 };
 
 export default RadiosBoolean;
