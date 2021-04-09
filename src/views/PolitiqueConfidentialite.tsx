@@ -16,8 +16,7 @@ function CGU({ history, location, dispatch }: Props) {
       <div css={styles.content}>
         <h2 css={styles.title}>Responsable de traitement</h2>
         <p>
-          Le responsable de traitements est la Direction Générale du Travail,
-          représentée par Monsieur Pierre Ramain, Directeur Général du Travail.
+          Le responsable de traitements est la Direction Générale du Travail.
         </p>
         <h2 css={styles.title}>Données personnelles traitées</h2>
         <p>
