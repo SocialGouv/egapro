@@ -16,13 +16,8 @@ function CGU({ history, location, dispatch }: Props) {
       <div css={styles.content}>
         <h2 css={styles.title}>Responsable de traitement</h2>
         <p>
-          Les responsables de traitement sont Pierre Ramain et Hélène Brisset.
-          <br />
-          <br />
-          Le délégué à la protection des données est « DPD » : Danièla PARROT,{" "}
-          <a href="mailto:dpd-minsociaux@sg.social.gouv.fr?subject=RGPD : protection des données sur Index Egapro">
-            dpd-minsociaux@sg.social.gouv.fr
-          </a>
+          Le responsable de traitements est la Direction Générale du Travail,
+          représentée par Monsieur Pierre Ramain, Directeur Général du Travail.
         </p>
         <h2 css={styles.title}>Données personnelles traitées</h2>
         <p>
@@ -30,12 +25,12 @@ function CGU({ history, location, dispatch }: Props) {
         </p>
         <ul>
           <li>
-            Pour les simples visiteurs : nature des opérations, date et heure de
-            l'opération.
+            Pour les simples visiteurs : identifiants de connexion, nature des
+            opérations, date et heure de l'opération.
           </li>
           <li>
-            Pour les utilisateurs du simulateur : nature des opérations, date et
-            heure de l'opération.
+            Pour les utilisateurs du simulateur : adresse email, nom, prénom,
+            numéro de téléphone.
           </li>
           <li>
             Pour les utilisateurs du formulaire de déclaration : adresse email,
@@ -45,32 +40,38 @@ function CGU({ history, location, dispatch }: Props) {
         <h2 css={styles.title}>Finalités</h2>
         <p>
           Ces données sont nécessaires et proportionnées pour la réalisation de
-          la mission de la Plateforme. Elles permettent de calculer l'index au
-          sein des entreprises, et de réaliser les déclarations qui en sont
-          issues.
+          la mission de la Plateforme. Elles permettent de calculer les écarts
+          de rémunération femmes-hommes au sein des entreprises, et de réaliser
+          les déclarations qui en sont issues.
         </p>
         <h2 css={styles.title}>Bases juridiques</h2>
         <p>
-          Conformément aux dispositions de l’article 6 du Règlement relatif à la
-          protection des données (appelé RGPD), le traitement est nécessaire à
-          l’exécution d’une mission d’intérêt public ou relève de l’exercice de
-          l’autorité publique dont est investi le Responsable de traitement.
+          Conformément aux dispositions de l’article 6-e du Règlement relatif à
+          la protection des données (appelé RGPD), le traitement est nécessaire
+          à l’exécution d’une mission d’intérêt public ou relève de l’exercice
+          de l’autorité publique dont est investi le Responsable de traitement.
           <br />
           <br />
-          Pour certains cookies, la base juridique du traitement est le
-          consentement des personnes concernées.
+          Conformément aux dispositions de l’article 6-c du Règlement relatif à
+          la protection des données (appelé RGPD), le traitement de données
+          relatif aux données de connexion est fondé sur l’obligation légale
+          reposant sur le responsable de traitement au titre de l’article 6 de
+          la LCEN et de l’article 1 du décret n°2011-219 du 25 février 2011.
         </p>
-        <h2 css={styles.title}>Duré de conservation</h2>
+        <h2 css={styles.title}>Durée de conservation</h2>
         <ul>
           <li>
             Pour les cookies : 13 mois maximum, ou jusqu'au retrait du
             consentement de la personne concernée.
           </li>
-          <li>Pour l'hébergeur : 12 mois (LCEN).</li>
+          <li>
+            Pour les données de connexion ou d’hébergeur : 12 mois (LCEN et
+            décret n°2011-219 du 25 février 2011).
+          </li>
           <li>
             Pour les données des utilisateurs du simulateur et du formulaire de
-            déclaration : la durée de conservation des données par
-            l'administration est de 3 ans.
+            déclaration : temps nécessaire au traitement de la demande, sans
+            excéder 3 mois.
           </li>
         </ul>
         <p>
@@ -94,7 +95,7 @@ function CGU({ history, location, dispatch }: Props) {
         <ul>
           <li>Pare feu système ;</li>
           <li>Pare feu applicatif (WAF) ;</li>
-          <li>Chiffrement des flux reseaux via certificat SSL ;</li>
+          <li>Chiffrement des flux réseaux via certificat SSL ;</li>
           <li>Disque dur chiffré ;</li>
           <li>Services isolés dans des containers ;</li>
           <li>Gestion des journaux ;</li>
@@ -108,7 +109,7 @@ function CGU({ history, location, dispatch }: Props) {
             Sauvegarde des bases de données via solution de stockage Azure ;
           </li>
           <li>
-            Accès aux données reservé aux membres de l'entité (hors restitution
+            Accès aux données réservé aux membres de l'entité (hors restitution
             applicative publique des données) ;
           </li>
           <li>
@@ -119,7 +120,7 @@ function CGU({ history, location, dispatch }: Props) {
         <h2 css={styles.title}>Droits des personnes concernées</h2>
         <p>
           Vous disposez des droits suivants concernant vos données à caractère
-          personnel :
+          personnel en tant qu’utilisateurs :
         </p>
         <ul>
           <li>
@@ -132,10 +133,16 @@ function CGU({ history, location, dispatch }: Props) {
           <li>Droit d’opposition au traitement de données, le cas échéant.</li>
         </ul>
         <p>
+          Vous disposez des droits suivants concernant vos données de connexion
+          :
+        </p>
+        <ul>
+          <li>Droit d’information et droit d’accès ;</li>
+          <li>Droit de rectification.</li>
+        </ul>
+        <p>
           Vous pouvez exercer ces droits en écrivant à{" "}
-          <a href="mailto:dpd-minsociaux@sg.social.gouv.fr">
-            dpd-minsociaux@sg.social.gouv.fr
-          </a>
+          <a href="mailto:index@travail.gouv.fr">index@travail.gouv.fr</a>
           <br />
           <br />
           En raison de l’obligation de sécurité et de confidentialité dans le
@@ -160,10 +167,10 @@ function CGU({ history, location, dispatch }: Props) {
           <br />
           <strong>Délais de réponse</strong>
           <br />
-          Les responsables s’engagent à répondre à votre demande d’accès, de
-          rectification ou d’opposition ou toute autre demande complémentaire
-          d’informations dans un délai raisonnable qui ne saurait dépasser 1
-          mois à compter de la réception de votre demande.
+          Le responsable de traitement s’engage à répondre à votre demande
+          d’accès, de rectification ou d’opposition ou toute autre demande
+          complémentaire d’informations dans un délai raisonnable qui ne saurait
+          dépasser 1 mois à compter de la réception de votre demande.
         </p>
         <h2 css={styles.title}>Destinataires :</h2>
         <p>
@@ -172,7 +179,7 @@ function CGU({ history, location, dispatch }: Props) {
           habilitées à connaître des informations traitées.
           <br />
           <br />
-          Les responsables de traitement veillent à ne fournir des accès qu’aux
+          Le responsable de traitement veillent à ne fournir des accès qu’aux
           seules personnes juridiquement habilitées à connaître des informations
           traitées.
         </p>
@@ -235,7 +242,7 @@ function CGU({ history, location, dispatch }: Props) {
           </li>
           <li>
             Le cookie ne permet pas de suivre la navigation de l’internaute sur
-            d’autres sites
+            d’autres sites.
           </li>
         </ul>
         <p>
@@ -244,21 +251,6 @@ function CGU({ history, location, dispatch }: Props) {
           respectant les conditions d’exemption du consentement de l’internaute
           définies par la recommandation « Cookies » de la Commission nationale
           informatique et libertés (CNIL).
-          <br />
-          <br />
-          Vous pouvez tout de même désactiver cet outil :
-          <iframe
-            css={styles.iframe}
-            title="désactivez Matomo"
-            src="https://matomo.fabrique.social.gouv.fr/index.php?module=CoreAdminHome&action=optOut&language=fr&backgroundColor=&fontColor=&fontSize=&fontFamily="
-          ></iframe>
-        </p>
-        <h2 css={styles.title}>Mise à jour des conditions d’utilisation</h2>
-        <p>
-          Les termes des présentes conditions d’utilisation peuvent être amendés
-          à tout moment, sans préavis, en fonction des modifications apportées à
-          la plateforme, de l’évolution de la législation ou pour tout autre
-          motif jugé nécessaire.
         </p>
       </div>
     </Page>
@@ -274,16 +266,16 @@ const styles = {
     marginTop: 30,
     marginLeft: 0,
     marginRight: 0,
-    marginBottom: 20
+    marginBottom: 20,
   }),
   table: css({
     thead: {
-      backgroundColor: "#ccc"
-    }
+      backgroundColor: "#ccc",
+    },
   }),
   iframe: css({
-    width: 600
-  })
+    width: 600,
+  }),
 };
 
 export default CGU;
