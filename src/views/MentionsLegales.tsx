@@ -28,7 +28,7 @@ function MentionsLegales({ history, location, dispatch }: Props) {
           Tél : 01 40 56 60 00
         </p>
         <h2 css={styles.title}>Directeur de la publication</h2>
-        <p>Pierre Ramain</p>
+        <p>Directeur Général du Travail</p>
         <h2 css={styles.title}>Hébergement de la plateforme</h2>
         <p>
           Ce site est hébergé au :
@@ -85,7 +85,7 @@ const styles = {
     marginTop: 30,
     marginLeft: 0,
     marginRight: 0,
-    marginBottom: 20
+    marginBottom: 20,
   }),
   subtitle: css({
     fontSize: 16,
@@ -94,8 +94,8 @@ const styles = {
     marginTop: 20,
     marginLeft: 0,
     marginRight: 0,
-    marginBottom: 10
-  })
+    marginBottom: 10,
+  }),
 };
 
 export default MentionsLegales;
