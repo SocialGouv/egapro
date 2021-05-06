@@ -130,6 +130,13 @@ function DeclarationForm({
     validateDeclaration("Valid");
   };
 
+  const after2020: boolean = Boolean(
+    state.informations.anneeDeclaration &&
+      state.informations.anneeDeclaration >= 2020
+  );
+  const displayNC =
+    noteIndex === undefined && after2020 ? " aux indicateurs calculables" : "";
+
   return (
     <Form
       onSubmit={onSubmit}
@@ -166,16 +173,21 @@ function DeclarationForm({
             />
           )}
 
-          {noteIndex !== undefined && (
+          {(noteIndex !== undefined || after2020) && (
             <Fragment>
               <FieldDate
                 name="datePublication"
-                label="Date de publication de cet index"
+                label={
+                  after2020
+                    ? `Date de publication des résultats obtenus${displayNC}`
+                    : "Date de publication de cet index"
+                }
                 readOnly={readOnly}
               />
               <p>
-                Avez-vous un site Internet pour publier le niveau de résultat
-                obtenu&nbsp;?
+                {after2020
+                  ? `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
+                  : "Avez-vous un site Internet pour publier le niveau de résultat obtenu ?"}
               </p>
               <RadiosBoolean
                 fieldName="publicationSurSiteInternet"
@@ -193,10 +205,18 @@ function DeclarationForm({
               <div css={styles.siteOrModalites}>
                 {values.publicationSurSiteInternet !== undefined &&
                   (values.publicationSurSiteInternet === "true" ? (
-                    <FieldSiteInternet readOnly={readOnly} />
+                    <FieldSiteInternet
+                      readOnly={readOnly}
+                      after2020={after2020}
+                      displayNC={displayNC}
+                    />
                   ) : (
                     <Textarea
-                      label="Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
+                      label={
+                        after2020
+                          ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
+                          : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
+                      }
                       fieldName="modalitesPublication"
                       errorText="Veuillez préciser les modalités de publicité"
                       readOnly={readOnly}
@@ -238,7 +258,15 @@ function DeclarationForm({
   );
 }
 
-function FieldSiteInternet({ readOnly }: { readOnly: boolean }) {
+function FieldSiteInternet({
+  readOnly,
+  after2020,
+  displayNC,
+}: {
+  readOnly: boolean;
+  after2020: boolean;
+  displayNC: string;
+}) {
   const field = useField("lienPublication", { validate });
   const error = hasFieldError(field.meta);
 
@@ -248,7 +276,9 @@ function FieldSiteInternet({ readOnly }: { readOnly: boolean }) {
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
       >
-        Adresse du site internet de publication du niveau de résultat obtenu
+        {after2020
+          ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus${displayNC}`
+          : "Adresse du site internet de publication du niveau de résultat obtenu"}
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
