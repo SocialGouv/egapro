@@ -202,12 +202,10 @@ const getDeclaration = (data: AppState): any => {
     points_calculables: data.declaration.totalPointCalculable,
   };
   const index = data.declaration.noteIndex;
-  if (index) {
-    declaration.index = index;
-    if (index < 75) {
-      declaration.mesures_correctives = data.declaration.mesuresCorrection;
-    }
 
+  if (index ||
+      (data.informations.anneeDeclaration &&
+       data.informations.anneeDeclaration >= 2020)) {
     declaration.publication = {
       date: toISOString(data.declaration.datePublication),
     };
@@ -215,6 +213,13 @@ const getDeclaration = (data: AppState): any => {
       declaration.publication.url = data.declaration.lienPublication;
     } else {
       declaration.publication.modalités = data.declaration.modalitesPublication;
+    }
+  }
+
+  if (index) {
+    declaration.index = index;
+    if (index < 75) {
+      declaration.mesures_correctives = data.declaration.mesuresCorrection;
     }
   }
   return declaration;
