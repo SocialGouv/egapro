@@ -384,10 +384,7 @@ const getIndicateur3 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurTrois.noteFinale,
     catégories: data.indicateurTrois.tauxPromotion.map((cat) =>
-      (cat.tauxPromotionFemmes !== undefined &&
-        cat.tauxPromotionHommes !== undefined)
-        ? asPercentage(cat.ecartTauxPromotion)
-        : null
+        asPercentage(cat.ecartTauxPromotion)
     ),
   };
   // @ts-ignore
