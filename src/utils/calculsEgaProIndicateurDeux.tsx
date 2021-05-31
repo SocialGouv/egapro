@@ -65,8 +65,8 @@ export const calculEcartTauxAugmentationParCSP = (
     return {
       ...categorie,
       ecartTauxAugmentation: calculEcartTauxAugmentation(
-        categorie.tauxAugmentationFemmes || 0,
-        categorie.tauxAugmentationHommes || 0
+        categorie.tauxAugmentationFemmes,
+        categorie.tauxAugmentationHommes
       )
     };
   });

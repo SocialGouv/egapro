@@ -354,10 +354,7 @@ const getIndicateur2 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurDeux.noteFinale,
     catégories: data.indicateurDeux.tauxAugmentation.map((cat) =>
-      (cat.tauxAugmentationFemmes !== undefined &&
-        cat.tauxAugmentationHommes !== undefined)
-        ? asPercentage(cat.ecartTauxAugmentation)
-        : null
+      asPercentage(cat.ecartTauxAugmentation)
     ),
   };
   // @ts-ignore

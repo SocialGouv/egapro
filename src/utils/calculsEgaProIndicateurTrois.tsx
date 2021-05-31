@@ -61,8 +61,8 @@ export const calculEcartTauxPromotionParCSP = (
     return {
       ...categorie,
       ecartTauxPromotion: calculEcartTauxPromotion(
-        categorie.tauxPromotionFemmes || 0,
-        categorie.tauxPromotionHommes || 0
+        categorie.tauxPromotionFemmes,
+        categorie.tauxPromotionHommes
       )
     };
   });
