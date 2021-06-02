@@ -180,7 +180,7 @@ function DeclarationForm({
                 label={
                   after2020
                     ? `Date de publication des résultats obtenus${displayNC}`
-                    : "Date de publication de cet index"
+                    : "Date de publication du niveau de résultat obtenu"
                 }
                 readOnly={readOnly}
               />
@@ -278,7 +278,7 @@ function FieldSiteInternet({
       >
         {after2020
           ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus${displayNC}`
-          : "Adresse du site internet de publication du niveau de résultat obtenu"}
+          : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"}
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
