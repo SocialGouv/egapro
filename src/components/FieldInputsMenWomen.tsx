@@ -5,12 +5,7 @@ import { useField, FieldMetaState } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 import { displayPercent, displayInt } from "../utils/helpers";
-import {
-  required,
-  mustBeNumber,
-  mustBeInteger,
-  minNumber
-} from "../utils/formHelpers";
+import { required, mustBeNumber } from "../utils/formHelpers";
 
 import { CellHead, Cell, Cell2 } from "./Cell";
 import CellInput, { hasFieldError } from "./CellInput";
@@ -21,18 +16,10 @@ type ValidateFunction = (value: string) => any;
 const validate: ValidateFunction = value => {
   const requiredError = required(value);
   const mustBeNumberError = mustBeNumber(value);
-  const mustBeIntegerError = mustBeInteger(value);
-  const minNumberError = minNumber(value, 0);
-
-  if (!requiredError && !mustBeNumberError && !mustBeIntegerError && !minNumberError) {
+  if (!requiredError && !mustBeNumberError) {
     return undefined;
   } else {
-    return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError,
-      mustBeInteger: mustBeIntegerError,
-      minNumberError: minNumberError
-    };
+    return { required: requiredError, mustBeNumber: mustBeNumberError };
   }
 };
 
@@ -63,12 +50,6 @@ const validateFunction = (
 
 export const getCustomValidateFieldError = (meta: FieldMetaState<string>) =>
   meta.error && meta.touched && meta.error.customValidate;
-
-const hasIntegerInputError = (meta: FieldMetaState<string>) =>
-meta.error && meta.touched && meta.error.mustBeInteger;
-
-const hasMinInputError = (meta: FieldMetaState<string>) =>
-  meta.error && meta.touched && meta.error.minNumberError;
 
 interface Props {
   readOnly: boolean;
@@ -107,8 +88,6 @@ function FieldInputsMenWomen({
   const femmesError = hasFieldError(femmesField.meta);
   const hommesError = hasFieldError(hommesField.meta);
   const error = femmesError || hommesError;
-  const integerError = hasIntegerInputError(femmesField.meta) || hasIntegerInputError(hommesField.meta);
-  const minNumberError = hasMinInputError(femmesField.meta) || hasMinInputError(hommesField.meta);
   const customValidateErrorFemmes = getCustomValidateFieldError(
     femmesField.meta
   );
@@ -182,21 +161,9 @@ function FieldInputsMenWomen({
           <div css={styles.error}>{customValidateErrorHommes}</div>
         )) ||
         (error && calculable && (
-          (integerError ? (
-            <div css={styles.error}>
-              ce champ doit contenir une valeur entière positive, sans virgule
-            </div>
-          ) : minNumberError ? (
-            <div css={styles.error}>
-              ce champ doit contenir une valeur supérieure à 0
-            </div>
-          ) : (
-            <div css={styles.error}>
-              ce champ n’est pas valide, renseignez une valeur numérique
-            </div>
-          ))
-
-
+          <div css={styles.error}>
+            ce champ n’est pas valide, renseignez une valeur numérique
+          </div>
         ))}
     </div>
   );

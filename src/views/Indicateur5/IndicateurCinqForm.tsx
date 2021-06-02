@@ -12,7 +12,6 @@ import {
   mustBeNumber,
   minNumber,
   maxNumber,
-  mustBeInteger,
 } from "../../utils/formHelpers";
 
 import { BlocFormLight } from "../../components/BlocForm";
@@ -25,7 +24,7 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 const validate = (value: string) => {
   const requiredError = required(value);
   const mustBeNumberError = mustBeNumber(value);
-  const mustBeIntegerError = mustBeInteger(value);
+  const mustBeIntegerError = !Number.isInteger(Number(value));
   const minNumberError = minNumber(value, 0);
   const maxNumberError = maxNumber(value, 10);
   if (

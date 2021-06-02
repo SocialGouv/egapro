@@ -86,9 +86,6 @@ export const minNumber = (value: string, min: number): boolean =>
 export const maxNumber = (value: string, max: number): boolean =>
   Number(value) > max;
 
-export const mustBeInteger = (value: string): boolean =>
-  !Number.isInteger(Number(value));
-
 export const mustBeDate = (value: string): boolean | string => {
   const parsed = parseDate(value);
   return parsed === undefined ||
