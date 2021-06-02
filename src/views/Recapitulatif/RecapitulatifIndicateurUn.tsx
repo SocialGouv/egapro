@@ -132,7 +132,7 @@ function RecapitulatifIndicateurUn({
         <RowLabelFull
           label={
             <Fragment>
-              écart de rémunération par csp
+              écart de rémunération par {indicateurUnParCSP ? "csp" : "niveau ou coefficient hiérarchique" }
               <br />
               (avant seuil de pertinence)
             </Fragment>
