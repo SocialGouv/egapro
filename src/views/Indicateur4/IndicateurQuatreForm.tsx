@@ -11,13 +11,13 @@ import {
   parseBooleanStateValue,
   required,
   mustBeNumber,
-  maxNumber
+  maxNumber,
 } from "../../utils/formHelpers";
 
 import { BlocFormLight } from "../../components/BlocForm";
 import FieldInput, {
   HEIGHT as FieldInputHeight,
-  MARGIN_TOP as FieldInputMarginTop
+  MARGIN_TOP as FieldInputMarginTop,
 } from "../../components/FieldInput";
 import RadiosBoolean from "../../components/RadiosBoolean";
 import ActionBar from "../../components/ActionBar";
@@ -41,14 +41,14 @@ const validateWithPreviousField = (
 ) => {
   const requiredError = required(value);
   const mustBeNumberError = mustBeNumber(value);
-  const maxNumberError = maxNumber(value, Number(valuePreviousField));
+  const maxNumberError = maxNumber(Number(valuePreviousField))(value);
   if (!requiredError && !mustBeNumberError && !maxNumberError) {
     return undefined;
   } else {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
-      previousField: maxNumberError
+      previousField: maxNumberError,
     };
   }
 };
@@ -56,7 +56,7 @@ const validateWithPreviousField = (
 const validateForm = ({
   presenceCongeMat,
   nombreSalarieesPeriodeAugmentation,
-  nombreSalarieesAugmentees
+  nombreSalarieesAugmentees,
 }: {
   presenceCongeMat: string;
   nombreSalarieesPeriodeAugmentation: string;
@@ -72,7 +72,7 @@ const validateForm = ({
     nombreSalarieesAugmentees: validateWithPreviousField(
       nombreSalarieesAugmentees,
       nombreSalarieesPeriodeAugmentation
-    )
+    ),
   };
 };
 
@@ -89,7 +89,7 @@ function IndicateurQuatreForm({
   indicateurQuatre,
   readOnly,
   updateIndicateurQuatre,
-  validateIndicateurQuatre
+  validateIndicateurQuatre,
 }: Props) {
   const initialValues = {
     presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),
@@ -98,14 +98,14 @@ function IndicateurQuatreForm({
     ),
     nombreSalarieesAugmentees: parseIntStateValue(
       indicateurQuatre.nombreSalarieesAugmentees
-    )
+    ),
   };
 
   const saveForm = (formData: any) => {
     const {
       presenceCongeMat,
       nombreSalarieesPeriodeAugmentation,
-      nombreSalarieesAugmentees
+      nombreSalarieesAugmentees,
     } = formData;
 
     updateIndicateurQuatre({
@@ -113,7 +113,7 @@ function IndicateurQuatreForm({
       nombreSalarieesPeriodeAugmentation: parseIntFormValue(
         nombreSalarieesPeriodeAugmentation
       ),
-      nombreSalarieesAugmentees: parseIntFormValue(nombreSalarieesAugmentees)
+      nombreSalarieesAugmentees: parseIntFormValue(nombreSalarieesAugmentees),
     });
   };
 
@@ -191,14 +191,14 @@ function IndicateurQuatreForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   spacer: css({
-    height: 8
+    height: 8,
   }),
   emptyFields: css({
-    height: (FieldInputHeight + FieldInputMarginTop) * 2
-  })
+    height: (FieldInputHeight + FieldInputMarginTop) * 2,
+  }),
 };
 
 export default IndicateurQuatreForm;

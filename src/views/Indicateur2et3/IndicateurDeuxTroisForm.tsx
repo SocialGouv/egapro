@@ -5,7 +5,7 @@ import {
   FormState,
   ActionIndicateurDeuxTroisData,
   PeriodeDeclaration,
-  GroupeEffectif
+  GroupeEffectif,
 } from "../../globals";
 
 import BlocForm from "../../components/BlocForm";
@@ -22,13 +22,15 @@ import {
   parseIntStateValue,
   parseBooleanFormValue,
   parseBooleanStateValue,
-  parsePeriodeDeclarationFormValue
+  parsePeriodeDeclarationFormValue,
+  ValidatorFunction,
+  maxNumber,
 } from "../../utils/formHelpers";
 import {
   calendarYear,
   dateToString,
   parseDate,
-  Year
+  Year,
 } from "../../utils/helpers";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
@@ -53,7 +55,7 @@ function IndicateurDeuxTroisForm({
   nombreSalaries,
   readOnly,
   updateIndicateurDeuxTrois,
-  validateIndicateurDeuxTrois
+  validateIndicateurDeuxTrois,
 }: Props) {
   const initialValues = {
     presenceAugmentationPromotion: parseBooleanStateValue(
@@ -65,7 +67,7 @@ function IndicateurDeuxTroisForm({
     nombreAugmentationPromotionHommes: parseIntStateValue(
       nombreAugmentationPromotionHommes
     ),
-    periodeDeclaration: periodeDeclaration
+    periodeDeclaration: periodeDeclaration,
   };
 
   const saveForm = (formData: any) => {
@@ -85,7 +87,7 @@ function IndicateurDeuxTroisForm({
       presenceAugmentationPromotion,
       nombreAugmentationPromotionFemmes,
       nombreAugmentationPromotionHommes,
-      periodeDeclaration
+      periodeDeclaration,
     });
   };
 
@@ -107,13 +109,14 @@ function IndicateurDeuxTroisForm({
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommes,
-    totalNombreSalariesFemme: totalNombreSalariesFemmes
+    totalNombreSalariesFemme: totalNombreSalariesFemmes,
   } = totalNombreSalaries(nombreSalaries);
 
-  const validateEffectifs = (value: string, maxNum: number): boolean => {
-    const intValue = parseIntFormValue(value);
-    return intValue === undefined || intValue <= maxNum;
-  };
+  const validateEffectifs: (max: Number, gender: string) => ValidatorFunction =
+    (max, gender) => (value) =>
+      maxNumber(max)(value)
+        ? `Le nombre ${gender} ne peut pas être supérieur aux effectifs`
+        : undefined;
 
   return (
     <Form
@@ -135,16 +138,16 @@ function IndicateurDeuxTroisForm({
             choices={[
               {
                 label: `Période de référence de l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
-                value: "unePeriodeReference"
+                value: "unePeriodeReference",
               },
               {
                 label: `Période de référence de 2 ans (du ${twoYears} au ${dateFinPeriodeReference})`,
-                value: "deuxPeriodesReference"
+                value: "deuxPeriodesReference",
               },
               {
                 label: `Période de référence de 3 ans (du ${threeYears} au ${dateFinPeriodeReference})`,
-                value: "troisPeriodesReference"
-              }
+                value: "troisPeriodesReference",
+              },
             ]}
           />
 
@@ -168,16 +171,14 @@ function IndicateurDeuxTroisForm({
                 mask="number"
                 femmeFieldName="nombreAugmentationPromotionFemmes"
                 hommeFieldName="nombreAugmentationPromotionHommes"
-                customValidateFemmes={(value: string) => {
-                  return validateEffectifs(value, totalNombreSalariesFemmes)
-                    ? undefined
-                    : "Le nombre de femmes ne peut pas être supérieur aux effectifs";
-                }}
-                customValidateHommes={(value: string) => {
-                  return validateEffectifs(value, totalNombreSalariesHommes)
-                    ? undefined
-                    : "Le nombre d'hommes ne peut pas être supérieur aux effectifs";
-                }}
+                validatorFemmes={validateEffectifs(
+                  totalNombreSalariesFemmes,
+                  "de femmes"
+                )}
+                validatorHommes={validateEffectifs(
+                  totalNombreSalariesHommes,
+                  "d'hommes"
+                )}
               />
             </BlocForm>
           )}
@@ -204,11 +205,11 @@ function IndicateurDeuxTroisForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   spacer: css({
-    marginTop: "2em"
-  })
+    marginTop: "2em",
+  }),
 };
 
 export default IndicateurDeuxTroisForm;

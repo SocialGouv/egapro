@@ -1,27 +1,15 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import React from "react";
-import { useField, FieldMetaState } from "react-final-form";
+import { useField } from "react-final-form";
 
 import globalStyles from "../utils/globalStyles";
 import { displayPercent, displayInt } from "../utils/helpers";
-import { required, mustBeNumber } from "../utils/formHelpers";
+import { ValidatorFunction } from "../utils/formHelpers";
 
 import { CellHead, Cell, Cell2 } from "./Cell";
-import CellInput, { hasFieldError } from "./CellInput";
+import CellInput from "./CellInput";
 import { IconValid, IconInvalid } from "./Icons";
-
-type ValidateFunction = (value: string) => any;
-
-const validate: ValidateFunction = value => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  if (!requiredError && !mustBeNumberError) {
-    return undefined;
-  } else {
-    return { required: requiredError, mustBeNumber: mustBeNumberError };
-  }
-};
 
 const displayReadOnlyValue = (
   value: string,
@@ -35,22 +23,6 @@ const displayReadOnlyValue = (
     : displayInt(Number(value));
 };
 
-const validateFunction = (
-  validate: ValidateFunction,
-  customValidate: ValidateFunction | undefined
-): ValidateFunction => {
-  return (value: string) => {
-    const errors = validate(value);
-    if (customValidate !== undefined && customValidate(value) !== undefined) {
-      return { ...errors, customValidate: customValidate(value) };
-    }
-    return errors;
-  };
-};
-
-export const getCustomValidateFieldError = (meta: FieldMetaState<string>) =>
-  meta.error && meta.touched && meta.error.customValidate;
-
 interface Props {
   readOnly: boolean;
   name: string;
@@ -59,8 +31,8 @@ interface Props {
   mask?: "number" | "percent" | undefined;
   femmeFieldName: string;
   hommeFieldName: string;
-  customValidateFemmes?: ValidateFunction;
-  customValidateHommes?: ValidateFunction;
+  validatorFemmes?: ValidatorFunction;
+  validatorHommes?: ValidatorFunction;
 }
 
 function FieldInputsMenWomen({
@@ -71,29 +43,19 @@ function FieldInputsMenWomen({
   mask,
   femmeFieldName,
   hommeFieldName,
-  customValidateFemmes,
-  customValidateHommes
+  validatorFemmes,
+  validatorHommes,
 }: Props) {
   const femmesField = useField(femmeFieldName, {
-    validate: calculable
-      ? validateFunction(validate, customValidateFemmes)
-      : undefined
+    validate: calculable ? validatorFemmes : undefined,
   });
   const hommesField = useField(hommeFieldName, {
-    validate: calculable
-      ? validateFunction(validate, customValidateHommes)
-      : undefined
+    validate: calculable ? validatorHommes : undefined,
   });
 
-  const femmesError = hasFieldError(femmesField.meta);
-  const hommesError = hasFieldError(hommesField.meta);
+  const femmesError = femmesField.meta.touched && femmesField.meta.error;
+  const hommesError = hommesField.meta.touched && hommesField.meta.error;
   const error = femmesError || hommesError;
-  const customValidateErrorFemmes = getCustomValidateFieldError(
-    femmesField.meta
-  );
-  const customValidateErrorHommes = getCustomValidateFieldError(
-    hommesField.meta
-  );
 
   return (
     <div css={styles.container}>
@@ -102,7 +64,7 @@ function FieldInputsMenWomen({
           style={[
             styles.cellHead,
             !calculable && styles.cellHeadInvalid,
-            error && calculable && styles.cellHeadError
+            error && calculable && styles.cellHeadError,
           ]}
         >
           {femmesField.meta.valid && hommesField.meta.valid ? (
@@ -154,17 +116,7 @@ function FieldInputsMenWomen({
           {calculableNumber} hommes
         </div>
       )}
-      {(customValidateErrorFemmes && calculable && (
-        <div css={styles.error}>{customValidateErrorFemmes}</div>
-      )) ||
-        (customValidateErrorHommes && calculable && (
-          <div css={styles.error}>{customValidateErrorHommes}</div>
-        )) ||
-        (error && calculable && (
-          <div css={styles.error}>
-            ce champ n’est pas valide, renseignez une valeur numérique
-          </div>
-        ))}
+      {calculable && error && <div css={styles.error}>{error}</div>}
     </div>
   );
 }
@@ -175,51 +127,51 @@ const styles = {
     flexDirection: "column",
     alignItems: "stretch",
     height: 51,
-    marginBottom: 10
+    marginBottom: 10,
   }),
   row: css({
     display: "flex",
     flexDirection: "row",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   }),
   cellHead: css({
     height: 22,
     display: "flex",
     alignItems: "center",
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
-    fontSize: 14
+    fontSize: 14,
   }),
   cellHeadInvalid: css({
     color: globalStyles.colors.invalid,
-    borderColor: "transparent"
+    borderColor: "transparent",
   }),
   cellHeadError: css({
     color: globalStyles.colors.error,
-    borderColor: "transparent"
+    borderColor: "transparent",
   }),
   cellHeadIcon: css({
-    marginRight: 5
+    marginRight: 5,
   }),
   cell2: css({
-    textAlign: "center"
+    textAlign: "center",
   }),
   cellMen: css({
-    borderColor: globalStyles.colors.men
+    borderColor: globalStyles.colors.men,
   }),
   cellWomen: css({
-    borderColor: globalStyles.colors.women
+    borderColor: globalStyles.colors.women,
   }),
   cellEmpty: css({
     height: 22,
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   }),
   cellEmptyMen: css({
-    color: globalStyles.colors.men
+    color: globalStyles.colors.men,
   }),
   cellEmptyWomen: css({
-    color: globalStyles.colors.women
+    color: globalStyles.colors.women,
   }),
   invalid: css({
     display: "flex",
@@ -230,7 +182,7 @@ const styles = {
     fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
-    borderBottom: `solid ${globalStyles.colors.invalid} 1px`
+    borderBottom: `solid ${globalStyles.colors.invalid} 1px`,
   }),
   error: css({
     display: "flex",
@@ -241,8 +193,8 @@ const styles = {
     fontSize: 12,
     fontStyle: "italic",
     lineHeight: "12px",
-    borderBottom: `solid ${globalStyles.colors.error} 1px`
-  })
+    borderBottom: `solid ${globalStyles.colors.error} 1px`,
+  }),
 };
 
 export default FieldInputsMenWomen;

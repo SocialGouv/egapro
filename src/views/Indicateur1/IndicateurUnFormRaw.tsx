@@ -5,10 +5,17 @@ import { Form } from "react-final-form";
 import {
   TranchesAges,
   GroupTranchesAgesIndicateurUn,
-  FormState
+  FormState,
 } from "../../globals";
 
-import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
+import {
+  composeValidators,
+  minNumber,
+  mustBeNumber,
+  parseIntFormValue,
+  parseIntStateValue,
+  required,
+} from "../../utils/formHelpers";
 
 import BlocForm from "../../components/BlocForm";
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
@@ -18,7 +25,7 @@ import FormSubmit from "../../components/FormSubmit";
 
 import { displayNameTranchesAges } from "../../utils/helpers";
 
-const valueAboveZero = (value: string) => Number(value) > 0 ? undefined : "La rémunération moyenne ne peut être nulle";
+const validator = composeValidators(required, mustBeNumber, minNumber(0));
 
 interface remunerationGroup {
   id: any;
@@ -59,8 +66,8 @@ const groupByCategorieSocioPro = (
           ...acc,
           [id]: {
             ...el,
-            tranchesAges: [...el.tranchesAges, otherAttr]
-          }
+            tranchesAges: [...el.tranchesAges, otherAttr],
+          },
         };
       } else {
         return {
@@ -68,8 +75,8 @@ const groupByCategorieSocioPro = (
           [id]: {
             id,
             name,
-            tranchesAges: [otherAttr]
-          }
+            tranchesAges: [otherAttr],
+          },
         };
       }
     },
@@ -85,7 +92,7 @@ function IndicateurUnFormRaw({
   readOnly,
   updateIndicateurUn,
   validateIndicateurUn,
-  nextLink
+  nextLink,
 }: Props) {
   const initialValues = {
     remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
@@ -104,12 +111,12 @@ function IndicateurUnFormRaw({
               ),
               remunerationAnnuelleBrutHommes: parseIntStateValue(
                 remunerationAnnuelleBrutHommes
-              )
+              ),
             };
           }
-        )
+        ),
       })
-    )
+    ),
   };
 
   const saveForm = (formData: any) => {
@@ -120,7 +127,7 @@ function IndicateurUnFormRaw({
           ({
             remunerationAnnuelleBrutFemmes,
             remunerationAnnuelleBrutHommes,
-            trancheAge
+            trancheAge,
           }: any) => {
             return {
               trancheAge,
@@ -129,10 +136,10 @@ function IndicateurUnFormRaw({
               ),
               remunerationAnnuelleBrutHommes: parseIntFormValue(
                 remunerationAnnuelleBrutHommes
-              )
+              ),
             };
           }
-        )
+        ),
       })
     );
     updateIndicateurUn(remunerationAnnuelle);
@@ -160,7 +167,7 @@ function IndicateurUnFormRaw({
               {
                 id,
                 name,
-                tranchesAges
+                tranchesAges,
               }: {
                 id: any;
                 name: string;
@@ -185,8 +192,8 @@ function IndicateurUnFormRaw({
                           mask="number"
                           femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
                           hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
-                          customValidateFemmes={valueAboveZero}
-                          customValidateHommes={valueAboveZero}
+                          validatorFemmes={validator}
+                          validatorHommes={validator}
                         />
                       );
                     }
@@ -216,8 +223,8 @@ function IndicateurUnFormRaw({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
-  })
+    flexDirection: "column",
+  }),
 };
 
 export default IndicateurUnFormRaw;

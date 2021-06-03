@@ -25,8 +25,8 @@ const validate = (value: string) => {
   const requiredError = required(value);
   const mustBeNumberError = mustBeNumber(value);
   const mustBeIntegerError = !Number.isInteger(Number(value));
-  const minNumberError = minNumber(value, 0);
-  const maxNumberError = maxNumber(value, 10);
+  const minNumberError = minNumber(0)(value);
+  const maxNumberError = maxNumber(10)(value);
   if (
     !requiredError &&
     !mustBeNumberError &&

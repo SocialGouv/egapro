@@ -4,7 +4,15 @@ import { ReactNode } from "react";
 import { Form } from "react-final-form";
 import { FormState, GroupTranchesAgesEffectif } from "../../globals";
 
-import { parseIntFormValue, parseIntStateValue } from "../../utils/formHelpers";
+import {
+  composeValidators,
+  minNumber,
+  mustBeInteger,
+  mustBeNumber,
+  parseIntFormValue,
+  parseIntStateValue,
+  required,
+} from "../../utils/formHelpers";
 import { displayInt } from "../../utils/helpers";
 
 import BlocForm from "../../components/BlocForm";
@@ -21,6 +29,13 @@ type Effectif = Array<{
   name: string;
   tranchesAges: Array<GroupTranchesAgesEffectif>;
 }>;
+
+const validator = composeValidators(
+  required,
+  mustBeNumber,
+  mustBeInteger,
+  minNumber(0)
+);
 
 interface Props {
   effectifRaw: Effectif;
@@ -39,7 +54,7 @@ const getTotalGroupNbSalarie = (
         totalGroupNbSalarieHomme:
           accGroup.totalGroupNbSalarieHomme + (nombreSalariesHommes || 0),
         totalGroupNbSalarieFemme:
-          accGroup.totalGroupNbSalarieFemme + (nombreSalariesFemmes || 0)
+          accGroup.totalGroupNbSalarieFemme + (nombreSalariesFemmes || 0),
       };
     },
     { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
@@ -48,14 +63,12 @@ const getTotalGroupNbSalarie = (
 const getTotalNbSalarie = (effectif: Effectif) =>
   effectif.reduce(
     (acc, { tranchesAges }) => {
-      const {
-        totalGroupNbSalarieHomme,
-        totalGroupNbSalarieFemme
-      } = getTotalGroupNbSalarie(tranchesAges);
+      const { totalGroupNbSalarieHomme, totalGroupNbSalarieFemme } =
+        getTotalGroupNbSalarie(tranchesAges);
 
       return {
         totalNbSalarieHomme: acc.totalNbSalarieHomme + totalGroupNbSalarieHomme,
-        totalNbSalarieFemme: acc.totalNbSalarieFemme + totalGroupNbSalarieFemme
+        totalNbSalarieFemme: acc.totalNbSalarieFemme + totalGroupNbSalarieFemme,
       };
     },
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 }
@@ -66,7 +79,7 @@ function EffectifFormRaw({
   readOnly,
   updateEffectif,
   validateEffectif,
-  nextLink
+  nextLink,
 }: Props) {
   const initialValues = {
     effectif: effectifRaw.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
@@ -80,11 +93,11 @@ function EffectifFormRaw({
           return {
             ...otherPropsTrancheAge,
             nombreSalariesFemmes: parseIntStateValue(nombreSalariesFemmes),
-            nombreSalariesHommes: parseIntStateValue(nombreSalariesHommes)
+            nombreSalariesHommes: parseIntStateValue(nombreSalariesHommes),
           };
         }
-      )
-    }))
+      ),
+    })),
   };
 
   const saveForm = (formData: any) => {
@@ -100,10 +113,10 @@ function EffectifFormRaw({
             return {
               ...otherPropsTrancheAge,
               nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes),
-              nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes)
+              nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes),
             };
           }
-        )
+        ),
       })
     );
     updateEffectif(effectif);
@@ -124,17 +137,14 @@ function EffectifFormRaw({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, hasValidationErrors, submitFailed }) => {
-        const { totalNbSalarieHomme, totalNbSalarieFemme } = getTotalNbSalarie(
-          effectifRaw
-        );
+        const { totalNbSalarieHomme, totalNbSalarieFemme } =
+          getTotalNbSalarie(effectifRaw);
         return (
           <form onSubmit={handleSubmit} css={styles.container}>
             <FormAutoSave saveForm={saveForm} />
             {effectifRaw.map(({ id, name, tranchesAges }, indexGroupe) => {
-              const {
-                totalGroupNbSalarieHomme,
-                totalGroupNbSalarieFemme
-              } = getTotalGroupNbSalarie(tranchesAges);
+              const { totalGroupNbSalarieHomme, totalGroupNbSalarieFemme } =
+                getTotalGroupNbSalarie(tranchesAges);
               return (
                 <BlocForm
                   key={id}
@@ -142,7 +152,7 @@ function EffectifFormRaw({
                   label="nombre de salariés"
                   footer={[
                     displayInt(totalGroupNbSalarieFemme),
-                    displayInt(totalGroupNbSalarieHomme)
+                    displayInt(totalGroupNbSalarieHomme),
                   ]}
                 >
                   {tranchesAges.map(({ trancheAge }, indexTrancheAge) => {
@@ -154,6 +164,8 @@ function EffectifFormRaw({
                         calculable={true}
                         calculableNumber={0}
                         mask="number"
+                        validatorFemmes={validator}
+                        validatorHommes={validator}
                         femmeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesFemmes`}
                         hommeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesHommes`}
                       />
@@ -201,7 +213,7 @@ function EffectifFormRaw({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
 
   rowFoot: css({
@@ -210,17 +222,17 @@ const styles = {
     alignItems: "center",
     height: 16,
     marginTop: 10,
-    paddingRight: 20
+    paddingRight: 20,
   }),
   rowFootCell: css({
     fontSize: 14,
-    textAlign: "center"
+    textAlign: "center",
   }),
   rowFootText: css({
     fontStyle: "italic",
     fontSize: 14,
-    marginLeft: "auto"
-  })
+    marginLeft: "auto",
+  }),
 };
 
 export default EffectifFormRaw;

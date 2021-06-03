@@ -74,24 +74,35 @@ export const parseTrancheEffectifsFormValue = (
 
 // VALIDATION
 
-export const required = (value: string): boolean | string =>
-  value ? false : "Ce champ ne peut être vide";
+export type ValidatorFunction = (value: string) => undefined | string;
 
-export const mustBeNumber = (value: string): boolean =>
-  Number.isNaN(Number(value));
+export const required: ValidatorFunction = (value) =>
+  value ? undefined : "Ce champ ne peut être vide";
 
-export const minNumber = (value: string, min: number): boolean =>
-  Number(value) < min;
+export const mustBeNumber: ValidatorFunction = (value) =>
+  isNaN(Number(value)) ? "Renseignez une valeur numérique" : undefined;
 
-export const maxNumber = (value: string, max: number): boolean =>
-  Number(value) > max;
+export const mustBeInteger: ValidatorFunction = (value) =>
+  Number.isInteger(Number(value))
+    ? undefined
+    : "Renseignez une valeur entière, sans virgule";
 
-export const mustBeDate = (value: string): boolean | string => {
+export const minNumber: (min: Number) => ValidatorFunction = (min) => (value) =>
+  isNaN(Number(value)) || Number(value) >= min
+    ? undefined
+    : `La valeur doit être supérieure à ${min}`;
+
+export const maxNumber: (max: Number) => ValidatorFunction = (max) => (value) =>
+  isNaN(Number(value)) || Number(value) <= max
+    ? undefined
+    : `La valeur doit être inférieure à ${max}`;
+
+export const mustBeDate: ValidatorFunction = (value) => {
   const parsed = parseDate(value);
   return parsed === undefined ||
     parsed.toString() === "ce champ doit contenir une date au format jj/mm/aaaa"
     ? "Ce champ doit contenir une date au format jj/mm/aaaa"
-    : false;
+    : undefined;
 };
 
 export const validateDate = (value: string) => {
@@ -107,5 +118,15 @@ export const validateDate = (value: string) => {
   }
 };
 
-const regexpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const regexpEmail =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const validateEmail = (email: string) => !regexpEmail.test(email);
+
+export const composeValidators =
+  (...validators: Array<ValidatorFunction>) =>
+  (value: string) =>
+    validators.reduce(
+      (error: undefined | string, validator: ValidatorFunction) =>
+        error || validator(value),
+      undefined
+    );
