@@ -22,11 +22,17 @@ import {
   parseFloatStateValue,
   parseBooleanFormValue,
   parseBooleanStateValue,
+  composeValidators,
+  minNumber,
+  mustBeNumber,
+  required,
 } from "../../utils/formHelpers";
 import {
   displayNameCategorieSocioPro,
   // displayFractionPercent
 } from "../../utils/helpers";
+
+const validator = composeValidators(required, mustBeNumber, minNumber(0));
 
 const validateForm = ({
   tauxPromotion,
@@ -182,6 +188,8 @@ function IndicateurTroisForm({
                       mask="percent"
                       femmeFieldName={`tauxPromotion.${index}.tauxPromotionFemmes`}
                       hommeFieldName={`tauxPromotion.${index}.tauxPromotionHommes`}
+                      validatorFemmes={validator}
+                      validatorHommes={validator}
                     />
                   );
                 }
