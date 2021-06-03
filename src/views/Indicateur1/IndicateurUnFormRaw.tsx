@@ -27,9 +27,9 @@ import FormSubmit from "../../components/FormSubmit";
 import { displayNameTranchesAges } from "../../utils/helpers";
 
 export const aboveZero: ValidatorFunction = (value) =>
-  isNaN(Number(value)) || Number(value) > 0
-    ? undefined
-    : "La valeur ne peut être inférieure ou égale à 0";
+  minNumber(1)(value)
+    ? "La valeur ne peut être inférieure ou égale à 0"
+    : undefined;
 
 const validator = composeValidators(required, mustBeNumber, aboveZero);
 
