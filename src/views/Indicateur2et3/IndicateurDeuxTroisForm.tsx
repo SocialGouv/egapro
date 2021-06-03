@@ -25,6 +25,11 @@ import {
   parsePeriodeDeclarationFormValue,
   ValidatorFunction,
   maxNumber,
+  composeValidators,
+  required,
+  minNumber,
+  mustBeInteger,
+  mustBeNumber,
 } from "../../utils/formHelpers";
 import {
   calendarYear,
@@ -34,6 +39,12 @@ import {
 } from "../../utils/helpers";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
+const validator = composeValidators(
+  required,
+  mustBeNumber,
+  mustBeInteger,
+  minNumber(0)
+);
 interface Props {
   finPeriodeReference: string;
   presenceAugmentationPromotion: boolean;
@@ -171,13 +182,13 @@ function IndicateurDeuxTroisForm({
                 mask="number"
                 femmeFieldName="nombreAugmentationPromotionFemmes"
                 hommeFieldName="nombreAugmentationPromotionHommes"
-                validatorFemmes={validateEffectifs(
-                  totalNombreSalariesFemmes,
-                  "de femmes"
+                validatorFemmes={composeValidators(
+                  validator,
+                  validateEffectifs(totalNombreSalariesFemmes, "de femmes")
                 )}
-                validatorHommes={validateEffectifs(
-                  totalNombreSalariesHommes,
-                  "d'hommes"
+                validatorHommes={composeValidators(
+                  validator,
+                  validateEffectifs(totalNombreSalariesHommes, "d'hommes")
                 )}
               />
             </BlocForm>
