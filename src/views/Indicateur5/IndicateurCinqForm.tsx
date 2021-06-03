@@ -12,6 +12,8 @@ import {
   mustBeNumber,
   minNumber,
   maxNumber,
+  composeValidators,
+  mustBeInteger,
 } from "../../utils/formHelpers";
 
 import { BlocFormLight } from "../../components/BlocForm";
@@ -21,51 +23,19 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
-const validate = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  const mustBeIntegerError = !Number.isInteger(Number(value));
-  const minNumberError = minNumber(0)(value);
-  const maxNumberError = maxNumber(10)(value);
-  if (
-    !requiredError &&
-    !mustBeNumberError &&
-    !mustBeIntegerError &&
-    !minNumberError &&
-    !maxNumberError
-  ) {
-    return undefined;
-  } else {
-    return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError,
-      mustBeInteger: mustBeIntegerError,
-      minNumber: minNumberError,
-      maxNumber: maxNumberError,
-    };
-  }
-};
-
-const validateForm = ({
-  nombreSalariesFemmes,
-  nombreSalariesHommes,
-}: {
-  nombreSalariesFemmes: string;
-  nombreSalariesHommes: string;
-}) => ({
-  nombreSalariesFemmes: validate(nombreSalariesFemmes),
-  nombreSalariesHommes: validate(nombreSalariesHommes),
-});
-
-const valueValidateForCalculator = (value: string) => {
-  return validate(value) === undefined;
-};
+const validator = composeValidators(
+  required,
+  mustBeNumber,
+  mustBeInteger,
+  minNumber(0),
+  maxNumber(10)
+);
 
 const calculator = createDecorator({
   field: "nombreSalariesFemmes",
   updates: {
     nombreSalariesHommes: (femmesValue, { nombreSalariesHommes }: any) =>
-      valueValidateForCalculator(femmesValue)
+      validator(femmesValue) === undefined
         ? parseIntStateValue(10 - parseIntFormValue(femmesValue))
         : nombreSalariesHommes,
   },
@@ -113,7 +83,6 @@ function IndicateurCinqForm({
     <Form
       onSubmit={onSubmit}
       decorators={[calculator]}
-      validate={validateForm}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -128,6 +97,7 @@ function IndicateurCinqForm({
               fieldName="nombreSalariesFemmes"
               label="nombre (entier) de femmes parmi les 10 plus hauts salaires"
               readOnly={readOnly}
+              validator={validator}
             />
             <FieldInput
               fieldName="nombreSalariesHommes"
