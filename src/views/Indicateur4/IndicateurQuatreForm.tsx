@@ -12,6 +12,10 @@ import {
   required,
   mustBeNumber,
   maxNumber,
+  composeValidators,
+  minNumber,
+  ValidatorFunction,
+  mustBeInteger,
 } from "../../utils/formHelpers";
 
 import { BlocFormLight } from "../../components/BlocForm";
@@ -25,56 +29,20 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
-const validate = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  if (!requiredError && !mustBeNumberError) {
-    return undefined;
-  } else {
-    return { required: requiredError, mustBeNumber: mustBeNumberError };
-  }
-};
+const validator = composeValidators(
+  required,
+  mustBeNumber,
+  mustBeInteger,
+  minNumber(0)
+);
 
-const validateWithPreviousField = (
-  value: string,
-  valuePreviousField: string
-) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  const maxNumberError = maxNumber(Number(valuePreviousField))(value);
-  if (!requiredError && !mustBeNumberError && !maxNumberError) {
-    return undefined;
-  } else {
-    return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError,
-      previousField: maxNumberError,
-    };
-  }
-};
-
-const validateForm = ({
-  presenceCongeMat,
-  nombreSalarieesPeriodeAugmentation,
-  nombreSalarieesAugmentees,
-}: {
-  presenceCongeMat: string;
-  nombreSalarieesPeriodeAugmentation: string;
-  nombreSalarieesAugmentees: string;
-}) => {
-  if (presenceCongeMat === "false") {
-    return undefined;
-  }
-  return {
-    nombreSalarieesPeriodeAugmentation: validate(
-      nombreSalarieesPeriodeAugmentation
-    ),
-    nombreSalarieesAugmentees: validateWithPreviousField(
-      nombreSalarieesAugmentees,
-      nombreSalarieesPeriodeAugmentation
-    ),
-  };
-};
+const lessThanPreviousField: (previousField: string) => ValidatorFunction =
+  (previousField) => (value) =>
+    isNaN(Number(previousField))
+      ? undefined
+      : maxNumber(Number(previousField))(value)
+      ? "ce champ ne peut être supérieur au précédent"
+      : undefined;
 
 ///////////////
 
@@ -125,7 +93,6 @@ function IndicateurQuatreForm({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -159,12 +126,19 @@ function IndicateurQuatreForm({
                 fieldName="nombreSalarieesPeriodeAugmentation"
                 label="parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
                 readOnly={readOnly}
+                validator={validator}
               />
               <div css={styles.spacer} />
               <FieldInput
                 fieldName="nombreSalarieesAugmentees"
                 label="parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
                 readOnly={readOnly}
+                validator={composeValidators(
+                  validator,
+                  lessThanPreviousField(
+                    values.nombreSalarieesPeriodeAugmentation
+                  )
+                )}
               />
             </BlocFormLight>
           )}
