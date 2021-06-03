@@ -12,9 +12,10 @@ import {
   composeValidators,
   minNumber,
   mustBeNumber,
-  parseIntFormValue,
-  parseIntStateValue,
+  parseFloatFormValue,
+  parseFloatStateValue,
   required,
+  ValidatorFunction,
 } from "../../utils/formHelpers";
 
 import BlocForm from "../../components/BlocForm";
@@ -25,7 +26,12 @@ import FormSubmit from "../../components/FormSubmit";
 
 import { displayNameTranchesAges } from "../../utils/helpers";
 
-const validator = composeValidators(required, mustBeNumber, minNumber(0));
+export const aboveZero: ValidatorFunction = (value) =>
+  isNaN(Number(value)) || Number(value) > 0
+    ? undefined
+    : "La valeur ne peut être inférieure ou égale à 0";
+
+const validator = composeValidators(required, mustBeNumber, aboveZero);
 
 interface remunerationGroup {
   id: any;
@@ -106,10 +112,10 @@ function IndicateurUnFormRaw({
           }: any) => {
             return {
               ...otherPropsTrancheAge,
-              remunerationAnnuelleBrutFemmes: parseIntStateValue(
+              remunerationAnnuelleBrutFemmes: parseFloatStateValue(
                 remunerationAnnuelleBrutFemmes
               ),
-              remunerationAnnuelleBrutHommes: parseIntStateValue(
+              remunerationAnnuelleBrutHommes: parseFloatStateValue(
                 remunerationAnnuelleBrutHommes
               ),
             };
@@ -131,10 +137,10 @@ function IndicateurUnFormRaw({
           }: any) => {
             return {
               trancheAge,
-              remunerationAnnuelleBrutFemmes: parseIntFormValue(
+              remunerationAnnuelleBrutFemmes: parseFloatFormValue(
                 remunerationAnnuelleBrutFemmes
               ),
-              remunerationAnnuelleBrutHommes: parseIntFormValue(
+              remunerationAnnuelleBrutHommes: parseFloatFormValue(
                 remunerationAnnuelleBrutHommes
               ),
             };
