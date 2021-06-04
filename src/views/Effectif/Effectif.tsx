@@ -6,7 +6,7 @@ import {
   AppState,
   ActionType,
   FormState,
-  ActionEffectifData
+  ActionEffectifData,
 } from "../../globals";
 import totalNombreSalaries from "../../utils/totalNombreSalaries";
 
@@ -36,11 +36,11 @@ function Effectif({ state, dispatch }: Props) {
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCsp,
-    totalNombreSalariesFemme: totalNombreSalariesFemmeCsp
+    totalNombreSalariesFemme: totalNombreSalariesFemmeCsp,
   } = totalNombreSalaries(state.effectif.nombreSalaries);
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCoef,
-    totalNombreSalariesFemme: totalNombreSalariesFemmeCoef
+    totalNombreSalariesFemme: totalNombreSalariesFemmeCoef,
   } = totalNombreSalaries(state.indicateurUn.coefficient);
 
   return (
@@ -125,14 +125,28 @@ function Effectif({ state, dispatch }: Props) {
             }
           />
         )}
-
+      {/* This should never happen, as modifying the effectif will invalidate the indicateur form */}
       {state.effectif.formValidated === "Valid" &&
         state.indicateurUn.formValidated === "Valid" &&
+        state.indicateurUn.coef &&
         (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
           totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
           <InfoBloc
-            title="Attention, vos effectifs ne sont pas les mêmes que ceux déclarés en niveaux ou coefficients hiérarchiques"
+            title="Attention"
             icon="warning"
+            text={
+              <Fragment>
+                <span>
+                  Vos effectifs ne sont pas les mêmes que ceux déclarés en
+                  niveaux ou coefficients hiérarchiques. &emsp;
+                </span>
+                <TextSimulatorLink
+                  to="/indicateur1"
+                  label="aller à l'indicateur écart de rémunérations"
+                />
+                &emsp;
+              </Fragment>
+            }
           />
         )}
 
