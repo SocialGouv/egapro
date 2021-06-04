@@ -12,12 +12,12 @@ export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
   (meta.error &&
     meta.touched &&
-    !!Object.values({ ...meta.error, required: false }).filter(item => !!item)
+    !!Object.values({ ...meta.error, required: false }).filter((item) => !!item)
       .length);
 
 const numberMask = createNumberMask({
   prefix: "",
-  thousandsSeparatorSymbol: " "
+  includeThousandsSeparator: false,
 });
 
 const suffixPercent = "%";
@@ -26,38 +26,34 @@ const percentNumberMask = createNumberMask({
   prefix: "",
   includeThousandsSeparator: false,
   suffix: suffixPercent,
-  allowDecimal: true
+  allowDecimal: true,
 });
 
 const parse = (inputValue: string) => {
-  return inputValue
-    .split(/\s/)
-    .join("")
-    .replace(suffixPercent, "");
+  return inputValue.split(/\s/).join("").replace(suffixPercent, "");
 };
 
 const digitRegExp = /\d/;
 const anyNonWhitespaceRegExp = /[^\s]/;
 
 // because designer don't want to block any char…
-const trickyMaskNumberToAllowAnyChar = (
-  mask: (value: string) => Array<string | RegExp>
-) => (value: string) => {
-  const valueOnlyNum = value
-    .replace(/_/g, "")
-    .replace(/%/g, "")
-    .replace(/[^\s]/g, "1");
+const trickyMaskNumberToAllowAnyChar =
+  (mask: (value: string) => Array<string | RegExp>) => (value: string) => {
+    const valueOnlyNum = value
+      .replace(/_/g, "")
+      .replace(/%/g, "")
+      .replace(/[^\s]/g, "1");
 
-  const rawMaskArray = mask(valueOnlyNum);
+    const rawMaskArray = mask(valueOnlyNum);
 
-  const transformedMaskArray = rawMaskArray.map((char: any) => {
-    return char.source && char.source === digitRegExp.source
-      ? anyNonWhitespaceRegExp
-      : char;
-  });
+    const transformedMaskArray = rawMaskArray.map((char: any) => {
+      return char.source && char.source === digitRegExp.source
+        ? anyNonWhitespaceRegExp
+        : char;
+    });
 
-  return transformedMaskArray;
-};
+    return transformedMaskArray;
+  };
 
 interface Props {
   field: FieldRenderProps<string, HTMLInputElement>;
@@ -68,10 +64,10 @@ interface Props {
 function CellInput({
   field: {
     input: { value, onChange, ...inputProps },
-    meta
+    meta,
   },
   mask,
-  style
+  style,
 }: Props) {
   const error = hasFieldError(meta);
 
@@ -79,8 +75,11 @@ function CellInput({
 
   const maskWithAnyChar = trickyMaskNumberToAllowAnyChar(maskToUse);
 
-  const inputValue = conformToMask(value, maskWithAnyChar(value), {})
-    .conformedValue;
+  const inputValue = conformToMask(
+    value,
+    maskWithAnyChar(value),
+    {}
+  ).conformedValue;
 
   return (
     <Cell style={styles.cell}>
@@ -90,11 +89,11 @@ function CellInput({
           css={[styles.input, style, error && styles.inputError]}
           autoComplete="off"
           value={inputValue}
-          onChange={event =>
+          onChange={(event) =>
             onChange({
               target: {
-                value: parse(event.target.value)
-              }
+                value: parse(event.target.value),
+              },
             })
           }
           {...inputProps}
@@ -115,19 +114,19 @@ function CellInput({
 const styles = {
   cell: css({
     height: 22,
-    display: "flex"
+    display: "flex",
   }),
   input: css({
     appearance: "none",
     border: `solid ${globalStyles.colors.default} 1px`,
     width: "100%",
     fontSize: 14,
-    textAlign: "center"
+    textAlign: "center",
   }),
   inputError: css({
     color: globalStyles.colors.error,
-    borderColor: globalStyles.colors.error
-  })
+    borderColor: globalStyles.colors.error,
+  }),
 };
 
 export default CellInput;

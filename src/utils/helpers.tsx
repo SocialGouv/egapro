@@ -50,7 +50,7 @@ export function displayFractionPercent(
 }
 
 export function displayPercent(num: number, digits: number = 1): string {
-  return num.toLocaleString("en-US", { maximumFractionDigits: digits }) + "%";
+  return num.toLocaleString("fr-FR", { maximumFractionDigits: digits }) + "%";
 }
 
 export function displayInt(num: number): string {
@@ -203,9 +203,11 @@ const getDeclaration = (data: AppState): any => {
   };
   const index = data.declaration.noteIndex;
 
-  if (index ||
-      (data.informations.anneeDeclaration &&
-       data.informations.anneeDeclaration >= 2020)) {
+  if (
+    index ||
+    (data.informations.anneeDeclaration &&
+      data.informations.anneeDeclaration >= 2020)
+  ) {
     declaration.publication = {
       date: toISOString(data.declaration.datePublication),
     };
@@ -384,7 +386,7 @@ const getIndicateur3 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurTrois.noteFinale,
     catégories: data.indicateurTrois.tauxPromotion.map((cat) =>
-        asPercentage(cat.ecartTauxPromotion)
+      asPercentage(cat.ecartTauxPromotion)
     ),
   };
   // @ts-ignore
