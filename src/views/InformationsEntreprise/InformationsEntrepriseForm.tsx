@@ -12,7 +12,7 @@ import {
   FormState,
   ActionInformationsEntrepriseData,
   Structure,
-  EntrepriseUES
+  EntrepriseUES,
 } from "../../globals";
 
 import globalStyles from "../../utils/globalStyles";
@@ -21,7 +21,7 @@ import {
   mustBeNumber,
   parseIntFormValue,
   parseIntStateValue,
-  required
+  required,
 } from "../../utils/formHelpers";
 
 import ActionBar from "../../components/ActionBar";
@@ -32,7 +32,7 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import InputField from "./components/EntrepriseUESInputField";
 import NombreEntreprises, {
-  validate as validateNombreEntreprises
+  validator as validateNombreEntreprises,
 } from "../../components/NombreEntreprises";
 import RadioButtons from "../../components/RadioButtons";
 import RegionsDepartements from "../../components/RegionsDepartements";
@@ -48,7 +48,7 @@ const validate = (value: string) => {
     return undefined;
   } else {
     return {
-      required: requiredError
+      required: requiredError,
     };
   }
 };
@@ -62,15 +62,21 @@ const validateCodePostal = (codePostal: string, departement: string) => {
   const requiredError = required(codePostal);
   const mustBeNumberError = mustBeNumber(codePostal);
   const mustBe5DigitsError = codePostal && codePostal.length !== 5;
-  const mustBeInDepartementError = codePostal && !codePostal.startsWith(dptCode);
-  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError && !mustBeInDepartementError) {
+  const mustBeInDepartementError =
+    codePostal && !codePostal.startsWith(dptCode);
+  if (
+    !requiredError &&
+    !mustBeNumberError &&
+    !mustBe5DigitsError &&
+    !mustBeInDepartementError
+  ) {
     return undefined;
   } else {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
       mustBe5Digits: mustBe5DigitsError,
-      mustBeInDepartementError: mustBeInDepartementError
+      mustBeInDepartementError: mustBeInDepartementError,
     };
   }
 };
@@ -86,7 +92,7 @@ const validateForm = ({
   commune,
   structure,
   nomUES,
-  nombreEntreprises
+  nombreEntreprises,
 }: {
   nomEntreprise: string;
   siren: string;
@@ -112,15 +118,15 @@ const validateForm = ({
   nomUES:
     structure === "Unité Economique et Sociale (UES)"
       ? validate(nomUES)
-      : undefined
+      : undefined,
 });
 
 const calculator = createDecorator({
   field: "nombreEntreprises",
   updates: {
     entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
-      adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES)
-  }
+      adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES),
+  },
 });
 
 const adaptEntreprisesUESSize = (
@@ -153,7 +159,7 @@ function InformationsEntrepriseForm({
   informationsEntreprise,
   readOnly,
   updateInformationsEntreprise,
-  validateInformationsEntreprise
+  validateInformationsEntreprise,
 }: Props) {
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -169,7 +175,7 @@ function InformationsEntrepriseForm({
     nombreEntreprises: parseIntStateValue(
       informationsEntreprise.nombreEntreprises
     ),
-    entreprisesUES: informationsEntreprise.entreprisesUES
+    entreprisesUES: informationsEntreprise.entreprisesUES,
   };
 
   const saveForm = (formData: any) => {
@@ -185,7 +191,7 @@ function InformationsEntrepriseForm({
       structure,
       nomUES,
       nombreEntreprises,
-      entreprisesUES
+      entreprisesUES,
     } = formData;
 
     updateInformationsEntreprise({
@@ -200,7 +206,7 @@ function InformationsEntrepriseForm({
       structure,
       nomUES,
       nombreEntreprises: parseIntFormValue(nombreEntreprises),
-      entreprisesUES
+      entreprisesUES,
     });
   };
 
@@ -225,7 +231,7 @@ function InformationsEntrepriseForm({
       mutators={{
         // potentially other mutators could be merged here
         newNombreEntreprises,
-        ...arrayMutators
+        ...arrayMutators,
       }}
       initialValues={initialValues}
       validate={validateForm}
@@ -235,7 +241,14 @@ function InformationsEntrepriseForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ form, handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
+      {({
+        form,
+        handleSubmit,
+        values,
+        hasValidationErrors,
+        errors,
+        submitFailed,
+      }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
@@ -246,12 +259,12 @@ function InformationsEntrepriseForm({
             choices={[
               {
                 label: "entreprise",
-                value: "Entreprise"
+                value: "Entreprise",
               },
               {
                 label: "Unité Economique et Sociale (UES)",
-                value: "Unité Economique et Sociale (UES)"
-              }
+                value: "Unité Economique et Sociale (UES)",
+              },
             ]}
           />
 
@@ -291,13 +304,14 @@ function InformationsEntrepriseForm({
             label="Code Postal"
             fieldName="codePostal"
             errorText={
-              errors.codePostal && (
-                errors.codePostal.required ||
+              errors.codePostal &&
+              (errors.codePostal.required ||
                 errors.codePostal.mustBeNumber ||
-                errors.codePostal.mustBe5Digits
-              )
-              ? "le code postal doit être composé de 5 chiffres"
-              : `le code postal ne correspond pas au département choisi (${departementCode[values.departement]})`
+                errors.codePostal.mustBe5Digits)
+                ? "le code postal doit être composé de 5 chiffres"
+                : `le code postal ne correspond pas au département choisi (${
+                    departementCode[values.departement]
+                  })`
             }
             readOnly={readOnly}
           />
@@ -313,7 +327,6 @@ function InformationsEntrepriseForm({
               <NombreEntreprises
                 fieldName="nombreEntreprises"
                 label="Nombre d'entreprises composant l'UES (le déclarant compris)"
-                errorText="le nombre d'entreprises composant l'UES doit être un nombre supérieur ou égal à 2"
                 entreprisesUES={informationsEntreprise.entreprisesUES}
                 newNombreEntreprises={form.mutators.newNombreEntreprises}
                 readOnly={readOnly}
@@ -377,18 +390,18 @@ function InformationsEntrepriseForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
-    textAlign: "center"
+    textAlign: "center",
   }),
   add: css({
     display: "flex",
     alignItems: "center",
     marginTop: 46 - 18 - 5,
-    textDecoration: "none"
+    textDecoration: "none",
   }),
   addIcon: css({
     width: 32,
@@ -399,12 +412,12 @@ const styles = {
     justifyContent: "center",
 
     backgroundColor: globalStyles.colors.default,
-    borderRadius: 16
+    borderRadius: 16,
   }),
   spacerAdd: css({
     height: 32,
-    marginTop: 46 - 18 - 5
-  })
+    marginTop: 46 - 18 - 5,
+  }),
 };
 
 export default InformationsEntrepriseForm;
