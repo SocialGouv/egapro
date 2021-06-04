@@ -75,6 +75,7 @@ export const parseTrancheEffectifsFormValue = (
 // VALIDATION
 
 export type ValidatorFunction = (value: string) => undefined | string;
+export type FormValidatorFunction = (values: Object) => undefined | string;
 
 export const required: ValidatorFunction = (value) =>
   value ? undefined : "Ce champ ne peut être vide";
@@ -127,6 +128,15 @@ export const composeValidators =
   (value: string) =>
     validators.reduce(
       (error: undefined | string, validator: ValidatorFunction) =>
+        error || validator(value),
+      undefined
+    );
+
+export const composeFormValidators =
+  (...validators: Array<FormValidatorFunction>) =>
+  (value: Object) =>
+    validators.reduce(
+      (error: undefined | string, validator: FormValidatorFunction) =>
         error || validator(value),
       undefined
     );

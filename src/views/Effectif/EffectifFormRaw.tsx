@@ -5,7 +5,9 @@ import { Form } from "react-final-form";
 import { FormState, GroupTranchesAgesEffectif } from "../../globals";
 
 import {
+  composeFormValidators,
   composeValidators,
+  FormValidatorFunction,
   minNumber,
   mustBeInteger,
   mustBeNumber,
@@ -43,6 +45,7 @@ interface Props {
   updateEffectif: (data: Effectif) => void;
   validateEffectif: (valid: FormState) => void;
   nextLink: ReactNode;
+  formValidator?: FormValidatorFunction;
 }
 
 const getTotalGroupNbSalarie = (
@@ -52,15 +55,17 @@ const getTotalGroupNbSalarie = (
     (accGroup, { nombreSalariesHommes, nombreSalariesFemmes }) => {
       return {
         totalGroupNbSalarieHomme:
-          accGroup.totalGroupNbSalarieHomme + (nombreSalariesHommes || 0),
+          accGroup.totalGroupNbSalarieHomme +
+          (Number(nombreSalariesHommes) || 0),
         totalGroupNbSalarieFemme:
-          accGroup.totalGroupNbSalarieFemme + (nombreSalariesFemmes || 0),
+          accGroup.totalGroupNbSalarieFemme +
+          (Number(nombreSalariesFemmes) || 0),
       };
     },
     { totalGroupNbSalarieHomme: 0, totalGroupNbSalarieFemme: 0 }
   );
 
-const getTotalNbSalarie = (effectif: Effectif) =>
+export const getTotalNbSalarie = (effectif: Effectif) =>
   effectif.reduce(
     (acc, { tranchesAges }) => {
       const { totalGroupNbSalarieHomme, totalGroupNbSalarieFemme } =
@@ -80,6 +85,7 @@ function EffectifFormRaw({
   updateEffectif,
   validateEffectif,
   nextLink,
+  formValidator,
 }: Props) {
   const initialValues = {
     effectif: effectifRaw.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
@@ -103,14 +109,20 @@ function EffectifFormRaw({
   const { totalNbSalarieHomme, totalNbSalarieFemme } =
     getTotalNbSalarie(effectifRaw);
 
-  const validateForm = ({ effectif }: { effectif: Effectif }) => {
-    if (totalNbSalarieFemme + totalNbSalarieHomme <= 0) {
-      return {
-        message:
-          "Le nombre total d'effectifs pris en compte ne peut pas être égal à zéro.",
-      };
-    }
-    return;
+  const formValidatorEffectif = ({ effectif }: any) => {
+    const { totalNbSalarieHomme, totalNbSalarieFemme } =
+      getTotalNbSalarie(effectif);
+    return totalNbSalarieFemme + totalNbSalarieHomme <= 0
+      ? "Le nombre total d'effectifs pris en compte ne peut pas être égal à zéro."
+      : undefined;
+  };
+
+  const validateForm = (values: Object) => {
+    const composedValidator = formValidator
+      ? composeFormValidators(formValidatorEffectif, formValidator)
+      : formValidatorEffectif;
+    const error = composedValidator(values);
+    return error ? { message: error } : undefined;
   };
 
   const saveForm = (formData: any) => {
