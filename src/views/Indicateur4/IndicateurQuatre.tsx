@@ -7,7 +7,7 @@ import {
   AppState,
   FormState,
   ActionType,
-  ActionIndicateurQuatreData
+  ActionIndicateurQuatreData,
 } from "../../globals";
 
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre";
@@ -42,7 +42,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
   const {
     indicateurCalculable,
     indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre
+    noteIndicateurQuatre,
   } = calculIndicateurQuatre(state);
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
@@ -107,7 +107,7 @@ function PageIndicateurQuatre({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-      tagline="Renseignez le taux de salariées en congés maternité durant la période de référence ayant reçu une augmentation à leur retour."
+      tagline="Renseignez le nombre de salariées en congé maternité durant la période de référence et ayant reçu une augmentation à leur retour."
     >
       {children}
     </Page>
