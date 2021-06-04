@@ -218,7 +218,7 @@ function DeclarationForm({
                           : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
                       }
                       fieldName="modalitesPublication"
-                      errorText="Veuillez préciser les modalités de publicité"
+                      errorText="Veuillez préciser les modalités de communication"
                       readOnly={readOnly}
                     />
                   ))}
