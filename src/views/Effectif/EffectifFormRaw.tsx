@@ -37,18 +37,6 @@ const validator = composeValidators(
   minNumber(0)
 );
 
-const validateForm = ({ effectif }: { effectif: Effectif }) => {
-  const { totalNbSalarieHomme, totalNbSalarieFemme } =
-    getTotalNbSalarie(effectif);
-  if (totalNbSalarieFemme + totalNbSalarieHomme <= 0) {
-    return {
-      notAll0:
-        "Le nombre total d'effectifs pris en compte ne peut pas être égal à zéro.",
-    };
-  }
-  return;
-};
-
 interface Props {
   effectifRaw: Effectif;
   readOnly: boolean;
@@ -112,6 +100,19 @@ function EffectifFormRaw({
     })),
   };
 
+  const { totalNbSalarieHomme, totalNbSalarieFemme } =
+    getTotalNbSalarie(effectifRaw);
+
+  const validateForm = ({ effectif }: { effectif: Effectif }) => {
+    if (totalNbSalarieFemme + totalNbSalarieHomme <= 0) {
+      return {
+        message:
+          "Le nombre total d'effectifs pris en compte ne peut pas être égal à zéro.",
+      };
+    }
+    return;
+  };
+
   const saveForm = (formData: any) => {
     const effectif = formData.effectif.map(
       ({ tranchesAges, ...otherPropGroupe }: any) => ({
@@ -150,8 +151,6 @@ function EffectifFormRaw({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, hasValidationErrors, submitFailed, errors }) => {
-        const { totalNbSalarieHomme, totalNbSalarieFemme } =
-          getTotalNbSalarie(effectifRaw);
         return (
           <form onSubmit={handleSubmit} css={styles.container}>
             <FormAutoSave saveForm={saveForm} />
@@ -213,8 +212,8 @@ function EffectifFormRaw({
                   hasValidationErrors={hasValidationErrors}
                   submitFailed={submitFailed}
                   errorMessage={
-                    errors.notAll0
-                      ? errors.notAll0
+                    errors.message
+                      ? errors.message
                       : "Les effectifs ne peuvent pas être validés si tous les champs ne sont pas remplis."
                   }
                 />
