@@ -19,7 +19,6 @@ import PageNotFound from "../views/PageNotFound";
 import Simulateur from "./Simulateur";
 import MainScrollView from "./MainScrollView";
 import MobileLayout from "./MobileLayout";
-import ConsulterIndex from "../views/ConsulterIndex";
 
 interface Props {
   state: AppState | undefined;
@@ -33,18 +32,12 @@ function AppLayout({ state, dispatch }: Props) {
     <div css={styles.layout}>
       <Switch>
         <Route
-          path="/consulter-index"
           render={() => {
-            document.title = "Consultation Index Egapro";
-            return <ConsulterIndex />
-          }}
-        />
-        <Route render={() => {
-          document.title = "Index Egapro";
+            document.title = "Index Egapro";
 
-          return (
-            layoutType === "mobile" ?
-              <MobileLayout /> :
+            return layoutType === "mobile" ? (
+              <MobileLayout />
+            ) : (
               <div css={styles.horizontalLayout}>
                 <div css={styles.leftColumn}>
                   <Header />
@@ -53,35 +46,46 @@ function AppLayout({ state, dispatch }: Props) {
                       <Route
                         path="/"
                         exact
-                        render={props => <Home {...props} dispatch={dispatch} />}
+                        render={(props) => (
+                          <Home {...props} dispatch={dispatch} />
+                        )}
                       />
                       <Route
                         path="/simulateur/:code"
                         render={({
-                                   match: {
-                                     params: { code }
-                                   }
-                                 }) => (
-                          <Simulateur code={code} state={state} dispatch={dispatch} />
+                          match: {
+                            params: { code },
+                          },
+                        }) => (
+                          <Simulateur
+                            code={code}
+                            state={state}
+                            dispatch={dispatch}
+                          />
                         )}
                       />
                       <Route
                         path="/mentions-legales"
                         exact
-                        render={props => (
+                        render={(props) => (
                           <MentionsLegales {...props} dispatch={dispatch} />
                         )}
                       />
                       <Route
                         path="/cgu"
                         exact
-                        render={props => <CGU {...props} dispatch={dispatch} />}
+                        render={(props) => (
+                          <CGU {...props} dispatch={dispatch} />
+                        )}
                       />
                       <Route
                         path="/politique-confidentialite"
                         exact
-                        render={props => (
-                          <PolitiqueConfidentialite {...props} dispatch={dispatch} />
+                        render={(props) => (
+                          <PolitiqueConfidentialite
+                            {...props}
+                            dispatch={dispatch}
+                          />
                         )}
                       />
                       <Route component={PageNotFound} />
@@ -90,16 +94,17 @@ function AppLayout({ state, dispatch }: Props) {
                 </div>
 
                 <div
-                    css={[
-                      styles.rightColumn,
-                      layoutType === "tablet" && styles.rightColumnTablet
-                    ]}
-                  >
-                    <FAQ />
+                  css={[
+                    styles.rightColumn,
+                    layoutType === "tablet" && styles.rightColumnTablet,
+                  ]}
+                >
+                  <FAQ />
                 </div>
               </div>
-          );
-        }}/>
+            );
+          }}
+        />
       </Switch>
     </div>
   );
@@ -117,8 +122,8 @@ const styles = {
     background:
       "linear-gradient(180deg, #FFFFFF 79px, rgba(255, 255, 255, 0) 79px, #FFFFFF 100%), #EFF0FA",
     "@media print": {
-      display: "block"
-    }
+      display: "block",
+    },
   }),
   leftColumn: css({
     display: "flex",
@@ -143,8 +148,8 @@ const styles = {
     */
 
     "@media print": {
-      display: "block"
-    }
+      display: "block",
+    },
   }),
   rightColumn: css({
     display: "flex",
@@ -152,15 +157,15 @@ const styles = {
     width: 375,
     flexShrink: 0,
     "@media print": {
-      display: "none"
-    }
+      display: "none",
+    },
   }),
   rightColumnTablet: css({
-    width: 320
+    width: 320,
   }),
   horizontalLayout: css({
-    display: "flex"
-  })
+    display: "flex",
+  }),
 };
 
 export default AppLayout;
