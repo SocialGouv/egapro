@@ -19,10 +19,9 @@ function Bubble({ children, style }: Props) {
 
 const styles = {
   container: css({
-    width: "100%",
+    width: 220,
     position: "relative",
-    height: 0,
-    paddingTop: "100%"
+    height: 220,
   }),
   bloc: css({
     position: "absolute",
@@ -42,9 +41,9 @@ const styles = {
     "@media print": {
       backgroundColor: "white",
       color: globalStyles.colors.default,
-      border: `solid ${globalStyles.colors.default} 1px`
-    }
-  })
+      border: `solid ${globalStyles.colors.default} 1px`,
+    },
+  }),
 };
 
 export default Bubble;
