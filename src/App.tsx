@@ -17,22 +17,11 @@ const history = createBrowserHistory();
 const piwik: any = new ReactPiwik({
   url: "matomo.fabrique.social.gouv.fr",
   siteId: 11,
-  trackErrors: true
+  trackErrors: true,
 });
 
 // track the initial pageview
 ReactPiwik.push(["trackPageView"]);
-
-const validateActions = [
-  "validateEffectif",
-  "validateIndicateurUnCoefGroup",
-  "validateIndicateurUnCoefEffectif",
-  "validateIndicateurUn",
-  "validateIndicateurDeux",
-  "validateIndicateurTrois",
-  "validateIndicateurQuatre",
-  "validateIndicateurCinq"
-];
 
 function App() {
   const [state, dispatchReducer] = useReducer(AppReducer, undefined);
@@ -40,7 +29,7 @@ function App() {
   const dispatch = useCallback(
     (action: ActionType) => {
       if (
-        validateActions.includes(action.type) &&
+        action.type.startsWith("validate") &&
         // @ts-ignore
         action.valid &&
         // @ts-ignore
@@ -79,13 +68,13 @@ const styles = {
     left: 0,
     top: 60,
     width: "100%",
-    zIndex: 1000
+    zIndex: 1000,
   }),
   banner: css({
     backgroundColor: "#fff",
     margin: "10px auto",
-    width: "70%"
-  })
+    width: "70%",
+  }),
 };
 
 export default App;
