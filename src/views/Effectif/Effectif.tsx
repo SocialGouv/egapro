@@ -46,7 +46,7 @@ function Effectif({ state, dispatch }: Props) {
   return (
     <Page
       title="Indication des effectifs"
-      tagline="Les effectifs pris en compte pour le calcul doivent être renseignés par catégorie socio-professionnelle (CSP) et tranche d’âge."
+      tagline="Les effectifs pris en compte pour le calcul doivent être renseignés en effectif physique par catégorie socio-professionnelle (CSP) et tranche d’âge."
     >
       <LayoutFormAndResult
         childrenForm={

@@ -9,8 +9,8 @@ function FAQEffectifsSteps() {
   return (
     <Fragment>
       <FAQStep icon={<IconText>CSP</IconText>}>
-        L’effectif de l’entreprise est apprécié sur la période de référence. Il
-        doit être renseigné par{" "}
+        L’effectif de l’entreprise est apprécié en effectif physique sur la
+        période de référence. Il doit être renseigné par{" "}
         <strong>catégories socio-professionnelles.</strong>
       </FAQStep>
 
@@ -47,8 +47,8 @@ const styles = {
     padding: 0,
     margin: 0,
     listStyle: "none",
-    marginTop: 6
-  })
+    marginTop: 6,
+  }),
 };
 
 export default FAQEffectifsSteps;

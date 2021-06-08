@@ -7,7 +7,7 @@ import globalStyles from "../../../utils/globalStyles";
 
 import {
   useColumnsWidth,
-  useLayoutType
+  useLayoutType,
 } from "../../../components/GridContext";
 import ActionLink from "../../../components/ActionLink";
 import { IconValid, IconInvalid } from "../../../components/Icons";
@@ -27,7 +27,7 @@ function IndicateurUnCoefMenu({
   setMenuSelected,
   coefficientGroupFormValidated,
   coefficientEffectifFormValidated,
-  formValidated
+  formValidated,
 }: Props) {
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
@@ -40,7 +40,7 @@ function IndicateurUnCoefMenu({
         onClick={() => setMenuSelected("groupe")}
       />
       <MenuItem
-        title="étape 2/3 : effectifs"
+        title="étape 2/3 : effectifs physiques"
         isSelected={menuSelected === "effectif"}
         formValidated={coefficientEffectifFormValidated}
         onClick={() => setMenuSelected("effectif")}
@@ -59,7 +59,7 @@ function MenuItem({
   title,
   isSelected,
   onClick,
-  formValidated
+  formValidated,
 }: {
   title: string;
   isSelected: boolean;
@@ -90,12 +90,12 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 36
+    marginBottom: 36,
   }),
   menuItem: css({
     flexGrow: 0,
     flexShrink: 1,
-    flexBasis: 166,
+    flexBasis: 180,
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
 
     display: "flex",
@@ -105,15 +105,15 @@ const styles = {
     fontSize: 14,
     lineHeight: "17px",
     textDecoration: "none",
-    textAlign: "left"
+    textAlign: "left",
   }),
   menuItemSelected: css({
     color: globalStyles.colors.primary,
-    borderColor: globalStyles.colors.primary
+    borderColor: globalStyles.colors.primary,
   }),
   icon: css({
-    marginRight: 3
-  })
+    marginRight: 3,
+  }),
 };
 
 export default IndicateurUnCoefMenu;
