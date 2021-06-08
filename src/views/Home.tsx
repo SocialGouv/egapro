@@ -51,7 +51,7 @@ function Home({ history, location, dispatch }: Props) {
     <Page
       title="Bienvenue sur Index Egapro"
       tagline={[
-        "L’Index d'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
+        "L’Index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
         "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
       ]}
     >
@@ -104,7 +104,12 @@ function Home({ history, location, dispatch }: Props) {
               </p>
 
               <div css={styles.buttonWrapper}>
-                <a href="/declaration/" css={[buttonStyles.button, styles.linkButton]}>déclarer directement</a>
+                <a
+                  href="/declaration/"
+                  css={[buttonStyles.button, styles.linkButton]}
+                >
+                  déclarer directement
+                </a>
               </div>
             </div>
           </div>

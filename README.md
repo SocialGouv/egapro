@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.com/SocialGouv/egapro.svg?branch=master)](https://travis-ci.com/SocialGouv/egapro)
 [![codecov](https://codecov.io/gh/SocialGouv/egapro/branch/master/graph/badge.svg)](https://codecov.io/gh/SocialGouv/egapro)
 
-> Calcul de l'indexe d'égalité homme / femme dans les entreprises
+> Calcul de l'indexe de l'égalité homme / femme dans les entreprises
 
 ## Lancer le projet avec docker
 
