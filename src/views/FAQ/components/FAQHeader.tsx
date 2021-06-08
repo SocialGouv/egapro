@@ -24,7 +24,7 @@ function FAQHeaderHomeButton() {
 
 function FAQHeader({
   location,
-  closeMenu
+  closeMenu,
 }: {
   location: RouteComponentProps["location"];
   closeMenu?: () => void;
@@ -35,7 +35,7 @@ function FAQHeader({
       css={[
         styles.container,
         layoutType === "tablet" && styles.containerTablet,
-        layoutType === "mobile" && styles.containerMobile
+        layoutType === "mobile" && styles.containerMobile,
       ]}
     >
       <div css={styles.aroundTitle}>
@@ -76,42 +76,42 @@ function FAQHeader({
 
 const styles = {
   container: css({
-    height: 80,
+    height: 100,
     flexShrink: 0,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     borderBottom: "1px solid #EFECEF",
     marginRight: 29,
-    marginLeft: 29
+    marginLeft: 29,
   }),
   containerTablet: css({
     marginRight: 21,
-    marginLeft: 21
+    marginLeft: 21,
   }),
   containerMobile: css({
     height: 56,
     marginRight: globalStyles.grid.gutterWidth,
-    marginLeft: globalStyles.grid.gutterWidth
+    marginLeft: globalStyles.grid.gutterWidth,
   }),
   title: css({
     fontFamily: "'Gabriela', serif",
-    fontSize: 18
+    fontSize: 18,
   }),
   aroundTitle: css({
     flexGrow: 1,
     flexShrink: 0,
-    flexBasis: 100
+    flexBasis: 100,
   }),
   buttonBack: css({
     color: globalStyles.colors.default,
     fontSize: 12,
-    textDecoration: "none"
+    textDecoration: "none",
   }),
   backIcon: css({
     fontSize: 8,
-    fontFamily: "Segoe UI Symbol" // fix Edge
-  })
+    fontFamily: "Segoe UI Symbol", // fix Edge
+  }),
 };
 
 export default FAQHeader;

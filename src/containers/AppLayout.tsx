@@ -120,7 +120,7 @@ const styles = {
     justifyContent: "center",
     overflow: "auto",
     background:
-      "linear-gradient(180deg, #FFFFFF 79px, rgba(255, 255, 255, 0) 79px, #FFFFFF 100%), #EFF0FA",
+      "linear-gradient(180deg, #FFFFFF 99px, rgba(255, 255, 255, 0) 99px, #FFFFFF 100%), #EFF0FA",
     "@media print": {
       display: "block",
     },
