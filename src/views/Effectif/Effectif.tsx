@@ -70,9 +70,11 @@ function Effectif({ state, dispatch }: Props) {
 
       {state.effectif.formValidated === "Valid" &&
         (state.indicateurUn.formValidated === "Invalid" ||
-          state.indicateurDeux.formValidated === "Invalid" ||
-          state.indicateurTrois.formValidated === "Invalid" ||
-          state.indicateurDeuxTrois.formValidated === "Invalid") && (
+          (state.informations.trancheEffectifs !== "50 à 250" &&
+            (state.indicateurDeux.formValidated === "Invalid" ||
+              state.indicateurTrois.formValidated === "Invalid")) ||
+          (state.informations.trancheEffectifs === "50 à 250" &&
+            state.indicateurDeuxTrois.formValidated === "Invalid")) && (
           <InfoBloc
             title="Vos effectifs ont été modifiés"
             icon="cross"
