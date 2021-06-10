@@ -95,7 +95,7 @@ const styles = {
   menuItem: css({
     flexGrow: 0,
     flexShrink: 1,
-    flexBasis: 180,
+    flexBasis: 200,
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
 
     display: "flex",
