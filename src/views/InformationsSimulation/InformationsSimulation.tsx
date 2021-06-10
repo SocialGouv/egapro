@@ -7,7 +7,7 @@ import {
   AppState,
   FormState,
   ActionType,
-  ActionInformationsSimulationData
+  ActionInformationsSimulationData,
 } from "../../globals";
 
 import InfoBloc from "../../components/InfoBloc";
@@ -51,9 +51,11 @@ function InformationsSimulation({ state, dispatch }: Props) {
       {state.informations.formValidated === "Valid" &&
         (state.effectif.formValidated === "Invalid" ||
           state.indicateurUn.formValidated === "Invalid" ||
-          state.indicateurDeux.formValidated === "Invalid" ||
-          state.indicateurTrois.formValidated === "Invalid" ||
-          state.indicateurDeuxTrois.formValidated === "Invalid" ||
+          (state.informations.trancheEffectifs !== "50 à 250" &&
+            (state.indicateurDeux.formValidated === "Invalid" ||
+              state.indicateurTrois.formValidated === "Invalid")) ||
+          (state.informations.trancheEffectifs === "50 à 250" &&
+            state.indicateurDeuxTrois.formValidated === "Invalid") ||
           state.indicateurQuatre.formValidated === "Invalid" ||
           state.indicateurCinq.formValidated === "Invalid") && (
           <InfoBloc
