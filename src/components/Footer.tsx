@@ -53,6 +53,9 @@ function Footer() {
         <Link to="/mentions-legales" css={styles.link}>
           mentions légales
         </Link>
+        <Link to="/accessibilite" css={styles.link}>
+          Accessibilité : non conforme
+        </Link>
         <Link to="/cgu" css={styles.link}>
           conditions générales d'utilisation
         </Link>

@@ -19,6 +19,7 @@ import PageNotFound from "../views/PageNotFound";
 import Simulateur from "./Simulateur";
 import MainScrollView from "./MainScrollView";
 import MobileLayout from "./MobileLayout";
+import Accessibilite from "../views/Accessibilite";
 
 interface Props {
   state: AppState | undefined;
@@ -69,6 +70,13 @@ function AppLayout({ state, dispatch }: Props) {
                         exact
                         render={(props) => (
                           <MentionsLegales {...props} dispatch={dispatch} />
+                        )}
+                      />
+                      <Route
+                        path="/accessibilite"
+                        exact
+                        render={(props) => (
+                          <Accessibilite {...props} dispatch={dispatch} />
                         )}
                       />
                       <Route

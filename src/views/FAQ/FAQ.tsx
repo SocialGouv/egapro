@@ -24,7 +24,7 @@ const FAQPaths: { [key: string]: string } = {
   indicateur2et3: "/section/indicateur2et3",
   indicateur4: "/section/indicateur4",
   indicateur5: "/section/indicateur5",
-  recapitulatif: "/section/resultat"
+  recapitulatif: "/section/resultat",
 };
 
 type LocationState = {
@@ -62,13 +62,13 @@ function FAQ({ closeMenu }: Props) {
   const layoutType = useLayoutType();
   return (
     <Route
-      render={route => {
+      render={(route) => {
         const location = (route as FAQRouteComponentProps).location;
         const locationFAQ = {
           pathname: mapDefaultPathnameToFAQPathname(location),
           search: "",
           hash: "",
-          state: undefined
+          state: undefined,
         };
         return (
           <div css={styles.container}>
@@ -78,7 +78,7 @@ function FAQ({ closeMenu }: Props) {
               css={[
                 styles.content,
                 layoutType === "tablet" && styles.contentTablet,
-                layoutType === "mobile" && styles.contentMobile
+                layoutType === "mobile" && styles.contentMobile,
               ]}
               key={locationFAQ.pathname}
             >
@@ -88,8 +88,9 @@ function FAQ({ closeMenu }: Props) {
                     "/",
                     "/simulateur/:code",
                     "/mentions-legales",
+                    "/accessibilite",
                     "/cgu",
-                    "/politique-confidentialite"
+                    "/politique-confidentialite",
                   ]}
                   exact
                   render={() => <FAQHome />}
@@ -121,8 +122,8 @@ function FAQ({ closeMenu }: Props) {
                   path="/section/:section"
                   render={({
                     match: {
-                      params: { section }
-                    }
+                      params: { section },
+                    },
                   }) => <FAQSection section={section} />}
                 />
 
@@ -132,8 +133,8 @@ function FAQ({ closeMenu }: Props) {
                   render={({
                     history,
                     match: {
-                      params: { section }
-                    }
+                      params: { section },
+                    },
                   }) => (
                     <FAQSectionDetailCalcul
                       history={history}
@@ -148,8 +149,8 @@ function FAQ({ closeMenu }: Props) {
                   render={({
                     history,
                     match: {
-                      params: { part, indexQuestion }
-                    }
+                      params: { part, indexQuestion },
+                    },
                   }) => (
                     <FAQQuestion
                       history={history}
@@ -176,7 +177,7 @@ const styles = {
     flexBasis: 0,
     display: "flex",
     flexDirection: "column",
-    backgroundColor: "white"
+    backgroundColor: "white",
   }),
   content: css({
     overflowY: "auto",
@@ -192,17 +193,17 @@ const styles = {
     position: "relative",
     "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
       // Only target IE11
-      display: "block"
-    }
+      display: "block",
+    },
   }),
   contentTablet: css({
     paddingRight: 21,
-    paddingLeft: 21
+    paddingLeft: 21,
   }),
   contentMobile: css({
     paddingRight: globalStyles.grid.gutterWidth,
-    paddingLeft: globalStyles.grid.gutterWidth
-  })
+    paddingLeft: globalStyles.grid.gutterWidth,
+  }),
 };
 
 export default FAQ;
