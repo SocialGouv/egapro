@@ -268,6 +268,8 @@ function InformationsEntrepriseForm({
             ]}
           />
 
+          <FieldSiren label="SIREN" name="siren" readOnly={readOnly} />
+
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <TextField
               label="Nom de l'UES"
@@ -287,7 +289,6 @@ function InformationsEntrepriseForm({
             errorText="le nom de l'entreprise n'est pas valide"
             readOnly={readOnly}
           />
-          <FieldSiren label="SIREN" name="siren" readOnly={readOnly} />
           <CodeNaf label="Code NAF" name="codeNaf" readOnly={readOnly} />
           <RegionsDepartements
             nameRegion="region"
