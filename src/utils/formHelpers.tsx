@@ -5,6 +5,7 @@ import {
 } from "./helpers";
 
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals";
+import { validateSiren } from "./api";
 
 // INT PARSE
 
@@ -97,6 +98,15 @@ export const maxNumber: (max: Number) => ValidatorFunction = (max) => (value) =>
   isNaN(Number(value)) || Number(value) <= max
     ? undefined
     : `La valeur doit être inférieure à ${max}`;
+
+export const isSirenValid = async (siren: string) => {
+  try {
+    await validateSiren(siren);
+    return undefined;
+  } catch (error) {
+    return `Numéro SIREN invalide: ${siren}`;
+  }
+};
 
 export const mustBeDate: ValidatorFunction = (value) => {
   const parsed = parseDate(value);

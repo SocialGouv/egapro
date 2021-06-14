@@ -5,9 +5,9 @@ import Input, { hasFieldError } from "./Input";
 
 import globalStyles from "../utils/globalStyles";
 
-import { required } from "../utils/formHelpers";
+import { isSirenValid, required } from "../utils/formHelpers";
 
-export const isValidSiren = (value: string): boolean => {
+export const isValidSiren = async (value: string): Promise<boolean> => {
   // https://fr.wikipedia.org/wiki/Syst%C3%A8me_d%27identification_du_r%C3%A9pertoire_des_entreprises#Calcul_et_validit%C3%A9_d'un_num%C3%A9ro_SIREN[3]
   if (Number.isNaN(Number(value))) {
     // Doit être un nombre ...
@@ -17,28 +17,13 @@ export const isValidSiren = (value: string): boolean => {
     // ... composé de 9 chiffres.
     return false;
   }
-  const digits = value.split("").map(Number);
-  // Appliquer la formule de luhn à chaque digit en position impaire : https://fr.wikipedia.org/wiki/Formule_de_Luhn
-  const luhn: Array<number> = digits.map((digit, index) => {
-    if (index % 2) {
-      const doubled = digit * 2;
-      if (doubled >= 10) {
-        return doubled - 9;
-      }
-      return doubled;
-    }
-    return digit;
-  });
-  let sum = 0;
-  for (let i = 0; i < luhn.length; i++) {
-    sum += luhn[i];
-  }
-  return sum % 10 === 0;
+  const result = await isSirenValid(value);
+  return !result;
 };
 
-export const validateSiren = (value: string) => {
+export const validateSiren = async (value: string) => {
   const requiredError = required(value);
-  const mustBeSirenError = !isValidSiren(value);
+  const mustBeSirenError = !(await isValidSiren(value));
   if (!requiredError && !mustBeSirenError) {
     return undefined;
   } else {
