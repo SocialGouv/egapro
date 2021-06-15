@@ -2,53 +2,44 @@
 import { css, jsx } from "@emotion/core";
 import { useField } from "react-final-form";
 
-import { required } from "../../../utils/formHelpers";
 import globalStyles from "../../../utils/globalStyles";
 
 import { hasFieldError } from "../../../components/Input";
-import { validateSiren as baseValidateSiren } from "../../../components/FieldSiren";
+import { sirenValidator } from "../../../components/FieldSiren";
 import FieldSiren from "../../../components/FieldSiren";
 import TextField from "../../../components/TextField";
 import { EntrepriseUES } from "../../../globals";
-
-const validate = (value: string) => {
-  const requiredError = required(value);
-
-  if (!requiredError) {
-    return undefined;
-  } else {
-    return { required: requiredError };
-  }
-};
-
-const validateSiren = (value: string, allValues: any) => {
-  const sirenInvalidError = baseValidateSiren(value);
-  if (sirenInvalidError) {
-    return sirenInvalidError;
-  }
-  let sirenList = allValues.entreprisesUES.map(
-    (entreprise: EntrepriseUES) => entreprise.siren
-  );
-  sirenList.push(allValues.siren);
-  if (sirenList.filter((siren: string) => siren === value).length >= 2) {
-    return { duplicate: true };
-  }
-  return undefined;
-};
 
 function InputField({
   nom,
   siren,
   index,
   readOnly,
+  updateSirenData,
 }: {
   nom: string;
   siren: string;
   index: number;
   readOnly: boolean;
+  updateSirenData: (data: object) => void;
 }) {
+  const validateSiren = (value: string, allValues: any) => {
+    const sirenInvalidError = sirenValidator(updateSirenData)(value);
+    if (sirenInvalidError) {
+      return sirenInvalidError;
+    }
+    let sirenList = allValues.entreprisesUES.map(
+      (entreprise: EntrepriseUES) => entreprise.siren
+    );
+    sirenList.push(allValues.siren);
+    if (sirenList.filter((siren: string) => siren === value).length >= 2) {
+      return { duplicate: true };
+    }
+    return undefined;
+  };
+
   const nomField = useField(nom, {
-    validate,
+    validate: validateSiren,
     parse: (value) => value,
     format: (value) => value,
   });
@@ -80,6 +71,7 @@ function InputField({
           label="Siren de l'entreprise"
           name={siren}
           readOnly={readOnly}
+          updateSirenData={updateSirenData}
         />
       </div>
     </div>

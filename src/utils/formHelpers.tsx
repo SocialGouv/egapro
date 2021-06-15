@@ -5,7 +5,6 @@ import {
 } from "./helpers";
 
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals";
-import { validateSiren } from "./api";
 
 // INT PARSE
 
@@ -76,6 +75,9 @@ export const parseTrancheEffectifsFormValue = (
 // VALIDATION
 
 export type ValidatorFunction = (value: string) => undefined | string;
+export type AsyncValidatorFunction = (
+  value: string
+) => Promise<undefined | string>;
 export type FormValidatorFunction = (values: Object) => undefined | string;
 
 export const required: ValidatorFunction = (value) =>
@@ -98,15 +100,6 @@ export const maxNumber: (max: Number) => ValidatorFunction = (max) => (value) =>
   isNaN(Number(value)) || Number(value) <= max
     ? undefined
     : `La valeur doit être inférieure à ${max}`;
-
-export const isSirenValid = async (siren: string) => {
-  try {
-    await validateSiren(siren);
-    return undefined;
-  } catch (error) {
-    return `Numéro SIREN invalide: ${siren}`;
-  }
-};
 
 export const mustBeDate: ValidatorFunction = (value) => {
   const parsed = parseDate(value);
@@ -134,11 +127,10 @@ const regexpEmail =
 export const validateEmail = (email: string) => !regexpEmail.test(email);
 
 export const composeValidators =
-  (...validators: Array<ValidatorFunction>) =>
+  (...validators: Array<ValidatorFunction | AsyncValidatorFunction>) =>
   (value: string) =>
     validators.reduce(
-      (error: undefined | string, validator: ValidatorFunction) =>
-        error || validator(value),
+      (error: undefined | string, validator: any) => error || validator(value),
       undefined
     );
 

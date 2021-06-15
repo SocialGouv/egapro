@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { css, jsx } from "@emotion/core";
 import { MutableState, Tools } from "final-form";
 import arrayMutators from "final-form-arrays";
@@ -178,6 +178,8 @@ function InformationsEntrepriseForm({
     entreprisesUES: informationsEntreprise.entreprisesUES,
   };
 
+  const [sirenData, setSirenData] = useState({});
+
   const saveForm = (formData: any) => {
     const {
       nomEntreprise,
@@ -268,7 +270,12 @@ function InformationsEntrepriseForm({
             ]}
           />
 
-          <FieldSiren label="SIREN" name="siren" readOnly={readOnly} />
+          <FieldSiren
+            label="SIREN"
+            name="siren"
+            readOnly={readOnly}
+            updateSirenData={setSirenData}
+          />
 
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <TextField
@@ -347,6 +354,7 @@ function InformationsEntrepriseForm({
                           siren={`${entrepriseUES}.siren`}
                           index={index}
                           readOnly={readOnly}
+                          updateSirenData={setSirenData}
                         />
                       ))}
                     </Fragment>
