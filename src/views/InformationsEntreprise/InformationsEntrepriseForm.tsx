@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { css, jsx } from "@emotion/core";
 import { MutableState, Tools } from "final-form";
 import arrayMutators from "final-form-arrays";
@@ -41,6 +41,15 @@ import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
 
 ///////////////////
+export type entrepriseData = {
+  raison_sociale?: string;
+  code_naf?: string;
+  région?: string;
+  département?: string;
+  adresse?: string;
+  commune?: string;
+  code_postal?: string;
+};
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -178,8 +187,6 @@ function InformationsEntrepriseForm({
     entreprisesUES: informationsEntreprise.entreprisesUES,
   };
 
-  const [sirenData, setSirenData] = useState({});
-
   const saveForm = (formData: any) => {
     const {
       nomEntreprise,
@@ -274,7 +281,7 @@ function InformationsEntrepriseForm({
             label="SIREN"
             name="siren"
             readOnly={readOnly}
-            updateSirenData={setSirenData}
+            form={form}
           />
 
           {values.structure === "Unité Economique et Sociale (UES)" && (

@@ -142,3 +142,16 @@ export const composeFormValidators =
         error || validator(value),
       undefined
     );
+
+export const simpleMemoize = (fn: any) => {
+  let lastArg: any;
+  let lastResult: any;
+  return (arg: any) => {
+    if (arg !== lastArg) {
+      console.log("arg: ", arg, " - last arg: ", lastArg);
+      lastArg = arg;
+      lastResult = fn(arg);
+    }
+    return lastResult;
+  };
+};

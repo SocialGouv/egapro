@@ -8,44 +8,61 @@ import globalStyles from "../utils/globalStyles";
 import {
   composeValidators,
   required,
+  simpleMemoize,
   ValidatorFunction,
 } from "../utils/formHelpers";
 import { validateSiren } from "../utils/api";
+import { entrepriseData } from "../views/InformationsEntreprise/InformationsEntrepriseForm";
+import { useEffect, useState } from "react";
+import { FormApi } from "final-form";
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9
     ? undefined
     : "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres";
 
-export const sirenValidator = (updateSirenData: (data: object) => void) => {
-  return composeValidators(required, nineDigits, async (siren: string) => {
-    try {
-      const result = await validateSiren(siren);
-      updateSirenData(result.jsonBody);
-      console.log("siren: ", result);
-      return undefined;
-    } catch (error) {
-      console.log("error: ", error.jsonBody.error);
-      updateSirenData({});
-      return `Numéro SIREN invalide: ${siren}`;
-    }
-  });
-};
+const memoizedValidateSiren = simpleMemoize(
+  async (siren: string) => await validateSiren(siren)
+);
 
 function FieldSiren({
   name,
   label,
   readOnly,
-  updateSirenData,
+  form,
 }: {
   name: string;
   label: string;
   readOnly: boolean;
-  updateSirenData: (data: object) => void;
+  form: FormApi<any>;
 }) {
-  const validator = sirenValidator(updateSirenData);
+  const [sirenData, updateSirenData] = useState({} as entrepriseData);
+
+  const checkSiren = async (siren: string) => {
+    try {
+      const result = await memoizedValidateSiren(siren);
+      updateSirenData(result.jsonBody);
+      return undefined;
+    } catch (error) {
+      updateSirenData({});
+      return `Numéro SIREN invalide: ${siren}`;
+    }
+  };
+
+  useEffect(() => {
+    form.batch(() => {
+      form.change("nomEntreprise", sirenData.raison_sociale || "");
+      form.change("codeNaf", sirenData.code_naf || "");
+      form.change("region", sirenData.région || "");
+      form.change("departement", sirenData.département || "");
+      form.change("adresse", sirenData.adresse || "");
+      form.change("commune", sirenData.commune || "");
+      form.change("codePostal", sirenData.code_postal || "");
+    });
+  }, [sirenData, form]);
+
   const field = useField(name, {
-    validate: validator,
+    validate: composeValidators(required, nineDigits, checkSiren),
   });
   const error = hasFieldError(field.meta);
 
