@@ -52,12 +52,6 @@ function EntrepriseUESInput({
       </label>
 
       <div css={styles.fieldRow}>
-        <TextField
-          label="Nom de l'entreprise"
-          fieldName={nom}
-          readOnly={readOnly}
-          errorText="le nom n'est pas valide"
-        />
         <FieldSiren
           label="Siren de l'entreprise"
           name={siren}
@@ -67,6 +61,12 @@ function EntrepriseUESInput({
             checkDuplicates,
             sirenValidator(updateSirenData)
           )}
+        />
+        <TextField
+          label="Nom de l'entreprise"
+          fieldName={nom}
+          readOnly={true}
+          errorText="le nom n'est pas valide"
         />
       </div>
     </div>
@@ -88,6 +88,7 @@ const styles = {
     height: 100,
     marginTop: 5,
     display: "flex",
+    justifyContent: "space-between",
   }),
   delete: css({
     marginLeft: globalStyles.grid.gutterWidth,
