@@ -292,6 +292,13 @@ export const regionCode: { [key: string]: string } = {
   "Provence-Alpes-Côte d'Azur": "93",
 };
 
+export const stringFromCode =
+  (correspondance: { [key: string]: string }) => (code: string) =>
+    Object.entries(correspondance || {}).find(([_, c]) => c === code)?.[0] ||
+    "";
+
+export const regionFromCode = stringFromCode(regionCode);
+
 export const departementCode: { [key: string]: string } = {
   Ain: "01",
   Aisne: "02",
@@ -403,3 +410,5 @@ export const departementCode: { [key: string]: string } = {
   "Nouvelle-Calédonie": "988",
   "Île de Clipperton": "989",
 };
+
+export const departementFromCode = stringFromCode(departementCode);

@@ -26,7 +26,7 @@ import {
 
 import ActionBar from "../../components/ActionBar";
 import ActionLink from "../../components/ActionLink";
-import CodeNaf from "../../components/CodeNaf";
+import CodeNaf, { codeNafFromCode } from "../../components/CodeNaf";
 import FieldSiren from "../../components/FieldSiren";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
@@ -34,7 +34,10 @@ import NombreEntreprises, {
   validator as validateNombreEntreprises,
 } from "../../components/NombreEntreprises";
 import RadioButtons from "../../components/RadioButtons";
-import RegionsDepartements from "../../components/RegionsDepartements";
+import RegionsDepartements, {
+  departementFromCode,
+  regionFromCode,
+} from "../../components/RegionsDepartements";
 import { departementCode } from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
@@ -285,9 +288,15 @@ function InformationsEntrepriseForm({
             updateSirenData={(sirenData) =>
               form.batch(() => {
                 form.change("nomEntreprise", sirenData.raison_sociale || "");
-                form.change("codeNaf", sirenData.code_naf || "");
-                form.change("region", sirenData.région || "");
-                form.change("departement", sirenData.département || "");
+                form.change(
+                  "codeNaf",
+                  codeNafFromCode(sirenData.code_naf || "")
+                );
+                form.change("region", regionFromCode(sirenData.région || ""));
+                form.change(
+                  "departement",
+                  departementFromCode(sirenData.département || "")
+                );
                 form.change("adresse", sirenData.adresse || "");
                 form.change("commune", sirenData.commune || "");
                 form.change("codePostal", sirenData.code_postal || "");

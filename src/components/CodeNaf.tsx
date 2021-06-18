@@ -10,7 +10,7 @@ import { required } from "../utils/formHelpers";
 function CodeNaf({
   name,
   label,
-  readOnly
+  readOnly,
 }: {
   name: string;
   label: string;
@@ -23,7 +23,7 @@ function CodeNaf({
           <label
             css={[
               styles.label,
-              meta.error && meta.touched && styles.labelError
+              meta.error && meta.touched && styles.labelError,
             ]}
             htmlFor={input.name}
           >
@@ -59,15 +59,15 @@ function CodeNaf({
 
 const styles = {
   formField: css({
-    marginBottom: 20
+    marginBottom: 20,
   }),
   label: css({
     fontSize: 14,
     fontWeight: "bold",
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   labelError: css({
-    color: globalStyles.colors.error
+    color: globalStyles.colors.error,
   }),
   fieldRow: css({
     height: 38,
@@ -77,15 +77,15 @@ const styles = {
     select: {
       borderRadius: 4,
       border: "1px solid",
-      width: "100%"
-    }
+      width: "100%",
+    },
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     textDecoration: "underline",
-    lineHeight: "15px"
+    lineHeight: "15px",
   }),
   fakeInput: css({
     flexGrow: 1,
@@ -98,8 +98,8 @@ const styles = {
     borderRadius: 5,
 
     fontSize: 14,
-    lineHeight: "38px"
-  })
+    lineHeight: "38px",
+  }),
 };
 
 export default CodeNaf;
@@ -837,5 +837,8 @@ const listeCodeNaf = [
   "97.00Z - Activités des ménages en tant qu'employeurs de personnel domestique",
   "98.10Z - Activités indifférenciées des ménages en tant que producteurs de biens pour usage propre",
   "98.20Z - Activités indifférenciées des ménages en tant que producteurs de services pour usage propre",
-  "99.00Z - Activités des organisations et organismes extraterritoriaux"
+  "99.00Z - Activités des organisations et organismes extraterritoriaux",
 ];
+
+export const codeNafFromCode = (code: string) =>
+  listeCodeNaf.find((codeNaf) => codeNaf.startsWith(code)) || "";
