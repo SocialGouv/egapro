@@ -41,7 +41,6 @@ import RegionsDepartements, {
 import { departementCode } from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import ActivityIndicator from "../../components/ActivityIndicator";
 import EntrepriseUESInput from "./components/EntrepriseUESInputField";
 
 ///////////////////
@@ -285,7 +284,7 @@ function InformationsEntrepriseForm({
             label="SIREN"
             name="siren"
             readOnly={readOnly}
-            updateSirenData={(sirenData) =>
+            updateSirenData={(sirenData: entrepriseData) =>
               form.batch(() => {
                 form.change("nomEntreprise", sirenData.raison_sociale || "");
                 form.change(
@@ -303,7 +302,6 @@ function InformationsEntrepriseForm({
               })
             }
           />
-          <ActivityIndicator size={30} color={globalStyles.colors.primary} />
 
           <TextField
             label={
@@ -379,7 +377,7 @@ function InformationsEntrepriseForm({
                           siren={`${entrepriseUES}.siren`}
                           index={index}
                           readOnly={readOnly}
-                          updateSirenData={(sirenData) =>
+                          updateSirenData={(sirenData: entrepriseData) =>
                             form.change(
                               `${entrepriseUES}.nom`,
                               sirenData.raison_sociale || ""
