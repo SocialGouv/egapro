@@ -99,6 +99,8 @@ const styles = {
 
     fontSize: 14,
     lineHeight: "38px",
+
+    overflow: "auto",
   }),
 };
 
