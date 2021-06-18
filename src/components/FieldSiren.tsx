@@ -24,7 +24,7 @@ const memoizedValidateSiren = simpleMemoize(
   async (siren: string) => await validateSiren(siren)
 );
 
-const checkSiren =
+export const checkSiren =
   (updateSirenData: (data: entrepriseData) => void) =>
   async (siren: string) => {
     try {
