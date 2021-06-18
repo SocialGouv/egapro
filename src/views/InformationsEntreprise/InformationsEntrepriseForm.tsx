@@ -305,15 +305,6 @@ function InformationsEntrepriseForm({
           />
           <ActivityIndicator size={30} color={globalStyles.colors.primary} />
 
-          {values.structure === "Unité Economique et Sociale (UES)" && (
-            <TextField
-              label="Nom de l'UES"
-              fieldName="nomUES"
-              errorText="le nom de l'UES n'est pas valide"
-              readOnly={readOnly}
-            />
-          )}
-
           <TextField
             label={
               values.structure === "Unité Economique et Sociale (UES)"
@@ -322,19 +313,19 @@ function InformationsEntrepriseForm({
             }
             fieldName="nomEntreprise"
             errorText="le nom de l'entreprise n'est pas valide"
-            readOnly={readOnly}
+            readOnly={true}
           />
-          <CodeNaf label="Code NAF" name="codeNaf" readOnly={readOnly} />
+          <CodeNaf label="Code NAF" name="codeNaf" readOnly={true} />
           <RegionsDepartements
             nameRegion="region"
             nameDepartement="departement"
-            readOnly={readOnly}
+            readOnly={true}
           />
           <TextField
             label="Adresse"
             fieldName="adresse"
             errorText="l'adresse n’est pas valide"
-            readOnly={readOnly}
+            readOnly={true}
           />
           <TextField
             label="Code Postal"
@@ -349,17 +340,23 @@ function InformationsEntrepriseForm({
                     departementCode[values.departement]
                   })`
             }
-            readOnly={readOnly}
+            readOnly={true}
           />
           <TextField
             label="Commune"
             fieldName="commune"
             errorText="la commune n'est pas valide"
-            readOnly={readOnly}
+            readOnly={true}
           />
 
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <Fragment>
+              <TextField
+                label="Nom de l'UES"
+                fieldName="nomUES"
+                errorText="le nom de l'UES n'est pas valide"
+                readOnly={readOnly}
+              />
               <NombreEntreprises
                 fieldName="nombreEntreprises"
                 label="Nombre d'entreprises composant l'UES (le déclarant compris)"
