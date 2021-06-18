@@ -74,9 +74,13 @@ export const parseTrancheEffectifsFormValue = (
 
 // VALIDATION
 
-export type ValidatorFunction = (value: string) => undefined | string;
+export type ValidatorFunction = (
+  value: string,
+  allValues?: any
+) => undefined | string;
 export type AsyncValidatorFunction = (
-  value: string
+  value: string,
+  allValues?: string[]
 ) => Promise<undefined | string>;
 export type FormValidatorFunction = (values: Object) => undefined | string;
 
@@ -128,9 +132,10 @@ export const validateEmail = (email: string) => !regexpEmail.test(email);
 
 export const composeValidators =
   (...validators: Array<ValidatorFunction | AsyncValidatorFunction>) =>
-  (value: string) =>
+  (value: string, allValues?: any) =>
     validators.reduce(
-      (error: undefined | string, validator: any) => error || validator(value),
+      (error: undefined | string, validator: any) =>
+        error || validator(value, allValues),
       undefined
     );
 
@@ -148,7 +153,6 @@ export const simpleMemoize = (fn: any) => {
   let lastResult: any;
   return (arg: any) => {
     if (arg !== lastArg) {
-      console.log("arg: ", arg, " - last arg: ", lastArg);
       lastArg = arg;
       lastResult = fn(arg);
     }

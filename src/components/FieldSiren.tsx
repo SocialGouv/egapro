@@ -13,8 +13,6 @@ import {
 } from "../utils/formHelpers";
 import { validateSiren } from "../utils/api";
 import { entrepriseData } from "../views/InformationsEntreprise/InformationsEntrepriseForm";
-import { useEffect, useState } from "react";
-import { FormApi } from "final-form";
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9
@@ -25,20 +23,9 @@ const memoizedValidateSiren = simpleMemoize(
   async (siren: string) => await validateSiren(siren)
 );
 
-function FieldSiren({
-  name,
-  label,
-  readOnly,
-  form,
-}: {
-  name: string;
-  label: string;
-  readOnly: boolean;
-  form: FormApi<any>;
-}) {
-  const [sirenData, updateSirenData] = useState({} as entrepriseData);
-
-  const checkSiren = async (siren: string) => {
+const checkSiren =
+  (updateSirenData: (data: entrepriseData) => void) =>
+  async (siren: string) => {
     try {
       const result = await memoizedValidateSiren(siren);
       updateSirenData(result.jsonBody);
@@ -49,20 +36,25 @@ function FieldSiren({
     }
   };
 
-  useEffect(() => {
-    form.batch(() => {
-      form.change("nomEntreprise", sirenData.raison_sociale || "");
-      form.change("codeNaf", sirenData.code_naf || "");
-      form.change("region", sirenData.région || "");
-      form.change("departement", sirenData.département || "");
-      form.change("adresse", sirenData.adresse || "");
-      form.change("commune", sirenData.commune || "");
-      form.change("codePostal", sirenData.code_postal || "");
-    });
-  }, [sirenData, form]);
+export const sirenValidator = (
+  updateSirenData: (data: entrepriseData) => void
+) => composeValidators(required, nineDigits, checkSiren(updateSirenData));
 
+function FieldSiren({
+  name,
+  label,
+  readOnly,
+  updateSirenData,
+  validator,
+}: {
+  name: string;
+  label: string;
+  readOnly: boolean;
+  updateSirenData: (sirenData: entrepriseData) => void;
+  validator?: ValidatorFunction;
+}) {
   const field = useField(name, {
-    validate: composeValidators(required, nineDigits, checkSiren),
+    validate: validator ? validator : sirenValidator(updateSirenData),
   });
   const error = hasFieldError(field.meta);
 

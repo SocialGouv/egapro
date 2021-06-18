@@ -30,7 +30,6 @@ import CodeNaf from "../../components/CodeNaf";
 import FieldSiren from "../../components/FieldSiren";
 import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
-import InputField from "./components/EntrepriseUESInputField";
 import NombreEntreprises, {
   validator as validateNombreEntreprises,
 } from "../../components/NombreEntreprises";
@@ -39,6 +38,8 @@ import RegionsDepartements from "../../components/RegionsDepartements";
 import { departementCode } from "../../components/RegionsDepartements";
 import TextField from "../../components/TextField";
 import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import ActivityIndicator from "../../components/ActivityIndicator";
+import EntrepriseUESInput from "./components/EntrepriseUESInputField";
 
 ///////////////////
 export type entrepriseData = {
@@ -281,8 +282,19 @@ function InformationsEntrepriseForm({
             label="SIREN"
             name="siren"
             readOnly={readOnly}
-            form={form}
+            updateSirenData={(sirenData) =>
+              form.batch(() => {
+                form.change("nomEntreprise", sirenData.raison_sociale || "");
+                form.change("codeNaf", sirenData.code_naf || "");
+                form.change("region", sirenData.région || "");
+                form.change("departement", sirenData.département || "");
+                form.change("adresse", sirenData.adresse || "");
+                form.change("commune", sirenData.commune || "");
+                form.change("codePostal", sirenData.code_postal || "");
+              })
+            }
           />
+          <ActivityIndicator size={30} color={globalStyles.colors.primary} />
 
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <TextField
@@ -355,13 +367,18 @@ function InformationsEntrepriseForm({
                   return (
                     <Fragment>
                       {fields.map((entrepriseUES, index) => (
-                        <InputField
+                        <EntrepriseUESInput
                           key={entrepriseUES}
                           nom={`${entrepriseUES}.nom`}
                           siren={`${entrepriseUES}.siren`}
                           index={index}
                           readOnly={readOnly}
-                          updateSirenData={setSirenData}
+                          updateSirenData={(sirenData) =>
+                            form.change(
+                              `${entrepriseUES}.nom`,
+                              sirenData.raison_sociale || ""
+                            )
+                          }
                         />
                       ))}
                     </Fragment>
