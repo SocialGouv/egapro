@@ -13,6 +13,7 @@ import {
 } from "../utils/formHelpers";
 import { validateSiren } from "../utils/api";
 import { entrepriseData } from "../views/InformationsEntreprise/InformationsEntrepriseForm";
+import ActivityIndicator from "./ActivityIndicator";
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9
@@ -29,6 +30,9 @@ const checkSiren =
     try {
       const result = await memoizedValidateSiren(siren);
       updateSirenData(result.jsonBody);
+      if (Object.keys(result.jsonBody).length === 0) {
+        return "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle";
+      }
       return undefined;
     } catch (error) {
       updateSirenData({});
@@ -68,6 +72,11 @@ function FieldSiren({
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
+        {field.meta.validating && (
+          <div css={styles.spinner}>
+            <ActivityIndicator size={30} color={globalStyles.colors.primary} />
+          </div>
+        )}
       </div>
       {error && <p css={styles.error}>{field.meta.error}</p>}
     </div>
@@ -96,6 +105,7 @@ const styles = {
       border: "1px solid",
     },
     "input[readonly]": { border: 0 },
+    position: "relative",
   }),
   error: css({
     height: 18,
@@ -103,6 +113,11 @@ const styles = {
     fontSize: 12,
     textDecoration: "underline",
     lineHeight: "15px",
+  }),
+  spinner: css({
+    position: "absolute",
+    right: 4,
+    top: 4,
   }),
 };
 
