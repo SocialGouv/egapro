@@ -101,6 +101,7 @@ const styles = {
     lineHeight: "38px",
 
     overflow: "auto",
+    cursor: "not-allowed",
   }),
 };
 

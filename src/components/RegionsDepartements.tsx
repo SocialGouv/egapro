@@ -156,6 +156,7 @@ const styles = {
 
     fontSize: 14,
     lineHeight: "38px",
+    cursor: "not-allowed",
   }),
 };
 

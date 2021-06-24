@@ -22,7 +22,7 @@ function InputField({
   name,
   index,
   deleteGroup,
-  readOnly
+  readOnly,
 }: {
   name: string;
   index: number;
@@ -31,8 +31,8 @@ function InputField({
 }) {
   const field = useField(name, {
     validate,
-    parse: value => value,
-    format: value => value
+    parse: (value) => value,
+    format: (value) => value,
   });
   const error = hasFieldError(field.meta);
 
@@ -67,34 +67,34 @@ function InputField({
 
 const styles = {
   inputField: css({
-    alignSelf: "stretch"
+    alignSelf: "stretch",
   }),
   label: css({
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   labelError: css({
-    color: globalStyles.colors.error
+    color: globalStyles.colors.error,
   }),
   fieldRow: css({
     height: 38,
     marginTop: 5,
     marginBottom: 5,
-    display: "flex"
+    display: "flex",
   }),
   delete: css({
     flexShrink: 0,
     alignSelf: "flex-end",
     marginLeft: globalStyles.grid.gutterWidth,
     fontSize: 12,
-    lineHeight: "15px"
+    lineHeight: "15px",
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     fontStyle: "italic",
-    lineHeight: "15px"
+    lineHeight: "15px",
   }),
 
   fakeInput: css({
@@ -108,8 +108,9 @@ const styles = {
     borderRadius: 5,
 
     fontSize: 14,
-    lineHeight: "38px"
-  })
+    lineHeight: "38px",
+    cursor: "not-allowed",
+  }),
 };
 
 export default InputField;

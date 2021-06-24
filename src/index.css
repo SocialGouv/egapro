@@ -121,3 +121,9 @@ svg {
 *:active {
   outline: none;
 }
+
+[readonly],
+[disabled],
+[disabled] * {
+  cursor: not-allowed;
+}
