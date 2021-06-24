@@ -10,6 +10,8 @@ import { useColumnsWidth, useLayoutType } from "./GridContext";
 function Footer() {
   const width = useColumnsWidth(2);
   const layoutType = useLayoutType();
+  const isDesktop = layoutType === "desktop";
+  const isMobile = layoutType === "mobile";
   const version =
     process.env.REACT_APP_VERSION || require("../../package.json").version;
 
@@ -17,14 +19,15 @@ function Footer() {
     <footer
       css={[
         styles.footer,
-        layoutType === "desktop" &&
+        isDesktop &&
           css({ marginLeft: -(width + globalStyles.grid.gutterWidth) }),
+        isMobile && css({ display: "block", paddingTop: "1em" }),
       ]}
     >
       <div
         css={[
           styles.footerLeft,
-          layoutType === "desktop" && css({ width }),
+          isDesktop && css({ width }),
           styles.footerLeftPrint,
         ]}
       >
@@ -34,37 +37,47 @@ function Footer() {
           rel="noopener noreferrer"
           css={[
             styles.containerLogo,
-            layoutType === "desktop" && styles.containerLogoDesktop,
+            isDesktop && styles.containerLogoDesktop,
+            isMobile && styles.containerLogoMobile,
           ]}
         >
           <Logo />
         </a>
       </div>
 
-      <div css={styles.footerLinks}>
+      <div css={[styles.footerLinks, isMobile && css({ margin: "1em" })]}>
         <a
           href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
           target="_blank"
           rel="noopener noreferrer"
-          css={styles.link}
+          css={[styles.link, isMobile && styles.linkMobile]}
         >
           retrouvez le simulateur au format Excel
         </a>
-        <Link to="/mentions-legales" css={styles.link}>
+        <Link
+          to="/mentions-legales"
+          css={[styles.link, isMobile && styles.linkMobile]}
+        >
           mentions légales
         </Link>
-        <Link to="/accessibilite" css={styles.link}>
+        <Link
+          to="/accessibilite"
+          css={[styles.link, isMobile && styles.linkMobile]}
+        >
           accessibilité : non conforme
         </Link>
-        <Link to="/cgu" css={styles.link}>
+        <Link to="/cgu" css={[styles.link, isMobile && styles.linkMobile]}>
           conditions générales d'utilisation
         </Link>
-        <Link to="/politique-confidentialite" css={styles.link}>
+        <Link
+          to="/politique-confidentialite"
+          css={[styles.link, isMobile && styles.linkMobile]}
+        >
           politique de confidentialité
         </Link>
       </div>
 
-      <div css={styles.footerInfo}>
+      <div css={[styles.footerInfo, isMobile && styles.footerInfoMobile]}>
         <em style={styles.info}>
           Index Egapro a été développé par les équipes de la fabrique numérique
           des ministères sociaux
@@ -130,6 +143,9 @@ const styles = {
   containerLogoDesktop: css({
     marginRight: 25,
   }),
+  containerLogoMobile: css({
+    margin: 0,
+  }),
 
   footerLinks: { display: "flex", flexDirection: "column" as "column" },
   link: {
@@ -138,6 +154,9 @@ const styles = {
     color: globalStyles.colors.default,
     textDecoration: "underline",
     margin: "2px 0",
+  },
+  linkMobile: {
+    fontSize: 14,
   },
 
   footerInfo: {
@@ -149,6 +168,7 @@ const styles = {
     textAlign: "right" as "right",
     marginRight: globalStyles.grid.gutterWidth,
   },
+  footerInfoMobile: { margin: "1em", textAlign: "left" as "left" },
   info: {
     fontSize: 12,
     lineHeight: "15px",
