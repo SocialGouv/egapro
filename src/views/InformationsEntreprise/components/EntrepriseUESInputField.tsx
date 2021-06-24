@@ -61,12 +61,14 @@ function EntrepriseUESInput({
             checkDuplicates,
             sirenValidator(updateSirenData)
           )}
+          customStyles={styles.siren}
         />
         <TextField
           label="Nom de l'entreprise"
           fieldName={nom}
           readOnly={true}
           errorText="le nom n'est pas valide"
+          customStyles={styles.nomEntreprise}
         />
       </div>
     </div>
@@ -89,6 +91,13 @@ const styles = {
     marginTop: 5,
     display: "flex",
     justifyContent: "space-between",
+  }),
+  siren: css({
+    marginRight: "1em",
+    width: "9em",
+  }),
+  nomEntreprise: css({
+    flexGrow: 2,
   }),
   delete: css({
     marginLeft: globalStyles.grid.gutterWidth,

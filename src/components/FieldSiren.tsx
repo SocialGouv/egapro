@@ -50,12 +50,14 @@ function FieldSiren({
   readOnly,
   updateSirenData,
   validator,
+  customStyles,
 }: {
   name: string;
   label: string;
   readOnly: boolean;
   updateSirenData: (sirenData: entrepriseData) => void;
   validator?: ValidatorFunction;
+  customStyles?: any;
 }) {
   const field = useField(name, {
     validate: validator ? validator : sirenValidator(updateSirenData),
@@ -63,7 +65,7 @@ function FieldSiren({
   const error = hasFieldError(field.meta);
 
   return (
-    <div css={styles.formField}>
+    <div css={[customStyles, styles.formField]}>
       <label
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
