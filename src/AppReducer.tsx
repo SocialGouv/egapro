@@ -143,6 +143,7 @@ const defaultState: AppState = {
   declaration: {
     formValidated: "None",
     mesuresCorrection: "",
+    cseMisEnPlace: undefined,
     dateConsultationCSE: "",
     publicationSurSiteInternet: undefined,
     datePublication: "",

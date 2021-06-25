@@ -74,6 +74,7 @@ export type AppState = {
   declaration: {
     formValidated: FormState;
     mesuresCorrection: string;
+    cseMisEnPlace: boolean | undefined;
     dateConsultationCSE: string;
     datePublication: string;
     publicationSurSiteInternet: boolean | undefined;
@@ -387,6 +388,7 @@ export type ActionInformationsDeclarantData = {
 
 export type ActionDeclarationData = {
   mesuresCorrection: string;
+  cseMisEnPlace: boolean | undefined;
   dateConsultationCSE: string;
   datePublication: string;
   publicationSurSiteInternet: boolean | undefined;

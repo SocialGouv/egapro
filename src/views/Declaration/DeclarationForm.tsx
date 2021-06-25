@@ -95,6 +95,10 @@ function DeclarationForm({
   const declaration = state.declaration;
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
+    cseMisEnPlace:
+      declaration.cseMisEnPlace !== undefined
+        ? parseBooleanStateValue(declaration.cseMisEnPlace)
+        : undefined,
     dateConsultationCSE: declaration.dateConsultationCSE,
     datePublication: declaration.datePublication,
     publicationSurSiteInternet:
@@ -108,6 +112,7 @@ function DeclarationForm({
   const saveForm = (formData: any) => {
     const {
       mesuresCorrection,
+      cseMisEnPlace,
       dateConsultationCSE,
       datePublication,
       publicationSurSiteInternet,
@@ -117,6 +122,10 @@ function DeclarationForm({
 
     updateDeclaration({
       mesuresCorrection,
+      cseMisEnPlace:
+        cseMisEnPlace !== undefined
+          ? parseBooleanFormValue(cseMisEnPlace)
+          : undefined,
       dateConsultationCSE,
       datePublication,
       publicationSurSiteInternet:
@@ -196,11 +205,30 @@ function DeclarationForm({
           )}
 
           {!indicateurUnParCSP && (
-            <FieldDate
-              name="dateConsultationCSE"
-              label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
-              readOnly={readOnly}
-            />
+            <Fragment>
+              {state.informationsEntreprise.structure === "Entreprise" && (
+                <div css={styles.formField}>
+                  Un CSE a-t-il été mis en place ?
+                  <RadiosBoolean
+                    fieldName="cseMisEnPlace"
+                    value={values.cseMisEnPlace}
+                    readOnly={readOnly}
+                    labelTrue="oui"
+                    labelFalse="non"
+                  />
+                </div>
+              )}
+              {(state.informationsEntreprise.structure !== "Entreprise" ||
+                values.cseMisEnPlace === "true") && (
+                <div>
+                  <FieldDate
+                    name="dateConsultationCSE"
+                    label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
+                    readOnly={readOnly}
+                  />
+                </div>
+              )}
+            </Fragment>
           )}
 
           {(noteIndex !== undefined || after2020) && (

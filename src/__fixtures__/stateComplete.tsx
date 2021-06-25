@@ -3,13 +3,13 @@ import {
   PeriodeDeclaration,
   Structure,
   TranchesAges,
-  TrancheEffectifs
+  TrancheEffectifs,
 } from "../globals";
 import AppReducer from "../AppReducer";
 
 const actionInitiateState = {
   type: "initiateState" as "initiateState",
-  data: {}
+  data: {},
 };
 
 const actionUpdateInformationsSimulation = {
@@ -18,8 +18,8 @@ const actionUpdateInformationsSimulation = {
     nomEntreprise: "BigCorp",
     trancheEffectifs: "1000 et plus" as TrancheEffectifs,
     anneeDeclaration: 2020,
-    finPeriodeReference: "2019-12-31"
-  }
+    finPeriodeReference: "2019-12-31",
+  },
 };
 
 const actionUpdateEffectif = {
@@ -32,24 +32,24 @@ const actionUpdateEffectif = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             nombreSalariesFemmes: 23,
-            nombreSalariesHommes: 32
+            nombreSalariesHommes: 32,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             nombreSalariesFemmes: 12,
-            nombreSalariesHommes: 13
+            nombreSalariesHommes: 13,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             nombreSalariesFemmes: 34,
-            nombreSalariesHommes: 7
+            nombreSalariesHommes: 7,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             nombreSalariesFemmes: 5,
-            nombreSalariesHommes: 21
-          }
-        ]
+            nombreSalariesHommes: 21,
+          },
+        ],
       },
       {
         categorieSocioPro: CategorieSocioPro.Employes,
@@ -57,24 +57,24 @@ const actionUpdateEffectif = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             nombreSalariesFemmes: 63,
-            nombreSalariesHommes: 25
+            nombreSalariesHommes: 25,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             nombreSalariesFemmes: 52,
-            nombreSalariesHommes: 62
+            nombreSalariesHommes: 62,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             nombreSalariesFemmes: 16,
-            nombreSalariesHommes: 18
+            nombreSalariesHommes: 18,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             nombreSalariesFemmes: 27,
-            nombreSalariesHommes: 19
-          }
-        ]
+            nombreSalariesHommes: 19,
+          },
+        ],
       },
       {
         categorieSocioPro: CategorieSocioPro.Techniciens,
@@ -82,24 +82,24 @@ const actionUpdateEffectif = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             nombreSalariesFemmes: 14,
-            nombreSalariesHommes: 15
+            nombreSalariesHommes: 15,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             nombreSalariesFemmes: 4,
-            nombreSalariesHommes: 5
+            nombreSalariesHommes: 5,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             nombreSalariesFemmes: 6,
-            nombreSalariesHommes: 8
+            nombreSalariesHommes: 8,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             nombreSalariesFemmes: 7,
-            nombreSalariesHommes: 7
-          }
-        ]
+            nombreSalariesHommes: 7,
+          },
+        ],
       },
       {
         categorieSocioPro: CategorieSocioPro.Cadres,
@@ -107,27 +107,27 @@ const actionUpdateEffectif = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             nombreSalariesFemmes: 7,
-            nombreSalariesHommes: 8
+            nombreSalariesHommes: 8,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             nombreSalariesFemmes: 10,
-            nombreSalariesHommes: 8
+            nombreSalariesHommes: 8,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             nombreSalariesFemmes: 13,
-            nombreSalariesHommes: 13
+            nombreSalariesHommes: 13,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             nombreSalariesFemmes: 16,
-            nombreSalariesHommes: 19
-          }
-        ]
-      }
-    ]
-  }
+            nombreSalariesHommes: 19,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 const actionUpdateIndicateurUnCsp = {
@@ -141,27 +141,27 @@ const actionUpdateIndicateurUnCsp = {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 23000,
             remunerationAnnuelleBrutHommes: 25000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 24000,
             remunerationAnnuelleBrutHommes: 26000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 25500,
             remunerationAnnuelleBrutHommes: 26000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 27500,
             remunerationAnnuelleBrutHommes: 28000,
-            ecartTauxRemuneration: undefined
-          }
-        ]
+            ecartTauxRemuneration: undefined,
+          },
+        ],
       },
       {
         categorieSocioPro: CategorieSocioPro.Employes,
@@ -170,27 +170,27 @@ const actionUpdateIndicateurUnCsp = {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 23000,
             remunerationAnnuelleBrutHommes: 25000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 24000,
             remunerationAnnuelleBrutHommes: 26000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 31000,
             remunerationAnnuelleBrutHommes: 33000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 39000,
             remunerationAnnuelleBrutHommes: 43000,
-            ecartTauxRemuneration: undefined
-          }
-        ]
+            ecartTauxRemuneration: undefined,
+          },
+        ],
       },
       {
         categorieSocioPro: CategorieSocioPro.Techniciens,
@@ -199,27 +199,27 @@ const actionUpdateIndicateurUnCsp = {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 26000,
             remunerationAnnuelleBrutHommes: 28000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 27000,
             remunerationAnnuelleBrutHommes: 29000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 34000,
             remunerationAnnuelleBrutHommes: 36000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 42000,
             remunerationAnnuelleBrutHommes: 46000,
-            ecartTauxRemuneration: undefined
-          }
-        ]
+            ecartTauxRemuneration: undefined,
+          },
+        ],
       },
       {
         categorieSocioPro: CategorieSocioPro.Cadres,
@@ -228,30 +228,30 @@ const actionUpdateIndicateurUnCsp = {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 36000,
             remunerationAnnuelleBrutHommes: 38000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 37000,
             remunerationAnnuelleBrutHommes: 39000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 44000,
             remunerationAnnuelleBrutHommes: 46000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 52000,
             remunerationAnnuelleBrutHommes: 56000,
-            ecartTauxRemuneration: undefined
-          }
-        ]
-      }
-    ]
-  }
+            ecartTauxRemuneration: undefined,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 const actionUpdateIndicateurUnCoefName = {
@@ -259,10 +259,10 @@ const actionUpdateIndicateurUnCoefName = {
   data: {
     coefficient: [
       {
-        name: "Business Developers"
-      }
-    ]
-  }
+        name: "Business Developers",
+      },
+    ],
+  },
 };
 
 const actionUpdateIndicateurUnCoefNombreSalaries = {
@@ -274,27 +274,27 @@ const actionUpdateIndicateurUnCoefNombreSalaries = {
           {
             trancheAge: TranchesAges.MoinsDe30ans,
             nombreSalariesFemmes: 5,
-            nombreSalariesHommes: 4
+            nombreSalariesHommes: 4,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             nombreSalariesFemmes: 2,
-            nombreSalariesHommes: 6
+            nombreSalariesHommes: 6,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             nombreSalariesFemmes: 5,
-            nombreSalariesHommes: 3
+            nombreSalariesHommes: 3,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             nombreSalariesFemmes: 1,
-            nombreSalariesHommes: 3
-          }
-        ]
-      }
-    ]
-  }
+            nombreSalariesHommes: 3,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 const actionUpdateIndicateurUnCoefRemuneration = {
@@ -307,30 +307,30 @@ const actionUpdateIndicateurUnCoefRemuneration = {
             trancheAge: TranchesAges.MoinsDe30ans,
             remunerationAnnuelleBrutFemmes: 25000,
             remunerationAnnuelleBrutHommes: 24000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De30a39ans,
             remunerationAnnuelleBrutFemmes: 32000,
             remunerationAnnuelleBrutHommes: 32000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.De40a49ans,
             remunerationAnnuelleBrutFemmes: 41000,
             remunerationAnnuelleBrutHommes: 43000,
-            ecartTauxRemuneration: undefined
+            ecartTauxRemuneration: undefined,
           },
           {
             trancheAge: TranchesAges.PlusDe50ans,
             remunerationAnnuelleBrutFemmes: 49000,
             remunerationAnnuelleBrutHommes: 51500,
-            ecartTauxRemuneration: undefined
-          }
-        ]
-      }
-    ]
-  }
+            ecartTauxRemuneration: undefined,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 const actionUpdateIndicateurDeux = {
@@ -342,28 +342,28 @@ const actionUpdateIndicateurDeux = {
         categorieSocioPro: CategorieSocioPro.Ouvriers,
         tauxAugmentationFemmes: 2.2,
         tauxAugmentationHommes: 3.5,
-        ecartTauxAugmentation: undefined
+        ecartTauxAugmentation: undefined,
       },
       {
         categorieSocioPro: CategorieSocioPro.Employes,
         tauxAugmentationFemmes: 1.3,
         tauxAugmentationHommes: 2.2,
-        ecartTauxAugmentation: undefined
+        ecartTauxAugmentation: undefined,
       },
       {
         categorieSocioPro: CategorieSocioPro.Techniciens,
         tauxAugmentationFemmes: 8.02,
         tauxAugmentationHommes: 6.92,
-        ecartTauxAugmentation: undefined
+        ecartTauxAugmentation: undefined,
       },
       {
         categorieSocioPro: CategorieSocioPro.Cadres,
         tauxAugmentationFemmes: 12.15,
         tauxAugmentationHommes: 13.56,
-        ecartTauxAugmentation: undefined
-      }
-    ]
-  }
+        ecartTauxAugmentation: undefined,
+      },
+    ],
+  },
 };
 
 const actionUpdateIndicateurTrois = {
@@ -375,28 +375,28 @@ const actionUpdateIndicateurTrois = {
         categorieSocioPro: CategorieSocioPro.Ouvriers,
         tauxPromotionFemmes: 1.1,
         tauxPromotionHommes: 2.2,
-        ecartTauxPromotion: undefined
+        ecartTauxPromotion: undefined,
       },
       {
         categorieSocioPro: CategorieSocioPro.Employes,
         tauxPromotionFemmes: 0.3,
         tauxPromotionHommes: 2.0,
-        ecartTauxPromotion: undefined
+        ecartTauxPromotion: undefined,
       },
       {
         categorieSocioPro: CategorieSocioPro.Techniciens,
         tauxPromotionFemmes: 2,
         tauxPromotionHommes: 3,
-        ecartTauxPromotion: undefined
+        ecartTauxPromotion: undefined,
       },
       {
         categorieSocioPro: CategorieSocioPro.Cadres,
         tauxPromotionFemmes: 4,
         tauxPromotionHommes: 5.55,
-        ecartTauxPromotion: undefined
-      }
-    ]
-  }
+        ecartTauxPromotion: undefined,
+      },
+    ],
+  },
 };
 
 const actionUpdateIndicateurDeuxTrois = {
@@ -405,8 +405,8 @@ const actionUpdateIndicateurDeuxTrois = {
     presenceAugmentationPromotion: false,
     nombreAugmentationPromotionFemmes: 1,
     nombreAugmentationPromotionHommes: 2,
-    periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration
-  }
+    periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration,
+  },
 };
 
 const actionUpdateIndicateurQuatre = {
@@ -414,16 +414,16 @@ const actionUpdateIndicateurQuatre = {
   data: {
     presenceCongeMat: false,
     nombreSalarieesPeriodeAugmentation: 7,
-    nombreSalarieesAugmentees: 7
-  }
+    nombreSalarieesAugmentees: 7,
+  },
 };
 
 const actionUpdateIndicateurCinq = {
   type: "updateIndicateurCinq" as "updateIndicateurCinq",
   data: {
     nombreSalariesHommes: 6,
-    nombreSalariesFemmes: 4
-  }
+    nombreSalariesFemmes: 4,
+  },
 };
 
 const actionUpdateInformationsEntreprise = {
@@ -442,9 +442,9 @@ const actionUpdateInformationsEntreprise = {
     nombreEntreprises: 2,
     entreprisesUES: [
       { nom: "entreprise 1", siren: "12345" },
-      { nom: "entreprise 2", siren: "67890" }
-    ]
-  }
+      { nom: "entreprise 2", siren: "67890" },
+    ],
+  },
 };
 
 const actionUpdateInformationsDeclarant = {
@@ -454,20 +454,21 @@ const actionUpdateInformationsDeclarant = {
     prenom: "Duck",
     tel: "0123456789",
     email: "daffy.duck@example.com",
-    acceptationCGU: true
-  }
+    acceptationCGU: true,
+  },
 };
 
 const actionUpdateDeclaration = {
   type: "updateDeclaration" as "updateDeclaration",
   data: {
     mesuresCorrection: "mmo",
+    cseMisEnPlace: true,
     dateConsultationCSE: "01/02/2019",
     datePublication: "01/02/2020",
     publicationSurSiteInternet: true,
     lienPublication: "https://example.com",
     modalitesPublication: "",
-  }
+  },
 };
 
 // fast pipe, I miss you in JS…

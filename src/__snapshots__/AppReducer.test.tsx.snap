@@ -9,6 +9,7 @@ exports[`resetState reset undefined state 1`] = `undefined`;
 exports[`test state used for test before testing stateComplete 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -414,6 +415,7 @@ Object {
 exports[`test state used for test before testing stateCompleteAndValidate 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "01/02/2020",
@@ -654,6 +656,7 @@ Object {
 exports[`test state used for test before testing stateDefault 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -1014,6 +1017,7 @@ exports[`test state used for test before testing stateUndefined 1`] = `undefined
 exports[`updateDeclaration change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2017",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -1419,6 +1423,7 @@ Object {
 exports[`updateDeclaration change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "01/02/2017",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -1779,6 +1784,7 @@ exports[`updateDeclaration nothing undefined state 1`] = `undefined`;
 exports[`updateEffectif change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -2184,6 +2190,7 @@ Object {
 exports[`updateEffectif change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -2544,6 +2551,7 @@ exports[`updateEffectif nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurCinq change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -2949,6 +2957,7 @@ Object {
 exports[`updateIndicateurCinq change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -3309,6 +3318,7 @@ exports[`updateIndicateurCinq nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurDeux change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -3710,6 +3720,7 @@ Object {
 exports[`updateIndicateurDeux change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -4066,6 +4077,7 @@ exports[`updateIndicateurDeux nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurDeuxTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -4471,6 +4483,7 @@ Object {
 exports[`updateIndicateurDeuxTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -4831,6 +4844,7 @@ exports[`updateIndicateurDeuxTrois nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurQuatre change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -5236,6 +5250,7 @@ Object {
 exports[`updateIndicateurQuatre change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -5596,6 +5611,7 @@ exports[`updateIndicateurQuatre nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -5997,6 +6013,7 @@ Object {
 exports[`updateIndicateurTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -6353,6 +6370,7 @@ exports[`updateIndicateurTrois nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurUnCoef Array<{name: string}> change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -6758,6 +6776,7 @@ Object {
 exports[`updateIndicateurUnCoef Array<{name: string}> change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -7156,6 +7175,7 @@ exports[`updateIndicateurUnCoef Array<{name: string}> nothing undefined state 1`
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -7561,6 +7581,7 @@ Object {
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}> change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -7959,6 +7980,7 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesEffe
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -8364,6 +8386,7 @@ Object {
 exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}> change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -8762,6 +8785,7 @@ exports[`updateIndicateurUnCoef Array<{tranchesAges: Array<GroupTranchesAgesIndi
 exports[`updateIndicateurUnCoefAddGroup change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -9204,6 +9228,7 @@ Object {
 exports[`updateIndicateurUnCoefAddGroup change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -9602,6 +9627,7 @@ exports[`updateIndicateurUnCoefAddGroup nothing undefined state 1`] = `undefined
 exports[`updateIndicateurUnCoefDeleteGroup change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -9969,6 +9995,7 @@ Object {
 exports[`updateIndicateurUnCoefDeleteGroup change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -10329,6 +10356,7 @@ exports[`updateIndicateurUnCoefDeleteGroup nothing undefined state 1`] = `undefi
 exports[`updateIndicateurUnCsp change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -10718,6 +10746,7 @@ Object {
 exports[`updateIndicateurUnCsp change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -11062,6 +11091,7 @@ exports[`updateIndicateurUnCsp nothing undefined state 1`] = `undefined`;
 exports[`updateIndicateurUnType change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -11467,6 +11497,7 @@ Object {
 exports[`updateIndicateurUnType change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -11827,6 +11858,7 @@ exports[`updateIndicateurUnType nothing undefined state 1`] = `undefined`;
 exports[`updateInformationsDeclarant change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -12232,6 +12264,7 @@ Object {
 exports[`updateInformationsDeclarant change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -12592,6 +12625,7 @@ exports[`updateInformationsDeclarant nothing undefined state 1`] = `undefined`;
 exports[`updateInformationsEntreprise change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -12993,6 +13027,7 @@ Object {
 exports[`updateInformationsEntreprise change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -13358,6 +13393,7 @@ exports[`updateInformationsEntreprise nothing undefined state 1`] = `undefined`;
 exports[`updateInformationsSimulation change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -13763,6 +13799,7 @@ Object {
 exports[`updateInformationsSimulation change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -14123,6 +14160,7 @@ exports[`updateInformationsSimulation nothing undefined state 1`] = `undefined`;
 exports[`validateDeclaration change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "01/02/2020",
@@ -14560,6 +14598,7 @@ Object {
 exports[`validateDeclaration change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "",
@@ -14952,6 +14991,7 @@ exports[`validateDeclaration nothing undefined state 1`] = `undefined`;
 exports[`validateEffectif None with csp false invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "01/02/2020",
@@ -15192,6 +15232,7 @@ Object {
 exports[`validateEffectif None with csp false stateCompleteAndValidateCoef 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "01/02/2020",
@@ -15432,6 +15473,7 @@ Object {
 exports[`validateEffectif None with csp true invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "01/02/2020",
@@ -15672,6 +15714,7 @@ Object {
 exports[`validateEffectif Valid change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -16077,6 +16120,7 @@ Object {
 exports[`validateEffectif Valid change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -16437,6 +16481,7 @@ exports[`validateEffectif Valid nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurCinq change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -16842,6 +16887,7 @@ Object {
 exports[`validateIndicateurCinq change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -17202,6 +17248,7 @@ exports[`validateIndicateurCinq nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurDeux change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -17607,6 +17654,7 @@ Object {
 exports[`validateIndicateurDeux change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -17967,6 +18015,7 @@ exports[`validateIndicateurDeux nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurDeuxTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -18372,6 +18421,7 @@ Object {
 exports[`validateIndicateurDeuxTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -18732,6 +18782,7 @@ exports[`validateIndicateurDeuxTrois nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurQuatre change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -19137,6 +19188,7 @@ Object {
 exports[`validateIndicateurQuatre change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -19497,6 +19549,7 @@ exports[`validateIndicateurQuatre nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurTrois change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -19902,6 +19955,7 @@ Object {
 exports[`validateIndicateurTrois change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -20262,6 +20316,7 @@ exports[`validateIndicateurTrois nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurUn change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -20667,6 +20722,7 @@ Object {
 exports[`validateIndicateurUn change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -21027,6 +21083,7 @@ exports[`validateIndicateurUn nothing undefined state 1`] = `undefined`;
 exports[`validateIndicateurUnCoefEffectif None invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "01/02/2020",
@@ -21267,6 +21324,7 @@ Object {
 exports[`validateIndicateurUnCoefEffectif Valid change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -21672,6 +21730,7 @@ Object {
 exports[`validateIndicateurUnCoefEffectif Valid change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -22032,6 +22091,7 @@ exports[`validateIndicateurUnCoefEffectif Valid nothing undefined state 1`] = `u
 exports[`validateIndicateurUnCoefGroup None invalid complete validate state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "07/01/2020 10:38",
     "datePublication": "01/02/2020",
@@ -22272,6 +22332,7 @@ Object {
 exports[`validateIndicateurUnCoefGroup Valid change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -22677,6 +22738,7 @@ Object {
 exports[`validateIndicateurUnCoefGroup Valid change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -23037,6 +23099,7 @@ exports[`validateIndicateurUnCoefGroup Valid nothing undefined state 1`] = `unde
 exports[`validateInformationsDeclarant change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -23442,6 +23505,7 @@ Object {
 exports[`validateInformationsDeclarant change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -23802,6 +23866,7 @@ exports[`validateInformationsDeclarant nothing undefined state 1`] = `undefined`
 exports[`validateInformationsEntreprise change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -24207,6 +24272,7 @@ Object {
 exports[`validateInformationsEntreprise change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
@@ -24567,6 +24633,7 @@ exports[`validateInformationsEntreprise nothing undefined state 1`] = `undefined
 exports[`validateInformationsSimulation change complete state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": true,
     "dateConsultationCSE": "01/02/2019",
     "dateDeclaration": "",
     "datePublication": "01/02/2020",
@@ -24972,6 +25039,7 @@ Object {
 exports[`validateInformationsSimulation change default state 1`] = `
 Object {
   "declaration": Object {
+    "cseMisEnPlace": undefined,
     "dateConsultationCSE": "",
     "dateDeclaration": "",
     "datePublication": "",
