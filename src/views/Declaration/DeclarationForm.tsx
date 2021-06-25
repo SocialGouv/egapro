@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { css, jsx } from "@emotion/core";
 import { Form, useField } from "react-final-form";
 
@@ -12,7 +12,7 @@ import FormAutoSave from "../../components/FormAutoSave";
 import FormSubmit from "../../components/FormSubmit";
 import Textarea from "../../components/Textarea";
 import MesuresCorrection from "../../components/MesuresCorrection";
-import { parseDate } from "../../utils/helpers";
+import { logToSentry, parseDate } from "../../utils/helpers";
 import RadiosBoolean from "../../components/RadiosBoolean";
 import {
   parseBooleanFormValue,
@@ -21,6 +21,9 @@ import {
 } from "../../utils/formHelpers";
 import Input, { hasFieldError } from "../../components/Input";
 import globalStyles from "../../utils/globalStyles";
+import ButtonAction from "../../components/ButtonAction";
+import ErrorMessage from "../../components/ErrorMessage";
+import { resendReceipt } from "../../utils/api";
 
 const validate = (value: string) => {
   const requiredError = required(value);
@@ -137,6 +140,33 @@ function DeclarationForm({
   const displayNC =
     noteIndex === undefined && after2020 ? " aux indicateurs calculables" : "";
 
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(undefined);
+
+  const onClick = () => {
+    setLoading(true);
+
+    resendReceipt(
+      state.informationsEntreprise.siren,
+      state.informations.anneeDeclaration
+    )
+      .then(() => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        const errorMessage =
+          (error.jsonBody && error.jsonBody.message) ||
+          "Erreur lors du renvoi de l'accusé de réception";
+        setErrorMessage(errorMessage);
+        logToSentry(error, undefined);
+      });
+  };
+
+  if (!loading && errorMessage) {
+    return ErrorMessage(errorMessage);
+  }
+
   return (
     <Form
       onSubmit={onSubmit}
@@ -227,17 +257,25 @@ function DeclarationForm({
           )}
 
           {readOnly ? (
-            <ActionBar>
-              Votre déclaration est maintenant finalisée, en date du{" "}
-              {declaration.dateDeclaration}. &emsp;
-              {declaration.formValidated === "Valid" && (
-                <p css={styles.edit}>
-                  <ActionLink onClick={() => validateDeclaration("None")}>
-                    modifier les données saisies
-                  </ActionLink>
-                </p>
-              )}
-            </ActionBar>
+            <Fragment>
+              <ActionBar>
+                Votre déclaration est maintenant finalisée, en date du{" "}
+                {declaration.dateDeclaration}. &emsp;
+                {declaration.formValidated === "Valid" && (
+                  <p css={styles.edit}>
+                    <ActionLink onClick={() => validateDeclaration("None")}>
+                      modifier les données saisies
+                    </ActionLink>
+                  </p>
+                )}
+              </ActionBar>
+              <ButtonAction
+                onClick={onClick}
+                label="renvoyer l'accusé de réception"
+                disabled={loading}
+                loading={loading}
+              />
+            </Fragment>
           ) : (
             <ActionBar>
               <FormSubmit

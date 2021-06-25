@@ -75,6 +75,9 @@ export const putDeclaration = (data) =>
 export const validateSiren = (siren) =>
   getResource(`/validate-siren?siren=${siren}`);
 
+export const resendReceipt = (siren, year) =>
+  postResource(`/declaration/${siren}/${year}/receipt`, {});
+
 // KILL THIS ENDPOINT
 export const sendEmailIndicatorsDatas = (id, email) =>
   postResource(`/simulation/${id}/send-code`, { email });
