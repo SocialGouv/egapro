@@ -299,7 +299,7 @@ function DeclarationForm({
               </ActionBar>
               <ButtonAction
                 onClick={onClick}
-                label="renvoyer l'accusé de réception"
+                label="Renvoyer l'accusé de réception"
                 disabled={loading}
                 loading={loading}
               />
