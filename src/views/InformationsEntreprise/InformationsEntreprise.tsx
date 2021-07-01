@@ -7,7 +7,7 @@ import {
   AppState,
   FormState,
   ActionType,
-  ActionInformationsEntrepriseData
+  ActionInformationsEntrepriseData,
 } from "../../globals";
 
 import Page from "../../components/Page";
@@ -54,7 +54,10 @@ function PageInformationsEntreprise({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Informations entreprise/UES"
-      tagline="Renseignez le nom de votre entreprise ou UES, ainsi que les informations de Siren, code Naf et adresse"
+      tagline={[
+        "Renseignez le périmètre retenu pour le calcul de l'index (Entreprise ou UES), le numéro Siren de l'entreprise déclarante, ainsi que les informations concernant l'UES.",
+        "Les informations relatives à l'entreprise (Raison sociale, Code NAF, Adresse complète) sont renseignées automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).",
+      ]}
     >
       {children}
     </Page>

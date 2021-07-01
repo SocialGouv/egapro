@@ -363,7 +363,7 @@ function InformationsEntrepriseForm({
                 readOnly={readOnly}
               />
               <h3>
-                Saisie des informations des entreprises composant l'UES (ne pas
+                Saisie du numéro Siren des entreprises composant l'UES (ne pas
                 inclure l'entreprise déclarante)
               </h3>
               <FieldArray name="entreprisesUES">
