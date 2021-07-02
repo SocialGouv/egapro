@@ -77,7 +77,7 @@ function PageInformationsSimulation({ children }: { children: ReactNode }) {
   return (
     <Page
       title="Informations calcul et période de référence"
-      tagline="Renseignez la tranche d'effectifs de votre entreprise ou UES, l'année au titre de laquelle les indicateurs sont calculés ainsi que la période de référence."
+      tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
     >
       {children}
     </Page>

@@ -265,12 +265,12 @@ function InformationsEntrepriseForm({
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
             fieldName="structure"
-            label="je déclare l'index en tant que"
+            label="Vous déclarez en tant que"
             value={values.structure}
             readOnly={readOnly}
             choices={[
               {
-                label: "entreprise",
+                label: "Entreprise",
                 value: "Entreprise",
               },
               {

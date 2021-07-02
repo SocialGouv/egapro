@@ -153,7 +153,7 @@ function InformationsSimulationForm({
 
           <RadioLabels
             fieldName="trancheEffectifs"
-            label="Quelle est la tranche d'effectifs de l'entreprise ou de l'UES ?"
+            label="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)"
             choices={[
               {
                 label: "Entre 50 et 250",
@@ -222,7 +222,7 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
         css={[styles.label, error && styles.labelError]}
         htmlFor={field.input.name}
       >
-        Quel est le nom de la simulation (ex : nom_entreprise_date)
+        Nom de la simulation (ex : nom_entreprise_date)
       </label>
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
