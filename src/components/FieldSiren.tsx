@@ -36,7 +36,9 @@ export const checkSiren =
       return undefined;
     } catch (error) {
       updateSirenData({});
-      return `Numéro SIREN invalide: ${siren}`;
+      const errorMessage =
+        error?.jsonBody?.error || `Numéro SIREN invalide: ${siren}`;
+      return errorMessage;
     }
   };
 
