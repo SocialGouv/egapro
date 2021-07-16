@@ -1,28 +1,20 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { StaticContext } from "react-router";
 import { RouteComponentProps } from "react-router-dom";
 
 import globalStyles from "../utils/globalStyles";
 
 import { useColumnsWidth, useLayoutType } from "../components/GridContext";
-import { Modal } from "../components/ModalContext";
 import Page from "../components/Page";
 import ActionLink from "../components/ActionLink";
 import ActionBar from "../components/ActionBar";
 import { ButtonSimulatorLink } from "../components/SimulatorLink";
 
-import ModalEmail from "./ModalEmail";
-
-type LocationState = {
-  openModalEmail?: boolean;
-};
-
 export type HomeSimulateurRouteComponentProps = RouteComponentProps<
   {},
-  StaticContext,
-  LocationState
+  StaticContext
 >;
 
 interface Props extends HomeSimulateurRouteComponentProps {
@@ -31,18 +23,6 @@ interface Props extends HomeSimulateurRouteComponentProps {
 
 function HomeSimulateur({ location, history, code }: Props) {
   const textEl = useRef<HTMLSpanElement>(null);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const closeModal = () => setModalIsOpen(false);
-
-  useEffect(() => {
-    if (location.state && location.state.openModalEmail) {
-      history.replace(location.pathname, {
-        ...(location.state && location.state),
-        openModalEmail: false
-      });
-      setModalIsOpen(true);
-    }
-  }, [location, history]);
 
   const link = window.location.href;
   const onCopy = () => {
@@ -93,10 +73,6 @@ function HomeSimulateur({ location, history, code }: Props) {
           <ButtonSimulatorLink to="/informations" label="suivant" />
         </ActionBar>
       </div>
-
-      <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
-        <ModalEmail closeModal={closeModal} code={code} />
-      </Modal>
     </Page>
   );
 }
@@ -104,7 +80,7 @@ function HomeSimulateur({ location, history, code }: Props) {
 const styles = {
   codeCopyBloc: css({
     display: "flex",
-    alignItems: "flex-end"
+    alignItems: "flex-end",
   }),
   codeCopyFakeInput: css({
     flexShrink: 1,
@@ -120,27 +96,27 @@ const styles = {
 
     overflow: "hidden",
     whiteSpace: "nowrap",
-    textOverflow: "ellipsis"
+    textOverflow: "ellipsis",
   }),
   codeCopyText: css({
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   codeCopyAction: css({
-    flexShrink: 0
+    flexShrink: 0,
   }),
 
   tagline: css({
     marginTop: 36,
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
 
   imageContainer: css({
     marginTop: 160,
     height: 151,
     width: 384,
-    position: "relative"
+    position: "relative",
   }),
   image: css({
     position: "absolute",
@@ -150,8 +126,8 @@ const styles = {
     left: -(globalStyles.grid.gutterWidth * 2),
     backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-home-simulator.svg)`,
     backgroundRepeat: "no-repeat",
-    backgroundSize: "contain"
-  })
+    backgroundSize: "contain",
+  }),
 };
 
 export default HomeSimulateur;

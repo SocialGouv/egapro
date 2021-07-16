@@ -78,6 +78,12 @@ export const validateSiren = (siren) =>
 export const resendReceipt = (siren, year) =>
   postResource(`/declaration/${siren}/${year}/receipt`, {});
 
+export const sendValidationEmail = (email, code) =>
+  postResource("/token", {
+    email,
+    url: `${window.location.origin}/simulateur/${code}?token=`,
+  });
+
 // KILL THIS ENDPOINT
 export const sendEmailIndicatorsDatas = (id, email) =>
   postResource(`/simulation/${id}/send-code`, { email });

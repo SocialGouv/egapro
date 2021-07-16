@@ -30,7 +30,6 @@ function Home({ history, location, dispatch }: Props) {
         setLoading(false);
         history.push(`/simulateur/${id}`, {
           ...(location.state && location.state),
-          openModalEmail: true,
         });
       })
       .catch((error) => {

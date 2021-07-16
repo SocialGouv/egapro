@@ -29,6 +29,7 @@ import InformationsEntreprise from "../views/InformationsEntreprise";
 import InformationsDeclarant from "../views/InformationsDeclarant";
 import InformationsSimulation from "../views/InformationsSimulation";
 import Recapitulatif from "../views/Recapitulatif";
+import AskEmail from "../views/AskEmail";
 
 interface Props {
   code: string;
@@ -38,11 +39,17 @@ interface Props {
 
 function Simulateur({ code, state, dispatch }: Props) {
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
-  );
+  const [errorMessage, setErrorMessage] =
+    useState<string | undefined>(undefined);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("token")) {
+    localStorage.setItem("token", urlParams.get("token") || "");
+  }
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
+    if (!token) return;
     setLoading(true);
     setErrorMessage(undefined);
     getIndicatorsDatas(code)
@@ -58,12 +65,13 @@ function Simulateur({ code, state, dispatch }: Props) {
             : "Erreur lors de la récupération des données";
         setErrorMessage(message);
       });
-  }, [code, dispatch]);
+  }, [code, token, dispatch]);
 
   useDebounceEffect(
     state,
     2000,
     (debouncedState) => {
+      if (!token) return;
       if (debouncedState) {
         putIndicatorsDatas(code, debouncedState).catch((error) => {
           setLoading(false);
@@ -76,8 +84,12 @@ function Simulateur({ code, state, dispatch }: Props) {
         });
       }
     },
-    [code]
+    [code, token]
   );
+
+  if (!token) {
+    return <AskEmail code={code} />;
+  }
 
   if (!loading && errorMessage) {
     return ErrorMessage(errorMessage);
