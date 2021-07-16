@@ -39,12 +39,16 @@ function checkStatusAndParseJson(response) {
 /////////////
 
 function fetchResource(method, pathname, body) {
+  const headers = body ? commonContentHeaders : commonHeaders;
+
   const requestObj = {
     method,
-    headers: body ? commonContentHeaders : commonHeaders,
+    headers: {
+      ...headers,
+      "API-KEY": localStorage.token,
+    },
     body: body ? JSON.stringify(body) : undefined,
   };
-  requestObj.credentials = "include";
   let origin = "/api";
   if (window.location.href.includes("localhost:")) {
     origin = "http://127.0.0.1:2626";
