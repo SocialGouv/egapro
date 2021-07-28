@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
 import { AppState, ActionType } from "../globals";
@@ -49,7 +49,6 @@ function Simulateur({ code, state, dispatch }: Props) {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (!token) return;
     setLoading(true);
     setErrorMessage(undefined);
     getIndicatorsDatas(code)
@@ -71,7 +70,6 @@ function Simulateur({ code, state, dispatch }: Props) {
     state,
     2000,
     (debouncedState) => {
-      if (!token) return;
       if (debouncedState) {
         putIndicatorsDatas(code, debouncedState).catch((error) => {
           setLoading(false);
@@ -86,10 +84,6 @@ function Simulateur({ code, state, dispatch }: Props) {
     },
     [code, token]
   );
-
-  if (!token) {
-    return <AskEmail code={code} />;
-  }
 
   if (!loading && errorMessage) {
     return ErrorMessage(errorMessage);
@@ -169,33 +163,43 @@ function Simulateur({ code, state, dispatch }: Props) {
         path="/simulateur/:code/recapitulatif"
         render={(props) => <Recapitulatif {...props} state={state} />}
       />
-      <Route
-        path="/simulateur/:code/informations-entreprise"
-        render={(props) => (
-          <InformationsEntreprise
-            {...props}
-            state={state}
-            dispatch={dispatch}
+      {token ? (
+        <Fragment>
+          <Route
+            path="/simulateur/:code/informations-entreprise"
+            render={(props) => (
+              <InformationsEntreprise
+                {...props}
+                state={state}
+                dispatch={dispatch}
+              />
+            )}
           />
-        )}
-      />
-      <Route
-        path="/simulateur/:code/informations-declarant"
-        render={(props) => (
-          <InformationsDeclarant {...props} state={state} dispatch={dispatch} />
-        )}
-      />
-      <Route
-        path="/simulateur/:code/declaration"
-        render={(props) => (
-          <Declaration
-            {...props}
-            code={code}
-            state={state}
-            dispatch={dispatch}
+          <Route
+            path="/simulateur/:code/informations-declarant"
+            render={(props) => (
+              <InformationsDeclarant
+                {...props}
+                state={state}
+                dispatch={dispatch}
+              />
+            )}
           />
-        )}
-      />
+          <Route
+            path="/simulateur/:code/declaration"
+            render={(props) => (
+              <Declaration
+                {...props}
+                code={code}
+                state={state}
+                dispatch={dispatch}
+              />
+            )}
+          />
+        </Fragment>
+      ) : (
+        <AskEmail code={code} />
+      )}
     </Switch>
   );
 }
