@@ -64,7 +64,7 @@ function Simulateur({ code, state, dispatch }: Props) {
             : "Erreur lors de la récupération des données";
         setErrorMessage(message);
       });
-  }, [code, token, dispatch]);
+  }, [code, dispatch]);
 
   useDebounceEffect(
     state,
@@ -82,7 +82,7 @@ function Simulateur({ code, state, dispatch }: Props) {
         });
       }
     },
-    [code, token]
+    [code]
   );
 
   if (!loading && errorMessage) {
