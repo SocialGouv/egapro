@@ -1,14 +1,18 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { Fragment, useEffect, useState } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, useHistory } from "react-router-dom";
 
 import { AppState, ActionType } from "../globals";
 
 import { logToSentry } from "../utils/helpers";
 
 import globalStyles from "../utils/globalStyles";
-import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api";
+import {
+  getIndicatorsDatas,
+  getTokenInfo,
+  putIndicatorsDatas,
+} from "../utils/api";
 import { useDebounceEffect } from "../utils/hooks";
 
 import ActivityIndicator from "../components/ActivityIndicator";
@@ -31,6 +35,20 @@ import InformationsSimulation from "../views/InformationsSimulation";
 import Recapitulatif from "../views/Recapitulatif";
 import AskEmail from "../views/AskEmail";
 
+interface TokenInfo {
+  email: string;
+  déclarations: [Declaration];
+  ownership: [string];
+}
+
+interface Declaration {
+  declared_at: Number;
+  modified_at: Number;
+  name: string;
+  siren: string;
+  year: Number;
+}
+
 interface Props {
   code: string;
   state: AppState | undefined;
@@ -41,12 +59,34 @@ function Simulateur({ code, state, dispatch }: Props) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] =
     useState<string | undefined>(undefined);
+  const [tokenInfo, setTokenInfo] =
+    useState<undefined | "error" | TokenInfo>(undefined);
+  const history = useHistory();
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has("token")) {
     localStorage.setItem("token", urlParams.get("token") || "");
+    // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
+    history.push({ search: "" });
   }
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    setLoading(true);
+    setErrorMessage(undefined);
+    getTokenInfo()
+      .then(({ jsonBody }) => {
+        setLoading(false);
+        setTokenInfo(jsonBody);
+      })
+      .catch((error) => {
+        setLoading(false);
+        setTokenInfo("error");
+      });
+  }, [token]);
 
   useEffect(() => {
     setLoading(true);
@@ -163,7 +203,17 @@ function Simulateur({ code, state, dispatch }: Props) {
         path="/simulateur/:code/recapitulatif"
         render={(props) => <Recapitulatif {...props} state={state} />}
       />
-      {token ? (
+      {tokenInfo === undefined ? (
+        <AskEmail code={code} />
+      ) : tokenInfo === "error" ? (
+        <Fragment>
+          <p></p>
+          <AskEmail
+            code={code}
+            tagLine="La session est expirée, veuillez fournir votre email afin de recevoir un lien vous permettant de la rafraîchir."
+          />
+        </Fragment>
+      ) : (
         <Fragment>
           <Route
             path="/simulateur/:code/informations-entreprise"
@@ -197,8 +247,6 @@ function Simulateur({ code, state, dispatch }: Props) {
             )}
           />
         </Fragment>
-      ) : (
-        <AskEmail code={code} />
       )}
     </Switch>
   );

@@ -14,7 +14,12 @@ import Input, { hasFieldError } from "../components/Input";
 import { required, validateEmail } from "../utils/formHelpers";
 import ButtonAction from "../components/ButtonAction";
 
-function AskEmail(props: { code: string }) {
+interface Props {
+  code: string;
+  tagLine?: string;
+}
+
+function AskEmail({ code, tagLine }: Props) {
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
   const [loading, setLoading] = useState(false);
@@ -25,7 +30,7 @@ function AskEmail(props: { code: string }) {
   const onSubmit = (formData: any) => {
     setLoading(true);
     setErrorMessage(undefined);
-    sendValidationEmail(formData.email, props.code)
+    sendValidationEmail(formData.email, code)
       .then(({ jsonBody }) => {
         setLoading(false);
         setSubmitted(true);
@@ -42,6 +47,7 @@ function AskEmail(props: { code: string }) {
   return (
     <Page title="Validation de l'email">
       <div css={css({ width })}>
+        {tagLine && <h2>{tagLine}</h2>}
         <Form onSubmit={onSubmit}>
           {({ handleSubmit, hasValidationErrors, submitFailed, values }) =>
             submitted ? (

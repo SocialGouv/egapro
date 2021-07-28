@@ -29,10 +29,6 @@ function checkStatusAndParseJson(response) {
   if (response.status >= 200 && response.status < 300) {
     return jsonPromise.then((jsonBody) => ({ response, jsonBody }));
   } else {
-    if (response.status === 401) {
-      localStorage.removeItem("token");
-    }
-
     return jsonPromise.then((jsonBody) => {
       const apiError = new ApiError(response, jsonBody);
       return Promise.reject.bind(Promise)(apiError);
@@ -91,6 +87,8 @@ export const sendValidationEmail = (email, code) =>
     email,
     url: `${window.location.href}?token=`,
   });
+
+export const getTokenInfo = () => getResource(`/me`);
 
 // KILL THIS ENDPOINT
 export const sendEmailIndicatorsDatas = (id, email) =>
