@@ -29,7 +29,7 @@ function checkStatusAndParseJson(response) {
   if (response.status >= 200 && response.status < 300) {
     return jsonPromise.then((jsonBody) => ({ response, jsonBody }));
   } else {
-    if (response.status == 401) {
+    if (response.status === 401) {
       localStorage.removeItem("token");
     }
 
