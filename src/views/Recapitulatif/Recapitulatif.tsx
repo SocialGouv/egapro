@@ -40,7 +40,7 @@ function Recapitulatif({ state }: Props) {
     effectifEtEcartRemuParTranche,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn
+    noteIndicateurUn,
   } = calculIndicateurUn(state);
 
   const {
@@ -50,7 +50,7 @@ function Recapitulatif({ state }: Props) {
     indicateurEcartAugmentation,
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
     noteIndicateurDeux,
-    correctionMeasure: correctionMeasureIndicateurDeux
+    correctionMeasure: correctionMeasureIndicateurDeux,
   } = calculIndicateurDeux(state);
 
   const {
@@ -60,7 +60,7 @@ function Recapitulatif({ state }: Props) {
     indicateurEcartPromotion,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteIndicateurTrois,
-    correctionMeasure: correctionMeasureIndicateurTrois
+    correctionMeasure: correctionMeasureIndicateurTrois,
   } = calculIndicateurTrois(state);
 
   const {
@@ -73,19 +73,19 @@ function Recapitulatif({ state }: Props) {
     correctionMeasure: correctionMeasureIndicateurDeuxTrois,
     tauxAugmentationPromotionHommes,
     tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries
+    plusPetitNombreSalaries,
   } = calculIndicateurDeuxTrois(state);
 
   const {
     indicateurCalculable: indicateurQuatreCalculable,
     indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre
+    noteIndicateurQuatre,
   } = calculIndicateurQuatre(state);
 
   const {
     indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
     indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq
+    noteIndicateurCinq,
   } = calculIndicateurCinq(state);
 
   const allIndicateurValid =
@@ -112,10 +112,8 @@ function Recapitulatif({ state }: Props) {
     noteIndicateurCinq
   );
 
-  const {
-    totalNombreSalariesHomme,
-    totalNombreSalariesFemme
-  } = totalNombreSalaries(state.effectif.nombreSalaries);
+  const { totalNombreSalariesHomme, totalNombreSalariesFemme } =
+    totalNombreSalaries(state.effectif.nombreSalaries);
 
   return (
     <Page title="Récapitulatif des résultats de vos indicateurs">
@@ -211,8 +209,16 @@ function Recapitulatif({ state }: Props) {
         }
         noteIndicateurCinq={noteIndicateurCinq}
       />
+      <p>
+        La simulation est terminée. Vous pouvez si vous le souhaitez déclarer
+        ces indicateurs en renseignant d'autres informations. Il vous sera
+        demandé un email valide pour pouvoir poursuivre.
+      </p>
       <ActionBar>
-        <ButtonSimulatorLink to="/informations-entreprise" label="suivant" />
+        <ButtonSimulatorLink
+          to="/informations-entreprise"
+          label="poursuivre vers la déclaration"
+        />
       </ActionBar>
       <ActionBar>
         <ButtonAction
@@ -244,13 +250,13 @@ function Recapitulatif({ state }: Props) {
 const styles = {
   info: css({
     marginLeft: 4,
-    fontSize: 12
+    fontSize: 12,
   }),
   monAvis: css({
     "@media print": {
-      display: "none"
-    }
-  })
+      display: "none",
+    },
+  }),
 };
 
 export default Recapitulatif;
