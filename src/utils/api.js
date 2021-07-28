@@ -89,7 +89,7 @@ export const resendReceipt = (siren, year) =>
 export const sendValidationEmail = (email, code) =>
   postResource("/token", {
     email,
-    url: `${window.location.origin}/simulateur/${code}?token=`,
+    url: `${window.location.href}?token=`,
   });
 
 // KILL THIS ENDPOINT
