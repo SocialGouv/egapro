@@ -231,6 +231,10 @@ export type ActionType =
       noteIndex: number | undefined;
       totalPoint: number;
       totalPointCalculable: number;
+    }
+  | {
+      type: "updateEmailDeclarant";
+      data: ActionEmailDeclarantData;
     };
 
 export type ActionInformationsSimulationData = {
@@ -394,6 +398,10 @@ export type ActionDeclarationData = {
   publicationSurSiteInternet: boolean | undefined;
   lienPublication: string;
   modalitesPublication: string;
+};
+
+export type ActionEmailDeclarantData = {
+  email: string;
 };
 
 ////

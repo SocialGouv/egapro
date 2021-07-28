@@ -687,6 +687,15 @@ function AppReducer(
         },
       };
     }
+    case "updateEmailDeclarant": {
+      return {
+        ...state,
+        informationsDeclarant: {
+          ...state.informationsDeclarant,
+          ...action.data,
+        },
+      };
+    }
     default:
       return state;
   }

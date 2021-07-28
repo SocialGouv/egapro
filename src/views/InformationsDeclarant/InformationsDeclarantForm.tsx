@@ -8,7 +8,7 @@ import globalStyles from "../../utils/globalStyles";
 import {
   AppState,
   FormState,
-  ActionInformationsDeclarantData
+  ActionInformationsDeclarantData,
 } from "../../globals";
 
 import { mustBeNumber, required, validateEmail } from "../../utils/formHelpers";
@@ -28,7 +28,7 @@ const validate = (value: string) => {
     return undefined;
   } else {
     return {
-      required: requiredError
+      required: requiredError,
     };
   }
 };
@@ -43,7 +43,7 @@ const validateTel = (value: string) => {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
-      mustBe10Digits: mustBe10DigitsError
+      mustBe10Digits: mustBe10DigitsError,
     };
   }
 };
@@ -53,7 +53,7 @@ const validateForm = ({
   prenom,
   tel,
   email,
-  acceptationCGU
+  acceptationCGU,
 }: {
   nom: string;
   prenom: string;
@@ -65,7 +65,7 @@ const validateForm = ({
   prenom: validate(prenom),
   tel: validateTel(tel),
   email: validateEmail(email) ? { invalid: true } : undefined,
-  acceptationCGU: acceptationCGU ? undefined : { invalid: true }
+  acceptationCGU: acceptationCGU ? undefined : { invalid: true },
 });
 
 interface Props {
@@ -79,14 +79,14 @@ function InformationsDeclarantForm({
   informationsDeclarant,
   readOnly,
   updateInformationsDeclarant,
-  validateInformationsDeclarant
+  validateInformationsDeclarant,
 }: Props) {
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
     prenom: informationsDeclarant.prenom,
     tel: informationsDeclarant.tel,
     email: informationsDeclarant.email,
-    acceptationCGU: informationsDeclarant.acceptationCGU
+    acceptationCGU: informationsDeclarant.acceptationCGU,
   };
 
   const saveForm = (formData: any) => {
@@ -97,7 +97,7 @@ function InformationsDeclarantForm({
       prenom,
       tel,
       email,
-      acceptationCGU
+      acceptationCGU,
     });
   };
 
@@ -139,10 +139,10 @@ function InformationsDeclarantForm({
             readOnly={readOnly}
           />
           <TextField
-            label="Email"
+            label="Email (fourni lors de la demande de validation de l'email)"
             fieldName="email"
             errorText="l'email n’est pas valide"
-            readOnly={readOnly}
+            readOnly={true}
           />
           <Field name="acceptationCGU" component="input" type="checkbox">
             {({ input, meta }: { input: any; meta: any }) => (
@@ -191,23 +191,23 @@ function InformationsDeclarantForm({
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
-    textAlign: "center"
+    textAlign: "center",
   }),
   label: css({
-    fontSize: 14
+    fontSize: 14,
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     textDecoration: "underline",
-    lineHeight: "15px"
-  })
+    lineHeight: "15px",
+  }),
 };
 
 export default InformationsDeclarantForm;

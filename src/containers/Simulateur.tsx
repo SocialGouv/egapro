@@ -81,6 +81,10 @@ function Simulateur({ code, state, dispatch }: Props) {
       .then(({ jsonBody }) => {
         setLoading(false);
         setTokenInfo(jsonBody);
+        dispatch({
+          type: "updateEmailDeclarant",
+          data: { email: jsonBody.email },
+        });
       })
       .catch((error) => {
         setLoading(false);
