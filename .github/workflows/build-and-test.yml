@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: ["*"]
 
-name: Install, build and test egapro
+name: Install, build & test
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone reposotory
+      - name: Clone repository
         uses: actions/checkout@v2
 
       - name: Install dependencies
@@ -20,6 +20,3 @@ jobs:
 
       - name: Run tests
         run: yarn test
-
-      - name: Run the app
-        run: yarn start
