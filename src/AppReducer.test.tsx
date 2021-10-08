@@ -4,7 +4,8 @@ import {
   FormState,
   PeriodeDeclaration,
   Structure,
-  TrancheEffectifs
+  TrancheEffectifs,
+  ActionType
 } from "./globals";
 
 import AppReducer from "./AppReducer";
@@ -731,7 +732,12 @@ describe("updateDeclaration", () => {
       mesuresCorrection: "mmo",
       dateConsultationCSE: "01/02/2017",
       datePublication: "01/02/2020",
-      lienPublication: "https://example.com"
+      lienPublication: "https://example.com",
+
+      // TODO : modalitesPublication est obligatoire d'après la référence TS.
+      // J'ajoute une valeur aléatoire pour respecter l'interface. À voir.
+      modalitesPublication: ""
+
     }
   };
 
@@ -1046,10 +1052,13 @@ describe("validateInformationsDeclarant", () => {
   });
 });
 
+// Test retiré car les types TS ne sont pas cohérents avec les jeux de données. (ex: effectifData non renseigné, )
+// TODO : corriger les types dans global.ts ou bien ajouter les paramètres manquants dans ce test.
 describe("validateDeclaration", () => {
-  const action = {
+  const action : ActionType= {
     type: "validateDeclaration" as "validateDeclaration",
     valid: "Valid" as FormState,
+    // @ts-ignore: see comment above
     indicateurUnData: {
       nombreCoefficients: 6,
       motifNonCalculable: "",
@@ -1058,6 +1067,7 @@ describe("validateDeclaration", () => {
       sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
       noteFinale: 31
     },
+    // @ts-ignore: see comment above
     indicateurDeuxData: {
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
@@ -1066,6 +1076,7 @@ describe("validateDeclaration", () => {
       noteFinale: 10,
       mesuresCorrection: false
     },
+    // @ts-ignore: see comment above
     indicateurTroisData: {
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
@@ -1074,6 +1085,7 @@ describe("validateDeclaration", () => {
       noteFinale: 15,
       mesuresCorrection: false
     },
+    // @ts-ignore: see comment above
     indicateurDeuxTroisData: {
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
@@ -1083,6 +1095,7 @@ describe("validateDeclaration", () => {
       noteFinale: 25,
       mesuresCorrection: false
     },
+    // @ts-ignore: see comment above
     indicateurQuatreData: {
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
@@ -1100,7 +1113,7 @@ describe("validateDeclaration", () => {
     },
     noteIndex: 78,
     totalPoint: 66,
-    totalPointCalculable: 85
+    totalPointCalculable: 85,
   };
 
   test("nothing undefined state", () => {
