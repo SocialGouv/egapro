@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+name: Install, build and test egapro
+jobs:
+  test-egapro:
+    runs-on: ubuntu-latest
+    name: report action
+    steps:
+      - uses: actions/checkout@v2
+      - shell: bash
+        run: |
+          yarn
+          yarn build
+          yarn test
+          yarn start
