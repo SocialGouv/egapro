@@ -95,12 +95,12 @@ export const mustBeInteger: ValidatorFunction = (value) =>
     ? undefined
     : "Renseignez une valeur entière, sans virgule";
 
-export const minNumber: (min: Number) => ValidatorFunction = (min) => (value) =>
+export const minNumber: (min: number) => ValidatorFunction = (min) => (value) =>
   isNaN(Number(value)) || Number(value) >= min
     ? undefined
     : `La valeur doit être supérieure à ${min}`;
 
-export const maxNumber: (max: Number) => ValidatorFunction = (max) => (value) =>
+export const maxNumber: (max: number) => ValidatorFunction = (max) => (value) =>
   isNaN(Number(value)) || Number(value) <= max
     ? undefined
     : `La valeur doit être inférieure à ${max}`;

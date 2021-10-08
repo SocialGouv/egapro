@@ -274,15 +274,15 @@ export type ActionIndicateurUnCoefData = {
 };
 
 export type DeclarationIndicateurUnData = {
-  nombreCoefficients: Number | undefined;
+  nombreCoefficients: number | undefined;
   nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   remunerationAnnuelle: Array<GroupeIndicateurUn>;
   coefficient: Array<GroupeCoefficient>;
-  resultatFinal: Number | undefined;
+  resultatFinal: number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteFinale: Number | undefined;
+  noteFinale: number | undefined;
 };
 
 export type ActionIndicateurDeuxData = {
@@ -295,9 +295,9 @@ export type DeclarationIndicateurDeuxData = {
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   tauxAugmentation: Array<GroupeIndicateurDeux>;
-  resultatFinal: Number | undefined;
+  resultatFinal: number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteFinale: Number | undefined;
+  noteFinale: number | undefined;
   mesuresCorrection: boolean;
 };
 
@@ -311,9 +311,9 @@ export type DeclarationIndicateurTroisData = {
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
   tauxPromotion: Array<GroupeIndicateurTrois>;
-  resultatFinal: Number | undefined;
+  resultatFinal: number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteFinale: Number | undefined;
+  noteFinale: number | undefined;
   mesuresCorrection: boolean;
 };
 
@@ -328,12 +328,12 @@ export type DeclarationIndicateurDeuxTroisData = {
   nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
-  resultatFinalEcart: Number | undefined;
-  resultatFinalNombreSalaries: Number | undefined;
+  resultatFinalEcart: number | undefined;
+  resultatFinalNombreSalaries: number | undefined;
   sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteEcart: Number | undefined;
-  noteNombreSalaries: Number | undefined;
-  noteFinale: Number | undefined;
+  noteEcart: number | undefined;
+  noteNombreSalaries: number | undefined;
+  noteFinale: number | undefined;
   mesuresCorrection: boolean;
 };
 
@@ -352,8 +352,8 @@ export type DeclarationIndicateurQuatreData = {
   nonCalculable: boolean;
   motifNonCalculable: string;
   motifNonCalculablePrecision: string;
-  resultatFinal: Number | undefined;
-  noteFinale: Number | undefined;
+  resultatFinal: number | undefined;
+  noteFinale: number | undefined;
 };
 
 export type ActionIndicateurCinqData = {
@@ -362,9 +362,9 @@ export type ActionIndicateurCinqData = {
 };
 
 export type DeclarationIndicateurCinqData = {
-  resultatFinal: Number | undefined;
+  resultatFinal: number | undefined;
   sexeSurRepresente: undefined | "egalite" | "femmes" | "hommes";
-  noteFinale: Number | undefined;
+  noteFinale: number | undefined;
 };
 
 export type ActionInformationsEntrepriseData = {
