@@ -392,10 +392,10 @@ export type ActionInformationsDeclarantData = {
 
 export type ActionDeclarationData = {
   mesuresCorrection: string;
-  cseMisEnPlace: boolean | undefined;
+  cseMisEnPlace?: boolean | undefined;
   dateConsultationCSE: string;
   datePublication: string;
-  publicationSurSiteInternet: boolean | undefined;
+  publicationSurSiteInternet?: boolean | undefined;
   lienPublication: string;
   modalitesPublication: string;
 };
@@ -435,7 +435,7 @@ export interface GroupTranchesAgesIndicateurUn {
   trancheAge: TranchesAges;
   remunerationAnnuelleBrutFemmes: number | undefined;
   remunerationAnnuelleBrutHommes: number | undefined;
-  ecartTauxRemuneration: number | undefined;
+  ecartTauxRemuneration?: number | undefined;
 }
 
 export interface GroupeIndicateurUn {
@@ -461,14 +461,14 @@ export interface GroupeIndicateurDeux {
   categorieSocioPro: CategorieSocioPro;
   tauxAugmentationFemmes: number | undefined;
   tauxAugmentationHommes: number | undefined;
-  ecartTauxAugmentation: number | undefined;
+  ecartTauxAugmentation?: number | undefined;
 }
 
 export interface GroupeIndicateurTrois {
   categorieSocioPro: CategorieSocioPro;
   tauxPromotionFemmes: number | undefined;
   tauxPromotionHommes: number | undefined;
-  ecartTauxPromotion: number | undefined;
+  ecartTauxPromotion?: number | undefined;
 }
 
 ////////////

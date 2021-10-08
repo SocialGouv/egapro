@@ -123,7 +123,7 @@ function IndicateurDeuxTroisForm({
     totalNombreSalariesFemme: totalNombreSalariesFemmes,
   } = totalNombreSalaries(nombreSalaries);
 
-  const validateEffectifs: (max: Number, gender: string) => ValidatorFunction =
+  const validateEffectifs: (max: number, gender: string) => ValidatorFunction =
     (max, gender) => (value) =>
       maxNumber(max)(value)
         ? `Le nombre ${gender} ne peut pas être supérieur aux effectifs`
