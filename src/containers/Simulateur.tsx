@@ -90,7 +90,7 @@ function Simulateur({ code, state, dispatch }: Props) {
         setLoading(false);
         setTokenInfo("error");
       });
-  }, [token]);
+  }, [token, dispatch]);
 
   useEffect(() => {
     setLoading(true);
