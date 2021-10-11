@@ -42,11 +42,11 @@ interface TokenInfo {
 }
 
 interface Declaration {
-  declared_at: Number;
-  modified_at: Number;
+  declared_at: number;
+  modified_at: number;
   name: string;
   siren: string;
-  year: Number;
+  year: number;
 }
 
 interface Props {
@@ -90,7 +90,7 @@ function Simulateur({ code, state, dispatch }: Props) {
         setLoading(false);
         setTokenInfo("error");
       });
-  }, [token]);
+  }, [token, dispatch]);
 
   useEffect(() => {
     setLoading(true);
