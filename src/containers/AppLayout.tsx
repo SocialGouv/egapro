@@ -13,6 +13,7 @@ import CGU from "../views/CGU";
 import FAQ from "../views/FAQ";
 import Home from "../views/Home";
 import MentionsLegales from "../views/MentionsLegales";
+import InfosApp from "../views/InfosApp";
 import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite";
 import PageNotFound from "../views/PageNotFound";
 
@@ -94,6 +95,13 @@ function AppLayout({ state, dispatch }: Props) {
                             {...props}
                             dispatch={dispatch}
                           />
+                        )}
+                      />
+                     <Route
+                        path="/infosApp"
+                        exact
+                        render={() => (
+                          <InfosApp />
                         )}
                       />
                       <Route component={PageNotFound} />
