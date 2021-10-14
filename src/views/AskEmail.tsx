@@ -58,9 +58,7 @@ function AskEmail({ code, tagLine }: Props) {
                 </p>
 
                 <p css={styles.warning}>
-                  Ouvrez ce mail et cliquez sur le lien de validation afin de
-                  poursuivre votre simulation ou d'accéder à votre déclaration
-                  déjà transmise.
+                  Ouvrez ce mail et cliquez sur le lien de validation pour accéder à la partie déclaration.
                 </p>
 
                 <p>
@@ -83,19 +81,7 @@ function AskEmail({ code, tagLine }: Props) {
             ) : (
               <Fragment>
                 <p>
-                  L’email saisi doit être valide.
-                  <br />
-                  <br />
-                  Pour pouvoir permettre de poursuivre la transmission des
-                  informations requises, il doit correspondre à celui de la
-                  personne à contacter par les services de l’inspection du
-                  travail en cas de besoin et sera celui sur lequel sera adressé
-                  l’accusé de réception en fin de procédure.
-                  <br />
-                  <br />
-                  Si vous souhaitez visualiser ou modifier votre déclaration
-                  déjà transmise, veuillez saisir l'email utilisé pour la
-                  déclaration.
+                  L’email saisi doit être valide. Il sera celui sur lequel sera adressé l’accusé de réception en fin de procédure et celui qui vous permettra d'accéder à votre déclaration une fois validée et transmise.
                   <br />
                   <br />
                   Attention : en cas d'email erroné, vous ne pourrez pas remplir

@@ -4,13 +4,29 @@ import { useReducer, useCallback } from "react";
 import { Router } from "react-router-dom";
 import ReactPiwik from "react-piwik";
 import { createBrowserHistory } from "history";
+import {ErrorBoundary} from 'react-error-boundary'
 
 import { ActionType } from "./globals";
 import AppReducer from "./AppReducer";
-
 import GridProvider from "./components/GridContext";
 import AppLayout from "./containers/AppLayout";
 import InfoBloc from "./components/InfoBloc";
+import Page from "./components/Page";
+import ActionBar from "./components/ActionBar";
+import ButtonAction from "./components/ButtonAction";
+
+function ErrorFallback({error, resetErrorBoundary}: {error: Error, resetErrorBoundary: () => void}) {
+  return (
+    <Page title="Quelque chose s'est mal passée... 😕">
+      <div style={{ color: "red", marginBottom: 20}}>
+        {error.message}
+      </div>
+    <ActionBar>
+      <ButtonAction label="retour" onClick={resetErrorBoundary} />
+    </ActionBar>
+  </Page>
+  )
+}
 
 const history = createBrowserHistory();
 
@@ -43,6 +59,12 @@ function App() {
   );
 
   return (
+    <ErrorBoundary
+    FallbackComponent={ErrorFallback}
+    onReset={() => {
+      history.goBack();
+    }}
+  >
     <Router history={piwik.connectToHistory(history)}>
       <GridProvider>
         {/* TODO: update the following date and message when there's another announcement */}
@@ -56,9 +78,12 @@ function App() {
             />
           </div>
         )}
+
         <AppLayout state={state} dispatch={dispatch} />
       </GridProvider>
     </Router>
+  </ErrorBoundary>
+
   );
 }
 

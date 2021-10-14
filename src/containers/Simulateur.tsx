@@ -81,6 +81,8 @@ function Simulateur({ code, state, dispatch }: Props) {
       .then(({ jsonBody }) => {
         setLoading(false);
         setTokenInfo(jsonBody);
+        localStorage.setItem("tokenInfo", JSON.stringify(jsonBody) || "");
+
         dispatch({
           type: "updateEmailDeclarant",
           data: { email: jsonBody.email },
@@ -214,7 +216,6 @@ function Simulateur({ code, state, dispatch }: Props) {
           <p></p>
           <AskEmail
             code={code}
-            tagLine="La session est expirée, veuillez fournir votre email afin de recevoir un lien vous permettant de la rafraîchir."
           />
         </Fragment>
       ) : (

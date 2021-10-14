@@ -100,6 +100,9 @@ function Footer() {
           >
             contribuez sur Github
           </a>
+          <Link to="/infosApp" css={[styles.infoLink, isMobile && styles.linkMobile]} style={{ marginLeft: 8}}>
+            infos application
+          </Link>
         </span>
       </div>
     </footer>
