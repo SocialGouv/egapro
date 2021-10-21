@@ -1,161 +1,119 @@
-import {
-  fractionToPercentage,
-  parseDate,
-  percentageToFraction,
-} from "./helpers";
+import { fractionToPercentage, parseDate, percentageToFraction } from "./helpers"
 
-import { PeriodeDeclaration, TrancheEffectifs } from "../globals";
+import { PeriodeDeclaration, TrancheEffectifs } from "../globals"
 
 // INT PARSE
 
-export const parseIntFormValue = (
-  value: string,
-  defaultValue: any = undefined
-) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : parseInt(value, 10);
+export const parseIntFormValue = (value: string, defaultValue: any = undefined) =>
+  value === "" ? defaultValue : Number.isNaN(Number(value)) ? defaultValue : parseInt(value, 10)
 
-export const parseIntStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(value);
+export const parseIntStateValue = (value: number | undefined) => (value === undefined ? "" : String(value))
 
 // Float PARSE
 
-export const parseFloatFormValue = (
-  value: string,
-  defaultValue: any = undefined
-) =>
-  value === ""
-    ? defaultValue
-    : Number.isNaN(Number(value))
-    ? defaultValue
-    : percentageToFraction(parseFloat(value));
+export const parseFloatFormValue = (value: string, defaultValue: any = undefined) =>
+  value === "" ? defaultValue : Number.isNaN(Number(value)) ? defaultValue : percentageToFraction(parseFloat(value))
 
 export const parseFloatStateValue = (value: number | undefined) =>
-  value === undefined ? "" : String(fractionToPercentage(value));
+  value === undefined ? "" : String(fractionToPercentage(value))
 
 // Boolean PARSE
 
-export const parseBooleanFormValue = (value: string) => value === "true";
+export const parseBooleanFormValue = (value: string) => value === "true"
 
-export const parseBooleanStateValue = (value: boolean) => String(value);
+export const parseBooleanStateValue = (value: boolean) => String(value)
 
 // PeriodeDeclaration PARSE
 
-export const parsePeriodeDeclarationFormValue = (
-  value: string
-): PeriodeDeclaration => {
+export const parsePeriodeDeclarationFormValue = (value: string): PeriodeDeclaration => {
   switch (value) {
     case "deuxPeriodesReference":
-      return "deuxPeriodesReference" as PeriodeDeclaration;
+      return "deuxPeriodesReference" as PeriodeDeclaration
     case "troisPeriodesReference":
-      return "troisPeriodesReference" as PeriodeDeclaration;
+      return "troisPeriodesReference" as PeriodeDeclaration
     default:
-      return "unePeriodeReference" as PeriodeDeclaration;
+      return "unePeriodeReference" as PeriodeDeclaration
   }
-};
+}
 
 // TrancheEffectif PARSE
 
-export const parseTrancheEffectifsFormValue = (
-  value: string
-): TrancheEffectifs => {
+export const parseTrancheEffectifsFormValue = (value: string): TrancheEffectifs => {
   switch (value) {
     case "251 à 999":
-      return "251 à 999" as TrancheEffectifs;
+      return "251 à 999" as TrancheEffectifs
     case "1000 et plus":
-      return "1000 et plus" as TrancheEffectifs;
+      return "1000 et plus" as TrancheEffectifs
     default:
-      return "50 à 250" as TrancheEffectifs;
+      return "50 à 250" as TrancheEffectifs
   }
-};
+}
 
 // VALIDATION
 
-export type ValidatorFunction = (
-  value: string,
-  allValues?: any
-) => undefined | string;
-export type AsyncValidatorFunction = (
-  value: string,
-  allValues?: string[]
-) => Promise<undefined | string>;
-export type FormValidatorFunction = (values: Object) => undefined | string;
+export type ValidatorFunction = (value: string, allValues?: any) => undefined | string
+export type AsyncValidatorFunction = (value: string, allValues?: string[]) => Promise<undefined | string>
+export type FormValidatorFunction = (values: Record<string, unknown>) => undefined | string
 
-export const required: ValidatorFunction = (value) =>
-  value ? undefined : "Ce champ ne peut être vide";
+export const required: ValidatorFunction = (value) => (value ? undefined : "Ce champ ne peut être vide")
 
 export const mustBeNumber: ValidatorFunction = (value) =>
-  isNaN(Number(value)) ? "Renseignez une valeur numérique" : undefined;
+  isNaN(Number(value)) ? "Renseignez une valeur numérique" : undefined
 
 export const mustBeInteger: ValidatorFunction = (value) =>
-  Number.isInteger(Number(value))
-    ? undefined
-    : "Renseignez une valeur entière, sans virgule";
+  Number.isInteger(Number(value)) ? undefined : "Renseignez une valeur entière, sans virgule"
 
 export const minNumber: (min: number) => ValidatorFunction = (min) => (value) =>
-  isNaN(Number(value)) || Number(value) >= min
-    ? undefined
-    : `La valeur doit être supérieure à ${min}`;
+  isNaN(Number(value)) || Number(value) >= min ? undefined : `La valeur doit être supérieure à ${min}`
 
 export const maxNumber: (max: number) => ValidatorFunction = (max) => (value) =>
-  isNaN(Number(value)) || Number(value) <= max
-    ? undefined
-    : `La valeur doit être inférieure à ${max}`;
+  isNaN(Number(value)) || Number(value) <= max ? undefined : `La valeur doit être inférieure à ${max}`
 
 export const mustBeDate: ValidatorFunction = (value) => {
-  const parsed = parseDate(value);
-  return parsed === undefined ||
-    parsed.toString() === "ce champ doit contenir une date au format jj/mm/aaaa"
+  const parsed = parseDate(value)
+  return parsed === undefined || parsed.toString() === "ce champ doit contenir une date au format jj/mm/aaaa"
     ? "Ce champ doit contenir une date au format jj/mm/aaaa"
-    : undefined;
-};
+    : undefined
+}
 
 export const validateDate = (value: string) => {
-  const requiredError = required(value);
-  const mustBeDateError = mustBeDate(value);
+  const requiredError = required(value)
+  const mustBeDateError = mustBeDate(value)
   if (!requiredError && !mustBeDateError) {
-    return undefined;
+    return undefined
   } else {
     return {
       required: requiredError,
       mustBeDate: mustBeDateError,
-    };
+    }
   }
-};
+}
 
 const regexpEmail =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-export const validateEmail = (email: string) => !regexpEmail.test(email);
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+export const validateEmail = (email: string) => !regexpEmail.test(email)
 
 export const composeValidators =
   (...validators: Array<ValidatorFunction | AsyncValidatorFunction>) =>
   (value: string, allValues?: any) =>
-    validators.reduce(
-      (error: undefined | string, validator: any) =>
-        error || validator(value, allValues),
-      undefined
-    );
+    validators.reduce((error: undefined | string, validator: any) => error || validator(value, allValues), undefined)
 
 export const composeFormValidators =
   (...validators: Array<FormValidatorFunction>) =>
-  (value: Object) =>
+  (value: Record<string, unknown>) =>
     validators.reduce(
-      (error: undefined | string, validator: FormValidatorFunction) =>
-        error || validator(value),
-      undefined
-    );
+      (error: undefined | string, validator: FormValidatorFunction) => error || validator(value),
+      undefined,
+    )
 
 export const simpleMemoize = (fn: any) => {
-  let lastArg: any;
-  let lastResult: any;
+  let lastArg: any
+  let lastResult: any
   return (arg: any) => {
     if (arg !== lastArg) {
-      lastArg = arg;
-      lastResult = fn(arg);
+      lastArg = arg
+      lastResult = fn(arg)
     }
-    return lastResult;
-  };
-};
+    return lastResult
+  }
+}

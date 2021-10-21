@@ -1,56 +1,42 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useCallback, ReactNode } from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { useCallback, ReactNode } from "react"
+import { RouteComponentProps } from "react-router-dom"
 
-import {
-  AppState,
-  FormState,
-  ActionType,
-  ActionIndicateurDeuxTroisData
-} from "../../globals";
+import { AppState, FormState, ActionType, ActionIndicateurDeuxTroisData } from "../../globals"
 
 import calculIndicateurDeuxTrois, {
   calculPlusPetitNombreSalaries,
-  calculBarem
-} from "../../utils/calculsEgaProIndicateurDeuxTrois";
-import totalNombreSalaries from "../../utils/totalNombreSalaries";
+  calculBarem,
+} from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
-import Page from "../../components/Page";
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
-import InfoBloc from "../../components/InfoBloc";
-import ActionBar from "../../components/ActionBar";
-import ActionLink from "../../components/ActionLink";
-import {
-  ButtonSimulatorLink,
-  TextSimulatorLink
-} from "../../components/SimulatorLink";
-import {
-  messageEcartNombreEquivalentSalaries,
-  displayPercent,
-  messageMesureCorrection
-} from "../../utils/helpers";
+import Page from "../../components/Page"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import InfoBloc from "../../components/InfoBloc"
+import ActionBar from "../../components/ActionBar"
+import ActionLink from "../../components/ActionLink"
+import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
+import { messageEcartNombreEquivalentSalaries, displayPercent, messageMesureCorrection } from "../../utils/helpers"
 
-import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm";
-import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult";
+import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
+import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
 
 interface Props extends RouteComponentProps {
-  state: AppState;
-  dispatch: (action: ActionType) => void;
+  state: AppState
+  dispatch: (action: ActionType) => void
 }
 
 function IndicateurDeuxTrois({ state, dispatch }: Props) {
   const updateIndicateurDeuxTrois = useCallback(
-    (data: ActionIndicateurDeuxTroisData) =>
-      dispatch({ type: "updateIndicateurDeuxTrois", data }),
-    [dispatch]
-  );
+    (data: ActionIndicateurDeuxTroisData) => dispatch({ type: "updateIndicateurDeuxTrois", data }),
+    [dispatch],
+  )
 
   const validateIndicateurDeuxTrois = useCallback(
-    (valid: FormState) =>
-      dispatch({ type: "validateIndicateurDeuxTrois", valid }),
-    [dispatch]
-  );
+    (valid: FormState) => dispatch({ type: "validateIndicateurDeuxTrois", valid }),
+    [dispatch],
+  )
 
   const {
     effectifsIndicateurCalculable,
@@ -58,8 +44,8 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente,
     noteIndicateurDeuxTrois,
-    correctionMeasure
-  } = calculIndicateurDeuxTrois(state);
+    correctionMeasure,
+  } = calculIndicateurDeuxTrois(state)
 
   // le formulaire d'informations n'est pas validé
   if (state.informations.formValidated !== "Valid") {
@@ -67,15 +53,10 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
       <PageIndicateurDeuxTrois>
         <InfoBloc
           title="vous devez renseignez vos informations d'entreprise avant d’avoir accès à cet indicateur"
-          text={
-            <TextSimulatorLink
-              to="/informations"
-              label="renseigner les informations"
-            />
-          }
+          text={<TextSimulatorLink to="/informations" label="renseigner les informations" />}
         />
       </PageIndicateurDeuxTrois>
-    );
+    )
   }
 
   // le formulaire d'effectif n'est pas validé
@@ -84,15 +65,10 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
       <PageIndicateurDeuxTrois>
         <InfoBloc
           title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={
-            <TextSimulatorLink
-              to="/effectifs"
-              label="renseigner les effectifs"
-            />
-          }
+          text={<TextSimulatorLink to="/effectifs" label="renseigner les effectifs" />}
         />
       </PageIndicateurDeuxTrois>
-    );
+    )
   }
 
   // les effectifs ne permettent pas de calculer l'indicateur
@@ -109,14 +85,11 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
           </ActionBar>
         </div>
       </PageIndicateurDeuxTrois>
-    );
+    )
   }
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
-  if (
-    state.indicateurDeuxTrois.formValidated === "Valid" &&
-    !state.indicateurDeuxTrois.presenceAugmentationPromotion
-  ) {
+  if (state.indicateurDeuxTrois.formValidated === "Valid" && !state.indicateurDeuxTrois.presenceAugmentationPromotion) {
     return (
       <PageIndicateurDeuxTrois>
         <div>
@@ -125,31 +98,21 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
             text="car il n’y a pas eu d'augmentation durant la période de référence."
           />
           <ActionBar>
-            <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>
-              modifier les données saisies
-            </ActionLink>
+            <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>modifier les données saisies</ActionLink>
           </ActionBar>
           <ActionBar>
             <ButtonSimulatorLink to="/indicateur4" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeuxTrois>
-    );
+    )
   }
 
-  const results = getResults(
-    indicateurEcartAugmentationPromotion,
-    indicateurEcartNombreEquivalentSalaries
-  );
+  const results = getResults(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
 
-  const {
-    totalNombreSalariesHomme: totalNombreSalariesHommes,
-    totalNombreSalariesFemme: totalNombreSalariesFemmes
-  } = totalNombreSalaries(state.effectif.nombreSalaries);
-  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(
-    totalNombreSalariesHommes,
-    totalNombreSalariesFemmes
-  );
+  const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
+    totalNombreSalaries(state.effectif.nombreSalaries)
+  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(totalNombreSalariesHommes, totalNombreSalariesFemmes)
 
   return (
     <PageIndicateurDeuxTrois>
@@ -157,15 +120,9 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
         childrenForm={
           <IndicateurDeuxTroisForm
             finPeriodeReference={state.informations.finPeriodeReference}
-            presenceAugmentationPromotion={
-              state.indicateurDeuxTrois.presenceAugmentationPromotion
-            }
-            nombreAugmentationPromotionFemmes={
-              state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes
-            }
-            nombreAugmentationPromotionHommes={
-              state.indicateurDeuxTrois.nombreAugmentationPromotionHommes
-            }
+            presenceAugmentationPromotion={state.indicateurDeuxTrois.presenceAugmentationPromotion}
+            nombreAugmentationPromotionFemmes={state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes}
+            nombreAugmentationPromotionHommes={state.indicateurDeuxTrois.nombreAugmentationPromotionHommes}
             periodeDeclaration={state.indicateurDeuxTrois.periodeDeclaration}
             nombreSalaries={state.effectif.nombreSalaries}
             readOnly={state.indicateurDeuxTrois.formValidated === "Valid"}
@@ -194,7 +151,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
         />
       )}
     </PageIndicateurDeuxTrois>
-  );
+  )
 }
 
 function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
@@ -205,88 +162,62 @@ function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
     >
       {children}
     </Page>
-  );
+  )
 }
 
-export type Result = { label: string; result: string; note: number };
-export type Results = { best: Result; worst: Result };
+export type Result = { label: string; result: string; note: number }
+export type Results = { best: Result; worst: Result }
 
 export const getResults = (
   indicateurEcartAugmentationPromotion: number | undefined,
-  indicateurEcartNombreEquivalentSalaries: number | undefined
+  indicateurEcartNombreEquivalentSalaries: number | undefined,
 ): Results => {
   const ecartTaux = {
     label: "votre résultat en pourcentage est de",
     result:
-      indicateurEcartAugmentationPromotion !== undefined
-        ? displayPercent(indicateurEcartAugmentationPromotion)
-        : "--",
-    note:
-      indicateurEcartAugmentationPromotion !== undefined
-        ? calculBarem(indicateurEcartAugmentationPromotion)
-        : 0
-  };
+      indicateurEcartAugmentationPromotion !== undefined ? displayPercent(indicateurEcartAugmentationPromotion) : "--",
+    note: indicateurEcartAugmentationPromotion !== undefined ? calculBarem(indicateurEcartAugmentationPromotion) : 0,
+  }
   const ecartNbSalaries = {
     label: "votre résultat en nombre équivalent de salariés* est",
-    result:
-      indicateurEcartNombreEquivalentSalaries !== undefined
-        ? `${indicateurEcartNombreEquivalentSalaries}`
-        : "--",
+    result: indicateurEcartNombreEquivalentSalaries !== undefined ? `${indicateurEcartNombreEquivalentSalaries}` : "--",
     note:
-      indicateurEcartNombreEquivalentSalaries !== undefined
-        ? calculBarem(indicateurEcartNombreEquivalentSalaries)
-        : 0
-  };
+      indicateurEcartNombreEquivalentSalaries !== undefined ? calculBarem(indicateurEcartNombreEquivalentSalaries) : 0,
+  }
   const results =
     indicateurEcartNombreEquivalentSalaries !== undefined &&
     indicateurEcartAugmentationPromotion !== undefined &&
-    indicateurEcartNombreEquivalentSalaries <
-      indicateurEcartAugmentationPromotion
+    indicateurEcartNombreEquivalentSalaries < indicateurEcartAugmentationPromotion
       ? { best: ecartNbSalaries, worst: ecartTaux }
-      : { worst: ecartNbSalaries, best: ecartTaux };
-  return results;
-};
+      : { worst: ecartNbSalaries, best: ecartTaux }
+  return results
+}
 
 export function AdditionalInfo({
   indicateurSexeSurRepresente,
   plusPetitNombreSalaries,
   correctionMeasure,
-  results
+  results,
 }: {
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
-  plusPetitNombreSalaries: "hommes" | "femmes" | undefined;
-  correctionMeasure: boolean;
-  results: Results;
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
+  plusPetitNombreSalaries: "hommes" | "femmes" | undefined
+  correctionMeasure: boolean
+  results: Results
 }) {
   return (
     <div css={styles.additionalInfo}>
       <p>
-        {results.worst.label} <strong>{results.worst.result}</strong>, la note
-        obtenue{" "}
-        {correctionMeasure &&
-          "avant prise en compte des mesures de correction "}
+        {results.worst.label} <strong>{results.worst.result}</strong>, la note obtenue{" "}
+        {correctionMeasure && "avant prise en compte des mesures de correction "}
         est de <strong>{results.worst.note}/35</strong>
         <br />
         {results.worst.note < results.best.note &&
           "cette note n'a pas été retenue dans le calcul de votre index car elle est la moins favorable"}
       </p>
-      <p>
-        {messageEcartNombreEquivalentSalaries(
-          indicateurSexeSurRepresente,
-          plusPetitNombreSalaries
-        )}
-      </p>
-      {correctionMeasure && (
-        <p>
-          {messageMesureCorrection(
-            indicateurSexeSurRepresente,
-            "d'augmentations",
-            "35/35"
-          )}
-        </p>
-      )}
+      <p>{messageEcartNombreEquivalentSalaries(indicateurSexeSurRepresente, plusPetitNombreSalaries)}</p>
+      {correctionMeasure && <p>{messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "35/35")}</p>}
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -296,9 +227,9 @@ const styles = {
     fontStyle: "italic",
     maxWidth: 500,
     "& > p": {
-      marginBottom: 30
-    }
-  })
-};
+      marginBottom: 30,
+    },
+  }),
+}
 
-export default IndicateurDeuxTrois;
+export default IndicateurDeuxTrois

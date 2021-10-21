@@ -1,2 +1,2 @@
-import InformationsSimulation from "./InformationsSimulation";
-export default InformationsSimulation;
+import InformationsSimulation from "./InformationsSimulation"
+export default InformationsSimulation

@@ -1,52 +1,48 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Field, Form } from "react-final-form";
-import { Link } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { Field, Form } from "react-final-form"
+import { Link } from "react-router-dom"
 
-import globalStyles from "../../utils/globalStyles";
+import globalStyles from "../../utils/globalStyles"
 
-import {
-  AppState,
-  FormState,
-  ActionInformationsDeclarantData,
-} from "../../globals";
+import { AppState, FormState, ActionInformationsDeclarantData } from "../../globals"
 
-import { mustBeNumber, required, validateEmail } from "../../utils/formHelpers";
+import { mustBeNumber, required, validateEmail } from "../../utils/formHelpers"
 
-import ActionBar from "../../components/ActionBar";
-import ActionLink from "../../components/ActionLink";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import TextField from "../../components/TextField";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import ActionBar from "../../components/ActionBar"
+import ActionLink from "../../components/ActionLink"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import TextField from "../../components/TextField"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
 ///////////////////
 
 const validate = (value: string) => {
-  const requiredError = required(value);
+  const requiredError = required(value)
   if (!requiredError) {
-    return undefined;
+    return undefined
   } else {
     return {
       required: requiredError,
-    };
+    }
   }
-};
+}
 
 const validateTel = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
-  const mustBe10DigitsError = value && value.length !== 10;
+  const requiredError = required(value)
+  const mustBeNumberError = mustBeNumber(value)
+  const mustBe10DigitsError = value && value.length !== 10
   if (!requiredError && !mustBeNumberError && !mustBe10DigitsError) {
-    return undefined;
+    return undefined
   } else {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
       mustBe10Digits: mustBe10DigitsError,
-    };
+    }
   }
-};
+}
 
 const validateForm = ({
   nom,
@@ -55,24 +51,24 @@ const validateForm = ({
   email,
   acceptationCGU,
 }: {
-  nom: string;
-  prenom: string;
-  tel: string;
-  email: string;
-  acceptationCGU: boolean;
+  nom: string
+  prenom: string
+  tel: string
+  email: string
+  acceptationCGU: boolean
 }) => ({
   nom: validate(nom),
   prenom: validate(prenom),
   tel: validateTel(tel),
   email: validateEmail(email) ? { invalid: true } : undefined,
   acceptationCGU: acceptationCGU ? undefined : { invalid: true },
-});
+})
 
 interface Props {
-  informationsDeclarant: AppState["informationsDeclarant"];
-  readOnly: boolean;
-  updateInformationsDeclarant: (data: ActionInformationsDeclarantData) => void;
-  validateInformationsDeclarant: (valid: FormState) => void;
+  informationsDeclarant: AppState["informationsDeclarant"]
+  readOnly: boolean
+  updateInformationsDeclarant: (data: ActionInformationsDeclarantData) => void
+  validateInformationsDeclarant: (valid: FormState) => void
 }
 
 function InformationsDeclarantForm({
@@ -87,10 +83,10 @@ function InformationsDeclarantForm({
     tel: informationsDeclarant.tel,
     email: informationsDeclarant.email,
     acceptationCGU: informationsDeclarant.acceptationCGU,
-  };
+  }
 
   const saveForm = (formData: any) => {
-    const { nom, prenom, tel, email, acceptationCGU } = formData;
+    const { nom, prenom, tel, email, acceptationCGU } = formData
 
     updateInformationsDeclarant({
       nom,
@@ -98,13 +94,13 @@ function InformationsDeclarantForm({
       tel,
       email,
       acceptationCGU,
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateInformationsDeclarant("Valid");
-  };
+    saveForm(formData)
+    validateInformationsDeclarant("Valid")
+  }
 
   return (
     <Form
@@ -120,12 +116,7 @@ function InformationsDeclarantForm({
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
 
-          <TextField
-            label="Nom du déclarant"
-            fieldName="nom"
-            errorText="le nom n’est pas valide"
-            readOnly={readOnly}
-          />
+          <TextField label="Nom du déclarant" fieldName="nom" errorText="le nom n’est pas valide" readOnly={readOnly} />
           <TextField
             label="Prénom du déclarant"
             fieldName="prenom"
@@ -147,15 +138,11 @@ function InformationsDeclarantForm({
           <Field name="acceptationCGU" component="input" type="checkbox">
             {({ input, meta }: { input: any; meta: any }) => (
               <label css={styles.label}>
-                <input {...input} disabled={readOnly} /> J'accepte l'utilisation
-                de mes données à caractère personnel pour réaliser des
-                statistiques et pour vérifier la validité de ma déclaration.
-                Pour en savoir plus sur l'usage de ces données, vous pouvez
-                consulter nos{" "}
+                <input {...input} disabled={readOnly} /> J'accepte l'utilisation de mes données à caractère personnel
+                pour réaliser des statistiques et pour vérifier la validité de ma déclaration. Pour en savoir plus sur
+                l'usage de ces données, vous pouvez consulter nos{" "}
                 <Link to="/cgu">Conditions Générales d'Utilisation</Link>
-                {meta.error && meta.touched && (
-                  <p css={styles.error}>veuillez accepter les CGUs</p>
-                )}
+                {meta.error && meta.touched && <p css={styles.error}>veuillez accepter les CGUs</p>}
               </label>
             )}
           </Field>
@@ -165,9 +152,7 @@ function InformationsDeclarantForm({
               &emsp;
               {informationsDeclarant.formValidated === "Valid" && (
                 <p css={styles.edit}>
-                  <ActionLink
-                    onClick={() => validateInformationsDeclarant("None")}
-                  >
+                  <ActionLink onClick={() => validateInformationsDeclarant("None")}>
                     modifier les données saisies
                   </ActionLink>
                 </p>
@@ -185,7 +170,7 @@ function InformationsDeclarantForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 const styles = {
@@ -208,6 +193,6 @@ const styles = {
     textDecoration: "underline",
     lineHeight: "15px",
   }),
-};
+}
 
-export default InformationsDeclarantForm;
+export default InformationsDeclarantForm

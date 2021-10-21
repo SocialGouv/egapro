@@ -1,45 +1,45 @@
 const commonHeaders = {
   Accept: "application/json",
-};
+}
 
 const commonContentHeaders = {
   ...commonHeaders,
   "Content-Type": "application/json",
-};
+}
 
 ////////////
 
 class ApiError extends Error {
   constructor(response, jsonBody, ...params) {
-    super(...params);
+    super(...params)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ApiError);
+      Error.captureStackTrace(this, ApiError)
     }
-    this.response = response;
-    this.jsonBody = jsonBody;
+    this.response = response
+    this.jsonBody = jsonBody
   }
 }
 
 function checkStatusAndParseJson(response) {
   if (response.status === 204) {
-    return { response };
+    return { response }
   }
 
-  let jsonPromise = response.json(); // there's always a body
+  let jsonPromise = response.json() // there's always a body
   if (response.status >= 200 && response.status < 300) {
-    return jsonPromise.then((jsonBody) => ({ response, jsonBody }));
+    return jsonPromise.then((jsonBody) => ({ response, jsonBody }))
   } else {
     return jsonPromise.then((jsonBody) => {
-      const apiError = new ApiError(response, jsonBody);
-      return Promise.reject.bind(Promise)(apiError);
-    });
+      const apiError = new ApiError(response, jsonBody)
+      return Promise.reject.bind(Promise)(apiError)
+    })
   }
 }
 
 /////////////
 
 function fetchResource(method, pathname, body) {
-  const headers = body ? commonContentHeaders : commonHeaders;
+  const headers = body ? commonContentHeaders : commonHeaders
 
   const requestObj = {
     method,
@@ -48,58 +48,46 @@ function fetchResource(method, pathname, body) {
       "API-KEY": localStorage.token,
     },
     body: body ? JSON.stringify(body) : undefined,
-  };
-  let origin = "/api";
+  }
+  let origin = "/api"
   if (window.location.href.includes("localhost:")) {
-    origin = "http://127.0.0.1:2626";
+    origin = "http://127.0.0.1:2626"
   }
 
-  return fetch(origin + pathname, requestObj).then(checkStatusAndParseJson);
+  return fetch(origin + pathname, requestObj).then(checkStatusAndParseJson)
 }
 
-const getResource = (pathname) => fetchResource("GET", pathname);
-const postResource = (pathname, body) => fetchResource("POST", pathname, body);
-const putResource = (pathname, body) => fetchResource("PUT", pathname, body);
+const getResource = (pathname) => fetchResource("GET", pathname)
+const postResource = (pathname, body) => fetchResource("POST", pathname, body)
+const putResource = (pathname, body) => fetchResource("PUT", pathname, body)
 
 /////////////
 
-export const getIndicatorsDatas = (id) => getResource(`/simulation/${id}`);
+export const getIndicatorsDatas = (id) => getResource(`/simulation/${id}`)
 
-export const postIndicatorsDatas = (data) => postResource("/simulation", data);
+export const postIndicatorsDatas = (data) => postResource("/simulation", data)
 
-export const putIndicatorsDatas = (id, data) =>
-  putResource(`/simulation/${id}`, { id, data });
+export const putIndicatorsDatas = (id, data) => putResource(`/simulation/${id}`, { id, data })
 
 export const putDeclaration = (data) =>
-  putResource(
-    `/declaration/${data.entreprise.siren}/${data.déclaration.année_indicateurs}`,
-    data
-  );
+  putResource(`/declaration/${data.entreprise.siren}/${data.déclaration.année_indicateurs}`, data)
 
-export const validateSiren = (siren) =>
-  getResource(`/validate-siren?siren=${siren}`);
+export const validateSiren = (siren) => getResource(`/validate-siren?siren=${siren}`)
 
-export const resendReceipt = (siren, year) =>
-  postResource(`/declaration/${siren}/${year}/receipt`, {});
+export const resendReceipt = (siren, year) => postResource(`/declaration/${siren}/${year}/receipt`, {})
 
-export const sendValidationEmail = (email, code) =>
+export const sendValidationEmail = (email) =>
   postResource("/token", {
     email,
     url: `${window.location.href}?token=`,
-  });
+  })
 
-export const getTokenInfo = () => getResource(`/me`);
+export const getTokenInfo = () => getResource(`/me`)
 
 // KILL THIS ENDPOINT
-export const sendEmailIndicatorsDatas = (id, email) =>
-  postResource(`/simulation/${id}/send-code`, { email });
+export const sendEmailIndicatorsDatas = (id, email) => postResource(`/simulation/${id}/send-code`, { email })
 
-export const findIndicatorsDataForRaisonSociale = (
-  raisonSociale,
-  { size, from, sortBy, order }
-) => {
-  const encodedRaisonSociale = encodeURIComponent(raisonSociale);
-  return getResource(
-    `/search?q=${encodedRaisonSociale}&size=${size}&from=${from}&sortBy=${sortBy}&order=${order}`
-  );
-};
+export const findIndicatorsDataForRaisonSociale = (raisonSociale, { size, from, sortBy, order }) => {
+  const encodedRaisonSociale = encodeURIComponent(raisonSociale)
+  return getResource(`/search?q=${encodedRaisonSociale}&size=${size}&from=${from}&sortBy=${sortBy}&order=${order}`)
+}

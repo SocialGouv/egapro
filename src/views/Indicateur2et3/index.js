@@ -1,2 +1,2 @@
-import IndicateurDeuxTrois from "./IndicateurDeuxTrois";
-export default IndicateurDeuxTrois;
+import IndicateurDeuxTrois from "./IndicateurDeuxTrois"
+export default IndicateurDeuxTrois

@@ -1,11 +1,11 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
 interface Props {
-  listTitle: string;
-  list: Array<string>;
-  scaleTitle: string;
-  scale: Array<string>;
+  listTitle: string
+  list: Array<string>
+  scaleTitle: string
+  scale: Array<string>
 }
 
 function FAQCalculScale({ listTitle, list, scaleTitle, scale }: Props) {
@@ -26,7 +26,7 @@ function FAQCalculScale({ listTitle, list, scaleTitle, scale }: Props) {
         ))}
       </tbody>
     </table>
-  );
+  )
 }
 
 const styles = {
@@ -35,17 +35,17 @@ const styles = {
     padding: "13px 25px",
     backgroundColor: "#F9F7F9",
     borderRadius: 5,
-    width: "100%"
+    width: "100%",
   }),
   text: css({
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   title: css({
     paddingBottom: 8,
     fontWeight: "bold",
-    textAlign: "left"
-  })
-};
+    textAlign: "left",
+  }),
+}
 
-export default FAQCalculScale;
+export default FAQCalculScale

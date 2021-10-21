@@ -1,95 +1,79 @@
 /** @jsx jsx */
-import { jsx, css } from "@emotion/core";
-import { useCallback, useState } from "react";
+import { jsx, css } from "@emotion/core"
+import { useCallback, useState } from "react"
 
-import {
-  AppState,
-  FormState,
-  ActionType,
-  ActionIndicateurUnCoefData
-} from "../../../globals";
+import { AppState, FormState, ActionType, ActionIndicateurUnCoefData } from "../../../globals"
 
-import { useScrollTo } from "../../../components/ScrollContext";
+import { useScrollTo } from "../../../components/ScrollContext"
 
-import IndicateurUnCoefMenu, { MenuOption } from "./IndicateurUnCoefMenu";
-import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm";
-import IndicateurUnCoefEffectifForm from "./IndicateurUnCoefEffectifForm";
-import IndicateurUnCoefRemuForm from "./IndicateurUnCoefRemuForm";
+import IndicateurUnCoefMenu, { MenuOption } from "./IndicateurUnCoefMenu"
+import IndicateurUnCoefGroupForm from "./IndicateurUnCoefGroupForm"
+import IndicateurUnCoefEffectifForm from "./IndicateurUnCoefEffectifForm"
+import IndicateurUnCoefRemuForm from "./IndicateurUnCoefRemuForm"
 
 function getDefaultMenuSelected(
   coefficientGroupFormValidated: FormState,
-  coefficientEffectifFormValidated: FormState
+  coefficientEffectifFormValidated: FormState,
 ): MenuOption {
   return coefficientEffectifFormValidated === "Valid"
     ? "remuneration"
     : coefficientGroupFormValidated === "Valid"
     ? "effectif"
-    : "groupe";
+    : "groupe"
 }
 
 interface Props {
-  state: AppState;
-  dispatch: (action: ActionType) => void;
+  state: AppState
+  dispatch: (action: ActionType) => void
 }
 
 function IndicateurUnCoef({ state, dispatch }: Props) {
   const updateIndicateurUnCoefAddGroup = useCallback(
     () => dispatch({ type: "updateIndicateurUnCoefAddGroup" }),
-    [dispatch]
-  );
+    [dispatch],
+  )
 
   const updateIndicateurUnCoefDeleteGroup = useCallback(
-    (index: number) =>
-      dispatch({ type: "updateIndicateurUnCoefDeleteGroup", index }),
-    [dispatch]
-  );
+    (index: number) => dispatch({ type: "updateIndicateurUnCoefDeleteGroup", index }),
+    [dispatch],
+  )
 
   const updateIndicateurUnCoef = useCallback(
-    (data: ActionIndicateurUnCoefData) =>
-      dispatch({ type: "updateIndicateurUnCoef", data }),
-    [dispatch]
-  );
+    (data: ActionIndicateurUnCoefData) => dispatch({ type: "updateIndicateurUnCoef", data }),
+    [dispatch],
+  )
 
   const validateIndicateurUnCoefGroup = useCallback(
-    (valid: FormState) =>
-      dispatch({ type: "validateIndicateurUnCoefGroup", valid }),
-    [dispatch]
-  );
+    (valid: FormState) => dispatch({ type: "validateIndicateurUnCoefGroup", valid }),
+    [dispatch],
+  )
 
   const validateIndicateurUnCoefEffectif = useCallback(
-    (valid: FormState) =>
-      dispatch({ type: "validateIndicateurUnCoefEffectif", valid }),
-    [dispatch]
-  );
+    (valid: FormState) => dispatch({ type: "validateIndicateurUnCoefEffectif", valid }),
+    [dispatch],
+  )
 
   const validateIndicateurUn = useCallback(
     (valid: FormState) => dispatch({ type: "validateIndicateurUn", valid }),
-    [dispatch]
-  );
+    [dispatch],
+  )
 
-  const {
-    coefficientGroupFormValidated,
-    coefficientEffectifFormValidated,
-    formValidated
-  } = state.indicateurUn;
+  const { coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } = state.indicateurUn
 
   const [menuSelected, setMenuSelected] = useState<MenuOption>(
-    getDefaultMenuSelected(
-      coefficientGroupFormValidated,
-      coefficientEffectifFormValidated
-    )
-  );
+    getDefaultMenuSelected(coefficientGroupFormValidated, coefficientEffectifFormValidated),
+  )
 
-  const scrollTo = useScrollTo();
+  const scrollTo = useScrollTo()
 
   const navigateTo = (menu: MenuOption) => {
-    scrollTo(0);
-    setMenuSelected(menu);
-  };
+    scrollTo(0)
+    setMenuSelected(menu)
+  }
 
-  const navigateToGroupe = () => navigateTo("groupe");
-  const navigateToEffectif = () => navigateTo("effectif");
-  const navigateToRemuneration = () => navigateTo("remuneration");
+  const navigateToGroupe = () => navigateTo("groupe")
+  const navigateToEffectif = () => navigateTo("effectif")
+  const navigateToRemuneration = () => navigateTo("remuneration")
 
   return (
     <div css={styles.container}>
@@ -128,14 +112,14 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
         />
       )}
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
-  })
-};
+    flexDirection: "column",
+  }),
+}
 
-export default IndicateurUnCoef;
+export default IndicateurUnCoef

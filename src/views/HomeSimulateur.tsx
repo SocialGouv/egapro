@@ -1,57 +1,61 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useRef } from "react";
-import { StaticContext } from "react-router";
-import { RouteComponentProps } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { useRef } from "react"
+import { StaticContext } from "react-router"
+import { RouteComponentProps } from "react-router-dom"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { useColumnsWidth, useLayoutType } from "../components/GridContext";
-import Page from "../components/Page";
-import ActionLink from "../components/ActionLink";
-import ActionBar from "../components/ActionBar";
-import { ButtonSimulatorLink } from "../components/SimulatorLink";
+import { useColumnsWidth, useLayoutType } from "../components/GridContext"
+import Page from "../components/Page"
+import ActionLink from "../components/ActionLink"
+import ActionBar from "../components/ActionBar"
+import { ButtonSimulatorLink } from "../components/SimulatorLink"
 
-export type HomeSimulateurRouteComponentProps = RouteComponentProps<
-  {},
-  StaticContext
->;
+export type HomeSimulateurRouteComponentProps = RouteComponentProps<Record<string, string>, StaticContext>
 
-interface Props extends HomeSimulateurRouteComponentProps {
-  code: string;
-}
+function HomeSimulateur(): JSX.Element {
+  const textEl = useRef<HTMLSpanElement>(null)
 
-function HomeSimulateur({ location, history, code }: Props) {
-  const textEl = useRef<HTMLSpanElement>(null);
-
-  const link = window.location.href;
+  const link = window.location.href
   const onCopy = () => {
     if (textEl.current && window.getSelection) {
-      const selection = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(textEl.current);
+      const selection = window.getSelection()
+      const range = document.createRange()
+      range.selectNodeContents(textEl.current)
       if (selection) {
-        selection.removeAllRanges();
-        selection.addRange(range);
+        selection.removeAllRanges()
+        selection.addRange(range)
       }
 
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(link);
+        navigator.clipboard.writeText(link)
       } else {
-        document.execCommand("copy");
+        document.execCommand("copy")
       }
     }
-  };
+  }
 
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
 
   return (
     <Page title="Bienvenue sur Index Egapro">
       <div css={css({ width })}>
         <div css={styles.codeCopyBloc}>
           <div css={styles.codeCopyFakeInput}>
-            <span ref={textEl} css={styles.codeCopyText} onClick={onCopy}>
+            <span
+              ref={textEl}
+              role="button"
+              tabIndex={0}
+              css={styles.codeCopyText}
+              onClick={onCopy}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === "Space") {
+                  onCopy()
+                }
+              }}
+            >
               {link}
             </span>
           </div>
@@ -61,8 +65,8 @@ function HomeSimulateur({ location, history, code }: Props) {
         </div>
 
         <p css={styles.tagline}>
-          Afin de pouvoir réaccéder à tout moment à votre calcul : pensez à
-          copier le code ci-dessus et le conserver précieusement.
+          Afin de pouvoir réaccéder à tout moment à votre calcul : pensez à copier le code ci-dessus et le conserver
+          précieusement.
         </p>
 
         <div css={styles.imageContainer}>
@@ -74,7 +78,7 @@ function HomeSimulateur({ location, history, code }: Props) {
         </ActionBar>
       </div>
     </Page>
-  );
+  )
 }
 
 const styles = {
@@ -128,6 +132,6 @@ const styles = {
     backgroundRepeat: "no-repeat",
     backgroundSize: "contain",
   }),
-};
+}
 
-export default HomeSimulateur;
+export default HomeSimulateur

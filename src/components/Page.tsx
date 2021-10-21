@@ -1,20 +1,20 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { useColumnsWidth, useLayoutType } from "./GridContext";
+import { useColumnsWidth, useLayoutType } from "./GridContext"
 
 interface Props {
-  title: string;
-  tagline?: string | Array<string>;
-  children: ReactNode;
+  title: string
+  tagline?: string | Array<string>
+  children: ReactNode
 }
 
 function Page({ title, tagline, children }: Props) {
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
   return (
     <div css={styles.page}>
       <div css={css({ width })}>
@@ -32,7 +32,7 @@ function Page({ title, tagline, children }: Props) {
       <div css={styles.spacer} />
       {children}
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -44,8 +44,8 @@ const styles = {
     marginBottom: globalStyles.grid.gutterWidth,
     "@media print": {
       display: "block",
-      marginRight: 0
-    }
+      marginRight: 0,
+    },
   }),
   title: css({
     marginTop: 36,
@@ -54,16 +54,16 @@ const styles = {
     fontWeight: "normal",
     marginLeft: 0,
     marginRight: 0,
-    marginBottom: 0
+    marginBottom: 0,
   }),
   tagline: css({
     marginTop: 12,
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   spacer: css({
-    height: 54
-  })
-};
+    height: 54,
+  }),
+}
 
-export default Page;
+export default Page

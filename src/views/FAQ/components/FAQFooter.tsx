@@ -1,14 +1,12 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import globalStyles from "../../../utils/globalStyles";
+import { css, jsx } from "@emotion/core"
+import globalStyles from "../../../utils/globalStyles"
 
 function FAQFooter() {
   return (
     <div css={styles.container}>
       <div>
-        <span css={styles.text}>
-          Vous n’avez pas trouvé l’aide que vous cherchiez ?
-        </span>
+        <span css={styles.text}>Vous n’avez pas trouvé l’aide que vous cherchiez ?</span>
         <br />
         <span css={styles.text}>
           <a
@@ -20,7 +18,7 @@ function FAQFooter() {
         </span>
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -41,6 +39,6 @@ const styles = {
     color: globalStyles.colors.default,
     textDecoration: "underline",
   },
-};
+}
 
-export default FAQFooter;
+export default FAQFooter

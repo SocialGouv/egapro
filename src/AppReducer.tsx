@@ -1,39 +1,27 @@
-import deepmerge from "deepmerge";
-import { format } from "date-fns";
-import {
-  AppState,
-  ActionType,
-  CategorieSocioPro,
-  TranchesAges,
-  PeriodeDeclaration,
-} from "./globals";
-import mapEnum from "./utils/mapEnum";
-import { overwriteMerge, combineMerge } from "./utils/merge";
+import deepmerge from "deepmerge"
+import { format } from "date-fns"
+import { AppState, ActionType, CategorieSocioPro, TranchesAges, PeriodeDeclaration } from "./globals"
+import mapEnum from "./utils/mapEnum"
+import { overwriteMerge, combineMerge } from "./utils/merge"
 
-const dataEffectif = mapEnum(
-  CategorieSocioPro,
-  (categorieSocioPro: CategorieSocioPro) => ({
-    categorieSocioPro,
-    tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
-      trancheAge,
-      nombreSalariesFemmes: undefined,
-      nombreSalariesHommes: undefined,
-    })),
-  })
-);
+const dataEffectif = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+  categorieSocioPro,
+  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+    trancheAge,
+    nombreSalariesFemmes: undefined,
+    nombreSalariesHommes: undefined,
+  })),
+}))
 
-const dataIndicateurUnCsp = mapEnum(
-  CategorieSocioPro,
-  (categorieSocioPro: CategorieSocioPro) => ({
-    categorieSocioPro,
-    tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
-      trancheAge,
-      remunerationAnnuelleBrutFemmes: undefined,
-      remunerationAnnuelleBrutHommes: undefined,
-      ecartTauxRemuneration: undefined,
-    })),
-  })
-);
+const dataIndicateurUnCsp = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+  categorieSocioPro,
+  tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
+    trancheAge,
+    remunerationAnnuelleBrutFemmes: undefined,
+    remunerationAnnuelleBrutHommes: undefined,
+    ecartTauxRemuneration: undefined,
+  })),
+}))
 
 const dataIndicateurUnCoefGroup = {
   name: "",
@@ -45,27 +33,21 @@ const dataIndicateurUnCoefGroup = {
     remunerationAnnuelleBrutHommes: undefined,
     ecartTauxRemuneration: undefined,
   })),
-};
+}
 
-const dataIndicateurDeux = mapEnum(
-  CategorieSocioPro,
-  (categorieSocioPro: CategorieSocioPro) => ({
-    categorieSocioPro,
-    tauxAugmentationFemmes: undefined,
-    tauxAugmentationHommes: undefined,
-    ecartTauxAugmentation: undefined,
-  })
-);
+const dataIndicateurDeux = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+  categorieSocioPro,
+  tauxAugmentationFemmes: undefined,
+  tauxAugmentationHommes: undefined,
+  ecartTauxAugmentation: undefined,
+}))
 
-const dataIndicateurTrois = mapEnum(
-  CategorieSocioPro,
-  (categorieSocioPro: CategorieSocioPro) => ({
-    categorieSocioPro,
-    tauxPromotionFemmes: undefined,
-    tauxPromotionHommes: undefined,
-    ecartTauxPromotion: undefined,
-  })
-);
+const dataIndicateurTrois = mapEnum(CategorieSocioPro, (categorieSocioPro: CategorieSocioPro) => ({
+  categorieSocioPro,
+  tauxPromotionFemmes: undefined,
+  tauxPromotionHommes: undefined,
+  ecartTauxPromotion: undefined,
+}))
 
 const defaultState: AppState = {
   informations: {
@@ -154,31 +136,23 @@ const defaultState: AppState = {
     totalPoint: 0,
     totalPointCalculable: 0,
   },
-};
+}
 
-function AppReducer(
-  state: AppState | undefined,
-  action: ActionType
-): AppState | undefined {
+function AppReducer(state: AppState | undefined, action: ActionType): AppState | undefined {
   if (action.type === "resetState") {
-    return undefined;
+    return undefined
   }
   if (action.type === "initiateState") {
     return deepmerge(defaultState, action.data, {
       arrayMerge: overwriteMerge,
-    });
+    })
   }
   if (!state) {
-    return state;
+    return state
   }
   switch (action.type) {
     case "updateInformationsSimulation": {
-      const {
-        nomEntreprise,
-        trancheEffectifs,
-        anneeDeclaration,
-        finPeriodeReference,
-      } = action.data;
+      const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference } = action.data
       if (trancheEffectifs !== state.informations.trancheEffectifs) {
         return {
           ...state,
@@ -190,9 +164,7 @@ function AppReducer(
             finPeriodeReference,
           },
           effectif:
-            state.effectif.formValidated === "Valid"
-              ? { ...state.effectif, formValidated: "Invalid" }
-              : state.effectif,
+            state.effectif.formValidated === "Valid" ? { ...state.effectif, formValidated: "Invalid" } : state.effectif,
           indicateurUn:
             state.indicateurUn.formValidated === "Valid"
               ? { ...state.indicateurUn, formValidated: "Invalid" }
@@ -232,7 +204,7 @@ function AppReducer(
                   formValidated: "Invalid",
                 }
               : state.declaration,
-        };
+        }
       }
       return {
         ...state,
@@ -243,7 +215,7 @@ function AppReducer(
           anneeDeclaration,
           finPeriodeReference,
         },
-      };
+      }
     }
     case "validateInformationsSimulation": {
       return {
@@ -254,19 +226,16 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateEffectif": {
-      const { nombreSalaries } = action.data;
+      const { nombreSalaries } = action.data
       return {
         ...state,
         effectif: { ...state.effectif, nombreSalaries },
-      };
+      }
     }
     case "validateEffectif": {
       if (action.valid === "None") {
@@ -297,62 +266,59 @@ function AppReducer(
             state.declaration.formValidated === "Valid"
               ? { ...state.declaration, formValidated: "Invalid" }
               : state.declaration,
-        };
+        }
       }
       return {
         ...state,
         effectif: { ...state.effectif, formValidated: action.valid },
-      };
+      }
     }
     case "updateIndicateurUnType": {
-      const { csp, coef, autre } = action.data;
+      const { csp, coef, autre } = action.data
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, csp, coef, autre },
-      };
+      }
     }
     case "updateIndicateurUnCsp": {
-      const { remunerationAnnuelle } = action.data;
+      const { remunerationAnnuelle } = action.data
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, remunerationAnnuelle },
-      };
+      }
     }
     case "updateIndicateurUnCoefAddGroup": {
-      const newGroupCoef = { ...dataIndicateurUnCoefGroup }; // Clone to avoid mutable issues
-      const coefficient = [...state.indicateurUn.coefficient, newGroupCoef];
+      const newGroupCoef = { ...dataIndicateurUnCoefGroup } // Clone to avoid mutable issues
+      const coefficient = [...state.indicateurUn.coefficient, newGroupCoef]
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, coefficient },
-      };
+      }
     }
     case "updateIndicateurUnCoefDeleteGroup": {
       const coefficient = [
         ...state.indicateurUn.coefficient.slice(0, action.index),
-        ...state.indicateurUn.coefficient.slice(
-          action.index + 1,
-          state.indicateurUn.coefficient.length
-        ),
-      ];
+        ...state.indicateurUn.coefficient.slice(action.index + 1, state.indicateurUn.coefficient.length),
+      ]
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, coefficient },
-      };
+      }
     }
     case "updateIndicateurUnCoef": {
-      const { coefficient } = action.data;
+      const { coefficient } = action.data
 
       const mergedCoefficient = deepmerge(
         state.indicateurUn.coefficient,
         // @ts-ignore
         coefficient,
-        { arrayMerge: combineMerge }
-      );
+        { arrayMerge: combineMerge },
+      )
       // @ts-ignore
       return {
         ...state,
         indicateurUn: { ...state.indicateurUn, coefficient: mergedCoefficient },
-      };
+      }
     }
     case "validateIndicateurUnCoefGroup": {
       return {
@@ -361,24 +327,19 @@ function AppReducer(
           ...state.indicateurUn,
           coefficientGroupFormValidated: action.valid,
           coefficientEffectifFormValidated:
-            action.valid === "None" &&
-            state.indicateurUn.coefficientEffectifFormValidated === "Valid"
+            action.valid === "None" && state.indicateurUn.coefficientEffectifFormValidated === "Valid"
               ? "Invalid"
               : state.indicateurUn.coefficientEffectifFormValidated,
           formValidated:
-            action.valid === "None" &&
-            state.indicateurUn.formValidated === "Valid"
+            action.valid === "None" && state.indicateurUn.formValidated === "Valid"
               ? "Invalid"
               : state.indicateurUn.formValidated,
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "validateIndicateurUnCoefEffectif": {
       return {
@@ -387,19 +348,15 @@ function AppReducer(
           ...state.indicateurUn,
           coefficientEffectifFormValidated: action.valid,
           formValidated:
-            action.valid === "None" &&
-            state.indicateurUn.formValidated === "Valid"
+            action.valid === "None" && state.indicateurUn.formValidated === "Valid"
               ? "Invalid"
               : state.indicateurUn.formValidated,
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "validateIndicateurUn": {
       return {
@@ -407,15 +364,12 @@ function AppReducer(
         indicateurUn: { ...state.indicateurUn, formValidated: action.valid },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateIndicateurDeux": {
-      const { tauxAugmentation, presenceAugmentation } = action.data;
+      const { tauxAugmentation, presenceAugmentation } = action.data
       return {
         ...state,
         indicateurDeux: {
@@ -423,7 +377,7 @@ function AppReducer(
           presenceAugmentation,
           tauxAugmentation,
         },
-      };
+      }
     }
     case "validateIndicateurDeux": {
       return {
@@ -434,15 +388,12 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateIndicateurTrois": {
-      const { tauxPromotion, presencePromotion } = action.data;
+      const { tauxPromotion, presencePromotion } = action.data
       return {
         ...state,
         indicateurTrois: {
@@ -450,7 +401,7 @@ function AppReducer(
           presencePromotion,
           tauxPromotion,
         },
-      };
+      }
     }
     case "validateIndicateurTrois": {
       return {
@@ -461,12 +412,9 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateIndicateurDeuxTrois": {
       const {
@@ -474,7 +422,7 @@ function AppReducer(
         nombreAugmentationPromotionFemmes,
         nombreAugmentationPromotionHommes,
         periodeDeclaration,
-      } = action.data;
+      } = action.data
       return {
         ...state,
         indicateurDeuxTrois: {
@@ -484,7 +432,7 @@ function AppReducer(
           nombreAugmentationPromotionHommes,
           periodeDeclaration,
         },
-      };
+      }
     }
     case "validateIndicateurDeuxTrois": {
       return {
@@ -495,12 +443,9 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateIndicateurQuatre": {
       return {
@@ -509,7 +454,7 @@ function AppReducer(
           ...state.indicateurQuatre,
           ...action.data,
         },
-      };
+      }
     }
     case "validateIndicateurQuatre": {
       return {
@@ -520,12 +465,9 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateIndicateurCinq": {
       return {
@@ -534,7 +476,7 @@ function AppReducer(
           ...state.indicateurCinq,
           ...action.data,
         },
-      };
+      }
     }
     case "validateIndicateurCinq": {
       return {
@@ -545,12 +487,9 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateInformationsEntreprise": {
       return {
@@ -559,7 +498,7 @@ function AppReducer(
           ...state.informationsEntreprise,
           ...action.data,
         },
-      };
+      }
     }
     case "validateInformationsEntreprise": {
       return {
@@ -570,12 +509,9 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateInformationsDeclarant": {
       return {
@@ -584,7 +520,7 @@ function AppReducer(
           ...state.informationsDeclarant,
           ...action.data,
         },
-      };
+      }
     }
     case "validateInformationsDeclarant": {
       return {
@@ -595,12 +531,9 @@ function AppReducer(
         },
         declaration: {
           ...state.declaration,
-          formValidated:
-            action.valid === "None"
-              ? "Invalid"
-              : state.declaration.formValidated,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
         },
-      };
+      }
     }
     case "updateDeclaration": {
       return {
@@ -609,10 +542,10 @@ function AppReducer(
           ...state.declaration,
           ...action.data,
         },
-      };
+      }
     }
     case "validateDeclaration": {
-      const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm");
+      const dateDeclaration = format(new Date(), "dd/MM/yyyy HH:mm")
       return {
         ...state,
         effectif:
@@ -668,24 +601,14 @@ function AppReducer(
           ...state.declaration,
           dateDeclaration:
             // Automatically set the "dateDeclaration" to now.
-            action.valid === "Valid"
-              ? dateDeclaration
-              : state.declaration.dateDeclaration,
-          noteIndex:
-            action.valid === "Valid"
-              ? action.noteIndex
-              : state.declaration.noteIndex,
-          totalPoint:
-            action.valid === "Valid"
-              ? action.totalPoint
-              : state.declaration.totalPoint,
+            action.valid === "Valid" ? dateDeclaration : state.declaration.dateDeclaration,
+          noteIndex: action.valid === "Valid" ? action.noteIndex : state.declaration.noteIndex,
+          totalPoint: action.valid === "Valid" ? action.totalPoint : state.declaration.totalPoint,
           totalPointCalculable:
-            action.valid === "Valid"
-              ? action.totalPointCalculable
-              : state.declaration.totalPointCalculable,
+            action.valid === "Valid" ? action.totalPointCalculable : state.declaration.totalPointCalculable,
           formValidated: action.valid,
         },
-      };
+      }
     }
     case "updateEmailDeclarant": {
       return {
@@ -694,11 +617,11 @@ function AppReducer(
           ...state.informationsDeclarant,
           ...action.data,
         },
-      };
+      }
     }
     default:
-      return state;
+      return state
   }
 }
 
-export default AppReducer;
+export default AppReducer

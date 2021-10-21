@@ -1,21 +1,16 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Form } from "react-final-form";
-import {
-  FormState,
-  ActionIndicateurDeuxTroisData,
-  PeriodeDeclaration,
-  GroupeEffectif,
-} from "../../globals";
+import { css, jsx } from "@emotion/core"
+import { Form } from "react-final-form"
+import { FormState, ActionIndicateurDeuxTroisData, PeriodeDeclaration, GroupeEffectif } from "../../globals"
 
-import BlocForm from "../../components/BlocForm";
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
-import RadiosBoolean from "../../components/RadiosBoolean";
-import RadioButtons from "../../components/RadioButtons";
-import ActionBar from "../../components/ActionBar";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import BlocForm from "../../components/BlocForm"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import RadioButtons from "../../components/RadioButtons"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
 import {
   parseIntFormValue,
@@ -30,31 +25,21 @@ import {
   minNumber,
   mustBeInteger,
   mustBeNumber,
-} from "../../utils/formHelpers";
-import {
-  calendarYear,
-  dateToString,
-  parseDate,
-  Year,
-} from "../../utils/helpers";
-import totalNombreSalaries from "../../utils/totalNombreSalaries";
+} from "../../utils/formHelpers"
+import { calendarYear, dateToString, parseDate, Year } from "../../utils/helpers"
+import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
-const validator = composeValidators(
-  required,
-  mustBeNumber,
-  mustBeInteger,
-  minNumber(0)
-);
+const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 interface Props {
-  finPeriodeReference: string;
-  presenceAugmentationPromotion: boolean;
-  nombreAugmentationPromotionFemmes: number | undefined;
-  nombreAugmentationPromotionHommes: number | undefined;
-  periodeDeclaration: PeriodeDeclaration;
-  nombreSalaries: GroupeEffectif[];
-  readOnly: boolean;
-  updateIndicateurDeuxTrois: (data: ActionIndicateurDeuxTroisData) => void;
-  validateIndicateurDeuxTrois: (valid: FormState) => void;
+  finPeriodeReference: string
+  presenceAugmentationPromotion: boolean
+  nombreAugmentationPromotionFemmes: number | undefined
+  nombreAugmentationPromotionHommes: number | undefined
+  periodeDeclaration: PeriodeDeclaration
+  nombreSalaries: GroupeEffectif[]
+  readOnly: boolean
+  updateIndicateurDeuxTrois: (data: ActionIndicateurDeuxTroisData) => void
+  validateIndicateurDeuxTrois: (valid: FormState) => void
 }
 
 function IndicateurDeuxTroisForm({
@@ -69,65 +54,40 @@ function IndicateurDeuxTroisForm({
   validateIndicateurDeuxTrois,
 }: Props) {
   const initialValues = {
-    presenceAugmentationPromotion: parseBooleanStateValue(
-      presenceAugmentationPromotion
-    ),
-    nombreAugmentationPromotionFemmes: parseIntStateValue(
-      nombreAugmentationPromotionFemmes
-    ),
-    nombreAugmentationPromotionHommes: parseIntStateValue(
-      nombreAugmentationPromotionHommes
-    ),
+    presenceAugmentationPromotion: parseBooleanStateValue(presenceAugmentationPromotion),
+    nombreAugmentationPromotionFemmes: parseIntStateValue(nombreAugmentationPromotionFemmes),
+    nombreAugmentationPromotionHommes: parseIntStateValue(nombreAugmentationPromotionHommes),
     periodeDeclaration: periodeDeclaration,
-  };
+  }
 
   const saveForm = (formData: any) => {
-    const presenceAugmentationPromotion = parseBooleanFormValue(
-      formData.presenceAugmentationPromotion
-    );
-    const nombreAugmentationPromotionFemmes = parseIntFormValue(
-      formData.nombreAugmentationPromotionFemmes
-    );
-    const nombreAugmentationPromotionHommes = parseIntFormValue(
-      formData.nombreAugmentationPromotionHommes
-    );
-    const periodeDeclaration = parsePeriodeDeclarationFormValue(
-      formData.periodeDeclaration
-    );
+    const presenceAugmentationPromotion = parseBooleanFormValue(formData.presenceAugmentationPromotion)
+    const nombreAugmentationPromotionFemmes = parseIntFormValue(formData.nombreAugmentationPromotionFemmes)
+    const nombreAugmentationPromotionHommes = parseIntFormValue(formData.nombreAugmentationPromotionHommes)
+    const periodeDeclaration = parsePeriodeDeclarationFormValue(formData.periodeDeclaration)
     updateIndicateurDeuxTrois({
       presenceAugmentationPromotion,
       nombreAugmentationPromotionFemmes,
       nombreAugmentationPromotionHommes,
       periodeDeclaration,
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateIndicateurDeuxTrois("Valid");
-  };
+    saveForm(formData)
+    validateIndicateurDeuxTrois("Valid")
+  }
 
-  const oneYear = dateToString(
-    parseDate(calendarYear(finPeriodeReference, Year.Subtract, 1))
-  );
-  const twoYears = dateToString(
-    parseDate(calendarYear(finPeriodeReference, Year.Subtract, 2))
-  );
-  const threeYears = dateToString(
-    parseDate(calendarYear(finPeriodeReference, Year.Subtract, 3))
-  );
-  const dateFinPeriodeReference = dateToString(parseDate(finPeriodeReference));
+  const oneYear = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 1)))
+  const twoYears = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 2)))
+  const threeYears = dateToString(parseDate(calendarYear(finPeriodeReference, Year.Subtract, 3)))
+  const dateFinPeriodeReference = dateToString(parseDate(finPeriodeReference))
 
-  const {
-    totalNombreSalariesHomme: totalNombreSalariesHommes,
-    totalNombreSalariesFemme: totalNombreSalariesFemmes,
-  } = totalNombreSalaries(nombreSalaries);
+  const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
+    totalNombreSalaries(nombreSalaries)
 
-  const validateEffectifs: (max: number, gender: string) => ValidatorFunction =
-    (max, gender) => (value) =>
-      maxNumber(max)(value)
-        ? `Le nombre ${gender} ne peut pas être supérieur aux effectifs`
-        : undefined;
+  const validateEffectifs: (max: number, gender: string) => ValidatorFunction = (max, gender) => (value) =>
+    maxNumber(max)(value) ? `Le nombre ${gender} ne peut pas être supérieur aux effectifs` : undefined
 
   return (
     <Form
@@ -184,12 +144,9 @@ function IndicateurDeuxTroisForm({
                 hommeFieldName="nombreAugmentationPromotionHommes"
                 validatorFemmes={composeValidators(
                   validator,
-                  validateEffectifs(totalNombreSalariesFemmes, "de femmes")
+                  validateEffectifs(totalNombreSalariesFemmes, "de femmes"),
                 )}
-                validatorHommes={composeValidators(
-                  validator,
-                  validateEffectifs(totalNombreSalariesHommes, "d'hommes")
-                )}
+                validatorHommes={composeValidators(validator, validateEffectifs(totalNombreSalariesHommes, "d'hommes"))}
               />
             </BlocForm>
           )}
@@ -210,7 +167,7 @@ function IndicateurDeuxTroisForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 const styles = {
@@ -221,6 +178,6 @@ const styles = {
   spacer: css({
     marginTop: "2em",
   }),
-};
+}
 
-export default IndicateurDeuxTroisForm;
+export default IndicateurDeuxTroisForm

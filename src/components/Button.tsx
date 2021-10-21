@@ -1,30 +1,25 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import ActivityIndicator from "./ActivityIndicator";
+import ActivityIndicator from "./ActivityIndicator"
 
 interface Props {
-  label: string;
-  outline?: boolean;
-  error?: boolean;
-  loading?: boolean;
+  label: string
+  outline?: boolean
+  error?: boolean
+  loading?: boolean
 }
 
-function Button({
-  label,
-  outline = false,
-  error = false,
-  loading = false
-}: Props) {
+function Button({ label, outline = false, error = false, loading = false }: Props) {
   return (
     <div
       css={[
         styles.button,
         outline && styles.buttonOutline,
         error && styles.buttonError,
-        !outline && !error && styles.buttonHover
+        !outline && !error && styles.buttonHover,
       ]}
     >
       <span css={[loading && styles.textLoading]}>{label}</span>
@@ -34,7 +29,7 @@ function Button({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export const styles = {
@@ -51,26 +46,25 @@ export const styles = {
     borderRadius: 5,
     cursor: "pointer",
     position: "relative",
-    background:
-      "linear-gradient(64.86deg, #696CD1 0%, #696CD1 51%, #191A49 100%)",
+    background: "linear-gradient(64.86deg, #696CD1 0%, #696CD1 51%, #191A49 100%)",
     backgroundSize: "200%",
-    transition: "background-position 350ms ease-in-out"
+    transition: "background-position 350ms ease-in-out",
   }),
   buttonHover: css({
     ":hover": {
-      backgroundPosition: "right center"
-    }
+      backgroundPosition: "right center",
+    },
   }),
   buttonOutline: css({
     color: globalStyles.colors.primary,
     backgroundColor: "#FFF",
-    background: "none"
+    background: "none",
   }),
   buttonError: css({
     color: globalStyles.colors.error,
     borderColor: globalStyles.colors.error,
     backgroundColor: "#FFF",
-    background: "none"
+    background: "none",
   }),
 
   loader: css({
@@ -82,12 +76,12 @@ export const styles = {
 
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   }),
 
   textLoading: css({
-    visibility: "hidden"
-  })
-};
+    visibility: "hidden",
+  }),
+}
 
-export default Button;
+export default Button

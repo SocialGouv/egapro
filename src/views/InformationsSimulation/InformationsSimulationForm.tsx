@@ -1,12 +1,8 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Form, useField } from "react-final-form";
+import { css, jsx } from "@emotion/core"
+import { Form, useField } from "react-final-form"
 
-import {
-  AppState,
-  FormState,
-  ActionInformationsSimulationData,
-} from "../../globals";
+import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
 import {
   mustBeNumber,
@@ -14,75 +10,72 @@ import {
   parseIntStateValue,
   parseTrancheEffectifsFormValue,
   required,
-} from "../../utils/formHelpers";
-import { parseDate } from "../../utils/helpers";
+} from "../../utils/formHelpers"
+import { parseDate } from "../../utils/helpers"
 
-import ActionBar from "../../components/ActionBar";
-import ActionLink from "../../components/ActionLink";
-import AnneeDeclaration from "../../components/AnneeDeclaration";
-import FieldDate from "../../components/FieldDate";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import Input, { hasFieldError } from "../../components/Input";
-import RadioLabels from "../../components/RadioLabels";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import globalStyles from "../../utils/globalStyles";
-import ButtonAction from "../../components/ButtonAction";
+import ActionBar from "../../components/ActionBar"
+import ActionLink from "../../components/ActionLink"
+import AnneeDeclaration from "../../components/AnneeDeclaration"
+import FieldDate from "../../components/FieldDate"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import Input, { hasFieldError } from "../../components/Input"
+import RadioLabels from "../../components/RadioLabels"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import globalStyles from "../../utils/globalStyles"
+import ButtonAction from "../../components/ButtonAction"
 
 ///////////////////
 
 const validate = (value: string) => {
-  const requiredError = required(value);
+  const requiredError = required(value)
   if (!requiredError) {
-    return undefined;
+    return undefined
   } else {
     return {
       required: requiredError,
-    };
+    }
   }
-};
+}
 
 const validateInt = (value: string) => {
-  const requiredError = required(value);
-  const mustBeNumberError = mustBeNumber(value);
+  const requiredError = required(value)
+  const mustBeNumberError = mustBeNumber(value)
   if (!requiredError && !mustBeNumberError) {
-    return undefined;
+    return undefined
   } else {
-    return { required: requiredError, mustBeNumber: mustBeNumberError };
+    return { required: requiredError, mustBeNumber: mustBeNumberError }
   }
-};
+}
 
 const validateForm = ({
   nomEntreprise,
   anneeDeclaration,
   finPeriodeReference,
 }: {
-  nomEntreprise: string;
-  anneeDeclaration: string;
-  finPeriodeReference: string;
+  nomEntreprise: string
+  anneeDeclaration: string
+  finPeriodeReference: string
 }) => {
-  const parsedFinPeriodeReference = parseDate(finPeriodeReference);
+  const parsedFinPeriodeReference = parseDate(finPeriodeReference)
   return {
     nomEntreprise: validate(nomEntreprise),
     anneeDeclaration: validateInt(anneeDeclaration),
     finPeriodeReference:
-      parsedFinPeriodeReference !== undefined &&
-      parsedFinPeriodeReference.getFullYear().toString() === anneeDeclaration
+      parsedFinPeriodeReference !== undefined && parsedFinPeriodeReference.getFullYear().toString() === anneeDeclaration
         ? undefined
         : {
             correspondanceAnneeDeclaration:
               "L'année de fin de période de référence doit correspondre à l'année au titre de laquelle les indicateurs sont calculés",
           },
-  };
-};
+  }
+}
 
 interface Props {
-  informations: AppState["informations"];
-  readOnly: boolean;
-  updateInformationsSimulation: (
-    data: ActionInformationsSimulationData
-  ) => void;
-  validateInformationsSimulation: (valid: FormState) => void;
+  informations: AppState["informations"]
+  readOnly: boolean
+  updateInformationsSimulation: (data: ActionInformationsSimulationData) => void
+  validateInformationsSimulation: (valid: FormState) => void
 }
 
 function InformationsSimulationForm({
@@ -96,28 +89,23 @@ function InformationsSimulationForm({
     trancheEffectifs: informations.trancheEffectifs,
     anneeDeclaration: parseIntStateValue(informations.anneeDeclaration),
     finPeriodeReference: informations.finPeriodeReference,
-  };
+  }
 
   const saveForm = (formData: any) => {
-    const {
-      nomEntreprise,
-      trancheEffectifs,
-      anneeDeclaration,
-      finPeriodeReference,
-    } = formData;
+    const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference } = formData
 
     updateInformationsSimulation({
       nomEntreprise,
       trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
       anneeDeclaration: parseIntFormValue(anneeDeclaration),
       finPeriodeReference,
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateInformationsSimulation("Valid");
-  };
+    saveForm(formData)
+    validateInformationsSimulation("Valid")
+  }
 
   return (
     <Form
@@ -130,15 +118,9 @@ function InformationsSimulationForm({
       initialValuesEqual={() => true}
       mutators={{
         selectEndOfYear: (args, state, utils) => {
-          const anneeDeclaration = parseIntFormValue(
-            (state.formState.values as any).anneeDeclaration
-          );
-          if (!anneeDeclaration) return;
-          utils.changeValue(
-            state,
-            "finPeriodeReference",
-            () => `31/12/${anneeDeclaration}`
-          );
+          const anneeDeclaration = parseIntFormValue((state.formState.values as any).anneeDeclaration)
+          if (!anneeDeclaration) return
+          utils.changeValue(state, "finPeriodeReference", () => `31/12/${anneeDeclaration}`)
         },
       }}
     >
@@ -189,9 +171,7 @@ function InformationsSimulationForm({
               &emsp;
               {informations.formValidated === "Valid" && (
                 <p css={styles.edit}>
-                  <ActionLink
-                    onClick={() => validateInformationsSimulation("None")}
-                  >
+                  <ActionLink onClick={() => validateInformationsSimulation("None")}>
                     modifier les données saisies
                   </ActionLink>
                 </p>
@@ -209,19 +189,16 @@ function InformationsSimulationForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
-  const field = useField("nomEntreprise", { validate });
-  const error = hasFieldError(field.meta);
+  const field = useField("nomEntreprise", { validate })
+  const error = hasFieldError(field.meta)
 
   return (
     <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
+      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
         Nom de la simulation (ex : nom_entreprise_date)
       </label>
       <div css={styles.fieldRow}>
@@ -229,32 +206,23 @@ function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
       </div>
       <p css={styles.error}>{error && "le nom n’est pas valide"}</p>
     </div>
-  );
+  )
 }
 
-function FieldPeriodeReference({
-  readOnly,
-  onClick,
-}: {
-  readOnly: boolean;
-  onClick: () => void;
-}) {
+function FieldPeriodeReference({ readOnly, onClick }: { readOnly: boolean; onClick: () => void }) {
+  //TODO REFACTOR : j'ai ajouté htmlFor pour le label, mais en fait c'est le composant FieldDate qui devrait avoir ne
+  // pas avoir de label (à l'heure actuell, il ajoute une balise label sans contenu texte)
   return (
     <div>
-      <label css={styles.label}>
-        Date de fin de la période de référence choisie pour le calcul de votre
-        Index (jj/mm/aaaa)
+      <label css={styles.label} htmlFor="finPeriodeReference">
+        Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)
       </label>
       <div css={styles.dates}>
         <FieldDate name="finPeriodeReference" readOnly={readOnly} label="" />
-        <ButtonAction
-          label="sélectionner la fin de l'année civile"
-          onClick={onClick}
-          outline={readOnly}
-        />
+        <ButtonAction label="sélectionner la fin de l'année civile" onClick={onClick} outline={readOnly} />
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -301,6 +269,6 @@ const styles = {
     marginBottom: 14,
     textAlign: "center",
   }),
-};
+}
 
-export default InformationsSimulationForm;
+export default InformationsSimulationForm

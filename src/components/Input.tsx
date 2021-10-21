@@ -1,29 +1,22 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { FieldRenderProps, FieldMetaState } from "react-final-form";
+import { css, jsx } from "@emotion/core"
+import { FieldRenderProps, FieldMetaState } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
 export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
-  (meta.error &&
-    meta.touched &&
-    Object.values({ ...meta.error, required: false }).includes(true));
+  (meta.error && meta.touched && Object.values({ ...meta.error, required: false }).includes(true))
 
 interface Props {
-  field: FieldRenderProps<string, HTMLInputElement>;
-  placeholder?: string;
-  style?: any;
-  readOnly?: boolean;
+  field: FieldRenderProps<string, HTMLInputElement>
+  placeholder?: string
+  style?: any
+  readOnly?: boolean
 }
 
-function Input({
-  field: { input, meta },
-  placeholder,
-  style,
-  readOnly = false
-}: Props) {
-  const error = hasFieldError(meta);
+function Input({ field: { input, meta }, placeholder, style, readOnly = false }: Props) {
+  const error = hasFieldError(meta)
 
   return (
     <input
@@ -34,7 +27,7 @@ function Input({
       readOnly={readOnly}
       {...input}
     />
-  );
+  )
 }
 
 const styles = {
@@ -45,12 +38,12 @@ const styles = {
     fontSize: 14,
     lineHeight: "17px",
     paddingLeft: 22,
-    paddingRight: 22
+    paddingRight: 22,
   }),
   inputError: css({
     color: globalStyles.colors.error,
-    borderColor: globalStyles.colors.error
-  })
-};
+    borderColor: globalStyles.colors.error,
+  }),
+}
 
-export default Input;
+export default Input

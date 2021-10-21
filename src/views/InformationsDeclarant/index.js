@@ -1,2 +1,2 @@
-import InformationsDeclarant from "./InformationsDeclarant";
-export default InformationsDeclarant;
+import InformationsDeclarant from "./InformationsDeclarant"
+export default InformationsDeclarant

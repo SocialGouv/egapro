@@ -1,38 +1,31 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { useCallback, ReactNode } from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { jsx } from "@emotion/core"
+import { useCallback, ReactNode } from "react"
+import { RouteComponentProps } from "react-router-dom"
 
-import {
-  AppState,
-  FormState,
-  ActionType,
-  ActionInformationsSimulationData,
-} from "../../globals";
+import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
 
-import InfoBloc from "../../components/InfoBloc";
-import Page from "../../components/Page";
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import InfoBloc from "../../components/InfoBloc"
+import Page from "../../components/Page"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
-import InformationsSimulationForm from "./InformationsSimulationForm";
+import InformationsSimulationForm from "./InformationsSimulationForm"
 
 interface Props extends RouteComponentProps {
-  state: AppState;
-  dispatch: (action: ActionType) => void;
+  state: AppState
+  dispatch: (action: ActionType) => void
 }
 
 function InformationsSimulation({ state, dispatch }: Props) {
   const updateInformationsSimulation = useCallback(
-    (data: ActionInformationsSimulationData) =>
-      dispatch({ type: "updateInformationsSimulation", data }),
-    [dispatch]
-  );
+    (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
+    [dispatch],
+  )
 
   const validateInformationsSimulation = useCallback(
-    (valid: FormState) =>
-      dispatch({ type: "validateInformationsSimulation", valid }),
-    [dispatch]
-  );
+    (valid: FormState) => dispatch({ type: "validateInformationsSimulation", valid }),
+    [dispatch],
+  )
 
   return (
     <PageInformationsSimulation>
@@ -52,8 +45,7 @@ function InformationsSimulation({ state, dispatch }: Props) {
         (state.effectif.formValidated === "Invalid" ||
           state.indicateurUn.formValidated === "Invalid" ||
           (state.informations.trancheEffectifs !== "50 à 250" &&
-            (state.indicateurDeux.formValidated === "Invalid" ||
-              state.indicateurTrois.formValidated === "Invalid")) ||
+            (state.indicateurDeux.formValidated === "Invalid" || state.indicateurTrois.formValidated === "Invalid")) ||
           (state.informations.trancheEffectifs === "50 à 250" &&
             state.indicateurDeuxTrois.formValidated === "Invalid") ||
           state.indicateurQuatre.formValidated === "Invalid" ||
@@ -63,14 +55,13 @@ function InformationsSimulation({ state, dispatch }: Props) {
             icon="cross"
             text={
               <span>
-                afin de s'assurer de la cohérence de votre index, merci de
-                vérifier les données de vos indicateurs.
+                afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs.
               </span>
             }
           />
         )}
     </PageInformationsSimulation>
-  );
+  )
 }
 
 function PageInformationsSimulation({ children }: { children: ReactNode }) {
@@ -81,7 +72,7 @@ function PageInformationsSimulation({ children }: { children: ReactNode }) {
     >
       {children}
     </Page>
-  );
+  )
 }
 
-export default InformationsSimulation;
+export default InformationsSimulation

@@ -1,23 +1,30 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import globalStyles from "../../../utils/globalStyles";
+import globalStyles from "../../../utils/globalStyles"
 
-import { IconSearch, IconClose } from "../../../components/Icons";
+import { IconSearch, IconClose } from "../../../components/Icons"
 
 interface Props {
-  searchTerm: string;
-  setSearchTerm: (searchTerm: string) => void;
+  searchTerm: string
+  setSearchTerm: (searchTerm: string) => void
 }
 
 function FAQSearchBox({ searchTerm, setSearchTerm }: Props) {
-  const onChange = (event: any) => setSearchTerm(event.target.value);
+  const onChange = (event: any) => setSearchTerm(event.target.value)
   return (
     <div css={styles.container}>
       {searchTerm !== "" ? (
         <div
           css={[styles.icon, styles.iconEnabled]}
+          role="button"
+          tabIndex={0}
           onClick={() => setSearchTerm("")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === "Space") {
+              setSearchTerm("")
+            }
+          }}
         >
           <IconClose />
         </div>
@@ -36,12 +43,12 @@ function FAQSearchBox({ searchTerm, setSearchTerm }: Props) {
         data-hj-whitelist
       />
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
-    position: "relative"
+    position: "relative",
   }),
   input: css({
     appearance: "none",
@@ -56,11 +63,11 @@ const styles = {
     color: globalStyles.colors.primary,
     "::placeholder": {
       fontWeight: "normal",
-      color: globalStyles.colors.primary
+      color: globalStyles.colors.primary,
     },
     "::-webkit-search-cancel-button": {
-      WebkitAppearance: "none"
-    }
+      WebkitAppearance: "none",
+    },
   }),
   icon: css({
     height: 52,
@@ -70,14 +77,14 @@ const styles = {
     left: 0,
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   }),
   iconEnabled: css({
-    cursor: "pointer"
+    cursor: "pointer",
   }),
   iconDisabled: css({
-    pointerEvents: "none"
-  })
-};
+    pointerEvents: "none",
+  }),
+}
 
-export default FAQSearchBox;
+export default FAQSearchBox

@@ -1,80 +1,76 @@
-import { AppState } from "../globals";
+import { AppState } from "../globals"
 
-import calculIndicateurUn from "./calculsEgaProIndicateurUn";
-import { roundDecimal } from "./helpers";
-import totalNombreSalaries from "./totalNombreSalaries";
+import calculIndicateurUn from "./calculsEgaProIndicateurUn"
+import { roundDecimal } from "./helpers"
+import totalNombreSalaries from "./totalNombreSalaries"
 
 import {
   calculEcartTauxAugmentation,
   calculIndicateurEcartAugmentation,
   calculIndicateurSexeSurRepresente,
-  calculIndicateurEcartAugmentationAbsolute
-} from "../utils/calculsEgaProIndicateurDeux";
+  calculIndicateurEcartAugmentationAbsolute,
+} from "../utils/calculsEgaProIndicateurDeux"
 
-const barem = [35, 35, 35, 25, 25, 25, 15, 15, 15, 15, 15, 0];
+const barem = [35, 35, 35, 25, 25, 25, 15, 15, 15, 15, 15, 0]
 
 ///////////////////////
 // INDICATEUR 2 ET 3 //
 ///////////////////////
 
 // // ETP
-export const calculEcartTauxAugmentationPromotion = calculEcartTauxAugmentation;
+export const calculEcartTauxAugmentationPromotion = calculEcartTauxAugmentation
 
 // // IEP
-export const calculIndicateurEcartAugmentationPromotion = calculIndicateurEcartAugmentation;
+export const calculIndicateurEcartAugmentationPromotion = calculIndicateurEcartAugmentation
 
-export const calculIndicateurEcartAugmentationPromotionAbsolute = calculIndicateurEcartAugmentationAbsolute;
+export const calculIndicateurEcartAugmentationPromotionAbsolute = calculIndicateurEcartAugmentationAbsolute
 
 // // IC
 export const calculEffectifsIndicateurCalculable = (
   totalNombreSalariesHommes: number | undefined,
-  totalNombreSalariesFemmes: number | undefined
+  totalNombreSalariesFemmes: number | undefined,
 ): boolean => {
   return (
     totalNombreSalariesHommes !== undefined &&
     totalNombreSalariesFemmes !== undefined &&
     totalNombreSalariesHommes >= 5 &&
     totalNombreSalariesFemmes >= 5
-  );
-};
+  )
+}
 
 export const calculIndicateurCalculable = (
   presenceAugmentationPromotion: boolean,
-  effectifsIndicateurCalculable: boolean
+  effectifsIndicateurCalculable: boolean,
 ): boolean => {
-  return presenceAugmentationPromotion && effectifsIndicateurCalculable;
-};
+  return presenceAugmentationPromotion && effectifsIndicateurCalculable
+}
 
 export const calculTaux = (
   nombreSalaries: number | undefined,
-  totalNombreSalaries: number | undefined
+  totalNombreSalaries: number | undefined,
 ): number | undefined =>
-  nombreSalaries !== undefined &&
-  totalNombreSalaries !== undefined &&
-  totalNombreSalaries > 0
+  nombreSalaries !== undefined && totalNombreSalaries !== undefined && totalNombreSalaries > 0
     ? nombreSalaries / totalNombreSalaries
-    : undefined;
+    : undefined
 
 export const calculPlusPetitNombreSalaries = (
   totalNombreSalariesHommes: number | undefined,
-  totalNombreSalariesFemmes: number | undefined
+  totalNombreSalariesFemmes: number | undefined,
 ): "hommes" | "femmes" | undefined => {
   if (
     totalNombreSalariesFemmes === totalNombreSalariesHommes ||
     totalNombreSalariesFemmes === undefined ||
     totalNombreSalariesHommes === undefined
   ) {
-    return undefined;
+    return undefined
   }
-  return totalNombreSalariesHommes > totalNombreSalariesFemmes
-    ? "femmes"
-    : "hommes";
-};
+  return totalNombreSalariesHommes > totalNombreSalariesFemmes ? "femmes" : "hommes"
+}
 
 export const calculIndicateurEcartNombreEquivalentSalaries = (
   indicateurEcartAugmentationPromotionAbsolute: number | undefined,
   totalNombreSalariesHommes: number | undefined,
-  totalNombreSalariesFemmes: number | undefined
+  totalNombreSalariesFemmes: number | undefined,
 ): number | undefined => {
   return indicateurEcartAugmentationPromotionAbsolute !== undefined &&
     totalNombreSalariesHommes !== undefined &&
@@ -83,40 +79,31 @@ export const calculIndicateurEcartNombreEquivalentSalaries = (
         (indicateurEcartAugmentationPromotionAbsolute *
           Math.min(totalNombreSalariesHommes, totalNombreSalariesFemmes)) /
           100,
-        1
+        1,
       )
-    : undefined;
-};
+    : undefined
+}
 
 // // NOTE
 
 export const calculBarem = (indicateur: number): number => {
-  return barem[
-    Math.min(
-      barem.length - 1,
-      Math.ceil(Math.max(0, roundDecimal(indicateur, 1)))
-    )
-  ];
-};
+  return barem[Math.min(barem.length - 1, Math.ceil(Math.max(0, roundDecimal(indicateur, 1))))]
+}
 
 export const calculNote = (
   ecartTaux: number | undefined,
   ecartNombreSalaries: number | undefined,
   noteIndicateurUn: number | undefined,
   indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
-  indicateurDeuxTroisSexeSurRepresente: "hommes" | "femmes" | undefined
+  indicateurDeuxTroisSexeSurRepresente: "hommes" | "femmes" | undefined,
 ): {
-  note: number | undefined;
-  correctionMeasure: boolean;
-  noteEcartTaux: number | undefined;
-  noteEcartNombreSalaries: number | undefined;
+  note: number | undefined
+  correctionMeasure: boolean
+  noteEcartTaux: number | undefined
+  noteEcartNombreSalaries: number | undefined
 } => {
-  const noteEcartTaux =
-    ecartTaux !== undefined ? calculBarem(ecartTaux) : undefined;
-  const noteEcartNombreSalaries =
-    ecartNombreSalaries !== undefined
-      ? calculBarem(ecartNombreSalaries)
-      : undefined;
+  const noteEcartTaux = ecartTaux !== undefined ? calculBarem(ecartTaux) : undefined
+  const noteEcartNombreSalaries = ecartNombreSalaries !== undefined ? calculBarem(ecartNombreSalaries) : undefined
   if (
     noteIndicateurUn !== undefined &&
     noteIndicateurUn < 40 &&
@@ -128,106 +115,96 @@ export const calculNote = (
       note: barem[0],
       correctionMeasure: true,
       noteEcartTaux,
-      noteEcartNombreSalaries
-    };
+      noteEcartNombreSalaries,
+    }
   }
   if (noteEcartTaux === undefined || noteEcartNombreSalaries === undefined) {
     return {
       note: undefined,
       correctionMeasure: false,
       noteEcartTaux,
-      noteEcartNombreSalaries
-    };
+      noteEcartNombreSalaries,
+    }
   }
 
-  const note = Math.max(noteEcartTaux, noteEcartNombreSalaries);
+  const note = Math.max(noteEcartTaux, noteEcartNombreSalaries)
   return {
     note,
     correctionMeasure: false,
     noteEcartTaux,
-    noteEcartNombreSalaries
-  };
-};
+    noteEcartNombreSalaries,
+  }
+}
 
 /////////
 // ALL //
 /////////
 
 export default function calculIndicateurDeuxTrois(state: AppState) {
-  const {
-    totalNombreSalariesHomme: totalNombreSalariesHommes,
-    totalNombreSalariesFemme: totalNombreSalariesFemmes
-  } = totalNombreSalaries(state.effectif.nombreSalaries);
+  const { totalNombreSalariesHomme: totalNombreSalariesHommes, totalNombreSalariesFemme: totalNombreSalariesFemmes } =
+    totalNombreSalaries(state.effectif.nombreSalaries)
 
-  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(
-    totalNombreSalariesHommes,
-    totalNombreSalariesFemmes
-  );
+  const plusPetitNombreSalaries = calculPlusPetitNombreSalaries(totalNombreSalariesHommes, totalNombreSalariesFemmes)
 
   const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
     totalNombreSalariesHommes,
-    totalNombreSalariesFemmes
-  );
+    totalNombreSalariesFemmes,
+  )
 
   const indicateurCalculable = calculIndicateurCalculable(
     state.indicateurDeuxTrois.presenceAugmentationPromotion,
-    effectifsIndicateurCalculable
-  );
+    effectifsIndicateurCalculable,
+  )
 
   const tauxAugmentationPromotionHommes = calculTaux(
     state.indicateurDeuxTrois.nombreAugmentationPromotionHommes,
-    totalNombreSalariesHommes
-  );
+    totalNombreSalariesHommes,
+  )
   const tauxAugmentationPromotionFemmes = calculTaux(
     state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes,
-    totalNombreSalariesFemmes
-  );
+    totalNombreSalariesFemmes,
+  )
 
   // // IEA
   const ecartTauxAugmentationPromotion = calculEcartTauxAugmentationPromotion(
     tauxAugmentationPromotionFemmes,
-    tauxAugmentationPromotionHommes
-  );
+    tauxAugmentationPromotionHommes,
+  )
 
   const indicateurEcartAugmentationPromotion = calculIndicateurEcartAugmentationPromotion(
     indicateurCalculable,
-    ecartTauxAugmentationPromotion
-  );
+    ecartTauxAugmentationPromotion,
+  )
 
   const indicateurEcartAugmentationPromotionAbsolute = calculIndicateurEcartAugmentationPromotionAbsolute(
-    indicateurEcartAugmentationPromotion
-  );
+    indicateurEcartAugmentationPromotion,
+  )
 
-  const indicateurSexeSurRepresente = calculIndicateurSexeSurRepresente(
-    indicateurEcartAugmentationPromotion
-  );
+  const indicateurSexeSurRepresente = calculIndicateurSexeSurRepresente(indicateurEcartAugmentationPromotion)
 
   // // Ecart en nombre équivalent de salariés
   const indicateurEcartNombreEquivalentSalaries = calculIndicateurEcartNombreEquivalentSalaries(
     indicateurEcartAugmentationPromotionAbsolute,
     totalNombreSalariesHommes,
-    totalNombreSalariesFemmes
-  );
+    totalNombreSalariesFemmes,
+  )
 
   // Mesures correction indicateur 1
-  const {
-    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn
-  } = calculIndicateurUn(state);
+  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculIndicateurUn(state)
 
   // // NOTE
   const {
     note: noteIndicateurDeuxTrois,
     correctionMeasure,
     noteEcartTaux,
-    noteEcartNombreSalaries
+    noteEcartNombreSalaries,
   } = calculNote(
     indicateurEcartAugmentationPromotionAbsolute,
     indicateurEcartNombreEquivalentSalaries,
     noteIndicateurUn,
     indicateurUnSexeSurRepresente,
-    indicateurSexeSurRepresente
-  );
+    indicateurSexeSurRepresente,
+  )
 
   return {
     effectifsIndicateurCalculable,
@@ -241,6 +218,6 @@ export default function calculIndicateurDeuxTrois(state: AppState) {
     correctionMeasure,
     tauxAugmentationPromotionHommes,
     tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries
-  };
+    plusPetitNombreSalaries,
+  }
 }

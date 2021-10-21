@@ -1,8 +1,8 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
-import { Form } from "react-final-form";
-import { AppState, FormState, ActionIndicateurQuatreData } from "../../globals";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
+import { Form } from "react-final-form"
+import { AppState, FormState, ActionIndicateurQuatreData } from "../../globals"
 
 import {
   parseIntFormValue,
@@ -16,79 +16,55 @@ import {
   minNumber,
   ValidatorFunction,
   mustBeInteger,
-} from "../../utils/formHelpers";
+} from "../../utils/formHelpers"
 
-import { BlocFormLight } from "../../components/BlocForm";
-import FieldInput, {
-  HEIGHT as FieldInputHeight,
-  MARGIN_TOP as FieldInputMarginTop,
-} from "../../components/FieldInput";
-import RadiosBoolean from "../../components/RadiosBoolean";
-import ActionBar from "../../components/ActionBar";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import { BlocFormLight } from "../../components/BlocForm"
+import FieldInput, { HEIGHT as FieldInputHeight, MARGIN_TOP as FieldInputMarginTop } from "../../components/FieldInput"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
-const validator = composeValidators(
-  required,
-  mustBeNumber,
-  mustBeInteger,
-  minNumber(0)
-);
+const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
-const lessThanPreviousField: (previousField: string) => ValidatorFunction =
-  (previousField) => (value) =>
-    isNaN(Number(previousField))
-      ? undefined
-      : maxNumber(Number(previousField))(value)
-      ? "ce champ ne peut être supérieur au précédent"
-      : undefined;
+const lessThanPreviousField: (previousField: string) => ValidatorFunction = (previousField) => (value) =>
+  isNaN(Number(previousField))
+    ? undefined
+    : maxNumber(Number(previousField))(value)
+    ? "ce champ ne peut être supérieur au précédent"
+    : undefined
 
 ///////////////
 
 interface Props {
-  indicateurQuatre: AppState["indicateurQuatre"];
-  readOnly: boolean;
-  updateIndicateurQuatre: (data: ActionIndicateurQuatreData) => void;
-  validateIndicateurQuatre: (valid: FormState) => void;
+  indicateurQuatre: AppState["indicateurQuatre"]
+  readOnly: boolean
+  updateIndicateurQuatre: (data: ActionIndicateurQuatreData) => void
+  validateIndicateurQuatre: (valid: FormState) => void
 }
 
-function IndicateurQuatreForm({
-  indicateurQuatre,
-  readOnly,
-  updateIndicateurQuatre,
-  validateIndicateurQuatre,
-}: Props) {
+function IndicateurQuatreForm({ indicateurQuatre, readOnly, updateIndicateurQuatre, validateIndicateurQuatre }: Props) {
   const initialValues = {
     presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),
-    nombreSalarieesPeriodeAugmentation: parseIntStateValue(
-      indicateurQuatre.nombreSalarieesPeriodeAugmentation
-    ),
-    nombreSalarieesAugmentees: parseIntStateValue(
-      indicateurQuatre.nombreSalarieesAugmentees
-    ),
-  };
+    nombreSalarieesPeriodeAugmentation: parseIntStateValue(indicateurQuatre.nombreSalarieesPeriodeAugmentation),
+    nombreSalarieesAugmentees: parseIntStateValue(indicateurQuatre.nombreSalarieesAugmentees),
+  }
 
   const saveForm = (formData: any) => {
-    const {
-      presenceCongeMat,
-      nombreSalarieesPeriodeAugmentation,
-      nombreSalarieesAugmentees,
-    } = formData;
+    const { presenceCongeMat, nombreSalarieesPeriodeAugmentation, nombreSalarieesAugmentees } = formData
 
     updateIndicateurQuatre({
       presenceCongeMat: parseBooleanFormValue(presenceCongeMat),
-      nombreSalarieesPeriodeAugmentation: parseIntFormValue(
-        nombreSalarieesPeriodeAugmentation
-      ),
+      nombreSalarieesPeriodeAugmentation: parseIntFormValue(nombreSalarieesPeriodeAugmentation),
       nombreSalarieesAugmentees: parseIntFormValue(nombreSalarieesAugmentees),
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateIndicateurQuatre("Valid");
-  };
+    saveForm(formData)
+    validateIndicateurQuatre("Valid")
+  }
 
   return (
     <Form
@@ -108,14 +84,12 @@ function IndicateurQuatreForm({
             readOnly={readOnly}
             labelTrue={
               <Fragment>
-                <strong>il y a eu des retours de congé maternité</strong>{" "}
-                pendant la période de référence
+                <strong>il y a eu des retours de congé maternité</strong> pendant la période de référence
               </Fragment>
             }
             labelFalse={
               <Fragment>
-                <strong>il n’y a pas eu de retour de congé maternité</strong>{" "}
-                pendant la période de référence
+                <strong>il n’y a pas eu de retour de congé maternité</strong> pendant la période de référence
               </Fragment>
             }
           />
@@ -135,9 +109,7 @@ function IndicateurQuatreForm({
                 readOnly={readOnly}
                 validator={composeValidators(
                   validator,
-                  lessThanPreviousField(
-                    values.nombreSalarieesPeriodeAugmentation
-                  )
+                  lessThanPreviousField(values.nombreSalarieesPeriodeAugmentation),
                 )}
               />
             </BlocFormLight>
@@ -159,7 +131,7 @@ function IndicateurQuatreForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 const styles = {
@@ -173,6 +145,6 @@ const styles = {
   emptyFields: css({
     height: (FieldInputHeight + FieldInputMarginTop) * 2,
   }),
-};
+}
 
-export default IndicateurQuatreForm;
+export default IndicateurQuatreForm

@@ -1,9 +1,9 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useField } from "react-final-form";
-import Input, { hasFieldError } from "./Input";
+import { css, jsx } from "@emotion/core"
+import { useField } from "react-final-form"
+import Input, { hasFieldError } from "./Input"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
 function TextField({
   errorText,
@@ -12,21 +12,18 @@ function TextField({
   readOnly,
   customStyles,
 }: {
-  errorText: string;
-  fieldName: string;
-  label: string;
-  readOnly: boolean;
-  customStyles?: any;
+  errorText: string
+  fieldName: string
+  label: string
+  readOnly: boolean
+  customStyles?: any
 }) {
-  const field = useField(fieldName);
-  const error = hasFieldError(field.meta);
+  const field = useField(fieldName)
+  const error = hasFieldError(field.meta)
 
   return (
     <div css={[customStyles, styles.formField]}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
+      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
         {label}
       </label>
       <div css={styles.fieldRow}>
@@ -34,7 +31,7 @@ function TextField({
       </div>
       <p css={styles.error}>{error && errorText}</p>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -67,6 +64,6 @@ const styles = {
     textDecoration: "underline",
     lineHeight: "15px",
   }),
-};
+}
 
-export default TextField;
+export default TextField

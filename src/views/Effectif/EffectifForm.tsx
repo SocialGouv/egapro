@@ -1,58 +1,48 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { useMemo, useCallback } from "react";
-import {
-  AppState,
-  FormState,
-  GroupTranchesAgesEffectif,
-  ActionEffectifData
-} from "../../globals";
+import { jsx } from "@emotion/core"
+import { useMemo, useCallback } from "react"
+import { AppState, FormState, GroupTranchesAgesEffectif, ActionEffectifData } from "../../globals"
 
-import { displayNameCategorieSocioPro } from "../../utils/helpers";
+import { displayNameCategorieSocioPro } from "../../utils/helpers"
 
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
-import EffectifFormRaw from "./EffectifFormRaw";
+import EffectifFormRaw from "./EffectifFormRaw"
 
 interface Props {
-  effectif: AppState["effectif"];
-  readOnly: boolean;
-  updateEffectif: (data: ActionEffectifData) => void;
-  validateEffectif: (valid: FormState) => void;
+  effectif: AppState["effectif"]
+  readOnly: boolean
+  updateEffectif: (data: ActionEffectifData) => void
+  validateEffectif: (valid: FormState) => void
 }
 
-function EffectifForm({
-  effectif,
-  readOnly,
-  updateEffectif,
-  validateEffectif
-}: Props) {
+function EffectifForm({ effectif, readOnly, updateEffectif, validateEffectif }: Props) {
   const effectifRaw = useMemo(
     () =>
       effectif.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({
         id: categorieSocioPro,
         name: displayNameCategorieSocioPro(categorieSocioPro),
-        tranchesAges
+        tranchesAges,
       })),
-    [effectif]
-  );
+    [effectif],
+  )
 
   const updateEffectifRaw = useCallback(
     (
       data: Array<{
-        id: any;
-        name: string;
-        tranchesAges: Array<GroupTranchesAgesEffectif>;
-      }>
+        id: any
+        name: string
+        tranchesAges: Array<GroupTranchesAgesEffectif>
+      }>,
     ) => {
       const nombreSalaries = data.map(({ id, tranchesAges }) => ({
         categorieSocioPro: id,
-        tranchesAges
-      }));
-      updateEffectif({ nombreSalaries });
+        tranchesAges,
+      }))
+      updateEffectif({ nombreSalaries })
     },
-    [updateEffectif]
-  );
+    [updateEffectif],
+  )
 
   return (
     <EffectifFormRaw
@@ -62,7 +52,7 @@ function EffectifForm({
       validateEffectif={validateEffectif}
       nextLink={<ButtonSimulatorLink to="/indicateur1" label="suivant" />}
     />
-  );
+  )
 }
 
-export default EffectifForm;
+export default EffectifForm

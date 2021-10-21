@@ -1,48 +1,39 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useCallback, ReactNode } from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { useCallback, ReactNode } from "react"
+import { RouteComponentProps } from "react-router-dom"
 
-import {
-  AppState,
-  FormState,
-  ActionType,
-  ActionIndicateurDeuxData
-} from "../../globals";
+import { AppState, FormState, ActionType, ActionIndicateurDeuxData } from "../../globals"
 
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux";
+import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 
-import Page from "../../components/Page";
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
-import InfoBloc from "../../components/InfoBloc";
-import ActionBar from "../../components/ActionBar";
-import ActionLink from "../../components/ActionLink";
-import {
-  ButtonSimulatorLink,
-  TextSimulatorLink
-} from "../../components/SimulatorLink";
+import Page from "../../components/Page"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import InfoBloc from "../../components/InfoBloc"
+import ActionBar from "../../components/ActionBar"
+import ActionLink from "../../components/ActionLink"
+import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
-import IndicateurDeuxForm from "./IndicateurDeuxForm";
-import IndicateurDeuxResult from "./IndicateurDeuxResult";
+import IndicateurDeuxForm from "./IndicateurDeuxForm"
+import IndicateurDeuxResult from "./IndicateurDeuxResult"
 
-import { messageMesureCorrection } from "../../utils/helpers";
+import { messageMesureCorrection } from "../../utils/helpers"
 
 interface Props extends RouteComponentProps {
-  state: AppState;
-  dispatch: (action: ActionType) => void;
+  state: AppState
+  dispatch: (action: ActionType) => void
 }
 
 function IndicateurDeux({ state, dispatch }: Props) {
   const updateIndicateurDeux = useCallback(
-    (data: ActionIndicateurDeuxData) =>
-      dispatch({ type: "updateIndicateurDeux", data }),
-    [dispatch]
-  );
+    (data: ActionIndicateurDeuxData) => dispatch({ type: "updateIndicateurDeux", data }),
+    [dispatch],
+  )
 
   const validateIndicateurDeux = useCallback(
     (valid: FormState) => dispatch({ type: "validateIndicateurDeux", valid }),
-    [dispatch]
-  );
+    [dispatch],
+  )
 
   const {
     effectifsIndicateurCalculable,
@@ -51,8 +42,8 @@ function IndicateurDeux({ state, dispatch }: Props) {
     indicateurEcartAugmentation,
     indicateurSexeSurRepresente,
     noteIndicateurDeux,
-    correctionMeasure
-  } = calculIndicateurDeux(state);
+    correctionMeasure,
+  } = calculIndicateurDeux(state)
 
   // le formulaire d'effectif n'est pas validé
   if (state.effectif.formValidated !== "Valid") {
@@ -60,15 +51,10 @@ function IndicateurDeux({ state, dispatch }: Props) {
       <PageIndicateurDeux>
         <InfoBloc
           title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={
-            <TextSimulatorLink
-              to="/effectifs"
-              label="renseigner les effectifs"
-            />
-          }
+          text={<TextSimulatorLink to="/effectifs" label="renseigner les effectifs" />}
         />
       </PageIndicateurDeux>
-    );
+    )
   }
 
   // les effectifs ne permettent pas de calculer l'indicateur
@@ -87,7 +73,7 @@ function IndicateurDeux({ state, dispatch }: Props) {
           </ActionBar>
         </div>
       </PageIndicateurDeux>
-    );
+    )
   }
 
   // formulaire indicateur validé mais données renseignées ne permettent pas de calculer l'indicateur
@@ -100,16 +86,14 @@ function IndicateurDeux({ state, dispatch }: Props) {
             text="car il n’y a pas eu d’augmentation individuelle durant la période de référence."
           />
           <ActionBar>
-            <ActionLink onClick={() => validateIndicateurDeux("None")}>
-              modifier les données saisies
-            </ActionLink>
+            <ActionLink onClick={() => validateIndicateurDeux("None")}>modifier les données saisies</ActionLink>
           </ActionBar>
           <ActionBar>
             <ButtonSimulatorLink to="/indicateur3" label="suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeux>
-    );
+    )
   }
 
   return (
@@ -138,17 +122,11 @@ function IndicateurDeux({ state, dispatch }: Props) {
       />
       {state.indicateurDeux.formValidated === "Valid" && correctionMeasure && (
         <div css={styles.additionalInfo}>
-          <p>
-            {messageMesureCorrection(
-              indicateurSexeSurRepresente,
-              "d'augmentations",
-              "20/20"
-            )}
-          </p>
+          <p>{messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "20/20")}</p>
         </div>
       )}
     </PageIndicateurDeux>
-  );
+  )
 }
 
 function PageIndicateurDeux({ children }: { children: ReactNode }) {
@@ -159,7 +137,7 @@ function PageIndicateurDeux({ children }: { children: ReactNode }) {
     >
       {children}
     </Page>
-  );
+  )
 }
 
 const styles = {
@@ -169,9 +147,9 @@ const styles = {
     fontStyle: "italic",
     maxWidth: 500,
     "& > p": {
-      marginBottom: 30
-    }
-  })
-};
+      marginBottom: 30,
+    },
+  }),
+}
 
-export default IndicateurDeux;
+export default IndicateurDeux

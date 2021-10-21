@@ -1,20 +1,20 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment, ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment, ReactNode } from "react"
 
-import { FormState, TrancheEffectifs } from "../../globals";
-import { calendarYear, Year } from "../../utils/helpers";
+import { FormState, TrancheEffectifs } from "../../globals"
+import { calendarYear, Year } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
-import { useColumnsWidth, useLayoutType } from "../../components/GridContext";
+import InfoBloc from "../../components/InfoBloc"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { useColumnsWidth, useLayoutType } from "../../components/GridContext"
 
 interface Props {
-  informationsFormValidated: FormState;
-  trancheEffectifs: TrancheEffectifs;
-  anneeDeclaration: number | undefined;
-  finPeriodeReference: string;
-  nombreSalaries: number | undefined;
+  informationsFormValidated: FormState
+  trancheEffectifs: TrancheEffectifs
+  anneeDeclaration: number | undefined
+  finPeriodeReference: string
+  nombreSalaries: number | undefined
 }
 
 function RecapitulatifInformations({
@@ -22,10 +22,10 @@ function RecapitulatifInformations({
   trancheEffectifs,
   anneeDeclaration,
   finPeriodeReference,
-  nombreSalaries
+  nombreSalaries,
 }: Props) {
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
 
   if (informationsFormValidated !== "Valid") {
     return (
@@ -35,27 +35,20 @@ function RecapitulatifInformations({
           text={
             <Fragment>
               <span>
-                Nous ne pouvons pas afficher les informations de votre
-                entreprise car vous n’avez pas encore validé vos données
-                saissies.
+                Nous ne pouvons pas afficher les informations de votre entreprise car vous n’avez pas encore validé vos
+                données saissies.
               </span>{" "}
-              <TextSimulatorLink
-                to="/informations"
-                label="valider les données"
-              />
+              <TextSimulatorLink to="/informations" label="valider les données" />
             </Fragment>
           }
         />
       </div>
-    );
+    )
   }
 
   return (
     <div css={[styles.container, css({ width })]}>
-      <DataDisplay
-        header="Année au titre de laquelle les indicateurs sont calculés"
-        data={anneeDeclaration}
-      />
+      <DataDisplay header="Année au titre de laquelle les indicateurs sont calculés" data={anneeDeclaration} />
 
       <DataDisplay header="Periode de référence">
         <div css={styles.dates}>
@@ -69,23 +62,17 @@ function RecapitulatifInformations({
         </div>
       </DataDisplay>
 
-      <DataDisplay
-        header="Tranche d'effectifs de l'entreprise ou de l'UES"
-        data={trancheEffectifs}
-      />
+      <DataDisplay header="Tranche d'effectifs de l'entreprise ou de l'UES" data={trancheEffectifs} />
 
-      <DataDisplay
-        header="Nombre de salariés pris en compte pour le calcul de l'index"
-        data={nombreSalaries}
-      />
+      <DataDisplay header="Nombre de salariés pris en compte pour le calcul de l'index" data={nombreSalaries} />
     </div>
-  );
+  )
 }
 
 interface DataDisplayProps {
-  header: string;
-  children?: ReactNode;
-  data?: any;
+  header: string
+  children?: ReactNode
+  data?: any
 }
 
 function DataDisplay({ header, data, children }: DataDisplayProps) {
@@ -94,7 +81,7 @@ function DataDisplay({ header, data, children }: DataDisplayProps) {
       <p css={styles.header}>{header}</p>
       {data ? <div css={styles.data}>{data}</div> : children}
     </Fragment>
-  );
+  )
 }
 
 const styles = {
@@ -102,15 +89,15 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginTop: 22,
-    marginBottom: 22
+    marginBottom: 22,
   }),
   header: css({
     fontWeight: "bold",
-    marginTop: 5
+    marginTop: 5,
   }),
   dates: css({
     display: "flex",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   }),
   data: css({
     backgroundColor: "#fff",
@@ -119,9 +106,9 @@ const styles = {
     marginBottom: 20,
     marginLeft: 0,
     marginTop: 5,
-    borderRadius: 4
+    borderRadius: 4,
   }),
-  dateField: css({ width: "40%" })
-};
+  dateField: css({ width: "40%" }),
+}
 
-export default RecapitulatifInformations;
+export default RecapitulatifInformations

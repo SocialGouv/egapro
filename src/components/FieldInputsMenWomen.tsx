@@ -1,38 +1,33 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import React from "react";
-import { useField } from "react-final-form";
+import { css, jsx } from "@emotion/core"
+import React from "react"
+import { useField } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
-import { displayPercent, displayInt } from "../utils/helpers";
-import { ValidatorFunction } from "../utils/formHelpers";
+import globalStyles from "../utils/globalStyles"
+import { displayPercent, displayInt } from "../utils/helpers"
+import { ValidatorFunction } from "../utils/formHelpers"
 
-import { CellHead, Cell, Cell2 } from "./Cell";
-import CellInput from "./CellInput";
-import { IconValid, IconInvalid } from "./Icons";
+import { CellHead, Cell, Cell2 } from "./Cell"
+import CellInput from "./CellInput"
+import { IconValid, IconInvalid } from "./Icons"
 
-const displayReadOnlyValue = (
-  value: string,
-  mask?: "number" | "percent" | undefined
-) => {
+const displayReadOnlyValue = (value: string, mask?: "number" | "percent" | undefined) => {
   if (!mask || !value) {
-    return value;
+    return value
   }
-  return mask === "percent"
-    ? displayPercent(Number(value), 2)
-    : displayInt(Number(value));
-};
+  return mask === "percent" ? displayPercent(Number(value), 2) : displayInt(Number(value))
+}
 
 interface Props {
-  readOnly: boolean;
-  name: string;
-  calculable: boolean;
-  calculableNumber: number;
-  mask?: "number" | "percent" | undefined;
-  femmeFieldName: string;
-  hommeFieldName: string;
-  validatorFemmes?: ValidatorFunction;
-  validatorHommes?: ValidatorFunction;
+  readOnly: boolean
+  name: string
+  calculable: boolean
+  calculableNumber: number
+  mask?: "number" | "percent" | undefined
+  femmeFieldName: string
+  hommeFieldName: string
+  validatorFemmes?: ValidatorFunction
+  validatorHommes?: ValidatorFunction
 }
 
 function FieldInputsMenWomen({
@@ -48,24 +43,20 @@ function FieldInputsMenWomen({
 }: Props) {
   const femmesField = useField(femmeFieldName, {
     validate: calculable ? validatorFemmes : undefined,
-  });
+  })
   const hommesField = useField(hommeFieldName, {
     validate: calculable ? validatorHommes : undefined,
-  });
+  })
 
-  const femmesError = femmesField.meta.touched && femmesField.meta.error;
-  const hommesError = hommesField.meta.touched && hommesField.meta.error;
-  const error = femmesError || hommesError;
+  const femmesError = femmesField.meta.touched && femmesField.meta.error
+  const hommesError = hommesField.meta.touched && hommesField.meta.error
+  const error = femmesError || hommesError
 
   return (
     <div css={styles.container}>
       <div css={styles.row}>
         <CellHead
-          style={[
-            styles.cellHead,
-            !calculable && styles.cellHeadInvalid,
-            error && calculable && styles.cellHeadError,
-          ]}
+          style={[styles.cellHead, !calculable && styles.cellHeadInvalid, error && calculable && styles.cellHeadError]}
         >
           {femmesField.meta.valid && hommesField.meta.valid ? (
             calculable ? (
@@ -96,11 +87,7 @@ function FieldInputsMenWomen({
           </React.Fragment>
         ) : calculable ? (
           <React.Fragment>
-            <CellInput
-              field={femmesField}
-              mask={mask}
-              style={styles.cellWomen}
-            />
+            <CellInput field={femmesField} mask={mask} style={styles.cellWomen} />
 
             <CellInput field={hommesField} mask={mask} style={styles.cellMen} />
           </React.Fragment>
@@ -112,13 +99,12 @@ function FieldInputsMenWomen({
         <div css={styles.invalid}>
           Le groupe ne peut pas être pris en compte pour le calcul
           <br />
-          car il comporte moins de {calculableNumber} femmes ou{" "}
-          {calculableNumber} hommes
+          car il comporte moins de {calculableNumber} femmes ou {calculableNumber} hommes
         </div>
       )}
       {calculable && error && <div css={styles.error}>{error}</div>}
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -195,6 +181,6 @@ const styles = {
     lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.error} 1px`,
   }),
-};
+}
 
-export default FieldInputsMenWomen;
+export default FieldInputsMenWomen

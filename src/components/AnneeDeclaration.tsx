@@ -1,21 +1,13 @@
 /** @jsx jsx */
-import { Fragment } from "react";
-import { css, jsx } from "@emotion/core";
-import { Field } from "react-final-form";
+import { Fragment } from "react"
+import { css, jsx } from "@emotion/core"
+import { Field } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { required } from "../utils/formHelpers";
+import { required } from "../utils/formHelpers"
 
-function AnneeDeclaration({
-  name,
-  label,
-  readOnly,
-}: {
-  name: string;
-  label: string;
-  readOnly: boolean;
-}) {
+function AnneeDeclaration({ name, label, readOnly }: { name: string; label: string; readOnly: boolean }) {
   // TODO: ce code est correct mais peut prêter à confusion : les utilisateurs
   // peuvent croire qu'il faut mettre "2020" pour une déclaration en février
   // 2020, alors que leur période de référence se termine le 31 décembre 2019
@@ -32,18 +24,12 @@ function AnneeDeclaration({
   // TODO: supprimer cette ligne et repasser au code ci-dessus, ou alors
   // supprimer l'année au titre de laquelle les indicateurs sont calculés, et
   // utiliser l'année de la date de fin de la période de référence.
-  const yearList = ["2020", "2019", "2018"];
+  const yearList = ["2020", "2019", "2018"]
   return (
     <Field name={name} validate={required} component="select">
       {({ input, meta }) => (
         <div css={styles.formField}>
-          <label
-            css={[
-              styles.label,
-              meta.error && meta.touched && styles.labelError,
-            ]}
-            htmlFor={input.name}
-          >
+          <label css={[styles.label, meta.error && meta.touched && styles.labelError]} htmlFor={input.name}>
             {label}
           </label>
           {readOnly ? (
@@ -63,16 +49,14 @@ function AnneeDeclaration({
                 </select>
               </div>
               {meta.error && meta.touched && (
-                <p css={styles.error}>
-                  veuillez sélectionner une année de déclaration dans la liste
-                </p>
+                <p css={styles.error}>veuillez sélectionner une année de déclaration dans la liste</p>
               )}
             </Fragment>
           )}
         </div>
       )}
     </Field>
-  );
+  )
 }
 
 const styles = {
@@ -119,6 +103,6 @@ const styles = {
     lineHeight: "38px",
     cursor: "not-allowed",
   }),
-};
+}
 
-export default AnneeDeclaration;
+export default AnneeDeclaration

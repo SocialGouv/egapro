@@ -1,11 +1,11 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Link } from "react-router-dom";
-import Button from "./Button";
+import { css, jsx } from "@emotion/core"
+import { Link } from "react-router-dom"
+import Button from "./Button"
 
 interface Props {
-  label: string;
-  to: string;
+  label: string
+  to: string
 }
 
 function ButtonLink({ label, to }: Props) {
@@ -13,14 +13,14 @@ function ButtonLink({ label, to }: Props) {
     <Link to={to} css={styles.button}>
       <Button label={label} />
     </Link>
-  );
+  )
 }
 
 const styles = {
   button: css({
     display: "inline-flex",
-    textDecoration: "none"
-  })
-};
+    textDecoration: "none",
+  }),
+}
 
-export default ButtonLink;
+export default ButtonLink

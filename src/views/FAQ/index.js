@@ -1,2 +1,2 @@
-import FAQ from "./FAQ";
-export default FAQ;
+import FAQ from "./FAQ"
+export default FAQ

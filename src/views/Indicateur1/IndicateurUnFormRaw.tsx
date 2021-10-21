@@ -1,12 +1,8 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
-import { Form } from "react-final-form";
-import {
-  TranchesAges,
-  GroupTranchesAgesIndicateurUn,
-  FormState,
-} from "../../globals";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
+import { Form } from "react-final-form"
+import { TranchesAges, GroupTranchesAgesIndicateurUn, FormState } from "../../globals"
 
 import {
   composeValidators,
@@ -16,82 +12,79 @@ import {
   parseFloatStateValue,
   required,
   ValidatorFunction,
-} from "../../utils/formHelpers";
+} from "../../utils/formHelpers"
 
-import BlocForm from "../../components/BlocForm";
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
-import ActionBar from "../../components/ActionBar";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
+import BlocForm from "../../components/BlocForm"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
 
-import { displayNameTranchesAges } from "../../utils/helpers";
+import { displayNameTranchesAges } from "../../utils/helpers"
 
 export const aboveZero: ValidatorFunction = (value) =>
-  minNumber(1)(value)
-    ? "La valeur ne peut être inférieure ou égale à 0"
-    : undefined;
+  minNumber(1)(value) ? "La valeur ne peut être inférieure ou égale à 0" : undefined
 
-const validator = composeValidators(required, mustBeNumber, aboveZero);
+const validator = composeValidators(required, mustBeNumber, aboveZero)
 
 interface remunerationGroup {
-  id: any;
-  name: string;
-  trancheAge: TranchesAges;
-  validiteGroupe: boolean;
-  remunerationAnnuelleBrutFemmes: number | undefined;
-  remunerationAnnuelleBrutHommes: number | undefined;
+  id: any
+  name: string
+  trancheAge: TranchesAges
+  validiteGroupe: boolean
+  remunerationAnnuelleBrutFemmes: number | undefined
+  remunerationAnnuelleBrutHommes: number | undefined
 }
 
 interface Props {
-  ecartRemuParTrancheAge: Array<remunerationGroup>;
-  readOnly: boolean;
+  ecartRemuParTrancheAge: Array<remunerationGroup>
+  readOnly: boolean
   updateIndicateurUn: (
     data: Array<{
-      id: any;
-      tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
-    }>
-  ) => void;
-  validateIndicateurUn: (valid: FormState) => void;
-  nextLink: ReactNode;
+      id: any
+      tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+    }>,
+  ) => void
+  validateIndicateurUn: (valid: FormState) => void
+  nextLink: ReactNode
 }
 
 const groupByCategorieSocioPro = (
-  ecartRemuParTrancheAge: Array<remunerationGroup>
+  ecartRemuParTrancheAge: Array<remunerationGroup>,
 ): Array<{
-  id: any;
-  name: string;
-  tranchesAges: Array<remunerationGroup>;
+  id: any
+  name: string
+  tranchesAges: Array<remunerationGroup>
 }> => {
-  const tmpArray = ecartRemuParTrancheAge.reduce(
-    (acc, { id, name, ...otherAttr }) => {
-      // @ts-ignore
-      const el = acc[id];
+  const tmpArray = ecartRemuParTrancheAge.reduce((acc, { id, name, ...otherAttr }) => {
+    // @ts-ignore
+    const el = acc[id]
 
-      if (el) {
-        return {
-          ...acc,
-          [id]: {
-            ...el,
-            tranchesAges: [...el.tranchesAges, otherAttr],
-          },
-        };
-      } else {
-        return {
-          ...acc,
-          [id]: {
-            id,
-            name,
-            tranchesAges: [otherAttr],
-          },
-        };
+    if (el) {
+      return {
+        ...acc,
+        [id]: {
+          ...el,
+          tranchesAges: [...el.tranchesAges, otherAttr],
+        },
       }
-    },
-    {}
-  );
+    } else {
+      return {
+        ...acc,
+        [id]: {
+          id,
+          name,
+          tranchesAges: [otherAttr],
+        },
+      }
+    }
+  }, {})
 
   // @ts-ignore
-  return Object.entries(tmpArray).map(([id, tranchesAges]) => tranchesAges);
-};
+  // TODO REFACTOR: remplacer par return Object.values(tmpArray)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return Object.entries(tmpArray).map(([_, tranchesAges]) => tranchesAges)
+}
 
 function IndicateurUnFormRaw({
   ecartRemuParTrancheAge,
@@ -105,56 +98,38 @@ function IndicateurUnFormRaw({
       ({ tranchesAges, ...otherPropGroupe }: any) => ({
         ...otherPropGroupe,
         tranchesAges: tranchesAges.map(
-          ({
-            remunerationAnnuelleBrutFemmes,
-            remunerationAnnuelleBrutHommes,
-            ...otherPropsTrancheAge
-          }: any) => {
+          ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, ...otherPropsTrancheAge }: any) => {
             return {
               ...otherPropsTrancheAge,
-              remunerationAnnuelleBrutFemmes: parseFloatStateValue(
-                remunerationAnnuelleBrutFemmes
-              ),
-              remunerationAnnuelleBrutHommes: parseFloatStateValue(
-                remunerationAnnuelleBrutHommes
-              ),
-            };
-          }
+              remunerationAnnuelleBrutFemmes: parseFloatStateValue(remunerationAnnuelleBrutFemmes),
+              remunerationAnnuelleBrutHommes: parseFloatStateValue(remunerationAnnuelleBrutHommes),
+            }
+          },
         ),
-      })
+      }),
     ),
-  };
+  }
 
   const saveForm = (formData: any) => {
-    const remunerationAnnuelle = formData.remunerationAnnuelle.map(
-      ({ tranchesAges, ...otherPropGroupe }: any) => ({
-        ...otherPropGroupe,
-        tranchesAges: tranchesAges.map(
-          ({
-            remunerationAnnuelleBrutFemmes,
-            remunerationAnnuelleBrutHommes,
+    const remunerationAnnuelle = formData.remunerationAnnuelle.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
+      ...otherPropGroupe,
+      tranchesAges: tranchesAges.map(
+        ({ remunerationAnnuelleBrutFemmes, remunerationAnnuelleBrutHommes, trancheAge }: any) => {
+          return {
             trancheAge,
-          }: any) => {
-            return {
-              trancheAge,
-              remunerationAnnuelleBrutFemmes: parseFloatFormValue(
-                remunerationAnnuelleBrutFemmes
-              ),
-              remunerationAnnuelleBrutHommes: parseFloatFormValue(
-                remunerationAnnuelleBrutHommes
-              ),
-            };
+            remunerationAnnuelleBrutFemmes: parseFloatFormValue(remunerationAnnuelleBrutFemmes),
+            remunerationAnnuelleBrutHommes: parseFloatFormValue(remunerationAnnuelleBrutHommes),
           }
-        ),
-      })
-    );
-    updateIndicateurUn(remunerationAnnuelle);
-  };
+        },
+      ),
+    }))
+    updateIndicateurUn(remunerationAnnuelle)
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateIndicateurUn("Valid");
-  };
+    saveForm(formData)
+    validateIndicateurUn("Valid")
+  }
 
   return (
     <Form
@@ -175,38 +150,36 @@ function IndicateurUnFormRaw({
                 name,
                 tranchesAges,
               }: {
-                id: any;
-                name: string;
+                id: any
+                name: string
                 tranchesAges: Array<{
-                  trancheAge: TranchesAges;
-                  validiteGroupe: boolean;
-                }>;
+                  trancheAge: TranchesAges
+                  validiteGroupe: boolean
+                }>
               },
-              indexGroupe
+              indexGroupe,
             ) => {
               return (
                 <BlocForm key={id} title={name} label="rémunération moyenne">
-                  {tranchesAges.map(
-                    ({ trancheAge, validiteGroupe }, indexTrancheAge) => {
-                      return (
-                        <FieldInputsMenWomen
-                          key={trancheAge}
-                          name={displayNameTranchesAges(trancheAge)}
-                          readOnly={readOnly}
-                          calculable={validiteGroupe}
-                          calculableNumber={3}
-                          mask="number"
-                          femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
-                          hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
-                          validatorFemmes={validator}
-                          validatorHommes={validator}
-                        />
-                      );
-                    }
-                  )}
+                  {tranchesAges.map(({ trancheAge, validiteGroupe }, indexTrancheAge) => {
+                    return (
+                      <FieldInputsMenWomen
+                        key={trancheAge}
+                        name={displayNameTranchesAges(trancheAge)}
+                        readOnly={readOnly}
+                        calculable={validiteGroupe}
+                        calculableNumber={3}
+                        mask="number"
+                        femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
+                        hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                        validatorFemmes={validator}
+                        validatorHommes={validator}
+                      />
+                    )
+                  })}
                 </BlocForm>
-              );
-            }
+              )
+            },
           )}
 
           {readOnly ? (
@@ -223,7 +196,7 @@ function IndicateurUnFormRaw({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 const styles = {
@@ -231,6 +204,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
   }),
-};
+}
 
-export default IndicateurUnFormRaw;
+export default IndicateurUnFormRaw

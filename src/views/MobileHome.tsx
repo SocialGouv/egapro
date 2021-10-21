@@ -1,15 +1,15 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import Logo from "../components/Logo";
-import ActionLink from "../components/ActionLink";
-import Footer from "../components/Footer";
-import { Fragment } from "react";
+import Logo from "../components/Logo"
+import ActionLink from "../components/ActionLink"
+import Footer from "../components/Footer"
+import { Fragment } from "react"
 
 interface Props {
-  openMenu: () => void;
+  openMenu: () => void
 }
 
 function MobileHome({ openMenu }: Props) {
@@ -25,26 +25,23 @@ function MobileHome({ openMenu }: Props) {
         </h1>
 
         <p css={styles.subtitle}>
-          L’outil de calcul et de déclaration de votre index égalité
-          professionnelle Femmes-Hommes
+          L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
         </p>
 
         <p css={styles.para}>
-          L’Index de l'égalité professionnelle a été conçu pour faire progresser
-          au sein des entreprises l’égalité salariale entre les femmes et les
-          hommes.
+          L’Index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité
+          salariale entre les femmes et les hommes.
         </p>
         <p css={styles.para}>
-          Il permet aux entreprises de mesurer, en toute transparence, les
-          écarts de rémunération entre les sexes et de mettre en évidence leurs
-          points de progression. Lorsque des disparités salariales sont
-          constatées, des mesures de correction doivent être prises.
+          Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de
+          mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures
+          de correction doivent être prises.
         </p>
 
         <div css={styles.info}>
           <p css={[styles.para, styles.noMargin]}>
-            Le calcul et la déclaration de l'index nécessitent un affichage plus
-            grand. Mais vous pouvez accéder à toute l'aide en ligne et à la FAQ.
+            Le calcul et la déclaration de l'index nécessitent un affichage plus grand. Mais vous pouvez accéder à toute
+            l'aide en ligne et à la FAQ.
           </p>
         </div>
 
@@ -59,13 +56,7 @@ function MobileHome({ openMenu }: Props) {
           </div>
 
           <div css={styles.arrow}>
-            <svg
-              width="49"
-              height="108"
-              viewBox="0 0 49 108"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg width="49" height="108" viewBox="0 0 49 108" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M48.7071 100.707C49.0976 100.317 49.0976 99.6834 48.7071 99.2929L42.3431 92.9289C41.9526 92.5384 41.3194 92.5384 40.9289 92.9289C40.5384 93.3195 40.5384 93.9526 40.9289 94.3431L46.5857 100L40.9289 105.657C40.5384 106.047 40.5384 106.681 40.9289 107.071C41.3194 107.462 41.9526 107.462 42.3431 107.071L48.7071 100.707ZM0.499949 0.5C0.499949 17.9416 -0.133314 42.976 5.40911 63.6341C8.1839 73.9765 12.5293 83.3202 19.3587 90.0854C26.2152 96.8776 35.5053 101 48 101V99C35.9946 99 27.2222 95.0599 20.7662 88.6646C14.2831 82.2423 10.066 73.2735 7.34079 63.1159C1.88321 42.774 2.49995 18.0584 2.49995 0.5H0.499949Z"
                 fill="#191A49"
@@ -76,7 +67,7 @@ function MobileHome({ openMenu }: Props) {
       </div>
       <Footer />
     </Fragment>
-  );
+  )
 }
 
 const styles = {
@@ -169,6 +160,6 @@ const styles = {
     top: 10,
     right: 56,
   }),
-};
+}
 
-export default MobileHome;
+export default MobileHome

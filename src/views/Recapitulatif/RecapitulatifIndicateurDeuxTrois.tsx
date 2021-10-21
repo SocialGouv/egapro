@@ -1,33 +1,30 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
 
-import { FormState } from "../../globals";
-import { displaySexeSurRepresente } from "../../utils/helpers";
+import { FormState } from "../../globals"
+import { displaySexeSurRepresente } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc";
-import RecapBloc from "./components/RecapBloc";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
+import InfoBloc from "../../components/InfoBloc"
+import RecapBloc from "./components/RecapBloc"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 
-import RowData, { RowLabels, RowLabelFull } from "./components/RowData";
+import RowData, { RowLabels, RowLabelFull } from "./components/RowData"
 
-import {
-  getResults,
-  AdditionalInfo
-} from "../Indicateur2et3/IndicateurDeuxTrois";
+import { getResults, AdditionalInfo } from "../Indicateur2et3/IndicateurDeuxTrois"
 
 interface Props {
-  indicateurDeuxTroisFormValidated: FormState;
-  effectifsIndicateurDeuxTroisCalculable: boolean;
-  indicateurDeuxTroisCalculable: boolean;
-  indicateurEcartAugmentationPromotion: number | undefined;
-  indicateurEcartNombreEquivalentSalaries: number | undefined;
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
-  noteIndicateurDeuxTrois: number | undefined;
-  correctionMeasure: boolean;
-  tauxAugmentationPromotionFemmes: number | undefined;
-  tauxAugmentationPromotionHommes: number | undefined;
-  plusPetitNombreSalaries: "hommes" | "femmes" | undefined;
+  indicateurDeuxTroisFormValidated: FormState
+  effectifsIndicateurDeuxTroisCalculable: boolean
+  indicateurDeuxTroisCalculable: boolean
+  indicateurEcartAugmentationPromotion: number | undefined
+  indicateurEcartNombreEquivalentSalaries: number | undefined
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
+  noteIndicateurDeuxTrois: number | undefined
+  correctionMeasure: boolean
+  tauxAugmentationPromotionFemmes: number | undefined
+  tauxAugmentationPromotionHommes: number | undefined
+  plusPetitNombreSalaries: "hommes" | "femmes" | undefined
 }
 
 function RecapitulatifIndicateurDeuxTrois({
@@ -41,7 +38,7 @@ function RecapitulatifIndicateurDeuxTrois({
   correctionMeasure,
   tauxAugmentationPromotionFemmes,
   tauxAugmentationPromotionHommes,
-  plusPetitNombreSalaries
+  plusPetitNombreSalaries,
 }: Props) {
   if (!effectifsIndicateurDeuxTroisCalculable) {
     return (
@@ -51,7 +48,7 @@ function RecapitulatifIndicateurDeuxTrois({
           text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
         />
       </div>
-    );
+    )
   }
 
   if (indicateurDeuxTroisFormValidated !== "Valid") {
@@ -62,18 +59,14 @@ function RecapitulatifIndicateurDeuxTrois({
           text={
             <Fragment>
               <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez
-                pas encore validé vos données saissies.
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies.
               </span>{" "}
-              <TextSimulatorLink
-                to="/indicateur2et3"
-                label="valider les données"
-              />
+              <TextSimulatorLink to="/indicateur2et3" label="valider les données" />
             </Fragment>
           }
         />
       </div>
-    );
+    )
   }
 
   if (!indicateurDeuxTroisCalculable) {
@@ -84,13 +77,10 @@ function RecapitulatifIndicateurDeuxTrois({
           text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu d'augmentation durant la période de référence"
         />
       </div>
-    );
+    )
   }
 
-  const results = getResults(
-    indicateurEcartAugmentationPromotion,
-    indicateurEcartNombreEquivalentSalaries
-  );
+  const results = getResults(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
 
   return (
     <div css={styles.container}>
@@ -101,24 +91,16 @@ function RecapitulatifIndicateurDeuxTrois({
           firstLineData: results.best.result,
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
           secondLineLabel: "votre note obtenue est",
-          secondLineData:
-            (noteIndicateurDeuxTrois !== undefined
-              ? noteIndicateurDeuxTrois
-              : "--") + "/35",
-          secondLineInfo: correctionMeasure
-            ? "** mesures de correction prises en compte"
-            : undefined,
-          indicateurSexeSurRepresente
+          secondLineData: (noteIndicateurDeuxTrois !== undefined ? noteIndicateurDeuxTrois : "--") + "/35",
+          secondLineInfo: correctionMeasure ? "** mesures de correction prises en compte" : undefined,
+          indicateurSexeSurRepresente,
         }}
       >
         <RowLabelFull label="taux d'augmentation" />
         <RowLabels labels={["femmes", "hommes"]} />
         <RowData
           name="taux de salariés augmentés"
-          data={[
-            tauxAugmentationPromotionFemmes,
-            tauxAugmentationPromotionHommes
-          ]}
+          data={[tauxAugmentationPromotionFemmes, tauxAugmentationPromotionHommes]}
           asPercent={true}
         />
       </RecapBloc>
@@ -129,7 +111,7 @@ function RecapitulatifIndicateurDeuxTrois({
         correctionMeasure={correctionMeasure}
       />
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -137,9 +119,9 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginTop: 22,
-    marginBottom: 22
+    marginBottom: 22,
   }),
-  message: css({})
-};
+  message: css({}),
+}
 
-export default RecapitulatifIndicateurDeuxTrois;
+export default RecapitulatifIndicateurDeuxTrois

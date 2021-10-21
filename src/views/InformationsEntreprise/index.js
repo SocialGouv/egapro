@@ -1,2 +1,2 @@
-import InformationsEntreprise from "./InformationsEntreprise";
-export default InformationsEntreprise;
+import InformationsEntreprise from "./InformationsEntreprise"
+export default InformationsEntreprise

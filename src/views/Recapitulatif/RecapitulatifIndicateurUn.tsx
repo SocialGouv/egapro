@@ -1,36 +1,31 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
 
-import { FormState, TranchesAges } from "../../globals";
-import {
-  effectifEtEcartRemuGroupCsp,
-  effectifEtEcartRemuGroupCoef
-} from "../../utils/calculsEgaProIndicateurUn";
+import { FormState, TranchesAges } from "../../globals"
+import { effectifEtEcartRemuGroupCsp, effectifEtEcartRemuGroupCoef } from "../../utils/calculsEgaProIndicateurUn"
 
 import {
   displayNameTranchesAges,
   displayNameCategorieSocioPro,
   displayPercent,
-  displaySexeSurRepresente
-} from "../../utils/helpers";
+  displaySexeSurRepresente,
+} from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc";
-import RecapBloc from "./components/RecapBloc";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
+import InfoBloc from "../../components/InfoBloc"
+import RecapBloc from "./components/RecapBloc"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 
-import RowData, { RowLabels, RowLabelFull } from "./components/RowData";
+import RowData, { RowLabels, RowLabelFull } from "./components/RowData"
 
 interface Props {
-  indicateurUnFormValidated: FormState;
-  effectifsIndicateurUnCalculable: boolean;
-  effectifEtEcartRemuParTranche:
-    | Array<effectifEtEcartRemuGroupCsp>
-    | Array<effectifEtEcartRemuGroupCoef>;
-  indicateurEcartRemuneration: number | undefined;
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
-  indicateurUnParCSP: boolean;
-  noteIndicateurUn: number | undefined;
+  indicateurUnFormValidated: FormState
+  effectifsIndicateurUnCalculable: boolean
+  effectifEtEcartRemuParTranche: Array<effectifEtEcartRemuGroupCsp> | Array<effectifEtEcartRemuGroupCoef>
+  indicateurEcartRemuneration: number | undefined
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
+  indicateurUnParCSP: boolean
+  noteIndicateurUn: number | undefined
 }
 
 function RecapitulatifIndicateurUn({
@@ -40,32 +35,25 @@ function RecapitulatifIndicateurUn({
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
   indicateurUnParCSP,
-  noteIndicateurUn
+  noteIndicateurUn,
 }: Props) {
   if (!effectifsIndicateurUnCalculable) {
-    const messageCalculParCSP = indicateurUnParCSP ? (
-      undefined
-    ) : (
-      <TextSimulatorLink
-        to="/indicateur1"
-        label="Vous devez calculer par CSP"
-      />
-    );
+    const messageCalculParCSP = indicateurUnParCSP ? undefined : (
+      <TextSimulatorLink to="/indicateur1" label="Vous devez calculer par CSP" />
+    )
     return (
       <div css={styles.container}>
         <InfoBloc
           title="Indicateur écart de rémunération entre les femmes et les hommes"
           text={
             <Fragment>
-              Malheureusement votre indicateur n’est pas calculable car
-              l’ensemble des groupes valables (c’est-à-dire comptant au moins 3
-              femmes et 3 hommes), représentent moins de 40% des effectifs.{" "}
-              {messageCalculParCSP}
+              Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire
+              comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. {messageCalculParCSP}
             </Fragment>
           }
         />
       </div>
-    );
+    )
   }
 
   if (indicateurUnFormValidated !== "Valid") {
@@ -76,18 +64,14 @@ function RecapitulatifIndicateurUn({
           text={
             <Fragment>
               <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez
-                pas encore validé vos données saissies.
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies.
               </span>{" "}
-              <TextSimulatorLink
-                to="/indicateur1"
-                label="valider les données"
-              />
+              <TextSimulatorLink to="/indicateur1" label="valider les données" />
             </Fragment>
           }
         />
       </div>
-    );
+    )
   }
 
   // @ts-ignore
@@ -99,18 +83,18 @@ function RecapitulatifIndicateurUn({
           ? {
               id: el.categorieSocioPro,
               name: displayNameCategorieSocioPro(el.categorieSocioPro),
-              ...el
+              ...el,
             }
-          : el;
+          : el
       if (index % 4 === 0) {
-        acc.push([newEl]);
+        acc.push([newEl])
       } else {
-        acc[acc.length - 1].push(newEl);
+        acc[acc.length - 1].push(newEl)
       }
-      return acc;
+      return acc
     },
-    []
-  );
+    [],
+  )
 
   return (
     <div css={styles.container}>
@@ -118,21 +102,17 @@ function RecapitulatifIndicateurUn({
         title="Indicateur écart de rémunération entre les femmes et les hommes"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
-          firstLineData:
-            indicateurEcartRemuneration !== undefined
-              ? displayPercent(indicateurEcartRemuneration)
-              : "--",
+          firstLineData: indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--",
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
           secondLineLabel: "votre note obtenue est",
-          secondLineData:
-            (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
-          indicateurSexeSurRepresente
+          secondLineData: (noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40",
+          indicateurSexeSurRepresente,
         }}
       >
         <RowLabelFull
           label={
             <Fragment>
-              écart de rémunération par {indicateurUnParCSP ? "csp" : "niveau ou coefficient hiérarchique" }
+              écart de rémunération par {indicateurUnParCSP ? "csp" : "niveau ou coefficient hiérarchique"}
               <br />
               (avant seuil de pertinence)
             </Fragment>
@@ -143,17 +123,17 @@ function RecapitulatifIndicateurUn({
             displayNameTranchesAges(TranchesAges.MoinsDe30ans),
             displayNameTranchesAges(TranchesAges.De30a39ans),
             displayNameTranchesAges(TranchesAges.De40a49ans),
-            displayNameTranchesAges(TranchesAges.PlusDe50ans)
+            displayNameTranchesAges(TranchesAges.PlusDe50ans),
           ]}
         />
 
         {groupEffectifEtEcartRemuParTranche.map(
           (
             effectifEtEcartRemuParTranche: Array<{
-              id: any;
-              name: string;
-              ecartRemunerationMoyenne: number | undefined;
-            }>
+              id: any
+              name: string
+              ecartRemunerationMoyenne: number | undefined
+            }>,
           ) => (
             <RowData
               key={effectifEtEcartRemuParTranche[0].id}
@@ -162,15 +142,15 @@ function RecapitulatifIndicateurUn({
                 effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne,
                 effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne,
                 effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne,
-                effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
+                effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne,
               ]}
               asPercent={true}
             />
-          )
+          ),
         )}
       </RecapBloc>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -178,8 +158,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginTop: 22,
-    marginBottom: 22
-  })
-};
+    marginBottom: 22,
+  }),
+}
 
-export default RecapitulatifIndicateurUn;
+export default RecapitulatifIndicateurUn

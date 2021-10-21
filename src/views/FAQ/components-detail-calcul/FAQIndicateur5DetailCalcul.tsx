@@ -1,12 +1,12 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
 
-import { IconLamp } from "../../../components/Icons";
+import { IconLamp } from "../../../components/Icons"
 
-import FAQStep from "../components/FAQStep";
-import FAQCalculScale from "../components/FAQCalculScale";
-import FAQTitle3 from "../components/FAQTitle3";
+import FAQStep from "../components/FAQStep"
+import FAQCalculScale from "../components/FAQCalculScale"
+import FAQTitle3 from "../components/FAQTitle3"
 
 function FAQIndicateur5DetailCalcul() {
   return (
@@ -14,8 +14,8 @@ function FAQIndicateur5DetailCalcul() {
       <FAQTitle3>Calculer l’indicateur</FAQTitle3>
 
       <FAQStep icon={<IconLamp />}>
-        Comparer le nombre de femmes et le nombre d’hommes comptant parmi les 10
-        plus hautes rémunérations de l’entreprise.
+        Comparer le nombre de femmes et le nombre d’hommes comptant parmi les 10 plus hautes rémunérations de
+        l’entreprise.
       </FAQStep>
 
       <div css={styles.content}>
@@ -29,13 +29,13 @@ function FAQIndicateur5DetailCalcul() {
         />
       </div>
     </Fragment>
-  );
+  )
 }
 
 const styles = {
   content: css({
-    marginTop: 30
-  })
-};
+    marginTop: 30,
+  }),
+}
 
-export default FAQIndicateur5DetailCalcul;
+export default FAQIndicateur5DetailCalcul

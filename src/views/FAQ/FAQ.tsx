@@ -1,19 +1,19 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import { StaticContext } from "react-router";
-import { Route, Switch, RouteComponentProps } from "react-router-dom";
+import { StaticContext } from "react-router"
+import { Route, Switch, RouteComponentProps } from "react-router-dom"
 
-import { useLayoutType } from "../../components/GridContext";
+import { useLayoutType } from "../../components/GridContext"
 
-import FAQHeader from "./components/FAQHeader";
-import FAQFooter from "./components/FAQFooter";
+import FAQHeader from "./components/FAQHeader"
+import FAQFooter from "./components/FAQFooter"
 
-import FAQHome from "./FAQHome";
-import FAQSection from "./FAQSection";
-import FAQSectionDetailCalcul from "./FAQSectionDetailCalcul";
-import FAQQuestion from "./FAQQuestion";
-import globalStyles from "../../utils/globalStyles";
+import FAQHome from "./FAQHome"
+import FAQSection from "./FAQSection"
+import FAQSectionDetailCalcul from "./FAQSectionDetailCalcul"
+import FAQQuestion from "./FAQQuestion"
+import globalStyles from "../../utils/globalStyles"
 
 const FAQPaths: { [key: string]: string } = {
   informations: "/section/informations",
@@ -25,51 +25,42 @@ const FAQPaths: { [key: string]: string } = {
   indicateur4: "/section/indicateur4",
   indicateur5: "/section/indicateur5",
   recapitulatif: "/section/resultat",
-};
+}
 
 type LocationState = {
-  faq?: string;
-};
+  faq?: string
+}
 
-type FAQRouteComponentProps = RouteComponentProps<
-  {},
-  StaticContext,
-  LocationState
->;
+type FAQRouteComponentProps = RouteComponentProps<Record<string, string>, StaticContext, LocationState>
 
-function mapDefaultPathnameToFAQPathname(
-  location: FAQRouteComponentProps["location"]
-) {
+function mapDefaultPathnameToFAQPathname(location: FAQRouteComponentProps["location"]) {
   if (location.state && location.state.faq) {
-    return location.state.faq;
+    return location.state.faq
   }
-  const splittedLocationPathname = location.pathname.split("/").filter(Boolean);
-  if (
-    splittedLocationPathname[0] !== "simulateur" ||
-    splittedLocationPathname.length !== 3
-  ) {
-    return location.pathname;
+  const splittedLocationPathname = location.pathname.split("/").filter(Boolean)
+  if (splittedLocationPathname[0] !== "simulateur" || splittedLocationPathname.length !== 3) {
+    return location.pathname
   }
-  const faqPath = FAQPaths[splittedLocationPathname[2]];
-  return faqPath ? faqPath : location.pathname;
+  const faqPath = FAQPaths[splittedLocationPathname[2]]
+  return faqPath ? faqPath : location.pathname
 }
 
 interface Props {
-  closeMenu?: () => void;
+  closeMenu?: () => void
 }
 
 function FAQ({ closeMenu }: Props) {
-  const layoutType = useLayoutType();
+  const layoutType = useLayoutType()
   return (
     <Route
       render={(route) => {
-        const location = (route as FAQRouteComponentProps).location;
+        const location = (route as FAQRouteComponentProps).location
         const locationFAQ = {
           pathname: mapDefaultPathnameToFAQPathname(location),
           search: "",
           hash: "",
           state: undefined,
-        };
+        }
         return (
           <div css={styles.container}>
             <FAQHeader location={locationFAQ} closeMenu={closeMenu} />
@@ -97,25 +88,13 @@ function FAQ({ closeMenu }: Props) {
                 />
 
                 {/* TODO: move to FAQPaths when a dedicated content is added */}
-                <Route
-                  path={["/", "/simulateur/:code/informations-entreprise"]}
-                  exact
-                  render={() => <FAQHome />}
-                />
+                <Route path={["/", "/simulateur/:code/informations-entreprise"]} exact render={() => <FAQHome />} />
 
                 {/* TODO: move to FAQPaths when a dedicated content is added */}
-                <Route
-                  path={["/", "/simulateur/:code/informations-declarant"]}
-                  exact
-                  render={() => <FAQHome />}
-                />
+                <Route path={["/", "/simulateur/:code/informations-declarant"]} exact render={() => <FAQHome />} />
 
                 {/* TODO: move to FAQPaths when a dedicated content is added */}
-                <Route
-                  path={["/", "/simulateur/:code/declaration"]}
-                  exact
-                  render={() => <FAQHome />}
-                />
+                <Route path={["/", "/simulateur/:code/declaration"]} exact render={() => <FAQHome />} />
 
                 <Route
                   exact
@@ -135,12 +114,7 @@ function FAQ({ closeMenu }: Props) {
                     match: {
                       params: { section },
                     },
-                  }) => (
-                    <FAQSectionDetailCalcul
-                      history={history}
-                      section={section}
-                    />
-                  )}
+                  }) => <FAQSectionDetailCalcul history={history} section={section} />}
                 />
 
                 <Route
@@ -151,23 +125,17 @@ function FAQ({ closeMenu }: Props) {
                     match: {
                       params: { part, indexQuestion },
                     },
-                  }) => (
-                    <FAQQuestion
-                      history={history}
-                      part={part}
-                      indexQuestion={indexQuestion}
-                    />
-                  )}
+                  }) => <FAQQuestion history={history} part={part} indexQuestion={indexQuestion} />}
                 />
               </Switch>
 
               <FAQFooter />
             </div>
           </div>
-        );
+        )
       }}
     />
-  );
+  )
 }
 
 const styles = {
@@ -204,6 +172,6 @@ const styles = {
     paddingRight: globalStyles.grid.gutterWidth,
     paddingLeft: globalStyles.grid.gutterWidth,
   }),
-};
+}
 
-export default FAQ;
+export default FAQ
