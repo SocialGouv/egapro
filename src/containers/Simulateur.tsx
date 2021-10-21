@@ -57,10 +57,12 @@ interface Props {
 
 function Simulateur({ code, state, dispatch }: Props) {
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] =
-    useState<string | undefined>(undefined);
-  const [tokenInfo, setTokenInfo] =
-    useState<undefined | "error" | TokenInfo>(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
+  const [tokenInfo, setTokenInfo] = useState<undefined | "error" | TokenInfo>(
+    undefined
+  );
   const history = useHistory();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -71,36 +73,33 @@ function Simulateur({ code, state, dispatch }: Props) {
   }
   const token = localStorage.getItem("token");
 
+  // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {
-    if (!token) {
-      return;
-    }
     setLoading(true);
     setErrorMessage(undefined);
-    getTokenInfo()
-      .then(({ jsonBody }) => {
+
+    Promise.all([getTokenInfo(), getIndicatorsDatas(code)])
+      .then(([tokenInfo, indicatorsData]) => {
+        tokenInfo = tokenInfo?.jsonBody;
+        indicatorsData = indicatorsData?.jsonBody;
+
         setLoading(false);
-        setTokenInfo(jsonBody);
-        localStorage.setItem("tokenInfo", JSON.stringify(jsonBody) || "");
+        setTokenInfo(tokenInfo);
+        localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo) || "");
+
+        const email =
+          indicatorsData.data?.informationsDeclarant?.email || tokenInfo?.email;
 
         dispatch({
-          type: "updateEmailDeclarant",
-          data: { email: jsonBody.email },
+          type: "initiateState",
+          data: {
+            ...indicatorsData?.data,
+            informationsDeclarant: {
+              ...indicatorsData?.data.informationsDeclarant,
+              email,
+            },
+          },
         });
-      })
-      .catch((error) => {
-        setLoading(false);
-        setTokenInfo("error");
-      });
-  }, [token, dispatch]);
-
-  useEffect(() => {
-    setLoading(true);
-    setErrorMessage(undefined);
-    getIndicatorsDatas(code)
-      .then(({ jsonBody }) => {
-        setLoading(false);
-        dispatch({ type: "initiateState", data: jsonBody.data });
       })
       .catch((error) => {
         setLoading(false);
@@ -110,8 +109,9 @@ function Simulateur({ code, state, dispatch }: Props) {
             : "Erreur lors de la récupération des données";
         setErrorMessage(message);
       });
-  }, [code, dispatch]);
+  }, [code, token, dispatch]);
 
+  // useEffect pour synchroniser le state dans la db, de façon asynchrone (après 2 secondes de debounce).
   useDebounceEffect(
     state,
     2000,
@@ -214,9 +214,7 @@ function Simulateur({ code, state, dispatch }: Props) {
       ) : tokenInfo === "error" ? (
         <Fragment>
           <p></p>
-          <AskEmail
-            code={code}
-          />
+          <AskEmail code={code} />
         </Fragment>
       ) : (
         <Fragment>
