@@ -54,22 +54,10 @@ function AppLayout({ state, dispatch }: Props) {
                           },
                         }) => <Simulateur code={code} state={state} dispatch={dispatch} />}
                       />
-                      <Route
-                        path="/mentions-legales"
-                        exact
-                        render={(props) => <MentionsLegales {...props} dispatch={dispatch} />}
-                      />
-                      <Route
-                        path="/accessibilite"
-                        exact
-                        render={(props) => <Accessibilite {...props} dispatch={dispatch} />}
-                      />
-                      <Route path="/cgu" exact render={(props) => <CGU {...props} dispatch={dispatch} />} />
-                      <Route
-                        path="/politique-confidentialite"
-                        exact
-                        render={(props) => <PolitiqueConfidentialite {...props} dispatch={dispatch} />}
-                      />
+                      <Route path="/mentions-legales" exact render={() => <MentionsLegales />} />
+                      <Route path="/accessibilite" exact render={() => <Accessibilite />} />
+                      <Route path="/cgu" exact render={() => <CGU />} />
+                      <Route path="/politique-confidentialite" exact render={() => <PolitiqueConfidentialite />} />
                       <Route path="/infosApp" exact render={() => <InfosApp />} />
                       <Route component={PageNotFound} />
                     </Switch>
