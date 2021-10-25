@@ -5,7 +5,7 @@ module.exports = {
     es2020: true,
     "jest/globals": true,
   },
-  ignorePatterns: ["node_modules/*", "!.prettierrc.js"],
+  ignorePatterns: ["node_modules/*"],
   parser: "@typescript-eslint/parser",
   extends: [
     "eslint:recommended",
