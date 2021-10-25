@@ -11,7 +11,7 @@
     "functional-tests": "cypress run",
     "type-check": "tsc --pretty --noEmit",
     "fresh-install": "rm -rf node_modules/ build/ && yarn",
-    "check-all": "yarn type-check && yarn test --watchAll=false",
+    "check-all": "yarn lint && yarn type-check && yarn test --watchAll=false",
     "migrate": "ts-node -O '{\"module\": \"commonjs\"}' src/migrations/*.ts"
   },
   "dependencies": {
