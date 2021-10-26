@@ -43,7 +43,6 @@ export const checkSiren =
       await ownersForSiren(siren);
     } catch (error) {
       console.error(error);
-      updateSirenData({});
       return "Vous n'êtes pas autorisé à déclarer pour ce SIREN, veuillez contacter votre référent de l'égalité professionnelle";
     }
 
@@ -52,6 +51,7 @@ export const checkSiren =
     }
 
     updateSirenData(result.jsonBody);
+
 
   };
 
