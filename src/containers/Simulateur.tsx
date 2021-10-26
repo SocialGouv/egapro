@@ -75,40 +75,52 @@ function Simulateur({ code, state, dispatch }: Props) {
 
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {
-    setLoading(true);
-    setErrorMessage(undefined);
+    async function runEffect() {
+      setLoading(true);
+      setErrorMessage(undefined);
 
-    Promise.all([getTokenInfo(), getIndicatorsDatas(code)])
-      .then(([tokenInfo, indicatorsData]) => {
-        tokenInfo = tokenInfo?.jsonBody;
-        indicatorsData = indicatorsData?.jsonBody;
+      let email = "";
 
+      try {
+        if (token) {
+          let tokenInfo  = await getTokenInfo();
+
+          if (tokenInfo) {
+            setTokenInfo(tokenInfo?.jsonBody);
+            localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "");
+
+            email = tokenInfo?.jsonBody?.email || email;
+          }
+        }
+
+        const indicatorsData = await getIndicatorsDatas(code);
         setLoading(false);
-        setTokenInfo(tokenInfo);
-        localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo) || "");
 
-        const email =
-          indicatorsData.data?.informationsDeclarant?.email || tokenInfo?.email;
+        const simuData = indicatorsData?.jsonBody?.data;
 
         dispatch({
           type: "initiateState",
           data: {
-            ...indicatorsData?.data,
+            ...simuData,
             informationsDeclarant: {
-              ...indicatorsData?.data.informationsDeclarant,
-              email,
+              ...simuData?.informationsDeclarant,
+              email: simuData?.informationsDeclarant?.email || email,
             },
-          },
-        });
-      })
-      .catch((error) => {
-        setLoading(false);
-        const message =
-          error.jsonBody && error.jsonBody.error
-            ? `Les données de votre déclaration n'ont pû être récupérées : ${error.jsonBody.error}`
-            : "Erreur lors de la récupération des données";
-        setErrorMessage(message);
-      });
+          }})
+        }
+        catch (_error) {
+          const error = _error as { jsonBody: { error: string }};
+          console.error(error);
+          setLoading(false);
+          const message = error.jsonBody?.error
+              ? `Les données de votre déclaration n'ont pû être récupérées : ${error.jsonBody.error}`
+              : "Erreur lors de la récupération des données";
+          setErrorMessage(message);
+        }
+    }
+
+    runEffect();
+
   }, [code, token, dispatch]);
 
   // useEffect pour synchroniser le state dans la db, de façon asynchrone (après 2 secondes de debounce).
