@@ -33,7 +33,6 @@ function InfosApp() {
               <caption style={{ textAlign: "left", marginBottom: 10}}>Informations sur l'utilisateur</caption>
               <tbody>
                 <tr><th scope="row" style={{ textAlign: "left" }}><b>Courriel</b></th><td>{ tokenInfo?.email}</td></tr>
-                <tr><th scope="row" style={{ textAlign: "left" }}><b>Déclarations</b></th><td>{ tokenInfo?.déclarations?.length ? tokenInfo?.déclarations.join(", ") : "N/A"}</td></tr>
                 <tr><th scope="row" style={{ textAlign: "left" }}><b>SIREN</b></th><td>{ tokenInfo?.ownership?.length ? tokenInfo?.ownership.join(", ") : "N/A"}</td></tr>
               </tbody>
             </table>
