@@ -1,26 +1,32 @@
 type TokenInfo = {
-    email: string,
-    déclarations: string[],
-    ownership: string[],
-    staff: boolean
-}
+  email: string;
+  déclarations: string[];
+  ownership: string[];
+  staff: boolean;
+};
 
 function getTokenInfo(): TokenInfo | null {
-    const tokenInfoString = localStorage.getItem("tokenInfo")
+  const tokenInfoString = localStorage.getItem("tokenInfo");
 
-    if (!tokenInfoString) return null;
+  if (!tokenInfoString) {
+    return null;
+  }
 
-    return JSON.parse(tokenInfoString)
+  return JSON.parse(tokenInfoString);
 }
 
 export function isUserGrantedForSiren(siren: string) {
-    const tokenInfo = getTokenInfo();
+  const tokenInfo = getTokenInfo();
 
-    if (tokenInfo?.staff) return true;
+  if (tokenInfo?.staff) {
+    return true;
+  }
 
-    const ownership = tokenInfo?.ownership;
+  const ownership = tokenInfo?.ownership;
 
-    if (!ownership?.length) return false;
+  if (!ownership?.length) {
+    return false;
+  }
 
-    return ownership.indexOf(siren) !== -1;
+  return ownership.indexOf(siren) !== -1;
 }
