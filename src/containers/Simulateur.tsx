@@ -8,6 +8,7 @@ import { AppState, ActionType } from "../globals";
 import { logToSentry } from "../utils/helpers";
 
 import globalStyles from "../utils/globalStyles";
+import { isUserGrantedForSiren } from "../utils/user";
 import {
   getIndicatorsDatas,
   getTokenInfo,
@@ -83,13 +84,16 @@ function Simulateur({ code, state, dispatch }: Props) {
 
       try {
         if (token) {
-          let tokenInfo  = await getTokenInfo();
+          let tokenInfo = await getTokenInfo();
 
           if (tokenInfo) {
             setTokenInfo(tokenInfo?.jsonBody);
-            localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "");
+            localStorage.setItem(
+              "tokenInfo",
+              JSON.stringify(tokenInfo?.jsonBody) || ""
+            );
 
-            email = tokenInfo?.jsonBody?.email || email;
+            email = tokenInfo?.jsonBody?.email || email;
           }
         }
 
@@ -97,6 +101,19 @@ function Simulateur({ code, state, dispatch }: Props) {
         setLoading(false);
 
         const simuData = indicatorsData?.jsonBody?.data;
+
+        const siren = simuData?.informationsEntreprise?.siren;
+
+        if (siren) {
+          if (!token) {
+            // On ne peut pas voir une simulation avec un SIREN rempli et qu'on n'est pas authentifié.
+            // Renvoi sur le formulaire d'email (cf. plus bas).
+            setErrorMessage("Veuillez vous connecter pour voir cette simulation.");
+          } else if (!isUserGrantedForSiren(siren)) {
+            // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
+            setErrorMessage("Vous n'êtes pas autorisés à voir cette simulation. Veuillez contacter votre référent EgaPro.");
+          }
+        }
 
         dispatch({
           type: "initiateState",
@@ -106,21 +123,20 @@ function Simulateur({ code, state, dispatch }: Props) {
               ...simuData?.informationsDeclarant,
               email: simuData?.informationsDeclarant?.email || email,
             },
-          }})
-        }
-        catch (_error) {
-          const error = _error as { jsonBody: { error: string }};
-          console.error(error);
-          setLoading(false);
-          const message = error.jsonBody?.error
-              ? `Les données de votre déclaration n'ont pû être récupérées : ${error.jsonBody.error}`
-              : "Erreur lors de la récupération des données";
-          setErrorMessage(message);
-        }
+          },
+        });
+      } catch (_error) {
+        const error = _error as { jsonBody: { error: string } };
+        console.error(error);
+        setLoading(false);
+        const message = error.jsonBody?.error
+          ? `Les données de votre déclaration n'ont pû être récupérées : ${error.jsonBody.error}`
+          : "Erreur lors de la récupération des données";
+        setErrorMessage(message);
+      }
     }
 
     runEffect();
-
   }, [code, token, dispatch]);
 
   // useEffect pour synchroniser le state dans la db, de façon asynchrone (après 2 secondes de debounce).
@@ -142,6 +158,10 @@ function Simulateur({ code, state, dispatch }: Props) {
     },
     [code]
   );
+
+  if (!loading && errorMessage === "Veuillez vous connecter pour voir cette simulation.") {
+    return <AskEmail code={code} reason={errorMessage}/>;
+  }
 
   if (!loading && errorMessage) {
     return ErrorMessage(errorMessage);

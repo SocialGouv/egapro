@@ -17,9 +17,10 @@ import ButtonAction from "../components/ButtonAction";
 interface Props {
   code: string;
   tagLine?: string;
+  reason?: string;
 }
 
-function AskEmail({ code, tagLine }: Props) {
+function AskEmail({ code, tagLine, reason}: Props) {
   const layoutType = useLayoutType();
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
   const [loading, setLoading] = useState(false);
@@ -52,6 +53,8 @@ function AskEmail({ code, tagLine }: Props) {
           {({ handleSubmit, hasValidationErrors, submitFailed, values }) =>
             submitted ? (
               <Fragment>
+                { reason && <p>{ reason }</p>}
+
                 <p>
                   Vous allez recevoir un mail sur l'adresse email que vous avez
                   indiquée à l'étape précédente.
@@ -80,6 +83,8 @@ function AskEmail({ code, tagLine }: Props) {
               </Fragment>
             ) : (
               <Fragment>
+                { reason && <Fragment><p>{ reason }</p><br/></Fragment>}
+
                 <p>
                   L’email saisi doit être valide. Il sera celui sur lequel sera adressé l’accusé de réception en fin de procédure et celui qui vous permettra d'accéder à votre déclaration une fois validée et transmise.
                   <br />
