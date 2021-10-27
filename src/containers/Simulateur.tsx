@@ -108,10 +108,10 @@ function Simulateur({ code, state, dispatch }: Props) {
           if (!token) {
             // On ne peut pas voir une simulation avec un SIREN rempli et qu'on n'est pas authentifié.
             // Renvoi sur le formulaire d'email (cf. plus bas).
-            setErrorMessage("Veuillez vous connecter pour voir cette simulation.");
+            setErrorMessage("Veuillez renseigner votre email pour accéder à cette simulation-déclaration.");
           } else if (!isUserGrantedForSiren(siren)) {
             // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
-            setErrorMessage("Vous n'êtes pas autorisés à voir cette simulation. Veuillez contacter votre référent EgaPro.");
+            setErrorMessage("Vous n'êtes pas autorisé à accéder à cette simulation-déclaration, veuillez contacter votre référent de l'égalité professionnelle.");
           }
         }
 
@@ -159,7 +159,7 @@ function Simulateur({ code, state, dispatch }: Props) {
     [code]
   );
 
-  if (!loading && errorMessage === "Veuillez vous connecter pour voir cette simulation.") {
+  if (!loading && errorMessage === "Veuillez renseigner votre email pour accéder à cette simulation-déclaration.") {
     return <AskEmail code={code} reason={errorMessage}/>;
   }
 

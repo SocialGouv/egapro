@@ -53,15 +53,13 @@ function AskEmail({ code, tagLine, reason}: Props) {
           {({ handleSubmit, hasValidationErrors, submitFailed, values }) =>
             submitted ? (
               <Fragment>
-                { reason && <p>{ reason }</p>}
-
                 <p>
                   Vous allez recevoir un mail sur l'adresse email que vous avez
                   indiquée à l'étape précédente.
                 </p>
 
                 <p css={styles.warning}>
-                  Ouvrez ce mail et cliquez sur le lien de validation pour accéder à la partie déclaration.
+                  Ouvrez ce mail et cliquez sur le lien de validation.
                 </p>
 
                 <p>
