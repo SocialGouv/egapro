@@ -13,6 +13,13 @@ if (process.env.REACT_APP_SENTRY_DSN) {
     release: process.env.REACT_APP_VERSION,
   })
 }
+
+if (process.env.NODE_ENV !== "production") {
+  import("@axe-core/react").then((axe) => {
+    axe.default(React, ReactDOM, 1000)
+  })
+}
+
 ReactDOM.render(<App />, document.getElementById("root"))
 
 // If you want your app to work offline and load faster, you can change

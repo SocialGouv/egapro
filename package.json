@@ -45,6 +45,7 @@
     "text-mask-addons": "3.8.0"
   },
   "devDependencies": {
+    "@axe-core/react": "^4.3.1",
     "@types/jest": "25.1.4",
     "@types/node": "12.12.31",
     "@types/node-fetch": "2.5.5",
