@@ -1,8 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core"
 import { useRef } from "react"
-import { StaticContext } from "react-router"
-import { RouteComponentProps } from "react-router-dom"
 
 import globalStyles from "../utils/globalStyles"
 
@@ -11,8 +9,6 @@ import Page from "../components/Page"
 import ActionLink from "../components/ActionLink"
 import ActionBar from "../components/ActionBar"
 import { ButtonSimulatorLink } from "../components/SimulatorLink"
-
-export type HomeSimulateurRouteComponentProps = RouteComponentProps<Record<string, string>, StaticContext>
 
 function HomeSimulateur(): JSX.Element {
   const textEl = useRef<HTMLSpanElement>(null)

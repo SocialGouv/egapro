@@ -375,7 +375,6 @@ function Declaration({ code, state, dispatch }: Props) {
               totalPointCalculable={totalPointCalculable}
             />
             <DeclarationForm
-              code={code}
               state={state}
               noteIndex={noteIndex}
               indicateurUnParCSP={state.indicateurUn.csp}

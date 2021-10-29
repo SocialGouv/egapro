@@ -17,7 +17,7 @@ import ErrorMessage from "../components/ErrorMessage"
 
 import Declaration from "../views/Declaration"
 import Effectif from "../views/Effectif"
-import HomeSimulateur, { HomeSimulateurRouteComponentProps } from "../views/HomeSimulateur"
+import HomeSimulateur from "../views/HomeSimulateur"
 import IndicateurUn from "../views/Indicateur1"
 import IndicateurDeux from "../views/Indicateur2"
 import IndicateurTrois from "../views/Indicateur3"
@@ -149,7 +149,7 @@ function Simulateur({ code, state, dispatch }: Props) {
   )
 
   if (!loading && errorMessage === "Veuillez renseigner votre email pour accéder à cette simulation-déclaration.") {
-    return <AskEmail code={code} reason={errorMessage} />
+    return <AskEmail reason={errorMessage} />
   }
 
   if (!loading && errorMessage) {
@@ -169,9 +169,8 @@ function Simulateur({ code, state, dispatch }: Props) {
       <Route
         path="/simulateur/:code/"
         exact
-        render={(props) => {
-          const foo = props as HomeSimulateurRouteComponentProps
-          return <HomeSimulateur {...foo} code={code} />
+        render={() => {
+          return <HomeSimulateur />
         }}
       />
       <Route
@@ -208,11 +207,11 @@ function Simulateur({ code, state, dispatch }: Props) {
       />
       <Route path="/simulateur/:code/recapitulatif" render={(props) => <Recapitulatif {...props} state={state} />} />
       {tokenInfo === undefined ? (
-        <AskEmail code={code} />
+        <AskEmail />
       ) : tokenInfo === "error" ? (
         <Fragment>
           <p></p>
-          <AskEmail code={code} />
+          <AskEmail />
         </Fragment>
       ) : (
         <Fragment>
