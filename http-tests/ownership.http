@@ -1,0 +1,9 @@
+
+
+
+// compte admin, membre du staff
+#@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2MzU3NzczMzR9.nFP71zws-1DuhUcWeiUQoWL9wiMKEqPHjyKxc2CEnhE
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaEBsYW5vcm1hbmRpc2UuZnIiLCJleHAiOjE2MzU3Nzc2Njd9.iP-mAWEGxtISuUxUoU10B3yCh9ai6RDbTZmBrhPdxMc
+@SIREN=382616415
+GET http://127.0.0.1:2626/ownership/{{SIREN}}
+Cookie: api-key={{token}}

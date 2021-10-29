@@ -1,0 +1,4 @@
+@API_ENTREPRISE_TOKEN = eyJhbGciOiJIUzI1NiJ9.eyJ1aWQiOiIzY2RiYmZiZC1lZTI1LTQyNDEtYmNjOC02ZGNkMDEwZjg2NWQiLCJqdGkiOiJiMTgwYmIxMy0zOTQyLTQ0M2ItOTI3NS00Y2VhZjJiODM2ODMiLCJyb2xlcyI6WyJlbnRyZXByaXNlcyJdLCJzdWIiOiJJbmRleCBFZ2Fwcm8iLCJpYXQiOjE2MTMxNDI3NjMsInZlcnNpb24iOiIxLjAiLCJleHAiOjE2NjAzMTM1NjN9.10-fZAVxL1TArN38__tyLnELEaGg_Sy5FHcWCpnANTw
+@SIREN = 722003936
+
+GET https://entreprise.api.gouv.fr/v2/entreprises/{{SIREN}}?token={{API_ENTREPRISE_TOKEN}}&context=CadreDeLaRequ%C3%AAte&recipient=B%C3%A9n%C3%A9ficiaireDeL%E2%80%99appel&object=RaisonDeL%E2%80%99AppelOuIdentifiant
