@@ -74,10 +74,16 @@ export const putDeclaration = (data) =>
 
 export const validateSiren = (siren) => getResource(`/validate-siren?siren=${siren}`)
 
-export const ownersForSiren = (siren) => getResource(`/ownership/${siren}`);
+/**
+ * Return the owners of the given siren. This endpoint returns only if the user is granted.
+ * Otherwise, it returns an error.
+ *
+ * @param {*} siren
+ * @returns { owners: string[] }
+ */
+export const ownersForSiren = (siren) => getResource(`/ownership/${siren}`)
 
-export const resendReceipt = (siren, year) =>
-  postResource(`/declaration/${siren}/${year}/receipt`, {});
+export const resendReceipt = (siren, year) => postResource(`/declaration/${siren}/${year}/receipt`, {})
 
 export const sendValidationEmail = (email) =>
   postResource("/token", {
