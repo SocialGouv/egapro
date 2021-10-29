@@ -7,14 +7,10 @@ import { AppState, ActionType } from "../globals"
 
 import { logToSentry } from "../utils/helpers"
 
-import globalStyles from "../utils/globalStyles";
-import { isUserGrantedForSiren } from "../utils/user";
-import {
-  getIndicatorsDatas,
-  getTokenInfo,
-  putIndicatorsDatas,
-} from "../utils/api";
-import { useDebounceEffect } from "../utils/hooks";
+import globalStyles from "../utils/globalStyles"
+import { isUserGrantedForSiren } from "../utils/user"
+import { getIndicatorsDatas, getTokenInfo, putIndicatorsDatas } from "../utils/api"
+import { useDebounceEffect } from "../utils/hooks"
 
 import ActivityIndicator from "../components/ActivityIndicator"
 import ErrorMessage from "../components/ErrorMessage"
@@ -55,14 +51,10 @@ interface Props {
 }
 
 function Simulateur({ code, state, dispatch }: Props) {
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
-  );
-  const [tokenInfo, setTokenInfo] = useState<undefined | "error" | TokenInfo>(
-    undefined
-  );
-  const history = useHistory();
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
+  const [tokenInfo, setTokenInfo] = useState<undefined | "error" | TokenInfo>(undefined)
+  const history = useHistory()
 
   const urlParams = new URLSearchParams(window.location.search)
   if (urlParams.has("token")) {
@@ -75,41 +67,40 @@ function Simulateur({ code, state, dispatch }: Props) {
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {
     async function runEffect() {
-      setLoading(true);
-      setErrorMessage(undefined);
+      setLoading(true)
+      setErrorMessage(undefined)
 
-      let email = "";
+      let email = ""
 
       try {
         if (token) {
-          let tokenInfo = await getTokenInfo();
+          const tokenInfo = await getTokenInfo()
 
           if (tokenInfo) {
-            setTokenInfo(tokenInfo?.jsonBody);
-            localStorage.setItem(
-              "tokenInfo",
-              JSON.stringify(tokenInfo?.jsonBody) || ""
-            );
+            setTokenInfo(tokenInfo?.jsonBody)
+            localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "")
 
-            email = tokenInfo?.jsonBody?.email || email;
+            email = tokenInfo?.jsonBody?.email || email
           }
         }
 
-        const indicatorsData = await getIndicatorsDatas(code);
-        setLoading(false);
+        const indicatorsData = await getIndicatorsDatas(code)
+        setLoading(false)
 
-        const simuData = indicatorsData?.jsonBody?.data;
+        const simuData = indicatorsData?.jsonBody?.data
 
-        const siren = simuData?.informationsEntreprise?.siren;
+        const siren = simuData?.informationsEntreprise?.siren
 
         if (siren) {
           if (!token) {
             // On ne peut pas voir une simulation avec un SIREN rempli et qu'on n'est pas authentifié.
             // Renvoi sur le formulaire d'email (cf. plus bas).
-            setErrorMessage("Veuillez renseigner votre email pour accéder à cette simulation-déclaration.");
+            setErrorMessage("Veuillez renseigner votre email pour accéder à cette simulation-déclaration.")
           } else if (!isUserGrantedForSiren(siren)) {
             // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
-            setErrorMessage("Vous n'êtes pas autorisé à accéder à cette simulation-déclaration, veuillez contacter votre référent de l'égalité professionnelle.");
+            setErrorMessage(
+              "Vous n'êtes pas autorisé à accéder à cette simulation-déclaration, veuillez contacter votre référent de l'égalité professionnelle.",
+            )
           }
         }
 
@@ -122,20 +113,20 @@ function Simulateur({ code, state, dispatch }: Props) {
               email: simuData?.informationsDeclarant?.email || email,
             },
           },
-        });
+        })
       } catch (_error) {
-        const error = _error as { jsonBody: { error: string } };
-        console.error(error);
-        setLoading(false);
+        const error = _error as { jsonBody: { error: string } }
+        console.error(error)
+        setLoading(false)
         const message = error.jsonBody?.error
           ? `Les données de votre déclaration n'ont pû être récupérées : ${error.jsonBody.error}`
-          : "Erreur lors de la récupération des données";
-        setErrorMessage(message);
+          : "Erreur lors de la récupération des données"
+        setErrorMessage(message)
       }
     }
 
-    runEffect();
-  }, [code, token, dispatch]);
+    runEffect()
+  }, [code, token, dispatch])
 
   // useEffect pour synchroniser le state dans la db, de façon asynchrone (après 2 secondes de debounce).
   useDebounceEffect(
@@ -158,7 +149,7 @@ function Simulateur({ code, state, dispatch }: Props) {
   )
 
   if (!loading && errorMessage === "Veuillez renseigner votre email pour accéder à cette simulation-déclaration.") {
-    return <AskEmail code={code} reason={errorMessage}/>;
+    return <AskEmail code={code} reason={errorMessage} />
   }
 
   if (!loading && errorMessage) {

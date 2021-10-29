@@ -15,18 +15,16 @@ import { required, validateEmail } from "../utils/formHelpers"
 import ButtonAction from "../components/ButtonAction"
 
 interface Props {
-  code: string;
-  tagLine?: string;
-  reason?: string;
+  tagLine?: string
+  reason?: string
 }
 
-function AskEmail({ code, tagLine, reason}: Props) {
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] =
-    useState<string | undefined>(undefined);
-  const [submitted, setSubmitted] = useState(false);
+function AskEmail({ tagLine, reason }: Props) {
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
+  const [submitted, setSubmitted] = useState(false)
 
   const onSubmit = (formData: any) => {
     setLoading(true)
@@ -54,9 +52,7 @@ function AskEmail({ code, tagLine, reason}: Props) {
               <Fragment>
                 <p>Vous allez recevoir un mail sur l'adresse email que vous avez indiquée à l'étape précédente.</p>
 
-                <p css={styles.warning}>
-                  Ouvrez ce mail et cliquez sur le lien de validation.
-                </p>
+                <p css={styles.warning}>Ouvrez ce mail et cliquez sur le lien de validation.</p>
 
                 <p>
                   Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisi (<strong>{values.email}</strong>
@@ -72,7 +68,12 @@ function AskEmail({ code, tagLine, reason}: Props) {
               </Fragment>
             ) : (
               <Fragment>
-                { reason && <Fragment><p>{ reason }</p><br/></Fragment>}
+                {reason && (
+                  <Fragment>
+                    <p>{reason}</p>
+                    <br />
+                  </Fragment>
+                )}
 
                 <p>
                   L’email saisi doit être valide. Il sera celui sur lequel sera adressé l’accusé de réception en fin de
