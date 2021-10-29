@@ -1,0 +1,2 @@
+@SIREN = 722003936
+GET http://127.0.0.1:2626/validate-siren?siren={{SIREN}}

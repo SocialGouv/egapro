@@ -74,7 +74,10 @@ export const putDeclaration = (data) =>
 
 export const validateSiren = (siren) => getResource(`/validate-siren?siren=${siren}`)
 
-export const resendReceipt = (siren, year) => postResource(`/declaration/${siren}/${year}/receipt`, {})
+export const ownersForSiren = (siren) => getResource(`/ownership/${siren}`);
+
+export const resendReceipt = (siren, year) =>
+  postResource(`/declaration/${siren}/${year}/receipt`, {});
 
 export const sendValidationEmail = (email) =>
   postResource("/token", {

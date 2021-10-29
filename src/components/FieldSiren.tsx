@@ -3,32 +3,50 @@ import { css, jsx } from "@emotion/core"
 import { useField } from "react-final-form"
 import Input, { hasFieldError } from "./Input"
 
-import globalStyles from "../utils/globalStyles"
+import globalStyles from "../utils/globalStyles";
+import { isEmpty } from "../utils/object";
 
 import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
-import { validateSiren } from "../utils/api"
+import { ownersForSiren, validateSiren } from "../utils/api";
 import { entrepriseData } from "../views/InformationsEntreprise/InformationsEntrepriseForm"
 import ActivityIndicator from "./ActivityIndicator"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"
 
-const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
 
-export const checkSiren = (updateSirenData: (data: entrepriseData) => void) => async (siren: string) => {
-  try {
-    const result = await memoizedValidateSiren(siren)
-    updateSirenData(result.jsonBody)
-    if (Object.keys(result.jsonBody).length === 0) {
-      return "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle"
+const memoizedValidateSiren = simpleMemoize(
+  async (siren: string) => await validateSiren(siren)
+);
+
+export const checkSiren =
+  (updateSirenData: (data: entrepriseData) => void) =>
+  async (siren: string) => {
+    let result;
+    try {
+       result = await memoizedValidateSiren(siren);
+    } catch (error) {
+      console.error(error);
+      updateSirenData({});
+      return `Numéro SIREN invalide: ${siren}`;
     }
-    return undefined
-  } catch (error) {
-    updateSirenData({})
-    const errorMessage = error?.jsonBody?.error || `Numéro SIREN invalide: ${siren}`
-    return errorMessage
-  }
-}
+
+    try {
+      await ownersForSiren(siren);
+    } catch (error) {
+      console.error(error);
+      return "Vous n'êtes pas autorisé à déclarer pour ce SIREN, veuillez contacter votre référent de l'égalité professionnelle";
+    }
+
+    if (isEmpty(result?.jsonBody)) {
+      return "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle";
+    }
+
+    updateSirenData(result.jsonBody);
+
+
+  };
+
 
 export const sirenValidator = (updateSirenData: (data: entrepriseData) => void) =>
   composeValidators(required, nineDigits, checkSiren(updateSirenData))
