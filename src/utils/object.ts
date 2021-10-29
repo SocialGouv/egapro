@@ -1,1 +1,1 @@
-export const isEmpty = (param: object): boolean => !Object.keys(param).length
+export const isEmpty = (param: Record<string, unknown>): boolean => !Object.keys(param).length
