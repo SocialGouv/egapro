@@ -93,4 +93,4 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Build app
-        run: yarn build
+        run: CI=false yarn build

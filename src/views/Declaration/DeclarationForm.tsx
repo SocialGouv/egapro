@@ -1,54 +1,50 @@
 /** @jsx jsx */
-import { Fragment, useState } from "react";
-import { css, jsx } from "@emotion/core";
-import { Form, useField } from "react-final-form";
+import { Fragment, useState } from "react"
+import { css, jsx } from "@emotion/core"
+import { Form, useField } from "react-final-form"
 
-import { AppState, FormState, ActionDeclarationData } from "../../globals";
+import { AppState, FormState, ActionDeclarationData } from "../../globals"
 
-import ActionBar from "../../components/ActionBar";
-import ActionLink from "../../components/ActionLink";
-import FieldDate from "../../components/FieldDate";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import Textarea from "../../components/Textarea";
-import MesuresCorrection from "../../components/MesuresCorrection";
-import { logToSentry, parseDate } from "../../utils/helpers";
-import RadiosBoolean from "../../components/RadiosBoolean";
-import {
-  parseBooleanFormValue,
-  parseBooleanStateValue,
-  required,
-} from "../../utils/formHelpers";
-import Input, { hasFieldError } from "../../components/Input";
-import globalStyles from "../../utils/globalStyles";
-import ButtonAction from "../../components/ButtonAction";
-import ErrorMessage from "../../components/ErrorMessage";
-import { resendReceipt } from "../../utils/api";
+import ActionBar from "../../components/ActionBar"
+import ActionLink from "../../components/ActionLink"
+import FieldDate from "../../components/FieldDate"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import Textarea from "../../components/Textarea"
+import MesuresCorrection from "../../components/MesuresCorrection"
+import { logToSentry, parseDate } from "../../utils/helpers"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import { parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
+import Input, { hasFieldError } from "../../components/Input"
+import globalStyles from "../../utils/globalStyles"
+import ButtonAction from "../../components/ButtonAction"
+import ErrorMessage from "../../components/ErrorMessage"
+import { resendReceipt } from "../../utils/api"
 
 const validate = (value: string) => {
-  const requiredError = required(value);
+  const requiredError = required(value)
   if (!requiredError) {
-    return undefined;
+    return undefined
   } else {
     return {
       required: requiredError,
-    };
+    }
   }
-};
+}
 
 const validateForm = (finPeriodeReference: string) => {
   return ({
     datePublication,
     publicationSurSiteInternet,
   }: {
-    datePublication: string;
-    publicationSurSiteInternet: string | undefined;
+    datePublication: string
+    publicationSurSiteInternet: string | undefined
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
-    if (!datePublication) return;
-    const parsedDatePublication = parseDate(datePublication);
-    const parsedFinPeriodeReference = parseDate(finPeriodeReference);
+    if (!datePublication) return
+    const parsedDatePublication = parseDate(datePublication)
+    const parsedFinPeriodeReference = parseDate(finPeriodeReference)
     return {
       datePublication:
         parsedDatePublication !== undefined &&
@@ -59,29 +55,25 @@ const validateForm = (finPeriodeReference: string) => {
               correspondanceFinPeriodeReference: `La date ne peut précéder la fin de la période de référence (${finPeriodeReference})`,
             },
       publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined
-          ? undefined
-          : "Il vous faut sélectionner un mode de publication",
-    };
-  };
-};
+        publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
+    }
+  }
+}
 
 ///////////////////
 interface Props {
-  code: string;
-  state: AppState;
-  noteIndex: number | undefined;
-  indicateurUnParCSP: boolean;
-  finPeriodeReference: string;
-  readOnly: boolean;
-  updateDeclaration: (data: ActionDeclarationData) => void;
-  validateDeclaration: (valid: FormState) => void;
-  apiError: string | undefined;
-  declaring: boolean;
+  state: AppState
+  noteIndex: number | undefined
+  indicateurUnParCSP: boolean
+  finPeriodeReference: string
+  readOnly: boolean
+  updateDeclaration: (data: ActionDeclarationData) => void
+  validateDeclaration: (valid: FormState) => void
+  apiError: string | undefined
+  declaring: boolean
 }
 
 function DeclarationForm({
-  code,
   state,
   noteIndex,
   indicateurUnParCSP,
@@ -92,13 +84,11 @@ function DeclarationForm({
   apiError,
   declaring,
 }: Props) {
-  const declaration = state.declaration;
+  const declaration = state.declaration
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
     cseMisEnPlace:
-      declaration.cseMisEnPlace !== undefined
-        ? parseBooleanStateValue(declaration.cseMisEnPlace)
-        : undefined,
+      declaration.cseMisEnPlace !== undefined ? parseBooleanStateValue(declaration.cseMisEnPlace) : undefined,
     dateConsultationCSE: declaration.dateConsultationCSE,
     datePublication: declaration.datePublication,
     publicationSurSiteInternet:
@@ -107,7 +97,7 @@ function DeclarationForm({
         : undefined,
     lienPublication: declaration.lienPublication,
     modalitesPublication: declaration.modalitesPublication,
-  };
+  }
 
   const saveForm = (formData: any) => {
     const {
@@ -118,62 +108,49 @@ function DeclarationForm({
       publicationSurSiteInternet,
       lienPublication,
       modalitesPublication,
-    } = formData;
+    } = formData
 
     updateDeclaration({
       mesuresCorrection,
-      cseMisEnPlace:
-        cseMisEnPlace !== undefined
-          ? parseBooleanFormValue(cseMisEnPlace)
-          : undefined,
+      cseMisEnPlace: cseMisEnPlace !== undefined ? parseBooleanFormValue(cseMisEnPlace) : undefined,
       dateConsultationCSE,
       datePublication,
       publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined
-          ? parseBooleanFormValue(publicationSurSiteInternet)
-          : undefined,
+        publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
       lienPublication,
       modalitesPublication,
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateDeclaration("Valid");
-  };
+    saveForm(formData)
+    validateDeclaration("Valid")
+  }
 
-  const after2020: boolean = Boolean(
-    state.informations.anneeDeclaration &&
-      state.informations.anneeDeclaration >= 2020
-  );
-  const displayNC =
-    noteIndex === undefined && after2020 ? " aux indicateurs calculables" : "";
+  const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
+  const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
 
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(undefined);
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(undefined)
 
   const onClick = () => {
-    setLoading(true);
+    setLoading(true)
 
-    resendReceipt(
-      state.informationsEntreprise.siren,
-      state.informations.anneeDeclaration
-    )
+    resendReceipt(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
       .then(() => {
-        setLoading(false);
+        setLoading(false)
       })
       .catch((error) => {
-        setLoading(false);
+        setLoading(false)
         const errorMessage =
-          (error.jsonBody && error.jsonBody.message) ||
-          "Erreur lors du renvoi de l'accusé de réception";
-        setErrorMessage(errorMessage);
-        logToSentry(error, undefined);
-      });
-  };
+          (error.jsonBody && error.jsonBody.message) || "Erreur lors du renvoi de l'accusé de réception"
+        setErrorMessage(errorMessage)
+        logToSentry(error, undefined)
+      })
+  }
 
   if (!loading && errorMessage) {
-    return ErrorMessage(errorMessage);
+    return ErrorMessage(errorMessage)
   }
 
   return (
@@ -186,13 +163,7 @@ function DeclarationForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({
-        handleSubmit,
-        values,
-        hasValidationErrors,
-        errors,
-        submitFailed,
-      }) => (
+      {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
 
@@ -218,8 +189,7 @@ function DeclarationForm({
                   />
                 </div>
               )}
-              {(state.informationsEntreprise.structure !== "Entreprise" ||
-                values.cseMisEnPlace === "true") && (
+              {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
                 <div>
                   <FieldDate
                     name="dateConsultationCSE"
@@ -254,20 +224,13 @@ function DeclarationForm({
                 labelTrue="oui"
                 labelFalse="non"
               />
-              {submitFailed &&
-                hasValidationErrors &&
-                errors &&
-                errors.publicationSurSiteInternet && (
-                  <p css={styles.error}>{errors.publicationSurSiteInternet}</p>
-                )}
+              {submitFailed && hasValidationErrors && errors && errors.publicationSurSiteInternet && (
+                <p css={styles.error}>{errors.publicationSurSiteInternet}</p>
+              )}
               <div css={styles.siteOrModalites}>
                 {values.publicationSurSiteInternet !== undefined &&
                   (values.publicationSurSiteInternet === "true" ? (
-                    <FieldSiteInternet
-                      readOnly={readOnly}
-                      after2020={after2020}
-                      displayNC={displayNC}
-                    />
+                    <FieldSiteInternet readOnly={readOnly} after2020={after2020} displayNC={displayNC} />
                   ) : (
                     <Textarea
                       label={
@@ -287,13 +250,10 @@ function DeclarationForm({
           {readOnly ? (
             <Fragment>
               <ActionBar>
-                Votre déclaration est maintenant finalisée, en date du{" "}
-                {declaration.dateDeclaration}. &emsp;
+                Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}. &emsp;
                 {declaration.formValidated === "Valid" && (
                   <p css={styles.edit}>
-                    <ActionLink onClick={() => validateDeclaration("None")}>
-                      modifier les données saisies
-                    </ActionLink>
+                    <ActionLink onClick={() => validateDeclaration("None")}>modifier les données saisies</ActionLink>
                   </p>
                 )}
               </ActionBar>
@@ -310,8 +270,7 @@ function DeclarationForm({
                 hasValidationErrors={hasValidationErrors || Boolean(apiError)}
                 submitFailed={submitFailed || Boolean(apiError)}
                 errorMessage={
-                  apiError ||
-                  "Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
+                  apiError || "Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
                 }
                 label="déclarer"
                 loading={declaring}
@@ -321,7 +280,7 @@ function DeclarationForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 function FieldSiteInternet({
@@ -329,19 +288,16 @@ function FieldSiteInternet({
   after2020,
   displayNC,
 }: {
-  readOnly: boolean;
-  after2020: boolean;
-  displayNC: string;
+  readOnly: boolean
+  after2020: boolean
+  displayNC: string
 }) {
-  const field = useField("lienPublication", { validate });
-  const error = hasFieldError(field.meta);
+  const field = useField("lienPublication", { validate })
+  const error = hasFieldError(field.meta)
 
   return (
     <div css={styles.formField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
+      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
         {after2020
           ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus${displayNC}`
           : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"}
@@ -349,11 +305,9 @@ function FieldSiteInternet({
       <div css={styles.fieldRow}>
         <Input field={field} readOnly={readOnly} />
       </div>
-      <p css={styles.error}>
-        {error && "veuillez entrer une adresse internet"}
-      </p>
+      <p css={styles.error}>{error && "veuillez entrer une adresse internet"}</p>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -397,6 +351,6 @@ const styles = {
     textDecoration: "underline",
     lineHeight: "15px",
   }),
-};
+}
 
-export default DeclarationForm;
+export default DeclarationForm

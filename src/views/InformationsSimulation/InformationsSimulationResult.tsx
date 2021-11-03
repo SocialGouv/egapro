@@ -1,24 +1,24 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import { FormState, TrancheEffectifs } from "../../globals";
-import { calendarYear, Year } from "../../utils/helpers";
+import { FormState, TrancheEffectifs } from "../../globals"
+import { calendarYear, Year } from "../../utils/helpers"
 
-import ResultBubble from "../../components/ResultBubble";
-import ActionLink from "../../components/ActionLink";
+import ResultBubble from "../../components/ResultBubble"
+import ActionLink from "../../components/ActionLink"
 
 interface Props {
-  nomEntreprise: string;
-  trancheEffectifs: TrancheEffectifs;
-  finPeriodeReference: string;
-  validateInformationsSimulation: (valid: FormState) => void;
+  nomEntreprise: string
+  trancheEffectifs: TrancheEffectifs
+  finPeriodeReference: string
+  validateInformationsSimulation: (valid: FormState) => void
 }
 
 function InformationsSimulationResult({
   nomEntreprise,
   trancheEffectifs,
   finPeriodeReference,
-  validateInformationsSimulation
+  validateInformationsSimulation,
 }: Props) {
   return (
     <div css={styles.container}>
@@ -32,24 +32,22 @@ function InformationsSimulationResult({
       />
 
       <p css={styles.edit}>
-        <ActionLink onClick={() => validateInformationsSimulation("None")}>
-          modifier les données saisies
-        </ActionLink>
+        <ActionLink onClick={() => validateInformationsSimulation("None")}>modifier les données saisies</ActionLink>
       </p>
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
     maxWidth: 250,
-    marginTop: 64
+    marginTop: 64,
   }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
-    textAlign: "center"
-  })
-};
+    textAlign: "center",
+  }),
+}
 
-export default InformationsSimulationResult;
+export default InformationsSimulationResult

@@ -1,1 +1,1 @@
-declare module "react-piwik";
+declare module "react-piwik"

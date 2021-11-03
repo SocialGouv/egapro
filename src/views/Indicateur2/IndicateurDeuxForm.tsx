@@ -1,21 +1,21 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Form } from "react-final-form";
-import { FormState, ActionIndicateurDeuxData } from "../../globals";
+import { css, jsx } from "@emotion/core"
+import { Form } from "react-final-form"
+import { FormState, ActionIndicateurDeuxData } from "../../globals"
 
 import {
   // calculTotalEffectifsEtTauxAugmentation,
   // calculEcartTauxAugmentation,
   effectifEtEcartAugmentGroup,
-} from "../../utils/calculsEgaProIndicateurDeux";
+} from "../../utils/calculsEgaProIndicateurDeux"
 
-import BlocForm from "../../components/BlocForm";
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen";
-import RadiosBoolean from "../../components/RadiosBoolean";
-import ActionBar from "../../components/ActionBar";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import BlocForm from "../../components/BlocForm"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
 import {
   parseFloatFormValue,
@@ -26,48 +26,45 @@ import {
   minNumber,
   mustBeNumber,
   required,
-} from "../../utils/formHelpers";
+} from "../../utils/formHelpers"
 import {
   displayNameCategorieSocioPro,
   // displayFractionPercent
-} from "../../utils/helpers";
+} from "../../utils/helpers"
 
-const validator = composeValidators(required, mustBeNumber, minNumber(0));
+const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
 const validateForm = ({
   tauxAugmentation,
   presenceAugmentation,
 }: {
   tauxAugmentation: Array<{
-    tauxAugmentationFemmes: string;
-    tauxAugmentationHommes: string;
-  }>;
-  presenceAugmentation: string;
+    tauxAugmentationFemmes: string
+    tauxAugmentationHommes: string
+  }>
+  presenceAugmentation: string
 }) => {
   if (presenceAugmentation === "false") {
-    return undefined;
+    return undefined
   }
-  const allInputs = tauxAugmentation.flatMap(
-    ({ tauxAugmentationFemmes, tauxAugmentationHommes }) => [
-      tauxAugmentationFemmes,
-      tauxAugmentationHommes,
-    ]
-  );
+  const allInputs = tauxAugmentation.flatMap(({ tauxAugmentationFemmes, tauxAugmentationHommes }) => [
+    tauxAugmentationFemmes,
+    tauxAugmentationHommes,
+  ])
   if (allInputs.every((input) => input === "0" || input === "")) {
     return {
-      notAll0:
-        "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
-    };
+      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
+    }
   }
-  return;
-};
+  return
+}
 
 interface Props {
-  ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>;
-  presenceAugmentation: boolean;
-  readOnly: boolean;
-  updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void;
-  validateIndicateurDeux: (valid: FormState) => void;
+  ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>
+  presenceAugmentation: boolean
+  readOnly: boolean
+  updateIndicateurDeux: (data: ActionIndicateurDeuxData) => void
+  validateIndicateurDeux: (valid: FormState) => void
 }
 
 function IndicateurDeuxForm({
@@ -80,43 +77,33 @@ function IndicateurDeuxForm({
   const initialValues = {
     presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
     tauxAugmentation: ecartAugmentParCategorieSocioPro.map(
-      ({
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes,
-        ...otherProps
-      }: any) => ({
+      ({ tauxAugmentationFemmes, tauxAugmentationHommes, ...otherProps }: any) => ({
         ...otherProps,
         tauxAugmentationFemmes: parseFloatStateValue(tauxAugmentationFemmes),
         tauxAugmentationHommes: parseFloatStateValue(tauxAugmentationHommes),
-      })
+      }),
     ),
-  };
+  }
 
   const saveForm = (formData: any) => {
-    const presenceAugmentation = parseBooleanFormValue(
-      formData.presenceAugmentation
-    );
+    const presenceAugmentation = parseBooleanFormValue(formData.presenceAugmentation)
     const tauxAugmentation = formData.tauxAugmentation.map(
-      ({
-        categorieSocioPro,
-        tauxAugmentationFemmes,
-        tauxAugmentationHommes,
-      }: any) => ({
+      ({ categorieSocioPro, tauxAugmentationFemmes, tauxAugmentationHommes }: any) => ({
         categorieSocioPro,
         tauxAugmentationFemmes: parseFloatFormValue(tauxAugmentationFemmes),
         tauxAugmentationHommes: parseFloatFormValue(tauxAugmentationHommes),
-      })
-    );
+      }),
+    )
     updateIndicateurDeux({
       tauxAugmentation,
       presenceAugmentation,
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateIndicateurDeux("Valid");
-  };
+    saveForm(formData)
+    validateIndicateurDeux("Valid")
+  }
 
   // Only for Total with updated values
   // const ecartAugmentParCategorieSocioProPourTotal = ecartAugmentParCategorieSocioPro.map(
@@ -157,13 +144,7 @@ function IndicateurDeuxForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({
-        handleSubmit,
-        values,
-        hasValidationErrors,
-        errors,
-        submitFailed,
-      }) => (
+      {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadiosBoolean
@@ -182,24 +163,22 @@ function IndicateurDeuxForm({
               //   displayFractionPercent(totalTauxAugmentationHommes)
               // ]}
             >
-              {ecartAugmentParCategorieSocioPro.map(
-                ({ categorieSocioPro, validiteGroupe }, index) => {
-                  return (
-                    <FieldInputsMenWomen
-                      key={categorieSocioPro}
-                      name={displayNameCategorieSocioPro(categorieSocioPro)}
-                      readOnly={readOnly}
-                      calculable={validiteGroupe}
-                      calculableNumber={10}
-                      mask="percent"
-                      femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
-                      hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
-                      validatorFemmes={validator}
-                      validatorHommes={validator}
-                    />
-                  );
-                }
-              )}
+              {ecartAugmentParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                return (
+                  <FieldInputsMenWomen
+                    key={categorieSocioPro}
+                    name={displayNameCategorieSocioPro(categorieSocioPro)}
+                    readOnly={readOnly}
+                    calculable={validiteGroupe}
+                    calculableNumber={10}
+                    mask="percent"
+                    femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
+                    hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
+                    validatorFemmes={validator}
+                    validatorHommes={validator}
+                  />
+                )
+              })}
             </BlocForm>
           )}
 
@@ -223,7 +202,7 @@ function IndicateurDeuxForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 const styles = {
@@ -231,6 +210,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
   }),
-};
+}
 
-export default IndicateurDeuxForm;
+export default IndicateurDeuxForm

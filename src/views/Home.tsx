@@ -1,49 +1,47 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useState } from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { useState } from "react"
+import { RouteComponentProps } from "react-router-dom"
 
-import { ActionType } from "../globals";
-import { postIndicatorsDatas } from "../utils/api";
-import { logToSentry } from "../utils/helpers";
+import { ActionType } from "../globals"
+import { postIndicatorsDatas } from "../utils/api"
+import { logToSentry } from "../utils/helpers"
 
-import Page from "../components/Page";
-import ButtonAction from "../components/ButtonAction";
-import { styles as buttonStyles } from "../components/Button";
-import ErrorMessage from "../components/ErrorMessage";
-import globalStyles from "../utils/globalStyles";
+import Page from "../components/Page"
+import ButtonAction from "../components/ButtonAction"
+import { styles as buttonStyles } from "../components/Button"
+import ErrorMessage from "../components/ErrorMessage"
+import globalStyles from "../utils/globalStyles"
 
 interface Props extends RouteComponentProps {
-  dispatch: (action: ActionType) => void;
+  dispatch: (action: ActionType) => void
 }
 
 function Home({ history, location, dispatch }: Props) {
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(undefined);
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(undefined)
 
   const onClick = () => {
-    setLoading(true);
-    dispatch({ type: "resetState" });
+    setLoading(true)
+    dispatch({ type: "resetState" })
 
     postIndicatorsDatas({})
       .then(({ jsonBody: { id } }) => {
-        setLoading(false);
+        setLoading(false)
         history.push(`/simulateur/${id}`, {
           ...(location.state && location.state),
-        });
+        })
       })
       .catch((error) => {
-        setLoading(false);
-        const errorMessage =
-          (error.jsonBody && error.jsonBody.message) ||
-          "Erreur lors de la récupération du code";
-        setErrorMessage(errorMessage);
-        logToSentry(error, undefined);
-      });
-  };
+        setLoading(false)
+        const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"
+        setErrorMessage(errorMessage)
+        logToSentry(error, undefined)
+      })
+  }
 
   if (!loading && errorMessage) {
-    return ErrorMessage(errorMessage);
+    return ErrorMessage(errorMessage)
   }
 
   return (
@@ -55,9 +53,7 @@ function Home({ history, location, dispatch }: Props) {
       ]}
     >
       <div css={styles.content}>
-        <h2 css={styles.title}>
-          Comment calculer et déclarer l’index égalité femmes-hommes ?
-        </h2>
+        <h2 css={styles.title}>Comment calculer et déclarer l’index égalité femmes-hommes ?</h2>
 
         <div css={styles.twoColumns}>
           <div css={styles.bloc}>
@@ -67,22 +63,14 @@ function Home({ history, location, dispatch }: Props) {
 
             <div css={styles.blocContent}>
               <span css={styles.blocContentStep}>Choix 1</span>
-              <span css={styles.blocContentTitle}>
-                Calcul et déclaration de l'index
-              </span>
+              <span css={styles.blocContentTitle}>Calcul et déclaration de l'index</span>
               <p css={styles.blocContentBody}>
-                Vous pouvez calculer votre index égalité professionnelle F/H sur
-                Index Egapro et le déclarer, si vous le souhaitez, suite au
-                calcul.
+                Vous pouvez calculer votre index égalité professionnelle F/H sur Index Egapro et le déclarer, si vous le
+                souhaitez, suite au calcul.
               </p>
 
               <div>
-                <ButtonAction
-                  onClick={onClick}
-                  label="commencer le calcul"
-                  disabled={loading}
-                  loading={loading}
-                />
+                <ButtonAction onClick={onClick} label="commencer le calcul" disabled={loading} loading={loading} />
               </div>
             </div>
           </div>
@@ -94,19 +82,14 @@ function Home({ history, location, dispatch }: Props) {
 
             <div css={styles.blocContent}>
               <span css={styles.blocContentStep}>Choix 2</span>
-              <span css={styles.blocContentTitle}>
-                Déclaration directe de l'index
-              </span>
+              <span css={styles.blocContentTitle}>Déclaration directe de l'index</span>
               <p css={styles.blocContentBody}>
-                Vous pouvez déclarer votre index égalité professionnelle F/H
-                calculé par ailleurs directement via le formulaire suivant :
+                Vous pouvez déclarer votre index égalité professionnelle F/H calculé par ailleurs directement via le
+                formulaire suivant :
               </p>
 
               <div css={styles.buttonWrapper}>
-                <a
-                  href="/declaration/"
-                  css={[buttonStyles.button, styles.linkButton]}
-                >
+                <a href="/declaration/" css={[buttonStyles.button, styles.linkButton]}>
                   déclarer directement
                 </a>
               </div>
@@ -115,7 +98,7 @@ function Home({ history, location, dispatch }: Props) {
         </div>
       </div>
     </Page>
-  );
+  )
 }
 
 const styles = {
@@ -204,6 +187,6 @@ const styles = {
   linkButton: css({
     textDecoration: "none",
   }),
-};
+}
 
-export default Home;
+export default Home

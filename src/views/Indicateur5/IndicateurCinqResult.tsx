@@ -1,23 +1,23 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import { FormState } from "../../globals";
+import { FormState } from "../../globals"
 
-import ResultBubble from "../../components/ResultBubble";
-import ActionLink from "../../components/ActionLink";
+import ResultBubble from "../../components/ResultBubble"
+import ActionLink from "../../components/ActionLink"
 
 interface Props {
-  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined;
-  indicateurNombreSalariesSexeSousRepresente: number | undefined;
-  noteIndicateurCinq: number | undefined;
-  validateIndicateurCinq: (valid: FormState) => void;
+  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined
+  indicateurNombreSalariesSexeSousRepresente: number | undefined
+  noteIndicateurCinq: number | undefined
+  validateIndicateurCinq: (valid: FormState) => void
 }
 
 function IndicateurCinqResult({
   indicateurSexeSousRepresente,
   indicateurNombreSalariesSexeSousRepresente,
   noteIndicateurCinq,
-  validateIndicateurCinq
+  validateIndicateurCinq,
 }: Props) {
   const firstLineInfo =
     indicateurSexeSousRepresente === undefined
@@ -26,7 +26,7 @@ function IndicateurCinqResult({
       ? "les femmes et les hommes sont à égalité"
       : indicateurSexeSousRepresente === "hommes"
       ? "les femmes sont sur-représentées"
-      : "les hommes sont sur-représentés";
+      : "les hommes sont sur-représentés"
   return (
     <div css={styles.container}>
       <ResultBubble
@@ -38,12 +38,9 @@ function IndicateurCinqResult({
         }
         firstLineInfo={firstLineInfo}
         secondLineLabel="votre note obtenue est"
-        secondLineData={
-          (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10"
-        }
+        secondLineData={(noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10"}
         indicateurSexeSurRepresente={
-          indicateurSexeSousRepresente === undefined ||
-          indicateurSexeSousRepresente === "egalite"
+          indicateurSexeSousRepresente === undefined || indicateurSexeSousRepresente === "egalite"
             ? undefined
             : indicateurSexeSousRepresente === "hommes"
             ? "femmes"
@@ -52,24 +49,22 @@ function IndicateurCinqResult({
       />
 
       <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurCinq("None")}>
-          modifier les données saisies
-        </ActionLink>
+        <ActionLink onClick={() => validateIndicateurCinq("None")}>modifier les données saisies</ActionLink>
       </p>
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
     maxWidth: 250,
-    marginTop: 64
+    marginTop: 64,
   }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
-    textAlign: "center"
-  })
-};
+    textAlign: "center",
+  }),
+}
 
-export default IndicateurCinqResult;
+export default IndicateurCinqResult

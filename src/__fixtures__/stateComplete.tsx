@@ -1,29 +1,23 @@
-import {
-  CategorieSocioPro,
-  PeriodeDeclaration,
-  Structure,
-  TranchesAges,
-  TrancheEffectifs,
-} from "../globals";
-import AppReducer from "../AppReducer";
+import { CategorieSocioPro, PeriodeDeclaration, Structure, TranchesAges, TrancheEffectifs } from "../globals"
+import AppReducer from "../AppReducer"
 
 const actionInitiateState = {
-  type: "initiateState" as "initiateState",
+  type: "initiateState" as const,
   data: {},
-};
+}
 
 const actionUpdateInformationsSimulation = {
-  type: "updateInformationsSimulation" as "updateInformationsSimulation",
+  type: "updateInformationsSimulation" as const,
   data: {
     nomEntreprise: "BigCorp",
     trancheEffectifs: "1000 et plus" as TrancheEffectifs,
     anneeDeclaration: 2020,
     finPeriodeReference: "2019-12-31",
   },
-};
+}
 
 const actionUpdateEffectif = {
-  type: "updateEffectif" as "updateEffectif",
+  type: "updateEffectif" as const,
   data: {
     nombreSalaries: [
       {
@@ -128,10 +122,10 @@ const actionUpdateEffectif = {
       },
     ],
   },
-};
+}
 
 const actionUpdateIndicateurUnCsp = {
-  type: "updateIndicateurUnCsp" as "updateIndicateurUnCsp",
+  type: "updateIndicateurUnCsp" as const,
   data: {
     remunerationAnnuelle: [
       {
@@ -252,10 +246,10 @@ const actionUpdateIndicateurUnCsp = {
       },
     ],
   },
-};
+}
 
 const actionUpdateIndicateurUnCoefName = {
-  type: "updateIndicateurUnCoef" as "updateIndicateurUnCoef",
+  type: "updateIndicateurUnCoef" as const,
   data: {
     coefficient: [
       {
@@ -263,10 +257,10 @@ const actionUpdateIndicateurUnCoefName = {
       },
     ],
   },
-};
+}
 
 const actionUpdateIndicateurUnCoefNombreSalaries = {
-  type: "updateIndicateurUnCoef" as "updateIndicateurUnCoef",
+  type: "updateIndicateurUnCoef" as const,
   data: {
     coefficient: [
       {
@@ -295,10 +289,10 @@ const actionUpdateIndicateurUnCoefNombreSalaries = {
       },
     ],
   },
-};
+}
 
 const actionUpdateIndicateurUnCoefRemuneration = {
-  type: "updateIndicateurUnCoef" as "updateIndicateurUnCoef",
+  type: "updateIndicateurUnCoef" as const,
   data: {
     coefficient: [
       {
@@ -331,10 +325,10 @@ const actionUpdateIndicateurUnCoefRemuneration = {
       },
     ],
   },
-};
+}
 
 const actionUpdateIndicateurDeux = {
-  type: "updateIndicateurDeux" as "updateIndicateurDeux",
+  type: "updateIndicateurDeux" as const,
   data: {
     presenceAugmentation: false,
     tauxAugmentation: [
@@ -364,10 +358,10 @@ const actionUpdateIndicateurDeux = {
       },
     ],
   },
-};
+}
 
 const actionUpdateIndicateurTrois = {
-  type: "updateIndicateurTrois" as "updateIndicateurTrois",
+  type: "updateIndicateurTrois" as const,
   data: {
     presencePromotion: false,
     tauxPromotion: [
@@ -397,37 +391,37 @@ const actionUpdateIndicateurTrois = {
       },
     ],
   },
-};
+}
 
 const actionUpdateIndicateurDeuxTrois = {
-  type: "updateIndicateurDeuxTrois" as "updateIndicateurDeuxTrois",
+  type: "updateIndicateurDeuxTrois" as const,
   data: {
     presenceAugmentationPromotion: false,
     nombreAugmentationPromotionFemmes: 1,
     nombreAugmentationPromotionHommes: 2,
     periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration,
   },
-};
+}
 
 const actionUpdateIndicateurQuatre = {
-  type: "updateIndicateurQuatre" as "updateIndicateurQuatre",
+  type: "updateIndicateurQuatre" as const,
   data: {
     presenceCongeMat: false,
     nombreSalarieesPeriodeAugmentation: 7,
     nombreSalarieesAugmentees: 7,
   },
-};
+}
 
 const actionUpdateIndicateurCinq = {
-  type: "updateIndicateurCinq" as "updateIndicateurCinq",
+  type: "updateIndicateurCinq" as const,
   data: {
     nombreSalariesHommes: 6,
     nombreSalariesFemmes: 4,
   },
-};
+}
 
 const actionUpdateInformationsEntreprise = {
-  type: "updateInformationsEntreprise" as "updateInformationsEntreprise",
+  type: "updateInformationsEntreprise" as const,
   data: {
     nomEntreprise: "acme",
     siren: "1234",
@@ -445,10 +439,10 @@ const actionUpdateInformationsEntreprise = {
       { nom: "entreprise 2", siren: "67890" },
     ],
   },
-};
+}
 
 const actionUpdateInformationsDeclarant = {
-  type: "updateInformationsDeclarant" as "updateInformationsDeclarant",
+  type: "updateInformationsDeclarant" as const,
   data: {
     nom: "Daffy",
     prenom: "Duck",
@@ -456,10 +450,10 @@ const actionUpdateInformationsDeclarant = {
     email: "daffy.duck@example.com",
     acceptationCGU: true,
   },
-};
+}
 
 const actionUpdateDeclaration = {
-  type: "updateDeclaration" as "updateDeclaration",
+  type: "updateDeclaration" as const,
   data: {
     mesuresCorrection: "mmo",
     cseMisEnPlace: true,
@@ -469,7 +463,7 @@ const actionUpdateDeclaration = {
     lienPublication: "https://example.com",
     modalitesPublication: "",
   },
-};
+}
 
 // fast pipe, I miss you in JS…
 const stateDefault = AppReducer(
@@ -485,35 +479,32 @@ const stateDefault = AppReducer(
                     AppReducer(
                       AppReducer(
                         AppReducer(
-                          AppReducer(
-                            AppReducer(undefined, actionInitiateState),
-                            actionUpdateInformationsSimulation
-                          ),
-                          actionUpdateEffectif
+                          AppReducer(AppReducer(undefined, actionInitiateState), actionUpdateInformationsSimulation),
+                          actionUpdateEffectif,
                         ),
-                        actionUpdateIndicateurUnCsp
+                        actionUpdateIndicateurUnCsp,
                       ),
-                      actionUpdateIndicateurUnCoefName
+                      actionUpdateIndicateurUnCoefName,
                     ),
-                    actionUpdateIndicateurUnCoefNombreSalaries
+                    actionUpdateIndicateurUnCoefNombreSalaries,
                   ),
-                  actionUpdateIndicateurUnCoefRemuneration
+                  actionUpdateIndicateurUnCoefRemuneration,
                 ),
-                actionUpdateIndicateurDeux
+                actionUpdateIndicateurDeux,
               ),
-              actionUpdateIndicateurTrois
+              actionUpdateIndicateurTrois,
             ),
-            actionUpdateIndicateurDeuxTrois
+            actionUpdateIndicateurDeuxTrois,
           ),
-          actionUpdateIndicateurQuatre
+          actionUpdateIndicateurQuatre,
         ),
-        actionUpdateIndicateurCinq
+        actionUpdateIndicateurCinq,
       ),
-      actionUpdateInformationsEntreprise
+      actionUpdateInformationsEntreprise,
     ),
-    actionUpdateInformationsDeclarant
+    actionUpdateInformationsDeclarant,
   ),
-  actionUpdateDeclaration
-);
+  actionUpdateDeclaration,
+)
 
-export default stateDefault;
+export default stateDefault

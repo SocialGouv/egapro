@@ -1,11 +1,6 @@
-import {
-  AppState,
-  CategorieSocioPro,
-  GroupeEffectif,
-  GroupeIndicateurTrois
-} from "../globals";
+import { AppState, CategorieSocioPro, GroupeEffectif, GroupeIndicateurTrois } from "../globals"
 
-import { roundDecimal } from "./helpers";
+import { roundDecimal } from "./helpers"
 
 import {
   calculEcartsPonderesParGroupe,
@@ -13,8 +8,8 @@ import {
   calculTotalEffectifs,
   calculEffectifsIndicateurCalculable,
   rowEffectifsParCategorieSocioPro,
-  effectifGroup
-} from "./calculsEgaPro";
+  effectifGroup,
+} from "./calculsEgaPro"
 
 import {
   calculValiditeGroupe,
@@ -22,11 +17,11 @@ import {
   calculIndicateurCalculable,
   calculIndicateurEcartAugmentation,
   calculIndicateurSexeSurRepresente,
-  calculIndicateurEcartAugmentationAbsolute
-} from "../utils/calculsEgaProIndicateurDeux";
-import calculIndicateurUn from "./calculsEgaProIndicateurUn";
+  calculIndicateurEcartAugmentationAbsolute,
+} from "../utils/calculsEgaProIndicateurDeux"
+import calculIndicateurUn from "./calculsEgaProIndicateurUn"
 
-const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0];
+const baremEcartPromotion = [15, 15, 15, 10, 10, 10, 5, 5, 5, 5, 5, 0]
 
 //////////////////
 // COMMON ////////
@@ -36,141 +31,108 @@ export {
   calculValiditeGroupe, // VG
   calculTotalEcartPondere, // TEV
   calculEffectifsIndicateurCalculable, // IC
-  calculIndicateurCalculable // IC
-};
+  calculIndicateurCalculable, // IC
+}
 
 //////////////////
 // INDICATEUR 3 //
 //////////////////
 
 // ETP
-export const calculEcartTauxPromotion = calculEcartTauxAugmentation;
+export const calculEcartTauxPromotion = calculEcartTauxAugmentation
 
 export interface effectifEtEcartPromoGroup extends effectifGroup {
-  categorieSocioPro: CategorieSocioPro;
-  tauxPromotionFemmes: number | undefined;
-  tauxPromotionHommes: number | undefined;
-  ecartTauxPromotion: number | undefined;
+  categorieSocioPro: CategorieSocioPro
+  tauxPromotionFemmes: number | undefined
+  tauxPromotionHommes: number | undefined
+  ecartTauxPromotion: number | undefined
 }
 
 // Ajout de l'écart de promotion dans les données par CSP
-export const calculEcartTauxPromotionParCSP = (
-  tauxPromotion: Array<GroupeIndicateurTrois>
-) =>
-  tauxPromotion.map(categorie => {
+export const calculEcartTauxPromotionParCSP = (tauxPromotion: Array<GroupeIndicateurTrois>) =>
+  tauxPromotion.map((categorie) => {
     return {
       ...categorie,
-      ecartTauxPromotion: calculEcartTauxPromotion(
-        categorie.tauxPromotionFemmes,
-        categorie.tauxPromotionHommes
-      )
-    };
-  });
+      ecartTauxPromotion: calculEcartTauxPromotion(categorie.tauxPromotionFemmes, categorie.tauxPromotionHommes),
+    }
+  })
 
 export const calculEffectifsEtEcartPromoParCategorieSocioPro = (
   dataEffectif: Array<GroupeEffectif>,
-  dataIndicateurTrois: Array<GroupeIndicateurTrois>
+  dataIndicateurTrois: Array<GroupeIndicateurTrois>,
 ): Array<effectifEtEcartPromoGroup> => {
-  return dataEffectif.map(
-    ({ categorieSocioPro, tranchesAges }: GroupeEffectif) => {
-      const effectifs = rowEffectifsParCategorieSocioPro(
-        tranchesAges,
-        calculValiditeGroupe
-      );
+  return dataEffectif.map(({ categorieSocioPro, tranchesAges }: GroupeEffectif) => {
+    const effectifs = rowEffectifsParCategorieSocioPro(tranchesAges, calculValiditeGroupe)
 
-      const dataPromo = dataIndicateurTrois.find(
-        ({ categorieSocioPro: csp }) => csp === categorieSocioPro
-      );
+    const dataPromo = dataIndicateurTrois.find(({ categorieSocioPro: csp }) => csp === categorieSocioPro)
 
-      const tauxPromotionFemmes = dataPromo && dataPromo.tauxPromotionFemmes;
-      const tauxPromotionHommes = dataPromo && dataPromo.tauxPromotionHommes;
+    const tauxPromotionFemmes = dataPromo && dataPromo.tauxPromotionFemmes
+    const tauxPromotionHommes = dataPromo && dataPromo.tauxPromotionHommes
 
-      // ETA
-      const ecartTauxPromotion = calculEcartTauxPromotion(
-        tauxPromotionFemmes,
-        tauxPromotionHommes
-      );
+    // ETA
+    const ecartTauxPromotion = calculEcartTauxPromotion(tauxPromotionFemmes, tauxPromotionHommes)
 
-      return {
-        ...effectifs,
-        categorieSocioPro,
-        tauxPromotionFemmes,
-        tauxPromotionHommes,
-        ecartTauxPromotion
-      };
+    return {
+      ...effectifs,
+      categorieSocioPro,
+      tauxPromotionFemmes,
+      tauxPromotionHommes,
+      ecartTauxPromotion,
     }
-  );
-};
+  })
+}
 
-export const calculTotalEffectifsEtTauxPromotion = (
-  groupEffectifEtEcartAugment: Array<effectifEtEcartPromoGroup>
-) => {
-  const {
-    totalNombreSalariesFemmes,
-    totalNombreSalariesHommes,
-    totalNombreSalaries,
-    totalEffectifsValides
-  } = calculTotalEffectifs(groupEffectifEtEcartAugment);
+export const calculTotalEffectifsEtTauxPromotion = (groupEffectifEtEcartAugment: Array<effectifEtEcartPromoGroup>) => {
+  const { totalNombreSalariesFemmes, totalNombreSalariesHommes, totalNombreSalaries, totalEffectifsValides } =
+    calculTotalEffectifs(groupEffectifEtEcartAugment)
 
-  const {
-    sommeProduitTauxPromotionFemmes,
-    sommeProduitTauxPromotionHommes
-  } = groupEffectifEtEcartAugment.reduce(
+  const { sommeProduitTauxPromotionFemmes, sommeProduitTauxPromotionHommes } = groupEffectifEtEcartAugment.reduce(
     (
       { sommeProduitTauxPromotionFemmes, sommeProduitTauxPromotionHommes },
-      {
-        nombreSalariesFemmes,
-        nombreSalariesHommes,
-        tauxPromotionFemmes,
-        tauxPromotionHommes
-      }
+      { nombreSalariesFemmes, nombreSalariesHommes, tauxPromotionFemmes, tauxPromotionHommes },
     ) => {
       return {
         sommeProduitTauxPromotionFemmes:
-          sommeProduitTauxPromotionFemmes +
-          (tauxPromotionFemmes || 0) * nombreSalariesFemmes,
+          sommeProduitTauxPromotionFemmes + (tauxPromotionFemmes || 0) * nombreSalariesFemmes,
         sommeProduitTauxPromotionHommes:
-          sommeProduitTauxPromotionHommes +
-          (tauxPromotionHommes || 0) * nombreSalariesHommes
-      };
+          sommeProduitTauxPromotionHommes + (tauxPromotionHommes || 0) * nombreSalariesHommes,
+      }
     },
     {
       sommeProduitTauxPromotionFemmes: 0,
-      sommeProduitTauxPromotionHommes: 0
-    }
-  );
+      sommeProduitTauxPromotionHommes: 0,
+    },
+  )
 
   // TTPF
-  const totalTauxPromotionFemmes =
-    sommeProduitTauxPromotionFemmes / totalNombreSalariesFemmes;
+  const totalTauxPromotionFemmes = sommeProduitTauxPromotionFemmes / totalNombreSalariesFemmes
 
   // TTPH
-  const totalTauxPromotionHommes =
-    sommeProduitTauxPromotionHommes / totalNombreSalariesHommes;
+  const totalTauxPromotionHommes = sommeProduitTauxPromotionHommes / totalNombreSalariesHommes
 
   return {
     totalNombreSalaries,
     totalEffectifsValides,
     totalTauxPromotionFemmes,
-    totalTauxPromotionHommes
-  };
-};
+    totalTauxPromotionHommes,
+  }
+}
 
 export const calculEcartsPonderesParCategorieSocioPro = calculEcartsPonderesParGroupe(
-  ({ ecartTauxPromotion }) => ecartTauxPromotion
-);
+  ({ ecartTauxPromotion }) => ecartTauxPromotion,
+)
 
 // IEP
-export const calculIndicateurEcartPromotion = calculIndicateurEcartAugmentation;
+export const calculIndicateurEcartPromotion = calculIndicateurEcartAugmentation
 
-export const calculIndicateurEcartPromotionAbsolute = calculIndicateurEcartAugmentationAbsolute;
+export const calculIndicateurEcartPromotionAbsolute = calculIndicateurEcartAugmentationAbsolute
 
 // NOTE
 export const calculNote = (
   indicateurEcartPromotion: number | undefined,
   noteIndicateurUn: number | undefined,
   indicateurUnSexeSurRepresente: "hommes" | "femmes" | undefined,
-  indicateurDeuxSexeSurRepresente: "hommes" | "femmes" | undefined
+  indicateurDeuxSexeSurRepresente: "hommes" | "femmes" | undefined,
 ): { note: number | undefined; correctionMeasure: boolean } => {
   if (
     noteIndicateurUn !== undefined &&
@@ -179,19 +141,16 @@ export const calculNote = (
     indicateurDeuxSexeSurRepresente &&
     indicateurUnSexeSurRepresente !== indicateurDeuxSexeSurRepresente
   ) {
-    return { note: baremEcartPromotion[0], correctionMeasure: true };
+    return { note: baremEcartPromotion[0], correctionMeasure: true }
   }
   const note =
     indicateurEcartPromotion !== undefined
       ? baremEcartPromotion[
-          Math.min(
-            baremEcartPromotion.length - 1,
-            Math.ceil(Math.max(0, roundDecimal(indicateurEcartPromotion, 1)))
-          )
+          Math.min(baremEcartPromotion.length - 1, Math.ceil(Math.max(0, roundDecimal(indicateurEcartPromotion, 1))))
         ]
-      : undefined;
-  return { note, correctionMeasure: false };
-};
+      : undefined
+  return { note, correctionMeasure: false }
+}
 
 /////////
 // ALL //
@@ -200,29 +159,22 @@ export const calculNote = (
 export default function calculIndicateurTrois(state: AppState) {
   const effectifEtEcartPromoParGroupe = calculEffectifsEtEcartPromoParCategorieSocioPro(
     state.effectif.nombreSalaries,
-    state.indicateurTrois.tauxPromotion
-  );
+    state.indicateurTrois.tauxPromotion,
+  )
 
-  const {
-    totalNombreSalaries,
-    totalEffectifsValides,
-    totalTauxPromotionFemmes,
-    totalTauxPromotionHommes
-  } = calculTotalEffectifsEtTauxPromotion(effectifEtEcartPromoParGroupe);
+  const { totalNombreSalaries, totalEffectifsValides, totalTauxPromotionFemmes, totalTauxPromotionHommes } =
+    calculTotalEffectifsEtTauxPromotion(effectifEtEcartPromoParGroupe)
 
   const ecartsPonderesByRow = calculEcartsPonderesParCategorieSocioPro(
     effectifEtEcartPromoParGroupe,
-    totalEffectifsValides
-  );
+    totalEffectifsValides,
+  )
 
   // TEP
-  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow);
+  const totalEcartPondere = calculTotalEcartPondere(ecartsPonderesByRow)
 
   // IC
-  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(
-    totalNombreSalaries,
-    totalEffectifsValides
-  );
+  const effectifsIndicateurCalculable = calculEffectifsIndicateurCalculable(totalNombreSalaries, totalEffectifsValides)
 
   // IC
   const indicateurCalculable = calculIndicateurCalculable(
@@ -230,36 +182,26 @@ export default function calculIndicateurTrois(state: AppState) {
     totalNombreSalaries,
     totalEffectifsValides,
     totalTauxPromotionFemmes,
-    totalTauxPromotionHommes
-  );
+    totalTauxPromotionHommes,
+  )
 
   // IEA
-  const indicateurEcartPromotion = calculIndicateurEcartPromotion(
-    indicateurCalculable,
-    totalEcartPondere
-  );
+  const indicateurEcartPromotion = calculIndicateurEcartPromotion(indicateurCalculable, totalEcartPondere)
 
-  const indicateurEcartPromotionAbsolute = calculIndicateurEcartPromotionAbsolute(
-    indicateurEcartPromotion
-  );
+  const indicateurEcartPromotionAbsolute = calculIndicateurEcartPromotionAbsolute(indicateurEcartPromotion)
 
-  const indicateurTroisSexeSurRepresente = calculIndicateurSexeSurRepresente(
-    indicateurEcartPromotion
-  );
+  const indicateurTroisSexeSurRepresente = calculIndicateurSexeSurRepresente(indicateurEcartPromotion)
 
   // Mesures correction indicateur 1
-  const {
-    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn
-  } = calculIndicateurUn(state);
+  const { indicateurSexeSurRepresente: indicateurUnSexeSurRepresente, noteIndicateurUn } = calculIndicateurUn(state)
 
   // NOTE
   const { note: noteIndicateurTrois, correctionMeasure } = calculNote(
     indicateurEcartPromotionAbsolute,
     noteIndicateurUn,
     indicateurUnSexeSurRepresente,
-    indicateurTroisSexeSurRepresente
-  );
+    indicateurTroisSexeSurRepresente,
+  )
 
   return {
     effectifsIndicateurCalculable,
@@ -268,6 +210,6 @@ export default function calculIndicateurTrois(state: AppState) {
     indicateurEcartPromotion: indicateurEcartPromotionAbsolute,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
     noteIndicateurTrois,
-    correctionMeasure
-  };
+    correctionMeasure,
+  }
 }

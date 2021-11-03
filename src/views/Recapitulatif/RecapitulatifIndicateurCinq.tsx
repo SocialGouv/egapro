@@ -1,25 +1,25 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
 
-import { FormState } from "../../globals";
+import { FormState } from "../../globals"
 
-import InfoBloc from "../../components/InfoBloc";
-import RecapBloc from "./components/RecapBloc";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
+import InfoBloc from "../../components/InfoBloc"
+import RecapBloc from "./components/RecapBloc"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 interface Props {
-  indicateurCinqFormValidated: FormState;
-  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined;
-  indicateurNombreSalariesSexeSousRepresente: number | undefined;
-  noteIndicateurCinq: number | undefined;
+  indicateurCinqFormValidated: FormState
+  indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined
+  indicateurNombreSalariesSexeSousRepresente: number | undefined
+  noteIndicateurCinq: number | undefined
 }
 
 function RecapitulatifIndicateurCinq({
   indicateurCinqFormValidated,
   indicateurSexeSousRepresente,
   indicateurNombreSalariesSexeSousRepresente,
-  noteIndicateurCinq
+  noteIndicateurCinq,
 }: Props) {
   if (indicateurCinqFormValidated !== "Valid") {
     return (
@@ -29,18 +29,14 @@ function RecapitulatifIndicateurCinq({
           text={
             <Fragment>
               <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez
-                pas encore validé vos données saissies.
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies.
               </span>{" "}
-              <TextSimulatorLink
-                to="/indicateur5"
-                label="valider les données"
-              />
+              <TextSimulatorLink to="/indicateur5" label="valider les données" />
             </Fragment>
           }
         />
       </div>
-    );
+    )
   }
 
   const firstLineInfo =
@@ -50,7 +46,7 @@ function RecapitulatifIndicateurCinq({
       ? "les femmes et les hommes sont à égalité"
       : indicateurSexeSousRepresente === "hommes"
       ? "les femmes sont sur-représentées"
-      : "les hommes sont sur-représentés";
+      : "les hommes sont sur-représentés"
 
   return (
     <div css={styles.container}>
@@ -64,22 +60,19 @@ function RecapitulatifIndicateurCinq({
               : "--",
           firstLineInfo,
           secondLineLabel: "votre note obtenue est",
-          secondLineData:
-            (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") +
-            "/10",
+          secondLineData: (noteIndicateurCinq !== undefined ? noteIndicateurCinq : "--") + "/10",
           indicateurSexeSurRepresente:
-            indicateurSexeSousRepresente === undefined ||
-            indicateurSexeSousRepresente === "egalite"
+            indicateurSexeSousRepresente === undefined || indicateurSexeSousRepresente === "egalite"
               ? undefined
               : indicateurSexeSousRepresente === "hommes"
               ? "femmes"
-              : "hommes"
+              : "hommes",
         }}
       >
         {null}
       </RecapBloc>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -87,8 +80,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginTop: 22,
-    marginBottom: 22
-  })
-};
+    marginBottom: 22,
+  }),
+}
 
-export default RecapitulatifIndicateurCinq;
+export default RecapitulatifIndicateurCinq

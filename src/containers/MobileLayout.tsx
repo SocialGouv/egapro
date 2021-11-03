@@ -1,16 +1,16 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useState } from "react";
+import { css, jsx } from "@emotion/core"
+import { useState } from "react"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import MobileHome from "../views/MobileHome";
-import FAQ from "../views/FAQ";
+import MobileHome from "../views/MobileHome"
+import FAQ from "../views/FAQ"
 
 function MobileLayout() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const openMenu = () => setIsMenuOpen(true);
-  const closeMenu = () => setIsMenuOpen(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const openMenu = () => setIsMenuOpen(true)
+  const closeMenu = () => setIsMenuOpen(false)
   return (
     <div css={styles.mobileLayout}>
       <div css={styles.scroll}>
@@ -20,7 +20,7 @@ function MobileLayout() {
         <FAQ closeMenu={closeMenu} />
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -53,12 +53,11 @@ const styles = {
       https://github.com/philipwalton/flexbugs#flexbug-17
     */
 
-    background:
-      "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%), #EFF0FA",
+    background: "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%), #EFF0FA",
 
     "@media print": {
-      display: "block"
-    }
+      display: "block",
+    },
   }),
   scroll: css({
     overflowY: "auto",
@@ -66,7 +65,7 @@ const styles = {
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: "0%",
-    position: "relative"
+    position: "relative",
   }),
   faq: css({
     position: "absolute",
@@ -81,13 +80,13 @@ const styles = {
     transform: "translate3d(100%, 0, 0)",
     transition: "visibility 0ms linear 250ms, transform 250ms ease-in-out",
 
-    boxShadow: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)"
+    boxShadow: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
   }),
   faqOpen: css({
     visibility: "visible",
     transform: "translate3d(0%, 0, 0)",
-    transitionDelay: "0ms"
-  })
-};
+    transitionDelay: "0ms",
+  }),
+}
 
-export default MobileLayout;
+export default MobileLayout

@@ -1,97 +1,75 @@
 /** @jsx jsx */
-import { Fragment } from "react";
-import { css, jsx } from "@emotion/core";
-import { MutableState, Tools } from "final-form";
-import arrayMutators from "final-form-arrays";
-import { Form } from "react-final-form";
-import createDecorator from "final-form-calculate";
-import { FieldArray } from "react-final-form-arrays";
+import { Fragment } from "react"
+import { css, jsx } from "@emotion/core"
+import { MutableState, Tools } from "final-form"
+import arrayMutators from "final-form-arrays"
+import { Form } from "react-final-form"
+import createDecorator from "final-form-calculate"
+import { FieldArray } from "react-final-form-arrays"
 
-import {
-  AppState,
-  FormState,
-  ActionInformationsEntrepriseData,
-  Structure,
-  EntrepriseUES,
-} from "../../globals";
+import { AppState, FormState, ActionInformationsEntrepriseData, Structure, EntrepriseUES } from "../../globals"
 
-import globalStyles from "../../utils/globalStyles";
+import globalStyles from "../../utils/globalStyles"
 
-import {
-  mustBeNumber,
-  parseIntFormValue,
-  parseIntStateValue,
-  required,
-} from "../../utils/formHelpers";
+import { mustBeNumber, parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 
-import ActionBar from "../../components/ActionBar";
-import ActionLink from "../../components/ActionLink";
-import CodeNaf, { codeNafFromCode } from "../../components/CodeNaf";
-import FieldSiren from "../../components/FieldSiren";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import NombreEntreprises, {
-  validator as validateNombreEntreprises,
-} from "../../components/NombreEntreprises";
-import RadioButtons from "../../components/RadioButtons";
-import RegionsDepartements, {
-  departementFromCode,
-  regionFromCode,
-} from "../../components/RegionsDepartements";
-import { departementCode } from "../../components/RegionsDepartements";
-import TextField from "../../components/TextField";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
-import EntrepriseUESInput from "./components/EntrepriseUESInputField";
+import ActionBar from "../../components/ActionBar"
+import ActionLink from "../../components/ActionLink"
+import CodeNaf, { codeNafFromCode } from "../../components/CodeNaf"
+import FieldSiren from "../../components/FieldSiren"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import NombreEntreprises, { validator as validateNombreEntreprises } from "../../components/NombreEntreprises"
+import RadioButtons from "../../components/RadioButtons"
+import RegionsDepartements, { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
+import { departementCode } from "../../components/RegionsDepartements"
+import TextField from "../../components/TextField"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
 ///////////////////
 export type entrepriseData = {
-  raison_sociale?: string;
-  code_naf?: string;
-  région?: string;
-  département?: string;
-  adresse?: string;
-  commune?: string;
-  code_postal?: string;
-};
+  raison_sociale?: string
+  code_naf?: string
+  région?: string
+  département?: string
+  adresse?: string
+  commune?: string
+  code_postal?: string
+}
 
 const validate = (value: string) => {
-  const requiredError = required(value);
+  const requiredError = required(value)
   if (!requiredError) {
-    return undefined;
+    return undefined
   } else {
     return {
       required: requiredError,
-    };
+    }
   }
-};
+}
 
 const validateCodePostal = (codePostal: string, departement: string) => {
-  let dptCode = departementCode[departement];
-  if (!dptCode) return undefined;
+  let dptCode = departementCode[departement]
+  if (!dptCode) return undefined
   if (["2A", "2B"].includes(dptCode)) {
-    dptCode = "20";
+    dptCode = "20"
   }
-  const requiredError = required(codePostal);
-  const mustBeNumberError = mustBeNumber(codePostal);
-  const mustBe5DigitsError = codePostal && codePostal.length !== 5;
-  const mustBeInDepartementError =
-    codePostal && !codePostal.startsWith(dptCode);
-  if (
-    !requiredError &&
-    !mustBeNumberError &&
-    !mustBe5DigitsError &&
-    !mustBeInDepartementError
-  ) {
-    return undefined;
+  const requiredError = required(codePostal)
+  const mustBeNumberError = mustBeNumber(codePostal)
+  const mustBe5DigitsError = codePostal && codePostal.length !== 5
+  const mustBeInDepartementError = codePostal && !codePostal.startsWith(dptCode)
+  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError && !mustBeInDepartementError) {
+    return undefined
   } else {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
       mustBe5Digits: mustBe5DigitsError,
       mustBeInDepartementError: mustBeInDepartementError,
-    };
+    }
   }
-};
+}
 
 const validateForm = ({
   nomEntreprise,
@@ -104,19 +82,17 @@ const validateForm = ({
   commune,
   structure,
   nomUES,
-  nombreEntreprises,
 }: {
-  nomEntreprise: string;
-  siren: string;
-  codeNaf: string;
-  region: string;
-  departement: string;
-  adresse: string;
-  codePostal: string;
-  commune: string;
-  structure: Structure;
-  nomUES: string;
-  nombreEntreprises: string;
+  nomEntreprise: string
+  siren: string
+  codeNaf: string
+  region: string
+  departement: string
+  adresse: string
+  codePostal: string
+  commune: string
+  structure: Structure
+  nomUES: string
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
@@ -127,11 +103,8 @@ const validateForm = ({
   codePostal: validateCodePostal(codePostal, departement),
   commune: validate(commune),
   structure: validate(structure),
-  nomUES:
-    structure === "Unité Economique et Sociale (UES)"
-      ? validate(nomUES)
-      : undefined,
-});
+  nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
+})
 
 const calculator = createDecorator({
   field: "nombreEntreprises",
@@ -139,32 +112,27 @@ const calculator = createDecorator({
     entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
       adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES),
   },
-});
+})
 
-const adaptEntreprisesUESSize = (
-  nombreEntreprises: string,
-  entreprisesUES: Array<EntrepriseUES>
-) => {
+const adaptEntreprisesUESSize = (nombreEntreprises: string, entreprisesUES: Array<EntrepriseUES>) => {
   if (validateNombreEntreprises(nombreEntreprises) === undefined) {
     // Il faut une entreprise à déclarer de moins vu que l'entreprise déclarant pour le compte de l'UES a déjà renseigné ses infos
-    const newSize = Number(nombreEntreprises) - 1;
+    const newSize = Number(nombreEntreprises) - 1
     while (newSize > entreprisesUES.length) {
       // Augmenter la taille de l'array si nécessaire
-      entreprisesUES.push({ nom: "", siren: "" });
+      entreprisesUES.push({ nom: "", siren: "" })
     }
     // Réduire la taille de l'array si nécessaire
-    entreprisesUES.length = newSize;
+    entreprisesUES.length = newSize
   }
-  return entreprisesUES;
-};
+  return entreprisesUES
+}
 
 interface Props {
-  informationsEntreprise: AppState["informationsEntreprise"];
-  readOnly: boolean;
-  updateInformationsEntreprise: (
-    data: ActionInformationsEntrepriseData
-  ) => void;
-  validateInformationsEntreprise: (valid: FormState) => void;
+  informationsEntreprise: AppState["informationsEntreprise"]
+  readOnly: boolean
+  updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
+  validateInformationsEntreprise: (valid: FormState) => void
 }
 
 function InformationsEntrepriseForm({
@@ -184,11 +152,9 @@ function InformationsEntrepriseForm({
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
-    nombreEntreprises: parseIntStateValue(
-      informationsEntreprise.nombreEntreprises
-    ),
+    nombreEntreprises: parseIntStateValue(informationsEntreprise.nombreEntreprises),
     entreprisesUES: informationsEntreprise.entreprisesUES,
-  };
+  }
 
   const saveForm = (formData: any) => {
     const {
@@ -204,7 +170,7 @@ function InformationsEntrepriseForm({
       nomUES,
       nombreEntreprises,
       entreprisesUES,
-    } = formData;
+    } = formData
 
     updateInformationsEntreprise({
       nomEntreprise: nomEntreprise,
@@ -219,23 +185,23 @@ function InformationsEntrepriseForm({
       nomUES,
       nombreEntreprises: parseIntFormValue(nombreEntreprises),
       entreprisesUES,
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateInformationsEntreprise("Valid");
-  };
+    saveForm(formData)
+    validateInformationsEntreprise("Valid")
+  }
 
   // Form mutator utilisé par le composant NombreEntreprise pour ne changer la
   // valeur du state qu'une fois la confirmation validée
   const newNombreEntreprises = (
     [name, newValue]: [string, string],
     state: MutableState<any>,
-    { changeValue }: Tools<any>
+    { changeValue }: Tools<any>,
   ) => {
-    changeValue(state, name, () => newValue);
-  };
+    changeValue(state, name, () => newValue)
+  }
 
   return (
     <Form
@@ -253,14 +219,7 @@ function InformationsEntrepriseForm({
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({
-        form,
-        handleSubmit,
-        values,
-        hasValidationErrors,
-        errors,
-        submitFailed,
-      }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
@@ -286,19 +245,13 @@ function InformationsEntrepriseForm({
             readOnly={readOnly}
             updateSirenData={(sirenData: entrepriseData) =>
               form.batch(() => {
-                form.change("nomEntreprise", sirenData.raison_sociale || "");
-                form.change(
-                  "codeNaf",
-                  codeNafFromCode(sirenData.code_naf || "")
-                );
-                form.change("region", regionFromCode(sirenData.région || ""));
-                form.change(
-                  "departement",
-                  departementFromCode(sirenData.département || "")
-                );
-                form.change("adresse", sirenData.adresse || "");
-                form.change("commune", sirenData.commune || "");
-                form.change("codePostal", sirenData.code_postal || "");
+                form.change("nomEntreprise", sirenData.raison_sociale || "")
+                form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
+                form.change("region", regionFromCode(sirenData.région || ""))
+                form.change("departement", departementFromCode(sirenData.département || ""))
+                form.change("adresse", sirenData.adresse || "")
+                form.change("commune", sirenData.commune || "")
+                form.change("codePostal", sirenData.code_postal || "")
               })
             }
           />
@@ -314,38 +267,20 @@ function InformationsEntrepriseForm({
             readOnly={true}
           />
           <CodeNaf label="Code NAF" name="codeNaf" readOnly={true} />
-          <RegionsDepartements
-            nameRegion="region"
-            nameDepartement="departement"
-            readOnly={true}
-          />
-          <TextField
-            label="Adresse"
-            fieldName="adresse"
-            errorText="l'adresse n’est pas valide"
-            readOnly={true}
-          />
+          <RegionsDepartements nameRegion="region" nameDepartement="departement" readOnly={true} />
+          <TextField label="Adresse" fieldName="adresse" errorText="l'adresse n’est pas valide" readOnly={true} />
           <TextField
             label="Code Postal"
             fieldName="codePostal"
             errorText={
               errors.codePostal &&
-              (errors.codePostal.required ||
-                errors.codePostal.mustBeNumber ||
-                errors.codePostal.mustBe5Digits)
+              (errors.codePostal.required || errors.codePostal.mustBeNumber || errors.codePostal.mustBe5Digits)
                 ? "le code postal doit être composé de 5 chiffres"
-                : `le code postal ne correspond pas au département choisi (${
-                    departementCode[values.departement]
-                  })`
+                : `le code postal ne correspond pas au département choisi (${departementCode[values.departement]})`
             }
             readOnly={true}
           />
-          <TextField
-            label="Commune"
-            fieldName="commune"
-            errorText="la commune n'est pas valide"
-            readOnly={true}
-          />
+          <TextField label="Commune" fieldName="commune" errorText="la commune n'est pas valide" readOnly={true} />
 
           {values.structure === "Unité Economique et Sociale (UES)" && (
             <Fragment>
@@ -362,10 +297,7 @@ function InformationsEntrepriseForm({
                 newNombreEntreprises={form.mutators.newNombreEntreprises}
                 readOnly={readOnly}
               />
-              <h3>
-                Saisie du numéro Siren des entreprises composant l'UES (ne pas
-                inclure l'entreprise déclarante)
-              </h3>
+              <h3>Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)</h3>
               <FieldArray name="entreprisesUES">
                 {({ fields }) => {
                   return (
@@ -378,15 +310,12 @@ function InformationsEntrepriseForm({
                           index={index}
                           readOnly={readOnly}
                           updateSirenData={(sirenData: entrepriseData) =>
-                            form.change(
-                              `${entrepriseUES}.nom`,
-                              sirenData.raison_sociale || ""
-                            )
+                            form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
                           }
                         />
                       ))}
                     </Fragment>
-                  );
+                  )
                 }}
               </FieldArray>
             </Fragment>
@@ -394,16 +323,11 @@ function InformationsEntrepriseForm({
 
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink
-                to="/informations-declarant"
-                label="suivant"
-              />
+              <ButtonSimulatorLink to="/informations-declarant" label="suivant" />
               &emsp;
               {informationsEntreprise.formValidated === "Valid" && (
                 <p css={styles.edit}>
-                  <ActionLink
-                    onClick={() => validateInformationsEntreprise("None")}
-                  >
+                  <ActionLink onClick={() => validateInformationsEntreprise("None")}>
                     modifier les données saisies
                   </ActionLink>
                 </p>
@@ -421,7 +345,7 @@ function InformationsEntrepriseForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 const styles = {
@@ -455,6 +379,6 @@ const styles = {
     height: 32,
     marginTop: 46 - 18 - 5,
   }),
-};
+}
 
-export default InformationsEntrepriseForm;
+export default InformationsEntrepriseForm

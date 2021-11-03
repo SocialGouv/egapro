@@ -1,27 +1,22 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
-import { IconWarning } from "../../components/Icons";
-import { useColumnsWidth, useLayoutType } from "../../components/GridContext";
+import { IconWarning } from "../../components/Icons"
+import { useColumnsWidth, useLayoutType } from "../../components/GridContext"
 
-import globalStyles from "../../utils/globalStyles";
+import globalStyles from "../../utils/globalStyles"
 
 interface Props {
-  allIndicateurValid: boolean;
-  noteIndex: number | undefined;
-  totalPoint: number;
-  totalPointCalculable: number;
+  allIndicateurValid: boolean
+  noteIndex: number | undefined
+  totalPoint: number
+  totalPointCalculable: number
 }
 
-function RecapitulatifIndex({
-  allIndicateurValid,
-  noteIndex,
-  totalPoint,
-  totalPointCalculable
-}: Props) {
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
+function RecapitulatifIndex({ allIndicateurValid, noteIndex, totalPoint, totalPointCalculable }: Props) {
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
   return (
     <div css={[styles.indexBloc, css({ width })]}>
       {allIndicateurValid ? (
@@ -41,8 +36,7 @@ function RecapitulatifIndex({
           <InfoBloc title="Index égalité femmes-hommes">
             <div>
               <p css={styles.blocText}>
-                Vos indicateurs calculables représentent moins de 75 points,
-                votre Index ne peut être calculé.
+                Vos indicateurs calculables représentent moins de 75 points, votre Index ne peut être calculé.
               </p>
               <p
                 css={styles.blocTextDetail}
@@ -53,19 +47,18 @@ function RecapitulatifIndex({
       ) : (
         <InfoBloc title="Index égalité femmes-hommes">
           <p css={styles.blocText}>
-            Vous n’avez pas encore validé tous vos indicateurs, votre index ne
-            peut être calculé.
+            Vous n’avez pas encore validé tous vos indicateurs, votre index ne peut être calculé.
           </p>
         </InfoBloc>
       )}
     </div>
-  );
+  )
 }
 
 interface InfoBlocProps {
-  title: string;
-  children: ReactNode;
-  icon?: "warning" | null;
+  title: string
+  children: ReactNode
+  icon?: "warning" | null
 }
 
 function InfoBloc({ title, children, icon = "warning" }: InfoBlocProps) {
@@ -73,21 +66,17 @@ function InfoBloc({ title, children, icon = "warning" }: InfoBlocProps) {
     <div css={styles.bloc}>
       <p css={styles.blocTitle}>{title}</p>
       <div css={styles.blocBody}>
-        {icon === null ? null : (
-          <div css={styles.blocIcon}>
-            {icon === "warning" ? <IconWarning /> : null}
-          </div>
-        )}
+        {icon === null ? null : <div css={styles.blocIcon}>{icon === "warning" ? <IconWarning /> : null}</div>}
         {children}
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
   indexBloc: css({
     marginTop: 22,
-    marginBottom: 44
+    marginBottom: 44,
   }),
 
   bloc: css({
@@ -100,30 +89,30 @@ const styles = {
     "@media print": {
       backgroundColor: "white",
       color: globalStyles.colors.default,
-      border: `solid ${globalStyles.colors.default} 1px`
-    }
+      border: `solid ${globalStyles.colors.default} 1px`,
+    },
   }),
   blocTitle: css({
     marginBottom: "auto",
     fontSize: 18,
     lineHeight: "22px",
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   }),
   blocBody: {
     marginTop: 4,
     display: "flex",
-    alignItems: "flex-end"
+    alignItems: "flex-end",
   },
   blocIcon: {
-    marginRight: 22
+    marginRight: 22,
   },
   blocText: css({
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   blocTextResult: css({
     display: "flex",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   }),
   blocTextDetail: css({
     marginTop: 9,
@@ -132,8 +121,8 @@ const styles = {
     fontSize: 12,
     lineHeight: "14px",
     fontStyle: "italic",
-    borderBottom: "1px solid #FFFFFF"
-  })
-};
+    borderBottom: "1px solid #FFFFFF",
+  }),
+}
 
-export default RecapitulatifIndex;
+export default RecapitulatifIndex

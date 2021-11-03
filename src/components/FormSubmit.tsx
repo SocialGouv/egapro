@@ -1,26 +1,20 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import ButtonSubmit from "./ButtonSubmit";
-import { IconWarning } from "./Icons";
+import ButtonSubmit from "./ButtonSubmit"
+import { IconWarning } from "./Icons"
 
 interface Props {
-  submitFailed: boolean;
-  hasValidationErrors: boolean;
-  errorMessage?: string;
-  loading?: boolean;
-  label?: string;
+  submitFailed: boolean
+  hasValidationErrors: boolean
+  errorMessage?: string
+  loading?: boolean
+  label?: string
 }
 
-function FormSubmit({
-  submitFailed,
-  hasValidationErrors,
-  errorMessage,
-  loading = false,
-  label = "valider"
-}: Props) {
+function FormSubmit({ submitFailed, hasValidationErrors, errorMessage, loading = false, label = "valider" }: Props) {
   return (
     <div css={styles.container}>
       <ButtonSubmit
@@ -38,14 +32,14 @@ function FormSubmit({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
     display: "flex",
     flexDirection: "column",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   }),
   error: css({
     display: "flex",
@@ -56,12 +50,12 @@ const styles = {
     border: `solid ${globalStyles.colors.error} 1px`,
     borderRadius: 5,
     color: globalStyles.colors.error,
-    fontSize: 12
+    fontSize: 12,
   }),
   icon: css({
     height: 20,
-    marginRight: 10
-  })
-};
+    marginRight: 10,
+  }),
+}
 
-export default FormSubmit;
+export default FormSubmit

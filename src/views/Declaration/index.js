@@ -1,2 +1,2 @@
-import Declaration from "./Declaration";
-export default Declaration;
+import Declaration from "./Declaration"
+export default Declaration

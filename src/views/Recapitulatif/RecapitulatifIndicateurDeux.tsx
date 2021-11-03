@@ -1,33 +1,29 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
 
-import { FormState, CategorieSocioPro } from "../../globals";
+import { FormState, CategorieSocioPro } from "../../globals"
 
-import {
-  displayNameCategorieSocioPro,
-  displayPercent,
-  displaySexeSurRepresente
-} from "../../utils/helpers";
+import { displayNameCategorieSocioPro, displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc";
-import RecapBloc from "./components/RecapBloc";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
+import InfoBloc from "../../components/InfoBloc"
+import RecapBloc from "./components/RecapBloc"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 
-import { RowDataFull, RowLabelFull } from "./components/RowData";
+import { RowDataFull, RowLabelFull } from "./components/RowData"
 
 interface Props {
-  indicateurDeuxFormValidated: FormState;
-  effectifsIndicateurDeuxCalculable: boolean;
-  indicateurDeuxCalculable: boolean;
+  indicateurDeuxFormValidated: FormState
+  effectifsIndicateurDeuxCalculable: boolean
+  indicateurDeuxCalculable: boolean
   effectifEtEcartAugmentParGroupe: Array<{
-    categorieSocioPro: CategorieSocioPro;
-    ecartTauxAugmentation: number | undefined;
-  }>;
-  indicateurEcartAugmentation: number | undefined;
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined;
-  noteIndicateurDeux: number | undefined;
-  correctionMeasure: boolean;
+    categorieSocioPro: CategorieSocioPro
+    ecartTauxAugmentation: number | undefined
+  }>
+  indicateurEcartAugmentation: number | undefined
+  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
+  noteIndicateurDeux: number | undefined
+  correctionMeasure: boolean
 }
 
 function RecapitulatifIndicateurDeux({
@@ -38,7 +34,7 @@ function RecapitulatifIndicateurDeux({
   indicateurEcartAugmentation,
   indicateurSexeSurRepresente,
   noteIndicateurDeux,
-  correctionMeasure
+  correctionMeasure,
 }: Props) {
   if (!effectifsIndicateurDeuxCalculable) {
     return (
@@ -48,7 +44,7 @@ function RecapitulatifIndicateurDeux({
           text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
         />
       </div>
-    );
+    )
   }
 
   if (indicateurDeuxFormValidated !== "Valid") {
@@ -59,18 +55,14 @@ function RecapitulatifIndicateurDeux({
           text={
             <Fragment>
               <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez
-                pas encore validé vos données saissies.
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies.
               </span>{" "}
-              <TextSimulatorLink
-                to="/indicateur2"
-                label="valider les données"
-              />
+              <TextSimulatorLink to="/indicateur2" label="valider les données" />
             </Fragment>
           }
         />
       </div>
-    );
+    )
   }
 
   if (!indicateurDeuxCalculable) {
@@ -81,7 +73,7 @@ function RecapitulatifIndicateurDeux({
           text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu d’augmentation durant la période de référence"
         />
       </div>
-    );
+    )
   }
 
   return (
@@ -90,36 +82,27 @@ function RecapitulatifIndicateurDeux({
         title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
         resultBubble={{
           firstLineLabel: "votre résultat final est",
-          firstLineData:
-            indicateurEcartAugmentation !== undefined
-              ? displayPercent(indicateurEcartAugmentation)
-              : "--",
+          firstLineData: indicateurEcartAugmentation !== undefined ? displayPercent(indicateurEcartAugmentation) : "--",
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
           secondLineLabel: "votre note obtenue est",
-          secondLineData:
-            (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") +
-            "/20",
-          secondLineInfo: correctionMeasure
-            ? "** mesures de correction prises en compte"
-            : undefined,
-          indicateurSexeSurRepresente
+          secondLineData: (noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20",
+          secondLineInfo: correctionMeasure ? "** mesures de correction prises en compte" : undefined,
+          indicateurSexeSurRepresente,
         }}
       >
         <RowLabelFull label="écart de taux d’augmentations par csp" />
 
-        {effectifEtEcartAugmentParGroupe.map(
-          ({ categorieSocioPro, ecartTauxAugmentation }) => (
-            <RowDataFull
-              key={categorieSocioPro}
-              name={displayNameCategorieSocioPro(categorieSocioPro)}
-              data={ecartTauxAugmentation}
-              asPercent={true}
-            />
-          )
-        )}
+        {effectifEtEcartAugmentParGroupe.map(({ categorieSocioPro, ecartTauxAugmentation }) => (
+          <RowDataFull
+            key={categorieSocioPro}
+            name={displayNameCategorieSocioPro(categorieSocioPro)}
+            data={ecartTauxAugmentation}
+            asPercent={true}
+          />
+        ))}
       </RecapBloc>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -127,8 +110,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginTop: 22,
-    marginBottom: 22
-  })
-};
+    marginBottom: 22,
+  }),
+}
 
-export default RecapitulatifIndicateurDeux;
+export default RecapitulatifIndicateurDeux

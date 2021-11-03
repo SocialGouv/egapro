@@ -1,11 +1,11 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
 interface Props {
-  children: ReactNode;
-  onClick: () => void;
-  style?: any;
+  children: ReactNode
+  onClick: () => void
+  style?: any
 }
 
 function ActionLink({ children, onClick, style }: Props) {
@@ -13,7 +13,7 @@ function ActionLink({ children, onClick, style }: Props) {
     <button type="button" css={[styles.button, style]} onClick={onClick}>
       {children}
     </button>
-  );
+  )
 }
 
 const styles = {
@@ -30,8 +30,8 @@ const styles = {
     cursor: "pointer",
     fontSize: 14,
     textAlign: "center",
-    textDecoration: "underline"
-  })
-};
+    textDecoration: "underline",
+  }),
+}
 
-export default ActionLink;
+export default ActionLink

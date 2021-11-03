@@ -1,45 +1,36 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { useCallback, ReactNode } from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { jsx } from "@emotion/core"
+import { useCallback, ReactNode } from "react"
+import { RouteComponentProps } from "react-router-dom"
 
-import {
-  AppState,
-  FormState,
-  ActionType,
-  ActionIndicateurCinqData
-} from "../../globals";
+import { AppState, FormState, ActionType, ActionIndicateurCinqData } from "../../globals"
 
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq";
+import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 
-import Page from "../../components/Page";
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import Page from "../../components/Page"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
-import IndicateurCinqForm from "./IndicateurCinqForm";
-import IndicateurCinqResult from "./IndicateurCinqResult";
+import IndicateurCinqForm from "./IndicateurCinqForm"
+import IndicateurCinqResult from "./IndicateurCinqResult"
 
 interface Props extends RouteComponentProps {
-  state: AppState;
-  dispatch: (action: ActionType) => void;
+  state: AppState
+  dispatch: (action: ActionType) => void
 }
 
 function IndicateurCinq({ state, dispatch }: Props) {
   const updateIndicateurCinq = useCallback(
-    (data: ActionIndicateurCinqData) =>
-      dispatch({ type: "updateIndicateurCinq", data }),
-    [dispatch]
-  );
+    (data: ActionIndicateurCinqData) => dispatch({ type: "updateIndicateurCinq", data }),
+    [dispatch],
+  )
 
   const validateIndicateurCinq = useCallback(
     (valid: FormState) => dispatch({ type: "validateIndicateurCinq", valid }),
-    [dispatch]
-  );
+    [dispatch],
+  )
 
-  const {
-    indicateurSexeSousRepresente,
-    indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq
-  } = calculIndicateurCinq(state);
+  const { indicateurSexeSousRepresente, indicateurNombreSalariesSexeSousRepresente, noteIndicateurCinq } =
+    calculIndicateurCinq(state)
 
   return (
     <PageIndicateurCinq>
@@ -56,9 +47,7 @@ function IndicateurCinq({ state, dispatch }: Props) {
           state.indicateurCinq.formValidated === "Valid" && (
             <IndicateurCinqResult
               indicateurSexeSousRepresente={indicateurSexeSousRepresente}
-              indicateurNombreSalariesSexeSousRepresente={
-                indicateurNombreSalariesSexeSousRepresente
-              }
+              indicateurNombreSalariesSexeSousRepresente={indicateurNombreSalariesSexeSousRepresente}
               noteIndicateurCinq={noteIndicateurCinq}
               validateIndicateurCinq={validateIndicateurCinq}
             />
@@ -66,7 +55,7 @@ function IndicateurCinq({ state, dispatch }: Props) {
         }
       />
     </PageIndicateurCinq>
-  );
+  )
 }
 
 function PageIndicateurCinq({ children }: { children: ReactNode }) {
@@ -77,7 +66,7 @@ function PageIndicateurCinq({ children }: { children: ReactNode }) {
     >
       {children}
     </Page>
-  );
+  )
 }
 
-export default IndicateurCinq;
+export default IndicateurCinq

@@ -1,2 +1,2 @@
-import Effectif from "./Effectif";
-export default Effectif;
+import Effectif from "./Effectif"
+export default Effectif

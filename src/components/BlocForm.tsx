@@ -1,21 +1,20 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment, ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment, ReactNode } from "react"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { CellHead, Cell, Cell2 } from "./Cell";
-import { IconMale, IconFemale } from "./Icons";
+import { CellHead, Cell, Cell2 } from "./Cell"
+import { IconMale, IconFemale } from "./Icons"
 
 interface Props {
-  title?: string;
-  label?: string;
-  footer?: string | [string, string];
-  children: ReactNode;
-  style?: any;
+  title?: string
+  label?: string
+  footer?: string | [string, string]
+  children: ReactNode
 }
 
-function BlocForm({ title, label, footer, children, style }: Props) {
+function BlocForm({ title, label, footer, children }: Props) {
   return (
     <div css={styles.container}>
       <div css={styles.background} />
@@ -57,39 +56,27 @@ function BlocForm({ title, label, footer, children, style }: Props) {
         )}
       </div>
     </div>
-  );
+  )
 }
 
-export function BlocFormLight({
-  children,
-  superLight = false
-}: {
-  children: ReactNode;
-  superLight?: boolean;
-}) {
+export function BlocFormLight({ children, superLight = false }: { children: ReactNode; superLight?: boolean }) {
   return (
     <div css={styles.container}>
       <div css={styles.background} />
-      <div
-        css={[
-          styles.blocForm,
-          styles.blocFormLight,
-          superLight && styles.blocFormSuperLight
-        ]}
-      >
+      <div css={[styles.blocForm, styles.blocFormLight, superLight && styles.blocFormSuperLight]}>
         <div css={styles.blocFormInner}>{children}</div>
       </div>
     </div>
-  );
+  )
 }
 
-const PADDING = 20;
+const PADDING = 20
 
 const styles = {
   container: css({
     position: "relative",
     marginTop: 50 + 14,
-    marginBottom: 20 + 14
+    marginBottom: 20 + 14,
   }),
   background: css({
     backgroundColor: "#FFF",
@@ -99,7 +86,7 @@ const styles = {
     left: -38,
     right: -38,
     borderRadius: "100%",
-    border: "1px solid #EFECEF"
+    border: "1px solid #EFECEF",
   }),
   blocForm: css({
     position: "relative",
@@ -107,22 +94,22 @@ const styles = {
     borderRight: `solid ${globalStyles.colors.default} 1px`,
     borderBottom: `solid ${globalStyles.colors.default} 1px`,
     paddingTop: 8,
-    paddingBottom: 8
+    paddingBottom: 8,
   }),
   blocFormWithFooter: css({
     borderBottom: "none",
-    paddingBottom: 8 + 8
+    paddingBottom: 8 + 8,
   }),
   blocFormLight: css({
-    borderRight: "none"
+    borderRight: "none",
   }),
   blocFormSuperLight: css({
-    borderBottom: "none"
+    borderBottom: "none",
   }),
 
   blocFormInner: css({
     paddingRight: PADDING,
-    paddingLeft: PADDING
+    paddingLeft: PADDING,
   }),
 
   rowHead: css({
@@ -135,23 +122,23 @@ const styles = {
     bottom: "100%",
     marginBottom: -9,
     minHeight: 16,
-    paddingLeft: PADDING
+    paddingLeft: PADDING,
   }),
   rowHeadCellHead: css({
     fontSize: 14,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   }),
   rowHeadCell: css({
     height: 16,
     fontSize: 12,
-    textAlign: "center"
+    textAlign: "center",
   }),
   rowHeadBorder: css({
     height: 1,
     backgroundColor: globalStyles.colors.default,
     flexShrink: 0,
     width: PADDING,
-    marginBottom: 8
+    marginBottom: 8,
   }),
 
   rowGender: css({
@@ -161,21 +148,21 @@ const styles = {
     paddingRight: PADDING,
     paddingLeft: PADDING,
     marginTop: 12,
-    marginBottom: 12
+    marginBottom: 12,
   }),
   cellMen: css({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: 12,
-    color: globalStyles.colors.men
+    color: globalStyles.colors.men,
   }),
   cellWomen: css({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: 12,
-    color: globalStyles.colors.women
+    color: globalStyles.colors.women,
   }),
 
   rowFoot: css({
@@ -186,16 +173,16 @@ const styles = {
     position: "absolute",
     bottom: -7,
     right: 0,
-    left: 0
+    left: 0,
   }),
   rowFootCell: css({
     fontSize: 14,
-    textAlign: "center"
+    textAlign: "center",
   }),
   rowFootTotal: css({
     fontStyle: "italic",
     fontSize: 14,
-    marginLeft: 8
+    marginLeft: 8,
   }),
   rowFootBorderLeft: css({
     height: 1,
@@ -203,14 +190,14 @@ const styles = {
     backgroundColor: globalStyles.colors.default,
     flexGrow: 1,
     flexShrink: 1,
-    flexBasis: "0%"
+    flexBasis: "0%",
   }),
   rowFootBorderRight: css({
     height: 1,
     backgroundColor: globalStyles.colors.default,
     width: PADDING,
-    flexShrink: 0
-  })
-};
+    flexShrink: 0,
+  }),
+}
 
-export default BlocForm;
+export default BlocForm

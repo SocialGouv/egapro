@@ -1,64 +1,55 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import MaskedInput, { conformToMask } from "react-text-mask";
-import createNumberMask from "text-mask-addons/dist/createNumberMask";
-import { FieldRenderProps, FieldMetaState } from "react-final-form";
+import { css, jsx } from "@emotion/core"
+import MaskedInput, { conformToMask } from "react-text-mask"
+import createNumberMask from "text-mask-addons/dist/createNumberMask"
+import { FieldRenderProps, FieldMetaState } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { Cell } from "./Cell";
+import { Cell } from "./Cell"
 
 export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
-  (meta.error &&
-    meta.touched &&
-    !!Object.values({ ...meta.error, required: false }).filter((item) => !!item)
-      .length);
+  (meta.error && meta.touched && !!Object.values({ ...meta.error, required: false }).filter((item) => !!item).length)
 
 const numberMask = createNumberMask({
   prefix: "",
   includeThousandsSeparator: false,
-});
+})
 
-const suffixPercent = "%";
+const suffixPercent = "%"
 
 const percentNumberMask = createNumberMask({
   prefix: "",
   includeThousandsSeparator: false,
   suffix: suffixPercent,
   allowDecimal: true,
-});
+})
 
 const parse = (inputValue: string) => {
-  return inputValue.split(/\s/).join("").replace(suffixPercent, "");
-};
+  return inputValue.split(/\s/).join("").replace(suffixPercent, "")
+}
 
-const digitRegExp = /\d/;
-const anyNonWhitespaceRegExp = /[^\s]/;
+const digitRegExp = /\d/
+const anyNonWhitespaceRegExp = /[^\s]/
 
 // because designer don't want to block any char…
-const trickyMaskNumberToAllowAnyChar =
-  (mask: (value: string) => Array<string | RegExp>) => (value: string) => {
-    const valueOnlyNum = value
-      .replace(/_/g, "")
-      .replace(/%/g, "")
-      .replace(/[^\s]/g, "1");
+const trickyMaskNumberToAllowAnyChar = (mask: (value: string) => Array<string | RegExp>) => (value: string) => {
+  const valueOnlyNum = value.replace(/_/g, "").replace(/%/g, "").replace(/[^\s]/g, "1")
 
-    const rawMaskArray = mask(valueOnlyNum);
+  const rawMaskArray = mask(valueOnlyNum)
 
-    const transformedMaskArray = rawMaskArray.map((char: any) => {
-      return char.source && char.source === digitRegExp.source
-        ? anyNonWhitespaceRegExp
-        : char;
-    });
+  const transformedMaskArray = rawMaskArray.map((char: any) => {
+    return char.source && char.source === digitRegExp.source ? anyNonWhitespaceRegExp : char
+  })
 
-    return transformedMaskArray;
-  };
+  return transformedMaskArray
+}
 
 interface Props {
-  field: FieldRenderProps<string, HTMLInputElement>;
-  mask?: "number" | "percent" | undefined;
-  style?: any;
+  field: FieldRenderProps<string, HTMLInputElement>
+  mask?: "number" | "percent" | undefined
+  style?: any
 }
 
 function CellInput({
@@ -69,17 +60,13 @@ function CellInput({
   mask,
   style,
 }: Props) {
-  const error = hasFieldError(meta);
+  const error = hasFieldError(meta)
 
-  const maskToUse = mask === "percent" ? percentNumberMask : numberMask;
+  const maskToUse = mask === "percent" ? percentNumberMask : numberMask
 
-  const maskWithAnyChar = trickyMaskNumberToAllowAnyChar(maskToUse);
+  const maskWithAnyChar = trickyMaskNumberToAllowAnyChar(maskToUse)
 
-  const inputValue = conformToMask(
-    value,
-    maskWithAnyChar(value),
-    {}
-  ).conformedValue;
+  const inputValue = conformToMask(value, maskWithAnyChar(value), {}).conformedValue
 
   return (
     <Cell style={styles.cell}>
@@ -108,7 +95,7 @@ function CellInput({
         />
       )}
     </Cell>
-  );
+  )
 }
 
 const styles = {
@@ -127,6 +114,6 @@ const styles = {
     color: globalStyles.colors.error,
     borderColor: globalStyles.colors.error,
   }),
-};
+}
 
-export default CellInput;
+export default CellInput

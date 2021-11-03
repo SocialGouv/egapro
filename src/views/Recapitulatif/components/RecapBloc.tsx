@@ -1,27 +1,22 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
-import globalStyles from "../../../utils/globalStyles";
+import globalStyles from "../../../utils/globalStyles"
 
-import ResultBubble, {
-  Props as ResultBubbleProps
-} from "../../../components/ResultBubble";
+import ResultBubble, { Props as ResultBubbleProps } from "../../../components/ResultBubble"
 
-import {
-  useColumnsWidth,
-  useLayoutType
-} from "../../../components/GridContext";
+import { useColumnsWidth, useLayoutType } from "../../../components/GridContext"
 
 interface Props {
-  title: string;
-  children: ReactNode;
-  resultBubble: ResultBubbleProps;
+  title: string
+  children: ReactNode
+  resultBubble: ResultBubbleProps
 }
 
 export function RecapBloc({ title, children, resultBubble }: Props) {
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 4 : 5);
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 4 : 5)
 
   return (
     <div css={styles.container}>
@@ -36,28 +31,17 @@ export function RecapBloc({ title, children, resultBubble }: Props) {
           </div>
         )}
 
-        <div
-          css={[styles.borderBottomBloc, !children && styles.borderNoChildren]}
-        />
-        <div
-          css={[styles.borderLeftBloc, !children && styles.borderNoChildren]}
-        />
+        <div css={[styles.borderBottomBloc, !children && styles.borderNoChildren]} />
+        <div css={[styles.borderLeftBloc, !children && styles.borderNoChildren]} />
       </div>
 
       <div css={styles.blocResult}>
-        <div
-          css={[
-            styles.borderBottomResult,
-            !children && styles.borderNoChildren
-          ]}
-        />
-        <div
-          css={[styles.borderRightResult, !children && styles.borderNoChildren]}
-        />
+        <div css={[styles.borderBottomResult, !children && styles.borderNoChildren]} />
+        <div css={[styles.borderRightResult, !children && styles.borderNoChildren]} />
         <ResultBubble {...resultBubble} />
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -66,7 +50,7 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     pageBreakInside: "avoid", // doesn't seems to work…
-    breakInside: "avoid"
+    breakInside: "avoid",
   }),
   background: css({
     backgroundColor: "#FFF",
@@ -78,8 +62,8 @@ const styles = {
     borderRadius: "100%",
     border: "1px solid #EFECEF",
     "@media print": {
-      display: "none"
-    }
+      display: "none",
+    },
   }),
 
   blocInfo: css({
@@ -88,23 +72,23 @@ const styles = {
     paddingLeft: globalStyles.grid.gutterWidth,
     "@media print": {
       flexShrink: 1,
-      flexGrow: 1
-    }
+      flexGrow: 1,
+    },
   }),
   blocInfoPrint: css({
     "@media print": {
-      width: "auto"
-    }
+      width: "auto",
+    },
   }),
   title: css({
     marginBottom: 20,
     fontSize: 18,
     lineHeight: "22px",
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   }),
 
   bloc: css({
-    position: "relative"
+    position: "relative",
   }),
   borderBottomBloc: css({
     position: "absolute",
@@ -115,8 +99,8 @@ const styles = {
     right: 0,
     "@media print": {
       borderBottom: `solid ${globalStyles.colors.default} 1px`,
-      background: "none"
-    }
+      background: "none",
+    },
   }),
   borderLeftBloc: css({
     position: "absolute",
@@ -127,8 +111,8 @@ const styles = {
     left: 0,
     "@media print": {
       borderLeft: `solid ${globalStyles.colors.default} 1px`,
-      background: "none"
-    }
+      background: "none",
+    },
   }),
 
   borderBottomResult: css({
@@ -140,8 +124,8 @@ const styles = {
     right: "50%",
     "@media print": {
       borderBottom: `solid ${globalStyles.colors.default} 1px`,
-      background: "none"
-    }
+      background: "none",
+    },
   }),
   borderRightResult: css({
     position: "absolute",
@@ -152,8 +136,8 @@ const styles = {
     right: "50%",
     "@media print": {
       borderRight: `solid ${globalStyles.colors.default} 1px`,
-      background: "none"
-    }
+      background: "none",
+    },
   }),
   blocResult: css({
     position: "relative",
@@ -166,13 +150,13 @@ const styles = {
     flexDirection: "column",
     "@media print": {
       minWidth: 250,
-      flexShrink: 0
-    }
+      flexShrink: 0,
+    },
   }),
 
   borderNoChildren: css({
-    bottom: "50%"
-  })
-};
+    bottom: "50%",
+  }),
+}
 
-export default RecapBloc;
+export default RecapBloc

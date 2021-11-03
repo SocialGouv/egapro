@@ -1,12 +1,12 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
 
-import { IconLamp, IconText } from "../../../components/Icons";
+import { IconLamp, IconText } from "../../../components/Icons"
 
-import FAQStep from "../components/FAQStep";
-import FAQCalculScale from "../components/FAQCalculScale";
-import FAQTitle3 from "../components/FAQTitle3";
+import FAQStep from "../components/FAQStep"
+import FAQCalculScale from "../components/FAQCalculScale"
+import FAQTitle3 from "../components/FAQTitle3"
 
 function FAQIndicateur1DetailCalcul() {
   return (
@@ -14,29 +14,26 @@ function FAQIndicateur1DetailCalcul() {
       <FAQTitle3>Calculer l’indicateur</FAQTitle3>
 
       <FAQStep icon={<IconLamp />}>
-        Les groupes ne comportant pas{" "}
-        <strong>au moins 3 hommes et 3 femmes</strong> ne sont pas retenus pour
-        le calcul.
+        Les groupes ne comportant pas <strong>au moins 3 hommes et 3 femmes</strong> ne sont pas retenus pour le calcul.
       </FAQStep>
 
       <FAQStep icon={<IconText>1</IconText>}>
-        Calculer la rémunération moyenne des femmes et des hommes au cours de la
-        période de référence par groupe.
+        Calculer la rémunération moyenne des femmes et des hommes au cours de la période de référence par groupe.
       </FAQStep>
 
       <FAQStep icon={<IconText>2</IconText>}>
-        Calculer l’écart de rémunération pour chaque groupe en soustrayant la rémunération 
-        moyenne des femmes à celle des hommes et en rapportant ce résultat à la rémunération moyenne des hommes.
+        Calculer l’écart de rémunération pour chaque groupe en soustrayant la rémunération moyenne des femmes à celle
+        des hommes et en rapportant ce résultat à la rémunération moyenne des hommes.
       </FAQStep>
 
       <FAQStep icon={<IconText>3</IconText>}>
-        Pondérer les résultats obtenus en fonction de l’effectif du groupe par
-        rapport à l’effectif total des groupes valides.
+        Pondérer les résultats obtenus en fonction de l’effectif du groupe par rapport à l’effectif total des groupes
+        valides.
       </FAQStep>
 
       <FAQStep icon={<IconText>4</IconText>}>
-        Enfin additionner les résultats des différents groupes pour obtenir
-        l’ecart global de rémunération entre les hommes et les femmes.
+        Enfin additionner les résultats des différents groupes pour obtenir l’ecart global de rémunération entre les
+        hommes et les femmes.
         <br />
         <em>* la valeur est exprimée en valeur absolue</em>
       </FAQStep>
@@ -68,7 +65,7 @@ function FAQIndicateur1DetailCalcul() {
             "supérieur à 17% ou égal à 18%",
             "supérieur à 18% ou égal à 19%",
             "supérieur à 19% ou égal à 20%",
-            "supérieur à 20%"
+            "supérieur à 20%",
           ]}
           scaleTitle="note sur 40"
           scale={[
@@ -93,18 +90,18 @@ function FAQIndicateur1DetailCalcul() {
             "8 points",
             "5 points",
             "2 points",
-            "0 point"
+            "0 point",
           ]}
         />
       </div>
     </Fragment>
-  );
+  )
 }
 
 const styles = {
   content: css({
-    marginTop: 30
-  })
-};
+    marginTop: 30,
+  }),
+}
 
-export default FAQIndicateur1DetailCalcul;
+export default FAQIndicateur1DetailCalcul

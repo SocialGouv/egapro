@@ -1,6 +1,6 @@
-import { AppState } from "../globals";
+import { AppState } from "../globals"
 
-import { roundDecimal } from "./helpers";
+import { roundDecimal } from "./helpers"
 
 //////////////////
 // INDICATEUR 4 //
@@ -8,42 +8,30 @@ import { roundDecimal } from "./helpers";
 
 export const calculIndicateurCalculable = (
   presenceCongeMat: boolean,
-  nombreSalarieesPeriodeAugmentation: number | undefined
+  nombreSalarieesPeriodeAugmentation: number | undefined,
 ) => {
-  return (
-    presenceCongeMat &&
-    nombreSalarieesPeriodeAugmentation !== undefined &&
-    nombreSalarieesPeriodeAugmentation > 0
-  );
-};
+  return presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation > 0
+}
 
 export const calculIndicateurEcartNombreSalarieesAugmentees = (
   indicateurCalculable: boolean,
   nombreSalarieesPeriodeAugmentation: number | undefined,
-  nombreSalarieesAugmentees: number | undefined
+  nombreSalarieesAugmentees: number | undefined,
 ): number | undefined =>
   indicateurCalculable &&
   nombreSalarieesPeriodeAugmentation !== undefined &&
   nombreSalarieesAugmentees !== undefined &&
   nombreSalarieesPeriodeAugmentation >= nombreSalarieesAugmentees
-    ? Math.abs(
-        roundDecimal(
-          100 *
-            (nombreSalarieesAugmentees / nombreSalarieesPeriodeAugmentation),
-          3
-        )
-      )
-    : undefined;
+    ? Math.abs(roundDecimal(100 * (nombreSalarieesAugmentees / nombreSalarieesPeriodeAugmentation), 3))
+    : undefined
 
 // NOTE
-export const calculNote = (
-  indicateurEcartNombreSalarieesAugmentees: number | undefined
-): number | undefined =>
+export const calculNote = (indicateurEcartNombreSalarieesAugmentees: number | undefined): number | undefined =>
   indicateurEcartNombreSalarieesAugmentees !== undefined
     ? indicateurEcartNombreSalarieesAugmentees < 100
       ? 0
       : 15
-    : undefined;
+    : undefined
 
 /////////
 // ALL //
@@ -52,22 +40,20 @@ export const calculNote = (
 export default function calculIndicateurQuatre(state: AppState) {
   const indicateurCalculable = calculIndicateurCalculable(
     state.indicateurQuatre.presenceCongeMat,
-    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation
-  );
+    state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,
+  )
 
   const indicateurEcartNombreSalarieesAugmentees = calculIndicateurEcartNombreSalarieesAugmentees(
     indicateurCalculable,
     state.indicateurQuatre.nombreSalarieesPeriodeAugmentation,
-    state.indicateurQuatre.nombreSalarieesAugmentees
-  );
+    state.indicateurQuatre.nombreSalarieesAugmentees,
+  )
 
-  const noteIndicateurQuatre = calculNote(
-    indicateurEcartNombreSalarieesAugmentees
-  );
+  const noteIndicateurQuatre = calculNote(indicateurEcartNombreSalarieesAugmentees)
 
   return {
     indicateurCalculable,
     indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre
-  };
+    noteIndicateurQuatre,
+  }
 }

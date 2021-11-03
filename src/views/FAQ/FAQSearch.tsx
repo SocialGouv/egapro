@@ -1,21 +1,21 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useState, ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { useState, ReactNode } from "react"
 
-import FAQSearchBox from "./components/FAQSearchBox";
-import FAQQuestionRow from "./components/FAQQuestionRow";
-import FAQTitle2 from "./components/FAQTitle2";
+import FAQSearchBox from "./components/FAQSearchBox"
+import FAQQuestionRow from "./components/FAQQuestionRow"
+import FAQTitle2 from "./components/FAQTitle2"
 
-import faqDataFuse from "./utils/faqFuse";
+import faqDataFuse from "./utils/faqFuse"
 
 interface Props {
-  children: ReactNode;
+  children: ReactNode
 }
 
 function FAQSearch({ children }: Props) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("")
 
-  const fuseResults = searchTerm !== "" ? faqDataFuse.search(searchTerm) : null;
+  const fuseResults = searchTerm !== "" ? faqDataFuse.search(searchTerm) : null
 
   return (
     <div css={styles.container}>
@@ -38,23 +38,23 @@ function FAQSearch({ children }: Props) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   content: css({
     marginTop: 28,
     marginBottom: 14,
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   part: css({
-    marginTop: 14
-  })
-};
+    marginTop: 14,
+  }),
+}
 
-export default FAQSearch;
+export default FAQSearch

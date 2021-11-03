@@ -1,27 +1,22 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { useMemo, useCallback } from "react";
-import {
-  ActionIndicateurUnCspData,
-  AppState,
-  GroupTranchesAgesIndicateurUn,
-  FormState
-} from "../../../globals";
+import { jsx } from "@emotion/core"
+import { useMemo, useCallback } from "react"
+import { ActionIndicateurUnCspData, AppState, GroupTranchesAgesIndicateurUn, FormState } from "../../../globals"
 
-import { effectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn";
+import { effectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
 
-import { ButtonSimulatorLink } from "../../../components/SimulatorLink";
+import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
-import { displayNameCategorieSocioPro } from "../../../utils/helpers";
+import { displayNameCategorieSocioPro } from "../../../utils/helpers"
 
-import IndicateurUnFormRaw from "../IndicateurUnFormRaw";
+import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 
 interface Props {
-  state: AppState;
-  ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroupCsp>;
-  readOnly: boolean;
-  updateIndicateurUn: (data: ActionIndicateurUnCspData) => void;
-  validateIndicateurUn: (valid: FormState) => void;
+  state: AppState
+  ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroupCsp>
+  readOnly: boolean
+  updateIndicateurUn: (data: ActionIndicateurUnCspData) => void
+  validateIndicateurUn: (valid: FormState) => void
 }
 
 function IndicateurUnCspForm({
@@ -29,33 +24,33 @@ function IndicateurUnCspForm({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
-  validateIndicateurUn
+  validateIndicateurUn,
 }: Props) {
   const ecartRemuParTrancheAgeRaw = useMemo(
     () =>
       ecartRemuParTrancheAge.map(({ categorieSocioPro, ...otherAttr }) => ({
         id: categorieSocioPro,
         name: displayNameCategorieSocioPro(categorieSocioPro),
-        ...otherAttr
+        ...otherAttr,
       })),
-    [ecartRemuParTrancheAge]
-  );
+    [ecartRemuParTrancheAge],
+  )
 
   const updateIndicateurUnRaw = useCallback(
     (
       data: Array<{
-        id: any;
-        tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
-      }>
+        id: any
+        tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      }>,
     ) => {
       const remunerationAnnuelle = data.map(({ id, tranchesAges }) => ({
         categorieSocioPro: id,
-        tranchesAges
-      }));
-      updateIndicateurUn({ remunerationAnnuelle });
+        tranchesAges,
+      }))
+      updateIndicateurUn({ remunerationAnnuelle })
     },
-    [updateIndicateurUn]
-  );
+    [updateIndicateurUn],
+  )
 
   return (
     <IndicateurUnFormRaw
@@ -65,16 +60,12 @@ function IndicateurUnCspForm({
       validateIndicateurUn={validateIndicateurUn}
       nextLink={
         <ButtonSimulatorLink
-          to={
-            state.informations.trancheEffectifs === "50 à 250"
-              ? "/indicateur2et3"
-              : "/indicateur2"
-          }
+          to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
           label="suivant"
         />
       }
     />
-  );
+  )
 }
 
-export default IndicateurUnCspForm;
+export default IndicateurUnCspForm

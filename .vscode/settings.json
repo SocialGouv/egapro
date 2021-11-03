@@ -1,0 +1,11 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "editor.formatOnSave": false,
+    "workbench.colorCustomizations": {
+        "statusBar.background": "#fd56e7" // Change this color!
+    },
+    // https://github.com/colinhacks/zod/issues/443
+    "typescript.tsdk": "node_modules/typescript/lib",
+}

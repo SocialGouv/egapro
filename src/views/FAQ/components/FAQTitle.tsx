@@ -1,27 +1,27 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
-import globalStyles from "../../../utils/globalStyles";
+import globalStyles from "../../../utils/globalStyles"
 
 function FAQTitle({ children }: { children: ReactNode }) {
   return (
     <div css={styles.container}>
       <span css={styles.title}>{children}</span>
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
-    marginBottom: 26
+    marginBottom: 26,
   }),
   title: css({
     fontSize: 18,
     lineHeight: "22px",
     color: globalStyles.colors.primary,
-    textTransform: "uppercase"
-  })
-};
+    textTransform: "uppercase",
+  }),
+}
 
-export default FAQTitle;
+export default FAQTitle

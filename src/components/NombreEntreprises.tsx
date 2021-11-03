@@ -1,11 +1,11 @@
 /** @jsx jsx */
-import { useState } from "react";
-import { css, jsx } from "@emotion/core";
-import { Field } from "react-final-form";
+import { useState } from "react"
+import { css, jsx } from "@emotion/core"
+import { Field } from "react-final-form"
 
-import { EntrepriseUES } from "../globals";
+import { EntrepriseUES } from "../globals"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
 import {
   composeValidators,
@@ -14,22 +14,15 @@ import {
   mustBeNumber,
   required,
   ValidatorFunction,
-} from "../utils/formHelpers";
+} from "../utils/formHelpers"
 
-import ModalConfirmDelete from "../views/InformationsEntreprise/components/EntrepriseUESModalConfirmDelete";
-import { Modal } from "./ModalContext";
+import ModalConfirmDelete from "../views/InformationsEntreprise/components/EntrepriseUESModalConfirmDelete"
+import { Modal } from "./ModalContext"
 
 const atLeastTwo: ValidatorFunction = (value) =>
-  minNumber(2)(value)
-    ? "le nombre d'entreprises composant l'UES doit être un nombre supérieur ou égal à 2"
-    : undefined;
+  minNumber(2)(value) ? "le nombre d'entreprises composant l'UES doit être un nombre supérieur ou égal à 2" : undefined
 
-export const validator = composeValidators(
-  required,
-  mustBeNumber,
-  mustBeInteger,
-  atLeastTwo
-);
+export const validator = composeValidators(required, mustBeNumber, mustBeInteger, atLeastTwo)
 
 function NombreEntreprises({
   fieldName,
@@ -38,53 +31,42 @@ function NombreEntreprises({
   newNombreEntreprises,
   readOnly,
 }: {
-  fieldName: string;
-  label: string;
-  entreprisesUES: Array<EntrepriseUES>;
-  newNombreEntreprises: (fieldName: string, newValue: string) => undefined;
-  readOnly: boolean;
+  fieldName: string
+  label: string
+  entreprisesUES: Array<EntrepriseUES>
+  newNombreEntreprises: (fieldName: string, newValue: string) => undefined
+  readOnly: boolean
 }) {
-  const [newValue, setNewValue] = useState<string | undefined>(undefined);
+  const [newValue, setNewValue] = useState<string | undefined>(undefined)
   const confirmChangeEvent = (newValue: string) => {
-    setNewValue(newValue);
-  };
+    setNewValue(newValue)
+  }
   const closeModal = () => {
-    setNewValue(undefined);
-  };
+    setNewValue(undefined)
+  }
 
   return (
     <Field name={fieldName} validate={validator}>
       {({ input, meta }) => (
         <div css={styles.formField}>
-          <label
-            css={[
-              styles.label,
-              meta.error && meta.touched && styles.labelError,
-            ]}
-            htmlFor={input.name}
-          >
+          <label css={[styles.label, meta.error && meta.touched && styles.labelError]} htmlFor={input.name}>
             {label}
           </label>
           <div css={styles.fieldRow}>
             <input
-              css={[
-                styles.input,
-                meta.error && meta.touched && styles.inputError,
-              ]}
+              css={[styles.input, meta.error && meta.touched && styles.inputError]}
               {...input}
               readOnly={readOnly}
               onChange={(event) => {
-                const newValue = event.target.value;
-                const newSize = Number.isNaN(Number(newValue))
-                  ? 0
-                  : Number(newValue);
+                const newValue = event.target.value
+                const newSize = Number.isNaN(Number(newValue)) ? 0 : Number(newValue)
                 if (
                   validator(newValue) !== undefined || // Si invalide, sera bloqué au niveau de la validation du champ dans RFF
                   newSize >= entreprisesUES.length
                 ) {
-                  input.onChange(event);
+                  input.onChange(event)
                 } else {
-                  confirmChangeEvent(event.target.value);
+                  confirmChangeEvent(event.target.value)
                 }
               }}
             />
@@ -95,7 +77,7 @@ function NombreEntreprises({
               closeModal={closeModal}
               sendChangeEvent={() => {
                 if (newValue !== undefined) {
-                  newNombreEntreprises(fieldName, newValue);
+                  newNombreEntreprises(fieldName, newValue)
                 }
               }}
             />
@@ -103,7 +85,7 @@ function NombreEntreprises({
         </div>
       )}
     </Field>
-  );
+  )
 }
 
 const styles = {
@@ -149,6 +131,6 @@ const styles = {
     textDecoration: "underline",
     lineHeight: "15px",
   }),
-};
+}
 
-export default NombreEntreprises;
+export default NombreEntreprises

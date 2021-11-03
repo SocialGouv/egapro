@@ -1,2 +1,2 @@
-import Recapitulatif from "./Recapitulatif";
-export default Recapitulatif;
+import Recapitulatif from "./Recapitulatif"
+export default Recapitulatif

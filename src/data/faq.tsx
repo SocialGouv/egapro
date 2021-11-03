@@ -1,12 +1,11 @@
-import { FAQPart, FAQSection } from "../globals";
+import { FAQPart, FAQSection } from "../globals"
 
 export const faqData: FAQPart = {
   champApplication: {
     title: "champ d’application et entrée en vigueur",
     qr: [
       {
-        question:
-          "À qui s'applique l'obligation de calcul et de publication de l'Index? ",
+        question: "À qui s'applique l'obligation de calcul et de publication de l'Index? ",
         reponse: [
           "Le calcul de l’Index est obligatoire pour les entreprises, les associations et les syndicats, qui emploient au moins 50 salariés.",
           "En ce qui concerne les employeurs publics, seuls les établissements publics à caractère industriel et commercial et certains établissements publics administratifs qui emploient au moins 50 salariés dans des conditions de droit privé sont assujettis à l'obligation de publier l'Index. En revanche, les collectivités territoriales ne sont pas assujetties à cette obligation.",
@@ -64,8 +63,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Est-il possible de changer de période annuelle de référence d'une année sur l'autre ?",
+        question: "Est-il possible de changer de période annuelle de référence d'une année sur l'autre ?",
         reponse: [
           "Non, le choix de la période annuelle de référence engage l'employeur d'une année sur l'autre ; sauf raisons particulières et exceptionnelles qu'il conviendra dès lors de justifier auprès de la Direccte (par exemple un changement dans la constitution de l'UES, avec ventes ou acquisition d'une des entreprises la composant, ou difficulté économique modifiant la configuration de l'entreprise). Cette stabilité permet une meilleure visibilité sur l'évolution de la note obtenue d'une année sur l'autre.",
         ],
@@ -76,8 +74,7 @@ export const faqData: FAQPart = {
     title: "effectifs à prendre en compte pour le calcul des indicateurs",
     qr: [
       {
-        question:
-          "Quels sont les effectifs à prendre en considération pour calculer les indicateurs ?",
+        question: "Quels sont les effectifs à prendre en considération pour calculer les indicateurs ?",
         reponse: [
           "L’effectif des salariés à prendre en compte pour le calcul des indicateurs est apprécié sur la période de référence annuelle choisie par l’employeur.",
           "Sont obligatoirement exclus de ce périmètre : les apprentis, les titulaires d’un contrat de professionnalisation, les salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont les intérimaires), les salariés expatriés, ainsi que les salariés absents plus de la moitié de la période de référence annuelle considérée (sauf pour le calcul de l'indicateur relatif au retour de congé maternité - cf. rubrique G).",
@@ -95,9 +92,7 @@ export const faqData: FAQPart = {
       {
         question:
           "L’obligation de présence du salarié pendant au moins 6 mois pour sa prise en compte dans les effectifs est-elle obligatoirement continue ?",
-        reponse: [
-          "Non, cette période de présence d’au moins 6 mois peut être continue ou discontinue.",
-        ],
+        reponse: ["Non, cette période de présence d’au moins 6 mois peut être continue ou discontinue."],
       },
       {
         question:
@@ -116,8 +111,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Faut-il prendre en compte les salariés placés en activité partielle (chômage partiel) ?",
+        question: "Faut-il prendre en compte les salariés placés en activité partielle (chômage partiel) ?",
         reponse: [
           "Les salariés placés en activité partielle ne sont pas pris en compte dans les effectifs pour le calcul de l’Index pour les périodes où ils ne sont pas en activité.",
         ],
@@ -147,9 +141,7 @@ export const faqData: FAQPart = {
       {
         question:
           "Pour calculer les effectifs à prendre en compte, faut-il exclure les personnes absentes plus de 6 mois dont les absences sont injustifiées ?",
-        reponse: [
-          "Oui, les personnes absentes plus de six mois pour absence injustifiée sont exclues du calcul.",
-        ],
+        reponse: ["Oui, les personnes absentes plus de six mois pour absence injustifiée sont exclues du calcul."],
       },
       {
         question:
@@ -160,8 +152,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Quelle est la définition des 4 catégories socioprofessionnelles (CSP) retenue dans le décret ?",
+        question: "Quelle est la définition des 4 catégories socioprofessionnelles (CSP) retenue dans le décret ?",
         reponse: [
           "La définition des quatre CSP retenues dans le décret correspond à la nomenclature de l’INSEE. Les 4 CSP prévues par le décret du 8 janvier 2019 étant les suivantes : Ouvriers / Employés / Techniciens et agents de maîtrise/ Ingénieurs et cadres.",
         ],
@@ -182,8 +173,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Dans le détail, quels types de primes faut-il exclure ou prendre en compte ?",
+        question: "Dans le détail, quels types de primes faut-il exclure ou prendre en compte ?",
         reponse: [
           "Sont exclues du calcul de l’index, les primes liées à une sujétion particulière qui ne concerne pas la personne du salarié. Ces primes se rapportent non pas à la personne du salarié ou à ses performances, mais aux contraintes ou caractéristiques liées à son poste de travail (ex : prime de salissure, prime de froid, prime d’ouverture / de fermeture d’un magasin, prime d’astreinte, etc.).",
           "Les primes collectives attribuées à tous les salariés, quel que soit leur poste de travail, sont à inclure dans la rémunération (par exemple : prime de transport ou prime de vacances).",
@@ -198,8 +188,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Comment traiter le cas des rémunérations et majorations versées un dimanche ou un jour férié ?",
+        question: "Comment traiter le cas des rémunérations et majorations versées un dimanche ou un jour férié ?",
         reponse: [
           "Pour les heures de travail réalisées un jour férié, le montant de base du salaire est pris en compte, mais pas la majoration, qui correspond à une sujétion particulière liée à la fonction.",
           "Pour les heures travaillées le dimanche, incluses dans l’horaire hebdomadaire, le montant de base est pris en compte, mais pas la majoration (sujétion particulière liée à la fonction).",
@@ -207,8 +196,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Faut-il reconstituer la rémunération d’une personne absente une partie de la période de référence ?",
+        question: "Faut-il reconstituer la rémunération d’une personne absente une partie de la période de référence ?",
         reponse: [
           "La rémunération de chaque salarié, au sens de l’article L. 3221-3, est reconstituée en équivalent temps plein sur la période de référence annuelle considérée.",
           "Par exemple, un salarié parti en congé sabbatique pendant 4 mois sera bien inclus dans les effectifs pris en compte pour le calcul des indicateurs. Sa rémunération sera reconstituée en équivalent temps plein sur les 12 mois.",
@@ -300,23 +288,18 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Dans quels cas l’employeur doit-il obligatoirement consulter le comité social et économique (CSE) ?",
+        question: "Dans quels cas l’employeur doit-il obligatoirement consulter le comité social et économique (CSE) ?",
         reponse: [
           "La consultation du CSE mentionnée au paragraphe 4.1. des annexes du décret du 8 janvier 2019 est obligatoire si l’employeur choisit une catégorisation par niveau ou coefficient hiérarchique en application de la classification de branche, ou d’une autre méthode de cotation des postes. La consultation du CSE n’est en revanche pas obligatoire dans le cas d’une répartition des salariés par CSP ou s’il choisit de regrouper entre elles une des 4 CSP existantes. Par exemple : le calcul de l’indicateur écart de rémunérations, avec 2 catégories cadres / non cadres (comprenant ouvriers / employés / techniciens-agents de maitrise) est possible sans consultation (avec un seuil de pertinence de 5% et non 2%).",
           "Une entreprise ayant déjà informé ses IRP par le passé sur la méthode de cotation des postes devra procéder à une nouvelle consultation dans le cadre du calcul de l’Index.",
         ],
       },
       {
-        question:
-          "Lorsque l’entreprise a plusieurs établissements, à quel niveau le CSE doit-il être consulté ?",
-        reponse: [
-          "Lorsque l’entreprise a plusieurs établissements, c’est le CSE central qui doit être consulté.",
-        ],
+        question: "Lorsque l’entreprise a plusieurs établissements, à quel niveau le CSE doit-il être consulté ?",
+        reponse: ["Lorsque l’entreprise a plusieurs établissements, c’est le CSE central qui doit être consulté."],
       },
       {
-        question:
-          "La consultation du comité social et économique implique-t-elle nécessairement un avis ?",
+        question: "La consultation du comité social et économique implique-t-elle nécessairement un avis ?",
         reponse: [
           "Oui, la consultation du comité social et économique mentionnée aux paragraphes 4.1 des annexes du décret du 8 janvier 2019 implique un avis.",
         ],
@@ -455,8 +438,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Comment calculer l’indicateur lorsque le congé maternité est suivi d’un congé parental ?",
+        question: "Comment calculer l’indicateur lorsque le congé maternité est suivi d’un congé parental ?",
         reponse: [
           "Lorsque le congé maternité est suivi d’un congé parental, l’indicateur est calculé en comparant le nombre de salariées ayant bénéficié d’une augmentation à leur retour physique dans l’entreprise, pendant l’année de référence, au nombre de salariées ayant béneficié d'un congé maternité pendant lequel des augmentations salariales ont eu lieu. Seules les augmentations intervenues pendant le congé de maternité sont prises en compte, et non celles intervenues pendant le congé parental.",
         ],
@@ -510,16 +492,14 @@ export const faqData: FAQPart = {
     title: "publication et transmission de l’index",
     qr: [
       {
-        question:
-          "Faut-il publier uniquement l’Index ou également le détail des indicateurs ?",
+        question: "Faut-il publier uniquement l’Index ou également le détail des indicateurs ?",
         reponse: [
           "L’obligation de publicité concerne uniquement la note globale de l’Index. Le détail des indicateurs est quant à lui réservé au comité social et économique (CSE) et aux services de l’inspection du travail. Néanmoins, si l’entreprise souhaite publier le résultat de chaque indicateur sur son site Internet, rien ne l’en empêche.",
           "Elle peut également y faire figurer les mesures de correction prévues.",
         ],
       },
       {
-        question:
-          "Sur quel site internet l’entreprise doit-elle publier son Index ?",
+        question: "Sur quel site internet l’entreprise doit-elle publier son Index ?",
         reponse: [
           "La note globale de l’Index doit être publiée sur le site internet de l'entreprise, lorsqu'il en existe un (y compris lorsque l’entreprise fait partie d’un groupe ou d’une UES). Une publication sur le site Intranet de l'entreprise n'est donc pas suffisante.",
           "La note globale pourra être publiée sur son site de présentation, il n'est pas pour autant obligatoire qu'elle figure sur la page d'accueil. ",
@@ -529,8 +509,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Quelles sont les informations à transmettre au comité social et économique (CSE) ? ",
+        question: "Quelles sont les informations à transmettre au comité social et économique (CSE) ? ",
         reponse: [
           "Les indicateurs ainsi que la note globale sont mis à la disposition du comité social et économique (CSE), via la base de données économiques et sociales. Les résultats sont présentés, pour le premier indicateur relatif à l’écart de rémunération entre les femmes et les hommes, par catégorie socioprofessionnelle, niveau ou coefficient hiérarchique ou selon les niveaux de la méthode de cotation des postes de l’entreprise, ainsi que par tranches d’âge. Les résultats des indicateurs relatifs au écarts de taux d’augmentations sont présentés par catégorie socioprofessionnelle. Le CSE est destinataire a minima de toutes les informations transmises à la DIRECCTE.",
           "Conformément à l’article D. 1142-5 du code du travail, les informations mentionnées ci-dessus sont accompagnées de toutes les précisions utiles à leur compréhension, notamment relatives à la méthodologie appliquée, la répartition des salariés par catégorie socio-professionnelle ou selon les niveaux de la méthode de cotation des postes de l’entreprise et, le cas échéant, des mesures de correction envisagées ou déjà mises en œuvre.",
@@ -553,8 +532,7 @@ export const faqData: FAQPart = {
         ],
       },
       {
-        question:
-          "Une entreprise créée en juillet 2019 doit-elle publier son Index en 2020 ?",
+        question: "Une entreprise créée en juillet 2019 doit-elle publier son Index en 2020 ?",
         reponse: [
           "Une entreprise créée en juillet 2019 doit publier son Index au 1er mars 2020 si, à cette date, son effectif comprend au moins 50 salariés. Néanmoins, si elle ne dispose pas de données sur douze mois consécutifs à la date d’assujettissement à l’obligation de publication, ses indicateurs et, partant, son Index ne seront pas calculables pour la première année. L’entreprise devra communiquer à la Direccte et au CSE les raisons pour lesquelles les indicateurs n’ont pas pu être calculés (article D. 1142-5).",
         ],
@@ -576,7 +554,7 @@ export const faqData: FAQPart = {
       },
     ],
   },
-};
+}
 
 export const faqSections: FAQSection = {
   champApplication: {
@@ -619,4 +597,4 @@ export const faqSections: FAQSection = {
     title: "résultat",
     parts: ["publication"],
   },
-};
+}

@@ -1,41 +1,41 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Route, Switch } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { Route, Switch } from "react-router-dom"
 
-import { AppState, ActionType } from "../globals";
+import { AppState, ActionType } from "../globals"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { useLayoutType } from "../components/GridContext";
-import Header from "../components/Header";
+import { useLayoutType } from "../components/GridContext"
+import Header from "../components/Header"
 
-import CGU from "../views/CGU";
-import FAQ from "../views/FAQ";
-import Home from "../views/Home";
-import MentionsLegales from "../views/MentionsLegales";
-import InfosApp from "../views/InfosApp";
-import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite";
-import PageNotFound from "../views/PageNotFound";
+import CGU from "../views/CGU"
+import FAQ from "../views/FAQ"
+import Home from "../views/Home"
+import MentionsLegales from "../views/MentionsLegales"
+import InfosApp from "../views/InfosApp"
+import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite"
+import PageNotFound from "../views/PageNotFound"
 
-import Simulateur from "./Simulateur";
-import MainScrollView from "./MainScrollView";
-import MobileLayout from "./MobileLayout";
-import Accessibilite from "../views/Accessibilite";
+import Simulateur from "./Simulateur"
+import MainScrollView from "./MainScrollView"
+import MobileLayout from "./MobileLayout"
+import Accessibilite from "../views/Accessibilite"
 
 interface Props {
-  state: AppState | undefined;
-  dispatch: (action: ActionType) => void;
+  state: AppState | undefined
+  dispatch: (action: ActionType) => void
 }
 
 function AppLayout({ state, dispatch }: Props) {
-  const layoutType = useLayoutType();
+  const layoutType = useLayoutType()
 
   return (
     <div css={styles.layout}>
       <Switch>
         <Route
           render={() => {
-            document.title = "Index Egapro";
+            document.title = "Index Egapro"
 
             return layoutType === "mobile" ? (
               <MobileLayout />
@@ -45,85 +45,35 @@ function AppLayout({ state, dispatch }: Props) {
                   <Header />
                   <MainScrollView state={state}>
                     <Switch>
-                      <Route
-                        path="/"
-                        exact
-                        render={(props) => (
-                          <Home {...props} dispatch={dispatch} />
-                        )}
-                      />
+                      <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
                       <Route
                         path="/simulateur/:code"
                         render={({
                           match: {
                             params: { code },
                           },
-                        }) => (
-                          <Simulateur
-                            code={code}
-                            state={state}
-                            dispatch={dispatch}
-                          />
-                        )}
+                        }) => <Simulateur code={code} state={state} dispatch={dispatch} />}
                       />
-                      <Route
-                        path="/mentions-legales"
-                        exact
-                        render={(props) => (
-                          <MentionsLegales {...props} dispatch={dispatch} />
-                        )}
-                      />
-                      <Route
-                        path="/accessibilite"
-                        exact
-                        render={(props) => (
-                          <Accessibilite {...props} dispatch={dispatch} />
-                        )}
-                      />
-                      <Route
-                        path="/cgu"
-                        exact
-                        render={(props) => (
-                          <CGU {...props} dispatch={dispatch} />
-                        )}
-                      />
-                      <Route
-                        path="/politique-confidentialite"
-                        exact
-                        render={(props) => (
-                          <PolitiqueConfidentialite
-                            {...props}
-                            dispatch={dispatch}
-                          />
-                        )}
-                      />
-                     <Route
-                        path="/infosApp"
-                        exact
-                        render={() => (
-                          <InfosApp />
-                        )}
-                      />
+                      <Route path="/mentions-legales" exact render={() => <MentionsLegales />} />
+                      <Route path="/accessibilite" exact render={() => <Accessibilite />} />
+                      <Route path="/cgu" exact render={() => <CGU />} />
+                      <Route path="/politique-confidentialite" exact render={() => <PolitiqueConfidentialite />} />
+                      <Route path="/infosApp" exact render={() => <InfosApp />} />
                       <Route component={PageNotFound} />
                     </Switch>
                   </MainScrollView>
                 </div>
 
-                <div
-                  css={[
-                    styles.rightColumn,
-                    layoutType === "tablet" && styles.rightColumnTablet,
-                  ]}
-                >
+                <div css={[styles.rightColumn, layoutType === "tablet" && styles.rightColumnTablet]}>
                   <FAQ />
                 </div>
               </div>
-            );
+            )
           }}
         />
       </Switch>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -135,8 +85,7 @@ const styles = {
     flexDirection: "row",
     justifyContent: "center",
     overflow: "auto",
-    background:
-      "linear-gradient(180deg, #FFFFFF 99px, rgba(255, 255, 255, 0) 99px, #FFFFFF 100%), #EFF0FA",
+    background: "linear-gradient(180deg, #FFFFFF 99px, rgba(255, 255, 255, 0) 99px, #FFFFFF 100%), #EFF0FA",
     "@media print": {
       display: "block",
     },
@@ -182,6 +131,6 @@ const styles = {
   horizontalLayout: css({
     display: "flex",
   }),
-};
+}
 
-export default AppLayout;
+export default AppLayout

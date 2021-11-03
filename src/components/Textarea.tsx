@@ -1,32 +1,26 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Field } from "react-final-form";
-import { required } from "../utils/formHelpers";
+import { css, jsx } from "@emotion/core"
+import { Field } from "react-final-form"
+import { required } from "../utils/formHelpers"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
 function TextField({
   errorText,
   fieldName,
   label,
-  readOnly
+  readOnly,
 }: {
-  errorText: string;
-  fieldName: string;
-  label: string;
-  readOnly: boolean;
+  errorText: string
+  fieldName: string
+  label: string
+  readOnly: boolean
 }) {
   return (
     <Field name={fieldName} validate={required} component="textarea">
       {({ input, meta }) => (
         <div css={styles.formField}>
-          <label
-            css={[
-              styles.label,
-              meta.error && meta.touched && styles.labelError
-            ]}
-            htmlFor={input.name}
-          >
+          <label css={[styles.label, meta.error && meta.touched && styles.labelError]} htmlFor={input.name}>
             {label}
           </label>
           <div css={styles.fieldRow}>
@@ -36,20 +30,20 @@ function TextField({
         </div>
       )}
     </Field>
-  );
+  )
 }
 
 const styles = {
   formField: css({
-    marginBottom: 20
+    marginBottom: 20,
   }),
   label: css({
     fontSize: 14,
     fontWeight: "bold",
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   labelError: css({
-    color: globalStyles.colors.error
+    color: globalStyles.colors.error,
   }),
   fieldRow: css({
     height: 38,
@@ -59,20 +53,20 @@ const styles = {
     textarea: {
       borderRadius: 4,
       border: "1px solid",
-      width: "100%"
+      width: "100%",
     },
     "textarea[readonly]": {
       border: 0,
-      borderRadius: 4
-    }
+      borderRadius: 4,
+    },
   }),
   error: css({
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
     textDecoration: "underline",
-    lineHeight: "15px"
-  })
-};
+    lineHeight: "15px",
+  }),
+}
 
-export default TextField;
+export default TextField
