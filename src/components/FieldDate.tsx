@@ -1,18 +1,18 @@
 /** @jsx jsx */
-import { Fragment } from "react";
-import { css, jsx } from "@emotion/core";
-import { useField, Field } from "react-final-form";
-import { hasFieldError } from "./Input";
+import { Fragment } from "react"
+import { css, jsx } from "@emotion/core"
+import { useField, Field } from "react-final-form"
+import { hasFieldError } from "./Input"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { validateDate } from "../utils/formHelpers";
-import { dateToString, parseDate } from "../utils/helpers";
+import { validateDate } from "../utils/formHelpers"
+import { dateToString, parseDate } from "../utils/helpers"
 
-import DatePicker, { registerLocale } from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import fr from "date-fns/locale/fr";
-registerLocale("fr", fr);
+import DatePicker, { registerLocale } from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+import fr from "date-fns/locale/fr"
+registerLocale("fr", fr)
 
 const displayMetaErrors = (error: { [key: string]: string }) => (
   <Fragment>
@@ -20,26 +20,15 @@ const displayMetaErrors = (error: { [key: string]: string }) => (
       .map((key) => error[key])
       .join(", ")}
   </Fragment>
-);
+)
 
-function FieldDate({
-  name,
-  label,
-  readOnly,
-}: {
-  name: string;
-  label: string;
-  readOnly: boolean;
-}) {
-  const field = useField(name, { validate: validateDate });
-  const error = hasFieldError(field.meta);
+function FieldDate({ name, label, readOnly }: { name: string; label: string; readOnly: boolean }) {
+  const field = useField(name, { validate: validateDate })
+  const error = hasFieldError(field.meta)
 
   return (
     <div css={styles.dateField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
+      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
         {label}
       </label>
       <div css={styles.fieldRow}>
@@ -49,9 +38,7 @@ function FieldDate({
               locale="fr"
               dateFormat="dd/MM/yyyy"
               selected={parseDate(props.input.value)}
-              onChange={(date) =>
-                date ? props.input.onChange(dateToString(date)) : ""
-              }
+              onChange={(date) => (date ? props.input.onChange(dateToString(date)) : "")}
               readOnly={readOnly}
               name={name}
             />
@@ -60,7 +47,7 @@ function FieldDate({
       </div>
       <p css={styles.error}>{error && displayMetaErrors(field.meta.error)}</p>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -101,6 +88,6 @@ const styles = {
     textDecoration: "underline",
     lineHeight: "15px",
   }),
-};
+}
 
-export default FieldDate;
+export default FieldDate

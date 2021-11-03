@@ -1,17 +1,17 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Switch, Link, Route, RouteComponentProps } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { Switch, Link, Route, RouteComponentProps } from "react-router-dom"
 
-import globalStyles from "../../../utils/globalStyles";
-import ActionLink from "../../../components/ActionLink";
-import { useLayoutType } from "../../../components/GridContext";
+import globalStyles from "../../../utils/globalStyles"
+import ActionLink from "../../../components/ActionLink"
+import { useLayoutType } from "../../../components/GridContext"
 
 function FAQHeaderBackButton({ onClick }: { onClick: () => void }) {
   return (
     <ActionLink style={styles.buttonBack} onClick={onClick}>
       <span css={styles.backIcon}>◀</span> retour
     </ActionLink>
-  );
+  )
 }
 
 function FAQHeaderHomeButton() {
@@ -19,17 +19,11 @@ function FAQHeaderHomeButton() {
     <Link to={{ state: { faq: "/" } }} css={styles.buttonBack}>
       <span css={styles.backIcon}>◀</span> voir toute l’aide
     </Link>
-  );
+  )
 }
 
-function FAQHeader({
-  location,
-  closeMenu,
-}: {
-  location: RouteComponentProps["location"];
-  closeMenu?: () => void;
-}) {
-  const layoutType = useLayoutType();
+function FAQHeader({ location, closeMenu }: { location: RouteComponentProps["location"]; closeMenu?: () => void }) {
+  const layoutType = useLayoutType()
   return (
     <div
       css={[
@@ -40,38 +34,24 @@ function FAQHeader({
     >
       <div css={styles.aroundTitle}>
         <Switch location={location}>
-          {closeMenu && (
-            <Route
-              exact
-              path="/"
-              render={() => <FAQHeaderBackButton onClick={closeMenu} />}
-            />
-          )}
-          <Route
-            exact
-            path="/section/:section"
-            render={() => <FAQHeaderHomeButton />}
-          />
+          {closeMenu && <Route exact path="/" render={() => <FAQHeaderBackButton onClick={closeMenu} />} />}
+          <Route exact path="/section/:section" render={() => <FAQHeaderHomeButton />} />
           <Route
             exact
             path={["/part/:part/question/:indexQuestion", "/contact"]}
-            render={({ history }) => (
-              <FAQHeaderBackButton onClick={() => history.goBack()} />
-            )}
+            render={({ history }) => <FAQHeaderBackButton onClick={() => history.goBack()} />}
           />
           <Route
             exact
             path="/section/:section/detail-calcul"
-            render={({ history }) => (
-              <FAQHeaderBackButton onClick={() => history.goBack()} />
-            )}
+            render={({ history }) => <FAQHeaderBackButton onClick={() => history.goBack()} />}
           />
         </Switch>
       </div>
       <span css={styles.title}>Aide</span>
       <div css={styles.aroundTitle} />
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -112,6 +92,6 @@ const styles = {
     fontSize: 8,
     fontFamily: "Segoe UI Symbol", // fix Edge
   }),
-};
+}
 
-export default FAQHeader;
+export default FAQHeader

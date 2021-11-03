@@ -1,37 +1,28 @@
-export default function(
+export default function (
   nombreSalaries: Array<{
     tranchesAges: Array<{
-      nombreSalariesHommes: number | undefined;
-      nombreSalariesFemmes: number | undefined;
-    }>;
-  }>
+      nombreSalariesHommes: number | undefined
+      nombreSalariesFemmes: number | undefined
+    }>
+  }>,
 ) {
   return nombreSalaries.reduce(
     (acc, { tranchesAges }) => {
-      const {
-        totalGroupNombreSalariesHomme,
-        totalGroupNombreSalariesFemme
-      } = tranchesAges.reduce(
+      const { totalGroupNombreSalariesHomme, totalGroupNombreSalariesFemme } = tranchesAges.reduce(
         (accGroup, { nombreSalariesHommes, nombreSalariesFemmes }) => {
           return {
-            totalGroupNombreSalariesHomme:
-              accGroup.totalGroupNombreSalariesHomme +
-              (nombreSalariesHommes || 0),
-            totalGroupNombreSalariesFemme:
-              accGroup.totalGroupNombreSalariesFemme +
-              (nombreSalariesFemmes || 0)
-          };
+            totalGroupNombreSalariesHomme: accGroup.totalGroupNombreSalariesHomme + (nombreSalariesHommes || 0),
+            totalGroupNombreSalariesFemme: accGroup.totalGroupNombreSalariesFemme + (nombreSalariesFemmes || 0),
+          }
         },
-        { totalGroupNombreSalariesHomme: 0, totalGroupNombreSalariesFemme: 0 }
-      );
+        { totalGroupNombreSalariesHomme: 0, totalGroupNombreSalariesFemme: 0 },
+      )
 
       return {
-        totalNombreSalariesHomme:
-          acc.totalNombreSalariesHomme + totalGroupNombreSalariesHomme,
-        totalNombreSalariesFemme:
-          acc.totalNombreSalariesFemme + totalGroupNombreSalariesFemme
-      };
+        totalNombreSalariesHomme: acc.totalNombreSalariesHomme + totalGroupNombreSalariesHomme,
+        totalNombreSalariesFemme: acc.totalNombreSalariesFemme + totalGroupNombreSalariesFemme,
+      }
     },
-    { totalNombreSalariesHomme: 0, totalNombreSalariesFemme: 0 }
-  );
+    { totalNombreSalariesHomme: 0, totalNombreSalariesFemme: 0 },
+  )
 }

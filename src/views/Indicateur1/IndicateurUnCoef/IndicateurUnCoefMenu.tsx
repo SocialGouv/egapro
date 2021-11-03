@@ -1,25 +1,22 @@
 /** @jsx jsx */
-import { jsx, css } from "@emotion/core";
+import { jsx, css } from "@emotion/core"
 
-import { FormState } from "../../../globals";
+import { FormState } from "../../../globals"
 
-import globalStyles from "../../../utils/globalStyles";
+import globalStyles from "../../../utils/globalStyles"
 
-import {
-  useColumnsWidth,
-  useLayoutType,
-} from "../../../components/GridContext";
-import ActionLink from "../../../components/ActionLink";
-import { IconValid, IconInvalid } from "../../../components/Icons";
+import { useColumnsWidth, useLayoutType } from "../../../components/GridContext"
+import ActionLink from "../../../components/ActionLink"
+import { IconValid, IconInvalid } from "../../../components/Icons"
 
-export type MenuOption = "groupe" | "effectif" | "remuneration";
+export type MenuOption = "groupe" | "effectif" | "remuneration"
 
 interface Props {
-  menuSelected: MenuOption;
-  setMenuSelected: (menu: MenuOption) => void;
-  coefficientGroupFormValidated: FormState;
-  coefficientEffectifFormValidated: FormState;
-  formValidated: FormState;
+  menuSelected: MenuOption
+  setMenuSelected: (menu: MenuOption) => void
+  coefficientGroupFormValidated: FormState
+  coefficientEffectifFormValidated: FormState
+  formValidated: FormState
 }
 
 function IndicateurUnCoefMenu({
@@ -29,8 +26,8 @@ function IndicateurUnCoefMenu({
   coefficientEffectifFormValidated,
   formValidated,
 }: Props) {
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
   return (
     <div css={[styles.menu, { width }]}>
       <MenuItem
@@ -52,7 +49,7 @@ function IndicateurUnCoefMenu({
         onClick={() => setMenuSelected("remuneration")}
       />
     </div>
-  );
+  )
 }
 
 function MenuItem({
@@ -61,16 +58,13 @@ function MenuItem({
   onClick,
   formValidated,
 }: {
-  title: string;
-  isSelected: boolean;
-  formValidated: FormState;
-  onClick: () => void;
+  title: string
+  isSelected: boolean
+  formValidated: FormState
+  onClick: () => void
 }) {
   return (
-    <ActionLink
-      style={[styles.menuItem, isSelected && styles.menuItemSelected]}
-      onClick={onClick}
-    >
+    <ActionLink style={[styles.menuItem, isSelected && styles.menuItemSelected]} onClick={onClick}>
       {formValidated === "Valid" ? (
         <div css={styles.icon}>
           <IconValid />
@@ -82,7 +76,7 @@ function MenuItem({
       ) : null}
       <span>{title}</span>
     </ActionLink>
-  );
+  )
 }
 
 const styles = {
@@ -114,6 +108,6 @@ const styles = {
   icon: css({
     marginRight: 3,
   }),
-};
+}
 
-export default IndicateurUnCoefMenu;
+export default IndicateurUnCoefMenu

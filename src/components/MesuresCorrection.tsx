@@ -1,38 +1,24 @@
 /** @jsx jsx */
-import { Fragment } from "react";
-import { css, jsx } from "@emotion/core";
-import { Field } from "react-final-form";
+import { Fragment } from "react"
+import { css, jsx } from "@emotion/core"
+import { Field } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { required } from "../utils/formHelpers";
+import { required } from "../utils/formHelpers"
 
 const choices: { [key: string]: string } = {
   mmo: "Mesures mises en œuvre",
   me: "Mesures envisagées",
   mne: "Mesures non envisagées",
-};
+}
 
-function MesuresCorrection({
-  name,
-  label,
-  readOnly,
-}: {
-  name: string;
-  label: string;
-  readOnly: boolean;
-}) {
+function MesuresCorrection({ name, label, readOnly }: { name: string; label: string; readOnly: boolean }) {
   return (
     <Field name={name} validate={required} component="select">
       {({ input, meta }) => (
         <div css={styles.formField}>
-          <label
-            css={[
-              styles.label,
-              meta.error && meta.touched && styles.labelError,
-            ]}
-            htmlFor={input.name}
-          >
+          <label css={[styles.label, meta.error && meta.touched && styles.labelError]} htmlFor={input.name}>
             {label}
           </label>
           {readOnly ? (
@@ -51,17 +37,13 @@ function MesuresCorrection({
                   ))}
                 </select>
               </div>
-              {meta.error && meta.touched && (
-                <p css={styles.error}>
-                  veuillez sélectionner un choix dans la liste
-                </p>
-              )}
+              {meta.error && meta.touched && <p css={styles.error}>veuillez sélectionner un choix dans la liste</p>}
             </Fragment>
           )}
         </div>
       )}
     </Field>
-  );
+  )
 }
 
 const styles = {
@@ -108,6 +90,6 @@ const styles = {
     lineHeight: "38px",
     cursor: "not-allowed",
   }),
-};
+}
 
-export default MesuresCorrection;
+export default MesuresCorrection

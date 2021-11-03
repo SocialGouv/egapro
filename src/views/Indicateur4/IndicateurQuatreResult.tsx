@@ -1,23 +1,23 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import { FormState } from "../../globals";
+import { FormState } from "../../globals"
 
-import { displayPercent } from "../../utils/helpers";
+import { displayPercent } from "../../utils/helpers"
 
-import ResultBubble from "../../components/ResultBubble";
-import ActionLink from "../../components/ActionLink";
+import ResultBubble from "../../components/ResultBubble"
+import ActionLink from "../../components/ActionLink"
 
 interface Props {
-  indicateurEcartNombreSalarieesAugmentees: number | undefined;
-  noteIndicateurQuatre: number | undefined;
-  validateIndicateurQuatre: (valid: FormState) => void;
+  indicateurEcartNombreSalarieesAugmentees: number | undefined
+  noteIndicateurQuatre: number | undefined
+  validateIndicateurQuatre: (valid: FormState) => void
 }
 
 function IndicateurQuatreResult({
   indicateurEcartNombreSalarieesAugmentees,
   noteIndicateurQuatre,
-  validateIndicateurQuatre
+  validateIndicateurQuatre,
 }: Props) {
   return (
     <div css={styles.container}>
@@ -29,32 +29,27 @@ function IndicateurQuatreResult({
             : "--"
         }
         secondLineLabel="votre note obtenue est"
-        secondLineData={
-          (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") +
-          "/15"
-        }
+        secondLineData={(noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") + "/15"}
         indicateurSexeSurRepresente="femmes"
       />
 
       <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurQuatre("None")}>
-          modifier les données saisies
-        </ActionLink>
+        <ActionLink onClick={() => validateIndicateurQuatre("None")}>modifier les données saisies</ActionLink>
       </p>
     </div>
-  );
+  )
 }
 
 const styles = {
   container: css({
     maxWidth: 250,
-    marginTop: 64
+    marginTop: 64,
   }),
   edit: css({
     marginTop: 14,
     marginBottom: 14,
-    textAlign: "center"
-  })
-};
+    textAlign: "center",
+  }),
+}
 
-export default IndicateurQuatreResult;
+export default IndicateurQuatreResult

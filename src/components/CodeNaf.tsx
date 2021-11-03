@@ -1,32 +1,18 @@
 /** @jsx jsx */
-import { Fragment } from "react";
-import { css, jsx } from "@emotion/core";
-import { Field } from "react-final-form";
+import { Fragment } from "react"
+import { css, jsx } from "@emotion/core"
+import { Field } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { required } from "../utils/formHelpers";
+import { required } from "../utils/formHelpers"
 
-function CodeNaf({
-  name,
-  label,
-  readOnly,
-}: {
-  name: string;
-  label: string;
-  readOnly: boolean;
-}) {
+function CodeNaf({ name, label, readOnly }: { name: string; label: string; readOnly: boolean }) {
   return (
     <Field name={name} validate={required} component="select">
       {({ input, meta }) => (
         <div css={styles.formField}>
-          <label
-            css={[
-              styles.label,
-              meta.error && meta.touched && styles.labelError,
-            ]}
-            htmlFor={input.name}
-          >
+          <label css={[styles.label, meta.error && meta.touched && styles.labelError]} htmlFor={input.name}>
             {label}
           </label>
           {readOnly ? (
@@ -44,17 +30,13 @@ function CodeNaf({
                   ))}
                 </select>
               </div>
-              {meta.error && meta.touched && (
-                <p css={styles.error}>
-                  veuillez sélectionner un code NAF dans la liste
-                </p>
-              )}
+              {meta.error && meta.touched && <p css={styles.error}>veuillez sélectionner un code NAF dans la liste</p>}
             </Fragment>
           )}
         </div>
       )}
     </Field>
-  );
+  )
 }
 
 const styles = {
@@ -103,9 +85,9 @@ const styles = {
     overflow: "auto",
     cursor: "not-allowed",
   }),
-};
+}
 
-export default CodeNaf;
+export default CodeNaf
 
 const listeCodeNaf = [
   "",
@@ -841,7 +823,6 @@ const listeCodeNaf = [
   "98.10Z - Activités indifférenciées des ménages en tant que producteurs de biens pour usage propre",
   "98.20Z - Activités indifférenciées des ménages en tant que producteurs de services pour usage propre",
   "99.00Z - Activités des organisations et organismes extraterritoriaux",
-];
+]
 
-export const codeNafFromCode = (code: string) =>
-  listeCodeNaf.find((codeNaf) => codeNaf.startsWith(code)) || "";
+export const codeNafFromCode = (code: string) => listeCodeNaf.find((codeNaf) => codeNaf.startsWith(code)) || ""

@@ -1,9 +1,9 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Form } from "react-final-form";
-import createDecorator from "final-form-calculate";
+import { css, jsx } from "@emotion/core"
+import { Form } from "react-final-form"
+import createDecorator from "final-form-calculate"
 
-import { AppState, FormState, ActionIndicateurCinqData } from "../../globals";
+import { AppState, FormState, ActionIndicateurCinqData } from "../../globals"
 
 import {
   parseIntFormValue,
@@ -14,22 +14,16 @@ import {
   maxNumber,
   composeValidators,
   mustBeInteger,
-} from "../../utils/formHelpers";
+} from "../../utils/formHelpers"
 
-import { BlocFormLight } from "../../components/BlocForm";
-import FieldInput from "../../components/FieldInput";
-import ActionBar from "../../components/ActionBar";
-import FormAutoSave from "../../components/FormAutoSave";
-import FormSubmit from "../../components/FormSubmit";
-import { ButtonSimulatorLink } from "../../components/SimulatorLink";
+import { BlocFormLight } from "../../components/BlocForm"
+import FieldInput from "../../components/FieldInput"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
-const validator = composeValidators(
-  required,
-  mustBeNumber,
-  mustBeInteger,
-  minNumber(0),
-  maxNumber(10)
-);
+const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0), maxNumber(10))
 
 const calculator = createDecorator({
   field: "nombreSalariesFemmes",
@@ -39,45 +33,36 @@ const calculator = createDecorator({
         ? parseIntStateValue(10 - parseIntFormValue(femmesValue))
         : nombreSalariesHommes,
   },
-});
+})
 
 ///////////////////
 
 interface Props {
-  indicateurCinq: AppState["indicateurCinq"];
-  readOnly: boolean;
-  updateIndicateurCinq: (data: ActionIndicateurCinqData) => void;
-  validateIndicateurCinq: (valid: FormState) => void;
+  indicateurCinq: AppState["indicateurCinq"]
+  readOnly: boolean
+  updateIndicateurCinq: (data: ActionIndicateurCinqData) => void
+  validateIndicateurCinq: (valid: FormState) => void
 }
 
-function IndicateurCinqForm({
-  indicateurCinq,
-  readOnly,
-  updateIndicateurCinq,
-  validateIndicateurCinq,
-}: Props) {
+function IndicateurCinqForm({ indicateurCinq, readOnly, updateIndicateurCinq, validateIndicateurCinq }: Props) {
   const initialValues = {
-    nombreSalariesHommes: parseIntStateValue(
-      indicateurCinq.nombreSalariesHommes
-    ),
-    nombreSalariesFemmes: parseIntStateValue(
-      indicateurCinq.nombreSalariesFemmes
-    ),
-  };
+    nombreSalariesHommes: parseIntStateValue(indicateurCinq.nombreSalariesHommes),
+    nombreSalariesFemmes: parseIntStateValue(indicateurCinq.nombreSalariesFemmes),
+  }
 
   const saveForm = (formData: any) => {
-    const { nombreSalariesHommes, nombreSalariesFemmes } = formData;
+    const { nombreSalariesHommes, nombreSalariesFemmes } = formData
 
     updateIndicateurCinq({
       nombreSalariesHommes: parseIntFormValue(nombreSalariesHommes),
       nombreSalariesFemmes: parseIntFormValue(nombreSalariesFemmes),
-    });
-  };
+    })
+  }
 
   const onSubmit = (formData: any) => {
-    saveForm(formData);
-    validateIndicateurCinq("Valid");
-  };
+    saveForm(formData)
+    validateIndicateurCinq("Valid")
+  }
 
   return (
     <Form
@@ -123,7 +108,7 @@ function IndicateurCinqForm({
         </form>
       )}
     </Form>
-  );
+  )
 }
 
 const styles = {
@@ -131,6 +116,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
   }),
-};
+}
 
-export default IndicateurCinqForm;
+export default IndicateurCinqForm

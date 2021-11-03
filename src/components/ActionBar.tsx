@@ -1,13 +1,13 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
 interface Props {
-  children: ReactNode;
+  children: ReactNode
 }
 
 function ActionBar({ children }: Props) {
-  return <div css={styles.actionBar}>{children}</div>;
+  return <div css={styles.actionBar}>{children}</div>
 }
 
 const styles = {
@@ -18,9 +18,9 @@ const styles = {
     marginTop: 46,
     marginBottom: 36,
     "@media print": {
-      display: "none"
-    }
-  })
-};
+      display: "none",
+    },
+  }),
+}
 
-export default ActionBar;
+export default ActionBar

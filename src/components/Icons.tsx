@@ -1,16 +1,10 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode, Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode, Fragment } from "react"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-export function IconWarning({
-  width = 40,
-  height = 35
-}: {
-  width?: number;
-  height?: number;
-}) {
+export function IconWarning({ width = 40, height = 35 }: { width?: number; height?: number }) {
   return (
     <svg
       width={width}
@@ -32,7 +26,7 @@ export function IconWarning({
         stroke="#696CD1"
       />
     </svg>
-  );
+  )
 }
 
 export function IconCircleCross() {
@@ -45,20 +39,14 @@ export function IconCircleCross() {
       xmlns="http://www.w3.org/2000/svg"
       css={[styles.strokeCurrentColor]}
     >
-      <ellipse
-        cx="17.9928"
-        cy="17.357"
-        rx="15.9942"
-        ry="15.4286"
-        strokeWidth="2"
-      />
+      <ellipse cx="17.9928" cy="17.357" rx="15.9942" ry="15.4286" strokeWidth="2" />
       <path
         d="M10.0945 24.9764L25.8913 9.73828M10.0945 9.73828L25.8913 24.9764"
         strokeWidth="2"
         strokeLinecap="round"
       />
     </svg>
-  );
+  )
 }
 
 export function IconValid() {
@@ -72,13 +60,9 @@ export function IconValid() {
       css={styles.strokeCurrentColor}
     >
       <circle cx="5.5" cy="5.5" r="4.5" />
-      <path
-        d="M7.72228 3.27783L5.5 8.00005L3.5 5.50005"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M7.72228 3.27783L5.5 8.00005L3.5 5.50005" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
-  );
+  )
 }
 
 export function IconInvalid() {
@@ -92,24 +76,14 @@ export function IconInvalid() {
       css={styles.strokeCurrentColor}
     >
       <circle cx="5.5" cy="5.5" r="4.5" />
-      <path
-        d="M3.27783 7.72228L7.72228 3.27783M3.27783 3.27783L7.72228 7.72228"
-        strokeLinecap="round"
-      />
+      <path d="M3.27783 7.72228L7.72228 3.27783M3.27783 3.27783L7.72228 7.72228" strokeLinecap="round" />
     </svg>
-  );
+  )
 }
 
 export function IconMale() {
   return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 15 15"
-      fill="none"
-      focusable="false"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" focusable="false" xmlns="http://www.w3.org/2000/svg">
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -117,19 +91,12 @@ export function IconMale() {
         fill={globalStyles.colors.men}
       />
     </svg>
-  );
+  )
 }
 
 export function IconFemale() {
   return (
-    <svg
-      width="15"
-      height="13"
-      viewBox="0 0 8 13"
-      fill="none"
-      focusable="false"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="15" height="13" viewBox="0 0 8 13" fill="none" focusable="false" xmlns="http://www.w3.org/2000/svg">
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -137,58 +104,42 @@ export function IconFemale() {
         fill={globalStyles.colors.women}
       />
     </svg>
-  );
+  )
 }
 
 export function IconSearch() {
   return (
-    <svg
-      width="19"
-      height="19"
-      viewBox="0 0 19 19"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="8" cy="8" r="7.5" stroke={globalStyles.colors.primary} />
       <path
         d="M17.6464 18.3536C17.8417 18.5488 18.1583 18.5488 18.3536 18.3536C18.5488 18.1583 18.5488 17.8417 18.3536 17.6464L17.6464 18.3536ZM18.3536 17.6464L13.3536 12.6464L12.6464 13.3536L17.6464 18.3536L18.3536 17.6464Z"
         fill={globalStyles.colors.primary}
       />
     </svg>
-  );
+  )
 }
 
 export function IconClose() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M1 17L17 1M1 1L17 17"
-        stroke={globalStyles.colors.primary}
-        strokeLinecap="round"
-      />
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 17L17 1M1 1L17 17" stroke={globalStyles.colors.primary} strokeLinecap="round" />
     </svg>
-  );
+  )
 }
 
 const styles = {
   strokeCurrentColor: css({
-    stroke: "currentColor"
+    stroke: "currentColor",
   }),
   fillCurrentColor: css({
-    fill: "currentColor"
-  })
-};
+    fill: "currentColor",
+  }),
+}
 
 // Pour le pas à pas
 
 export function IconText({ children }: { children: ReactNode }) {
-  return <div css={stylesIcon.icon}>{children}</div>;
+  return <div css={stylesIcon.icon}>{children}</div>
 }
 
 const stylesIcon = {
@@ -203,9 +154,9 @@ const stylesIcon = {
     alignItems: "center",
     justifyContent: "center",
 
-    fontSize: 12
-  }
-};
+    fontSize: 12,
+  },
+}
 
 function SubIconValid() {
   return (
@@ -218,31 +169,21 @@ function SubIconValid() {
         strokeLinejoin="round"
       />
     </Fragment>
-  );
+  )
 }
 
 function SubIconInvalid() {
   return (
     <Fragment>
       <circle cx="33" cy="15" r="6" fill="white" stroke="#191A49" />
-      <path
-        d="M30.0371 17.963L35.963 12.0371M30.0371 12.0371L35.963 17.963"
-        stroke="#191A49"
-        strokeLinecap="round"
-      />
+      <path d="M30.0371 17.963L35.963 12.0371M30.0371 12.0371L35.963 17.963" stroke="#191A49" strokeLinecap="round" />
     </Fragment>
-  );
+  )
 }
 
 export function IconLamp() {
   return (
-    <svg
-      width="45"
-      height="45"
-      viewBox="0 0 45 45"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="22.5" cy="22.5" r="22" fill="white" stroke="#191A49" />
       <path
         d="M24.4615 33.0726H24.4365V33.0976C24.4365 34.126 23.5623 34.975 22.5 34.975C21.4377 34.975 20.5635 34.126 20.5635 33.0976V33.0726H20.5385H20.2115C19.1826 33.0726 18.275 32.2563 18.275 31.1951V27.3902C18.275 25.831 17.503 24.783 16.5505 23.4902C16.4578 23.3643 16.3634 23.2361 16.2678 23.1049C15.1897 21.6252 14.025 19.7805 14.025 16.8773C14.025 12.2779 18.1856 9.025 22.5 9.025C26.8144 9.025 30.975 12.2779 30.975 16.8773C30.975 19.7805 29.8103 21.6252 28.7322 23.1049C28.6366 23.2361 28.5422 23.3643 28.4495 23.4902C27.497 24.783 26.725 25.831 26.725 27.3902V31.1951C26.725 32.2563 25.8174 33.0726 24.7885 33.0726H24.4615ZM19.492 26.759L19.4945 26.7811H19.5168H25.4832H25.5055L25.508 26.759C25.695 25.1324 26.5767 23.938 27.4396 22.7691C27.5303 22.6463 27.6207 22.5238 27.7101 22.4011C28.757 20.9644 29.7173 19.4797 29.7173 16.8773C29.7173 12.9901 26.1592 10.2433 22.5 10.2433C18.8408 10.2433 15.2827 12.9901 15.2827 16.8773C15.2827 19.4797 16.243 20.9644 17.2899 22.4011C17.3793 22.5238 17.4697 22.6463 17.5604 22.7691C18.4233 23.938 19.305 25.1324 19.492 26.759ZM24.4205 11.5913L24.4206 11.5913C24.5077 11.5916 24.5964 11.6032 24.6888 11.6297C26.7012 12.3661 28.2001 14.0787 28.5848 16.1783L28.5848 16.1784C28.6435 16.4904 28.3983 16.8249 28.0738 16.8824C27.7495 16.9398 27.4055 16.7097 27.3467 16.397C27.0398 14.7222 25.8362 13.3471 24.2351 12.7616L24.235 12.7615C23.9622 12.6631 23.7822 12.3636 23.8321 12.0872C23.8852 11.9009 23.9687 11.7773 24.0693 11.7002C24.1701 11.6229 24.2905 11.5907 24.4205 11.5913ZM25.4673 28.0244V27.9994H25.4423H19.5577H19.5327V28.0244V29.2927V29.3177H19.5577H25.4423H25.4673V29.2927V28.0244ZM25.4673 30.561V30.536H25.4423H19.5577H19.5327V30.561V31.1951C19.5327 31.592 19.8614 31.8543 20.2115 31.8543H24.7885C25.1386 31.8543 25.4673 31.592 25.4673 31.1951V30.561ZM23.1788 33.0976V33.0726H23.1538H21.8462H21.8212V33.0976C21.8212 33.4744 22.1134 33.7567 22.5 33.7567C22.8866 33.7567 23.1788 33.4744 23.1788 33.0976Z"
@@ -251,47 +192,29 @@ export function IconLamp() {
         strokeWidth="0.05"
       />
     </svg>
-  );
+  )
 }
 
 export function IconPeople({ valid }: { valid?: boolean }) {
   return (
-    <svg
-      width="45"
-      height="45"
-      viewBox="0 0 45 45"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="22.5" cy="22.5" r="22.5" fill="white" />
       <path
         d="M22.5 20C16.7427 20 14.016 25.7102 12.8242 29.6163C12.1867 31.7058 13.3529 33.8213 15.4519 34.4271C17.3539 34.976 19.8608 35.5 22.5 35.5C25.1392 35.5 27.6461 34.976 29.5481 34.4271C31.6471 33.8213 32.8133 31.7058 32.1758 29.6163C30.984 25.7102 28.2573 20 22.5 20Z"
         fill="white"
         stroke="#191A49"
       />
-      <circle
-        cx="22.3924"
-        cy="16.3506"
-        r="5.85061"
-        fill="white"
-        stroke="#191A49"
-      />
+      <circle cx="22.3924" cy="16.3506" r="5.85061" fill="white" stroke="#191A49" />
       {valid === true && <SubIconValid />}
       {valid === false && <SubIconInvalid />}
       <circle cx="22.5" cy="22.5" r="22" stroke="#191A49" />
     </svg>
-  );
+  )
 }
 
 export function IconCalendar({ valid }: { valid?: boolean }) {
   return (
-    <svg
-      width="45"
-      height="45"
-      viewBox="0 0 45 45"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="22.5" cy="22.5" r="22" fill="white" stroke="#191A49" />
       <path d="M9.5 20H35" stroke="#191A49" />
       <rect x="9.5" y="11.5" width="26" height="23" rx="1.5" stroke="#191A49" />
@@ -302,18 +225,12 @@ export function IconCalendar({ valid }: { valid?: boolean }) {
       {valid === true && <SubIconValid />}
       {valid === false && <SubIconInvalid />}
     </svg>
-  );
+  )
 }
 
 export function IconMoney({ valid }: { valid?: boolean }) {
   return (
-    <svg
-      width="45"
-      height="45"
-      viewBox="0 0 45 45"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="22.5" cy="22.5" r="22" fill="white" stroke="#191A49" />
       <path
         d="M17.2588 13.056L23 11.5176L28.7412 13.056L32.944 17.2588L34.4824 23L32.944 28.7412L28.7412 32.944L23 34.4824L17.2588 32.944L13.056 28.7412L11.5176 23L13.056 17.2588L17.2588 13.056Z"
@@ -332,18 +249,12 @@ export function IconMoney({ valid }: { valid?: boolean }) {
         fill="#191A49"
       />
     </svg>
-  );
+  )
 }
 
 export function IconGrow({ valid }: { valid?: boolean }) {
   return (
-    <svg
-      width="45"
-      height="45"
-      viewBox="0 0 45 45"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="22.5" cy="22.5" r="22" fill="white" stroke="#191A49" />
       <path
         d="M24.5577 18.8187C25.4185 18.8187 26.2427 18.6264 27.0302 18.2418L27.1676 19.4505C26.3709 19.8168 25.4963 20 24.544 20C23.4176 20 22.4377 19.7024 21.6044 19.1071C20.7802 18.5119 20.217 17.6923 19.9148 16.6484H18.5V15.6319H19.7225C19.7042 15.3571 19.6951 15.1465 19.6951 15C19.6951 14.7527 19.7088 14.5147 19.7363 14.2857H18.5V13.2692H19.9423C20.2537 12.2527 20.826 11.456 21.6593 10.8791C22.4927 10.293 23.4725 10 24.5989 10C25.0659 10 25.5238 10.0504 25.9725 10.1511C26.4212 10.2518 26.8196 10.3892 27.1676 10.5632L27.0302 11.772C26.206 11.3782 25.391 11.1813 24.5852 11.1813C23.8068 11.1813 23.1474 11.369 22.6071 11.7445C22.076 12.1108 21.6822 12.619 21.4258 13.2692H25.4918V14.2857H21.1648C21.1374 14.5147 21.1236 14.7527 21.1236 15C21.1236 15.2106 21.1374 15.4212 21.1648 15.6319H25.4918V16.6484H21.3984C21.6364 17.3168 22.0256 17.848 22.5659 18.2418C23.1062 18.6264 23.7701 18.8187 24.5577 18.8187Z"
@@ -357,5 +268,5 @@ export function IconGrow({ valid }: { valid?: boolean }) {
       {valid === true && <SubIconValid />}
       {valid === false && <SubIconInvalid />}
     </svg>
-  );
+  )
 }

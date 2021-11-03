@@ -1,31 +1,25 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useField } from "react-final-form";
-import { ValidatorFunction } from "../utils/formHelpers";
+import { css, jsx } from "@emotion/core"
+import { useField } from "react-final-form"
+import { ValidatorFunction } from "../utils/formHelpers"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { CellHead, Cell } from "./Cell";
-import CellInput from "./CellInput";
-import { IconValid, IconInvalid } from "./Icons";
+import { CellHead, Cell } from "./Cell"
+import CellInput from "./CellInput"
+import { IconValid, IconInvalid } from "./Icons"
 
 interface Props {
-  fieldName: string;
-  label: string;
-  readOnly: boolean;
-  theme?: "hommes" | "femmes";
-  validator?: ValidatorFunction;
+  fieldName: string
+  label: string
+  readOnly: boolean
+  theme?: "hommes" | "femmes"
+  validator?: ValidatorFunction
 }
 
-function FieldInput({
-  fieldName,
-  label,
-  readOnly,
-  theme = "femmes",
-  validator,
-}: Props) {
-  const field = useField(fieldName, { validate: validator });
-  const error = field.meta.touched && field.meta.error;
+function FieldInput({ fieldName, label, readOnly, theme = "femmes", validator }: Props) {
+  const field = useField(fieldName, { validate: validator })
+  const error = field.meta.touched && field.meta.error
 
   return (
     <div css={styles.container}>
@@ -46,28 +40,20 @@ function FieldInput({
         </CellHead>
 
         {readOnly ? (
-          <Cell
-            style={[
-              styles.cellEmpty,
-              theme === "hommes" ? styles.cellEmptyMen : styles.cellEmptyWomen,
-            ]}
-          >
+          <Cell style={[styles.cellEmpty, theme === "hommes" ? styles.cellEmptyMen : styles.cellEmptyWomen]}>
             {field.input.value}
           </Cell>
         ) : (
-          <CellInput
-            field={field}
-            style={theme === "hommes" ? styles.cellMen : styles.cellWomen}
-          />
+          <CellInput field={field} style={theme === "hommes" ? styles.cellMen : styles.cellWomen} />
         )}
       </div>
       {error && <div css={styles.error}>{error}</div>}
     </div>
-  );
+  )
 }
 
-export const HEIGHT = 58;
-export const MARGIN_TOP = 10;
+export const HEIGHT = 58
+export const MARGIN_TOP = 10
 
 const styles = {
   container: css({
@@ -130,6 +116,6 @@ const styles = {
     lineHeight: "12px",
     borderBottom: `solid ${globalStyles.colors.error} 1px`,
   }),
-};
+}
 
-export default FieldInput;
+export default FieldInput

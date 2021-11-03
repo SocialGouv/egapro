@@ -1,9 +1,9 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
-import { useField } from "react-final-form";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
+import { useField } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
 function RadioField({
   fieldName,
@@ -11,61 +11,40 @@ function RadioField({
   value,
   disabled,
 }: {
-  fieldName: string;
-  label: ReactNode;
-  value: string | undefined;
-  disabled: boolean;
+  fieldName: string
+  label: ReactNode
+  value: string | undefined
+  disabled: boolean
 }) {
-  const { input } = useField(fieldName, { type: "radio", value });
+  const { input } = useField(fieldName, { type: "radio", value })
   return (
     <label css={styles.label}>
       <input css={styles.radio} {...input} disabled={disabled} />
       <div css={[styles.fakeRadio, input.checked && styles.fakeRadioChecked]} />
       <span css={styles.labelText}>{label}</span>
     </label>
-  );
+  )
 }
 
 interface Props {
-  readOnly: boolean;
-  fieldName: string;
-  value: string | undefined;
-  labelTrue: ReactNode;
-  labelFalse: ReactNode;
+  readOnly: boolean
+  fieldName: string
+  value: string | undefined
+  labelTrue: ReactNode
+  labelFalse: ReactNode
 }
 
-function RadiosBoolean({
-  readOnly,
-  fieldName,
-  value,
-  labelTrue,
-  labelFalse,
-}: Props) {
+function RadiosBoolean({ readOnly, fieldName, value, labelTrue, labelFalse }: Props) {
   return (
     <div css={styles.container}>
       <div css={[readOnly && value === "false" && styles.radioFieldDisabled]}>
-        <RadioField
-          fieldName={fieldName}
-          label={labelTrue}
-          value="true"
-          disabled={readOnly}
-        />
+        <RadioField fieldName={fieldName} label={labelTrue} value="true" disabled={readOnly} />
       </div>
-      <div
-        css={[
-          styles.radioFieldFalse,
-          readOnly && value === "true" && styles.radioFieldDisabled,
-        ]}
-      >
-        <RadioField
-          fieldName={fieldName}
-          label={labelFalse}
-          value="false"
-          disabled={readOnly}
-        />
+      <div css={[styles.radioFieldFalse, readOnly && value === "true" && styles.radioFieldDisabled]}>
+        <RadioField fieldName={fieldName} label={labelFalse} value="false" disabled={readOnly} />
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -103,6 +82,6 @@ const styles = {
   radioFieldDisabled: css({
     visibility: "hidden",
   }),
-};
+}
 
-export default RadiosBoolean;
+export default RadiosBoolean

@@ -1,47 +1,39 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { Fragment, useCallback } from "react";
-import { RouteComponentProps } from "react-router-dom";
-import {
-  AppState,
-  ActionType,
-  FormState,
-  ActionEffectifData,
-} from "../../globals";
-import totalNombreSalaries from "../../utils/totalNombreSalaries";
+import { jsx } from "@emotion/core"
+import { Fragment, useCallback } from "react"
+import { RouteComponentProps } from "react-router-dom"
+import { AppState, ActionType, FormState, ActionEffectifData } from "../../globals"
+import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
-import Page from "../../components/Page";
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
-import InfoBloc from "../../components/InfoBloc";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
+import Page from "../../components/Page"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import InfoBloc from "../../components/InfoBloc"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 
-import EffectifForm from "./EffectifForm";
-import EffectifResult from "./EffectifResult";
+import EffectifForm from "./EffectifForm"
+import EffectifResult from "./EffectifResult"
 
 interface Props extends RouteComponentProps {
-  state: AppState;
-  dispatch: (action: ActionType) => void;
+  state: AppState
+  dispatch: (action: ActionType) => void
 }
 
 function Effectif({ state, dispatch }: Props) {
   const updateEffectif = useCallback(
     (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
-    [dispatch]
-  );
+    [dispatch],
+  )
 
-  const validateEffectif = useCallback(
-    (valid: FormState) => dispatch({ type: "validateEffectif", valid }),
-    [dispatch]
-  );
+  const validateEffectif = useCallback((valid: FormState) => dispatch({ type: "validateEffectif", valid }), [dispatch])
 
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCsp,
     totalNombreSalariesFemme: totalNombreSalariesFemmeCsp,
-  } = totalNombreSalaries(state.effectif.nombreSalaries);
+  } = totalNombreSalaries(state.effectif.nombreSalaries)
   const {
     totalNombreSalariesHomme: totalNombreSalariesHommeCoef,
     totalNombreSalariesFemme: totalNombreSalariesFemmeCoef,
-  } = totalNombreSalaries(state.indicateurUn.coefficient);
+  } = totalNombreSalaries(state.indicateurUn.coefficient)
 
   return (
     <Page
@@ -71,8 +63,7 @@ function Effectif({ state, dispatch }: Props) {
       {state.effectif.formValidated === "Valid" &&
         (state.indicateurUn.formValidated === "Invalid" ||
           (state.informations.trancheEffectifs !== "50 à 250" &&
-            (state.indicateurDeux.formValidated === "Invalid" ||
-              state.indicateurTrois.formValidated === "Invalid")) ||
+            (state.indicateurDeux.formValidated === "Invalid" || state.indicateurTrois.formValidated === "Invalid")) ||
           (state.informations.trancheEffectifs === "50 à 250" &&
             state.indicateurDeuxTrois.formValidated === "Invalid")) && (
           <InfoBloc
@@ -81,17 +72,13 @@ function Effectif({ state, dispatch }: Props) {
             text={
               <Fragment>
                 <span>
-                  afin de s'assurer de la cohérence de votre index, merci de
-                  vérifier les données de vos indicateurs.
+                  afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs.
                 </span>
                 &emsp;
                 <span>
                   {state.indicateurUn.formValidated === "Invalid" && (
                     <Fragment>
-                      <TextSimulatorLink
-                        to="/indicateur1"
-                        label="aller à l'indicateur écart de rémunérations"
-                      />
+                      <TextSimulatorLink to="/indicateur1" label="aller à l'indicateur écart de rémunérations" />
                       &emsp;
                     </Fragment>
                   )}
@@ -108,10 +95,7 @@ function Effectif({ state, dispatch }: Props) {
                   {state.informations.trancheEffectifs !== "50 à 250" &&
                     state.indicateurTrois.formValidated === "Invalid" && (
                       <Fragment>
-                        <TextSimulatorLink
-                          to="/indicateur3"
-                          label="aller à l'indicateur écart de taux de promotions"
-                        />
+                        <TextSimulatorLink to="/indicateur3" label="aller à l'indicateur écart de taux de promotions" />
                         &emsp;
                       </Fragment>
                     )}
@@ -139,13 +123,9 @@ function Effectif({ state, dispatch }: Props) {
             text={
               <Fragment>
                 <span>
-                  Vos effectifs ne sont pas les mêmes que ceux déclarés en
-                  niveaux ou coefficients hiérarchiques. &emsp;
+                  Vos effectifs ne sont pas les mêmes que ceux déclarés en niveaux ou coefficients hiérarchiques. &emsp;
                 </span>
-                <TextSimulatorLink
-                  to="/indicateur1"
-                  label="aller à l'indicateur écart de rémunérations"
-                />
+                <TextSimulatorLink to="/indicateur1" label="aller à l'indicateur écart de rémunérations" />
                 &emsp;
               </Fragment>
             }
@@ -162,7 +142,7 @@ function Effectif({ state, dispatch }: Props) {
           />
         )}
     </Page>
-  );
+  )
 }
 
-export default Effectif;
+export default Effectif

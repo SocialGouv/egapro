@@ -1,76 +1,64 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { useCallback } from "react";
-import {
-  AppState,
-  FormState,
-  ActionIndicateurUnCoefData,
-  GroupTranchesAgesIndicateurUn
-} from "../../../globals";
+import { jsx } from "@emotion/core"
+import { useCallback } from "react"
+import { AppState, FormState, ActionIndicateurUnCoefData, GroupTranchesAgesIndicateurUn } from "../../../globals"
 
-import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn";
+import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 
-import LayoutFormAndResult from "../../../components/LayoutFormAndResult";
-import InfoBloc from "../../../components/InfoBloc";
-import ActionLink from "../../../components/ActionLink";
-import { ButtonSimulatorLink } from "../../../components/SimulatorLink";
+import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
+import InfoBloc from "../../../components/InfoBloc"
+import ActionLink from "../../../components/ActionLink"
+import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
-import IndicateurUnFormRaw from "../IndicateurUnFormRaw";
-import IndicateurUnResult from "../IndicateurUnResult";
+import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
+import IndicateurUnResult from "../IndicateurUnResult"
 
 interface Props {
-  state: AppState;
-  updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void;
-  validateIndicateurUn: (valid: FormState) => void;
-  navigateToEffectif: () => void;
+  state: AppState
+  updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void
+  validateIndicateurUn: (valid: FormState) => void
+  navigateToEffectif: () => void
 }
 
 function IndicateurUnCoefEffectifForm({
   state,
   updateIndicateurUnCoef,
   validateIndicateurUn,
-  navigateToEffectif
+  navigateToEffectif,
 }: Props) {
-  const {
-    coefficientEffectifFormValidated,
-    formValidated
-  } = state.indicateurUn;
+  const { coefficientEffectifFormValidated, formValidated } = state.indicateurUn
 
   const {
     effectifsIndicateurCalculable,
     effectifEtEcartRemuParTrancheCoef,
     indicateurEcartRemuneration,
     indicateurSexeSurRepresente,
-    noteIndicateurUn
-  } = calculIndicateurUn(state);
+    noteIndicateurUn,
+  } = calculIndicateurUn(state)
 
   const updateIndicateurUn = useCallback(
     (
       data: Array<{
-        id: any;
-        tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
-      }>
+        id: any
+        tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      }>,
     ) => {
-      const coefficient = data.map(({ id, tranchesAges }) => ({
-        tranchesAges
-      }));
-      updateIndicateurUnCoef({ coefficient });
+      const coefficient = data.map(({ tranchesAges }) => ({
+        tranchesAges,
+      }))
+      updateIndicateurUnCoef({ coefficient })
     },
-    [updateIndicateurUnCoef]
-  );
+    [updateIndicateurUnCoef],
+  )
 
   // le formulaire d'effectif n'est pas validé
   if (coefficientEffectifFormValidated !== "Valid") {
     return (
       <InfoBloc
         title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-        text={
-          <ActionLink onClick={navigateToEffectif}>
-            renseigner les effectifs
-          </ActionLink>
-        }
+        text={<ActionLink onClick={navigateToEffectif}>renseigner les effectifs</ActionLink>}
       />
-    );
+    )
   }
 
   // les effectifs ne permettent pas de calculer l'indicateur
@@ -84,10 +72,10 @@ function IndicateurUnCoefEffectifForm({
               effectifs. Vous devez calculer par CSP."
         />
       </div>
-    );
+    )
   }
 
-  const readOnly = formValidated === "Valid";
+  const readOnly = formValidated === "Valid"
 
   return (
     <LayoutFormAndResult
@@ -99,11 +87,7 @@ function IndicateurUnCoefEffectifForm({
           validateIndicateurUn={validateIndicateurUn}
           nextLink={
             <ButtonSimulatorLink
-              to={
-                state.informations.trancheEffectifs === "50 à 250"
-                  ? "/indicateur2et3"
-                  : "/indicateur2"
-              }
+              to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
               label="suivant"
             />
           }
@@ -120,7 +104,7 @@ function IndicateurUnCoefEffectifForm({
         )
       }
     />
-  );
+  )
 }
 
-export default IndicateurUnCoefEffectifForm;
+export default IndicateurUnCoefEffectifForm

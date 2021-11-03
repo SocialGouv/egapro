@@ -1,12 +1,12 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
-import globalStyles from "../../../utils/globalStyles";
+import globalStyles from "../../../utils/globalStyles"
 
-import { displayFractionPercent } from "../../../utils/helpers";
+import { displayFractionPercent } from "../../../utils/helpers"
 
-import { CellHead, Cell } from "../../../components/Cell";
+import { CellHead, Cell } from "../../../components/Cell"
 
 function RowData({
   name,
@@ -14,10 +14,10 @@ function RowData({
   asPercent,
   message,
 }: {
-  name: string;
-  data: Array<number | undefined>;
-  asPercent?: boolean;
-  message?: string;
+  name: string
+  data: Array<number | undefined>
+  asPercent?: boolean
+  message?: string
 }) {
   return (
     <div css={styles.container}>
@@ -29,34 +29,20 @@ function RowData({
             key={index}
             style={[
               styles.cell,
-              datum !== undefined && Math.sign(datum) > 0
-                ? styles.cellMen
-                : styles.cellWomen,
+              datum !== undefined && Math.sign(datum) > 0 ? styles.cellMen : styles.cellWomen,
               datum === undefined && styles.cellEmpty,
             ]}
           >
-            {datum !== undefined
-              ? asPercent
-                ? displayFractionPercent(datum, 1)
-                : datum
-              : "nc"}
+            {datum !== undefined ? (asPercent ? displayFractionPercent(datum, 1) : datum) : "nc"}
           </Cell>
         ))}
       </div>
       <p css={css({ fontSize: "0.8em" })}>{message}</p>
     </div>
-  );
+  )
 }
 
-export function RowDataFull({
-  name,
-  data,
-  asPercent,
-}: {
-  name: string;
-  data: number | undefined;
-  asPercent: boolean;
-}) {
+export function RowDataFull({ name, data, asPercent }: { name: string; data: number | undefined; asPercent: boolean }) {
   return (
     <div css={styles.container}>
       <div css={styles.row}>
@@ -66,21 +52,15 @@ export function RowDataFull({
           style={[
             styles.cell,
             styles.cellFull,
-            data !== undefined && Math.sign(data) > 0
-              ? styles.cellMen
-              : styles.cellWomen,
+            data !== undefined && Math.sign(data) > 0 ? styles.cellMen : styles.cellWomen,
             data === undefined && styles.cellEmpty,
           ]}
         >
-          {data !== undefined
-            ? asPercent
-              ? displayFractionPercent(data, 1)
-              : data
-            : "nc"}
+          {data !== undefined ? (asPercent ? displayFractionPercent(data, 1) : data) : "nc"}
         </Cell>
       </div>
     </div>
-  );
+  )
 }
 
 export function RowLabels({ labels }: { labels: Array<string> }) {
@@ -94,7 +74,7 @@ export function RowLabels({ labels }: { labels: Array<string> }) {
         </Cell>
       ))}
     </div>
-  );
+  )
 }
 
 export function RowLabelFull({ label }: { label: ReactNode }) {
@@ -102,11 +82,9 @@ export function RowLabelFull({ label }: { label: ReactNode }) {
     <div css={[styles.row, styles.rowLabel]}>
       <CellHead />
 
-      <Cell style={[styles.cell, styles.cellLabel, styles.cellFull]}>
-        {label}
-      </Cell>
+      <Cell style={[styles.cell, styles.cellLabel, styles.cellFull]}>{label}</Cell>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -162,6 +140,6 @@ const styles = {
   cellFull: css({
     width: 48 * 4 + 3 * 4,
   }),
-};
+}
 
-export default RowData;
+export default RowData

@@ -1,46 +1,34 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Switch, Route, Link } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { Switch, Route, Link } from "react-router-dom"
 
-import { FormState, TrancheEffectifs } from "../globals";
+import { FormState, TrancheEffectifs } from "../globals"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { useLayoutType } from "../components/GridContext";
+import { useLayoutType } from "../components/GridContext"
 
-import { IconValid, IconInvalid } from "./Icons";
-import { useColumnsWidth } from "./GridContext";
-import { Fragment } from "react";
+import { IconValid, IconInvalid } from "./Icons"
+import { useColumnsWidth } from "./GridContext"
+import { Fragment } from "react"
 
 interface CustomNavLinkProps {
-  title: string;
-  label?: string;
-  valid?: FormState;
-  to: string;
-  activeOnlyWhenExact?: boolean;
+  title: string
+  label?: string
+  valid?: FormState
+  to: string
+  activeOnlyWhenExact?: boolean
 }
 
-function CustomNavLink({
-  title,
-  label,
-  valid = "None",
-  to,
-  activeOnlyWhenExact = false
-}: CustomNavLinkProps) {
-  const layoutType = useLayoutType();
+function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact = false }: CustomNavLinkProps) {
+  const layoutType = useLayoutType()
   return (
     <Route
       path={to}
       exact={activeOnlyWhenExact}
+      // eslint-disable-next-line react/no-children-prop
       children={({ match }) => (
-        <Link
-          to={to}
-          css={[
-            styles.link,
-            layoutType === "tablet" && styles.itemTablet,
-            match && styles.activeLink
-          ]}
-        >
+        <Link to={to} css={[styles.link, layoutType === "tablet" && styles.itemTablet, match && styles.activeLink]}>
           <div css={styles.linkInner}>
             {valid === "Valid" ? (
               <div css={styles.icon}>
@@ -60,22 +48,22 @@ function CustomNavLink({
         </Link>
       )}
     />
-  );
+  )
 }
 
 interface Props {
-  trancheEffectifs: TrancheEffectifs;
-  informationsFormValidated: FormState;
-  effectifFormValidated: FormState;
-  indicateurUnFormValidated: FormState;
-  indicateurDeuxFormValidated: FormState;
-  indicateurTroisFormValidated: FormState;
-  indicateurDeuxTroisFormValidated: FormState;
-  indicateurQuatreFormValidated: FormState;
-  indicateurCinqFormValidated: FormState;
-  informationsEntrepriseFormValidated: FormState;
-  informationsDeclarantFormValidated: FormState;
-  declarationFormValidated: FormState;
+  trancheEffectifs: TrancheEffectifs
+  informationsFormValidated: FormState
+  effectifFormValidated: FormState
+  indicateurUnFormValidated: FormState
+  indicateurDeuxFormValidated: FormState
+  indicateurTroisFormValidated: FormState
+  indicateurDeuxTroisFormValidated: FormState
+  indicateurQuatreFormValidated: FormState
+  indicateurCinqFormValidated: FormState
+  informationsEntrepriseFormValidated: FormState
+  informationsDeclarantFormValidated: FormState
+  declarationFormValidated: FormState
 }
 
 function Menu({
@@ -90,53 +78,27 @@ function Menu({
   indicateurCinqFormValidated,
   informationsEntrepriseFormValidated,
   informationsDeclarantFormValidated,
-  declarationFormValidated
+  declarationFormValidated,
 }: Props) {
-  const width = useColumnsWidth(2);
-  const layoutType = useLayoutType();
+  const width = useColumnsWidth(2)
+  const layoutType = useLayoutType()
 
   return (
-    <div
-      css={[
-        layoutType === "desktop" &&
-          css({ width, marginLeft: globalStyles.grid.gutterWidth })
-      ]}
-    >
+    <div css={[layoutType === "desktop" && css({ width, marginLeft: globalStyles.grid.gutterWidth })]}>
       <Switch>
         <Route
           path="/simulateur/:code"
           render={({
             match: {
-              params: { code }
-            }
+              params: { code },
+            },
           }) => (
             <div css={styles.menuWrapper}>
-              <div
-                css={[
-                  styles.menu,
-                  layoutType === "tablet" && styles.menuTablet
-                ]}
-              >
-                <CustomNavLink
-                  to={`/simulateur/${code}`}
-                  title="vos informations"
-                  activeOnlyWhenExact={true}
-                />
+              <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
+                <CustomNavLink to={`/simulateur/${code}`} title="vos informations" activeOnlyWhenExact={true} />
               </div>
-              <div
-                css={[
-                  styles.menu,
-                  layoutType === "tablet" && styles.menuTablet
-                ]}
-              >
-                <h5
-                  css={[
-                    styles.menuTitle,
-                    layoutType === "tablet" && styles.itemTablet
-                  ]}
-                >
-                  Calcul de l'index
-                </h5>
+              <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
+                <h5 css={[styles.menuTitle, layoutType === "tablet" && styles.itemTablet]}>Calcul de l'index</h5>
                 <CustomNavLink
                   to={`/simulateur/${code}/informations`}
                   title="informations calcul"
@@ -190,25 +152,10 @@ function Menu({
                   label="hautes rémunérations"
                   valid={indicateurCinqFormValidated}
                 />
-                <CustomNavLink
-                  to={`/simulateur/${code}/recapitulatif`}
-                  title="récapitulatif"
-                />
+                <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="récapitulatif" />
               </div>
-              <div
-                css={[
-                  styles.menu,
-                  layoutType === "tablet" && styles.menuTablet
-                ]}
-              >
-                <h5
-                  css={[
-                    styles.menuTitle,
-                    layoutType === "tablet" && styles.itemTablet
-                  ]}
-                >
-                  Déclaration
-                </h5>
+              <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
+                <h5 css={[styles.menuTitle, layoutType === "tablet" && styles.itemTablet]}>Déclaration</h5>
                 <CustomNavLink
                   to={`/simulateur/${code}/informations-entreprise`}
                   title="informations entreprise/UES"
@@ -230,23 +177,23 @@ function Menu({
         />
       </Switch>
     </div>
-  );
+  )
 }
 
 const styles = {
   menuWrapper: css({
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   }),
   menu: css({
     display: "flex",
     flexDirection: "column",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   }),
   menuTitle: css({
     paddingTop: 7,
     paddingBottom: 7,
-    marginBottom: 0
+    marginBottom: 0,
   }),
   menuTablet: css({
     flexDirection: "row",
@@ -254,8 +201,8 @@ const styles = {
     paddingLeft: globalStyles.grid.gutterWidth,
     backgroundColor: "white",
     ":last-child": {
-      borderBottom: "1px solid #EFECEF"
-    }
+      borderBottom: "1px solid #EFECEF",
+    },
   }),
   link: css({
     paddingTop: 7,
@@ -265,27 +212,27 @@ const styles = {
     lineHeight: "15px",
     textDecoration: "none",
     ":hover": {
-      color: globalStyles.colors.primary
-    }
+      color: globalStyles.colors.primary,
+    },
   }),
   itemTablet: css({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     margin: "0 15px 0 0",
-    justifyContent: "center"
+    justifyContent: "center",
   }),
   activeLink: css({
-    color: globalStyles.colors.primary
+    color: globalStyles.colors.primary,
   }),
   linkInner: css({
     display: "flex",
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   }),
   icon: css({
-    marginRight: 3
-  })
-};
+    marginRight: 3,
+  }),
+}
 
-export default Menu;
+export default Menu

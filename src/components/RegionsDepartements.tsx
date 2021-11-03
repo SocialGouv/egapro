@@ -1,20 +1,20 @@
 /** @jsx jsx */
-import { Fragment } from "react";
-import { css, jsx } from "@emotion/core";
-import { Field } from "react-final-form";
+import { Fragment } from "react"
+import { css, jsx } from "@emotion/core"
+import { Field } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { required } from "../utils/formHelpers";
+import { required } from "../utils/formHelpers"
 
 function RegionsDepartements({
   nameRegion,
   nameDepartement,
   readOnly,
 }: {
-  nameRegion: string;
-  nameDepartement: string;
-  readOnly: boolean;
+  nameRegion: string
+  nameDepartement: string
+  readOnly: boolean
 }) {
   return (
     <Field name={nameRegion} validate={required} component="select">
@@ -22,10 +22,7 @@ function RegionsDepartements({
         <Fragment>
           <div css={styles.formField}>
             <label
-              css={[
-                styles.label,
-                regionMeta.error && regionMeta.touched && styles.labelError,
-              ]}
+              css={[styles.label, regionMeta.error && regionMeta.touched && styles.labelError]}
               htmlFor={regionInput.name}
             >
               Région
@@ -47,9 +44,7 @@ function RegionsDepartements({
                   </select>
                 </div>
                 {regionMeta.error && regionMeta.touched && (
-                  <p css={styles.error}>
-                    veuillez sélectionner une région dans la liste
-                  </p>
+                  <p css={styles.error}>veuillez sélectionner une région dans la liste</p>
                 )}
               </Fragment>
             )}
@@ -63,17 +58,14 @@ function RegionsDepartements({
                 regionsDepartements[region] === undefined ||
                 !regionsDepartements[region].includes(departement)
                 ? true
-                : undefined;
+                : undefined
             }}
             component="select"
           >
             {({ input: deptInput, meta: deptMeta }) => (
               <div css={styles.formField}>
                 <label
-                  css={[
-                    styles.label,
-                    deptMeta.error && deptMeta.touched && styles.labelError,
-                  ]}
+                  css={[styles.label, deptMeta.error && deptMeta.touched && styles.labelError]}
                   htmlFor={deptInput.name}
                 >
                   Département
@@ -88,20 +80,16 @@ function RegionsDepartements({
                       <select {...deptInput}>
                         <option value="" key="empty"></option>
                         {Array.isArray(regionsDepartements[regionInput.value])
-                          ? regionsDepartements[regionInput.value].map(
-                              (region: string) => (
-                                <option value={region} key={region}>
-                                  {region}
-                                </option>
-                              )
-                            )
+                          ? regionsDepartements[regionInput.value].map((region: string) => (
+                              <option value={region} key={region}>
+                                {region}
+                              </option>
+                            ))
                           : null}
                       </select>
                     </div>
                     {deptMeta.error && deptMeta.touched && (
-                      <p css={styles.error}>
-                        veuillez sélectionner un département dans la liste
-                      </p>
+                      <p css={styles.error}>veuillez sélectionner un département dans la liste</p>
                     )}
                   </Fragment>
                 )}
@@ -111,7 +99,7 @@ function RegionsDepartements({
         </Fragment>
       )}
     </Field>
-  );
+  )
 }
 
 const styles = {
@@ -158,9 +146,9 @@ const styles = {
     lineHeight: "38px",
     cursor: "not-allowed",
   }),
-};
+}
 
-export default RegionsDepartements;
+export default RegionsDepartements
 
 const regionsDepartements: { [key: string]: Array<string> } = {
   "Auvergne-Rhône-Alpes": [
@@ -188,14 +176,7 @@ const regionsDepartements: { [key: string]: Array<string> } = {
     "Territoire de Belfort",
   ],
   Bretagne: ["Côtes-d'Armor", "Finistère", "Ille-et-Vilaine", "Morbihan"],
-  "Centre-Val de Loire": [
-    "Cher",
-    "Eure-et-Loir",
-    "Indre",
-    "Indre-et-Loire",
-    "Loir-et-Cher",
-    "Loiret",
-  ],
+  "Centre-Val de Loire": ["Cher", "Eure-et-Loir", "Indre", "Indre-et-Loire", "Loir-et-Cher", "Loiret"],
   Corse: ["Corse-du-Sud", "Haute-Corse"],
   "Grand Est": [
     "Ardennes",
@@ -255,13 +236,7 @@ const regionsDepartements: { [key: string]: Array<string> } = {
     "Tarn",
     "Tarn-et-Garonne",
   ],
-  "Pays de la Loire": [
-    "Loire-Atlantique",
-    "Maine-et-Loire",
-    "Mayenne",
-    "Sarthe",
-    "Vendée",
-  ],
+  "Pays de la Loire": ["Loire-Atlantique", "Maine-et-Loire", "Mayenne", "Sarthe", "Vendée"],
   "Provence-Alpes-Côte d'Azur": [
     "Alpes-de-Haute-Provence",
     "Hautes-Alpes",
@@ -270,7 +245,7 @@ const regionsDepartements: { [key: string]: Array<string> } = {
     "Var",
     "Vaucluse",
   ],
-};
+}
 
 export const regionCode: { [key: string]: string } = {
   "Auvergne-Rhône-Alpes": "84",
@@ -291,14 +266,14 @@ export const regionCode: { [key: string]: string } = {
   Occitanie: "76",
   "Pays de la Loire": "52",
   "Provence-Alpes-Côte d'Azur": "93",
-};
+}
 
-export const stringFromCode =
-  (correspondance: { [key: string]: string }) => (code: string) =>
-    Object.entries(correspondance || {}).find(([_, c]) => c === code)?.[0] ||
-    "";
+export const stringFromCode = (correspondance: { [key: string]: string }) => (code: string) =>
+  //TODO REFACTOR : utiliser Object.values
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Object.entries(correspondance || {}).find(([_, c]) => c === code)?.[0] || ""
 
-export const regionFromCode = stringFromCode(regionCode);
+export const regionFromCode = stringFromCode(regionCode)
 
 export const departementCode: { [key: string]: string } = {
   Ain: "01",
@@ -410,6 +385,6 @@ export const departementCode: { [key: string]: string } = {
   "Polynésie française": "987",
   "Nouvelle-Calédonie": "988",
   "Île de Clipperton": "989",
-};
+}
 
-export const departementFromCode = stringFromCode(departementCode);
+export const departementFromCode = stringFromCode(departementCode)

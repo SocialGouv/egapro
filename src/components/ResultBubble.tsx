@@ -1,18 +1,18 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import Bubble from "./Bubble";
+import Bubble from "./Bubble"
 
 export interface Props {
-  firstLineLabel: string;
-  firstLineData: string;
-  firstLineInfo?: string;
-  secondLineLabel: string;
-  secondLineData: string;
-  secondLineInfo?: string;
-  indicateurSexeSurRepresente?: "hommes" | "femmes" | undefined;
+  firstLineLabel: string
+  firstLineData: string
+  firstLineInfo?: string
+  secondLineLabel: string
+  secondLineData: string
+  secondLineInfo?: string
+  indicateurSexeSurRepresente?: "hommes" | "femmes" | undefined
 }
 
 function ResultBubble({
@@ -22,13 +22,13 @@ function ResultBubble({
   secondLineLabel,
   secondLineData,
   secondLineInfo,
-  indicateurSexeSurRepresente
+  indicateurSexeSurRepresente,
 }: Props) {
   return (
     <Bubble
       style={[
         indicateurSexeSurRepresente === "femmes" && styles.blocWomen,
-        indicateurSexeSurRepresente === "hommes" && styles.blocMen
+        indicateurSexeSurRepresente === "hommes" && styles.blocMen,
       ]}
     >
       <div css={styles.blocInfo}>
@@ -47,7 +47,7 @@ function ResultBubble({
         {secondLineInfo && <p css={styles.info}>{secondLineInfo}</p>}
       </div>
     </Bubble>
-  );
+  )
 }
 
 const styles = {
@@ -55,18 +55,18 @@ const styles = {
     backgroundColor: globalStyles.colors.women,
     "@media print": {
       color: globalStyles.colors.women,
-      border: `solid ${globalStyles.colors.women} 1px`
-    }
+      border: `solid ${globalStyles.colors.women} 1px`,
+    },
   }),
   blocMen: css({
     backgroundColor: globalStyles.colors.men,
     "@media print": {
       color: globalStyles.colors.men,
-      border: `solid ${globalStyles.colors.men} 1px`
-    }
+      border: `solid ${globalStyles.colors.men} 1px`,
+    },
   }),
   blocInfo: css({
-    borderBottom: "1px solid #FFFFFF"
+    borderBottom: "1px solid #FFFFFF",
   }),
   message: css({
     marginBottom: 2,
@@ -74,20 +74,20 @@ const styles = {
     alignItems: "baseline",
 
     fontSize: 14,
-    lineHeight: "17px"
+    lineHeight: "17px",
   }),
   messageLabel: css({
-    marginRight: "auto"
+    marginRight: "auto",
   }),
   messageData: css({
-    fontWeight: "bold"
+    fontWeight: "bold",
   }),
   info: css({
     marginTop: 7,
     fontSize: 12,
     fontStyle: "italic",
-    lineHeight: "15px"
-  })
-};
+    lineHeight: "15px",
+  }),
+}
 
-export default ResultBubble;
+export default ResultBubble

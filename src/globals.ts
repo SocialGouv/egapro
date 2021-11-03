@@ -1,408 +1,405 @@
 export type AppState = {
   informations: {
-    formValidated: FormState;
-    nomEntreprise: string;
-    trancheEffectifs: TrancheEffectifs;
-    anneeDeclaration: number | undefined;
-    finPeriodeReference: string;
-  };
+    formValidated: FormState
+    nomEntreprise: string
+    trancheEffectifs: TrancheEffectifs
+    anneeDeclaration: number | undefined
+    finPeriodeReference: string
+  }
   effectif: {
-    formValidated: FormState;
-    nombreSalaries: Array<GroupeEffectif>;
-  };
+    formValidated: FormState
+    nombreSalaries: Array<GroupeEffectif>
+  }
   indicateurUn: {
-    formValidated: FormState;
-    csp: boolean;
-    coef: boolean;
-    autre: boolean;
-    remunerationAnnuelle: Array<GroupeIndicateurUn>;
-    coefficientGroupFormValidated: FormState;
-    coefficientEffectifFormValidated: FormState;
-    coefficient: Array<GroupeCoefficient>;
-  };
+    formValidated: FormState
+    csp: boolean
+    coef: boolean
+    autre: boolean
+    remunerationAnnuelle: Array<GroupeIndicateurUn>
+    coefficientGroupFormValidated: FormState
+    coefficientEffectifFormValidated: FormState
+    coefficient: Array<GroupeCoefficient>
+  }
   indicateurDeux: {
-    formValidated: FormState;
-    presenceAugmentation: boolean;
-    tauxAugmentation: Array<GroupeIndicateurDeux>;
-  };
+    formValidated: FormState
+    presenceAugmentation: boolean
+    tauxAugmentation: Array<GroupeIndicateurDeux>
+  }
   indicateurTrois: {
-    formValidated: FormState;
-    presencePromotion: boolean;
-    tauxPromotion: Array<GroupeIndicateurTrois>;
-  };
+    formValidated: FormState
+    presencePromotion: boolean
+    tauxPromotion: Array<GroupeIndicateurTrois>
+  }
   indicateurDeuxTrois: {
-    formValidated: FormState;
-    presenceAugmentationPromotion: boolean;
-    nombreAugmentationPromotionFemmes: number | undefined;
-    nombreAugmentationPromotionHommes: number | undefined;
-    periodeDeclaration: PeriodeDeclaration;
-  };
+    formValidated: FormState
+    presenceAugmentationPromotion: boolean
+    nombreAugmentationPromotionFemmes: number | undefined
+    nombreAugmentationPromotionHommes: number | undefined
+    periodeDeclaration: PeriodeDeclaration
+  }
   indicateurQuatre: {
-    formValidated: FormState;
-    presenceCongeMat: boolean;
-    nombreSalarieesPeriodeAugmentation: number | undefined;
-    nombreSalarieesAugmentees: number | undefined;
-  };
+    formValidated: FormState
+    presenceCongeMat: boolean
+    nombreSalarieesPeriodeAugmentation: number | undefined
+    nombreSalarieesAugmentees: number | undefined
+  }
   indicateurCinq: {
-    formValidated: FormState;
-    nombreSalariesHommes: number | undefined;
-    nombreSalariesFemmes: number | undefined;
-  };
+    formValidated: FormState
+    nombreSalariesHommes: number | undefined
+    nombreSalariesFemmes: number | undefined
+  }
   informationsEntreprise: {
-    formValidated: FormState;
-    nomEntreprise: string;
-    siren: string;
-    codeNaf: string;
-    region: string;
-    departement: string;
-    adresse: string;
-    codePostal: string;
-    commune: string;
-    structure: Structure;
-    nomUES: string;
-    nombreEntreprises: number | undefined;
-    entreprisesUES: Array<EntrepriseUES>;
-  };
+    formValidated: FormState
+    nomEntreprise: string
+    siren: string
+    codeNaf: string
+    region: string
+    departement: string
+    adresse: string
+    codePostal: string
+    commune: string
+    structure: Structure
+    nomUES: string
+    nombreEntreprises: number | undefined
+    entreprisesUES: Array<EntrepriseUES>
+  }
   informationsDeclarant: {
-    formValidated: FormState;
-    nom: string;
-    prenom: string;
-    tel: string;
-    email: string;
-    acceptationCGU: boolean;
-  };
+    formValidated: FormState
+    nom: string
+    prenom: string
+    tel: string
+    email: string
+    acceptationCGU: boolean
+  }
   declaration: {
-    formValidated: FormState;
-    mesuresCorrection: string;
-    cseMisEnPlace: boolean | undefined;
-    dateConsultationCSE: string;
-    datePublication: string;
-    publicationSurSiteInternet: boolean | undefined;
-    lienPublication: string;
-    modalitesPublication: string;
-    dateDeclaration: string;
-    noteIndex: number | undefined;
-    totalPoint: number;
-    totalPointCalculable: number;
-  };
-};
+    formValidated: FormState
+    mesuresCorrection: string
+    cseMisEnPlace: boolean | undefined
+    dateConsultationCSE: string
+    datePublication: string
+    publicationSurSiteInternet: boolean | undefined
+    lienPublication: string
+    modalitesPublication: string
+    dateDeclaration: string
+    noteIndex: number | undefined
+    totalPoint: number
+    totalPointCalculable: number
+  }
+}
 
-export type PeriodeDeclaration =
-  | "unePeriodeReference"
-  | "deuxPeriodesReference"
-  | "troisPeriodesReference";
+export type PeriodeDeclaration = "unePeriodeReference" | "deuxPeriodesReference" | "troisPeriodesReference"
 
-export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus";
+export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus"
 
-export type FormState = "None" | "Valid" | "Invalid";
+export type FormState = "None" | "Valid" | "Invalid"
 
-export type Structure = "Entreprise" | "Unité Economique et Sociale (UES)";
+export type Structure = "Entreprise" | "Unité Economique et Sociale (UES)"
 
 export interface EntrepriseUES {
-  nom: string;
-  siren: string;
+  nom: string
+  siren: string
 }
 
 export type ActionType =
   | {
-      type: "resetState";
+      type: "resetState"
     }
   | {
-      type: "initiateState";
-      data: any;
+      type: "initiateState"
+      data: any
     }
   | {
-      type: "updateInformationsSimulation";
-      data: ActionInformationsSimulationData;
+      type: "updateInformationsSimulation"
+      data: ActionInformationsSimulationData
     }
   | {
-      type: "validateInformationsSimulation";
-      valid: FormState;
+      type: "validateInformationsSimulation"
+      valid: FormState
     }
   | {
-      type: "updateEffectif";
-      data: ActionEffectifData;
+      type: "updateEffectif"
+      data: ActionEffectifData
     }
   | {
-      type: "validateEffectif";
-      valid: FormState;
+      type: "validateEffectif"
+      valid: FormState
     }
   | {
-      type: "updateIndicateurUnType";
-      data: ActionIndicateurUnTypeData;
+      type: "updateIndicateurUnType"
+      data: ActionIndicateurUnTypeData
     }
   | {
-      type: "updateIndicateurUnCsp";
-      data: ActionIndicateurUnCspData;
+      type: "updateIndicateurUnCsp"
+      data: ActionIndicateurUnCspData
     }
   | {
-      type: "updateIndicateurUnCoefAddGroup";
+      type: "updateIndicateurUnCoefAddGroup"
     }
   | {
-      type: "updateIndicateurUnCoefDeleteGroup";
-      index: number;
+      type: "updateIndicateurUnCoefDeleteGroup"
+      index: number
     }
   | {
-      type: "updateIndicateurUnCoef";
-      data: ActionIndicateurUnCoefData;
+      type: "updateIndicateurUnCoef"
+      data: ActionIndicateurUnCoefData
     }
   | {
-      type: "validateIndicateurUnCoefGroup";
-      valid: FormState;
+      type: "validateIndicateurUnCoefGroup"
+      valid: FormState
     }
   | {
-      type: "validateIndicateurUnCoefEffectif";
-      valid: FormState;
+      type: "validateIndicateurUnCoefEffectif"
+      valid: FormState
     }
   | {
-      type: "validateIndicateurUn";
-      valid: FormState;
+      type: "validateIndicateurUn"
+      valid: FormState
     }
   | {
-      type: "updateIndicateurDeux";
-      data: ActionIndicateurDeuxData;
+      type: "updateIndicateurDeux"
+      data: ActionIndicateurDeuxData
     }
   | {
-      type: "validateIndicateurDeux";
-      valid: FormState;
+      type: "validateIndicateurDeux"
+      valid: FormState
     }
   | {
-      type: "updateIndicateurTrois";
-      data: ActionIndicateurTroisData;
+      type: "updateIndicateurTrois"
+      data: ActionIndicateurTroisData
     }
   | {
-      type: "validateIndicateurTrois";
-      valid: FormState;
+      type: "validateIndicateurTrois"
+      valid: FormState
     }
   | {
-      type: "updateIndicateurDeuxTrois";
-      data: ActionIndicateurDeuxTroisData;
+      type: "updateIndicateurDeuxTrois"
+      data: ActionIndicateurDeuxTroisData
     }
   | {
-      type: "validateIndicateurDeuxTrois";
-      valid: FormState;
+      type: "validateIndicateurDeuxTrois"
+      valid: FormState
     }
   | {
-      type: "updateIndicateurQuatre";
-      data: ActionIndicateurQuatreData;
+      type: "updateIndicateurQuatre"
+      data: ActionIndicateurQuatreData
     }
   | {
-      type: "validateIndicateurQuatre";
-      valid: FormState;
+      type: "validateIndicateurQuatre"
+      valid: FormState
     }
   | {
-      type: "updateIndicateurCinq";
-      data: ActionIndicateurCinqData;
+      type: "updateIndicateurCinq"
+      data: ActionIndicateurCinqData
     }
   | {
-      type: "validateIndicateurCinq";
-      valid: FormState;
+      type: "validateIndicateurCinq"
+      valid: FormState
     }
   | {
-      type: "updateInformationsEntreprise";
-      data: ActionInformationsEntrepriseData;
+      type: "updateInformationsEntreprise"
+      data: ActionInformationsEntrepriseData
     }
   | {
-      type: "validateInformationsEntreprise";
-      valid: FormState;
+      type: "validateInformationsEntreprise"
+      valid: FormState
     }
   | {
-      type: "updateInformationsDeclarant";
-      data: ActionInformationsDeclarantData;
+      type: "updateInformationsDeclarant"
+      data: ActionInformationsDeclarantData
     }
   | {
-      type: "validateInformationsDeclarant";
-      valid: FormState;
+      type: "validateInformationsDeclarant"
+      valid: FormState
     }
   | {
-      type: "updateDeclaration";
-      data: ActionDeclarationData;
+      type: "updateDeclaration"
+      data: ActionDeclarationData
     }
   | {
-      type: "validateDeclaration";
-      valid: FormState;
-      effectifData: DeclarationEffectifData;
-      indicateurUnData: DeclarationIndicateurUnData;
-      indicateurDeuxData: DeclarationIndicateurDeuxData;
-      indicateurTroisData: DeclarationIndicateurTroisData;
-      indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData;
-      indicateurQuatreData: DeclarationIndicateurQuatreData;
-      indicateurCinqData: DeclarationIndicateurCinqData;
-      noteIndex: number | undefined;
-      totalPoint: number;
-      totalPointCalculable: number;
+      type: "validateDeclaration"
+      valid: FormState
+      effectifData: DeclarationEffectifData
+      indicateurUnData: DeclarationIndicateurUnData
+      indicateurDeuxData: DeclarationIndicateurDeuxData
+      indicateurTroisData: DeclarationIndicateurTroisData
+      indicateurDeuxTroisData: DeclarationIndicateurDeuxTroisData
+      indicateurQuatreData: DeclarationIndicateurQuatreData
+      indicateurCinqData: DeclarationIndicateurCinqData
+      noteIndex: number | undefined
+      totalPoint: number
+      totalPointCalculable: number
     }
   | {
-      type: "updateEmailDeclarant";
-      data: ActionEmailDeclarantData;
-    };
+      type: "updateEmailDeclarant"
+      data: ActionEmailDeclarantData
+    }
 
 export type ActionInformationsSimulationData = {
-  nomEntreprise: string;
-  trancheEffectifs: TrancheEffectifs;
-  anneeDeclaration: number | undefined;
-  finPeriodeReference: string;
-};
+  nomEntreprise: string
+  trancheEffectifs: TrancheEffectifs
+  anneeDeclaration: number | undefined
+  finPeriodeReference: string
+}
 
 export type ActionEffectifData = {
-  nombreSalaries: Array<GroupeEffectif>;
-};
+  nombreSalaries: Array<GroupeEffectif>
+}
 
 export type DeclarationEffectifData = {
-  nombreSalariesTotal: number;
-};
+  nombreSalariesTotal: number
+}
 
 export type ActionIndicateurUnTypeData = {
-  csp: boolean;
-  coef: boolean;
-  autre: boolean;
-};
+  csp: boolean
+  coef: boolean
+  autre: boolean
+}
 
 export type ActionIndicateurUnCspData = {
-  remunerationAnnuelle: Array<GroupeIndicateurUn>;
-};
+  remunerationAnnuelle: Array<GroupeIndicateurUn>
+}
 
 export type ActionIndicateurUnCoefData = {
   coefficient:
     | Array<{ name: string }>
     | Array<{
-        tranchesAges: Array<GroupTranchesAgesEffectif>;
+        tranchesAges: Array<GroupTranchesAgesEffectif>
       }>
     | Array<{
-        tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
-      }>;
-};
+        tranchesAges: Array<GroupTranchesAgesIndicateurUn>
+      }>
+}
 
 export type DeclarationIndicateurUnData = {
-  nombreCoefficients: number | undefined;
-  nonCalculable: boolean;
-  motifNonCalculable: string;
-  motifNonCalculablePrecision: string;
-  remunerationAnnuelle: Array<GroupeIndicateurUn>;
-  coefficient: Array<GroupeCoefficient>;
-  resultatFinal: number | undefined;
-  sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteFinale: number | undefined;
-};
+  nombreCoefficients: number | undefined
+  nonCalculable: boolean
+  motifNonCalculable: string
+  motifNonCalculablePrecision: string
+  remunerationAnnuelle: Array<GroupeIndicateurUn>
+  coefficient: Array<GroupeCoefficient>
+  resultatFinal: number | undefined
+  sexeSurRepresente: undefined | "femmes" | "hommes"
+  noteFinale: number | undefined
+}
 
 export type ActionIndicateurDeuxData = {
-  presenceAugmentation: boolean;
-  tauxAugmentation: Array<GroupeIndicateurDeux>;
-};
+  presenceAugmentation: boolean
+  tauxAugmentation: Array<GroupeIndicateurDeux>
+}
 
 export type DeclarationIndicateurDeuxData = {
-  nonCalculable: boolean;
-  motifNonCalculable: string;
-  motifNonCalculablePrecision: string;
-  tauxAugmentation: Array<GroupeIndicateurDeux>;
-  resultatFinal: number | undefined;
-  sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteFinale: number | undefined;
-  mesuresCorrection: boolean;
-};
+  nonCalculable: boolean
+  motifNonCalculable: string
+  motifNonCalculablePrecision: string
+  tauxAugmentation: Array<GroupeIndicateurDeux>
+  resultatFinal: number | undefined
+  sexeSurRepresente: undefined | "femmes" | "hommes"
+  noteFinale: number | undefined
+  mesuresCorrection: boolean
+}
 
 export type ActionIndicateurTroisData = {
-  presencePromotion: boolean;
-  tauxPromotion: Array<GroupeIndicateurTrois>;
-};
+  presencePromotion: boolean
+  tauxPromotion: Array<GroupeIndicateurTrois>
+}
 
 export type DeclarationIndicateurTroisData = {
-  nonCalculable: boolean;
-  motifNonCalculable: string;
-  motifNonCalculablePrecision: string;
-  tauxPromotion: Array<GroupeIndicateurTrois>;
-  resultatFinal: number | undefined;
-  sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteFinale: number | undefined;
-  mesuresCorrection: boolean;
-};
+  nonCalculable: boolean
+  motifNonCalculable: string
+  motifNonCalculablePrecision: string
+  tauxPromotion: Array<GroupeIndicateurTrois>
+  resultatFinal: number | undefined
+  sexeSurRepresente: undefined | "femmes" | "hommes"
+  noteFinale: number | undefined
+  mesuresCorrection: boolean
+}
 
 export type ActionIndicateurDeuxTroisData = {
-  presenceAugmentationPromotion: boolean;
-  nombreAugmentationPromotionFemmes: number | undefined;
-  nombreAugmentationPromotionHommes: number | undefined;
-  periodeDeclaration: PeriodeDeclaration;
-};
+  presenceAugmentationPromotion: boolean
+  nombreAugmentationPromotionFemmes: number | undefined
+  nombreAugmentationPromotionHommes: number | undefined
+  periodeDeclaration: PeriodeDeclaration
+}
 
 export type DeclarationIndicateurDeuxTroisData = {
-  nonCalculable: boolean;
-  motifNonCalculable: string;
-  motifNonCalculablePrecision: string;
-  resultatFinalEcart: number | undefined;
-  resultatFinalNombreSalaries: number | undefined;
-  sexeSurRepresente: undefined | "femmes" | "hommes";
-  noteEcart: number | undefined;
-  noteNombreSalaries: number | undefined;
-  noteFinale: number | undefined;
-  mesuresCorrection: boolean;
-};
+  nonCalculable: boolean
+  motifNonCalculable: string
+  motifNonCalculablePrecision: string
+  resultatFinalEcart: number | undefined
+  resultatFinalNombreSalaries: number | undefined
+  sexeSurRepresente: undefined | "femmes" | "hommes"
+  noteEcart: number | undefined
+  noteNombreSalaries: number | undefined
+  noteFinale: number | undefined
+  mesuresCorrection: boolean
+}
 
 export type DateInterval = {
-  start: Date;
-  end: Date;
-};
+  start: Date
+  end: Date
+}
 
 export type ActionIndicateurQuatreData = {
-  presenceCongeMat: boolean;
-  nombreSalarieesPeriodeAugmentation: number | undefined;
-  nombreSalarieesAugmentees: number | undefined;
-};
+  presenceCongeMat: boolean
+  nombreSalarieesPeriodeAugmentation: number | undefined
+  nombreSalarieesAugmentees: number | undefined
+}
 
 export type DeclarationIndicateurQuatreData = {
-  nonCalculable: boolean;
-  motifNonCalculable: string;
-  motifNonCalculablePrecision: string;
-  resultatFinal: number | undefined;
-  noteFinale: number | undefined;
-};
+  nonCalculable: boolean
+  motifNonCalculable: string
+  motifNonCalculablePrecision: string
+  resultatFinal: number | undefined
+  noteFinale: number | undefined
+}
 
 export type ActionIndicateurCinqData = {
-  nombreSalariesHommes: number | undefined;
-  nombreSalariesFemmes: number | undefined;
-};
+  nombreSalariesHommes: number | undefined
+  nombreSalariesFemmes: number | undefined
+}
 
 export type DeclarationIndicateurCinqData = {
-  resultatFinal: number | undefined;
-  sexeSurRepresente: undefined | "egalite" | "femmes" | "hommes";
-  noteFinale: number | undefined;
-};
+  resultatFinal: number | undefined
+  sexeSurRepresente: undefined | "egalite" | "femmes" | "hommes"
+  noteFinale: number | undefined
+}
 
 export type ActionInformationsEntrepriseData = {
-  nomEntreprise: string;
-  siren: string;
-  codeNaf: string;
-  region: string;
-  departement: string;
-  adresse: string;
-  codePostal: string;
-  commune: string;
-  structure: Structure;
-  nomUES: string;
-  nombreEntreprises: number | undefined;
-  entreprisesUES: Array<EntrepriseUES>;
-};
+  nomEntreprise: string
+  siren: string
+  codeNaf: string
+  region: string
+  departement: string
+  adresse: string
+  codePostal: string
+  commune: string
+  structure: Structure
+  nomUES: string
+  nombreEntreprises: number | undefined
+  entreprisesUES: Array<EntrepriseUES>
+}
 
 export type ActionInformationsDeclarantData = {
-  nom: string;
-  prenom: string;
-  tel: string;
-  email: string;
-  acceptationCGU: boolean;
-};
+  nom: string
+  prenom: string
+  tel: string
+  email: string
+  acceptationCGU: boolean
+}
 
 export type ActionDeclarationData = {
-  mesuresCorrection: string;
-  cseMisEnPlace?: boolean | undefined;
-  dateConsultationCSE: string;
-  datePublication: string;
-  publicationSurSiteInternet?: boolean | undefined;
-  lienPublication: string;
-  modalitesPublication: string;
-};
+  mesuresCorrection: string
+  cseMisEnPlace?: boolean | undefined
+  dateConsultationCSE: string
+  datePublication: string
+  publicationSurSiteInternet?: boolean | undefined
+  lienPublication: string
+  modalitesPublication: string
+}
 
 export type ActionEmailDeclarantData = {
-  email: string;
-};
+  email: string
+}
 
 ////
 
@@ -421,54 +418,54 @@ export enum CategorieSocioPro {
 }
 
 export interface GroupTranchesAgesEffectif {
-  trancheAge: TranchesAges;
-  nombreSalariesFemmes: number | undefined;
-  nombreSalariesHommes: number | undefined;
+  trancheAge: TranchesAges
+  nombreSalariesFemmes: number | undefined
+  nombreSalariesHommes: number | undefined
 }
 
 export interface GroupeEffectif {
-  categorieSocioPro: CategorieSocioPro;
-  tranchesAges: Array<GroupTranchesAgesEffectif>;
+  categorieSocioPro: CategorieSocioPro
+  tranchesAges: Array<GroupTranchesAgesEffectif>
 }
 
 export interface GroupTranchesAgesIndicateurUn {
-  trancheAge: TranchesAges;
-  remunerationAnnuelleBrutFemmes: number | undefined;
-  remunerationAnnuelleBrutHommes: number | undefined;
-  ecartTauxRemuneration?: number | undefined;
+  trancheAge: TranchesAges
+  remunerationAnnuelleBrutFemmes: number | undefined
+  remunerationAnnuelleBrutHommes: number | undefined
+  ecartTauxRemuneration?: number | undefined
 }
 
 export interface GroupeIndicateurUn {
-  categorieSocioPro: CategorieSocioPro;
-  tranchesAges: Array<GroupTranchesAgesIndicateurUn>;
+  categorieSocioPro: CategorieSocioPro
+  tranchesAges: Array<GroupTranchesAgesIndicateurUn>
 }
 
 export interface GroupTranchesAgesCoefficient {
-  trancheAge: TranchesAges;
-  nombreSalariesFemmes: number | undefined;
-  nombreSalariesHommes: number | undefined;
-  remunerationAnnuelleBrutFemmes: number | undefined;
-  remunerationAnnuelleBrutHommes: number | undefined;
-  ecartTauxRemuneration: number | undefined;
+  trancheAge: TranchesAges
+  nombreSalariesFemmes: number | undefined
+  nombreSalariesHommes: number | undefined
+  remunerationAnnuelleBrutFemmes: number | undefined
+  remunerationAnnuelleBrutHommes: number | undefined
+  ecartTauxRemuneration: number | undefined
 }
 
 export interface GroupeCoefficient {
-  name: string;
-  tranchesAges: Array<GroupTranchesAgesCoefficient>;
+  name: string
+  tranchesAges: Array<GroupTranchesAgesCoefficient>
 }
 
 export interface GroupeIndicateurDeux {
-  categorieSocioPro: CategorieSocioPro;
-  tauxAugmentationFemmes: number | undefined;
-  tauxAugmentationHommes: number | undefined;
-  ecartTauxAugmentation?: number | undefined;
+  categorieSocioPro: CategorieSocioPro
+  tauxAugmentationFemmes: number | undefined
+  tauxAugmentationHommes: number | undefined
+  ecartTauxAugmentation?: number | undefined
 }
 
 export interface GroupeIndicateurTrois {
-  categorieSocioPro: CategorieSocioPro;
-  tauxPromotionFemmes: number | undefined;
-  tauxPromotionHommes: number | undefined;
-  ecartTauxPromotion?: number | undefined;
+  categorieSocioPro: CategorieSocioPro
+  tauxPromotionFemmes: number | undefined
+  tauxPromotionHommes: number | undefined
+  ecartTauxPromotion?: number | undefined
 }
 
 ////////////
@@ -483,14 +480,14 @@ export type FAQPartType =
   | "indicateur3"
   | "indicateur2et3"
   | "indicateur4"
-  | "publication";
+  | "publication"
 
 export type FAQPart = {
   [key in FAQPartType]: {
-    title: string;
-    qr: Array<{ question: string; reponse: Array<string> }>;
-  };
-};
+    title: string
+    qr: Array<{ question: string; reponse: Array<string> }>
+  }
+}
 
 export type FAQSectionType =
   | "champApplication"
@@ -502,11 +499,11 @@ export type FAQSectionType =
   | "indicateur2et3"
   | "indicateur4"
   | "indicateur5"
-  | "resultat";
+  | "resultat"
 
 export type FAQSection = {
   [key in FAQSectionType]: {
-    title: string;
-    parts: Array<FAQPartType>;
-  };
-};
+    title: string
+    parts: Array<FAQPartType>
+  }
+}

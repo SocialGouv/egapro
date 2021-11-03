@@ -1,18 +1,16 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+import { css, jsx } from "@emotion/core"
 
 function Logo({ layout = "default" }: { layout?: "default" | "mobile" }) {
   return (
-    <div
-      css={[styles.container, layout === "mobile" && styles.containerMobile]}
-    >
+    <div css={[styles.container, layout === "mobile" && styles.containerMobile]}>
       <img
         css={[styles.image, layout === "mobile" && styles.imageMobile]}
         src={process.env.PUBLIC_URL + "/marianne.svg"}
         alt="Ministère du Travail"
       />
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -20,12 +18,12 @@ const styles = {
     flexShrink: 0,
     display: "flex",
     flexDirection: "column",
-    width: 76
+    width: 76,
   }),
   containerMobile: css({
     flexDirection: "row",
     alignItems: "flex-end",
-    width: "auto"
+    width: "auto",
   }),
   image: css({
     display: "block",
@@ -34,13 +32,13 @@ const styles = {
   imageMobile: css({
     width: 60,
     height: 36,
-    marginRight: 3
+    marginRight: 3,
   }),
   text: css({
     marginTop: 3,
     fontSize: 9,
-    textAlign: "center"
-  })
-};
+    textAlign: "center",
+  }),
+}
 
-export default Logo;
+export default Logo

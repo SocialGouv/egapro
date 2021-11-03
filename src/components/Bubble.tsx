@@ -1,12 +1,12 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { ReactNode } from "react"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
 export interface Props {
-  children: ReactNode;
-  style?: any;
+  children: ReactNode
+  style?: any
 }
 
 function Bubble({ children, style }: Props) {
@@ -14,7 +14,7 @@ function Bubble({ children, style }: Props) {
     <div css={styles.container}>
       <div css={[styles.bloc, style]}>{children}</div>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -44,6 +44,6 @@ const styles = {
       border: `solid ${globalStyles.colors.default} 1px`,
     },
   }),
-};
+}
 
-export default Bubble;
+export default Bubble

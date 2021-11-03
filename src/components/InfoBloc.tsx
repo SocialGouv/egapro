@@ -1,39 +1,31 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useState, ReactNode } from "react";
+import { css, jsx } from "@emotion/core"
+import { useState, ReactNode } from "react"
 
-import globalStyles from "../utils/globalStyles";
+import globalStyles from "../utils/globalStyles"
 
-import { IconWarning, IconCircleCross } from "./Icons";
-import { useColumnsWidth, useLayoutType } from "./GridContext";
+import { IconWarning, IconCircleCross } from "./Icons"
+import { useColumnsWidth, useLayoutType } from "./GridContext"
 
 interface Props {
-  title: string;
-  text?: ReactNode;
-  icon?: "warning" | "cross" | null;
-  additionalCss?: any;
-  closeButton?: boolean;
+  title: string
+  text?: ReactNode
+  icon?: "warning" | "cross" | null
+  additionalCss?: any
+  closeButton?: boolean
 }
 
-function InfoBloc({
-  title,
-  text,
-  icon = "warning",
-  additionalCss,
-  closeButton = false
-}: Props) {
-  const layoutType = useLayoutType();
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7);
-  const [isBlocVisible, setIsBlocVisible] = useState(true);
-  const discardBloc = () => setIsBlocVisible(false);
+function InfoBloc({ title, text, icon = "warning", additionalCss, closeButton = false }: Props) {
+  const layoutType = useLayoutType()
+  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
+  const [isBlocVisible, setIsBlocVisible] = useState(true)
+  const discardBloc = () => setIsBlocVisible(false)
 
   if (isBlocVisible) {
     return (
       <div css={[styles.bloc, css({ width }), additionalCss]}>
         {icon === null ? null : (
-          <div css={styles.blocIcon}>
-            {icon === "cross" ? <IconCircleCross /> : <IconWarning />}
-          </div>
+          <div css={styles.blocIcon}>{icon === "cross" ? <IconCircleCross /> : <IconWarning />}</div>
         )}
 
         <div css={styles.textWrapper}>
@@ -46,9 +38,9 @@ function InfoBloc({
           </button>
         )}
       </div>
-    );
+    )
   }
-  return null;
+  return null
 }
 
 const styles = {
@@ -58,33 +50,33 @@ const styles = {
     alignItems: "center",
     border: `2px solid ${globalStyles.colors.primary}`,
     borderRadius: 5,
-    position: "relative"
+    position: "relative",
   }),
   blocTitle: css({
     fontSize: 18,
     lineHeight: "22px",
-    color: globalStyles.colors.primary
+    color: globalStyles.colors.primary,
   }),
   blocIcon: {
     marginRight: 22,
-    color: globalStyles.colors.primary
+    color: globalStyles.colors.primary,
   },
   textWrapper: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   blocText: css({
     marginTop: 4,
     fontSize: 14,
     lineHeight: "17px",
-    color: globalStyles.colors.primary
+    color: globalStyles.colors.primary,
   }),
   buttonClose: css({
     backgroundColor: "inherit",
     border: 0,
     color: globalStyles.colors.primary,
     cursor: "pointer",
-    padding: 10
-  })
-};
+    padding: 10,
+  }),
+}
 
-export default InfoBloc;
+export default InfoBloc

@@ -1,22 +1,22 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useField } from "react-final-form";
+import { css, jsx } from "@emotion/core"
+import { useField } from "react-final-form"
 
-import { required } from "../../../../utils/formHelpers";
-import globalStyles from "../../../../utils/globalStyles";
+import { required } from "../../../../utils/formHelpers"
+import globalStyles from "../../../../utils/globalStyles"
 
-import Input, { hasFieldError } from "../../../../components/Input";
-import ActionLink from "../../../../components/ActionLink";
+import Input, { hasFieldError } from "../../../../components/Input"
+import ActionLink from "../../../../components/ActionLink"
 
 const validate = (value: string) => {
-  const requiredError = required(value);
+  const requiredError = required(value)
 
   if (!requiredError) {
-    return undefined;
+    return undefined
   } else {
-    return { required: requiredError };
+    return { required: requiredError }
   }
-};
+}
 
 function InputField({
   name,
@@ -24,24 +24,21 @@ function InputField({
   deleteGroup,
   readOnly,
 }: {
-  name: string;
-  index: number;
-  deleteGroup: (index: number) => void;
-  readOnly: boolean;
+  name: string
+  index: number
+  deleteGroup: (index: number) => void
+  readOnly: boolean
 }) {
   const field = useField(name, {
     validate,
     parse: (value) => value,
     format: (value) => value,
-  });
-  const error = hasFieldError(field.meta);
+  })
+  const error = hasFieldError(field.meta)
 
   return (
     <div css={styles.inputField}>
-      <label
-        css={[styles.label, error && styles.labelError]}
-        htmlFor={field.input.name}
-      >
+      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
         {`Groupe ${index + 1}`}
       </label>
 
@@ -58,11 +55,9 @@ function InputField({
         </div>
       )}
 
-      <p css={styles.error}>
-        {error && "vous devez donner un nom à votre groupe"}
-      </p>
+      <p css={styles.error}>{error && "vous devez donner un nom à votre groupe"}</p>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -111,6 +106,6 @@ const styles = {
     lineHeight: "38px",
     cursor: "not-allowed",
   }),
-};
+}
 
-export default InputField;
+export default InputField

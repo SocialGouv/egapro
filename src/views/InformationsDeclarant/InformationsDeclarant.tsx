@@ -1,37 +1,30 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { useCallback, ReactNode } from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { jsx } from "@emotion/core"
+import { useCallback, ReactNode } from "react"
+import { RouteComponentProps } from "react-router-dom"
 
-import {
-  AppState,
-  FormState,
-  ActionType,
-  ActionInformationsDeclarantData
-} from "../../globals";
+import { AppState, FormState, ActionType, ActionInformationsDeclarantData } from "../../globals"
 
-import Page from "../../components/Page";
-import LayoutFormAndResult from "../../components/LayoutFormAndResult";
+import Page from "../../components/Page"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
-import InformationsDeclarantForm from "./InformationsDeclarantForm";
+import InformationsDeclarantForm from "./InformationsDeclarantForm"
 
 interface Props extends RouteComponentProps {
-  state: AppState;
-  dispatch: (action: ActionType) => void;
+  state: AppState
+  dispatch: (action: ActionType) => void
 }
 
 function InformationsDeclarant({ state, dispatch }: Props) {
   const updateInformationsDeclarant = useCallback(
-    (data: ActionInformationsDeclarantData) =>
-      dispatch({ type: "updateInformationsDeclarant", data }),
-    [dispatch]
-  );
+    (data: ActionInformationsDeclarantData) => dispatch({ type: "updateInformationsDeclarant", data }),
+    [dispatch],
+  )
 
   const validateInformationsDeclarant = useCallback(
-    (valid: FormState) =>
-      dispatch({ type: "validateInformationsDeclarant", valid }),
-    [dispatch]
-  );
+    (valid: FormState) => dispatch({ type: "validateInformationsDeclarant", valid }),
+    [dispatch],
+  )
 
   return (
     <PageInformationsDeclarant>
@@ -47,7 +40,7 @@ function InformationsDeclarant({ state, dispatch }: Props) {
         childrenResult={null}
       />
     </PageInformationsDeclarant>
-  );
+  )
 }
 
 function PageInformationsDeclarant({ children }: { children: ReactNode }) {
@@ -58,7 +51,7 @@ function PageInformationsDeclarant({ children }: { children: ReactNode }) {
     >
       {children}
     </Page>
-  );
+  )
 }
 
-export default InformationsDeclarant;
+export default InformationsDeclarant

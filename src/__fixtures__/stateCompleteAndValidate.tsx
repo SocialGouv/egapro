@@ -1,73 +1,73 @@
-import { FormState } from "../globals";
-import AppReducer from "../AppReducer";
+import { FormState } from "../globals"
+import AppReducer from "../AppReducer"
 
-import stateComplete from "./stateComplete";
+import stateComplete from "./stateComplete"
 
 const actionValidateInformationsSimulation = {
-  type: "validateInformationsSimulation" as "validateInformationsSimulation",
-  valid: "Valid" as FormState
-};
+  type: "validateInformationsSimulation" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateEffectif = {
-  type: "validateEffectif" as "validateEffectif",
-  valid: "Valid" as FormState
-};
+  type: "validateEffectif" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurUnCoefGroup = {
-  type: "validateIndicateurUnCoefGroup" as "validateIndicateurUnCoefGroup",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurUnCoefGroup" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurUnCoefEffectif = {
-  type: "validateIndicateurUnCoefEffectif" as "validateIndicateurUnCoefEffectif",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurUnCoefEffectif" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurUn = {
-  type: "validateIndicateurUn" as "validateIndicateurUn",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurUn" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurDeux = {
-  type: "validateIndicateurDeux" as "validateIndicateurDeux",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurDeux" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurTrois = {
-  type: "validateIndicateurTrois" as "validateIndicateurTrois",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurTrois" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurDeuxTrois = {
-  type: "validateIndicateurDeuxTrois" as "validateIndicateurDeuxTrois",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurDeuxTrois" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurQuatre = {
-  type: "validateIndicateurQuatre" as "validateIndicateurQuatre",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurQuatre" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateIndicateurCinq = {
-  type: "validateIndicateurCinq" as "validateIndicateurCinq",
-  valid: "Valid" as FormState
-};
+  type: "validateIndicateurCinq" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateInformationsEntreprise = {
-  type: "validateInformationsEntreprise" as "validateInformationsEntreprise",
-  valid: "Valid" as FormState
-};
+  type: "validateInformationsEntreprise" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateInformationsDeclarant = {
-  type: "validateInformationsDeclarant" as "validateInformationsDeclarant",
-  valid: "Valid" as FormState
-};
+  type: "validateInformationsDeclarant" as const,
+  valid: "Valid" as FormState,
+}
 
 const actionValidateDeclaration = {
-  type: "validateDeclaration" as "validateDeclaration",
+  type: "validateDeclaration" as const,
   valid: "Valid" as FormState,
   effectifData: {
-    nombreSalariesTotal: 52
+    nombreSalariesTotal: 52,
   },
   indicateurUnData: {
     nombreCoefficients: 6,
@@ -78,7 +78,7 @@ const actionValidateDeclaration = {
     coefficient: [],
     resultatFinal: 8.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
-    noteFinale: 31
+    noteFinale: 31,
   },
   indicateurDeuxData: {
     nonCalculable: false,
@@ -88,7 +88,7 @@ const actionValidateDeclaration = {
     resultatFinal: 5.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 10,
-    mesuresCorrection: false
+    mesuresCorrection: false,
   },
   indicateurTroisData: {
     nonCalculable: false,
@@ -98,7 +98,7 @@ const actionValidateDeclaration = {
     resultatFinal: 3.0,
     sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
     noteFinale: 15,
-    mesuresCorrection: false
+    mesuresCorrection: false,
   },
   indicateurDeuxTroisData: {
     nonCalculable: false,
@@ -110,29 +110,29 @@ const actionValidateDeclaration = {
     noteEcart: 25,
     noteNombreSalaries: 5,
     noteFinale: 25,
-    mesuresCorrection: false
+    mesuresCorrection: false,
   },
   indicateurQuatreData: {
     nonCalculable: false,
     motifNonCalculable: "",
     motifNonCalculablePrecision: "",
     resultatFinal: 80.0,
-    noteFinale: 0
+    noteFinale: 0,
   },
   indicateurCinqData: {
     resultatFinal: 4.0,
     sexeSurRepresente: "hommes" as undefined | "egalite" | "femmes" | "hommes",
-    noteFinale: 10
+    noteFinale: 10,
   },
   noteIndex: 78,
   totalPoint: 66,
-  totalPointCalculable: 85
-};
+  totalPointCalculable: 85,
+}
 
 // Mock the Date for tests
-const realDate = global.Date;
+const realDate = global.Date
 // @ts-ignore
-global.Date = jest.fn(() => new realDate(1578393480399));
+global.Date = jest.fn(() => new realDate(1578393480399))
 
 const stateDefault = AppReducer(
   AppReducer(
@@ -146,36 +146,33 @@ const stateDefault = AppReducer(
                   AppReducer(
                     AppReducer(
                       AppReducer(
-                        AppReducer(
-                          stateComplete,
-                          actionValidateInformationsSimulation
-                        ),
-                        actionValidateEffectif
+                        AppReducer(stateComplete, actionValidateInformationsSimulation),
+                        actionValidateEffectif,
                       ),
-                      actionValidateIndicateurUnCoefGroup
+                      actionValidateIndicateurUnCoefGroup,
                     ),
-                    actionValidateIndicateurUnCoefEffectif
+                    actionValidateIndicateurUnCoefEffectif,
                   ),
-                  actionValidateIndicateurUn
+                  actionValidateIndicateurUn,
                 ),
-                actionValidateIndicateurDeux
+                actionValidateIndicateurDeux,
               ),
-              actionValidateIndicateurTrois
+              actionValidateIndicateurTrois,
             ),
-            actionValidateIndicateurDeuxTrois
+            actionValidateIndicateurDeuxTrois,
           ),
-          actionValidateIndicateurQuatre
+          actionValidateIndicateurQuatre,
         ),
-        actionValidateIndicateurCinq
+        actionValidateIndicateurCinq,
       ),
-      actionValidateInformationsEntreprise
+      actionValidateInformationsEntreprise,
     ),
-    actionValidateInformationsDeclarant
+    actionValidateInformationsDeclarant,
   ),
-  actionValidateDeclaration
-);
+  actionValidateDeclaration,
+)
 
 // Restore the Date
-global.Date = realDate;
+global.Date = realDate
 
-export default stateDefault;
+export default stateDefault

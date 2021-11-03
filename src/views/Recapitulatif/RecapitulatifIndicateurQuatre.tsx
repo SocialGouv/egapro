@@ -1,22 +1,22 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { css, jsx } from "@emotion/core"
+import { Fragment } from "react"
 
-import { FormState } from "../../globals";
+import { FormState } from "../../globals"
 
-import { displayPercent } from "../../utils/helpers";
+import { displayPercent } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc";
-import RecapBloc from "./components/RecapBloc";
-import { TextSimulatorLink } from "../../components/SimulatorLink";
+import InfoBloc from "../../components/InfoBloc"
+import RecapBloc from "./components/RecapBloc"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 interface Props {
-  indicateurQuatreFormValidated: FormState;
-  indicateurQuatreCalculable: boolean;
-  indicateurEcartNombreSalarieesAugmentees: number | undefined;
-  presenceCongeMat: boolean;
-  nombreSalarieesPeriodeAugmentation: number | undefined;
-  noteIndicateurQuatre: number | undefined;
+  indicateurQuatreFormValidated: FormState
+  indicateurQuatreCalculable: boolean
+  indicateurEcartNombreSalarieesAugmentees: number | undefined
+  presenceCongeMat: boolean
+  nombreSalarieesPeriodeAugmentation: number | undefined
+  noteIndicateurQuatre: number | undefined
 }
 
 function RecapitulatifIndicateurQuatre({
@@ -25,7 +25,7 @@ function RecapitulatifIndicateurQuatre({
   indicateurEcartNombreSalarieesAugmentees,
   presenceCongeMat,
   nombreSalarieesPeriodeAugmentation,
-  noteIndicateurQuatre
+  noteIndicateurQuatre,
 }: Props) {
   if (indicateurQuatreFormValidated !== "Valid") {
     return (
@@ -35,27 +35,21 @@ function RecapitulatifIndicateurQuatre({
           text={
             <Fragment>
               <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez
-                pas encore validé vos données saissies.
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies.
               </span>{" "}
-              <TextSimulatorLink
-                to="/indicateur4"
-                label="valider les données"
-              />
+              <TextSimulatorLink to="/indicateur4" label="valider les données" />
             </Fragment>
           }
         />
       </div>
-    );
+    )
   }
 
   if (!indicateurQuatreCalculable) {
     const messageNonCalculable =
-      presenceCongeMat &&
-      nombreSalarieesPeriodeAugmentation !== undefined &&
-      nombreSalarieesPeriodeAugmentation === 0
+      presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation === 0
         ? "d’augmentations salariales pendant la durée du ou des congés maternité"
-        : "de retour de congé maternité pendant la période de référence.";
+        : "de retour de congé maternité pendant la période de référence."
     return (
       <div css={styles.container}>
         <InfoBloc
@@ -63,7 +57,7 @@ function RecapitulatifIndicateurQuatre({
           text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
         />
       </div>
-    );
+    )
   }
 
   return (
@@ -77,16 +71,14 @@ function RecapitulatifIndicateurQuatre({
               ? displayPercent(indicateurEcartNombreSalarieesAugmentees)
               : "--",
           secondLineLabel: "votre note obtenue est",
-          secondLineData:
-            (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") +
-            "/15",
-          indicateurSexeSurRepresente: "femmes"
+          secondLineData: (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") + "/15",
+          indicateurSexeSurRepresente: "femmes",
         }}
       >
         {null}
       </RecapBloc>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -94,8 +86,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     marginTop: 22,
-    marginBottom: 22
-  })
-};
+    marginBottom: 22,
+  }),
+}
 
-export default RecapitulatifIndicateurQuatre;
+export default RecapitulatifIndicateurQuatre

@@ -1,45 +1,35 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { Link } from "react-router-dom";
+import { css, jsx } from "@emotion/core"
+import { Link } from "react-router-dom"
 
-import globalStyles from "../utils/globalStyles";
-import Logo from "./Logo";
+import globalStyles from "../utils/globalStyles"
+import Logo from "./Logo"
 
-import { useColumnsWidth, useLayoutType } from "./GridContext";
+import { useColumnsWidth, useLayoutType } from "./GridContext"
+
+import packageConfig from "../../package.json"
 
 function Footer() {
-  const width = useColumnsWidth(2);
-  const layoutType = useLayoutType();
-  const isDesktop = layoutType === "desktop";
-  const isMobile = layoutType === "mobile";
-  const version =
-    process.env.REACT_APP_VERSION || require("../../package.json").version;
+  const width = useColumnsWidth(2)
+  const layoutType = useLayoutType()
+  const isDesktop = layoutType === "desktop"
+  const isMobile = layoutType === "mobile"
+  const version = process.env.REACT_APP_VERSION || packageConfig.version
 
   return (
     <footer
       css={[
         styles.footer,
-        isDesktop &&
-          css({ marginLeft: -(width + globalStyles.grid.gutterWidth) }),
+        isDesktop && css({ marginLeft: -(width + globalStyles.grid.gutterWidth) }),
         isMobile && css({ display: "block", paddingTop: "1em" }),
       ]}
     >
-      <div
-        css={[
-          styles.footerLeft,
-          isDesktop && css({ width }),
-          styles.footerLeftPrint,
-        ]}
-      >
+      <div css={[styles.footerLeft, isDesktop && css({ width }), styles.footerLeftPrint]}>
         <a
           href="https://travail-emploi.gouv.fr/"
           target="_blank"
           rel="noopener noreferrer"
-          css={[
-            styles.containerLogo,
-            isDesktop && styles.containerLogoDesktop,
-            isMobile && styles.containerLogoMobile,
-          ]}
+          css={[styles.containerLogo, isDesktop && styles.containerLogoDesktop, isMobile && styles.containerLogoMobile]}
         >
           <Logo />
         </a>
@@ -54,33 +44,23 @@ function Footer() {
         >
           retrouvez le simulateur au format Excel
         </a>
-        <Link
-          to="/mentions-legales"
-          css={[styles.link, isMobile && styles.linkMobile]}
-        >
+        <Link to="/mentions-legales" css={[styles.link, isMobile && styles.linkMobile]}>
           mentions légales
         </Link>
-        <Link
-          to="/accessibilite"
-          css={[styles.link, isMobile && styles.linkMobile]}
-        >
+        <Link to="/accessibilite" css={[styles.link, isMobile && styles.linkMobile]}>
           accessibilité : non conforme
         </Link>
         <Link to="/cgu" css={[styles.link, isMobile && styles.linkMobile]}>
           conditions générales d'utilisation
         </Link>
-        <Link
-          to="/politique-confidentialite"
-          css={[styles.link, isMobile && styles.linkMobile]}
-        >
+        <Link to="/politique-confidentialite" css={[styles.link, isMobile && styles.linkMobile]}>
           politique de confidentialité
         </Link>
       </div>
 
       <div css={[styles.footerInfo, isMobile && styles.footerInfoMobile]}>
         <em style={styles.info}>
-          Index Egapro a été développé par les équipes de la fabrique numérique
-          des ministères sociaux
+          Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
         </em>
         <span style={styles.info}>
           Pour nous aider à l'améliorer
@@ -100,13 +80,13 @@ function Footer() {
           >
             contribuez sur Github
           </a>
-          <Link to="/infosApp" css={[styles.infoLink, isMobile && styles.linkMobile]} style={{ marginLeft: 8}}>
+          <Link to="/infosApp" css={[styles.infoLink, isMobile && styles.linkMobile]} style={{ marginLeft: 8 }}>
             infos application
           </Link>
         </span>
       </div>
     </footer>
-  );
+  )
 }
 
 const styles = {
@@ -150,7 +130,7 @@ const styles = {
     margin: 0,
   }),
 
-  footerLinks: { display: "flex", flexDirection: "column" as "column" },
+  footerLinks: { display: "flex", flexDirection: "column" as const },
   link: {
     fontSize: 10,
     lineHeight: "11px",
@@ -167,11 +147,11 @@ const styles = {
     flexShrink: 1,
     flexBasis: "0%",
     display: "flex",
-    flexDirection: "column" as "column",
-    textAlign: "right" as "right",
+    flexDirection: "column" as const,
+    textAlign: "right" as const,
     marginRight: globalStyles.grid.gutterWidth,
   },
-  footerInfoMobile: { margin: "1em", textAlign: "left" as "left" },
+  footerInfoMobile: { margin: "1em", textAlign: "left" as const },
   info: {
     fontSize: 12,
     lineHeight: "15px",
@@ -182,6 +162,6 @@ const styles = {
     textDecoration: "underline",
     marginLeft: 8,
   },
-};
+}
 
-export default Footer;
+export default Footer

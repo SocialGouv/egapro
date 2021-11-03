@@ -1,15 +1,15 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useField } from "react-final-form";
+import { css, jsx } from "@emotion/core"
+import { useField } from "react-final-form"
 
-import globalStyles from "../../../utils/globalStyles";
+import globalStyles from "../../../utils/globalStyles"
 
-import { hasFieldError } from "../../../components/Input";
-import FieldSiren, { sirenValidator } from "../../../components/FieldSiren";
-import TextField from "../../../components/TextField";
-import { EntrepriseUES } from "../../../globals";
-import { entrepriseData } from "../InformationsEntrepriseForm";
-import { composeValidators, required } from "../../../utils/formHelpers";
+import { hasFieldError } from "../../../components/Input"
+import FieldSiren, { sirenValidator } from "../../../components/FieldSiren"
+import TextField from "../../../components/TextField"
+import { EntrepriseUES } from "../../../globals"
+import { entrepriseData } from "../InformationsEntrepriseForm"
+import { composeValidators, required } from "../../../utils/formHelpers"
 
 function EntrepriseUESInput({
   nom,
@@ -18,36 +18,31 @@ function EntrepriseUESInput({
   readOnly,
   updateSirenData,
 }: {
-  nom: string;
-  siren: string;
-  index: number;
-  readOnly: boolean;
-  updateSirenData: (sirenData: entrepriseData) => void;
+  nom: string
+  siren: string
+  index: number
+  readOnly: boolean
+  updateSirenData: (sirenData: entrepriseData) => void
 }) {
   const checkDuplicates = (value: string, allValues: any) => {
-    let sirenList = allValues.entreprisesUES.map(
-      (entreprise: EntrepriseUES) => entreprise.siren
-    );
-    sirenList.push(allValues.siren);
+    const sirenList = allValues.entreprisesUES.map((entreprise: EntrepriseUES) => entreprise.siren)
+    sirenList.push(allValues.siren)
     if (sirenList.filter((siren: string) => siren === value).length >= 2) {
-      return "ce numéro SIREN est déjà utilisé";
+      return "ce numéro SIREN est déjà utilisé"
     }
-    return undefined;
-  };
+    return undefined
+  }
 
   const nomField = useField(nom, {
     validate: required,
     parse: (value) => value,
     format: (value) => value,
-  });
-  const nomError = hasFieldError(nomField.meta);
+  })
+  const nomError = hasFieldError(nomField.meta)
 
   return (
     <div css={styles.inputField}>
-      <label
-        css={[styles.label, nomError && styles.labelError]}
-        htmlFor={nomField.input.name}
-      >
+      <label css={[styles.label, nomError && styles.labelError]} htmlFor={nomField.input.name}>
         {`Entreprise ${index + 1}`}
       </label>
 
@@ -57,10 +52,7 @@ function EntrepriseUESInput({
           name={siren}
           readOnly={readOnly}
           updateSirenData={updateSirenData}
-          validator={composeValidators(
-            checkDuplicates,
-            sirenValidator(updateSirenData)
-          )}
+          validator={composeValidators(checkDuplicates, sirenValidator(updateSirenData))}
           customStyles={styles.siren}
         />
         <TextField
@@ -72,7 +64,7 @@ function EntrepriseUESInput({
         />
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -109,6 +101,6 @@ const styles = {
     fontStyle: "italic",
     lineHeight: "15px",
   }),
-};
+}
 
-export default EntrepriseUESInput;
+export default EntrepriseUESInput

@@ -1,2 +1,2 @@
-import IndicateurQuatre from "./IndicateurQuatre";
-export default IndicateurQuatre;
+import IndicateurQuatre from "./IndicateurQuatre"
+export default IndicateurQuatre

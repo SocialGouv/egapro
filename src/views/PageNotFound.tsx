@@ -1,11 +1,11 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core";
-import { RouteComponentProps } from "react-router-dom";
+import { jsx } from "@emotion/core"
+import { RouteComponentProps } from "react-router-dom"
 
-import Page from "../components/Page";
+import Page from "../components/Page"
 
-import ActionBar from "../components/ActionBar";
-import ButtonAction from "../components/ButtonAction";
+import ActionBar from "../components/ActionBar"
+import ButtonAction from "../components/ButtonAction"
 
 function PageNotFound({ history }: RouteComponentProps) {
   return (
@@ -14,7 +14,7 @@ function PageNotFound({ history }: RouteComponentProps) {
         <ButtonAction label="retour" onClick={() => history.goBack()} />
       </ActionBar>
     </Page>
-  );
+  )
 }
 
-export default PageNotFound;
+export default PageNotFound
