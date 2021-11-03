@@ -77,7 +77,6 @@ const validateForm = ({
   codeNaf,
   region,
   departement,
-  adresse,
   codePostal,
   commune,
   structure,
@@ -88,7 +87,6 @@ const validateForm = ({
   codeNaf: string
   region: string
   departement: string
-  adresse: string
   codePostal: string
   commune: string
   structure: Structure
@@ -99,7 +97,7 @@ const validateForm = ({
   codeNaf: validate(codeNaf),
   region: validate(region),
   departement: validate(departement),
-  adresse: validate(adresse),
+  adresse: undefined, // address is not filled for some case returned by the API entreprise.
   codePostal: validateCodePostal(codePostal, departement),
   commune: validate(commune),
   structure: validate(structure),
