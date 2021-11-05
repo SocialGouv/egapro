@@ -67,3 +67,18 @@ export function useDataFetching<SearchResult, SearchParams, DebouncedParams>(
     loading,
   }
 }
+
+/**
+ * Update the title of the page and restore it when the component is unmouted.
+ *
+ * @param title title of the page
+ */
+export function useTitle(title: string) {
+  useEffect(() => {
+    const prevTitle = document.title
+    document.title = title + " - " + prevTitle
+    return () => {
+      document.title = prevTitle
+    }
+  })
+}
