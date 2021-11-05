@@ -16,13 +16,18 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Indicateur retour congé maternité"
+
 function IndicateurQuatre({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateIndicateurQuatre = useCallback(
     (data: ActionIndicateurQuatreData) => dispatch({ type: "updateIndicateurQuatre", data }),
     [dispatch],

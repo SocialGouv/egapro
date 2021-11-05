@@ -21,13 +21,18 @@ import { messageEcartNombreEquivalentSalaries, displayPercent, messageMesureCorr
 
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Indicateur écart de taux d'augmentation"
+
 function IndicateurDeuxTrois({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateIndicateurDeuxTrois = useCallback(
     (data: ActionIndicateurDeuxTroisData) => dispatch({ type: "updateIndicateurDeuxTrois", data }),
     [dispatch],
@@ -157,7 +162,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
 function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur écart de taux d'augmentation"
+      title={title}
       tagline="Le nombre de femmes et d’hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
     >
       {children}

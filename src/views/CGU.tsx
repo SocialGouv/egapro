@@ -2,10 +2,15 @@
 import { css, jsx } from "@emotion/core"
 
 import Page from "../components/Page"
+import { useTitle } from "../utils/hooks"
+
+const title = "Conditions d’utilisation"
 
 function CGU() {
+  useTitle(title)
+
   return (
-    <Page title="Conditions d’utilisation d'Index Egapro">
+    <Page title={title}>
       <div css={styles.content}>
         <p>
           Les présentes conditions générales d’utilisation (dites « CGU ») fixent le cadre juridique de la Plateforme

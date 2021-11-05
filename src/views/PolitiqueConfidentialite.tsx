@@ -2,8 +2,11 @@
 import { css, jsx } from "@emotion/core"
 
 import Page from "../components/Page"
+import { useTitle } from "../utils/hooks"
 
 function CGU() {
+  useTitle("Politique de confidentialité")
+
   return (
     <Page title="Protection des données à caractère personnel">
       <div css={styles.content}>

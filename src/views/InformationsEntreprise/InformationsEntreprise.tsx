@@ -9,13 +9,18 @@ import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Informations entreprise/UES"
+
 function InformationsEntreprise({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateInformationsEntreprise = useCallback(
     (data: ActionInformationsEntrepriseData) => dispatch({ type: "updateInformationsEntreprise", data }),
     [dispatch],
@@ -46,7 +51,7 @@ function InformationsEntreprise({ state, dispatch }: Props) {
 function PageInformationsEntreprise({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Informations entreprise/UES"
+      title={title}
       tagline={[
         "Renseignez le périmètre retenu pour le calcul de l'index (Entreprise ou UES), le numéro Siren de l'entreprise déclarante, ainsi que les informations concernant l'UES.",
         "Les informations relatives à l'entreprise (Raison sociale, Code NAF, Adresse complète) sont renseignées automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).",

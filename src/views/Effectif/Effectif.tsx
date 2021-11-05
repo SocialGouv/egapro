@@ -12,13 +12,18 @@ import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 import EffectifForm from "./EffectifForm"
 import EffectifResult from "./EffectifResult"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Effectifs pris en compte"
+
 function Effectif({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateEffectif = useCallback(
     (data: ActionEffectifData) => dispatch({ type: "updateEffectif", data }),
     [dispatch],

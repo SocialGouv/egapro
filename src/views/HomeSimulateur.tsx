@@ -9,8 +9,13 @@ import Page from "../components/Page"
 import ActionLink from "../components/ActionLink"
 import ActionBar from "../components/ActionBar"
 import { ButtonSimulatorLink } from "../components/SimulatorLink"
+import { useTitle } from "../utils/hooks"
+
+const title = "Début d'un calcul d'index"
 
 function HomeSimulateur(): JSX.Element {
+  useTitle(title)
+
   const textEl = useRef<HTMLSpanElement>(null)
 
   const link = window.location.href

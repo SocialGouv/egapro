@@ -10,13 +10,18 @@ import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsSimulationForm from "./InformationsSimulationForm"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Informations calcul et période de référence"
+
 function InformationsSimulation({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateInformationsSimulation = useCallback(
     (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
     [dispatch],
@@ -67,7 +72,7 @@ function InformationsSimulation({ state, dispatch }: Props) {
 function PageInformationsSimulation({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Informations calcul et période de référence"
+      title={title}
       tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
     >
       {children}

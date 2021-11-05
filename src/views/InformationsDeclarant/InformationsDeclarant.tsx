@@ -9,13 +9,18 @@ import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsDeclarantForm from "./InformationsDeclarantForm"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Informations déclarant"
+
 function InformationsDeclarant({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateInformationsDeclarant = useCallback(
     (data: ActionInformationsDeclarantData) => dispatch({ type: "updateInformationsDeclarant", data }),
     [dispatch],
@@ -45,10 +50,7 @@ function InformationsDeclarant({ state, dispatch }: Props) {
 
 function PageInformationsDeclarant({ children }: { children: ReactNode }) {
   return (
-    <Page
-      title="Informations déclarant"
-      tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email"
-    >
+    <Page title={title} tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email">
       {children}
     </Page>
   )

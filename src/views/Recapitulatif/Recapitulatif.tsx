@@ -27,12 +27,17 @@ import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
 import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois"
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
 }
 
+const title = "Récapitulatif"
+
 function Recapitulatif({ state }: Props) {
+  useTitle(title)
+
   const trancheEffectifs = state.informations.trancheEffectifs
 
   const {
