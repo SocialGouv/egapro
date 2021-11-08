@@ -62,7 +62,7 @@ function Simulateur({ code, state, dispatch }: Props) {
     // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
     history.push({ search: "" })
   }
-  const token = localStorage.getItem("token")
+  let token = localStorage.getItem("token")
 
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {
@@ -74,13 +74,22 @@ function Simulateur({ code, state, dispatch }: Props) {
 
       try {
         if (token) {
-          const tokenInfo = await getTokenInfo()
+          try {
+            const tokenInfo = await getTokenInfo()
 
-          if (tokenInfo) {
-            setTokenInfo(tokenInfo?.jsonBody)
-            localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "")
+            if (tokenInfo) {
+              setTokenInfo(tokenInfo?.jsonBody)
+              localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "")
 
-            email = tokenInfo?.jsonBody?.email || email
+              email = tokenInfo?.jsonBody?.email || email
+            }
+          } catch (error) {
+            // If token has expired, we remove it from localStorage and state.
+            console.error(error)
+            token = ""
+            localStorage.setItem("token", "")
+            localStorage.setItem("tokenInfo", "")
+            setTokenInfo(undefined)
           }
         }
 
