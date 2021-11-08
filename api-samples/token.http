@@ -1,0 +1,15 @@
+
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2MzYzODM4NjN9.wyvaA49OmEdzRfrDKtNRy1ojT-oG_oRqg003VFCsj3w
+@SIREN=382616415
+
+### Demande d'un token. La réponse est dans la console de l'API.
+POST http://127.0.0.1:2626/token
+Content-Type: application/json
+
+{
+    "email": "admin@gmail.com"
+}
+
+###
+GET http://127.0.0.1:2626/declaration/{{SIREN}}/2020
+Cookie: api-key={{token}}

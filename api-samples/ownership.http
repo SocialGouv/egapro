@@ -1,9 +1,17 @@
-
-
-
 // compte admin, membre du staff
 #@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2MzU3NzczMzR9.nFP71zws-1DuhUcWeiUQoWL9wiMKEqPHjyKxc2CEnhE
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaEBsYW5vcm1hbmRpc2UuZnIiLCJleHAiOjE2MzU3Nzc2Njd9.iP-mAWEGxtISuUxUoU10B3yCh9ai6RDbTZmBrhPdxMc
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2MzYzODM3MzV9.mdSq-3QGFtDfT8zAiwdIH1zTZ719rRE5FP3f8hKvfYE
 @SIREN=382616415
+
+### Demande d'un token. La réponse est dans la console.
+POST http://127.0.0.1:2626/token
+Content-Type: application/json
+
+{
+    "email": "admin@gmail.com"
+}
+
+### Récupération des ownerships d'un SIREN
+
 GET http://127.0.0.1:2626/ownership/{{SIREN}}
 Cookie: api-key={{token}}
