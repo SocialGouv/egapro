@@ -13,18 +13,19 @@ interface Props {
   placeholder?: string
   style?: any
   readOnly?: boolean
+  autocomplete?: string
 }
 
-function Input({ field: { input, meta }, placeholder, style, readOnly = false }: Props) {
+function Input({ field: { input, meta }, placeholder, style, readOnly = false, autocomplete }: Props) {
   const error = hasFieldError(meta)
 
   return (
     <input
       css={[styles.input, style, error && styles.inputError]}
-      autoComplete="off"
       placeholder={placeholder}
       id={input.name}
       readOnly={readOnly}
+      autoComplete={autocomplete ? autocomplete : "off"}
       {...input}
     />
   )

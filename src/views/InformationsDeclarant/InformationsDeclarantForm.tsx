@@ -116,18 +116,26 @@ function InformationsDeclarantForm({
         <form onSubmit={handleSubmit} css={styles.container}>
           <FormAutoSave saveForm={saveForm} />
 
-          <TextField label="Nom du déclarant" fieldName="nom" errorText="le nom n’est pas valide" readOnly={readOnly} />
+          <TextField
+            label="Nom du déclarant"
+            fieldName="nom"
+            errorText="le nom n’est pas valide"
+            readOnly={readOnly}
+            autocomplete="family-name"
+          />
           <TextField
             label="Prénom du déclarant"
             fieldName="prenom"
             errorText="le prénom n’est pas valide"
             readOnly={readOnly}
+            autocomplete="given-name"
           />
           <TextField
             label="Numéro de téléphone"
             fieldName="tel"
             errorText="le numéro de téléphone doit être composé de 10 chiffres"
             readOnly={readOnly}
+            autocomplete="tel-national"
           />
           <TextField
             label="Email (fourni lors de la demande de validation de l'email)"
