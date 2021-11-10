@@ -113,7 +113,7 @@ function Menu({
               params: { code },
             },
           }) => (
-            <div css={styles.menuWrapper}>
+            <div role="navigation" css={styles.menuWrapper}>
               <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
                 <CustomNavLink to={`/simulateur/${code}`} title="vos informations" activeOnlyWhenExact={true} />
               </div>

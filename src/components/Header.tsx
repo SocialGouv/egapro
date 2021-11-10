@@ -12,7 +12,7 @@ function Header() {
   const width = useColumnsWidth(2)
   const layoutType = useLayoutType()
   return (
-    <header css={styles.header}>
+    <header role="banner" css={styles.header}>
       <div css={[styles.headerLeft, layoutType === "desktop" && css({ width }), styles.headerLeftPrint]}>
         <a
           href="https://travail-emploi.gouv.fr/"

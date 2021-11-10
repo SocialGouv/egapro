@@ -56,7 +56,9 @@ function MainView({ children, pathname }: { children: ReactNode; pathname: strin
 
   return (
     <div css={styles.viewContainer}>
-      <div css={styles.view}>{children}</div>
+      <div role="main" id="main" tabIndex={-1} css={styles.view}>
+        {children}
+      </div>
       <Footer />
     </div>
   )
