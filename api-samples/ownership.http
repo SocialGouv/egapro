@@ -1,6 +1,4 @@
-// compte admin, membre du staff
-#@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2MzU3NzczMzR9.nFP71zws-1DuhUcWeiUQoWL9wiMKEqPHjyKxc2CEnhE
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2MzYzODM3MzV9.mdSq-3QGFtDfT8zAiwdIH1zTZ719rRE5FP3f8hKvfYE
+@token=renseigner_token
 @SIREN=382616415
 
 ### Demande d'un token. La réponse est dans la console.

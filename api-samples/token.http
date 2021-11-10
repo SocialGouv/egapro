@@ -1,5 +1,5 @@
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2MzYzODM4NjN9.wyvaA49OmEdzRfrDKtNRy1ojT-oG_oRqg003VFCsj3w
+@token=renseigner_token
 @SIREN=382616415
 
 ### Demande d'un token. La réponse est dans la console de l'API.

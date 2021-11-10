@@ -1,3 +1,4 @@
+@API_ENTREPRISE_TOKEN = renseigner_token
 @SIREN = 722003936
 
 GET https://entreprise.api.gouv.fr/v2/entreprises/{{SIREN}}?token=renseigner_api_entreprise&context=CadreDeLaRequ%C3%AAte&recipient=B%C3%A9n%C3%A9ficiaireDeL%E2%80%99appel&object=RaisonDeL%E2%80%99AppelOuIdentifiant
