@@ -1,4 +1,3 @@
-@token=renseigner_token
 @SIREN=382616415
 
 ### Demande d'un token. La réponse est dans la console.
@@ -12,4 +11,4 @@ Content-Type: application/json
 ### Récupération des ownerships d'un SIREN
 
 GET http://127.0.0.1:2626/ownership/{{SIREN}}
-Cookie: api-key={{token}}
+Cookie: api-key=renseigner_token_ici

@@ -1,5 +1,4 @@
 
-@token=renseigner_token
 @SIREN=382616415
 
 ### Demande d'un token. La réponse est dans la console de l'API.
@@ -12,4 +11,4 @@ Content-Type: application/json
 
 ###
 GET http://127.0.0.1:2626/declaration/{{SIREN}}/2020
-Cookie: api-key={{token}}
+Cookie: api-key=renseigner_token_ici
