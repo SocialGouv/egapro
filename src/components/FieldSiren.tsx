@@ -5,8 +5,6 @@ import Input, { hasFieldError } from "./Input"
 
 import globalStyles from "../utils/globalStyles"
 import { isEmpty } from "../utils/object"
-
-  ValidatorFunction,
 import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
 import { ownersForSiren, validateSiren } from "../utils/api"
 import { entrepriseData } from "../views/InformationsEntreprise/InformationsEntrepriseForm"
