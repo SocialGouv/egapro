@@ -18,13 +18,18 @@ import IndicateurTroisForm from "./IndicateurTroisForm"
 import IndicateurTroisResult from "./IndicateurTroisResult"
 
 import { messageMesureCorrection } from "../../utils/helpers"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Indicateur écart de taux de promotion"
+
 function IndicateurTrois({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateIndicateurTrois = useCallback(
     (data: ActionIndicateurTroisData) => dispatch({ type: "updateIndicateurTrois", data }),
     [dispatch],
@@ -132,7 +137,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
 function PageIndicateurTrois({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur écart de taux de promotion"
+      title={title}
       tagline="Le pourcentage de femmes et d’hommes ayant été promus durant la période de référence, doit être renseigné par CSP."
     >
       {children}

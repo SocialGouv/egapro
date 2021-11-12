@@ -18,13 +18,18 @@ import IndicateurDeuxForm from "./IndicateurDeuxForm"
 import IndicateurDeuxResult from "./IndicateurDeuxResult"
 
 import { messageMesureCorrection } from "../../utils/helpers"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Indicateur écart de taux d’augmentation individuelle hors promotion"
+
 function IndicateurDeux({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateIndicateurDeux = useCallback(
     (data: ActionIndicateurDeuxData) => dispatch({ type: "updateIndicateurDeux", data }),
     [dispatch],
@@ -132,7 +137,7 @@ function IndicateurDeux({ state, dispatch }: Props) {
 function PageIndicateurDeux({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Indicateur écart de taux d’augmentation individuelle hors promotion"
+      title={title}
       tagline="Le pourcentage de femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."
     >
       {children}

@@ -4,11 +4,15 @@ import { useHistory } from "react-router"
 
 import Page from "../components/Page"
 import config from "../../package.json"
+import { useTitle } from "../utils/hooks"
+
+const title = "Informations sur l'application"
 
 /**
  * App informations and user profile view & management.
  */
 function InfosApp() {
+  useTitle(title)
   const history = useHistory()
 
   // TODO: use a hook to manage localStorage

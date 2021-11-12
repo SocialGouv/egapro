@@ -11,12 +11,14 @@ function TextField({
   label,
   readOnly,
   customStyles,
+  autocomplete,
 }: {
   errorText: string
   fieldName: string
   label: string
   readOnly: boolean
   customStyles?: any
+  autocomplete?: string
 }) {
   const field = useField(fieldName)
   const error = hasFieldError(field.meta)
@@ -27,7 +29,7 @@ function TextField({
         {label}
       </label>
       <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
+        <Input field={field} readOnly={readOnly} autocomplete={autocomplete} />
       </div>
       <p css={styles.error}>{error && errorText}</p>
     </div>

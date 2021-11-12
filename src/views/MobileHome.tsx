@@ -7,12 +7,17 @@ import Logo from "../components/Logo"
 import ActionLink from "../components/ActionLink"
 import Footer from "../components/Footer"
 import { Fragment } from "react"
+import { useTitle } from "../utils/hooks"
 
 interface Props {
   openMenu: () => void
 }
 
+const title = "Page d'affichage mobile"
+
 function MobileHome({ openMenu }: Props) {
+  useTitle(title)
+
   return (
     <Fragment>
       <div css={styles.page}>

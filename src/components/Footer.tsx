@@ -18,6 +18,7 @@ function Footer() {
 
   return (
     <footer
+      role="contentinfo"
       css={[
         styles.footer,
         isDesktop && css({ marginLeft: -(width + globalStyles.grid.gutterWidth) }),

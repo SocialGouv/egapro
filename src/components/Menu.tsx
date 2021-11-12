@@ -20,6 +20,22 @@ interface CustomNavLinkProps {
   activeOnlyWhenExact?: boolean
 }
 
+function buildA11yTitle({
+  title,
+  label,
+  isValid,
+  isCurrentStep,
+}: {
+  title: string
+  label?: string
+  isValid?: boolean
+  isCurrentStep?: boolean
+}): string {
+  return `${title} ${label ? label : ""} ${isValid ? ", Étape complétée" : ""} ${
+    isCurrentStep ? ", Étape en cours" : ""
+  }`
+}
+
 function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact = false }: CustomNavLinkProps) {
   const layoutType = useLayoutType()
   return (
@@ -28,7 +44,11 @@ function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact =
       exact={activeOnlyWhenExact}
       // eslint-disable-next-line react/no-children-prop
       children={({ match }) => (
-        <Link to={to} css={[styles.link, layoutType === "tablet" && styles.itemTablet, match && styles.activeLink]}>
+        <Link
+          to={to}
+          css={[styles.link, layoutType === "tablet" && styles.itemTablet, match && styles.activeLink]}
+          aria-label={buildA11yTitle({ title, label, isValid: valid === "Valid", isCurrentStep: Boolean(match) })}
+        >
           <div css={styles.linkInner}>
             {valid === "Valid" ? (
               <div css={styles.icon}>
@@ -93,7 +113,7 @@ function Menu({
               params: { code },
             },
           }) => (
-            <div css={styles.menuWrapper}>
+            <div role="navigation" css={styles.menuWrapper}>
               <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
                 <CustomNavLink to={`/simulateur/${code}`} title="vos informations" activeOnlyWhenExact={true} />
               </div>

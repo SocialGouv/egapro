@@ -2,10 +2,15 @@
 import { css, jsx } from "@emotion/core"
 
 import Page from "../components/Page"
+import { useTitle } from "../utils/hooks"
+
+const title = "Mentions légales"
 
 function MentionsLegales() {
+  useTitle(title)
+
   return (
-    <Page title="Mentions légales d'Index Egapro">
+    <Page title={title}>
       <div css={styles.content}>
         <h2 css={styles.title}>Editeur de la plateforme</h2>
         <p>

@@ -13,13 +13,18 @@ import { sendValidationEmail } from "../utils/api"
 import Input, { hasFieldError } from "../components/Input"
 import { required, validateEmail } from "../utils/formHelpers"
 import ButtonAction from "../components/ButtonAction"
+import { useTitle } from "../utils/hooks"
 
 interface Props {
   tagLine?: string
   reason?: string
 }
 
+const title = "Validation de l'email"
+
 function AskEmail({ tagLine, reason }: Props) {
+  useTitle(title)
+
   const layoutType = useLayoutType()
   const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
   const [loading, setLoading] = useState(false)
@@ -43,7 +48,7 @@ function AskEmail({ tagLine, reason }: Props) {
   }
 
   return (
-    <Page title="Validation de l'email">
+    <Page title={title}>
       <div css={css({ width })}>
         {tagLine && <h2>{tagLine}</h2>}
         <Form onSubmit={onSubmit}>

@@ -12,13 +12,18 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import IndicateurCinqForm from "./IndicateurCinqForm"
 import IndicateurCinqResult from "./IndicateurCinqResult"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+const title = "Indicateur hautes rémunérations"
+
 function IndicateurCinq({ state, dispatch }: Props) {
+  useTitle(title)
+
   const updateIndicateurCinq = useCallback(
     (data: ActionIndicateurCinqData) => dispatch({ type: "updateIndicateurCinq", data }),
     [dispatch],

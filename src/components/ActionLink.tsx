@@ -18,13 +18,8 @@ function ActionLink({ children, onClick, style }: Props) {
 
 const styles = {
   button: css({
-    all: "unset",
-
     padding: 0,
     border: "none",
-    outline: "none",
-    font: "inherit",
-    color: "inherit",
     background: "none",
 
     cursor: "pointer",

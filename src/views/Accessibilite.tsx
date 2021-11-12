@@ -2,10 +2,15 @@
 import { css, jsx } from "@emotion/core"
 
 import Page from "../components/Page"
+import { useTitle } from "../utils/hooks"
+
+const title = "Accessibilité"
 
 function Accessibilite() {
+  useTitle(title)
+
   return (
-    <Page title="Accessibilité">
+    <Page title={title}>
       <div css={styles.content}>
         <h2>Déclaration d’accessibilité</h2>
         <p>

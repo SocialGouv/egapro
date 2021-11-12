@@ -38,6 +38,7 @@ import { TextSimulatorLink } from "../../components/SimulatorLink"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
 import { formatDataForAPI, logToSentry } from "../../utils/helpers"
+import { useTitle } from "../../utils/hooks"
 
 interface Props extends RouteComponentProps {
   code: string
@@ -45,7 +46,11 @@ interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void
 }
 
+const title = "Déclaration"
+
 function Declaration({ code, state, dispatch }: Props) {
+  useTitle(title)
+
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
 
@@ -396,7 +401,7 @@ function Declaration({ code, state, dispatch }: Props) {
 function PageDeclaration({ children }: { children: ReactNode }) {
   return (
     <Page
-      title="Déclaration"
+      title={title}
       tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration"
     >
       {children}

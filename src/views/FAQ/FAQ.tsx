@@ -62,7 +62,7 @@ function FAQ({ closeMenu }: Props) {
           state: undefined,
         }
         return (
-          <div css={styles.container}>
+          <div role="search" css={styles.container}>
             <FAQHeader location={locationFAQ} closeMenu={closeMenu} />
 
             <div
