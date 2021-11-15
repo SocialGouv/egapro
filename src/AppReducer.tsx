@@ -314,9 +314,9 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
         coefficient,
         { arrayMerge: combineMerge },
       )
-      // @ts-ignore
       return {
         ...state,
+        // @ts-ignore
         indicateurUn: { ...state.indicateurUn, coefficient: mergedCoefficient },
       }
     }
