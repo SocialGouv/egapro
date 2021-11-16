@@ -1,8 +1,11 @@
 /** @jsx jsx */
+// import { Avatar } from "../components/ds/Avatar"
+
 import { css, jsx } from "@emotion/core"
 import { Link } from "react-router-dom"
 
 import globalStyles from "../utils/globalStyles"
+import { MenuProfile } from "./ds/MenuProfile"
 
 import { useColumnsWidth, useLayoutType } from "./GridContext"
 
@@ -30,6 +33,9 @@ function Header() {
         <p css={styles.subtitle}>
           L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
         </p>
+      </div>
+      <div>
+        <MenuProfile />
       </div>
     </header>
   )
@@ -71,7 +77,7 @@ const styles = {
   }),
   headerInner: css({
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
     flexGrow: 1,
     alignItems: "baseline",
   }),
