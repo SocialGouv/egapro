@@ -5,6 +5,7 @@ import { Router } from "react-router-dom"
 import ReactPiwik from "react-piwik"
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
+import { ChakraProvider, extendTheme } from "@chakra-ui/react"
 
 import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
@@ -14,6 +15,36 @@ import InfoBloc from "./components/InfoBloc"
 import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ButtonAction"
+
+const color = {
+  brand: {
+    primary: "#191a49",
+  },
+}
+
+// Chakra UI custom theme
+const appTheme = {
+  config: {
+    initialColorMode: "light",
+    useSystemColorMode: false,
+  },
+  color,
+  styles: {
+    // Reuse the defaut styles from index.css.
+    global: {
+      body: {
+        fontFamily: '"Cabin", -apple-system, sans-serif',
+        color: color.brand.primary,
+      },
+
+      a: {
+        color: "teal.500",
+      },
+    },
+  },
+}
+
+const theme = extendTheme(appTheme)
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (
@@ -57,30 +88,32 @@ function App() {
   )
 
   return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onReset={() => {
-        history.goBack()
-      }}
-    >
-      <Router history={piwik.connectToHistory(history)}>
-        <GridProvider>
-          {/* TODO: update the following date and message when there's another announcement */}
-          {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
-            <div css={styles.bannerWrapper}>
-              <InfoBloc
-                title="Interruption de service programmée"
-                text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
-                additionalCss={styles.banner}
-                closeButton={true}
-              />
-            </div>
-          )}
+    <ChakraProvider theme={theme}>
+      <ErrorBoundary
+        FallbackComponent={ErrorFallback}
+        onReset={() => {
+          history.goBack()
+        }}
+      >
+        <Router history={piwik.connectToHistory(history)}>
+          <GridProvider>
+            {/* TODO: update the following date and message when there's another announcement */}
+            {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
+              <div css={styles.bannerWrapper}>
+                <InfoBloc
+                  title="Interruption de service programmée"
+                  text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
+                  additionalCss={styles.banner}
+                  closeButton={true}
+                />
+              </div>
+            )}
 
-          <AppLayout state={state} dispatch={dispatch} />
-        </GridProvider>
-      </Router>
-    </ErrorBoundary>
+            <AppLayout state={state} dispatch={dispatch} />
+          </GridProvider>
+        </Router>
+      </ErrorBoundary>
+    </ChakraProvider>
   )
 }
 
