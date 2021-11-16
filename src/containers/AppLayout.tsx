@@ -1,4 +1,5 @@
 /** @jsx jsx */
+import React from "react"
 import { css, jsx } from "@emotion/core"
 import { Route, Switch } from "react-router-dom"
 
@@ -21,6 +22,8 @@ import Simulateur from "./Simulateur"
 import MainScrollView from "./MainScrollView"
 import MobileLayout from "./MobileLayout"
 import Accessibilite from "../views/Accessibilite"
+import MesEntreprises from "../views/private/MesEntreprises"
+import MonProfil from "../views/private/MonProfil"
 
 interface Props {
   state: AppState | undefined
@@ -33,6 +36,8 @@ function AppLayout({ state, dispatch }: Props) {
   return (
     <div css={styles.layout}>
       <Switch>
+        <Route path="/mes-entreprises" exact component={MesEntreprises} />
+        <Route path="/mon-profil" exact component={MonProfil} />
         <Route
           render={() => {
             document.title = "Index Egapro"
