@@ -16,9 +16,16 @@ import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ButtonAction"
 
-const color = {
+const colors = {
   brand: {
     primary: "#191a49",
+  },
+  button: {
+    primary: {
+      300: "hsl(238deg 53% 82%)",
+      500: "hsl(238deg 53% 62%)", // "#696CD1"
+      600: "hsl(238deg 43% 52%)",
+    },
   },
 }
 
@@ -28,13 +35,14 @@ const appTheme = {
     initialColorMode: "light",
     useSystemColorMode: false,
   },
-  color,
+  colors,
   styles: {
     // Reuse the defaut styles from index.css.
     global: {
       body: {
         fontFamily: '"Cabin", -apple-system, sans-serif',
-        color: color.brand.primary,
+        fontWeight: "400",
+        color: colors.brand.primary,
       },
 
       a: {
