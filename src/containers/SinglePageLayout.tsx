@@ -12,7 +12,9 @@ export function SinglePageLayout({ children }: Props) {
   return (
     <Flex direction="column" minHeight="100vh">
       <Header />
-      <Box flexGrow={1}>{children}</Box>
+      <Box as="main" role="main" flexGrow={1}>
+        {children}
+      </Box>
       <Footer />
     </Flex>
   )

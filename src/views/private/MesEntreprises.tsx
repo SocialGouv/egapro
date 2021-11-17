@@ -93,7 +93,11 @@ function MesEntreprises() {
           <p>Vous ne gérez pas encore d'entreprise.</p>
         ) : (
           <React.Fragment>
-            <Select onChange={(event) => setChosenSiren(event?.target?.value)} defaultValue={chosenSiren}>
+            <Select
+              onChange={(event) => setChosenSiren(event?.target?.value)}
+              defaultValue={chosenSiren}
+              aria-label="Liste des SIREN"
+            >
               {sirens.map((siren) => (
                 <option key={siren} value={siren}>
                   {siren}

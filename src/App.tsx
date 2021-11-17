@@ -23,7 +23,7 @@ const colors = {
   button: {
     primary: {
       300: "hsl(238deg 53% 82%)",
-      500: "hsl(238deg 53% 62%)", // "#696CD1"
+      500: "hsl(238deg 53% 60%)", // "#696CD1"
       600: "hsl(238deg 43% 52%)",
     },
   },
