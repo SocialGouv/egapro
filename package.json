@@ -47,6 +47,7 @@
     "react-scripts": "4.0.3",
     "react-table": "7.0.0",
     "react-text-mask": "5.4.3",
+    "swr": "^1.0.1",
     "text-mask-addons": "3.8.0"
   },
   "devDependencies": {
