@@ -8,7 +8,7 @@ import { hasFieldError } from "../../../components/Input"
 import FieldSiren, { sirenValidator } from "../../../components/FieldSiren"
 import TextField from "../../../components/TextField"
 import { EntrepriseUES } from "../../../globals"
-import { entrepriseData } from "../InformationsEntrepriseForm"
+import { EntrepriseType } from "../../../globals"
 import { composeValidators, required } from "../../../utils/formHelpers"
 
 function EntrepriseUESInput({
@@ -22,7 +22,7 @@ function EntrepriseUESInput({
   siren: string
   index: number
   readOnly: boolean
-  updateSirenData: (sirenData: entrepriseData) => void
+  updateSirenData: (sirenData: EntrepriseType) => void
 }) {
   const checkDuplicates = (value: string, allValues: any) => {
     const sirenList = allValues.entreprisesUES.map((entreprise: EntrepriseUES) => entreprise.siren)

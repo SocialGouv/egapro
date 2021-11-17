@@ -7,7 +7,7 @@ import globalStyles from "../utils/globalStyles"
 import { isEmpty } from "../utils/object"
 import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
 import { ownersForSiren, validateSiren } from "../utils/api"
-import { entrepriseData } from "../views/InformationsEntreprise/InformationsEntrepriseForm"
+import { EntrepriseType } from "../globals"
 import ActivityIndicator from "./ActivityIndicator"
 
 const nineDigits: ValidatorFunction = (value) =>
@@ -15,7 +15,7 @@ const nineDigits: ValidatorFunction = (value) =>
 
 const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
 
-export const checkSiren = (updateSirenData: (data: entrepriseData) => void) => async (siren: string) => {
+export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
   let result
   try {
     result = await memoizedValidateSiren(siren)
@@ -39,7 +39,7 @@ export const checkSiren = (updateSirenData: (data: entrepriseData) => void) => a
   updateSirenData(result.jsonBody)
 }
 
-export const sirenValidator = (updateSirenData: (data: entrepriseData) => void) =>
+export const sirenValidator = (updateSirenData: (data: EntrepriseType) => void) =>
   composeValidators(required, nineDigits, checkSiren(updateSirenData))
 
 function FieldSiren({
@@ -53,7 +53,7 @@ function FieldSiren({
   name: string
   label: string
   readOnly: boolean
-  updateSirenData: (sirenData: entrepriseData) => void
+  updateSirenData: (sirenData: EntrepriseType) => void
   validator?: ValidatorFunction
   customStyles?: any
 }) {
