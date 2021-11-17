@@ -5,11 +5,14 @@ import Page from "../../components/Page"
 import { Select } from "@chakra-ui/select"
 import useSWR from "swr"
 import { fetcher } from "../../utils/fetcher"
-import { Box, Flex, List, ListIcon, ListItem, Text } from "@chakra-ui/layout"
+import { Box, Flex, HStack, List, ListIcon, ListItem, Text } from "@chakra-ui/layout"
 import { EntrepriseType } from "../../globals"
 import { AddIcon, DragHandleIcon } from "@chakra-ui/icons"
 import PrimaryButton from "../../components/ds/PrimaryButton"
 import { Spinner } from "@chakra-ui/spinner"
+import { FormControl, FormHelperText, FormLabel } from "@chakra-ui/form-control"
+import { Input } from "@chakra-ui/input"
+import { useHistory } from "react-router"
 
 const title = "Mes entreprises"
 
@@ -68,23 +71,40 @@ function useSiren(siren: string) {
 function MesEntreprises() {
   useTitle(title)
   const { ownership: sirens } = useUser()
+  const [email, setEmail] = React.useState("")
+
   const [chosenSiren, setChosenSiren] = React.useState(sirens?.[0] || "")
 
   const { entreprise, error, isLoading } = useSiren(chosenSiren)
 
+  const history = useHistory()
+
   /**
    *
-   * Je cherche à réucupérer les inforamtions des Siren
+   * Je suis sur l'ajout d'un owner. ça marche mais la liste des users n'est pas mis à jour.
    *
-   * Problème : j'ai une liste de SIREN pour lesquelles je dois récupérer les données.
+   * Pour ça, je pense qu'il faut passer par mutate de swr pour lui demander de revalider.
    *
-   * Dans un premier temps, j'essaie de récupérer les données du premier SIREN. Mais est-ce que ça a un sens le 1er SIREN ?
+   * https://swr.vercel.app/docs/mutation
    *
-   * Ce siren sera stocké dans un state, et sera modifié quand le user cliquera sur une nouvelle valeur du select.
+   * Ensuite, il faudra ajouter des icones pour supprimer les users.
    *
-   *
+   * Et revoir un peu le layout
    *
    */
+
+  async function addUser(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    try {
+      const result = await fetcher(`/ownership/${chosenSiren}/${email}`, {
+        method: "PUT",
+      })
+      setEmail("")
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   return (
     <SinglePageLayout>
@@ -113,7 +133,18 @@ function MesEntreprises() {
                 <InfoEntreprise data={entreprise} />
                 <UtilisateursEntreprise siren={chosenSiren} isReady={Boolean(entreprise)} />
                 <Box mt="8">
-                  <PrimaryButton leftIcon={<AddIcon />}> Ajouter un responsable</PrimaryButton>
+                  <form onSubmit={addUser}>
+                    <HStack>
+                      <FormControl id="email">
+                        <FormLabel>Courriel du responsable</FormLabel>
+                        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                        <FormHelperText>Un courriel lui sera envoyé pour confirmer son adresse.</FormHelperText>
+                      </FormControl>
+                      <PrimaryButton leftIcon={<AddIcon />} type="submit">
+                        Ajouter
+                      </PrimaryButton>
+                    </HStack>
+                  </form>
                 </Box>
               </Flex>
             )}
