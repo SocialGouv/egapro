@@ -20,6 +20,10 @@ export const fetcher = async (endpoint: string, options: RequestInit) => {
     throw new Error(message || "Erreur serveur")
   }
 
+  if (response.status === 204) {
+    return null
+  }
+
   return response.json()
 }
 
