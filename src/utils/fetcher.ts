@@ -15,9 +15,12 @@ export const fetcher = async (endpoint: string, options: RequestInit) => {
   const response = await fetch(API_URL + endpoint, options)
 
   if (!response.ok) {
-    const { error: message } = await response.json()
+    const error: Error & { info?: string; status?: number } = new Error("Erreur API")
 
-    throw new Error(message || "Erreur serveur")
+    error.info = await response.json()
+    error.status = response.status
+
+    throw error
   }
 
   if (response.status === 204) {
