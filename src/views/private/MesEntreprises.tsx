@@ -4,7 +4,7 @@ import { Box, Flex, HStack, List, ListIcon, ListItem, Text } from "@chakra-ui/la
 import { Spinner } from "@chakra-ui/spinner"
 import { FormControl, FormHelperText, FormLabel } from "@chakra-ui/form-control"
 import { Input } from "@chakra-ui/input"
-import { AddIcon, DragHandleIcon } from "@chakra-ui/icons"
+import { AddIcon, DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
 
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import { useTitle, useToastMessage, useUser } from "../../utils/hooks"
@@ -14,7 +14,11 @@ import Page from "../../components/Page"
 import { fetcher } from "../../utils/fetcher"
 import { AlertMessageType, EntrepriseType } from "../../globals"
 import PrimaryButton from "../../components/ds/PrimaryButton"
+import LinkButton from "../../components/ds/LinkButton"
 import Toast from "../../components/ds/Toast"
+import { useBoolean } from "@chakra-ui/hooks"
+import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
+import { IconButton } from "@chakra-ui/button"
 
 const title = "Mes entreprises"
 
@@ -24,33 +28,55 @@ function InfoEntreprise({ entreprise }: { entreprise: EntrepriseType }) {
 
   return (
     <Box maxW="sm" borderWidth="3px" borderRadius="lg" as="section">
-      <Box p="6" pt="4" pb="4">
-        <Box mt="1" fontWeight="semibold" as="h4" lineHeight="tight" isTruncated>
-          {raison_sociale}
+      <HStack spacing="4" p="6" pt="4" pb="4">
+        <Flex>
+          <OfficeBuildingIcon w={6} h={6} color="gray.500" />
+        </Flex>
+        <Box>
+          <Text fontWeight="semibold" as="h4" lineHeight="tight" isTruncated>
+            {raison_sociale}
+          </Text>
+          <Text fontSize="md" color="gray.600">
+            {commune}
+          </Text>
         </Box>
-        <Text fontSize="md" color="gray.600">
-          {commune}
-        </Text>
-      </Box>
+      </HStack>
     </Box>
   )
 }
 
-function UtilisateursEntreprise({ owners, isReady = false }: { owners: string[]; isReady: boolean }) {
+function UtilisateursEntreprise({
+  owners,
+  siren,
+  isReady = false,
+  removeUser,
+}: {
+  owners: string[]
+  siren: string
+  isReady: boolean
+  removeUser: (owner: string, siren: string) => void
+}) {
   if (!isReady || !owners) return null
 
   return (
     <Box mt="4">
       <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
-        Responsables enregistrés
+        Responsables
       </Text>
 
       <List spacing={3}>
         {owners?.map((owner: string) => (
-          <ListItem key={owner}>
+          <ListItem key={owner} verticalAlign="center">
             <ListIcon as={DragHandleIcon} color="green.500" />
-
-            {owner}
+            {owner}&nbsp;
+            <IconButton
+              variant="none"
+              colorScheme="teal"
+              aria-label="Supprimer cet utilisateur"
+              icon={<DeleteIcon />}
+              onClick={() => removeUser(owner, siren)}
+              h="6"
+            />
           </ListItem>
         ))}
       </List>
@@ -68,6 +94,7 @@ function MesEntreprises() {
   const [chosenSiren, setChosenSiren] = React.useState(sirens?.[0] || "")
   const { entreprise, error: errorSiren, isLoading: isLoadingSiren } = useSiren(chosenSiren)
   const { owners, error: errorOwners, isLoading: isLoadingOwners, mutate: mutateOwners } = useOwnersOfSiren(chosenSiren)
+  const [showAddForm, setShowAddForm] = useBoolean()
 
   const isLoading = isLoadingSiren || isLoadingOwners
 
@@ -79,10 +106,24 @@ function MesEntreprises() {
     [chosenSiren, errorOwners, errorSiren],
   )
 
+  React.useEffect(() => {
+    setShowAddForm.off()
+  }, [chosenSiren])
+
   /**
-   * Ensuite, il faudra ajouter des icones pour supprimer les users.
+   * Je suis sur la suppression des utilisateurs.
    *
-   * Et revoir un peu le layout
+   * L'icône devrait être centré et rouge.
+   * Il devrait appeler une modale qui va demander confirmation.
+   * Si l'utilisateur à supprimer et l'utilisateur lui-même, modifier le message.
+   * Voir comment bien typer OfficeBuildingIcon.
+   * removeUser a un mutate, qui ne doit enlever que l'email à supprimer
+   *
+   * Gérer les erreurs renvoyées par Axe.
+   *
+   * Revoir un peu le layout
+   * La zone rosée se décale quand il y a beacoup de hauteur ??
+   * Les items de menu sont en teal. Mettre une couleur plus dans le ds.
    *
    * Et voir comment se connecter.
    *
@@ -96,11 +137,26 @@ function MesEntreprises() {
         method: "PUT",
       })
       setEmail("")
+      setShowAddForm.off()
       mutateOwners([...owners, email])
       toastSuccess("L'utilisateur est ajouté.")
     } catch (error) {
       console.error(error)
       toastError("Erreur pour ajouter cet email.")
+    }
+  }
+
+  async function removeUser(owner: string, siren: string) {
+    console.log("dans removuser")
+    try {
+      await fetcher(`/ownership/${siren}/${owner}`, {
+        method: "DELETE",
+      })
+      mutateOwners([]) // TODO ne pas tout supprimer
+      toastSuccess("L'utilisateur a été supprimé.")
+    } catch (error) {
+      console.error(error)
+      toastError("Erreur pour supprimer cet email.")
     }
   }
 
@@ -130,21 +186,35 @@ function MesEntreprises() {
             ) : (
               <Flex mt="6" direction="column">
                 <InfoEntreprise entreprise={entreprise} />
-                <UtilisateursEntreprise owners={owners} isReady={Boolean(entreprise)} />
-                <Box mt="8">
-                  <form onSubmit={addUser}>
-                    <HStack>
-                      <FormControl id="email">
-                        <FormLabel>Courriel du responsable</FormLabel>
-                        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                        <FormHelperText>Un courriel lui sera envoyé pour confirmer son adresse.</FormHelperText>
-                      </FormControl>
-                      <PrimaryButton leftIcon={<AddIcon />} type="submit">
-                        Ajouter
-                      </PrimaryButton>
-                    </HStack>
-                  </form>
-                </Box>
+                <UtilisateursEntreprise
+                  owners={owners}
+                  siren={chosenSiren}
+                  isReady={Boolean(entreprise)}
+                  removeUser={removeUser}
+                />
+                &nbsp;
+                <LinkButton variant="ghost" onClick={setShowAddForm.toggle}>
+                  <span aria-hidden="true" style={{ marginRight: "20px" }}>
+                    🙋
+                  </span>
+                  &nbsp;Vous souhaitez ajouter un responsable ?
+                </LinkButton>
+                {showAddForm && (
+                  <Box mt="8">
+                    <form onSubmit={addUser}>
+                      <HStack>
+                        <FormControl id="email">
+                          <FormLabel>Courriel du responsable</FormLabel>
+                          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                          <FormHelperText>Un courriel lui sera envoyé pour confirmer son adresse.</FormHelperText>
+                        </FormControl>
+                        <PrimaryButton leftIcon={<AddIcon />} type="submit">
+                          Ajouter
+                        </PrimaryButton>
+                      </HStack>
+                    </form>
+                  </Box>
+                )}
               </Flex>
             )}
           </React.Fragment>
