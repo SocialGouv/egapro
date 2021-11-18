@@ -1,4 +1,7 @@
+import React from "react"
+import { useToast } from "@chakra-ui/toast"
 import { useState, useEffect, useCallback, ChangeEvent, ChangeEventHandler } from "react"
+import { AlertMessageType } from "../globals"
 
 export function useDebounce(value: any, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value)
@@ -98,4 +101,24 @@ export function useUser(): { email: string; ownership: string[]; logout: () => v
   }
 
   return { email, ownership, logout }
+}
+
+function setToastMessage(toast: ReturnType<typeof useToast>) {
+  return function (message: AlertMessageType) {
+    if (message?.text) {
+      toast({
+        title: message.kind === "success" ? "Succès" : "Erreur",
+        description: message.text,
+        status: message.kind,
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+  }
+}
+
+export function useToastMessage() {
+  const toast = useToast()
+
+  return { setToastMessage: setToastMessage(toast) }
 }

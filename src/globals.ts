@@ -517,3 +517,8 @@ export type EntrepriseType = {
   commune?: string
   code_postal?: string
 }
+
+export type AlertMessageType = {
+  text: string
+  kind: "success" | "error"
+} | null

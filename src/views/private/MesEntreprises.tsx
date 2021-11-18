@@ -1,24 +1,25 @@
 import React from "react"
-import { SinglePageLayout } from "../../containers/SinglePageLayout"
-import { useTitle, useUser } from "../../utils/hooks"
-import Page from "../../components/Page"
 import { Select } from "@chakra-ui/select"
-import useSWR from "swr"
-import { fetcher } from "../../utils/fetcher"
 import { Box, Flex, HStack, List, ListIcon, ListItem, Text } from "@chakra-ui/layout"
-import { EntrepriseType } from "../../globals"
-import { AddIcon, DragHandleIcon } from "@chakra-ui/icons"
-import PrimaryButton from "../../components/ds/PrimaryButton"
 import { Spinner } from "@chakra-ui/spinner"
 import { FormControl, FormHelperText, FormLabel } from "@chakra-ui/form-control"
 import { Input } from "@chakra-ui/input"
-import { useHistory } from "react-router"
+import { AddIcon, DragHandleIcon } from "@chakra-ui/icons"
+
+import { SinglePageLayout } from "../../containers/SinglePageLayout"
+import { useTitle, useToastMessage, useUser } from "../../utils/hooks"
+import { useSiren } from "../../hooks/useSiren"
+import { useOwnersOfSiren } from "../../hooks/useOwnersOfSiren"
+import Page from "../../components/Page"
+import { fetcher } from "../../utils/fetcher"
+import { AlertMessageType, EntrepriseType } from "../../globals"
+import PrimaryButton from "../../components/ds/PrimaryButton"
 
 const title = "Mes entreprises"
 
-function InfoEntreprise({ data }: { data: EntrepriseType }) {
-  if (!data) return null
-  const { raison_sociale, commune } = data
+function InfoEntreprise({ entreprise }: { entreprise: EntrepriseType }) {
+  if (!entreprise) return null
+  const { raison_sociale, commune } = entreprise
 
   return (
     <Box maxW="sm" borderWidth="3px" borderRadius="lg" as="section">
@@ -34,12 +35,9 @@ function InfoEntreprise({ data }: { data: EntrepriseType }) {
   )
 }
 
-function UtilisateursEntreprise({ siren, isReady = false }: { siren: string; isReady: boolean }) {
-  if (!isReady) return null
+function UtilisateursEntreprise({ owners, isReady = false }: { owners: string[]; isReady: boolean }) {
+  if (!isReady || !owners) return null
 
-  const { data, error } = useSWR(siren ? `/ownership/${siren}` : null, fetcher)
-
-  if (error) return <Text>{JSON.stringify(error)}</Text>
   return (
     <Box mt="4">
       <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
@@ -47,7 +45,7 @@ function UtilisateursEntreprise({ siren, isReady = false }: { siren: string; isR
       </Text>
 
       <List spacing={3}>
-        {data?.owners?.map((owner: string) => (
+        {owners?.map((owner: string) => (
           <ListItem key={owner}>
             <ListIcon as={DragHandleIcon} color="green.500" />
 
@@ -59,37 +57,42 @@ function UtilisateursEntreprise({ siren, isReady = false }: { siren: string; isR
   )
 }
 
-function useSiren(siren: string) {
-  const { data: entreprise, error } = useSWR(siren ? `/validate-siren?siren=${siren}` : null, fetcher)
-
-  const isLoading = !entreprise && !error
-  const isError = Boolean(error)
-
-  return { entreprise, error, isLoading, isError }
-}
-
 function MesEntreprises() {
   useTitle(title)
+  const { setToastMessage } = useToastMessage()
+
   const { ownership: sirens } = useUser()
   const [email, setEmail] = React.useState("")
+  // const [message, setMessage] = React.useState<AlertMessageType>(null)
 
   const [chosenSiren, setChosenSiren] = React.useState(sirens?.[0] || "")
+  const { entreprise, error: errorSiren, isLoading: isLoadingSiren } = useSiren(chosenSiren)
+  const { owners, error: errorOwners, isLoading: isLoadingOwners, mutate: mutateOwners } = useOwnersOfSiren(chosenSiren)
 
-  const { entreprise, error, isLoading } = useSiren(chosenSiren)
+  const isLoading = isLoadingSiren || isLoadingOwners
 
-  const history = useHistory()
+  console.log("errorSiren", errorSiren)
+  console.log("errorOwners", errorOwners)
 
+  const message: AlertMessageType = React.useMemo(
+    () =>
+      !errorSiren && !errorOwners
+        ? null
+        : { kind: "error", text: "Une erreur est survenue lors de la récupération des données." },
+    [chosenSiren, errorOwners, errorSiren],
+  )
+
+  React.useEffect(() => {
+    setToastMessage(message)
+  }, [message])
+
+  // useToastMessage(message)
   /**
-   *
-   * Je suis sur l'ajout d'un owner. ça marche mais la liste des users n'est pas mis à jour.
-   *
-   * Pour ça, je pense qu'il faut passer par mutate de swr pour lui demander de revalider.
-   *
-   * https://swr.vercel.app/docs/mutation
-   *
    * Ensuite, il faudra ajouter des icones pour supprimer les users.
    *
    * Et revoir un peu le layout
+   *
+   * Et voir comment se connecter.
    *
    */
 
@@ -97,12 +100,15 @@ function MesEntreprises() {
     event.preventDefault()
 
     try {
-      const result = await fetcher(`/ownership/${chosenSiren}/${email}`, {
+      await fetcher(`/ownership/${chosenSiren}/${email}`, {
         method: "PUT",
       })
       setEmail("")
+      mutateOwners([...owners, email])
+      setToastMessage({ kind: "success", text: "L'utilisateur est ajouté." })
     } catch (error) {
       console.error(error)
+      setToastMessage({ kind: "error", text: "Erreur pour ajouter cet email" })
     }
   }
 
@@ -130,8 +136,8 @@ function MesEntreprises() {
               </Box>
             ) : (
               <Flex mt="6" direction="column">
-                <InfoEntreprise data={entreprise} />
-                <UtilisateursEntreprise siren={chosenSiren} isReady={Boolean(entreprise)} />
+                <InfoEntreprise entreprise={entreprise} />
+                <UtilisateursEntreprise owners={owners} isReady={Boolean(entreprise)} />
                 <Box mt="8">
                   <form onSubmit={addUser}>
                     <HStack>
