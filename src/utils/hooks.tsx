@@ -103,7 +103,7 @@ export function useUser(): { email: string; ownership: string[]; logout: () => v
   return { email, ownership, logout }
 }
 
-function setToastMessage(toast: ReturnType<typeof useToast>) {
+function showToastMessage(toast: ReturnType<typeof useToast>) {
   return function (message: AlertMessageType) {
     if (message?.text) {
       toast({
@@ -120,5 +120,5 @@ function setToastMessage(toast: ReturnType<typeof useToast>) {
 export function useToastMessage() {
   const toast = useToast()
 
-  return { setToastMessage: setToastMessage(toast) }
+  return showToastMessage(toast)
 }

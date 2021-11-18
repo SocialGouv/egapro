@@ -14,6 +14,7 @@ import Page from "../../components/Page"
 import { fetcher } from "../../utils/fetcher"
 import { AlertMessageType, EntrepriseType } from "../../globals"
 import PrimaryButton from "../../components/ds/PrimaryButton"
+import Toast from "../../components/ds/Toast"
 
 const title = "Mes entreprises"
 
@@ -59,20 +60,16 @@ function UtilisateursEntreprise({ owners, isReady = false }: { owners: string[];
 
 function MesEntreprises() {
   useTitle(title)
-  const { setToastMessage } = useToastMessage()
+  const toastMessage = useToastMessage()
 
   const { ownership: sirens } = useUser()
   const [email, setEmail] = React.useState("")
-  // const [message, setMessage] = React.useState<AlertMessageType>(null)
 
   const [chosenSiren, setChosenSiren] = React.useState(sirens?.[0] || "")
   const { entreprise, error: errorSiren, isLoading: isLoadingSiren } = useSiren(chosenSiren)
   const { owners, error: errorOwners, isLoading: isLoadingOwners, mutate: mutateOwners } = useOwnersOfSiren(chosenSiren)
 
   const isLoading = isLoadingSiren || isLoadingOwners
-
-  console.log("errorSiren", errorSiren)
-  console.log("errorOwners", errorOwners)
 
   const message: AlertMessageType = React.useMemo(
     () =>
@@ -82,11 +79,6 @@ function MesEntreprises() {
     [chosenSiren, errorOwners, errorSiren],
   )
 
-  React.useEffect(() => {
-    setToastMessage(message)
-  }, [message])
-
-  // useToastMessage(message)
   /**
    * Ensuite, il faudra ajouter des icones pour supprimer les users.
    *
@@ -105,15 +97,16 @@ function MesEntreprises() {
       })
       setEmail("")
       mutateOwners([...owners, email])
-      setToastMessage({ kind: "success", text: "L'utilisateur est ajouté." })
+      toastMessage({ kind: "success", text: "L'utilisateur est ajouté." })
     } catch (error) {
       console.error(error)
-      setToastMessage({ kind: "error", text: "Erreur pour ajouter cet email" })
+      toastMessage({ kind: "error", text: "Erreur pour ajouter cet email" })
     }
   }
 
   return (
     <SinglePageLayout>
+      <Toast message={message} />
       <Page title={title}>
         {!sirens?.length ? (
           <p>Vous ne gérez pas encore d'entreprise.</p>
