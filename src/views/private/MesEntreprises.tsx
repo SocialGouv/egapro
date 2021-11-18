@@ -60,7 +60,7 @@ function UtilisateursEntreprise({ owners, isReady = false }: { owners: string[];
 
 function MesEntreprises() {
   useTitle(title)
-  const toastMessage = useToastMessage()
+  const { toastSuccess, toastError } = useToastMessage({})
 
   const { ownership: sirens } = useUser()
   const [email, setEmail] = React.useState("")
@@ -97,10 +97,10 @@ function MesEntreprises() {
       })
       setEmail("")
       mutateOwners([...owners, email])
-      toastMessage({ kind: "success", text: "L'utilisateur est ajouté." })
+      toastSuccess("L'utilisateur est ajouté.")
     } catch (error) {
       console.error(error)
-      toastMessage({ kind: "error", text: "Erreur pour ajouter cet email" })
+      toastError("Erreur pour ajouter cet email.")
     }
   }
 
