@@ -24,6 +24,7 @@ import MobileLayout from "./MobileLayout"
 import Accessibilite from "../views/Accessibilite"
 import MesEntreprises from "../views/private/MesEntreprises"
 import MonProfil from "../views/private/MonProfil"
+import Mire from "../views/Mire"
 
 interface Props {
   state: AppState | undefined
@@ -36,6 +37,7 @@ function AppLayout({ state, dispatch }: Props) {
   return (
     <div css={styles.layout}>
       <Switch>
+        <Route path="/me-connecter" exact component={Mire} />
         <Route path="/mes-entreprises" exact component={MesEntreprises} />
         <Route path="/mon-profil" exact component={MonProfil} />
         <Route
