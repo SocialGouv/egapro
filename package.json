@@ -48,7 +48,8 @@
     "react-table": "7.0.0",
     "react-text-mask": "5.4.3",
     "swr": "^1.0.1",
-    "text-mask-addons": "3.8.0"
+    "text-mask-addons": "3.8.0",
+    "zod": "^3.11.6"
   },
   "devDependencies": {
     "@axe-core/react": "^4.3.1",
