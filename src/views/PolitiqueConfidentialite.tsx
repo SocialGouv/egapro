@@ -36,14 +36,14 @@ function CGU() {
           <br />
           Conformément aux dispositions de l’article 6-c du Règlement relatif à la protection des données (appelé RGPD),
           le traitement de données relatif aux données de connexion est fondé sur l’obligation légale reposant sur le
-          responsable de traitement au titre de l’article 6 de la LCEN et de l’article 1 du décret n°2011-219 du 25
-          février 2011.
+          responsable de traitement au titre de l’article 6 de la LCEN et de l’article 1 du décret n°2021-1363 du 20 
+          octobre 2021.
         </p>
         <h2 css={styles.title}>Durée de conservation</h2>
         <ul>
           <li>Pour les cookies : 13 mois maximum, ou jusqu'au retrait du consentement de la personne concernée.</li>
           <li>
-            Pour les données de connexion ou d’hébergeur : 12 mois (LCEN et décret n°2011-219 du 25 février 2011).
+            Pour les données de connexion ou d’hébergeur : 12 mois (LCEN et décret n°2021-1363 du 20 octobre 2021).
           </li>
           <li>
             Pour les données des utilisateurs du simulateur et du formulaire de déclaration : temps nécessaire au
