@@ -1,7 +1,7 @@
 import React from "react"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
-import { Box, Flex } from "@chakra-ui/layout"
+import { Box, Container, Flex } from "@chakra-ui/layout"
 import { ReactNode } from "react"
 
 interface Props {
@@ -13,7 +13,7 @@ export function SinglePageLayout({ children }: Props) {
     <Flex direction="column" minHeight="100vh">
       <Header />
       <Box as="main" role="main" flexGrow={1}>
-        {children}
+        <Container maxW="container.md">{children}</Container>
       </Box>
       <Footer />
     </Flex>

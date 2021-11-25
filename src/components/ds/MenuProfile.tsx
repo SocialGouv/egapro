@@ -4,7 +4,7 @@ import { Avatar } from "@chakra-ui/avatar"
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from "@chakra-ui/menu"
 import { Link as RouterLink } from "react-router-dom"
 import { Link } from "@chakra-ui/react"
-import { useUser } from "../../utils/hooks"
+import { useUser } from "../AuthContext"
 
 type MenuLinkProps = {
   children: React.ReactNode
@@ -31,16 +31,16 @@ export function MenuProfile() {
       <MenuList>
         {!email ? (
           <MenuItem>
-            <MenuLink to="/me-connecter">Me connecter</MenuLink>
+            <MenuLink to="/tableauDeBord/me-connecter">Me connecter</MenuLink>
           </MenuItem>
         ) : (
           <React.Fragment>
             <MenuItem>
-              <MenuLink to="/mon-profil">Mon Profil</MenuLink>
+              <MenuLink to="/tableauDeBord/mon-profil">Mon Profil</MenuLink>
             </MenuItem>
 
             <MenuItem>
-              <MenuLink to="/mes-entreprises">Mes entreprises</MenuLink>
+              <MenuLink to="/tableauDeBord/mes-entreprises">Mes entreprises</MenuLink>
             </MenuItem>
             <MenuDivider />
             <MenuItem>Déconnexion</MenuItem>

@@ -7,7 +7,7 @@ import { Input } from "@chakra-ui/input"
 import { AddIcon, DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
 
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
-import { useTitle, useToastMessage, useUser } from "../../utils/hooks"
+import { useTitle, useToastMessage } from "../../utils/hooks"
 import { useSiren } from "../../hooks/useSiren"
 import { useOwnersOfSiren } from "../../hooks/useOwnersOfSiren"
 import Page from "../../components/Page"
@@ -19,6 +19,7 @@ import Toast from "../../components/ds/Toast"
 import { useBoolean } from "@chakra-ui/hooks"
 import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
 import { IconButton } from "@chakra-ui/button"
+import { useUser } from "../../components/AuthContext"
 
 const title = "Mes entreprises"
 
@@ -110,25 +111,6 @@ function MesEntreprises() {
     setShowAddForm.off()
   }, [chosenSiren])
 
-  /**
-   * Je suis sur la suppression des utilisateurs.
-   *
-   * L'icône devrait être centré et rouge.
-   * Il devrait appeler une modale qui va demander confirmation.
-   * Si l'utilisateur à supprimer et l'utilisateur lui-même, modifier le message.
-   * Voir comment bien typer OfficeBuildingIcon.
-   * removeUser a un mutate, qui ne doit enlever que l'email à supprimer
-   *
-   * Gérer les erreurs renvoyées par Axe.
-   *
-   * Revoir un peu le layout
-   * La zone rosée se décale quand il y a beacoup de hauteur ??
-   * Les items de menu sont en teal. Mettre une couleur plus dans le ds.
-   *
-   * Et voir comment se connecter.
-   *
-   */
-
   async function addUser(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -147,7 +129,6 @@ function MesEntreprises() {
   }
 
   async function removeUser(owner: string, siren: string) {
-    console.log("dans removuser")
     try {
       await fetcher(`/ownership/${siren}/${owner}`, {
         method: "DELETE",
