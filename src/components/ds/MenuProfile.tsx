@@ -1,4 +1,5 @@
 import React from "react"
+import { useHistory } from "react-router-dom"
 
 import { Avatar } from "@chakra-ui/avatar"
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from "@chakra-ui/menu"
@@ -20,7 +21,14 @@ function MenuLink({ children, to }: MenuLinkProps) {
 }
 
 export function MenuProfile() {
-  const { email } = useUser()
+  const history = useHistory()
+  const { email, logout } = useUser()
+
+  function deconnectUser() {
+    logout()
+
+    history.go(0)
+  }
 
   return (
     <Menu>
@@ -43,7 +51,7 @@ export function MenuProfile() {
               <MenuLink to="/tableauDeBord/mes-entreprises">Mes entreprises</MenuLink>
             </MenuItem>
             <MenuDivider />
-            <MenuItem>Déconnexion</MenuItem>
+            <MenuItem onClick={deconnectUser}>Déconnexion</MenuItem>
           </React.Fragment>
         )}
       </MenuList>
