@@ -16,10 +16,19 @@ import { AlertMessageType, EntrepriseType } from "../../globals"
 import PrimaryButton from "../../components/ds/PrimaryButton"
 import LinkButton from "../../components/ds/LinkButton"
 import Toast from "../../components/ds/Toast"
-import { useBoolean } from "@chakra-ui/hooks"
+import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
 import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
 import { IconButton } from "@chakra-ui/button"
 import { useUser } from "../../components/AuthContext"
+import {
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+} from "@chakra-ui/modal"
 
 const title = "Mes entreprises"
 
@@ -46,6 +55,50 @@ function InfoEntreprise({ entreprise }: { entreprise: EntrepriseType }) {
   )
 }
 
+function UserListItem({
+  owner,
+  siren,
+  removeUser,
+}: {
+  owner: string
+  siren: string
+  removeUser: (owner: string, siren: string) => void
+}) {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  return (
+    <ListItem key={owner} verticalAlign="center">
+      <ListIcon as={DragHandleIcon} color="green.500" />
+      {owner}&nbsp;
+      <IconButton
+        variant="none"
+        colorScheme="teal"
+        aria-label="Supprimer cet utilisateur"
+        icon={<DeleteIcon />}
+        onClick={onOpen}
+        h="6"
+      />
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Supprimer l'utilisateur</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Cette opération est irréversible.</ModalBody>
+
+          <ModalFooter>
+            <PrimaryButton colorScheme="red" mr={3} onClick={() => removeUser(owner, siren)}>
+              Confirmer
+            </PrimaryButton>
+            <PrimaryButton variant="ghost" onClick={onClose}>
+              Annuler
+            </PrimaryButton>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </ListItem>
+  )
+}
+
 function UtilisateursEntreprise({
   owners,
   siren,
@@ -67,18 +120,7 @@ function UtilisateursEntreprise({
 
       <List spacing={3}>
         {owners?.map((owner: string) => (
-          <ListItem key={owner} verticalAlign="center">
-            <ListIcon as={DragHandleIcon} color="green.500" />
-            {owner}&nbsp;
-            <IconButton
-              variant="none"
-              colorScheme="teal"
-              aria-label="Supprimer cet utilisateur"
-              icon={<DeleteIcon />}
-              onClick={() => removeUser(owner, siren)}
-              h="6"
-            />
-          </ListItem>
+          <UserListItem key={owner} owner={owner} siren={siren} removeUser={removeUser} />
         ))}
       </List>
     </Box>
@@ -149,17 +191,20 @@ function MesEntreprises() {
           <p>Vous ne gérez pas encore d'entreprise.</p>
         ) : (
           <React.Fragment>
-            <Select
-              onChange={(event) => setChosenSiren(event?.target?.value)}
-              defaultValue={chosenSiren}
-              aria-label="Liste des SIREN"
-            >
-              {sirens.map((siren) => (
-                <option key={siren} value={siren}>
-                  {siren}
-                </option>
-              ))}
-            </Select>
+            <FormControl id="siren">
+              <FormLabel>SIREN</FormLabel>
+              <Select
+                onChange={(event) => setChosenSiren(event?.target?.value)}
+                defaultValue={chosenSiren}
+                aria-label="Liste des SIREN"
+              >
+                {sirens.map((siren) => (
+                  <option key={siren} value={siren}>
+                    {siren}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
             {isLoading ? (
               <Box m="6">
                 <Spinner />
