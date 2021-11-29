@@ -104,7 +104,7 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
-    overflow: "auto",
+    // overflow: "auto",
     background: "linear-gradient(180deg, #FFFFFF 99px, rgba(255, 255, 255, 0) 99px, #FFFFFF 100%), #EFF0FA",
     "@media print": {
       display: "block",
