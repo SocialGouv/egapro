@@ -6,6 +6,8 @@ import ReactPiwik from "react-piwik"
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
 import { ChakraProvider, extendTheme } from "@chakra-ui/react"
+import defaultTheme from "@chakra-ui/theme"
+import { StyleFunctionProps } from "@chakra-ui/theme-tools"
 
 import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
@@ -47,6 +49,20 @@ const appTheme = {
 
       a: {
         color: "teal.500",
+      },
+    },
+  },
+  components: {
+    Input: {
+      variants: {
+        "blue-outline": (props: StyleFunctionProps) => ({
+          ...defaultTheme.components.Input.variants.outline(props),
+          field: {
+            ...defaultTheme.components.Input.variants.outline(props).field,
+            border: "1px solid",
+            borderColor: "blue.100",
+          },
+        }),
       },
     },
   },

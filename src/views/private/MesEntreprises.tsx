@@ -2,7 +2,7 @@ import React from "react"
 import { Select } from "@chakra-ui/select"
 import { Box, Flex, HStack, List, ListIcon, ListItem, Text } from "@chakra-ui/layout"
 import { Spinner } from "@chakra-ui/spinner"
-import { FormControl, FormHelperText, FormLabel } from "@chakra-ui/form-control"
+import { FormControl, FormLabel } from "@chakra-ui/form-control"
 import { Input } from "@chakra-ui/input"
 import { AddIcon, DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
 
@@ -133,8 +133,9 @@ function MesEntreprises() {
 
   const { ownership: sirens } = useUser()
   const [email, setEmail] = React.useState("")
+  const orderedSirens = sirens.sort()
 
-  const [chosenSiren, setChosenSiren] = React.useState(sirens?.[0] || "")
+  const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
   const { entreprise, error: errorSiren, isLoading: isLoadingSiren } = useSiren(chosenSiren)
   const { owners, error: errorOwners, isLoading: isLoadingOwners, mutate: mutateOwners } = useOwnersOfSiren(chosenSiren)
   const [showAddForm, setShowAddForm] = useBoolean()
@@ -163,7 +164,7 @@ function MesEntreprises() {
       setEmail("")
       setShowAddForm.off()
       mutateOwners([...owners, email])
-      toastSuccess("L'utilisateur est ajouté.")
+      toastSuccess("Le responsable a été ajouté.")
     } catch (error) {
       console.error(error)
       toastError("Erreur pour ajouter cet email.")
@@ -176,7 +177,7 @@ function MesEntreprises() {
         method: "DELETE",
       })
       mutateOwners([]) // TODO ne pas tout supprimer
-      toastSuccess("L'utilisateur a été supprimé.")
+      toastSuccess("Le responsable a été supprimé.")
     } catch (error) {
       console.error(error)
       toastError("Erreur pour supprimer cet email.")
@@ -198,7 +199,7 @@ function MesEntreprises() {
                 defaultValue={chosenSiren}
                 aria-label="Liste des SIREN"
               >
-                {sirens.map((siren) => (
+                {orderedSirens.map((siren) => (
                   <option key={siren} value={siren}>
                     {siren}
                   </option>
@@ -226,13 +227,17 @@ function MesEntreprises() {
                   &nbsp;Vous souhaitez ajouter un responsable ?
                 </LinkButton>
                 {showAddForm && (
-                  <Box mt="8">
+                  <Box mt="4">
                     <form onSubmit={addUser}>
-                      <HStack>
+                      <HStack align="flex-end">
                         <FormControl id="email">
-                          <FormLabel>Courriel du responsable</FormLabel>
-                          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                          <FormHelperText>Un courriel lui sera envoyé pour confirmer son adresse.</FormHelperText>
+                          <FormLabel>Email du responsable</FormLabel>
+                          <Input
+                            variant="blue-outline"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
                         </FormControl>
                         <PrimaryButton leftIcon={<AddIcon />} type="submit">
                           Ajouter

@@ -1,6 +1,6 @@
 import React from "react"
 import { FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/form-control"
-import { Input } from "@chakra-ui/input"
+import { Input, InputProps } from "@chakra-ui/input"
 import { Box } from "@chakra-ui/layout"
 import { useField } from "react-final-form"
 import { z } from "zod"
@@ -28,6 +28,7 @@ type InputControlProps = {
     | "time"
     | "url"
   placeholder?: string
+  variant?: InputProps["variant"]
 }
 
 export const formValidator =
@@ -41,7 +42,7 @@ export const formValidator =
     }
   }
 
-export function InputControl({ name, label, type, placeholder, ...rest }: InputControlProps) {
+export function InputControl({ name, label, type, placeholder, variant = "outline", ...rest }: InputControlProps) {
   const {
     input,
     meta: { error, touched, submitting },
@@ -50,7 +51,15 @@ export function InputControl({ name, label, type, placeholder, ...rest }: InputC
   return (
     <FormControl isInvalid={error && touched} {...rest}>
       <FormLabel htmlFor={name}>{label}</FormLabel>
-      <Input {...input} type={type} id={name} name={name} placeholder={placeholder} isDisabled={submitting} />
+      <Input
+        {...input}
+        variant={variant}
+        type={type}
+        id={name}
+        name={name}
+        placeholder={placeholder}
+        isDisabled={submitting}
+      />
       <FormErrorMessage>{error}</FormErrorMessage>
     </FormControl>
   )
