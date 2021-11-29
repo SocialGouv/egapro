@@ -1,7 +1,8 @@
 import React from "react"
-import { Icon, IconProps } from "@chakra-ui/react"
+import { Icon } from "@chakra-ui/react"
+import { StyleFunctionProps } from "@chakra-ui/theme-tools"
 
-export const OfficeBuildingIcon = function (props: any) {
+export const OfficeBuildingIcon = function (props: Partial<StyleFunctionProps>) {
   return (
     <Icon viewBox="0 0 24 24" color="red.500" {...props}>
       <path
