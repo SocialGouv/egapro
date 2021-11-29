@@ -1,9 +1,7 @@
 import { Avatar } from "@chakra-ui/avatar"
 import { Box, HStack, Text, VStack } from "@chakra-ui/layout"
 import React from "react"
-import { useHistory } from "react-router-dom"
 import { useUser } from "../../components/AuthContext"
-import PrimaryButton from "../../components/ds/PrimaryButton"
 import Page from "../../components/Page"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import { useTitle } from "../../utils/hooks"
@@ -12,13 +10,7 @@ const title = "Mon profil"
 
 function MonProfil() {
   useTitle(title)
-  const history = useHistory()
-  const { email, logout } = useUser()
-
-  function logoutUser() {
-    logout()
-    history.goBack()
-  }
+  const { email } = useUser()
 
   return (
     <SinglePageLayout>
@@ -35,9 +27,6 @@ function MonProfil() {
                     </VStack>
                   </Box>
                 </HStack>
-                <Box>
-                  <PrimaryButton onClick={logoutUser}>Me déconnecter</PrimaryButton>
-                </Box>
               </VStack>
             ) : (
               "Utilisateur non connecté"
