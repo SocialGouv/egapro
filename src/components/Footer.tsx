@@ -36,34 +36,44 @@ function Footer() {
         </a>
       </div>
 
-      <div css={[styles.footerLinks, isMobile && css({ margin: "1em" })]}>
-        <a
-          href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
-          target="_blank"
-          rel="noopener noreferrer"
-          css={[styles.link, isMobile && styles.linkMobile]}
-        >
-          retrouvez le simulateur au format Excel
-        </a>
-        <Link to="/mentions-legales" css={[styles.link, isMobile && styles.linkMobile]}>
-          mentions légales
-        </Link>
-        <Link to="/accessibilite" css={[styles.link, isMobile && styles.linkMobile]}>
-          accessibilité : non conforme
-        </Link>
-        <Link to="/cgu" css={[styles.link, isMobile && styles.linkMobile]}>
-          conditions générales d'utilisation
-        </Link>
-        <Link to="/politique-confidentialite" css={[styles.link, isMobile && styles.linkMobile]}>
-          politique de confidentialité
-        </Link>
-      </div>
+      <ul css={[styles.footerLinks, isMobile && css({ margin: "1em" })]}>
+        <li>
+          <a
+            href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
+            target="_blank"
+            rel="noopener noreferrer"
+            css={[styles.link, isMobile && styles.linkMobile]}
+          >
+            retrouvez le simulateur au format Excel
+          </a>
+        </li>
+        <li>
+          <Link to="/mentions-legales" css={[styles.link, isMobile && styles.linkMobile]}>
+            mentions légales
+          </Link>
+        </li>
+        <li>
+          <Link to="/accessibilite" css={[styles.link, isMobile && styles.linkMobile]}>
+            accessibilité&nbsp;: non conforme
+          </Link>
+        </li>
+        <li>
+          <Link to="/cgu" css={[styles.link, isMobile && styles.linkMobile]}>
+            conditions générales d'utilisation
+          </Link>
+        </li>
+        <li>
+          <Link to="/politique-confidentialite" css={[styles.link, isMobile && styles.linkMobile]}>
+            politique de confidentialité
+          </Link>
+        </li>
+      </ul>
 
       <div css={[styles.footerInfo, isMobile && styles.footerInfoMobile]}>
-        <em style={styles.info}>
+        <p style={styles.info}>
           Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
-        </em>
-        <span style={styles.info}>
+        </p>
+        <p style={styles.info}>
           Pour nous aider à l'améliorer
           <a
             href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
@@ -81,7 +91,7 @@ function Footer() {
           >
             contribuez sur Github
           </a>
-        </span>
+        </p>
       </div>
     </footer>
   )
@@ -90,8 +100,10 @@ function Footer() {
 const styles = {
   footer: css({
     backgroundColor: "#FFF",
-    height: 120,
+    height: 160,
     marginTop: 54,
+    paddingTop: 20,
+    paddingBottom: 20,
     flexShrink: 0,
     display: "flex",
     flexDirection: "row",
@@ -128,13 +140,16 @@ const styles = {
     margin: 0,
   }),
 
-  footerLinks: { display: "flex", flexDirection: "column" as const },
+  footerLinks: {
+    display: "flex",
+    listStyle: "none",
+    flexDirection: "column" as const,
+  },
   link: {
-    fontSize: 10,
-    lineHeight: "11px",
+    display: "inline-block",
+    fontSize: 14,
     color: globalStyles.colors.default,
     textDecoration: "underline",
-    margin: "2px 0",
   },
   linkMobile: {
     fontSize: 14,
@@ -151,8 +166,9 @@ const styles = {
   },
   footerInfoMobile: { margin: "1em", textAlign: "left" as const },
   info: {
+    fontStyle: "italic",
     fontSize: 12,
-    lineHeight: "15px",
+    lineHeight: 1.25,
     marginBottom: 4,
   },
   infoLink: {
