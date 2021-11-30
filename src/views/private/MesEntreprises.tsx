@@ -11,7 +11,7 @@ import { useTitle, useToastMessage } from "../../utils/hooks"
 import { useSiren } from "../../hooks/useSiren"
 import { useOwnersOfSiren } from "../../hooks/useOwnersOfSiren"
 import Page from "../../components/Page"
-import { fetcher } from "../../utils/fetcher"
+import { EXPIRED_TOKEN_MESSAGE, fetcher } from "../../utils/fetcher"
 import { AlertMessageType, EntrepriseType } from "../../globals"
 import PrimaryButton from "../../components/ds/PrimaryButton"
 import LinkButton from "../../components/ds/LinkButton"
@@ -148,6 +148,11 @@ function MesEntreprises() {
     () =>
       !errorSiren && !errorOwners
         ? null
+        : errorSiren?.info === EXPIRED_TOKEN_MESSAGE || errorOwners?.info === EXPIRED_TOKEN_MESSAGE
+        ? {
+            kind: "error",
+            text: "Votre session a expiré, veuillez vous reconnecter.",
+          }
         : { kind: "error", text: "Une erreur est survenue lors de la récupération des données." },
     [chosenSiren, errorOwners, errorSiren],
   )
