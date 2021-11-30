@@ -507,3 +507,18 @@ export type FAQSection = {
     parts: Array<FAQPartType>
   }
 }
+
+export type EntrepriseType = {
+  raison_sociale?: string
+  code_naf?: string
+  région?: string
+  département?: string
+  adresse?: string
+  commune?: string
+  code_postal?: string
+}
+
+export type AlertMessageType = {
+  text: string
+  kind: "success" | "error"
+} | null

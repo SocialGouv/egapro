@@ -7,7 +7,14 @@ import { Form } from "react-final-form"
 import createDecorator from "final-form-calculate"
 import { FieldArray } from "react-final-form-arrays"
 
-import { AppState, FormState, ActionInformationsEntrepriseData, Structure, EntrepriseUES } from "../../globals"
+import {
+  AppState,
+  FormState,
+  ActionInformationsEntrepriseData,
+  Structure,
+  EntrepriseUES,
+  EntrepriseType,
+} from "../../globals"
 
 import globalStyles from "../../utils/globalStyles"
 
@@ -26,17 +33,6 @@ import { departementCode } from "../../components/RegionsDepartements"
 import TextField from "../../components/TextField"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
-
-///////////////////
-export type entrepriseData = {
-  raison_sociale?: string
-  code_naf?: string
-  région?: string
-  département?: string
-  adresse?: string
-  commune?: string
-  code_postal?: string
-}
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -241,7 +237,7 @@ function InformationsEntrepriseForm({
             label="SIREN"
             name="siren"
             readOnly={readOnly}
-            updateSirenData={(sirenData: entrepriseData) =>
+            updateSirenData={(sirenData: EntrepriseType) =>
               form.batch(() => {
                 form.change("nomEntreprise", sirenData.raison_sociale || "")
                 form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
@@ -307,7 +303,7 @@ function InformationsEntrepriseForm({
                           siren={`${entrepriseUES}.siren`}
                           index={index}
                           readOnly={readOnly}
-                          updateSirenData={(sirenData: entrepriseData) =>
+                          updateSirenData={(sirenData: EntrepriseType) =>
                             form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
                           }
                         />

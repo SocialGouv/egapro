@@ -1,4 +1,7 @@
+import React from "react"
+import { useToast, UseToastOptions } from "@chakra-ui/toast"
 import { useState, useEffect, useCallback, ChangeEvent, ChangeEventHandler } from "react"
+import { AlertMessageType } from "../globals"
 
 export function useDebounce(value: any, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value)
@@ -81,4 +84,49 @@ export function useTitle(title: string) {
       document.title = prevTitle
     }
   })
+}
+
+/**
+ * Utility to retrive user's info.
+ *
+ * @returns the information for the authenticated user
+ */
+export function useUser(): { email: string; ownership: string[]; logout: () => void } {
+  const tokenInfoLS = localStorage.getItem("tokenInfo")
+  const { email, ownership } = tokenInfoLS ? JSON.parse(tokenInfoLS) : { email: "", ownership: [] }
+
+  function logout() {
+    localStorage.setItem("token", "")
+    localStorage.setItem("tokenInfo", "")
+  }
+
+  return { email, ownership, logout }
+}
+
+function showToastMessage(toast: ReturnType<typeof useToast>, options?: UseToastOptions) {
+  return function (message: AlertMessageType) {
+    if (message?.text) {
+      toast({
+        title: message.kind === "success" ? "Succès" : "Erreur",
+        description: message.text,
+        status: message.kind,
+        isClosable: true,
+        ...(options || {}),
+      })
+    }
+  }
+}
+
+/**
+ * Return utility to show toast messages.
+ */
+export function useToastMessage(options?: UseToastOptions) {
+  const toast = useToast()
+
+  const toastMessage = showToastMessage(toast, options)
+
+  const toastSuccess = (text: string) => toastMessage({ kind: "success", text })
+  const toastError = (text: string) => toastMessage({ kind: "error", text })
+
+  return { toastMessage, toastSuccess, toastError }
 }

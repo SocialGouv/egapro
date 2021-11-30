@@ -1,18 +1,10 @@
 # EgaPro
 
-> Calcul de l'indexe de l'égalité homme / femme dans les entreprises
+> Calcul de l'index de l'égalité homme / femme dans les entreprises
 
 Ce projet est le frontend qui permet de faire une simulation-déclaration pour Egapro.
 
 ## Installer et lancer
-
-Ajouter le fichier `.env` à la racine du projet:
-
-```bash
-cp .env.sample .env
-```
-
-Y modifier les variables d'environnement nécessaires.
 
 ```bash
 yarn install
