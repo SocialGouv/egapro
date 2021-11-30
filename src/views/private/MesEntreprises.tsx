@@ -3,8 +3,8 @@ import { Select } from "@chakra-ui/select"
 import { Box, Flex, HStack, List, ListIcon, ListItem, Text } from "@chakra-ui/layout"
 import { Spinner } from "@chakra-ui/spinner"
 import { FormControl, FormLabel } from "@chakra-ui/form-control"
-import { Input } from "@chakra-ui/input"
-import { AddIcon, DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
+import { DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
+import { z } from "zod"
 
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import { useTitle, useToastMessage } from "../../utils/hooks"
@@ -29,6 +29,8 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/modal"
+import { Form } from "react-final-form"
+import { formValidator, InputControl } from "../../components/ds/form-lib"
 
 const title = "Mes entreprises"
 
@@ -37,7 +39,7 @@ function InfoEntreprise({ entreprise }: { entreprise: EntrepriseType }) {
   const { raison_sociale, commune } = entreprise
 
   return (
-    <Box maxW="sm" borderWidth="3px" borderRadius="lg" as="section">
+    <Box borderWidth="3px" borderRadius="lg" as="section">
       <HStack spacing="4" p="6" pt="4" pb="4">
         <Flex>
           <OfficeBuildingIcon w={6} h={6} color="gray.500" />
@@ -154,11 +156,11 @@ function MesEntreprises() {
     setShowAddForm.off()
   }, [chosenSiren])
 
-  async function addUser(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function addUser(formData: any) {
+    setEmail(formData.email)
 
     try {
-      await fetcher(`/ownership/${chosenSiren}/${email}`, {
+      await fetcher(`/ownership/${chosenSiren}/${formData.email}`, {
         method: "PUT",
       })
       setEmail("")
@@ -183,6 +185,10 @@ function MesEntreprises() {
       toastError("Erreur pour supprimer cet email.")
     }
   }
+
+  const FormInput = z.object({
+    email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
+  })
 
   return (
     <SinglePageLayout>
@@ -228,22 +234,18 @@ function MesEntreprises() {
                 </LinkButton>
                 {showAddForm && (
                   <Box mt="4">
-                    <form onSubmit={addUser}>
-                      <HStack align="flex-end">
-                        <FormControl id="email">
-                          <FormLabel>Email du responsable</FormLabel>
-                          <Input
-                            variant="blue-outline"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                          />
-                        </FormControl>
-                        <PrimaryButton leftIcon={<AddIcon />} type="submit">
-                          Ajouter
-                        </PrimaryButton>
-                      </HStack>
-                    </form>
+                    <Form
+                      onSubmit={addUser}
+                      validate={formValidator(FormInput)}
+                      render={({ handleSubmit }) => (
+                        <form onSubmit={handleSubmit}>
+                          <HStack align="flex-end">
+                            <InputControl name="email" label="Email du responsable" variant="blue-outline" />
+                            <PrimaryButton type="submit">Ajouter</PrimaryButton>
+                          </HStack>
+                        </form>
+                      )}
+                    />
                   </Box>
                 )}
               </Flex>
