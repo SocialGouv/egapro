@@ -7,7 +7,7 @@ function Logo({ layout = "default" }: { layout?: "default" | "mobile" }) {
       <img
         css={[styles.image, layout === "mobile" && styles.imageMobile]}
         src={process.env.PUBLIC_URL + "/marianne.svg"}
-        alt="Ministère du Travail"
+        alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
       />
     </div>
   )
