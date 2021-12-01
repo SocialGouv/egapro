@@ -79,6 +79,7 @@ const styles = {
   }),
   scroll: css({
     display: "flex",
+    alignItems: "flex-start",
     flexDirection: "row",
     flexGrow: 1,
     flexShrink: 1,

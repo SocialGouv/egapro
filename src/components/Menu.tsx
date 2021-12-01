@@ -1,6 +1,6 @@
 import React, { Fragment } from "react"
 import { Switch, Route, Link as ReachLink } from "react-router-dom"
-import { Box, Text, List, ListItem, Link } from "@chakra-ui/react"
+import { Box, Heading, List, ListItem, Link } from "@chakra-ui/react"
 import { FormState, TrancheEffectifs } from "../globals"
 import globalStyles from "../utils/globalStyles"
 import { IconValid, IconInvalid } from "./Icons"
@@ -100,8 +100,31 @@ function Menu({
   informationsDeclarantFormValidated,
   declarationFormValidated,
 }: Props) {
+  const listStyles = {
+    "@media (max-width: 1279px)": {
+      display: "flex",
+      flexWrap: "no-wrap",
+      overflowX: "auto",
+      li: {
+        marginTop: "0 !important",
+      },
+      a: {
+        fontSize: "13px !important",
+      },
+      "li:not(:last-child)": {
+        marginRight: 4,
+      },
+    },
+  }
   return (
-    <Box as="nav" role="navigation" bg={{ base: "#fff", xl: "transparent" }} px={4} py={{ base: 6, xl: 4 }}>
+    <Box
+      as="nav"
+      role="navigation"
+      id="navigation"
+      bg={{ base: "#fff", xl: "transparent" }}
+      px={4}
+      py={{ base: 4, xl: 8 }}
+    >
       <Switch>
         <Route
           path="/simulateur/:code"
@@ -112,10 +135,10 @@ function Menu({
           }) => (
             <React.Fragment>
               <CustomNavLink to={`/simulateur/${code}`} title="vos informations" activeOnlyWhenExact={true} />
-              <Text fontSize="lg" mb={2} mt={3}>
+              <Heading as="div" size="sm" mb={2} mt={4}>
                 Calcul de l'index
-              </Text>
-              <List spacing={2}>
+              </Heading>
+              <List spacing={2} sx={listStyles}>
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/informations`}
@@ -189,10 +212,10 @@ function Menu({
                   <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="récapitulatif" />
                 </ListItem>
               </List>
-              <Text fontSize="lg" mb={2} mt={3}>
+              <Heading as="div" size="sm" mb={2} mt={4}>
                 Déclaration
-              </Text>
-              <List spacing={2}>
+              </Heading>
+              <List spacing={2} sx={listStyles}>
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/informations-entreprise`}
