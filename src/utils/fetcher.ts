@@ -3,6 +3,8 @@ if (window.location.href.includes("localhost:")) {
   API_URL = "http://127.0.0.1:2626"
 }
 
+export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again"
+
 export const fetcher = async (endpoint: string, options: RequestInit) => {
   options = {
     ...options,
@@ -17,8 +19,14 @@ export const fetcher = async (endpoint: string, options: RequestInit) => {
   if (!response.ok) {
     const error: Error & { info?: string; status?: number } = new Error("Erreur API")
 
-    error.info = await response.json()
+    error.info = (await response.json())?.error
     error.status = response.status
+
+    if (error.info) {
+      if (/Invalid token/i.test(error.info) || /No authentication token was provided/i.test(error.info)) {
+        error.info = EXPIRED_TOKEN_MESSAGE
+      }
+    }
 
     throw error
   }
@@ -29,5 +37,3 @@ export const fetcher = async (endpoint: string, options: RequestInit) => {
 
   return response.json()
 }
-
-export default fetcher
