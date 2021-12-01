@@ -46,8 +46,8 @@ function InfoEntreprise({ siren }: { siren: string }) {
 
       {isLoading ? (
         <Stack>
-          <Skeleton height="25px" />
-          <Skeleton height="20px" />
+          <Skeleton height="20px" w="200px" />
+          <Skeleton height="20px" color="gray.600" w="200px" />
         </Stack>
       ) : (
         <Stack>

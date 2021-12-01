@@ -49,8 +49,13 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   function logout() {
     localStorage.setItem("token", "")
     localStorage.setItem("tokenInfo", "")
-    setContext(() => initialContext)
+    setContext(initialContext)
   }
+
+  React.useEffect(() => {
+    // tentative de login au mount du composant
+    login(localStorage.getItem("token") || "")
+  }, [])
 
   return <AuthContext.Provider value={{ ...context, logout, login }}>{children}</AuthContext.Provider>
 }
