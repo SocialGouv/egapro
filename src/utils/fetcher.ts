@@ -37,5 +37,3 @@ export const fetcher = async (endpoint: string, options: RequestInit) => {
 
   return response.json()
 }
-
-export default fetcher

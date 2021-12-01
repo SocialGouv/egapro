@@ -1,5 +1,6 @@
 import useSWR from "swr"
-import fetcher from "../utils/fetcher"
+import { fetcher } from "../utils/fetcher"
+import { makeMessage } from "../utils/makeMessage"
 import { useLogoutIfExpiredToken } from "./useLogoutIfExpiredToken"
 
 export function useSiren(siren: string) {
@@ -9,5 +10,5 @@ export function useSiren(siren: string) {
   const isLoading = !entreprise && !error
   const isError = Boolean(error)
 
-  return { entreprise, error, isLoading, isError, mutate }
+  return { entreprise, message: makeMessage(error), isLoading, isError, mutate }
 }

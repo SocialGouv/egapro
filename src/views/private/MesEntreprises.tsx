@@ -1,25 +1,4 @@
 import React from "react"
-import { Select } from "@chakra-ui/select"
-import { Box, Flex, HStack, List, ListIcon, ListItem, Text } from "@chakra-ui/layout"
-import { Spinner } from "@chakra-ui/spinner"
-import { FormControl, FormLabel } from "@chakra-ui/form-control"
-import { DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
-import { z } from "zod"
-
-import { SinglePageLayout } from "../../containers/SinglePageLayout"
-import { useTitle, useToastMessage } from "../../utils/hooks"
-import { useSiren } from "../../hooks/useSiren"
-import { useOwnersOfSiren } from "../../hooks/useOwnersOfSiren"
-import Page from "../../components/Page"
-import { EXPIRED_TOKEN_MESSAGE, fetcher } from "../../utils/fetcher"
-import { AlertMessageType, EntrepriseType } from "../../globals"
-import PrimaryButton from "../../components/ds/PrimaryButton"
-import LinkButton from "../../components/ds/LinkButton"
-import Toast from "../../components/ds/Toast"
-import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
-import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
-import { IconButton } from "@chakra-ui/button"
-import { useUser } from "../../components/AuthContext"
 import {
   Modal,
   ModalBody,
@@ -29,31 +8,58 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/modal"
+import { Select } from "@chakra-ui/select"
+import { Box, Flex, HStack, List, ListIcon, ListItem, Stack, Text } from "@chakra-ui/layout"
+import { Spinner } from "@chakra-ui/spinner"
+import { FormControl, FormLabel } from "@chakra-ui/form-control"
+import { IconButton } from "@chakra-ui/button"
+import { DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
+import { Skeleton } from "@chakra-ui/react"
+import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
 import { Form } from "react-final-form"
+import { z } from "zod"
+
+import { SinglePageLayout } from "../../containers/SinglePageLayout"
+import { useTitle, useToastMessage } from "../../utils/hooks"
+import { useSiren } from "../../hooks/useSiren"
+import { useOwnersOfSiren } from "../../hooks/useOwnersOfSiren"
+import Page from "../../components/Page"
+import { fetcher } from "../../utils/fetcher"
+import PrimaryButton from "../../components/ds/PrimaryButton"
+import LinkButton from "../../components/ds/LinkButton"
+import Toast from "../../components/ds/Toast"
+import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
+import { useUser } from "../../components/AuthContext"
 import { formValidator, InputControl } from "../../components/ds/form-lib"
 
 const title = "Mes entreprises"
 
-function InfoEntreprise({ entreprise }: { entreprise: EntrepriseType }) {
-  if (!entreprise) return null
-  const { raison_sociale, commune } = entreprise
+function InfoEntreprise({ siren }: { siren: string }) {
+  const { entreprise, message, isLoading } = useSiren(siren)
 
   return (
-    <Box borderWidth="3px" borderRadius="lg" as="section">
-      <HStack spacing="4" p="6" pt="4" pb="4">
-        <Flex>
-          <OfficeBuildingIcon w={6} h={6} color="gray.500" />
-        </Flex>
-        <Box>
+    <HStack borderWidth="3px" borderRadius="lg" as="section" spacing="4" p="6" pt="4" pb="4">
+      <Toast message={message} />
+      <Flex>
+        <OfficeBuildingIcon w={6} h={6} color="gray.500" />
+      </Flex>
+
+      {isLoading ? (
+        <Stack>
+          <Skeleton height="25px" />
+          <Skeleton height="20px" />
+        </Stack>
+      ) : (
+        <Stack>
           <Text fontWeight="semibold" as="h4" lineHeight="tight" isTruncated>
-            {raison_sociale}
+            {entreprise?.raison_sociale}
           </Text>
           <Text fontSize="md" color="gray.600">
-            {commune}
+            {entreprise?.commune}
           </Text>
-        </Box>
-      </HStack>
-    </Box>
+        </Stack>
+      )}
+    </HStack>
   )
 }
 
@@ -101,76 +107,27 @@ function UserListItem({
   )
 }
 
-function UtilisateursEntreprise({
-  owners,
-  siren,
-  isReady = false,
-  removeUser,
-}: {
-  owners: string[]
-  siren: string
-  isReady: boolean
-  removeUser: (owner: string, siren: string) => void
-}) {
-  if (!isReady || !owners) return null
-
-  return (
-    <Box mt="4">
-      <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
-        Responsables
-      </Text>
-
-      <List spacing={3}>
-        {owners?.map((owner: string) => (
-          <UserListItem key={owner} owner={owner} siren={siren} removeUser={removeUser} />
-        ))}
-      </List>
-    </Box>
-  )
-}
-
-function MesEntreprises() {
-  useTitle(title)
-  const { toastSuccess, toastError } = useToastMessage({})
-
-  const { ownership: sirens } = useUser()
+function UtilisateursEntreprise({ siren }: { siren: string }) {
   const [email, setEmail] = React.useState("")
-  const orderedSirens = sirens.sort()
-
-  const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
-  const { entreprise, error: errorSiren, isLoading: isLoadingSiren } = useSiren(chosenSiren)
-  const { owners, error: errorOwners, isLoading: isLoadingOwners, mutate: mutateOwners } = useOwnersOfSiren(chosenSiren)
+  const { toastSuccess, toastError } = useToastMessage({})
   const [showAddForm, setShowAddForm] = useBoolean()
 
-  const isLoading = isLoadingSiren || isLoadingOwners
-
-  const message: AlertMessageType = React.useMemo(
-    () =>
-      !errorSiren && !errorOwners
-        ? null
-        : errorSiren?.info === EXPIRED_TOKEN_MESSAGE || errorOwners?.info === EXPIRED_TOKEN_MESSAGE
-        ? {
-            kind: "error",
-            text: "Votre session a expiré, veuillez vous reconnecter.",
-          }
-        : { kind: "error", text: "Une erreur est survenue lors de la récupération des données." },
-    [chosenSiren, errorOwners, errorSiren],
-  )
+  const { owners, message, isLoading, mutate } = useOwnersOfSiren(siren)
 
   React.useEffect(() => {
     setShowAddForm.off()
-  }, [chosenSiren])
+  }, [siren])
 
   async function addUser(formData: any) {
     setEmail(formData.email)
 
     try {
-      await fetcher(`/ownership/${chosenSiren}/${formData.email}`, {
+      await fetcher(`/ownership/${siren}/${formData.email}`, {
         method: "PUT",
       })
       setEmail("")
       setShowAddForm.off()
-      mutateOwners([...owners, email])
+      mutate([...owners, email])
       toastSuccess("Le responsable a été ajouté.")
     } catch (error) {
       console.error(error)
@@ -183,7 +140,7 @@ function MesEntreprises() {
       await fetcher(`/ownership/${siren}/${owner}`, {
         method: "DELETE",
       })
-      mutateOwners([]) // TODO ne pas tout supprimer
+      mutate([]) // TODO ne pas tout supprimer
       toastSuccess("Le responsable a été supprimé.")
     } catch (error) {
       console.error(error)
@@ -196,8 +153,65 @@ function MesEntreprises() {
   })
 
   return (
-    <SinglePageLayout>
+    <Box mt="4">
       <Toast message={message} />
+
+      {isLoading ? (
+        <Box m="6">
+          <Spinner />
+        </Box>
+      ) : (
+        <React.Fragment>
+          <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
+            Responsables
+          </Text>
+
+          <List spacing={3}>
+            {owners?.map((owner: string) => (
+              <UserListItem key={owner} owner={owner} siren={siren} removeUser={removeUser} />
+            ))}
+          </List>
+
+          <Flex mt="6" direction="column">
+            <LinkButton variant="ghost" onClick={setShowAddForm.toggle}>
+              <span aria-hidden="true" style={{ marginRight: "20px" }}>
+                🙋
+              </span>
+              &nbsp;Vous souhaitez ajouter un responsable ?
+            </LinkButton>
+            {showAddForm && (
+              <Box mt="4">
+                <Form
+                  onSubmit={addUser}
+                  validate={formValidator(FormInput)}
+                  render={({ handleSubmit }) => (
+                    <form onSubmit={handleSubmit}>
+                      <HStack align="flex-end">
+                        <InputControl name="email" label="Email du responsable" variant="blue-outline" />
+                        <PrimaryButton type="submit">Ajouter</PrimaryButton>
+                      </HStack>
+                    </form>
+                  )}
+                />
+              </Box>
+            )}
+          </Flex>
+        </React.Fragment>
+      )}
+    </Box>
+  )
+}
+
+function MesEntreprises() {
+  useTitle(title)
+
+  const { ownership: sirens } = useUser()
+  const orderedSirens = sirens.sort()
+
+  const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
+
+  return (
+    <SinglePageLayout>
       <Page title={title}>
         {!sirens?.length ? (
           <p>Vous ne gérez pas encore d'entreprise.</p>
@@ -217,44 +231,12 @@ function MesEntreprises() {
                 ))}
               </Select>
             </FormControl>
-            {isLoading ? (
-              <Box m="6">
-                <Spinner />
-              </Box>
-            ) : (
-              <Flex mt="6" direction="column">
-                <InfoEntreprise entreprise={entreprise} />
-                <UtilisateursEntreprise
-                  owners={owners}
-                  siren={chosenSiren}
-                  isReady={Boolean(entreprise)}
-                  removeUser={removeUser}
-                />
-                &nbsp;
-                <LinkButton variant="ghost" onClick={setShowAddForm.toggle}>
-                  <span aria-hidden="true" style={{ marginRight: "20px" }}>
-                    🙋
-                  </span>
-                  &nbsp;Vous souhaitez ajouter un responsable ?
-                </LinkButton>
-                {showAddForm && (
-                  <Box mt="4">
-                    <Form
-                      onSubmit={addUser}
-                      validate={formValidator(FormInput)}
-                      render={({ handleSubmit }) => (
-                        <form onSubmit={handleSubmit}>
-                          <HStack align="flex-end">
-                            <InputControl name="email" label="Email du responsable" variant="blue-outline" />
-                            <PrimaryButton type="submit">Ajouter</PrimaryButton>
-                          </HStack>
-                        </form>
-                      )}
-                    />
-                  </Box>
-                )}
-              </Flex>
-            )}
+
+            <Flex mt="6" direction="column">
+              <InfoEntreprise siren={chosenSiren} />
+              <UtilisateursEntreprise siren={chosenSiren} />
+              &nbsp;
+            </Flex>
           </React.Fragment>
         )}
       </Page>
