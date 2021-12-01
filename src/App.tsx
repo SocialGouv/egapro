@@ -7,7 +7,7 @@ import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
 import { ChakraProvider, extendTheme } from "@chakra-ui/react"
 import defaultTheme from "@chakra-ui/theme"
-import { StyleFunctionProps } from "@chakra-ui/theme-tools"
+import { createBreakpoints, StyleFunctionProps } from "@chakra-ui/theme-tools"
 
 import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
@@ -68,7 +68,15 @@ const appTheme = {
   },
 }
 
-const theme = extendTheme(appTheme)
+const breakpoints = createBreakpoints({
+  sm: "30em",
+  md: "48em",
+  lg: "64rem",
+  xl: "80rem",
+  "2xl": "96em",
+})
+
+const theme = extendTheme({ appTheme, breakpoints })
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (

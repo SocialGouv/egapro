@@ -1,16 +1,16 @@
 /** @jsx jsx */
+import React, { Fragment } from "react"
 import { css, jsx } from "@emotion/core"
 import { Switch, Route, Link } from "react-router-dom"
+import { Box, Text, List, ListItem } from "@chakra-ui/react"
 
 import { FormState, TrancheEffectifs } from "../globals"
 
 import globalStyles from "../utils/globalStyles"
 
-import { useLayoutType } from "../components/GridContext"
+import { useLayoutType } from "./GridContext"
 
 import { IconValid, IconInvalid } from "./Icons"
-import { useColumnsWidth } from "./GridContext"
-import { Fragment } from "react"
 
 interface CustomNavLinkProps {
   title: string
@@ -100,11 +100,8 @@ function Menu({
   informationsDeclarantFormValidated,
   declarationFormValidated,
 }: Props) {
-  const width = useColumnsWidth(2)
-  const layoutType = useLayoutType()
-
   return (
-    <div css={[layoutType === "desktop" && css({ width, marginLeft: globalStyles.grid.gutterWidth })]}>
+    <Box as="nav" role="navigation" bg={{ base: "#fff", xl: "transparent" }} px={4} py={{ base: 6, xl: 4 }}>
       <Switch>
         <Route
           path="/simulateur/:code"
@@ -113,123 +110,125 @@ function Menu({
               params: { code },
             },
           }) => (
-            <div role="navigation" css={styles.menuWrapper}>
-              <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
-                <CustomNavLink to={`/simulateur/${code}`} title="vos informations" activeOnlyWhenExact={true} />
-              </div>
-              <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
-                <h5 css={[styles.menuTitle, layoutType === "tablet" && styles.itemTablet]}>Calcul de l'index</h5>
-                <CustomNavLink
-                  to={`/simulateur/${code}/informations`}
-                  title="informations calcul"
-                  label="et période de référence"
-                  valid={informationsFormValidated}
-                />
-                <CustomNavLink
-                  to={`/simulateur/${code}/effectifs`}
-                  title="effectifs"
-                  label="pris en compte"
-                  valid={effectifFormValidated}
-                />
-                <CustomNavLink
-                  to={`/simulateur/${code}/indicateur1`}
-                  title="indicateur"
-                  label="écart de rémunération"
-                  valid={indicateurUnFormValidated}
-                />
+            <React.Fragment>
+              <CustomNavLink to={`/simulateur/${code}`} title="vos informations" activeOnlyWhenExact={true} />
+              <Text fontSize="lg" mb={2} mt={3}>
+                Calcul de l'index
+              </Text>
+              <List spacing={2}>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/informations`}
+                    title="informations calcul"
+                    label="et période de référence"
+                    valid={informationsFormValidated}
+                  />
+                </ListItem>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/effectifs`}
+                    title="effectifs"
+                    label="pris en compte"
+                    valid={effectifFormValidated}
+                  />
+                </ListItem>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/indicateur1`}
+                    title="indicateur"
+                    label="écart de rémunération"
+                    valid={indicateurUnFormValidated}
+                  />
+                </ListItem>
                 {(trancheEffectifs !== "50 à 250" && (
                   <Fragment>
-                    <CustomNavLink
-                      to={`/simulateur/${code}/indicateur2`}
-                      title="indicateur"
-                      label="écart de taux d'augmentation"
-                      valid={indicateurDeuxFormValidated}
-                    />
-                    <CustomNavLink
-                      to={`/simulateur/${code}/indicateur3`}
-                      title="indicateur"
-                      label="écart de taux de promotion"
-                      valid={indicateurTroisFormValidated}
-                    />
+                    <ListItem>
+                      <CustomNavLink
+                        to={`/simulateur/${code}/indicateur2`}
+                        title="indicateur"
+                        label="écart de taux d'augmentation"
+                        valid={indicateurDeuxFormValidated}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <CustomNavLink
+                        to={`/simulateur/${code}/indicateur3`}
+                        title="indicateur"
+                        label="écart de taux de promotion"
+                        valid={indicateurTroisFormValidated}
+                      />
+                    </ListItem>
                   </Fragment>
                 )) || (
-                  <CustomNavLink
-                    to={`/simulateur/${code}/indicateur2et3`}
-                    title="indicateur"
-                    label="écart de taux d'augmentation"
-                    valid={indicateurDeuxTroisFormValidated}
-                  />
+                  <ListItem>
+                    <CustomNavLink
+                      to={`/simulateur/${code}/indicateur2et3`}
+                      title="indicateur"
+                      label="écart de taux d'augmentation"
+                      valid={indicateurDeuxTroisFormValidated}
+                    />
+                  </ListItem>
                 )}
-                <CustomNavLink
-                  to={`/simulateur/${code}/indicateur4`}
-                  title="indicateur"
-                  label="retour congé maternité"
-                  valid={indicateurQuatreFormValidated}
-                />
-                <CustomNavLink
-                  to={`/simulateur/${code}/indicateur5`}
-                  title="indicateur"
-                  label="hautes rémunérations"
-                  valid={indicateurCinqFormValidated}
-                />
-                <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="récapitulatif" />
-              </div>
-              <div css={[styles.menu, layoutType === "tablet" && styles.menuTablet]}>
-                <h5 css={[styles.menuTitle, layoutType === "tablet" && styles.itemTablet]}>Déclaration</h5>
-                <CustomNavLink
-                  to={`/simulateur/${code}/informations-entreprise`}
-                  title="informations entreprise/UES"
-                  valid={informationsEntrepriseFormValidated}
-                />
-                <CustomNavLink
-                  to={`/simulateur/${code}/informations-declarant`}
-                  title="informations déclarant"
-                  valid={informationsDeclarantFormValidated}
-                />
-                <CustomNavLink
-                  to={`/simulateur/${code}/declaration`}
-                  title="déclaration"
-                  valid={declarationFormValidated}
-                />
-              </div>
-            </div>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/indicateur4`}
+                    title="indicateur"
+                    label="retour congé maternité"
+                    valid={indicateurQuatreFormValidated}
+                  />
+                </ListItem>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/indicateur5`}
+                    title="indicateur"
+                    label="hautes rémunérations"
+                    valid={indicateurCinqFormValidated}
+                  />
+                </ListItem>
+                <ListItem>
+                  <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="récapitulatif" />
+                </ListItem>
+              </List>
+              <Text fontSize="lg" mb={2} mt={3}>
+                Déclaration
+              </Text>
+              <List spacing={2}>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/informations-entreprise`}
+                    title="informations entreprise/UES"
+                    valid={informationsEntrepriseFormValidated}
+                  />
+                </ListItem>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/informations-declarant`}
+                    title="informations déclarant"
+                    valid={informationsDeclarantFormValidated}
+                  />
+                </ListItem>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}/declaration`}
+                    title="déclaration"
+                    valid={declarationFormValidated}
+                  />
+                </ListItem>
+              </List>
+            </React.Fragment>
           )}
         />
       </Switch>
-    </div>
+    </Box>
   )
 }
 
 const styles = {
-  menuWrapper: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  menu: css({
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-  }),
-  menuTitle: css({
-    paddingTop: 7,
-    paddingBottom: 7,
-    marginBottom: 0,
-  }),
-  menuTablet: css({
-    flexDirection: "row",
-    alignItems: "stretch",
-    paddingLeft: globalStyles.grid.gutterWidth,
-    backgroundColor: "white",
-    ":last-child": {
-      borderBottom: "1px solid #EFECEF",
-    },
-  }),
   link: css({
-    paddingTop: 7,
-    paddingBottom: 7,
+    display: "inline-block",
     color: globalStyles.colors.default,
-    fontSize: 12,
-    lineHeight: "15px",
+    fontSize: 13,
+    lineHeight: 1.125,
     textDecoration: "none",
     ":hover": {
       color: globalStyles.colors.primary,
