@@ -1,5 +1,4 @@
 import React from "react"
-import { useHistory } from "react-router"
 import { getTokenInfo } from "../utils/api"
 
 const initialContext = {
