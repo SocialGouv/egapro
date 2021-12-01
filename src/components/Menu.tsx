@@ -1,15 +1,8 @@
-/** @jsx jsx */
 import React, { Fragment } from "react"
-import { css, jsx } from "@emotion/core"
-import { Switch, Route, Link } from "react-router-dom"
-import { Box, Text, List, ListItem } from "@chakra-ui/react"
-
+import { Switch, Route, Link as ReachLink } from "react-router-dom"
+import { Box, Text, List, ListItem, Link } from "@chakra-ui/react"
 import { FormState, TrancheEffectifs } from "../globals"
-
 import globalStyles from "../utils/globalStyles"
-
-import { useLayoutType } from "./GridContext"
-
 import { IconValid, IconInvalid } from "./Icons"
 
 interface CustomNavLinkProps {
@@ -31,13 +24,12 @@ function buildA11yTitle({
   isValid?: boolean
   isCurrentStep?: boolean
 }): string {
-  return `${title} ${label ? label : ""} ${isValid ? ", Étape complétée" : ""} ${
-    isCurrentStep ? ", Étape en cours" : ""
+  return `${title}${label ? ` ${label}` : ""}${isValid ? " : étape complétée" : ""}${
+    isCurrentStep ? " : étape en cours" : ""
   }`
 }
 
 function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact = false }: CustomNavLinkProps) {
-  const layoutType = useLayoutType()
   return (
     <Route
       path={to}
@@ -45,26 +37,34 @@ function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact =
       // eslint-disable-next-line react/no-children-prop
       children={({ match }) => (
         <Link
+          fontSize="sm"
+          sx={{
+            lineHeight: 1.25,
+            display: "inline-flex",
+            color: match ? globalStyles.colors.primary : "inherit",
+          }}
+          as={ReachLink}
           to={to}
-          css={[styles.link, layoutType === "tablet" && styles.itemTablet, match && styles.activeLink]}
-          aria-label={buildA11yTitle({ title, label, isValid: valid === "Valid", isCurrentStep: Boolean(match) })}
+          aria-label={buildA11yTitle({
+            title,
+            label,
+            isValid: valid === "Valid",
+            isCurrentStep: Boolean(match),
+          })}
         >
-          <div css={styles.linkInner}>
-            {valid === "Valid" ? (
-              <div css={styles.icon}>
-                <IconValid />
-              </div>
-            ) : valid === "Invalid" ? (
-              <div css={styles.icon}>
-                <IconInvalid />
-              </div>
-            ) : null}
-            <span>
-              {title}
-              {label && layoutType !== "desktop" && ` ${label}`}
-            </span>
-          </div>
-          {label && layoutType === "desktop" && <span>{label}</span>}
+          {valid === "Valid" ? (
+            <Box mr={1} pt={1} cx={{ flexShrink: 0 }}>
+              <IconValid />
+            </Box>
+          ) : valid === "Invalid" ? (
+            <Box mr={2} pt={1} cx={{ flexShrink: 0 }}>
+              <IconInvalid />
+            </Box>
+          ) : null}
+          <Box cx={{ flexGrow: 1 }}>
+            {title}
+            {label && <Box>{label}</Box>}
+          </Box>
         </Link>
       )}
     />
@@ -221,37 +221,6 @@ function Menu({
       </Switch>
     </Box>
   )
-}
-
-const styles = {
-  link: css({
-    display: "inline-block",
-    color: globalStyles.colors.default,
-    fontSize: 13,
-    lineHeight: 1.125,
-    textDecoration: "none",
-    ":hover": {
-      color: globalStyles.colors.primary,
-    },
-  }),
-  itemTablet: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    margin: "0 15px 0 0",
-    justifyContent: "center",
-  }),
-  activeLink: css({
-    color: globalStyles.colors.primary,
-  }),
-  linkInner: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-  }),
-  icon: css({
-    marginRight: 3,
-  }),
 }
 
 export default Menu
