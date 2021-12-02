@@ -12,6 +12,7 @@ import ButtonAction from "../components/ButtonAction"
 import { styles as buttonStyles } from "../components/Button"
 import ErrorMessage from "../components/ErrorMessage"
 import globalStyles from "../utils/globalStyles"
+import { Heading, SimpleGrid, Image } from "@chakra-ui/react"
 
 interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void
@@ -52,15 +53,24 @@ function Home({ history, location, dispatch }: Props) {
         "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
       ]}
     >
-      <div css={styles.content}>
-        <h2 css={styles.title}>Comment calculer et déclarer l’index égalité femmes-hommes ?</h2>
+      <div>
+        <Heading as="h2" size="md" mb={6}>
+          Comment calculer et déclarer l’index égalité femmes-hommes&nbsp;?
+        </Heading>
 
-        <div css={styles.twoColumns}>
-          <div css={styles.bloc}>
-            <div css={styles.blocImage}>
-              <div css={[styles.image, styles.illustrationSimulator]} />
-            </div>
-
+        <SimpleGrid columns={2} spacing={10}>
+          <div>
+            <Image
+              src={`${process.env.PUBLIC_URL}/illustration-simulator.svg`}
+              aria-hidden="true"
+              alt=""
+              mx={-4}
+              sx={{
+                display: "block",
+                width: "calc(100% + var(--chakra-space-4))",
+                maxWidth: "calc(100% + var(--chakra-space-4))",
+              }}
+            />
             <div css={styles.blocContent}>
               <span css={styles.blocContentStep}>Choix 1</span>
               <span css={styles.blocContentTitle}>Calcul et déclaration de l'index</span>
@@ -75,11 +85,18 @@ function Home({ history, location, dispatch }: Props) {
             </div>
           </div>
 
-          <div css={styles.bloc}>
-            <div css={styles.blocImage}>
-              <div css={[styles.image, styles.illustrationPublish]} />
-            </div>
-
+          <div>
+            <Image
+              src={`${process.env.PUBLIC_URL}/illustration-publish.svg`}
+              aria-hidden="true"
+              alt=""
+              mx={-4}
+              sx={{
+                display: "block",
+                width: "calc(100% + var(--chakra-space-4))",
+                maxWidth: "calc(100% + var(--chakra-space-4))",
+              }}
+            />
             <div css={styles.blocContent}>
               <span css={styles.blocContentStep}>Choix 2</span>
               <span css={styles.blocContentTitle}>Déclaration directe de l'index</span>
@@ -87,7 +104,6 @@ function Home({ history, location, dispatch }: Props) {
                 Vous pouvez déclarer votre index égalité professionnelle F/H calculé par ailleurs directement via le
                 formulaire suivant :
               </p>
-
               <div css={styles.buttonWrapper}>
                 <a href="/declaration/" css={[buttonStyles.button, styles.linkButton]}>
                   déclarer directement
@@ -95,14 +111,13 @@ function Home({ history, location, dispatch }: Props) {
               </div>
             </div>
           </div>
-        </div>
+        </SimpleGrid>
       </div>
     </Page>
   )
 }
 
 const styles = {
-  content: css({}),
   title: css({
     fontSize: 18,
     lineHeight: "22px",
@@ -114,17 +129,6 @@ const styles = {
   twoColumns: css({
     display: "flex",
     flexDirection: "row",
-  }),
-  bloc: css({
-    marginBottom: 50,
-    padding: 10,
-    width: "50%",
-  }),
-  blocImage: css({
-    width: 300,
-    height: 205,
-    flexShrink: 0,
-    position: "relative",
   }),
 
   image: css({
