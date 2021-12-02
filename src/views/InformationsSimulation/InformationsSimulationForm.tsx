@@ -219,7 +219,11 @@ function FieldPeriodeReference({ readOnly, onClick }: { readOnly: boolean; onCli
       </label>
       <div css={styles.dates}>
         <FieldDate name="finPeriodeReference" readOnly={readOnly} label="" />
-        <ButtonAction label="sélectionner la fin de l'année civile" onClick={onClick} outline={readOnly} />
+        <ButtonAction
+          label="sélectionner la fin de l'année civile"
+          onClick={onClick}
+          variant={readOnly ? "outline" : "solid"}
+        />
       </div>
     </div>
   )

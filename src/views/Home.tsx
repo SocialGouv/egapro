@@ -9,9 +9,9 @@ import { logToSentry } from "../utils/helpers"
 
 import Page from "../components/Page"
 import ButtonAction from "../components/ButtonAction"
-import { styles as buttonStyles } from "../components/Button"
 import ErrorMessage from "../components/ErrorMessage"
 import globalStyles from "../utils/globalStyles"
+import ButtonLink from "../components/ButtonLink"
 import { Heading, SimpleGrid, Image } from "@chakra-ui/react"
 
 interface Props extends RouteComponentProps {
@@ -105,9 +105,7 @@ function Home({ history, location, dispatch }: Props) {
                 formulaire suivant :
               </p>
               <div css={styles.buttonWrapper}>
-                <a href="/declaration/" css={[buttonStyles.button, styles.linkButton]}>
-                  déclarer directement
-                </a>
+                <ButtonLink to="/declaration/" label="déclarer directement" />
               </div>
             </div>
           </div>

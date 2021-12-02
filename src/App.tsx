@@ -18,35 +18,20 @@ import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ButtonAction"
 
-const colors = {
-  brand: {
-    primary: "#191a49",
-  },
-  button: {
-    primary: {
-      300: "hsl(238deg 53% 82%)",
-      500: "hsl(238deg 53% 60%)", // "#696CD1"
-      600: "hsl(238deg 43% 52%)",
-    },
-  },
-}
-
 // Chakra UI custom theme
 const appTheme = {
   config: {
     initialColorMode: "light",
     useSystemColorMode: false,
   },
-  colors,
   styles: {
     // Reuse the defaut styles from index.css.
     global: {
       body: {
         fontFamily: '"Cabin", -apple-system, sans-serif',
         fontWeight: "400",
-        color: colors.brand.primary,
+        color: "#191a49",
       },
-
       a: {
         color: "teal.500",
       },
@@ -76,7 +61,24 @@ const breakpoints = createBreakpoints({
   "2xl": "96em",
 })
 
-const theme = extendTheme({ appTheme, breakpoints })
+const theme = extendTheme({
+  appTheme,
+  breakpoints,
+  colors: {
+    primary: {
+      50: "#f8f8fd",
+      100: "#f0f0fa",
+      200: "#dadaf3",
+      300: "#c3c4ec",
+      400: "#9698de",
+      500: "#696cd0",
+      600: "#5f61bb",
+      700: "#4f519c",
+      800: "#3f417d",
+      900: "#333566",
+    },
+  },
+})
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (

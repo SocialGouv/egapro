@@ -26,11 +26,11 @@ import { useOwnersOfSiren } from "../../hooks/useOwnersOfSiren"
 import Page from "../../components/Page"
 import { fetcher } from "../../utils/fetcher"
 import PrimaryButton from "../../components/ds/PrimaryButton"
-import LinkButton from "../../components/ds/LinkButton"
 import Toast from "../../components/ds/Toast"
 import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
 import { useUser } from "../../components/AuthContext"
 import { formValidator, InputControl } from "../../components/ds/form-lib"
+import ButtonAction from "../../components/ButtonAction"
 
 const title = "Mes entreprises"
 
@@ -173,12 +173,13 @@ function UtilisateursEntreprise({ siren }: { siren: string }) {
           </List>
 
           <Flex mt="6" direction="column">
-            <LinkButton variant="ghost" onClick={setShowAddForm.toggle}>
-              <span aria-hidden="true" style={{ marginRight: "20px" }}>
-                🙋
-              </span>
-              &nbsp;Vous souhaitez ajouter un responsable ?
-            </LinkButton>
+            <ButtonAction
+              variant="outline"
+              onClick={setShowAddForm.toggle}
+              label="Vous souhaitez ajouter un responsable ?"
+              leftIcon={<span aria-hidden="true">🙋</span>}
+            />
+
             {showAddForm && (
               <Box mt="4">
                 <Form
