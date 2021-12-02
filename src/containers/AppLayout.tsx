@@ -1,5 +1,5 @@
 import React from "react"
-import { Box } from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react"
 
 import { Route, Switch, Redirect, RouteProps } from "react-router-dom"
 
@@ -57,7 +57,7 @@ function AppLayout({ state, dispatch }: Props) {
             return layoutType === "mobile" ? (
               <MobileLayout />
             ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+              <Flex direction="column" sx={{ minHeight: "100%" }}>
                 <Header />
                 <MainScrollView state={state}>
                   <Switch>
@@ -78,7 +78,7 @@ function AppLayout({ state, dispatch }: Props) {
                   </Switch>
                 </MainScrollView>
                 <Footer />
-              </Box>
+              </Flex>
             )
           }}
         />

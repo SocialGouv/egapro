@@ -1,5 +1,5 @@
 import React, { useEffect, ReactNode } from "react"
-import { Container, Box } from "@chakra-ui/react"
+import { Container, Box, Flex, Grid } from "@chakra-ui/react"
 import { withRouter, RouteComponentProps } from "react-router-dom"
 
 import { AppState } from "../globals"
@@ -33,18 +33,16 @@ function MainScrollView({ children, state, location }: Props) {
   )
 
   return (
-    <Box
+    <Flex
+      grow={1}
       sx={{
-        display: "flex",
         height: "100%",
-        flex: "1 0 auto",
       }}
     >
       <Container maxW="container.xl">
         <ModalProvider>
-          <Box
+          <Grid
             sx={{
-              display: "grid",
               gridTemplateColumns: "200px 1fr 380px",
               gridTemplateRows: "auto",
               gridTemplateAreas: "'nav main aside'",
@@ -58,10 +56,10 @@ function MainScrollView({ children, state, location }: Props) {
             <Box bg="white" sx={{ gridArea: "aside" }} mr={-3}>
               <FAQ />
             </Box>
-          </Box>
+          </Grid>
         </ModalProvider>
       </Container>
-    </Box>
+    </Flex>
   )
 }
 
