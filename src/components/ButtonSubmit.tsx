@@ -1,33 +1,8 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import Button from "./Button"
+import React from "react"
+import ButtonAction, { ButtonActionProps } from "./ButtonAction"
 
-interface Props {
-  label: string
-  outline?: boolean
-  error?: boolean
-  loading?: boolean
-}
-
-function ButtonSubmit({ label, outline = false, error = false, loading = false }: Props) {
-  return (
-    <button type="submit" css={styles.button} disabled={loading}>
-      <Button label={label} outline={outline} error={error} loading={loading} />
-    </button>
-  )
-}
-
-const styles = {
-  button: css({
-    all: "unset",
-
-    padding: 0,
-    border: "none",
-    outline: "none",
-    font: "inherit",
-    color: "inherit",
-    background: "none",
-  }),
+function ButtonSubmit({ label, loading = false }: ButtonActionProps) {
+  return <ButtonAction label={label} type="submit" disabled={loading} loading={loading} size="lg" />
 }
 
 export default ButtonSubmit

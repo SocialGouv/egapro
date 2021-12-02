@@ -9,9 +9,9 @@ import { logToSentry } from "../utils/helpers"
 
 import Page from "../components/Page"
 import ButtonAction from "../components/ButtonAction"
-import { styles as buttonStyles } from "../components/Button"
 import ErrorMessage from "../components/ErrorMessage"
 import globalStyles from "../utils/globalStyles"
+import ButtonLink from "../components/ButtonLink"
 
 interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void
@@ -89,9 +89,7 @@ function Home({ history, location, dispatch }: Props) {
               </p>
 
               <div css={styles.buttonWrapper}>
-                <a href="/declaration/" css={[buttonStyles.button, styles.linkButton]}>
-                  déclarer directement
-                </a>
+                <ButtonLink to="/declaration/" label="déclarer directement" />
               </div>
             </div>
           </div>

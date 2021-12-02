@@ -1,26 +1,34 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import React from "react"
 import { Link } from "react-router-dom"
-import Button from "./Button"
+import { Button } from "@chakra-ui/react"
+import { ButtonProps } from "./ButtonAction"
 
-interface Props {
-  label: string
+type ButtonLinkProps = ButtonProps & {
   to: string
 }
 
-function ButtonLink({ label, to }: Props) {
+function ButtonLink({
+  label,
+  to,
+  colorScheme = "primary",
+  variant = "solid",
+  leftIcon,
+  rightIcon,
+  size = "md",
+}: ButtonLinkProps) {
   return (
-    <Link to={to} css={styles.button}>
-      <Button label={label} />
-    </Link>
+    <Button
+      to={to}
+      as={Link}
+      colorScheme={colorScheme}
+      variant={variant}
+      leftIcon={leftIcon}
+      rightIcon={rightIcon}
+      size={size}
+    >
+      {label}
+    </Button>
   )
-}
-
-const styles = {
-  button: css({
-    display: "inline-flex",
-    textDecoration: "none",
-  }),
 }
 
 export default ButtonLink
