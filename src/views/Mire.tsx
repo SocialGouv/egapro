@@ -15,20 +15,22 @@ import { useUser } from "../components/AuthContext"
 const title = "Accéder à mes entreprises et déclarations transmises"
 
 /**
- * Check if a token is present in the URL bar. If so, store it in local storage and remove it from the URL bar.
- *
- * An event listener is set on storage event to handle this token and get the user's data (see AuthContext).
+ * Check if a token is present in the URL bar. If so, run login with it.
  */
-function checkIfTokenIsInURL() {
+function useCheckIfTokenIsInURL() {
+  const { login } = useUser()
+  // const history = useHistory()
+
   const urlParams = new URLSearchParams(window.location.search)
 
   const tokenInURL = urlParams.get("token")
 
   if (tokenInURL) {
-    localStorage.setItem("token", tokenInURL)
+    login(tokenInURL)
+    window.history.pushState({}, document.title, window.location.pathname)
   }
 
-  window.history.pushState({}, document.title, window.location.pathname)
+  // history.push(window.location.pathname) // TODO: this doesn't work because it re renders infinitely
 }
 
 function Mire() {
@@ -40,7 +42,7 @@ function Mire() {
   const [email, setEmail] = React.useState("")
   const { isAuthenticated } = useUser()
 
-  checkIfTokenIsInURL()
+  useCheckIfTokenIsInURL()
 
   const onSubmit = (formData: any) => {
     setEmail(formData.email)
