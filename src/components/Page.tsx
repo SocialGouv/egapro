@@ -1,10 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { ReactNode } from "react"
-
-import globalStyles from "../utils/globalStyles"
-
-import { useColumnsWidth, useLayoutType } from "./GridContext"
+import React, { ReactNode } from "react"
+import { Box, Heading, Text } from "@chakra-ui/react"
 
 interface Props {
   title: string
@@ -13,57 +8,23 @@ interface Props {
 }
 
 function Page({ title, tagline, children }: Props) {
-  const layoutType = useLayoutType()
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
   return (
-    <div css={styles.page}>
-      <div css={css({ width })}>
-        <h1 css={styles.title}>{title}</h1>
-        {tagline && Array.isArray(tagline) ? (
-          tagline.map((tl, index) => (
-            <p css={styles.tagline} key={index}>
+    <React.Fragment>
+      <Heading as="h1">{title}</Heading>
+      {tagline && Array.isArray(tagline)
+        ? tagline.map((tl, index) => (
+            <Text mt={4} fontSize="sm" key={index}>
               {tl}
-            </p>
+            </Text>
           ))
-        ) : (
-          <p css={styles.tagline}>{tagline}</p>
-        )}
-      </div>
-      <div css={styles.spacer} />
-      {children}
-    </div>
+        : tagline && (
+            <Text mt={4} fontSize="sm">
+              {tagline}
+            </Text>
+          )}
+      {children && <Box pt={6}>{children}</Box>}
+    </React.Fragment>
   )
-}
-
-const styles = {
-  page: css({
-    display: "flex",
-    flexDirection: "column",
-    marginRight: globalStyles.grid.gutterWidth,
-    marginLeft: globalStyles.grid.gutterWidth,
-    marginBottom: globalStyles.grid.gutterWidth,
-    "@media print": {
-      display: "block",
-      marginRight: 0,
-    },
-  }),
-  title: css({
-    marginTop: 36,
-    fontSize: 32,
-    lineHeight: "39px",
-    fontWeight: "normal",
-    marginLeft: 0,
-    marginRight: 0,
-    marginBottom: 0,
-  }),
-  tagline: css({
-    marginTop: 12,
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  spacer: css({
-    height: 54,
-  }),
 }
 
 export default Page

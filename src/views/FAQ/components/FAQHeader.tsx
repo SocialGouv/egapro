@@ -56,12 +56,12 @@ function FAQHeader({ location, closeMenu }: { location: RouteComponentProps["loc
 
 const styles = {
   container: css({
-    height: 100,
+    height: 80,
     flexShrink: 0,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    borderBottom: "1px solid #EFECEF",
+    borderBottom: "1px solid #E3E4ED",
     marginRight: 29,
     marginLeft: 29,
   }),

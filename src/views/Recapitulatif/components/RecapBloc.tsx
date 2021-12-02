@@ -60,7 +60,7 @@ const styles = {
     left: -38,
     right: -38,
     borderRadius: "100%",
-    border: "1px solid #EFECEF",
+    border: "1px solid #E3E4ED",
     "@media print": {
       display: "none",
     },

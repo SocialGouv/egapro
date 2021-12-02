@@ -29,7 +29,7 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    borderTop: "1px solid #EFECEF",
+    borderTop: "1px solid #E3E4ED",
   }),
   text: css({
     fontSize: 12,

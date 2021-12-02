@@ -4,7 +4,6 @@ import { useRef } from "react"
 
 import globalStyles from "../utils/globalStyles"
 
-import { useColumnsWidth, useLayoutType } from "../components/GridContext"
 import Page from "../components/Page"
 import ActionLink from "../components/ActionLink"
 import ActionBar from "../components/ActionBar"
@@ -37,12 +36,9 @@ function HomeSimulateur(): JSX.Element {
     }
   }
 
-  const layoutType = useLayoutType()
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
-
   return (
     <Page title="Bienvenue sur Index Egapro">
-      <div css={css({ width })}>
+      <div>
         <div css={styles.codeCopyBloc}>
           <div css={styles.codeCopyFakeInput}>
             <span
@@ -100,7 +96,6 @@ const styles = {
     border: `solid ${globalStyles.colors.default} 1px`,
 
     overflow: "hidden",
-    whiteSpace: "nowrap",
     textOverflow: "ellipsis",
   }),
   codeCopyText: css({

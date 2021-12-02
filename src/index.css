@@ -73,16 +73,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
 
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
+html, body, #root  {
+  height: 100%;
 }
 
 #root {
-  display: flex;
-  flex: 1 1 0%;
-  overflow: auto;
+  background: linear-gradient(#eff0fa,#fff)
 }
 
 @media print {

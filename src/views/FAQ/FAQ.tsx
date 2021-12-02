@@ -64,7 +64,6 @@ function FAQ({ closeMenu }: Props) {
         return (
           <div role="search" css={styles.container}>
             <FAQHeader location={locationFAQ} closeMenu={closeMenu} />
-
             <div
               css={[
                 styles.content,
@@ -140,21 +139,14 @@ function FAQ({ closeMenu }: Props) {
 
 const styles = {
   container: css({
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    display: "flex",
-    flexDirection: "column",
+    position: "sticky",
+    top: "0",
     backgroundColor: "white",
   }),
   content: css({
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    display: "flex",
-    flexDirection: "column",
+    maxHeight: "calc(100vh - 80px)",
     paddingRight: 29,
     paddingLeft: 29,
     paddingTop: 26,

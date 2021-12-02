@@ -102,9 +102,6 @@ function Menu({
 }: Props) {
   const listStyles = {
     "@media (max-width: 1279px)": {
-      display: "flex",
-      flexWrap: "no-wrap",
-      overflowX: "auto",
       li: {
         marginTop: "0 !important",
       },
@@ -121,9 +118,12 @@ function Menu({
       as="nav"
       role="navigation"
       id="navigation"
-      bg={{ base: "#fff", xl: "transparent" }}
-      px={4}
       py={{ base: 4, xl: 8 }}
+      px={4}
+      sx={{
+        position: "sticky",
+        top: "0",
+      }}
     >
       <Switch>
         <Route

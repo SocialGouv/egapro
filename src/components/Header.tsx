@@ -1,56 +1,56 @@
 /** @jsx jsx */
-// import { Avatar } from "../components/ds/Avatar"
-
 import { css, jsx } from "@emotion/core"
 import { Link } from "react-router-dom"
+import { Box, Container } from "@chakra-ui/react"
 
 import globalStyles from "../utils/globalStyles"
 import { MenuProfile } from "./ds/MenuProfile"
 
-import { useColumnsWidth, useLayoutType } from "./GridContext"
-
 import Logo from "./Logo"
 
 function Header() {
-  const width = useColumnsWidth(2)
-  const layoutType = useLayoutType()
   return (
-    <header role="banner" css={styles.header}>
-      <div css={[styles.headerLeft, layoutType === "desktop" && css({ width }), styles.headerLeftPrint]}>
-        <a
-          href="https://travail-emploi.gouv.fr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          css={[styles.containerLogo, layoutType === "desktop" && styles.containerLogoDesktop]}
-        >
-          <Logo />
-        </a>
-      </div>
-      <div css={styles.headerInner}>
-        <Link to="/" css={styles.title}>
-          Index Egapro
-        </Link>
-        <p css={styles.subtitle}>
-          L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
-        </p>
-      </div>
-      <div>
-        <MenuProfile />
-      </div>
-    </header>
+    <Box py={6} as="header" role="banner" css={styles.header}>
+      <Container
+        maxW="container.xl"
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box pr={6}>
+          <a
+            href="https://travail-emploi.gouv.fr/"
+            target="_blank"
+            rel="noopener noreferrer"
+            css={[styles.containerLogo]}
+          >
+            <Logo />
+          </a>
+        </Box>
+        <div css={styles.headerInner}>
+          <Link to="/" css={styles.title}>
+            Index Egapro
+          </Link>
+          <p css={styles.subtitle}>
+            L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+          </p>
+        </div>
+        <div>
+          <MenuProfile />
+        </div>
+      </Container>
+    </Box>
   )
 }
 
 const styles = {
   header: css({
     backgroundColor: "#FFF",
-    height: 100,
     flexShrink: 0,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottom: "1px solid #EFECEF",
+    borderBottom: "1px solid #E3E4ED",
   }),
   headerLeft: css({
     display: "flex",
