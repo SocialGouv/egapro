@@ -8,6 +8,14 @@ const tokens = {
     xl: "80rem",
     "2xl": "96em",
   }),
+  sizes: {
+    container: {
+      xl: "1400px",
+      lg: "1024px",
+      md: "768px",
+      sm: "640px",
+    },
+  },
   colors: {
     primary: {
       50: "#f8f8fd",
