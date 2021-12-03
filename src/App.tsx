@@ -5,10 +5,8 @@ import { Router } from "react-router-dom"
 import ReactPiwik from "react-piwik"
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
-import { ChakraProvider, extendTheme } from "@chakra-ui/react"
-import defaultTheme from "@chakra-ui/theme"
-import { createBreakpoints, StyleFunctionProps } from "@chakra-ui/theme-tools"
-
+import { ChakraProvider } from "@chakra-ui/react"
+import theme from "./theme"
 import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
 import GridProvider from "./components/GridContext"
@@ -17,68 +15,6 @@ import InfoBloc from "./components/InfoBloc"
 import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ButtonAction"
-
-// Chakra UI custom theme
-const appTheme = {
-  config: {
-    initialColorMode: "light",
-    useSystemColorMode: false,
-  },
-  styles: {
-    // Reuse the defaut styles from index.css.
-    global: {
-      body: {
-        fontFamily: '"Cabin", -apple-system, sans-serif',
-        fontWeight: "400",
-        color: "#191a49",
-      },
-      a: {
-        color: "teal.500",
-      },
-    },
-  },
-  components: {
-    Input: {
-      variants: {
-        "blue-outline": (props: StyleFunctionProps) => ({
-          ...defaultTheme.components.Input.variants.outline(props),
-          field: {
-            ...defaultTheme.components.Input.variants.outline(props).field,
-            border: "1px solid",
-            borderColor: "blue.100",
-          },
-        }),
-      },
-    },
-  },
-}
-
-const breakpoints = createBreakpoints({
-  sm: "30em",
-  md: "48em",
-  lg: "64rem",
-  xl: "80rem",
-  "2xl": "96em",
-})
-
-const theme = extendTheme({
-  appTheme,
-  breakpoints,
-  colors: {
-    primary: {
-      50: "#f8f8fd",
-      100: "#f0f0fa",
-      200: "#dadaf3",
-      300: "#c3c4ec",
-      400: "#9698de",
-      500: "#696cd0",
-      600: "#5f61bb",
-      700: "#4f519c",
-      800: "#3f417d",
-      900: "#333566",
-    },
-  },
-})
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (
