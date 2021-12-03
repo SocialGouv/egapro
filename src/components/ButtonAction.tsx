@@ -8,6 +8,7 @@ export interface ButtonProps {
   leftIcon?: React.ReactElement
   rightIcon?: React.ReactElement
   size?: "xs" | "sm" | "md" | "lg"
+  fullWidth?: boolean
 }
 
 export type ButtonActionProps = ButtonProps & {
@@ -28,6 +29,7 @@ function ButtonAction({
   size = "md",
   disabled = false,
   loading = false,
+  fullWidth,
 }: ButtonActionProps) {
   return (
     <Button
@@ -40,6 +42,9 @@ function ButtonAction({
       variant={variant}
       leftIcon={leftIcon}
       rightIcon={rightIcon}
+      sx={{
+        width: fullWidth ? "100%" : "auto",
+      }}
     >
       {label}
     </Button>

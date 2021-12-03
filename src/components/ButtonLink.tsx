@@ -15,6 +15,7 @@ function ButtonLink({
   leftIcon,
   rightIcon,
   size = "md",
+  fullWidth,
 }: ButtonLinkProps) {
   return (
     <Button
@@ -25,6 +26,9 @@ function ButtonLink({
       leftIcon={leftIcon}
       rightIcon={rightIcon}
       size={size}
+      sx={{
+        width: fullWidth ? "100%" : "auto",
+      }}
     >
       {label}
     </Button>

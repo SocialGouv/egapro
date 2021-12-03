@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { useState } from "react"
+import React, { useState } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { ActionType } from "../globals"
@@ -10,9 +8,9 @@ import { logToSentry } from "../utils/helpers"
 import Page from "../components/Page"
 import ButtonAction from "../components/ButtonAction"
 import ErrorMessage from "../components/ErrorMessage"
-import globalStyles from "../utils/globalStyles"
 import ButtonLink from "../components/ButtonLink"
-import { Heading, SimpleGrid, Image } from "@chakra-ui/react"
+import { Heading, SimpleGrid } from "@chakra-ui/react"
+import Card from "../components/ds/Card"
 
 interface Props extends RouteComponentProps {
   dispatch: (action: ActionType) => void
@@ -57,138 +55,44 @@ function Home({ history, location, dispatch }: Props) {
         <Heading as="h2" size="md" mb={6}>
           Comment calculer et déclarer l’index égalité femmes-hommes&nbsp;?
         </Heading>
-
-        <SimpleGrid columns={2} spacing={10}>
-          <div>
-            <Image
-              src={`${process.env.PUBLIC_URL}/illustration-simulator.svg`}
-              aria-hidden="true"
-              alt=""
-              mx={-4}
-              sx={{
-                display: "block",
-                width: "calc(100% + var(--chakra-space-4))",
-                maxWidth: "calc(100% + var(--chakra-space-4))",
-              }}
-            />
-            <div css={styles.blocContent}>
-              <span css={styles.blocContentStep}>Choix 1</span>
-              <span css={styles.blocContentTitle}>Calcul et déclaration de l'index</span>
-              <p css={styles.blocContentBody}>
-                Vous pouvez calculer votre index égalité professionnelle F/H sur Index Egapro et le déclarer, si vous le
-                souhaitez, suite au calcul.
-              </p>
-
-              <div>
-                <ButtonAction onClick={onClick} label="commencer le calcul" disabled={loading} loading={loading} />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <Image
-              src={`${process.env.PUBLIC_URL}/illustration-publish.svg`}
-              aria-hidden="true"
-              alt=""
-              mx={-4}
-              sx={{
-                display: "block",
-                width: "calc(100% + var(--chakra-space-4))",
-                maxWidth: "calc(100% + var(--chakra-space-4))",
-              }}
-            />
-            <div css={styles.blocContent}>
-              <span css={styles.blocContentStep}>Choix 2</span>
-              <span css={styles.blocContentTitle}>Déclaration directe de l'index</span>
-              <p css={styles.blocContentBody}>
-                Vous pouvez déclarer votre index égalité professionnelle F/H calculé par ailleurs directement via le
-                formulaire suivant :
-              </p>
-              <div css={styles.buttonWrapper}>
-                <ButtonLink to="/declaration/" label="déclarer directement" />
-              </div>
-            </div>
-          </div>
+        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+          <Card
+            img={{
+              url: "illustration-simulator.svg",
+            }}
+            legend="Choix 1"
+            title={{
+              node: "h3",
+              text: "Calcul et déclaration de l'index",
+            }}
+            content="Vous pouvez calculer votre index égalité professionnelle F/H sur Index Egapro et le déclarer, si vous le souhaitez, suite au calcul."
+            action={
+              <ButtonAction
+                onClick={onClick}
+                label="Commencer le calcul"
+                disabled={loading}
+                loading={loading}
+                fullWidth
+              />
+            }
+          />
+          <Card
+            img={{
+              url: "illustration-publish.svg",
+            }}
+            legend="Choix 2"
+            title={{
+              node: "h3",
+              text: "Déclaration directe de l'index",
+            }}
+            content="Vous pouvez déclarer votre index égalité professionnelle F/H calculé par ailleurs directement via le
+                formulaire suivant."
+            action={<ButtonLink to="/declaration/" label="Déclarer directement" fullWidth />}
+          />
         </SimpleGrid>
       </div>
     </Page>
   )
-}
-
-const styles = {
-  title: css({
-    fontSize: 18,
-    lineHeight: "22px",
-    fontWeight: "bold",
-    marginLeft: 0,
-    marginRight: 0,
-  }),
-
-  twoColumns: css({
-    display: "flex",
-    flexDirection: "row",
-  }),
-
-  image: css({
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    left: -globalStyles.grid.gutterWidth,
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "contain",
-  }),
-  illustrationData: css({
-    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-data.svg)`,
-  }),
-  illustrationSimulator: css({
-    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-simulator.svg)`,
-  }),
-  illustrationPublish: css({
-    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-publish.svg)`,
-  }),
-
-  blocContent: css({
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    display: "flex",
-    flexDirection: "column",
-    paddingTop: 10,
-    paddingBottom: 10,
-  }),
-  blocContentStep: css({
-    display: "inline-block",
-    fontSize: 12,
-    lineHeight: "15px",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-  }),
-  blocContentTitle: css({
-    display: "inline-block",
-    fontSize: 18,
-    lineHeight: "22px",
-    textTransform: "uppercase",
-    marginBottom: 14,
-  }),
-  blocContentBody: css({
-    fontSize: 14,
-    lineHeight: "17px",
-    marginBottom: "auto",
-    paddingBottom: 10,
-  }),
-
-  blocContentInfo: css({
-    fontSize: 14,
-    lineHeight: "17px",
-    fontStyle: "italic",
-  }),
-  buttonWrapper: css({
-    display: "flex",
-  }),
-  linkButton: css({
-    textDecoration: "none",
-  }),
 }
 
 export default Home

@@ -1,0 +1,38 @@
+import React, { FunctionComponent } from "react"
+import { Box, Heading, Image, Text, Flex } from "@chakra-ui/react"
+
+export type CardProps = {
+  img: {
+    url: string
+    alt?: string
+  }
+  legend: string
+  title: {
+    text: string
+    node: "h2" | "h3" | "h4" | "h5" | "h6" | "p"
+  }
+  content: string
+  action: React.ReactElement
+}
+
+const Card: FunctionComponent<CardProps> = ({ img, legend, title, content, action }) => {
+  return (
+    <Flex p={4} direction="column" bg="white" borderRadius="lg" borderWidth={1}>
+      <Image src={`${process.env.PUBLIC_URL}/${img.url}`} aria-hidden="true" alt={img.alt} />
+      <Box mt={3} flexGrow={1}>
+        <Text fontSize="sm" color="gray.500" fontWeight="semibold" mb={1}>
+          {legend}
+        </Text>
+        <Heading fontSize="xl" as={title.node}>
+          {title.text}
+        </Heading>
+        <Text mt={2} fontSize="sm">
+          {content}
+        </Text>
+      </Box>
+      <Box mt={4}>{action}</Box>
+    </Flex>
+  )
+}
+
+export default Card
