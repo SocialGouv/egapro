@@ -9,11 +9,14 @@ import { composeValidators, required, simpleMemoize, ValidatorFunction } from ".
 import { ownersForSiren, validateSiren } from "../utils/api"
 import { EntrepriseType } from "../globals"
 import ActivityIndicator from "./ActivityIndicator"
+import { useUser } from "../utils/hooks"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"
 
 const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
+
+const NOT_ALLOWED_MESSAGE = "Vous n'êtes pas autorisé à déclarer pour ce SIREN."
 
 export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
   let result
@@ -29,7 +32,7 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
     await ownersForSiren(siren)
   } catch (error) {
     console.error(error)
-    return "Vous n'êtes pas autorisé à déclarer pour ce SIREN, veuillez contacter votre référent de l'égalité professionnelle"
+    return NOT_ALLOWED_MESSAGE
   }
 
   if (isEmpty(result?.jsonBody)) {
@@ -60,6 +63,7 @@ function FieldSiren({
   const field = useField(name, {
     validate: validator ? validator : sirenValidator(updateSirenData),
   })
+  const { email } = useUser()
   const error = hasFieldError(field.meta)
 
   return (
@@ -75,7 +79,25 @@ function FieldSiren({
           </div>
         )}
       </div>
-      {error && <p css={styles.error}>{field.meta.error}</p>}
+      {error && (
+        <p css={styles.error}>
+          {field.meta.error}
+          {field.meta.error === NOT_ALLOWED_MESSAGE && (
+            <p>
+              Pour faire une demande à l'équipe Egapro,&nbsp;
+              <a
+                css={styles.error}
+                target="_blank"
+                rel="noreferrer noopener"
+                href={`mailto:dgt.ega-pro@travail.gouv.fr?subject=EgaPro - Demander à être responsable d'un SIREN&body=Bonjour, je souhaite être responsable pour le SIREN ${field.input.value}. Mon email de responsable est ${email}. Cordialement.`}
+              >
+                cliquez ici
+              </a>
+              .
+            </p>
+          )}
+        </p>
+      )}
     </div>
   )
 }
