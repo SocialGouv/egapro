@@ -16,13 +16,20 @@ function Header() {
       }}
     >
       <Box
-        py={1}
+        bg="white"
         fontSize="xs"
         sx={{
+          height: 0,
+          overflow: "hidden",
           borderBottom: "1px solid #f1f2fb",
+          transform: "translateY(-100%)",
+          ":focus-within": {
+            height: "auto",
+            transform: "translateY(0%)",
+          },
         }}
       >
-        <Container as="nav" maxW="container.xl" tabIndex={-1}>
+        <Container as="nav" maxW="container.xl">
           <HStack as={List} spacing={4}>
             <ListItem>
               <Link href="#navigation">Aller au menu</Link>
