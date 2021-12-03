@@ -3,7 +3,6 @@ import "react-app-polyfill/stable"
 import React from "react"
 import ReactDOM from "react-dom"
 import * as Sentry from "@sentry/react"
-import "./index.css"
 import App from "./App"
 import * as serviceWorker from "./serviceWorker"
 

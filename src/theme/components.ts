@@ -8,6 +8,14 @@ const components = {
         fontWeight: "normal",
       },
     },
+
+    Heading: {
+      baseStyle: {
+        fontWeight: "semibold",
+        color: "gray.800",
+      },
+    },
+
     Input: {
       variants: {
         "blue-outline": (props: StyleFunctionProps) => ({

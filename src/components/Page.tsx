@@ -10,18 +10,16 @@ interface Props {
 function Page({ title, tagline, children }: Props) {
   return (
     <React.Fragment>
-      <Heading as="h1">{title}</Heading>
+      <Heading as="h1" size="lg">
+        {title}
+      </Heading>
       {tagline && Array.isArray(tagline)
         ? tagline.map((tl, index) => (
-            <Text mt={4} fontSize="sm" key={index}>
+            <Text mt={4} key={index}>
               {tl}
             </Text>
           ))
-        : tagline && (
-            <Text mt={4} fontSize="sm">
-              {tagline}
-            </Text>
-          )}
+        : tagline && <Text mt={4}>{tagline}</Text>}
       {children && <Box pt={6}>{children}</Box>}
     </React.Fragment>
   )

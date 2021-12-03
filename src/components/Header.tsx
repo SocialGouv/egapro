@@ -64,7 +64,7 @@ function Header() {
               fontFamily: "'Gabriela', serif",
             }}
           >
-            <Link as={ReachLink} to="/" fontSize="2xl">
+            <Link as={ReachLink} to="/" fontSize="2xl" color="gray.900">
               Index Egapro
             </Link>
             <Text fontSize="xs">
