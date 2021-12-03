@@ -1,7 +1,7 @@
 import React from "react"
 import { Link as ReachLink } from "react-router-dom"
 import { Box, Container, List, ListItem, Text, Link } from "@chakra-ui/react"
-import Logo from "./Logo"
+import Logo from "./ds/Logo"
 import packageConfig from "../../package.json"
 
 function Footer() {

@@ -2,7 +2,7 @@ import React from "react"
 import { Link as ReachLink } from "react-router-dom"
 import { Box, Container, Link, Flex, Text } from "@chakra-ui/react"
 import { MenuProfile } from "./ds/MenuProfile"
-import Logo from "./Logo"
+import Logo from "./ds/Logo"
 
 function Header() {
   return (
