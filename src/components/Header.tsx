@@ -47,7 +47,7 @@ function Header() {
         </Container>
       </Box>
       <Container maxW="container.xl" id="navigation">
-        <Flex align="center" py={6}>
+        <Flex align="center" py={4}>
           <Box pr={6}>
             <Link
               href="https://travail-emploi.gouv.fr/"
