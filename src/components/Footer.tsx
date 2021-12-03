@@ -9,6 +9,7 @@ function Footer() {
 
   return (
     <Box
+      id="footer"
       as="footer"
       role="contentinfo"
       py={6}

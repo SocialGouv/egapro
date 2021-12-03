@@ -38,6 +38,9 @@ function MainScrollView({ children, state, location }: Props) {
       sx={{
         height: "100%",
       }}
+      as={"main"}
+      role="main"
+      id="main"
     >
       <Container maxW="container.xl">
         <ModalProvider>
@@ -52,7 +55,7 @@ function MainScrollView({ children, state, location }: Props) {
             <Box sx={{ gridArea: "nav" }} ml={-3}>
               {menu}
             </Box>
-            <MainView pathname={location.pathname}>{children}</MainView>
+            <Content pathname={location.pathname}>{children}</Content>
             <Box bg="white" sx={{ gridArea: "aside" }} mr={-3}>
               <FAQ />
             </Box>
@@ -63,21 +66,13 @@ function MainScrollView({ children, state, location }: Props) {
   )
 }
 
-function MainView({ children, pathname }: { children: ReactNode; pathname: string }) {
+function Content({ children, pathname }: { children: ReactNode; pathname: string }) {
   const scrollTo = useScrollTo()
 
   useEffect(() => scrollTo(0), [pathname, scrollTo])
 
   return (
-    <Box
-      as={"main"}
-      px={8}
-      py={10}
-      sx={{ gridArea: "main", borderRight: "1px solid #E3E4ED" }}
-      role="main"
-      id="main"
-      tabIndex={-1}
-    >
+    <Box px={8} py={10} sx={{ gridArea: "main", borderRight: "1px solid #E3E4ED" }}>
       {children}
     </Box>
   )

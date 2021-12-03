@@ -62,7 +62,7 @@ function FAQ({ closeMenu }: Props) {
           state: undefined,
         }
         return (
-          <div role="search" css={styles.container}>
+          <aside id="search" role="search" css={styles.container}>
             <FAQHeader location={locationFAQ} closeMenu={closeMenu} />
             <div
               css={[
@@ -130,7 +130,7 @@ function FAQ({ closeMenu }: Props) {
 
               <FAQFooter />
             </div>
-          </div>
+          </aside>
         )
       }}
     />
