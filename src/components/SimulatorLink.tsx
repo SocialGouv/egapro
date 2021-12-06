@@ -33,7 +33,7 @@ interface LinkProps {
 export function ButtonSimulatorLink({ to, label }: LinkProps) {
   return (
     <SimulatorLinkWithRouter>
-      {(toSimulator) => <ButtonLink to={`${toSimulator}${to}`} label={label} />}
+      {(toSimulator) => <ButtonLink to={`${toSimulator}${to}`} label={label} size="lg" />}
     </SimulatorLinkWithRouter>
   )
 }
