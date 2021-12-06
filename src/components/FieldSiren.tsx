@@ -1,8 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core"
 import { useField } from "react-final-form"
-import Input, { hasFieldError } from "./Input"
+import { Link } from "@chakra-ui/react"
 
+import Input, { hasFieldError } from "./Input"
 import globalStyles from "../utils/globalStyles"
 import { isEmpty } from "../utils/object"
 import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
@@ -10,6 +11,7 @@ import { ownersForSiren, validateSiren } from "../utils/api"
 import { EntrepriseType } from "../globals"
 import ActivityIndicator from "./ActivityIndicator"
 import { useUser } from "../utils/hooks"
+import { ExternalLinkIcon } from "@chakra-ui/icons"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"
@@ -85,14 +87,16 @@ function FieldSiren({
           {field.meta.error === NOT_ALLOWED_MESSAGE && (
             <p>
               Pour faire une demande à l'équipe Egapro,&nbsp;
-              <a
-                css={styles.error}
+              <Link
+                isExternal
+                textDecoration="underline"
                 target="_blank"
                 rel="noreferrer noopener"
-                href={`mailto:dgt.ega-pro@travail.gouv.fr?subject=EgaPro - Demander à être responsable d'un SIREN&body=Bonjour, je souhaite être responsable pour le SIREN ${field.input.value}. Mon email de responsable est ${email}. Cordialement.`}
+                href={`mailto:dgt.ega-pro@travail.gouv.fr?subject=EgaPro - Demander à être déclarant d'un SIREN&body=Bonjour, je souhaite être déclarant pour le SIREN ${field.input.value}. Mon email de déclaration est ${email}. Cordialement.`}
               >
-                cliquez ici
-              </a>
+                cliquez ici&nbsp;
+                <ExternalLinkIcon mx="2px" />
+              </Link>
               .
             </p>
           )}
@@ -130,7 +134,6 @@ const styles = {
     height: 18,
     color: globalStyles.colors.error,
     fontSize: 12,
-    textDecoration: "underline",
     lineHeight: "15px",
   }),
   spinner: css({
