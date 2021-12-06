@@ -29,10 +29,10 @@ function Header() {
           },
         }}
       >
-        <Container as="nav" maxW="container.xl">
+        <Container maxW="container.xl">
           <HStack as={List} spacing={4}>
             <ListItem>
-              <Link href="#navigation">Aller au menu</Link>
+              <Link href="#menu">Aller au menu</Link>
             </ListItem>
             <ListItem>
               <Link href="#main">Aller au contenu</Link>
@@ -46,7 +46,7 @@ function Header() {
           </HStack>
         </Container>
       </Box>
-      <Container maxW="container.xl" id="navigation">
+      <Container maxW="container.xl" id="menu">
         <Flex align="center" py={4}>
           <Box pr={6}>
             <Link
