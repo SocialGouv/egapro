@@ -4,7 +4,6 @@ import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
 import { ButtonSimulatorLink } from "../components/SimulatorLink"
 import { useTitle } from "../utils/hooks"
-import { string } from "zod"
 
 const title = "Début d'un calcul d'index"
 
@@ -54,7 +53,7 @@ function HomeSimulateur(): JSX.Element {
         />
       </ActionBar>
 
-      <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} alt="" />
+      <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} />
     </Page>
   )
 }
