@@ -53,7 +53,7 @@ function HomeSimulateur(): JSX.Element {
         />
       </ActionBar>
 
-      <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} alt="" />
+      <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} alt="" aria-hidden="true" />
     </Page>
   )
 }
