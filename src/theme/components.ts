@@ -18,6 +18,18 @@ const components = {
 
     Input: {
       variants: {
+        outline: (props: StyleFunctionProps) => ({
+          ...defaultTheme.components.Input.variants.outline(props),
+          field: {
+            ...defaultTheme.components.Input.variants.outline(props).field,
+            borderColor: "gray.400",
+            background: "white",
+            _readOnly: {
+              background: "primary.200",
+              borderColor: "transparent",
+            },
+          },
+        }),
         "blue-outline": (props: StyleFunctionProps) => ({
           ...defaultTheme.components.Input.variants.outline(props),
           field: {
