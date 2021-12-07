@@ -1,0 +1,87 @@
+name: Netlify deployment
+
+on:
+  push:
+    branches:
+      - '**'
+  # workflow_dispatch:
+  #   inputs:
+  #     simuBranch:
+  #       description: "Branche pour la simulation-déclaration"
+  #       required: true
+  #       default: "master"
+  #     declaBranch:
+  #       description: "Branche pour la déclaration directe"
+  #       required: true
+  #       default: "master"
+  #     apiUrl:
+  #       description: "URL de l'API"
+  #       required: true
+  #       default: "https://dev.egapro.fabrique.social.gouv.fr/api"
+
+concurrency:
+  cancel-in-progress: true
+  group: netlify-deploy-${{ github.ref }}
+
+jobs:
+
+  checkout_build_simu:
+    runs-on: ubuntu-latest
+    steps:        
+      - name: Checkout commit
+        uses: actions/checkout@v2
+        with:
+          ref: feat/pr-deploy
+      
+      - name: Install Dependencies
+        run: |
+          yarn install --frozen-lockfile --force --non-interactive
+          
+      - name: Build app
+        run: CI=false REACT_APP_EGAPRO_API_URL=https://dev.egapro.fabrique.social.gouv.fr/api yarn build
+      
+      - name: Upload react build
+        uses: actions/upload-artifact@v2
+        with:
+          name: react-build
+          path: build
+
+  checkout_build_decla:
+    runs-on: ubuntu-latest
+    steps:        
+      - name: Checkout commit
+        uses: actions/checkout@v2
+        with:
+          ref: feat/pr-deploy
+          repository: "SocialGouv/egapro-declaration"
+      
+      - name: Update API URL in Jekyll config
+        run: |
+          echo "EGAPRO_API_URL: ${EGAPRO_API_URL}" >> _config.yml
+          
+      # - name: Build app
+      #   uses:  helaili/jekyll-action@v2
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     jekyll_build_options: --baseurl "/declaration"
+      - name: Install Jekyll
+        run: |
+          gem install jekyll bundler
+
+      - name: Build Jekyll app
+        run: |
+          jekyll build --baseurl "/declaration"
+
+      - name: Debug
+        run: |
+          ls -lah
+
+      # - name: Upload build artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: react-build
+      #     path: build
+
+      
+          
+
