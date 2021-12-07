@@ -54,6 +54,10 @@ function fetchResource(method, pathname, body) {
     origin = "http://127.0.0.1:2626"
   }
 
+  console.log("process.env.API_URL", process.env.REACT_APP_EGAPRO_API_URL)
+
+  if (process.env.REACT_APP_EGAPRO_API_URL) origin = process.env.REACT_APP_EGAPRO_API_URL
+
   return fetch(origin + pathname, requestObj).then(checkStatusAndParseJson)
 }
 

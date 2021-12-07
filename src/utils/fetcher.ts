@@ -2,6 +2,7 @@ let API_URL = "/api"
 if (window.location.href.includes("localhost:")) {
   API_URL = "http://127.0.0.1:2626"
 }
+if (process.env.REACT_APP_EGAPRO_API_URL) API_URL = process.env.REACT_APP_EGAPRO_API_URL
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again"
 
