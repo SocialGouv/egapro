@@ -46,7 +46,12 @@ jobs:
           echo "EGAPRO_API_URL: ${EGAPRO_API_URL}" >> _config.yml
           
       - name: Build app
-        run: jekyll build --baseurl "/declaration"
+        uses:  helaili/jekyll-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          jekyll_build_options: --baseurl "/declaration"
+
+
       
           
 
