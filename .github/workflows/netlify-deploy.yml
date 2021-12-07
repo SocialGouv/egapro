@@ -31,7 +31,7 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v2
         with:
-          ref: feat/pr-deploy
+          ref: master
       
       - name: Install Dependencies
         run: |
@@ -52,7 +52,7 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v2
         with:
-          ref: feat/pr-deploy
+          ref: master
           repository: "SocialGouv/egapro-declaration"
       
       - name: Update API URL in Jekyll config
@@ -66,7 +66,7 @@ jobs:
       #     jekyll_build_options: --baseurl "/declaration"
       - name: Install Jekyll
         run: |
-          gem install jekyll bundler
+          gem install jekyll bundler --user-install
 
       - name: Build Jekyll app
         run: |
