@@ -8,7 +8,7 @@ import { logToSentry } from "../utils/helpers"
 import Page from "../components/Page"
 import ButtonAction from "../components/ButtonAction"
 import ErrorMessage from "../components/ErrorMessage"
-import ButtonLink from "../components/ButtonLink"
+import ButtonLinkNoRouter from "../components/ButtonLinkNoRouter"
 import { Heading, SimpleGrid } from "@chakra-ui/react"
 import Card from "../components/ds/Card"
 
@@ -87,7 +87,7 @@ function Home({ history, location, dispatch }: Props) {
             }}
             content="Vous pouvez déclarer votre index égalité professionnelle F/H calculé par ailleurs directement via le
                 formulaire suivant."
-            action={<ButtonLink to="/declaration/" label="Déclarer directement" fullWidth />}
+            action={<ButtonLinkNoRouter to="/declaration/" label="Déclarer directement" fullWidth />}
           />
         </SimpleGrid>
       </div>
