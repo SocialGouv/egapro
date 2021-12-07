@@ -85,15 +85,23 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: react-build
-        path: build
+        path: dist
 
     - uses: actions/download-artifact@v2
       with:
         name: jekyll-site
-        path: build/declaration
+        path: dist/declaration
 
     - name: debug
       run: |
         ls -lah
-        ls -lah build/
-        ls -lah build/declaration/
+        ls -lah dist/
+        ls -lah dist/declaration/
+
+    - name: Deploy to Netlify
+      uses: nwtgck/actions-netlify@v1.2
+      with:
+        publish-dir: ./dist
+      env:
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
