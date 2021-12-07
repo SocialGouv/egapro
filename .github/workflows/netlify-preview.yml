@@ -45,7 +45,7 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v2
         with:
-          repository: "https://github.com/SocialGouv/egapro-declaration"
+          repository: "SocialGouv/egapro-declaration"
           ref: ${{github.event.inputs.declaBranch}}
       
       - name: Update API URL in Jekyll config
