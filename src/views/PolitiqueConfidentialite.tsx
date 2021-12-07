@@ -36,7 +36,7 @@ function CGU() {
           <br />
           Conformément aux dispositions de l’article 6-c du Règlement relatif à la protection des données (appelé RGPD),
           le traitement de données relatif aux données de connexion est fondé sur l’obligation légale reposant sur le
-          responsable de traitement au titre de l’article 6 de la LCEN et de l’article 1 du décret n°2021-1363 du 20 
+          responsable de traitement au titre de l’article 6 de la LCEN et de l’article 1 du décret n°2021-1363 du 20
           octobre 2021.
         </p>
         <h2 css={styles.title}>Durée de conservation</h2>
