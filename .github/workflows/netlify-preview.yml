@@ -1,5 +1,9 @@
 name: Manually triggered workflow
+
 on:
+  push:
+    branches:
+      - '**'
   workflow_dispatch:
     inputs:
       simuBranch:
@@ -15,6 +19,16 @@ on:
         required: true
         default: "https://dev.egapro.fabrique.social.gouv.fr/api"
 
+concurrency:
+  cancel-in-progress: true
+  group: netlify-${{ github.ref }}
+
+env:
+  inputs:
+    simuBranch: feat/pr-deploy
+    declaBranch: feat/pr-deploy
+    apiUrl: https://dev.egapro.fabrique.social.gouv.fr/api
+
 jobs:
 
   checkout_build_simu:
@@ -23,7 +37,7 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v2
         with:
-          ref: ${{github.event.inputs.simuBranch}}
+          ref: ${{ github.event.inputs.simuBranch }}
       
       - name: Install Dependencies
         run: |
