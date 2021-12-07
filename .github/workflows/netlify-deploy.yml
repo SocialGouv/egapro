@@ -66,7 +66,7 @@ jobs:
       #     jekyll_build_options: --baseurl "/declaration"
       - name: Install Jekyll
         run: |
-          gem install jekyll bundler --user-install
+          gem install -n /usr/local/bin jekyll bundler --user-install
 
       - name: Build Jekyll app
         run: |
