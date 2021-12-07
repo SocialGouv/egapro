@@ -187,9 +187,11 @@ function UtilisateursEntreprise({ siren }: { siren: string }) {
                   validate={formValidator(FormInput)}
                   render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
-                      <HStack align="flex-end">
-                        <InputControl name="email" label="Email du responsable" variant="blue-outline" />
-                        <PrimaryButton type="submit">Ajouter</PrimaryButton>
+                      <HStack spacing={4} align="flex-start">
+                        <InputControl name="email" label="Email du responsable" />
+                        <Box pt={8}>
+                          <PrimaryButton type="submit">Ajouter</PrimaryButton>
+                        </Box>
                       </HStack>
                     </form>
                   )}
@@ -236,7 +238,6 @@ function MesEntreprises() {
             <Flex mt="6" direction="column">
               <InfoEntreprise siren={chosenSiren} />
               <UtilisateursEntreprise siren={chosenSiren} />
-              &nbsp;
             </Flex>
           </React.Fragment>
         )}

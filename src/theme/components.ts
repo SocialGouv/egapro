@@ -30,12 +30,21 @@ const components = {
             },
           },
         }),
-        "blue-outline": (props: StyleFunctionProps) => ({
+      },
+    },
+
+    Select: {
+      variants: {
+        outline: (props: StyleFunctionProps) => ({
           ...defaultTheme.components.Input.variants.outline(props),
           field: {
             ...defaultTheme.components.Input.variants.outline(props).field,
-            border: "1px solid",
-            borderColor: "blue.100",
+            borderColor: "gray.400",
+            background: "white",
+            _readOnly: {
+              background: "primary.200",
+              borderColor: "transparent",
+            },
           },
         }),
       },

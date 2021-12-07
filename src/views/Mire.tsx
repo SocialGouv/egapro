@@ -100,7 +100,7 @@ function Mire() {
               validate={formValidator(FormInput)}
               render={({ handleSubmit, values, submitting, pristine }) => (
                 <form onSubmit={handleSubmit}>
-                  <InputControl name="email" label="Courriel" variant="blue-outline" />
+                  <InputControl name="email" label="Courriel" />
 
                   <DebugForm show={false} values={values} />
 
