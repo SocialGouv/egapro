@@ -15,14 +15,7 @@ on:
         required: true
         default: "https://dev.egapro.fabrique.social.gouv.fr/api"
 
-jobs:
-  say_hello:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "Hello ${{ github.event.inputs.name }}!"
-          echo "- in ${{ github.event.inputs.home }}!"
-    
+jobs:    
   checkout_build_simu:
     runs-on: ubuntu-latest
     steps:        
