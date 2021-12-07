@@ -44,7 +44,7 @@ jobs:
           yarn install --frozen-lockfile --force --non-interactive
           
       - name: Build app
-        run: CI=false REACT_APP_EGAPRO_API_URL=${github.event.inputs.REACT_APP_EGAPRO_API_URL} yarn build
+        run: CI=false REACT_APP_EGAPRO_API_URL=${{github.event.inputs.REACT_APP_EGAPRO_API_URL}} yarn build
       
           
           
