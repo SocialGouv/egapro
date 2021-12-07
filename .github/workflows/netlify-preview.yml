@@ -10,6 +10,18 @@ on:
         description: 'location'
         required: false
         default: 'The Octoverse'
+      simuBranch:
+        description: "Branche pour la simulation-déclaration"
+        required: true
+        default: "master"
+      declaBranch:
+        description: "Branche pour la déclaration directe"
+        required: true
+        default: "master"
+      apiUrl:
+        description: "URL de l'API"
+        required: true
+        default: "https://dev.egapro.fabrique.social.gouv.fr/api"
 
 jobs:
   say_hello:
@@ -18,3 +30,21 @@ jobs:
       - run: |
           echo "Hello ${{ github.event.inputs.name }}!"
           echo "- in ${{ github.event.inputs.home }}!"
+    
+  checkout_build_simu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.inputs.simuBranch}}
+      
+      - name: Install Dependencies
+        run: |
+          yarn install --frozen-lockfile --force --non-interactive
+          
+      - name: Build app
+        run: CI=false REACT_APP_EGAPRO_API_URL=${github.event.inputs.REACT_APP_EGAPRO_API_URL} yarn build
+      
+          
+          
