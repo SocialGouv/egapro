@@ -43,6 +43,9 @@ jobs:
         CI: false
         REACT_APP_EGAPRO_API_URL: ${{github.event.inputs.apiUrl}}
 
+    - name: Copy Netlify files
+      run: cp .netlify/_redirects build/
+
     - name: Upload react build
       uses: actions/upload-artifact@v2
       with:
