@@ -36,10 +36,10 @@ jobs:
     - name: Install Dependencies
       run: |
         yarn install --frozen-lockfile --force --non-interactive
-         
+
     - name: Build app
       run: yarn build
-      env: 
+      env:
         CI: false
         REACT_APP_EGAPRO_API_URL: ${{github.event.inputs.apiUrl}}
 
@@ -62,15 +62,15 @@ jobs:
     - name: Update API URL in Jekyll config
       run: |
         echo "EGAPRO_API_URL: ${{github.event.inputs.apiUrl}}" >> _config.yml
-        
+
     - name: Install Jekyll
       run: |
         gem install -n /usr/local/bin jekyll bundler --user-install
-        
+
     - name: Build Jekyll app
       run: |
         jekyll build --baseurl "/declaration"
-        
+
     - name: Upload _site artifact
       uses: actions/upload-artifact@v2
       with:
@@ -97,11 +97,13 @@ jobs:
         ls -lah
         ls -lah dist/
         ls -lah dist/declaration/
-        
+
     - name: Deploy to Netlify
       uses: nwtgck/actions-netlify@v1.2
       with:
         publish-dir: ./dist
+        production-deploy: true
+        deploy-message: "Branche simulation: ${{ github.event.inputs.simuBranch }} / Branche déclaration: ${{ github.event.inputs.declaBranch }}"
       env:
         NETLIFY_SITE_ID: ${{ github.event.inputs.netlifySiteId || secrets.NETLIFY_SITE_ID }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
