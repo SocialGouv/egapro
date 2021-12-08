@@ -14,6 +14,10 @@ on:
         description: "URL de l'API"
         required: true
         default: "https://dev.egapro.fabrique.social.gouv.fr/api"
+      netlifySiteId:
+        description: "Id of the Nelify site"
+        required: true
+        default: ${{secrets.NETLIFY_SITE_ID}}
 
 concurrency:
   cancel-in-progress: true
@@ -100,5 +104,5 @@ jobs:
       with:
         publish-dir: ./dist
       env:
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        NETLIFY_SITE_ID: ${{ github.event.inputs.netlifySiteId }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
