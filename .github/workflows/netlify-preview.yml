@@ -1,4 +1,4 @@
-name: Manually triggered workflow
+name: Netlify preview
 on:
   workflow_dispatch:
     inputs:
@@ -15,43 +15,90 @@ on:
         required: true
         default: "https://dev.egapro.fabrique.social.gouv.fr/api"
 
-jobs:    
-  checkout_build_simu:
+concurrency:
+  cancel-in-progress: true
+  group: netlify-deploy-${{ github.ref }}
+
+jobs:
+
+  build-simulation:
     runs-on: ubuntu-latest
-    steps:        
-      - name: Checkout commit
-        uses: actions/checkout@v2
-        with:
-          ref: ${{github.event.inputs.simuBranch}}
-      
-      - name: Install Dependencies
-        run: |
-          yarn install --frozen-lockfile --force --non-interactive
-          
-      - name: Build app
-        run: CI=false REACT_APP_EGAPRO_API_URL=${{github.event.inputs.REACT_APP_EGAPRO_API_URL}} yarn build
-      
-          
-  checkout_build_decla:
+    steps:
+
+    - name: Checkout commit
+      uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.inputs.simuBranch}}
+
+    - name: Install Dependencies
+      run: |
+        yarn install --frozen-lockfile --force --non-interactive
+         
+    - name: Build app
+      run: yarn build
+      env: 
+        CI: false
+        REACT_APP_EGAPRO_API_URL: ${{github.event.inputs.apiUrl}}
+
+    - name: Upload react build
+      uses: actions/upload-artifact@v2
+      with:
+        name: react-build
+        path: build
+
+  build-declaration:
     runs-on: ubuntu-latest
-    steps:        
-      - name: Checkout commit
-        uses: actions/checkout@v2
-        with:
-          repository: "SocialGouv/egapro-declaration"
-          ref: ${{github.event.inputs.declaBranch}}
-      
-      - name: Update API URL in Jekyll config
-        run: |
-          echo "EGAPRO_API_URL: ${EGAPRO_API_URL}" >> _config.yml
-          
-      - name: Build app
-        uses:  helaili/jekyll-action@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          jekyll_build_options: --baseurl "/declaration"
+    steps:
 
+    - name: Checkout commit
+      uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.inputs.declaBranch}}
+        repository: "SocialGouv/egapro-declaration"
 
-      
-          
+    - name: Update API URL in Jekyll config
+      run: |
+        echo "EGAPRO_API_URL: ${github.event.inputs.apiUrl}" >> _config.yml
+        
+    - name: Install Jekyll
+      run: |
+        gem install -n /usr/local/bin jekyll bundler --user-install
+        
+    - name: Build Jekyll app
+      run: |
+        jekyll build --baseurl "/declaration"
+        
+    - name: Upload _site artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: jekyll-site
+        path: _site
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-simulation, build-declaration]
+    steps:
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: react-build
+        path: dist
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: jekyll-site
+        path: dist/declaration
+
+    - name: debug
+      run: |
+        ls -lah
+        ls -lah dist/
+        ls -lah dist/declaration/
+        
+    - name: Deploy to Netlify
+      uses: nwtgck/actions-netlify@v1.2
+      with:
+        publish-dir: ./dist
+      env:
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
