@@ -58,7 +58,7 @@ jobs:
 
     - name: Update API URL in Jekyll config
       run: |
-        echo "EGAPRO_API_URL: ${github.event.inputs.apiUrl}" >> _config.yml
+        echo "EGAPRO_API_URL: ${{github.event.inputs.apiUrl}}" >> _config.yml
         
     - name: Install Jekyll
       run: |
