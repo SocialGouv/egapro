@@ -1,0 +1,57 @@
+name: Manually triggered workflow
+on:
+  workflow_dispatch:
+    inputs:
+      simuBranch:
+        description: "Branche pour la simulation-déclaration"
+        required: true
+        default: "master"
+      declaBranch:
+        description: "Branche pour la déclaration directe"
+        required: true
+        default: "master"
+      apiUrl:
+        description: "URL de l'API"
+        required: true
+        default: "https://dev.egapro.fabrique.social.gouv.fr/api"
+
+jobs:    
+  checkout_build_simu:
+    runs-on: ubuntu-latest
+    steps:        
+      - name: Checkout commit
+        uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.inputs.simuBranch}}
+      
+      - name: Install Dependencies
+        run: |
+          yarn install --frozen-lockfile --force --non-interactive
+          
+      - name: Build app
+        run: CI=false REACT_APP_EGAPRO_API_URL=${{github.event.inputs.REACT_APP_EGAPRO_API_URL}} yarn build
+      
+          
+  checkout_build_decla:
+    runs-on: ubuntu-latest
+    steps:        
+      - name: Checkout commit
+        uses: actions/checkout@v2
+        with:
+          repository: "SocialGouv/egapro-declaration"
+          ref: ${{github.event.inputs.declaBranch}}
+      
+      - name: Update API URL in Jekyll config
+        run: |
+          echo "EGAPRO_API_URL: ${EGAPRO_API_URL}" >> _config.yml
+          
+      - name: Build app
+        uses:  helaili/jekyll-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          jekyll_build_options: --baseurl "/declaration"
+
+
+      
+          
+
