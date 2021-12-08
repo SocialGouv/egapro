@@ -15,9 +15,8 @@ on:
         required: true
         default: "https://dev.egapro.fabrique.social.gouv.fr/api"
       netlifySiteId:
-        description: "Id of the Nelify site"
-        required: true
-        default: ${{secrets.NETLIFY_SITE_ID}}
+        description: "Id of the Netlify site"
+        required: false
 
 concurrency:
   cancel-in-progress: true
@@ -104,5 +103,5 @@ jobs:
       with:
         publish-dir: ./dist
       env:
-        NETLIFY_SITE_ID: ${{ github.event.inputs.netlifySiteId }}
+        NETLIFY_SITE_ID: ${{ github.event.inputs.netlifySiteId || secrets.NETLIFY_SITE_ID }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
