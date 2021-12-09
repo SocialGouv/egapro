@@ -32,7 +32,10 @@ jobs:
         content="${content//$'\n'/'%0A'}"
         content="${content//$'\r'/'%0D'}"
         # end of optional handling for multi line json
-        NETLIFY_SITE_ID = ${{ github.event.inputs.netlifySiteId || fromJson(content).siteId }}
-        echo NETLIFY_SITE_ID
+      env:
+        NETLIFY_SITE_ID: ${{ github.event.inputs.netlifySiteId || fromJson(content).siteId }}
+
+    - name: debug
+      run: echo "Résultat $NETLIFY_SITE_ID"
 
 
