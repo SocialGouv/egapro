@@ -1,0 +1,38 @@
+# Je cherche à récupérer le site id du fichier .netlify/state.json.
+# Référence : https://stackoverflow.com/a/64627966/2728710
+# content = $(cat .netlify/state.json)
+# echo "::set-output name=siteId::${JSON//'%'/'%25'}"
+# echo "::set-output name=stateJson::$content" # alternative
+
+# NETLIFY_SITE_ID: ${{fromJson(steps.my-step.outputs.stateJson)}}
+
+name: Test
+on:
+  workflow_dispatch:
+    inputs:
+      netlifySiteId:
+        description: "Id of the Netlify site"
+        required: false
+
+concurrency:
+  cancel-in-progress: true
+  group: netlify-deploy-${{ github.ref }}
+
+jobs:
+
+  build-simulation:
+    runs-on: ubuntu-latest
+    steps:
+
+    - id: get-site-id
+      run: |
+        content = $(cat .netlify/state.json)
+        # the following lines are only required for multi line json
+        content="${content//'%'/'%25'}"
+        content="${content//$'\n'/'%0A'}"
+        content="${content//$'\r'/'%0D'}"
+        # end of optional handling for multi line json
+        NETLIFY_SITE_ID = ${{ github.event.inputs.netlifySiteId || fromJson(content).siteId }}
+        echo NETLIFY_SITE_ID
+
+
