@@ -55,7 +55,7 @@ function RecapitulatifIndicateurTrois({
           text={
             <Fragment>
               <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saissies.
+                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.
               </span>{" "}
               <TextSimulatorLink to="/indicateur3" label="valider les données" />
             </Fragment>
