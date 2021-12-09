@@ -38,24 +38,22 @@ function Footer() {
 
       <div css={[styles.footerLinks, isMobile && css({ margin: "1em" })]}>
         <a
-          href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
           css={[styles.link, isMobile && styles.linkMobile]}
         >
-          retrouvez le simulateur au format Excel
+          Contactez votre référent Egapro
         </a>
         <Link to="/mentions-legales" css={[styles.link, isMobile && styles.linkMobile]}>
-          mentions légales
+          Mentions légales
         </Link>
         <Link to="/accessibilite" css={[styles.link, isMobile && styles.linkMobile]}>
-          accessibilité : non conforme
+          Accessibilité : non conforme
         </Link>
         <Link to="/cgu" css={[styles.link, isMobile && styles.linkMobile]}>
-          conditions générales d'utilisation
+          Conditions générales d'utilisation
         </Link>
         <Link to="/politique-confidentialite" css={[styles.link, isMobile && styles.linkMobile]}>
-          politique de confidentialité
+          Politique de confidentialité
         </Link>
       </div>
 
