@@ -30,6 +30,24 @@ const components = {
             },
           },
         }),
+        outlinePrimary: (props: StyleFunctionProps) => ({
+          ...defaultTheme.components.Input.variants.outline(props),
+          field: {
+            ...defaultTheme.components.Input.variants.outline(props).field,
+            borderColor: "primary.400",
+            background: "primary.50",
+            _hover: {
+              borderColor: "primary.500",
+            },
+            _placeholder: {
+              color: "primary.400",
+            },
+            _readOnly: {
+              background: "primary.200",
+              borderColor: "transparent",
+            },
+          },
+        }),
       },
     },
 
@@ -47,6 +65,30 @@ const components = {
             },
           },
         }),
+      },
+    },
+
+    Table: {
+      sizes: {
+        sm: {
+          th: {
+            px: "2",
+            py: "2",
+            lineHeight: "1",
+            fontSize: "xs",
+          },
+          td: {
+            px: "2",
+            py: "1.5",
+            fontSize: "sm",
+            lineHeight: "1",
+          },
+          caption: {
+            px: "1",
+            py: "2",
+            fontSize: "xs",
+          },
+        },
       },
     },
   },

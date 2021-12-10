@@ -1,33 +1,19 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { Link } from "react-router-dom"
+import React, { FunctionComponent } from "react"
+import { Text, Link } from "@chakra-ui/react"
+import { Link as LinkRouter } from "react-router-dom"
 
-import globalStyles from "../../../utils/globalStyles"
-
-interface Props {
+interface FAQQuestionRowProps {
   part: string
   index: number
   question: string
 }
 
-function FAQQuestionRow({ part, index, question }: Props) {
-  return (
-    <Link to={{ state: { faq: `/part/${part}/question/${index}` } }} css={styles.link}>
-      <p css={styles.questionRow}>• {question}</p>
+const FAQQuestionRow: FunctionComponent<FAQQuestionRowProps> = ({ part, index, question }) => (
+  <Text fontSize="sm">
+    <Link as={LinkRouter} to={{ state: { faq: `/part/${part}/question/${index}` } }} display="inline-block">
+      {question}
     </Link>
-  )
-}
-
-const styles = {
-  questionRow: css({
-    marginBottom: 12,
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  link: css({
-    color: globalStyles.colors.default,
-    textDecoration: "none",
-  }),
-}
+  </Text>
+)
 
 export default FAQQuestionRow

@@ -1,13 +1,10 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import React, { FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { FAQSectionType } from "../../globals"
-import globalStyles from "../../utils/globalStyles"
 
 import FAQTitle from "./components/FAQTitle"
 import FAQTitle2 from "./components/FAQTitle2"
-
 import FAQIndicateur1DetailCalcul from "./components-detail-calcul/FAQIndicateur1DetailCalcul"
 import FAQIndicateur2DetailCalcul from "./components-detail-calcul/FAQIndicateur2DetailCalcul"
 import FAQIndicateur3DetailCalcul from "./components-detail-calcul/FAQIndicateur3DetailCalcul"
@@ -18,34 +15,34 @@ import FAQResultatDetailCalcul from "./components-detail-calcul/FAQResultatDetai
 
 import { faqSections } from "../../data/faq"
 
-interface Props {
+interface FAQSectionDetailCalculProps {
   section: FAQSectionType
   history: RouteComponentProps["history"]
 }
 
-function FAQSectionDetailCalcul({ section }: Props) {
+const FAQSectionDetailCalcul: FunctionComponent<FAQSectionDetailCalculProps> = ({
+  section,
+}: FAQSectionDetailCalculProps) => {
   const faqSection = faqSections[section]
-
   const FAQDetailCalculElement = FAQDetailCalcul({ section })
 
   return (
-    <div css={styles.container}>
-      <FAQTitle>{faqSection.title}</FAQTitle>
+    <React.Fragment>
+      <FAQTitle mb={6}>{faqSection.title}</FAQTitle>
 
-      <div css={styles.content}>
-        {FAQDetailCalculElement && (
-          <div css={styles.pasapas}>
-            <FAQTitle2>Comprendre comment est calculé {section === "resultat" ? "l'index" : "l'indicateur"}</FAQTitle2>
-
-            {FAQDetailCalculElement}
-          </div>
-        )}
-      </div>
-    </div>
+      {FAQDetailCalculElement && (
+        <React.Fragment>
+          <FAQTitle2 as="h4">
+            Comprendre comment est calculé {section === "resultat" ? "l'index" : "l'indicateur"}
+          </FAQTitle2>
+          {FAQDetailCalculElement}
+        </React.Fragment>
+      )}
+    </React.Fragment>
   )
 }
 
-function FAQDetailCalcul({ section }: { section: FAQSectionType }) {
+const FAQDetailCalcul = ({ section }: { section: FAQSectionType }) => {
   switch (section) {
     case "indicateur1":
       return <FAQIndicateur1DetailCalcul />
@@ -64,27 +61,6 @@ function FAQDetailCalcul({ section }: { section: FAQSectionType }) {
     default:
       return null
   }
-}
-
-const styles = {
-  container: css({}),
-  content: css({
-    marginTop: 28,
-    marginBottom: 14,
-  }),
-  pasapas: css({
-    marginBottom: 28,
-  }),
-
-  button: css({
-    color: globalStyles.colors.default,
-    fontSize: 12,
-    textDecoration: "none",
-  }),
-  buttonIcon: css({
-    fontSize: 8,
-    fontFamily: "Segoe UI Symbol", // fix Edge
-  }),
 }
 
 export default FAQSectionDetailCalcul

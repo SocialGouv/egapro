@@ -1,6 +1,6 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import React, { FunctionComponent } from "react"
 import { useState, ReactNode } from "react"
+import { Box, VStack, StackDivider, Text } from "@chakra-ui/react"
 
 import FAQSearchBox from "./components/FAQSearchBox"
 import FAQQuestionRow from "./components/FAQQuestionRow"
@@ -8,53 +8,36 @@ import FAQTitle2 from "./components/FAQTitle2"
 
 import faqDataFuse from "./utils/faqFuse"
 
-interface Props {
+interface FAQSearchProps {
   children: ReactNode
 }
 
-function FAQSearch({ children }: Props) {
+const FAQSearch: FunctionComponent<FAQSearchProps> = ({ children }) => {
   const [searchTerm, setSearchTerm] = useState("")
 
   const fuseResults = searchTerm !== "" ? faqDataFuse.search(searchTerm) : null
 
   return (
-    <div css={styles.container}>
+    <React.Fragment>
       <FAQSearchBox searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
-      {searchTerm === "" ? (
-        children
-      ) : (
-        <div css={styles.content}>
-          {fuseResults ? (
-            fuseResults.map(({ item: { part, title, index, question } }) => (
-              <div css={styles.part} key={part + index}>
-                <FAQTitle2>{title}</FAQTitle2>
-                <FAQQuestionRow part={part} index={index} question={question} />
-              </div>
-            ))
-          ) : (
-            <p>Pas de résultat</p>
-          )}
-        </div>
-      )}
-    </div>
+      <Box mt={4}>
+        {searchTerm === "" ? (
+          children
+        ) : (
+          <VStack spacing={4} divider={<StackDivider borderColor="gray.100" />}>
+            {fuseResults &&
+              fuseResults.map(({ item: { part, title, index, question } }) => (
+                <Box key={part + index}>
+                  <FAQTitle2 mb={1}>{title}</FAQTitle2>
+                  <FAQQuestionRow part={part} index={index} question={question} />
+                </Box>
+              ))}
+          </VStack>
+        )}
+        {searchTerm !== "" && fuseResults?.length === 0 && <Text fontSize="sm">Aucun résultat trouvé</Text>}
+      </Box>
+    </React.Fragment>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  content: css({
-    marginTop: 28,
-    marginBottom: 14,
-    display: "flex",
-    flexDirection: "column",
-  }),
-  part: css({
-    marginTop: 14,
-  }),
 }
 
 export default FAQSearch

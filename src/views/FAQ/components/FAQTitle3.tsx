@@ -1,27 +1,10 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { ReactNode } from "react"
+import React, { FunctionComponent } from "react"
+import { Heading, HeadingProps } from "@chakra-ui/react"
 
-import globalStyles from "../../../utils/globalStyles"
-
-function FAQTitle3({ children }: { children: ReactNode }) {
-  return (
-    <div css={styles.container}>
-      <span css={styles.title}>{children}</span>
-    </div>
-  )
-}
-
-const styles = {
-  container: css({
-    marginBottom: 8,
-    paddingTop: 8,
-  }),
-  title: css({
-    fontSize: 14,
-    lineHeight: "17px",
-    color: globalStyles.colors.default,
-  }),
-}
+const FAQTitle3: FunctionComponent<HeadingProps> = ({ children, ...rest }) => (
+  <Heading as="h5" fontSize="sm" color="gray.600" fontWeight="semibold" mt={4} mb={3} {...rest}>
+    {children}
+  </Heading>
+)
 
 export default FAQTitle3

@@ -1,51 +1,32 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import React, { FunctionComponent } from "react"
+import { Table, Thead, Tbody, Tr, Th, Td, Box } from "@chakra-ui/react"
 
-interface Props {
+interface FAQCalculScaleProps {
   listTitle: string
   list: Array<string>
   scaleTitle: string
   scale: Array<string>
 }
 
-function FAQCalculScale({ listTitle, list, scaleTitle, scale }: Props) {
-  return (
-    <table css={styles.container}>
-      <thead>
-        <tr>
-          <th css={[styles.text, styles.title]}>{listTitle}</th>
-          <th css={[styles.text, styles.title]}>{scaleTitle}</th>
-        </tr>
-      </thead>
-      <tbody>
+const FAQCalculScale: FunctionComponent<FAQCalculScaleProps> = ({ listTitle, list, scaleTitle, scale }) => (
+  <Box border="1px solid" borderColor="gray.200" borderRadius="md" overflowY="hidden" bg="white">
+    <Table variant="striped" size="sm" marginBottom="-1px">
+      <Thead>
+        <Tr>
+          <Th>{listTitle}</Th>
+          <Th>{scaleTitle}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
         {list.map((listEl, index) => (
-          <tr key={listEl}>
-            <td css={styles.text}>• {listEl}</td>
-            <td css={styles.text}>{scale[index]}</td>
-          </tr>
+          <Tr key={listEl}>
+            <Td>{listEl}</Td>
+            <Td>{scale[index]}</Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
-  )
-}
-
-const styles = {
-  container: css({
-    marginBottom: 12,
-    padding: "13px 25px",
-    backgroundColor: "#F9F7F9",
-    borderRadius: 5,
-    width: "100%",
-  }),
-  text: css({
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  title: css({
-    paddingBottom: 8,
-    fontWeight: "bold",
-    textAlign: "left",
-  }),
-}
+      </Tbody>
+    </Table>
+  </Box>
+)
 
 export default FAQCalculScale

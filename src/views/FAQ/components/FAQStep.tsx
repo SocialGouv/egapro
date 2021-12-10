@@ -1,41 +1,23 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { ReactNode } from "react"
+import React, { FunctionComponent, ReactNode } from "react"
+import { Box, Flex } from "@chakra-ui/react"
 
-function FAQStep({ children, icon }: { children: ReactNode; icon: ReactNode }) {
-  return (
-    <div css={styles.container}>
-      <div css={styles.background}>
-        <span css={styles.text}>{children}</span>
-      </div>
-      <div css={styles.iconContainer}>{icon}</div>
-    </div>
-  )
-}
+type FAQStepProp = { children: ReactNode; icon: ReactNode }
 
-const styles = {
-  container: css({
-    position: "relative",
-    marginBottom: 12,
-    paddingLeft: 27,
-  }),
-  background: css({
-    backgroundColor: "#F9F7F9",
-    borderRadius: 5,
-    padding: "10px 18px 10px 27px",
-  }),
-  text: css({
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  iconContainer: {
-    left: 0,
-    top: "50%",
-    position: "absolute" as const, // Because typescript…
-    marginTop: -22,
-    width: 44,
-    height: 44,
-  },
-}
+const FAQStep: FunctionComponent<FAQStepProp> = ({ children, icon }) => (
+  <Flex>
+    <Box
+      pt={4}
+      sx={{
+        position: "relative",
+        marginRight: "-22px",
+      }}
+    >
+      {icon}
+    </Box>
+    <Box bg="primary.100" pl={8} pr={6} py={4} borderRadius="md" fontSize="sm">
+      {children}
+    </Box>
+  </Flex>
+)
 
 export default FAQStep

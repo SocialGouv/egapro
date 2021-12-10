@@ -1,62 +1,74 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { Link } from "react-router-dom"
+import React, { FunctionComponent } from "react"
+import { LinkBox, LinkOverlay, Text, Flex, Icon } from "@chakra-ui/react"
+import { RiArrowDropRightLine } from "react-icons/ri"
+import { Link as LinkRouter } from "react-router-dom"
 
-import globalStyles from "../../../utils/globalStyles"
-
-interface Props {
+interface FAQSectionRowProps {
   section: string
   title: string
   detail: string
 }
 
-function FAQSectionRow({ section, title, detail }: Props) {
-  return (
-    <Link to={{ state: { faq: `/section/${section}` } }} css={styles.link}>
-      <div css={styles.container}>
-        <div css={styles.row}>
-          <span css={styles.title}>{title}</span>
-          <span css={styles.chevron}>›</span>
-        </div>
-        <span css={styles.detail}>{detail}</span>
-      </div>
-    </Link>
-  )
-}
-
-const styles = {
-  container: css({
-    marginTop: 14,
-    marginBottom: 14,
-  }),
-  row: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  }),
-  title: css({
-    fontSize: 12,
-    fontWeight: "bold",
-    lineHeight: "15px",
-    color: globalStyles.colors.primary,
-    textTransform: "uppercase",
-  }),
-  chevron: css({
-    marginLeft: 14,
-    lineHeight: "15px",
-    color: globalStyles.colors.primary,
-  }),
-  detail: css({
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-
-  link: css({
-    color: globalStyles.colors.default,
-    textDecoration: "none",
-  }),
-}
+const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, detail }) => (
+  <LinkBox
+    py={2}
+    px={2}
+    mx={-2}
+    borderRadius="md"
+    sx={{
+      transition: "background-color .1s ease-in-out",
+      _hover: {
+        backgroundColor: "primary.100",
+        ".section-icon": {
+          color: "primary.600",
+        },
+        ".section-detail": {
+          color: "primary.700",
+        },
+      },
+    }}
+  >
+    <Flex>
+      <LinkOverlay
+        as={LinkRouter}
+        to={{ state: { faq: `/section/${section}` } }}
+        color="primary.500"
+        fontWeight="bold"
+        fontFamily="heading"
+        fontSize="sm"
+        display="block"
+        lineHeight={1.2}
+        sx={{
+          transition: "color .1s ease-in-out",
+          _hover: {
+            color: "primary.700",
+          },
+        }}
+      >
+        {title}
+      </LinkOverlay>
+      <Icon
+        boxSize={5}
+        as={RiArrowDropRightLine}
+        color="gray.400"
+        ml="auto"
+        className="section-icon"
+        sx={{
+          transition: "color .1s ease-in-out",
+        }}
+      />
+    </Flex>
+    <Text
+      fontSize="sm"
+      color="gray.600"
+      className="section-detail"
+      sx={{
+        transition: "color .1s ease-in-out",
+      }}
+    >
+      {detail}
+    </Text>
+  </LinkBox>
+)
 
 export default FAQSectionRow

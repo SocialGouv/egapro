@@ -13,6 +13,4 @@ const theme = extendTheme({
   ...components,
 })
 
-console.log(theme)
-
 export default theme
