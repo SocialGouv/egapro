@@ -52,31 +52,28 @@ function Footer() {
             }}
           >
             <ListItem>
-              <Link
-                href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
-                isExternal
-              >
-                retrouvez le simulateur au format Excel
+              <Link href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" isExternal>
+                Contactez votre référent Egapro
               </Link>
             </ListItem>
             <ListItem>
               <Link as={ReachLink} to="/mentions-legales">
-                mentions légales
+                Mentions légales
               </Link>
             </ListItem>
             <ListItem>
               <Link as={ReachLink} to="/accessibilite">
-                accessibilité&nbsp;: non conforme
+                Accessibilité&nbsp;: non conforme
               </Link>
             </ListItem>
             <ListItem>
               <Link as={ReachLink} to="/cgu">
-                conditions générales d'utilisation
+                Conditions générales d'utilisation
               </Link>
             </ListItem>
             <ListItem>
               <Link as={ReachLink} to="/politique-confidentialite">
-                politique de confidentialité
+                Politique de confidentialité
               </Link>
             </ListItem>
           </List>

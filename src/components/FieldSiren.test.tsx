@@ -80,8 +80,6 @@ describe("isValidSiren", () => {
   })
 
   test("returns an error message for an invalid siren", async () => {
-    await expect(validator("234567891")).resolves.toBe(
-      "Vous n'êtes pas autorisé à déclarer pour ce SIREN, veuillez contacter votre référent de l'égalité professionnelle",
-    )
+    await expect(validator("234567891")).resolves.toBe("Vous n'êtes pas autorisé à déclarer pour ce SIREN.")
   })
 })

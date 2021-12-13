@@ -36,7 +36,7 @@ function RecapitulatifInformations({
             <Fragment>
               <span>
                 Nous ne pouvons pas afficher les informations de votre entreprise car vous n’avez pas encore validé vos
-                données saissies.
+                données saisies.
               </span>{" "}
               <TextSimulatorLink to="/informations" label="valider les données" />
             </Fragment>
