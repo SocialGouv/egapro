@@ -1,7 +1,7 @@
 import React, { Fragment } from "react"
 import { Text } from "@chakra-ui/react"
 
-import { IconLamp, IconGrow } from "../../../components/Icons"
+import { IconLamp, IconGrow } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 
@@ -10,7 +10,7 @@ const FAQIndicateur3Steps = () => (
     <Text>
       <strong>Indicateur concernant les entreprises de plus de 250 salariés</strong>
     </Text>
-    <FAQStep icon={<IconGrow valid={true} />}>
+    <FAQStep icon={<IconGrow />} isValid="valid">
       <Text>
         La notion de promotion correspond au <strong>passage à un niveau ou coefficient hiérarchique supérieur.</strong>
       </Text>

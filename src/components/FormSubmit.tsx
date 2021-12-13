@@ -4,7 +4,7 @@ import { css, jsx } from "@emotion/core"
 import globalStyles from "../utils/globalStyles"
 
 import ButtonSubmit from "./ButtonSubmit"
-import { IconWarning } from "./Icons"
+import { IconWarning } from "./ds/Icons"
 
 interface Props {
   submitFailed: boolean
@@ -27,7 +27,7 @@ function FormSubmit({
       {errorMessage && submitFailed && hasValidationErrors && (
         <div css={styles.error}>
           <div css={styles.icon}>
-            <IconWarning width={23} height={20} />
+            <IconWarning boxSize="8" />
           </div>
           <p>{errorMessage}</p>
         </div>

@@ -5,7 +5,7 @@ import { Fragment, ReactNode } from "react"
 import globalStyles from "../utils/globalStyles"
 
 import { CellHead, Cell, Cell2 } from "./Cell"
-import { IconMale, IconFemale } from "./Icons"
+import { IconMale, IconFemale } from "./ds/Icons"
 
 interface Props {
   title?: string

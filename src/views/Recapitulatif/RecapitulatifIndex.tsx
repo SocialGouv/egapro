@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core"
 import { ReactNode } from "react"
 
-import { IconWarning } from "../../components/Icons"
+import { IconWarning } from "../../components/ds/Icons"
 import { useColumnsWidth, useLayoutType } from "../../components/GridContext"
 
 import globalStyles from "../../utils/globalStyles"

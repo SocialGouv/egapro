@@ -1,7 +1,7 @@
 import React, { Fragment } from "react"
 import { Text, UnorderedList, ListItem } from "@chakra-ui/react"
 
-import { IconLamp, IconText, IconPeople } from "../../../components/Icons"
+import { IconLamp, IconText, IconPeople } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 
@@ -20,7 +20,7 @@ const FAQEffectifsSteps = () => (
         référence ou dernier jour de présence du salarié dans l’entreprise.
       </Text>
     </FAQStep>
-    <FAQStep icon={<IconPeople valid={false} />}>
+    <FAQStep icon={<IconPeople />} isValid="invalid">
       <Text>
         <strong>Ne sont pas pris en compte dans les effectifs&nbsp;:</strong>
       </Text>

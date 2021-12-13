@@ -1,13 +1,13 @@
 import React, { Fragment } from "react"
 import { Text } from "@chakra-ui/react"
 
-import { IconPeople, IconGrow } from "../../../components/Icons"
+import { IconPeople, IconGrow } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 
 const FAQIndicateur4Steps = () => (
   <Fragment>
-    <FAQStep icon={<IconPeople valid={true} />}>
+    <FAQStep icon={<IconPeople />} isValid="valid">
       <Text>
         Seules les salariées qui sont rentrées de congé maternité (ou d’adoption) durant la période de référence sont
         prises en considération.

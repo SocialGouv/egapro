@@ -1,7 +1,7 @@
 import React, { Fragment } from "react"
 import { Text, UnorderedList, ListItem } from "@chakra-ui/react"
 
-import { IconLamp, IconGrow } from "../../../components/Icons"
+import { IconLamp, IconGrow } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 
@@ -10,7 +10,7 @@ const FAQIndicateur2et3Steps = () => (
     <Text>
       <strong>Indicateur concernant les entreprises entre 50 et 250 salariés</strong>
     </Text>
-    <FAQStep icon={<IconGrow valid={true} />}>
+    <FAQStep icon={<IconGrow />} isValid="invalid">
       <Text>
         La notion d'
         <strong>

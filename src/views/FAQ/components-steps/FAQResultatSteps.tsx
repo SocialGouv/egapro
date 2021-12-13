@@ -1,7 +1,7 @@
 import React, { Fragment } from "react"
 import { Text, UnorderedList, ListItem, Link } from "@chakra-ui/react"
 
-import { IconLamp } from "../../../components/Icons"
+import { IconLamp } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 

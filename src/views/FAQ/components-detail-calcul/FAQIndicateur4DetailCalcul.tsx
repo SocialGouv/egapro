@@ -1,7 +1,7 @@
 import React, { Fragment } from "react"
 import { Box, Text } from "@chakra-ui/react"
 
-import { IconText } from "../../../components/Icons"
+import { IconText } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 import FAQCalculScale from "../components/FAQCalculScale"

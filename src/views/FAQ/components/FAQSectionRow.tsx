@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
-import { LinkBox, LinkOverlay, Text, Flex, Icon } from "@chakra-ui/react"
-import { RiArrowDropRightLine } from "react-icons/ri"
+import { LinkBox, LinkOverlay, Text, Flex, Box } from "@chakra-ui/react"
 import { Link as LinkRouter } from "react-router-dom"
+import { IconArrowRight } from "../../../components/ds/Icons"
 
 interface FAQSectionRowProps {
   section: string
@@ -47,16 +47,16 @@ const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, 
       >
         {title}
       </LinkOverlay>
-      <Icon
-        boxSize={5}
-        as={RiArrowDropRightLine}
-        color="gray.400"
+      <Box
         ml="auto"
-        className="section-icon"
         sx={{
-          transition: "color .1s ease-in-out",
+          svg: {
+            transition: "color .1s ease-in-out",
+          },
         }}
-      />
+      >
+        <IconArrowRight boxSize="5" color="gray.400" className="section-icon" />
+      </Box>
     </Flex>
     <Text
       fontSize="sm"

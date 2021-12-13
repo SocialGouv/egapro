@@ -4,7 +4,7 @@ import { useState, ReactNode } from "react"
 
 import globalStyles from "../utils/globalStyles"
 
-import { IconWarning, IconCircleCross } from "./Icons"
+import { IconWarning, IconCircleCross } from "./ds/Icons"
 import { useColumnsWidth, useLayoutType } from "./GridContext"
 
 interface Props {
@@ -25,9 +25,10 @@ function InfoBloc({ title, text, icon = "warning", additionalCss, closeButton = 
     return (
       <div css={[styles.bloc, css({ width }), additionalCss]}>
         {icon === null ? null : (
-          <div css={styles.blocIcon}>{icon === "cross" ? <IconCircleCross /> : <IconWarning />}</div>
+          <div css={styles.blocIcon}>
+            {icon === "cross" ? <IconCircleCross boxSize="10" /> : <IconWarning boxSize="10" />}
+          </div>
         )}
-
         <div css={styles.textWrapper}>
           <p css={styles.blocTitle}>{title}</p>
           {text && <p css={styles.blocText}>{text}</p>}

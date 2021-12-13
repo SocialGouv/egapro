@@ -7,7 +7,7 @@ import globalStyles from "../../../utils/globalStyles"
 
 import { useColumnsWidth, useLayoutType } from "../../../components/GridContext"
 import ActionLink from "../../../components/ActionLink"
-import { IconValid, IconInvalid } from "../../../components/Icons"
+import { IconValid, IconInvalid } from "../../../components/ds/Icons"
 
 export type MenuOption = "groupe" | "effectif" | "remuneration"
 

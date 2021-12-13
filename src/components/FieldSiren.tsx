@@ -11,7 +11,7 @@ import { ownersForSiren, validateSiren } from "../utils/api"
 import { EntrepriseType } from "../globals"
 import ActivityIndicator from "./ActivityIndicator"
 import { useUser } from "../utils/hooks"
-import { ExternalLinkIcon } from "@chakra-ui/icons"
+import { IconExternalLink } from "./ds/Icons"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"
@@ -90,12 +90,10 @@ function FieldSiren({
               <Link
                 isExternal
                 textDecoration="underline"
-                target="_blank"
-                rel="noreferrer noopener"
                 href={`mailto:dgt.ega-pro@travail.gouv.fr?subject=EgaPro - Demander à être déclarant d'un SIREN&body=Bonjour, je souhaite être déclarant pour le SIREN ${field.input.value}. Mon email de déclaration est ${email}. Cordialement.`}
               >
                 cliquez ici&nbsp;
-                <ExternalLinkIcon mx="2px" />
+                <IconExternalLink />
               </Link>
               .
             </p>

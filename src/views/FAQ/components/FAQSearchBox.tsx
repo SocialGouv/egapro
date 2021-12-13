@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
-import { RiSearchLine } from "react-icons/ri"
-import { Input, InputGroup, InputLeftElement, FormLabel, FormControl, VisuallyHidden, Icon } from "@chakra-ui/react"
+import { Input, InputGroup, InputLeftElement, FormLabel, FormControl, VisuallyHidden } from "@chakra-ui/react"
+import { IconSearch } from "../../../components/ds/Icons"
 
 interface FAQSearchBoxProps {
   searchTerm: string
@@ -16,7 +16,7 @@ const FAQSearchBox: FunctionComponent<FAQSearchBoxProps> = ({ searchTerm, setSea
       </FormLabel>
       <InputGroup>
         <InputLeftElement pointerEvents="none">
-          <Icon as={RiSearchLine} color="primary.500" aria-hidden="true" />
+          <IconSearch color="primary.500" />
         </InputLeftElement>
         <Input
           id="faq-search"

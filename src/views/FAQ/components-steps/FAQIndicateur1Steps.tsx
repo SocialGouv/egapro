@@ -1,7 +1,7 @@
 import React, { Fragment } from "react"
 import { Text, UnorderedList, ListItem } from "@chakra-ui/react"
 
-import { IconLamp, IconText, IconMoney } from "../../../components/Icons"
+import { IconLamp, IconText, IconMoney } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 
@@ -13,7 +13,7 @@ const FAQIndicateur1Steps = () => (
         période de référence.
       </Text>
     </FAQStep>
-    <FAQStep icon={<IconMoney valid={true} />}>
+    <FAQStep icon={<IconMoney />} isValid="valid">
       <Text>
         <strong>Doivent être pris en compte dans la rémunération&nbsp;:</strong>
       </Text>
@@ -32,7 +32,7 @@ const FAQIndicateur1Steps = () => (
       </UnorderedList>
     </FAQStep>
 
-    <FAQStep icon={<IconMoney valid={false} />}>
+    <FAQStep icon={<IconMoney />} isValid="invalid">
       <Text>
         <strong>Ne doivent pas être pris en compte dans la rémunération&nbsp;:</strong>
       </Text>

@@ -1,12 +1,12 @@
 import React, { FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
-import { Box, Button, Heading, Icon, Text } from "@chakra-ui/react"
-import { RiArrowGoBackLine } from "react-icons/ri"
+import { Box, Button, Heading, Text } from "@chakra-ui/react"
 
 import { FAQPartType } from "../../globals"
 import { faqData } from "../../data/faq"
 
 import FAQTitle from "./components/FAQTitle"
+import { IconBack } from "../../components/ds/Icons"
 
 interface FAQSectionProps {
   part: FAQPartType
@@ -39,7 +39,7 @@ const FAQSection: FunctionComponent<FAQSectionProps> = ({ part, indexQuestion, h
           </Text>
         ))}
       </Box>
-      <Button onClick={() => history.goBack()} size="sm" leftIcon={<Icon as={RiArrowGoBackLine} />} variant="link">
+      <Button onClick={() => history.goBack()} size="sm" leftIcon={<IconBack />} variant="link">
         Retour aux questions
       </Button>
     </React.Fragment>

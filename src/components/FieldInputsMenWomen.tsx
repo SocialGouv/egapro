@@ -9,7 +9,7 @@ import { ValidatorFunction } from "../utils/formHelpers"
 
 import { CellHead, Cell, Cell2 } from "./Cell"
 import CellInput from "./CellInput"
-import { IconValid, IconInvalid } from "./Icons"
+import { IconValid, IconInvalid } from "./ds/Icons"
 
 const displayReadOnlyValue = (value: string, mask?: "number" | "percent" | undefined) => {
   if (!mask || !value) {

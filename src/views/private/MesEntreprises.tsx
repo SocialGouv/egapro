@@ -13,7 +13,6 @@ import { Box, Flex, HStack, List, ListIcon, ListItem, Stack, Text } from "@chakr
 import { Spinner } from "@chakra-ui/spinner"
 import { FormControl, FormLabel } from "@chakra-ui/form-control"
 import { IconButton } from "@chakra-ui/button"
-import { DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
 import { Skeleton } from "@chakra-ui/react"
 import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
 import { Form } from "react-final-form"
@@ -27,10 +26,10 @@ import Page from "../../components/Page"
 import { fetcher } from "../../utils/fetcher"
 import PrimaryButton from "../../components/ds/PrimaryButton"
 import Toast from "../../components/ds/Toast"
-import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
 import { useUser } from "../../components/AuthContext"
 import { formValidator, InputControl } from "../../components/ds/form-lib"
 import ButtonAction from "../../components/ButtonAction"
+import { IconDelete, IconDrag, IconOfficeBuilding } from "../../components/ds/Icons"
 
 const title = "Mes entreprises"
 
@@ -41,7 +40,7 @@ function InfoEntreprise({ siren }: { siren: string }) {
     <HStack borderWidth="3px" borderRadius="lg" as="section" spacing="4" p="6" pt="4" pb="4">
       <Toast message={message} />
       <Flex>
-        <OfficeBuildingIcon w={6} h={6} color="gray.500" />
+        <IconOfficeBuilding boxSize="8" color="gray.500" />
       </Flex>
 
       {isLoading ? (
@@ -76,13 +75,13 @@ function UserListItem({
 
   return (
     <ListItem key={owner} verticalAlign="center">
-      <ListIcon as={DragHandleIcon} color="green.500" />
+      <ListIcon as={IconDrag} color="green.500" />
       {owner}&nbsp;
       <IconButton
         variant="none"
         colorScheme="teal"
         aria-label="Supprimer cet utilisateur"
-        icon={<DeleteIcon />}
+        icon={<IconDelete />}
         onClick={onOpen}
         h="6"
       />

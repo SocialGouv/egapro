@@ -1,13 +1,13 @@
 import React, { Fragment } from "react"
 import { Text } from "@chakra-ui/react"
 
-import { IconCalendar } from "../../../components/Icons"
+import { IconCalendar } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 
 const FAQInformationsSteps = () => (
   <Fragment>
-    <FAQStep icon={<IconCalendar valid={true} />}>
+    <FAQStep icon={<IconCalendar />} isValid="valid">
       <Text>
         Les indicateurs sont calculés à partir des données de la période de référence annuelle choisie par l’entreprise.{" "}
         <strong>Cette période doit être de 12 mois consécutifs et précéder l’année de publication.</strong> Elle doit

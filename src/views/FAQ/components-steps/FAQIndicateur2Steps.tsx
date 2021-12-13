@@ -1,7 +1,7 @@
 import React, { Fragment } from "react"
 import { Text } from "@chakra-ui/react"
 
-import { IconLamp, IconMoney, IconGrow } from "../../../components/Icons"
+import { IconLamp, IconMoney, IconGrow } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 
@@ -10,7 +10,7 @@ const FAQIndicateur2Steps = () => (
     <Text>
       <strong>Indicateur concernant les entreprises de plus de 250 salariés</strong>
     </Text>
-    <FAQStep icon={<IconMoney valid={true} />}>
+    <FAQStep icon={<IconMoney />} isValid="valid">
       <Text>
         La notion d'
         <strong>
@@ -18,7 +18,7 @@ const FAQIndicateur2Steps = () => (
         </strong>
       </Text>
     </FAQStep>
-    <FAQStep icon={<IconGrow valid={false} />}>
+    <FAQStep icon={<IconGrow />} isValid="invalid">
       <Text>
         La notion d’augmentation individuelle pour le calcul de cet indicateur exclut les augmentations de salaires
         liées à une promotion.

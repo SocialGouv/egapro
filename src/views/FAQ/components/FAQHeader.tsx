@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
-import { Box, Icon, Button, Heading } from "@chakra-ui/react"
-import { RiArrowGoBackLine } from "react-icons/ri"
+import { Box, Button, Heading } from "@chakra-ui/react"
 import { Switch, Link, Route, RouteComponentProps } from "react-router-dom"
+import { IconBack } from "../../../components/ds/Icons"
 
 export type FAQHeaderProps = {
   location: RouteComponentProps["location"]
@@ -9,13 +9,13 @@ export type FAQHeaderProps = {
 }
 
 const FAQHeaderBackButton = ({ onClick }: { onClick: () => void }) => (
-  <Button onClick={onClick} size="xs" leftIcon={<Icon as={RiArrowGoBackLine} />} variant="link">
+  <Button onClick={onClick} size="xs" leftIcon={<IconBack />} variant="link">
     Retour
   </Button>
 )
 
 const FAQHeaderHomeButton = () => (
-  <Button as={Link} to={{ state: { faq: "/" } }} size="xs" leftIcon={<Icon as={RiArrowGoBackLine} />} variant="link">
+  <Button as={Link} to={{ state: { faq: "/" } }} size="xs" leftIcon={<IconBack />} variant="link">
     Voir toute l’aide
   </Button>
 )

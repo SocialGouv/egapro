@@ -6,7 +6,7 @@ import globalStyles from "../../../../utils/globalStyles"
 import ActionLink from "../../../../components/ActionLink"
 import ButtonAction from "../../../../components/ButtonAction"
 
-import { IconWarning } from "../../../../components/Icons"
+import { IconWarning } from "../../../../components/ds/Icons"
 import { useColumnsWidth, useLayoutType } from "../../../../components/GridContext"
 
 function ModalConfirmDelete({ closeModal, deleteGroup }: { closeModal: () => void; deleteGroup: () => void }) {
