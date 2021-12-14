@@ -76,7 +76,7 @@
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "kinto-http": "^4.7.3",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "prettier": "^2.4.1",
     "prettier-eslint": "^13.0.0",
     "ts-node": "^8.6.2",
