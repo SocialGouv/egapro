@@ -1,12 +1,14 @@
 import React, { FunctionComponent } from "react"
-import { Box, BoxProps } from "@chakra-ui/react"
+import { Box, BoxProps, Flex } from "@chakra-ui/react"
 import { IconInvalid, IconValid } from "./Icons"
 
 export type IconBulletWrapperProps = { isValid?: "valid" | "invalid" }
 
 const IconBulletWrapper: FunctionComponent<BoxProps & IconBulletWrapperProps> = ({ children, isValid, ...rest }) => {
   return (
-    <Box
+    <Flex
+      justifyContent="center"
+      alignItems="center"
       position="relative"
       height={12}
       width={12}
@@ -14,9 +16,6 @@ const IconBulletWrapper: FunctionComponent<BoxProps & IconBulletWrapperProps> = 
       borderColor="primary.300"
       bg="white"
       borderRadius="50%"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
       color={isValid ? (isValid === "valid" ? "green.600" : "red.600") : "primary.700"}
       {...rest}
     >
@@ -37,9 +36,9 @@ const IconBulletWrapper: FunctionComponent<BoxProps & IconBulletWrapperProps> = 
           {isValid === "invalid" && <IconInvalid color="red.500" boxSize="4" />}
         </Box>
       )}
-      <Box
-        height={6}
-        width={6}
+      <Flex
+        justifyContent="center"
+        alignItems="center"
         sx={{
           svg: {
             width: 6,
@@ -48,8 +47,8 @@ const IconBulletWrapper: FunctionComponent<BoxProps & IconBulletWrapperProps> = 
         }}
       >
         {children}
-      </Box>
-    </Box>
+      </Flex>
+    </Flex>
   )
 }
 
