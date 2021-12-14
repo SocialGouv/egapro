@@ -7,7 +7,7 @@ import globalStyles from "../utils/globalStyles"
 
 import { CellHead, Cell } from "./Cell"
 import CellInput from "./CellInput"
-import { IconValid, IconInvalid } from "./Icons"
+import { IconValid, IconInvalid } from "./ds/Icons"
 
 interface Props {
   fieldName: string

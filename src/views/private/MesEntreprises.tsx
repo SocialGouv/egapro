@@ -13,7 +13,6 @@ import { Box, Flex, HStack, List, ListIcon, ListItem, Stack, Text } from "@chakr
 import { Spinner } from "@chakra-ui/spinner"
 import { FormControl, FormLabel } from "@chakra-ui/form-control"
 import { IconButton } from "@chakra-ui/button"
-import { DeleteIcon, DragHandleIcon } from "@chakra-ui/icons"
 import { Skeleton } from "@chakra-ui/react"
 import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
 import { Form } from "react-final-form"
@@ -26,11 +25,11 @@ import { useOwnersOfSiren } from "../../hooks/useOwnersOfSiren"
 import Page from "../../components/Page"
 import { fetcher } from "../../utils/fetcher"
 import PrimaryButton from "../../components/ds/PrimaryButton"
-import LinkButton from "../../components/ds/LinkButton"
 import Toast from "../../components/ds/Toast"
-import { OfficeBuildingIcon } from "../../components/ds/icons/OfficeBuildingIcon"
 import { useUser } from "../../components/AuthContext"
 import { formValidator, InputControl } from "../../components/ds/form-lib"
+import ButtonAction from "../../components/ButtonAction"
+import { IconDelete, IconDrag, IconOfficeBuilding } from "../../components/ds/Icons"
 
 const title = "Mes entreprises"
 
@@ -41,7 +40,7 @@ function InfoEntreprise({ siren }: { siren: string }) {
     <HStack borderWidth="3px" borderRadius="lg" as="section" spacing="4" p="6" pt="4" pb="4">
       <Toast message={message} />
       <Flex>
-        <OfficeBuildingIcon w={6} h={6} color="gray.500" />
+        <IconOfficeBuilding boxSize="8" color="gray.500" />
       </Flex>
 
       {isLoading ? (
@@ -76,13 +75,13 @@ function UserListItem({
 
   return (
     <ListItem key={owner} verticalAlign="center">
-      <ListIcon as={DragHandleIcon} color="green.500" />
+      <ListIcon as={IconDrag} color="green.500" />
       {owner}&nbsp;
       <IconButton
         variant="none"
         colorScheme="teal"
         aria-label="Supprimer cet utilisateur"
-        icon={<DeleteIcon />}
+        icon={<IconDelete />}
         onClick={onOpen}
         h="6"
       />
@@ -173,12 +172,13 @@ function UtilisateursEntreprise({ siren }: { siren: string }) {
           </List>
 
           <Flex mt="6" direction="column">
-            <LinkButton variant="ghost" onClick={setShowAddForm.toggle}>
-              <span aria-hidden="true" style={{ marginRight: "20px" }}>
-                🙋
-              </span>
-              &nbsp;Vous souhaitez ajouter un responsable ?
-            </LinkButton>
+            <ButtonAction
+              variant="outline"
+              onClick={setShowAddForm.toggle}
+              label="Vous souhaitez ajouter un responsable ?"
+              leftIcon={<span aria-hidden="true">🙋</span>}
+            />
+
             {showAddForm && (
               <Box mt="4">
                 <Form
@@ -186,9 +186,11 @@ function UtilisateursEntreprise({ siren }: { siren: string }) {
                   validate={formValidator(FormInput)}
                   render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
-                      <HStack align="flex-end">
-                        <InputControl name="email" label="Email du responsable" variant="blue-outline" />
-                        <PrimaryButton type="submit">Ajouter</PrimaryButton>
+                      <HStack spacing={4} align="flex-start">
+                        <InputControl name="email" label="Email du responsable" />
+                        <Box pt={8}>
+                          <PrimaryButton type="submit">Ajouter</PrimaryButton>
+                        </Box>
                       </HStack>
                     </form>
                   )}
@@ -235,7 +237,6 @@ function MesEntreprises() {
             <Flex mt="6" direction="column">
               <InfoEntreprise siren={chosenSiren} />
               <UtilisateursEntreprise siren={chosenSiren} />
-              &nbsp;
             </Flex>
           </React.Fragment>
         )}

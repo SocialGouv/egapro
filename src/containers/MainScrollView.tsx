@@ -1,15 +1,13 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { useEffect, ReactNode } from "react"
+import React, { useEffect, ReactNode } from "react"
+import { Container, Box, Flex, Grid } from "@chakra-ui/react"
 import { withRouter, RouteComponentProps } from "react-router-dom"
 
 import { AppState } from "../globals"
 
-import { useLayoutType } from "../components/GridContext"
 import ModalProvider from "../components/ModalContext"
-import ScrollProvider, { useScrollTo } from "../components/ScrollContext"
-import Footer from "../components/Footer"
+import { useScrollTo } from "../components/ScrollContext"
 import Menu from "../components/Menu"
+import FAQ from "../views/FAQ"
 
 interface Props extends RouteComponentProps {
   children: ReactNode
@@ -17,8 +15,6 @@ interface Props extends RouteComponentProps {
 }
 
 function MainScrollView({ children, state, location }: Props) {
-  const layoutType = useLayoutType()
-
   const menu = (
     <Menu
       trancheEffectifs={state ? state.informations.trancheEffectifs : "50 à 250"}
@@ -37,90 +33,48 @@ function MainScrollView({ children, state, location }: Props) {
   )
 
   return (
-    <div css={styles.main}>
-      <ModalProvider>
-        {layoutType === "tablet" && menu}
-        <ScrollProvider style={styles.scroll}>
-          {layoutType === "desktop" && <div css={styles.menu}>{menu}</div>}
-          <MainView pathname={location.pathname}>{children}</MainView>
-        </ScrollProvider>
-      </ModalProvider>
-    </div>
+    <Flex
+      grow={1}
+      sx={{
+        height: "100%",
+      }}
+      as={"main"}
+      role="main"
+      id="main"
+    >
+      <Container maxW="container.xl">
+        <ModalProvider>
+          <Grid
+            sx={{
+              gridTemplateColumns: "200px 1fr 380px",
+              gridTemplateRows: "auto",
+              gridTemplateAreas: "'nav main aside'",
+              height: "100%",
+            }}
+          >
+            <Box sx={{ gridArea: "nav" }} ml={-3}>
+              {menu}
+            </Box>
+            <Content pathname={location.pathname}>{children}</Content>
+            <Box bg="white" sx={{ gridArea: "aside" }} mr={-3}>
+              <FAQ />
+            </Box>
+          </Grid>
+        </ModalProvider>
+      </Container>
+    </Flex>
   )
 }
 
-function MainView({ children, pathname }: { children: ReactNode; pathname: string }) {
+function Content({ children, pathname }: { children: ReactNode; pathname: string }) {
   const scrollTo = useScrollTo()
 
   useEffect(() => scrollTo(0), [pathname, scrollTo])
 
   return (
-    <div css={styles.viewContainer}>
-      <div role="main" id="main" tabIndex={-1} css={styles.view}>
-        {children}
-      </div>
-      <Footer />
-    </div>
+    <Box px={8} py={10} sx={{ gridArea: "main", borderRight: "1px solid #E3E4ED" }}>
+      {children}
+    </Box>
   )
 }
-
-const styles = {
-  main: css({
-    borderRight: "1px solid #EFECEF",
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: "0%",
-    position: "relative",
-    "@media print": {
-      display: "block",
-    },
-  }),
-  scroll: css({
-    display: "flex",
-    flexDirection: "row",
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: "0px",
-    position: "relative",
-    "@media print": {
-      display: "block",
-      borderRight: "none",
-      background: "none",
-    },
-  }),
-  menu: css({
-    position: "sticky",
-    top: 0,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    paddingBottom: 80,
-    "@media print": {
-      display: "none",
-    },
-  }),
-  viewContainer: css({
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: "0%",
-    "@media print": {
-      display: "block",
-    },
-  }),
-  view: css({
-    flexGrow: 1,
-    flexShrink: 0,
-    flexBasis: "auto",
-    display: "flex",
-    flexDirection: "column",
-    "@media print": {
-      display: "block",
-    },
-  }),
-}
-
 export default withRouter(MainScrollView)

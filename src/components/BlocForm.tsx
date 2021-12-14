@@ -5,7 +5,7 @@ import { Fragment, ReactNode } from "react"
 import globalStyles from "../utils/globalStyles"
 
 import { CellHead, Cell, Cell2 } from "./Cell"
-import { IconMale, IconFemale } from "./Icons"
+import { IconMale, IconFemale } from "./ds/Icons"
 
 interface Props {
   title?: string
@@ -86,7 +86,7 @@ const styles = {
     left: -38,
     right: -38,
     borderRadius: "100%",
-    border: "1px solid #EFECEF",
+    border: "1px solid #E3E4ED",
   }),
   blocForm: css({
     position: "relative",

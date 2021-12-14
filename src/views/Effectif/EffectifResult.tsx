@@ -55,11 +55,11 @@ const styles = {
   bubble: css({
     backgroundColor: "white",
     color: globalStyles.colors.default,
-    border: "solid #EFECEF 1px",
+    border: "solid #E3E4ED 1px",
     "@media print": {
       backgroundColor: "white",
       color: globalStyles.colors.default,
-      border: "solid #EFECEF 1px",
+      border: "solid #E3E4ED 1px",
     },
   }),
 

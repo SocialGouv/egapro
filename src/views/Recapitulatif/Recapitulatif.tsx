@@ -200,7 +200,7 @@ function Recapitulatif({ state }: Props) {
         <ButtonSimulatorLink to="/informations-entreprise" label="poursuivre vers la déclaration" />
       </ActionBar>
       <ActionBar>
-        <ButtonAction label="imprimer" outline={true} onClick={() => window.print()} />
+        <ButtonAction label="imprimer" variant="outline" onClick={() => window.print()} />
         <span css={styles.info}>(possible d'enregistrer en PDF depuis la fenêtre d'impression)</span>
       </ActionBar>
 

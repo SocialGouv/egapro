@@ -1,54 +1,45 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { Fragment } from "react"
+import React, { Fragment } from "react"
+import { Text, UnorderedList, ListItem } from "@chakra-ui/react"
 
-import { IconLamp, IconGrow } from "../../../components/Icons"
+import { IconLamp, IconGrow } from "../../../components/ds/Icons"
+
 import FAQStep from "../components/FAQStep"
 
-function FAQIndicateur2et3Steps() {
-  return (
-    <Fragment>
+const FAQIndicateur2et3Steps = () => (
+  <Fragment>
+    <Text>
       <strong>Indicateur concernant les entreprises entre 50 et 250 salariés</strong>
-      <br />
-      <br />
-
-      <FAQStep icon={<IconGrow valid={true} />}>
+    </Text>
+    <FAQStep icon={<IconGrow />} isValid="invalid">
+      <Text>
         La notion d'
         <strong>
           augmentation individuelle correspond à une augmentation individuelle du salaire de base du salarié concerné.
         </strong>
-      </FAQStep>
+      </Text>
+    </FAQStep>
 
-      <FAQStep icon={<IconLamp />}>
+    <FAQStep icon={<IconLamp />}>
+      <Text>
         La notion d’augmentation individuelle pour le calcul de cet indicateur <strong>inclut</strong> les augmentations
         de salaire liées à une promotion.
-      </FAQStep>
-
-      <FAQStep icon={<IconLamp />}>
+      </Text>
+    </FAQStep>
+    <FAQStep icon={<IconLamp />}>
+      <Text>
         L'indicateur est calculé <strong>au niveau de l'entreprise</strong>, et non par groupes de salariés.
-      </FAQStep>
-
-      <FAQStep icon={<IconLamp />}>
-        <p>L’indicateur n’est pas calculable :</p>
-        <ul css={styles.list}>
-          <li>• Si aucune augmentation individuelle n'est intervenue au cours de la période de référence,</li>
-          <li>
-            • Ou si l’effectif pris en compte pour le calcul des indicateurs ne comporte pas au moins 5 femmes et 5
-            hommes.
-          </li>
-        </ul>
-      </FAQStep>
-    </Fragment>
-  )
-}
-
-const styles = {
-  list: css({
-    padding: 0,
-    margin: 0,
-    listStyle: "none",
-    marginTop: 6,
-  }),
-}
+      </Text>
+    </FAQStep>
+    <FAQStep icon={<IconLamp />}>
+      <Text>L’indicateur n’est pas calculable&nbsp;:</Text>
+      <UnorderedList>
+        <ListItem>Si aucune augmentation individuelle n'est intervenue au cours de la période de référence,</ListItem>
+        <ListItem>
+          Ou si l’effectif pris en compte pour le calcul des indicateurs ne comporte pas au moins 5 femmes et 5 hommes.
+        </ListItem>
+      </UnorderedList>
+    </FAQStep>
+  </Fragment>
+)
 
 export default FAQIndicateur2et3Steps

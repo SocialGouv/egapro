@@ -1,10 +1,7 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-
+import React, { FunctionComponent } from "react"
+import { Box } from "@chakra-ui/react"
 import { StaticContext } from "react-router"
 import { Route, Switch, RouteComponentProps } from "react-router-dom"
-
-import { useLayoutType } from "../../components/GridContext"
 
 import FAQHeader from "./components/FAQHeader"
 import FAQFooter from "./components/FAQFooter"
@@ -13,7 +10,6 @@ import FAQHome from "./FAQHome"
 import FAQSection from "./FAQSection"
 import FAQSectionDetailCalcul from "./FAQSectionDetailCalcul"
 import FAQQuestion from "./FAQQuestion"
-import globalStyles from "../../utils/globalStyles"
 
 const FAQPaths: { [key: string]: string } = {
   informations: "/section/informations",
@@ -33,7 +29,7 @@ type LocationState = {
 
 type FAQRouteComponentProps = RouteComponentProps<Record<string, string>, StaticContext, LocationState>
 
-function mapDefaultPathnameToFAQPathname(location: FAQRouteComponentProps["location"]) {
+const mapDefaultPathnameToFAQPathname = (location: FAQRouteComponentProps["location"]) => {
   if (location.state && location.state.faq) {
     return location.state.faq
   }
@@ -45,133 +41,92 @@ function mapDefaultPathnameToFAQPathname(location: FAQRouteComponentProps["locat
   return faqPath ? faqPath : location.pathname
 }
 
-interface Props {
+interface FAQProps {
   closeMenu?: () => void
 }
 
-function FAQ({ closeMenu }: Props) {
-  const layoutType = useLayoutType()
-  return (
-    <Route
-      render={(route) => {
-        const location = (route as FAQRouteComponentProps).location
-        const locationFAQ = {
-          pathname: mapDefaultPathnameToFAQPathname(location),
-          search: "",
-          hash: "",
-          state: undefined,
-        }
-        return (
-          <div role="search" css={styles.container}>
-            <FAQHeader location={locationFAQ} closeMenu={closeMenu} />
+const FAQ: FunctionComponent<FAQProps> = ({ closeMenu }) => (
+  <Route
+    render={(route) => {
+      const location = (route as FAQRouteComponentProps).location
+      const locationFAQ = {
+        pathname: mapDefaultPathnameToFAQPathname(location),
+        search: "",
+        hash: "",
+        state: undefined,
+      }
+      return (
+        <Box as="aside" id="search" role="search" bg="white">
+          <FAQHeader location={locationFAQ} closeMenu={closeMenu} />
+          <Box
+            p={6}
+            overflowY="auto"
+            maxHeight="100vh"
+            sx={{ WebkitOverflowScrolling: "touch" }}
+            key={locationFAQ.pathname}
+          >
+            <Switch location={locationFAQ}>
+              <Route
+                path={[
+                  "/",
+                  "/simulateur/:code",
+                  "/mentions-legales",
+                  "/accessibilite",
+                  "/cgu",
+                  "/politique-confidentialite",
+                ]}
+                exact
+                render={() => <FAQHome />}
+              />
 
-            <div
-              css={[
-                styles.content,
-                layoutType === "tablet" && styles.contentTablet,
-                layoutType === "mobile" && styles.contentMobile,
-              ]}
-              key={locationFAQ.pathname}
-            >
-              <Switch location={locationFAQ}>
-                <Route
-                  path={[
-                    "/",
-                    "/simulateur/:code",
-                    "/mentions-legales",
-                    "/accessibilite",
-                    "/cgu",
-                    "/politique-confidentialite",
-                  ]}
-                  exact
-                  render={() => <FAQHome />}
-                />
+              {/* TODO: move to FAQPaths when a dedicated content is added */}
+              <Route path={["/", "/simulateur/:code/informations-entreprise"]} exact render={() => <FAQHome />} />
 
-                {/* TODO: move to FAQPaths when a dedicated content is added */}
-                <Route path={["/", "/simulateur/:code/informations-entreprise"]} exact render={() => <FAQHome />} />
+              {/* TODO: move to FAQPaths when a dedicated content is added */}
+              <Route path={["/", "/simulateur/:code/informations-declarant"]} exact render={() => <FAQHome />} />
 
-                {/* TODO: move to FAQPaths when a dedicated content is added */}
-                <Route path={["/", "/simulateur/:code/informations-declarant"]} exact render={() => <FAQHome />} />
+              {/* TODO: move to FAQPaths when a dedicated content is added */}
+              <Route path={["/", "/simulateur/:code/declaration"]} exact render={() => <FAQHome />} />
 
-                {/* TODO: move to FAQPaths when a dedicated content is added */}
-                <Route path={["/", "/simulateur/:code/declaration"]} exact render={() => <FAQHome />} />
+              <Route
+                exact
+                path="/section/:section"
+                render={({
+                  match: {
+                    params: { section },
+                  },
+                }) => <FAQSection section={section} />}
+              />
 
-                <Route
-                  exact
-                  path="/section/:section"
-                  render={({
-                    match: {
-                      params: { section },
-                    },
-                  }) => <FAQSection section={section} />}
-                />
+              <Route
+                exact
+                path="/section/:section/detail-calcul"
+                render={({
+                  history,
+                  match: {
+                    params: { section },
+                  },
+                }) => <FAQSectionDetailCalcul history={history} section={section} />}
+              />
 
-                <Route
-                  exact
-                  path="/section/:section/detail-calcul"
-                  render={({
-                    history,
-                    match: {
-                      params: { section },
-                    },
-                  }) => <FAQSectionDetailCalcul history={history} section={section} />}
-                />
+              <Route
+                exact
+                path="/part/:part/question/:indexQuestion"
+                render={({
+                  history,
+                  match: {
+                    params: { part, indexQuestion },
+                  },
+                }) => <FAQQuestion history={history} part={part} indexQuestion={indexQuestion} />}
+              />
+            </Switch>
 
-                <Route
-                  exact
-                  path="/part/:part/question/:indexQuestion"
-                  render={({
-                    history,
-                    match: {
-                      params: { part, indexQuestion },
-                    },
-                  }) => <FAQQuestion history={history} part={part} indexQuestion={indexQuestion} />}
-                />
-              </Switch>
-
-              <FAQFooter />
-            </div>
-          </div>
-        )
-      }}
-    />
-  )
-}
-
-const styles = {
-  container: css({
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    display: "flex",
-    flexDirection: "column",
-    backgroundColor: "white",
-  }),
-  content: css({
-    overflowY: "auto",
-    WebkitOverflowScrolling: "touch",
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    display: "flex",
-    flexDirection: "column",
-    paddingRight: 29,
-    paddingLeft: 29,
-    paddingTop: 26,
-    position: "relative",
-    "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
-      // Only target IE11
-      display: "block",
-    },
-  }),
-  contentTablet: css({
-    paddingRight: 21,
-    paddingLeft: 21,
-  }),
-  contentMobile: css({
-    paddingRight: globalStyles.grid.gutterWidth,
-    paddingLeft: globalStyles.grid.gutterWidth,
-  }),
-}
+            <FAQFooter />
+          </Box>
+        </Box>
+      )
+    }}
+  />
+)
 
 export default FAQ

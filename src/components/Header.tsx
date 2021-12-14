@@ -1,97 +1,83 @@
-/** @jsx jsx */
-// import { Avatar } from "../components/ds/Avatar"
-
-import { css, jsx } from "@emotion/core"
-import { Link } from "react-router-dom"
-
-import globalStyles from "../utils/globalStyles"
+import React from "react"
+import { Link as ReachLink } from "react-router-dom"
+import { Box, Container, Link, Flex, Text, ListItem, List, HStack } from "@chakra-ui/react"
 import { MenuProfile } from "./ds/MenuProfile"
-
-import { useColumnsWidth, useLayoutType } from "./GridContext"
-
-import Logo from "./Logo"
+import Logo from "./ds/Logo"
 
 function Header() {
-  const width = useColumnsWidth(2)
-  const layoutType = useLayoutType()
   return (
-    <header role="banner" css={styles.header}>
-      <div css={[styles.headerLeft, layoutType === "desktop" && css({ width }), styles.headerLeftPrint]}>
-        <a
-          href="https://travail-emploi.gouv.fr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          css={[styles.containerLogo, layoutType === "desktop" && styles.containerLogoDesktop]}
-        >
-          <Logo />
-        </a>
-      </div>
-      <div css={styles.headerInner}>
-        <Link to="/" css={styles.title}>
-          Index Egapro
-        </Link>
-        <p css={styles.subtitle}>
-          L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
-        </p>
-      </div>
-      <div>
-        <MenuProfile />
-      </div>
-    </header>
+    <Box
+      as="header"
+      role="banner"
+      bg="white"
+      sx={{
+        flexShrink: 0,
+        borderBottom: "1px solid #E3E4ED",
+      }}
+    >
+      <Box
+        bg="white"
+        fontSize="xs"
+        sx={{
+          height: 0,
+          overflow: "hidden",
+          borderBottom: "1px solid #f1f2fb",
+          transform: "translateY(-100%)",
+          ":focus-within": {
+            height: "auto",
+            transform: "translateY(0%)",
+          },
+        }}
+      >
+        <Container maxW="container.xl">
+          <HStack as={List} spacing={4}>
+            <ListItem>
+              <Link href="#menu">Aller au menu</Link>
+            </ListItem>
+            <ListItem>
+              <Link href="#main">Aller au contenu</Link>
+            </ListItem>
+            <ListItem>
+              <Link href="#search">Aller à l'aide</Link>
+            </ListItem>
+            <ListItem>
+              <Link href="#footer">Aller au pied de page</Link>
+            </ListItem>
+          </HStack>
+        </Container>
+      </Box>
+      <Container maxW="container.xl" id="menu">
+        <Flex align="center" py={4}>
+          <Box pr={6}>
+            <Link
+              href="https://travail-emploi.gouv.fr/"
+              isExternal
+              sx={{
+                display: "block",
+              }}
+            >
+              <Logo />
+            </Link>
+          </Box>
+          <Box
+            sx={{
+              fontFamily: "'Gabriela', serif",
+            }}
+          >
+            <Link as={ReachLink} to="/" fontSize="2xl" color="gray.900">
+              Index Egapro
+            </Link>
+            <Text fontSize="xs">
+              L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+            </Text>
+          </Box>
+          <Box ml="auto">
+            <MenuProfile />
+          </Box>
+        </Flex>
+      </Container>
+    </Box>
   )
-}
-
-const styles = {
-  header: css({
-    backgroundColor: "#FFF",
-    height: 100,
-    flexShrink: 0,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottom: "1px solid #EFECEF",
-  }),
-  headerLeft: css({
-    display: "flex",
-    flexDirection: "row",
-    marginLeft: globalStyles.grid.gutterWidth,
-    marginRight: globalStyles.grid.gutterWidth,
-    "@media print": {
-      marginLeft: 0,
-    },
-  }),
-  headerLeftPrint: css({
-    "@media print": {
-      width: "auto",
-    },
-  }),
-  containerLogo: css({
-    marginLeft: "auto",
-    marginRight: 0,
-    textDecoration: "none",
-    color: "currentColor",
-  }),
-  containerLogoDesktop: css({
-    marginRight: 25,
-  }),
-  headerInner: css({
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-    alignItems: "baseline",
-  }),
-  title: css({
-    fontFamily: "'Gabriela', serif",
-    marginRight: 24,
-    fontSize: 24,
-    color: globalStyles.colors.default,
-    textDecoration: "none",
-  }),
-  subtitle: css({
-    fontFamily: "'Gabriela', serif",
-    fontSize: 12,
-  }),
 }
 
 export default Header

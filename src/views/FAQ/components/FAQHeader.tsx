@@ -1,97 +1,57 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import React, { FunctionComponent } from "react"
+import { Box, Button, Heading } from "@chakra-ui/react"
 import { Switch, Link, Route, RouteComponentProps } from "react-router-dom"
+import { IconBack } from "../../../components/ds/Icons"
 
-import globalStyles from "../../../utils/globalStyles"
-import ActionLink from "../../../components/ActionLink"
-import { useLayoutType } from "../../../components/GridContext"
-
-function FAQHeaderBackButton({ onClick }: { onClick: () => void }) {
-  return (
-    <ActionLink style={styles.buttonBack} onClick={onClick}>
-      <span css={styles.backIcon}>◀</span> retour
-    </ActionLink>
-  )
+export type FAQHeaderProps = {
+  location: RouteComponentProps["location"]
+  closeMenu?: () => void
 }
 
-function FAQHeaderHomeButton() {
-  return (
-    <Link to={{ state: { faq: "/" } }} css={styles.buttonBack}>
-      <span css={styles.backIcon}>◀</span> voir toute l’aide
-    </Link>
-  )
-}
+const FAQHeaderBackButton = ({ onClick }: { onClick: () => void }) => (
+  <Button onClick={onClick} size="xs" leftIcon={<IconBack />} variant="link">
+    Retour
+  </Button>
+)
 
-function FAQHeader({ location, closeMenu }: { location: RouteComponentProps["location"]; closeMenu?: () => void }) {
-  const layoutType = useLayoutType()
-  return (
-    <div
-      css={[
-        styles.container,
-        layoutType === "tablet" && styles.containerTablet,
-        layoutType === "mobile" && styles.containerMobile,
-      ]}
-    >
-      <div css={styles.aroundTitle}>
-        <Switch location={location}>
-          {closeMenu && <Route exact path="/" render={() => <FAQHeaderBackButton onClick={closeMenu} />} />}
-          <Route exact path="/section/:section" render={() => <FAQHeaderHomeButton />} />
-          <Route
-            exact
-            path={["/part/:part/question/:indexQuestion", "/contact"]}
-            render={({ history }) => <FAQHeaderBackButton onClick={() => history.goBack()} />}
-          />
-          <Route
-            exact
-            path="/section/:section/detail-calcul"
-            render={({ history }) => <FAQHeaderBackButton onClick={() => history.goBack()} />}
-          />
-        </Switch>
-      </div>
-      <span css={styles.title}>Aide</span>
-      <div css={styles.aroundTitle} />
-    </div>
-  )
-}
+const FAQHeaderHomeButton = () => (
+  <Button as={Link} to={{ state: { faq: "/" } }} size="xs" leftIcon={<IconBack />} variant="link">
+    Voir toute l’aide
+  </Button>
+)
 
-const styles = {
-  container: css({
-    height: 100,
-    flexShrink: 0,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottom: "1px solid #EFECEF",
-    marginRight: 29,
-    marginLeft: 29,
-  }),
-  containerTablet: css({
-    marginRight: 21,
-    marginLeft: 21,
-  }),
-  containerMobile: css({
-    height: 56,
-    marginRight: globalStyles.grid.gutterWidth,
-    marginLeft: globalStyles.grid.gutterWidth,
-  }),
-  title: css({
-    fontFamily: "'Gabriela', serif",
-    fontSize: 18,
-  }),
-  aroundTitle: css({
-    flexGrow: 1,
-    flexShrink: 0,
-    flexBasis: 100,
-  }),
-  buttonBack: css({
-    color: globalStyles.colors.default,
-    fontSize: 12,
-    textDecoration: "none",
-  }),
-  backIcon: css({
-    fontSize: 8,
-    fontFamily: "Segoe UI Symbol", // fix Edge
-  }),
-}
+const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ location, closeMenu }) => (
+  <Box
+    height={20}
+    mx={6}
+    textAlign="center"
+    borderBottom="1px solid"
+    borderColor="gray.200"
+    position="relative"
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+  >
+    <Box position="absolute" top="50%" left={0} transform="translateY(calc(-50% + .125rem))" fontSize="xs">
+      <Switch location={location}>
+        {closeMenu && <Route exact path="/" render={() => <FAQHeaderBackButton onClick={closeMenu} />} />}
+        <Route exact path="/section/:section" render={() => <FAQHeaderHomeButton />} />
+        <Route
+          exact
+          path={["/part/:part/question/:indexQuestion", "/contact"]}
+          render={({ history }) => <FAQHeaderBackButton onClick={() => history.goBack()} />}
+        />
+        <Route
+          exact
+          path="/section/:section/detail-calcul"
+          render={({ history }) => <FAQHeaderBackButton onClick={() => history.goBack()} />}
+        />
+      </Switch>
+    </Box>
+    <Heading as="h2" fontFamily="'Gabriela', serif" size="md" color="gray.700">
+      Aide
+    </Heading>
+  </Box>
+)
 
 export default FAQHeader

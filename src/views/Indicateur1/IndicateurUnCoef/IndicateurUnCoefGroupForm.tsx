@@ -96,7 +96,14 @@ function IndicateurUnCoefGroupForm({
             ) : (
               <ActionLink onClick={updateIndicateurUnCoefAddGroup} style={styles.add}>
                 <div css={styles.addIcon}>
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 26 26"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
                     <path
                       d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
                       stroke="white"

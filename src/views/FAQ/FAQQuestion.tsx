@@ -1,76 +1,49 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import React, { FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
+import { Box, Button, Heading, Text } from "@chakra-ui/react"
 
 import { FAQPartType } from "../../globals"
-
-import ActionLink from "../../components/ActionLink"
-
-import FAQTitle from "./components/FAQTitle"
-
 import { faqData } from "../../data/faq"
 
-interface Props {
+import FAQTitle from "./components/FAQTitle"
+import { IconBack } from "../../components/ds/Icons"
+
+interface FAQSectionProps {
   part: FAQPartType
   indexQuestion: number
   history: RouteComponentProps["history"]
 }
 
-function FAQSection({ part, indexQuestion, history }: Props) {
+const FAQSection: FunctionComponent<FAQSectionProps> = ({ part, indexQuestion, history }) => {
   const faqPart = faqData[part]
   const faqQuestion = faqPart.qr[indexQuestion]
 
   return (
-    <div css={styles.container}>
-      <FAQTitle>{faqPart.title}</FAQTitle>
-
-      <div css={styles.content}>
-        <p css={styles.question}>• {faqQuestion.question}</p>
-        <div css={styles.responseBloc}>
-          {faqQuestion.reponse.map((reponsePara, index) => (
-            <p key={index} css={styles.responseRow}>
-              {reponsePara}
-            </p>
-          ))}
-        </div>
-
-        <ActionLink style={styles.button} onClick={() => history.goBack()}>
-          <span css={styles.buttonIcon}>◀</span> ︎retour aux questions
-        </ActionLink>
-      </div>
-    </div>
+    <React.Fragment>
+      <FAQTitle mb={6}>{faqPart.title}</FAQTitle>
+      <Box mb={6}>
+        <Heading as="p" fontSize="md" fontWeight="bold" mb={4}>
+          {faqQuestion.question}
+        </Heading>
+        {faqQuestion.reponse.map((reponsePara, index) => (
+          <Text
+            key={index}
+            fontSize="sm"
+            sx={{
+              "&:not(:last-child)": {
+                marginBottom: 2,
+              },
+            }}
+          >
+            {reponsePara}
+          </Text>
+        ))}
+      </Box>
+      <Button onClick={() => history.goBack()} size="sm" leftIcon={<IconBack />} variant="link">
+        Retour aux questions
+      </Button>
+    </React.Fragment>
   )
-}
-
-const styles = {
-  container: css({}),
-  content: css({
-    marginBottom: 14,
-  }),
-  question: css({
-    marginBottom: 12,
-    fontWeight: "bold",
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  responseBloc: css({
-    paddingLeft: 15,
-    marginBottom: 12,
-  }),
-  responseRow: css({
-    marginBottom: 4,
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-
-  button: css({
-    fontSize: 12,
-    textDecoration: "none",
-  }),
-  buttonIcon: css({
-    fontSize: 8,
-    fontFamily: "Segoe UI Symbol", // fix Edge
-  }),
 }
 
 export default FAQSection

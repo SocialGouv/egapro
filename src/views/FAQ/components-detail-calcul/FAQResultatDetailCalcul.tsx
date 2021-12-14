@@ -1,24 +1,23 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/core"
-import { Fragment } from "react"
+import React, { Fragment } from "react"
+import { Text } from "@chakra-ui/react"
 
-import { IconText } from "../../../components/Icons"
+import { IconText } from "../../../components/ds/Icons"
 
 import FAQStep from "../components/FAQStep"
 import FAQTitle3 from "../components/FAQTitle3"
 
-function FAQResultatDetailCalcul() {
-  return (
-    <Fragment>
-      <FAQTitle3>Calculer l’index</FAQTitle3>
-
-      <FAQStep icon={<IconText>1</IconText>}>
+const FAQResultatDetailCalcul = () => (
+  <Fragment>
+    <FAQTitle3>Calculer l’index</FAQTitle3>
+    <FAQStep icon={<IconText>1</IconText>}>
+      <Text>
         Les indicateurs calculables doivent représenter au moins 75 points de l’Index pour que celui-ci soit calculable.
-        <br />
+      </Text>
+      <Text mt={1}>
         Le nombre total de points ainsi obtenus est ramené sur 100 en appliquant la règle de la proportionnalité.
-      </FAQStep>
-    </Fragment>
-  )
-}
+      </Text>
+    </FAQStep>
+  </Fragment>
+)
 
 export default FAQResultatDetailCalcul

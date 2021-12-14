@@ -1,35 +1,53 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import Button from "./Button"
+import React from "react"
+import { Button } from "@chakra-ui/react"
 
-interface Props {
+export interface ButtonProps {
   label: string
-  onClick: () => void
-  outline?: boolean
-  error?: boolean
+  colorScheme?: "primary" | "gray"
+  variant?: "solid" | "outline" | "ghost" | "link"
+  leftIcon?: React.ReactElement
+  rightIcon?: React.ReactElement
+  size?: "xs" | "sm" | "md" | "lg"
+  fullWidth?: boolean
+}
+
+export type ButtonActionProps = ButtonProps & {
+  onClick?: () => void
   disabled?: boolean
   loading?: boolean
+  type?: "button" | "submit" | "reset" | undefined
 }
 
-function ButtonAction({ label, onClick, outline = false, error = false, disabled = false, loading = false }: Props) {
+function ButtonAction({
+  label,
+  colorScheme = "primary",
+  variant = "solid",
+  onClick,
+  leftIcon,
+  rightIcon,
+  type,
+  size = "md",
+  disabled = false,
+  loading = false,
+  fullWidth,
+}: ButtonActionProps) {
   return (
-    <button type="button" disabled={disabled} css={styles.button} onClick={onClick}>
-      <Button label={label} outline={outline} error={error} loading={loading} />
-    </button>
+    <Button
+      size={size}
+      type={type}
+      onClick={onClick}
+      isDisabled={disabled}
+      isLoading={loading}
+      colorScheme={colorScheme}
+      variant={variant}
+      leftIcon={leftIcon}
+      rightIcon={rightIcon}
+      sx={{
+        width: fullWidth ? "100%" : "auto",
+      }}
+    >
+      {label}
+    </Button>
   )
 }
-
-const styles = {
-  button: css({
-    all: "unset",
-
-    padding: 0,
-    border: "none",
-    outline: "none",
-    font: "inherit",
-    color: "inherit",
-    background: "none",
-  }),
-}
-
 export default ButtonAction

@@ -1,13 +1,12 @@
 import React from "react"
-import { Link } from "react-router-dom"
 import { Button } from "@chakra-ui/react"
 import { ButtonProps } from "./ButtonAction"
 
-type ButtonLinkProps = ButtonProps & {
+type ButtonLinkNoRouterProps = ButtonProps & {
   to: string
 }
 
-function ButtonLink({
+function ButtonLinkNoRouter({
   label,
   to,
   colorScheme = "primary",
@@ -16,11 +15,11 @@ function ButtonLink({
   rightIcon,
   size = "md",
   fullWidth,
-}: ButtonLinkProps) {
+}: ButtonLinkNoRouterProps) {
   return (
     <Button
-      to={to}
-      as={Link}
+      href={to}
+      as="a"
       colorScheme={colorScheme}
       variant={variant}
       leftIcon={leftIcon}
@@ -35,4 +34,4 @@ function ButtonLink({
   )
 }
 
-export default ButtonLink
+export default ButtonLinkNoRouter

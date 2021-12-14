@@ -1,12 +1,6 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { useRef } from "react"
-
-import globalStyles from "../utils/globalStyles"
-
-import { useColumnsWidth, useLayoutType } from "../components/GridContext"
+import React from "react"
+import { Text, Input, InputGroup, InputRightElement, Button, Image, useToast } from "@chakra-ui/react"
 import Page from "../components/Page"
-import ActionLink from "../components/ActionLink"
 import ActionBar from "../components/ActionBar"
 import { ButtonSimulatorLink } from "../components/SimulatorLink"
 import { useTitle } from "../utils/hooks"
@@ -15,124 +9,53 @@ const title = "Début d'un calcul d'index"
 
 function HomeSimulateur(): JSX.Element {
   useTitle(title)
-
-  const textEl = useRef<HTMLSpanElement>(null)
-
+  const toast = useToast()
   const link = window.location.href
-  const onCopy = () => {
-    if (textEl.current && window.getSelection) {
-      const selection = window.getSelection()
-      const range = document.createRange()
-      range.selectNodeContents(textEl.current)
-      if (selection) {
-        selection.removeAllRanges()
-        selection.addRange(range)
-      }
 
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(link)
-      } else {
-        document.execCommand("copy")
-      }
+  const onCopy = () => {
+    const id = "test-toast"
+    navigator.clipboard.writeText(link)
+    if (!toast.isActive(id)) {
+      toast({
+        id,
+        title: "Code copié",
+        description: "Pensez à conserver ce code précieusement.",
+        position: "bottom-right",
+        variant: "left-accent",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      })
     }
   }
 
-  const layoutType = useLayoutType()
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
-
   return (
     <Page title="Bienvenue sur Index Egapro">
-      <div css={css({ width })}>
-        <div css={styles.codeCopyBloc}>
-          <div css={styles.codeCopyFakeInput}>
-            <span
-              ref={textEl}
-              role="button"
-              tabIndex={0}
-              css={styles.codeCopyText}
-              onClick={onCopy}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === "Space") {
-                  onCopy()
-                }
-              }}
-            >
-              {link}
-            </span>
-          </div>
-          <div css={styles.codeCopyAction}>
-            <ActionLink onClick={onCopy}>copier le lien</ActionLink>
-          </div>
-        </div>
+      <InputGroup size="md">
+        <Input onClick={onCopy} defaultValue={link} pr="8rem" type={"text"} placeholder="Enter password" />
+        <InputRightElement width="7rem" sx={{ right: 1 }}>
+          <Button h="1.75rem" size="sm" onClick={onCopy} variant="outline" colorScheme="primary">
+            <div>Copier&nbsp;le&nbsp;lien</div>
+          </Button>
+        </InputRightElement>
+      </InputGroup>
 
-        <p css={styles.tagline}>
-          Afin de pouvoir réaccéder à tout moment à votre calcul : pensez à copier le code ci-dessus et le conserver
-          précieusement.
-        </p>
+      <Text mt={6}>
+        Afin de pouvoir réaccéder à tout moment à votre calcul&nbsp;:{" "}
+        <strong>pensez à copier le code ci-dessus et le conserver précieusement</strong>.
+      </Text>
 
-        <div css={styles.imageContainer}>
-          <div css={styles.image} />
-        </div>
+      <ActionBar>
+        <ButtonSimulatorLink
+          to="/informations"
+          label="Étape suivante"
+          aria-label="Aller à : Informations calcul et période de référence"
+        />
+      </ActionBar>
 
-        <ActionBar>
-          <ButtonSimulatorLink to="/informations" label="suivant" />
-        </ActionBar>
-      </div>
+      <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} alt="" aria-hidden="true" />
     </Page>
   )
-}
-
-const styles = {
-  codeCopyBloc: css({
-    display: "flex",
-    alignItems: "flex-end",
-  }),
-  codeCopyFakeInput: css({
-    flexShrink: 1,
-    flexGrow: 1,
-    marginRight: 20,
-
-    paddingTop: 9,
-    paddingBottom: 9,
-    paddingLeft: globalStyles.grid.gutterWidth,
-    paddingRight: globalStyles.grid.gutterWidth,
-    background: "white",
-    border: `solid ${globalStyles.colors.default} 1px`,
-
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-  }),
-  codeCopyText: css({
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  codeCopyAction: css({
-    flexShrink: 0,
-  }),
-
-  tagline: css({
-    marginTop: 36,
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-
-  imageContainer: css({
-    marginTop: 160,
-    height: 151,
-    width: 384,
-    position: "relative",
-  }),
-  image: css({
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    left: -(globalStyles.grid.gutterWidth * 2),
-    backgroundImage: `url(${process.env.PUBLIC_URL}/illustration-home-simulator.svg)`,
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "contain",
-  }),
 }
 
 export default HomeSimulateur

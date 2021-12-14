@@ -5,10 +5,8 @@ import { Router } from "react-router-dom"
 import ReactPiwik from "react-piwik"
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
-import { ChakraProvider, extendTheme } from "@chakra-ui/react"
-import defaultTheme from "@chakra-ui/theme"
-import { StyleFunctionProps } from "@chakra-ui/theme-tools"
-
+import { ChakraProvider } from "@chakra-ui/react"
+import theme from "./theme"
 import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
 import GridProvider from "./components/GridContext"
@@ -17,58 +15,6 @@ import InfoBloc from "./components/InfoBloc"
 import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ButtonAction"
-
-const colors = {
-  brand: {
-    primary: "#191a49",
-  },
-  button: {
-    primary: {
-      300: "hsl(238deg 53% 82%)",
-      500: "hsl(238deg 53% 60%)", // "#696CD1"
-      600: "hsl(238deg 43% 52%)",
-    },
-  },
-}
-
-// Chakra UI custom theme
-const appTheme = {
-  config: {
-    initialColorMode: "light",
-    useSystemColorMode: false,
-  },
-  colors,
-  styles: {
-    // Reuse the defaut styles from index.css.
-    global: {
-      body: {
-        fontFamily: '"Cabin", -apple-system, sans-serif',
-        fontWeight: "400",
-        color: colors.brand.primary,
-      },
-
-      a: {
-        color: "teal.500",
-      },
-    },
-  },
-  components: {
-    Input: {
-      variants: {
-        "blue-outline": (props: StyleFunctionProps) => ({
-          ...defaultTheme.components.Input.variants.outline(props),
-          field: {
-            ...defaultTheme.components.Input.variants.outline(props).field,
-            border: "1px solid",
-            borderColor: "blue.100",
-          },
-        }),
-      },
-    },
-  },
-}
-
-const theme = extendTheme(appTheme)
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (

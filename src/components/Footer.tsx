@@ -1,163 +1,118 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { Link } from "react-router-dom"
-
-import globalStyles from "../utils/globalStyles"
-import Logo from "./Logo"
-
-import { useColumnsWidth, useLayoutType } from "./GridContext"
-
+import React from "react"
+import { Link as ReachLink } from "react-router-dom"
+import { Box, Container, List, ListItem, Text, Link } from "@chakra-ui/react"
+import Logo from "./ds/Logo"
 import packageConfig from "../../package.json"
 
 function Footer() {
-  const width = useColumnsWidth(2)
-  const layoutType = useLayoutType()
-  const isDesktop = layoutType === "desktop"
-  const isMobile = layoutType === "mobile"
   const version = process.env.REACT_APP_VERSION || packageConfig.version
 
   return (
-    <footer
+    <Box
+      id="footer"
+      as="footer"
       role="contentinfo"
-      css={[
-        styles.footer,
-        isDesktop && css({ marginLeft: -(width + globalStyles.grid.gutterWidth) }),
-        isMobile && css({ display: "block", paddingTop: "1em" }),
-      ]}
+      py={6}
+      sx={{
+        borderTop: "1px solid #E3E4ED",
+        "@media print": {
+          display: "none",
+        },
+      }}
     >
-      <div css={[styles.footerLeft, isDesktop && css({ width }), styles.footerLeftPrint]}>
-        <a
-          href="https://travail-emploi.gouv.fr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          css={[styles.containerLogo, isDesktop && styles.containerLogoDesktop, isMobile && styles.containerLogoMobile]}
+      <Container
+        maxW="container.xl"
+        sx={{
+          "@media (min-width: 1024px)": {
+            display: "flex",
+            flexDirection: "row",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            "@media (min-width: 640px)": {
+              display: "flex",
+              flexDirection: "row",
+            },
+          }}
         >
-          <Logo />
-        </a>
-      </div>
+          <Box pr={8}>
+            <Link href="https://travail-emploi.gouv.fr/" isExternal pt={2} sx={{ display: "block" }}>
+              <Logo />
+            </Link>
+          </Box>
 
-      <div css={[styles.footerLinks, isMobile && css({ margin: "1em" })]}>
-        <a
-          href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-          css={[styles.link, isMobile && styles.linkMobile]}
+          <List
+            fontSize="sm"
+            sx={{
+              "@media (max-width: 639px)": {
+                marginTop: "var(--chakra-space-4)",
+              },
+            }}
+          >
+            <ListItem>
+              <Link href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" isExternal>
+                Contactez votre référent Egapro
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link as={ReachLink} to="/mentions-legales">
+                Mentions légales
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link as={ReachLink} to="/accessibilite">
+                Accessibilité&nbsp;: non conforme
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link as={ReachLink} to="/cgu">
+                Conditions générales d'utilisation
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link as={ReachLink} to="/politique-confidentialite">
+                Politique de confidentialité
+              </Link>
+            </ListItem>
+          </List>
+        </Box>
+
+        <Box
+          sx={{
+            "@media (max-width: 1023px)": {
+              marginTop: "var(--chakra-space-4)",
+            },
+            "@media (min-width: 1024px)": {
+              marginLeft: "auto",
+            },
+          }}
         >
-          Contactez votre référent Egapro
-        </a>
-        <Link to="/mentions-legales" css={[styles.link, isMobile && styles.linkMobile]}>
-          Mentions légales
-        </Link>
-        <Link to="/accessibilite" css={[styles.link, isMobile && styles.linkMobile]}>
-          Accessibilité : non conforme
-        </Link>
-        <Link to="/cgu" css={[styles.link, isMobile && styles.linkMobile]}>
-          Conditions générales d'utilisation
-        </Link>
-        <Link to="/politique-confidentialite" css={[styles.link, isMobile && styles.linkMobile]}>
-          Politique de confidentialité
-        </Link>
-      </div>
-
-      <div css={[styles.footerInfo, isMobile && styles.footerInfoMobile]}>
-        <em style={styles.info}>
-          Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
-        </em>
-        <span style={styles.info}>
-          Pour nous aider à l'améliorer
-          <a
-            href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-            target="_blank"
-            rel="noopener noreferrer"
-            css={styles.infoLink}
-          >
-            donnez-nous votre avis
-          </a>
-          <a
-            href={`https://github.com/SocialGouv/egapro/tree/${version}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            css={styles.infoLink}
-          >
-            contribuez sur Github
-          </a>
-        </span>
-      </div>
-    </footer>
+          <Text fontSize="sm" as="i">
+            Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
+          </Text>
+          <Text fontSize="sm" mt={1}>
+            Pour nous aider à l'améliorer{" "}
+            <Link
+              sx={{ textDecoration: "underline" }}
+              href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+              isExternal
+            >
+              donnez-nous votre avis
+            </Link>{" "}
+            <Link
+              sx={{ textDecoration: "underline" }}
+              href={`https://github.com/SocialGouv/egapro/tree/${version}`}
+              isExternal
+            >
+              contribuez sur Github
+            </Link>
+          </Text>
+        </Box>
+      </Container>
+    </Box>
   )
-}
-
-const styles = {
-  footer: css({
-    backgroundColor: "#FFF",
-    height: 120,
-    marginTop: 54,
-    flexShrink: 0,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    borderTop: "1px solid #EFECEF",
-    "@media print": {
-      display: "none",
-    },
-  }),
-  footerLeft: css({
-    display: "flex",
-    flexDirection: "row",
-    marginLeft: globalStyles.grid.gutterWidth,
-    marginRight: globalStyles.grid.gutterWidth,
-    "@media print": {
-      marginLeft: 0,
-    },
-  }),
-  footerLeftPrint: css({
-    "@media print": {
-      width: "auto",
-    },
-  }),
-  containerLogo: css({
-    marginLeft: "auto",
-    marginRight: 0,
-    textDecoration: "none",
-    color: "currentColor",
-  }),
-  containerLogoDesktop: css({
-    marginRight: 25,
-  }),
-  containerLogoMobile: css({
-    margin: 0,
-  }),
-
-  footerLinks: { display: "flex", flexDirection: "column" as const },
-  link: {
-    fontSize: 10,
-    lineHeight: "11px",
-    color: globalStyles.colors.default,
-    textDecoration: "underline",
-    margin: "2px 0",
-  },
-  linkMobile: {
-    fontSize: 14,
-  },
-
-  footerInfo: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: "0%",
-    display: "flex",
-    flexDirection: "column" as const,
-    textAlign: "right" as const,
-    marginRight: globalStyles.grid.gutterWidth,
-  },
-  footerInfoMobile: { margin: "1em", textAlign: "left" as const },
-  info: {
-    fontSize: 12,
-    lineHeight: "15px",
-    marginBottom: 4,
-  },
-  infoLink: {
-    color: globalStyles.colors.default,
-    textDecoration: "underline",
-    marginLeft: 8,
-  },
 }
 
 export default Footer

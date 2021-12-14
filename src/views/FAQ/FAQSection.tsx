@@ -1,16 +1,12 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
-import { Fragment } from "react"
+import React, { FunctionComponent } from "react"
 import { Link } from "react-router-dom"
+import { Box, List, ListItem, VStack, Button } from "@chakra-ui/react"
 
 import { FAQSectionType } from "../../globals"
-import globalStyles from "../../utils/globalStyles"
-
 import FAQSearch from "./FAQSearch"
 import FAQTitle from "./components/FAQTitle"
 import FAQTitle2 from "./components/FAQTitle2"
 import FAQQuestionRow from "./components/FAQQuestionRow"
-
 import FAQEffectifsSteps from "./components-steps/FAQEffectifsSteps"
 import FAQIndicateur1Steps from "./components-steps/FAQIndicateur1Steps"
 import FAQIndicateur2Steps from "./components-steps/FAQIndicateur2Steps"
@@ -23,29 +19,27 @@ import FAQResultatSteps from "./components-steps/FAQResultatSteps"
 
 import { faqData, faqSections } from "../../data/faq"
 
-interface Props {
+interface FAQSectionProps {
   section: FAQSectionType
 }
 
-function FAQSection({ section }: Props) {
+const FAQSection: FunctionComponent<FAQSectionProps> = ({ section }) => {
   const faqSection = faqSections[section]
-
   const FAQStepsElement = FAQSteps({ section })
 
   return (
-    <div css={styles.container}>
-      <FAQTitle>{faqSection.title}</FAQTitle>
-
+    <React.Fragment>
+      <FAQTitle mb={6}>{faqSection.title}</FAQTitle>
       <FAQSearch>
-        <div css={styles.content}>
+        <div>
           {FAQStepsElement && (
-            <div css={styles.pasapas}>
-              <FAQTitle2>L'essentiel</FAQTitle2>
-
-              {FAQStepsElement}
-            </div>
+            <React.Fragment>
+              <FAQTitle2 mb={3} as="h4">
+                L'essentiel
+              </FAQTitle2>
+              <VStack spacing={4}>{FAQStepsElement}</VStack>
+            </React.Fragment>
           )}
-
           {[
             "indicateur1",
             "indicateur2",
@@ -55,29 +49,54 @@ function FAQSection({ section }: Props) {
             "indicateur5",
             "resultat",
           ].includes(section) && (
-            <Link to={{ state: { faq: `/section/${section}/detail-calcul` } }} css={styles.link}>
-              comprendre comment est calculé {section === "resultat" ? "l'index" : "l'indicateur"}
-            </Link>
+            <Box mt={4} ml={6}>
+              <Button
+                as={Link}
+                to={{ state: { faq: `/section/${section}/detail-calcul` } }}
+                size="sm"
+                variant="outline"
+                colorScheme="primary"
+                width="100%"
+              >
+                Comment est calculé {section === "resultat" ? "l'index" : "l'indicateur"}&nbsp;?
+              </Button>
+            </Box>
           )}
-
           {faqSection.parts.length > 0 && (
-            <Fragment>
-              <FAQTitle2>Les questions récurrentes</FAQTitle2>
-              {faqSection.parts.map((part) => {
-                const faqPart = faqData[part]
-                return faqPart.qr.map(({ question }, index) => (
-                  <FAQQuestionRow key={part + index} part={part} index={index} question={question} />
-                ))
-              })}
-            </Fragment>
+            <Box mt={6}>
+              <FAQTitle2 mb={3} as="h4">
+                Les questions récurrentes
+              </FAQTitle2>
+              <List>
+                {faqSection.parts.map((part) => {
+                  const faqPart = faqData[part]
+                  return faqPart.qr.map(({ question }, index) => (
+                    <ListItem
+                      key={part + index}
+                      sx={{
+                        "&:not(:first-of-type)": {
+                          paddingTop: 2,
+                        },
+                        "&:not(:last-child)": {
+                          paddingBottom: 2,
+                          borderBottom: "1px solid var(--chakra-colors-gray-100)",
+                        },
+                      }}
+                    >
+                      <FAQQuestionRow part={part} index={index} question={question} />
+                    </ListItem>
+                  ))
+                })}
+              </List>
+            </Box>
           )}
         </div>
       </FAQSearch>
-    </div>
+    </React.Fragment>
   )
 }
 
-function FAQSteps({ section }: Props) {
+const FAQSteps: FunctionComponent<FAQSectionProps> = ({ section }) => {
   switch (section) {
     case "informations":
       return <FAQInformationsSteps />
@@ -100,24 +119,6 @@ function FAQSteps({ section }: Props) {
     default:
       return null
   }
-}
-
-const styles = {
-  container: css({}),
-  content: css({
-    marginTop: 28,
-    marginBottom: 14,
-  }),
-  pasapas: css({
-    marginBottom: 28,
-  }),
-  link: css({
-    display: "inline-block",
-    marginBottom: 48,
-    fontSize: 14,
-    lineHeight: "17px",
-    color: globalStyles.colors.default,
-  }),
 }
 
 export default FAQSection

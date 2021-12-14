@@ -20,6 +20,7 @@
     "@emotion/core": "10.0.28",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "@heroicons/react": "^1.0.5",
     "@sentry/react": "^5.29.2",
     "@types/lodash": "4.14.149",
     "@types/react-datepicker": "2.11.0",
