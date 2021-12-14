@@ -1,5 +1,5 @@
-import React, { ReactNode, FunctionComponent, ElementType } from "react"
-import { Icon as IconChakra, Box } from "@chakra-ui/react"
+import React, { ReactNode } from "react"
+import { Icon as IconChakra, Box, IconProps, ChakraComponent } from "@chakra-ui/react"
 import { SearchIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/solid"
 import {
   LightBulbIcon,
@@ -15,17 +15,10 @@ import {
   ExternalLinkIcon,
   ChevronRightIcon,
 } from "@heroicons/react/outline"
-import { SystemStyleObject } from "@chakra-ui/styled-system"
 
-type IconProps = {
-  boxSize?: string
-  color?: string
-  className?: string
-  sx?: SystemStyleObject
-  as?: ElementType
-}
+type SvgComponent = ChakraComponent<"svg", Record<string, unknown>>
 
-const Icon: FunctionComponent<IconProps> = ({ ...props }) => <IconChakra aria-hidden="true" {...props} />
+const Icon = ((props: IconProps) => <IconChakra aria-hidden="true" {...props} />) as SvgComponent
 
 export const IconText = ({ children }: { children: ReactNode }) => {
   return (
@@ -35,25 +28,25 @@ export const IconText = ({ children }: { children: ReactNode }) => {
   )
 }
 
-export const IconSearch: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={SearchIcon} {...props} />
+export const IconSearch = (props: IconProps) => <Icon as={SearchIcon} {...props} />
 
-export const IconValid: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={CheckCircleIcon} {...props} />
+export const IconValid = (props: IconProps) => <Icon as={CheckCircleIcon} {...props} />
 
-export const IconInvalid: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={XCircleIcon} {...props} />
+export const IconInvalid = (props: IconProps) => <Icon as={XCircleIcon} {...props} />
 
-export const IconLamp: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={LightBulbIcon} {...props} />
+export const IconLamp = (props: IconProps) => <Icon as={LightBulbIcon} {...props} />
 
-export const IconPeople: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={UserIcon} {...props} />
+export const IconPeople = (props: IconProps) => <Icon as={UserIcon} {...props} />
 
-export const IconCalendar: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={CalendarIcon} {...props} />
+export const IconCalendar = (props: IconProps) => <Icon as={CalendarIcon} {...props} />
 
-export const IconMoney: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={CurrencyEuroIcon} {...props} />
+export const IconMoney = (props: IconProps) => <Icon as={CurrencyEuroIcon} {...props} />
 
-export const IconGrow: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={TrendingUpIcon} {...props} />
+export const IconGrow = (props: IconProps) => <Icon as={TrendingUpIcon} {...props} />
 
-export const IconBack: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={ArrowNarrowLeftIcon} {...props} />
+export const IconBack = (props: IconProps) => <Icon as={ArrowNarrowLeftIcon} {...props} />
 
-export const IconFemale: FunctionComponent<IconProps> = ({ ...props }) => (
+export const IconFemale = (props: IconProps) => (
   <Icon {...props}>
     <path
       d="M12 2C8.691 2 6 4.691 6 8c0 2.967 2.167 5.432 5 5.91V17H8v2h3v2.988h2V19h3v-2h-3v-3.09c2.833-.479 5-2.943 5-5.91 0-3.309-2.691-6-6-6zm0 10c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z"
@@ -62,7 +55,7 @@ export const IconFemale: FunctionComponent<IconProps> = ({ ...props }) => (
   </Icon>
 )
 
-export const IconMale: FunctionComponent<IconProps> = ({ ...props }) => (
+export const IconMale = (props: IconProps) => (
   <Icon {...props}>
     <path
       d="M20 11V4h-7l2.793 2.793-4.322 4.322A5.961 5.961 0 0 0 8 10c-3.309 0-6 2.691-6 6s2.691 6 6 6 6-2.691 6-6c0-1.294-.416-2.49-1.115-3.471l4.322-4.322L20 11zM8 20c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z"
@@ -71,17 +64,15 @@ export const IconMale: FunctionComponent<IconProps> = ({ ...props }) => (
   </Icon>
 )
 
-export const IconWarning: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={ExclamationIcon} {...props} />
+export const IconWarning = (props: IconProps) => <Icon as={ExclamationIcon} {...props} />
 
-export const IconCircleCross: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={XCircleLineIcon} {...props} />
+export const IconCircleCross = (props: IconProps) => <Icon as={XCircleLineIcon} {...props} />
 
-export const IconOfficeBuilding: FunctionComponent<IconProps> = ({ ...props }) => (
-  <Icon as={OfficeBuildingIcon} {...props} />
-)
+export const IconOfficeBuilding = (props: IconProps) => <Icon as={OfficeBuildingIcon} {...props} />
 
-export const IconDelete: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={TrashIcon} {...props} />
+export const IconDelete = (props: IconProps) => <Icon as={TrashIcon} {...props} />
 
-export const IconDrag: FunctionComponent<IconProps> = ({ ...props }) => (
+export const IconDrag = (props: IconProps) => (
   <Icon {...props}>
     <path
       d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
@@ -90,8 +81,6 @@ export const IconDrag: FunctionComponent<IconProps> = ({ ...props }) => (
   </Icon>
 )
 
-export const IconExternalLink: FunctionComponent<IconProps> = ({ ...props }) => (
-  <Icon as={ExternalLinkIcon} {...props} />
-)
+export const IconExternalLink = (props: IconProps) => <Icon as={ExternalLinkIcon} {...props} />
 
-export const IconArrowRight: FunctionComponent<IconProps> = ({ ...props }) => <Icon as={ChevronRightIcon} {...props} />
+export const IconArrowRight = (props: IconProps) => <Icon as={ChevronRightIcon} {...props} />
