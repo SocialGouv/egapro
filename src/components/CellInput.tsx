@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import MaskedInput, { conformToMask } from "react-text-mask"
 import createNumberMask from "text-mask-addons/dist/createNumberMask"
 import { FieldRenderProps, FieldMetaState } from "react-final-form"

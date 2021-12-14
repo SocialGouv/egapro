@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Fragment } from "react"
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { Field } from "react-final-form"
 
 import globalStyles from "../utils/globalStyles"

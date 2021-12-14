@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { Fragment, useCallback } from "react"
 import { RouteComponentProps } from "react-router-dom"
 import { AppState, ActionType, FormState, ActionEffectifData } from "../../globals"

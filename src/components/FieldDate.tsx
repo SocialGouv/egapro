@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Fragment } from "react"
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { useField, Field } from "react-final-form"
 import { hasFieldError } from "./Input"
 

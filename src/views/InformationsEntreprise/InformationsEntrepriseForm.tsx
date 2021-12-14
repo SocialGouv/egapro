@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Fragment } from "react"
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { MutableState, Tools } from "final-form"
 import arrayMutators from "final-form-arrays"
 import { Form } from "react-final-form"

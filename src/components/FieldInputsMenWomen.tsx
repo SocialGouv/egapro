@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import React from "react"
 import { useField } from "react-final-form"
 
@@ -92,7 +92,7 @@ function FieldInputsMenWomen({
             <CellInput field={hommesField} mask={mask} style={styles.cellMen} />
           </React.Fragment>
         ) : (
-          <Cell2 css={styles.cell2} />
+          <Cell2 style={styles.cell2} />
         )}
       </div>
       {!calculable && (

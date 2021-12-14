@@ -17,7 +17,6 @@
   "dependencies": {
     "@chakra-ui/icons": "^1.1.1",
     "@chakra-ui/react": "^1.7.1",
-    "@emotion/core": "10.0.28",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@heroicons/react": "^1.0.5",

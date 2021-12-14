@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx, keyframes } from "@emotion/core"
+import { css, jsx, keyframes } from "@emotion/react"
 
 interface Props {
   size?: number

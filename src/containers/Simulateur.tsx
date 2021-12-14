@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { Fragment, useEffect, useState } from "react"
 import { Route, Switch, useHistory } from "react-router-dom"
 

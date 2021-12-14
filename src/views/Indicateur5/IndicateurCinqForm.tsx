@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { Form } from "react-final-form"
 import createDecorator from "final-form-calculate"
 

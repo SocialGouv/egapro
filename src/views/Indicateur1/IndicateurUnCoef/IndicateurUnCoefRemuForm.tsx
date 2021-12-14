@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { useCallback } from "react"
 import { AppState, FormState, ActionIndicateurUnCoefData, GroupTranchesAgesIndicateurUn } from "../../../globals"
 
