@@ -31,13 +31,12 @@ function RecapitulatifIndicateurQuatre({
     return (
       <div css={styles.container}>
         <InfoBloc
+          type="warning"
           title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
           text={
             <Fragment>
-              <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.
-              </span>{" "}
-              <TextSimulatorLink to="/indicateur4" label="valider les données" />
+              Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
+              <TextSimulatorLink to="/indicateur4" label="Valider les données" />
             </Fragment>
           }
         />
@@ -53,6 +52,7 @@ function RecapitulatifIndicateurQuatre({
     return (
       <div css={styles.container}>
         <InfoBloc
+          type="warning"
           title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
           text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
         />

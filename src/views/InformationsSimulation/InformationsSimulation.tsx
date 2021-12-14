@@ -57,12 +57,8 @@ function InformationsSimulation({ state, dispatch }: Props) {
           state.indicateurCinq.formValidated === "Invalid") && (
           <InfoBloc
             title="Vos informations ont été modifiées"
-            icon="cross"
-            text={
-              <span>
-                afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs.
-              </span>
-            }
+            type="success"
+            text="Afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs."
           />
         )}
     </PageInformationsSimulation>

@@ -1,83 +1,34 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { useState, ReactNode } from "react"
+import React, { useState, ReactNode, FunctionComponent } from "react"
+import { Alert, AlertIcon, AlertTitle, Box, AlertDescription, CloseButton } from "@chakra-ui/react"
 
-import globalStyles from "../utils/globalStyles"
-
-import { IconWarning, IconCircleCross } from "./ds/Icons"
-import { useColumnsWidth, useLayoutType } from "./GridContext"
-
-interface Props {
+interface InfoBlocProps {
+  type?: "error" | "success" | "warning" | "info"
   title: string
   text?: ReactNode
-  icon?: "warning" | "cross" | null
-  additionalCss?: any
   closeButton?: boolean
 }
 
-function InfoBloc({ title, text, icon = "warning", additionalCss, closeButton = false }: Props) {
-  const layoutType = useLayoutType()
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
+const InfoBloc: FunctionComponent<InfoBlocProps> = ({ type = "info", title, text, closeButton = false }) => {
   const [isBlocVisible, setIsBlocVisible] = useState(true)
   const discardBloc = () => setIsBlocVisible(false)
 
   if (isBlocVisible) {
     return (
-      <div css={[styles.bloc, css({ width }), additionalCss]}>
-        {icon === null ? null : (
-          <div css={styles.blocIcon}>
-            {icon === "cross" ? <IconCircleCross boxSize="10" /> : <IconWarning boxSize="10" />}
-          </div>
-        )}
-        <div css={styles.textWrapper}>
-          <p css={styles.blocTitle}>{title}</p>
-          {text && <p css={styles.blocText}>{text}</p>}
-        </div>
-        {closeButton && (
-          <button css={styles.buttonClose} onClick={discardBloc}>
-            x
-          </button>
-        )}
-      </div>
+      <Alert status={type} borderRadius="md" p={4} sx={{ boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.05)" }}>
+        <AlertIcon />
+        <Box>
+          <AlertTitle lineHeight={1.25}>{title}</AlertTitle>
+          {text && (
+            <AlertDescription fontSize="sm" lineHeight={1.25} display="block" mt={1}>
+              {text}
+            </AlertDescription>
+          )}
+        </Box>
+        {closeButton && <CloseButton onClick={discardBloc} position="absolute" right="8px" top="8px" />}
+      </Alert>
     )
   }
   return null
-}
-
-const styles = {
-  bloc: css({
-    padding: "12px 18px",
-    display: "flex",
-    alignItems: "center",
-    border: `2px solid ${globalStyles.colors.primary}`,
-    borderRadius: 5,
-    position: "relative",
-  }),
-  blocTitle: css({
-    fontSize: 18,
-    lineHeight: "22px",
-    color: globalStyles.colors.primary,
-  }),
-  blocIcon: {
-    marginRight: 22,
-    color: globalStyles.colors.primary,
-  },
-  textWrapper: {
-    flexGrow: 1,
-  },
-  blocText: css({
-    marginTop: 4,
-    fontSize: 14,
-    lineHeight: "17px",
-    color: globalStyles.colors.primary,
-  }),
-  buttonClose: css({
-    backgroundColor: "inherit",
-    border: 0,
-    color: globalStyles.colors.primary,
-    cursor: "pointer",
-    padding: 10,
-  }),
 }
 
 export default InfoBloc

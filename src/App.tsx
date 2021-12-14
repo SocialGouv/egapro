@@ -73,7 +73,6 @@ function App() {
                 <InfoBloc
                   title="Interruption de service programmée"
                   text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
-                  additionalCss={styles.banner}
                   closeButton={true}
                 />
               </div>
@@ -90,9 +89,9 @@ function App() {
 const styles = {
   bannerWrapper: css({
     position: "fixed",
-    left: 0,
-    top: 60,
-    width: "100%",
+    left: 20,
+    bottom: 20,
+    right: 20,
     zIndex: 1000,
   }),
   banner: css({

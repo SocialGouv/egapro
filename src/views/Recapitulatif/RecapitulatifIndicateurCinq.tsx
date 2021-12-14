@@ -25,13 +25,12 @@ function RecapitulatifIndicateurCinq({
     return (
       <div css={styles.container}>
         <InfoBloc
+          type="warning"
           title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
           text={
             <Fragment>
-              <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.
-              </span>{" "}
-              <TextSimulatorLink to="/indicateur5" label="valider les données" />
+              Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
+              <TextSimulatorLink to="/indicateur5" label="Valider les données" />
             </Fragment>
           }
         />

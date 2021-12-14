@@ -55,8 +55,9 @@ function IndicateurDeux({ state, dispatch }: Props) {
     return (
       <PageIndicateurDeux>
         <InfoBloc
-          title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={<TextSimulatorLink to="/effectifs" label="renseigner les effectifs" />}
+          type="warning"
+          title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+          text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
         />
       </PageIndicateurDeux>
     )
@@ -68,10 +69,9 @@ function IndicateurDeux({ state, dispatch }: Props) {
       <PageIndicateurDeux>
         <div>
           <InfoBloc
+            type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car l’ensemble des groupes valables (c’est-à-dire comptant au
-              moins 10 femmes et 10 hommes), représentent moins de 40% des
-              effectifs."
+            text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
           />
           <ActionBar>
             <ButtonSimulatorLink to="/indicateur3" label="suivant" />
@@ -87,8 +87,9 @@ function IndicateurDeux({ state, dispatch }: Props) {
       <PageIndicateurDeux>
         <div>
           <InfoBloc
+            type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car il n’y a pas eu d’augmentation individuelle durant la période de référence."
+            text="Il n’y a pas eu d’augmentation individuelle durant la période de référence."
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurDeux("None")}>modifier les données saisies</ActionLink>

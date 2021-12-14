@@ -40,6 +40,7 @@ function RecapitulatifIndicateurTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
+          type="warning"
           title="Indicateur écart de taux de promotions entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
         />
@@ -51,12 +52,11 @@ function RecapitulatifIndicateurTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
+          type="warning"
           title="Indicateur écart de taux de promotions entre les femmes et les hommes"
           text={
             <Fragment>
-              <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.
-              </span>{" "}
+              Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
               <TextSimulatorLink to="/indicateur3" label="valider les données" />
             </Fragment>
           }
@@ -69,8 +69,9 @@ function RecapitulatifIndicateurTrois({
     return (
       <div css={styles.container}>
         <InfoBloc
+          type="warning"
           title="Indicateur écart de taux de promotions entre les femmes et les hommes"
-          text="Malheureusement votre indicateur n’est pas calculable  car il n’y a pas eu de promotion durant la période de référence"
+          text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu de promotion durant la période de référence"
         />
       </div>
     )

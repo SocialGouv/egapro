@@ -69,8 +69,8 @@ function IndicateurUnCoefEffectifForm({
   if (coefficientGroupFormValidated !== "Valid") {
     return (
       <InfoBloc
-        title="vous devez renseignez vos groupes avant d’avoir accès à cet indicateur"
-        text={<ActionLink onClick={navigateToGroupe}>renseigner les groupes</ActionLink>}
+        title="Vous devez renseignez vos groupes avant d’avoir accès à cet indicateur"
+        text={<ActionLink onClick={navigateToGroupe}>Renseigner les groupes</ActionLink>}
       />
     )
   }
@@ -112,11 +112,11 @@ function IndicateurUnCoefEffectifForm({
       {coefficientEffectifFormValidated === "Valid" && formValidated === "Invalid" && (
         <InfoBloc
           title="Vos effectifs ont été modifiés"
-          icon="cross"
+          type="success"
           text={
             <Fragment>
               <span>
-                afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
+                Afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
               </span>
               <br />
               <span>

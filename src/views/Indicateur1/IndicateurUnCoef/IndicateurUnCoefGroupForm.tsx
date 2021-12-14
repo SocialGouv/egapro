@@ -141,11 +141,11 @@ function IndicateurUnCoefGroupForm({
         (coefficientEffectifFormValidated === "Invalid" || formValidated === "Invalid") && (
           <InfoBloc
             title="Vos groupes ont été modifiés"
-            icon="cross"
+            type="success"
             text={
               <Fragment>
                 <span>
-                  afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
+                  Afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
                 </span>
                 &emsp;
                 <span>
