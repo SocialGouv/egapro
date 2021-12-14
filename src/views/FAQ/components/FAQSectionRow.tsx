@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { LinkBox, LinkOverlay, Text, Box } from "@chakra-ui/react"
+import { LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
 import { Link as LinkRouter } from "react-router-dom"
 import { IconArrowRight } from "../../../components/ds/Icons"
 
@@ -28,37 +28,35 @@ const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, 
       },
     }}
   >
-    <Box position="relative">
-      <LinkOverlay
-        as={LinkRouter}
-        to={{ state: { faq: `/section/${section}` } }}
-        pr={4}
-        color="primary.500"
-        fontWeight="bold"
-        fontFamily="heading"
-        fontSize="sm"
-        display="block"
-        lineHeight={1.2}
-        sx={{
-          transition: "color .1s ease-in-out",
-          _hover: {
-            color: "primary.700",
-          },
-        }}
-      >
-        {title}
-      </LinkOverlay>
-      <IconArrowRight
-        boxSize="3"
-        color="gray.400"
-        className="section-icon"
-        sx={{
-          position: "absolute",
-          top: 0.5,
-          right: 0,
-        }}
-      />
-    </Box>
+    <LinkOverlay
+      as={LinkRouter}
+      to={{ state: { faq: `/section/${section}` } }}
+      pr={4}
+      color="primary.500"
+      fontWeight="bold"
+      fontFamily="heading"
+      fontSize="sm"
+      display="block"
+      lineHeight={1.2}
+      sx={{
+        transition: "color .1s ease-in-out",
+        _hover: {
+          color: "primary.700",
+        },
+      }}
+    >
+      {title}
+    </LinkOverlay>
+    <IconArrowRight
+      boxSize="3"
+      color="gray.400"
+      className="section-icon"
+      sx={{
+        position: "absolute",
+        top: 2.5,
+        right: 2,
+      }}
+    />
     <Text
       fontSize="sm"
       color="gray.600"
