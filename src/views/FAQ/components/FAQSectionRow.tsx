@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { LinkBox, LinkOverlay, Text, Flex, Box } from "@chakra-ui/react"
+import { LinkBox, LinkOverlay, Text, Box } from "@chakra-ui/react"
 import { Link as LinkRouter } from "react-router-dom"
 import { IconArrowRight } from "../../../components/ds/Icons"
 
@@ -28,10 +28,11 @@ const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, 
       },
     }}
   >
-    <Flex>
+    <Box position="relative">
       <LinkOverlay
         as={LinkRouter}
         to={{ state: { faq: `/section/${section}` } }}
+        pr={4}
         color="primary.500"
         fontWeight="bold"
         fontFamily="heading"
@@ -47,17 +48,17 @@ const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, 
       >
         {title}
       </LinkOverlay>
-      <Box
-        ml="auto"
+      <IconArrowRight
+        boxSize="3"
+        color="gray.400"
+        className="section-icon"
         sx={{
-          svg: {
-            transition: "color .1s ease-in-out",
-          },
+          position: "absolute",
+          top: 0.5,
+          right: 0,
         }}
-      >
-        <IconArrowRight boxSize="5" color="gray.400" className="section-icon" />
-      </Box>
-    </Flex>
+      />
+    </Box>
     <Text
       fontSize="sm"
       color="gray.600"
