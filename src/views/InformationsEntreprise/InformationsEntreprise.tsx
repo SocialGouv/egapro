@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { useCallback, ReactNode } from "react"
 import { RouteComponentProps } from "react-router-dom"
 

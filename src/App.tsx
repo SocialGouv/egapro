@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { useReducer, useCallback } from "react"
 import { Router } from "react-router-dom"
 import ReactPiwik from "react-piwik"

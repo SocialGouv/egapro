@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { FieldRenderProps, FieldMetaState } from "react-final-form"
 
 import globalStyles from "../utils/globalStyles"

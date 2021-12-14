@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { Fragment } from "react"
 import { Form } from "react-final-form"
 import { AppState, FormState, ActionIndicateurQuatreData } from "../../globals"

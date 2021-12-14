@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { Field, Form } from "react-final-form"
 import { Link } from "react-router-dom"
 

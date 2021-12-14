@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { useRef, useContext, createContext, ReactNode } from "react"
 import ReactDOM from "react-dom"
 

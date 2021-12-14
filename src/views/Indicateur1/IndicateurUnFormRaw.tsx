@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { ReactNode } from "react"
 import { Form } from "react-final-form"
 import { TranchesAges, GroupTranchesAgesIndicateurUn, FormState } from "../../globals"
