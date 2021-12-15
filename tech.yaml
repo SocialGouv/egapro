@@ -2,9 +2,10 @@ name: EgaPro
 
 # List your code repos
 repositories:
-  frontend: https://github.com/SocialGouv/egapro
+  simulation-declaration: https://github.com/SocialGouv/egapro
+  declaration-directe: https://github.com/SocialGouv/egapro-declaration
+  consultation: https://github.com/SocialGouv/egapro-consultation
   api: https://github.com/SocialGouv/egapro-api
-  declaration: https://github.com/SocialGouv/egapro-declaration
 
 # List all docs links
 documentation:
@@ -18,17 +19,21 @@ tools:
 
 # Overall technical stack
 stack:
-  frontend:
+  simulation-declaration:
     - TypeScript
     - Create-react-app
+    - Chakra-UI
+  declaration:
+    - JavaScript
+    - Jekyll
+  consultation:
+    - JavaScript
   api:
     - Python
     - PostgreSQL
-  declaration:
-    - Jekyll
-    - JavaScript
   tests:
     - Jest unit tests (frontend)
     - PyTest (api)
   ci:
     - VMs
+    - GitHub action pour la simulation-declaration
