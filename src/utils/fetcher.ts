@@ -6,7 +6,14 @@ if (process.env.REACT_APP_EGAPRO_API_URL) API_URL = process.env.REACT_APP_EGAPRO
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again"
 
-export const fetcher = async (endpoint: string, options: RequestInit) => {
+/* Fetcher which can use an options and handles error in a generic way.
+ *
+ * @param endpoint the full end point to use
+ * @param options the request options (optional)
+ * @returns the JSON response
+ * @throws an error if the response is not ok
+ */
+export const genericFetch = async (endpoint: string, options?: RequestInit) => {
   options = {
     ...options,
     headers: {
@@ -15,7 +22,7 @@ export const fetcher = async (endpoint: string, options: RequestInit) => {
     },
   }
 
-  const response = await fetch(API_URL + endpoint, options)
+  const response = await fetch(endpoint, options)
 
   if (!response.ok) {
     const error: Error & { info?: string; status?: number } = new Error("Erreur API")
@@ -37,4 +44,14 @@ export const fetcher = async (endpoint: string, options: RequestInit) => {
   }
 
   return response.json()
+}
+
+/**
+ * Fetcher to call the Egapro API
+ *
+ * @param key the path to use after the API_URL (named key because it is used in cache for useSWR)
+ * @param options the request options (optional)
+ */
+export const fetcher = async (key: string, options: RequestInit) => {
+  return genericFetch(API_URL + key, options)
 }
