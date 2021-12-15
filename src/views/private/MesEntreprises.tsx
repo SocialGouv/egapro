@@ -46,17 +46,11 @@ function InfoEntreprise({ siren }: { siren: string }) {
       {isLoading ? (
         <Stack>
           <Skeleton height="20px" w="200px" />
-          <Skeleton height="20px" color="gray.600" w="200px" />
         </Stack>
       ) : (
-        <Stack>
-          <Text fontWeight="semibold" as="h4" lineHeight="tight" isTruncated>
-            {entreprise?.raison_sociale}
-          </Text>
-          <Text fontSize="md" color="gray.600">
-            {entreprise?.commune}
-          </Text>
-        </Stack>
+        <Text fontWeight="semibold" lineHeight="tight" noOfLines={2}>
+          {entreprise?.raison_sociale}
+        </Text>
       )}
     </HStack>
   )
