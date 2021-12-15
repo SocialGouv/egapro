@@ -5,7 +5,7 @@ import { Fragment, ReactNode } from "react"
 import { FormState, TrancheEffectifs } from "../../globals"
 import { calendarYear, Year } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { useColumnsWidth, useLayoutType } from "../../components/GridContext"
 

@@ -6,7 +6,7 @@ import { FormState, CategorieSocioPro } from "../../globals"
 
 import { displayNameCategorieSocioPro, displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 

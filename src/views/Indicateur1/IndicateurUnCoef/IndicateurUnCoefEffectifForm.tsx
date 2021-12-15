@@ -6,7 +6,7 @@ import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import ButtonAction from "../../../components/ButtonAction"
-import InfoBloc from "../../../components/InfoBloc"
+import InfoBloc from "../../../components/ds/InfoBloc"
 import ActionLink from "../../../components/ActionLink"
 
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"

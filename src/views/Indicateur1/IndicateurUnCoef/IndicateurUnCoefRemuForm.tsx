@@ -6,7 +6,7 @@ import { AppState, FormState, ActionIndicateurUnCoefData, GroupTranchesAgesIndic
 import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import InfoBloc from "../../../components/InfoBloc"
+import InfoBloc from "../../../components/ds/InfoBloc"
 import ActionLink from "../../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 

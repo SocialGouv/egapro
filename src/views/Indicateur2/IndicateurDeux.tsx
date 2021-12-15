@@ -9,7 +9,7 @@ import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"

@@ -8,7 +8,7 @@ import { AppState, ActionType } from "../../globals"
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 import Page from "../../components/Page"
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 import ActionBar from "../../components/ActionBar"
 import { TextSimulatorLink, ButtonSimulatorLink } from "../../components/SimulatorLink"
 

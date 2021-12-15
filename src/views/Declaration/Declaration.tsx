@@ -28,7 +28,7 @@ import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 

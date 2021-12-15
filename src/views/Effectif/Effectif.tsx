@@ -7,7 +7,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 import EffectifForm from "./EffectifForm"

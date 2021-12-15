@@ -9,7 +9,7 @@ import { ActionIndicateurUnCoefData, FormState, AppState } from "../../../global
 import globalStyles from "../../../utils/globalStyles"
 
 import { useColumnsWidth, useLayoutType } from "../../../components/GridContext"
-import InfoBloc from "../../../components/InfoBloc"
+import InfoBloc from "../../../components/ds/InfoBloc"
 import ActionLink from "../../../components/ActionLink"
 import ButtonAction from "../../../components/ButtonAction"
 import ActionBar from "../../../components/ActionBar"

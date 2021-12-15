@@ -6,7 +6,7 @@ import { FormState } from "../../globals"
 
 import { displayPercent } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 

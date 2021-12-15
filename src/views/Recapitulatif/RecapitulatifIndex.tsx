@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 import { Text } from "@chakra-ui/react"
 
-import InfoBloc from "../../components/InfoBloc"
+import InfoBloc from "../../components/ds/InfoBloc"
 
 interface RecapitulatifIndexProps {
   allIndicateurValid: boolean
