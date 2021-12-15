@@ -1,7 +1,9 @@
 import React from "react"
 import { Link as ReachLink } from "react-router-dom"
 import { Box, Container, List, ListItem, Text, Link } from "@chakra-ui/react"
+
 import Logo from "./ds/Logo"
+import TextLink from "./ds/TextLink"
 import packageConfig from "../../package.json"
 
 function Footer() {
@@ -94,20 +96,15 @@ function Footer() {
           </Text>
           <Text fontSize="sm" mt={1}>
             Pour nous aider à l'améliorer{" "}
-            <Link
-              sx={{ textDecoration: "underline" }}
-              href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+            <TextLink
+              to="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
               isExternal
             >
               donnez-nous votre avis
-            </Link>{" "}
-            <Link
-              sx={{ textDecoration: "underline" }}
-              href={`https://github.com/SocialGouv/egapro/tree/${version}`}
-              isExternal
-            >
+            </TextLink>{" "}
+            <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
               contribuez sur Github
-            </Link>
+            </TextLink>
           </Text>
         </Box>
       </Container>

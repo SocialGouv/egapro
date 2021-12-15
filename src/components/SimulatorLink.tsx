@@ -2,7 +2,7 @@ import React, { ReactElement } from "react"
 import { RouteComponentProps, withRouter } from "react-router-dom"
 
 import ButtonLink from "./ButtonLink"
-import TextLink from "./TextLink"
+import TextLink from "./ds/TextLink"
 
 interface MatchParams {
   code: string
@@ -41,7 +41,7 @@ export function ButtonSimulatorLink({ to, label }: LinkProps) {
 export function TextSimulatorLink({ to, label }: LinkProps) {
   return (
     <SimulatorLinkWithRouter>
-      {(toSimulator) => <TextLink to={`${toSimulator}${to}`} label={label} />}
+      {(toSimulator) => <TextLink to={`${toSimulator}${to}`}>{label}</TextLink>}
     </SimulatorLinkWithRouter>
   )
 }
