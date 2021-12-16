@@ -316,6 +316,24 @@ function Declaration({ code, state, dispatch }: Props) {
         />
         <h2>Les formulaires suivants ne sont pas validés</h2>
         <ul>
+          {state.informations.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/informations"
+                label="informations calcul et période de référence
+"
+              />
+            </li>
+          )}
+          {state.effectif.formValidated !== "Valid" && (
+            <li>
+              <TextSimulatorLink
+                to="/effectifs"
+                label="effectifs pris en compte
+"
+              />
+            </li>
+          )}
           {state.indicateurUn.formValidated !== "Valid" &&
             ((!effectifsIndicateurUnCalculable && !state.indicateurUn.csp) || effectifsIndicateurUnCalculable) && (
               <li>
