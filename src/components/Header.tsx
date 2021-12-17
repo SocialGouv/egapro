@@ -1,7 +1,8 @@
 import React from "react"
 import { Link as ReachLink } from "react-router-dom"
 import { Box, Container, Link, Flex, Text, ListItem, List, HStack } from "@chakra-ui/react"
-import { MenuProfile } from "./ds/MenuProfile"
+
+import MenuProfile from "./ds/MenuProfile"
 import Logo from "./ds/Logo"
 
 function Header() {

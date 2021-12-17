@@ -4,6 +4,7 @@ import { SearchIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/solid
 import {
   LightBulbIcon,
   UserIcon,
+  UserCircleIcon,
   CalendarIcon,
   CurrencyEuroIcon,
   TrendingUpIcon,
@@ -37,6 +38,8 @@ export const IconInvalid = (props: IconProps) => <Icon as={XCircleIcon} {...prop
 export const IconLamp = (props: IconProps) => <Icon as={LightBulbIcon} {...props} />
 
 export const IconPeople = (props: IconProps) => <Icon as={UserIcon} {...props} />
+
+export const IconPeopleCircle = (props: IconProps) => <Icon as={UserCircleIcon} {...props} />
 
 export const IconCalendar = (props: IconProps) => <Icon as={CalendarIcon} {...props} />
 
