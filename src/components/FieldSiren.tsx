@@ -12,6 +12,7 @@ import { EntrepriseType } from "../globals"
 import ActivityIndicator from "./ActivityIndicator"
 import { useUser } from "../utils/hooks"
 import { IconExternalLink } from "./ds/Icons"
+import React from "react"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"
@@ -85,7 +86,8 @@ function FieldSiren({
         <p css={styles.error}>
           {field.meta.error}
           {field.meta.error === NOT_ALLOWED_MESSAGE && (
-            <p>
+            <React.Fragment>
+              <br />
               Pour faire une demande à l'équipe Egapro,&nbsp;
               <Link
                 isExternal
@@ -96,7 +98,7 @@ function FieldSiren({
                 <IconExternalLink />
               </Link>
               .
-            </p>
+            </React.Fragment>
           )}
         </p>
       )}
