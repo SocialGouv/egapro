@@ -318,20 +318,12 @@ function Declaration({ code, state, dispatch }: Props) {
         <ul>
           {state.informations.formValidated !== "Valid" && (
             <li>
-              <TextSimulatorLink
-                to="/informations"
-                label="informations calcul et période de référence
-"
-              />
+              <TextSimulatorLink to="/informations" label="informations calcul et période de référence" />
             </li>
           )}
           {state.effectif.formValidated !== "Valid" && (
             <li>
-              <TextSimulatorLink
-                to="/effectifs"
-                label="effectifs pris en compte
-"
-              />
+              <TextSimulatorLink to="/effectifs" label="effectifs pris en compte" />
             </li>
           )}
           {state.indicateurUn.formValidated !== "Valid" &&
