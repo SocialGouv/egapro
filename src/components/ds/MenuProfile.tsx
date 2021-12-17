@@ -43,6 +43,10 @@ const MenuProfile: FunctionComponent = () => {
             <MenuLink to="/tableauDeBord/mes-entreprises">Mes entreprises</MenuLink>
           </MenuItem>
           <MenuDivider />
+          <MenuItem>
+            <MenuLink to="/tableauDeBord/gerer-utilisateurs">Gérer utilisateurs</MenuLink>
+          </MenuItem>
+          <MenuDivider />
           <MenuItem onClick={disconnectUser} color="orange.500">
             Déconnexion
           </MenuItem>

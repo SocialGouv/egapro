@@ -23,6 +23,7 @@ import MonProfil from "../views/private/MonProfil"
 import Mire from "../views/Mire"
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
+import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
 
 interface Props {
   state: AppState | undefined
@@ -46,6 +47,9 @@ function AppLayout({ state, dispatch }: Props) {
         <Route path="/tableauDeBord/me-connecter" exact component={Mire} />
         <PrivateRoute path="/tableauDeBord/mes-entreprises" exact>
           <MesEntreprises />
+        </PrivateRoute>
+        <PrivateRoute path="/tableauDeBord/gerer-utilisateurs" exact>
+          <GererUtilisateursPage />
         </PrivateRoute>
         <PrivateRoute path="/tableauDeBord/mon-profil" exact>
           <MonProfil />
