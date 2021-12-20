@@ -12,7 +12,7 @@ import {
   displaySexeSurRepresente,
 } from "../../utils/helpers"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
@@ -45,7 +45,7 @@ function RecapitulatifIndicateurUn({
     )
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de rémunération entre les femmes et les hommes"
           text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
@@ -57,7 +57,7 @@ function RecapitulatifIndicateurUn({
   if (indicateurUnFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de rémunération entre les femmes et les hommes"
           text={

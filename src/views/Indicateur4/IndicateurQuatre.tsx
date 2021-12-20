@@ -9,7 +9,7 @@ import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
@@ -52,7 +52,7 @@ function IndicateurQuatre({ state, dispatch }: Props) {
     return (
       <PageIndicateurQuatre>
         <div>
-          <InfoBloc
+          <InfoBlock
             type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
             text={messageNonCalculable}

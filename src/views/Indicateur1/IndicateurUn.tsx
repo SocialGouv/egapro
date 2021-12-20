@@ -8,7 +8,7 @@ import { AppState, ActionType } from "../../globals"
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 
 import Page from "../../components/Page"
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import { TextSimulatorLink, ButtonSimulatorLink } from "../../components/SimulatorLink"
 
@@ -34,7 +34,7 @@ function IndicateurUn({ state, dispatch }: Props) {
   if (state.effectif.formValidated !== "Valid") {
     return (
       <PageIndicateurUn>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
           text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
@@ -49,7 +49,7 @@ function IndicateurUn({ state, dispatch }: Props) {
   if (!effectifsIndicateurCalculable && state.indicateurUn.csp) {
     return (
       <PageIndicateurUn>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Malheureusement votre indicateur n’est pas calculable"
           text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs."

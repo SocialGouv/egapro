@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 import { Text } from "@chakra-ui/react"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 
 interface RecapitulatifIndexProps {
   allIndicateurValid: boolean
@@ -19,7 +19,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
   <React.Fragment>
     {allIndicateurValid ? (
       noteIndex !== undefined ? (
-        <InfoBloc
+        <InfoBlock
           type="success"
           title="Index égalité femmes-hommes"
           text={
@@ -34,7 +34,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
           }
         />
       ) : (
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Index égalité femmes-hommes"
           text={
@@ -52,7 +52,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
         />
       )
     ) : (
-      <InfoBloc
+      <InfoBlock
         type="warning"
         title="Index égalité femmes-hommes"
         text="Vous n’avez pas encore validé tous vos indicateurs, votre index ne peut être calculé."

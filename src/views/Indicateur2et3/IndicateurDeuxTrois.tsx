@@ -13,7 +13,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
@@ -56,7 +56,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   if (state.informations.formValidated !== "Valid") {
     return (
       <PageIndicateurDeuxTrois>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Vous devez renseignez vos informations d'entreprise avant d’avoir accès à cet indicateur"
           text={<TextSimulatorLink to="/informations" label="Renseigner les informations" />}
@@ -69,7 +69,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   if (state.effectif.formValidated !== "Valid") {
     return (
       <PageIndicateurDeuxTrois>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
           text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
@@ -83,7 +83,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     return (
       <PageIndicateurDeuxTrois>
         <div>
-          <InfoBloc
+          <InfoBlock
             type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
             text="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
@@ -101,7 +101,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     return (
       <PageIndicateurDeuxTrois>
         <div>
-          <InfoBloc
+          <InfoBlock
             type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
             text="Il n’y a pas eu d'augmentation durant la période de référence."

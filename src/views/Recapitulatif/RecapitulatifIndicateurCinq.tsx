@@ -4,7 +4,7 @@ import { Fragment } from "react"
 
 import { FormState } from "../../globals"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
@@ -24,7 +24,7 @@ function RecapitulatifIndicateurCinq({
   if (indicateurCinqFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
           text={

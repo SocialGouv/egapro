@@ -6,7 +6,7 @@ import { FormState, CategorieSocioPro } from "../../globals"
 
 import { displayNameCategorieSocioPro, displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
@@ -39,7 +39,7 @@ function RecapitulatifIndicateurDeux({
   if (!effectifsIndicateurDeuxCalculable) {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
@@ -51,7 +51,7 @@ function RecapitulatifIndicateurDeux({
   if (indicateurDeuxFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
           text={
@@ -68,7 +68,7 @@ function RecapitulatifIndicateurDeux({
   if (!indicateurDeuxCalculable) {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d’augmentation durant la période de référence"

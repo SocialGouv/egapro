@@ -5,7 +5,7 @@ import { Fragment, ReactNode } from "react"
 import { FormState, TrancheEffectifs } from "../../globals"
 import { calendarYear, Year } from "../../utils/helpers"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { useColumnsWidth, useLayoutType } from "../../components/GridContext"
 
@@ -30,7 +30,7 @@ function RecapitulatifInformations({
   if (informationsFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Informations"
           text={

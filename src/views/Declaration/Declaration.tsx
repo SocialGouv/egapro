@@ -27,7 +27,7 @@ import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
@@ -309,7 +309,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   ) {
     return (
       <PageDeclaration>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
           text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes."

@@ -9,7 +9,7 @@ import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
@@ -54,7 +54,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
   if (state.effectif.formValidated !== "Valid") {
     return (
       <PageIndicateurTrois>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
           text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
@@ -68,7 +68,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
     return (
       <PageIndicateurTrois>
         <div>
-          <InfoBloc
+          <InfoBlock
             type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
             text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
@@ -86,7 +86,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
     return (
       <PageIndicateurTrois>
         <div>
-          <InfoBloc
+          <InfoBlock
             type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
             text="Il n’y a pas eu de promotion durant la période de référence."

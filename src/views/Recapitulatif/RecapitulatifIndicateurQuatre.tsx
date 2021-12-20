@@ -6,7 +6,7 @@ import { FormState } from "../../globals"
 
 import { displayPercent } from "../../utils/helpers"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
@@ -30,7 +30,7 @@ function RecapitulatifIndicateurQuatre({
   if (indicateurQuatreFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
           text={
@@ -51,7 +51,7 @@ function RecapitulatifIndicateurQuatre({
         : "de retour de congé maternité pendant la période de référence."
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
           text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}

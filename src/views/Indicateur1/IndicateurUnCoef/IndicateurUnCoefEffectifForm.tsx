@@ -6,7 +6,7 @@ import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import ButtonAction from "../../../components/ButtonAction"
-import InfoBloc from "../../../components/ds/InfoBloc"
+import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
 
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
@@ -68,7 +68,7 @@ function IndicateurUnCoefEffectifForm({
   // le formulaire d'effectif n'est pas validé
   if (coefficientGroupFormValidated !== "Valid") {
     return (
-      <InfoBloc
+      <InfoBlock
         title="Vous devez renseignez vos groupes avant d’avoir accès à cet indicateur"
         text={<ActionLink onClick={navigateToGroupe}>Renseigner les groupes</ActionLink>}
       />
@@ -110,7 +110,7 @@ function IndicateurUnCoefEffectifForm({
       />
 
       {coefficientEffectifFormValidated === "Valid" && formValidated === "Invalid" && (
-        <InfoBloc
+        <InfoBlock
           title="Vos effectifs ont été modifiés"
           type="success"
           text={

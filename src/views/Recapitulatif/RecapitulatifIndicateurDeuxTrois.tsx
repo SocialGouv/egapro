@@ -5,7 +5,7 @@ import { Fragment } from "react"
 import { FormState } from "../../globals"
 import { displaySexeSurRepresente } from "../../utils/helpers"
 
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
@@ -43,7 +43,7 @@ function RecapitulatifIndicateurDeuxTrois({
   if (!effectifsIndicateurDeuxTroisCalculable) {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
@@ -55,7 +55,7 @@ function RecapitulatifIndicateurDeuxTrois({
   if (indicateurDeuxTroisFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
           text={
@@ -72,7 +72,7 @@ function RecapitulatifIndicateurDeuxTrois({
   if (!indicateurDeuxTroisCalculable) {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
           type="warning"
           title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
           text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d'augmentation durant la période de référence"

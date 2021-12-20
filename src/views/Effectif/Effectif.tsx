@@ -7,7 +7,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/ds/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 import EffectifForm from "./EffectifForm"
@@ -71,7 +71,7 @@ function Effectif({ state, dispatch }: Props) {
             (state.indicateurDeux.formValidated === "Invalid" || state.indicateurTrois.formValidated === "Invalid")) ||
           (state.informations.trancheEffectifs === "50 à 250" &&
             state.indicateurDeuxTrois.formValidated === "Invalid")) && (
-          <InfoBloc
+          <InfoBlock
             type="success"
             title="Vos effectifs ont été modifiés"
             text={
@@ -122,7 +122,7 @@ function Effectif({ state, dispatch }: Props) {
         state.indicateurUn.coef &&
         (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
           totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
-          <InfoBloc
+          <InfoBlock
             title="Attention"
             type="warning"
             text={
@@ -141,7 +141,7 @@ function Effectif({ state, dispatch }: Props) {
         state.effectif.formValidated === "Valid" &&
         totalNombreSalariesHommeCsp + totalNombreSalariesFemmeCsp > 250 &&
         state.informations.trancheEffectifs === "50 à 250" && (
-          <InfoBloc
+          <InfoBlock
             title="Attention, les effectifs pris en compte pour le calcul sont supérieurs aux effectifs déclarés pour l'entreprise"
             type="warning"
           />
