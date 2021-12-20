@@ -9,7 +9,7 @@ import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
@@ -47,12 +47,16 @@ function IndicateurQuatre({ state, dispatch }: Props) {
       state.indicateurQuatre.presenceCongeMat &&
       state.indicateurQuatre.nombreSalarieesPeriodeAugmentation !== undefined &&
       state.indicateurQuatre.nombreSalarieesPeriodeAugmentation === 0
-        ? "car il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité"
-        : "car il n’y a pas eu de retour de congé maternité pendant la période de référence."
+        ? "Il n’y a pas eu d’augmentations salariales pendant la durée du ou des congés maternité."
+        : "Il n’y a pas eu de retour de congé maternité pendant la période de référence."
     return (
       <PageIndicateurQuatre>
         <div>
-          <InfoBloc title="Malheureusement votre indicateur n’est pas calculable" text={messageNonCalculable} />
+          <InfoBlock
+            type="warning"
+            title="Malheureusement votre indicateur n’est pas calculable"
+            text={messageNonCalculable}
+          />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurQuatre("None")}>modifier les données saisies</ActionLink>
           </ActionBar>

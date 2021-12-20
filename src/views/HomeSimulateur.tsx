@@ -1,5 +1,5 @@
-import React from "react"
-import { Text, Input, InputGroup, InputRightElement, Button, Image, useToast } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
+import { Text, Input, InputGroup, InputRightElement, Button, Image, useClipboard } from "@chakra-ui/react"
 import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
 import { ButtonSimulatorLink } from "../components/SimulatorLink"
@@ -7,27 +7,10 @@ import { useTitle } from "../utils/hooks"
 
 const title = "Début d'un calcul d'index"
 
-function HomeSimulateur(): JSX.Element {
+const HomeSimulateur: FunctionComponent = () => {
   useTitle(title)
-  const toast = useToast()
   const link = window.location.href
-
-  const onCopy = () => {
-    const id = "test-toast"
-    navigator.clipboard.writeText(link)
-    if (!toast.isActive(id)) {
-      toast({
-        id,
-        title: "Code copié",
-        description: "Pensez à conserver ce code précieusement.",
-        position: "bottom-right",
-        variant: "left-accent",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      })
-    }
-  }
+  const { hasCopied, onCopy } = useClipboard(link)
 
   return (
     <Page title="Bienvenue sur Index Egapro">
@@ -35,7 +18,7 @@ function HomeSimulateur(): JSX.Element {
         <Input onClick={onCopy} defaultValue={link} pr="8rem" type={"text"} placeholder="Enter password" />
         <InputRightElement width="7rem" sx={{ right: 1 }}>
           <Button h="1.75rem" size="sm" onClick={onCopy} variant="outline" colorScheme="primary">
-            <div>Copier&nbsp;le&nbsp;lien</div>
+            {hasCopied ? <>Lien&nbsp;copié</> : <>Copier&nbsp;le&nbsp;lien</>}
           </Button>
         </InputRightElement>
       </InputGroup>

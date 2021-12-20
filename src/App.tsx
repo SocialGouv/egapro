@@ -11,7 +11,7 @@ import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
 import GridProvider from "./components/GridContext"
 import AppLayout from "./containers/AppLayout"
-import InfoBloc from "./components/InfoBloc"
+import InfoBlock from "./components/ds/InfoBlock"
 import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ButtonAction"
@@ -70,10 +70,9 @@ function App() {
             {/* TODO: update the following date and message when there's another announcement */}
             {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
               <div css={styles.bannerWrapper}>
-                <InfoBloc
+                <InfoBlock
                   title="Interruption de service programmée"
                   text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
-                  additionalCss={styles.banner}
                   closeButton={true}
                 />
               </div>
@@ -90,9 +89,9 @@ function App() {
 const styles = {
   bannerWrapper: css({
     position: "fixed",
-    left: 0,
-    top: 60,
-    width: "100%",
+    left: 20,
+    bottom: 20,
+    right: 20,
     zIndex: 1000,
   }),
   banner: css({

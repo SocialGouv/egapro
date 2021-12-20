@@ -12,7 +12,7 @@ import {
   displaySexeSurRepresente,
 } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
@@ -38,19 +38,17 @@ function RecapitulatifIndicateurUn({
   noteIndicateurUn,
 }: Props) {
   if (!effectifsIndicateurUnCalculable) {
-    const messageCalculParCSP = indicateurUnParCSP ? undefined : (
+    const messageCalculParCSP = indicateurUnParCSP ? (
+      ""
+    ) : (
       <TextSimulatorLink to="/indicateur1" label="Vous devez calculer par CSP" />
     )
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
+          type="warning"
           title="Indicateur écart de rémunération entre les femmes et les hommes"
-          text={
-            <Fragment>
-              Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire
-              comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. {messageCalculParCSP}
-            </Fragment>
-          }
+          text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
         />
       </div>
     )
@@ -59,14 +57,13 @@ function RecapitulatifIndicateurUn({
   if (indicateurUnFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
+          type="warning"
           title="Indicateur écart de rémunération entre les femmes et les hommes"
           text={
             <Fragment>
-              <span>
-                Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.
-              </span>{" "}
-              <TextSimulatorLink to="/indicateur1" label="valider les données" />
+              Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
+              <TextSimulatorLink to="/indicateur1" label="Valider les données" />
             </Fragment>
           }
         />

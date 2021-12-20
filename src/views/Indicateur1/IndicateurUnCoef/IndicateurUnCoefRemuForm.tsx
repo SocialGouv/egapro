@@ -6,7 +6,7 @@ import { AppState, FormState, ActionIndicateurUnCoefData, GroupTranchesAgesIndic
 import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import InfoBloc from "../../../components/InfoBloc"
+import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
 
@@ -54,9 +54,10 @@ function IndicateurUnCoefEffectifForm({
   // le formulaire d'effectif n'est pas validé
   if (coefficientEffectifFormValidated !== "Valid") {
     return (
-      <InfoBloc
-        title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-        text={<ActionLink onClick={navigateToEffectif}>renseigner les effectifs</ActionLink>}
+      <InfoBlock
+        type="warning"
+        title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+        text={<ActionLink onClick={navigateToEffectif}>Renseigner les effectifs</ActionLink>}
       />
     )
   }
@@ -65,9 +66,10 @@ function IndicateurUnCoefEffectifForm({
   if (!effectifsIndicateurCalculable) {
     return (
       <div>
-        <InfoBloc
+        <InfoBlock
+          type="warning"
           title="Malheureusement votre indicateur n’est pas calculable en niveau ou coefficient hiérarchique"
-          text="car l’ensemble des groupes valables (c’est-à-dire comptant au
+          text="L’ensemble des groupes valables (c’est-à-dire comptant au
               moins 3 femmes et 3 hommes), représentent moins de 40% des
               effectifs. Vous devez calculer par CSP."
         />

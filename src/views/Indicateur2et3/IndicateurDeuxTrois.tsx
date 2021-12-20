@@ -13,7 +13,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
@@ -56,9 +56,10 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   if (state.informations.formValidated !== "Valid") {
     return (
       <PageIndicateurDeuxTrois>
-        <InfoBloc
-          title="vous devez renseignez vos informations d'entreprise avant d’avoir accès à cet indicateur"
-          text={<TextSimulatorLink to="/informations" label="renseigner les informations" />}
+        <InfoBlock
+          type="warning"
+          title="Vous devez renseignez vos informations d'entreprise avant d’avoir accès à cet indicateur"
+          text={<TextSimulatorLink to="/informations" label="Renseigner les informations" />}
         />
       </PageIndicateurDeuxTrois>
     )
@@ -68,9 +69,10 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
   if (state.effectif.formValidated !== "Valid") {
     return (
       <PageIndicateurDeuxTrois>
-        <InfoBloc
-          title="vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={<TextSimulatorLink to="/effectifs" label="renseigner les effectifs" />}
+        <InfoBlock
+          type="warning"
+          title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+          text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
         />
       </PageIndicateurDeuxTrois>
     )
@@ -81,9 +83,10 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     return (
       <PageIndicateurDeuxTrois>
         <div>
-          <InfoBloc
+          <InfoBlock
+            type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
+            text="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
           />
           <ActionBar>
             <ButtonSimulatorLink to="/indicateur4" label="suivant" />
@@ -98,9 +101,10 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     return (
       <PageIndicateurDeuxTrois>
         <div>
-          <InfoBloc
+          <InfoBlock
+            type="warning"
             title="Malheureusement votre indicateur n’est pas calculable"
-            text="car il n’y a pas eu d'augmentation durant la période de référence."
+            text="Il n’y a pas eu d'augmentation durant la période de référence."
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>modifier les données saisies</ActionLink>

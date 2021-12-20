@@ -7,7 +7,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBloc from "../../components/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 import EffectifForm from "./EffectifForm"
@@ -71,19 +71,19 @@ function Effectif({ state, dispatch }: Props) {
             (state.indicateurDeux.formValidated === "Invalid" || state.indicateurTrois.formValidated === "Invalid")) ||
           (state.informations.trancheEffectifs === "50 à 250" &&
             state.indicateurDeuxTrois.formValidated === "Invalid")) && (
-          <InfoBloc
+          <InfoBlock
+            type="success"
             title="Vos effectifs ont été modifiés"
-            icon="cross"
             text={
               <Fragment>
                 <span>
-                  afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs.
+                  Afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs.
                 </span>
                 &emsp;
                 <span>
                   {state.indicateurUn.formValidated === "Invalid" && (
                     <Fragment>
-                      <TextSimulatorLink to="/indicateur1" label="aller à l'indicateur écart de rémunérations" />
+                      <TextSimulatorLink to="/indicateur1" label="Aller à l'indicateur écart de rémunérations" />
                       &emsp;
                     </Fragment>
                   )}
@@ -92,7 +92,7 @@ function Effectif({ state, dispatch }: Props) {
                       <Fragment>
                         <TextSimulatorLink
                           to="/indicateur2"
-                          label="aller à l'indicateur écart de taux d'augmentations"
+                          label="Aller à l'indicateur écart de taux d'augmentations"
                         />
                         &emsp;
                       </Fragment>
@@ -100,7 +100,7 @@ function Effectif({ state, dispatch }: Props) {
                   {state.informations.trancheEffectifs !== "50 à 250" &&
                     state.indicateurTrois.formValidated === "Invalid" && (
                       <Fragment>
-                        <TextSimulatorLink to="/indicateur3" label="aller à l'indicateur écart de taux de promotions" />
+                        <TextSimulatorLink to="/indicateur3" label="Aller à l'indicateur écart de taux de promotions" />
                         &emsp;
                       </Fragment>
                     )}
@@ -108,7 +108,7 @@ function Effectif({ state, dispatch }: Props) {
                     state.indicateurDeuxTrois.formValidated === "Invalid" && (
                       <TextSimulatorLink
                         to="/indicateur2et3"
-                        label="aller à l'indicateur écart de taux d'augmentations"
+                        label="Aller à l'indicateur écart de taux d'augmentations"
                       />
                     )}
                 </span>
@@ -122,15 +122,15 @@ function Effectif({ state, dispatch }: Props) {
         state.indicateurUn.coef &&
         (totalNombreSalariesHommeCoef !== totalNombreSalariesHommeCsp ||
           totalNombreSalariesFemmeCoef !== totalNombreSalariesFemmeCsp) && (
-          <InfoBloc
+          <InfoBlock
             title="Attention"
-            icon="warning"
+            type="warning"
             text={
               <Fragment>
                 <span>
                   Vos effectifs ne sont pas les mêmes que ceux déclarés en niveaux ou coefficients hiérarchiques. &emsp;
                 </span>
-                <TextSimulatorLink to="/indicateur1" label="aller à l'indicateur écart de rémunérations" />
+                <TextSimulatorLink to="/indicateur1" label="Aller à l'indicateur écart de rémunérations" />
                 &emsp;
               </Fragment>
             }
@@ -141,9 +141,9 @@ function Effectif({ state, dispatch }: Props) {
         state.effectif.formValidated === "Valid" &&
         totalNombreSalariesHommeCsp + totalNombreSalariesFemmeCsp > 250 &&
         state.informations.trancheEffectifs === "50 à 250" && (
-          <InfoBloc
+          <InfoBlock
             title="Attention, les effectifs pris en compte pour le calcul sont supérieurs aux effectifs déclarés pour l'entreprise"
-            icon="warning"
+            type="warning"
           />
         )}
     </Page>

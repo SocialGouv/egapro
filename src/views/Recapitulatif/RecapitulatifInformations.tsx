@@ -5,7 +5,7 @@ import { Fragment, ReactNode } from "react"
 import { FormState, TrancheEffectifs } from "../../globals"
 import { calendarYear, Year } from "../../utils/helpers"
 
-import InfoBloc from "../../components/InfoBloc"
+import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import { useColumnsWidth, useLayoutType } from "../../components/GridContext"
 
@@ -30,15 +30,13 @@ function RecapitulatifInformations({
   if (informationsFormValidated !== "Valid") {
     return (
       <div css={styles.container}>
-        <InfoBloc
+        <InfoBlock
+          type="warning"
           title="Informations"
           text={
             <Fragment>
-              <span>
-                Nous ne pouvons pas afficher les informations de votre entreprise car vous n’avez pas encore validé vos
-                données saisies.
-              </span>{" "}
-              <TextSimulatorLink to="/informations" label="valider les données" />
+              Nous ne pouvons pas afficher les informations de votre entreprise car vous n’avez pas encore validé vos
+              données saisies. <TextSimulatorLink to="/informations" label="Valider les données" />
             </Fragment>
           }
         />
@@ -50,7 +48,7 @@ function RecapitulatifInformations({
     <div css={[styles.container, css({ width })]}>
       <DataDisplay header="Année au titre de laquelle les indicateurs sont calculés" data={anneeDeclaration} />
 
-      <DataDisplay header="Periode de référence">
+      <DataDisplay header="Période de référence">
         <div css={styles.dates}>
           <div css={styles.dateField}>
             <DataDisplay header="Date de début" data={calendarYear(finPeriodeReference, Year.Subtract, 1)} />
