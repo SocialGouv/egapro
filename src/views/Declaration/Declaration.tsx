@@ -1,7 +1,6 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { useCallback, Fragment, ReactNode, useState, useEffect } from "react"
+import React, { useCallback, Fragment, ReactNode, useState, useEffect, FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
+import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
 
 import {
   AppState,
@@ -40,7 +39,7 @@ import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
 import { formatDataForAPI, logToSentry } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface DeclarationProps extends RouteComponentProps {
   code: string
   state: AppState
   dispatch: (action: ActionType) => void
@@ -48,7 +47,7 @@ interface Props extends RouteComponentProps {
 
 const title = "Déclaration"
 
-function Declaration({ code, state, dispatch }: Props) {
+const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
   useTitle(title)
 
   const [declaring, setDeclaring] = useState(false)
@@ -315,66 +314,68 @@ function Declaration({ code, state, dispatch }: Props) {
           title="Vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
           text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes."
         />
-        <h2>Les formulaires suivants ne sont pas validés</h2>
-        <ul>
+        <Heading as="h2" size="md" mt={6}>
+          Les formulaires suivants ne sont pas validés
+        </Heading>
+        <UnorderedList mt={2}>
           {state.informations.formValidated !== "Valid" && (
-            <li>
-              <TextSimulatorLink to="/informations" label="informations calcul et période de référence" />
-            </li>
+            <ListItem>
+              <TextSimulatorLink to="/informations" label="Informations calcul et période de référence" />
+            </ListItem>
           )}
           {state.effectif.formValidated !== "Valid" && (
-            <li>
-              <TextSimulatorLink to="/effectifs" label="effectifs pris en compte" />
-            </li>
+            <ListItem>
+              <TextSimulatorLink to="/effectifs" label="Effectifs pris en compte" />
+            </ListItem>
           )}
           {state.indicateurUn.formValidated !== "Valid" &&
             ((!effectifsIndicateurUnCalculable && !state.indicateurUn.csp) || effectifsIndicateurUnCalculable) && (
-              <li>
-                <TextSimulatorLink to="/indicateur1" label="l'indicateur écart de rémunération" />
-              </li>
+              <ListItem>
+                <TextSimulatorLink to="/indicateur1" label="Indicateur écart de rémunération" />
+              </ListItem>
             )}
           {trancheEffectifs !== "50 à 250" &&
             state.indicateurDeux.formValidated !== "Valid" &&
             effectifsIndicateurDeuxCalculable && (
-              <li>
-                <TextSimulatorLink to="/indicateur2" label="l'indicateur écart de taux d'augmentations" />
-              </li>
+              <ListItem>
+                <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
+              </ListItem>
             )}
           {trancheEffectifs !== "50 à 250" &&
             state.indicateurTrois.formValidated !== "Valid" &&
             effectifsIndicateurTroisCalculable && (
-              <li>
-                <TextSimulatorLink to="/indicateur3" label="l'indicateur écart de taux de promotions" />
-              </li>
+              <ListItem>
+                <TextSimulatorLink to="/indicateur3" label="Indicateur écart de taux de promotions" />
+              </ListItem>
             )}
           {trancheEffectifs === "50 à 250" &&
             state.indicateurDeuxTrois.formValidated !== "Valid" &&
             effectifsIndicateurDeuxTroisCalculable && (
-              <li>
-                <TextSimulatorLink to="/indicateur2et3" label="l'indicateur écart de taux d'augmentations" />
-              </li>
+              <ListItem>
+                <TextSimulatorLink to="/indicateur2et3" label="Indicateur écart de taux d'augmentations" />
+              </ListItem>
             )}
           {state.indicateurQuatre.formValidated !== "Valid" && (
-            <li>
-              <TextSimulatorLink to="/indicateur4" label="l'indicateur retour de congé maternité" />
-            </li>
+            <ListItem>
+              <TextSimulatorLink to="/indicateur4" label="Indicateur retour de congé maternité" />
+            </ListItem>
           )}
           {state.indicateurCinq.formValidated !== "Valid" && (
-            <li>
-              <TextSimulatorLink to="/indicateur5" label="l'indicateur hautes rémunérations" />
-            </li>
+            <ListItem>
+              <TextSimulatorLink to="/indicateur5" label="Indicateur hautes rémunérations" />
+            </ListItem>
           )}
           {state.informationsEntreprise.formValidated !== "Valid" && (
-            <li>
-              <TextSimulatorLink to="/informations-entreprise" label="les informations entreprise/UES" />
-            </li>
+            <ListItem>
+              <TextSimulatorLink to="/informations-entreprise" label="Informations entreprise/UES" />
+            </ListItem>
           )}
           {state.informationsDeclarant.formValidated !== "Valid" && (
-            <li>
-              <TextSimulatorLink to="/informations-declarant" label="les informations déclarant" />
-            </li>
+            <ListItem>
+              <TextSimulatorLink to="/informations-declarant" label="Informations déclarant" />
+            </ListItem>
           )}
-        </ul>
+        </UnorderedList>
       </PageDeclaration>
     )
   }
