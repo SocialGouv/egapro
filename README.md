@@ -1,3 +1,5 @@
+[![Install, build & test](https://github.com/SocialGouv/egapro/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/SocialGouv/egapro/actions/workflows/build-and-test.yml)
+
 # EgaPro
 
 > Calcul de l'index de l'égalité homme / femme dans les entreprises
