@@ -303,7 +303,7 @@ function FieldSiteInternet({
           : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"}
       </label>
       <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
+        <Input field={field} isReadOnly={readOnly} />
       </div>
       <p css={styles.error}>{error && "veuillez entrer une adresse internet"}</p>
     </div>

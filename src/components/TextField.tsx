@@ -29,7 +29,7 @@ function TextField({
         {label}
       </label>
       <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} autocomplete={autocomplete} />
+        <Input field={field} isReadOnly={readOnly} autocomplete={autocomplete} />
       </div>
       <p css={styles.error}>{error && errorText}</p>
     </div>

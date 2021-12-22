@@ -15,6 +15,7 @@ import {
   TrashIcon,
   ExternalLinkIcon,
   ChevronRightIcon,
+  PencilIcon,
 } from "@heroicons/react/outline"
 
 type SvgComponent = ChakraComponent<"svg", Record<string, unknown>>
@@ -28,6 +29,8 @@ export const IconText = ({ children }: { children: ReactNode }) => {
     </Box>
   )
 }
+
+export const IconEdit = (props: IconProps) => <Icon as={PencilIcon} {...props} />
 
 export const IconSearch = (props: IconProps) => <Icon as={SearchIcon} {...props} />
 

@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, ReactNode, FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
@@ -12,14 +10,14 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InformationsSimulationForm from "./InformationsSimulationForm"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface InformationsSimulationProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Informations calcul et période de référence"
 
-function InformationsSimulation({ state, dispatch }: Props) {
+const InformationsSimulation: FunctionComponent<InformationsSimulationProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const updateInformationsSimulation = useCallback(

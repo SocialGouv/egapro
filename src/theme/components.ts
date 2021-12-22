@@ -68,6 +68,8 @@ const components = {
       },
     },
 
+    FormLabel: { baseStyle: { fontWeight: "semibold", fontSize: "sm" } },
+
     Table: {
       sizes: {
         sm: {

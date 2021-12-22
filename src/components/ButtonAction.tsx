@@ -1,7 +1,7 @@
 import React from "react"
-import { Button } from "@chakra-ui/react"
+import { Button, ButtonProps as ButtonChakraProps } from "@chakra-ui/react"
 
-export interface ButtonProps {
+export type ButtonProps = ButtonChakraProps & {
   label: string
   colorScheme?: "primary" | "gray" | "orange"
   variant?: "solid" | "outline" | "ghost" | "link"
@@ -30,6 +30,7 @@ function ButtonAction({
   disabled = false,
   loading = false,
   fullWidth,
+  ...rest
 }: ButtonActionProps) {
   return (
     <Button
@@ -45,6 +46,7 @@ function ButtonAction({
       sx={{
         width: fullWidth ? "100%" : "auto",
       }}
+      {...rest}
     >
       {label}
     </Button>

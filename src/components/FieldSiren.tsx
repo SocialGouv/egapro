@@ -75,7 +75,7 @@ function FieldSiren({
         {label}
       </label>
       <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
+        <Input field={field} isReadOnly={readOnly} />
         {field.meta.validating && (
           <div css={styles.spinner}>
             <ActivityIndicator size={30} color={globalStyles.colors.primary} />
