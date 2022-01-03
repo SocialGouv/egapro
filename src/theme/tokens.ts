@@ -1,6 +1,10 @@
 import { createBreakpoints } from "@chakra-ui/theme-tools"
 
 const tokens = {
+  fonts: {
+    heading: "Gabriela",
+    body: "Raleway",
+  },
   breakpoints: createBreakpoints({
     sm: "30em",
     md: "48em",

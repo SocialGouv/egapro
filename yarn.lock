@@ -2200,6 +2200,16 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@fontsource/cabin@^4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@fontsource/cabin/-/cabin-4.5.0.tgz#c438bfec9cade7adc19fa469d11652e909801357"
+  integrity sha512-0BsaPOruXFIFmn5DoAZb9eJXL3Ycb0wWztZ5mff6AkFHAA+quclOfgV8c5vIqC6AO0h8zmJUrZjV/IryP9WvmA==
+
+"@fontsource/gabriela@^4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@fontsource/gabriela/-/gabriela-4.5.0.tgz#8a1718f26dda758a1115fb9ae5a9104cfd371a52"
+  integrity sha512-gwXofsoJu+gtKCjfzbrxPMeK2X8AN+bgxah8xEpVzfKUMQJR5zoXCq/w4A4a2gu0jVNe/hNWeCYMioj4dvZdvg==
+
 "@gar/promisify@^1.0.1":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@gar/promisify/-/promisify-1.1.2.tgz"
