@@ -55,7 +55,7 @@ function Footer() {
           >
             <ListItem>
               <Link href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" isExternal>
-                Contactez votre référent Egapro
+                Télécharger la liste des référents Egapro (XLSX, 22 Ko)
               </Link>
             </ListItem>
             <ListItem>
