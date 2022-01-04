@@ -34,7 +34,6 @@ const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, 
       pr={4}
       color="primary.500"
       fontWeight="bold"
-      fontFamily="heading"
       fontSize="sm"
       display="block"
       lineHeight={1.2}
