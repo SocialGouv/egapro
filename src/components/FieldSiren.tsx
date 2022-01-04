@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/react"
 import { useField } from "react-final-form"
 import { Link } from "@chakra-ui/react"
 
-import Input, { hasFieldError } from "./Input"
+import Input from "./Input"
 import globalStyles from "../utils/globalStyles"
 import { isEmpty } from "../utils/object"
 import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
@@ -35,10 +35,12 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
     await ownersForSiren(siren)
   } catch (error) {
     console.error(error)
+    updateSirenData({})
     return NOT_ALLOWED_MESSAGE
   }
 
   if (isEmpty(result?.jsonBody)) {
+    updateSirenData({})
     return "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle"
   }
 
@@ -66,8 +68,14 @@ function FieldSiren({
   const field = useField(name, {
     validate: validator ? validator : sirenValidator(updateSirenData),
   })
+  const { meta } = field
+
   const { email } = useUser()
-  const error = hasFieldError(field.meta)
+
+  // For required and 9digits validators, we want to display errors onBlur or onSubmit.
+  // But for sirenValidator, we want to display errors as soon as the API answers us.
+  const error =
+    (meta?.error && meta?.submitFailed) || (meta?.error && meta?.touched) || meta?.error === NOT_ALLOWED_MESSAGE
 
   return (
     <div css={[customStyles, styles.formField]}>
