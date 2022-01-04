@@ -20,6 +20,8 @@ const nineDigits: ValidatorFunction = (value) =>
 const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
 
 const NOT_ALLOWED_MESSAGE = "Vous n'êtes pas autorisé à déclarer pour ce SIREN."
+const UNKNOWN_SIREN =
+  "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
 
 export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
   let result
@@ -41,7 +43,7 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
 
   if (isEmpty(result?.jsonBody)) {
     updateSirenData({})
-    return "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle"
+    return UNKNOWN_SIREN
   }
 
   updateSirenData(result.jsonBody)
@@ -75,7 +77,10 @@ function FieldSiren({
   // For required and 9digits validators, we want to display errors onBlur or onSubmit.
   // But for sirenValidator, we want to display errors as soon as the API answers us.
   const error =
-    (meta?.error && meta?.submitFailed) || (meta?.error && meta?.touched) || meta?.error === NOT_ALLOWED_MESSAGE
+    (meta?.error && meta?.submitFailed) ||
+    (meta?.error && meta?.touched) ||
+    meta?.error === NOT_ALLOWED_MESSAGE ||
+    meta?.error === UNKNOWN_SIREN
 
   return (
     <div css={[customStyles, styles.formField]}>
