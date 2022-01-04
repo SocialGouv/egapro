@@ -7,7 +7,7 @@ type RadioButtonProps = RadioProps & { fieldName: string; choiceValue: string }
 const InputRadio: FunctionComponent<RadioButtonProps> = ({ fieldName, choiceValue, children, ...rest }) => {
   const { input } = useField(fieldName, { type: "radio", value: choiceValue })
   return (
-    <Box as={Radio} colorScheme="primary" isFocusable {...rest} {...input}>
+    <Box as={Radio} colorScheme="primary" bg="white" borderColor="gray.300" isFocusable {...rest} {...input}>
       {children}
     </Box>
   )
