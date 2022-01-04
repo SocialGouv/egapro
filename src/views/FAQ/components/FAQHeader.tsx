@@ -48,7 +48,7 @@ const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ location, closeMenu }) =
         />
       </Switch>
     </Box>
-    <Heading as="h2" fontFamily="'Gabriela', serif" size="md" color="gray.700">
+    <Heading as="h2" fontFamily="custom" fontWeight="medium" size="md" color="gray.700">
       Aide
     </Heading>
   </Box>

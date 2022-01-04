@@ -60,11 +60,7 @@ function Header() {
               <Logo />
             </Link>
           </Box>
-          <Box
-            sx={{
-              fontFamily: "'Gabriela', serif",
-            }}
-          >
+          <Box fontFamily="custom">
             <Link as={ReachLink} to="/" fontSize="2xl" color="gray.900">
               Index Egapro
             </Link>
