@@ -99,7 +99,8 @@ function Simulateur({ code, state, dispatch }: Props) {
 
         const simuData = indicatorsData?.jsonBody?.data
 
-        const siren = simuData?.informationsEntreprise?.siren
+        const siren =
+          simuData?.informationsEntreprise?.formValidated === "Valid" ? simuData?.informationsEntreprise?.siren : null
 
         // a free siren is a siren that has no owners already bound to it.
         const freeSiren = await sirenIsFree(siren)
