@@ -17,6 +17,7 @@ class ApiError extends Error {
     }
     this.response = response
     this.jsonBody = jsonBody
+    this.name = "ApiError"
   }
 }
 
@@ -30,7 +31,7 @@ function checkStatusAndParseJson(response) {
     return jsonPromise.then((jsonBody) => ({ response, jsonBody }))
   } else {
     return jsonPromise.then((jsonBody) => {
-      const apiError = new ApiError(response, jsonBody)
+      const apiError = new ApiError(response, jsonBody, "Erreur dans l'API")
       return Promise.reject.bind(Promise)(apiError)
     })
   }
@@ -53,8 +54,6 @@ function fetchResource(method, pathname, body) {
   if (window.location.href.includes("localhost:")) {
     origin = "http://127.0.0.1:2626"
   }
-
-  console.log("process.env.API_URL", process.env.REACT_APP_EGAPRO_API_URL)
 
   if (process.env.REACT_APP_EGAPRO_API_URL) origin = process.env.REACT_APP_EGAPRO_API_URL
 

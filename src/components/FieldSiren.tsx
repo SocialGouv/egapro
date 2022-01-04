@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/react"
 import { useField } from "react-final-form"
 import { Link } from "@chakra-ui/react"
 
-import Input, { hasFieldError } from "./Input"
+import Input from "./Input"
 import globalStyles from "../utils/globalStyles"
 import { isEmpty } from "../utils/object"
 import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
@@ -15,11 +15,13 @@ import { IconExternalLink } from "./ds/Icons"
 import React from "react"
 
 const nineDigits: ValidatorFunction = (value) =>
-  value.length === 9 ? undefined : "ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres"
+  value.length === 9 ? undefined : "Ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres."
 
 const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
 
 const NOT_ALLOWED_MESSAGE = "Vous n'êtes pas autorisé à déclarer pour ce SIREN."
+const UNKNOWN_SIREN =
+  "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
 
 export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
   let result
@@ -35,11 +37,13 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
     await ownersForSiren(siren)
   } catch (error) {
     console.error(error)
+    updateSirenData({})
     return NOT_ALLOWED_MESSAGE
   }
 
   if (isEmpty(result?.jsonBody)) {
-    return "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle"
+    updateSirenData({})
+    return UNKNOWN_SIREN
   }
 
   updateSirenData(result.jsonBody)
@@ -66,8 +70,17 @@ function FieldSiren({
   const field = useField(name, {
     validate: validator ? validator : sirenValidator(updateSirenData),
   })
+  const { meta } = field
+
   const { email } = useUser()
-  const error = hasFieldError(field.meta)
+
+  // For required and 9digits validators, we want to display errors onBlur or onSubmit.
+  // But for sirenValidator, we want to display errors as soon as the API answers us.
+  const error =
+    (meta?.error && meta?.submitFailed) ||
+    (meta?.error && meta?.touched) ||
+    meta?.error === NOT_ALLOWED_MESSAGE ||
+    meta?.error === UNKNOWN_SIREN
 
   return (
     <div css={[customStyles, styles.formField]}>
