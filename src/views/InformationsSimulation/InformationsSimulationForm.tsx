@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
-import { FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react"
+import { FormControl, FormLabel } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
@@ -18,13 +18,13 @@ import AnneeDeclaration from "../../components/AnneeDeclaration"
 import FieldDate from "../../components/FieldDate"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-import Input, { hasFieldError } from "../../components/Input"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import ButtonAction from "../../components/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
 import { IconEdit } from "../../components/ds/Icons"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import InputRadio from "../../components/ds/InputRadio"
+import InputGroup from "../../components/ds/InputGroup"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -72,14 +72,14 @@ const validateForm = ({
 
 const FieldNomEntreprise = ({ readOnly }: { readOnly: boolean }) => {
   const field = useField("nomEntreprise", { validate })
-  const error = hasFieldError(field.meta)
 
   return (
-    <FormControl isInvalid={error}>
-      <FormLabel htmlFor={field.input.name}>Nom de la simulation (ex : nom_entreprise_date)</FormLabel>
-      <Input field={field} isReadOnly={readOnly} />
-      <FormErrorMessage>Le nom n’est pas valide</FormErrorMessage>
-    </FormControl>
+    <InputGroup
+      field={field}
+      label="Nom de la simulation (ex : nom_entreprise_date)"
+      isReadOnly={readOnly}
+      message={{ error: "Le nom n’est pas valide" }}
+    />
   )
 }
 
