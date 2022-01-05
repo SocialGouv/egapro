@@ -22,7 +22,7 @@ const MenuLink: FunctionComponent<MenuLinkProps> = ({ children, to }) => {
 
 const MenuProfile: FunctionComponent = () => {
   const history = useHistory()
-  const { email, logout } = useUser()
+  const { email, logout, staff } = useUser()
 
   const disconnectUser = () => {
     logout()
@@ -42,10 +42,14 @@ const MenuProfile: FunctionComponent = () => {
           <MenuItem>
             <MenuLink to="/tableauDeBord/mes-entreprises">Mes entreprises</MenuLink>
           </MenuItem>
-          <MenuDivider />
-          <MenuItem>
-            <MenuLink to="/tableauDeBord/gerer-utilisateurs">Gérer utilisateurs</MenuLink>
-          </MenuItem>
+          {staff && (
+            <React.Fragment>
+              <MenuDivider />
+              <MenuItem>
+                <MenuLink to="/tableauDeBord/gerer-utilisateurs">Gérer utilisateurs</MenuLink>
+              </MenuItem>
+            </React.Fragment>
+          )}
           <MenuDivider />
           <MenuItem onClick={disconnectUser} color="orange.500">
             Déconnexion

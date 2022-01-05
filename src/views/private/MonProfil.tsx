@@ -1,5 +1,6 @@
 import { Avatar } from "@chakra-ui/avatar"
 import { Box, HStack, Text, VStack } from "@chakra-ui/layout"
+import { Badge } from "@chakra-ui/react"
 import React from "react"
 import { useUser } from "../../components/AuthContext"
 import Page from "../../components/Page"
@@ -10,7 +11,7 @@ const title = "Mon profil"
 
 function MonProfil() {
   useTitle(title)
-  const { email } = useUser()
+  const { email, staff } = useUser()
 
   return (
     <SinglePageLayout>
@@ -23,7 +24,11 @@ function MonProfil() {
                   <Avatar size="sm" name={email} />
                   <Box ml={4}>
                     <VStack>
-                      <Text fontSize="lg">{email}</Text>
+                      <Text fontSize="lg">
+                        {email}
+                        {"  "}
+                        {staff && <Badge colorScheme="green">Staff</Badge>}
+                      </Text>
                     </VStack>
                   </Box>
                 </HStack>

@@ -4,6 +4,7 @@ import { getTokenInfo } from "../utils/api"
 const initialContext = {
   email: "",
   ownership: [] as string[],
+  staff: false,
   isAuthenticated: false,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   logout: () => {},
@@ -13,6 +14,8 @@ const initialContext = {
 
 const AuthContext = React.createContext(initialContext)
 AuthContext.displayName = "AuthContext"
+
+// TODO : ne plus utiliser que ce contexte. En particulier, dans Simulateur, il y a tout un traitement qui utilise getTokenInfo directement.
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const [context, setContext] = React.useState(initialContext)
@@ -31,6 +34,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
             ...context,
             ...(tokenInfo?.jsonBody?.email && { email: tokenInfo?.jsonBody?.email }),
             ...(tokenInfo?.jsonBody?.ownership && { ownership: tokenInfo?.jsonBody?.ownership }),
+            ...(tokenInfo?.jsonBody?.staff && { staff: tokenInfo?.jsonBody?.staff }),
             isAuthenticated: Boolean(tokenInfo?.jsonBody?.email),
           }
 
