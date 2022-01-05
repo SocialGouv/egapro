@@ -6,6 +6,26 @@ if (process.env.REACT_APP_EGAPRO_API_URL) API_URL = process.env.REACT_APP_EGAPRO
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again"
 
+type FetchErrorOptions = {
+  info?: string
+  status?: number
+}
+
+class FetchError extends Error {
+  info
+  status
+
+  constructor(message: string, options?: FetchErrorOptions) {
+    super(message)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this)
+    }
+    this.info = options?.info
+    this.status = options?.status
+    this.name = "FetchError"
+  }
+}
+
 /* Fetcher which can use an options and handles error in a generic way.
  *
  * @param endpoint the full end point to use
@@ -25,10 +45,9 @@ export const genericFetch = async (endpoint: string, options?: RequestInit) => {
   const response = await fetch(endpoint, options)
 
   if (!response.ok) {
-    const error: Error & { info?: string; status?: number } = new Error("Erreur API")
+    const info = (await response.json())?.error
 
-    error.info = (await response.json())?.error
-    error.status = response.status
+    const error = new FetchError("Erreur API", { info, status: response.status })
 
     if (error.info) {
       if (/Invalid token/i.test(error.info) || /No authentication token was provided/i.test(error.info)) {
