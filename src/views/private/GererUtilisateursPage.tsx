@@ -8,34 +8,36 @@ import Page from "../../components/Page"
 import { useUser } from "../../components/AuthContext"
 import InfoEntreprise from "../../components/InfoEntreprise"
 import UtilisateursEntreprise from "../../components/UtilisateursEntreprise"
-// import Combobox from "../../components/ds/Combobox"
+import { Input } from "@chakra-ui/react"
 
-const title = "Mes entreprises"
+const title = "Gérer les utilisateurs"
 
 function GererUtilisateursPage() {
   useTitle(title)
 
-  const { ownership: sirens } = useUser()
-  const orderedSirens = sirens.sort()
+  const { staff } = useUser()
 
-  const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
+  const [siren, setSiren] = React.useState("")
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setSiren(event.target.value)
 
   return (
     <SinglePageLayout>
       <Page title={title}>
-        {!sirens?.length ? (
-          <p>Vous ne gérez pas encore d'entreprise.</p>
+        {!staff ? (
+          <p>Vous n'êtes pas membre du staff.</p>
         ) : (
           <React.Fragment>
             <FormControl id="siren">
               <FormLabel>SIREN</FormLabel>
-              {/* <Combobox /> */}
+              <Input value={siren} onChange={handleChange} placeholder="Saisissez le SIREN de l'entreprise" />
             </FormControl>
 
-            <Flex mt="6" direction="column">
-              <InfoEntreprise siren={chosenSiren} />
-              <UtilisateursEntreprise siren={chosenSiren} />
-            </Flex>
+            {siren && (
+              <Flex mt="6" direction="column">
+                <InfoEntreprise siren={siren} />
+                <UtilisateursEntreprise siren={siren} />
+              </Flex>
+            )}
           </React.Fragment>
         )}
       </Page>

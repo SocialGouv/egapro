@@ -40,7 +40,7 @@ function Mire() {
   const { toastSuccess, toastError } = useToastMessage({})
   const [submitted, setSubmitted] = React.useState(false)
   const [email, setEmail] = React.useState("")
-  const { isAuthenticated } = useUser()
+  const { isAuthenticated, staff } = useUser()
 
   useCheckIfTokenIsInURL()
 
@@ -62,6 +62,7 @@ function Mire() {
     email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
   })
 
+  if (staff) return <Redirect to="/tableauDeBord/gerer-utilisateurs" />
   if (isAuthenticated) return <Redirect to="/tableauDeBord/mes-entreprises" />
 
   return (
