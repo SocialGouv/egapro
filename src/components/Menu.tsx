@@ -134,7 +134,7 @@ function Menu({
             },
           }) => (
             <React.Fragment>
-              <CustomNavLink to={`/simulateur/${code}`} title="vos informations" activeOnlyWhenExact={true} />
+              <CustomNavLink to={`/simulateur/${code}`} title="Vos informations" activeOnlyWhenExact={true} />
               <Heading as="div" size="sm" mb={2} mt={4}>
                 Calcul de l'index
               </Heading>
@@ -142,7 +142,7 @@ function Menu({
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/informations`}
-                    title="informations calcul"
+                    title="Informations calcul"
                     label="et période de référence"
                     valid={informationsFormValidated}
                   />
@@ -150,7 +150,7 @@ function Menu({
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/effectifs`}
-                    title="effectifs"
+                    title="Effectifs"
                     label="pris en compte"
                     valid={effectifFormValidated}
                   />
@@ -158,7 +158,7 @@ function Menu({
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/indicateur1`}
-                    title="indicateur"
+                    title="Indicateur"
                     label="écart de rémunération"
                     valid={indicateurUnFormValidated}
                   />
@@ -168,7 +168,7 @@ function Menu({
                     <ListItem>
                       <CustomNavLink
                         to={`/simulateur/${code}/indicateur2`}
-                        title="indicateur"
+                        title="Indicateur"
                         label="écart de taux d'augmentation"
                         valid={indicateurDeuxFormValidated}
                       />
@@ -176,7 +176,7 @@ function Menu({
                     <ListItem>
                       <CustomNavLink
                         to={`/simulateur/${code}/indicateur3`}
-                        title="indicateur"
+                        title="Indicateur"
                         label="écart de taux de promotion"
                         valid={indicateurTroisFormValidated}
                       />
@@ -186,7 +186,7 @@ function Menu({
                   <ListItem>
                     <CustomNavLink
                       to={`/simulateur/${code}/indicateur2et3`}
-                      title="indicateur"
+                      title="Indicateur"
                       label="écart de taux d'augmentation"
                       valid={indicateurDeuxTroisFormValidated}
                     />
@@ -195,7 +195,7 @@ function Menu({
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/indicateur4`}
-                    title="indicateur"
+                    title="Indicateur"
                     label="retour congé maternité"
                     valid={indicateurQuatreFormValidated}
                   />
@@ -203,13 +203,13 @@ function Menu({
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/indicateur5`}
-                    title="indicateur"
+                    title="Indicateur"
                     label="hautes rémunérations"
                     valid={indicateurCinqFormValidated}
                   />
                 </ListItem>
                 <ListItem>
-                  <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="récapitulatif" />
+                  <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="Récapitulatif" />
                 </ListItem>
               </List>
               <Heading as="div" size="sm" mb={2} mt={4}>
@@ -219,21 +219,21 @@ function Menu({
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/informations-entreprise`}
-                    title="informations entreprise/UES"
+                    title="Informations entreprise/UES"
                     valid={informationsEntrepriseFormValidated}
                   />
                 </ListItem>
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/informations-declarant`}
-                    title="informations déclarant"
+                    title="Informations déclarant"
                     valid={informationsDeclarantFormValidated}
                   />
                 </ListItem>
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/declaration`}
-                    title="déclaration"
+                    title="Déclaration"
                     valid={declarationFormValidated}
                   />
                 </ListItem>

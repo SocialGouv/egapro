@@ -2,7 +2,7 @@ import { FAQPart, FAQSection } from "../globals"
 
 export const faqData: FAQPart = {
   champApplication: {
-    title: "champ d’application et entrée en vigueur",
+    title: "Champ d’application et entrée en vigueur",
     qr: [
       {
         question: "À qui s'applique l'obligation de calcul et de publication de l'Index? ",
@@ -48,7 +48,7 @@ export const faqData: FAQPart = {
     ],
   },
   periodeReference: {
-    title: "période de référence",
+    title: "Période de référence",
     qr: [
       {
         question:
@@ -71,7 +71,7 @@ export const faqData: FAQPart = {
     ],
   },
   effectifs: {
-    title: "effectifs à prendre en compte pour le calcul des indicateurs",
+    title: "Effectifs à prendre en compte pour le calcul des indicateurs",
     qr: [
       {
         question: "Quels sont les effectifs à prendre en considération pour calculer les indicateurs ?",
@@ -160,7 +160,7 @@ export const faqData: FAQPart = {
     ],
   },
   remuneration: {
-    title: "éléments de la rémunération pris en compte",
+    title: "Éléments de la rémunération pris en compte",
     qr: [
       {
         question:
@@ -251,7 +251,7 @@ export const faqData: FAQPart = {
     ],
   },
   indicateur1: {
-    title: "indicateur - écart de rémunération",
+    title: "Indicateur - écart de rémunération",
     qr: [
       {
         question:
@@ -327,7 +327,7 @@ export const faqData: FAQPart = {
     ],
   },
   indicateur2: {
-    title: "indicateur - écart de taux d’augmentations",
+    title: "Indicateur - écart de taux d’augmentations",
     qr: [
       {
         question:
@@ -354,7 +354,7 @@ export const faqData: FAQPart = {
     ],
   },
   indicateur3: {
-    title: "indicateur - écart de taux de promotions",
+    title: "Indicateur - écart de taux de promotions",
     qr: [
       {
         question:
@@ -390,7 +390,7 @@ export const faqData: FAQPart = {
     ],
   },
   indicateur2et3: {
-    title: "indicateurs - écart de taux d’augmentations",
+    title: "Indicateurs - écart de taux d’augmentations",
     qr: [
       {
         question:
@@ -425,7 +425,7 @@ export const faqData: FAQPart = {
     ],
   },
   indicateur4: {
-    title: "indicateur - congé maternité",
+    title: "Indicateur - congé maternité",
     qr: [
       {
         question:
@@ -489,7 +489,7 @@ export const faqData: FAQPart = {
     ],
   },
   publication: {
-    title: "publication et transmission de l’index",
+    title: "Publication et transmission de l’index",
     qr: [
       {
         question: "Faut-il publier uniquement l’Index ou également le détail des indicateurs ?",
@@ -558,43 +558,43 @@ export const faqData: FAQPart = {
 
 export const faqSections: FAQSection = {
   champApplication: {
-    title: "champ d’application et entrée en vigueur",
+    title: "Champ d’application et entrée en vigueur",
     parts: ["champApplication"],
   },
   informations: {
-    title: "période de référence",
+    title: "Période de référence",
     parts: ["periodeReference"],
   },
   effectifs: {
-    title: "effectifs pris en compte",
+    title: "Effectifs pris en compte",
     parts: ["effectifs"],
   },
   indicateur1: {
-    title: "indicateur - écart de rémunération",
+    title: "Indicateur - écart de rémunération",
     parts: ["remuneration", "indicateur1"],
   },
   indicateur2et3: {
-    title: "indicateur - écart d'augmentations (50 à 250 salariés)",
+    title: "Indicateur - écart d'augmentations (50 à 250 salariés)",
     parts: ["indicateur2et3"],
   },
   indicateur2: {
-    title: "indicateur - écart d’augmentations (plus de 250 salariés)",
+    title: "Indicateur - écart d’augmentations (plus de 250 salariés)",
     parts: ["indicateur2"],
   },
   indicateur3: {
-    title: "indicateur - écart de promotions (plus de 250 salariés)",
+    title: "Indicateur - écart de promotions (plus de 250 salariés)",
     parts: ["indicateur3"],
   },
   indicateur4: {
-    title: "indicateur - congé maternité",
+    title: "Indicateur - congé maternité",
     parts: ["indicateur4"],
   },
   indicateur5: {
-    title: "indicateur - hautes rémunérations",
+    title: "Indicateur - hautes rémunérations",
     parts: [],
   },
   resultat: {
-    title: "résultat",
+    title: "Résultat",
     parts: ["publication"],
   },
 }

@@ -29,6 +29,7 @@ import InformationsDeclarant from "../views/InformationsDeclarant"
 import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
 import AskEmail from "../views/AskEmail"
+import { sirenIsFree } from "../utils/siren"
 
 interface TokenInfo {
   email: string
@@ -98,14 +99,18 @@ function Simulateur({ code, state, dispatch }: Props) {
 
         const simuData = indicatorsData?.jsonBody?.data
 
-        const siren = simuData?.informationsEntreprise?.siren
+        const siren =
+          simuData?.informationsEntreprise?.formValidated === "Valid" ? simuData?.informationsEntreprise?.siren : null
+
+        // a free siren is a siren that has no owners already bound to it.
+        const freeSiren = await sirenIsFree(siren)
 
         if (siren) {
           if (!token) {
             // On ne peut pas voir une simulation avec un SIREN rempli et qu'on n'est pas authentifié.
             // Renvoi sur le formulaire d'email (cf. plus bas).
             setErrorMessage("Veuillez renseigner votre email pour accéder à cette simulation-déclaration.")
-          } else if (!isUserGrantedForSiren(siren)) {
+          } else if (!isUserGrantedForSiren(siren) && !freeSiren) {
             // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
             setErrorMessage(
               "Vous n'êtes pas autorisé à accéder à cette simulation-déclaration, veuillez contacter votre référent de l'égalité professionnelle.",
