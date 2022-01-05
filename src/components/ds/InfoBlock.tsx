@@ -9,7 +9,7 @@ interface InfoBlocProps {
 }
 
 const InfoBlock: FunctionComponent<InfoBlocProps> = ({ type = "info", title, text, closeButton = false }) => {
-  const [isBlockVisible, setIsBlockVisible] = useBoolean()
+  const [isBlockVisible, setIsBlockVisible] = useBoolean(true)
 
   if (isBlockVisible) {
     return (
