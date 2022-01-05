@@ -24,7 +24,9 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
           title="Index égalité femmes-hommes"
           text={
             <React.Fragment>
-              <Text>{`Votre résultat total est <strong>${noteIndex}/100</strong>.`}</Text>
+              <Text>
+                Votre résultat total est <strong>{noteIndex}/100</strong>.
+              </Text>
               <Text
                 mt={1}
                 fontStyle="italic"
