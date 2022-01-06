@@ -117,3 +117,7 @@ export const simpleMemoize = (fn: any) => {
     return lastResult
   }
 }
+
+export function isFormValid(formState: { formValidated: string }) {
+  return formState.formValidated === "Valid"
+}
