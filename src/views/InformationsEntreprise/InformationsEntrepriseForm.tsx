@@ -267,7 +267,7 @@ function InformationsEntrepriseForm({
             label="Code Postal"
             fieldName="codePostal"
             errorText={
-              errors.codePostal &&
+              errors?.codePostal &&
               (errors.codePostal.required || errors.codePostal.mustBeNumber || errors.codePostal.mustBe5Digits)
                 ? "le code postal doit être composé de 5 chiffres"
                 : `le code postal ne correspond pas au département choisi (${departementCode[values.departement]})`

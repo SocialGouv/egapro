@@ -38,7 +38,8 @@ const validateForm = (finPeriodeReference: string) => {
     publicationSurSiteInternet,
   }: {
     datePublication: string
-    publicationSurSiteInternet: string | undefined
+    publicationSurSiteInternet?: string
+    cseMisEnPlace?: string
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
@@ -179,7 +180,7 @@ function DeclarationForm({
             <Fragment>
               {state.informationsEntreprise.structure === "Entreprise" && (
                 <div css={styles.formField}>
-                  Un CSE a-t-il été mis en place ?
+                  Un CSE a-t-il été mis en place&nbsp;?
                   <RadiosBoolean
                     fieldName="cseMisEnPlace"
                     value={values.cseMisEnPlace}

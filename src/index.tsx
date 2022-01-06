@@ -13,13 +13,7 @@ if (process.env.REACT_APP_SENTRY_DSN) {
   })
 }
 
-if (process.env.NODE_ENV !== "production") {
-  import("@axe-core/react").then((axe) => {
-    axe.default(React, ReactDOM, 1000)
-  })
-}
-
-ReactDOM.render(<App />, document.getElementById("root"))
+ReactDOM.render(<App />, document?.getElementById("root"))
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

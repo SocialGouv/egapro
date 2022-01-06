@@ -56,6 +56,7 @@ const validateForm = ({
   nomEntreprise: string
   anneeDeclaration: string
   finPeriodeReference: string
+  trancheEffectifs: string
 }) => {
   const parsedFinPeriodeReference = parseDate(finPeriodeReference)
   return {

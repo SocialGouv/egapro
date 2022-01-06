@@ -71,6 +71,7 @@ function CellInput({
   return (
     <Cell style={styles.cell}>
       {mask ? (
+        // @ts-ignore
         <MaskedInput
           mask={maskWithAnyChar}
           css={[styles.input, style, error && styles.inputError]}
