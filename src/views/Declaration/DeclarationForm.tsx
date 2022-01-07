@@ -164,7 +164,7 @@ function DeclarationForm({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit} css={styles.container} style={{ marginTop: 20 }}>
           <FormAutoSave saveForm={saveForm} />
 
           {noteIndex !== undefined && noteIndex < 75 && (

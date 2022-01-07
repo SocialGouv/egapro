@@ -38,6 +38,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
 import { formatDataForAPI, logToSentry } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
+import { isFormValid } from "../../utils/formHelpers"
 
 interface DeclarationProps extends RouteComponentProps {
   code: string
@@ -111,15 +112,15 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   const trancheEffectifs = state.informations.trancheEffectifs
 
   const allIndicateurValid =
-    (state.indicateurUn.formValidated === "Valid" ||
+    (isFormValid(state.indicateurUn) ||
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
       (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
     (trancheEffectifs !== "50 à 250"
-      ? (state.indicateurDeux.formValidated === "Valid" || !effectifsIndicateurDeuxCalculable) &&
-        (state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable)
-      : state.indicateurDeuxTrois.formValidated === "Valid" || !effectifsIndicateurDeuxTroisCalculable) &&
-    state.indicateurQuatre.formValidated === "Valid" &&
-    state.indicateurCinq.formValidated === "Valid"
+      ? (isFormValid(state.indicateurDeux) || !effectifsIndicateurDeuxCalculable) &&
+        (isFormValid(state.indicateurTrois) || !effectifsIndicateurTroisCalculable)
+      : isFormValid(state.indicateurDeuxTrois) || !effectifsIndicateurDeuxTroisCalculable) &&
+    isFormValid(state.indicateurQuatre) &&
+    isFormValid(state.indicateurCinq)
 
   const effectifData: DeclarationEffectifData = {
     nombreSalariesTotal,
@@ -304,8 +305,10 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   // tous les formulaires ne sont pas encore validés
   if (
     !allIndicateurValid ||
-    state.informationsEntreprise.formValidated !== "Valid" ||
-    state.informationsDeclarant.formValidated !== "Valid"
+    !isFormValid(state.informations) ||
+    !isFormValid(state.effectif) ||
+    !isFormValid(state.informationsEntreprise) ||
+    !isFormValid(state.informationsDeclarant)
   ) {
     return (
       <PageDeclaration>
@@ -318,59 +321,57 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
           Les formulaires suivants ne sont pas validés
         </Heading>
         <UnorderedList mt={2}>
-          {state.informations.formValidated !== "Valid" && (
+          {!isFormValid(state.informations) && (
             <ListItem>
               <TextSimulatorLink to="/informations" label="Informations calcul et période de référence" />
             </ListItem>
           )}
-          {state.effectif.formValidated !== "Valid" && (
+          {!isFormValid(state.effectif) && (
             <ListItem>
               <TextSimulatorLink to="/effectifs" label="Effectifs pris en compte" />
             </ListItem>
           )}
-          {state.indicateurUn.formValidated !== "Valid" &&
+          {!isFormValid(state.indicateurUn) &&
             ((!effectifsIndicateurUnCalculable && !state.indicateurUn.csp) || effectifsIndicateurUnCalculable) && (
               <ListItem>
                 <TextSimulatorLink to="/indicateur1" label="Indicateur écart de rémunération" />
               </ListItem>
             )}
+          {trancheEffectifs !== "50 à 250" && !isFormValid(state.indicateurDeux) && effectifsIndicateurDeuxCalculable && (
+            <ListItem>
+              <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
+            </ListItem>
+          )}
           {trancheEffectifs !== "50 à 250" &&
-            state.indicateurDeux.formValidated !== "Valid" &&
-            effectifsIndicateurDeuxCalculable && (
-              <ListItem>
-                <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
-              </ListItem>
-            )}
-          {trancheEffectifs !== "50 à 250" &&
-            state.indicateurTrois.formValidated !== "Valid" &&
+            !isFormValid(state.indicateurTrois) &&
             effectifsIndicateurTroisCalculable && (
               <ListItem>
                 <TextSimulatorLink to="/indicateur3" label="Indicateur écart de taux de promotions" />
               </ListItem>
             )}
           {trancheEffectifs === "50 à 250" &&
-            state.indicateurDeuxTrois.formValidated !== "Valid" &&
+            !isFormValid(state.indicateurDeuxTrois) &&
             effectifsIndicateurDeuxTroisCalculable && (
               <ListItem>
                 <TextSimulatorLink to="/indicateur2et3" label="Indicateur écart de taux d'augmentations" />
               </ListItem>
             )}
-          {state.indicateurQuatre.formValidated !== "Valid" && (
+          {!isFormValid(state.indicateurQuatre) && (
             <ListItem>
               <TextSimulatorLink to="/indicateur4" label="Indicateur retour de congé maternité" />
             </ListItem>
           )}
-          {state.indicateurCinq.formValidated !== "Valid" && (
+          {!isFormValid(state.indicateurCinq) && (
             <ListItem>
               <TextSimulatorLink to="/indicateur5" label="Indicateur hautes rémunérations" />
             </ListItem>
           )}
-          {state.informationsEntreprise.formValidated !== "Valid" && (
+          {!isFormValid(state.informationsEntreprise) && (
             <ListItem>
               <TextSimulatorLink to="/informations-entreprise" label="Informations entreprise/UES" />
             </ListItem>
           )}
-          {state.informationsDeclarant.formValidated !== "Valid" && (
+          {!isFormValid(state.informationsDeclarant) && (
             <ListItem>
               <TextSimulatorLink to="/informations-declarant" label="Informations déclarant" />
             </ListItem>
@@ -396,7 +397,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
               noteIndex={noteIndex}
               indicateurUnParCSP={state.indicateurUn.csp}
               finPeriodeReference={state.informations.finPeriodeReference}
-              readOnly={state.declaration.formValidated === "Valid" && !declaring}
+              readOnly={isFormValid(state.declaration) && !declaring}
               updateDeclaration={updateDeclaration}
               validateDeclaration={validateDeclaration}
               apiError={apiError}
