@@ -1,15 +1,15 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { Fragment, ReactNode } from "react"
+import React, { FunctionComponent } from "react"
+import { Heading, SimpleGrid } from "@chakra-ui/react"
 
 import { FormState, TrancheEffectifs } from "../../globals"
 import { calendarYear, Year } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-import { useColumnsWidth, useLayoutType } from "../../components/GridContext"
+import FormStack from "../../components/ds/FormStack"
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
 
-interface Props {
+interface RecapitulatifInformationsProps {
   informationsFormValidated: FormState
   trancheEffectifs: TrancheEffectifs
   anneeDeclaration: number | undefined
@@ -17,96 +17,48 @@ interface Props {
   nombreSalaries: number | undefined
 }
 
-function RecapitulatifInformations({
+const RecapitulatifInformations: FunctionComponent<RecapitulatifInformationsProps> = ({
   informationsFormValidated,
   trancheEffectifs,
   anneeDeclaration,
   finPeriodeReference,
   nombreSalaries,
-}: Props) {
-  const layoutType = useLayoutType()
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
-
+}) => {
   if (informationsFormValidated !== "Valid") {
     return (
-      <div css={styles.container}>
-        <InfoBlock
-          type="warning"
-          title="Informations"
-          text={
-            <Fragment>
-              Nous ne pouvons pas afficher les informations de votre entreprise car vous n’avez pas encore validé vos
-              données saisies. <TextSimulatorLink to="/informations" label="Valider les données" />
-            </Fragment>
-          }
-        />
-      </div>
+      <InfoBlock
+        type="warning"
+        title="Informations"
+        text={
+          <>
+            Nous ne pouvons pas afficher les informations de votre entreprise car vous n’avez pas encore validé vos
+            données saisies. <TextSimulatorLink to="/informations" label="Valider les données" />
+          </>
+        }
+      />
     )
   }
 
   return (
-    <div css={[styles.container, css({ width })]}>
-      <DataDisplay header="Année au titre de laquelle les indicateurs sont calculés" data={anneeDeclaration} />
-
-      <DataDisplay header="Période de référence">
-        <div css={styles.dates}>
-          <div css={styles.dateField}>
-            <DataDisplay header="Date de début" data={calendarYear(finPeriodeReference, Year.Subtract, 1)} />
-          </div>
-
-          <div css={styles.dateField}>
-            <DataDisplay header="Date de fin" data={finPeriodeReference} />
-          </div>
-        </div>
-      </DataDisplay>
-
-      <DataDisplay header="Tranche d'effectifs de l'entreprise ou de l'UES" data={trancheEffectifs} />
-
-      <DataDisplay header="Nombre de salariés pris en compte pour le calcul de l'index" data={nombreSalaries} />
-    </div>
+    <FormStack>
+      <FakeInputGroup label="Année au titre de laquelle les indicateurs sont calculés">
+        {anneeDeclaration}
+      </FakeInputGroup>
+      <div>
+        <Heading as="div" size="sm" mb={2}>
+          Période de référence
+        </Heading>
+        <SimpleGrid columns={{ xl: 2 }} spacing={6}>
+          <FakeInputGroup label="Date de début">{calendarYear(finPeriodeReference, Year.Subtract, 1)}</FakeInputGroup>
+          <FakeInputGroup label="Date de début">{finPeriodeReference}</FakeInputGroup>
+        </SimpleGrid>
+      </div>
+      <FakeInputGroup label="Tranche d'effectifs de l'entreprise ou de l'UES">{trancheEffectifs}</FakeInputGroup>
+      <FakeInputGroup label="Nombre de salariés pris en compte pour le calcul de l'index">
+        {nombreSalaries}
+      </FakeInputGroup>
+    </FormStack>
   )
-}
-
-interface DataDisplayProps {
-  header: string
-  children?: ReactNode
-  data?: any
-}
-
-function DataDisplay({ header, data, children }: DataDisplayProps) {
-  return (
-    <Fragment>
-      <p css={styles.header}>{header}</p>
-      {data ? <div css={styles.data}>{data}</div> : children}
-    </Fragment>
-  )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-    marginTop: 22,
-    marginBottom: 22,
-  }),
-  header: css({
-    fontWeight: "bold",
-    marginTop: 5,
-  }),
-  dates: css({
-    display: "flex",
-    justifyContent: "space-between",
-  }),
-  data: css({
-    backgroundColor: "#fff",
-    lineHeight: "2.5em",
-    paddingLeft: "1em",
-    marginBottom: 20,
-    marginLeft: 0,
-    marginTop: 5,
-    borderRadius: 4,
-  }),
-  dateField: css({ width: "40%" }),
 }
 
 export default RecapitulatifInformations
