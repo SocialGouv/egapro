@@ -1,5 +1,16 @@
 import React, { FunctionComponent } from "react"
-import { Text, Input, InputGroup, InputRightElement, Button, Image, useClipboard } from "@chakra-ui/react"
+import {
+  Text,
+  Input,
+  InputGroup,
+  FormLabel,
+  InputRightElement,
+  VisuallyHidden,
+  Button,
+  Image,
+  useClipboard,
+  FormControl,
+} from "@chakra-ui/react"
 import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
 import { ButtonSimulatorLink } from "../components/SimulatorLink"
@@ -14,14 +25,19 @@ const HomeSimulateur: FunctionComponent = () => {
 
   return (
     <Page title="Bienvenue sur Index Egapro">
-      <InputGroup size="md">
-        <Input onClick={onCopy} defaultValue={link} pr="8rem" type={"text"} placeholder="Enter password" />
-        <InputRightElement width="7rem" sx={{ right: 1 }}>
-          <Button h="1.75rem" size="sm" onClick={onCopy} variant="outline" colorScheme="primary">
-            {hasCopied ? <>Lien&nbsp;copié</> : <>Copier&nbsp;le&nbsp;lien</>}
-          </Button>
-        </InputRightElement>
-      </InputGroup>
+      <FormControl>
+        <FormLabel htmlFor="plop">
+          <VisuallyHidden>Lien de la déclaration</VisuallyHidden>
+        </FormLabel>
+        <InputGroup size="md">
+          <Input id="plop" onClick={onCopy} defaultValue={link} pr="8rem" type={"text"} placeholder="Enter password" />
+          <InputRightElement width="7rem" sx={{ right: 1 }}>
+            <Button h="1.75rem" size="sm" onClick={onCopy} variant="outline" colorScheme="primary">
+              {hasCopied ? <>Lien&nbsp;copié</> : <>Copier&nbsp;le&nbsp;lien</>}
+            </Button>
+          </InputRightElement>
+        </InputGroup>
+      </FormControl>
 
       <Text mt={6}>
         Afin de pouvoir réaccéder à tout moment à votre calcul&nbsp;:{" "}
