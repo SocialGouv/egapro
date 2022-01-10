@@ -10,7 +10,7 @@ import { useColumnsWidth, useLayoutType } from "../../../components/GridContext"
 
 interface Props {
   title: string
-  children: ReactNode
+  children?: ReactNode
   resultBubble: ResultBubbleProps
 }
 

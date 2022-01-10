@@ -45,7 +45,7 @@ const styles = {
   error: css({
     display: "flex",
     alignItems: "center",
-    marginTop: 4,
+    marginTop: 20,
     padding: "8px 12px",
     backgroundColor: "white",
     border: `solid ${globalStyles.colors.error} 1px`,
