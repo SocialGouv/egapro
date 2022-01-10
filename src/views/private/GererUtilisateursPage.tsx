@@ -18,7 +18,10 @@ function GererUtilisateursPage() {
   const { staff } = useUser()
 
   const [siren, setSiren] = React.useState("")
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setSiren(event.target.value)
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target?.value
+    setSiren(value ? value.replace(/\s/g, "") : value)
+  }
 
   return (
     <SinglePageLayout>
@@ -32,7 +35,7 @@ function GererUtilisateursPage() {
               <Input value={siren} onChange={handleChange} placeholder="Saisissez le SIREN de l'entreprise" />
             </FormControl>
 
-            {siren && (
+            {siren?.length === 9 && (
               <Flex mt="6" direction="column">
                 <InfoEntreprise siren={siren} />
                 <UtilisateursEntreprise siren={siren} />
