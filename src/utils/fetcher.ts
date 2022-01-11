@@ -6,7 +6,7 @@ if (process.env.REACT_APP_EGAPRO_API_URL) API_URL = process.env.REACT_APP_EGAPRO
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again"
 
-type FetchError = Error & {
+export type FetchError = Error & {
   info?: string
   status?: number
 }

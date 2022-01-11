@@ -5,7 +5,7 @@ import { genericErrorMessage } from "../utils/makeMessage"
 import { useLogoutIfExpiredToken } from "./useLogoutIfExpiredToken"
 
 export function useOwnersOfSiren(siren: string) {
-  const { data, error, mutate } = useSWR(siren ? `/ownership/${siren}` : null, fetcher)
+  const { data, error, mutate } = useSWR<{ owners: Array<string> }>(siren ? `/ownership/${siren}` : null, fetcher)
   useLogoutIfExpiredToken(error)
 
   const isLoading = !data && !error
@@ -16,6 +16,6 @@ export function useOwnersOfSiren(siren: string) {
     message: genericErrorMessage(error),
     isLoading,
     isError,
-    mutate,
+    mutate: (emails: string[]) => mutate({ owners: emails }),
   }
 }

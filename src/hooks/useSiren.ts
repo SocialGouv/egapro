@@ -14,8 +14,13 @@ const fetcherSiren = async (siren: string) => {
   return genericFetch(API_SOCIAL_GOUV_SIREN + siren)
 }
 
+type ReturnApiType = {
+  label: string
+  firstMatchingEtablissement: { address: string }
+}
+
 export function useSiren(siren: string) {
-  const { data, error, mutate } = useSWR(siren ? siren : null, fetcherSiren, {
+  const { data, error } = useSWR<ReturnApiType>(siren ? siren : null, fetcherSiren, {
     onErrorRetry: (error) => {
       // Never retry on 404.
       if (error.status === 404) return
@@ -28,5 +33,5 @@ export function useSiren(siren: string) {
 
   const entreprise = data ? { raison_sociale: data.label, adresse: data.firstMatchingEtablissement?.address } : null
 
-  return { entreprise, error, message: genericErrorMessage(error), isLoading, isError, mutate }
+  return { entreprise, error, message: genericErrorMessage(error), isLoading, isError }
 }
