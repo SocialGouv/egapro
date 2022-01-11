@@ -64,7 +64,7 @@ function MentionsLegales() {
       <Text>
         Le site est protégé par un certificat électronique, matérialisé pour la grande majorité des navigateurs par un
         cadenas. Cette protection participe à la confidentialité des échanges. En aucun cas les services associés à la
-        plateforme ne seront à l’origine d’envoi de courriels pour demander la saisie d’informations personnelles.
+        plateforme ne seront à l’origine d’envoi d'emails pour demander la saisie d’informations personnelles.
       </Text>
     </Page>
   )
