@@ -52,7 +52,7 @@ const HomeSimulateur: FunctionComponent = () => {
         />
       </ActionBar>
 
-      <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} alt="" aria-hidden="true" mt={16} />
+      <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} alt="" aria-hidden="true" mt={20} />
     </Page>
   )
 }
