@@ -4,14 +4,14 @@ import { Flex, HStack, Stack, Text } from "@chakra-ui/layout"
 
 import { IconOfficeBuilding } from "./ds/Icons"
 import { useSiren } from "../hooks/useSiren"
-import Toast from "./ds/Toast"
+import { useSoloToastMessage } from "../utils/hooks"
 
 export default function InfoEntreprise({ siren }: { siren: string }) {
   const { entreprise, message, isLoading } = useSiren(siren)
+  useSoloToastMessage("info-entreprise-toast", message)
 
   return (
     <HStack borderWidth="3px" borderRadius="lg" as="section" spacing="4" p="6" pt="4" pb="4">
-      <Toast message={message} />
       <Flex>
         <IconOfficeBuilding boxSize="8" color="gray.500" />
       </Flex>

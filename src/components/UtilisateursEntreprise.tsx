@@ -6,11 +6,11 @@ import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
 import { Form } from "react-final-form"
 import { z } from "zod"
 
+import { fetcher } from "../utils/fetcher"
 import { useToastMessage } from "../utils/hooks"
 import { useOwnersOfSiren } from "../hooks/useOwnersOfSiren"
-import { fetcher } from "../utils/fetcher"
+import { useSoloToastMessage } from "../utils/hooks"
 import PrimaryButton from "../components/ds/PrimaryButton"
-import Toast from "../components/ds/Toast"
 import { formValidator, InputControl } from "../components/ds/form-lib"
 import ButtonAction from "../components/ButtonAction"
 import { IconDelete, IconDrag } from "../components/ds/Icons"
@@ -75,6 +75,7 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
   const [showAddForm, setShowAddForm] = useBoolean()
 
   const { owners, message, isLoading, mutate } = useOwnersOfSiren(siren)
+  useSoloToastMessage("utilisateurs-entreprise-toast", message)
 
   React.useEffect(() => {
     setShowAddForm.off()
@@ -116,8 +117,6 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
 
   return (
     <Box mt="4">
-      <Toast message={message} />
-
       {isLoading ? (
         <Box m="6">
           <Spinner />

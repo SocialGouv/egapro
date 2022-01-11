@@ -1,5 +1,6 @@
 import { EXPIRED_TOKEN_MESSAGE } from "../utils/fetcher"
 import { AlertMessageType } from "../globals"
+import type { FetchError } from "../utils/fetcher"
 
 function makeMessage(kind: AlertMessageType["kind"]) {
   return function (text: string): AlertMessageType {
@@ -7,16 +8,28 @@ function makeMessage(kind: AlertMessageType["kind"]) {
   }
 }
 
-// function sucessMessage(text: string): AlertMessageType {
-//   return makeMessage("success")(text)
-// }
+/**
+ * Build a success message to display in a Toast
+ *
+ * @param text Text to display in the alert
+ * @returns AlertMessageType
+ */
+export function sucessMessage(text: string): AlertMessageType {
+  return makeMessage("success")(text)
+}
 
-function errorMessage(text: string): AlertMessageType {
+/**
+ * Build an error message to display in a Toast
+ *
+ * @param text Text to display in the alert
+ * @returns AlertMessageType
+ */
+export function errorMessage(text: string): AlertMessageType {
   return makeMessage("error")(text)
 }
 
 // Helper to have generic messages for app.
-export function genericErrorMessage(error: Error & { info: string; status: number }): AlertMessageType | null {
+export function genericErrorMessage(error: FetchError): AlertMessageType | null {
   if (!error) return null
 
   switch (error?.status) {
