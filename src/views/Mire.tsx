@@ -73,7 +73,7 @@ function Mire() {
               Un mail vous a été envoyé.
             </Text>
             <Text as="p" mb="4">
-              Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisie (<strong>{email}</strong>) soit
+              Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisi (<strong>{email}</strong>) soit
               incorrect, ou bien que le mail ait été déplacé dans votre dossier de courriers indésirables ou dans le
               dossier SPAM.
             </Text>
@@ -100,7 +100,7 @@ function Mire() {
               validate={formValidator(FormInput)}
               render={({ handleSubmit, values, submitting, pristine }) => (
                 <form onSubmit={handleSubmit}>
-                  <InputControl name="email" label="Courriel" />
+                  <InputControl name="email" label="Email" />
 
                   <DebugForm show={false} values={values} />
 
