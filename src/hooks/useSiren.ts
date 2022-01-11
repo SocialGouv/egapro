@@ -15,7 +15,13 @@ const fetcherSiren = async (siren: string) => {
 }
 
 export function useSiren(siren: string) {
-  const { data, error, mutate } = useSWR(siren ? siren : null, fetcherSiren)
+  const { data, error, mutate } = useSWR(siren ? siren : null, fetcherSiren, {
+    onErrorRetry: (error) => {
+      // Never retry on 404.
+      if (error.status === 404) return
+    },
+    revalidateOnFocus: false,
+  })
 
   const isLoading = !data && !error
   const isError = Boolean(error)
