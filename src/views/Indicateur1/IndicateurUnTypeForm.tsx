@@ -1,13 +1,13 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { useCallback } from "react"
+import React, { FunctionComponent, useCallback } from "react"
 import { Form } from "react-final-form"
+import { Text } from "@chakra-ui/react"
+
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals"
 
 import FormAutoSave from "../../components/FormAutoSave"
 import RadioButtons from "../../components/RadioButtons"
 
-interface Props {
+interface IndicateurUnTypeFormProps {
   csp: boolean
   coef: boolean
   autre: boolean
@@ -15,7 +15,7 @@ interface Props {
   dispatch: (action: ActionType) => void
 }
 
-function IndicateurUnTypeForm({ coef, autre, readOnly, dispatch }: Props) {
+const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ coef, autre, readOnly, dispatch }) => {
   const updateIndicateurUnType = useCallback(
     (data: ActionIndicateurUnTypeData) => dispatch({ type: "updateIndicateurUnType", data }),
     [dispatch],
@@ -47,7 +47,7 @@ function IndicateurUnTypeForm({ coef, autre, readOnly, dispatch }: Props) {
       initialValues={initialValues}
     >
       {({ handleSubmit, values }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
             fieldName="modaliteDeclaration"
@@ -71,27 +71,17 @@ function IndicateurUnTypeForm({ coef, autre, readOnly, dispatch }: Props) {
               },
             ]}
           />
-          {values.modaliteDeclaration !== "csp" ? (
-            <p>
+          {values.modaliteDeclaration !== "csp" && (
+            <Text>
               Si vous choisissez cette option, la consultation du CSE est obligatoire.
               <br />
               La date de consultation vous sera demandée au moment de la déclaration
-            </p>
-          ) : (
-            ""
+            </Text>
           )}
         </form>
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-    marginBottom: 54,
-  }),
 }
 
 export default IndicateurUnTypeForm

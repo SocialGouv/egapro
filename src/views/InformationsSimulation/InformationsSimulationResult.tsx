@@ -32,7 +32,7 @@ function InformationsSimulationResult({
       />
 
       <p css={styles.edit}>
-        <ActionLink onClick={() => validateInformationsSimulation("None")}>modifier les données saisies</ActionLink>
+        <ActionLink onClick={() => validateInformationsSimulation("None")}>Modifier les données saisies</ActionLink>
       </p>
     </div>
   )

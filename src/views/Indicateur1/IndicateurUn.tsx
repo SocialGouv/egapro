@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { ReactNode } from "react"
+import React, { FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, ActionType } from "../../globals"
@@ -17,14 +15,14 @@ import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface IndicateurUnProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Indicateur écart de rémunération"
 
-function IndicateurUn({ state, dispatch }: Props) {
+const IndicateurUn: FunctionComponent<IndicateurUnProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const { csp, coef, autre } = state.indicateurUn
@@ -57,7 +55,7 @@ function IndicateurUn({ state, dispatch }: Props) {
         <ActionBar>
           <ButtonSimulatorLink
             to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-            label="suivant"
+            label="Suivant"
           />
         </ActionBar>
       </PageIndicateurUn>
@@ -76,17 +74,15 @@ function IndicateurUn({ state, dispatch }: Props) {
   )
 }
 
-function PageIndicateurUn({ children }: { children: ReactNode }) {
-  return (
-    <Page
-      title={title}
-      tagline={[
-        "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE) et par tranche d’âge.",
-      ]}
-    >
-      {children}
-    </Page>
-  )
-}
+const PageIndicateurUn: FunctionComponent = ({ children }) => (
+  <Page
+    title={title}
+    tagline={[
+      "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE) et par tranche d’âge.",
+    ]}
+  >
+    {children}
+  </Page>
+)
 
 export default IndicateurUn

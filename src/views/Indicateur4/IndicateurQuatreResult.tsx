@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { Box } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
 
@@ -8,19 +8,19 @@ import { displayPercent } from "../../utils/helpers"
 import ResultBubble from "../../components/ResultBubble"
 import ActionLink from "../../components/ActionLink"
 
-interface Props {
+interface IndicateurQuatreResultProps {
   indicateurEcartNombreSalarieesAugmentees: number | undefined
   noteIndicateurQuatre: number | undefined
   validateIndicateurQuatre: (valid: FormState) => void
 }
 
-function IndicateurQuatreResult({
+const IndicateurQuatreResult: FunctionComponent<IndicateurQuatreResultProps> = ({
   indicateurEcartNombreSalarieesAugmentees,
   noteIndicateurQuatre,
   validateIndicateurQuatre,
-}: Props) {
+}) => {
   return (
-    <div css={styles.container}>
+    <Box mt={24}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
@@ -33,23 +33,11 @@ function IndicateurQuatreResult({
         indicateurSexeSurRepresente="femmes"
       />
 
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurQuatre("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+      <Box textAlign="center" mt={4}>
+        <ActionLink onClick={() => validateIndicateurQuatre("None")}>Modifier les données saisies</ActionLink>
+      </Box>
+    </Box>
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default IndicateurQuatreResult

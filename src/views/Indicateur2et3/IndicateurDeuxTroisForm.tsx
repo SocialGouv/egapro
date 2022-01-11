@@ -1,6 +1,7 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
+import { Box } from "@chakra-ui/react"
+
 import { FormState, ActionIndicateurDeuxTroisData, PeriodeDeclaration, GroupeEffectif } from "../../globals"
 
 import BlocForm from "../../components/BlocForm"
@@ -30,7 +31,8 @@ import { calendarYear, dateToString, parseDate, Year } from "../../utils/helpers
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
-interface Props {
+
+interface IndicateurDeuxTroisForProps {
   finPeriodeReference: string
   presenceAugmentationPromotion: boolean
   nombreAugmentationPromotionFemmes: number | undefined
@@ -42,7 +44,7 @@ interface Props {
   validateIndicateurDeuxTrois: (valid: FormState) => void
 }
 
-function IndicateurDeuxTroisForm({
+const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = ({
   finPeriodeReference,
   presenceAugmentationPromotion,
   nombreAugmentationPromotionFemmes,
@@ -52,7 +54,7 @@ function IndicateurDeuxTroisForm({
   readOnly,
   updateIndicateurDeuxTrois,
   validateIndicateurDeuxTrois,
-}: Props) {
+}) => {
   const initialValues = {
     presenceAugmentationPromotion: parseBooleanStateValue(presenceAugmentationPromotion),
     nombreAugmentationPromotionFemmes: parseIntStateValue(nombreAugmentationPromotionFemmes),
@@ -99,7 +101,7 @@ function IndicateurDeuxTroisForm({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <RadioButtons
             fieldName="periodeDeclaration"
@@ -122,15 +124,14 @@ function IndicateurDeuxTroisForm({
             ]}
           />
 
-          <div css={styles.spacer} />
-
-          <RadiosBoolean
-            fieldName="presenceAugmentationPromotion"
-            value={values.presenceAugmentationPromotion}
-            readOnly={readOnly}
-            labelTrue="il y a eu des augmentations durant la période de déclaration"
-            labelFalse="il n’y a pas eu d'augmentations durant la période de déclaration"
-          />
+          <Box mt={4}>
+            <RadiosBoolean
+              fieldName="presenceAugmentationPromotion"
+              value={values.presenceAugmentationPromotion}
+              readOnly={readOnly}
+              label="Il y a t'il eu des augmentations durant la période de déclaration ?"
+            />
+          </Box>
 
           {values.presenceAugmentationPromotion === "true" && (
             <BlocForm>
@@ -153,7 +154,7 @@ function IndicateurDeuxTroisForm({
 
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/indicateur4" label="suivant" />
+              <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
             </ActionBar>
           ) : (
             <ActionBar>
@@ -168,16 +169,6 @@ function IndicateurDeuxTroisForm({
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  spacer: css({
-    marginTop: "2em",
-  }),
 }
 
 export default IndicateurDeuxTroisForm

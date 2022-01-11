@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx, css } from "@emotion/react"
-import { useCallback, useState } from "react"
+import React, { FunctionComponent, useCallback, useState } from "react"
 
 import { AppState, FormState, ActionType, ActionIndicateurUnCoefData } from "../../../globals"
 
@@ -22,12 +20,12 @@ function getDefaultMenuSelected(
     : "groupe"
 }
 
-interface Props {
+interface IndicateurUnCoefProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
-function IndicateurUnCoef({ state, dispatch }: Props) {
+const IndicateurUnCoef: FunctionComponent<IndicateurUnCoefProps> = ({ state, dispatch }) => {
   const updateIndicateurUnCoefAddGroup = useCallback(
     () => dispatch({ type: "updateIndicateurUnCoefAddGroup" }),
     [dispatch],
@@ -76,7 +74,7 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
   const navigateToRemuneration = () => navigateTo("remuneration")
 
   return (
-    <div css={styles.container}>
+    <div>
       <IndicateurUnCoefMenu
         menuSelected={menuSelected}
         setMenuSelected={setMenuSelected}
@@ -113,13 +111,6 @@ function IndicateurUnCoef({ state, dispatch }: Props) {
       )}
     </div>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
 }
 
 export default IndicateurUnCoef

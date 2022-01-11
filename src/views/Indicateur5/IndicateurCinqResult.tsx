@@ -1,24 +1,24 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { Box } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
 
 import ResultBubble from "../../components/ResultBubble"
 import ActionLink from "../../components/ActionLink"
 
-interface Props {
+interface IndicateurCinqResultProps {
   indicateurSexeSousRepresente: "hommes" | "femmes" | "egalite" | undefined
   indicateurNombreSalariesSexeSousRepresente: number | undefined
   noteIndicateurCinq: number | undefined
   validateIndicateurCinq: (valid: FormState) => void
 }
 
-function IndicateurCinqResult({
+const IndicateurCinqResult: FunctionComponent<IndicateurCinqResultProps> = ({
   indicateurSexeSousRepresente,
   indicateurNombreSalariesSexeSousRepresente,
   noteIndicateurCinq,
   validateIndicateurCinq,
-}: Props) {
+}) => {
   const firstLineInfo =
     indicateurSexeSousRepresente === undefined
       ? undefined
@@ -28,7 +28,7 @@ function IndicateurCinqResult({
       ? "les femmes sont sur-représentées"
       : "les hommes sont sur-représentés"
   return (
-    <div css={styles.container}>
+    <Box mt={6}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={
@@ -48,23 +48,11 @@ function IndicateurCinqResult({
         }
       />
 
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurCinq("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+      <Box textAlign="center" mt={4}>
+        <ActionLink onClick={() => validateIndicateurCinq("None")}>Modifier les données saisies</ActionLink>
+      </Box>
+    </Box>
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default IndicateurCinqResult

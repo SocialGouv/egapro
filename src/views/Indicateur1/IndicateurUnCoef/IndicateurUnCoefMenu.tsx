@@ -84,7 +84,8 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 36,
+    marginBottom: 32,
+    marginTop: 32,
   }),
   menuItem: css({
     flexGrow: 0,

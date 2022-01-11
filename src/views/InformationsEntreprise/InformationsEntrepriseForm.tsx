@@ -1,6 +1,5 @@
-/** @jsx jsx */
-import { Fragment } from "react"
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { FormControl, FormLabel, Text } from "@chakra-ui/react"
 import { MutableState, Tools } from "final-form"
 import arrayMutators from "final-form-arrays"
 import { Form } from "react-final-form"
@@ -16,23 +15,24 @@ import {
   EntrepriseType,
 } from "../../globals"
 
-import globalStyles from "../../utils/globalStyles"
-
 import { mustBeNumber, parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
-import CodeNaf, { codeNafFromCode } from "../../components/CodeNaf"
+import { codeNafFromCode } from "../../components/CodeNaf"
 import FieldSiren from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import NombreEntreprises, { validator as validateNombreEntreprises } from "../../components/NombreEntreprises"
-import RadioButtons from "../../components/RadioButtons"
-import RegionsDepartements, { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
+import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
 import { departementCode } from "../../components/RegionsDepartements"
-import TextField from "../../components/TextField"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
+import ButtonAction from "../../components/ButtonAction"
+import { IconEdit } from "../../components/ds/Icons"
+import InputRadio from "../../components/ds/InputRadio"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
+import FormStack from "../../components/ds/FormStack"
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -122,19 +122,19 @@ const adaptEntreprisesUESSize = (nombreEntreprises: string, entreprisesUES: Arra
   return entreprisesUES
 }
 
-interface Props {
+interface InformationsEntrepriseFormProps {
   informationsEntreprise: AppState["informationsEntreprise"]
   readOnly: boolean
   updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
   validateInformationsEntreprise: (valid: FormState) => void
 }
 
-function InformationsEntrepriseForm({
+const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({
   informationsEntreprise,
   readOnly,
   updateInformationsEntreprise,
   validateInformationsEntreprise,
-}: Props) {
+}) => {
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
     siren: informationsEntreprise.siren,
@@ -214,117 +214,105 @@ function InformationsEntrepriseForm({
       initialValuesEqual={() => true}
     >
       {({ form, handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <RadioButtons
-            fieldName="structure"
-            label="Vous déclarez en tant que"
-            value={values.structure}
-            readOnly={readOnly}
-            choices={[
-              {
-                label: "Entreprise",
-                value: "Entreprise",
-              },
-              {
-                label: "Unité Economique et Sociale (UES)",
-                value: "Unité Economique et Sociale (UES)",
-              },
-            ]}
-          />
-
-          <FieldSiren
-            label="SIREN"
-            name="siren"
-            readOnly={readOnly}
-            updateSirenData={(sirenData: EntrepriseType) =>
-              form.batch(() => {
-                form.change("nomEntreprise", sirenData.raison_sociale || "")
-                form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
-                form.change("region", regionFromCode(sirenData.région || ""))
-                form.change("departement", departementFromCode(sirenData.département || ""))
-                form.change("adresse", sirenData.adresse || "")
-                form.change("commune", sirenData.commune || "")
-                form.change("codePostal", sirenData.code_postal || "")
-              })
-            }
-          />
-
-          <TextField
-            label={
-              values.structure === "Unité Economique et Sociale (UES)"
-                ? "Raison sociale de l'entreprise déclarant pour le compte de l'UES"
-                : "Raison sociale de l'entreprise"
-            }
-            fieldName="nomEntreprise"
-            errorText="le nom de l'entreprise n'est pas valide"
-            readOnly={true}
-          />
-          <CodeNaf label="Code NAF" name="codeNaf" readOnly={true} />
-          <RegionsDepartements nameRegion="region" nameDepartement="departement" readOnly={true} />
-          <TextField label="Adresse" fieldName="adresse" errorText="l'adresse n’est pas valide" readOnly={true} />
-          <TextField
-            label="Code Postal"
-            fieldName="codePostal"
-            errorText={
-              errors.codePostal &&
-              (errors.codePostal.required || errors.codePostal.mustBeNumber || errors.codePostal.mustBe5Digits)
-                ? "le code postal doit être composé de 5 chiffres"
-                : `le code postal ne correspond pas au département choisi (${departementCode[values.departement]})`
-            }
-            readOnly={true}
-          />
-          <TextField label="Commune" fieldName="commune" errorText="la commune n'est pas valide" readOnly={true} />
-
-          {values.structure === "Unité Economique et Sociale (UES)" && (
-            <Fragment>
-              <TextField
-                label="Nom de l'UES"
-                fieldName="nomUES"
-                errorText="le nom de l'UES n'est pas valide"
-                readOnly={readOnly}
-              />
-              <NombreEntreprises
-                fieldName="nombreEntreprises"
-                label="Nombre d'entreprises composant l'UES (le déclarant compris)"
-                entreprisesUES={informationsEntreprise.entreprisesUES}
-                newNombreEntreprises={form.mutators.newNombreEntreprises}
-                readOnly={readOnly}
-              />
-              <h3>Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)</h3>
-              <FieldArray name="entreprisesUES">
-                {({ fields }) => {
-                  return (
-                    <Fragment>
-                      {fields.map((entrepriseUES, index) => (
-                        <EntrepriseUESInput
-                          key={entrepriseUES}
-                          nom={`${entrepriseUES}.nom`}
-                          siren={`${entrepriseUES}.siren`}
-                          index={index}
-                          readOnly={readOnly}
-                          updateSirenData={(sirenData: EntrepriseType) =>
-                            form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
-                          }
-                        />
-                      ))}
-                    </Fragment>
-                  )
-                }}
-              </FieldArray>
-            </Fragment>
-          )}
+          <FormStack>
+            <FormControl readOnly={readOnly}>
+              <FormLabel as="div">Vous déclarez en tant que</FormLabel>
+              <InputRadioGroup defaultValue={values.structure}>
+                <InputRadio value="Entreprise" fieldName="structure" choiceValue="Entreprise" isReadOnly={readOnly}>
+                  Entreprise
+                </InputRadio>
+                <InputRadio
+                  value="Unité Economique et Sociale (UES)"
+                  fieldName="structure"
+                  choiceValue="Unité Economique et Sociale (UES)"
+                  isReadOnly={readOnly}
+                >
+                  Unité Economique et Sociale (UES)
+                </InputRadio>
+              </InputRadioGroup>
+            </FormControl>
+            <FieldSiren
+              label="SIREN"
+              name="siren"
+              readOnly={readOnly}
+              updateSirenData={(sirenData: EntrepriseType) =>
+                form.batch(() => {
+                  form.change("nomEntreprise", sirenData.raison_sociale || "")
+                  form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
+                  form.change("region", regionFromCode(sirenData.région || ""))
+                  form.change("departement", departementFromCode(sirenData.département || ""))
+                  form.change("adresse", sirenData.adresse || "")
+                  form.change("commune", sirenData.commune || "")
+                  form.change("codePostal", sirenData.code_postal || "")
+                })
+              }
+            />
+            <FakeInputGroup
+              label={
+                values.structure === "Unité Economique et Sociale (UES)"
+                  ? "Raison sociale de l'entreprise déclarant pour le compte de l'UES"
+                  : "Raison sociale de l'entreprise"
+              }
+            >
+              {initialValues.nomEntreprise}
+            </FakeInputGroup>
+            <FakeInputGroup label="Code NAF">{initialValues.codeNaf}</FakeInputGroup>
+            <FakeInputGroup label="Région">{initialValues.region}</FakeInputGroup>
+            <FakeInputGroup label="Département">{initialValues.departement}</FakeInputGroup>
+            <FakeInputGroup label="Adresse">{initialValues.adresse}</FakeInputGroup>
+            <FakeInputGroup label="Code postal">{initialValues.codePostal}</FakeInputGroup>
+            <FakeInputGroup label="Commune">{initialValues.commune}</FakeInputGroup>
+            {values.structure === "Unité Economique et Sociale (UES)" && (
+              <>
+                <FakeInputGroup label="Nom de l'UES">{initialValues.nomUES}</FakeInputGroup>
+                <NombreEntreprises
+                  fieldName="nombreEntreprises"
+                  label="Nombre d'entreprises composant l'UES (le déclarant compris)"
+                  entreprisesUES={informationsEntreprise.entreprisesUES}
+                  newNombreEntreprises={form.mutators.newNombreEntreprises}
+                  readOnly={readOnly}
+                />
+                <Text>
+                  Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)
+                </Text>
+                <FieldArray name="entreprisesUES">
+                  {({ fields }) => {
+                    return (
+                      <>
+                        {fields.map((entrepriseUES, index) => (
+                          <EntrepriseUESInput
+                            key={entrepriseUES}
+                            nom={`${entrepriseUES}.nom`}
+                            siren={`${entrepriseUES}.siren`}
+                            index={index}
+                            readOnly={readOnly}
+                            updateSirenData={(sirenData: EntrepriseType) =>
+                              form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
+                            }
+                          />
+                        ))}
+                      </>
+                    )
+                  }}
+                </FieldArray>
+              </>
+            )}
+          </FormStack>
 
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/informations-declarant" label="suivant" />
+              <ButtonSimulatorLink to="/informations-declarant" label="Suivant" />
               &emsp;
               {informationsEntreprise.formValidated === "Valid" && (
-                <p css={styles.edit}>
-                  <ActionLink onClick={() => validateInformationsEntreprise("None")}>
-                    modifier les données saisies
-                  </ActionLink>
-                </p>
+                <ButtonAction
+                  leftIcon={<IconEdit />}
+                  label="Modifier les données saisies"
+                  onClick={() => validateInformationsEntreprise("None")}
+                  variant="link"
+                  size="sm"
+                />
               )}
             </ActionBar>
           ) : (
@@ -340,39 +328,6 @@ function InformationsEntrepriseForm({
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
-  add: css({
-    display: "flex",
-    alignItems: "center",
-    marginTop: 46 - 18 - 5,
-    textDecoration: "none",
-  }),
-  addIcon: css({
-    width: 32,
-    height: 32,
-    marginRight: 16,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-
-    backgroundColor: globalStyles.colors.default,
-    borderRadius: 16,
-  }),
-  spacerAdd: css({
-    height: 32,
-    marginTop: 46 - 18 - 5,
-  }),
 }
 
 export default InformationsEntrepriseForm

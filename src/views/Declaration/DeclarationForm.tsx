@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment, useState } from "react"
+import React, { Fragment, FunctionComponent, useState } from "react"
 import { css, jsx } from "@emotion/react"
 import { Form, useField } from "react-final-form"
 
@@ -20,6 +20,7 @@ import globalStyles from "../../utils/globalStyles"
 import ButtonAction from "../../components/ButtonAction"
 import ErrorMessage from "../../components/ErrorMessage"
 import { resendReceipt } from "../../utils/api"
+import FormStack from "../../components/ds/FormStack"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -60,8 +61,7 @@ const validateForm = (finPeriodeReference: string) => {
   }
 }
 
-///////////////////
-interface Props {
+interface DeclarationFormProps {
   state: AppState
   noteIndex: number | undefined
   indicateurUnParCSP: boolean
@@ -73,7 +73,7 @@ interface Props {
   declaring: boolean
 }
 
-function DeclarationForm({
+const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   state,
   noteIndex,
   indicateurUnParCSP,
@@ -83,7 +83,7 @@ function DeclarationForm({
   validateDeclaration,
   apiError,
   declaring,
-}: Props) {
+}) => {
   const declaration = state.declaration
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
@@ -166,94 +166,88 @@ function DeclarationForm({
       {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
         <form onSubmit={handleSubmit} css={styles.container} style={{ marginTop: 20 }}>
           <FormAutoSave saveForm={saveForm} />
-
-          {noteIndex !== undefined && noteIndex < 75 && (
-            <MesuresCorrection
-              label="Mesures de correction prévues à l'article D. 1142-6"
-              name="mesuresCorrection"
-              readOnly={readOnly}
-            />
-          )}
-
-          {!indicateurUnParCSP && (
-            <Fragment>
-              {state.informationsEntreprise.structure === "Entreprise" && (
-                <div css={styles.formField}>
-                  Un CSE a-t-il été mis en place ?
+          <FormStack>
+            {noteIndex !== undefined && noteIndex < 75 && (
+              <MesuresCorrection
+                label="Mesures de correction prévues à l'article D. 1142-6"
+                name="mesuresCorrection"
+                readOnly={readOnly}
+              />
+            )}
+            {!indicateurUnParCSP && (
+              <Fragment>
+                {state.informationsEntreprise.structure === "Entreprise" && (
                   <RadiosBoolean
                     fieldName="cseMisEnPlace"
                     value={values.cseMisEnPlace}
                     readOnly={readOnly}
-                    labelTrue="oui"
-                    labelFalse="non"
+                    label="Un CSE a-t-il été mis en place ?"
                   />
-                </div>
-              )}
-              {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
-                <div>
-                  <FieldDate
-                    name="dateConsultationCSE"
-                    label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
-                    readOnly={readOnly}
-                  />
-                </div>
-              )}
-            </Fragment>
-          )}
-
-          {(noteIndex !== undefined || after2020) && (
-            <Fragment>
-              <FieldDate
-                name="datePublication"
-                label={
-                  after2020
-                    ? `Date de publication des résultats obtenus${displayNC}`
-                    : "Date de publication du niveau de résultat obtenu"
-                }
-                readOnly={readOnly}
-              />
-              <p>
-                {after2020
-                  ? `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
-                  : "Avez-vous un site Internet pour publier le niveau de résultat obtenu ?"}
-              </p>
-              <RadiosBoolean
-                fieldName="publicationSurSiteInternet"
-                value={values.publicationSurSiteInternet}
-                readOnly={readOnly}
-                labelTrue="oui"
-                labelFalse="non"
-              />
-              {submitFailed && hasValidationErrors && errors && errors.publicationSurSiteInternet && (
-                <p css={styles.error}>{errors.publicationSurSiteInternet}</p>
-              )}
-              <div css={styles.siteOrModalites}>
-                {values.publicationSurSiteInternet !== undefined &&
-                  (values.publicationSurSiteInternet === "true" ? (
-                    <FieldSiteInternet readOnly={readOnly} after2020={after2020} displayNC={displayNC} />
-                  ) : (
-                    <Textarea
-                      label={
-                        after2020
-                          ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
-                          : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
-                      }
-                      fieldName="modalitesPublication"
-                      errorText="Veuillez préciser les modalités de communication"
+                )}
+                {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
+                  <div>
+                    <FieldDate
+                      name="dateConsultationCSE"
+                      label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
                       readOnly={readOnly}
                     />
-                  ))}
-              </div>
-            </Fragment>
-          )}
+                  </div>
+                )}
+              </Fragment>
+            )}
 
+            {(noteIndex !== undefined || after2020) && (
+              <Fragment>
+                <FieldDate
+                  name="datePublication"
+                  label={
+                    after2020
+                      ? `Date de publication des résultats obtenus${displayNC}`
+                      : "Date de publication du niveau de résultat obtenu"
+                  }
+                  readOnly={readOnly}
+                />
+                <RadiosBoolean
+                  fieldName="publicationSurSiteInternet"
+                  value={values.publicationSurSiteInternet}
+                  readOnly={readOnly}
+                  label={
+                    after2020
+                      ? `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
+                      : "Avez-vous un site Internet pour publier le niveau de résultat obtenu ?"
+                  }
+                />
+                {submitFailed && hasValidationErrors && errors && errors.publicationSurSiteInternet && (
+                  <p css={styles.error}>{errors.publicationSurSiteInternet}</p>
+                )}
+
+                <div css={styles.siteOrModalites}>
+                  {values.publicationSurSiteInternet !== undefined &&
+                    (values.publicationSurSiteInternet === "true" ? (
+                      <FieldSiteInternet readOnly={readOnly} after2020={after2020} displayNC={displayNC} />
+                    ) : (
+                      <Textarea
+                        label={
+                          after2020
+                            ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
+                            : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
+                        }
+                        fieldName="modalitesPublication"
+                        errorText="Veuillez préciser les modalités de communication"
+                        readOnly={readOnly}
+                      />
+                    ))}
+                </div>
+              </Fragment>
+            )}
+          </FormStack>
           {readOnly ? (
             <Fragment>
               <ActionBar>
                 Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}. &emsp;
                 {declaration.formValidated === "Valid" && (
                   <p css={styles.edit}>
-                    <ActionLink onClick={() => validateDeclaration("None")}>modifier les données saisies</ActionLink>
+                    <ActionLink onClick={() => validateDeclaration("None")}>Modifier les données saisies</ActionLink>
                   </p>
                 )}
               </ActionBar>
@@ -272,7 +266,7 @@ function DeclarationForm({
                 errorMessage={
                   apiError || "Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
                 }
-                label="déclarer"
+                label="Déclarer"
                 loading={declaring}
               />
             </ActionBar>

@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, ReactNode, FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsEntrepriseData } from "../../globals"
@@ -11,14 +9,14 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface InformationsEntrepriseProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Informations entreprise/UES"
 
-function InformationsEntreprise({ state, dispatch }: Props) {
+const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const updateInformationsEntreprise = useCallback(
@@ -48,7 +46,7 @@ function InformationsEntreprise({ state, dispatch }: Props) {
   )
 }
 
-function PageInformationsEntreprise({ children }: { children: ReactNode }) {
+const PageInformationsEntreprise: FunctionComponent<{ children: ReactNode }> = ({ children }) => {
   return (
     <Page
       title={title}

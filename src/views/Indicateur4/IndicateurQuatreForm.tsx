@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { Fragment } from "react"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 import { AppState, FormState, ActionIndicateurQuatreData } from "../../globals"
 
@@ -19,7 +17,7 @@ import {
 } from "../../utils/formHelpers"
 
 import { BlocFormLight } from "../../components/BlocForm"
-import FieldInput, { HEIGHT as FieldInputHeight, MARGIN_TOP as FieldInputMarginTop } from "../../components/FieldInput"
+import FieldInput from "../../components/FieldInput"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
@@ -35,16 +33,19 @@ const lessThanPreviousField: (previousField: string) => ValidatorFunction = (pre
     ? "ce champ ne peut être supérieur au précédent"
     : undefined
 
-///////////////
-
-interface Props {
+interface IndicateurQuatreFormProps {
   indicateurQuatre: AppState["indicateurQuatre"]
   readOnly: boolean
   updateIndicateurQuatre: (data: ActionIndicateurQuatreData) => void
   validateIndicateurQuatre: (valid: FormState) => void
 }
 
-function IndicateurQuatreForm({ indicateurQuatre, readOnly, updateIndicateurQuatre, validateIndicateurQuatre }: Props) {
+const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
+  indicateurQuatre,
+  readOnly,
+  updateIndicateurQuatre,
+  validateIndicateurQuatre,
+}) => {
   const initialValues = {
     presenceCongeMat: parseBooleanStateValue(indicateurQuatre.presenceCongeMat),
     nombreSalarieesPeriodeAugmentation: parseIntStateValue(indicateurQuatre.nombreSalarieesPeriodeAugmentation),
@@ -76,36 +77,26 @@ function IndicateurQuatreForm({ indicateurQuatre, readOnly, updateIndicateurQuat
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <RadiosBoolean
             fieldName="presenceCongeMat"
             value={values.presenceCongeMat}
             readOnly={readOnly}
-            labelTrue={
-              <Fragment>
-                <strong>il y a eu des retours de congé maternité</strong> pendant la période de référence
-              </Fragment>
-            }
-            labelFalse={
-              <Fragment>
-                <strong>il n’y a pas eu de retour de congé maternité</strong> pendant la période de référence
-              </Fragment>
-            }
+            label="Il y a t'il eu des retours de congé maternité pendant la période de référence ?"
           />
 
           {values.presenceCongeMat === "true" && (
             <BlocFormLight>
               <FieldInput
                 fieldName="nombreSalarieesPeriodeAugmentation"
-                label="parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
+                label="Parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
                 readOnly={readOnly}
                 validator={validator}
               />
-              <div css={styles.spacer} />
               <FieldInput
                 fieldName="nombreSalarieesAugmentees"
-                label="parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
+                label="Parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
                 readOnly={readOnly}
                 validator={composeValidators(
                   validator,
@@ -117,7 +108,7 @@ function IndicateurQuatreForm({ indicateurQuatre, readOnly, updateIndicateurQuat
 
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/indicateur5" label="suivant" />
+              <ButtonSimulatorLink to="/indicateur5" label="Suivant" />
             </ActionBar>
           ) : (
             <ActionBar>
@@ -132,19 +123,6 @@ function IndicateurQuatreForm({ indicateurQuatre, readOnly, updateIndicateurQuat
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  spacer: css({
-    height: 8,
-  }),
-  emptyFields: css({
-    height: (FieldInputHeight + FieldInputMarginTop) * 2,
-  }),
 }
 
 export default IndicateurQuatreForm

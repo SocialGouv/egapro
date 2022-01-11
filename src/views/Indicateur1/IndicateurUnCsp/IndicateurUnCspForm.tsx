@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { useMemo, useCallback } from "react"
+import React, { useMemo, useCallback, FunctionComponent } from "react"
 import { ActionIndicateurUnCspData, AppState, GroupTranchesAgesIndicateurUn, FormState } from "../../../globals"
 
 import { effectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
@@ -11,7 +9,7 @@ import { displayNameCategorieSocioPro } from "../../../utils/helpers"
 
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 
-interface Props {
+interface IndicateurUnCspFormProps {
   state: AppState
   ecartRemuParTrancheAge: Array<effectifEtEcartRemuGroupCsp>
   readOnly: boolean
@@ -19,13 +17,13 @@ interface Props {
   validateIndicateurUn: (valid: FormState) => void
 }
 
-function IndicateurUnCspForm({
+const IndicateurUnCspForm: FunctionComponent<IndicateurUnCspFormProps> = ({
   state,
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
   validateIndicateurUn,
-}: Props) {
+}) => {
   const ecartRemuParTrancheAgeRaw = useMemo(
     () =>
       ecartRemuParTrancheAge.map(({ categorieSocioPro, ...otherAttr }) => ({
@@ -61,7 +59,7 @@ function IndicateurUnCspForm({
       nextLink={
         <ButtonSimulatorLink
           to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-          label="suivant"
+          label="Suivant"
         />
       }
     />

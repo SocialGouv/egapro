@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { FormLabel, Input } from "@chakra-ui/react"
+import { FormLabel, Input, Box, Text } from "@chakra-ui/react"
 
 export type FakeInputGroupProps = {
   label: string
@@ -7,12 +7,12 @@ export type FakeInputGroupProps = {
 
 const FakeInputGroup: FunctionComponent<FakeInputGroupProps> = ({ label, children }) => {
   return (
-    <div>
+    <Box>
       <FormLabel as="div">{label}</FormLabel>
-      <Input as="div" isReadOnly py={2}>
-        {children}
+      <Input as={Box} isReadOnly py={2} sx={{ borderColor: "transparent !important" }}>
+        <Text noOfLines={1}>{children}</Text>
       </Input>
-    </div>
+    </Box>
   )
 }
 

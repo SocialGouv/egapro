@@ -35,7 +35,7 @@ function EffectifResult({ totalNombreSalariesHomme, totalNombreSalariesFemme, va
       </Bubble>
 
       <p css={styles.edit}>
-        <ActionLink onClick={() => validateEffectif("None")}>modifier les données saisies</ActionLink>
+        <ActionLink onClick={() => validateEffectif("None")}>Modifier les données saisies</ActionLink>
       </p>
     </div>
   )

@@ -26,11 +26,11 @@ const HomeSimulateur: FunctionComponent = () => {
   return (
     <Page title="Bienvenue sur Index Egapro">
       <FormControl>
-        <FormLabel htmlFor="plop">
+        <FormLabel htmlFor="link">
           <VisuallyHidden>Lien de la déclaration</VisuallyHidden>
         </FormLabel>
         <InputGroup size="md">
-          <Input id="plop" onClick={onCopy} defaultValue={link} pr="8rem" type={"text"} placeholder="Enter password" />
+          <Input id="link" onClick={onCopy} defaultValue={link} pr="8rem" type={"text"} placeholder="Enter password" />
           <InputRightElement width="7rem" sx={{ right: 1 }}>
             <Button h="1.75rem" size="sm" onClick={onCopy} variant="outline" colorScheme="primary">
               {hasCopied ? <>Lien&nbsp;copié</> : <>Copier&nbsp;le&nbsp;lien</>}

@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { Box } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
 import { displaySexeSurRepresente } from "../../utils/helpers"
@@ -8,7 +8,7 @@ import { Result } from "./IndicateurDeuxTrois"
 import ResultBubble from "../../components/ResultBubble"
 import ActionLink from "../../components/ActionLink"
 
-interface Props {
+interface IndicateurDeuxTroisResultProps {
   bestResult: Result
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
   noteIndicateurDeuxTrois: number | undefined
@@ -16,15 +16,15 @@ interface Props {
   validateIndicateurDeuxTrois: (valid: FormState) => void
 }
 
-function IndicateurDeuxTroisResult({
+const IndicateurDeuxTroisResult: FunctionComponent<IndicateurDeuxTroisResultProps> = ({
   bestResult,
   indicateurSexeSurRepresente,
   noteIndicateurDeuxTrois,
   correctionMeasure,
   validateIndicateurDeuxTrois,
-}: Props) {
+}) => {
   return (
-    <div css={styles.container}>
+    <Box mt={16}>
       <ResultBubble
         firstLineLabel={bestResult.label}
         firstLineData={bestResult.result}
@@ -35,23 +35,11 @@ function IndicateurDeuxTroisResult({
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
 
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+      <Box textAlign="center" mt={4}>
+        <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>Modifier les données saisies</ActionLink>
+      </Box>
+    </Box>
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default IndicateurDeuxTroisResult

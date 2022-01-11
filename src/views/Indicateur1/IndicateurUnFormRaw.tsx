@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { ReactNode } from "react"
+import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
 import { TranchesAges, GroupTranchesAgesIndicateurUn, FormState } from "../../globals"
 
@@ -36,7 +34,7 @@ interface remunerationGroup {
   remunerationAnnuelleBrutHommes: number | undefined
 }
 
-interface Props {
+interface IndicateurUnFormRawProps {
   ecartRemuParTrancheAge: Array<remunerationGroup>
   readOnly: boolean
   updateIndicateurUn: (
@@ -86,13 +84,13 @@ const groupByCategorieSocioPro = (
   return Object.entries(tmpArray).map(([_, tranchesAges]) => tranchesAges)
 }
 
-function IndicateurUnFormRaw({
+const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
   validateIndicateurUn,
   nextLink,
-}: Props) {
+}) => {
   const initialValues = {
     remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
       ({ tranchesAges, ...otherPropGroupe }: any) => ({
@@ -141,7 +139,7 @@ function IndicateurUnFormRaw({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           {initialValues.remunerationAnnuelle.map(
             (
@@ -197,13 +195,6 @@ function IndicateurUnFormRaw({
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
 }
 
 export default IndicateurUnFormRaw

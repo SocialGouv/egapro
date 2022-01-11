@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { useCallback } from "react"
+import React, { FunctionComponent, useCallback } from "react"
 
 import { AppState, FormState, ActionType, ActionIndicateurUnCspData } from "../../../globals"
 
@@ -11,12 +9,12 @@ import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import IndicateurUnCspForm from "./IndicateurUnCspForm"
 import IndicateurUnResult from "../IndicateurUnResult"
 
-interface Props {
+interface IndicateurUnCspProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
-function IndicateurUnCsp({ state, dispatch }: Props) {
+const IndicateurUnCsp: FunctionComponent<IndicateurUnCspProps> = ({ state, dispatch }) => {
   const updateIndicateurUn = useCallback(
     (data: ActionIndicateurUnCspData) => dispatch({ type: "updateIndicateurUnCsp", data }),
     [dispatch],

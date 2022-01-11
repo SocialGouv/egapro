@@ -94,7 +94,15 @@ const styles = {
     backgroundImage: `radial-gradient(${globalStyles.colors.default} 0%, ${globalStyles.colors.default} 3px, #FFF 3px)`,
   }),
   radioFieldDisabled: css({
-    visibility: "hidden",
+    border: "0px",
+    clip: "rect(0px, 0px, 0px, 0px)",
+    height: "1px",
+    width: "1px",
+    margin: "-1px",
+    padding: "0px",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    position: "absolute",
   }),
 }
 

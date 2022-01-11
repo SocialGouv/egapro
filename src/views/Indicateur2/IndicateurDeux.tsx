@@ -1,6 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, FunctionComponent } from "react"
+import { Text } from "@chakra-ui/react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionIndicateurDeuxData } from "../../globals"
@@ -20,14 +19,14 @@ import IndicateurDeuxResult from "./IndicateurDeuxResult"
 import { messageMesureCorrection } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface IndicateurDeuxProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Indicateur écart de taux d’augmentation individuelle hors promotion"
 
-function IndicateurDeux({ state, dispatch }: Props) {
+const IndicateurDeux: FunctionComponent<IndicateurDeuxProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const updateIndicateurDeux = useCallback(
@@ -74,7 +73,7 @@ function IndicateurDeux({ state, dispatch }: Props) {
             text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
           />
           <ActionBar>
-            <ButtonSimulatorLink to="/indicateur3" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeux>
@@ -92,10 +91,10 @@ function IndicateurDeux({ state, dispatch }: Props) {
             text="Il n’y a pas eu d’augmentation individuelle durant la période de référence."
           />
           <ActionBar>
-            <ActionLink onClick={() => validateIndicateurDeux("None")}>modifier les données saisies</ActionLink>
+            <ActionLink onClick={() => validateIndicateurDeux("None")}>Modifier les données saisies</ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonSimulatorLink to="/indicateur3" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeux>
@@ -106,13 +105,20 @@ function IndicateurDeux({ state, dispatch }: Props) {
     <PageIndicateurDeux>
       <LayoutFormAndResult
         childrenForm={
-          <IndicateurDeuxForm
-            ecartAugmentParCategorieSocioPro={effectifEtEcartAugmentParGroupe}
-            presenceAugmentation={state.indicateurDeux.presenceAugmentation}
-            readOnly={state.indicateurDeux.formValidated === "Valid"}
-            updateIndicateurDeux={updateIndicateurDeux}
-            validateIndicateurDeux={validateIndicateurDeux}
-          />
+          <div>
+            <IndicateurDeuxForm
+              ecartAugmentParCategorieSocioPro={effectifEtEcartAugmentParGroupe}
+              presenceAugmentation={state.indicateurDeux.presenceAugmentation}
+              readOnly={state.indicateurDeux.formValidated === "Valid"}
+              updateIndicateurDeux={updateIndicateurDeux}
+              validateIndicateurDeux={validateIndicateurDeux}
+            />
+            {state.indicateurDeux.formValidated === "Valid" && correctionMeasure && (
+              <Text fontSize="sm" color="gray.500" fontStyle="italic" mt={6}>
+                {messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "20/20")}
+              </Text>
+            )}
+          </div>
         }
         childrenResult={
           state.indicateurDeux.formValidated === "Valid" && (
@@ -126,36 +132,17 @@ function IndicateurDeux({ state, dispatch }: Props) {
           )
         }
       />
-      {state.indicateurDeux.formValidated === "Valid" && correctionMeasure && (
-        <div css={styles.additionalInfo}>
-          <p>{messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "20/20")}</p>
-        </div>
-      )}
     </PageIndicateurDeux>
   )
 }
 
-function PageIndicateurDeux({ children }: { children: ReactNode }) {
-  return (
-    <Page
-      title={title}
-      tagline="Le pourcentage de femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."
-    >
-      {children}
-    </Page>
-  )
-}
-
-const styles = {
-  additionalInfo: css({
-    color: "#61676F",
-    fontSize: 14,
-    fontStyle: "italic",
-    maxWidth: 500,
-    "& > p": {
-      marginBottom: 30,
-    },
-  }),
-}
+const PageIndicateurDeux: FunctionComponent = ({ children }) => (
+  <Page
+    title={title}
+    tagline="Le pourcentage de femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."
+  >
+    {children}
+  </Page>
+)
 
 export default IndicateurDeux

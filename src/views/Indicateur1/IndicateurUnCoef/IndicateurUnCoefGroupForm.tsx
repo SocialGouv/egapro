@@ -118,7 +118,7 @@ function IndicateurUnCoefGroupForm({
 
             {readOnly ? (
               <ActionBar>
-                <ButtonAction onClick={navigateToEffectif} label="suivant" />
+                <ButtonAction onClick={navigateToEffectif} label="Suivant" />
                 <div css={styles.spacerActionBar} />
                 <ActionLink onClick={() => validateIndicateurUnCoefGroup("None")}>modifier les groupes</ActionLink>
               </ActionBar>

@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsDeclarantData } from "../../globals"
@@ -11,14 +9,14 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InformationsDeclarantForm from "./InformationsDeclarantForm"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface InformationsDeclarantProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Informations déclarant"
 
-function InformationsDeclarant({ state, dispatch }: Props) {
+const InformationsDeclarant: FunctionComponent<InformationsDeclarantProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const updateInformationsDeclarant = useCallback(
@@ -48,12 +46,10 @@ function InformationsDeclarant({ state, dispatch }: Props) {
   )
 }
 
-function PageInformationsDeclarant({ children }: { children: ReactNode }) {
-  return (
-    <Page title={title} tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email">
-      {children}
-    </Page>
-  )
-}
+const PageInformationsDeclarant: FunctionComponent = ({ children }) => (
+  <Page title={title} tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email">
+    {children}
+  </Page>
+)
 
 export default InformationsDeclarant

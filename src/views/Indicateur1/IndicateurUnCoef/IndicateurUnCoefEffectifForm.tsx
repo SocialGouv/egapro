@@ -94,7 +94,7 @@ function IndicateurUnCoefEffectifForm({
             readOnly={readOnly}
             updateEffectif={updateEffectifRaw}
             validateEffectif={validateIndicateurUnCoefEffectif}
-            nextLink={<ButtonAction onClick={navigateToRemuneration} label="suivant" />}
+            nextLink={<ButtonAction onClick={navigateToRemuneration} label="Suivant" />}
             formValidator={formValidator}
           />
         }

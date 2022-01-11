@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 import { FormState, ActionIndicateurDeuxData } from "../../globals"
 
@@ -59,7 +58,7 @@ const validateForm = ({
   return
 }
 
-interface Props {
+interface IndicateurDeuxFormProps {
   ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>
   presenceAugmentation: boolean
   readOnly: boolean
@@ -67,13 +66,13 @@ interface Props {
   validateIndicateurDeux: (valid: FormState) => void
 }
 
-function IndicateurDeuxForm({
+const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
   ecartAugmentParCategorieSocioPro,
   presenceAugmentation,
   readOnly,
   updateIndicateurDeux,
   validateIndicateurDeux,
-}: Props) {
+}) => {
   const initialValues = {
     presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
     tauxAugmentation: ecartAugmentParCategorieSocioPro.map(
@@ -145,14 +144,13 @@ function IndicateurDeuxForm({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <RadiosBoolean
             fieldName="presenceAugmentation"
             value={values.presenceAugmentation}
             readOnly={readOnly}
-            labelTrue="il y a eu des augmentations durant la période de référence"
-            labelFalse="il n’y a pas eu d’augmentation durant la période de référence"
+            label="Il y a t'il eu des augmentations durant la période de référence ?"
           />
 
           {values.presenceAugmentation === "true" && (
@@ -184,7 +182,7 @@ function IndicateurDeuxForm({
 
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/indicateur3" label="suivant" />
+              <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
             </ActionBar>
           ) : (
             <ActionBar>
@@ -203,13 +201,6 @@ function IndicateurDeuxForm({
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
 }
 
 export default IndicateurDeuxForm

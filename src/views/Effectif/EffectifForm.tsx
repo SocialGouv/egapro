@@ -50,7 +50,7 @@ function EffectifForm({ effectif, readOnly, updateEffectif, validateEffectif }: 
       readOnly={readOnly}
       updateEffectif={updateEffectifRaw}
       validateEffectif={validateEffectif}
-      nextLink={<ButtonSimulatorLink to="/indicateur1" label="suivant" />}
+      nextLink={<ButtonSimulatorLink to="/indicateur1" label="Suivant" />}
     />
   )
 }

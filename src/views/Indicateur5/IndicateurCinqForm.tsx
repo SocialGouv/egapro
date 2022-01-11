@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 import createDecorator from "final-form-calculate"
 
@@ -35,16 +34,19 @@ const calculator = createDecorator({
   },
 })
 
-///////////////////
-
-interface Props {
+interface IndicateurCinqFormProps {
   indicateurCinq: AppState["indicateurCinq"]
   readOnly: boolean
   updateIndicateurCinq: (data: ActionIndicateurCinqData) => void
   validateIndicateurCinq: (valid: FormState) => void
 }
 
-function IndicateurCinqForm({ indicateurCinq, readOnly, updateIndicateurCinq, validateIndicateurCinq }: Props) {
+const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
+  indicateurCinq,
+  readOnly,
+  updateIndicateurCinq,
+  validateIndicateurCinq,
+}) => {
   const initialValues = {
     nombreSalariesHommes: parseIntStateValue(indicateurCinq.nombreSalariesHommes),
     nombreSalariesFemmes: parseIntStateValue(indicateurCinq.nombreSalariesFemmes),
@@ -75,7 +77,7 @@ function IndicateurCinqForm({ indicateurCinq, readOnly, updateIndicateurCinq, va
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <BlocFormLight>
             <FieldInput
@@ -94,7 +96,7 @@ function IndicateurCinqForm({ indicateurCinq, readOnly, updateIndicateurCinq, va
 
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/recapitulatif" label="suivant" />
+              <ButtonSimulatorLink to="/recapitulatif" label="Suivant" />
             </ActionBar>
           ) : (
             <ActionBar>
@@ -109,13 +111,6 @@ function IndicateurCinqForm({ indicateurCinq, readOnly, updateIndicateurCinq, va
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
 }
 
 export default IndicateurCinqForm

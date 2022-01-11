@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { Box } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
 
@@ -8,21 +8,21 @@ import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 import ResultBubble from "../../components/ResultBubble"
 import ActionLink from "../../components/ActionLink"
 
-interface Props {
+interface IndicateurUnResultProps {
   indicateurEcartRemuneration: number | undefined
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
   noteIndicateurUn: number | undefined
   validateIndicateurUn: (valid: FormState) => void
 }
 
-function IndicateurUnResult({
+const IndicateurUnResult: FunctionComponent<IndicateurUnResultProps> = ({
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
   noteIndicateurUn,
   validateIndicateurUn,
-}: Props) {
+}) => {
   return (
-    <div css={styles.container}>
+    <Box mt={16}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--"}
@@ -32,23 +32,11 @@ function IndicateurUnResult({
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
 
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurUn("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+      <Box textAlign="center" mt={4}>
+        <ActionLink onClick={() => validateIndicateurUn("None")}>Modifier les données saisies</ActionLink>
+      </Box>
+    </Box>
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default IndicateurUnResult

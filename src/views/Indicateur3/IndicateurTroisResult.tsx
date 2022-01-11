@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { Box } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
@@ -7,7 +7,7 @@ import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 import ResultBubble from "../../components/ResultBubble"
 import ActionLink from "../../components/ActionLink"
 
-interface Props {
+interface IndicateurTroisResultProps {
   indicateurEcartPromotion: number | undefined
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
   noteIndicateurTrois: number | undefined
@@ -15,15 +15,15 @@ interface Props {
   validateIndicateurTrois: (valid: FormState) => void
 }
 
-function IndicateurTroisResult({
+const IndicateurTroisResult: FunctionComponent<IndicateurTroisResultProps> = ({
   indicateurEcartPromotion,
   indicateurSexeSurRepresente,
   noteIndicateurTrois,
   correctionMeasure,
   validateIndicateurTrois,
-}: Props) {
+}) => {
   return (
-    <div css={styles.container}>
+    <Box mt={16}>
       <ResultBubble
         firstLineLabel="votre résultat final est"
         firstLineData={indicateurEcartPromotion !== undefined ? displayPercent(indicateurEcartPromotion) : "--"}
@@ -33,24 +33,11 @@ function IndicateurTroisResult({
         secondLineInfo={correctionMeasure ? "** mesures de correction prises en compte" : undefined}
         indicateurSexeSurRepresente={indicateurSexeSurRepresente}
       />
-
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurTrois("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+      <Box textAlign="center" mt={4}>
+        <ActionLink onClick={() => validateIndicateurTrois("None")}>Modifier les données saisies</ActionLink>
+      </Box>
+    </Box>
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default IndicateurTroisResult

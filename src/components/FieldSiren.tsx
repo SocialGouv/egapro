@@ -1,7 +1,6 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { FormControl, FormLabel, Box, FormErrorMessage, Link } from "@chakra-ui/react"
 import { useField } from "react-final-form"
-import { Link } from "@chakra-ui/react"
 
 import Input from "./Input"
 import globalStyles from "../utils/globalStyles"
@@ -12,7 +11,6 @@ import { EntrepriseType } from "../globals"
 import ActivityIndicator from "./ActivityIndicator"
 import { useUser } from "../utils/hooks"
 import { IconExternalLink } from "./ds/Icons"
-import React from "react"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "Ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres."
@@ -52,21 +50,15 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
 export const sirenValidator = (updateSirenData: (data: EntrepriseType) => void) =>
   composeValidators(required, nineDigits, checkSiren(updateSirenData))
 
-function FieldSiren({
-  name,
-  label,
-  readOnly,
-  updateSirenData,
-  validator,
-  customStyles,
-}: {
+type FieldSirenProps = {
   name: string
   label: string
   readOnly: boolean
   updateSirenData: (sirenData: EntrepriseType) => void
   validator?: ValidatorFunction
-  customStyles?: any
-}) {
+}
+
+const FieldSiren: FunctionComponent<FieldSirenProps> = ({ name, label, readOnly, updateSirenData, validator }) => {
   const field = useField(name, {
     validate: validator ? validator : sirenValidator(updateSirenData),
   })
@@ -83,24 +75,21 @@ function FieldSiren({
     meta?.error === UNKNOWN_SIREN
 
   return (
-    <div css={[customStyles, styles.formField]}>
-      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
-        {label}
-      </label>
-      <div css={styles.fieldRow}>
+    <FormControl isInvalid={error}>
+      <FormLabel htmlFor={field.input.name}>{label}</FormLabel>
+      <Box position="relative">
         <Input field={field} isReadOnly={readOnly} />
         {field.meta.validating && (
-          <div css={styles.spinner}>
-            <ActivityIndicator size={30} color={globalStyles.colors.primary} />
-          </div>
+          <Box position="absolute" right={2} top={2} zIndex={2} pointerEvents="none">
+            <ActivityIndicator size={24} color={globalStyles.colors.primary} />
+          </Box>
         )}
-      </div>
+      </Box>
       {error && (
-        <p css={styles.error}>
-          {field.meta.error}
+        <>
+          <FormErrorMessage>{field.meta.error}</FormErrorMessage>
           {field.meta.error === NOT_ALLOWED_MESSAGE && (
-            <React.Fragment>
-              <br />
+            <FormErrorMessage mt={0}>
               Pour faire une demande à l'équipe Egapro,&nbsp;
               <Link
                 isExternal
@@ -111,49 +100,12 @@ function FieldSiren({
                 <IconExternalLink />
               </Link>
               .
-            </React.Fragment>
+            </FormErrorMessage>
           )}
-        </p>
+        </>
       )}
-    </div>
+    </FormControl>
   )
-}
-
-const styles = {
-  formField: css({
-    marginBottom: 20,
-  }),
-  label: css({
-    fontSize: 14,
-    fontWeight: "bold",
-    lineHeight: "17px",
-  }),
-  labelError: css({
-    color: globalStyles.colors.error,
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex",
-    input: {
-      borderRadius: 4,
-      border: "1px solid",
-    },
-    "input[readonly]": { border: 0 },
-    position: "relative",
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    lineHeight: "15px",
-  }),
-  spinner: css({
-    position: "absolute",
-    right: 4,
-    top: 4,
-  }),
 }
 
 export default FieldSiren

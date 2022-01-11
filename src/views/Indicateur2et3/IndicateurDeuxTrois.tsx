@@ -1,6 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, FunctionComponent } from "react"
+import { Text, VStack } from "@chakra-ui/react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionIndicateurDeuxTroisData } from "../../globals"
@@ -23,14 +22,14 @@ import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface IndicateurDeuxTroisProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Indicateur écart de taux d'augmentation"
 
-function IndicateurDeuxTrois({ state, dispatch }: Props) {
+const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const updateIndicateurDeuxTrois = useCallback(
@@ -89,7 +88,7 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
             text="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
           />
           <ActionBar>
-            <ButtonSimulatorLink to="/indicateur4" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeuxTrois>
@@ -107,10 +106,10 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
             text="Il n’y a pas eu d'augmentation durant la période de référence."
           />
           <ActionBar>
-            <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>modifier les données saisies</ActionLink>
+            <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>Modifier les données saisies</ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonSimulatorLink to="/indicateur4" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
           </ActionBar>
         </div>
       </PageIndicateurDeuxTrois>
@@ -127,17 +126,27 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
     <PageIndicateurDeuxTrois>
       <LayoutFormAndResult
         childrenForm={
-          <IndicateurDeuxTroisForm
-            finPeriodeReference={state.informations.finPeriodeReference}
-            presenceAugmentationPromotion={state.indicateurDeuxTrois.presenceAugmentationPromotion}
-            nombreAugmentationPromotionFemmes={state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes}
-            nombreAugmentationPromotionHommes={state.indicateurDeuxTrois.nombreAugmentationPromotionHommes}
-            periodeDeclaration={state.indicateurDeuxTrois.periodeDeclaration}
-            nombreSalaries={state.effectif.nombreSalaries}
-            readOnly={state.indicateurDeuxTrois.formValidated === "Valid"}
-            updateIndicateurDeuxTrois={updateIndicateurDeuxTrois}
-            validateIndicateurDeuxTrois={validateIndicateurDeuxTrois}
-          />
+          <div>
+            <IndicateurDeuxTroisForm
+              finPeriodeReference={state.informations.finPeriodeReference}
+              presenceAugmentationPromotion={state.indicateurDeuxTrois.presenceAugmentationPromotion}
+              nombreAugmentationPromotionFemmes={state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes}
+              nombreAugmentationPromotionHommes={state.indicateurDeuxTrois.nombreAugmentationPromotionHommes}
+              periodeDeclaration={state.indicateurDeuxTrois.periodeDeclaration}
+              nombreSalaries={state.effectif.nombreSalaries}
+              readOnly={state.indicateurDeuxTrois.formValidated === "Valid"}
+              updateIndicateurDeuxTrois={updateIndicateurDeuxTrois}
+              validateIndicateurDeuxTrois={validateIndicateurDeuxTrois}
+            />
+            {state.indicateurDeuxTrois.formValidated === "Valid" && (
+              <AdditionalInfo
+                results={results}
+                indicateurSexeSurRepresente={indicateurSexeSurRepresente}
+                plusPetitNombreSalaries={plusPetitNombreSalaries}
+                correctionMeasure={correctionMeasure}
+              />
+            )}
+          </div>
         }
         childrenResult={
           state.indicateurDeuxTrois.formValidated === "Valid" && (
@@ -151,28 +160,18 @@ function IndicateurDeuxTrois({ state, dispatch }: Props) {
           )
         }
       />
-      {state.indicateurDeuxTrois.formValidated === "Valid" && (
-        <AdditionalInfo
-          results={results}
-          indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-          plusPetitNombreSalaries={plusPetitNombreSalaries}
-          correctionMeasure={correctionMeasure}
-        />
-      )}
     </PageIndicateurDeuxTrois>
   )
 }
 
-function PageIndicateurDeuxTrois({ children }: { children: ReactNode }) {
-  return (
-    <Page
-      title={title}
-      tagline="Le nombre de femmes et d’hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
-    >
-      {children}
-    </Page>
-  )
-}
+const PageIndicateurDeuxTrois: FunctionComponent = ({ children }) => (
+  <Page
+    title={title}
+    tagline="Le nombre de femmes et d’hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
+  >
+    {children}
+  </Page>
+)
 
 export type Result = { label: string; result: string; note: number }
 export type Results = { best: Result; worst: Result }
@@ -214,31 +213,27 @@ export function AdditionalInfo({
   results: Results
 }) {
   return (
-    <div css={styles.additionalInfo}>
-      <p>
+    <VStack spacing={4} mt={6}>
+      <Text fontSize="sm" color="gray.500" fontStyle="italic">
         {results.worst.label} <strong>{results.worst.result}</strong>, la note obtenue{" "}
         {correctionMeasure && "avant prise en compte des mesures de correction "}
-        est de <strong>{results.worst.note}/35</strong>
-        <br />
-        {results.worst.note < results.best.note &&
-          "cette note n'a pas été retenue dans le calcul de votre index car elle est la moins favorable"}
-      </p>
-      <p>{messageEcartNombreEquivalentSalaries(indicateurSexeSurRepresente, plusPetitNombreSalaries)}</p>
-      {correctionMeasure && <p>{messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "35/35")}</p>}
-    </div>
+        est de <strong>{results.worst.note}/35</strong>.
+      </Text>
+      {results.worst.note < results.best.note && (
+        <Text fontSize="sm" color="gray.500" fontStyle="italic">
+          Cette note n'a pas été retenue dans le calcul de votre index car elle est la moins favorable
+        </Text>
+      )}
+      <Text fontSize="sm" color="gray.500" fontStyle="italic">
+        {messageEcartNombreEquivalentSalaries(indicateurSexeSurRepresente, plusPetitNombreSalaries)}
+      </Text>
+      {correctionMeasure && (
+        <Text fontSize="sm" color="gray.500" fontStyle="italic">
+          {messageMesureCorrection(indicateurSexeSurRepresente, "d'augmentations", "35/35")}
+        </Text>
+      )}
+    </VStack>
   )
-}
-
-const styles = {
-  additionalInfo: css({
-    color: "#61676F",
-    fontSize: 14,
-    fontStyle: "italic",
-    maxWidth: 500,
-    "& > p": {
-      marginBottom: 30,
-    },
-  }),
 }
 
 export default IndicateurDeuxTrois

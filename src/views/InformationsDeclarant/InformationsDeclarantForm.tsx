@@ -1,22 +1,20 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { Box, Flex, Text } from "@chakra-ui/react"
 import { Field, Form } from "react-final-form"
 import { Link } from "react-router-dom"
-
-import globalStyles from "../../utils/globalStyles"
 
 import { AppState, FormState, ActionInformationsDeclarantData } from "../../globals"
 
 import { mustBeNumber, required, validateEmail } from "../../utils/formHelpers"
 
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import TextField from "../../components/TextField"
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
-///////////////////
+import { IconEdit } from "../../components/ds/Icons"
+import ButtonAction from "../../components/ButtonAction"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -64,19 +62,19 @@ const validateForm = ({
   acceptationCGU: acceptationCGU ? undefined : { invalid: true },
 })
 
-interface Props {
+interface InformationsDeclarantFormProps {
   informationsDeclarant: AppState["informationsDeclarant"]
   readOnly: boolean
   updateInformationsDeclarant: (data: ActionInformationsDeclarantData) => void
   validateInformationsDeclarant: (valid: FormState) => void
 }
 
-function InformationsDeclarantForm({
+const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProps> = ({
   informationsDeclarant,
   readOnly,
   updateInformationsDeclarant,
   validateInformationsDeclarant,
-}: Props) {
+}) => {
   const initialValues: ActionInformationsDeclarantData = {
     nom: informationsDeclarant.nom,
     prenom: informationsDeclarant.prenom,
@@ -113,9 +111,8 @@ function InformationsDeclarantForm({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-
           <TextField
             label="Nom du déclarant"
             fieldName="nom"
@@ -137,33 +134,44 @@ function InformationsDeclarantForm({
             readOnly={readOnly}
             autocomplete="tel-national"
           />
-          <TextField
-            label="Email (fourni lors de la demande de validation de l'email)"
-            fieldName="email"
-            errorText="l'email n’est pas valide"
-            readOnly={true}
-          />
+          <Box mb={6}>
+            <FakeInputGroup label="Email (fourni lors de la demande de validation de l'email)">
+              {initialValues.email}
+            </FakeInputGroup>
+          </Box>
           <Field name="acceptationCGU" component="input" type="checkbox">
             {({ input, meta }: { input: any; meta: any }) => (
-              <label css={styles.label}>
-                <input {...input} disabled={readOnly} /> J'accepte l'utilisation de mes données à caractère personnel
-                pour réaliser des statistiques et pour vérifier la validité de ma déclaration. Pour en savoir plus sur
-                l'usage de ces données, vous pouvez consulter nos{" "}
-                <Link to="/cgu">Conditions Générales d'Utilisation</Link>
-                {meta.error && meta.touched && <p css={styles.error}>veuillez accepter les CGUs</p>}
-              </label>
+              <div>
+                <label>
+                  <Flex>
+                    <input {...input} disabled={readOnly} />
+                    <Box as="span" fontSize="sm" ml={2} mt={-1}>
+                      J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et
+                      pour vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous
+                      pouvez consulter nos <Link to="/cgu">Conditions Générales d'Utilisation</Link>.
+                    </Box>
+                  </Flex>
+                </label>
+                {meta.error && meta.touched && (
+                  <Text color="red.500" fontSize="sm" pl={5}>
+                    Veuillez accepter les CGUs
+                  </Text>
+                )}
+              </div>
             )}
           </Field>
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/declaration" label="suivant" />
+              <ButtonSimulatorLink to="/declaration" label="Suivant" />
               &emsp;
               {informationsDeclarant.formValidated === "Valid" && (
-                <p css={styles.edit}>
-                  <ActionLink onClick={() => validateInformationsDeclarant("None")}>
-                    modifier les données saisies
-                  </ActionLink>
-                </p>
+                <ButtonAction
+                  leftIcon={<IconEdit />}
+                  label="Modifier les données saisies"
+                  onClick={() => validateInformationsDeclarant("None")}
+                  variant="link"
+                  size="sm"
+                />
               )}
             </ActionBar>
           ) : (
@@ -179,28 +187,6 @@ function InformationsDeclarantForm({
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
-  label: css({
-    fontSize: 14,
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    textDecoration: "underline",
-    lineHeight: "15px",
-  }),
 }
 
 export default InformationsDeclarantForm
