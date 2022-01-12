@@ -23,6 +23,7 @@ import MonProfil from "../views/private/MonProfil"
 import Mire from "../views/Mire"
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
+import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
 
 interface Props {
   state: AppState | undefined
@@ -31,9 +32,24 @@ interface Props {
 
 /**
  * A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.
+ *
+ * @param staffOnly true is only staff member can access this page
  */
-function PrivateRoute({ children, ...rest }: RouteProps) {
-  const { isAuthenticated } = useUser()
+function PrivateRoute({ children, staffOnly, ...rest }: RouteProps & { staffOnly?: boolean }) {
+  const { isAuthenticated, staff } = useUser()
+
+  if (staffOnly) {
+    if (!staff) {
+      return isAuthenticated ? (
+        <Redirect to="/tableauDeBord/mes-entreprises" />
+      ) : (
+        <Redirect to="/tableauDeBord/me-connecter" />
+      )
+    }
+
+    return <Route {...rest} render={() => children} />
+  }
+
   return <Route {...rest} render={() => (isAuthenticated ? children : <Redirect to="/tableauDeBord/me-connecter" />)} />
 }
 
@@ -46,6 +62,9 @@ function AppLayout({ state, dispatch }: Props) {
         <Route path="/tableauDeBord/me-connecter" exact component={Mire} />
         <PrivateRoute path="/tableauDeBord/mes-entreprises" exact>
           <MesEntreprises />
+        </PrivateRoute>
+        <PrivateRoute path="/tableauDeBord/gerer-utilisateurs" staffOnly exact>
+          <GererUtilisateursPage />
         </PrivateRoute>
         <PrivateRoute path="/tableauDeBord/mon-profil" exact>
           <MonProfil />

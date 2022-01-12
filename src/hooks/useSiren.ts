@@ -1,6 +1,6 @@
 import useSWR from "swr"
 import { genericFetch } from "../utils/fetcher"
-import { makeMessage } from "../utils/makeMessage"
+import { genericErrorMessage } from "../utils/makeMessage"
 
 const API_SOCIAL_GOUV_SIREN = "https://search-recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/"
 
@@ -14,13 +14,24 @@ const fetcherSiren = async (siren: string) => {
   return genericFetch(API_SOCIAL_GOUV_SIREN + siren)
 }
 
+type ReturnApiType = {
+  label: string
+  firstMatchingEtablissement: { address: string }
+}
+
 export function useSiren(siren: string) {
-  const { data, error, mutate } = useSWR(siren ? siren : null, fetcherSiren)
+  const { data, error } = useSWR<ReturnApiType>(siren ? siren : null, fetcherSiren, {
+    onErrorRetry: (error) => {
+      // Never retry on 404.
+      if (error.status === 404) return
+    },
+    revalidateOnFocus: false,
+  })
 
   const isLoading = !data && !error
   const isError = Boolean(error)
 
   const entreprise = data ? { raison_sociale: data.label, adresse: data.firstMatchingEtablissement?.address } : null
 
-  return { entreprise, message: makeMessage(error), isLoading, isError, mutate }
+  return { entreprise, error, message: genericErrorMessage(error), isLoading, isError }
 }

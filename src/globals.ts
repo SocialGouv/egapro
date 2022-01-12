@@ -521,4 +521,4 @@ export type EntrepriseType = {
 export type AlertMessageType = {
   text: string
   kind: "success" | "error"
-} | null
+}
