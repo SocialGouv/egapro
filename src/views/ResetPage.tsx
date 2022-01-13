@@ -17,7 +17,7 @@ interface ResetPageProps extends RouteComponentProps {
   dispatch: (action: ActionType) => void
 }
 
-function ResetPage({ dispatch, state }: ResetPageProps) {
+function ResetPage({ dispatch, state }: ResetPageProps): null {
   const history = useHistory()
   const location = useLocation()
 

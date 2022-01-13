@@ -1,5 +1,5 @@
 import React, { useCallback, Fragment, ReactNode, useState, useEffect, FunctionComponent } from "react"
-import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
+import { RouteComponentProps, useHistory } from "react-router-dom"
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
 
 import {
