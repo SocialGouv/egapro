@@ -1,5 +1,5 @@
 import React, { useCallback, Fragment, ReactNode, useState, useEffect, FunctionComponent } from "react"
-import { RouteComponentProps } from "react-router-dom"
+import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
 
 import {
@@ -35,7 +35,7 @@ import DeclarationForm from "./DeclarationForm"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
-import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
+import { postIndicatorsDatas, putDeclaration, putIndicatorsDatas } from "../../utils/api"
 import { formatDataForAPI, logToSentry } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 import { isFormValid } from "../../utils/formHelpers"
@@ -50,6 +50,8 @@ const title = "Déclaration"
 
 const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
   useTitle(title)
+  const history = useHistory()
+  const location = useLocation()
 
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
@@ -58,6 +60,10 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
     [dispatch],
   )
+
+  const resetDeclaration = useCallback(() => {
+    history.push(`/nouvelleSimulation`)
+  }, [])
 
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
 
@@ -399,6 +405,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
               finPeriodeReference={state.informations.finPeriodeReference}
               readOnly={isFormValid(state.declaration) && !declaring}
               updateDeclaration={updateDeclaration}
+              resetDeclaration={resetDeclaration}
               validateDeclaration={validateDeclaration}
               apiError={apiError}
               declaring={declaring}
