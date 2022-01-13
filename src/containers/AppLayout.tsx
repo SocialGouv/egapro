@@ -71,7 +71,7 @@ function AppLayout({ state, dispatch }: Props) {
           <MonProfil />
         </PrivateRoute>
         <Route
-          path="/nouvelleSimulation"
+          path="/nouvelle-simulation"
           exact
           render={(props) => <ResetPage {...props} dispatch={dispatch} state={state} />}
         />

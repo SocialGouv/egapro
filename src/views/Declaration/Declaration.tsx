@@ -35,7 +35,7 @@ import DeclarationForm from "./DeclarationForm"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
-import { postIndicatorsDatas, putDeclaration, putIndicatorsDatas } from "../../utils/api"
+import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
 import { formatDataForAPI, logToSentry } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 import { isFormValid } from "../../utils/formHelpers"
@@ -51,7 +51,6 @@ const title = "Déclaration"
 const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
   useTitle(title)
   const history = useHistory()
-  const location = useLocation()
 
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
@@ -62,7 +61,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   )
 
   const resetDeclaration = useCallback(() => {
-    history.push(`/nouvelleSimulation`)
+    history.push(`/nouvelle-simulation`)
   }, [])
 
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
