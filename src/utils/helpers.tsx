@@ -168,7 +168,7 @@ const getDeclaration = (data: AppState): any => {
   }
   const index = data.declaration.noteIndex
 
-  if (index || (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2020)) {
+  if (index !== undefined || (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2020)) {
     declaration.publication = {
       date: toISOString(data.declaration.datePublication),
     }
@@ -179,7 +179,7 @@ const getDeclaration = (data: AppState): any => {
     }
   }
 
-  if (index) {
+  if (index !== undefined) {
     declaration.index = index
     if (index < 75) {
       declaration.mesures_correctives = data.declaration.mesuresCorrection
