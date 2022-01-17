@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react"
 import { useCallback, ReactNode } from "react"
-import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
 
@@ -12,7 +11,7 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InformationsSimulationForm from "./InformationsSimulationForm"
 import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface Props {
   state: AppState
   dispatch: (action: ActionType) => void
 }
