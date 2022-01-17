@@ -102,10 +102,10 @@ function Simulateur({ code, state, dispatch }: Props) {
         const siren =
           simuData?.informationsEntreprise?.formValidated === "Valid" ? simuData?.informationsEntreprise?.siren : null
 
-        // a free siren is a siren that has no owners already bound to it.
-        const freeSiren = await sirenIsFree(siren)
-
         if (siren) {
+          // a free siren is a siren that has no owners already bound to it.
+          const freeSiren = await sirenIsFree(siren)
+
           if (!token) {
             // On ne peut pas voir une simulation avec un SIREN rempli et qu'on n'est pas authentifié.
             // Renvoi sur le formulaire d'email (cf. plus bas).

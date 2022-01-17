@@ -20,6 +20,7 @@ import globalStyles from "../../utils/globalStyles"
 import ButtonAction from "../../components/ButtonAction"
 import ErrorMessage from "../../components/ErrorMessage"
 import { resendReceipt } from "../../utils/api"
+import PrimaryButton from "../../components/ds/PrimaryButton"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -68,6 +69,7 @@ interface Props {
   finPeriodeReference: string
   readOnly: boolean
   updateDeclaration: (data: ActionDeclarationData) => void
+  resetDeclaration: () => void
   validateDeclaration: (valid: FormState) => void
   apiError: string | undefined
   declaring: boolean
@@ -80,6 +82,7 @@ function DeclarationForm({
   finPeriodeReference,
   readOnly,
   updateDeclaration,
+  resetDeclaration,
   validateDeclaration,
   apiError,
   declaring,
@@ -213,9 +216,13 @@ function DeclarationForm({
                 readOnly={readOnly}
               />
               <p>
-                {after2020
-                  ? `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
-                  : "Avez-vous un site Internet pour publier le niveau de résultat obtenu ?"}
+                {after2020 ? (
+                  `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
+                ) : (
+                  <span style={{ whiteSpace: "nowrap" }}>
+                    Avez-vous un site Internet pour publier le niveau de résultat obtenu ?
+                  </span>
+                )}
               </p>
               <RadiosBoolean
                 fieldName="publicationSurSiteInternet"
@@ -263,6 +270,9 @@ function DeclarationForm({
                 disabled={loading}
                 loading={loading}
               />
+              <PrimaryButton variant="outline" mt={3} onClick={resetDeclaration}>
+                Effectuer une nouvelle simulation et déclaration
+              </PrimaryButton>
             </Fragment>
           ) : (
             <ActionBar>

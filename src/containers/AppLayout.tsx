@@ -24,6 +24,7 @@ import Mire from "../views/Mire"
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
 import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
+import ResetPage from "../views/ResetPage"
 
 interface Props {
   state: AppState | undefined
@@ -69,6 +70,11 @@ function AppLayout({ state, dispatch }: Props) {
         <PrivateRoute path="/tableauDeBord/mon-profil" exact>
           <MonProfil />
         </PrivateRoute>
+        <Route
+          path="/nouvelle-simulation"
+          exact
+          render={(props) => <ResetPage {...props} dispatch={dispatch} state={state} />}
+        />
         <Route
           render={() => {
             document.title = "Index Egapro"
