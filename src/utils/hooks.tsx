@@ -77,11 +77,7 @@ export function useDataFetching<SearchResult, SearchParams, DebouncedParams>(
  */
 export function useTitle(title: string) {
   useEffect(() => {
-    const prevTitle = document.title
-    document.title = title + " - " + prevTitle
-    return () => {
-      document.title = prevTitle
-    }
+    document.title = title + " - Index Egapro"
   })
 }
 
