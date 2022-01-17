@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
 import { Fragment, useEffect, useState } from "react"
-import { Route, Switch, useHistory } from "react-router-dom"
+import { Redirect, Route, Switch, useHistory } from "react-router-dom"
 
 import { AppState, ActionType } from "../globals"
 
@@ -180,67 +180,72 @@ function Simulateur({ code, state, dispatch }: Props) {
 
   return (
     <Switch>
-      <Route
-        path="/simulateur/:code/"
-        exact
-        render={() => {
-          return <HomeSimulateur />
-        }}
-      />
-      <Route
-        path="/simulateur/:code/informations"
-        render={(props) => <InformationsSimulation {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route
-        path="/simulateur/:code/effectifs"
-        render={(props) => <Effectif {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route
-        path="/simulateur/:code/indicateur1"
-        render={(props) => <IndicateurUn {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route
-        path="/simulateur/:code/indicateur2"
-        render={(props) => <IndicateurDeux {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route
-        path="/simulateur/:code/indicateur3"
-        render={(props) => <IndicateurTrois {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route
-        path="/simulateur/:code/indicateur2et3"
-        render={(props) => <IndicateurDeuxTrois {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route
-        path="/simulateur/:code/indicateur4"
-        render={(props) => <IndicateurQuatre {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route
-        path="/simulateur/:code/indicateur5"
-        render={(props) => <IndicateurCinq {...props} state={state} dispatch={dispatch} />}
-      />
-      <Route path="/simulateur/:code/recapitulatif" render={(props) => <Recapitulatif {...props} state={state} />} />
-      {tokenInfo === undefined ? (
-        <AskEmail />
-      ) : tokenInfo === "error" ? (
-        <Fragment>
-          <p></p>
-          <AskEmail />
-        </Fragment>
+      <Route path="/simulateur/:code/" exact>
+        <HomeSimulateur />
+      </Route>
+      <Route path="/simulateur/:code/informations">
+        <InformationsSimulation state={state} dispatch={dispatch} />
+      </Route>
+
+      {/*  We ensure to have the informations page always filleds before allowing to go to other form pages.  */}
+      {state?.informations?.formValidated !== "Valid" ? (
+        <Redirect to={`/simulateur/${code}/informations`} />
       ) : (
         <Fragment>
-          <Route
-            path="/simulateur/:code/informations-entreprise"
-            render={(props) => <InformationsEntreprise {...props} state={state} dispatch={dispatch} />}
-          />
-          <Route
-            path="/simulateur/:code/informations-declarant"
-            render={(props) => <InformationsDeclarant {...props} state={state} dispatch={dispatch} />}
-          />
-          <Route
-            path="/simulateur/:code/declaration"
-            render={(props) => <Declaration {...props} code={code} state={state} dispatch={dispatch} />}
-          />
+          <Switch>
+            <Route
+              path="/simulateur/:code/effectifs"
+              render={(props) => <Effectif {...props} state={state} dispatch={dispatch} />}
+            />
+            <Route
+              path="/simulateur/:code/indicateur1"
+              render={(props) => <IndicateurUn {...props} state={state} dispatch={dispatch} />}
+            />
+            <Route
+              path="/simulateur/:code/indicateur2"
+              render={(props) => <IndicateurDeux {...props} state={state} dispatch={dispatch} />}
+            />
+            <Route
+              path="/simulateur/:code/indicateur3"
+              render={(props) => <IndicateurTrois {...props} state={state} dispatch={dispatch} />}
+            />
+            <Route
+              path="/simulateur/:code/indicateur2et3"
+              render={(props) => <IndicateurDeuxTrois {...props} state={state} dispatch={dispatch} />}
+            />
+            <Route
+              path="/simulateur/:code/indicateur4"
+              render={(props) => <IndicateurQuatre {...props} state={state} dispatch={dispatch} />}
+            />
+            <Route
+              path="/simulateur/:code/indicateur5"
+              render={(props) => <IndicateurCinq {...props} state={state} dispatch={dispatch} />}
+            />
+            <Route
+              path="/simulateur/:code/recapitulatif"
+              render={(props) => <Recapitulatif {...props} state={state} />}
+            />
+            {tokenInfo === undefined || tokenInfo === "error" ? (
+              <Route>
+                <AskEmail />
+              </Route>
+            ) : (
+              <Fragment>
+                <Route
+                  path="/simulateur/:code/informations-entreprise"
+                  render={(props) => <InformationsEntreprise {...props} state={state} dispatch={dispatch} />}
+                />
+                <Route
+                  path="/simulateur/:code/informations-declarant"
+                  render={(props) => <InformationsDeclarant {...props} state={state} dispatch={dispatch} />}
+                />
+                <Route
+                  path="/simulateur/:code/declaration"
+                  render={(props) => <Declaration {...props} code={code} state={state} dispatch={dispatch} />}
+                />
+              </Fragment>
+            )}
+          </Switch>
         </Fragment>
       )}
     </Switch>
