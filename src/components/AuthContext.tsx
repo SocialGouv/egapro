@@ -1,4 +1,5 @@
 import React from "react"
+import { useHistory } from "react-router-dom"
 import { getTokenInfo } from "../utils/api"
 
 const initialContext = {
@@ -70,4 +71,26 @@ export function useUser(): typeof initialContext {
   if (!context) throw new Error("useUser must be used in a <AuthContextProvider />")
 
   return context
+}
+
+/**
+ * Check if a token is present in the URL bar. If so, run login with it.
+ */
+export function useCheckIfTokenIsInURL() {
+  const { login } = useUser()
+  const history = useHistory()
+
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+
+    const tokenInURL = urlParams.get("token")
+
+    if (tokenInURL) {
+      login(tokenInURL)
+      // window.history.pushState({}, document.title, window.location.pathname)
+      // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
+      history.push({ search: "" })
+      // history.push(window.location.pathname) // TODO: this doesn't work because it re renders infinitely
+    }
+  })
 }
