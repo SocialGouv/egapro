@@ -24,6 +24,7 @@ import Mire from "../views/Mire"
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
 import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
+import ResetPage from "../views/ResetPage"
 
 interface Props {
   state: AppState | undefined
@@ -78,6 +79,12 @@ function AppLayout({ state, dispatch }: Props) {
   return (
     <AuthContextProvider>
       <Switch>
+        <Route
+          path="/nouvelle-simulation"
+          exact
+          render={(props) => <ResetPage {...props} dispatch={dispatch} state={state} />}
+        />
+
         <Route path="/tableauDeBord/">
           <DashboardRoutes />
         </Route>

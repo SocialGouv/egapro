@@ -64,8 +64,8 @@ function Footer() {
               </Link>
             </ListItem>
             <ListItem>
-              <Link as={ReachLink} to="/accessibilite">
-                Accessibilité&nbsp;: non conforme
+              <Link href={process.env.PUBLIC_URL + "/a11y/declaration-accessibilite-rgaa-4-1.pdf"}>
+                Accessibilité&nbsp;: partiellement conforme
               </Link>
             </ListItem>
             <ListItem>
