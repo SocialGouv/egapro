@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
 import { Fragment, useEffect, useState } from "react"
-import { Redirect, Route, Switch, useHistory } from "react-router-dom"
+import { Redirect, Route, Switch } from "react-router-dom"
 
 import { AppState, ActionType } from "../globals"
 
@@ -9,7 +9,7 @@ import { logToSentry } from "../utils/helpers"
 
 import globalStyles from "../utils/globalStyles"
 import { isUserGrantedForSiren } from "../utils/user"
-import { getIndicatorsDatas, getTokenInfo, putIndicatorsDatas } from "../utils/api"
+import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api"
 import { useDebounceEffect } from "../utils/hooks"
 
 import ActivityIndicator from "../components/ActivityIndicator"
@@ -30,12 +30,7 @@ import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
 import AskEmail from "../views/AskEmail"
 import { sirenIsFree } from "../utils/siren"
-
-interface TokenInfo {
-  email: string
-  déclarations: [Declaration]
-  ownership: [string]
-}
+import { useCheckIfTokenIsInURL, useUser } from "../components/AuthContext"
 
 interface Declaration {
   declared_at: number
@@ -54,16 +49,9 @@ interface Props {
 function Simulateur({ code, state, dispatch }: Props) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-  const [tokenInfo, setTokenInfo] = useState<undefined | "error" | TokenInfo>(undefined)
-  const history = useHistory()
+  const { email, isAuthenticated } = useUser()
 
-  const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.has("token")) {
-    localStorage.setItem("token", urlParams.get("token") || "")
-    // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
-    history.push({ search: "" })
-  }
-  let token = localStorage.getItem("token")
+  useCheckIfTokenIsInURL()
 
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {
@@ -71,29 +59,7 @@ function Simulateur({ code, state, dispatch }: Props) {
       setLoading(true)
       setErrorMessage(undefined)
 
-      let email = ""
-
       try {
-        if (token) {
-          try {
-            const tokenInfo = await getTokenInfo()
-
-            if (tokenInfo) {
-              setTokenInfo(tokenInfo?.jsonBody)
-              localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "")
-
-              email = tokenInfo?.jsonBody?.email || email
-            }
-          } catch (error) {
-            // If token has expired, we remove it from localStorage and state.
-            console.error(error)
-            token = ""
-            localStorage.setItem("token", "")
-            localStorage.setItem("tokenInfo", "")
-            setTokenInfo(undefined)
-          }
-        }
-
         const indicatorsData = await getIndicatorsDatas(code)
         setLoading(false)
 
@@ -102,19 +68,21 @@ function Simulateur({ code, state, dispatch }: Props) {
         const siren =
           simuData?.informationsEntreprise?.formValidated === "Valid" ? simuData?.informationsEntreprise?.siren : null
 
-        // a free siren is a siren that has no owners already bound to it.
-        const freeSiren = await sirenIsFree(siren)
-
         if (siren) {
-          if (!token) {
+          if (!isAuthenticated) {
             // On ne peut pas voir une simulation avec un SIREN rempli et qu'on n'est pas authentifié.
             // Renvoi sur le formulaire d'email (cf. plus bas).
             setErrorMessage("Veuillez renseigner votre email pour accéder à cette simulation-déclaration.")
-          } else if (!isUserGrantedForSiren(siren) && !freeSiren) {
-            // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
-            setErrorMessage(
-              "Vous n'êtes pas autorisé à accéder à cette simulation-déclaration, veuillez contacter votre référent de l'égalité professionnelle.",
-            )
+          } else {
+            // a free siren is a siren that has no owners already bound to it.
+            const freeSiren = await sirenIsFree(siren)
+
+            if (!isUserGrantedForSiren(siren) && !freeSiren) {
+              // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
+              setErrorMessage(
+                "Vous n'êtes pas autorisé à accéder à cette simulation-déclaration, veuillez contacter votre référent de l'égalité professionnelle.",
+              )
+            }
           }
         }
 
@@ -124,6 +92,7 @@ function Simulateur({ code, state, dispatch }: Props) {
             ...simuData,
             informationsDeclarant: {
               ...simuData?.informationsDeclarant,
+              // We preserve the original author email, if any.
               email: simuData?.informationsDeclarant?.email || email,
             },
           },
@@ -140,7 +109,7 @@ function Simulateur({ code, state, dispatch }: Props) {
     }
 
     runEffect()
-  }, [code, token, dispatch])
+  }, [code, dispatch, isAuthenticated, email])
 
   // useEffect pour synchroniser le state dans la db, de façon asynchrone (après 2 secondes de debounce).
   useDebounceEffect(
@@ -225,7 +194,7 @@ function Simulateur({ code, state, dispatch }: Props) {
               path="/simulateur/:code/recapitulatif"
               render={(props) => <Recapitulatif {...props} state={state} />}
             />
-            {tokenInfo === undefined || tokenInfo === "error" ? (
+            {!isAuthenticated ? (
               <Route>
                 <AskEmail />
               </Route>
