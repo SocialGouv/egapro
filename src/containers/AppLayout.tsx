@@ -85,7 +85,7 @@ function AppLayout({ state, dispatch }: Props) {
         {layoutType === "mobile" ? (
           <MobileLayout />
         ) : (
-          <Flex direction="column" sx={{ minHeight: "100%" }}>
+          <Flex direction="column" sx={{ minHeight: "100vh" }}>
             <Header />
             <MainScrollView state={state}>
               <Switch>
