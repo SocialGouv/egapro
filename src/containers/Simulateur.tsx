@@ -30,7 +30,7 @@ import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
 import AskEmail from "../views/AskEmail"
 import { sirenIsFree } from "../utils/siren"
-import { useCheckIfTokenIsInURL, useUser } from "../components/AuthContext"
+import { useUser } from "../components/AuthContext"
 
 interface Declaration {
   declared_at: number
@@ -49,9 +49,9 @@ interface Props {
 function Simulateur({ code, state, dispatch }: Props) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-  const { email, isAuthenticated } = useUser()
+  const { email, isAuthenticated, checkTokenInURL } = useUser()
 
-  useCheckIfTokenIsInURL()
+  checkTokenInURL()
 
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {

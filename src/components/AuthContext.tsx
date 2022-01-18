@@ -1,6 +1,8 @@
 import React from "react"
+
 import { useHistory } from "react-router-dom"
 import { getTokenInfo } from "../utils/api"
+import { EXPIRED_TOKEN_MESSAGE, FetchError } from "../utils/fetcher"
 
 const initialContext = {
   email: "",
@@ -8,9 +10,13 @@ const initialContext = {
   staff: false,
   isAuthenticated: false,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
+  login: (token: string) => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   logout: () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  login: (token: string) => {},
+  checkTokenInURL: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  logoutIfExpiredToken: (error: FetchError) => {},
 }
 
 const AuthContext = React.createContext(initialContext)
@@ -57,12 +63,43 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     setContext(initialContext)
   }
 
+  /**
+   * Check if a token is present in the URL bar. If so, run login with it.
+   */
+  function checkTokenInURL() {
+    const history = useHistory()
+
+    React.useEffect(() => {
+      const urlParams = new URLSearchParams(window.location.search)
+
+      const tokenInURL = urlParams.get("token")
+
+      if (tokenInURL) {
+        login(tokenInURL)
+        // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
+        history.push({ search: "" })
+      }
+    })
+  }
+
+  function logoutIfExpiredToken(error: FetchError) {
+    React.useEffect(() => {
+      if (error?.info === EXPIRED_TOKEN_MESSAGE) {
+        logout()
+      }
+    }, [error])
+  }
+
   React.useEffect(() => {
     // tentative de login au mount du composant
     login(localStorage.getItem("token") || "")
   }, [])
 
-  return <AuthContext.Provider value={{ ...context, logout, login }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ ...context, logout, login, checkTokenInURL, logoutIfExpiredToken }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useUser(): typeof initialContext {
@@ -71,26 +108,4 @@ export function useUser(): typeof initialContext {
   if (!context) throw new Error("useUser must be used in a <AuthContextProvider />")
 
   return context
-}
-
-/**
- * Check if a token is present in the URL bar. If so, run login with it.
- */
-export function useCheckIfTokenIsInURL() {
-  const { login } = useUser()
-  const history = useHistory()
-
-  React.useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-
-    const tokenInURL = urlParams.get("token")
-
-    if (tokenInURL) {
-      login(tokenInURL)
-      // window.history.pushState({}, document.title, window.location.pathname)
-      // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
-      history.push({ search: "" })
-      // history.push(window.location.pathname) // TODO: this doesn't work because it re renders infinitely
-    }
-  })
 }
