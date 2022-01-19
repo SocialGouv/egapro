@@ -130,6 +130,7 @@ const defaultState: AppState = {
     publicationSurSiteInternet: undefined,
     datePublication: "",
     lienPublication: "",
+    planRelance: undefined,
     modalitesPublication: "",
     dateDeclaration: "",
     noteIndex: undefined,

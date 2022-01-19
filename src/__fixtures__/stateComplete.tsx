@@ -462,6 +462,7 @@ const actionUpdateDeclaration = {
     publicationSurSiteInternet: true,
     lienPublication: "https://example.com",
     modalitesPublication: "",
+    planRelance: undefined,
   },
 }
 

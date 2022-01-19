@@ -21,6 +21,7 @@ import ButtonAction from "../../components/ButtonAction"
 import ErrorMessage from "../../components/ErrorMessage"
 import { resendReceipt } from "../../utils/api"
 import PrimaryButton from "../../components/ds/PrimaryButton"
+import { hardSpace } from "../../utils/string"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -37,9 +38,11 @@ const validateForm = (finPeriodeReference: string) => {
   return ({
     datePublication,
     publicationSurSiteInternet,
+    planRelance,
   }: {
     datePublication: string
     publicationSurSiteInternet: string | undefined
+    planRelance: string | undefined
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
@@ -57,6 +60,8 @@ const validateForm = (finPeriodeReference: string) => {
             },
       publicationSurSiteInternet:
         publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
+      planRelance:
+        planRelance !== undefined ? undefined : "Il vous faut indiquer si vous avez bénéficié du plan de relance",
     }
   }
 }
@@ -100,6 +105,7 @@ function DeclarationForm({
         : undefined,
     lienPublication: declaration.lienPublication,
     modalitesPublication: declaration.modalitesPublication,
+    planRelance: declaration.planRelance !== undefined ? parseBooleanStateValue(declaration.planRelance) : undefined,
   }
 
   const saveForm = (formData: any) => {
@@ -111,6 +117,7 @@ function DeclarationForm({
       publicationSurSiteInternet,
       lienPublication,
       modalitesPublication,
+      planRelance,
     } = formData
 
     updateDeclaration({
@@ -122,6 +129,7 @@ function DeclarationForm({
         publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
       lienPublication,
       modalitesPublication,
+      planRelance: parseBooleanFormValue(planRelance),
     })
   }
 
@@ -131,7 +139,11 @@ function DeclarationForm({
   }
 
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
+  const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
+
   const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
+
+  const isUES = Boolean(state.informationsEntreprise.nomUES)
 
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
@@ -217,11 +229,9 @@ function DeclarationForm({
               />
               <p>
                 {after2020 ? (
-                  `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
+                  `Avez-vous un site Internet pour publier les résultats obtenus${displayNC}${hardSpace}?`
                 ) : (
-                  <span style={{ whiteSpace: "nowrap" }}>
-                    Avez-vous un site Internet pour publier le niveau de résultat obtenu ?
-                  </span>
+                  <span>{`Avez-vous un site Internet pour publier le niveau de résultat obtenu${hardSpace}?`}</span>
                 )}
               </p>
               <RadiosBoolean
@@ -251,6 +261,7 @@ function DeclarationForm({
                     />
                   ))}
               </div>
+              {after2021 ? <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} /> : null}
             </Fragment>
           )}
 
@@ -317,6 +328,37 @@ function FieldSiteInternet({
       </div>
       <p css={styles.error}>{error && "veuillez entrer une adresse internet"}</p>
     </div>
+  )
+}
+
+function FieldPlanRelance({ readOnly, after2021, isUES }: { readOnly: boolean; after2021: boolean; isUES: boolean }) {
+  const field = useField("planRelance", { validate })
+  const error = hasFieldError(field.meta)
+
+  if (!after2021) return null
+
+  return (
+    <Fragment>
+      <p>
+        {isUES ? (
+          <Fragment>
+            {`Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l’UES a-t-elle bénéficié, en 2021 et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance »${hardSpace}?`}
+          </Fragment>
+        ) : (
+          <Fragment>
+            {`Avez-vous bénéficié, en 2021 et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance »${hardSpace}?`}
+          </Fragment>
+        )}
+      </p>
+      <RadiosBoolean
+        fieldName="planRelance"
+        value={field.input.value}
+        readOnly={readOnly}
+        labelTrue="oui"
+        labelFalse="non"
+      />
+      {error && <p css={styles.error}>{error}</p>}
+    </Fragment>
   )
 }
 

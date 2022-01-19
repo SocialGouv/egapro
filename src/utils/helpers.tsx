@@ -227,6 +227,11 @@ const getEntreprise = (data: AppState): any => {
       entreprises: data.informationsEntreprise.entreprisesUES.map(({ nom, siren }) => ({ raison_sociale: nom, siren })),
     }
   }
+
+  if (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2021) {
+    entreprise.plan_relance = data.declaration.planRelance
+  }
+
   return entreprise
 }
 
