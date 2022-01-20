@@ -56,7 +56,6 @@ const validateForm = ({
   nomEntreprise: string
   anneeDeclaration: string
   finPeriodeReference: string
-  trancheEffectifs: string
 }) => {
   const parsedFinPeriodeReference = parseDate(finPeriodeReference)
   return {
@@ -103,7 +102,7 @@ function InformationsSimulationForm({
     })
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
     validateInformationsSimulation("Valid")
   }
