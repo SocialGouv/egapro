@@ -207,6 +207,17 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
               : state.declaration,
         }
       }
+
+      // If year >= 2021, use the planRelance if present, for other cases, always return undefined.
+      let planRelance = undefined
+
+      if (state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021) {
+        planRelance = state.declaration.planRelance
+      }
+
+      console.log("state.informations.anneeDeclaration", state.informations.anneeDeclaration)
+      console.log("planRelance", planRelance)
+
       return {
         ...state,
         informations: {
@@ -215,6 +226,10 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
           trancheEffectifs,
           anneeDeclaration,
           finPeriodeReference,
+        },
+        declaration: {
+          ...state.declaration,
+          planRelance,
         },
       }
     }

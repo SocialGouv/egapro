@@ -400,9 +400,6 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
             <DeclarationForm
               state={state}
               noteIndex={noteIndex}
-              indicateurUnParCSP={state.indicateurUn.csp}
-              finPeriodeReference={state.informations.finPeriodeReference}
-              readOnly={isFormValid(state.declaration) && !declaring}
               updateDeclaration={updateDeclaration}
               resetDeclaration={resetDeclaration}
               validateDeclaration={validateDeclaration}

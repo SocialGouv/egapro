@@ -1,5 +1,4 @@
 /** @jsx jsx */
-import { Fragment } from "react"
 import { css, jsx } from "@emotion/react"
 import { useField, Field } from "react-final-form"
 import { hasFieldError } from "./Input"
@@ -12,15 +11,8 @@ import { dateToString, parseDate } from "../utils/helpers"
 import DatePicker, { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import fr from "date-fns/locale/fr"
+import { displayMetaErrors } from "../utils/form-error-helpers"
 registerLocale("fr", fr)
-
-const displayMetaErrors = (error: { [key: string]: string }) => (
-  <Fragment>
-    {Object.keys(error)
-      .map((key) => error[key])
-      .join(", ")}
-  </Fragment>
-)
 
 function FieldDate({ name, label, readOnly }: { name: string; label: string; readOnly: boolean }) {
   const field = useField(name, { validate: validateDate })

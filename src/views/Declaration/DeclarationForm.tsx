@@ -14,7 +14,7 @@ import Textarea from "../../components/Textarea"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import { logToSentry, parseDate } from "../../utils/helpers"
 import RadiosBoolean from "../../components/RadiosBoolean"
-import { parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
+import { isFormValid, parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
 import Input, { hasFieldError } from "../../components/Input"
 import globalStyles from "../../utils/globalStyles"
 import ButtonAction from "../../components/ButtonAction"
@@ -22,6 +22,7 @@ import ErrorMessage from "../../components/ErrorMessage"
 import { resendReceipt } from "../../utils/api"
 import PrimaryButton from "../../components/ds/PrimaryButton"
 import { hardSpace } from "../../utils/string"
+import { displayMetaErrors } from "../../utils/form-error-helpers"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -34,7 +35,13 @@ const validate = (value: string) => {
   }
 }
 
-const validateForm = (finPeriodeReference: string) => {
+const validateForm = ({
+  finPeriodeReference,
+  anneeDeclaration,
+}: {
+  finPeriodeReference: string
+  anneeDeclaration: number | undefined
+}) => {
   return ({
     datePublication,
     publicationSurSiteInternet,
@@ -49,6 +56,7 @@ const validateForm = (finPeriodeReference: string) => {
     if (!datePublication) return
     const parsedDatePublication = parseDate(datePublication)
     const parsedFinPeriodeReference = parseDate(finPeriodeReference)
+
     return {
       datePublication:
         parsedDatePublication !== undefined &&
@@ -61,7 +69,9 @@ const validateForm = (finPeriodeReference: string) => {
       publicationSurSiteInternet:
         publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
       planRelance:
-        planRelance !== undefined ? undefined : "Il vous faut indiquer si vous avez bénéficié du plan de relance",
+        anneeDeclaration && anneeDeclaration >= 2021 && planRelance === undefined
+          ? "Il vous faut indiquer si vous avez bénéficié du plan de relance"
+          : undefined,
     }
   }
 }
@@ -70,9 +80,6 @@ const validateForm = (finPeriodeReference: string) => {
 interface Props {
   state: AppState
   noteIndex: number | undefined
-  indicateurUnParCSP: boolean
-  finPeriodeReference: string
-  readOnly: boolean
   updateDeclaration: (data: ActionDeclarationData) => void
   resetDeclaration: () => void
   validateDeclaration: (valid: FormState) => void
@@ -83,9 +90,6 @@ interface Props {
 function DeclarationForm({
   state,
   noteIndex,
-  indicateurUnParCSP,
-  finPeriodeReference,
-  readOnly,
   updateDeclaration,
   resetDeclaration,
   validateDeclaration,
@@ -93,6 +97,11 @@ function DeclarationForm({
   declaring,
 }: Props) {
   const declaration = state.declaration
+  const indicateurUnParCSP = state.indicateurUn.csp
+  const finPeriodeReference = state.informations.finPeriodeReference
+  const anneeDeclaration = state.informations.anneeDeclaration
+  const readOnly = isFormValid(state.declaration) && !declaring
+
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
     cseMisEnPlace:
@@ -171,7 +180,7 @@ function DeclarationForm({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm(finPeriodeReference)}
+      validate={validateForm({ finPeriodeReference, anneeDeclaration })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -357,7 +366,7 @@ function FieldPlanRelance({ readOnly, after2021, isUES }: { readOnly: boolean; a
         labelTrue="oui"
         labelFalse="non"
       />
-      {error && <p css={styles.error}>{error}</p>}
+      <p css={styles.error}>{error && displayMetaErrors(field.meta.error)}</p>
     </Fragment>
   )
 }
