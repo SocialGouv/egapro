@@ -39,7 +39,6 @@ const validateForm = (finPeriodeReference: string) => {
   }: {
     datePublication: string
     publicationSurSiteInternet?: string
-    cseMisEnPlace?: string
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
@@ -123,7 +122,7 @@ function DeclarationForm({
     })
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
     validateDeclaration("Valid")
   }
