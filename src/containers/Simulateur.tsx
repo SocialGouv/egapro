@@ -30,7 +30,7 @@ import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
 import AskEmail from "../views/AskEmail"
 import { sirenIsFree } from "../utils/siren"
-import { useUser } from "../components/AuthContext"
+import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 
 interface Declaration {
   declared_at: number
@@ -49,9 +49,19 @@ interface Props {
 function Simulateur({ code, state, dispatch }: Props) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-  const { email, isAuthenticated, checkTokenInURL } = useUser()
+  const { email, isAuthenticated } = useUser()
 
-  checkTokenInURL()
+  /**
+   * Je cherche à faire marcher correctement useCheckTokenInUrl.
+   *
+   * Quand un nouveau token est détecté, on est censé avoir une tentative de login.
+   * Si ok, un nouveau contexte est renvoyé, ce qui est censé changer l'email et isAuthenticated.
+   *
+   * De cette façon, le useEffect qui suit, qui écoute email et isAuthenticated devrait être relancé.
+   * Or il ne l'est pas. ??? 🤔
+   */
+
+  useCheckTokenInURL()
 
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {

@@ -10,7 +10,7 @@ import PrimaryButton from "../components/ds/PrimaryButton"
 import Page from "../components/Page"
 import { DebugForm, formValidator, InputControl } from "../components/ds/form-lib"
 import { Redirect, useHistory } from "react-router"
-import { useUser } from "../components/AuthContext"
+import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
 
@@ -21,9 +21,9 @@ function Mire() {
   const { toastSuccess, toastError } = useToastMessage({})
   const [submitted, setSubmitted] = React.useState(false)
   const [email, setEmail] = React.useState("")
-  const { isAuthenticated, staff, checkTokenInURL } = useUser()
+  const { isAuthenticated, staff } = useUser()
 
-  checkTokenInURL()
+  useCheckTokenInURL()
 
   const onSubmit = (formData: any) => {
     setEmail(formData.email)
