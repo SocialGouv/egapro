@@ -27,6 +27,7 @@ function FieldDate({ name, label, readOnly }: { name: string; label: string; rea
         <Field name={name} validate={validateDate}>
           {(props) => (
             <DatePicker
+              autoComplete="off"
               locale="fr"
               dateFormat="dd/MM/yyyy"
               selected={parseDate(props.input.value)}
