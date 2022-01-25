@@ -102,7 +102,7 @@ function InformationsSimulationForm({
     })
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
     validateInformationsSimulation("Valid")
   }

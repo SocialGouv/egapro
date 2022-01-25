@@ -48,7 +48,7 @@ const validateForm = ({
     planRelance,
   }: {
     datePublication: string
-    publicationSurSiteInternet: string | undefined
+    publicationSurSiteInternet?: string
     planRelance: string | undefined
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
@@ -142,7 +142,7 @@ function DeclarationForm({
     })
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
     validateDeclaration("Valid")
   }
@@ -203,7 +203,7 @@ function DeclarationForm({
             <Fragment>
               {state.informationsEntreprise.structure === "Entreprise" && (
                 <div css={styles.formField}>
-                  Un CSE a-t-il été mis en place ?
+                  Un CSE a-t-il été mis en place&nbsp;?
                   <RadiosBoolean
                     fieldName="cseMisEnPlace"
                     value={values.cseMisEnPlace}

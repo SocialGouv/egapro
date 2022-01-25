@@ -7,6 +7,7 @@ import { FieldRenderProps, FieldMetaState } from "react-final-form"
 import globalStyles from "../utils/globalStyles"
 
 import { Cell } from "./Cell"
+import { Input } from "@chakra-ui/react"
 
 export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
@@ -71,7 +72,8 @@ function CellInput({
   return (
     <Cell style={styles.cell}>
       {mask ? (
-        <MaskedInput
+        <Input
+          as={MaskedInput}
           mask={maskWithAnyChar}
           css={[styles.input, style, error && styles.inputError]}
           autoComplete="off"

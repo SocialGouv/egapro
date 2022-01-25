@@ -192,7 +192,7 @@ function IndicateurDeuxForm({
                 hasValidationErrors={hasValidationErrors}
                 submitFailed={submitFailed}
                 errorMessage={
-                  errors.notAll0
+                  errors?.notAll0
                     ? errors.notAll0
                     : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
                 }
