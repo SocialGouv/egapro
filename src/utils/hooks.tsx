@@ -77,29 +77,8 @@ export function useDataFetching<SearchResult, SearchParams, DebouncedParams>(
  */
 export function useTitle(title: string) {
   useEffect(() => {
-    const prevTitle = document.title
-    document.title = title + " - " + prevTitle
-    return () => {
-      document.title = prevTitle
-    }
+    document.title = title + " - Index Egapro"
   })
-}
-
-/**
- * Utility to retrive user's info.
- *
- * @returns the information for the authenticated user
- */
-export function useUser(): { email: string; ownership: string[]; logout: () => void } {
-  const tokenInfoLS = localStorage.getItem("tokenInfo")
-  const { email, ownership } = tokenInfoLS ? JSON.parse(tokenInfoLS) : { email: "", ownership: [] }
-
-  function logout() {
-    localStorage.setItem("token", "")
-    localStorage.setItem("tokenInfo", "")
-  }
-
-  return { email, ownership, logout }
 }
 
 function showToastMessage(toast: ReturnType<typeof useToast>, options?: UseToastOptions) {

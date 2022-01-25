@@ -10,7 +10,7 @@ import { composeValidators, required, simpleMemoize, ValidatorFunction } from ".
 import { ownersForSiren, validateSiren } from "../utils/api"
 import { EntrepriseType } from "../globals"
 import ActivityIndicator from "./ActivityIndicator"
-import { useUser } from "../utils/hooks"
+import { useUser } from "./AuthContext"
 import { IconExternalLink } from "./ds/Icons"
 import React from "react"
 

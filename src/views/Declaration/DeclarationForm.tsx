@@ -14,13 +14,15 @@ import Textarea from "../../components/Textarea"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import { logToSentry, parseDate } from "../../utils/helpers"
 import RadiosBoolean from "../../components/RadiosBoolean"
-import { parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
+import { isFormValid, parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
 import Input, { hasFieldError } from "../../components/Input"
 import globalStyles from "../../utils/globalStyles"
 import ButtonAction from "../../components/ButtonAction"
 import ErrorMessage from "../../components/ErrorMessage"
 import { resendReceipt } from "../../utils/api"
 import PrimaryButton from "../../components/ds/PrimaryButton"
+import { hardSpace } from "../../utils/string"
+import { displayMetaErrors } from "../../utils/form-error-helpers"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -33,19 +35,28 @@ const validate = (value: string) => {
   }
 }
 
-const validateForm = (finPeriodeReference: string) => {
+const validateForm = ({
+  finPeriodeReference,
+  anneeDeclaration,
+}: {
+  finPeriodeReference: string
+  anneeDeclaration: number | undefined
+}) => {
   return ({
     datePublication,
     publicationSurSiteInternet,
+    planRelance,
   }: {
     datePublication: string
     publicationSurSiteInternet?: string
+    planRelance: string | undefined
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
     if (!datePublication) return
     const parsedDatePublication = parseDate(datePublication)
     const parsedFinPeriodeReference = parseDate(finPeriodeReference)
+
     return {
       datePublication:
         parsedDatePublication !== undefined &&
@@ -57,6 +68,10 @@ const validateForm = (finPeriodeReference: string) => {
             },
       publicationSurSiteInternet:
         publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
+      planRelance:
+        anneeDeclaration && anneeDeclaration >= 2021 && planRelance === undefined
+          ? "Il vous faut indiquer si vous avez bénéficié du plan de relance"
+          : undefined,
     }
   }
 }
@@ -65,9 +80,6 @@ const validateForm = (finPeriodeReference: string) => {
 interface Props {
   state: AppState
   noteIndex: number | undefined
-  indicateurUnParCSP: boolean
-  finPeriodeReference: string
-  readOnly: boolean
   updateDeclaration: (data: ActionDeclarationData) => void
   resetDeclaration: () => void
   validateDeclaration: (valid: FormState) => void
@@ -78,9 +90,6 @@ interface Props {
 function DeclarationForm({
   state,
   noteIndex,
-  indicateurUnParCSP,
-  finPeriodeReference,
-  readOnly,
   updateDeclaration,
   resetDeclaration,
   validateDeclaration,
@@ -88,6 +97,11 @@ function DeclarationForm({
   declaring,
 }: Props) {
   const declaration = state.declaration
+  const indicateurUnParCSP = state.indicateurUn.csp
+  const finPeriodeReference = state.informations.finPeriodeReference
+  const anneeDeclaration = state.informations.anneeDeclaration
+  const readOnly = isFormValid(state.declaration) && !declaring
+
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
     cseMisEnPlace:
@@ -100,6 +114,7 @@ function DeclarationForm({
         : undefined,
     lienPublication: declaration.lienPublication,
     modalitesPublication: declaration.modalitesPublication,
+    planRelance: declaration.planRelance !== undefined ? parseBooleanStateValue(declaration.planRelance) : undefined,
   }
 
   const saveForm = (formData: any) => {
@@ -111,6 +126,7 @@ function DeclarationForm({
       publicationSurSiteInternet,
       lienPublication,
       modalitesPublication,
+      planRelance,
     } = formData
 
     updateDeclaration({
@@ -122,6 +138,7 @@ function DeclarationForm({
         publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
       lienPublication,
       modalitesPublication,
+      planRelance: parseBooleanFormValue(planRelance),
     })
   }
 
@@ -131,7 +148,11 @@ function DeclarationForm({
   }
 
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
+  const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
+
   const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
+
+  const isUES = Boolean(state.informationsEntreprise.nomUES)
 
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
@@ -159,7 +180,7 @@ function DeclarationForm({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm(finPeriodeReference)}
+      validate={validateForm({ finPeriodeReference, anneeDeclaration })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -217,11 +238,9 @@ function DeclarationForm({
               />
               <p>
                 {after2020 ? (
-                  `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
+                  `Avez-vous un site Internet pour publier les résultats obtenus${displayNC}${hardSpace}?`
                 ) : (
-                  <span style={{ whiteSpace: "nowrap" }}>
-                    Avez-vous un site Internet pour publier le niveau de résultat obtenu ?
-                  </span>
+                  <span>{`Avez-vous un site Internet pour publier le niveau de résultat obtenu${hardSpace}?`}</span>
                 )}
               </p>
               <RadiosBoolean
@@ -251,6 +270,7 @@ function DeclarationForm({
                     />
                   ))}
               </div>
+              {after2021 ? <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} /> : null}
             </Fragment>
           )}
 
@@ -317,6 +337,37 @@ function FieldSiteInternet({
       </div>
       <p css={styles.error}>{error && "veuillez entrer une adresse internet"}</p>
     </div>
+  )
+}
+
+function FieldPlanRelance({ readOnly, after2021, isUES }: { readOnly: boolean; after2021: boolean; isUES: boolean }) {
+  const field = useField("planRelance", { validate })
+  const error = hasFieldError(field.meta)
+
+  if (!after2021) return null
+
+  return (
+    <Fragment>
+      <p>
+        {isUES ? (
+          <Fragment>
+            {`Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l’UES a-t-elle bénéficié, en 2021 et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance »${hardSpace}?`}
+          </Fragment>
+        ) : (
+          <Fragment>
+            {`Avez-vous bénéficié, en 2021 et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan de relance »${hardSpace}?`}
+          </Fragment>
+        )}
+      </p>
+      <RadiosBoolean
+        fieldName="planRelance"
+        value={field.input.value}
+        readOnly={readOnly}
+        labelTrue="oui"
+        labelFalse="non"
+      />
+      <p css={styles.error}>{error && displayMetaErrors(field.meta.error)}</p>
+    </Fragment>
   )
 }
 

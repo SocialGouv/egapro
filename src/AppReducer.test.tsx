@@ -731,6 +731,7 @@ describe("updateDeclaration", () => {
       // TODO : modalitesPublication est obligatoire d'après la référence TS.
       // J'ajoute une valeur aléatoire pour respecter l'interface. À voir.
       modalitesPublication: "",
+      planRelance: false,
     },
   }
 

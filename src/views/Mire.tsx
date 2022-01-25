@@ -10,28 +10,9 @@ import PrimaryButton from "../components/ds/PrimaryButton"
 import Page from "../components/Page"
 import { DebugForm, formValidator, InputControl } from "../components/ds/form-lib"
 import { Redirect, useHistory } from "react-router"
-import { useUser } from "../components/AuthContext"
+import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
-
-/**
- * Check if a token is present in the URL bar. If so, run login with it.
- */
-function useCheckIfTokenIsInURL() {
-  const { login } = useUser()
-  // const history = useHistory()
-
-  const urlParams = new URLSearchParams(window.location.search)
-
-  const tokenInURL = urlParams.get("token")
-
-  if (tokenInURL) {
-    login(tokenInURL)
-    window.history.pushState({}, document.title, window.location.pathname)
-  }
-
-  // history.push(window.location.pathname) // TODO: this doesn't work because it re renders infinitely
-}
 
 function Mire() {
   useTitle(title)
@@ -42,7 +23,7 @@ function Mire() {
   const [email, setEmail] = React.useState("")
   const { isAuthenticated, staff } = useUser()
 
-  useCheckIfTokenIsInURL()
+  useCheckTokenInURL()
 
   const onSubmit = (formData: any) => {
     setEmail(formData.email)
