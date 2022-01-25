@@ -88,15 +88,19 @@ export function useCheckTokenInURL() {
 
   // useEffect called at every render, to try to login with the token in the URL.
   React.useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
+    async function runEffect() {
+      const urlParams = new URLSearchParams(window.location.search)
 
-    const tokenInURL = urlParams.get("token")
+      const tokenInURL = urlParams.get("token")
 
-    if (tokenInURL) {
-      login(tokenInURL)
-      // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
-      history.push({ search: "" })
+      if (tokenInURL) {
+        await login(tokenInURL)
+        // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
+        history.push({ search: "" })
+      }
     }
+
+    runEffect()
   })
 }
 

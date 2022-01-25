@@ -215,9 +215,6 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
         planRelance = state.declaration.planRelance
       }
 
-      console.log("state.informations.anneeDeclaration", state.informations.anneeDeclaration)
-      console.log("planRelance", planRelance)
-
       return {
         ...state,
         informations: {

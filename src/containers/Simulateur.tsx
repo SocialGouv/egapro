@@ -51,18 +51,6 @@ function Simulateur({ code, state, dispatch }: Props) {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   const { email, isAuthenticated } = useUser()
 
-  /**
-   * Je cherche à faire marcher correctement useCheckTokenInUrl.
-   *
-   * Quand un nouveau token est détecté, on est censé avoir une tentative de login.
-   * Si ok, un nouveau contexte est renvoyé, ce qui est censé changer l'email et isAuthenticated.
-   *
-   * De cette façon, le useEffect qui suit, qui écoute email et isAuthenticated devrait être relancé.
-   * Or il ne l'est pas. ??? 🤔
-   */
-
-  useCheckTokenInURL()
-
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {
     async function runEffect() {
@@ -140,6 +128,9 @@ function Simulateur({ code, state, dispatch }: Props) {
     },
     [code],
   )
+
+  // Check to see if the link is a magic link.
+  useCheckTokenInURL()
 
   if (!loading && errorMessage === "Veuillez renseigner votre email pour accéder à cette simulation-déclaration.") {
     return <AskEmail reason={errorMessage} />
