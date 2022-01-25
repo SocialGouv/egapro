@@ -270,9 +270,10 @@ function DeclarationForm({
                     />
                   ))}
               </div>
-              {after2021 ? <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} /> : null}
             </Fragment>
           )}
+
+          {after2021 ? <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} /> : null}
 
           {readOnly ? (
             <Fragment>
