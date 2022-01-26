@@ -28,7 +28,11 @@ jest.mock("../utils/api", () => ({
         })
       }
       default: {
-        return { jsonBody: {} }
+        const error: any = new Error()
+        error.response = {
+          status: 404,
+        }
+        return Promise.reject(error)
       }
     }
   },

@@ -5,7 +5,6 @@ import { Link } from "@chakra-ui/react"
 
 import Input from "./Input"
 import globalStyles from "../utils/globalStyles"
-import { isEmpty } from "../utils/object"
 import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
 import { ownersForSiren, validateSiren } from "../utils/api"
 import { EntrepriseType } from "../globals"
@@ -27,9 +26,13 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
   let result
   try {
     result = await memoizedValidateSiren(siren)
-  } catch (error) {
-    console.error(error)
+  } catch (error: any) {
+    console.error(error?.response?.status, error)
     updateSirenData({})
+
+    if (error?.response?.status === 404) {
+      return UNKNOWN_SIREN
+    }
     return `Numéro SIREN invalide: ${siren}`
   }
 
@@ -39,11 +42,6 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
     console.error(error)
     updateSirenData({})
     return NOT_ALLOWED_MESSAGE
-  }
-
-  if (isEmpty(result?.jsonBody)) {
-    updateSirenData({})
-    return UNKNOWN_SIREN
   }
 
   updateSirenData(result.jsonBody)
