@@ -20,9 +20,11 @@ function FieldDate({ name, label, readOnly }: { name: string; label: string; rea
 
   return (
     <div css={styles.dateField}>
-      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
-        {label}
-      </label>
+      {label && (
+        <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
+          {label}
+        </label>
+      )}
       <div css={styles.fieldRow}>
         <Field name={name} validate={validateDate}>
           {(props) => (
@@ -45,14 +47,12 @@ function FieldDate({ name, label, readOnly }: { name: string; label: string; rea
 
 const styles = {
   dateField: css({
-    marginTop: 5,
     input: {
       display: "flex",
       fontSize: 14,
-      paddingLeft: 22,
-      paddingRight: 22,
-      height: 38,
-      marginTop: 5,
+      paddingLeft: 16,
+      paddingRight: 16,
+      height: 40,
     },
   }),
   label: css({
@@ -65,8 +65,6 @@ const styles = {
   }),
   fieldRow: css({
     height: 38,
-    marginTop: 5,
-    marginBottom: 5,
     display: "flex",
     input: {
       borderRadius: 4,
