@@ -27,9 +27,12 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
   let result
   try {
     result = await memoizedValidateSiren(siren)
-  } catch (error) {
-    console.error(error)
+  } catch (error: any) {
+    console.error(error?.response?.status, error)
     updateSirenData({})
+    if (error?.response?.status === 404) {
+      return UNKNOWN_SIREN
+    }
     return `Numéro SIREN invalide: ${siren}`
   }
 
@@ -39,11 +42,6 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
     console.error(error)
     updateSirenData({})
     return NOT_ALLOWED_MESSAGE
-  }
-
-  if (isEmpty(result?.jsonBody)) {
-    updateSirenData({})
-    return UNKNOWN_SIREN
   }
 
   updateSirenData(result.jsonBody)
