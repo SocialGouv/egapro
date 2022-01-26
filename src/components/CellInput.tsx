@@ -71,7 +71,7 @@ function CellInput({
 
   return (
     <Cell style={styles.cell}>
-      {!mask ? (
+      {mask ? (
         <Input
           as={MaskedInput}
           mask={maskWithAnyChar}
