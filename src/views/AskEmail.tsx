@@ -3,13 +3,30 @@ import { Box, Heading, Text, Image } from "@chakra-ui/react"
 
 import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
-import { Form, useField } from "react-final-form"
+import { Form } from "react-final-form"
 import FormSubmit from "../components/FormSubmit"
 import { sendValidationEmail } from "../utils/api"
 import { required, validateEmail } from "../utils/formHelpers"
 import ButtonAction from "../components/ButtonAction"
 import { useTitle } from "../utils/hooks"
 import InputGroup from "../components/ds/InputGroup"
+
+const validateMail = (value: string) => {
+  const requiredError = required(value)
+  const emailError = validateEmail(value)
+
+  if (!requiredError && !emailError) {
+    return undefined
+  } else {
+    return { required: requiredError, validateEmail: emailError }
+  }
+}
+
+const validateForm = ({ email }: { email: string }) => {
+  return {
+    email: validateMail(email),
+  }
+}
 
 interface AskEmailProps {
   tagLine?: string
@@ -48,7 +65,7 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
           {tagLine}
         </Heading>
       )}
-      <Form onSubmit={onSubmit}>
+      <Form onSubmit={onSubmit} validate={validateForm}>
         {({ handleSubmit, hasValidationErrors, submitFailed, values }) =>
           submitted ? (
             <>
@@ -78,7 +95,11 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
               </Text>
               <Box mt={6} maxW="lg">
                 <form onSubmit={handleSubmit}>
-                  <FieldEmail />
+                  <InputGroup
+                    fieldName="email"
+                    label="Votre Email"
+                    message={{ error: "l’adresse mail n’est pas valide" }}
+                  />
                   {errorMessage && <Text color="red.500">{errorMessage}</Text>}
                   <ActionBar>
                     <FormSubmit
@@ -96,23 +117,6 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
       <Image src={`${process.env.PUBLIC_URL}/illustration-home-simulator.svg`} alt="" aria-hidden="true" mt={20} />
     </Page>
   )
-}
-
-const validate = (value: string) => {
-  const requiredError = required(value)
-  const emailError = validateEmail(value)
-
-  if (!requiredError && !emailError) {
-    return undefined
-  } else {
-    return { required: requiredError, validateEmail: emailError }
-  }
-}
-
-const FieldEmail = () => {
-  const field = useField("email", { validate })
-
-  return <InputGroup field={field} label="Votre Email" message={{ error: "l’adresse mail n’est pas valide" }} />
 }
 
 export default AskEmail

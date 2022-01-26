@@ -1,6 +1,7 @@
 import { fractionToPercentage, parseDate, percentageToFraction } from "./helpers"
 
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals"
+import { FieldMetaState } from "react-final-form"
 
 // INT PARSE
 
@@ -121,3 +122,7 @@ export const simpleMemoize = (fn: any) => {
 export function isFormValid(formState: { formValidated: string }) {
   return formState.formValidated === "Valid"
 }
+
+export const isFieldHasError = (meta: FieldMetaState<string>) =>
+  (meta.error && meta.submitFailed) ||
+  (meta.error && meta.touched && Object.values({ ...meta.error, required: false }).includes(true))

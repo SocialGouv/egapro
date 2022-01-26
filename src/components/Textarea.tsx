@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
+import { Textarea } from "@chakra-ui/react"
 import { Field } from "react-final-form"
 import { required } from "../utils/formHelpers"
 
@@ -24,7 +25,7 @@ function TextField({
             {label}
           </label>
           <div css={styles.fieldRow}>
-            <textarea {...input} readOnly={readOnly} />
+            <Textarea {...input} readOnly={readOnly} />
           </div>
           {meta.error && meta.touched && <p css={styles.error}>{errorText}</p>}
         </div>

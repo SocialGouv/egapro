@@ -1,37 +1,23 @@
-/** @jsx jsx */
-import React, { Fragment, FunctionComponent, useState } from "react"
-import { css, jsx } from "@emotion/react"
-import { Form, useField } from "react-final-form"
+import React, { FunctionComponent, useState } from "react"
+import { Form } from "react-final-form"
 
 import { AppState, FormState, ActionDeclarationData } from "../../globals"
 
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
-import FieldDate from "../../components/FieldDate"
+import InputDateGroup from "../../components/ds/InputDateGroup"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-import Textarea from "../../components/Textarea"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import { logToSentry, parseDate } from "../../utils/helpers"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import { parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
-import Input, { hasFieldError } from "../../components/Input"
-import globalStyles from "../../utils/globalStyles"
 import ButtonAction from "../../components/ButtonAction"
 import ErrorMessage from "../../components/ErrorMessage"
 import { resendReceipt } from "../../utils/api"
 import FormStack from "../../components/ds/FormStack"
-
-const validate = (value: string) => {
-  const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
-}
+import TextareaGroup from "../../components/ds/TextareaGroup"
+import InputGroup from "../../components/ds/InputGroup"
 
 const validateForm = (finPeriodeReference: string) => {
   return ({
@@ -164,9 +150,9 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container} style={{ marginTop: 20 }}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <FormStack>
+          <FormStack mt={6}>
             {noteIndex !== undefined && noteIndex < 75 && (
               <MesuresCorrection
                 label="Mesures de correction prévues à l'article D. 1142-6"
@@ -175,7 +161,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
               />
             )}
             {!indicateurUnParCSP && (
-              <Fragment>
+              <>
                 {state.informationsEntreprise.structure === "Entreprise" && (
                   <RadiosBoolean
                     fieldName="cseMisEnPlace"
@@ -185,27 +171,25 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   />
                 )}
                 {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
-                  <div>
-                    <FieldDate
-                      name="dateConsultationCSE"
-                      label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
-                      readOnly={readOnly}
-                    />
-                  </div>
+                  <InputDateGroup
+                    fieldName="dateConsultationCSE"
+                    label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
+                    isReadOnly={readOnly}
+                  />
                 )}
-              </Fragment>
+              </>
             )}
 
             {(noteIndex !== undefined || after2020) && (
-              <Fragment>
-                <FieldDate
-                  name="datePublication"
+              <>
+                <InputDateGroup
+                  fieldName="datePublication"
                   label={
                     after2020
                       ? `Date de publication des résultats obtenus${displayNC}`
                       : "Date de publication du niveau de résultat obtenu"
                   }
-                  readOnly={readOnly}
+                  isReadOnly={readOnly}
                 />
                 <RadiosBoolean
                   fieldName="publicationSurSiteInternet"
@@ -217,38 +201,40 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                       : "Avez-vous un site Internet pour publier le niveau de résultat obtenu ?"
                   }
                 />
-                {submitFailed && hasValidationErrors && errors && errors.publicationSurSiteInternet && (
-                  <p css={styles.error}>{errors.publicationSurSiteInternet}</p>
-                )}
 
-                <div css={styles.siteOrModalites}>
-                  {values.publicationSurSiteInternet !== undefined &&
-                    (values.publicationSurSiteInternet === "true" ? (
-                      <FieldSiteInternet readOnly={readOnly} after2020={after2020} displayNC={displayNC} />
-                    ) : (
-                      <Textarea
-                        label={
-                          after2020
-                            ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
-                            : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
-                        }
-                        fieldName="modalitesPublication"
-                        errorText="Veuillez préciser les modalités de communication"
-                        readOnly={readOnly}
-                      />
-                    ))}
-                </div>
-              </Fragment>
+                {values.publicationSurSiteInternet !== undefined &&
+                  (values.publicationSurSiteInternet === "true" ? (
+                    <InputGroup
+                      label={
+                        after2020
+                          ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus${displayNC}`
+                          : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"
+                      }
+                      fieldName="lienPublication"
+                      message={{ error: "Veuillez entrer une adresse internet" }}
+                      isReadOnly={readOnly}
+                    />
+                  ) : (
+                    <TextareaGroup
+                      label={
+                        after2020
+                          ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
+                          : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
+                      }
+                      fieldName="modalitesPublication"
+                      message={{ error: "Veuillez préciser les modalités de communication" }}
+                      isReadOnly={readOnly}
+                    />
+                  ))}
+              </>
             )}
           </FormStack>
           {readOnly ? (
-            <Fragment>
+            <>
               <ActionBar>
                 Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}. &emsp;
                 {declaration.formValidated === "Valid" && (
-                  <p css={styles.edit}>
-                    <ActionLink onClick={() => validateDeclaration("None")}>Modifier les données saisies</ActionLink>
-                  </p>
+                  <ActionLink onClick={() => validateDeclaration("None")}>Modifier les données saisies</ActionLink>
                 )}
               </ActionBar>
               <ButtonAction
@@ -257,7 +243,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                 disabled={loading}
                 loading={loading}
               />
-            </Fragment>
+            </>
           ) : (
             <ActionBar>
               <FormSubmit
@@ -275,76 +261,6 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
       )}
     </Form>
   )
-}
-
-function FieldSiteInternet({
-  readOnly,
-  after2020,
-  displayNC,
-}: {
-  readOnly: boolean
-  after2020: boolean
-  displayNC: string
-}) {
-  const field = useField("lienPublication", { validate })
-  const error = hasFieldError(field.meta)
-
-  return (
-    <div css={styles.formField}>
-      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
-        {after2020
-          ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus${displayNC}`
-          : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"}
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} isReadOnly={readOnly} />
-      </div>
-      <p css={styles.error}>{error && "veuillez entrer une adresse internet"}</p>
-    </div>
-  )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  formField: css({
-    marginBottom: 20,
-  }),
-  label: css({
-    fontSize: 14,
-    fontWeight: "bold",
-    lineHeight: "17px",
-  }),
-  labelError: css({
-    color: globalStyles.colors.error,
-  }),
-  siteOrModalites: css({
-    marginTop: 20,
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex",
-    input: {
-      borderRadius: 4,
-      border: "1px solid",
-    },
-    "input[readonly]": { border: 0 },
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
-  error: css({
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    textDecoration: "underline",
-    lineHeight: "15px",
-  }),
 }
 
 export default DeclarationForm

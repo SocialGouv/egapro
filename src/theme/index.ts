@@ -13,4 +13,6 @@ const theme = extendTheme({
   ...components,
 })
 
+console.log(theme.components.Textarea)
+
 export default theme

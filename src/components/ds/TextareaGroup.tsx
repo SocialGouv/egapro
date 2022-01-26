@@ -2,40 +2,37 @@ import React, { FunctionComponent } from "react"
 import {
   FormControl,
   FormControlProps,
-  Input,
+  Textarea,
   FormErrorMessage,
   FormHelperText,
   FormLabel,
   VisuallyHidden,
 } from "@chakra-ui/react"
 import { Field } from "react-final-form"
+import { isFieldHasError, required } from "../../utils/formHelpers"
 
-import { isFieldHasError } from "../../utils/formHelpers"
-
-export type InputGroupProps = FormControlProps & {
+export type TextareaGroupProps = FormControlProps & {
   label: string
-  isLabelHidden?: boolean
   fieldName: string
-  autocomplete?: string
+  isLabelHidden?: boolean
   message?: {
     help?: string
     error?: string
   }
 }
 
-const InputGroup: FunctionComponent<InputGroupProps> = ({
+const TextareaGroup: FunctionComponent<TextareaGroupProps> = ({
   isLabelHidden,
   label,
   fieldName,
   message,
-  autocomplete,
   ...rest
 }) => (
-  <Field name={fieldName} component="input">
+  <Field name={fieldName} validate={required} component="textarea">
     {({ input, meta }) => (
       <FormControl isInvalid={isFieldHasError(meta)} {...rest}>
         <FormLabel htmlFor={input.name}>{isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}</FormLabel>
-        <Input id={input.name} autocomplete={autocomplete} {...input} />
+        <Textarea id={input.name} {...input} />
         {message?.help && <FormHelperText>{message.help}</FormHelperText>}
         {message?.error && <FormErrorMessage>{message.error}</FormErrorMessage>}
       </FormControl>
@@ -43,4 +40,4 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
   </Field>
 )
 
-export default InputGroup
+export default TextareaGroup

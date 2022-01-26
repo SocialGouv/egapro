@@ -78,7 +78,7 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({ name, label, readOnly,
     <FormControl isInvalid={error}>
       <FormLabel htmlFor={field.input.name}>{label}</FormLabel>
       <Box position="relative">
-        <Input field={field} isReadOnly={readOnly} />
+        <Input field={field} isReadOnly={readOnly} {...field.input} />
         {field.meta.validating && (
           <Box position="absolute" right={2} top={2} zIndex={2} pointerEvents="none">
             <ActivityIndicator size={24} color={globalStyles.colors.primary} />

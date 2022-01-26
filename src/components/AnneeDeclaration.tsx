@@ -1,8 +1,6 @@
 import React, { FunctionComponent } from "react"
-import { Field } from "react-final-form"
 
-import { required } from "../utils/formHelpers"
-import { Select, FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/react"
+import SelectGroup from "./ds/SelectGroup"
 
 type AnneeDeclarationProps = { name: string; label: string; readOnly: boolean }
 
@@ -25,28 +23,14 @@ const AnneeDeclaration: FunctionComponent<AnneeDeclarationProps> = ({ name, labe
   // utiliser l'année de la date de fin de la période de référence.
   const yearList = ["2020", "2019", "2018"]
   return (
-    <Field name={name} validate={required} component="select">
-      {({ input, meta }) => (
-        <FormControl isInvalid={meta.error && meta.touched}>
-          <FormLabel htmlFor={input.name}>{label}</FormLabel>
-          <Select
-            isReadOnly={readOnly}
-            {...input}
-            sx={{
-              pointerEvents: readOnly ? "none" : "initial",
-            }}
-          >
-            <option />
-            {yearList.map((year: string) => (
-              <option value={year} key={year}>
-                {year}
-              </option>
-            ))}
-          </Select>
-          <FormErrorMessage>Veuillez sélectionner une année de déclaration dans la liste</FormErrorMessage>
-        </FormControl>
-      )}
-    </Field>
+    <SelectGroup
+      fieldName={name}
+      options={yearList}
+      optionLabel="Choisir une année"
+      label={label}
+      isReadOnly={readOnly}
+      message={{ error: "Veuillez sélectionner une année de déclaration dans la liste" }}
+    />
   )
 }
 

@@ -10,11 +10,12 @@ import { mustBeNumber, required, validateEmail } from "../../utils/formHelpers"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-import TextField from "../../components/TextField"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import { IconEdit } from "../../components/ds/Icons"
 import ButtonAction from "../../components/ButtonAction"
+import { IconEdit } from "../../components/ds/Icons"
+import InputGroup from "../../components/ds/InputGroup"
+import FormStack from "../../components/ds/FormStack"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -113,53 +114,53 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <TextField
-            label="Nom du déclarant"
-            fieldName="nom"
-            errorText="le nom n’est pas valide"
-            readOnly={readOnly}
-            autocomplete="family-name"
-          />
-          <TextField
-            label="Prénom du déclarant"
-            fieldName="prenom"
-            errorText="le prénom n’est pas valide"
-            readOnly={readOnly}
-            autocomplete="given-name"
-          />
-          <TextField
-            label="Numéro de téléphone"
-            fieldName="tel"
-            errorText="le numéro de téléphone doit être composé de 10 chiffres"
-            readOnly={readOnly}
-            autocomplete="tel-national"
-          />
-          <Box mb={6}>
+          <FormStack>
+            <InputGroup
+              label="Nom du déclarant"
+              fieldName="nom"
+              message={{ error: "Le nom n’est pas valide" }}
+              isReadOnly={readOnly}
+              autocomplete="family-name"
+            />
+            <InputGroup
+              label="Prénom du déclarant"
+              fieldName="prenom"
+              message={{ error: "Le prénom n’est pas valide" }}
+              isReadOnly={readOnly}
+              autocomplete="given-name"
+            />
+            <InputGroup
+              label="Numéro de téléphone"
+              fieldName="tel"
+              message={{ error: "Le numéro de téléphone doit être composé de 10 chiffres" }}
+              isReadOnly={readOnly}
+              autocomplete="tel-national"
+            />
             <FakeInputGroup label="Email (fourni lors de la demande de validation de l'email)">
               {initialValues.email}
             </FakeInputGroup>
-          </Box>
-          <Field name="acceptationCGU" component="input" type="checkbox">
-            {({ input, meta }: { input: any; meta: any }) => (
-              <div>
-                <label>
-                  <Flex>
-                    <input {...input} disabled={readOnly} />
-                    <Box as="span" fontSize="sm" ml={2} mt={-1}>
-                      J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et
-                      pour vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous
-                      pouvez consulter nos <Link to="/cgu">Conditions Générales d'Utilisation</Link>.
-                    </Box>
-                  </Flex>
-                </label>
-                {meta.error && meta.touched && (
-                  <Text color="red.500" fontSize="sm" pl={5}>
-                    Veuillez accepter les CGUs
-                  </Text>
-                )}
-              </div>
-            )}
-          </Field>
+            <Field name="acceptationCGU" component="input" type="checkbox">
+              {({ input, meta }: { input: any; meta: any }) => (
+                <div>
+                  <label>
+                    <Flex>
+                      <input {...input} disabled={readOnly} />
+                      <Box as="span" fontSize="sm" ml={2} mt={-1}>
+                        J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et
+                        pour vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données,
+                        vous pouvez consulter nos <Link to="/cgu">Conditions Générales d'Utilisation</Link>.
+                      </Box>
+                    </Flex>
+                  </label>
+                  {meta.error && meta.touched && (
+                    <Text color="red.500" fontSize="sm" pl={5}>
+                      Veuillez accepter les CGUs
+                    </Text>
+                  )}
+                </div>
+              )}
+            </Field>
+          </FormStack>
           {readOnly ? (
             <ActionBar>
               <ButtonSimulatorLink to="/declaration" label="Suivant" />

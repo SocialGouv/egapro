@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { Form, useField } from "react-final-form"
+import { Form } from "react-final-form"
 import { FormControl, FormLabel } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
@@ -15,7 +15,7 @@ import { parseDate } from "../../utils/helpers"
 
 import ActionBar from "../../components/ActionBar"
 import AnneeDeclaration from "../../components/AnneeDeclaration"
-import FieldDate from "../../components/FieldDate"
+import InputDateGroup from "../../components/ds/InputDateGroup"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
@@ -70,23 +70,10 @@ const validateForm = ({
   }
 }
 
-const FieldNomEntreprise = ({ readOnly }: { readOnly: boolean }) => {
-  const field = useField("nomEntreprise", { validate })
-
-  return (
-    <InputGroup
-      field={field}
-      label="Nom de la simulation (ex : nom_entreprise_date)"
-      isReadOnly={readOnly}
-      message={{ error: "Le nom n’est pas valide" }}
-    />
-  )
-}
-
 const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onClick: () => void }) => (
-  <FieldDate
-    name="finPeriodeReference"
-    readOnly={readOnly}
+  <InputDateGroup
+    fieldName="finPeriodeReference"
+    isReadOnly={readOnly}
     label="Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)"
   >
     <ButtonAction
@@ -97,7 +84,7 @@ const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onCli
       size="sm"
       variant="ghost"
     />
-  </FieldDate>
+  </InputDateGroup>
 )
 
 interface InformationsSimulationFormProps {
@@ -161,8 +148,12 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
           d'effectifs". Otherwise it would not re-update the menu when
           switching back to the original value */}
             <FormAutoSave saveForm={saveForm} onlyWhenDirty={false} />
-            <FieldNomEntreprise readOnly={readOnly} />
-
+            <InputGroup
+              fieldName="nomEntreprise"
+              label="Nom de la simulation (ex : nom_entreprise_date)"
+              isReadOnly={readOnly}
+              message={{ error: "Le nom n’est pas valide" }}
+            />
             <FormControl readOnly={readOnly}>
               <FormLabel as="div">
                 Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)
