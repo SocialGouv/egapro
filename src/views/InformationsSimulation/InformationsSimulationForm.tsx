@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
 import { Form, useField } from "react-final-form"
+import { Grid, GridItem } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
@@ -217,14 +218,18 @@ function FieldPeriodeReference({ readOnly, onClick }: { readOnly: boolean; onCli
       <label css={styles.label} htmlFor="finPeriodeReference">
         Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)
       </label>
-      <div css={styles.dates}>
-        <FieldDate name="finPeriodeReference" readOnly={readOnly} label="" />
-        <ButtonAction
-          label="sélectionner la fin de l'année civile"
-          onClick={onClick}
-          variant={readOnly ? "outline" : "solid"}
-        />
-      </div>
+      <Grid templateColumns="repeat(2, 1fr)" gap={4} mt={2}>
+        <GridItem>
+          <FieldDate name="finPeriodeReference" readOnly={readOnly} label="" />
+        </GridItem>
+        <GridItem>
+          <ButtonAction
+            label="sélectionner la fin de l'année civile"
+            onClick={onClick}
+            variant={readOnly ? "outline" : "solid"}
+          />
+        </GridItem>
+      </Grid>
     </div>
   )
 }
@@ -262,11 +267,6 @@ const styles = {
     fontSize: 12,
     textDecoration: "underline",
     lineHeight: "15px",
-  }),
-  dates: css({
-    display: "flex",
-    justifyContent: "space-between",
-    "> *": { width: "48% !important" },
   }),
   edit: css({
     marginTop: 14,
