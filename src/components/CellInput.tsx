@@ -71,11 +71,13 @@ function CellInput({
 
   return (
     <Cell style={styles.cell}>
-      {mask ? (
+      {!mask ? (
         <Input
           as={MaskedInput}
           mask={maskWithAnyChar}
-          css={[styles.input, style, error && styles.inputError]}
+          css={[style, error && styles.inputError]}
+          size="sm"
+          px={1}
           autoComplete="off"
           value={inputValue}
           onChange={(event) =>
@@ -88,8 +90,10 @@ function CellInput({
           {...inputProps}
         />
       ) : (
-        <input
-          css={[styles.input, style, error && styles.inputError]}
+        <Input
+          px={1}
+          size="sm"
+          css={[style, error && styles.inputError]}
           autoComplete="off"
           value={value}
           onChange={onChange}
