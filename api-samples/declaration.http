@@ -8,7 +8,7 @@ Content-Type: application/json
 ###
 
 GET http://127.0.0.1:2626/declaration/834902959/2021
-Cookie: api-key=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2NDM4MTA2ODN9.WR3qFXBYYeMu8d8cfzQMMTkJXk9jEJarE8EJUALMf4w
+Cookie: api-key={{ token-api }}
 
 ###
 GET http://127.0.0.1:2626/simulation/{{ token-simulation}}
