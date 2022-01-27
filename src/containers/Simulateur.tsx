@@ -49,7 +49,7 @@ type Params = {
   code: string
 }
 
-function Simulateur({ state, dispatch }: Props) {
+function Simulateur({ state, dispatch }: Props): JSX.Element {
   const { code } = useParams<Params>()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
