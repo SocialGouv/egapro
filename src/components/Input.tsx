@@ -38,8 +38,8 @@ const styles = {
     width: "100%",
     fontSize: 14,
     lineHeight: "17px",
-    paddingLeft: 22,
-    paddingRight: 22,
+    paddingLeft: 16,
+    paddingRight: 16,
   }),
   inputError: css({
     color: globalStyles.colors.error,
