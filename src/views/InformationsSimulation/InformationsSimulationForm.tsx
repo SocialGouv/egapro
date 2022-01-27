@@ -163,7 +163,7 @@ function InformationsSimulationForm({
 
           {alreadyDeclared && (
             <Text color="gray.600" fontSize="sm" as="i" mb="8">
-              L'année ne peut pas être modifiée car une déclaration a déjà été déposée.
+              L'année ne peut pas être modifiée car une déclaration a déjà été validée et transmise.
             </Text>
           )}
 

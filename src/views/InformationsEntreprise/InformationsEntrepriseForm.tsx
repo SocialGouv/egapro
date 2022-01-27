@@ -330,7 +330,8 @@ function InformationsEntrepriseForm({
                     </ActionLink>
                   ) : (
                     <Text color="gray.600" fontSize="sm" as="i" mb="8">
-                      Les données d'entreprise ne sont pas modifiables car une déclaration a déjà été déposée.
+                      Les données d'entreprise/UES ne sont pas modifiables car une déclaration a déjà été validée et
+                      transmise.
                     </Text>
                   )}
                 </p>
