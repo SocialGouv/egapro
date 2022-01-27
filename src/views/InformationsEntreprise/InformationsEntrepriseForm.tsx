@@ -33,6 +33,7 @@ import { departementCode } from "../../components/RegionsDepartements"
 import TextField from "../../components/TextField"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
+import { Text } from "@chakra-ui/react"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -127,6 +128,7 @@ interface Props {
   readOnly: boolean
   updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
   validateInformationsEntreprise: (valid: FormState) => void
+  alreadyDeclared: boolean
 }
 
 function InformationsEntrepriseForm({
@@ -134,6 +136,7 @@ function InformationsEntrepriseForm({
   readOnly,
   updateInformationsEntreprise,
   validateInformationsEntreprise,
+  alreadyDeclared,
 }: Props) {
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -321,9 +324,15 @@ function InformationsEntrepriseForm({
               &emsp;
               {informationsEntreprise.formValidated === "Valid" && (
                 <p css={styles.edit}>
-                  <ActionLink onClick={() => validateInformationsEntreprise("None")}>
-                    modifier les données saisies
-                  </ActionLink>
+                  {!alreadyDeclared ? (
+                    <ActionLink onClick={() => validateInformationsEntreprise("None")}>
+                      modifier les données saisies
+                    </ActionLink>
+                  ) : (
+                    <Text color="gray.600" fontSize="sm" as="i" mb="8">
+                      Les données d'entreprise ne sont pas modifiables car une déclaration a déjà été déposée.
+                    </Text>
+                  )}
                 </p>
               )}
             </ActionBar>

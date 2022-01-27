@@ -10,6 +10,8 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsSimulationForm from "./InformationsSimulationForm"
 import { useTitle } from "../../utils/hooks"
+import { useDeclaration } from "../../hooks/useDeclaration"
+import { useParams } from "react-router-dom"
 
 interface Props {
   state: AppState
@@ -18,8 +20,13 @@ interface Props {
 
 const title = "Informations calcul et période de référence"
 
+type Params = {
+  code: string
+}
+
 function InformationsSimulation({ state, dispatch }: Props) {
   useTitle(title)
+  const { code } = useParams<Params>()
 
   const updateInformationsSimulation = useCallback(
     (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
@@ -31,6 +38,10 @@ function InformationsSimulation({ state, dispatch }: Props) {
     [dispatch],
   )
 
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  const alreadyDeclared = declaration?.data?.id === code
+
   return (
     <PageInformationsSimulation>
       <LayoutFormAndResult
@@ -40,6 +51,7 @@ function InformationsSimulation({ state, dispatch }: Props) {
             readOnly={state.informations.formValidated === "Valid"}
             updateInformationsSimulation={updateInformationsSimulation}
             validateInformationsSimulation={validateInformationsSimulation}
+            alreadyDeclared={alreadyDeclared}
           />
         }
         childrenResult={null}

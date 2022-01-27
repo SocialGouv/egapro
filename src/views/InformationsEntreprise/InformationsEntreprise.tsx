@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react"
 import { useCallback, ReactNode } from "react"
-import { RouteComponentProps } from "react-router-dom"
+import { RouteComponentProps, useParams } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsEntrepriseData } from "../../globals"
 
@@ -10,16 +10,22 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
 import { useTitle } from "../../utils/hooks"
+import { useDeclaration } from "../../hooks/useDeclaration"
 
 interface Props extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+type Params = {
+  code: string
+}
+
 const title = "Informations entreprise/UES"
 
 function InformationsEntreprise({ state, dispatch }: Props) {
   useTitle(title)
+  const { code } = useParams<Params>()
 
   const updateInformationsEntreprise = useCallback(
     (data: ActionInformationsEntrepriseData) => dispatch({ type: "updateInformationsEntreprise", data }),
@@ -31,6 +37,10 @@ function InformationsEntreprise({ state, dispatch }: Props) {
     [dispatch],
   )
 
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  const alreadyDeclared = declaration?.data?.id === code
+
   return (
     <PageInformationsEntreprise>
       <LayoutFormAndResult
@@ -40,6 +50,7 @@ function InformationsEntreprise({ state, dispatch }: Props) {
             readOnly={state.informationsEntreprise.formValidated === "Valid"}
             updateInformationsEntreprise={updateInformationsEntreprise}
             validateInformationsEntreprise={validateInformationsEntreprise}
+            alreadyDeclared={alreadyDeclared}
           />
         }
         childrenResult={null}
