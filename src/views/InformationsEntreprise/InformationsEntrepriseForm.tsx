@@ -239,7 +239,7 @@ function InformationsEntrepriseForm({
           <FieldSiren
             label="SIREN"
             name="siren"
-            readOnly={readOnly}
+            readOnly={readOnly || alreadyDeclared}
             updateSirenData={(sirenData: EntrepriseType) =>
               form.batch(() => {
                 form.change("nomEntreprise", sirenData.raison_sociale || "")
@@ -252,6 +252,12 @@ function InformationsEntrepriseForm({
               })
             }
           />
+
+          {alreadyDeclared && (
+            <Text color="gray.600" fontSize="sm" as="i" mb="8">
+              Le SIREN n'est pas modifiable car une déclaration a déjà été validée et transmise.
+            </Text>
+          )}
 
           <TextField
             label={
@@ -324,16 +330,9 @@ function InformationsEntrepriseForm({
               &emsp;
               {informationsEntreprise.formValidated === "Valid" && (
                 <p css={styles.edit}>
-                  {!alreadyDeclared ? (
-                    <ActionLink onClick={() => validateInformationsEntreprise("None")}>
-                      modifier les données saisies
-                    </ActionLink>
-                  ) : (
-                    <Text color="gray.600" fontSize="sm" as="i" mb="8">
-                      Les données d'entreprise/UES ne sont pas modifiables car une déclaration a déjà été validée et
-                      transmise.
-                    </Text>
-                  )}
+                  <ActionLink onClick={() => validateInformationsEntreprise("None")}>
+                    modifier les données saisies
+                  </ActionLink>
                 </p>
               )}
             </ActionBar>
