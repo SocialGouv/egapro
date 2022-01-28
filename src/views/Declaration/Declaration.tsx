@@ -1,5 +1,5 @@
 import React, { useCallback, Fragment, ReactNode, useState, useEffect, FunctionComponent } from "react"
-import { RouteComponentProps } from "react-router-dom"
+import { RouteComponentProps, useHistory } from "react-router-dom"
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
 
 import {
@@ -50,6 +50,7 @@ const title = "Déclaration"
 
 const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
   useTitle(title)
+  const history = useHistory()
 
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
@@ -58,6 +59,10 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
     [dispatch],
   )
+
+  const resetDeclaration = useCallback(() => {
+    history.push(`/nouvelle-simulation`)
+  }, [])
 
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
 
@@ -395,10 +400,8 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
             <DeclarationForm
               state={state}
               noteIndex={noteIndex}
-              indicateurUnParCSP={state.indicateurUn.csp}
-              finPeriodeReference={state.informations.finPeriodeReference}
-              readOnly={isFormValid(state.declaration) && !declaring}
               updateDeclaration={updateDeclaration}
+              resetDeclaration={resetDeclaration}
               validateDeclaration={validateDeclaration}
               apiError={apiError}
               declaring={declaring}

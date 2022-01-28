@@ -23,6 +23,8 @@ import MonProfil from "../views/private/MonProfil"
 import Mire from "../views/Mire"
 import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
+import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
+import ResetPage from "../views/ResetPage"
 
 interface Props {
   state: AppState | undefined
@@ -31,10 +33,44 @@ interface Props {
 
 /**
  * A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.
+ *
+ * @param staffOnly true is only staff member can access this page
  */
-function PrivateRoute({ children, ...rest }: RouteProps) {
-  const { isAuthenticated } = useUser()
+function PrivateRoute({ children, staffOnly, ...rest }: RouteProps & { staffOnly?: boolean }) {
+  const { isAuthenticated, staff } = useUser()
+
+  if (staffOnly) {
+    if (!staff) {
+      return isAuthenticated ? (
+        <Redirect to="/tableauDeBord/mes-entreprises" />
+      ) : (
+        <Redirect to="/tableauDeBord/me-connecter" />
+      )
+    }
+
+    return <Route {...rest} render={() => children} />
+  }
+
   return <Route {...rest} render={() => (isAuthenticated ? children : <Redirect to="/tableauDeBord/me-connecter" />)} />
+}
+
+function DashboardRoutes() {
+  return (
+    <Switch>
+      <Route path="/tableauDeBord/me-connecter" exact>
+        <Mire />
+      </Route>
+      <PrivateRoute path="/tableauDeBord/mes-entreprises" exact>
+        <MesEntreprises />
+      </PrivateRoute>
+      <PrivateRoute path="/tableauDeBord/gerer-utilisateurs" staffOnly exact>
+        <GererUtilisateursPage />
+      </PrivateRoute>
+      <PrivateRoute path="/tableauDeBord/mon-profil" exact>
+        <MonProfil />
+      </PrivateRoute>
+    </Switch>
+  )
 }
 
 function AppLayout({ state, dispatch }: Props) {
@@ -43,45 +79,42 @@ function AppLayout({ state, dispatch }: Props) {
   return (
     <AuthContextProvider>
       <Switch>
-        <Route path="/tableauDeBord/me-connecter" exact component={Mire} />
-        <PrivateRoute path="/tableauDeBord/mes-entreprises" exact>
-          <MesEntreprises />
-        </PrivateRoute>
-        <PrivateRoute path="/tableauDeBord/mon-profil" exact>
-          <MonProfil />
-        </PrivateRoute>
         <Route
-          render={() => {
-            document.title = "Index Egapro"
-
-            return layoutType === "mobile" ? (
-              <MobileLayout />
-            ) : (
-              <Flex direction="column" sx={{ minHeight: "100%" }}>
-                <Header />
-                <MainScrollView state={state}>
-                  <Switch>
-                    <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
-                    <Route
-                      path="/simulateur/:code"
-                      render={({
-                        match: {
-                          params: { code },
-                        },
-                      }) => <Simulateur code={code} state={state} dispatch={dispatch} />}
-                    />
-                    <Route path="/mentions-legales" exact render={() => <MentionsLegales />} />
-                    <Route path="/accessibilite" exact render={() => <Accessibilite />} />
-                    <Route path="/cgu" exact render={() => <CGU />} />
-                    <Route path="/politique-confidentialite" exact render={() => <PolitiqueConfidentialite />} />
-                    <Route component={PageNotFound} />
-                  </Switch>
-                </MainScrollView>
-                <Footer />
-              </Flex>
-            )
-          }}
+          path="/nouvelle-simulation"
+          exact
+          render={(props) => <ResetPage {...props} dispatch={dispatch} state={state} />}
         />
+
+        <Route path="/tableauDeBord/">
+          <DashboardRoutes />
+        </Route>
+
+        {layoutType === "mobile" ? (
+          <MobileLayout />
+        ) : (
+          <Flex direction="column" sx={{ minHeight: "100vh" }}>
+            <Header />
+            <MainScrollView state={state}>
+              <Switch>
+                <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
+                <Route
+                  path="/simulateur/:code"
+                  render={({
+                    match: {
+                      params: { code },
+                    },
+                  }) => <Simulateur code={code} state={state} dispatch={dispatch} />}
+                />
+                <Route path="/mentions-legales" exact render={() => <MentionsLegales />} />
+                <Route path="/accessibilite" exact render={() => <Accessibilite />} />
+                <Route path="/cgu" exact render={() => <CGU />} />
+                <Route path="/politique-confidentialite" exact render={() => <PolitiqueConfidentialite />} />
+                <Route component={PageNotFound} />
+              </Switch>
+            </MainScrollView>
+            <Footer />
+          </Flex>
+        )}
       </Switch>
     </AuthContextProvider>
   )

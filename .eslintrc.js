@@ -15,10 +15,12 @@ module.exports = {
     "plugin:prettier/recommended",
     "plugin:cypress/recommended",
   ],
-  plugins: ["react", "@typescript-eslint", "jest"],
+  plugins: ["react", "@typescript-eslint", "jest", "react-hooks"],
   rules: {
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
+    "react-hooks/rules-of-hooks": "error", // Vérifie les règles des Hooks
+    "react-hooks/exhaustive-deps": "warn", // Vérifie les tableaux de dépendances
     "jsx-a11y/anchor-is-valid": "off",
     "@typescript-eslint/no-unused-vars": ["warn"],
     "@typescript-eslint/ban-ts-comment": "off", // TODO : à supprimer ?

@@ -1,3 +1,4 @@
 @SIREN = 722003936
+@token = {{$dotenv API_ENTREPRISES_TOKEN}}
 
-GET https://entreprise.api.gouv.fr/v2/entreprises/{{SIREN}}?token={{renseigner_api_entreprise_token_ici}}&context=CadreDeLaRequ%C3%AAte&recipient=B%C3%A9n%C3%A9ficiaireDeL%E2%80%99appel&object=RaisonDeL%E2%80%99AppelOuIdentifiant
+GET https://entreprise.api.gouv.fr/v2/entreprises/{{SIREN}}?token={{token}}&context=CadreDeLaRequ%C3%AAte&recipient=B%C3%A9n%C3%A9ficiaireDeL%E2%80%99appel&object=RaisonDeL%E2%80%99AppelOuIdentifiant

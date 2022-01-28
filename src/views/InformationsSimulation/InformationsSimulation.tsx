@@ -1,5 +1,4 @@
 import React, { useCallback, ReactNode, FunctionComponent } from "react"
-import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
 
@@ -10,7 +9,7 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InformationsSimulationForm from "./InformationsSimulationForm"
 import { useTitle } from "../../utils/hooks"
 
-interface InformationsSimulationProps extends RouteComponentProps {
+interface InformationsSimulationProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }

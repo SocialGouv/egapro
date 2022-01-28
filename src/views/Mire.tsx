@@ -10,28 +10,9 @@ import PrimaryButton from "../components/ds/PrimaryButton"
 import Page from "../components/Page"
 import { DebugForm, formValidator, InputControl } from "../components/ds/form-lib"
 import { Redirect, useHistory } from "react-router"
-import { useUser } from "../components/AuthContext"
+import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
-
-/**
- * Check if a token is present in the URL bar. If so, run login with it.
- */
-function useCheckIfTokenIsInURL() {
-  const { login } = useUser()
-  // const history = useHistory()
-
-  const urlParams = new URLSearchParams(window.location.search)
-
-  const tokenInURL = urlParams.get("token")
-
-  if (tokenInURL) {
-    login(tokenInURL)
-    window.history.pushState({}, document.title, window.location.pathname)
-  }
-
-  // history.push(window.location.pathname) // TODO: this doesn't work because it re renders infinitely
-}
 
 function Mire() {
   useTitle(title)
@@ -40,9 +21,9 @@ function Mire() {
   const { toastSuccess, toastError } = useToastMessage({})
   const [submitted, setSubmitted] = React.useState(false)
   const [email, setEmail] = React.useState("")
-  const { isAuthenticated } = useUser()
+  const { isAuthenticated, staff } = useUser()
 
-  useCheckIfTokenIsInURL()
+  useCheckTokenInURL()
 
   const onSubmit = (formData: any) => {
     setEmail(formData.email)
@@ -62,6 +43,7 @@ function Mire() {
     email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
   })
 
+  if (staff) return <Redirect to="/tableauDeBord/gerer-utilisateurs" />
   if (isAuthenticated) return <Redirect to="/tableauDeBord/mes-entreprises" />
 
   return (
@@ -73,7 +55,7 @@ function Mire() {
               Un mail vous a été envoyé.
             </Text>
             <Text as="p" mb="4">
-              Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisie (<strong>{email}</strong>) soit
+              Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisi (<strong>{email}</strong>) soit
               incorrect, ou bien que le mail ait été déplacé dans votre dossier de courriers indésirables ou dans le
               dossier SPAM.
             </Text>
@@ -100,7 +82,7 @@ function Mire() {
               validate={formValidator(FormInput)}
               render={({ handleSubmit, values, submitting, pristine }) => (
                 <form onSubmit={handleSubmit}>
-                  <InputControl name="email" label="Courriel" />
+                  <InputControl name="email" label="Email" />
 
                   <DebugForm show={false} values={values} />
 

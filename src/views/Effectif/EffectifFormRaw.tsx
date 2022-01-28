@@ -179,7 +179,7 @@ function EffectifFormRaw({ effectifRaw, readOnly, updateEffectif, validateEffect
                   hasValidationErrors={hasValidationErrors}
                   submitFailed={submitFailed}
                   errorMessage={
-                    errors.message
+                    errors?.message
                       ? errors.message
                       : "Les effectifs ne peuvent pas être validés si tous les champs ne sont pas remplis."
                   }

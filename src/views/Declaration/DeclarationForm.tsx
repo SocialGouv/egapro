@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from "react"
-import { Form } from "react-final-form"
+import { Form, useField } from "react-final-form"
 
 import { AppState, FormState, ActionDeclarationData } from "../../globals"
 
@@ -11,27 +11,49 @@ import FormSubmit from "../../components/FormSubmit"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import { logToSentry, parseDate } from "../../utils/helpers"
 import RadiosBoolean from "../../components/RadiosBoolean"
-import { parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
+import { isFormValid, parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
 import ButtonAction from "../../components/ButtonAction"
 import ErrorMessage from "../../components/ErrorMessage"
 import { resendReceipt } from "../../utils/api"
 import FormStack from "../../components/ds/FormStack"
 import TextareaGroup from "../../components/ds/TextareaGroup"
 import InputGroup from "../../components/ds/InputGroup"
+import { displayMetaErrors } from "../../utils/form-error-helpers"
+import { hasFieldError } from "../../components/Input"
 
-const validateForm = (finPeriodeReference: string) => {
+const validate = (value: string) => {
+  const requiredError = required(value)
+  if (!requiredError) {
+    return undefined
+  } else {
+    return {
+      required: requiredError,
+    }
+  }
+}
+
+const validateForm = ({
+  finPeriodeReference,
+  anneeDeclaration,
+}: {
+  finPeriodeReference: string
+  anneeDeclaration: number | undefined
+}) => {
   return ({
     datePublication,
     publicationSurSiteInternet,
+    planRelance,
   }: {
     datePublication: string
-    publicationSurSiteInternet: string | undefined
+    publicationSurSiteInternet?: string
+    planRelance: string | undefined
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
     if (!datePublication) return
     const parsedDatePublication = parseDate(datePublication)
     const parsedFinPeriodeReference = parseDate(finPeriodeReference)
+
     return {
       datePublication:
         parsedDatePublication !== undefined &&
@@ -43,6 +65,10 @@ const validateForm = (finPeriodeReference: string) => {
             },
       publicationSurSiteInternet:
         publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
+      planRelance:
+        anneeDeclaration && anneeDeclaration >= 2021 && planRelance === undefined
+          ? "Il vous faut indiquer si vous avez bénéficié du plan de relance"
+          : undefined,
     }
   }
 }
@@ -50,10 +76,8 @@ const validateForm = (finPeriodeReference: string) => {
 interface DeclarationFormProps {
   state: AppState
   noteIndex: number | undefined
-  indicateurUnParCSP: boolean
-  finPeriodeReference: string
-  readOnly: boolean
   updateDeclaration: (data: ActionDeclarationData) => void
+  resetDeclaration: () => void
   validateDeclaration: (valid: FormState) => void
   apiError: string | undefined
   declaring: boolean
@@ -62,15 +86,18 @@ interface DeclarationFormProps {
 const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   state,
   noteIndex,
-  indicateurUnParCSP,
-  finPeriodeReference,
-  readOnly,
   updateDeclaration,
+  resetDeclaration,
   validateDeclaration,
   apiError,
   declaring,
 }) => {
   const declaration = state.declaration
+  const indicateurUnParCSP = state.indicateurUn.csp
+  const finPeriodeReference = state.informations.finPeriodeReference
+  const anneeDeclaration = state.informations.anneeDeclaration
+  const readOnly = isFormValid(state.declaration) && !declaring
+
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
     cseMisEnPlace:
@@ -83,6 +110,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
         : undefined,
     lienPublication: declaration.lienPublication,
     modalitesPublication: declaration.modalitesPublication,
+    planRelance: declaration.planRelance !== undefined ? parseBooleanStateValue(declaration.planRelance) : undefined,
   }
 
   const saveForm = (formData: any) => {
@@ -94,6 +122,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
       publicationSurSiteInternet,
       lienPublication,
       modalitesPublication,
+      planRelance,
     } = formData
 
     updateDeclaration({
@@ -105,16 +134,21 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
         publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
       lienPublication,
       modalitesPublication,
+      planRelance: parseBooleanFormValue(planRelance),
     })
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: typeof initialValues) => {
     saveForm(formData)
     validateDeclaration("Valid")
   }
 
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
+  const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
+
   const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
+
+  const isUES = Boolean(state.informationsEntreprise.nomUES)
 
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
@@ -142,14 +176,14 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm(finPeriodeReference)}
+      validate={validateForm({ finPeriodeReference, anneeDeclaration })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
+      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack mt={6}>
@@ -228,6 +262,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   ))}
               </>
             )}
+            {after2021 && <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />}
           </FormStack>
           {readOnly ? (
             <>
@@ -240,6 +275,12 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
               <ButtonAction
                 onClick={onClick}
                 label="Renvoyer l'accusé de réception"
+                disabled={loading}
+                loading={loading}
+              />
+              <ButtonAction
+                onClick={resetDeclaration}
+                label="Effectuer une nouvelle simulation et déclaration"
                 disabled={loading}
                 loading={loading}
               />
@@ -260,6 +301,41 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
         </form>
       )}
     </Form>
+  )
+}
+
+const FieldPlanRelance = ({
+  readOnly,
+  after2021,
+  isUES,
+}: {
+  readOnly: boolean
+  after2021: boolean
+  isUES: boolean
+}) => {
+  const field = useField("planRelance", { validate })
+  const error = hasFieldError(field.meta)
+
+  if (!after2021) return null
+
+  return (
+    <>
+      <RadiosBoolean
+        fieldName="planRelance"
+        value={field.input.value}
+        readOnly={readOnly}
+        label={
+          isUES
+            ? `Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l’UES a-t-elle bénéficié, en 2021
+              et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission
+              « Plan de relance »&nbsp;?`
+            : `
+              Avez-vous bénéficié, en 2021 et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour
+              2021 au titre de la mission « Plan de relance »&nbsp;?`
+        }
+      />
+      <p>{error && displayMetaErrors(field.meta.error)}</p>
+    </>
   )
 }
 

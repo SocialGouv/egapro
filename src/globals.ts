@@ -79,6 +79,7 @@ export type AppState = {
     datePublication: string
     publicationSurSiteInternet: boolean | undefined
     lienPublication: string
+    planRelance: boolean | undefined
     modalitesPublication: string
     dateDeclaration: string
     noteIndex: number | undefined
@@ -395,6 +396,7 @@ export type ActionDeclarationData = {
   publicationSurSiteInternet?: boolean | undefined
   lienPublication: string
   modalitesPublication: string
+  planRelance: boolean | undefined
 }
 
 export type ActionEmailDeclarantData = {
@@ -521,4 +523,4 @@ export type EntrepriseType = {
 export type AlertMessageType = {
   text: string
   kind: "success" | "error"
-} | null
+}
