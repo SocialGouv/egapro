@@ -213,7 +213,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ form, handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>

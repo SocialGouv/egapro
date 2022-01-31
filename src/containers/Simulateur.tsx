@@ -143,7 +143,7 @@ function Simulateur({ code, state, dispatch }: Props) {
   if (loading || !state) {
     return (
       <div css={styles.viewLoading}>
-        <ActivityIndicator size={30} color={globalStyles.colors.primary} />
+        <ActivityIndicator color={globalStyles.colors.primary} />
       </div>
     )
   }
