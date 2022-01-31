@@ -14,7 +14,7 @@ import { IconExternalLink } from "./ds/Icons"
 import React from "react"
 
 const nineDigits: ValidatorFunction = (value) =>
-  value.length === 9 ? undefined : "Ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres."
+  value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres."
 
 const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
 
@@ -49,6 +49,21 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
 
 export const sirenValidator = (updateSirenData: (data: EntrepriseType) => void) =>
   composeValidators(required, nineDigits, checkSiren(updateSirenData))
+
+export function FieldSirenReadOnly({ name, label }: { name: string; label: string }) {
+  const field = useField(name)
+
+  return (
+    <div css={[styles.formField]}>
+      <label css={[styles.label]} htmlFor={field.input.name}>
+        {label}
+      </label>
+      <div css={styles.fieldRow}>
+        <Input field={field} readOnly={true} />
+      </div>
+    </div>
+  )
+}
 
 function FieldSiren({
   name,

@@ -23,7 +23,7 @@ import { mustBeNumber, parseIntFormValue, parseIntStateValue, required } from ".
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import CodeNaf, { codeNafFromCode } from "../../components/CodeNaf"
-import FieldSiren from "../../components/FieldSiren"
+import FieldSiren, { FieldSirenReadOnly } from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import NombreEntreprises, { validator as validateNombreEntreprises } from "../../components/NombreEntreprises"
@@ -236,22 +236,26 @@ function InformationsEntrepriseForm({
             ]}
           />
 
-          <FieldSiren
-            label="SIREN"
-            name="siren"
-            readOnly={readOnly || alreadyDeclared}
-            updateSirenData={(sirenData: EntrepriseType) =>
-              form.batch(() => {
-                form.change("nomEntreprise", sirenData.raison_sociale || "")
-                form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
-                form.change("region", regionFromCode(sirenData.région || ""))
-                form.change("departement", departementFromCode(sirenData.département || ""))
-                form.change("adresse", sirenData.adresse || "")
-                form.change("commune", sirenData.commune || "")
-                form.change("codePostal", sirenData.code_postal || "")
-              })
-            }
-          />
+          {readOnly || alreadyDeclared ? (
+            <FieldSirenReadOnly label="SIREN" name="siren" />
+          ) : (
+            <FieldSiren
+              label="SIREN"
+              name="siren"
+              readOnly={readOnly || alreadyDeclared}
+              updateSirenData={(sirenData: EntrepriseType) =>
+                form.batch(() => {
+                  form.change("nomEntreprise", sirenData.raison_sociale || "")
+                  form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
+                  form.change("region", regionFromCode(sirenData.région || ""))
+                  form.change("departement", departementFromCode(sirenData.département || ""))
+                  form.change("adresse", sirenData.adresse || "")
+                  form.change("commune", sirenData.commune || "")
+                  form.change("codePostal", sirenData.code_postal || "")
+                })
+              }
+            />
+          )}
 
           {alreadyDeclared && (
             <Text color="gray.600" fontSize="sm" as="i" mb="8">

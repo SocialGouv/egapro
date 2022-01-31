@@ -5,7 +5,7 @@ import { useField } from "react-final-form"
 import globalStyles from "../../../utils/globalStyles"
 
 import { hasFieldError } from "../../../components/Input"
-import FieldSiren, { sirenValidator } from "../../../components/FieldSiren"
+import FieldSiren, { FieldSirenReadOnly, sirenValidator } from "../../../components/FieldSiren"
 import TextField from "../../../components/TextField"
 import { EntrepriseUES } from "../../../globals"
 import { EntrepriseType } from "../../../globals"
@@ -47,14 +47,18 @@ function EntrepriseUESInput({
       </label>
 
       <div css={styles.fieldRow}>
-        <FieldSiren
-          label="Siren de l'entreprise"
-          name={siren}
-          readOnly={readOnly}
-          updateSirenData={updateSirenData}
-          validator={composeValidators(checkDuplicates, sirenValidator(updateSirenData))}
-          customStyles={styles.siren}
-        />
+        {readOnly ? (
+          <FieldSirenReadOnly label="Siren de l'entreprise" name={siren} />
+        ) : (
+          <FieldSiren
+            label="Siren de l'entreprise"
+            name={siren}
+            readOnly={readOnly}
+            updateSirenData={updateSirenData}
+            validator={composeValidators(checkDuplicates, sirenValidator(updateSirenData))}
+            customStyles={styles.siren}
+          />
+        )}
         <TextField
           label="Nom de l'entreprise"
           fieldName={nom}
