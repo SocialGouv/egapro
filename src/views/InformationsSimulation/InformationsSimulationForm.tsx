@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
 import { Form, useField } from "react-final-form"
-import { Grid, GridItem } from "@chakra-ui/react"
+import { Text, Grid, GridItem } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
@@ -25,8 +25,6 @@ import RadioLabels from "../../components/RadioLabels"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import globalStyles from "../../utils/globalStyles"
 import ButtonAction from "../../components/ButtonAction"
-
-///////////////////
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -77,6 +75,7 @@ interface Props {
   readOnly: boolean
   updateInformationsSimulation: (data: ActionInformationsSimulationData) => void
   validateInformationsSimulation: (valid: FormState) => void
+  alreadyDeclared: boolean
 }
 
 function InformationsSimulationForm({
@@ -84,6 +83,7 @@ function InformationsSimulationForm({
   readOnly,
   updateInformationsSimulation,
   validateInformationsSimulation,
+  alreadyDeclared,
 }: Props) {
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
@@ -158,8 +158,14 @@ function InformationsSimulationForm({
           <AnneeDeclaration
             label="Année au titre de laquelle les indicateurs sont calculés"
             name="anneeDeclaration"
-            readOnly={readOnly}
+            readOnly={readOnly || alreadyDeclared}
           />
+
+          {alreadyDeclared && (
+            <Text color="gray.600" fontSize="sm" as="i" mb="8">
+              L'année ne peut pas être modifiée car une déclaration a déjà été validée et transmise.
+            </Text>
+          )}
 
           <FieldPeriodeReference
             readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}

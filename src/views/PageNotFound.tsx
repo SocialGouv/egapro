@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react"
-import { RouteComponentProps } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 
 import Page from "../components/Page"
 
@@ -8,8 +8,9 @@ import ActionBar from "../components/ActionBar"
 import ButtonAction from "../components/ButtonAction"
 import { useTitle } from "../utils/hooks"
 
-function PageNotFound({ history }: RouteComponentProps) {
+function PageNotFound() {
   useTitle("Page inexistante")
+  const history = useHistory()
 
   return (
     <Page title="Malheureusement la page que vous cherchez n’existe pas !">

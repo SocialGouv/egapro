@@ -33,6 +33,7 @@ import { departementCode } from "../../components/RegionsDepartements"
 import TextField from "../../components/TextField"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
+import { Text } from "@chakra-ui/react"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -127,6 +128,7 @@ interface Props {
   readOnly: boolean
   updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
   validateInformationsEntreprise: (valid: FormState) => void
+  alreadyDeclared: boolean
 }
 
 function InformationsEntrepriseForm({
@@ -134,6 +136,7 @@ function InformationsEntrepriseForm({
   readOnly,
   updateInformationsEntreprise,
   validateInformationsEntreprise,
+  alreadyDeclared,
 }: Props) {
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -236,7 +239,7 @@ function InformationsEntrepriseForm({
           <FieldSiren
             label="SIREN"
             name="siren"
-            readOnly={readOnly}
+            readOnly={readOnly || alreadyDeclared}
             updateSirenData={(sirenData: EntrepriseType) =>
               form.batch(() => {
                 form.change("nomEntreprise", sirenData.raison_sociale || "")
@@ -249,6 +252,12 @@ function InformationsEntrepriseForm({
               })
             }
           />
+
+          {alreadyDeclared && (
+            <Text color="gray.600" fontSize="sm" as="i" mb="8">
+              Le SIREN n'est pas modifiable car une déclaration a déjà été validée et transmise.
+            </Text>
+          )}
 
           <TextField
             label={
