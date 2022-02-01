@@ -1,10 +1,10 @@
 import React, { FunctionComponent, useState } from "react"
 import { Form, useField } from "react-final-form"
+import { Box, Text } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionDeclarationData } from "../../globals"
 
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
@@ -20,6 +20,7 @@ import TextareaGroup from "../../components/ds/TextareaGroup"
 import InputGroup from "../../components/ds/InputGroup"
 import { displayMetaErrors } from "../../utils/form-error-helpers"
 import { hasFieldError } from "../../components/Input"
+import { IconEdit } from "../../components/ds/Icons"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -265,27 +266,41 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
               </>
             )}
             {after2021 && <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />}
+            {readOnly && (
+              <Text fontSize="sm" fontWeight="bold">
+                Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}
+              </Text>
+            )}
           </FormStack>
           {readOnly ? (
             <>
               <ActionBar>
-                Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}. &emsp;
+                <ButtonAction
+                  onClick={onClick}
+                  label="Renvoyer l'accusé de réception"
+                  disabled={loading}
+                  loading={loading}
+                  variant="outline"
+                />
                 {declaration.formValidated === "Valid" && (
-                  <ActionLink onClick={() => validateDeclaration("None")}>Modifier les données saisies</ActionLink>
+                  <ButtonAction
+                    leftIcon={<IconEdit />}
+                    label="Modifier les données saisies"
+                    onClick={() => validateDeclaration("None")}
+                    variant="link"
+                    size="sm"
+                  />
                 )}
               </ActionBar>
-              <ButtonAction
-                onClick={onClick}
-                label="Renvoyer l'accusé de réception"
-                disabled={loading}
-                loading={loading}
-              />
-              <ButtonAction
-                onClick={resetDeclaration}
-                label="Effectuer une nouvelle simulation et déclaration"
-                disabled={loading}
-                loading={loading}
-              />
+              <Box mt={6}>
+                <ButtonAction
+                  onClick={resetDeclaration}
+                  size="lg"
+                  label="Effectuer une nouvelle simulation et déclaration"
+                  disabled={loading}
+                  loading={loading}
+                />
+              </Box>
             </>
           ) : (
             <ActionBar>
