@@ -97,19 +97,24 @@ function AppLayout({ state, dispatch }: Props) {
             <MainScrollView state={state}>
               <Switch>
                 <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
-                <Route
-                  path="/simulateur/:code"
-                  render={({
-                    match: {
-                      params: { code },
-                    },
-                  }) => <Simulateur code={code} state={state} dispatch={dispatch} />}
-                />
-                <Route path="/mentions-legales" exact render={() => <MentionsLegales />} />
-                <Route path="/accessibilite" exact render={() => <Accessibilite />} />
-                <Route path="/cgu" exact render={() => <CGU />} />
-                <Route path="/politique-confidentialite" exact render={() => <PolitiqueConfidentialite />} />
-                <Route component={PageNotFound} />
+                <Route path="/simulateur/:code">
+                  <Simulateur state={state} dispatch={dispatch} />
+                </Route>
+                <Route path="/mentions-legales" exact>
+                  <MentionsLegales />
+                </Route>
+                <Route path="/accessibilite" exact>
+                  <Accessibilite />
+                </Route>
+                <Route path="/cgu" exact>
+                  <CGU />
+                </Route>
+                <Route path="/politique-confidentialite" exact>
+                  <PolitiqueConfidentialite />
+                </Route>
+                <Route>
+                  <PageNotFound />
+                </Route>
               </Switch>
             </MainScrollView>
             <Footer />

@@ -1,5 +1,5 @@
 import React, { useCallback, ReactNode, FunctionComponent } from "react"
-import { RouteComponentProps } from "react-router-dom"
+import { RouteComponentProps, useParams } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsEntrepriseData } from "../../globals"
 
@@ -8,16 +8,22 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
 import { useTitle } from "../../utils/hooks"
+import { useDeclaration } from "../../hooks/useDeclaration"
 
 interface InformationsEntrepriseProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
+type Params = {
+  code: string
+}
+
 const title = "Informations entreprise/UES"
 
 const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = ({ state, dispatch }) => {
   useTitle(title)
+  const { code } = useParams<Params>()
 
   const updateInformationsEntreprise = useCallback(
     (data: ActionInformationsEntrepriseData) => dispatch({ type: "updateInformationsEntreprise", data }),
@@ -29,6 +35,10 @@ const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = (
     [dispatch],
   )
 
+  const { declaration } = useDeclaration(state?.informationsEntreprise?.siren, state?.informations?.anneeDeclaration)
+
+  const alreadyDeclared = declaration?.data?.id === code
+
   return (
     <PageInformationsEntreprise>
       <LayoutFormAndResult
@@ -38,6 +48,7 @@ const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = (
             readOnly={state.informationsEntreprise.formValidated === "Valid"}
             updateInformationsEntreprise={updateInformationsEntreprise}
             validateInformationsEntreprise={validateInformationsEntreprise}
+            alreadyDeclared={alreadyDeclared}
           />
         }
         childrenResult={null}

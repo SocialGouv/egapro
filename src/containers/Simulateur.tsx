@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
 import { Fragment, useEffect, useState } from "react"
-import { Redirect, Route, Switch } from "react-router-dom"
+import { Redirect, Route, Switch, useParams } from "react-router-dom"
 
 import { AppState, ActionType } from "../globals"
 
@@ -41,12 +41,16 @@ interface Declaration {
 }
 
 interface Props {
-  code: string
   state: AppState | undefined
   dispatch: (action: ActionType) => void
 }
 
-function Simulateur({ code, state, dispatch }: Props) {
+type Params = {
+  code: string
+}
+
+function Simulateur({ state, dispatch }: Props): JSX.Element {
+  const { code } = useParams<Params>()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   const { email, isAuthenticated } = useUser()

@@ -127,6 +127,7 @@ interface InformationsEntrepriseFormProps {
   readOnly: boolean
   updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
   validateInformationsEntreprise: (valid: FormState) => void
+  alreadyDeclared: boolean
 }
 
 const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({
@@ -134,6 +135,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
   readOnly,
   updateInformationsEntreprise,
   validateInformationsEntreprise,
+  alreadyDeclared,
 }) => {
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -233,22 +235,35 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                 </InputRadio>
               </InputRadioGroup>
             </FormControl>
-            <FieldSiren
-              label="SIREN"
-              name="siren"
-              readOnly={readOnly}
-              updateSirenData={(sirenData: EntrepriseType) =>
-                form.batch(() => {
-                  form.change("nomEntreprise", sirenData.raison_sociale || "")
-                  form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
-                  form.change("region", regionFromCode(sirenData.région || ""))
-                  form.change("departement", departementFromCode(sirenData.département || ""))
-                  form.change("adresse", sirenData.adresse || "")
-                  form.change("commune", sirenData.commune || "")
-                  form.change("codePostal", sirenData.code_postal || "")
-                })
-              }
-            />
+            {readOnly || alreadyDeclared ? (
+              <FakeInputGroup
+                label="SIREN"
+                message={
+                  alreadyDeclared
+                    ? "Le SIREN n'est pas modifiable car une déclaration a déjà été validée et" + " transmise."
+                    : undefined
+                }
+              >
+                {informationsEntreprise.siren}
+              </FakeInputGroup>
+            ) : (
+              <FieldSiren
+                label="SIREN"
+                name="siren"
+                readOnly={readOnly}
+                updateSirenData={(sirenData: EntrepriseType) =>
+                  form.batch(() => {
+                    form.change("nomEntreprise", sirenData.raison_sociale || "")
+                    form.change("codeNaf", codeNafFromCode(sirenData.code_naf || ""))
+                    form.change("region", regionFromCode(sirenData.région || ""))
+                    form.change("departement", departementFromCode(sirenData.département || ""))
+                    form.change("adresse", sirenData.adresse || "")
+                    form.change("commune", sirenData.commune || "")
+                    form.change("codePostal", sirenData.code_postal || "")
+                  })
+                }
+              />
+            )}
             <FakeInputGroup
               label={
                 values.structure === "Unité Economique et Sociale (UES)"

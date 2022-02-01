@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import { FormControl, FormLabel } from "@chakra-ui/react"
+import { Text, FormControl, FormLabel } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
@@ -92,6 +92,7 @@ interface InformationsSimulationFormProps {
   readOnly: boolean
   updateInformationsSimulation: (data: ActionInformationsSimulationData) => void
   validateInformationsSimulation: (valid: FormState) => void
+  alreadyDeclared: boolean
 }
 
 const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormProps> = ({
@@ -99,6 +100,7 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
   readOnly,
   updateInformationsSimulation,
   validateInformationsSimulation,
+  alreadyDeclared,
 }) => {
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
@@ -189,8 +191,14 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
             <AnneeDeclaration
               label="Année au titre de laquelle les indicateurs sont calculés"
               name="anneeDeclaration"
-              readOnly={readOnly}
+              readOnly={readOnly || alreadyDeclared}
             />
+
+            {alreadyDeclared && (
+              <Text color="gray.600" fontSize="sm" as="i" mb="8">
+                L'année ne peut pas être modifiée car une déclaration a déjà été validée et transmise.
+              </Text>
+            )}
 
             <FieldPeriodeReference
               readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}

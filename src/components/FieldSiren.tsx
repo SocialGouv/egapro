@@ -10,7 +10,7 @@ import { IconExternalLink } from "./ds/Icons"
 import InputGroup from "./ds/InputGroup"
 
 const nineDigits: ValidatorFunction = (value) =>
-  value.length === 9 ? undefined : "Ce champ n’est pas valide, renseignez un numéro SIREN de 9 chiffres."
+  value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres."
 
 const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
 

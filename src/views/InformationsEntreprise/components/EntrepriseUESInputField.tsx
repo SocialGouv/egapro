@@ -28,12 +28,17 @@ const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({
     const sirenList = allValues.entreprisesUES.map((entreprise: EntrepriseUES) => entreprise.siren)
     sirenList.push(allValues.siren)
     if (sirenList.filter((siren: string) => siren === value).length >= 2) {
-      return "Ce numéro SIREN est déjà utilisé."
+      return "ce numéro SIREN est déjà utilisé"
     }
     return undefined
   }
 
   const nomField = useField(nom, {
+    validate: required,
+    parse: (value) => value,
+    format: (value) => value,
+  })
+  const sirenField = useField(siren, {
     validate: required,
     parse: (value) => value,
     format: (value) => value,
@@ -44,13 +49,17 @@ const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({
     <FormControl isInvalid={nomError}>
       <FormLabel as="div">{`Entreprise ${index + 1}`}</FormLabel>
       <SimpleGrid columns={2} spacing={6}>
-        <FieldSiren
-          label="Siren de l'entreprise"
-          name={siren}
-          readOnly={readOnly}
-          updateSirenData={updateSirenData}
-          validator={composeValidators(checkDuplicates, sirenValidator(updateSirenData))}
-        />
+        {!readOnly ? (
+          <FakeInputGroup label="Siren de l'entreprise">{sirenField.input.value}</FakeInputGroup>
+        ) : (
+          <FieldSiren
+            label="Siren de l'entreprise"
+            name={siren}
+            readOnly={readOnly}
+            updateSirenData={updateSirenData}
+            validator={composeValidators(checkDuplicates, sirenValidator(updateSirenData))}
+          />
+        )}
         <FakeInputGroup label="Nom de l'entreprise">{nomField.input.value}</FakeInputGroup>
       </SimpleGrid>
     </FormControl>
