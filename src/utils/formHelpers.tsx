@@ -106,18 +106,6 @@ export const composeFormValidators =
       undefined,
     )
 
-export const simpleMemoize = (fn: any) => {
-  let lastArg: any
-  let lastResult: any
-  return (arg: any) => {
-    if (arg !== lastArg) {
-      lastArg = arg
-      lastResult = fn(arg)
-    }
-    return lastResult
-  }
-}
-
 export function isFormValid(formState: { formValidated: string }) {
   return formState.formValidated === "Valid"
 }
