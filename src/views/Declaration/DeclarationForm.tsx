@@ -201,7 +201,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                     fieldName="cseMisEnPlace"
                     value={values.cseMisEnPlace}
                     readOnly={readOnly}
-                    label="Un CSE a-t-il été mis en place ?"
+                    label={<>Un CSE a-t-il été mis en place&nbsp;?</>}
                   />
                 )}
                 {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
@@ -230,9 +230,11 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   value={values.publicationSurSiteInternet}
                   readOnly={readOnly}
                   label={
-                    after2020
-                      ? `Avez-vous un site Internet pour publier les résultats obtenus${displayNC} ?`
-                      : "Avez-vous un site Internet pour publier le niveau de résultat obtenu ?"
+                    after2020 ? (
+                      <>Avez-vous un site Internet pour publier les résultats obtenus {displayNC}&nbsp;?</>
+                    ) : (
+                      <>Avez-vous un site Internet pour publier le niveau de résultat obtenu&nbsp;?</>
+                    )
                   }
                 />
 
@@ -241,7 +243,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                     <InputGroup
                       label={
                         after2020
-                          ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus${displayNC}`
+                          ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus ${displayNC}`
                           : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"
                       }
                       fieldName="lienPublication"
@@ -325,13 +327,18 @@ const FieldPlanRelance = ({
         value={field.input.value}
         readOnly={readOnly}
         label={
-          isUES
-            ? `Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l’UES a-t-elle bénéficié, en 2021
+          isUES ? (
+            <>
+              Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l’UES a-t-elle bénéficié, en 2021
               et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission
-              « Plan de relance »&nbsp;?`
-            : `
+              « Plan de relance »&nbsp;?
+            </>
+          ) : (
+            <>
               Avez-vous bénéficié, en 2021 et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour
-              2021 au titre de la mission « Plan de relance »&nbsp;?`
+              2021 au titre de la mission « Plan de relance »&nbsp;?
+            </>
+          )
         }
       />
       <p>{error && displayMetaErrors(field.meta.error)}</p>

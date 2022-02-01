@@ -83,7 +83,7 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
             fieldName="presenceCongeMat"
             value={values.presenceCongeMat}
             readOnly={readOnly}
-            label="Il y a t'il eu des retours de congé maternité pendant la période de référence ?"
+            label={<>Il y a t'il eu des retours de congé maternité pendant la période de référence&nbsp;?</>}
           />
 
           {values.presenceCongeMat === "true" && (

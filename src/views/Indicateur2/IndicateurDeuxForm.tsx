@@ -150,7 +150,7 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
             fieldName="presenceAugmentation"
             value={values.presenceAugmentation}
             readOnly={readOnly}
-            label="Il y a t'il eu des augmentations durant la période de référence ?"
+            label={<>Il y a t'il eu des augmentations durant la période de référence&nbsp;?</>}
           />
 
           {values.presenceAugmentation === "true" && (

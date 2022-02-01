@@ -129,7 +129,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
               fieldName="presenceAugmentationPromotion"
               value={values.presenceAugmentationPromotion}
               readOnly={readOnly}
-              label="Il y a t'il eu des augmentations durant la période de déclaration ?"
+              label={<>Il y a t'il eu des augmentations durant la période de déclaration&nbsp;?</>}
             />
           </Box>
 

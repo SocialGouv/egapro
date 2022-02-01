@@ -8,7 +8,7 @@ interface RadiosBooleanProps {
   readOnly: boolean
   fieldName: string
   value?: string
-  label?: string
+  label?: string | React.ReactElement
 }
 
 const RadiosBoolean: FunctionComponent<RadiosBooleanProps> = ({ readOnly, fieldName, label, value }) => {
