@@ -36,6 +36,7 @@
     "fuse.js": "3.6.1",
     "http-proxy-middleware": "1.0.3",
     "lodash": "^4.17.21",
+    "moize": "^6.1.0",
     "normalize.css": "8.0.1",
     "react": "16.13.1",
     "react-app-polyfill": "1.0.6",
