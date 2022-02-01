@@ -49,7 +49,7 @@ const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({
     <FormControl isInvalid={nomError}>
       <FormLabel as="div">{`Entreprise ${index + 1}`}</FormLabel>
       <SimpleGrid columns={2} spacing={6}>
-        {!readOnly ? (
+        {readOnly ? (
           <FakeInputGroup label="Siren de l'entreprise">{sirenField.input.value}</FakeInputGroup>
         ) : (
           <FieldSiren
