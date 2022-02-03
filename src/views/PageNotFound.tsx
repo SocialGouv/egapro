@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom"
 import Page from "../components/Page"
 
 import ActionBar from "../components/ActionBar"
-import ButtonAction from "../components/ButtonAction"
+import ButtonAction from "../components/ds/ButtonAction"
 import { useTitle } from "../utils/hooks"
 
 function PageNotFound() {

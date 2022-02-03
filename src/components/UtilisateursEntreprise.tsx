@@ -12,7 +12,7 @@ import { useOwnersOfSiren } from "../hooks/useOwnersOfSiren"
 import { useSoloToastMessage } from "../utils/hooks"
 import PrimaryButton from "../components/ds/PrimaryButton"
 import { formValidator, InputControl } from "./ds/form-lib"
-import ButtonAction from "../components/ButtonAction"
+import ButtonAction from "./ds/ButtonAction"
 import { IconDelete, IconDrag } from "./ds/Icons"
 
 import {

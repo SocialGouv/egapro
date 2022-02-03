@@ -7,7 +7,7 @@ import { Form } from "react-final-form"
 import FormSubmit from "../components/FormSubmit"
 import { sendValidationEmail } from "../utils/api"
 import { required, validateEmail } from "../utils/formHelpers"
-import ButtonAction from "../components/ButtonAction"
+import ButtonAction from "../components/ds/ButtonAction"
 import { useTitle } from "../utils/hooks"
 import InputGroup from "../components/ds/InputGroup"
 

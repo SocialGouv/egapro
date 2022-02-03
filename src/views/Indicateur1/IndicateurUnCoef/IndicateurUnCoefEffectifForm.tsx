@@ -5,7 +5,7 @@ import { AppState, FormState, GroupTranchesAgesEffectif, ActionIndicateurUnCoefD
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import ButtonAction from "../../../components/ButtonAction"
+import ButtonAction from "../../../components/ds/ButtonAction"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
 

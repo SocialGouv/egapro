@@ -6,9 +6,9 @@ import { postIndicatorsDatas } from "../utils/api"
 import { logToSentry } from "../utils/helpers"
 
 import Page from "../components/Page"
-import ButtonAction from "../components/ButtonAction"
+import ButtonAction from "../components/ds/ButtonAction"
 import ErrorMessage from "../components/ErrorMessage"
-import ButtonLinkNoRouter from "../components/ButtonLinkNoRouter"
+import ButtonLinkNoRouter from "../components/ds/ButtonLinkNoRouter"
 import { Heading, SimpleGrid } from "@chakra-ui/react"
 import Card from "../components/ds/Card"
 

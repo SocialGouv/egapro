@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react"
 import { RouteComponentProps, withRouter } from "react-router-dom"
 
-import ButtonLink from "./ButtonLink"
+import ButtonLink from "./ds/ButtonLink"
 import TextLink from "./ds/TextLink"
 
 interface MatchParams {

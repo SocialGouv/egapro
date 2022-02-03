@@ -16,7 +16,7 @@ import AppLayout from "./containers/AppLayout"
 import InfoBlock from "./components/ds/InfoBlock"
 import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
-import ButtonAction from "./components/ButtonAction"
+import ButtonAction from "./components/ds/ButtonAction"
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (

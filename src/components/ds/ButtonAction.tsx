@@ -1,4 +1,4 @@
-import React from "react"
+import React, { FunctionComponent } from "react"
 import { Button, ButtonProps as ButtonChakraProps } from "@chakra-ui/react"
 
 export type ButtonProps = ButtonChakraProps & {
@@ -18,7 +18,7 @@ export type ButtonActionProps = ButtonProps & {
   type?: "button" | "submit" | "reset" | undefined
 }
 
-function ButtonAction({
+const ButtonAction: FunctionComponent<ButtonActionProps> = ({
   label,
   colorScheme = "primary",
   variant = "solid",
@@ -31,25 +31,24 @@ function ButtonAction({
   loading = false,
   fullWidth,
   ...rest
-}: ButtonActionProps) {
-  return (
-    <Button
-      size={size}
-      type={type}
-      onClick={onClick}
-      isDisabled={disabled}
-      isLoading={loading}
-      colorScheme={colorScheme}
-      variant={variant}
-      leftIcon={leftIcon}
-      rightIcon={rightIcon}
-      sx={{
-        width: fullWidth ? "100%" : "auto",
-      }}
-      {...rest}
-    >
-      {label}
-    </Button>
-  )
-}
+}) => (
+  <Button
+    size={size}
+    type={type}
+    onClick={onClick}
+    isDisabled={disabled}
+    isLoading={loading}
+    colorScheme={colorScheme}
+    variant={variant}
+    leftIcon={leftIcon}
+    rightIcon={rightIcon}
+    sx={{
+      width: fullWidth ? "100%" : "auto",
+    }}
+    {...rest}
+  >
+    {label}
+  </Button>
+)
+
 export default ButtonAction

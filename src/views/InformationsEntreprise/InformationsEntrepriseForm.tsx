@@ -27,7 +27,7 @@ import { departementFromCode, regionFromCode } from "../../components/RegionsDep
 import { departementCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
-import ButtonAction from "../../components/ButtonAction"
+import ButtonAction from "../../components/ds/ButtonAction"
 import { IconEdit } from "../../components/ds/Icons"
 import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"

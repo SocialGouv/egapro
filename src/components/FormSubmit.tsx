@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react"
 import { VStack } from "@chakra-ui/react"
 
 import InfoBlock from "./ds/InfoBlock"
-import ButtonAction from "./ButtonAction"
+import ButtonAction from "./ds/ButtonAction"
 
 interface FormSubmitProps {
   submitFailed: boolean
