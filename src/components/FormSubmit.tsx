@@ -1,12 +1,10 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { VStack } from "@chakra-ui/react"
 
-import globalStyles from "../utils/globalStyles"
+import InfoBlock from "./ds/InfoBlock"
+import ButtonAction from "./ButtonAction"
 
-import ButtonSubmit from "./ButtonSubmit"
-import { IconWarning } from "./ds/Icons"
-
-interface Props {
+interface FormSubmitProps {
   submitFailed: boolean
   hasValidationErrors: boolean
   errorMessage?: string
@@ -14,49 +12,19 @@ interface Props {
   label?: string
 }
 
-function FormSubmit({
+const FormSubmit: FunctionComponent<FormSubmitProps> = ({
   submitFailed,
   hasValidationErrors,
   errorMessage,
   loading = false,
   label = "Valider les" + " informations",
-}: Props) {
+}) => {
   return (
-    <div css={styles.container}>
-      <ButtonSubmit label={label} loading={loading} />
-      {errorMessage && submitFailed && hasValidationErrors && (
-        <div css={styles.error}>
-          <div css={styles.icon}>
-            <IconWarning boxSize="8" />
-          </div>
-          <p>{errorMessage}</p>
-        </div>
-      )}
-    </div>
+    <VStack spacing={6} align="flex-start">
+      <ButtonAction label={label} type="submit" disabled={loading} loading={loading} size="lg" />
+      {errorMessage && submitFailed && hasValidationErrors && <InfoBlock type="error" title={errorMessage} />}
+    </VStack>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-  }),
-  error: css({
-    display: "flex",
-    alignItems: "center",
-    marginTop: 20,
-    padding: "8px 12px",
-    backgroundColor: "white",
-    border: `solid ${globalStyles.colors.error} 1px`,
-    borderRadius: 5,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-  }),
-  icon: css({
-    height: 20,
-    marginRight: 10,
-  }),
 }
 
 export default FormSubmit
