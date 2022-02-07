@@ -27,23 +27,25 @@ function CGU() {
           permettent de calculer les écarts de rémunération femmes-hommes au sein des entreprises, et de réaliser les
           déclarations qui en sont issues.
         </p>
-        <h2 css={styles.title}>Bases juridiques</h2>
+        <h2 css={styles.title}>Bases juridiques des traitements de données</h2>
         <p>
-          Conformément aux dispositions de l’article 6-e du Règlement relatif à la protection des données (appelé RGPD),
-          le traitement est nécessaire à l’exécution d’une mission d’intérêt public ou relève de l’exercice de
-          l’autorité publique dont est investi le Responsable de traitement.
+          Conformément aux dispositions de l'article 6-e du Règlement relatif à la protection des données (appelé RGPD),
+          le traitement est nécessaire à l'exécution d'une mission d'intérêt public ou relève de l'exercice de
+          l'autorité publique dont est investi le Responsable de traitement.
           <br />
           <br />
-          Conformément aux dispositions de l’article 6-c du Règlement relatif à la protection des données (appelé RGPD),
-          le traitement de données relatif aux données de connexion est fondé sur l’obligation légale reposant sur le
-          responsable de traitement au titre de l’article 6 de la LCEN et de l’article 1 du décret n°2021-1363 du 20
-          octobre 2021.
+          Conformément aux dispositions de l'article 6-c du Règlement relatif à la protection des données (appelé RGPD),
+          le traitement de données relatif aux données de connexion est fondé sur l'obligation légale reposant sur le
+          responsable de traitement au titre de la loi LCEN n° 2004-575 du 21 juin 2004 pour la confiance dans
+          l'économie numérique et par l'article 1 du décret n°2021-1363 portant injonction, au regard de la menace grave
+          et actuelle contre la sécurité nationale, de conservation pour une durée d'un an de certaines catégories de
+          données de connexion.
         </p>
         <h2 css={styles.title}>Durée de conservation</h2>
         <ul>
-          <li>Pour les cookies : 13 mois maximum, ou jusqu'au retrait du consentement de la personne concernée.</li>
           <li>
-            Pour les données de connexion ou d’hébergeur : 12 mois (LCEN et décret n°2021-1363 du 20 octobre 2021).
+            Pour les données de connexion ou d'hébergeur : 12 mois (LCEN et articles 1 et 5 du décret n°2021-1362 du 20
+            octobre 2021 relatif à la conservation des données).
           </li>
           <li>
             Pour les données des utilisateurs du simulateur et du formulaire de déclaration : temps nécessaire au
@@ -51,14 +53,14 @@ function CGU() {
           </li>
         </ul>
         <p>
-          Passés ces délais de conservation, les responsables de traitement s’engagent à supprimer définitivement les
+          Passés ces délais de conservation, les responsables de traitement s'engagent à supprimer définitivement les
           données des personnes concernées.
         </p>
         <h2 css={styles.title}>Sécurité et confidentialité</h2>
         <p>
           Les données personnelles sont traitées dans des conditions sécurisées, selon les moyens actuels de la
           technique, dans le respect des dispositions relatives à la protection de la vie privée et notamment au
-          référentiel général de sécurité, prévu à l’article 9 de l’ordonnance 2005-1516 du 8 décembre 2005 relative aux
+          référentiel général de sécurité, prévu à l'article 9 de l'ordonnance 2005-1516 du 8 décembre 2005 relative aux
           échanges électroniques entre les usagers et les autorités administratives et entre les autorités
           administratives.
           <br />
@@ -85,22 +87,22 @@ function CGU() {
           </li>
         </ul>
         <h2 css={styles.title}>Droits des personnes concernées</h2>
-        <p>Vous disposez des droits suivants concernant vos données à caractère personnel en tant qu’utilisateurs :</p>
+        <p>Vous disposez des droits suivants concernant vos données à caractère personnel en tant qu'utilisateurs :</p>
         <ul>
-          <li>Droit d’information, d’accès et de communication des données ;</li>
+          <li>Droit d'information, d'accès et de communication des données ;</li>
           <li>Droit de rectification et le cas échéant de suppression des données ;</li>
-          <li>Droit d’opposition au traitement de données, le cas échéant.</li>
+          <li>Droit d'opposition au traitement de données, le cas échéant.</li>
         </ul>
         <p>Vous disposez des droits suivants concernant vos données de connexion :</p>
         <ul>
-          <li>Droit d’information et droit d’accès ;</li>
+          <li>Droit d'information et droit d'accès ;</li>
           <li>Droit de rectification.</li>
         </ul>
         <p>
           Vous pouvez exercer ces droits en écrivant à <a href="mailto:index@travail.gouv.fr">index@travail.gouv.fr</a>
           <br />
           <br />
-          En raison de l’obligation de sécurité et de confidentialité dans le traitement des données à caractère
+          En raison de l'obligation de sécurité et de confidentialité dans le traitement des données à caractère
           personnel qui incombe à Index Egapro, votre demande sera uniquement traitée si vous rapportez la preuve de
           votre identité. Pour vous aider dans votre démarche, vous trouverez{" "}
           <a href="https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces">ici</a>
@@ -115,8 +117,8 @@ function CGU() {
           <br />
           <strong>Délais de réponse</strong>
           <br />
-          Le responsable de traitement s’engage à répondre à votre demande d’accès, de rectification ou d’opposition ou
-          toute autre demande complémentaire d’informations dans un délai raisonnable qui ne saurait dépasser 1 mois à
+          Le responsable de traitement s'engage à répondre à votre demande d'accès, de rectification ou d'opposition ou
+          toute autre demande complémentaire d'informations dans un délai raisonnable qui ne saurait dépasser 1 mois à
           compter de la réception de votre demande.
         </p>
         <h2 css={styles.title}>Destinataires :</h2>
@@ -125,14 +127,14 @@ function CGU() {
           personnes juridiquement habilitées à connaître des informations traitées.
           <br />
           <br />
-          Le responsable de traitement veillent à ne fournir des accès qu’aux seules personnes juridiquement habilitées
+          Le responsable de traitement veillent à ne fournir des accès qu'aux seules personnes juridiquement habilitées
           à connaître des informations traitées.
         </p>
         <h2 css={styles.title}>Sous-traitants :</h2>
         <p>
           Certaines des données sont envoyées à des sous-traitants pour réaliser certaines missions. Les responsables de
           traitement se sont assurés de la mise en œuvre par ses sous-traitants de garanties adéquates et du respect de
-          conditions strictes de confidentialité, d’usage et de protection des données.
+          conditions strictes de confidentialité, d'usage et de protection des données.
         </p>
         <br />
         <table css={styles.table}>
@@ -155,32 +157,69 @@ function CGU() {
                 </a>
               </td>
             </tr>
+            <tr>
+              <td>Google</td>
+              <td>États-Unis</td>
+              <td>Mesure d'audience</td>
+              <td>
+                <a href="https://policies.google.com/privacy?hl=fr ">https://policies.google.com/privacy?hl=fr</a>
+              </td>
+            </tr>
           </tbody>
         </table>
         <h2 css={styles.title}>Cookies</h2>
         <p>
-          Index Egapro, en tant qu’éditeurs de la présente Plateforme, pourra faire usage de cookies. Certains cookies
-          sont dispensés du recueil préalable de votre consentement dans la mesure où ils sont strictement nécessaires à
-          la fourniture du service. Les traceurs ont vocation à être conservés sur le poste informatique de l'Internaute
-          pour une durée allant jusqu'à 13 mois.
-          <br />
-          <br />
-          Mesure d’audience :
-          <br />
-          <br />
-          Certains cookies permettent d’établir des mesures statistiques de fréquentation et d’utilisation du site
-          pouvant être utilisées à des fins de suivi et d’amélioration du service :
+          Index Egapro pourra faire usage de cookies. Les traceurs ont vocation à être conservés sur le poste
+          informatique de l'Internaute pour une durée allant jusqu'à 13 mois.
         </p>
-        <ul>
-          <li>Les données collectées ne sont pas recoupées avec d’autres traitements.</li>
-          <li>Le cookie déposé sert uniquement à la production de statistiques anonymes.</li>
-          <li>Le cookie ne permet pas de suivre la navigation de l’internaute sur d’autres sites.</li>
-        </ul>
+
+        <p>Mesure d'audience :</p>
+
         <p>
-          La mesure d’audience (nombre de visites, pages consultées) est réalisée par un outil libre intitulé Matomo
-          spécifiquement paramétré, respectant les conditions d’exemption du consentement de l’internaute définies par
-          la recommandation « Cookies » de la Commission nationale informatique et libertés (CNIL).
+          Certains cookies permettent d'établir des mesures statistiques de fréquentation et d'utilisation du site
+          pouvant être utilisées à des fins de suivi et d'amélioration du service.
         </p>
+        <br />
+        <br />
+
+        <table css={styles.table}>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Type</th>
+              <th>Usage</th>
+              <th>Émetteur</th>
+              <th>Qui a accès ?</th>
+              <th>Consentement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GoogleAnalytics</td>
+              <td>Mesure d'audience</td>
+              <td>Outil Google de mesure d'audience ;</td>
+              <td>Google</td>
+              <td>Direction Générale du Travail ; Google</td>
+              <td>Oui</td>
+            </tr>
+            <tr>
+              <td>GoogleTagManager</td>
+              <td>Mesure d'audience</td>
+              <td> Outil Google de gestion de balises ;</td>
+              <td>Google</td>
+              <td>Direction Générale du Travail ; Google</td>
+              <td>Oui</td>
+            </tr>
+            <tr>
+              <td>Ad.doubleclick.net</td>
+              <td>Publicité</td>
+              <td>Service de publicité et de diffusion d'annonce</td>
+              <td>Google</td>
+              <td>Direction Générale du Travail ; Google</td>
+              <td>Oui</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </Page>
   )
