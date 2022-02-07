@@ -167,7 +167,10 @@ function CGU() {
             </tr>
           </tbody>
         </table>
-        <h2 css={styles.title}>Cookies</h2>
+        <h2 id="cookies" css={styles.title}>
+          Cookies
+        </h2>
+
         <p>
           Index Egapro pourra faire usage de cookies. Les traceurs ont vocation à être conservés sur le poste
           informatique de l'Internaute pour une durée allant jusqu'à 13 mois.

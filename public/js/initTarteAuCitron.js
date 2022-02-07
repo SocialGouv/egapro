@@ -1,7 +1,7 @@
 /* globals tarteaucitron, gtag */
 
 tarteaucitron.init({
-  privacyUrl: "https://index-egapro.travail.gouv.fr/politique-confidentialite" /* Privacy policy url */,
+  privacyUrl: "/politique-confidentialite#cookies" /* Privacy policy url */,
 
   hashtag: "#tarteaucitron" /* Open the panel with this hashtag */,
   cookieName: "tarteaucitron" /* Cookie name */,
@@ -35,7 +35,7 @@ tarteaucitron.init({
 
   //"cookieDomain": ".my-multisite-domaine.fr", /* Shared cookie for multisite */
 
-  readmoreLink: "" /* Change the default readmore link */,
+  readmoreLink: "/politique-confidentialite#cookies" /* Change the default readmore link */,
 
   mandatory: true /* Show a message about mandatory cookies */,
 })
