@@ -1,15 +1,17 @@
 import React, { FunctionComponent, useState } from "react"
+import { Form } from "react-final-form"
 import { Box, Heading, Text, Image } from "@chakra-ui/react"
 
-import Page from "../components/Page"
-import ActionBar from "../components/ActionBar"
-import { Form } from "react-final-form"
-import FormSubmit from "../components/FormSubmit"
+import { useTitle } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
 import { required, validateEmail } from "../utils/formHelpers"
 import ButtonAction from "../components/ds/ButtonAction"
-import { useTitle } from "../utils/hooks"
 import InputGroup from "../components/ds/InputGroup"
+import FormStack from "../components/ds/FormStack"
+import Page from "../components/Page"
+import ActionBar from "../components/ActionBar"
+import FormError from "../components/FormError"
+import FormSubmit from "../components/FormSubmit"
 
 const validateMail = (value: string) => {
   const requiredError = required(value)
@@ -95,18 +97,16 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
               </Text>
               <Box mt={6} maxW="lg">
                 <form onSubmit={handleSubmit}>
-                  <InputGroup
-                    fieldName="email"
-                    label="Votre Email"
-                    message={{ error: "l’adresse mail n’est pas valide" }}
-                  />
-                  {errorMessage && <Text color="red.500">{errorMessage}</Text>}
-                  <ActionBar>
-                    <FormSubmit
-                      hasValidationErrors={hasValidationErrors}
-                      submitFailed={submitFailed}
-                      loading={loading}
+                  <FormStack>
+                    {errorMessage && submitFailed && hasValidationErrors && <FormError message={errorMessage} />}
+                    <InputGroup
+                      fieldName="email"
+                      label="Votre Email"
+                      message={{ error: "l’adresse mail n’est pas valide" }}
                     />
+                  </FormStack>
+                  <ActionBar>
+                    <FormSubmit loading={loading} />
                   </ActionBar>
                 </form>
               </Box>

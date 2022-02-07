@@ -29,6 +29,9 @@ import {
 } from "../../utils/formHelpers"
 import { calendarYear, dateToString, parseDate, Year } from "../../utils/helpers"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
+import FormError from "../../components/FormError"
+import { jsx } from "@emotion/react"
+import FormStack from "../../components/ds/FormStack"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -103,36 +106,37 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
       {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <RadioButtons
-            fieldName="periodeDeclaration"
-            label="Sur quelle période souhaitez-vous calculer votre indicateur ?"
-            value={values.periodeDeclaration}
-            readOnly={readOnly}
-            choices={[
-              {
-                label: `Période de référence de l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
-                value: "unePeriodeReference",
-              },
-              {
-                label: `Période de référence de 2 ans (du ${twoYears} au ${dateFinPeriodeReference})`,
-                value: "deuxPeriodesReference",
-              },
-              {
-                label: `Période de référence de 3 ans (du ${threeYears} au ${dateFinPeriodeReference})`,
-                value: "troisPeriodesReference",
-              },
-            ]}
-          />
-
-          <Box mt={4}>
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
+            <RadioButtons
+              fieldName="periodeDeclaration"
+              label="Sur quelle période souhaitez-vous calculer votre indicateur ?"
+              value={values.periodeDeclaration}
+              readOnly={readOnly}
+              choices={[
+                {
+                  label: `Période de référence de l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
+                  value: "unePeriodeReference",
+                },
+                {
+                  label: `Période de référence de 2 ans (du ${twoYears} au ${dateFinPeriodeReference})`,
+                  value: "deuxPeriodesReference",
+                },
+                {
+                  label: `Période de référence de 3 ans (du ${threeYears} au ${dateFinPeriodeReference})`,
+                  value: "troisPeriodesReference",
+                },
+              ]}
+            />
             <RadiosBoolean
               fieldName="presenceAugmentationPromotion"
               value={values.presenceAugmentationPromotion}
               readOnly={readOnly}
               label={<>Il y a t'il eu des augmentations durant la période de déclaration&nbsp;?</>}
             />
-          </Box>
-
+          </FormStack>
           {values.presenceAugmentationPromotion === "true" && (
             <BlocForm>
               <FieldInputsMenWomen
@@ -158,11 +162,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

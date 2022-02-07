@@ -25,6 +25,7 @@ import { IconEdit } from "../../components/ds/Icons"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import InputRadio from "../../components/ds/InputRadio"
 import InputGroup from "../../components/ds/InputGroup"
+import FormError from "../../components/FormError"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -150,6 +151,9 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
           d'effectifs". Otherwise it would not re-update the menu when
           switching back to the original value */}
             <FormAutoSave saveForm={saveForm} onlyWhenDirty={false} />
+            {submitFailed && hasValidationErrors && (
+              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
             <InputGroup
               fieldName="nomEntreprise"
               label="Nom de la simulation (ex : nom_entreprise_date)"
@@ -220,11 +224,7 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

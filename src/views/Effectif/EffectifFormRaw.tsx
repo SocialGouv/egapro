@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
-import { ReactNode } from "react"
+import React, { ReactNode } from "react"
 import { Form } from "react-final-form"
 import { FormState, GroupTranchesAgesEffectif } from "../../globals"
 
@@ -25,6 +25,7 @@ import FormSubmit from "../../components/FormSubmit"
 import { Cell, Cell2 } from "../../components/Cell"
 
 import { displayNameTranchesAges } from "../../utils/helpers"
+import FormError from "../../components/FormError"
 
 type Effectif = Array<{
   id: any
@@ -131,6 +132,15 @@ function EffectifFormRaw({ effectifRaw, readOnly, updateEffectif, validateEffect
         return (
           <form onSubmit={handleSubmit} css={styles.container}>
             <FormAutoSave saveForm={saveForm} />
+            {submitFailed && hasValidationErrors && (
+              <FormError
+                message={
+                  errors?.message
+                    ? errors.message
+                    : "Les effectifs ne peuvent pas être validés si tous les champs ne sont pas remplis."
+                }
+              />
+            )}
             {effectifRaw.map(({ id, name, tranchesAges }, indexGroupe) => {
               const { totalGroupNbSalarieHomme, totalGroupNbSalarieFemme } = getTotalGroupNbSalarie(tranchesAges)
               return (
@@ -175,15 +185,7 @@ function EffectifFormRaw({ effectifRaw, readOnly, updateEffectif, validateEffect
               <ActionBar>{nextLink}</ActionBar>
             ) : (
               <ActionBar>
-                <FormSubmit
-                  hasValidationErrors={hasValidationErrors}
-                  submitFailed={submitFailed}
-                  errorMessage={
-                    errors?.message
-                      ? errors.message
-                      : "Les effectifs ne peuvent pas être validés si tous les champs ne sont pas remplis."
-                  }
-                />
+                <FormSubmit />
               </ActionBar>
             )}
           </form>

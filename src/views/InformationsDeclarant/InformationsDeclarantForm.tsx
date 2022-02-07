@@ -16,6 +16,7 @@ import ButtonAction from "../../components/ds/ButtonAction"
 import { IconEdit } from "../../components/ds/Icons"
 import InputGroup from "../../components/ds/InputGroup"
 import FormStack from "../../components/ds/FormStack"
+import FormError from "../../components/FormError"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -115,6 +116,9 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
             <InputGroup
               label="Nom du déclarant"
               fieldName="nom"
@@ -177,11 +181,7 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

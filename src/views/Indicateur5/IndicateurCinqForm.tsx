@@ -21,6 +21,7 @@ import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import FormError from "../../components/FormError"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0), maxNumber(10))
 
@@ -79,6 +80,9 @@ const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
+          {submitFailed && hasValidationErrors && (
+            <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+          )}
           <BlocFormLight>
             <FieldInput
               fieldName="nombreSalariesFemmes"
@@ -100,11 +104,7 @@ const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

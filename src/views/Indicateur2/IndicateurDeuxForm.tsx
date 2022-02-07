@@ -30,6 +30,8 @@ import {
   displayNameCategorieSocioPro,
   // displayFractionPercent
 } from "../../utils/helpers"
+import FormError from "../../components/FormError"
+import FormStack from "../../components/ds/FormStack"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
@@ -146,12 +148,23 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
       {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <RadiosBoolean
-            fieldName="presenceAugmentation"
-            value={values.presenceAugmentation}
-            readOnly={readOnly}
-            label={<>Il y a t'il eu des augmentations durant la période de référence&nbsp;?</>}
-          />
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError
+                message={
+                  errors?.notAll0
+                    ? errors.notAll0
+                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                }
+              />
+            )}
+            <RadiosBoolean
+              fieldName="presenceAugmentation"
+              value={values.presenceAugmentation}
+              readOnly={readOnly}
+              label={<>Il y a t'il eu des augmentations durant la période de référence&nbsp;?</>}
+            />
+          </FormStack>
 
           {values.presenceAugmentation === "true" && (
             <BlocForm
@@ -186,15 +199,7 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage={
-                  errors?.notAll0
-                    ? errors.notAll0
-                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
-                }
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

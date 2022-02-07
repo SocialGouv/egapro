@@ -19,6 +19,8 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 
 import { displayNameTranchesAges } from "../../utils/helpers"
+import FormError from "../../components/FormError"
+import { jsx } from "@emotion/react"
 
 export const aboveZero: ValidatorFunction = (value) =>
   minNumber(1)(value) ? "La valeur ne peut être inférieure ou égale à 0" : undefined
@@ -141,6 +143,9 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
+          {submitFailed && hasValidationErrors && (
+            <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+          )}
           {initialValues.remunerationAnnuelle.map(
             (
               {
@@ -184,11 +189,7 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
             <ActionBar>{nextLink}</ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

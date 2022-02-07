@@ -23,6 +23,8 @@ import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import FormError from "../../components/FormError"
+import FormStack from "../../components/ds/FormStack"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -79,12 +81,17 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
       {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <RadiosBoolean
-            fieldName="presenceCongeMat"
-            value={values.presenceCongeMat}
-            readOnly={readOnly}
-            label={<>Il y a t'il eu des retours de congé maternité pendant la période de référence&nbsp;?</>}
-          />
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
+            <RadiosBoolean
+              fieldName="presenceCongeMat"
+              value={values.presenceCongeMat}
+              readOnly={readOnly}
+              label={<>Il y a t'il eu des retours de congé maternité pendant la période de référence&nbsp;?</>}
+            />
+          </FormStack>
 
           {values.presenceCongeMat === "true" && (
             <BlocFormLight>
@@ -112,11 +119,7 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

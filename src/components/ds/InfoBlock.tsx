@@ -3,7 +3,7 @@ import { Alert, AlertIcon, AlertTitle, Box, AlertDescription, CloseButton, useBo
 
 interface InfoBlocProps {
   type?: "error" | "success" | "warning" | "info"
-  title: string
+  title?: string
   text?: ReactNode
   closeButton?: boolean
 }
@@ -18,7 +18,7 @@ const InfoBlock: FunctionComponent<InfoBlocProps> = ({ type = "info", title, tex
         <Box>
           <AlertTitle lineHeight={1.25}>{title}</AlertTitle>
           {text && (
-            <AlertDescription fontSize="sm" lineHeight={1.25} display="block" mt={1}>
+            <AlertDescription fontSize="sm" lineHeight={1.25} display="block" mt={title && 1}>
               {text}
             </AlertDescription>
           )}

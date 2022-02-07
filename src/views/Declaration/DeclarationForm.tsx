@@ -21,6 +21,7 @@ import InputGroup from "../../components/ds/InputGroup"
 import { displayMetaErrors } from "../../utils/form-error-helpers"
 import { hasFieldError } from "../../components/Input"
 import { IconEdit } from "../../components/ds/Icons"
+import FormError from "../../components/FormError"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -188,6 +189,9 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack mt={6}>
+            {((submitFailed && hasValidationErrors) || Boolean(apiError)) && (
+              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
             {noteIndex !== undefined && noteIndex < 75 && (
               <MesuresCorrection
                 label="Mesures de correction prévues à l'article D. 1142-6"
@@ -304,15 +308,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             </>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors || Boolean(apiError)}
-                submitFailed={submitFailed || Boolean(apiError)}
-                errorMessage={
-                  apiError || "Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
-                }
-                label="Déclarer"
-                loading={declaring}
-              />
+              <FormSubmit label="Déclarer" loading={declaring} />
             </ActionBar>
           )}
         </form>

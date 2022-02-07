@@ -33,6 +33,7 @@ import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FormStack from "../../components/ds/FormStack"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import FormError from "../../components/FormError"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -219,6 +220,9 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
             <FormControl readOnly={readOnly}>
               <FormLabel as="div">Vous déclarez en tant que</FormLabel>
               <InputRadioGroup defaultValue={values.structure}>
@@ -332,11 +336,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>

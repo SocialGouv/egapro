@@ -55,7 +55,7 @@ function InputField({
         </div>
       )}
 
-      <p css={styles.error}>{error && "vous devez donner un nom à votre groupe"}</p>
+      {error && <p css={styles.error}>Vous devez donner un nom à votre groupe</p>}
     </div>
   )
 }

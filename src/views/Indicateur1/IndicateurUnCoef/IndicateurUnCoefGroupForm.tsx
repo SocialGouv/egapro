@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
-import { Fragment, useState } from "react"
+import React, { Fragment, useState } from "react"
 import { Form } from "react-final-form"
 import arrayMutators from "final-form-arrays"
 import { FieldArray } from "react-final-form-arrays"
@@ -19,6 +19,8 @@ import { Modal } from "../../../components/ModalContext"
 
 import InputField from "./components/CoefGroupInputField"
 import ModalConfirmDelete from "./components/CoefGroupModalConfirmDelete"
+import FormError from "../../../components/FormError"
+import FormStack from "../../../components/ds/FormStack"
 
 interface Props {
   state: AppState
@@ -74,22 +76,26 @@ function IndicateurUnCoefGroupForm({
         {({ handleSubmit, hasValidationErrors, submitFailed }) => (
           <form onSubmit={handleSubmit} css={[styles.container, { width }]}>
             <FormAutoSave saveForm={saveForm} />
-
-            <FieldArray name="groupes">
-              {({ fields }) => (
-                <Fragment>
-                  {fields.map((name, index) => (
-                    <InputField
-                      key={name}
-                      name={`${name}.name`}
-                      index={index}
-                      deleteGroup={confirmGroupToDelete}
-                      readOnly={readOnly}
-                    />
-                  ))}
-                </Fragment>
+            <FormStack>
+              {submitFailed && hasValidationErrors && (
+                <FormError message="Les groupes ne peuvent pas être validés si tous les champs ne sont pas remplis." />
               )}
-            </FieldArray>
+              <FieldArray name="groupes">
+                {({ fields }) => (
+                  <Fragment>
+                    {fields.map((name, index) => (
+                      <InputField
+                        key={name}
+                        name={`${name}.name`}
+                        index={index}
+                        deleteGroup={confirmGroupToDelete}
+                        readOnly={readOnly}
+                      />
+                    ))}
+                  </Fragment>
+                )}
+              </FieldArray>
+            </FormStack>
 
             {readOnly ? (
               <div css={styles.spacerAdd} />
@@ -123,15 +129,11 @@ function IndicateurUnCoefGroupForm({
                 <ActionLink onClick={() => validateIndicateurUnCoefGroup("None")}>modifier les groupes</ActionLink>
               </ActionBar>
             ) : (
-              <ActionBar>
-                {coefficient.length > 0 && (
-                  <FormSubmit
-                    hasValidationErrors={hasValidationErrors}
-                    submitFailed={submitFailed}
-                    errorMessage="Les groupes ne peuvent pas être validés si tous les champs ne sont pas remplis."
-                  />
-                )}
-              </ActionBar>
+              coefficient.length > 0 && (
+                <ActionBar>
+                  <FormSubmit />
+                </ActionBar>
+              )
             )}
           </form>
         )}
