@@ -1,8 +1,9 @@
 import React, { FunctionComponent } from "react"
+import moize from "moize"
 import { Link } from "@chakra-ui/react"
 import { useField } from "react-final-form"
 
-import { composeValidators, required, simpleMemoize, ValidatorFunction } from "../utils/formHelpers"
+import { composeValidators, required, ValidatorFunction } from "../utils/formHelpers"
 import { ownersForSiren, validateSiren } from "../utils/api"
 import { EntrepriseType } from "../globals"
 import { useUser } from "./AuthContext"
@@ -12,9 +13,16 @@ import InputGroup from "./ds/InputGroup"
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres."
 
-const memoizedValidateSiren = simpleMemoize(async (siren: string) => await validateSiren(siren))
+const moizeConfig = {
+  maxSize: 1000,
+  maxAge: 1000 * 60 * 60, // 1 hour
+  isPromise: true,
+}
+
+const memoizedValidateSiren = moize(moizeConfig)(validateSiren)
 
 const NOT_ALLOWED_MESSAGE = "Vous n'êtes pas autorisé à déclarer pour ce SIREN."
+
 const UNKNOWN_SIREN =
   "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
 
