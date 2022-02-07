@@ -5,7 +5,7 @@ module.exports = {
     es2020: true,
     "jest/globals": true,
   },
-  ignorePatterns: ["node_modules/*"],
+  ignorePatterns: ["node_modules/*", "public/js/tarteaucitron/*"],
   parser: "@typescript-eslint/parser",
   extends: [
     "eslint:recommended",
