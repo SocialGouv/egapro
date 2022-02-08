@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
 import { useEffect, useCallback, useState } from "react"
-import ButtonAction from "../components/ButtonAction"
 
 import Page from "../components/Page"
 import { useTitle } from "../utils/hooks"
+import ButtonAction from "../components/ds/ButtonAction"
 
 function CGU() {
   useTitle("Politique de confidentialité")
