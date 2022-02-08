@@ -44,6 +44,23 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
     return `Numéro SIREN invalide: ${siren}`
   }
 
+  updateSirenData(result.jsonBody)
+}
+
+export const checkSirenWithOwner = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
+  let result
+  try {
+    result = await memoizedValidateSiren(siren)
+  } catch (error: any) {
+    console.error(error?.response?.status, error)
+    updateSirenData({})
+
+    if (error?.response?.status === 404) {
+      return UNKNOWN_SIREN
+    }
+    return `Numéro SIREN invalide: ${siren}`
+  }
+
   try {
     await ownersForSiren(siren)
   } catch (error) {
@@ -56,7 +73,12 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
 }
 
 export const sirenValidator = (updateSirenData: (data: EntrepriseType) => void) =>
+  // By default, check the siren with the owner.
   composeValidators(required, nineDigits, checkSiren(updateSirenData))
+
+export const sirenValidatorWithOwner = (updateSirenData: (data: EntrepriseType) => void) =>
+  // By default, check the siren with the owner.
+  composeValidators(required, nineDigits, checkSirenWithOwner(updateSirenData))
 
 export function FieldSirenReadOnly({ name, label }: { name: string; label: string }) {
   const field = useField(name)
@@ -89,7 +111,8 @@ function FieldSiren({
   customStyles?: any
 }) {
   const field = useField(name, {
-    validate: validator ? validator : sirenValidator(updateSirenData),
+    validate: validator ? validator : sirenValidatorWithOwner(updateSirenData),
+    validateFields: [],
   })
   const { meta } = field
 

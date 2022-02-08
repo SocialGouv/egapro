@@ -55,9 +55,9 @@ jest.mock("../utils/api", () => ({
   },
 }))
 
-import { sirenValidator } from "./FieldSiren"
+import { sirenValidatorWithOwner } from "./FieldSiren"
 
-const validator = sirenValidator(jest.fn())
+const validator = sirenValidatorWithOwner(jest.fn())
 
 let consoleErrorMock: jest.SpyInstance
 
