@@ -1,11 +1,32 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
+import { useEffect, useCallback, useState } from "react"
+import ButtonAction from "../components/ButtonAction"
 
 import Page from "../components/Page"
 import { useTitle } from "../utils/hooks"
 
 function CGU() {
   useTitle("Politique de confidentialité")
+  const [hasTarteAuCitron, setTarteAuCitron] = useState(false)
+
+  const openTarteAuCitron = useCallback(() => {
+    // @ts-ignore
+    if (window && window.tarteaucitron) {
+      // @ts-ignore
+      window.tarteaucitron.userInterface.openPanel()
+    }
+  }, [])
+
+  useEffect(() => {
+    // We need a delay to wait for tarteaucitron to be loaded.
+    const timeout = setTimeout(() => {
+      console.log("dans useEffect", document?.getElementById("tarteaucitronClosePanel"))
+      setTarteAuCitron(typeof document !== "undefined" && !!document.getElementById("tarteaucitronClosePanel"))
+    }, 1000)
+
+    return () => clearTimeout(timeout)
+  }, [])
 
   return (
     <Page title="Protection des données à caractère personnel">
@@ -167,7 +188,10 @@ function CGU() {
             </tr>
           </tbody>
         </table>
-        <h2 css={styles.title}>Cookies</h2>
+        <h2 id="cookies" css={styles.title}>
+          Cookies
+        </h2>
+
         <p>
           Index Egapro pourra faire usage de cookies. Les traceurs ont vocation à être conservés sur le poste
           informatique de l'Internaute pour une durée allant jusqu'à 13 mois.
@@ -220,6 +244,28 @@ function CGU() {
             </tr>
           </tbody>
         </table>
+
+        {hasTarteAuCitron ? (
+          <div style={{ textAlign: "center", marginTop: 30 }}>
+            <p style={{ marginBottom: 20 }}>
+              Vous pouvez retirer votre consentement relatif aux cookies en cliquant sur "Modifier les réglages".{" "}
+            </p>
+
+            <ButtonAction
+              variant="outline"
+              onClick={openTarteAuCitron}
+              label="Modifier les réglages"
+              leftIcon={<span aria-hidden="true">🙋</span>}
+              size="lg"
+            />
+          </div>
+        ) : (
+          <p>
+            Seules certaines pages du site sont concernées par la mesure d’audience et l’analyse comportementale avec
+            Google Analytics et vous n’avez visité aucune de ces pages. Aucun cookie Google Analytics n’a donc été
+            déposé sur votre terminal.
+          </p>
+        )}
       </div>
     </Page>
   )
