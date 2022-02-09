@@ -4,16 +4,6 @@ import { Spinner } from "@chakra-ui/spinner"
 import { IconButton } from "@chakra-ui/button"
 import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
 import { Form } from "react-final-form"
-import { z } from "zod"
-
-import { fetcher } from "../utils/fetcher"
-import { useToastMessage } from "../utils/hooks"
-import { useOwnersOfSiren } from "../hooks/useOwnersOfSiren"
-import { useSoloToastMessage } from "../utils/hooks"
-import PrimaryButton from "../components/ds/PrimaryButton"
-import { formValidator, InputControl } from "../components/ds/form-lib"
-import ButtonAction from "../components/ButtonAction"
-import { IconDelete, IconDrag } from "../components/ds/Icons"
 
 import {
   Modal,
@@ -24,6 +14,16 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/modal"
+
+import { fetcher } from "../utils/fetcher"
+import { useToastMessage } from "../utils/hooks"
+import { useOwnersOfSiren } from "../hooks/useOwnersOfSiren"
+import { useSoloToastMessage } from "../utils/hooks"
+import PrimaryButton from "../components/ds/PrimaryButton"
+import ButtonAction from "../components/ButtonAction"
+import { IconDelete, IconDrag } from "../components/ds/Icons"
+
+import { FieldEmail } from "./ds/FieldEmail"
 
 function UtilisateurItem({
   owner,
@@ -111,10 +111,6 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
     }
   }
 
-  const FormInput = z.object({
-    email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
-  })
-
   return (
     <Box mt="4">
       {isLoading ? (
@@ -145,11 +141,10 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
               <Box mt="4">
                 <Form
                   onSubmit={addUser}
-                  validate={formValidator(FormInput)}
                   render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
                       <HStack spacing={4} align="flex-start">
-                        <InputControl name="email" label="Email du responsable" />
+                        <FieldEmail label="Email du responsable" />
                         <Box pt={8}>
                           <PrimaryButton type="submit">Ajouter</PrimaryButton>
                         </Box>
