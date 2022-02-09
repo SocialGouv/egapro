@@ -19,7 +19,7 @@ function FormSubmit({
   hasValidationErrors,
   errorMessage,
   loading = false,
-  label = "Valider les" + " informations",
+  label = "Valider les informations",
 }: Props) {
   return (
     <div css={styles.container}>

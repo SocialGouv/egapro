@@ -1,19 +1,17 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/react"
+import { Fragment, useState } from "react"
+import { Form } from "react-final-form"
 
 import globalStyles from "../utils/globalStyles"
-
 import { useColumnsWidth, useLayoutType } from "../components/GridContext"
 import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
-import { Fragment, useState } from "react"
-import { Form, useField } from "react-final-form"
 import FormSubmit from "../components/FormSubmit"
 import { sendValidationEmail } from "../utils/api"
-import Input, { hasFieldError } from "../components/Input"
-import { required, validateEmail } from "../utils/formHelpers"
 import ButtonAction from "../components/ButtonAction"
 import { useTitle } from "../utils/hooks"
+import { FieldEmail } from "../components/ds/FieldEmail"
 
 interface Props {
   tagLine?: string
@@ -98,6 +96,7 @@ function AskEmail({ tagLine, reason }: Props) {
                       hasValidationErrors={hasValidationErrors}
                       submitFailed={submitFailed}
                       loading={loading}
+                      label="Envoyer"
                     />
                   </ActionBar>
                 </form>
@@ -111,34 +110,6 @@ function AskEmail({ tagLine, reason }: Props) {
         </div>
       </div>
     </Page>
-  )
-}
-
-const validate = (value: string) => {
-  const requiredError = required(value)
-  const emailError = validateEmail(value)
-
-  if (!requiredError && !emailError) {
-    return undefined
-  } else {
-    return { required: requiredError, validateEmail: emailError }
-  }
-}
-
-function FieldEmail() {
-  const field = useField("email", { validate })
-  const error = hasFieldError(field.meta)
-
-  return (
-    <Fragment>
-      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
-        email
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} />
-      </div>
-      <p css={styles.error}>{error && "l’adresse mail n’est pas valide"}</p>
-    </Fragment>
   )
 }
 
@@ -163,19 +134,7 @@ const styles = {
     width: 405,
     marginTop: 46,
   }),
-  label: css({
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  labelError: css({
-    color: globalStyles.colors.error,
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex",
-  }),
+
   warning: css({
     fontWeight: "bold",
     margin: "1em",

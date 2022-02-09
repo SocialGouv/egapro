@@ -21,7 +21,6 @@ function CGU() {
   useEffect(() => {
     // We need a delay to wait for tarteaucitron to be loaded.
     const timeout = setTimeout(() => {
-      console.log("dans useEffect", document?.getElementById("tarteaucitronClosePanel"))
       setTarteAuCitron(typeof document !== "undefined" && !!document.getElementById("tarteaucitronClosePanel"))
     }, 1000)
 

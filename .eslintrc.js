@@ -14,6 +14,8 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
     "plugin:cypress/recommended",
+    "plugin:testing-library/react",
+    "plugin:jest-dom/recommended",
   ],
   plugins: ["react", "@typescript-eslint", "jest", "react-hooks"],
   rules: {
