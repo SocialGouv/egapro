@@ -6,7 +6,7 @@ import { fieldValidator, InputControl, InputControlProps } from "./form-lib"
 type FieldEmailProps = Partial<InputControlProps>
 
 const FieldInput = z
-  .string()
+  .string({ required_error: "L'adresse mail est requise" })
   .min(1, { message: "L'adresse mail est requise" })
   .email({ message: "L'adresse mail est invalide" })
 
