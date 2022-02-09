@@ -96,6 +96,7 @@ function AskEmail({ tagLine, reason }: Props) {
                       hasValidationErrors={hasValidationErrors}
                       submitFailed={submitFailed}
                       loading={loading}
+                      label="Envoyer"
                     />
                   </ActionBar>
                 </form>
