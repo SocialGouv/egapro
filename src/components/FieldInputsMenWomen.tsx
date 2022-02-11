@@ -1,15 +1,11 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import React from "react"
+import React, { FunctionComponent } from "react"
+import { Box, Grid, GridItem, Input, Text } from "@chakra-ui/react"
 import { useField } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles"
 import { displayPercent, displayInt } from "../utils/helpers"
 import { ValidatorFunction } from "../utils/formHelpers"
 
-import { CellHead, Cell, Cell2 } from "./Cell"
 import CellInput from "./CellInput"
-import { IconValid, IconInvalid } from "./ds/Icons"
 
 const displayReadOnlyValue = (value: string, mask?: "number" | "percent" | undefined) => {
   if (!mask || !value) {
@@ -18,9 +14,11 @@ const displayReadOnlyValue = (value: string, mask?: "number" | "percent" | undef
   return mask === "percent" ? displayPercent(Number(value), 2) : displayInt(Number(value))
 }
 
-interface Props {
+interface FieldInputsMenWomenProps {
   readOnly: boolean
-  name: string
+  legend?: string
+  title: string
+  label: { men: string; women: string }
   calculable: boolean
   calculableNumber: number
   mask?: "number" | "percent" | undefined
@@ -30,8 +28,10 @@ interface Props {
   validatorHommes?: ValidatorFunction
 }
 
-function FieldInputsMenWomen({
-  name,
+const FieldInputsMenWomen: FunctionComponent<FieldInputsMenWomenProps> = ({
+  legend,
+  title,
+  label,
   readOnly,
   calculable,
   calculableNumber,
@@ -40,7 +40,7 @@ function FieldInputsMenWomen({
   hommeFieldName,
   validatorFemmes,
   validatorHommes,
-}: Props) {
+}) => {
   const femmesField = useField(femmeFieldName, {
     validate: calculable ? validatorFemmes : undefined,
   })
@@ -53,134 +53,92 @@ function FieldInputsMenWomen({
   const error = femmesError || hommesError
 
   return (
-    <div css={styles.container}>
-      <div css={styles.row}>
-        <CellHead
-          style={[styles.cellHead, !calculable && styles.cellHeadInvalid, error && calculable && styles.cellHeadError]}
+    <Grid
+      templateColumns="1fr 5.5rem 5.5rem"
+      gap={2}
+      p={2}
+      borderRadius="md"
+      alignItems="center"
+      border="1px solid"
+      borderColor={
+        femmesField.meta.valid && hommesField.meta.valid
+          ? calculable
+            ? "gray.200"
+            : "primary.100"
+          : error
+          ? "red.100"
+          : "gray.200"
+      }
+      bg={
+        femmesField.meta.valid && hommesField.meta.valid
+          ? calculable
+            ? "transparent"
+            : "primary.100"
+          : error
+          ? "red.50"
+          : "transparent"
+      }
+    >
+      <GridItem>
+        <Box
+          lineHeight={1.125}
+          color={femmesField.meta.valid && hommesField.meta.valid ? "gray.600" : error ? "red.600" : "gray.600"}
         >
-          {femmesField.meta.valid && hommesField.meta.valid ? (
-            calculable ? (
-              <div css={styles.cellHeadIcon}>
-                <IconValid />
-              </div>
-            ) : (
-              <div css={styles.cellHeadIcon}>
-                <IconInvalid />
-              </div>
-            )
-          ) : error ? (
-            <div css={styles.cellHeadIcon}>
-              <IconInvalid />
-            </div>
-          ) : null}
-          <span>{name}</span>
-        </CellHead>
-
-        {readOnly ? (
-          <React.Fragment>
-            <Cell style={[styles.cellEmpty, styles.cellEmptyWomen]}>
+          {legend && (
+            <>
+              <Box as="span" fontSize="xs">
+                {legend}
+              </Box>
+              <br />
+            </>
+          )}
+          <Box as="span" fontSize="sm" fontWeight="semibold">
+            {title}
+          </Box>
+        </Box>
+      </GridItem>
+      {readOnly ? (
+        <>
+          <GridItem textAlign="right">
+            <Input as={Box} isReadOnly py={2} sx={{ borderColor: "transparent !important" }} size="sm" lineHeight="1">
               {displayReadOnlyValue(femmesField.input.value, mask)}
-            </Cell>
-            <Cell style={[styles.cellEmpty, styles.cellEmptyMen]}>
+            </Input>
+          </GridItem>
+          <GridItem textAlign="right">
+            <Input as={Box} isReadOnly py={2} sx={{ borderColor: "transparent !important" }} size="sm" lineHeight="1">
               {displayReadOnlyValue(hommesField.input.value, mask)}
-            </Cell>
-          </React.Fragment>
-        ) : calculable ? (
-          <React.Fragment>
-            <CellInput field={femmesField} mask={mask} style={styles.cellWomen} />
-
-            <CellInput field={hommesField} mask={mask} style={styles.cellMen} />
-          </React.Fragment>
-        ) : (
-          <Cell2 style={styles.cell2} />
-        )}
-      </div>
-      {!calculable && (
-        <div css={styles.invalid}>
-          Le groupe ne peut pas être pris en compte pour le calcul
-          <br />
-          car il comporte moins de {calculableNumber} femmes ou {calculableNumber} hommes
-        </div>
+            </Input>
+          </GridItem>
+        </>
+      ) : calculable ? (
+        <>
+          <GridItem>
+            <CellInput field={femmesField} mask={mask} placeholder="Femmes" theme="women" label={label.women} />
+          </GridItem>
+          <GridItem>
+            <CellInput field={hommesField} mask={mask} placeholder="Hommes" theme="men" label={label.men} />
+          </GridItem>
+        </>
+      ) : (
+        <GridItem colSpan={2} />
       )}
-      {calculable && error && <div css={styles.error}>{error}</div>}
-    </div>
+      {calculable && error && (
+        <GridItem colSpan={3}>
+          <Text color="red.600" fontSize="sm">
+            {error}
+          </Text>
+        </GridItem>
+      )}
+      {!calculable && (
+        <GridItem colSpan={3}>
+          <Text fontSize="xs">
+            Le groupe ne peut pas être pris en compte pour le calcul car il comporte moins de {calculableNumber} femmes
+            ou {calculableNumber} hommes.
+          </Text>
+        </GridItem>
+      )}
+    </Grid>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "stretch",
-    height: 51,
-    marginBottom: 10,
-  }),
-  row: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "flex-start",
-  }),
-  cellHead: css({
-    height: 22,
-    display: "flex",
-    alignItems: "center",
-    borderBottom: `solid ${globalStyles.colors.default} 1px`,
-    fontSize: 14,
-  }),
-  cellHeadInvalid: css({
-    color: globalStyles.colors.invalid,
-    borderColor: "transparent",
-  }),
-  cellHeadError: css({
-    color: globalStyles.colors.error,
-    borderColor: "transparent",
-  }),
-  cellHeadIcon: css({
-    marginRight: 5,
-  }),
-  cell2: css({
-    textAlign: "center",
-  }),
-  cellMen: css({
-    borderColor: globalStyles.colors.men,
-  }),
-  cellWomen: css({
-    borderColor: globalStyles.colors.women,
-  }),
-  cellEmpty: css({
-    height: 22,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  }),
-  cellEmptyMen: css({
-    color: globalStyles.colors.men,
-  }),
-  cellEmptyWomen: css({
-    color: globalStyles.colors.women,
-  }),
-  invalid: css({
-    display: "flex",
-    alignItems: "center",
-    height: 23,
-    paddingBottom: 4,
-    color: globalStyles.colors.invalid,
-    fontSize: 12,
-    fontStyle: "italic",
-    lineHeight: "12px",
-    borderBottom: `solid ${globalStyles.colors.invalid} 1px`,
-  }),
-  error: css({
-    display: "flex",
-    alignItems: "center",
-    height: 18,
-    marginTop: 5,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    fontStyle: "italic",
-    lineHeight: "12px",
-    borderBottom: `solid ${globalStyles.colors.error} 1px`,
-  }),
 }
 
 export default FieldInputsMenWomen

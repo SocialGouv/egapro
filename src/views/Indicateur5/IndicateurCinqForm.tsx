@@ -22,6 +22,7 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
+import FormStack from "../../components/ds/FormStack"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0), maxNumber(10))
 
@@ -80,23 +81,26 @@ const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          {submitFailed && hasValidationErrors && (
-            <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
-          )}
-          <BlocFormLight>
-            <FieldInput
-              fieldName="nombreSalariesFemmes"
-              label="nombre (entier) de femmes parmi les 10 plus hauts salaires"
-              readOnly={readOnly}
-              validator={validator}
-            />
-            <FieldInput
-              fieldName="nombreSalariesHommes"
-              label="nombre (entier) d’hommes parmi les 10 plus hauts salaires"
-              readOnly={true}
-              theme="hommes"
-            />
-          </BlocFormLight>
+          {/* eslint-disable-next-line react/jsx-no-undef */}
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
+            <BlocFormLight>
+              <FieldInput
+                fieldName="nombreSalariesFemmes"
+                label="nombre (entier) de femmes parmi les 10 plus hauts salaires"
+                readOnly={readOnly}
+                validator={validator}
+              />
+              <FieldInput
+                fieldName="nombreSalariesHommes"
+                label="nombre (entier) d’hommes parmi les 10 plus hauts salaires"
+                readOnly={true}
+                theme="men"
+              />
+            </BlocFormLight>
+          </FormStack>
 
           {readOnly ? (
             <ActionBar>

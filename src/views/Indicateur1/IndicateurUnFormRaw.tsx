@@ -20,7 +20,7 @@ import FormSubmit from "../../components/FormSubmit"
 
 import { displayNameTranchesAges } from "../../utils/helpers"
 import FormError from "../../components/FormError"
-import { jsx } from "@emotion/react"
+import FormStack from "../../components/ds/FormStack"
 
 export const aboveZero: ValidatorFunction = (value) =>
   minNumber(1)(value) ? "La valeur ne peut être inférieure ou égale à 0" : undefined
@@ -143,47 +143,54 @@ const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          {submitFailed && hasValidationErrors && (
-            <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
-          )}
-          {initialValues.remunerationAnnuelle.map(
-            (
-              {
-                id,
-                name,
-                tranchesAges,
-              }: {
-                id: any
-                name: string
-                tranchesAges: Array<{
-                  trancheAge: TranchesAges
-                  validiteGroupe: boolean
-                }>
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
+            {initialValues.remunerationAnnuelle.map(
+              (
+                {
+                  id,
+                  name,
+                  tranchesAges,
+                }: {
+                  id: any
+                  name: string
+                  tranchesAges: Array<{
+                    trancheAge: TranchesAges
+                    validiteGroupe: boolean
+                  }>
+                },
+                indexGroupe,
+              ) => {
+                return (
+                  <BlocForm key={id} title={name} label="rémunération moyenne">
+                    {tranchesAges.map(({ trancheAge, validiteGroupe }, indexTrancheAge) => {
+                      return (
+                        <FieldInputsMenWomen
+                          key={trancheAge}
+                          legend="Rémunération moyenne des"
+                          label={{
+                            women: `Rémunération moyenne des femmes de ${displayNameTranchesAges(trancheAge)}`,
+                            men: `Rémunération moyenne des hommes de ${displayNameTranchesAges(trancheAge)}`,
+                          }}
+                          title={displayNameTranchesAges(trancheAge)}
+                          readOnly={readOnly}
+                          calculable={validiteGroupe}
+                          calculableNumber={3}
+                          mask="number"
+                          femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
+                          hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                          validatorFemmes={validator}
+                          validatorHommes={validator}
+                        />
+                      )
+                    })}
+                  </BlocForm>
+                )
               },
-              indexGroupe,
-            ) => {
-              return (
-                <BlocForm key={id} title={name} label="rémunération moyenne">
-                  {tranchesAges.map(({ trancheAge, validiteGroupe }, indexTrancheAge) => {
-                    return (
-                      <FieldInputsMenWomen
-                        key={trancheAge}
-                        name={displayNameTranchesAges(trancheAge)}
-                        readOnly={readOnly}
-                        calculable={validiteGroupe}
-                        calculableNumber={3}
-                        mask="number"
-                        femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
-                        hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
-                        validatorFemmes={validator}
-                        validatorHommes={validator}
-                      />
-                    )
-                  })}
-                </BlocForm>
-              )
-            },
-          )}
+            )}
+          </FormStack>
 
           {readOnly ? (
             <ActionBar>{nextLink}</ActionBar>

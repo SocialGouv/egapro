@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import { Box } from "@chakra-ui/react"
 
 import { FormState, ActionIndicateurDeuxTroisData, PeriodeDeclaration, GroupeEffectif } from "../../globals"
 
@@ -30,7 +29,6 @@ import {
 import { calendarYear, dateToString, parseDate, Year } from "../../utils/helpers"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import FormError from "../../components/FormError"
-import { jsx } from "@emotion/react"
 import FormStack from "../../components/ds/FormStack"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
@@ -136,25 +134,34 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
               readOnly={readOnly}
               label={<>Il y a t'il eu des augmentations durant la période de déclaration&nbsp;?</>}
             />
+
+            {values.presenceAugmentationPromotion === "true" && (
+              <BlocForm title="Nombre d'augmentations">
+                <FieldInputsMenWomen
+                  legend="Nombre de"
+                  title="salariés augmentés"
+                  label={{
+                    women: "Nombre de femmes augmentées",
+                    men: "Nombre d'hommes'augmentées",
+                  }}
+                  readOnly={readOnly}
+                  calculable={true} // This isn't used here, if the field is not calculable it's because of the number of men/women declared in the "effectifs"
+                  calculableNumber={0} // Same here.
+                  mask="number"
+                  femmeFieldName="nombreAugmentationPromotionFemmes"
+                  hommeFieldName="nombreAugmentationPromotionHommes"
+                  validatorFemmes={composeValidators(
+                    validator,
+                    validateEffectifs(totalNombreSalariesFemmes, "de femmes"),
+                  )}
+                  validatorHommes={composeValidators(
+                    validator,
+                    validateEffectifs(totalNombreSalariesHommes, "d'hommes"),
+                  )}
+                />
+              </BlocForm>
+            )}
           </FormStack>
-          {values.presenceAugmentationPromotion === "true" && (
-            <BlocForm>
-              <FieldInputsMenWomen
-                name="nombre de salariés augmentés"
-                readOnly={readOnly}
-                calculable={true} // This isn't used here, if the field is not calculable it's because of the number of men/women declared in the "effectifs"
-                calculableNumber={0} // Same here.
-                mask="number"
-                femmeFieldName="nombreAugmentationPromotionFemmes"
-                hommeFieldName="nombreAugmentationPromotionHommes"
-                validatorFemmes={composeValidators(
-                  validator,
-                  validateEffectifs(totalNombreSalariesFemmes, "de femmes"),
-                )}
-                validatorHommes={composeValidators(validator, validateEffectifs(totalNombreSalariesHommes, "d'hommes"))}
-              />
-            </BlocForm>
-          )}
 
           {readOnly ? (
             <ActionBar>

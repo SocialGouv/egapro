@@ -164,34 +164,39 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
               readOnly={readOnly}
               label={<>Il y a t'il eu des augmentations durant la période de référence&nbsp;?</>}
             />
-          </FormStack>
 
-          {values.presenceAugmentation === "true" && (
-            <BlocForm
-              label="% de salariés augmentés"
-              // footer={[
-              //   displayFractionPercent(totalTauxAugmentationFemmes),
-              //   displayFractionPercent(totalTauxAugmentationHommes)
-              // ]}
-            >
-              {ecartAugmentParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
-                return (
-                  <FieldInputsMenWomen
-                    key={categorieSocioPro}
-                    name={displayNameCategorieSocioPro(categorieSocioPro)}
-                    readOnly={readOnly}
-                    calculable={validiteGroupe}
-                    calculableNumber={10}
-                    mask="percent"
-                    femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
-                    hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
-                    validatorFemmes={validator}
-                    validatorHommes={validator}
-                  />
-                )
-              })}
-            </BlocForm>
-          )}
+            {values.presenceAugmentation === "true" && (
+              <BlocForm
+                title="Poucentage d'augmentations"
+                // footer={[
+                //   displayFractionPercent(totalTauxAugmentationFemmes),
+                //   displayFractionPercent(totalTauxAugmentationHommes)
+                // ]}
+              >
+                {ecartAugmentParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                  return (
+                    <FieldInputsMenWomen
+                      key={categorieSocioPro}
+                      legend="% de salariés augmentés"
+                      label={{
+                        women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} augmentées`,
+                        men: `Pourcentage d'hommes' ${displayNameCategorieSocioPro(categorieSocioPro)} augmentés`,
+                      }}
+                      title={displayNameCategorieSocioPro(categorieSocioPro)}
+                      readOnly={readOnly}
+                      calculable={validiteGroupe}
+                      calculableNumber={10}
+                      mask="percent"
+                      femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
+                      hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
+                      validatorFemmes={validator}
+                      validatorHommes={validator}
+                    />
+                  )
+                })}
+              </BlocForm>
+            )}
+          </FormStack>
 
           {readOnly ? (
             <ActionBar>

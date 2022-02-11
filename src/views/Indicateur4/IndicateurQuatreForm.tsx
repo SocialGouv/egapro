@@ -91,27 +91,27 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
               readOnly={readOnly}
               label={<>Il y a t'il eu des retours de congé maternité pendant la période de référence&nbsp;?</>}
             />
-          </FormStack>
 
-          {values.presenceCongeMat === "true" && (
-            <BlocFormLight>
-              <FieldInput
-                fieldName="nombreSalarieesPeriodeAugmentation"
-                label="Parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
-                readOnly={readOnly}
-                validator={validator}
-              />
-              <FieldInput
-                fieldName="nombreSalarieesAugmentees"
-                label="Parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
-                readOnly={readOnly}
-                validator={composeValidators(
-                  validator,
-                  lessThanPreviousField(values.nombreSalarieesPeriodeAugmentation),
-                )}
-              />
-            </BlocFormLight>
-          )}
+            {values.presenceCongeMat === "true" && (
+              <BlocFormLight>
+                <FieldInput
+                  fieldName="nombreSalarieesPeriodeAugmentation"
+                  label="Parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
+                  readOnly={readOnly}
+                  validator={validator}
+                />
+                <FieldInput
+                  fieldName="nombreSalarieesAugmentees"
+                  label="Parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
+                  readOnly={readOnly}
+                  validator={composeValidators(
+                    validator,
+                    lessThanPreviousField(values.nombreSalarieesPeriodeAugmentation),
+                  )}
+                />
+              </BlocFormLight>
+            )}
+          </FormStack>
 
           {readOnly ? (
             <ActionBar>

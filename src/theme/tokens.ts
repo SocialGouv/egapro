@@ -22,6 +22,8 @@ const tokens = {
     },
   },
   colors: {
+    men: "#447F8D",
+    women: "#886AA7",
     gray: {
       50: "#F8FAFC",
       100: "#F1F5F9",

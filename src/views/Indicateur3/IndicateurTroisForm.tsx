@@ -164,34 +164,39 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
               readOnly={readOnly}
               label={<>Il y a t'il eu des promotions durant la période de référence&nbsp;?</>}
             />
-          </FormStack>
 
-          {values.presencePromotion === "true" && (
-            <BlocForm
-              label="% de salariés promus"
-              // footer={[
-              //   displayFractionPercent(totalTauxPromotionFemmes),
-              //   displayFractionPercent(totalTauxPromotionHommes)
-              // ]}
-            >
-              {ecartPromoParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
-                return (
-                  <FieldInputsMenWomen
-                    key={categorieSocioPro}
-                    name={displayNameCategorieSocioPro(categorieSocioPro)}
-                    readOnly={readOnly}
-                    calculable={validiteGroupe}
-                    calculableNumber={10}
-                    mask="percent"
-                    femmeFieldName={`tauxPromotion.${index}.tauxPromotionFemmes`}
-                    hommeFieldName={`tauxPromotion.${index}.tauxPromotionHommes`}
-                    validatorFemmes={validator}
-                    validatorHommes={validator}
-                  />
-                )
-              })}
-            </BlocForm>
-          )}
+            {values.presencePromotion === "true" && (
+              <BlocForm
+                title="Poucentage de promotions"
+                // footer={[
+                //   displayFractionPercent(totalTauxPromotionFemmes),
+                //   displayFractionPercent(totalTauxPromotionHommes)
+                // ]}
+              >
+                {ecartPromoParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                  return (
+                    <FieldInputsMenWomen
+                      key={categorieSocioPro}
+                      legend="% de salariés promus"
+                      title={displayNameCategorieSocioPro(categorieSocioPro)}
+                      label={{
+                        women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} promues`,
+                        men: `Pourcentage d'hommes ${displayNameCategorieSocioPro(categorieSocioPro)} promus`,
+                      }}
+                      readOnly={readOnly}
+                      calculable={validiteGroupe}
+                      calculableNumber={10}
+                      mask="percent"
+                      femmeFieldName={`tauxPromotion.${index}.tauxPromotionFemmes`}
+                      hommeFieldName={`tauxPromotion.${index}.tauxPromotionHommes`}
+                      validatorFemmes={validator}
+                      validatorHommes={validator}
+                    />
+                  )
+                })}
+              </BlocForm>
+            )}
+          </FormStack>
 
           {readOnly ? (
             <ActionBar>

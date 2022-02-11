@@ -1,13 +1,10 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { FormControl, FormLabel, Input, InputGroup, InputLeftElement, VisuallyHidden } from "@chakra-ui/react"
 import MaskedInput, { conformToMask } from "react-text-mask"
 import createNumberMask from "text-mask-addons/dist/createNumberMask"
 import { FieldRenderProps, FieldMetaState } from "react-final-form"
 
-import globalStyles from "../utils/globalStyles"
-
-import { Cell } from "./Cell"
-import { Input } from "@chakra-ui/react"
+import { IconFemale, IconMale } from "./ds/Icons"
 
 export const hasFieldError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
@@ -47,20 +44,24 @@ const trickyMaskNumberToAllowAnyChar = (mask: (value: string) => Array<string | 
   return transformedMaskArray
 }
 
-interface Props {
+interface CellInputProps {
+  theme: "women" | "men"
+  label?: string
+  placeholder?: string
   field: FieldRenderProps<string, HTMLInputElement>
   mask?: "number" | "percent" | undefined
-  style?: any
 }
 
-function CellInput({
+const CellInput: FunctionComponent<CellInputProps> = ({
+  theme,
+  label,
   field: {
     input: { value, onChange, ...inputProps },
     meta,
   },
   mask,
-  style,
-}: Props) {
+  placeholder,
+}) => {
   const error = hasFieldError(meta)
 
   const maskToUse = mask === "percent" ? percentNumberMask : numberMask
@@ -70,56 +71,55 @@ function CellInput({
   const inputValue = conformToMask(value, maskWithAnyChar(value), {}).conformedValue
 
   return (
-    <Cell style={styles.cell}>
-      {mask ? (
-        <Input
-          as={MaskedInput}
-          mask={maskWithAnyChar}
-          css={[style, error && styles.inputError]}
-          size="sm"
-          px={1}
-          autoComplete="off"
-          value={inputValue}
-          onChange={(event) =>
-            onChange({
-              target: {
-                value: parse(event.target.value),
-              },
-            })
-          }
-          {...inputProps}
-        />
-      ) : (
-        <Input
-          px={1}
-          size="sm"
-          css={[style, error && styles.inputError]}
-          autoComplete="off"
-          value={value}
-          onChange={onChange}
-          {...inputProps}
-        />
+    <FormControl isInvalid={error}>
+      {label && (
+        <FormLabel htmlFor={inputProps.name} position="absolute">
+          <VisuallyHidden>{label}</VisuallyHidden>
+        </FormLabel>
       )}
-    </Cell>
+      <InputGroup>
+        <InputLeftElement pointerEvents="none" width="6" height="8">
+          {theme === "women" ? (
+            <IconFemale color={error ? "red.500" : "women"} />
+          ) : (
+            <IconMale color={error ? "red.500" : "men"} />
+          )}
+        </InputLeftElement>
+        {mask ? (
+          <Input
+            id={inputProps.name}
+            placeholder={placeholder}
+            pl={6}
+            pr={1.5}
+            as={MaskedInput}
+            mask={maskWithAnyChar}
+            size="sm"
+            autoComplete="off"
+            value={inputValue}
+            borderColor={theme}
+            onChange={(event) =>
+              onChange({
+                target: {
+                  value: parse(event.target.value),
+                },
+              })
+            }
+            {...inputProps}
+          />
+        ) : (
+          <Input
+            placeholder={placeholder}
+            pl={6}
+            pr={1.5}
+            size="sm"
+            autoComplete="off"
+            value={value}
+            onChange={onChange}
+            {...inputProps}
+          />
+        )}
+      </InputGroup>
+    </FormControl>
   )
 }
-
-const styles = {
-  cell: css({
-    height: 22,
-    display: "flex",
-  }),
-  input: css({
-    appearance: "none",
-    border: `solid ${globalStyles.colors.default} 1px`,
-    width: "100%",
-    fontSize: 14,
-    textAlign: "center",
-  }),
-  inputError: css({
-    color: globalStyles.colors.error,
-    borderColor: globalStyles.colors.error,
-  }),
-}
-
 export default CellInput
