@@ -154,7 +154,7 @@ function FieldSiren({
           {field.meta.error === NOT_ALLOWED_MESSAGE && (
             <React.Fragment>
               <br />
-              Pour faire une demande à l'équipe Egapro,&nbsp;
+              Pour faire une demande d'autorisation à l'équipe Egapro,&nbsp;
               <Link
                 isExternal
                 textDecoration="underline"
