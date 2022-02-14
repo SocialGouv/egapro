@@ -79,11 +79,11 @@ describe("isValidSiren", () => {
     expect(validator("a")).toBe("Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres.")
     expect(validator("")).toBe("Ce champ ne peut être vide")
     await expect(validator("000000000")).resolves.toBe(
-      "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle.",
+      "Ce SIREN n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle.",
     )
   })
 
-  test("returns an error message for an invalid siren", async () => {
+  test("returns an error message for a not allowed user", async () => {
     await expect(validator("234567891")).resolves.toBe("Vous n'êtes pas autorisé à déclarer pour ce SIREN.")
   })
 })
