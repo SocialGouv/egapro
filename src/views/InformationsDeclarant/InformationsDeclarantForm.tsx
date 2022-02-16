@@ -2,10 +2,9 @@ import React, { FunctionComponent } from "react"
 import { Box, Flex, Text } from "@chakra-ui/react"
 import { Field, Form } from "react-final-form"
 import { Link } from "react-router-dom"
+import { z } from "zod"
 
 import { AppState, FormState, ActionInformationsDeclarantData } from "../../globals"
-
-import { mustBeNumber, required, validateEmail } from "../../utils/formHelpers"
 
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
@@ -17,51 +16,28 @@ import { IconEdit } from "../../components/ds/Icons"
 import InputGroup from "../../components/ds/InputGroup"
 import FormStack from "../../components/ds/FormStack"
 import FormError from "../../components/FormError"
+import { formValidator } from "../../components/ds/form-lib"
 
-const validate = (value: string) => {
-  const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
-}
-
-const validateTel = (value: string) => {
-  const requiredError = required(value)
-  const mustBeNumberError = mustBeNumber(value)
-  const mustBe10DigitsError = value && value.length !== 10
-  if (!requiredError && !mustBeNumberError && !mustBe10DigitsError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError,
-      mustBe10Digits: mustBe10DigitsError,
-    }
-  }
-}
-
-const validateForm = ({
-  nom,
-  prenom,
-  tel,
-  email,
-  acceptationCGU,
-}: {
-  nom: string
-  prenom: string
-  tel: string
-  email: string
-  acceptationCGU: boolean
-}) => ({
-  nom: validate(nom),
-  prenom: validate(prenom),
-  tel: validateTel(tel),
-  email: validateEmail(email) ? { invalid: true } : undefined,
-  acceptationCGU: acceptationCGU ? undefined : { invalid: true },
+const FormInputs = z.object({
+  nom: z
+    .string({
+      required_error: "Le nom ne peut pas être vide",
+      invalid_type_error: "Le nom n’est pas valide",
+    })
+    .min(1, { message: "Le nom ne peut pas être vide" }),
+  prenom: z
+    .string({
+      required_error: "Le prénom ne peut pas être vide",
+      invalid_type_error: "Le prénom n'est pas valide",
+    })
+    .min(1, { message: "Le prénom ne peut pas être vide" }),
+  tel: z.string({ required_error: "Le numéro de téléphone est requis" }).regex(new RegExp("^[0-9]{10}$"), {
+    message: "Le numéro de téléphone doit être composé de 10 chiffres",
+  }),
+  email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
+  acceptationCGU: z.literal(true, {
+    invalid_type_error: "Veuillez accepter les CGUs",
+  }),
 })
 
 interface InformationsDeclarantFormProps {
@@ -106,7 +82,7 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
     <Form
       onSubmit={onSubmit}
       initialValues={initialValues}
-      validate={validateForm}
+      validate={formValidator(FormInputs)}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
@@ -119,26 +95,19 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
             {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            <InputGroup
-              label="Nom du déclarant"
-              fieldName="nom"
-              message={{ error: "Le nom n’est pas valide" }}
-              isReadOnly={readOnly}
-              autocomplete="family-name"
-            />
+            <InputGroup label="Nom du déclarant" fieldName="nom" isReadOnly={readOnly} autocomplete="family-name" />
             <InputGroup
               label="Prénom du déclarant"
               fieldName="prenom"
-              message={{ error: "Le prénom n’est pas valide" }}
               isReadOnly={readOnly}
               autocomplete="given-name"
             />
             <InputGroup
               label="Numéro de téléphone"
               fieldName="tel"
-              message={{ error: "Le numéro de téléphone doit être composé de 10 chiffres" }}
               isReadOnly={readOnly}
               autocomplete="tel-national"
+              type="tel"
             />
             <FakeInputGroup label="Email (fourni lors de la demande de validation de l'email)">
               {initialValues.email}

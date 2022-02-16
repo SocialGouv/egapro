@@ -15,14 +15,13 @@ import {
   mustBeInteger,
 } from "../../utils/formHelpers"
 
-import { BlocFormLight } from "../../components/BlocForm"
-import FieldInput from "../../components/FieldInput"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
 import FormStack from "../../components/ds/FormStack"
+import InputGroup from "../../components/ds/InputGroup"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0), maxNumber(10))
 
@@ -86,20 +85,18 @@ const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
             {submitFailed && hasValidationErrors && (
               <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            <BlocFormLight>
-              <FieldInput
-                fieldName="nombreSalariesFemmes"
-                label="nombre (entier) de femmes parmi les 10 plus hauts salaires"
-                readOnly={readOnly}
-                validator={validator}
-              />
-              <FieldInput
-                fieldName="nombreSalariesHommes"
-                label="nombre (entier) d’hommes parmi les 10 plus hauts salaires"
-                readOnly={true}
-                theme="men"
-              />
-            </BlocFormLight>
+            <InputGroup
+              fieldName="nombreSalariesFemmes"
+              label="Nombre (entier) de femmes parmi les 10 plus hauts salaires"
+              isReadOnly={readOnly}
+              validate={validator}
+            />
+            <InputGroup
+              fieldName="nombreSalariesHommes"
+              label="Nombre (entier) d'hommes parmi les 10 plus hauts salaires"
+              isReadOnly
+              validate={validator}
+            />
           </FormStack>
 
           {readOnly ? (

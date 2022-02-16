@@ -21,6 +21,8 @@ export type InputGroupProps = FormControlProps & {
   autocomplete?: string
   isLoading?: boolean
   hasError?: boolean
+  validate?: any
+  type?: "text" | "tel" | "number" | "password"
   message?: {
     help?: React.ReactElement | string
     error?: React.ReactElement | string
@@ -35,26 +37,33 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
   autocomplete,
   isLoading,
   hasError,
+  type = "text",
+  validate,
   ...rest
 }) => {
   const msgStyle = { flexDirection: "column", alignItems: "flex-start" }
   return (
-    <Field name={fieldName} component="input">
-      {({ input, meta }) => (
-        <FormControl isInvalid={hasError || isFieldHasError(meta)} {...rest}>
-          <FormLabel htmlFor={input.name}>{isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}</FormLabel>
-          <Box position="relative">
-            <Input id={input.name} autocomplete={autocomplete} {...input} />
-            {isLoading && (
-              <Box position="absolute" right={2} top={2} zIndex={2} pointerEvents="none">
-                <ActivityIndicator />
-              </Box>
-            )}
-          </Box>
-          {message?.help && <FormHelperText sx={msgStyle}>{message.help}</FormHelperText>}
-          {message?.error && <FormErrorMessage sx={msgStyle}>{message.error}</FormErrorMessage>}
-        </FormControl>
-      )}
+    <Field name={fieldName} validate={validate} component="input">
+      {({ input, meta }) => {
+        return (
+          <FormControl isInvalid={hasError || isFieldHasError(meta) || (meta.error && meta.touched)} {...rest}>
+            <FormLabel htmlFor={input.name}>
+              {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
+            </FormLabel>
+            <Box position="relative">
+              <Input id={input.name} autocomplete={autocomplete} type={type} {...input} />
+              {isLoading && (
+                <Box position="absolute" right={2} top={2} zIndex={2} pointerEvents="none">
+                  <ActivityIndicator />
+                </Box>
+              )}
+            </Box>
+            {message?.help && <FormHelperText sx={msgStyle}>{message.help}</FormHelperText>}
+            {message?.error && <FormErrorMessage sx={msgStyle}>{message.error}</FormErrorMessage>}
+            {!message?.error && meta?.error && <FormErrorMessage sx={msgStyle}>{meta.error}</FormErrorMessage>}
+          </FormControl>
+        )
+      }}
     </Field>
   )
 }

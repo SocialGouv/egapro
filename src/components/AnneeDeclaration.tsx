@@ -23,7 +23,6 @@ const AnneeDeclaration: FunctionComponent<AnneeDeclarationProps> = ({ name, labe
       optionLabel="Choisir une année"
       label={label}
       isReadOnly={readOnly}
-      message={{ error: "Veuillez sélectionner une année de déclaration dans la liste" }}
     />
   )
 }

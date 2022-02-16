@@ -1,10 +1,10 @@
 import React, { FunctionComponent, useState } from "react"
 import { Form } from "react-final-form"
+import { z } from "zod"
 import { Box, Heading, Text, Image } from "@chakra-ui/react"
 
 import { useTitle } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
-import { required, validateEmail } from "../utils/formHelpers"
 import ButtonAction from "../components/ds/ButtonAction"
 import InputGroup from "../components/ds/InputGroup"
 import FormStack from "../components/ds/FormStack"
@@ -12,23 +12,11 @@ import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
 import FormError from "../components/FormError"
 import FormSubmit from "../components/FormSubmit"
+import { formValidator } from "../components/ds/form-lib"
 
-const validateMail = (value: string) => {
-  const requiredError = required(value)
-  const emailError = validateEmail(value)
-
-  if (!requiredError && !emailError) {
-    return undefined
-  } else {
-    return { required: requiredError, validateEmail: emailError }
-  }
-}
-
-const validateForm = ({ email }: { email: string }) => {
-  return {
-    email: validateMail(email),
-  }
-}
+const FormInput = z.object({
+  email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
+})
 
 interface AskEmailProps {
   tagLine?: string
@@ -67,7 +55,7 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
           {tagLine}
         </Heading>
       )}
-      <Form onSubmit={onSubmit} validate={validateForm}>
+      <Form onSubmit={onSubmit} validate={formValidator(FormInput)}>
         {({ handleSubmit, hasValidationErrors, submitFailed, values }) =>
           submitted ? (
             <>
@@ -99,11 +87,7 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
                 <form onSubmit={handleSubmit}>
                   <FormStack>
                     {errorMessage && submitFailed && hasValidationErrors && <FormError message={errorMessage} />}
-                    <InputGroup
-                      fieldName="email"
-                      label="Votre Email"
-                      message={{ error: "l’adresse mail n’est pas valide" }}
-                    />
+                    <InputGroup fieldName="email" label="Votre Email" />
                   </FormStack>
                   <ActionBar>
                     <FormSubmit loading={loading} />

@@ -35,7 +35,11 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
   return (
     <Field name={fieldName} validate={validateDate} component="input">
       {({ input, meta }) => (
-        <FormControl isInvalid={isFieldHasError(meta)} isReadOnly={isReadOnly} {...rest}>
+        <FormControl
+          isInvalid={isFieldHasError(meta) || (meta.error && meta.touched)}
+          isReadOnly={isReadOnly}
+          {...rest}
+        >
           <FormLabel htmlFor={input.name}>{label}</FormLabel>
           <Flex align="center">
             <Box

@@ -4,13 +4,7 @@ import { Text, FormControl, FormLabel } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
-import {
-  mustBeNumber,
-  parseIntFormValue,
-  parseIntStateValue,
-  parseTrancheEffectifsFormValue,
-  required,
-} from "../../utils/formHelpers"
+import { parseIntFormValue, parseIntStateValue, parseTrancheEffectifsFormValue } from "../../utils/formHelpers"
 import { parseDate } from "../../utils/helpers"
 
 import ActionBar from "../../components/ActionBar"
@@ -27,27 +21,6 @@ import InputRadio from "../../components/ds/InputRadio"
 import InputGroup from "../../components/ds/InputGroup"
 import FormError from "../../components/FormError"
 
-const validate = (value: string) => {
-  const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
-}
-
-const validateInt = (value: string) => {
-  const requiredError = required(value)
-  const mustBeNumberError = mustBeNumber(value)
-  if (!requiredError && !mustBeNumberError) {
-    return undefined
-  } else {
-    return { required: requiredError, mustBeNumber: mustBeNumberError }
-  }
-}
-
 const validateForm = ({
   nomEntreprise,
   anneeDeclaration,
@@ -59,8 +32,8 @@ const validateForm = ({
 }) => {
   const parsedFinPeriodeReference = parseDate(finPeriodeReference)
   return {
-    nomEntreprise: validate(nomEntreprise),
-    anneeDeclaration: validateInt(anneeDeclaration),
+    nomEntreprise: nomEntreprise ? undefined : "Le nom n'est pas valide",
+    anneeDeclaration: anneeDeclaration ? undefined : "Veuillez sélectionner une année de déclaration dans la liste",
     finPeriodeReference:
       parsedFinPeriodeReference !== undefined && parsedFinPeriodeReference.getFullYear().toString() === anneeDeclaration
         ? undefined
@@ -158,7 +131,6 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
               fieldName="nomEntreprise"
               label="Nom de la simulation (ex : nom_entreprise_date)"
               isReadOnly={readOnly}
-              message={{ error: "Le nom n’est pas valide" }}
             />
             <FormControl readOnly={readOnly}>
               <FormLabel as="div">

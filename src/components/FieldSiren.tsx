@@ -24,20 +24,46 @@ const memoizedValidateSiren = moize(moizeConfig)(validateSiren)
 const NOT_ALLOWED_MESSAGE = "Vous n'êtes pas autorisé à déclarer pour ce SIREN."
 
 const UNKNOWN_SIREN =
-  "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
+  "Ce SIREN n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
 
-export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
-  let result
+const CLOSED_SIREN = "Le SIREN saisi correspond à une entreprise fermée, veuillez vérifier votre saisie."
+
+const INVALID_SIREN = "Le SIREN est invalide."
+
+async function checkSiren(siren: string) {
   try {
-    result = await memoizedValidateSiren(siren)
+    const result = await memoizedValidateSiren(siren)
+    return result
   } catch (error: any) {
     console.error(error?.response?.status, error)
-    updateSirenData({})
 
     if (error?.response?.status === 404) {
-      return UNKNOWN_SIREN
+      throw new Error(UNKNOWN_SIREN)
+    } else if (/Le Siren saisi correspond à une entreprise fermée/i.test(error?.jsonBody?.error)) {
+      throw new Error(CLOSED_SIREN)
     }
-    return `Numéro SIREN invalide: ${siren}`
+
+    throw new Error(INVALID_SIREN)
+  }
+}
+
+export const checkSirenWithoutOwner = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
+  try {
+    const result = await checkSiren(siren)
+    updateSirenData(result.jsonBody)
+  } catch (error: unknown) {
+    updateSirenData({})
+    return (error as Error).message
+  }
+}
+
+export const checkSirenWithOwner = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
+  let result
+  try {
+    result = await checkSiren(siren)
+  } catch (error: unknown) {
+    updateSirenData({})
+    return (error as Error).message
   }
 
   try {
@@ -52,7 +78,12 @@ export const checkSiren = (updateSirenData: (data: EntrepriseType) => void) => a
 }
 
 export const sirenValidator = (updateSirenData: (data: EntrepriseType) => void) =>
-  composeValidators(required, nineDigits, checkSiren(updateSirenData))
+  // By default, check the siren with the owner.
+  composeValidators(required, nineDigits, checkSirenWithoutOwner(updateSirenData))
+
+export const sirenValidatorWithOwner = (updateSirenData: (data: EntrepriseType) => void) =>
+  // By default, check the siren with the owner.
+  composeValidators(required, nineDigits, checkSirenWithOwner(updateSirenData))
 
 type FieldSirenProps = {
   name: string
@@ -64,7 +95,8 @@ type FieldSirenProps = {
 
 const FieldSiren: FunctionComponent<FieldSirenProps> = ({ name, label, readOnly, updateSirenData, validator }) => {
   const field = useField(name, {
-    validate: validator ? validator : sirenValidator(updateSirenData),
+    validate: validator ? validator : sirenValidatorWithOwner(updateSirenData),
+    validateFields: [],
   })
   const { meta } = field
 

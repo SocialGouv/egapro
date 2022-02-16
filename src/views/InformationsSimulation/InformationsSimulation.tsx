@@ -1,4 +1,5 @@
 import React, { useCallback, ReactNode, FunctionComponent } from "react"
+import { Box } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
 
@@ -64,11 +65,13 @@ const InformationsSimulation: FunctionComponent<InformationsSimulationProps> = (
             state.indicateurDeuxTrois.formValidated === "Invalid") ||
           state.indicateurQuatre.formValidated === "Invalid" ||
           state.indicateurCinq.formValidated === "Invalid") && (
-          <InfoBlock
-            title="Vos informations ont été modifiées"
-            type="success"
-            text="Afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs."
-          />
+          <Box mt={6}>
+            <InfoBlock
+              title="Vos informations ont été modifiées"
+              type="success"
+              text="Afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs."
+            />
+          </Box>
         )}
     </PageInformationsSimulation>
   )

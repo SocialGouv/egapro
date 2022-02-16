@@ -16,8 +16,6 @@ import {
   mustBeInteger,
 } from "../../utils/formHelpers"
 
-import { BlocFormLight } from "../../components/BlocForm"
-import FieldInput from "../../components/FieldInput"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
@@ -25,6 +23,7 @@ import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
 import FormStack from "../../components/ds/FormStack"
+import InputGroup from "../../components/ds/InputGroup"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -93,23 +92,23 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
             />
 
             {values.presenceCongeMat === "true" && (
-              <BlocFormLight>
-                <FieldInput
+              <>
+                <InputGroup
                   fieldName="nombreSalarieesPeriodeAugmentation"
                   label="Parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
-                  readOnly={readOnly}
-                  validator={validator}
+                  isReadOnly={readOnly}
+                  validate={validator}
                 />
-                <FieldInput
+                <InputGroup
                   fieldName="nombreSalarieesAugmentees"
                   label="Parmi ces salariées, combien ont bénéficié d’une augmentation à leur retour de congé maternité ?"
-                  readOnly={readOnly}
-                  validator={composeValidators(
+                  isReadOnly={readOnly}
+                  validate={composeValidators(
                     validator,
                     lessThanPreviousField(values.nombreSalarieesPeriodeAugmentation),
                   )}
                 />
-              </BlocFormLight>
+              </>
             )}
           </FormStack>
 

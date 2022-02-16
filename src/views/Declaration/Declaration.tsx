@@ -418,7 +418,7 @@ function PageDeclaration({ children }: { children: ReactNode }) {
   return (
     <Page
       title={title}
-      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration"
+      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration."
     >
       {children}
     </Page>
