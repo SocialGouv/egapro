@@ -2,6 +2,8 @@ import { fractionToPercentage, parseDate, percentageToFraction } from "./helpers
 
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals"
 import { FieldMetaState } from "react-final-form"
+import { fieldValidator } from "../components/ds/form-lib"
+import { z } from "zod"
 
 // INT PARSE
 

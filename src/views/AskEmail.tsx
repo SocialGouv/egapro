@@ -15,7 +15,10 @@ import FormSubmit from "../components/FormSubmit"
 import { formValidator } from "../components/ds/form-lib"
 
 const FormInput = z.object({
-  email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
+  email: z
+    .string({ required_error: "L'adresse mail est requise" })
+    .min(1, { message: "L'adresse mail est requise" })
+    .email({ message: "L'adresse mail est invalide" }),
 })
 
 interface AskEmailProps {
@@ -87,10 +90,10 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
                 <form onSubmit={handleSubmit}>
                   <FormStack>
                     {errorMessage && submitFailed && hasValidationErrors && <FormError message={errorMessage} />}
-                    <InputGroup fieldName="email" label="Votre Email" />
+                    <InputGroup fieldName="email" label="Votre Email" type="email" />
                   </FormStack>
                   <ActionBar>
-                    <FormSubmit loading={loading} />
+                    <FormSubmit loading={loading} label="Envoyer" />
                   </ActionBar>
                 </form>
               </Box>

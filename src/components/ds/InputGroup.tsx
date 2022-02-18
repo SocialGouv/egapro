@@ -9,7 +9,7 @@ import {
   FormLabel,
   VisuallyHidden,
 } from "@chakra-ui/react"
-import { Field } from "react-final-form"
+import { Field, UseFieldConfig } from "react-final-form"
 
 import { isFieldHasError } from "../../utils/formHelpers"
 import ActivityIndicator from "../ActivityIndicator"
@@ -22,7 +22,8 @@ export type InputGroupProps = FormControlProps & {
   isLoading?: boolean
   hasError?: boolean
   validate?: any
-  type?: "text" | "tel" | "number" | "password"
+  rafConfig?: UseFieldConfig<string, string>
+  type?: React.HTMLInputTypeAttribute
   message?: {
     help?: React.ReactElement | string
     error?: React.ReactElement | string
@@ -38,6 +39,7 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
   isLoading,
   hasError,
   type = "text",
+  rafConfig,
   validate,
   ...rest
 }) => {
@@ -51,7 +53,7 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
               {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
             </FormLabel>
             <Box position="relative">
-              <Input id={input.name} autocomplete={autocomplete} type={type} {...input} />
+              <Input id={input.name} autocomplete={autocomplete} type={type} rafConfig={rafConfig} {...input} />
               {isLoading && (
                 <Box position="absolute" right={2} top={2} zIndex={2} pointerEvents="none">
                   <ActivityIndicator />

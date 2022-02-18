@@ -1,16 +1,15 @@
 import React from "react"
 import { Box, Text } from "@chakra-ui/layout"
 import { Form } from "react-final-form"
-import { z } from "zod"
+import { Redirect, useHistory } from "react-router"
 
 import { SinglePageLayout } from "../containers/SinglePageLayout"
 import { useTitle, useToastMessage } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
 import PrimaryButton from "../components/ds/PrimaryButton"
 import Page from "../components/Page"
-import { DebugForm, formValidator, InputControl } from "../components/ds/form-lib"
-import { Redirect, useHistory } from "react-router"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
+import { FieldEmail } from "../components/ds/FieldEmail"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
 
@@ -39,9 +38,6 @@ function Mire() {
         setSubmitted(false)
       })
   }
-  const FormInput = z.object({
-    email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
-  })
 
   if (staff) return <Redirect to="/tableauDeBord/gerer-utilisateurs" />
   if (isAuthenticated) return <Redirect to="/tableauDeBord/mes-entreprises" />
@@ -79,12 +75,9 @@ function Mire() {
             </Box>
             <Form
               onSubmit={onSubmit}
-              validate={formValidator(FormInput)}
-              render={({ handleSubmit, values, submitting, pristine }) => (
+              render={({ handleSubmit, submitting, pristine }) => (
                 <form onSubmit={handleSubmit}>
-                  <InputControl name="email" label="Email" />
-
-                  <DebugForm show={false} values={values} />
+                  <FieldEmail />
 
                   <PrimaryButton type="submit" disabled={submitting || pristine} mt={6}>
                     Envoyer
