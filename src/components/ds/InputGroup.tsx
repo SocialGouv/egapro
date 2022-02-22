@@ -16,6 +16,7 @@ import ActivityIndicator from "../ActivityIndicator"
 
 export type InputGroupProps = FormControlProps & {
   label: string
+  placeholder?: string
   isLabelHidden?: boolean
   fieldName: string
   autocomplete?: string
@@ -33,6 +34,7 @@ export type InputGroupProps = FormControlProps & {
 const InputGroup: FunctionComponent<InputGroupProps> = ({
   isLabelHidden,
   label,
+  placeholder,
   fieldName,
   message,
   autocomplete,
@@ -53,7 +55,14 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
               {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
             </FormLabel>
             <Box position="relative">
-              <Input id={input.name} autocomplete={autocomplete} type={type} rafConfig={rafConfig} {...input} />
+              <Input
+                id={input.name}
+                placeholder={placeholder}
+                autocomplete={autocomplete}
+                type={type}
+                rafConfig={rafConfig}
+                {...input}
+              />
               {isLoading && (
                 <Box position="absolute" right={2} top={2} zIndex={2} pointerEvents="none">
                   <ActivityIndicator />

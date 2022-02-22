@@ -3,7 +3,7 @@ import { Button, ButtonProps as ButtonChakraProps } from "@chakra-ui/react"
 
 export type ButtonProps = ButtonChakraProps & {
   label: string
-  colorScheme?: "primary" | "gray" | "orange"
+  colorScheme?: "primary" | "gray" | "orange" | "red"
   variant?: "solid" | "outline" | "ghost" | "link"
   leftIcon?: React.ReactElement
   rightIcon?: React.ReactElement

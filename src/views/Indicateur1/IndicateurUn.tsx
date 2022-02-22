@@ -8,6 +8,7 @@ import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import Page from "../../components/Page"
 import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
+import FormStack from "../../components/ds/FormStack"
 import { TextSimulatorLink, ButtonSimulatorLink } from "../../components/SimulatorLink"
 
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
@@ -81,7 +82,7 @@ const PageIndicateurUn: FunctionComponent = ({ children }) => (
       "Les rémunérations annuelles moyennes des femmes et des hommes doivent être renseignées par catégorie de postes équivalents (soit par CSP, soit par niveau ou coefficient hiérarchique en application de la classification de branche ou d’une autre méthode de cotation des postes après consultation du CSE) et par tranche d’âge.",
     ]}
   >
-    {children}
+    <FormStack>{children}</FormStack>
   </Page>
 )
 

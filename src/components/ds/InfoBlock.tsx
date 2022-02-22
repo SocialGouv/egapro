@@ -1,19 +1,28 @@
 import React, { ReactNode, FunctionComponent } from "react"
-import { Alert, AlertIcon, AlertTitle, Box, AlertDescription, CloseButton, useBoolean } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertProps,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  AlertDescription,
+  CloseButton,
+  useBoolean,
+} from "@chakra-ui/react"
 
-interface InfoBlocProps {
+type InfoBlocProps = {
   type?: "error" | "success" | "warning" | "info"
   title?: string
   text?: ReactNode
   closeButton?: boolean
-}
+} & AlertProps
 
-const InfoBlock: FunctionComponent<InfoBlocProps> = ({ type = "info", title, text, closeButton = false }) => {
+const InfoBlock: FunctionComponent<InfoBlocProps> = ({ type = "info", title, text, closeButton = false, ...rest }) => {
   const [isBlockVisible, setIsBlockVisible] = useBoolean(true)
 
   if (isBlockVisible) {
     return (
-      <Alert status={type} borderRadius="md" p={4} sx={{ boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.05)" }}>
+      <Alert status={type} borderRadius="md" p={4} sx={{ boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.05)" }} {...rest}>
         <AlertIcon />
         <Box>
           <AlertTitle lineHeight={1.25}>{title}</AlertTitle>

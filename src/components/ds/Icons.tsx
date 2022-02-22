@@ -16,6 +16,7 @@ import {
   ExternalLinkIcon,
   ChevronRightIcon,
   PencilIcon,
+  PlusCircleIcon,
 } from "@heroicons/react/outline"
 
 type SvgComponent = ChakraComponent<"svg", Record<string, unknown>>
@@ -77,6 +78,8 @@ export const IconCircleCross = (props: IconProps) => <Icon as={XCircleLineIcon} 
 export const IconOfficeBuilding = (props: IconProps) => <Icon as={OfficeBuildingIcon} {...props} />
 
 export const IconDelete = (props: IconProps) => <Icon as={TrashIcon} {...props} />
+
+export const IconPlusCircle = (props: IconProps) => <Icon as={PlusCircleIcon} {...props} />
 
 export const IconDrag = (props: IconProps) => (
   <Icon {...props}>
