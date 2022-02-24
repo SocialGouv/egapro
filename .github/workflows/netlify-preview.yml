@@ -116,7 +116,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [build-simulation, build-declaration]
+    needs: [build-simulation, build-declaration, build-consultation]
     steps:
 
     - uses: actions/download-artifact@v2
@@ -132,7 +132,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: consultation-export
-        path: dist/consultation
+        path: dist/consulter-index
 
     - name: debug
       run: |
