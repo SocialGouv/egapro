@@ -11,7 +11,7 @@ on:
         required: true
         default: "master"
       consultationBranch:
-        description: "Branche pour la déclaration directe"
+        description: "Branche pour la consultation"
         required: true
         default: "master"
       apiUrl:
