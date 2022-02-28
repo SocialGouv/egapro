@@ -10,6 +10,10 @@ on:
         description: "Branche pour la déclaration directe"
         required: true
         default: "master"
+      consultationBranch:
+        description: "Branche pour la consultation"
+        required: true
+        default: "master"
       apiUrl:
         description: "URL de l'API"
         required: true
@@ -80,9 +84,39 @@ jobs:
         name: jekyll-site
         path: _site
 
+  build-consultation:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout commit
+      uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.inputs.consultationBranch}}
+        repository: "SocialGouv/egapro-next"
+
+
+    - name: Install Dependencies
+      run: |
+        yarn install --frozen-lockfile --force --non-interactive
+
+    - name: Build app
+      run: yarn build
+      env:
+        CI: false
+        NEXT_PUBLIC_API_URL: ${{github.event.inputs.apiUrl}}
+
+    - name: Export app
+      run: yarn export
+
+    - name: Upload react build
+      uses: actions/upload-artifact@v2
+      with:
+        name: consultation-export
+        path: out
+
   deploy:
     runs-on: ubuntu-latest
-    needs: [build-simulation, build-declaration]
+    needs: [build-simulation, build-declaration, build-consultation]
     steps:
 
     - uses: actions/download-artifact@v2
@@ -94,6 +128,11 @@ jobs:
       with:
         name: jekyll-site
         path: dist/declaration
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: consultation-export
+        path: dist/consulter-index
 
     - name: debug
       run: |
