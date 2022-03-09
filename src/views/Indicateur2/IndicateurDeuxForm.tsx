@@ -1,12 +1,9 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
+
 import { FormState, ActionIndicateurDeuxData } from "../../globals"
 
-import {
-  // calculTotalEffectifsEtTauxAugmentation,
-  // calculEcartTauxAugmentation,
-  effectifEtEcartAugmentGroup,
-} from "../../utils/calculsEgaProIndicateurDeux"
+import { effectifEtEcartAugmentGroup } from "../../utils/calculsEgaProIndicateurDeux"
 
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"

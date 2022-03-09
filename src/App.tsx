@@ -1,13 +1,12 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
-import { useReducer, useCallback } from "react"
+import React, { useReducer, useCallback, FunctionComponent } from "react"
 import { Router } from "react-router-dom"
 import "@fontsource/gabriela"
 import "@fontsource/cabin"
 import ReactPiwik from "react-piwik"
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
-import { ChakraProvider } from "@chakra-ui/react"
+import { Box, ChakraProvider } from "@chakra-ui/react"
+
 import theme from "./theme"
 import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
@@ -18,10 +17,17 @@ import Page from "./components/Page"
 import ActionBar from "./components/ActionBar"
 import ButtonAction from "./components/ds/ButtonAction"
 
-function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+interface ErrorFallbackProps {
+  error: Error
+  resetErrorBoundary: () => void
+}
+
+const ErrorFallback: FunctionComponent<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
   return (
     <Page title="Quelque chose s'est mal passée... 😕">
-      <div style={{ color: "red", marginBottom: 20 }}>{error.message}</div>
+      <Box bg="red" mb={4}>
+        {error.message}
+      </Box>
       <ActionBar>
         <ButtonAction label="retour" onClick={resetErrorBoundary} />
       </ActionBar>
@@ -40,7 +46,7 @@ const piwik: any = new ReactPiwik({
 // track the initial pageview
 ReactPiwik.push(["trackPageView"])
 
-function App() {
+const App = () => {
   const [state, dispatchReducer] = useReducer(AppReducer, undefined)
 
   const dispatch = useCallback(
@@ -71,13 +77,13 @@ function App() {
           <GridProvider>
             {/* TODO: update the following date and message when there's another announcement */}
             {new Date() < new Date("2020-02-19T14:00:00.000Z") && (
-              <div css={styles.bannerWrapper}>
+              <Box position="fixed" left={4} bottom={4} right={4} zIndex={1000}>
                 <InfoBlock
                   title="Interruption de service programmée"
                   text="Le service sera indisponible le mercredi 19 février à partir de 12h30 pour une durée d'environ 1h30"
                   closeButton={true}
                 />
-              </div>
+              </Box>
             )}
 
             <AppLayout state={state} dispatch={dispatch} />
@@ -86,21 +92,6 @@ function App() {
       </ErrorBoundary>
     </ChakraProvider>
   )
-}
-
-const styles = {
-  bannerWrapper: css({
-    position: "fixed",
-    left: 20,
-    bottom: 20,
-    right: 20,
-    zIndex: 1000,
-  }),
-  banner: css({
-    backgroundColor: "#fff",
-    margin: "10px auto",
-    width: "70%",
-  }),
 }
 
 export default App

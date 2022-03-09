@@ -1,5 +1,6 @@
 import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
+
 import { TranchesAges, GroupTranchesAgesIndicateurUn, FormState } from "../../globals"
 
 import {
@@ -11,14 +12,13 @@ import {
   required,
   ValidatorFunction,
 } from "../../utils/formHelpers"
+import { displayNameTranchesAges } from "../../utils/helpers"
 
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-
-import { displayNameTranchesAges } from "../../utils/helpers"
 import FormError from "../../components/FormError"
 import FormStack from "../../components/ds/FormStack"
 

@@ -16,16 +16,15 @@ import {
   required,
 } from "../../utils/formHelpers"
 import { displayInt } from "../../utils/helpers"
+import { displayNameTranchesAges } from "../../utils/helpers"
 
+import FormStack from "../../components/ds/FormStack"
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-
-import { displayNameTranchesAges } from "../../utils/helpers"
 import FormError from "../../components/FormError"
-import FormStack from "../../components/ds/FormStack"
 
 type Effectif = Array<{
   id: any

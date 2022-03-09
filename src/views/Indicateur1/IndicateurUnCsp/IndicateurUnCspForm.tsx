@@ -2,10 +2,9 @@ import React, { useMemo, useCallback, FunctionComponent } from "react"
 import { ActionIndicateurUnCspData, AppState, GroupTranchesAgesIndicateurUn, FormState } from "../../../globals"
 
 import { effectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
+import { displayNameCategorieSocioPro } from "../../../utils/helpers"
 
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
-
-import { displayNameCategorieSocioPro } from "../../../utils/helpers"
 
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 

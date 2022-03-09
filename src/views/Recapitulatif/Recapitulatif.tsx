@@ -4,6 +4,8 @@ import { RouteComponentProps } from "react-router-dom"
 
 import { AppState } from "../../globals"
 
+import { useTitle } from "../../utils/hooks"
+
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
@@ -25,7 +27,6 @@ import RecapitulatifIndicateurTrois from "./RecapitulatifIndicateurTrois"
 import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois"
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
-import { useTitle } from "../../utils/hooks"
 
 interface RecapitulatifProps extends RouteComponentProps {
   state: AppState

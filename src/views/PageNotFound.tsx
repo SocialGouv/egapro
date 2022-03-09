@@ -1,14 +1,13 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+import React from "react"
 import { useHistory } from "react-router-dom"
 
-import Page from "../components/Page"
-
-import ActionBar from "../components/ActionBar"
-import ButtonAction from "../components/ds/ButtonAction"
 import { useTitle } from "../utils/hooks"
 
-function PageNotFound() {
+import ButtonAction from "../components/ds/ButtonAction"
+import Page from "../components/Page"
+import ActionBar from "../components/ActionBar"
+
+const PageNotFound = () => {
   useTitle("Page inexistante")
   const history = useHistory()
 

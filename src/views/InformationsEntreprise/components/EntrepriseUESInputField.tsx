@@ -2,12 +2,13 @@ import React, { FunctionComponent } from "react"
 import { useField } from "react-final-form"
 import { FormControl, FormLabel, SimpleGrid } from "@chakra-ui/react"
 
+import { EntrepriseUES, EntrepriseType } from "../../../globals"
+
+import { composeValidators, required } from "../../../utils/formHelpers"
+
+import FakeInputGroup from "../../../components/ds/FakeInputGroup"
 import { hasFieldError } from "../../../components/Input"
 import FieldSiren, { sirenValidator } from "../../../components/FieldSiren"
-import { EntrepriseUES } from "../../../globals"
-import { EntrepriseType } from "../../../globals"
-import { composeValidators, required } from "../../../utils/formHelpers"
-import FakeInputGroup from "../../../components/ds/FakeInputGroup"
 
 type EntrepriseUESInputProps = {
   nom: string

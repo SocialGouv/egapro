@@ -1,18 +1,17 @@
 import React from "react"
-import { Flex } from "@chakra-ui/layout"
-import { FormControl, FormLabel } from "@chakra-ui/form-control"
+import { Flex, FormControl, FormLabel, Text, Input } from "@chakra-ui/react"
 
 import { useTitle } from "../../utils/hooks"
+
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import Page from "../../components/Page"
 import { useUser } from "../../components/AuthContext"
 import InfoEntreprise from "../../components/InfoEntreprise"
 import UtilisateursEntreprise from "../../components/UtilisateursEntreprise"
-import { Input } from "@chakra-ui/react"
 
 const title = "Gérer les utilisateurs"
 
-function GererUtilisateursPage() {
+const GererUtilisateursPage = () => {
   useTitle(title)
 
   const { staff } = useUser()
@@ -27,9 +26,9 @@ function GererUtilisateursPage() {
     <SinglePageLayout>
       <Page title={title}>
         {!staff ? (
-          <p>Vous n'êtes pas membre du staff.</p>
+          <Text>Vous n'êtes pas membre du staff.</Text>
         ) : (
-          <React.Fragment>
+          <>
             <FormControl id="siren">
               <FormLabel>SIREN</FormLabel>
               <Input value={siren} onChange={handleChange} placeholder="Saisissez le SIREN de l'entreprise" />
@@ -41,7 +40,7 @@ function GererUtilisateursPage() {
                 <UtilisateursEntreprise siren={siren} />
               </Flex>
             )}
-          </React.Fragment>
+          </>
         )}
       </Page>
     </SinglePageLayout>

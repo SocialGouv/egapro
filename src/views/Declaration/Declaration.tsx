@@ -1,4 +1,4 @@
-import React, { useCallback, Fragment, ReactNode, useState, useEffect, FunctionComponent } from "react"
+import React, { useCallback, ReactNode, useState, useEffect, FunctionComponent } from "react"
 import { RouteComponentProps, useHistory } from "react-router-dom"
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
 
@@ -390,7 +390,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     <PageDeclaration>
       <LayoutFormAndResult
         childrenForm={
-          <Fragment>
+          <>
             <RecapitulatifIndex
               allIndicateurValid={allIndicateurValid}
               noteIndex={noteIndex}
@@ -406,7 +406,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
               apiError={apiError}
               declaring={declaring}
             />
-          </Fragment>
+          </>
         }
         childrenResult={null}
       />

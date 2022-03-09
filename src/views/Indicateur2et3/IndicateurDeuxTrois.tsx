@@ -9,18 +9,18 @@ import calculIndicateurDeuxTrois, {
   calculBarem,
 } from "../../utils/calculsEgaProIndicateurDeuxTrois"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
+import { messageEcartNombreEquivalentSalaries, displayPercent, messageMesureCorrection } from "../../utils/helpers"
+import { useTitle } from "../../utils/hooks"
 
+import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
-import { messageEcartNombreEquivalentSalaries, displayPercent, messageMesureCorrection } from "../../utils/helpers"
 
 import IndicateurDeuxTroisForm from "./IndicateurDeuxTroisForm"
 import IndicateurDeuxTroisResult from "./IndicateurDeuxTroisResult"
-import { useTitle } from "../../utils/hooks"
 
 interface IndicateurDeuxTroisProps extends RouteComponentProps {
   state: AppState

@@ -11,10 +11,12 @@ import {
   useClipboard,
   FormControl,
 } from "@chakra-ui/react"
+
+import { useTitle } from "../utils/hooks"
+
 import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
 import { ButtonSimulatorLink } from "../components/SimulatorLink"
-import { useTitle } from "../utils/hooks"
 
 const title = "Début d'un calcul d'index"
 

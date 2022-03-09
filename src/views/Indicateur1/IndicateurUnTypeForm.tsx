@@ -4,10 +4,10 @@ import { FormControl, FormLabel, Text, Stack } from "@chakra-ui/react"
 
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals"
 
-import FormAutoSave from "../../components/FormAutoSave"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import InputRadio from "../../components/ds/InputRadio"
 import FormStack from "../../components/ds/FormStack"
+import FormAutoSave from "../../components/FormAutoSave"
 
 interface IndicateurUnTypeFormProps {
   csp: boolean

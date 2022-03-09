@@ -5,19 +5,18 @@ import { RouteComponentProps } from "react-router-dom"
 import { AppState, FormState, ActionType, ActionIndicateurDeuxData } from "../../globals"
 
 import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
+import { messageMesureCorrection } from "../../utils/helpers"
+import { useTitle } from "../../utils/hooks"
 
+import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
 
 import IndicateurDeuxForm from "./IndicateurDeuxForm"
 import IndicateurDeuxResult from "./IndicateurDeuxResult"
-
-import { messageMesureCorrection } from "../../utils/helpers"
-import { useTitle } from "../../utils/hooks"
 
 interface IndicateurDeuxProps extends RouteComponentProps {
   state: AppState

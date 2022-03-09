@@ -1,11 +1,13 @@
 import React from "react"
 import { Text, Heading, Link } from "@chakra-ui/react"
-import Page from "../components/Page"
+
 import { useTitle } from "../utils/hooks"
+
+import Page from "../components/Page"
 
 const title = "Conditions d’utilisation"
 
-function CGU() {
+const CGU = () => {
   useTitle(title)
 
   return (

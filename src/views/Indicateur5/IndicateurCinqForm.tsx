@@ -15,13 +15,13 @@ import {
   mustBeInteger,
 } from "../../utils/formHelpers"
 
+import FormStack from "../../components/ds/FormStack"
+import InputGroup from "../../components/ds/InputGroup"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
-import FormStack from "../../components/ds/FormStack"
-import InputGroup from "../../components/ds/InputGroup"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0), maxNumber(10))
 

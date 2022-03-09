@@ -3,15 +3,6 @@ import { Form } from "react-final-form"
 
 import { FormState, ActionIndicateurDeuxTroisData, PeriodeDeclaration, GroupeEffectif } from "../../globals"
 
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
-import RadiosBoolean from "../../components/RadiosBoolean"
-import RadioButtons from "../../components/RadioButtons"
-import ActionBar from "../../components/ActionBar"
-import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
 import {
   parseIntFormValue,
   parseIntStateValue,
@@ -28,6 +19,15 @@ import {
 } from "../../utils/formHelpers"
 import { calendarYear, dateToString, parseDate, Year } from "../../utils/helpers"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
+
+import BlocForm from "../../components/BlocForm"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import RadioButtons from "../../components/RadioButtons"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
 import FormStack from "../../components/ds/FormStack"
 

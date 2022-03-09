@@ -3,17 +3,18 @@ import { Box, Text } from "@chakra-ui/layout"
 import { Form } from "react-final-form"
 import { Redirect, useHistory } from "react-router"
 
-import { SinglePageLayout } from "../containers/SinglePageLayout"
 import { useTitle, useToastMessage } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
+
+import { FieldEmail } from "../components/ds/FieldEmail"
 import PrimaryButton from "../components/ds/PrimaryButton"
 import Page from "../components/Page"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
-import { FieldEmail } from "../components/ds/FieldEmail"
+import { SinglePageLayout } from "../containers/SinglePageLayout"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
 
-function Mire() {
+const Mire = () => {
   useTitle(title)
 
   const history = useHistory()

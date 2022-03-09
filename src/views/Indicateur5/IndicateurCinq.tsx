@@ -4,13 +4,13 @@ import { RouteComponentProps } from "react-router-dom"
 import { AppState, FormState, ActionType, ActionIndicateurCinqData } from "../../globals"
 
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import { useTitle } from "../../utils/hooks"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import IndicateurCinqForm from "./IndicateurCinqForm"
 import IndicateurCinqResult from "./IndicateurCinqResult"
-import { useTitle } from "../../utils/hooks"
 
 interface IndicateurCinqProps extends RouteComponentProps {
   state: AppState

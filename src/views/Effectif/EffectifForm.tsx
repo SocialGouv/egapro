@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
-import { useMemo, useCallback } from "react"
+import React, { useMemo, useCallback, FunctionComponent } from "react"
 import { AppState, FormState, GroupTranchesAgesEffectif, ActionEffectifData } from "../../globals"
 
 import { displayNameCategorieSocioPro } from "../../utils/helpers"
@@ -9,14 +7,19 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 
 import EffectifFormRaw from "./EffectifFormRaw"
 
-interface Props {
+interface EffectifFormProps {
   effectif: AppState["effectif"]
   readOnly: boolean
   updateEffectif: (data: ActionEffectifData) => void
   validateEffectif: (valid: FormState) => void
 }
 
-function EffectifForm({ effectif, readOnly, updateEffectif, validateEffectif }: Props) {
+const EffectifForm: FunctionComponent<EffectifFormProps> = ({
+  effectif,
+  readOnly,
+  updateEffectif,
+  validateEffectif,
+}) => {
   const effectifRaw = useMemo(
     () =>
       effectif.nombreSalaries.map(({ categorieSocioPro, tranchesAges }) => ({

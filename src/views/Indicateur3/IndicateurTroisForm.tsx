@@ -2,20 +2,7 @@ import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 import { FormState, ActionIndicateurTroisData } from "../../globals"
 
-import {
-  // calculTotalEffectifsEtTauxPromotion,
-  // calculEcartTauxPromotion,
-  effectifEtEcartPromoGroup,
-} from "../../utils/calculsEgaProIndicateurTrois"
-
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
-import RadiosBoolean from "../../components/RadiosBoolean"
-import ActionBar from "../../components/ActionBar"
-import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
+import { effectifEtEcartPromoGroup } from "../../utils/calculsEgaProIndicateurTrois"
 import {
   parseFloatFormValue,
   parseFloatStateValue,
@@ -26,12 +13,17 @@ import {
   mustBeNumber,
   required,
 } from "../../utils/formHelpers"
-import {
-  displayNameCategorieSocioPro,
-  // displayFractionPercent
-} from "../../utils/helpers"
-import FormError from "../../components/FormError"
+import { displayNameCategorieSocioPro } from "../../utils/helpers"
+
 import FormStack from "../../components/ds/FormStack"
+import BlocForm from "../../components/BlocForm"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import FormError from "../../components/FormError"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 

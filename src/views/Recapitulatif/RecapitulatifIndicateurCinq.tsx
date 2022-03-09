@@ -1,4 +1,4 @@
-import React, { Fragment, FunctionComponent } from "react"
+import React, { FunctionComponent } from "react"
 
 import { FormState } from "../../globals"
 
@@ -25,10 +25,10 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
         type="warning"
         title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations."
         text={
-          <Fragment>
+          <>
             Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
             <TextSimulatorLink to="/indicateur5" label="Valider les données" />
-          </Fragment>
+          </>
         }
       />
     )

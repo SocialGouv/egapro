@@ -5,9 +5,9 @@ import { RouteComponentProps } from "react-router-dom"
 import { AppState, ActionType, FormState, ActionEffectifData } from "../../globals"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
+import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 import EffectifForm from "./EffectifForm"

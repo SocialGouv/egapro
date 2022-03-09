@@ -2,11 +2,13 @@ import React, { FunctionComponent } from "react"
 import { Box } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
+
 import { displaySexeSurRepresente } from "../../utils/helpers"
-import { Result } from "./IndicateurDeuxTrois"
 
 import ResultBubble from "../../components/ResultBubble"
 import ActionLink from "../../components/ActionLink"
+
+import { Result } from "./IndicateurDeuxTrois"
 
 interface IndicateurDeuxTroisResultProps {
   bestResult: Result

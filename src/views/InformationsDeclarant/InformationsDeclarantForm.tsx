@@ -6,17 +6,17 @@ import { z } from "zod"
 
 import { AppState, FormState, ActionInformationsDeclarantData } from "../../globals"
 
-import ActionBar from "../../components/ActionBar"
-import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import ButtonAction from "../../components/ds/ButtonAction"
 import { IconEdit } from "../../components/ds/Icons"
 import InputGroup from "../../components/ds/InputGroup"
 import FormStack from "../../components/ds/FormStack"
-import FormError from "../../components/FormError"
 import { formValidator } from "../../components/ds/form-lib"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import FormError from "../../components/FormError"
 
 const FormInputs = z.object({
   nom: z

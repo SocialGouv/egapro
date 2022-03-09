@@ -5,14 +5,15 @@ import { Box, Heading, Text, Image } from "@chakra-ui/react"
 
 import { useTitle } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
+
 import ButtonAction from "../components/ds/ButtonAction"
 import InputGroup from "../components/ds/InputGroup"
+import { formValidator } from "../components/ds/form-lib"
 import FormStack from "../components/ds/FormStack"
 import Page from "../components/Page"
 import ActionBar from "../components/ActionBar"
 import FormError from "../components/FormError"
 import FormSubmit from "../components/FormSubmit"
-import { formValidator } from "../components/ds/form-lib"
 
 const FormInput = z.object({
   email: z

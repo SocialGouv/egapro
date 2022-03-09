@@ -1,16 +1,17 @@
 import React, { useCallback, ReactNode, FunctionComponent } from "react"
+import { useParams } from "react-router-dom"
 import { Box } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
+
+import { useTitle } from "../../utils/hooks"
+import { useDeclaration } from "../../hooks/useDeclaration"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsSimulationForm from "./InformationsSimulationForm"
-import { useTitle } from "../../utils/hooks"
-import { useDeclaration } from "../../hooks/useDeclaration"
-import { useParams } from "react-router-dom"
 
 interface InformationsSimulationProps {
   state: AppState

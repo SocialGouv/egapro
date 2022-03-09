@@ -1,9 +1,8 @@
 import React from "react"
-import { Select } from "@chakra-ui/select"
-import { Flex } from "@chakra-ui/layout"
-import { FormControl, FormLabel } from "@chakra-ui/form-control"
+import { Select, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react"
 
 import { useTitle } from "../../utils/hooks"
+
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import Page from "../../components/Page"
 import { useUser } from "../../components/AuthContext"
@@ -12,7 +11,7 @@ import UtilisateursEntreprise from "../../components/UtilisateursEntreprise"
 
 const title = "Mes entreprises"
 
-function MesEntreprises() {
+const MesEntreprises = () => {
   useTitle(title)
 
   const { ownership: sirens } = useUser()
@@ -24,9 +23,9 @@ function MesEntreprises() {
     <SinglePageLayout>
       <Page title={title}>
         {!sirens?.length ? (
-          <p>Vous ne gérez pas encore d'entreprise.</p>
+          <Text>Vous ne gérez pas encore d'entreprise.</Text>
         ) : (
-          <React.Fragment>
+          <>
             <FormControl id="siren">
               <FormLabel>SIREN</FormLabel>
               <Select
@@ -46,7 +45,7 @@ function MesEntreprises() {
               <InfoEntreprise siren={chosenSiren} />
               <UtilisateursEntreprise siren={chosenSiren} />
             </Flex>
-          </React.Fragment>
+          </>
         )}
       </Page>
     </SinglePageLayout>

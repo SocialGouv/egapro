@@ -2,6 +2,7 @@ import React, { FunctionComponent } from "react"
 import { Box } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
+
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
 import ResultBubble from "../../components/ResultBubble"

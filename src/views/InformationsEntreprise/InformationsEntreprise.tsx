@@ -3,12 +3,13 @@ import { RouteComponentProps, useParams } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsEntrepriseData } from "../../globals"
 
+import { useTitle } from "../../utils/hooks"
+import { useDeclaration } from "../../hooks/useDeclaration"
+
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
-import { useTitle } from "../../utils/hooks"
-import { useDeclaration } from "../../hooks/useDeclaration"
 
 interface InformationsEntrepriseProps extends RouteComponentProps {
   state: AppState
