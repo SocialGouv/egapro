@@ -1,7 +1,8 @@
 /** @jsx jsx */
-import { useState } from "react"
+import React, { useState } from "react"
 import { css, jsx } from "@emotion/react"
 import { Field } from "react-final-form"
+import { Text } from "@chakra-ui/react"
 
 import { EntrepriseUES } from "../globals"
 
@@ -16,8 +17,9 @@ import {
   ValidatorFunction,
 } from "../utils/formHelpers"
 
-import ModalConfirmDelete from "../views/InformationsEntreprise/components/EntrepriseUESModalConfirmDelete"
-import { Modal } from "./ModalContext"
+import Modal from "./ds/Modal"
+import { useDisclosure } from "@chakra-ui/hooks"
+import ButtonAction from "./ds/ButtonAction"
 
 const atLeastTwo: ValidatorFunction = (value) =>
   minNumber(2)(value) ? "le nombre d'entreprises composant l'UES doit être un nombre supérieur ou égal à 2" : undefined
@@ -37,12 +39,14 @@ function NombreEntreprises({
   newNombreEntreprises: (fieldName: string, newValue: string) => undefined
   readOnly: boolean
 }) {
+  const { onClose } = useDisclosure()
   const [newValue, setNewValue] = useState<string | undefined>(undefined)
   const confirmChangeEvent = (newValue: string) => {
     setNewValue(newValue)
   }
   const closeModal = () => {
     setNewValue(undefined)
+    onClose()
   }
 
   return (
@@ -72,15 +76,26 @@ function NombreEntreprises({
             />
           </div>
           {meta.error && meta.touched && <p css={styles.error}>{meta.error}</p>}
-          <Modal isOpen={newValue !== undefined} onRequestClose={closeModal}>
-            <ModalConfirmDelete
-              closeModal={closeModal}
-              sendChangeEvent={() => {
-                if (newValue !== undefined) {
-                  newNombreEntreprises(fieldName, newValue)
-                }
-              }}
-            />
+          <Modal
+            isOpen={newValue !== undefined}
+            onClose={closeModal}
+            title="Êtes-vous sûr de vouloir réduire le nombre d'entreprises composant l'UES ?"
+            footer={
+              <div>
+                <ButtonAction
+                  onClick={() => {
+                    if (newValue !== undefined) {
+                      newNombreEntreprises(fieldName, newValue)
+                    }
+                    closeModal()
+                  }}
+                  label="Confirmer et supprimer les données"
+                />
+                <ButtonAction colorScheme="gray" onClick={() => closeModal()} label="Annuler" />
+              </div>
+            }
+          >
+            <Text>Toutes les données renseignées pour ces entreprises seront effacées définitivement.</Text>
           </Modal>
         </div>
       )}

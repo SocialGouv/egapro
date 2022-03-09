@@ -4,7 +4,6 @@ import { withRouter, RouteComponentProps } from "react-router-dom"
 
 import { AppState } from "../globals"
 
-import ModalProvider from "../components/ModalContext"
 import { useScrollTo } from "../components/ScrollContext"
 import Menu from "../components/Menu"
 import FAQ from "../views/FAQ"
@@ -43,24 +42,22 @@ function MainScrollView({ children, state, location }: Props) {
       id="main"
     >
       <Container maxW="container.xl">
-        <ModalProvider>
-          <Grid
-            sx={{
-              gridTemplateColumns: "200px 1fr 380px",
-              gridTemplateRows: "auto",
-              gridTemplateAreas: "'nav main aside'",
-              height: "100%",
-            }}
-          >
-            <Box sx={{ gridArea: "nav" }} ml={-3}>
-              {menu}
-            </Box>
-            <Content pathname={location.pathname}>{children}</Content>
-            <Box bg="white" sx={{ gridArea: "aside" }} mr={-3}>
-              <FAQ />
-            </Box>
-          </Grid>
-        </ModalProvider>
+        <Grid
+          sx={{
+            gridTemplateColumns: "200px 1fr 380px",
+            gridTemplateRows: "auto",
+            gridTemplateAreas: "'nav main aside'",
+            height: "100%",
+          }}
+        >
+          <Box sx={{ gridArea: "nav" }} ml={-3}>
+            {menu}
+          </Box>
+          <Content pathname={location.pathname}>{children}</Content>
+          <Box bg="white" sx={{ gridArea: "aside" }} mr={-3}>
+            <FAQ />
+          </Box>
+        </Grid>
       </Container>
     </Flex>
   )

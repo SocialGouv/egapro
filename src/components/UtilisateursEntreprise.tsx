@@ -13,17 +13,8 @@ import { useSoloToastMessage } from "../utils/hooks"
 import PrimaryButton from "../components/ds/PrimaryButton"
 import { formValidator, InputControl } from "./ds/form-lib"
 import ButtonAction from "./ds/ButtonAction"
+import Modal from "./ds/Modal"
 import { IconDelete, IconDrag } from "./ds/Icons"
-
-import {
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/modal"
 
 function UtilisateurItem({
   owner,
@@ -48,22 +39,23 @@ function UtilisateurItem({
         onClick={onOpen}
         h="6"
       />
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Supprimer l'utilisateur</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>Cette opération est irréversible.</ModalBody>
-
-          <ModalFooter>
-            <PrimaryButton colorScheme="red" mr={3} onClick={() => removeUser(owner, siren)}>
-              Confirmer
-            </PrimaryButton>
-            <PrimaryButton variant="ghost" onClick={onClose}>
-              Annuler
-            </PrimaryButton>
-          </ModalFooter>
-        </ModalContent>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Supprimer l'utilisateur"
+        footer={
+          <>
+            <ButtonAction
+              colorScheme="red"
+              onClick={() => removeUser(owner, siren)}
+              label="Supprimer l'utilisateur"
+              leftIcon={<IconDelete />}
+            />
+            <ButtonAction colorScheme="gray" onClick={onClose} label="Annuler" />
+          </>
+        }
+      >
+        <Text>Cette opération est irréversible.</Text>
       </Modal>
     </ListItem>
   )
@@ -122,7 +114,7 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
           <Spinner />
         </Box>
       ) : (
-        <React.Fragment>
+        <>
           <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
             Responsables
           </Text>
@@ -160,7 +152,7 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
               </Box>
             )}
           </Flex>
-        </React.Fragment>
+        </>
       )}
     </Box>
   )

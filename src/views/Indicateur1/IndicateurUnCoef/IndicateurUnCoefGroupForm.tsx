@@ -12,13 +12,12 @@ import ButtonAction from "../../../components/ds/ButtonAction"
 import ActionBar from "../../../components/ActionBar"
 import FormAutoSave from "../../../components/FormAutoSave"
 import FormSubmit from "../../../components/FormSubmit"
-import { Modal } from "../../../components/ModalContext"
+import Modal from "../../../components/ds/Modal"
 
 import InputField from "./components/CoefGroupInputField"
-import ModalConfirmDelete from "./components/CoefGroupModalConfirmDelete"
 import FormError from "../../../components/FormError"
 import FormStack from "../../../components/ds/FormStack"
-import { IconPlusCircle } from "../../../components/ds/Icons"
+import { IconDelete, IconPlusCircle } from "../../../components/ds/Icons"
 
 interface IndicateurUnCoefGroupFormProps {
   state: AppState
@@ -163,13 +162,26 @@ const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProp
           />
         )}
 
-      <Modal isOpen={indexGroupToDelete !== undefined} onRequestClose={closeModal}>
-        <ModalConfirmDelete
-          closeModal={closeModal}
-          deleteGroup={() => {
-            indexGroupToDelete !== undefined && updateIndicateurUnCoefDeleteGroup(indexGroupToDelete)
-          }}
-        />
+      <Modal
+        isOpen={indexGroupToDelete !== undefined}
+        onClose={closeModal}
+        title="Êtes vous sûr de vouloir supprimer ce groupe ?"
+        footer={
+          <>
+            <ButtonAction
+              colorScheme="red"
+              leftIcon={<IconDelete />}
+              onClick={() => {
+                indexGroupToDelete !== undefined && updateIndicateurUnCoefDeleteGroup(indexGroupToDelete)
+                closeModal()
+              }}
+              label="Supprimer"
+            />
+            <ButtonAction colorScheme="gray" onClick={() => closeModal()} label="Annuler" />
+          </>
+        }
+      >
+        <Text>Toutes les données renseignées pour ce groupes seront effacées définitivement.</Text>
       </Modal>
     </>
   )
