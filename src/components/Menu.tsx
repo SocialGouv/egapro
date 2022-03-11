@@ -54,11 +54,11 @@ function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact =
         >
           {valid === "Valid" ? (
             <Box mr={1} pt={1} cx={{ flexShrink: 0 }}>
-              <IconValid />
+              <IconValid color="green.400" />
             </Box>
           ) : valid === "Invalid" ? (
             <Box mr={2} pt={1} cx={{ flexShrink: 0 }}>
-              <IconInvalid />
+              <IconInvalid color="red.500" />
             </Box>
           ) : null}
           <Box cx={{ flexGrow: 1 }}>
