@@ -30,6 +30,8 @@ const CLOSED_SIREN = "Le SIREN saisi correspond à une entreprise fermée, veuil
 
 const INVALID_SIREN = "Le SIREN est invalide."
 
+const FOREIGN_SIREN = "Le SIREN saisi correspond à une entreprise étrangère."
+
 async function checkSiren(siren: string) {
   try {
     const result = await memoizedValidateSiren(siren)
@@ -41,6 +43,13 @@ async function checkSiren(siren: string) {
       throw new Error(UNKNOWN_SIREN)
     } else if (/Le Siren saisi correspond à une entreprise fermée/i.test(error?.jsonBody?.error)) {
       throw new Error(CLOSED_SIREN)
+    }
+
+    if (
+      error?.response?.status === 422 &&
+      /Le Siren saisi correspond à une entreprise étrangère/i.test(error?.jsonBody?.error)
+    ) {
+      throw new Error(FOREIGN_SIREN)
     }
 
     throw new Error(INVALID_SIREN)
