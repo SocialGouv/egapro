@@ -193,7 +193,14 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
           noteIndicateurCinq={noteIndicateurCinq}
         />
       </VStack>
-      <Box mt={6}>
+      <Box
+        mt={6}
+        sx={{
+          "@media print": {
+            display: "none",
+          },
+        }}
+      >
         <Text>
           La simulation est terminée. Vous pouvez si vous le souhaitez déclarer ces indicateurs en renseignant d'autres
           informations. Il vous sera demandé un email valide pour pouvoir poursuivre.
@@ -201,13 +208,21 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
 
         <ActionBar>
           <ButtonSimulatorLink to="/informations-entreprise" label="Poursuivre vers la déclaration" />
-          <div>
-            <Tooltip label="Possible d'enregistrer en PDF depuis la fenêtre d'impression" hasArrow>
+          <Box>
+            <Tooltip
+              label="Possible d'enregistrer en PDF depuis la fenêtre d'impression"
+              hasArrow
+              sx={{
+                "@media print": {
+                  display: "none",
+                },
+              }}
+            >
               <Button size="lg" variant="outline" onClick={() => window.print()}>
                 Imprimer
               </Button>
             </Tooltip>
-          </div>
+          </Box>
         </ActionBar>
 
         <Box mt={8}>

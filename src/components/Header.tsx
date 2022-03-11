@@ -14,6 +14,9 @@ function Header() {
       sx={{
         flexShrink: 0,
         borderBottom: "1px solid #E3E4ED",
+        "@media print": {
+          display: "none",
+        },
       }}
     >
       <Box
