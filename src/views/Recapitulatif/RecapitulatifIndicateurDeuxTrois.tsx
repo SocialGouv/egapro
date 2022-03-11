@@ -1,15 +1,14 @@
 import React, { FunctionComponent } from "react"
+import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
-import { displaySexeSurRepresente } from "../../utils/helpers"
+import { displayFractionPercentWithEmptyData, displaySexeSurRepresente } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
-import RowData, { RowLabels, RowLabelFull } from "./components/RowData"
-
-import { getResults, AdditionalInfo } from "../Indicateur2et3/IndicateurDeuxTrois"
+import { getResults } from "../Indicateur2et3/IndicateurDeuxTrois"
 
 interface RecapitulatifIndicateurDeuxTroisProps {
   indicateurDeuxTroisFormValidated: FormState
@@ -36,7 +35,6 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
   correctionMeasure,
   tauxAugmentationPromotionFemmes,
   tauxAugmentationPromotionHommes,
-  plusPetitNombreSalaries,
 }) => {
   if (!effectifsIndicateurDeuxTroisCalculable) {
     return (
@@ -79,7 +77,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
     <div>
       <RecapBloc
         title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
-        resultBubble={{
+        resultSummary={{
           firstLineLabel: results.best.label,
           firstLineData: results.best.result,
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
@@ -89,20 +87,24 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
           indicateurSexeSurRepresente,
         }}
       >
-        <RowLabelFull label="taux d'augmentation" />
-        <RowLabels labels={["femmes", "hommes"]} />
-        <RowData
-          name="taux de salariés augmentés"
-          data={[tauxAugmentationPromotionFemmes, tauxAugmentationPromotionHommes]}
-          asPercent={true}
-        />
+        <Table size="sm" variant="striped">
+          <TableCaption>taux d'augmentation</TableCaption>
+          <Thead textTransform="inherit" fontSize=".5rem">
+            <Tr>
+              <Th />
+              <Th fontSize="xxs">Femmes</Th>
+              <Th fontSize="xxs">Hommes</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>taux de salariés augmentés</Td>
+              <Td isNumeric>{displayFractionPercentWithEmptyData(tauxAugmentationPromotionFemmes, 1)}</Td>
+              <Td isNumeric>{displayFractionPercentWithEmptyData(tauxAugmentationPromotionHommes, 1)}</Td>
+            </Tr>
+          </Tbody>
+        </Table>
       </RecapBloc>
-      <AdditionalInfo
-        results={results}
-        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-        plusPetitNombreSalaries={plusPetitNombreSalaries}
-        correctionMeasure={correctionMeasure}
-      />
     </div>
   )
 }

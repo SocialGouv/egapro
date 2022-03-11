@@ -1,14 +1,18 @@
 import React, { FunctionComponent } from "react"
+import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
 
 import { FormState, CategorieSocioPro } from "../../globals"
 
-import { displayNameCategorieSocioPro, displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
+import {
+  displayFractionPercentWithEmptyData,
+  displayNameCategorieSocioPro,
+  displayPercent,
+  displaySexeSurRepresente,
+} from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-
-import { RowDataFull, RowLabelFull } from "./components/RowData"
 
 interface RecapitulatifIndicateurDeuxProps {
   indicateurDeuxFormValidated: FormState
@@ -72,7 +76,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   return (
     <RecapBloc
       title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
-      resultBubble={{
+      resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData: indicateurEcartAugmentation !== undefined ? displayPercent(indicateurEcartAugmentation) : "--",
         firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
@@ -82,16 +86,17 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         indicateurSexeSurRepresente,
       }}
     >
-      <RowLabelFull label="écart de taux d’augmentations par csp" />
-
-      {effectifEtEcartAugmentParGroupe.map(({ categorieSocioPro, ecartTauxAugmentation }) => (
-        <RowDataFull
-          key={categorieSocioPro}
-          name={displayNameCategorieSocioPro(categorieSocioPro)}
-          data={ecartTauxAugmentation}
-          asPercent={true}
-        />
-      ))}
+      <Table size="sm" variant="striped">
+        <TableCaption>écart de taux d’augmentations par csp</TableCaption>
+        <Tbody>
+          {effectifEtEcartAugmentParGroupe.map(({ categorieSocioPro, ecartTauxAugmentation }) => (
+            <Tr key={categorieSocioPro}>
+              <Td>{displayNameCategorieSocioPro(categorieSocioPro)}</Td>
+              <Td isNumeric>{displayFractionPercentWithEmptyData(ecartTauxAugmentation, 1)}</Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
     </RecapBloc>
   )
 }

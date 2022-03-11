@@ -1,4 +1,5 @@
 import React, { FunctionComponent } from "react"
+import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 
 import { FormState, TranchesAges } from "../../globals"
 import { effectifEtEcartRemuGroupCsp, effectifEtEcartRemuGroupCoef } from "../../utils/calculsEgaProIndicateurUn"
@@ -13,8 +14,6 @@ import {
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-
-import RowData, { RowLabels, RowLabelFull } from "./components/RowData"
 
 interface RecapitulatifIndicateurUnProps {
   indicateurUnFormValidated: FormState
@@ -86,7 +85,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   return (
     <RecapBloc
       title="Indicateur écart de rémunération entre les femmes et les hommes"
-      resultBubble={{
+      resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData: indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--",
         firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
@@ -95,45 +94,43 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         indicateurSexeSurRepresente,
       }}
     >
-      <RowLabelFull
-        label={
+      <Table size="sm" variant="striped">
+        <TableCaption>
           <>
             écart de rémunération par {indicateurUnParCSP ? "csp" : "niveau ou coefficient hiérarchique"}
             <br />
             (avant seuil de pertinence)
           </>
-        }
-      />
-      <RowLabels
-        labels={[
-          displayNameTranchesAges(TranchesAges.MoinsDe30ans),
-          displayNameTranchesAges(TranchesAges.De30a39ans),
-          displayNameTranchesAges(TranchesAges.De40a49ans),
-          displayNameTranchesAges(TranchesAges.PlusDe50ans),
-        ]}
-      />
-
-      {groupEffectifEtEcartRemuParTranche.map(
-        (
-          effectifEtEcartRemuParTranche: Array<{
-            id: any
-            name: string
-            ecartRemunerationMoyenne: number | undefined
-          }>,
-        ) => (
-          <RowData
-            key={effectifEtEcartRemuParTranche[0].id}
-            name={effectifEtEcartRemuParTranche[0].name}
-            data={[
-              effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne,
-              effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne,
-              effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne,
-              effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne,
-            ]}
-            asPercent={true}
-          />
-        ),
-      )}
+        </TableCaption>
+        <Thead textTransform="inherit" fontSize=".5rem">
+          <Tr>
+            <Th />
+            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.MoinsDe30ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De30a39ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.De40a49ans)}</Th>
+            <Th fontSize="xxs">{displayNameTranchesAges(TranchesAges.PlusDe50ans)}</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {groupEffectifEtEcartRemuParTranche.map(
+            (
+              effectifEtEcartRemuParTranche: Array<{
+                id: any
+                name: string
+                ecartRemunerationMoyenne: number | undefined
+              }>,
+            ) => (
+              <Tr key={effectifEtEcartRemuParTranche[0].id}>
+                <Td>{effectifEtEcartRemuParTranche[0].name}</Td>
+                <Td isNumeric>{effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne}%</Td>
+                <Td isNumeric>{effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne}%</Td>
+                <Td isNumeric>{effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne}%</Td>
+                <Td isNumeric>{effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne}%</Td>
+              </Tr>
+            ),
+          )}
+        </Tbody>
+      </Table>
     </RecapBloc>
   )
 }

@@ -46,7 +46,7 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
   return (
     <RecapBloc
       title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations."
-      resultBubble={{
+      resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData:
           indicateurNombreSalariesSexeSousRepresente !== undefined

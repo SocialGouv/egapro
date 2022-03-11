@@ -57,7 +57,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
   return (
     <RecapBloc
       title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-      resultBubble={{
+      resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData:
           indicateurEcartNombreSalarieesAugmentees !== undefined
