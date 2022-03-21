@@ -13,7 +13,7 @@ function PageNotFound() {
   const history = useHistory()
 
   return (
-    <Page title="Malheureusement la page que vous cherchez n’existe pas !">
+    <Page title="Malheureusement la page que vous cherchez n'existe pas !">
       <ActionBar>
         <ButtonAction label="retour" onClick={() => history.goBack()} />
       </ActionBar>
