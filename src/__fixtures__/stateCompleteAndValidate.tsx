@@ -1,71 +1,72 @@
-import { FormState } from "../globals"
-import AppReducer from "../AppReducer"
+import flow from "lodash/fp/flow"
 
+import { ActionType } from "../globals"
+import { currifiedReducer as reducer } from "../AppReducer"
 import stateComplete from "./stateComplete"
 
-const actionValidateInformationsSimulation = {
-  type: "validateInformationsSimulation" as const,
-  valid: "Valid" as FormState,
+const actionValidateInformationsSimulation: ActionType = {
+  type: "validateInformationsSimulation",
+  valid: "Valid",
 }
 
-const actionValidateEffectif = {
-  type: "validateEffectif" as const,
-  valid: "Valid" as FormState,
+const actionValidateEffectif: ActionType = {
+  type: "validateEffectif",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurUnCoefGroup = {
-  type: "validateIndicateurUnCoefGroup" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurUnCoefGroup: ActionType = {
+  type: "validateIndicateurUnCoefGroup",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurUnCoefEffectif = {
-  type: "validateIndicateurUnCoefEffectif" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurUnCoefEffectif: ActionType = {
+  type: "validateIndicateurUnCoefEffectif",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurUn = {
-  type: "validateIndicateurUn" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurUn: ActionType = {
+  type: "validateIndicateurUn",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurDeux = {
-  type: "validateIndicateurDeux" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurDeux: ActionType = {
+  type: "validateIndicateurDeux",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurTrois = {
-  type: "validateIndicateurTrois" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurTrois: ActionType = {
+  type: "validateIndicateurTrois",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurDeuxTrois = {
-  type: "validateIndicateurDeuxTrois" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurDeuxTrois: ActionType = {
+  type: "validateIndicateurDeuxTrois",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurQuatre = {
-  type: "validateIndicateurQuatre" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurQuatre: ActionType = {
+  type: "validateIndicateurQuatre",
+  valid: "Valid",
 }
 
-const actionValidateIndicateurCinq = {
-  type: "validateIndicateurCinq" as const,
-  valid: "Valid" as FormState,
+const actionValidateIndicateurCinq: ActionType = {
+  type: "validateIndicateurCinq",
+  valid: "Valid",
 }
 
-const actionValidateInformationsEntreprise = {
-  type: "validateInformationsEntreprise" as const,
-  valid: "Valid" as FormState,
+const actionValidateInformationsEntreprise: ActionType = {
+  type: "validateInformationsEntreprise",
+  valid: "Valid",
 }
 
-const actionValidateInformationsDeclarant = {
-  type: "validateInformationsDeclarant" as const,
-  valid: "Valid" as FormState,
+const actionValidateInformationsDeclarant: ActionType = {
+  type: "validateInformationsDeclarant",
+  valid: "Valid",
 }
 
-const actionValidateDeclaration = {
-  type: "validateDeclaration" as const,
-  valid: "Valid" as FormState,
+const actionValidateDeclaration: ActionType = {
+  type: "validateDeclaration",
+  valid: "Valid",
   effectifData: {
     nombreSalariesTotal: 52,
   },
@@ -77,7 +78,7 @@ const actionValidateDeclaration = {
     remunerationAnnuelle: [],
     coefficient: [],
     resultatFinal: 8.0,
-    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    sexeSurRepresente: "femmes",
     noteFinale: 31,
   },
   indicateurDeuxData: {
@@ -86,7 +87,7 @@ const actionValidateDeclaration = {
     motifNonCalculablePrecision: "",
     tauxAugmentation: [],
     resultatFinal: 5.0,
-    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    sexeSurRepresente: "femmes",
     noteFinale: 10,
     mesuresCorrection: false,
   },
@@ -96,7 +97,7 @@ const actionValidateDeclaration = {
     motifNonCalculablePrecision: "",
     tauxPromotion: [],
     resultatFinal: 3.0,
-    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    sexeSurRepresente: "femmes",
     noteFinale: 15,
     mesuresCorrection: false,
   },
@@ -106,7 +107,7 @@ const actionValidateDeclaration = {
     motifNonCalculablePrecision: "",
     resultatFinalEcart: 25,
     resultatFinalNombreSalaries: 5,
-    sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+    sexeSurRepresente: "femmes",
     noteEcart: 25,
     noteNombreSalaries: 5,
     noteFinale: 25,
@@ -121,7 +122,7 @@ const actionValidateDeclaration = {
   },
   indicateurCinqData: {
     resultatFinal: 4.0,
-    sexeSurRepresente: "hommes" as undefined | "egalite" | "femmes" | "hommes",
+    sexeSurRepresente: "hommes",
     noteFinale: 10,
   },
   noteIndex: 78,
@@ -134,43 +135,21 @@ const realDate = global.Date
 // @ts-ignore
 global.Date = jest.fn(() => new realDate(1578393480399))
 
-const stateDefault = AppReducer(
-  AppReducer(
-    AppReducer(
-      AppReducer(
-        AppReducer(
-          AppReducer(
-            AppReducer(
-              AppReducer(
-                AppReducer(
-                  AppReducer(
-                    AppReducer(
-                      AppReducer(
-                        AppReducer(stateComplete, actionValidateInformationsSimulation),
-                        actionValidateEffectif,
-                      ),
-                      actionValidateIndicateurUnCoefGroup,
-                    ),
-                    actionValidateIndicateurUnCoefEffectif,
-                  ),
-                  actionValidateIndicateurUn,
-                ),
-                actionValidateIndicateurDeux,
-              ),
-              actionValidateIndicateurTrois,
-            ),
-            actionValidateIndicateurDeuxTrois,
-          ),
-          actionValidateIndicateurQuatre,
-        ),
-        actionValidateIndicateurCinq,
-      ),
-      actionValidateInformationsEntreprise,
-    ),
-    actionValidateInformationsDeclarant,
-  ),
-  actionValidateDeclaration,
-)
+const stateDefault = flow(
+  reducer(actionValidateInformationsSimulation),
+  reducer(actionValidateEffectif),
+  reducer(actionValidateIndicateurUnCoefGroup),
+  reducer(actionValidateIndicateurUnCoefEffectif),
+  reducer(actionValidateIndicateurUn),
+  reducer(actionValidateIndicateurDeux),
+  reducer(actionValidateIndicateurTrois),
+  reducer(actionValidateIndicateurDeuxTrois),
+  reducer(actionValidateIndicateurQuatre),
+  reducer(actionValidateIndicateurCinq),
+  reducer(actionValidateInformationsEntreprise),
+  reducer(actionValidateInformationsDeclarant),
+  reducer(actionValidateDeclaration),
+)(stateComplete)
 
 // Restore the Date
 global.Date = realDate

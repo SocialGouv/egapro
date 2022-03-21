@@ -1,23 +1,25 @@
-import { CategorieSocioPro, PeriodeDeclaration, Structure, TranchesAges, TrancheEffectifs } from "../globals"
-import AppReducer from "../AppReducer"
+import flow from "lodash/fp/flow"
 
-const actionInitiateState = {
-  type: "initiateState" as const,
+import { CategorieSocioPro, TranchesAges, ActionType } from "../globals"
+import { currifiedReducer as reducer } from "../AppReducer"
+
+const actionInitiateState: ActionType = {
+  type: "initiateState",
   data: {},
 }
 
-const actionUpdateInformationsSimulation = {
-  type: "updateInformationsSimulation" as const,
+const actionUpdateInformationsSimulation: ActionType = {
+  type: "updateInformationsSimulation",
   data: {
     nomEntreprise: "BigCorp",
-    trancheEffectifs: "1000 et plus" as TrancheEffectifs,
+    trancheEffectifs: "1000 et plus",
     anneeDeclaration: 2020,
     finPeriodeReference: "2019-12-31",
   },
 }
 
-const actionUpdateEffectif = {
-  type: "updateEffectif" as const,
+const actionUpdateEffectif: ActionType = {
+  type: "updateEffectif",
   data: {
     nombreSalaries: [
       {
@@ -124,8 +126,8 @@ const actionUpdateEffectif = {
   },
 }
 
-const actionUpdateIndicateurUnCsp = {
-  type: "updateIndicateurUnCsp" as const,
+const actionUpdateIndicateurUnCsp: ActionType = {
+  type: "updateIndicateurUnCsp",
   data: {
     remunerationAnnuelle: [
       {
@@ -248,8 +250,8 @@ const actionUpdateIndicateurUnCsp = {
   },
 }
 
-const actionUpdateIndicateurUnCoefName = {
-  type: "updateIndicateurUnCoef" as const,
+const actionUpdateIndicateurUnCoefName: ActionType = {
+  type: "updateIndicateurUnCoef",
   data: {
     coefficient: [
       {
@@ -259,8 +261,8 @@ const actionUpdateIndicateurUnCoefName = {
   },
 }
 
-const actionUpdateIndicateurUnCoefNombreSalaries = {
-  type: "updateIndicateurUnCoef" as const,
+const actionUpdateIndicateurUnCoefNombreSalaries: ActionType = {
+  type: "updateIndicateurUnCoef",
   data: {
     coefficient: [
       {
@@ -291,8 +293,8 @@ const actionUpdateIndicateurUnCoefNombreSalaries = {
   },
 }
 
-const actionUpdateIndicateurUnCoefRemuneration = {
-  type: "updateIndicateurUnCoef" as const,
+const actionUpdateIndicateurUnCoefRemuneration: ActionType = {
+  type: "updateIndicateurUnCoef",
   data: {
     coefficient: [
       {
@@ -327,8 +329,8 @@ const actionUpdateIndicateurUnCoefRemuneration = {
   },
 }
 
-const actionUpdateIndicateurDeux = {
-  type: "updateIndicateurDeux" as const,
+const actionUpdateIndicateurDeux: ActionType = {
+  type: "updateIndicateurDeux",
   data: {
     presenceAugmentation: false,
     tauxAugmentation: [
@@ -360,8 +362,8 @@ const actionUpdateIndicateurDeux = {
   },
 }
 
-const actionUpdateIndicateurTrois = {
-  type: "updateIndicateurTrois" as const,
+const actionUpdateIndicateurTrois: ActionType = {
+  type: "updateIndicateurTrois",
   data: {
     presencePromotion: false,
     tauxPromotion: [
@@ -393,18 +395,18 @@ const actionUpdateIndicateurTrois = {
   },
 }
 
-const actionUpdateIndicateurDeuxTrois = {
-  type: "updateIndicateurDeuxTrois" as const,
+const actionUpdateIndicateurDeuxTrois: ActionType = {
+  type: "updateIndicateurDeuxTrois",
   data: {
     presenceAugmentationPromotion: false,
     nombreAugmentationPromotionFemmes: 1,
     nombreAugmentationPromotionHommes: 2,
-    periodeDeclaration: "unePeriodeReference" as PeriodeDeclaration,
+    periodeDeclaration: "unePeriodeReference",
   },
 }
 
-const actionUpdateIndicateurQuatre = {
-  type: "updateIndicateurQuatre" as const,
+const actionUpdateIndicateurQuatre: ActionType = {
+  type: "updateIndicateurQuatre",
   data: {
     presenceCongeMat: false,
     nombreSalarieesPeriodeAugmentation: 7,
@@ -412,16 +414,16 @@ const actionUpdateIndicateurQuatre = {
   },
 }
 
-const actionUpdateIndicateurCinq = {
-  type: "updateIndicateurCinq" as const,
+const actionUpdateIndicateurCinq: ActionType = {
+  type: "updateIndicateurCinq",
   data: {
     nombreSalariesHommes: 6,
     nombreSalariesFemmes: 4,
   },
 }
 
-const actionUpdateInformationsEntreprise = {
-  type: "updateInformationsEntreprise" as const,
+const actionUpdateInformationsEntreprise: ActionType = {
+  type: "updateInformationsEntreprise",
   data: {
     nomEntreprise: "acme",
     siren: "1234",
@@ -431,7 +433,7 @@ const actionUpdateInformationsEntreprise = {
     adresse: "30 rue des alouettes",
     codePostal: "12345",
     commune: "Trifouilly",
-    structure: "Unité Economique et Sociale (UES)" as Structure,
+    structure: "Unité Economique et Sociale (UES)",
     nomUES: "nom d'une UES",
     nombreEntreprises: 2,
     entreprisesUES: [
@@ -441,8 +443,8 @@ const actionUpdateInformationsEntreprise = {
   },
 }
 
-const actionUpdateInformationsDeclarant = {
-  type: "updateInformationsDeclarant" as const,
+const actionUpdateInformationsDeclarant: ActionType = {
+  type: "updateInformationsDeclarant",
   data: {
     nom: "Daffy",
     prenom: "Duck",
@@ -452,8 +454,8 @@ const actionUpdateInformationsDeclarant = {
   },
 }
 
-const actionUpdateDeclaration = {
-  type: "updateDeclaration" as const,
+const actionUpdateDeclaration: ActionType = {
+  type: "updateDeclaration",
   data: {
     mesuresCorrection: "mmo",
     cseMisEnPlace: true,
@@ -466,46 +468,22 @@ const actionUpdateDeclaration = {
   },
 }
 
-// fast pipe, I miss you in JS…
-const stateDefault = AppReducer(
-  AppReducer(
-    AppReducer(
-      AppReducer(
-        AppReducer(
-          AppReducer(
-            AppReducer(
-              AppReducer(
-                AppReducer(
-                  AppReducer(
-                    AppReducer(
-                      AppReducer(
-                        AppReducer(
-                          AppReducer(AppReducer(undefined, actionInitiateState), actionUpdateInformationsSimulation),
-                          actionUpdateEffectif,
-                        ),
-                        actionUpdateIndicateurUnCsp,
-                      ),
-                      actionUpdateIndicateurUnCoefName,
-                    ),
-                    actionUpdateIndicateurUnCoefNombreSalaries,
-                  ),
-                  actionUpdateIndicateurUnCoefRemuneration,
-                ),
-                actionUpdateIndicateurDeux,
-              ),
-              actionUpdateIndicateurTrois,
-            ),
-            actionUpdateIndicateurDeuxTrois,
-          ),
-          actionUpdateIndicateurQuatre,
-        ),
-        actionUpdateIndicateurCinq,
-      ),
-      actionUpdateInformationsEntreprise,
-    ),
-    actionUpdateInformationsDeclarant,
-  ),
-  actionUpdateDeclaration,
-)
+const stateDefault = flow(
+  reducer(actionInitiateState),
+  reducer(actionUpdateInformationsSimulation),
+  reducer(actionUpdateEffectif),
+  reducer(actionUpdateIndicateurUnCsp),
+  reducer(actionUpdateIndicateurUnCoefName),
+  reducer(actionUpdateIndicateurUnCoefNombreSalaries),
+  reducer(actionUpdateIndicateurUnCoefRemuneration),
+  reducer(actionUpdateIndicateurDeux),
+  reducer(actionUpdateIndicateurTrois),
+  reducer(actionUpdateIndicateurDeuxTrois),
+  reducer(actionUpdateIndicateurQuatre),
+  reducer(actionUpdateIndicateurCinq),
+  reducer(actionUpdateInformationsEntreprise),
+  reducer(actionUpdateInformationsDeclarant),
+  reducer(actionUpdateDeclaration),
+)(undefined)
 
 export default stateDefault

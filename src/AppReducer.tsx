@@ -638,4 +638,6 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
   }
 }
 
+export const currifiedReducer = (action: ActionType) => (state: AppState | undefined) => AppReducer(state, action)
+
 export default AppReducer
