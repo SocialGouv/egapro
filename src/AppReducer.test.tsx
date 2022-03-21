@@ -1,12 +1,4 @@
-import {
-  CategorieSocioPro,
-  TranchesAges,
-  FormState,
-  PeriodeDeclaration,
-  Structure,
-  TrancheEffectifs,
-  ActionType,
-} from "./globals"
+import { CategorieSocioPro, TranchesAges, ActionType } from "./globals"
 
 import AppReducer from "./AppReducer"
 
@@ -59,11 +51,11 @@ describe("resetState", () => {
 //////////////////
 
 describe("updateInformationsSimulation", () => {
-  const action = {
-    type: "updateInformationsSimulation" as const,
+  const action: ActionType = {
+    type: "updateInformationsSimulation",
     data: {
       nomEntreprise: "acme",
-      trancheEffectifs: "251 à 999" as TrancheEffectifs,
+      trancheEffectifs: "251 à 999",
       anneeDeclaration: 2018,
       finPeriodeReference: "2020-10-14",
     },
@@ -83,8 +75,8 @@ describe("updateInformationsSimulation", () => {
 })
 
 describe("updateEffectif", () => {
-  const action = {
-    type: "updateEffectif" as const,
+  const action: ActionType = {
+    type: "updateEffectif",
     data: {
       nombreSalaries: [
         {
@@ -205,8 +197,8 @@ describe("updateEffectif", () => {
 })
 
 describe("updateIndicateurUnType", () => {
-  const action = {
-    type: "updateIndicateurUnType" as const,
+  const action: ActionType = {
+    type: "updateIndicateurUnType",
     data: { csp: false, coef: false, autre: false },
   }
 
@@ -224,8 +216,8 @@ describe("updateIndicateurUnType", () => {
 })
 
 describe("updateIndicateurUnCsp", () => {
-  const action = {
-    type: "updateIndicateurUnCsp" as const,
+  const action: ActionType = {
+    type: "updateIndicateurUnCsp",
     data: {
       remunerationAnnuelle: [
         {
@@ -346,8 +338,8 @@ describe("updateIndicateurUnCsp", () => {
 })
 
 describe("updateIndicateurUnCoefAddGroup", () => {
-  const action = {
-    type: "updateIndicateurUnCoefAddGroup" as const,
+  const action: ActionType = {
+    type: "updateIndicateurUnCoefAddGroup",
   }
 
   test("nothing undefined state", () => {
@@ -364,8 +356,8 @@ describe("updateIndicateurUnCoefAddGroup", () => {
 })
 
 describe("updateIndicateurUnCoefDeleteGroup", () => {
-  const action = {
-    type: "updateIndicateurUnCoefDeleteGroup" as const,
+  const action: ActionType = {
+    type: "updateIndicateurUnCoefDeleteGroup",
     index: 0,
   }
 
@@ -383,15 +375,15 @@ describe("updateIndicateurUnCoefDeleteGroup", () => {
 })
 
 describe("updateIndicateurUnCoef", () => {
-  const actionCoefAddGroup = {
-    type: "updateIndicateurUnCoefAddGroup" as const,
+  const actionCoefAddGroup: ActionType = {
+    type: "updateIndicateurUnCoefAddGroup",
   }
   const stateUndefinedWithOneGroup = AppReducer(stateUndefined, actionCoefAddGroup)
   const stateDefaultWithOneGroup = AppReducer(stateDefault, actionCoefAddGroup)
 
   describe("Array<{name: string}>", () => {
-    const action = {
-      type: "updateIndicateurUnCoef" as const,
+    const action: ActionType = {
+      type: "updateIndicateurUnCoef",
       data: {
         coefficient: [
           {
@@ -415,8 +407,8 @@ describe("updateIndicateurUnCoef", () => {
   })
 
   describe("Array<{tranchesAges: Array<GroupTranchesAgesEffectif>}>", () => {
-    const action = {
-      type: "updateIndicateurUnCoef" as const,
+    const action: ActionType = {
+      type: "updateIndicateurUnCoef",
       data: {
         coefficient: [
           {
@@ -461,8 +453,8 @@ describe("updateIndicateurUnCoef", () => {
   })
 
   describe("Array<{tranchesAges: Array<GroupTranchesAgesIndicateurUn>}>", () => {
-    const action = {
-      type: "updateIndicateurUnCoef" as const,
+    const action: ActionType = {
+      type: "updateIndicateurUnCoef",
       data: {
         coefficient: [
           {
@@ -508,8 +500,8 @@ describe("updateIndicateurUnCoef", () => {
 })
 
 describe("updateIndicateurDeux", () => {
-  const action = {
-    type: "updateIndicateurDeux" as const,
+  const action: ActionType = {
+    type: "updateIndicateurDeux",
     data: {
       presenceAugmentation: true,
       tauxAugmentation: [
@@ -551,8 +543,8 @@ describe("updateIndicateurDeux", () => {
 })
 
 describe("updateIndicateurTrois", () => {
-  const action = {
-    type: "updateIndicateurTrois" as const,
+  const action: ActionType = {
+    type: "updateIndicateurTrois",
     data: {
       presencePromotion: true,
       tauxPromotion: [
@@ -594,13 +586,13 @@ describe("updateIndicateurTrois", () => {
 })
 
 describe("updateIndicateurDeuxTrois", () => {
-  const action = {
-    type: "updateIndicateurDeuxTrois" as const,
+  const action: ActionType = {
+    type: "updateIndicateurDeuxTrois",
     data: {
       presenceAugmentationPromotion: true,
       nombreAugmentationPromotionFemmes: 3,
       nombreAugmentationPromotionHommes: 4,
-      periodeDeclaration: "deuxPeriodesReference" as PeriodeDeclaration,
+      periodeDeclaration: "deuxPeriodesReference",
     },
   }
 
@@ -618,8 +610,8 @@ describe("updateIndicateurDeuxTrois", () => {
 })
 
 describe("updateIndicateurQuatre", () => {
-  const action = {
-    type: "updateIndicateurQuatre" as const,
+  const action: ActionType = {
+    type: "updateIndicateurQuatre",
     data: {
       presenceCongeMat: true,
       nombreSalarieesPeriodeAugmentation: 6,
@@ -641,8 +633,8 @@ describe("updateIndicateurQuatre", () => {
 })
 
 describe("updateIndicateurCinq", () => {
-  const action = {
-    type: "updateIndicateurCinq" as const,
+  const action: ActionType = {
+    type: "updateIndicateurCinq",
     data: {
       nombreSalariesHommes: 8,
       nombreSalariesFemmes: 2,
@@ -663,8 +655,8 @@ describe("updateIndicateurCinq", () => {
 })
 
 describe("updateInformationsEntreprise", () => {
-  const action = {
-    type: "updateInformationsEntreprise" as const,
+  const action: ActionType = {
+    type: "updateInformationsEntreprise",
     data: {
       nomEntreprise: "acme",
       siren: "12345",
@@ -674,7 +666,7 @@ describe("updateInformationsEntreprise", () => {
       adresse: "2 rue du mérou",
       codePostal: "34000",
       commune: "Montpellier",
-      structure: "Unité Economique et Sociale (UES)" as Structure,
+      structure: "Unité Economique et Sociale (UES)",
       nomUES: "foobar UES",
       nombreEntreprises: 2,
       entreprisesUES: [{ nom: "entreprise 1", siren: "12345" }],
@@ -695,8 +687,8 @@ describe("updateInformationsEntreprise", () => {
 })
 
 describe("updateInformationsDeclarant", () => {
-  const action = {
-    type: "updateInformationsDeclarant" as const,
+  const action: ActionType = {
+    type: "updateInformationsDeclarant",
     data: {
       nom: "Norris",
       prenom: "Chuck",
@@ -720,8 +712,8 @@ describe("updateInformationsDeclarant", () => {
 })
 
 describe("updateDeclaration", () => {
-  const action = {
-    type: "updateDeclaration" as const,
+  const action: ActionType = {
+    type: "updateDeclaration",
     data: {
       mesuresCorrection: "mmo",
       dateConsultationCSE: "01/02/2017",
@@ -753,9 +745,9 @@ describe("updateDeclaration", () => {
 //////////////////
 
 describe("validateInformationsSimulation", () => {
-  const action = {
-    type: "validateInformationsSimulation" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateInformationsSimulation",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -773,9 +765,9 @@ describe("validateInformationsSimulation", () => {
 
 describe("validateEffectif", () => {
   describe("Valid", () => {
-    const action = {
-      type: "validateEffectif" as const,
-      valid: "Valid" as FormState,
+    const action: ActionType = {
+      type: "validateEffectif",
+      valid: "Valid",
     }
 
     test("nothing undefined state", () => {
@@ -792,9 +784,9 @@ describe("validateEffectif", () => {
   })
 
   describe("None with csp true", () => {
-    const action = {
-      type: "validateEffectif" as const,
-      valid: "None" as FormState,
+    const action: ActionType = {
+      type: "validateEffectif",
+      valid: "None",
     }
 
     test("invalid complete validate state", () => {
@@ -803,8 +795,8 @@ describe("validateEffectif", () => {
   })
 
   describe("None with csp false", () => {
-    const actionUpdateIndicateurUnType = {
-      type: "updateIndicateurUnType" as const,
+    const actionUpdateIndicateurUnType: ActionType = {
+      type: "updateIndicateurUnType",
       data: { csp: false, coef: false, autre: false },
     }
 
@@ -814,9 +806,9 @@ describe("validateEffectif", () => {
       expect(stateCompleteAndValidateCoef).toMatchSnapshot()
     })
 
-    const action = {
-      type: "validateEffectif" as const,
-      valid: "None" as FormState,
+    const action: ActionType = {
+      type: "validateEffectif",
+      valid: "None",
     }
 
     test("invalid complete validate state", () => {
@@ -827,9 +819,9 @@ describe("validateEffectif", () => {
 
 describe("validateIndicateurUnCoefGroup", () => {
   describe("Valid", () => {
-    const action = {
-      type: "validateIndicateurUnCoefGroup" as const,
-      valid: "Valid" as FormState,
+    const action: ActionType = {
+      type: "validateIndicateurUnCoefGroup",
+      valid: "Valid",
     }
 
     test("nothing undefined state", () => {
@@ -846,9 +838,9 @@ describe("validateIndicateurUnCoefGroup", () => {
   })
 
   describe("None", () => {
-    const action = {
-      type: "validateIndicateurUnCoefGroup" as const,
-      valid: "None" as FormState,
+    const action: ActionType = {
+      type: "validateIndicateurUnCoefGroup",
+      valid: "None",
     }
 
     test("invalid complete validate state", () => {
@@ -859,9 +851,9 @@ describe("validateIndicateurUnCoefGroup", () => {
 
 describe("validateIndicateurUnCoefEffectif", () => {
   describe("Valid", () => {
-    const action = {
-      type: "validateIndicateurUnCoefEffectif" as const,
-      valid: "Valid" as FormState,
+    const action: ActionType = {
+      type: "validateIndicateurUnCoefEffectif",
+      valid: "Valid",
     }
 
     test("nothing undefined state", () => {
@@ -878,9 +870,9 @@ describe("validateIndicateurUnCoefEffectif", () => {
   })
 
   describe("None", () => {
-    const action = {
-      type: "validateIndicateurUnCoefEffectif" as const,
-      valid: "None" as FormState,
+    const action: ActionType = {
+      type: "validateIndicateurUnCoefEffectif",
+      valid: "None",
     }
 
     test("invalid complete validate state", () => {
@@ -890,9 +882,9 @@ describe("validateIndicateurUnCoefEffectif", () => {
 })
 
 describe("validateIndicateurUn", () => {
-  const action = {
-    type: "validateIndicateurUn" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateIndicateurUn",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -909,9 +901,9 @@ describe("validateIndicateurUn", () => {
 })
 
 describe("validateIndicateurDeux", () => {
-  const action = {
-    type: "validateIndicateurDeux" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateIndicateurDeux",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -928,9 +920,9 @@ describe("validateIndicateurDeux", () => {
 })
 
 describe("validateIndicateurTrois", () => {
-  const action = {
-    type: "validateIndicateurTrois" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateIndicateurTrois",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -947,9 +939,9 @@ describe("validateIndicateurTrois", () => {
 })
 
 describe("validateIndicateurDeuxTrois", () => {
-  const action = {
-    type: "validateIndicateurDeuxTrois" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateIndicateurDeuxTrois",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -966,9 +958,9 @@ describe("validateIndicateurDeuxTrois", () => {
 })
 
 describe("validateIndicateurQuatre", () => {
-  const action = {
-    type: "validateIndicateurQuatre" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateIndicateurQuatre",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -985,9 +977,9 @@ describe("validateIndicateurQuatre", () => {
 })
 
 describe("validateIndicateurCinq", () => {
-  const action = {
-    type: "validateIndicateurCinq" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateIndicateurCinq",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -1004,9 +996,9 @@ describe("validateIndicateurCinq", () => {
 })
 
 describe("validateInformationsEntreprise", () => {
-  const action = {
-    type: "validateInformationsEntreprise" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateInformationsEntreprise",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -1023,9 +1015,9 @@ describe("validateInformationsEntreprise", () => {
 })
 
 describe("validateInformationsDeclarant", () => {
-  const action = {
-    type: "validateInformationsDeclarant" as const,
-    valid: "Valid" as FormState,
+  const action: ActionType = {
+    type: "validateInformationsDeclarant",
+    valid: "Valid",
   }
 
   test("nothing undefined state", () => {
@@ -1045,15 +1037,15 @@ describe("validateInformationsDeclarant", () => {
 // TODO : corriger les types dans global.ts ou bien ajouter les paramètres manquants dans ce test.
 describe("validateDeclaration", () => {
   const action: ActionType = {
-    type: "validateDeclaration" as const,
-    valid: "Valid" as FormState,
+    type: "validateDeclaration",
+    valid: "Valid",
     // @ts-ignore: see comment above
     indicateurUnData: {
       nombreCoefficients: 6,
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
       resultatFinal: 8.0,
-      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      sexeSurRepresente: "femmes",
       noteFinale: 31,
     },
     // @ts-ignore: see comment above
@@ -1061,7 +1053,7 @@ describe("validateDeclaration", () => {
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
       resultatFinal: 5.0,
-      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      sexeSurRepresente: "femmes",
       noteFinale: 10,
       mesuresCorrection: false,
     },
@@ -1070,7 +1062,7 @@ describe("validateDeclaration", () => {
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
       resultatFinal: 3.0,
-      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      sexeSurRepresente: "femmes",
       noteFinale: 15,
       mesuresCorrection: false,
     },
@@ -1080,7 +1072,7 @@ describe("validateDeclaration", () => {
       motifNonCalculablePrecision: "",
       resultatFinalEcart: 25,
       resultatFinalNombreSalaries: 5,
-      sexeSurRepresente: "femmes" as undefined | "femmes" | "hommes",
+      sexeSurRepresente: "femmes",
       noteFinale: 25,
       mesuresCorrection: false,
     },
@@ -1093,7 +1085,7 @@ describe("validateDeclaration", () => {
     },
     indicateurCinqData: {
       resultatFinal: 4.0,
-      sexeSurRepresente: "hommes" as undefined | "egalite" | "femmes" | "hommes",
+      sexeSurRepresente: "hommes",
       noteFinale: 10,
     },
     noteIndex: 78,
