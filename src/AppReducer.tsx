@@ -165,6 +165,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
             finPeriodeReference,
           },
           effectif:
+            // We set invalid for all forms because we want the user to revalidate the form because prerequisites may have changed.
             state.effectif.formValidated === "Valid" ? { ...state.effectif, formValidated: "Invalid" } : state.effectif,
           indicateurUn:
             state.indicateurUn.formValidated === "Valid"
@@ -254,7 +255,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
       if (action.valid === "None") {
         return {
           ...state,
-          effectif: { ...state.effectif, formValidated: action.valid },
+          effectif: { ...state.effectif, formValidated: "None" },
           indicateurUn:
             state.indicateurUn.formValidated === "Valid"
               ? {
