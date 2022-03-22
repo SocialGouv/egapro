@@ -15,6 +15,7 @@ const realDate = global.Date
 beforeEach(() => {
   // @ts-ignore
   global.Date = jest.fn(() => new realDate(1578393480399))
+  global.Date.UTC = realDate.UTC
 })
 
 afterEach(() => {
