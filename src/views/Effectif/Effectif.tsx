@@ -1,4 +1,4 @@
-/** @jsx jsx */
+/** @jsxImportSource @emotion/react */
 import { jsx } from "@emotion/react"
 import { Fragment, useCallback } from "react"
 import { RouteComponentProps } from "react-router-dom"

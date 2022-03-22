@@ -1,7 +1,7 @@
-/** @jsx jsx */
+/** @jsxImportSource @emotion/react */
 import { useReducer, useCallback } from "react"
 import { Router } from "react-router-dom"
-import { css, jsx } from "@emotion/react"
+import { css } from "@emotion/react"
 import "@fontsource/gabriela"
 import "@fontsource/cabin"
 import ReactPiwik from "react-piwik"

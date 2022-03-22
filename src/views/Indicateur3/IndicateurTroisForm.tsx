@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react"
 import { Form } from "react-final-form"
 import { FormState, ActionIndicateurTroisData } from "../../globals"
 

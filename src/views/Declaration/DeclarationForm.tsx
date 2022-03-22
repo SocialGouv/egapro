@@ -1,6 +1,6 @@
-/** @jsx jsx */
+/** @jsxImportSource @emotion/react */
 import { Fragment, useState } from "react"
-import { css, jsx } from "@emotion/react"
+import { css } from "@emotion/react"
 import { Form, useField } from "react-final-form"
 
 import { AppState, FormState, ActionDeclarationData } from "../../globals"

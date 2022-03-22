@@ -1,4 +1,4 @@
-/** @jsx jsx */
+/** @jsxImportSource @emotion/react */
 import { FunctionComponent } from "react"
 
 import { Fragment } from "react"
