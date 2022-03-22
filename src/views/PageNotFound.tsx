@@ -1,5 +1,4 @@
 /** @jsxImportSource @emotion/react */
-import { jsx } from "@emotion/react"
 import { useHistory } from "react-router-dom"
 
 import Page from "../components/Page"

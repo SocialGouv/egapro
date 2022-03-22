@@ -1,12 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import { jsx } from "@emotion/react"
 import { useMemo, useCallback } from "react"
+
 import { AppState, FormState, GroupTranchesAgesEffectif, ActionEffectifData } from "../../globals"
-
 import { displayNameCategorieSocioPro } from "../../utils/helpers"
-
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
 import EffectifFormRaw from "./EffectifFormRaw"
 
 interface Props {

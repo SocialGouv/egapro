@@ -1,13 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import { jsx } from "@emotion/react"
 import { useCallback } from "react"
 
 import { AppState, FormState, ActionType, ActionIndicateurUnCspData } from "../../../globals"
-
 import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
-
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-
 import IndicateurUnCspForm from "./IndicateurUnCspForm"
 import IndicateurUnResult from "../IndicateurUnResult"
 

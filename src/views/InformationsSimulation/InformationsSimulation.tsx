@@ -1,13 +1,10 @@
 /** @jsxImportSource @emotion/react */
-import { jsx } from "@emotion/react"
 import { useCallback, ReactNode } from "react"
 
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
-
 import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-
 import InformationsSimulationForm from "./InformationsSimulationForm"
 import { useTitle } from "../../utils/hooks"
 import { useDeclaration } from "../../hooks/useDeclaration"
