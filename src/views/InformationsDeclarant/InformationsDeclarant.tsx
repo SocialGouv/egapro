@@ -1,13 +1,10 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { useCallback, ReactNode } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsDeclarantData } from "../../globals"
-
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-
 import InformationsDeclarantForm from "./InformationsDeclarantForm"
 import { useTitle } from "../../utils/hooks"
 

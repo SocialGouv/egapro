@@ -1,14 +1,12 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { Fragment, useMemo, useCallback } from "react"
+
 import { AppState, FormState, GroupTranchesAgesEffectif, ActionIndicateurUnCoefData } from "../../../globals"
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
-
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import ButtonAction from "../../../components/ButtonAction"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
-
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
 import EffectifResult from "../../Effectif/EffectifResult"
 

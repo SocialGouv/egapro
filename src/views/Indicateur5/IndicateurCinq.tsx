@@ -1,15 +1,11 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { useCallback, ReactNode } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionIndicateurCinqData } from "../../globals"
-
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-
 import IndicateurCinqForm from "./IndicateurCinqForm"
 import IndicateurCinqResult from "./IndicateurCinqResult"
 import { useTitle } from "../../utils/hooks"

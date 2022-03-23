@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react"
 import { useCallback } from "react"
 import { Form } from "react-final-form"
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals"

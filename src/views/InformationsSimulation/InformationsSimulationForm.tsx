@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react"
 import { Form, useField } from "react-final-form"
 import { Text, Grid, GridItem } from "@chakra-ui/react"
 

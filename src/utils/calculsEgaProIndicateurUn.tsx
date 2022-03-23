@@ -15,7 +15,7 @@ import {
   calculTotalEcartPondere,
   calculTotalEffectifs,
   rowEffectifsParTrancheAge,
-  effectifGroup,
+  EffectifGroup,
   calculEffectifsIndicateurCalculable,
 } from "./calculsEgaPro"
 
@@ -76,7 +76,7 @@ export const calculEcartApresApplicationSeuilPertinenceCoef = (
   ecartRemunerationMoyenne: number | undefined,
 ): number | undefined => calculEcartApresApplicationSeuilPertinence(ecartRemunerationMoyenne, seuilPertinenceCoef)
 
-export interface effectifEtEcartRemuGroupCsp extends effectifGroup {
+export interface effectifEtEcartRemuGroupCsp extends EffectifGroup {
   categorieSocioPro: CategorieSocioPro
   trancheAge: TranchesAges
   remunerationAnnuelleBrutFemmes: number | undefined
@@ -92,7 +92,7 @@ export interface tmpGroupTranchesAgesCsp {
   nombreSalariesHommes: number | undefined
 }
 
-export interface effectifEtEcartRemuGroupCoef extends effectifGroup {
+export interface effectifEtEcartRemuGroupCoef extends EffectifGroup {
   id: any
   name: string
   trancheAge: TranchesAges

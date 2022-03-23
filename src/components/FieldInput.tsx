@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react"
 import { useField } from "react-final-form"
 import { ValidatorFunction } from "../utils/formHelpers"
 

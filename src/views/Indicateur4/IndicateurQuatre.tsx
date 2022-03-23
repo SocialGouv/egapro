@@ -1,19 +1,15 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { useCallback, ReactNode } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionIndicateurQuatreData } from "../../globals"
-
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
 import { useTitle } from "../../utils/hooks"

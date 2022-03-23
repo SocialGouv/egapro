@@ -1,8 +1,5 @@
-/** @jsx jsx */
-import { FunctionComponent } from "react"
-
-import { Fragment } from "react"
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
+import { Fragment, FunctionComponent } from "react"
 
 export const displayMetaErrors: FunctionComponent<{ [key: string]: string }> = (error) => (
   <Fragment>

@@ -8,4 +8,10 @@
     },
     // https://github.com/colinhacks/zod/issues/443
     "typescript.tsdk": "node_modules/typescript/lib",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.history": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true
+    }
 }

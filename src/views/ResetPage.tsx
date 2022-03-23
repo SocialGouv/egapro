@@ -29,9 +29,7 @@ function ResetPage({ dispatch, state }: ResetPageProps): null {
     if (state === undefined) {
       postIndicatorsDatas({})
         .then(({ jsonBody: { id } }) => {
-          history.push(`/simulateur/${id}`, {
-            ...(location.state && location.state),
-          })
+          history.push(`/simulateur/${id}`, location.state ? location.state : {})
         })
         .catch((error) => {
           const errorMessage = (error.jsonBody && error.jsonBody.message) || "Erreur lors de la récupération du code"

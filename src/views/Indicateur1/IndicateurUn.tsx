@@ -1,17 +1,13 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { ReactNode } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, ActionType } from "../../globals"
-
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
-
 import Page from "../../components/Page"
 import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import { TextSimulatorLink, ButtonSimulatorLink } from "../../components/SimulatorLink"
-
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
 import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"

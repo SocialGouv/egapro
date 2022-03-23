@@ -1,6 +1,6 @@
-/** @jsx jsx */
+/** @jsxImportSource @emotion/react */
 import { useState } from "react"
-import { css, jsx } from "@emotion/react"
+import { css } from "@emotion/react"
 import { Field } from "react-final-form"
 
 import { EntrepriseUES } from "../globals"

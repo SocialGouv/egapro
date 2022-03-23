@@ -27,9 +27,8 @@ function Home({ history, location, dispatch }: Props) {
     postIndicatorsDatas({})
       .then(({ jsonBody: { id } }) => {
         setLoading(false)
-        history.push(`/simulateur/${id}`, {
-          ...(location.state && location.state),
-        })
+
+        history.push(`/simulateur/${id}`, location.state ? location.state : {})
       })
       .catch((error) => {
         setLoading(false)

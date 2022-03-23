@@ -7,7 +7,7 @@ import {
   calculTotalEcartPondere,
   calculTotalEffectifs,
   rowEffectifsParCategorieSocioPro,
-  effectifGroup,
+  EffectifGroup,
   calculEffectifsIndicateurCalculable,
 } from "./calculsEgaPro"
 import calculIndicateurUn from "./calculsEgaProIndicateurUn"
@@ -43,7 +43,7 @@ export const calculEcartTauxAugmentation = (
     ? roundDecimal(tauxAugmentationHommes - tauxAugmentationFemmes, 6)
     : undefined
 
-export interface effectifEtEcartAugmentGroup extends effectifGroup {
+export interface effectifEtEcartAugmentGroup extends EffectifGroup {
   categorieSocioPro: CategorieSocioPro
   tauxAugmentationFemmes: number | undefined
   tauxAugmentationHommes: number | undefined

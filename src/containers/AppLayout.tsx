@@ -92,33 +92,35 @@ function AppLayout({ state, dispatch }: Props) {
         {layoutType === "mobile" ? (
           <MobileLayout />
         ) : (
-          <Flex direction="column" sx={{ minHeight: "100vh" }}>
-            <Header />
-            <MainScrollView state={state}>
-              <Switch>
-                <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
-                <Route path="/simulateur/:code">
-                  <Simulateur state={state} dispatch={dispatch} />
-                </Route>
-                <Route path="/mentions-legales" exact>
-                  <MentionsLegales />
-                </Route>
-                <Route path="/accessibilite" exact>
-                  <Accessibilite />
-                </Route>
-                <Route path="/cgu" exact>
-                  <CGU />
-                </Route>
-                <Route path="/politique-confidentialite" exact>
-                  <PolitiqueConfidentialite />
-                </Route>
-                <Route>
-                  <PageNotFound />
-                </Route>
-              </Switch>
-            </MainScrollView>
-            <Footer />
-          </Flex>
+          <>
+            <Flex direction="column">
+              <Header />
+              <MainScrollView state={state}>
+                <Switch>
+                  <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
+                  <Route path="/simulateur/:code">
+                    <Simulateur state={state} dispatch={dispatch} />
+                  </Route>
+                  <Route path="/mentions-legales" exact>
+                    <MentionsLegales />
+                  </Route>
+                  <Route path="/accessibilite" exact>
+                    <Accessibilite />
+                  </Route>
+                  <Route path="/cgu" exact>
+                    <CGU />
+                  </Route>
+                  <Route path="/politique-confidentialite" exact>
+                    <PolitiqueConfidentialite />
+                  </Route>
+                  <Route>
+                    <PageNotFound />
+                  </Route>
+                </Switch>
+              </MainScrollView>
+              <Footer />
+            </Flex>
+          </>
         )}
       </Switch>
     </AuthContextProvider>

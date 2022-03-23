@@ -70,18 +70,13 @@ export const calculEcartsPonderesParGroupe =
 export const calculTotalEcartPondere = (tableauEcartsPonderes: Array<number | undefined>): number | undefined =>
   tableauEcartsPonderes.length === 0 || tableauEcartsPonderes.includes(undefined)
     ? undefined
-    : roundDecimal(
-        tableauEcartsPonderes
-          .filter((ecartPondere) => ecartPondere !== undefined)
-          .reduce((acc, val) => (acc || 0) + (val !== undefined ? val : 0), undefined) || 0,
-        6,
-      )
+    : roundDecimal((tableauEcartsPonderes as number[]).reduce((acc, val) => acc + val, 0) || 0, 6)
 
 //////////////////
 // EFFECTIFS /////
 //////////////////
 
-export interface effectifGroup {
+export interface EffectifGroup {
   nombreSalariesFemmes: number
   nombreSalariesHommes: number
   validiteGroupe: boolean
@@ -91,7 +86,7 @@ export interface effectifGroup {
 export const rowEffectifsParTrancheAge = (
   { nombreSalariesFemmes, nombreSalariesHommes }: GroupTranchesAgesEffectif,
   calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): effectifGroup => {
+): EffectifGroup => {
   nombreSalariesFemmes = nombreSalariesFemmes || 0
   nombreSalariesHommes = nombreSalariesHommes || 0
 
@@ -111,7 +106,7 @@ export const rowEffectifsParTrancheAge = (
 export const rowEffectifsParCategorieSocioPro = (
   tranchesAges: Array<GroupTranchesAgesEffectif>,
   calculValiditeGroupe: (nombreSalariesFemmes: number, nombreSalariesHommes: number) => boolean,
-): effectifGroup => {
+): EffectifGroup => {
   const { nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe } = tranchesAges.reduce(
     ({ nombreSalariesFemmesGroupe, nombreSalariesHommesGroupe }, { nombreSalariesFemmes, nombreSalariesHommes }) => ({
       nombreSalariesFemmesGroupe: nombreSalariesFemmesGroupe + (nombreSalariesFemmes || 0),
@@ -137,7 +132,7 @@ export const rowEffectifsParCategorieSocioPro = (
   }
 }
 
-export const calculTotalEffectifs = (groupEffectif: Array<effectifGroup>) => {
+export const calculTotalEffectifs = (groupEffectif: Array<EffectifGroup>) => {
   const { totalNombreSalariesFemmes, totalNombreSalariesHommes } = groupEffectif.reduce(
     ({ totalNombreSalariesFemmes, totalNombreSalariesHommes }, { nombreSalariesFemmes, nombreSalariesHommes }) => {
       return {

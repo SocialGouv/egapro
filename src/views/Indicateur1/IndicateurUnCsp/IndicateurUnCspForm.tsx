@@ -1,14 +1,10 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { useMemo, useCallback } from "react"
+
 import { ActionIndicateurUnCspData, AppState, GroupTranchesAgesIndicateurUn, FormState } from "../../../globals"
-
 import { effectifEtEcartRemuGroupCsp } from "../../../utils/calculsEgaProIndicateurUn"
-
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
-
 import { displayNameCategorieSocioPro } from "../../../utils/helpers"
-
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 
 interface Props {

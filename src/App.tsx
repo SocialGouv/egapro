@@ -1,13 +1,16 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { useReducer, useCallback } from "react"
 import { Router } from "react-router-dom"
+import { css } from "@emotion/react"
 import "@fontsource/gabriela"
 import "@fontsource/cabin"
 import ReactPiwik from "react-piwik"
+
+// @ts-ignore TS doesn't find the type definition of history. No error before.
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
 import { ChakraProvider } from "@chakra-ui/react"
+
 import theme from "./theme"
 import { ActionType } from "./globals"
 import AppReducer from "./AppReducer"
