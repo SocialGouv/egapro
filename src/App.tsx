@@ -1,8 +1,11 @@
 import React, { useReducer, useCallback, FunctionComponent } from "react"
 import { Router } from "react-router-dom"
+import { css } from "@emotion/react"
 import "@fontsource/gabriela"
 import "@fontsource/cabin"
 import ReactPiwik from "react-piwik"
+
+// @ts-ignore TS doesn't find the type definition of history. No error before.
 import { createBrowserHistory } from "history"
 import { ErrorBoundary } from "react-error-boundary"
 import { Box, ChakraProvider } from "@chakra-ui/react"

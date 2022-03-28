@@ -1,7 +1,9 @@
 import React, { FunctionComponent } from "react"
-import { Box } from "@chakra-ui/react"
 import { StaticContext } from "react-router"
 import { Route, Switch, RouteComponentProps } from "react-router-dom"
+import { Box } from "@chakra-ui/react"
+
+import type { FAQSectionType, FAQPartType } from "../../globals"
 
 import FAQHeader from "./components/FAQHeader"
 import FAQFooter from "./components/FAQFooter"
@@ -95,7 +97,7 @@ const FAQ: FunctionComponent<FAQProps> = ({ closeMenu }) => (
                   match: {
                     params: { section },
                   },
-                }) => <FAQSection section={section} />}
+                }) => <FAQSection section={section as FAQSectionType} />}
               />
 
               <Route
@@ -106,7 +108,7 @@ const FAQ: FunctionComponent<FAQProps> = ({ closeMenu }) => (
                   match: {
                     params: { section },
                   },
-                }) => <FAQSectionDetailCalcul history={history} section={section} />}
+                }) => <FAQSectionDetailCalcul history={history} section={section as FAQSectionType} />}
               />
 
               <Route
@@ -117,7 +119,9 @@ const FAQ: FunctionComponent<FAQProps> = ({ closeMenu }) => (
                   match: {
                     params: { part, indexQuestion },
                   },
-                }) => <FAQQuestion history={history} part={part} indexQuestion={indexQuestion} />}
+                }) => (
+                  <FAQQuestion history={history} part={part as FAQPartType} indexQuestion={Number(indexQuestion)} />
+                )}
               />
             </Switch>
 

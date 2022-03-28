@@ -1,15 +1,12 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
 import { useCallback } from "react"
+
 import { AppState, FormState, ActionIndicateurUnCoefData, GroupTranchesAgesIndicateurUn } from "../../../globals"
-
 import calculIndicateurUn from "../../../utils/calculsEgaProIndicateurUn"
-
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../../components/SimulatorLink"
-
 import IndicateurUnFormRaw from "../IndicateurUnFormRaw"
 import IndicateurUnResult from "../IndicateurUnResult"
 

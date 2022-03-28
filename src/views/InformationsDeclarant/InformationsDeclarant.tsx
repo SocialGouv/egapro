@@ -7,7 +7,6 @@ import { useTitle } from "../../utils/hooks"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-
 import InformationsDeclarantForm from "./InformationsDeclarantForm"
 
 interface InformationsDeclarantProps extends RouteComponentProps {

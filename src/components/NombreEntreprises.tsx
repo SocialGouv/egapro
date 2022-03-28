@@ -1,8 +1,8 @@
-/** @jsx jsx */
-import React, { useState } from "react"
-import { css, jsx } from "@emotion/react"
+/** @jsxImportSource @emotion/react */
+import { useState } from "react"
+import { css } from "@emotion/react"
 import { Field } from "react-final-form"
-import { Text } from "@chakra-ui/react"
+import { Text, Box } from "@chakra-ui/react"
 
 import { EntrepriseUES } from "../globals"
 
@@ -52,7 +52,7 @@ function NombreEntreprises({
   return (
     <Field name={fieldName} validate={validator}>
       {({ input, meta }) => (
-        <div css={styles.formField}>
+        <Box mb={4}>
           <label css={[styles.label, meta.error && meta.touched && styles.labelError]} htmlFor={input.name}>
             {label}
           </label>
@@ -97,16 +97,13 @@ function NombreEntreprises({
           >
             <Text>Toutes les données renseignées pour ces entreprises seront effacées définitivement.</Text>
           </Modal>
-        </div>
+        </Box>
       )}
     </Field>
   )
 }
 
 const styles = {
-  formField: css({
-    marginBottom: 20,
-  }),
   label: css({
     fontSize: 14,
     fontWeight: "bold",

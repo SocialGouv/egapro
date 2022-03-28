@@ -9,7 +9,6 @@ import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-
 import EffectifForm from "./EffectifForm"
 import EffectifResult from "./EffectifResult"
 import { useTitle } from "../../utils/hooks"

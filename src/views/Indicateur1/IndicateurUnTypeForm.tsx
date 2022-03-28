@@ -52,7 +52,7 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ co
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
-            <FormControl readOnly={readOnly}>
+            <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">
                 Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)
               </FormLabel>

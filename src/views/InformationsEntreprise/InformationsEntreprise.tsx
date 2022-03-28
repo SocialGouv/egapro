@@ -8,7 +8,6 @@ import { useDeclaration } from "../../hooks/useDeclaration"
 
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
 
 interface InformationsEntrepriseProps extends RouteComponentProps {

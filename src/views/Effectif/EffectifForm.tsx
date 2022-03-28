@@ -2,9 +2,7 @@ import React, { useMemo, useCallback, FunctionComponent } from "react"
 import { AppState, FormState, GroupTranchesAgesEffectif, ActionEffectifData } from "../../globals"
 
 import { displayNameCategorieSocioPro } from "../../utils/helpers"
-
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
 import EffectifFormRaw from "./EffectifFormRaw"
 
 interface EffectifFormProps {

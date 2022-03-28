@@ -2,7 +2,6 @@ import React, { FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, ActionType } from "../../globals"
-
 import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
 import { useTitle } from "../../utils/hooks"
 
@@ -11,7 +10,6 @@ import FormStack from "../../components/ds/FormStack"
 import Page from "../../components/Page"
 import ActionBar from "../../components/ActionBar"
 import { TextSimulatorLink, ButtonSimulatorLink } from "../../components/SimulatorLink"
-
 import IndicateurUnTypeForm from "./IndicateurUnTypeForm"
 import IndicateurUnCsp from "./IndicateurUnCsp/IndicateurUnCsp"
 import IndicateurUnCoef from "./IndicateurUnCoef/IndicateurUnCoef"

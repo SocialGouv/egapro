@@ -8,7 +8,7 @@ import {
   calculTotalEffectifs,
   calculEffectifsIndicateurCalculable,
   rowEffectifsParCategorieSocioPro,
-  effectifGroup,
+  EffectifGroup,
 } from "./calculsEgaPro"
 
 import {
@@ -41,7 +41,7 @@ export {
 // ETP
 export const calculEcartTauxPromotion = calculEcartTauxAugmentation
 
-export interface effectifEtEcartPromoGroup extends effectifGroup {
+export interface effectifEtEcartPromoGroup extends EffectifGroup {
   categorieSocioPro: CategorieSocioPro
   tauxPromotionFemmes: number | undefined
   tauxPromotionHommes: number | undefined

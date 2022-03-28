@@ -132,7 +132,7 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
               label="Nom de la simulation (ex : nom_entreprise_date)"
               isReadOnly={readOnly}
             />
-            <FormControl readOnly={readOnly}>
+            <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">
                 Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)
               </FormLabel>

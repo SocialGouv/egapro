@@ -13,7 +13,7 @@ interface RadiosBooleanProps {
 
 const RadiosBoolean: FunctionComponent<RadiosBooleanProps> = ({ readOnly, fieldName, label, value }) => {
   return (
-    <FormControl readOnly={readOnly}>
+    <FormControl isReadOnly={readOnly}>
       <FormLabel as="div">{label}</FormLabel>
       <InputRadioGroup defaultValue={value}>
         <InputRadio value="true" choiceValue="true" fieldName={fieldName} isReadOnly={readOnly}>

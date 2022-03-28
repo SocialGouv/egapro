@@ -34,7 +34,7 @@ const InputField: FunctionComponent<InputFieldProps> = ({ name, index, deleteGro
   const error = hasFieldError(field.meta)
 
   return (
-    <FormControl component="input" isInvalid={error}>
+    <FormControl isInvalid={error}>
       <FormLabel htmlFor={field.input.name}>{`Groupe ${index + 1}`}</FormLabel>
       <InputGroup>
         <Input

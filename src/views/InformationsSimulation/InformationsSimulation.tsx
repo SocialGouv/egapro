@@ -10,7 +10,6 @@ import { useDeclaration } from "../../hooks/useDeclaration"
 import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-
 import InformationsSimulationForm from "./InformationsSimulationForm"
 
 interface InformationsSimulationProps {

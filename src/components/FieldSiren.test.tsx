@@ -1,3 +1,5 @@
+import { sirenValidatorWithOwner } from "./FieldSiren"
+
 jest.mock("../utils/api", () => ({
   validateSiren: (siren: string) => {
     switch (siren) {
@@ -54,8 +56,6 @@ jest.mock("../utils/api", () => ({
     }
   },
 }))
-
-import { sirenValidatorWithOwner } from "./FieldSiren"
 
 const validator = sirenValidatorWithOwner(jest.fn())
 

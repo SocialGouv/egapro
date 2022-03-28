@@ -13,7 +13,6 @@ import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
 

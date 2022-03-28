@@ -223,7 +223,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
             {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            <FormControl readOnly={readOnly}>
+            <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">Vous déclarez en tant que</FormLabel>
               <InputRadioGroup defaultValue={values.structure}>
                 <InputRadio value="Entreprise" fieldName="structure" choiceValue="Entreprise" isReadOnly={readOnly}>

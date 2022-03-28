@@ -27,9 +27,8 @@ const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => 
     postIndicatorsDatas({})
       .then(({ jsonBody: { id } }) => {
         setLoading(false)
-        history.push(`/simulateur/${id}`, {
-          ...(location.state && location.state),
-        })
+
+        history.push(`/simulateur/${id}`, location.state ? location.state : {})
       })
       .catch((error) => {
         setLoading(false)

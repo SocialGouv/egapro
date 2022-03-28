@@ -58,8 +58,9 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
               <Input
                 id={input.name}
                 placeholder={placeholder}
-                autocomplete={autocomplete}
+                autoComplete={autocomplete}
                 type={type}
+                // @ts-ignore
                 rafConfig={rafConfig}
                 {...input}
               />
