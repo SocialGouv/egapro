@@ -40,7 +40,7 @@ const SelectGroup: FunctionComponent<SelectGroupProps> = ({
           <FormLabel htmlFor={input.name}>{isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}</FormLabel>
           <Select id={input.name} {...input}>
             {optionLabel && (
-              <option disabled selected value="">
+              <option disabled value="">
                 -- {optionLabel} --
               </option>
             )}
