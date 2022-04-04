@@ -1,19 +1,16 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { Fragment } from "react"
+import React, { FunctionComponent } from "react"
+import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
-import { displaySexeSurRepresente } from "../../utils/helpers"
+import { displayFractionPercentWithEmptyData, displaySexeSurRepresente } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
-import RowData, { RowLabels, RowLabelFull } from "./components/RowData"
+import { getResults } from "../Indicateur2et3/IndicateurDeuxTrois"
 
-import { getResults, AdditionalInfo } from "../Indicateur2et3/IndicateurDeuxTrois"
-
-interface Props {
+interface RecapitulatifIndicateurDeuxTroisProps {
   indicateurDeuxTroisFormValidated: FormState
   effectifsIndicateurDeuxTroisCalculable: boolean
   indicateurDeuxTroisCalculable: boolean
@@ -27,7 +24,7 @@ interface Props {
   plusPetitNombreSalaries: "hommes" | "femmes" | undefined
 }
 
-function RecapitulatifIndicateurDeuxTrois({
+const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateurDeuxTroisProps> = ({
   indicateurDeuxTroisFormValidated,
   effectifsIndicateurDeuxTroisCalculable,
   indicateurDeuxTroisCalculable,
@@ -38,56 +35,49 @@ function RecapitulatifIndicateurDeuxTrois({
   correctionMeasure,
   tauxAugmentationPromotionFemmes,
   tauxAugmentationPromotionHommes,
-  plusPetitNombreSalaries,
-}: Props) {
+}) => {
   if (!effectifsIndicateurDeuxTroisCalculable) {
     return (
-      <div css={styles.container}>
-        <InfoBlock
-          type="warning"
-          title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
-          text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
-        />
-      </div>
+      <InfoBlock
+        type="warning"
+        title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
+        text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
+      />
     )
   }
 
   if (indicateurDeuxTroisFormValidated !== "Valid") {
     return (
-      <div css={styles.container}>
-        <InfoBlock
-          type="warning"
-          title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
-          text={
-            <Fragment>
-              Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-              <TextSimulatorLink to="/indicateur2et3" label="Valider les données" />
-            </Fragment>
-          }
-        />
-      </div>
+      <InfoBlock
+        type="warning"
+        title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
+        text={
+          <>
+            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
+            <TextSimulatorLink to="/indicateur2et3" label="Valider les données" />
+          </>
+        }
+      />
     )
   }
 
   if (!indicateurDeuxTroisCalculable) {
     return (
-      <div css={styles.container}>
-        <InfoBlock
-          type="warning"
-          title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
-          text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d'augmentation durant la période de référence"
-        />
-      </div>
+      <InfoBlock
+        type="warning"
+        title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
+        text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d'augmentation durant la période de référence"
+      />
     )
   }
 
   const results = getResults(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)
 
   return (
-    <div css={styles.container}>
+    <div>
       <RecapBloc
         title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
-        resultBubble={{
+        resultSummary={{
           firstLineLabel: results.best.label,
           firstLineData: results.best.result,
           firstLineInfo: displaySexeSurRepresente(indicateurSexeSurRepresente),
@@ -97,32 +87,26 @@ function RecapitulatifIndicateurDeuxTrois({
           indicateurSexeSurRepresente,
         }}
       >
-        <RowLabelFull label="taux d'augmentation" />
-        <RowLabels labels={["femmes", "hommes"]} />
-        <RowData
-          name="taux de salariés augmentés"
-          data={[tauxAugmentationPromotionFemmes, tauxAugmentationPromotionHommes]}
-          asPercent={true}
-        />
+        <Table size="sm" variant="striped">
+          <TableCaption>taux d'augmentation</TableCaption>
+          <Thead textTransform="inherit" fontSize=".5rem">
+            <Tr>
+              <Th />
+              <Th fontSize="xxs">Femmes</Th>
+              <Th fontSize="xxs">Hommes</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>taux de salariés augmentés</Td>
+              <Td isNumeric>{displayFractionPercentWithEmptyData(tauxAugmentationPromotionFemmes, 1)}</Td>
+              <Td isNumeric>{displayFractionPercentWithEmptyData(tauxAugmentationPromotionHommes, 1)}</Td>
+            </Tr>
+          </Tbody>
+        </Table>
       </RecapBloc>
-      <AdditionalInfo
-        results={results}
-        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-        plusPetitNombreSalaries={plusPetitNombreSalaries}
-        correctionMeasure={correctionMeasure}
-      />
     </div>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-    marginTop: 22,
-    marginBottom: 22,
-  }),
-  message: css({}),
 }
 
 export default RecapitulatifIndicateurDeuxTrois

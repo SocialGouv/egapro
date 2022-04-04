@@ -1,27 +1,29 @@
-/** @jsxImportSource @emotion/react */
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionIndicateurQuatreData } from "../../globals"
+
+import { useTitle } from "../../utils/hooks"
+
 import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+
+import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import IndicateurQuatreForm from "./IndicateurQuatreForm"
 import IndicateurQuatreResult from "./IndicateurQuatreResult"
-import { useTitle } from "../../utils/hooks"
 
-interface Props extends RouteComponentProps {
+interface IndicateurQuatreProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Indicateur retour congé maternité"
 
-function IndicateurQuatre({ state, dispatch }: Props) {
+const IndicateurQuatre: FunctionComponent<IndicateurQuatreProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const updateIndicateurQuatre = useCallback(
@@ -54,10 +56,10 @@ function IndicateurQuatre({ state, dispatch }: Props) {
             text={messageNonCalculable}
           />
           <ActionBar>
-            <ActionLink onClick={() => validateIndicateurQuatre("None")}>modifier les données saisies</ActionLink>
+            <ActionLink onClick={() => validateIndicateurQuatre("None")}>Modifier les données saisies</ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonSimulatorLink to="/indicateur5" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur5" label="Suivant" />
           </ActionBar>
         </div>
       </PageIndicateurQuatre>
@@ -89,15 +91,13 @@ function IndicateurQuatre({ state, dispatch }: Props) {
   )
 }
 
-function PageIndicateurQuatre({ children }: { children: ReactNode }) {
-  return (
-    <Page
-      title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-      tagline="Renseignez le nombre de salariées en congé maternité durant la période de référence et ayant reçu une augmentation à leur retour."
-    >
-      {children}
-    </Page>
-  )
-}
+const PageIndicateurQuatre: FunctionComponent = ({ children }) => (
+  <Page
+    title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+    tagline="Renseignez le nombre de salariées en congé maternité durant la période de référence et ayant reçu une augmentation à leur retour."
+  >
+    {children}
+  </Page>
+)
 
 export default IndicateurQuatre

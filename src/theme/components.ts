@@ -68,6 +68,21 @@ const components = {
       },
     },
 
+    Textarea: {
+      variants: {
+        outline: {
+          borderColor: "gray.400",
+          background: "white",
+          _readOnly: {
+            background: "primary.200",
+            borderColor: "transparent",
+          },
+        },
+      },
+    },
+
+    FormLabel: { baseStyle: { fontWeight: "semibold", fontSize: "sm" } },
+
     Table: {
       sizes: {
         sm: {

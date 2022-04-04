@@ -4,7 +4,6 @@ import { withRouter, RouteComponentProps } from "react-router-dom"
 
 import { AppState } from "../globals"
 
-import ModalProvider from "../components/ModalContext"
 import { useScrollTo } from "../components/ScrollContext"
 import Menu from "../components/Menu"
 import FAQ from "../views/FAQ"
@@ -43,24 +42,43 @@ function MainScrollView({ children, state, location }: Props) {
       id="main"
     >
       <Container maxW="container.xl">
-        <ModalProvider>
-          <Grid
-            sx={{
+        <Grid
+          sx={{
+            "@media screen": {
               gridTemplateColumns: "200px 1fr 380px",
               gridTemplateRows: "auto",
               gridTemplateAreas: "'nav main aside'",
               height: "100%",
+            },
+          }}
+        >
+          <Box
+            ml={-3}
+            sx={{
+              gridArea: "nav",
+              "@media print": {
+                display: "none",
+                marginLeft: 0,
+                borderRight: "none",
+              },
             }}
           >
-            <Box sx={{ gridArea: "nav" }} ml={-3}>
-              {menu}
-            </Box>
-            <Content pathname={location.pathname}>{children}</Content>
-            <Box bg="white" sx={{ gridArea: "aside" }} mr={-3}>
-              <FAQ />
-            </Box>
-          </Grid>
-        </ModalProvider>
+            {menu}
+          </Box>
+          <Content pathname={location.pathname}>{children}</Content>
+          <Box
+            bg="white"
+            mr={-3}
+            sx={{
+              gridArea: "aside",
+              "@media print": {
+                display: "none",
+              },
+            }}
+          >
+            <FAQ />
+          </Box>
+        </Grid>
       </Container>
     </Flex>
   )
@@ -72,7 +90,19 @@ function Content({ children, pathname }: { children: ReactNode; pathname: string
   useEffect(() => scrollTo(0), [pathname, scrollTo])
 
   return (
-    <Box px={8} py={10} sx={{ gridArea: "main", borderRight: "1px solid #E3E4ED" }}>
+    <Box
+      px={8}
+      py={10}
+      sx={{
+        gridArea: "main",
+        borderRight: "1px solid #E3E4ED",
+        "@media print": {
+          paddingLeft: 0,
+          paddingRight: 0,
+          borderRight: "none",
+        },
+      }}
+    >
       {children}
     </Box>
   )

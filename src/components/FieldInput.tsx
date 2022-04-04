@@ -13,11 +13,11 @@ interface Props {
   fieldName: string
   label: string
   readOnly: boolean
-  theme?: "hommes" | "femmes"
+  theme?: "men" | "women"
   validator?: ValidatorFunction
 }
 
-function FieldInput({ fieldName, label, readOnly, theme = "femmes", validator }: Props) {
+function FieldInput({ fieldName, label, readOnly, theme = "women", validator }: Props) {
   const field = useField(fieldName, { validate: validator })
   const error = field.meta.touched && field.meta.error
 
@@ -39,13 +39,7 @@ function FieldInput({ fieldName, label, readOnly, theme = "femmes", validator }:
           </div>
         </CellHead>
 
-        {readOnly ? (
-          <Cell style={[styles.cellEmpty, theme === "hommes" ? styles.cellEmptyMen : styles.cellEmptyWomen]}>
-            {field.input.value}
-          </Cell>
-        ) : (
-          <CellInput field={field} style={theme === "hommes" ? styles.cellMen : styles.cellWomen} />
-        )}
+        {readOnly ? <Cell>{field.input.value}</Cell> : <CellInput field={field} theme={theme} />}
       </div>
       {error && <div css={styles.error}>{error}</div>}
     </div>

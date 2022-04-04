@@ -1,51 +1,25 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { Form, useField } from "react-final-form"
-import { Text, Grid, GridItem } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
+import { Form } from "react-final-form"
+import { Text, FormControl, FormLabel } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
-import {
-  mustBeNumber,
-  parseIntFormValue,
-  parseIntStateValue,
-  parseTrancheEffectifsFormValue,
-  required,
-} from "../../utils/formHelpers"
+import { parseIntFormValue, parseIntStateValue, parseTrancheEffectifsFormValue } from "../../utils/formHelpers"
 import { parseDate } from "../../utils/helpers"
 
+import ButtonAction from "../../components/ds/ButtonAction"
+import FormStack from "../../components/ds/FormStack"
+import { IconEdit } from "../../components/ds/Icons"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
+import InputRadio from "../../components/ds/InputRadio"
+import InputDateGroup from "../../components/ds/InputDateGroup"
+import InputGroup from "../../components/ds/InputGroup"
 import ActionBar from "../../components/ActionBar"
-import ActionLink from "../../components/ActionLink"
 import AnneeDeclaration from "../../components/AnneeDeclaration"
-import FieldDate from "../../components/FieldDate"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-import Input, { hasFieldError } from "../../components/Input"
-import RadioLabels from "../../components/RadioLabels"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import globalStyles from "../../utils/globalStyles"
-import ButtonAction from "../../components/ButtonAction"
-
-const validate = (value: string) => {
-  const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
-}
-
-const validateInt = (value: string) => {
-  const requiredError = required(value)
-  const mustBeNumberError = mustBeNumber(value)
-  if (!requiredError && !mustBeNumberError) {
-    return undefined
-  } else {
-    return { required: requiredError, mustBeNumber: mustBeNumberError }
-  }
-}
+import FormError from "../../components/FormError"
 
 const validateForm = ({
   nomEntreprise,
@@ -58,8 +32,8 @@ const validateForm = ({
 }) => {
   const parsedFinPeriodeReference = parseDate(finPeriodeReference)
   return {
-    nomEntreprise: validate(nomEntreprise),
-    anneeDeclaration: validateInt(anneeDeclaration),
+    nomEntreprise: nomEntreprise ? undefined : "Le nom n'est pas valide",
+    anneeDeclaration: anneeDeclaration ? undefined : "Veuillez sélectionner une année de déclaration dans la liste",
     finPeriodeReference:
       parsedFinPeriodeReference !== undefined && parsedFinPeriodeReference.getFullYear().toString() === anneeDeclaration
         ? undefined
@@ -70,7 +44,24 @@ const validateForm = ({
   }
 }
 
-interface Props {
+const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onClick: () => void }) => (
+  <InputDateGroup
+    fieldName="finPeriodeReference"
+    isReadOnly={readOnly}
+    label="Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)"
+  >
+    <ButtonAction
+      ml={2}
+      label="sélectionner la fin de l'année civile"
+      onClick={onClick}
+      disabled={readOnly}
+      size="sm"
+      variant="ghost"
+    />
+  </InputDateGroup>
+)
+
+interface InformationsSimulationFormProps {
   informations: AppState["informations"]
   readOnly: boolean
   updateInformationsSimulation: (data: ActionInformationsSimulationData) => void
@@ -78,13 +69,13 @@ interface Props {
   alreadyDeclared: boolean
 }
 
-function InformationsSimulationForm({
+const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormProps> = ({
   informations,
   readOnly,
   updateInformationsSimulation,
   validateInformationsSimulation,
   alreadyDeclared,
-}: Props) {
+}) => {
   const initialValues = {
     nomEntreprise: informations.nomEntreprise,
     trancheEffectifs: informations.trancheEffectifs,
@@ -126,159 +117,92 @@ function InformationsSimulationForm({
       }}
     >
       {({ form, handleSubmit, hasValidationErrors, submitFailed, values }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
-          {/* pass `onlyWhenDirty={false}` because we want the form to always
+        <form onSubmit={handleSubmit}>
+          <FormStack>
+            {/* pass `onlyWhenDirty={false}` because we want the form to always
           auto save, as we update the left menu depending on the "tranche
           d'effectifs". Otherwise it would not re-update the menu when
           switching back to the original value */}
-          <FormAutoSave saveForm={saveForm} onlyWhenDirty={false} />
-          <FieldNomEntreprise readOnly={readOnly} />
+            <FormAutoSave saveForm={saveForm} onlyWhenDirty={false} />
+            {submitFailed && hasValidationErrors && (
+              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
+            <InputGroup
+              fieldName="nomEntreprise"
+              label="Nom de la simulation (ex : nom_entreprise_date)"
+              isReadOnly={readOnly}
+            />
+            <FormControl isReadOnly={readOnly}>
+              <FormLabel as="div">
+                Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)
+              </FormLabel>
+              <InputRadioGroup defaultValue={values.trancheEffectifs}>
+                <InputRadio
+                  value="50 à 250"
+                  fieldName="trancheEffectifs"
+                  choiceValue={"50 à 250"}
+                  isReadOnly={readOnly}
+                >
+                  Entre 50 et 250
+                </InputRadio>
+                <InputRadio
+                  value="251 à 999"
+                  fieldName="trancheEffectifs"
+                  choiceValue={"251 à 999"}
+                  isReadOnly={readOnly}
+                >
+                  Entre 251 et 999
+                </InputRadio>
+                <InputRadio
+                  value="1000 et plus"
+                  fieldName="trancheEffectifs"
+                  choiceValue="1000 et plus"
+                  isReadOnly={readOnly}
+                >
+                  1000 et plus
+                </InputRadio>
+              </InputRadioGroup>
+            </FormControl>
 
-          <RadioLabels
-            fieldName="trancheEffectifs"
-            label="Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)"
-            choices={[
-              {
-                label: "Entre 50 et 250",
-                value: "50 à 250",
-              },
-              {
-                label: "Entre 251 et 999",
-                value: "251 à 999",
-              },
-              {
-                label: "1000 et plus",
-                value: "1000 et plus",
-              },
-            ]}
-            value={values.trancheEffectifs}
-            readOnly={readOnly}
-          />
+            <AnneeDeclaration
+              label="Année au titre de laquelle les indicateurs sont calculés"
+              name="anneeDeclaration"
+              readOnly={readOnly || alreadyDeclared}
+            />
 
-          <AnneeDeclaration
-            label="Année au titre de laquelle les indicateurs sont calculés"
-            name="anneeDeclaration"
-            readOnly={readOnly || alreadyDeclared}
-          />
+            {alreadyDeclared && (
+              <Text color="gray.600" fontSize="sm" as="i" mb="8">
+                L'année ne peut pas être modifiée car une déclaration a déjà été validée et transmise.
+              </Text>
+            )}
 
-          {alreadyDeclared && (
-            <Text color="gray.600" fontSize="sm" as="i" mb="8">
-              L'année ne peut pas être modifiée car une déclaration a déjà été validée et transmise.
-            </Text>
-          )}
-
-          <FieldPeriodeReference
-            readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
-            onClick={form.mutators.selectEndOfYear}
-          />
-
+            <FieldPeriodeReference
+              readOnly={readOnly || !parseIntFormValue(values.anneeDeclaration)}
+              onClick={form.mutators.selectEndOfYear}
+            />
+          </FormStack>
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/effectifs" label="suivant" />
-              &emsp;
+              <ButtonSimulatorLink to="/effectifs" label="Suivant" />
               {informations.formValidated === "Valid" && (
-                <p css={styles.edit}>
-                  <ActionLink onClick={() => validateInformationsSimulation("None")}>
-                    modifier les données saisies
-                  </ActionLink>
-                </p>
+                <ButtonAction
+                  leftIcon={<IconEdit />}
+                  label="Modifier les données saisies"
+                  onClick={() => validateInformationsSimulation("None")}
+                  variant="link"
+                  size="sm"
+                />
               )}
             </ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>
       )}
     </Form>
   )
-}
-
-function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
-  const field = useField("nomEntreprise", { validate })
-  const error = hasFieldError(field.meta)
-
-  return (
-    <div css={styles.formField}>
-      <label css={[styles.label, error && styles.labelError]} htmlFor={field.input.name}>
-        Nom de la simulation (ex : nom_entreprise_date)
-      </label>
-      <div css={styles.fieldRow}>
-        <Input field={field} readOnly={readOnly} />
-      </div>
-      <p css={styles.error}>{error && "le nom n’est pas valide"}</p>
-    </div>
-  )
-}
-
-function FieldPeriodeReference({ readOnly, onClick }: { readOnly: boolean; onClick: () => void }) {
-  //TODO REFACTOR : j'ai ajouté htmlFor pour le label, mais en fait c'est le composant FieldDate qui devrait avoir ne
-  // pas avoir de label (à l'heure actuell, il ajoute une balise label sans contenu texte)
-  return (
-    <div>
-      <label css={styles.label} htmlFor="finPeriodeReference">
-        Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)
-      </label>
-      <Grid templateColumns="repeat(2, 1fr)" gap={4} mt={2}>
-        <GridItem>
-          <FieldDate name="finPeriodeReference" readOnly={readOnly} label="" />
-        </GridItem>
-        <GridItem>
-          <ButtonAction
-            label="sélectionner la fin de l'année civile"
-            onClick={onClick}
-            variant={readOnly ? "outline" : "solid"}
-          />
-        </GridItem>
-      </Grid>
-    </div>
-  )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-  formField: css({
-    marginBottom: 20,
-  }),
-  label: css({
-    fontSize: 14,
-    fontWeight: "bold",
-    lineHeight: "17px",
-  }),
-  labelError: css({
-    color: globalStyles.colors.error,
-  }),
-  fieldRow: css({
-    height: 38,
-    marginTop: 5,
-    marginBottom: 5,
-    display: "flex",
-    input: {
-      borderRadius: 4,
-      border: "1px solid",
-    },
-    "input[readonly]": { border: 0 },
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    textDecoration: "underline",
-    lineHeight: "15px",
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default InformationsSimulationForm

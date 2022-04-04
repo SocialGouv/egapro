@@ -32,14 +32,6 @@ import AskEmail from "../views/AskEmail"
 import { sirenIsFree } from "../utils/siren"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 
-interface Declaration {
-  declared_at: number
-  modified_at: number
-  name: string
-  siren: string
-  year: number
-}
-
 interface Props {
   state: AppState | undefined
   dispatch: (action: ActionType) => void
@@ -147,7 +139,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
   if (loading || !state) {
     return (
       <div css={styles.viewLoading}>
-        <ActivityIndicator size={30} color={globalStyles.colors.primary} />
+        <ActivityIndicator color={globalStyles.colors.primary} />
       </div>
     )
   }

@@ -1,13 +1,9 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
+
 import { FormState, ActionIndicateurDeuxData } from "../../globals"
 
-import {
-  // calculTotalEffectifsEtTauxAugmentation,
-  // calculEcartTauxAugmentation,
-  effectifEtEcartAugmentGroup,
-} from "../../utils/calculsEgaProIndicateurDeux"
+import { effectifEtEcartAugmentGroup } from "../../utils/calculsEgaProIndicateurDeux"
 
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
@@ -31,6 +27,8 @@ import {
   displayNameCategorieSocioPro,
   // displayFractionPercent
 } from "../../utils/helpers"
+import FormError from "../../components/FormError"
+import FormStack from "../../components/ds/FormStack"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
@@ -59,7 +57,7 @@ const validateForm = ({
   return
 }
 
-interface Props {
+interface IndicateurDeuxFormProps {
   ecartAugmentParCategorieSocioPro: Array<effectifEtEcartAugmentGroup>
   presenceAugmentation: boolean
   readOnly: boolean
@@ -67,13 +65,13 @@ interface Props {
   validateIndicateurDeux: (valid: FormState) => void
 }
 
-function IndicateurDeuxForm({
+const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
   ecartAugmentParCategorieSocioPro,
   presenceAugmentation,
   readOnly,
   updateIndicateurDeux,
   validateIndicateurDeux,
-}: Props) {
+}) => {
   const initialValues = {
     presenceAugmentation: parseBooleanStateValue(presenceAugmentation),
     tauxAugmentation: ecartAugmentParCategorieSocioPro.map(
@@ -145,71 +143,71 @@ function IndicateurDeuxForm({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <RadiosBoolean
-            fieldName="presenceAugmentation"
-            value={values.presenceAugmentation}
-            readOnly={readOnly}
-            labelTrue="il y a eu des augmentations durant la période de référence"
-            labelFalse="il n’y a pas eu d’augmentation durant la période de référence"
-          />
-
-          {values.presenceAugmentation === "true" && (
-            <BlocForm
-              label="% de salariés augmentés"
-              // footer={[
-              //   displayFractionPercent(totalTauxAugmentationFemmes),
-              //   displayFractionPercent(totalTauxAugmentationHommes)
-              // ]}
-            >
-              {ecartAugmentParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
-                return (
-                  <FieldInputsMenWomen
-                    key={categorieSocioPro}
-                    name={displayNameCategorieSocioPro(categorieSocioPro)}
-                    readOnly={readOnly}
-                    calculable={validiteGroupe}
-                    calculableNumber={10}
-                    mask="percent"
-                    femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
-                    hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
-                    validatorFemmes={validator}
-                    validatorHommes={validator}
-                  />
-                )
-              })}
-            </BlocForm>
-          )}
-
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/indicateur3" label="suivant" />
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage={
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError
+                message={
                   errors?.notAll0
                     ? errors.notAll0
                     : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
                 }
               />
+            )}
+            <RadiosBoolean
+              fieldName="presenceAugmentation"
+              value={values.presenceAugmentation}
+              readOnly={readOnly}
+              label={<>Il y a t'il eu des augmentations durant la période de référence&nbsp;?</>}
+            />
+
+            {values.presenceAugmentation === "true" && (
+              <BlocForm
+                title="Poucentage d'augmentations"
+                // footer={[
+                //   displayFractionPercent(totalTauxAugmentationFemmes),
+                //   displayFractionPercent(totalTauxAugmentationHommes)
+                // ]}
+              >
+                {ecartAugmentParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                  return (
+                    <FieldInputsMenWomen
+                      key={categorieSocioPro}
+                      legend="% de salariés augmentés"
+                      label={{
+                        women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} augmentées`,
+                        men: `Pourcentage d'hommes' ${displayNameCategorieSocioPro(categorieSocioPro)} augmentés`,
+                      }}
+                      title={displayNameCategorieSocioPro(categorieSocioPro)}
+                      readOnly={readOnly}
+                      calculable={validiteGroupe}
+                      calculableNumber={10}
+                      mask="percent"
+                      femmeFieldName={`tauxAugmentation.${index}.tauxAugmentationFemmes`}
+                      hommeFieldName={`tauxAugmentation.${index}.tauxAugmentationHommes`}
+                      validatorFemmes={validator}
+                      validatorHommes={validator}
+                    />
+                  )
+                })}
+              </BlocForm>
+            )}
+          </FormStack>
+
+          {readOnly ? (
+            <ActionBar>
+              <ButtonSimulatorLink to="/indicateur3" label="Suivant" />
+            </ActionBar>
+          ) : (
+            <ActionBar>
+              <FormSubmit />
             </ActionBar>
           )}
         </form>
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
 }
 
 export default IndicateurDeuxForm

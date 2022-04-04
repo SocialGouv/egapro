@@ -1,6 +1,7 @@
 import { fractionToPercentage, parseDate, percentageToFraction } from "./helpers"
 
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals"
+import { FieldMetaState } from "react-final-form"
 
 // INT PARSE
 
@@ -109,3 +110,7 @@ export const composeFormValidators =
 export function isFormValid(formState: { formValidated: string }) {
   return formState.formValidated === "Valid"
 }
+
+export const isFieldHasError = (meta: FieldMetaState<string>): boolean =>
+  (meta.error && meta.submitFailed) ||
+  (meta.error && meta.touched && Object.values({ ...meta.error, required: false }).includes(true))

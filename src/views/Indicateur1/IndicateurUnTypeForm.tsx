@@ -1,13 +1,15 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { useCallback } from "react"
+import React, { FunctionComponent, useCallback } from "react"
 import { Form } from "react-final-form"
+import { FormControl, FormLabel, Text, Stack } from "@chakra-ui/react"
+
 import { ActionIndicateurUnTypeData, ActionType } from "../../globals"
 
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
+import InputRadio from "../../components/ds/InputRadio"
+import FormStack from "../../components/ds/FormStack"
 import FormAutoSave from "../../components/FormAutoSave"
-import RadioButtons from "../../components/RadioButtons"
 
-interface Props {
+interface IndicateurUnTypeFormProps {
   csp: boolean
   coef: boolean
   autre: boolean
@@ -15,7 +17,7 @@ interface Props {
   dispatch: (action: ActionType) => void
 }
 
-function IndicateurUnTypeForm({ coef, autre, readOnly, dispatch }: Props) {
+const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ coef, autre, readOnly, dispatch }) => {
   const updateIndicateurUnType = useCallback(
     (data: ActionIndicateurUnTypeData) => dispatch({ type: "updateIndicateurUnType", data }),
     [dispatch],
@@ -47,51 +49,39 @@ function IndicateurUnTypeForm({ coef, autre, readOnly, dispatch }: Props) {
       initialValues={initialValues}
     >
       {({ handleSubmit, values }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <RadioButtons
-            fieldName="modaliteDeclaration"
-            label="Modalités de calcul de l'indicateur relatif à l'écart de rémunération
-          entre les femmes et les hommes"
-            value={values.modaliteDeclaration}
-            readOnly={readOnly}
-            choices={[
-              {
-                label: "Par catégorie socio-professionnelle",
-                value: "csp",
-              },
-              {
-                label: "Par niveau ou coefficient hiérarchique en application de la classification de branche",
-                value: "coef",
-              },
-              {
-                label:
-                  "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
-                value: "autre",
-              },
-            ]}
-          />
-          {values.modaliteDeclaration !== "csp" ? (
-            <p>
-              Si vous choisissez cette option, la consultation du CSE est obligatoire.
-              <br />
-              La date de consultation vous sera demandée au moment de la déclaration
-            </p>
-          ) : (
-            ""
-          )}
+          <FormStack>
+            <FormControl isReadOnly={readOnly}>
+              <FormLabel as="div">
+                Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)
+              </FormLabel>
+              <InputRadioGroup defaultValue={values.modaliteDeclaration}>
+                <Stack>
+                  <InputRadio value="csp" fieldName="modaliteDeclaration" choiceValue="csp" isReadOnly={readOnly}>
+                    Par catégorie socio-professionnelle
+                  </InputRadio>
+                  <InputRadio value="coef" fieldName="modaliteDeclaration" choiceValue="coef" isReadOnly={readOnly}>
+                    Par niveau ou coefficient hiérarchique en application de la classification de branche
+                  </InputRadio>
+                  <InputRadio value="autre" fieldName="modaliteDeclaration" choiceValue="autre" isReadOnly={readOnly}>
+                    Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes
+                  </InputRadio>
+                </Stack>
+              </InputRadioGroup>
+            </FormControl>
+            {values.modaliteDeclaration !== "csp" && (
+              <Text fontSize="sm">
+                Si vous choisissez cette option, la consultation du CSE est obligatoire.
+                <br />
+                La date de consultation vous sera demandée au moment de la déclaration.
+              </Text>
+            )}
+          </FormStack>
         </form>
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-    marginBottom: 54,
-  }),
 }
 
 export default IndicateurUnTypeForm

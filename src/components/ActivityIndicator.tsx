@@ -1,19 +1,14 @@
-/** @jsxImportSource @emotion/react */
-import { css, keyframes } from "@emotion/react"
+import React, { FunctionComponent } from "react"
+import { Box, BoxProps, keyframes } from "@chakra-ui/react"
 
-interface Props {
+interface ActivityIndicatorProps {
   size?: number
   color?: string
 }
 
-function ActivityIndicator({ size = 25, color = "#FFF" }: Props) {
-  return (
-    <div css={[stylesActivity.container, { width: size, height: size }]}>
-      <div css={[stylesActivity.round, { backgroundColor: color }]} />
-      <div css={[stylesActivity.round, stylesActivity.round2, { backgroundColor: color }]} />
-    </div>
-  )
-}
+const Pills = (props: BoxProps) => (
+  <Box position="absolute" top="0" left="0" right="0" bottom="0" borderRadius="full" opacity={0.6} {...props} />
+)
 
 const bounce = keyframes({
   "0%": {
@@ -27,24 +22,14 @@ const bounce = keyframes({
   },
 })
 
-const stylesActivity = {
-  container: css({
-    position: "relative",
-  }),
-  round: css({
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-
-    borderRadius: "50%",
-    opacity: 0.6,
-    animation: `${bounce} 2.0s infinite ease-in-out`,
-  }),
-  round2: css({
-    animationDelay: "-1.0s",
-  }),
+const ActivityIndicator: FunctionComponent<ActivityIndicatorProps> = ({ size = 6, color = "primary.500" }) => {
+  const pillsAnimation = `${bounce} 2.0s infinite ease-in-out`
+  return (
+    <Box position="relative" height={size} width={size}>
+      <Pills bg={color} animation={pillsAnimation} />
+      <Pills bg={color} animation={pillsAnimation} sx={{ animationDelay: "-1.0s" }} />
+    </Box>
+  )
 }
 
 export default ActivityIndicator

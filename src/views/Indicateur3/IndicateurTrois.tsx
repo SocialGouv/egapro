@@ -1,15 +1,16 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, FunctionComponent } from "react"
 import { RouteComponentProps } from "react-router-dom"
+import { Text } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionType, ActionIndicateurTroisData } from "../../globals"
 
 import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
+import { messageMesureCorrection } from "../../utils/helpers"
+import { useTitle } from "../../utils/hooks"
 
+import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-import InfoBlock from "../../components/ds/InfoBlock"
 import ActionBar from "../../components/ActionBar"
 import ActionLink from "../../components/ActionLink"
 import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/SimulatorLink"
@@ -17,17 +18,14 @@ import { ButtonSimulatorLink, TextSimulatorLink } from "../../components/Simulat
 import IndicateurTroisForm from "./IndicateurTroisForm"
 import IndicateurTroisResult from "./IndicateurTroisResult"
 
-import { messageMesureCorrection } from "../../utils/helpers"
-import { useTitle } from "../../utils/hooks"
-
-interface Props extends RouteComponentProps {
+interface IndicateurTroisProps extends RouteComponentProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
 
 const title = "Indicateur écart de taux de promotion"
 
-function IndicateurTrois({ state, dispatch }: Props) {
+const IndicateurTrois: FunctionComponent<IndicateurTroisProps> = ({ state, dispatch }) => {
   useTitle(title)
 
   const updateIndicateurTrois = useCallback(
@@ -74,7 +72,7 @@ function IndicateurTrois({ state, dispatch }: Props) {
             text="L’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
           />
           <ActionBar>
-            <ButtonSimulatorLink to="/indicateur4" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
           </ActionBar>
         </div>
       </PageIndicateurTrois>
@@ -92,10 +90,10 @@ function IndicateurTrois({ state, dispatch }: Props) {
             text="Il n’y a pas eu de promotion durant la période de référence."
           />
           <ActionBar>
-            <ActionLink onClick={() => validateIndicateurTrois("None")}>modifier les données saisies</ActionLink>
+            <ActionLink onClick={() => validateIndicateurTrois("None")}>Modifier les données saisies</ActionLink>
           </ActionBar>
           <ActionBar>
-            <ButtonSimulatorLink to="/indicateur4" label="suivant" />
+            <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
           </ActionBar>
         </div>
       </PageIndicateurTrois>
@@ -106,13 +104,20 @@ function IndicateurTrois({ state, dispatch }: Props) {
     <PageIndicateurTrois>
       <LayoutFormAndResult
         childrenForm={
-          <IndicateurTroisForm
-            ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
-            presencePromotion={state.indicateurTrois.presencePromotion}
-            readOnly={state.indicateurTrois.formValidated === "Valid"}
-            updateIndicateurTrois={updateIndicateurTrois}
-            validateIndicateurTrois={validateIndicateurTrois}
-          />
+          <div>
+            <IndicateurTroisForm
+              ecartPromoParCategorieSocioPro={effectifEtEcartPromoParGroupe}
+              presencePromotion={state.indicateurTrois.presencePromotion}
+              readOnly={state.indicateurTrois.formValidated === "Valid"}
+              updateIndicateurTrois={updateIndicateurTrois}
+              validateIndicateurTrois={validateIndicateurTrois}
+            />
+            {state.indicateurTrois.formValidated === "Valid" && correctionMeasure && (
+              <Text fontSize="sm" color="gray.500" fontStyle="italic" mt={6}>
+                {messageMesureCorrection(indicateurSexeSurRepresente, "de promotions", "15/15")}
+              </Text>
+            )}
+          </div>
         }
         childrenResult={
           state.indicateurTrois.formValidated === "Valid" && (
@@ -126,16 +131,11 @@ function IndicateurTrois({ state, dispatch }: Props) {
           )
         }
       />
-      {state.indicateurTrois.formValidated === "Valid" && correctionMeasure && (
-        <div css={styles.additionalInfo}>
-          <p>{messageMesureCorrection(indicateurSexeSurRepresente, "de promotions", "15/15")}</p>
-        </div>
-      )}
     </PageIndicateurTrois>
   )
 }
 
-function PageIndicateurTrois({ children }: { children: ReactNode }) {
+const PageIndicateurTrois: FunctionComponent = ({ children }) => {
   return (
     <Page
       title={title}
@@ -144,18 +144,6 @@ function PageIndicateurTrois({ children }: { children: ReactNode }) {
       {children}
     </Page>
   )
-}
-
-const styles = {
-  additionalInfo: css({
-    color: "#61676F",
-    fontSize: 14,
-    fontStyle: "italic",
-    maxWidth: 500,
-    "& > p": {
-      marginBottom: 30,
-    },
-  }),
 }
 
 export default IndicateurTrois

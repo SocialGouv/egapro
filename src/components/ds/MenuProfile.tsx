@@ -5,7 +5,7 @@ import { Button, Link } from "@chakra-ui/react"
 
 import { IconPeopleCircle } from "./Icons"
 import { useUser } from "../AuthContext"
-import ButtonLink from "../ButtonLink"
+import ButtonLink from "./ButtonLink"
 
 type MenuLinkProps = {
   children: React.ReactNode

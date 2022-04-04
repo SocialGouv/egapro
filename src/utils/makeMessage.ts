@@ -1,6 +1,6 @@
-import { EXPIRED_TOKEN_MESSAGE } from "../utils/fetcher"
+import { EXPIRED_TOKEN_MESSAGE } from "./fetcher"
 import { AlertMessageType } from "../globals"
-import type { FetchError } from "../utils/fetcher"
+import type { FetchError } from "./fetcher"
 
 function makeMessage(kind: AlertMessageType["kind"]) {
   return function (text: string): AlertMessageType {

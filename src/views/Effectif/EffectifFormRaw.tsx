@@ -1,7 +1,7 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { ReactNode } from "react"
+import React, { FunctionComponent, ReactNode } from "react"
+import { Grid, GridItem, Text } from "@chakra-ui/react"
 import { Form } from "react-final-form"
+
 import { FormState, GroupTranchesAgesEffectif } from "../../globals"
 
 import {
@@ -16,15 +16,15 @@ import {
   required,
 } from "../../utils/formHelpers"
 import { displayInt } from "../../utils/helpers"
+import { displayNameTranchesAges } from "../../utils/helpers"
 
+import FormStack from "../../components/ds/FormStack"
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-import { Cell, Cell2 } from "../../components/Cell"
-
-import { displayNameTranchesAges } from "../../utils/helpers"
+import FormError from "../../components/FormError"
 
 type Effectif = Array<{
   id: any
@@ -34,7 +34,7 @@ type Effectif = Array<{
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
-interface Props {
+interface EffectifFormRawProps {
   effectifRaw: Effectif
   readOnly: boolean
   updateEffectif: (data: Effectif) => void
@@ -67,7 +67,14 @@ export const getTotalNbSalarie = (effectif: Effectif) =>
     { totalNbSalarieHomme: 0, totalNbSalarieFemme: 0 },
   )
 
-function EffectifFormRaw({ effectifRaw, readOnly, updateEffectif, validateEffectif, nextLink, formValidator }: Props) {
+const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
+  effectifRaw,
+  readOnly,
+  updateEffectif,
+  validateEffectif,
+  nextLink,
+  formValidator,
+}) => {
   const initialValues = {
     effectif: effectifRaw.map(({ tranchesAges, ...otherPropGroupe }: any) => ({
       ...otherPropGroupe,
@@ -129,61 +136,89 @@ function EffectifFormRaw({ effectifRaw, readOnly, updateEffectif, validateEffect
     >
       {({ handleSubmit, hasValidationErrors, submitFailed, errors }) => {
         return (
-          <form onSubmit={handleSubmit} css={styles.container}>
+          <form onSubmit={handleSubmit}>
             <FormAutoSave saveForm={saveForm} />
-            {effectifRaw.map(({ id, name, tranchesAges }, indexGroupe) => {
-              const { totalGroupNbSalarieHomme, totalGroupNbSalarieFemme } = getTotalGroupNbSalarie(tranchesAges)
-              return (
-                <BlocForm
-                  key={id}
-                  title={name}
-                  label="nombre de salariés"
-                  footer={[displayInt(totalGroupNbSalarieFemme), displayInt(totalGroupNbSalarieHomme)]}
-                >
-                  {tranchesAges.map(({ trancheAge }, indexTrancheAge) => {
-                    return (
-                      <FieldInputsMenWomen
-                        key={trancheAge}
-                        readOnly={readOnly}
-                        name={displayNameTranchesAges(trancheAge)}
-                        calculable={true}
-                        calculableNumber={0}
-                        mask="number"
-                        validatorFemmes={validator}
-                        validatorHommes={validator}
-                        femmeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesFemmes`}
-                        hommeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesHommes`}
-                      />
-                    )
-                  })}
-                </BlocForm>
-              )
-            })}
-
-            <div css={styles.rowFoot}>
-              <div css={styles.rowFootText}>total des effectifs</div>
-              <Cell style={styles.rowFootCell}>{displayInt(totalNbSalarieFemme)}</Cell>
-              <Cell style={styles.rowFootCell}>{displayInt(totalNbSalarieHomme)}</Cell>
-            </div>
-
-            <div css={styles.rowFoot}>
-              <div css={styles.rowFootText}>soit</div>
-              <Cell2 style={styles.rowFootCell}>{displayInt(totalNbSalarieHomme + totalNbSalarieFemme)}</Cell2>
-            </div>
-
-            {readOnly ? (
-              <ActionBar>{nextLink}</ActionBar>
-            ) : (
-              <ActionBar>
-                <FormSubmit
-                  hasValidationErrors={hasValidationErrors}
-                  submitFailed={submitFailed}
-                  errorMessage={
+            <FormStack>
+              {submitFailed && hasValidationErrors && (
+                <FormError
+                  message={
                     errors?.message
                       ? errors.message
                       : "Les effectifs ne peuvent pas être validés si tous les champs ne sont pas remplis."
                   }
                 />
+              )}
+
+              {effectifRaw.map(({ id, name, tranchesAges }, indexGroupe) => {
+                const { totalGroupNbSalarieHomme, totalGroupNbSalarieFemme } = getTotalGroupNbSalarie(tranchesAges)
+                return (
+                  <BlocForm
+                    key={id}
+                    title={name}
+                    label="Nombre de salariés"
+                    footer={[displayInt(totalGroupNbSalarieFemme), displayInt(totalGroupNbSalarieHomme)]}
+                  >
+                    {tranchesAges.map(({ trancheAge }, indexTrancheAge) => {
+                      return (
+                        <FieldInputsMenWomen
+                          key={trancheAge}
+                          readOnly={readOnly}
+                          legend="Nombre de salariés de"
+                          label={{
+                            women: `Nombre de femmes de ${displayNameTranchesAges(trancheAge)}`,
+                            men: `Nombre d'hommes de ${displayNameTranchesAges(trancheAge)}`,
+                          }}
+                          title={displayNameTranchesAges(trancheAge)}
+                          calculable={true}
+                          calculableNumber={0}
+                          mask="number"
+                          validatorFemmes={validator}
+                          validatorHommes={validator}
+                          femmeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesFemmes`}
+                          hommeFieldName={`effectif.${indexGroupe}.tranchesAges.${indexTrancheAge}.nombreSalariesHommes`}
+                        />
+                      )
+                    })}
+                  </BlocForm>
+                )
+              })}
+            </FormStack>
+
+            <Grid templateColumns="1fr 5.5rem 5.5rem" gap={2} mt={6} px={4} textAlign="right">
+              <GridItem pr={2}>Total des effectifs&nbsp;:</GridItem>
+              <GridItem pr={5}>
+                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                  {displayInt(totalNbSalarieFemme)}
+                </Text>
+                <Text fontSize="xs" color="women">
+                  Femmes
+                </Text>
+              </GridItem>
+              <GridItem pr={5}>
+                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                  {displayInt(totalNbSalarieHomme)}
+                </Text>
+                <Text fontSize="xs" color="men">
+                  Hommes
+                </Text>
+              </GridItem>
+            </Grid>
+
+            <Grid templateColumns="1fr 5.5rem 5.5rem" gap={2} mt={4} px={4} textAlign="right">
+              <GridItem pr={2}>Soit&nbsp;:</GridItem>
+              <GridItem pr={5} colSpan={2}>
+                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                  {displayInt(totalNbSalarieHomme + totalNbSalarieFemme)}
+                </Text>
+                <Text fontSize="xs">Personnes</Text>
+              </GridItem>
+            </Grid>
+
+            {readOnly ? (
+              <ActionBar>{nextLink}</ActionBar>
+            ) : (
+              <ActionBar>
+                <FormSubmit />
               </ActionBar>
             )}
           </form>
@@ -191,31 +226,6 @@ function EffectifFormRaw({ effectifRaw, readOnly, updateEffectif, validateEffect
       }}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-
-  rowFoot: css({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    height: 16,
-    marginTop: 10,
-    paddingRight: 20,
-  }),
-  rowFootCell: css({
-    fontSize: 14,
-    textAlign: "center",
-  }),
-  rowFootText: css({
-    fontStyle: "italic",
-    fontSize: 14,
-    marginLeft: "auto",
-  }),
 }
 
 export default EffectifFormRaw

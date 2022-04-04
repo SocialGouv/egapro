@@ -1,7 +1,8 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { ReactNode } from "react"
+/** @jsx jsx */
+import { css, jsx } from "@emotion/react"
+import { FunctionComponent, ReactNode } from "react"
 import { useField } from "react-final-form"
+import { Flex, FormControl, FormLabel } from "@chakra-ui/react"
 
 function RadioField({
   fieldName,
@@ -30,7 +31,7 @@ export type RadioLabelChoice = {
   value: string
 }
 
-interface Props {
+interface RadioLabelsProps {
   readOnly: boolean
   fieldName: string
   label: string
@@ -38,11 +39,11 @@ interface Props {
   choices: RadioLabelChoice[]
 }
 
-function RadioLabels({ readOnly, fieldName, label, value, choices }: Props) {
+const RadioLabels: FunctionComponent<RadioLabelsProps> = ({ readOnly, fieldName, label, value, choices }) => {
   return (
-    <div css={styles.container}>
-      <p css={styles.inputLabel}>{label}</p>
-      <div css={[styles.radioField]}>
+    <FormControl>
+      <FormLabel as="div">{label}</FormLabel>
+      <Flex role="radiogroup">
         {choices.map(({ label: choiceLabel, value: choiceValue }) => (
           <RadioField
             key={choiceLabel}
@@ -53,8 +54,8 @@ function RadioLabels({ readOnly, fieldName, label, value, choices }: Props) {
             disabled={readOnly}
           />
         ))}
-      </div>
-    </div>
+      </Flex>
+    </FormControl>
   )
 }
 
@@ -63,7 +64,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     fontSize: 14,
-    marginBottom: 40,
   }),
   radioField: css({
     display: "flex",

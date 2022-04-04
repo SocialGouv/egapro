@@ -1,4 +1,4 @@
-import React, { useCallback, Fragment, ReactNode, useState, useEffect, FunctionComponent } from "react"
+import React, { useCallback, ReactNode, useState, useEffect, FunctionComponent } from "react"
 import { RouteComponentProps, useHistory } from "react-router-dom"
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
 
@@ -40,30 +40,7 @@ import { formatDataForAPI, logToSentry } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
 import { isFormValid } from "../../utils/formHelpers"
 
-interface DeclarationProps extends RouteComponentProps {
-  code: string
-  state: AppState
-  dispatch: (action: ActionType) => void
-}
-
-const title = "Déclaration"
-
-const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
-  useTitle(title)
-  const history = useHistory()
-
-  const [declaring, setDeclaring] = useState(false)
-  const [apiError, setApiError] = useState<string | undefined>(undefined)
-
-  const updateDeclaration = useCallback(
-    (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
-    [dispatch],
-  )
-
-  const resetDeclaration = useCallback(() => {
-    history.push(`/nouvelle-simulation`)
-  }, [])
-
+function buildHelpers(state: AppState) {
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
 
   const nombreSalariesTotal = totalNombreSalariesFemme + totalNombreSalariesHomme
@@ -228,45 +205,78 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     noteIndicateurCinq,
   )
 
-  const validateDeclaration = useCallback(
-    (valid: FormState) => {
-      if (valid === "Valid") {
-        setDeclaring(true)
-      } else {
-        setDeclaring(false)
-      }
-      if (!apiError) {
-        return dispatch({
-          type: "validateDeclaration",
-          valid,
-          effectifData,
-          indicateurUnData,
-          indicateurDeuxData,
-          indicateurTroisData,
-          indicateurDeuxTroisData,
-          indicateurQuatreData,
-          indicateurCinqData,
-          noteIndex,
-          totalPoint,
-          totalPointCalculable,
-        })
-      }
-    },
-    [
-      dispatch,
-      effectifData,
-      indicateurUnData,
-      indicateurDeuxData,
-      indicateurTroisData,
-      indicateurDeuxTroisData,
-      indicateurQuatreData,
-      indicateurCinqData,
-      noteIndex,
-      totalPoint,
-      totalPointCalculable,
-      apiError,
-    ],
+  return {
+    effectifsIndicateurUnCalculable,
+    effectifsIndicateurDeuxCalculable,
+    effectifsIndicateurTroisCalculable,
+    effectifsIndicateurDeuxTroisCalculable,
+    trancheEffectifs,
+    allIndicateurValid,
+    effectifData,
+    indicateurUnData,
+    indicateurDeuxData,
+    indicateurTroisData,
+    indicateurDeuxTroisData,
+    indicateurQuatreData,
+    indicateurCinqData,
+    noteIndex,
+    totalPoint,
+    totalPointCalculable,
+  }
+}
+
+interface DeclarationProps extends RouteComponentProps {
+  code: string
+  state: AppState
+  dispatch: (action: ActionType) => void
+}
+
+const title = "Déclaration"
+
+const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
+  useTitle(title)
+  const history = useHistory()
+
+  const [declaring, setDeclaring] = useState(false)
+  const [apiError, setApiError] = useState<string | undefined>(undefined)
+
+  const updateDeclaration = useCallback(
+    (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
+    [dispatch],
   )
+
+  const resetDeclaration = useCallback(() => {
+    history.push(`/nouvelle-simulation`)
+  }, [history])
+
+  const helpers = buildHelpers(state)
+
+  const {
+    effectifsIndicateurUnCalculable,
+    effectifsIndicateurDeuxCalculable,
+    effectifsIndicateurTroisCalculable,
+    effectifsIndicateurDeuxTroisCalculable,
+    trancheEffectifs,
+    allIndicateurValid,
+    noteIndex,
+    totalPoint,
+    totalPointCalculable,
+  } = helpers
+
+  const validateDeclaration = (valid: FormState) => {
+    if (valid === "Valid") {
+      setDeclaring(true)
+    } else {
+      setDeclaring(false)
+    }
+    if (!apiError) {
+      return dispatch({
+        type: "validateDeclaration",
+        valid,
+        ...helpers,
+      })
+    }
+  }
 
   useEffect(() => {
     if (declaring) {
@@ -305,7 +315,8 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
           logToSentry(error, data)
         })
     }
-  }, [code, declaring, state, validateDeclaration])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- validateDeclaration is not needed to be subscribed on change.
+  }, [code, declaring, state])
 
   // tous les formulaires ne sont pas encore validés
   if (
@@ -390,7 +401,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     <PageDeclaration>
       <LayoutFormAndResult
         childrenForm={
-          <Fragment>
+          <>
             <RecapitulatifIndex
               allIndicateurValid={allIndicateurValid}
               noteIndex={noteIndex}
@@ -406,7 +417,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
               apiError={apiError}
               declaring={declaring}
             />
-          </Fragment>
+          </>
         }
         childrenResult={null}
       />
@@ -418,7 +429,7 @@ function PageDeclaration({ children }: { children: ReactNode }) {
   return (
     <Page
       title={title}
-      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration"
+      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration."
     >
       {children}
     </Page>

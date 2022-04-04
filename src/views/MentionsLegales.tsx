@@ -1,11 +1,13 @@
 import React from "react"
 import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
-import Page from "../components/Page"
+
 import { useTitle } from "../utils/hooks"
+
+import Page from "../components/Page"
 
 const title = "Mentions légales"
 
-function MentionsLegales() {
+const MentionsLegales = () => {
   useTitle(title)
 
   return (

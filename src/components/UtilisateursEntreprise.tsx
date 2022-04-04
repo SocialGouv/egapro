@@ -4,26 +4,17 @@ import { Spinner } from "@chakra-ui/spinner"
 import { IconButton } from "@chakra-ui/button"
 import { useBoolean, useDisclosure } from "@chakra-ui/hooks"
 import { Form } from "react-final-form"
-
-import {
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/modal"
+import { z } from "zod"
 
 import { fetcher } from "../utils/fetcher"
 import { useToastMessage } from "../utils/hooks"
 import { useOwnersOfSiren } from "../hooks/useOwnersOfSiren"
 import { useSoloToastMessage } from "../utils/hooks"
 import PrimaryButton from "../components/ds/PrimaryButton"
-import ButtonAction from "../components/ButtonAction"
-import { IconDelete, IconDrag } from "../components/ds/Icons"
-
-import { FieldEmail } from "./ds/FieldEmail"
+import { formValidator, InputControl } from "./ds/form-lib"
+import ButtonAction from "./ds/ButtonAction"
+import Modal from "./ds/Modal"
+import { IconDelete, IconDrag } from "./ds/Icons"
 
 function UtilisateurItem({
   owner,
@@ -48,22 +39,23 @@ function UtilisateurItem({
         onClick={onOpen}
         h="6"
       />
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Supprimer l'utilisateur</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>Cette opération est irréversible.</ModalBody>
-
-          <ModalFooter>
-            <PrimaryButton colorScheme="red" mr={3} onClick={() => removeUser(owner, siren)}>
-              Confirmer
-            </PrimaryButton>
-            <PrimaryButton variant="ghost" onClick={onClose}>
-              Annuler
-            </PrimaryButton>
-          </ModalFooter>
-        </ModalContent>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Supprimer l'utilisateur"
+        footer={
+          <>
+            <ButtonAction
+              colorScheme="red"
+              onClick={() => removeUser(owner, siren)}
+              label="Supprimer l'utilisateur"
+              leftIcon={<IconDelete />}
+            />
+            <ButtonAction colorScheme="gray" onClick={onClose} label="Annuler" />
+          </>
+        }
+      >
+        <Text>Cette opération est irréversible.</Text>
       </Modal>
     </ListItem>
   )
@@ -79,6 +71,7 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
 
   React.useEffect(() => {
     setShowAddForm.off()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setShowAddForm is not added because the properties returned by useBoolean are stable values.
   }, [siren])
 
   async function addUser(formData: any) {
@@ -111,6 +104,10 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
     }
   }
 
+  const FormInput = z.object({
+    email: z.string({ required_error: "L'adresse mail est requise" }).email({ message: "L'adresse mail est invalide" }),
+  })
+
   return (
     <Box mt="4">
       {isLoading ? (
@@ -118,7 +115,7 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
           <Spinner />
         </Box>
       ) : (
-        <React.Fragment>
+        <>
           <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
             Responsables
           </Text>
@@ -141,10 +138,11 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
               <Box mt="4">
                 <Form
                   onSubmit={addUser}
+                  validate={formValidator(FormInput)}
                   render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
                       <HStack spacing={4} align="flex-start">
-                        <FieldEmail label="Email du responsable" />
+                        <InputControl name="email" label="Email du responsable" />
                         <Box pt={8}>
                           <PrimaryButton type="submit">Ajouter</PrimaryButton>
                         </Box>
@@ -155,7 +153,7 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
               </Box>
             )}
           </Flex>
-        </React.Fragment>
+        </>
       )}
     </Box>
   )

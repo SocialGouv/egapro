@@ -87,7 +87,7 @@ function IndicateurUnCoefEffectifForm({
           nextLink={
             <ButtonSimulatorLink
               to={state.informations.trancheEffectifs === "50 à 250" ? "/indicateur2et3" : "/indicateur2"}
-              label="suivant"
+              label="Suivant"
             />
           }
         />

@@ -1,27 +1,29 @@
-/** @jsxImportSource @emotion/react */
-import { useCallback, ReactNode } from "react"
+import React, { useCallback, ReactNode, FunctionComponent } from "react"
+import { useParams } from "react-router-dom"
+import { Box } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
+
+import { useTitle } from "../../utils/hooks"
+import { useDeclaration } from "../../hooks/useDeclaration"
+
 import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InformationsSimulationForm from "./InformationsSimulationForm"
-import { useTitle } from "../../utils/hooks"
-import { useDeclaration } from "../../hooks/useDeclaration"
-import { useParams } from "react-router-dom"
 
-interface Props {
+interface InformationsSimulationProps {
   state: AppState
   dispatch: (action: ActionType) => void
 }
-
-const title = "Informations calcul et période de référence"
 
 type Params = {
   code: string
 }
 
-function InformationsSimulation({ state, dispatch }: Props) {
+const title = "Informations calcul et période de référence"
+
+const InformationsSimulation: FunctionComponent<InformationsSimulationProps> = ({ state, dispatch }) => {
   useTitle(title)
   const { code } = useParams<Params>()
 
@@ -63,11 +65,13 @@ function InformationsSimulation({ state, dispatch }: Props) {
             state.indicateurDeuxTrois.formValidated === "Invalid") ||
           state.indicateurQuatre.formValidated === "Invalid" ||
           state.indicateurCinq.formValidated === "Invalid") && (
-          <InfoBlock
-            title="Vos informations ont été modifiées"
-            type="success"
-            text="Afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs."
-          />
+          <Box mt={6}>
+            <InfoBlock
+              title="Vos informations ont été modifiées"
+              type="success"
+              text="Afin de s'assurer de la cohérence de votre index, merci de vérifier les données de vos indicateurs."
+            />
+          </Box>
         )}
     </PageInformationsSimulation>
   )

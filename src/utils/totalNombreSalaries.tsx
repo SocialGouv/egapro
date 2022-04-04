@@ -1,4 +1,4 @@
-export default function (
+function totalNombreSalaries(
   nombreSalaries: Array<{
     tranchesAges: Array<{
       nombreSalariesHommes: number | undefined
@@ -26,3 +26,5 @@ export default function (
     { totalNombreSalariesHomme: 0, totalNombreSalariesFemme: 0 },
   )
 }
+
+export default totalNombreSalaries

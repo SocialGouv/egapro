@@ -1,14 +1,12 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 
 import { FormState } from "../../globals"
 
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
-import ResultBubble from "../../components/ResultBubble"
-import ActionLink from "../../components/ActionLink"
+import ResultSummary from "../../components/ResultSummary"
 
-interface Props {
+interface IndicateurDeuxResultProps {
   indicateurEcartAugmentation: number | undefined
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
   noteIndicateurDeux: number | undefined
@@ -16,42 +14,25 @@ interface Props {
   validateIndicateurDeux: (valid: FormState) => void
 }
 
-function IndicateurDeuxResult({
+const IndicateurDeuxResult: FunctionComponent<IndicateurDeuxResultProps> = ({
   indicateurEcartAugmentation,
   indicateurSexeSurRepresente,
   noteIndicateurDeux,
   correctionMeasure,
   validateIndicateurDeux,
-}: Props) {
+}) => {
   return (
-    <div css={styles.container}>
-      <ResultBubble
-        firstLineLabel="votre résultat final est"
-        firstLineData={indicateurEcartAugmentation !== undefined ? displayPercent(indicateurEcartAugmentation) : "--"}
-        firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
-        secondLineLabel="votre note obtenue est"
-        secondLineData={(noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"}
-        secondLineInfo={correctionMeasure ? "** mesures de correction prises en compte" : undefined}
-        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-      />
-
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurDeux("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+    <ResultSummary
+      firstLineLabel="votre résultat final est"
+      firstLineData={indicateurEcartAugmentation !== undefined ? displayPercent(indicateurEcartAugmentation) : "--"}
+      firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
+      secondLineLabel="votre note obtenue est"
+      secondLineData={(noteIndicateurDeux !== undefined ? noteIndicateurDeux : "--") + "/20"}
+      secondLineInfo={correctionMeasure ? "** mesures de correction prises en compte" : undefined}
+      indicateurSexeSurRepresente={indicateurSexeSurRepresente}
+      onEdit={() => validateIndicateurDeux("None")}
+    />
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default IndicateurDeuxResult

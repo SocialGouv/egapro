@@ -1,7 +1,6 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { ReactNode } from "react"
+import React, { FunctionComponent, ReactNode } from "react"
 import { Form } from "react-final-form"
+
 import { TranchesAges, GroupTranchesAgesIndicateurUn, FormState } from "../../globals"
 
 import {
@@ -13,14 +12,15 @@ import {
   required,
   ValidatorFunction,
 } from "../../utils/formHelpers"
+import { displayNameTranchesAges } from "../../utils/helpers"
 
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-
-import { displayNameTranchesAges } from "../../utils/helpers"
+import FormError from "../../components/FormError"
+import FormStack from "../../components/ds/FormStack"
 
 export const aboveZero: ValidatorFunction = (value) =>
   minNumber(1)(value) ? "La valeur ne peut être inférieure ou égale à 0" : undefined
@@ -36,7 +36,7 @@ interface remunerationGroup {
   remunerationAnnuelleBrutHommes: number | undefined
 }
 
-interface Props {
+interface IndicateurUnFormRawProps {
   ecartRemuParTrancheAge: Array<remunerationGroup>
   readOnly: boolean
   updateIndicateurUn: (
@@ -86,13 +86,13 @@ const groupByCategorieSocioPro = (
   return Object.entries(tmpArray).map(([_, tranchesAges]) => tranchesAges)
 }
 
-function IndicateurUnFormRaw({
+const IndicateurUnFormRaw: FunctionComponent<IndicateurUnFormRawProps> = ({
   ecartRemuParTrancheAge,
   readOnly,
   updateIndicateurUn,
   validateIndicateurUn,
   nextLink,
-}: Props) {
+}) => {
   const initialValues = {
     remunerationAnnuelle: groupByCategorieSocioPro(ecartRemuParTrancheAge).map(
       ({ tranchesAges, ...otherPropGroupe }: any) => ({
@@ -141,69 +141,68 @@ function IndicateurUnFormRaw({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, hasValidationErrors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          {initialValues.remunerationAnnuelle.map(
-            (
-              {
-                id,
-                name,
-                tranchesAges,
-              }: {
-                id: any
-                name: string
-                tranchesAges: Array<{
-                  trancheAge: TranchesAges
-                  validiteGroupe: boolean
-                }>
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+            )}
+            {initialValues.remunerationAnnuelle.map(
+              (
+                {
+                  id,
+                  name,
+                  tranchesAges,
+                }: {
+                  id: any
+                  name: string
+                  tranchesAges: Array<{
+                    trancheAge: TranchesAges
+                    validiteGroupe: boolean
+                  }>
+                },
+                indexGroupe,
+              ) => {
+                return (
+                  <BlocForm key={id} title={name} label="rémunération moyenne">
+                    {tranchesAges.map(({ trancheAge, validiteGroupe }, indexTrancheAge) => {
+                      return (
+                        <FieldInputsMenWomen
+                          key={trancheAge}
+                          legend="Rémunération moyenne des"
+                          label={{
+                            women: `Rémunération moyenne des femmes de ${displayNameTranchesAges(trancheAge)}`,
+                            men: `Rémunération moyenne des hommes de ${displayNameTranchesAges(trancheAge)}`,
+                          }}
+                          title={displayNameTranchesAges(trancheAge)}
+                          readOnly={readOnly}
+                          calculable={validiteGroupe}
+                          calculableNumber={3}
+                          mask="number"
+                          femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
+                          hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
+                          validatorFemmes={validator}
+                          validatorHommes={validator}
+                        />
+                      )
+                    })}
+                  </BlocForm>
+                )
               },
-              indexGroupe,
-            ) => {
-              return (
-                <BlocForm key={id} title={name} label="rémunération moyenne">
-                  {tranchesAges.map(({ trancheAge, validiteGroupe }, indexTrancheAge) => {
-                    return (
-                      <FieldInputsMenWomen
-                        key={trancheAge}
-                        name={displayNameTranchesAges(trancheAge)}
-                        readOnly={readOnly}
-                        calculable={validiteGroupe}
-                        calculableNumber={3}
-                        mask="number"
-                        femmeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutFemmes`}
-                        hommeFieldName={`remunerationAnnuelle.${indexGroupe}.tranchesAges.${indexTrancheAge}.remunerationAnnuelleBrutHommes`}
-                        validatorFemmes={validator}
-                        validatorHommes={validator}
-                      />
-                    )
-                  })}
-                </BlocForm>
-              )
-            },
-          )}
+            )}
+          </FormStack>
 
           {readOnly ? (
             <ActionBar>{nextLink}</ActionBar>
           ) : (
             <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
-              />
+              <FormSubmit />
             </ActionBar>
           )}
         </form>
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
 }
 
 export default IndicateurUnFormRaw

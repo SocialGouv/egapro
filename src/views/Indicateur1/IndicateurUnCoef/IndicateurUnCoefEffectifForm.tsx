@@ -1,16 +1,16 @@
-/** @jsxImportSource @emotion/react */
-import { Fragment, useMemo, useCallback } from "react"
+import React, { FunctionComponent, useMemo, useCallback } from "react"
+import { Text } from "@chakra-ui/react"
 
 import { AppState, FormState, GroupTranchesAgesEffectif, ActionIndicateurUnCoefData } from "../../../globals"
 import totalNombreSalaries from "../../../utils/totalNombreSalaries"
 import LayoutFormAndResult from "../../../components/LayoutFormAndResult"
-import ButtonAction from "../../../components/ButtonAction"
+import ButtonAction from "../../../components/ds/ButtonAction"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
 import EffectifFormRaw, { getTotalNbSalarie } from "../../Effectif/EffectifFormRaw"
 import EffectifResult from "../../Effectif/EffectifResult"
 
-interface Props {
+interface IndicateurUnCoefEffectifFormProps {
   state: AppState
   updateIndicateurUnCoef: (data: ActionIndicateurUnCoefData) => void
   validateIndicateurUnCoefEffectif: (valid: FormState) => void
@@ -18,13 +18,13 @@ interface Props {
   navigateToGroupe: () => void
 }
 
-function IndicateurUnCoefEffectifForm({
+const IndicateurUnCoefEffectifForm: FunctionComponent<IndicateurUnCoefEffectifFormProps> = ({
   state,
   updateIndicateurUnCoef,
   validateIndicateurUnCoefEffectif,
   navigateToRemuneration,
   navigateToGroupe,
-}: Props) {
+}) => {
   const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
     state.indicateurUn
 
@@ -84,7 +84,7 @@ function IndicateurUnCoefEffectifForm({
   }
 
   return (
-    <Fragment>
+    <>
       <LayoutFormAndResult
         childrenForm={
           <EffectifFormRaw
@@ -92,7 +92,7 @@ function IndicateurUnCoefEffectifForm({
             readOnly={readOnly}
             updateEffectif={updateEffectifRaw}
             validateEffectif={validateIndicateurUnCoefEffectif}
-            nextLink={<ButtonAction onClick={navigateToRemuneration} label="suivant" />}
+            nextLink={<ButtonAction onClick={navigateToRemuneration} label="Suivant" size={"lg"} />}
             formValidator={formValidator}
           />
         }
@@ -109,27 +109,24 @@ function IndicateurUnCoefEffectifForm({
 
       {coefficientEffectifFormValidated === "Valid" && formValidated === "Invalid" && (
         <InfoBlock
+          mt={4}
           title="Vos effectifs ont été modifiés"
           type="success"
           text={
-            <Fragment>
-              <span>
+            <>
+              <Text>
                 Afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
-              </span>
-              <br />
-              <span>
-                {formValidated === "Invalid" && (
-                  <Fragment>
-                    <ActionLink onClick={navigateToRemuneration}>aller à l'étape 3 : rémunérations</ActionLink>
-                    &emsp;
-                  </Fragment>
-                )}
-              </span>
-            </Fragment>
+              </Text>
+              {formValidated === "Invalid" && (
+                <Text mt={1}>
+                  <ActionLink onClick={navigateToRemuneration}>Aller à l'étape 3 : rémunérations</ActionLink>
+                </Text>
+              )}
+            </>
           }
         />
       )}
-    </Fragment>
+    </>
   )
 }
 

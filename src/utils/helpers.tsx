@@ -38,6 +38,10 @@ export function displayFractionPercent(num: number, digits = 2): string {
   return displayPercent(num * 100, digits)
 }
 
+export function displayFractionPercentWithEmptyData(num?: number, digits = 2): string {
+  return num ? displayFractionPercent(num, digits) : "0%"
+}
+
 export function displayPercent(num: number, digits = 1): string {
   return num.toLocaleString("fr-FR", { maximumFractionDigits: digits }) + "%"
 }

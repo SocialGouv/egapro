@@ -1,6 +1,4 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { Fragment } from "react"
+import React, { FunctionComponent } from "react"
 
 import { FormState } from "../../globals"
 
@@ -10,7 +8,7 @@ import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 
-interface Props {
+interface RecapitulatifIndicateurQuatreProps {
   indicateurQuatreFormValidated: FormState
   indicateurQuatreCalculable: boolean
   indicateurEcartNombreSalarieesAugmentees: number | undefined
@@ -19,28 +17,26 @@ interface Props {
   noteIndicateurQuatre: number | undefined
 }
 
-function RecapitulatifIndicateurQuatre({
+const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQuatreProps> = ({
   indicateurQuatreFormValidated,
   indicateurQuatreCalculable,
   indicateurEcartNombreSalarieesAugmentees,
   presenceCongeMat,
   nombreSalarieesPeriodeAugmentation,
   noteIndicateurQuatre,
-}: Props) {
+}) => {
   if (indicateurQuatreFormValidated !== "Valid") {
     return (
-      <div css={styles.container}>
-        <InfoBlock
-          type="warning"
-          title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-          text={
-            <Fragment>
-              Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-              <TextSimulatorLink to="/indicateur4" label="Valider les données" />
-            </Fragment>
-          }
-        />
-      </div>
+      <InfoBlock
+        type="warning"
+        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+        text={
+          <>
+            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
+            <TextSimulatorLink to="/indicateur4" label="Valider les données" />
+          </>
+        }
+      />
     )
   }
 
@@ -50,44 +46,31 @@ function RecapitulatifIndicateurQuatre({
         ? "d’augmentations salariales pendant la durée du ou des congés maternité"
         : "de retour de congé maternité pendant la période de référence."
     return (
-      <div css={styles.container}>
-        <InfoBlock
-          type="warning"
-          title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-          text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
-        />
-      </div>
+      <InfoBlock
+        type="warning"
+        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+        text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
+      />
     )
   }
 
   return (
-    <div css={styles.container}>
-      <RecapBloc
-        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-        resultBubble={{
-          firstLineLabel: "votre résultat final est",
-          firstLineData:
-            indicateurEcartNombreSalarieesAugmentees !== undefined
-              ? displayPercent(indicateurEcartNombreSalarieesAugmentees)
-              : "--",
-          secondLineLabel: "votre note obtenue est",
-          secondLineData: (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") + "/15",
-          indicateurSexeSurRepresente: "femmes",
-        }}
-      >
-        {null}
-      </RecapBloc>
-    </div>
+    <RecapBloc
+      title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+      resultSummary={{
+        firstLineLabel: "votre résultat final est",
+        firstLineData:
+          indicateurEcartNombreSalarieesAugmentees !== undefined
+            ? displayPercent(indicateurEcartNombreSalarieesAugmentees)
+            : "--",
+        secondLineLabel: "votre note obtenue est",
+        secondLineData: (noteIndicateurQuatre !== undefined ? noteIndicateurQuatre : "--") + "/15",
+        indicateurSexeSurRepresente: "femmes",
+      }}
+    >
+      {null}
+    </RecapBloc>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-    marginTop: 22,
-    marginBottom: 22,
-  }),
 }
 
 export default RecapitulatifIndicateurQuatre

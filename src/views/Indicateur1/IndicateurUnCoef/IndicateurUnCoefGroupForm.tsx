@@ -1,26 +1,25 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { Fragment, useState } from "react"
+import React, { FunctionComponent, useState } from "react"
+import { Box, List, ListItem, Text } from "@chakra-ui/react"
 import { Form } from "react-final-form"
 import arrayMutators from "final-form-arrays"
 import { FieldArray } from "react-final-form-arrays"
+
 import { ActionIndicateurUnCoefData, FormState, AppState } from "../../../globals"
 
-import globalStyles from "../../../utils/globalStyles"
-
-import { useColumnsWidth, useLayoutType } from "../../../components/GridContext"
 import InfoBlock from "../../../components/ds/InfoBlock"
 import ActionLink from "../../../components/ActionLink"
-import ButtonAction from "../../../components/ButtonAction"
+import ButtonAction from "../../../components/ds/ButtonAction"
 import ActionBar from "../../../components/ActionBar"
 import FormAutoSave from "../../../components/FormAutoSave"
 import FormSubmit from "../../../components/FormSubmit"
-import { Modal } from "../../../components/ModalContext"
+import Modal from "../../../components/ds/Modal"
 
 import InputField from "./components/CoefGroupInputField"
-import ModalConfirmDelete from "./components/CoefGroupModalConfirmDelete"
+import FormError from "../../../components/FormError"
+import FormStack from "../../../components/ds/FormStack"
+import { IconDelete, IconPlusCircle } from "../../../components/ds/Icons"
 
-interface Props {
+interface IndicateurUnCoefGroupFormProps {
   state: AppState
   updateIndicateurUnCoefAddGroup: () => void
   updateIndicateurUnCoefDeleteGroup: (index: number) => void
@@ -30,7 +29,7 @@ interface Props {
   navigateToRemuneration: () => void
 }
 
-function IndicateurUnCoefGroupForm({
+const IndicateurUnCoefGroupForm: FunctionComponent<IndicateurUnCoefGroupFormProps> = ({
   state,
   updateIndicateurUnCoefAddGroup,
   updateIndicateurUnCoefDeleteGroup,
@@ -38,7 +37,7 @@ function IndicateurUnCoefGroupForm({
   validateIndicateurUnCoefGroup,
   navigateToEffectif,
   navigateToRemuneration,
-}: Props) {
+}) => {
   const { coefficient, coefficientGroupFormValidated, coefficientEffectifFormValidated, formValidated } =
     state.indicateurUn
   const readOnly = coefficientGroupFormValidated === "Valid"
@@ -54,15 +53,12 @@ function IndicateurUnCoefGroupForm({
     validateIndicateurUnCoefGroup("Valid")
   }
 
-  const layoutType = useLayoutType()
-  const width = useColumnsWidth(layoutType === "desktop" ? 6 : 7)
-
   const [indexGroupToDelete, setIndexGroupToDelete] = useState<number | undefined>(undefined)
   const confirmGroupToDelete = (index: number) => setIndexGroupToDelete(index)
   const closeModal = () => setIndexGroupToDelete(undefined)
 
   return (
-    <Fragment>
+    <>
       <Form
         onSubmit={onSubmit}
         mutators={{
@@ -72,66 +68,67 @@ function IndicateurUnCoefGroupForm({
         initialValues={initialValues}
       >
         {({ handleSubmit, hasValidationErrors, submitFailed }) => (
-          <form onSubmit={handleSubmit} css={[styles.container, { width }]}>
+          <form onSubmit={handleSubmit}>
             <FormAutoSave saveForm={saveForm} />
-
-            <FieldArray name="groupes">
-              {({ fields }) => (
-                <Fragment>
-                  {fields.map((name, index) => (
-                    <InputField
-                      key={name}
-                      name={`${name}.name`}
-                      index={index}
-                      deleteGroup={confirmGroupToDelete}
-                      readOnly={readOnly}
-                    />
-                  ))}
-                </Fragment>
+            <FormStack>
+              {submitFailed && hasValidationErrors && (
+                <FormError message="Les groupes ne peuvent pas être validés si tous les champs ne sont pas remplis." />
               )}
-            </FieldArray>
 
-            {readOnly ? (
-              <div css={styles.spacerAdd} />
-            ) : (
-              <ActionLink onClick={updateIndicateurUnCoefAddGroup} style={styles.add}>
-                <div css={styles.addIcon}>
-                  <svg
-                    width="26"
-                    height="26"
-                    viewBox="0 0 26 26"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M12.9992 24.174V1.82597M1.8252 13H24.1733"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-                <span>ajouter un niveau ou coefficient hiérarchique</span>
-              </ActionLink>
-            )}
-
-            {readOnly ? (
-              <ActionBar>
-                <ButtonAction onClick={navigateToEffectif} label="suivant" />
-                <div css={styles.spacerActionBar} />
-                <ActionLink onClick={() => validateIndicateurUnCoefGroup("None")}>modifier les groupes</ActionLink>
-              </ActionBar>
-            ) : (
-              <ActionBar>
-                {coefficient.length > 0 && (
-                  <FormSubmit
-                    hasValidationErrors={hasValidationErrors}
-                    submitFailed={submitFailed}
-                    errorMessage="Les groupes ne peuvent pas être validés si tous les champs ne sont pas remplis."
-                  />
+              <FieldArray name="groupes">
+                {({ fields }) => (
+                  <>
+                    {fields.length === 0 ? (
+                      <Box textAlign="center" pt={6}>
+                        <Text fontSize="sm" color="gray.500">
+                          Aucun niveau ou coefficient hiérarchique renseigné.
+                          <br />
+                          Vous pouvez en ajouter en utilisant le bouton ci-dessous.
+                        </Text>
+                      </Box>
+                    ) : (
+                      fields.map((name, index) => (
+                        <InputField
+                          key={index}
+                          name={`${name}.name`}
+                          index={index}
+                          deleteGroup={confirmGroupToDelete}
+                          editGroup={() => validateIndicateurUnCoefGroup("None")}
+                          readOnly={readOnly}
+                        />
+                      ))
+                    )}
+                  </>
                 )}
+              </FieldArray>
+              {!readOnly && (
+                <Box textAlign="center">
+                  <ButtonAction
+                    size="sm"
+                    variant="outline"
+                    label="Ajouter un niveau ou coefficient hiérarchique"
+                    onClick={updateIndicateurUnCoefAddGroup}
+                    leftIcon={<IconPlusCircle />}
+                  />
+                </Box>
+              )}
+            </FormStack>
+
+            {readOnly ? (
+              <ActionBar borderTop="1px solid" borderColor="gray.200" pt={4}>
+                <ButtonAction onClick={navigateToEffectif} label="Suivant" size="lg" />
+                <ButtonAction
+                  onClick={() => validateIndicateurUnCoefGroup("None")}
+                  label="Modifier les groupes"
+                  variant="link"
+                />
               </ActionBar>
+            ) : (
+              coefficient.length > 0 && (
+                <ActionBar borderTop="1px solid" borderColor="gray.200" pt={4}>
+                  <FormSubmit />
+                </ActionBar>
+              )
             )}
           </form>
         )}
@@ -140,76 +137,54 @@ function IndicateurUnCoefGroupForm({
       {coefficientGroupFormValidated === "Valid" &&
         (coefficientEffectifFormValidated === "Invalid" || formValidated === "Invalid") && (
           <InfoBlock
+            mt={4}
             title="Vos groupes ont été modifiés"
             type="success"
             text={
-              <Fragment>
-                <span>
+              <>
+                <Text>
                   Afin de s'assurer de la cohérence de votre indicateur, merci de vérifier les données de vos étapes.
-                </span>
-                &emsp;
-                <span>
+                </Text>
+                <List mt={1}>
                   {coefficientEffectifFormValidated === "Invalid" && (
-                    <Fragment>
-                      <ActionLink onClick={navigateToEffectif}>aller à l'étape 2 : effectifs</ActionLink>
-                      &emsp;
-                    </Fragment>
+                    <ListItem>
+                      <ActionLink onClick={navigateToEffectif}>Aller à l'étape 2&nbsp;: effectifs</ActionLink>
+                    </ListItem>
                   )}
                   {formValidated === "Invalid" && (
-                    <Fragment>
-                      <ActionLink onClick={navigateToRemuneration}>aller à l'étape 3 : rémunérations</ActionLink>
-                      &emsp;
-                    </Fragment>
+                    <ListItem>
+                      <ActionLink onClick={navigateToRemuneration}>Aller à l'étape 3&nbsp;: rémunérations</ActionLink>
+                    </ListItem>
                   )}
-                </span>
-              </Fragment>
+                </List>
+              </>
             }
           />
         )}
 
-      <Modal isOpen={indexGroupToDelete !== undefined} onRequestClose={closeModal}>
-        <ModalConfirmDelete
-          closeModal={closeModal}
-          deleteGroup={() => {
-            indexGroupToDelete !== undefined && updateIndicateurUnCoefDeleteGroup(indexGroupToDelete)
-          }}
-        />
+      <Modal
+        isOpen={indexGroupToDelete !== undefined}
+        onClose={closeModal}
+        title="Êtes vous sûr de vouloir supprimer ce groupe ?"
+        footer={
+          <>
+            <ButtonAction
+              colorScheme="red"
+              leftIcon={<IconDelete />}
+              onClick={() => {
+                indexGroupToDelete !== undefined && updateIndicateurUnCoefDeleteGroup(indexGroupToDelete)
+                closeModal()
+              }}
+              label="Supprimer"
+            />
+            <ButtonAction colorScheme="gray" onClick={() => closeModal()} label="Annuler" />
+          </>
+        }
+      >
+        <Text>Toutes les données renseignées pour ce groupes seront effacées définitivement.</Text>
       </Modal>
-    </Fragment>
+    </>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
-
-  add: css({
-    display: "flex",
-    alignItems: "center",
-    marginTop: 46 - 18 - 5,
-    textDecoration: "none",
-  }),
-  addIcon: css({
-    width: 32,
-    height: 32,
-    marginRight: 16,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-
-    backgroundColor: globalStyles.colors.default,
-    borderRadius: 16,
-  }),
-
-  spacerActionBar: css({
-    width: 66,
-  }),
-  spacerAdd: css({
-    height: 32,
-    marginTop: 46 - 18 - 5,
-  }),
 }
 
 export default IndicateurUnCoefGroupForm

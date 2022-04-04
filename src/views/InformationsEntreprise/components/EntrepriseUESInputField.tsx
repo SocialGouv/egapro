@@ -1,29 +1,30 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 import { useField } from "react-final-form"
+import { FormControl, FormLabel, SimpleGrid } from "@chakra-ui/react"
 
-import globalStyles from "../../../utils/globalStyles"
+import { EntrepriseUES, EntrepriseType } from "../../../globals"
 
-import { hasFieldError } from "../../../components/Input"
-import FieldSiren, { FieldSirenReadOnly, sirenValidator } from "../../../components/FieldSiren"
-import TextField from "../../../components/TextField"
-import { EntrepriseUES } from "../../../globals"
-import { EntrepriseType } from "../../../globals"
 import { composeValidators, required } from "../../../utils/formHelpers"
 
-function EntrepriseUESInput({
-  nom,
-  siren,
-  index,
-  readOnly,
-  updateSirenData,
-}: {
+import FakeInputGroup from "../../../components/ds/FakeInputGroup"
+import { hasFieldError } from "../../../components/Input"
+import FieldSiren, { sirenValidator } from "../../../components/FieldSiren"
+
+type EntrepriseUESInputProps = {
   nom: string
   siren: string
   index: number
   readOnly: boolean
   updateSirenData: (sirenData: EntrepriseType) => void
-}) {
+}
+
+const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({
+  nom,
+  siren,
+  index,
+  readOnly,
+  updateSirenData,
+}) => {
   const checkDuplicates = (value: string, allValues: any) => {
     const sirenList = allValues.entreprisesUES.map((entreprise: EntrepriseUES) => entreprise.siren)
     sirenList.push(allValues.siren)
@@ -38,17 +39,19 @@ function EntrepriseUESInput({
     parse: (value) => value,
     format: (value) => value,
   })
+  const sirenField = useField(siren, {
+    validate: required,
+    parse: (value) => value,
+    format: (value) => value,
+  })
   const nomError = hasFieldError(nomField.meta)
 
   return (
-    <div css={styles.inputField}>
-      <label css={[styles.label, nomError && styles.labelError]} htmlFor={nomField.input.name}>
-        {`Entreprise ${index + 1}`}
-      </label>
-
-      <div css={styles.fieldRow}>
+    <FormControl isInvalid={nomError}>
+      <FormLabel as="div">{`Entreprise ${index + 1}`}</FormLabel>
+      <SimpleGrid columns={2} spacing={6}>
         {readOnly ? (
-          <FieldSirenReadOnly label="Siren de l'entreprise" name={siren} />
+          <FakeInputGroup label="Siren de l'entreprise">{sirenField.input.value}</FakeInputGroup>
         ) : (
           <FieldSiren
             label="Siren de l'entreprise"
@@ -56,55 +59,12 @@ function EntrepriseUESInput({
             readOnly={readOnly}
             updateSirenData={updateSirenData}
             validator={composeValidators(checkDuplicates, sirenValidator(updateSirenData))}
-            customStyles={styles.siren}
           />
         )}
-        <TextField
-          label="Nom de l'entreprise"
-          fieldName={nom}
-          readOnly={true}
-          errorText="le nom n'est pas valide"
-          customStyles={styles.nomEntreprise}
-        />
-      </div>
-    </div>
+        <FakeInputGroup label="Nom de l'entreprise">{nomField.input.value}</FakeInputGroup>
+      </SimpleGrid>
+    </FormControl>
   )
-}
-
-const styles = {
-  inputField: css({
-    alignSelf: "stretch",
-  }),
-  label: css({
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  labelError: css({
-    color: globalStyles.colors.error,
-  }),
-  fieldRow: css({
-    height: 100,
-    marginTop: 5,
-    display: "flex",
-    justifyContent: "space-between",
-  }),
-  siren: css({
-    marginRight: "1em",
-    width: "9em",
-  }),
-  nomEntreprise: css({
-    flexGrow: 2,
-  }),
-  delete: css({
-    marginLeft: globalStyles.grid.gutterWidth,
-  }),
-  error: css({
-    height: 18,
-    color: globalStyles.colors.error,
-    fontSize: 12,
-    fontStyle: "italic",
-    lineHeight: "15px",
-  }),
 }
 
 export default EntrepriseUESInput

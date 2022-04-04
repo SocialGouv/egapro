@@ -1,89 +1,66 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
+import React from "react"
+import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
 
-import globalStyles from "../../utils/globalStyles"
+import Summary from "../../components/Summary"
+import { FunctionComponent } from "react"
+import ButtonAction from "../../components/ds/ButtonAction"
+import { IconEdit } from "../../components/ds/Icons"
 
-import Bubble from "../../components/Bubble"
-import ActionLink from "../../components/ActionLink"
-
-interface Props {
+interface EffectifResultProps {
   totalNombreSalariesHomme: number
   totalNombreSalariesFemme: number
   validateEffectif: (valid: FormState) => void
 }
 
-function EffectifResult({ totalNombreSalariesHomme, totalNombreSalariesFemme, validateEffectif }: Props) {
+const EffectifResult: FunctionComponent<EffectifResultProps> = ({
+  totalNombreSalariesHomme,
+  totalNombreSalariesFemme,
+  validateEffectif,
+}) => {
   return (
-    <div css={styles.container}>
-      <Bubble style={styles.bubble}>
-        <div css={styles.blocNumbers}>
-          <p css={styles.message}>
-            <span css={styles.messageLabel}>Nombre de femmes</span>
-            <span css={styles.messageData}>{totalNombreSalariesFemme}</span>
-          </p>
-          <p css={styles.message}>
-            <span css={styles.messageLabel}>Nombre d’hommes</span>
-            <span css={styles.messageData}>{totalNombreSalariesHomme}</span>
-          </p>
-        </div>
-        <p css={styles.message}>
-          <span css={styles.messageLabel}>Total effectifs</span>
-          <span css={styles.messageData}>{totalNombreSalariesFemme + totalNombreSalariesHomme}</span>
-        </p>
-      </Bubble>
-
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateEffectif("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+    <Summary
+      footer={
+        <ButtonAction
+          leftIcon={<IconEdit />}
+          label="Modifier les effectifs"
+          onClick={() => validateEffectif("None")}
+          size="sm"
+          variant="outline"
+          colorScheme="primary"
+        />
+      }
+    >
+      <Table size="sm">
+        <TableCaption placement="top" mt={0} pt={0} mb={1}>
+          Récapitulatif
+        </TableCaption>
+        <Tbody>
+          <Tr>
+            <Td>Nombre de femmes</Td>
+            <Td isNumeric fontWeight="semibold">
+              {totalNombreSalariesFemme}
+            </Td>
+          </Tr>
+          <Tr>
+            <Td>Nombre d’hommes</Td>
+            <Td isNumeric fontWeight="semibold">
+              {totalNombreSalariesHomme}
+            </Td>
+          </Tr>
+          <Tr>
+            <Td pt={3} border="none">
+              Total effectifs
+            </Td>
+            <Td pt={3} isNumeric fontWeight="semibold" border="none">
+              {totalNombreSalariesFemme + totalNombreSalariesHomme}
+            </Td>
+          </Tr>
+        </Tbody>
+      </Table>
+    </Summary>
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
-
-  bubble: css({
-    backgroundColor: "white",
-    color: globalStyles.colors.default,
-    border: "solid #E3E4ED 1px",
-    "@media print": {
-      backgroundColor: "white",
-      color: globalStyles.colors.default,
-      border: "solid #E3E4ED 1px",
-    },
-  }),
-
-  blocNumbers: css({
-    height: 50,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-  }),
-
-  message: css({
-    marginBottom: 2,
-    display: "flex",
-    alignItems: "baseline",
-
-    fontSize: 14,
-    lineHeight: "17px",
-  }),
-  messageLabel: css({
-    marginRight: "auto",
-  }),
-  messageData: css({
-    fontWeight: "bold",
-  }),
 }
 
 export default EffectifResult

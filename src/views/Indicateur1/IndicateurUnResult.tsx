@@ -1,54 +1,35 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 
 import { FormState } from "../../globals"
 
 import { displayPercent, displaySexeSurRepresente } from "../../utils/helpers"
 
-import ResultBubble from "../../components/ResultBubble"
-import ActionLink from "../../components/ActionLink"
+import ResultSummary from "../../components/ResultSummary"
 
-interface Props {
+interface IndicateurUnResultProps {
   indicateurEcartRemuneration: number | undefined
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined
   noteIndicateurUn: number | undefined
   validateIndicateurUn: (valid: FormState) => void
 }
 
-function IndicateurUnResult({
+const IndicateurUnResult: FunctionComponent<IndicateurUnResultProps> = ({
   indicateurEcartRemuneration,
   indicateurSexeSurRepresente,
   noteIndicateurUn,
   validateIndicateurUn,
-}: Props) {
+}) => {
   return (
-    <div css={styles.container}>
-      <ResultBubble
-        firstLineLabel="votre résultat final est"
-        firstLineData={indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--"}
-        firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
-        secondLineLabel="votre note obtenue est"
-        secondLineData={(noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40"}
-        indicateurSexeSurRepresente={indicateurSexeSurRepresente}
-      />
-
-      <p css={styles.edit}>
-        <ActionLink onClick={() => validateIndicateurUn("None")}>modifier les données saisies</ActionLink>
-      </p>
-    </div>
+    <ResultSummary
+      firstLineLabel="votre résultat final est"
+      firstLineData={indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--"}
+      firstLineInfo={displaySexeSurRepresente(indicateurSexeSurRepresente)}
+      secondLineLabel="votre note obtenue est"
+      secondLineData={(noteIndicateurUn !== undefined ? noteIndicateurUn : "--") + "/40"}
+      indicateurSexeSurRepresente={indicateurSexeSurRepresente}
+      onEdit={() => validateIndicateurUn("None")}
+    />
   )
-}
-
-const styles = {
-  container: css({
-    maxWidth: 250,
-    marginTop: 64,
-  }),
-  edit: css({
-    marginTop: 14,
-    marginBottom: 14,
-    textAlign: "center",
-  }),
 }
 
 export default IndicateurUnResult

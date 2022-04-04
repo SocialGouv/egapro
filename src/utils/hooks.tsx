@@ -19,6 +19,7 @@ export function useDebounce(value: any, delay: number) {
 }
 
 export function useDebounceEffect(value: any, delay: number, callback: (debouncedValue: any) => void, dep: any[]) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- We can't anticipate neither the values used in callback nor the deps.
   const memoizedCallback = useCallback(callback, dep)
 
   const debouncedValue = useDebounce(value, delay)
@@ -139,5 +140,6 @@ export function useSoloToastMessage(id: string, message: AlertMessageType | null
     } else {
       toast.closeAll()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- toast and toastMessage are utilities we don't need to subscribe to.
   }, [message])
 }

@@ -23,6 +23,7 @@ function ResetPage({ dispatch, state }: ResetPageProps): null {
 
   React.useEffect(() => {
     dispatch({ type: "resetState" })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to subscribe to dispatch changes.
   }, [])
 
   React.useEffect(() => {
@@ -36,7 +37,8 @@ function ResetPage({ dispatch, state }: ResetPageProps): null {
           console.error(errorMessage)
         })
     }
-  }, [postIndicatorsDatas, state])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to subscribe to history and location.state changes.
+  }, [state])
 
   return null
 }

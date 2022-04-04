@@ -1,22 +1,8 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 import { FormState, ActionIndicateurTroisData } from "../../globals"
 
-import {
-  // calculTotalEffectifsEtTauxPromotion,
-  // calculEcartTauxPromotion,
-  effectifEtEcartPromoGroup,
-} from "../../utils/calculsEgaProIndicateurTrois"
-
-import BlocForm from "../../components/BlocForm"
-import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
-import RadiosBoolean from "../../components/RadiosBoolean"
-import ActionBar from "../../components/ActionBar"
-import FormAutoSave from "../../components/FormAutoSave"
-import FormSubmit from "../../components/FormSubmit"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-
+import { effectifEtEcartPromoGroup } from "../../utils/calculsEgaProIndicateurTrois"
 import {
   parseFloatFormValue,
   parseFloatStateValue,
@@ -27,10 +13,17 @@ import {
   mustBeNumber,
   required,
 } from "../../utils/formHelpers"
-import {
-  displayNameCategorieSocioPro,
-  // displayFractionPercent
-} from "../../utils/helpers"
+import { displayNameCategorieSocioPro } from "../../utils/helpers"
+
+import FormStack from "../../components/ds/FormStack"
+import BlocForm from "../../components/BlocForm"
+import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import ActionBar from "../../components/ActionBar"
+import FormAutoSave from "../../components/FormAutoSave"
+import FormSubmit from "../../components/FormSubmit"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
+import FormError from "../../components/FormError"
 
 const validator = composeValidators(required, mustBeNumber, minNumber(0))
 
@@ -59,7 +52,7 @@ const validateForm = ({
   return
 }
 
-interface Props {
+interface IndicateurTroisFormProps {
   ecartPromoParCategorieSocioPro: Array<effectifEtEcartPromoGroup>
   presencePromotion: boolean
   readOnly: boolean
@@ -67,13 +60,13 @@ interface Props {
   validateIndicateurTrois: (valid: FormState) => void
 }
 
-function IndicateurTroisForm({
+const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
   ecartPromoParCategorieSocioPro,
   presencePromotion,
   readOnly,
   updateIndicateurTrois,
   validateIndicateurTrois,
-}: Props) {
+}) => {
   const initialValues = {
     presencePromotion: parseBooleanStateValue(presencePromotion),
     tauxPromotion: ecartPromoParCategorieSocioPro.map(
@@ -145,71 +138,71 @@ function IndicateurTroisForm({
       initialValuesEqual={() => true}
     >
       {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
-        <form onSubmit={handleSubmit} css={styles.container}>
+        <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
-          <RadiosBoolean
-            fieldName="presencePromotion"
-            value={values.presencePromotion}
-            readOnly={readOnly}
-            labelTrue="il y a eu des promotions durant la période de référence"
-            labelFalse="il n’y a pas eu de promotions durant la période de référence"
-          />
-
-          {values.presencePromotion === "true" && (
-            <BlocForm
-              label="% de salariés promus"
-              // footer={[
-              //   displayFractionPercent(totalTauxPromotionFemmes),
-              //   displayFractionPercent(totalTauxPromotionHommes)
-              // ]}
-            >
-              {ecartPromoParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
-                return (
-                  <FieldInputsMenWomen
-                    key={categorieSocioPro}
-                    name={displayNameCategorieSocioPro(categorieSocioPro)}
-                    readOnly={readOnly}
-                    calculable={validiteGroupe}
-                    calculableNumber={10}
-                    mask="percent"
-                    femmeFieldName={`tauxPromotion.${index}.tauxPromotionFemmes`}
-                    hommeFieldName={`tauxPromotion.${index}.tauxPromotionHommes`}
-                    validatorFemmes={validator}
-                    validatorHommes={validator}
-                  />
-                )
-              })}
-            </BlocForm>
-          )}
-
-          {readOnly ? (
-            <ActionBar>
-              <ButtonSimulatorLink to="/indicateur4" label="suivant" />
-            </ActionBar>
-          ) : (
-            <ActionBar>
-              <FormSubmit
-                hasValidationErrors={hasValidationErrors}
-                submitFailed={submitFailed}
-                errorMessage={
+          <FormStack>
+            {submitFailed && hasValidationErrors && (
+              <FormError
+                message={
                   errors?.notAll0
                     ? errors.notAll0
                     : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
                 }
               />
+            )}
+            <RadiosBoolean
+              fieldName="presencePromotion"
+              value={values.presencePromotion}
+              readOnly={readOnly}
+              label={<>Il y a t'il eu des promotions durant la période de référence&nbsp;?</>}
+            />
+
+            {values.presencePromotion === "true" && (
+              <BlocForm
+                title="Poucentage de promotions"
+                // footer={[
+                //   displayFractionPercent(totalTauxPromotionFemmes),
+                //   displayFractionPercent(totalTauxPromotionHommes)
+                // ]}
+              >
+                {ecartPromoParCategorieSocioPro.map(({ categorieSocioPro, validiteGroupe }, index) => {
+                  return (
+                    <FieldInputsMenWomen
+                      key={categorieSocioPro}
+                      legend="% de salariés promus"
+                      title={displayNameCategorieSocioPro(categorieSocioPro)}
+                      label={{
+                        women: `Pourcentage de femmes ${displayNameCategorieSocioPro(categorieSocioPro)} promues`,
+                        men: `Pourcentage d'hommes ${displayNameCategorieSocioPro(categorieSocioPro)} promus`,
+                      }}
+                      readOnly={readOnly}
+                      calculable={validiteGroupe}
+                      calculableNumber={10}
+                      mask="percent"
+                      femmeFieldName={`tauxPromotion.${index}.tauxPromotionFemmes`}
+                      hommeFieldName={`tauxPromotion.${index}.tauxPromotionHommes`}
+                      validatorFemmes={validator}
+                      validatorHommes={validator}
+                    />
+                  )
+                })}
+              </BlocForm>
+            )}
+          </FormStack>
+
+          {readOnly ? (
+            <ActionBar>
+              <ButtonSimulatorLink to="/indicateur4" label="Suivant" />
+            </ActionBar>
+          ) : (
+            <ActionBar>
+              <FormSubmit />
             </ActionBar>
           )}
         </form>
       )}
     </Form>
   )
-}
-
-const styles = {
-  container: css({
-    display: "flex",
-    flexDirection: "column",
-  }),
 }
 
 export default IndicateurTroisForm

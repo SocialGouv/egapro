@@ -16,14 +16,14 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
   totalPoint,
   totalPointCalculable,
 }) => (
-  <React.Fragment>
+  <>
     {allIndicateurValid ? (
       noteIndex !== undefined ? (
         <InfoBlock
           type="success"
           title="Index égalité femmes-hommes"
           text={
-            <React.Fragment>
+            <>
               <Text>
                 Votre résultat total est <strong>{noteIndex}/100</strong>.
               </Text>
@@ -32,7 +32,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
                 fontStyle="italic"
                 fontSize="xs"
               >{`${totalPoint} points sur un maximum de ${totalPointCalculable} pouvant être obtenus.`}</Text>
-            </React.Fragment>
+            </>
           }
         />
       ) : (
@@ -40,7 +40,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
           type="warning"
           title="Index égalité femmes-hommes"
           text={
-            <React.Fragment>
+            <>
               <Text>
                 Vos indicateurs calculables représentent moins de 75 points, votre Index ne peut être calculé.
               </Text>
@@ -49,7 +49,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
                 fontStyle="italic"
                 fontSize="xs"
               >{`${totalPoint} points sur un maximum de ${totalPointCalculable} pouvant être obtenus.`}</Text>
-            </React.Fragment>
+            </>
           }
         />
       )
@@ -60,7 +60,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
         text="Vous n’avez pas encore validé tous vos indicateurs, votre index ne peut être calculé."
       />
     )}
-  </React.Fragment>
+  </>
 )
 
 export default RecapitulatifIndex

@@ -19,7 +19,7 @@ describe("The Home Page on desktop", function () {
   })
 
   it("displays a button that leads to the next step", function () {
-    cy.get("a").contains("suivant").click()
+    cy.get("a").contains("Suivant").click()
     cy.url().should("contain", "/informations")
   })
 
@@ -29,7 +29,7 @@ describe("The Home Page on desktop", function () {
     cy.get("select[name=anneeDeclaration]").select("2019")
     cy.get("input[name=finPeriodeReference]").type("25/11/2019")
     cy.get("button[type=submit]").click()
-    cy.get("a").contains("suivant").click()
+    cy.get("a").contains("Suivant").click()
     cy.url().should("contain", "effectifs")
   })
 
@@ -40,7 +40,7 @@ describe("The Home Page on desktop", function () {
         cy.wrap($el).type("5")
       })
     cy.get("button[type=submit]").click()
-    cy.get("a").contains("suivant").click()
+    cy.get("a").contains("Suivant").click()
     cy.url().should("contain", "indicateur1")
   })
 
@@ -51,7 +51,7 @@ describe("The Home Page on desktop", function () {
         cy.wrap($el).type("1000")
       })
     cy.get("button[type=submit]").click()
-    cy.get("a").contains("suivant").click()
+    cy.get("a").contains("Suivant").click()
     cy.url().should("contain", "indicateur2et3")
   })
 
@@ -62,7 +62,7 @@ describe("The Home Page on desktop", function () {
         cy.wrap($el).type("5")
       })
     cy.get("button[type=submit]").click()
-    cy.get("a").contains("suivant").click()
+    cy.get("a").contains("Suivant").click()
     cy.url().should("contain", "indicateur4")
   })
 
@@ -73,14 +73,14 @@ describe("The Home Page on desktop", function () {
         cy.wrap($el).type("5")
       })
     cy.get("button[type=submit]").click()
-    cy.get("a").contains("suivant").click()
+    cy.get("a").contains("Suivant").click()
     cy.url().should("contain", "indicateur5")
   })
 
   it("displays the 'indicateur5' form", function () {
     cy.get("form input[type!=radio]").first().type("5")
     cy.get("button[type=submit]").click()
-    cy.get("a").contains("suivant").click()
+    cy.get("a").contains("Suivant").click()
     cy.url().should("contain", "recapitulatif")
   })
 
