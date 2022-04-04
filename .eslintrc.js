@@ -22,6 +22,7 @@ module.exports = {
     "jsx-a11y/anchor-is-valid": "off",
     "@typescript-eslint/no-unused-vars": ["warn"],
     "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-explicit-any": "off", // TODO: remove this when there will be no other TS errors.
     "react/no-unescaped-entities": ["error", { forbid: [">", "}"] }], // ajout qui autorise les apostrophes dans le JSX.
     "prettier/prettier": [
       "error",

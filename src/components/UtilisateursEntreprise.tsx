@@ -71,6 +71,7 @@ export default function UtilisateursEntreprise({ siren }: { siren: string }) {
 
   React.useEffect(() => {
     setShowAddForm.off()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setShowAddForm is not added because the properties returned by useBoolean are stable values.
   }, [siren])
 
   async function addUser(formData: any) {

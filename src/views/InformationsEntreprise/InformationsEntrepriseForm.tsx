@@ -244,7 +244,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                 label="SIREN"
                 message={
                   alreadyDeclared
-                    ? "Le SIREN n'est pas modifiable car une déclaration a déjà été validée et" + " transmise."
+                    ? "Le SIREN n'est pas modifiable car une déclaration a déjà été validée et transmise."
                     : undefined
                 }
               >

@@ -1,6 +1,5 @@
 import React, { useReducer, useCallback, FunctionComponent } from "react"
 import { Router } from "react-router-dom"
-import { css } from "@emotion/react"
 import "@fontsource/gabriela"
 import "@fontsource/cabin"
 import ReactPiwik from "react-piwik"
@@ -49,7 +48,7 @@ const piwik: any = new ReactPiwik({
 // track the initial pageview
 ReactPiwik.push(["trackPageView"])
 
-const App = () => {
+const App: FunctionComponent = () => {
   const [state, dispatchReducer] = useReducer(AppReducer, undefined)
 
   const dispatch = useCallback(

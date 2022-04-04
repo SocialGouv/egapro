@@ -1,4 +1,4 @@
-import React from "react"
+import React, { FunctionComponent } from "react"
 import { Flex, FormControl, FormLabel, Text, Input } from "@chakra-ui/react"
 
 import { useTitle } from "../../utils/hooks"
@@ -11,7 +11,7 @@ import UtilisateursEntreprise from "../../components/UtilisateursEntreprise"
 
 const title = "Gérer les utilisateurs"
 
-const GererUtilisateursPage = () => {
+const GererUtilisateursPage: FunctionComponent = () => {
   useTitle(title)
 
   const { staff } = useUser()

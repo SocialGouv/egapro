@@ -1,4 +1,4 @@
-import React from "react"
+import React, { FunctionComponent } from "react"
 import { Avatar, Badge, Box, HStack, Text, VStack } from "@chakra-ui/react"
 
 import { useUser } from "../../components/AuthContext"
@@ -8,7 +8,7 @@ import { useTitle } from "../../utils/hooks"
 
 const title = "Mon profil"
 
-const MonProfil = () => {
+const MonProfil: FunctionComponent = () => {
   useTitle(title)
   const { email, staff } = useUser()
 

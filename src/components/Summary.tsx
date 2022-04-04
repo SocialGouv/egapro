@@ -3,7 +3,6 @@ import { Box } from "@chakra-ui/react"
 
 export type SummaryProps = {
   colorScheme?: string
-  style?: any
   footer?: ReactElement
 }
 

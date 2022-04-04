@@ -1,11 +1,10 @@
-import React from "react"
+import React, { FunctionComponent } from "react"
 import { Box, Text } from "@chakra-ui/layout"
 import { Form } from "react-final-form"
 import { Redirect, useHistory } from "react-router"
 
 import { useTitle, useToastMessage } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
-
 import { FieldEmail } from "../components/ds/FieldEmail"
 import PrimaryButton from "../components/ds/PrimaryButton"
 import Page from "../components/Page"
@@ -14,7 +13,7 @@ import { SinglePageLayout } from "../containers/SinglePageLayout"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
 
-const Mire = () => {
+const Mire: FunctionComponent = () => {
   useTitle(title)
 
   const history = useHistory()
