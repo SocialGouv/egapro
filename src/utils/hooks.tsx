@@ -140,5 +140,6 @@ export function useSoloToastMessage(id: string, message: AlertMessageType | null
     } else {
       toast.closeAll()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- toast and toastMessage are utilities we don't need to subscribe to.
   }, [message])
 }
