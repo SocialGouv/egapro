@@ -1,5 +1,5 @@
 import React, { useEffect, ReactNode } from "react"
-import { Container, Box, Flex, Grid } from "@chakra-ui/react"
+import { Container, Box, Flex, Grid, useMediaQuery } from "@chakra-ui/react"
 import { withRouter, RouteComponentProps } from "react-router-dom"
 
 import { AppState } from "../globals"
@@ -14,6 +14,8 @@ interface Props extends RouteComponentProps {
 }
 
 function MainScrollView({ children, state, location }: Props) {
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
+
   const menu = (
     <Menu
       trancheEffectifs={state ? state.informations.trancheEffectifs : "50 à 250"}
@@ -45,7 +47,7 @@ function MainScrollView({ children, state, location }: Props) {
         <Grid
           sx={{
             "@media screen": {
-              gridTemplateColumns: "200px 1fr 380px",
+              gridTemplateColumns: isLargerThan1280 ? "200px 1fr 380px" : "200px 1fr",
               gridTemplateRows: "auto",
               gridTemplateAreas: "'nav main aside'",
               height: "100%",
@@ -66,18 +68,20 @@ function MainScrollView({ children, state, location }: Props) {
             {menu}
           </Box>
           <Content pathname={location.pathname}>{children}</Content>
-          <Box
-            bg="white"
-            mr={-3}
-            sx={{
-              gridArea: "aside",
-              "@media print": {
-                display: "none",
-              },
-            }}
-          >
-            <FAQ />
-          </Box>
+          {isLargerThan1280 && (
+            <Box
+              bg="white"
+              mr={-3}
+              sx={{
+                gridArea: "aside",
+                "@media print": {
+                  display: "none",
+                },
+              }}
+            >
+              <FAQ />
+            </Box>
+          )}
         </Grid>
       </Container>
     </Flex>
@@ -85,6 +89,7 @@ function MainScrollView({ children, state, location }: Props) {
 }
 
 function Content({ children, pathname }: { children: ReactNode; pathname: string }) {
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const scrollTo = useScrollTo()
 
   useEffect(() => scrollTo(0), [pathname, scrollTo])
@@ -95,7 +100,7 @@ function Content({ children, pathname }: { children: ReactNode; pathname: string
       py={10}
       sx={{
         gridArea: "main",
-        borderRight: "1px solid #E3E4ED",
+        borderRight: isLargerThan1280 ? "1px solid #E3E4ED" : "none",
         "@media print": {
           paddingLeft: 0,
           paddingRight: 0,

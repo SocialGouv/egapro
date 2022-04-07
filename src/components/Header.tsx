@@ -1,11 +1,31 @@
 import React from "react"
 import { Link as ReachLink } from "react-router-dom"
-import { Box, Container, Link, Flex, Text, ListItem, List, HStack } from "@chakra-ui/react"
+import {
+  Box,
+  Container,
+  Link,
+  Flex,
+  Text,
+  ListItem,
+  List,
+  HStack,
+  useDisclosure,
+  Button,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerBody,
+  useMediaQuery,
+} from "@chakra-ui/react"
 
 import MenuProfile from "./ds/MenuProfile"
 import Logo from "./ds/Logo"
+import FAQ from "../views/FAQ"
 
 function Header() {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const btnRef = React.useRef()
+  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
   return (
     <Box
       as="header"
@@ -71,9 +91,27 @@ function Header() {
               L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
             </Text>
           </Box>
-          <Box ml="auto">
+          <HStack ml="auto" spacing={2}>
+            {isSmallerThan1280 && (
+              <>
+                {/* @ts-ignore */}
+                <Button ref={btnRef} colorScheme="primary" variant="ghost" onClick={onOpen}>
+                  Aide
+                </Button>
+                {/* @ts-ignore */}
+                <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef} size="md">
+                  <DrawerOverlay />
+                  <DrawerContent>
+                    <DrawerBody p={0}>
+                      <FAQ />
+                    </DrawerBody>
+                  </DrawerContent>
+                </Drawer>
+              </>
+            )}
+
             <MenuProfile />
-          </Box>
+          </HStack>
         </Flex>
       </Container>
     </Box>
