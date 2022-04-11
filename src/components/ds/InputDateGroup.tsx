@@ -41,27 +41,15 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
           {...rest}
         >
           <FormLabel htmlFor={input.name}>{label}</FormLabel>
-          <Flex align="center">
-            <Box
-              flexGrow={1}
-              sx={{
-                ".react-datepicker-wrapper": {
-                  display: "block",
-                  width: "100%",
-                },
-              }}
-            >
-              <Input
-                as={DatePicker}
-                locale="fr"
-                dateFormat="dd/MM/yyyy"
-                selected={parseDate(input.value)}
-                // @ts-ignore
-                onChange={(date) => (date ? input.onChange(dateToString(date)) : "")}
-              />
-            </Box>
-            {children}
-          </Flex>
+          <Input
+            as={DatePicker}
+            locale="fr"
+            dateFormat="dd/MM/yyyy"
+            selected={parseDate(input.value)}
+            // @ts-ignore
+            onChange={(date) => (date ? input.onChange(dateToString(date)) : "")}
+          />
+          {children}
           <FormErrorMessage>{displayMetaErrors(meta.error)}</FormErrorMessage>
         </FormControl>
       )}

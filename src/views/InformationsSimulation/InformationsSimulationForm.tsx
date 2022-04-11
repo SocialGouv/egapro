@@ -51,12 +51,12 @@ const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onCli
     label="Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)"
   >
     <ButtonAction
-      ml={2}
-      label="sélectionner la fin de l'année civile"
+      mt={2}
+      label="Sélectionner la fin de l'année civile"
       onClick={onClick}
       disabled={readOnly}
+      variant="link"
       size="sm"
-      variant="ghost"
     />
   </InputDateGroup>
 )
