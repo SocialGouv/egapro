@@ -53,7 +53,7 @@ const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => 
       <Heading as="h2" size="md" mb={6}>
         Comment calculer et déclarer l’index égalité femmes-hommes&nbsp;?
       </Heading>
-      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+      <SimpleGrid columns={{ base: 1, sm: 2, md: 1, lg: 2 }} spacing={6}>
         <Card
           img={{
             url: "illustration-simulator.svg",

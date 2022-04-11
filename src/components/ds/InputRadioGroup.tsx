@@ -9,7 +9,7 @@ type RadioButtonGroupProps = RadioGroupProps
 const InputRadioGroup: FunctionComponent<RadioButtonGroupProps> = ({ children, ...rest }) => {
   return (
     <RadioGroup {...rest}>
-      <Stack spacing={5} direction="row">
+      <Stack spacing={{ base: 2, sm: 5 }} direction={{ base: "column", sm: "row" }}>
         {children}
       </Stack>
     </RadioGroup>
