@@ -28,7 +28,7 @@ import { generateImpersonateToken } from "../../utils/api"
 const title = "Générer le token pour un utilisateur"
 
 const URL_SIMU = "/tableauDeBord/me-connecter"
-const URL_DECLA = "/declaration"
+const URL_DECLA = "/declaration/"
 
 const getOrigin = window?.location?.origin || ""
 
