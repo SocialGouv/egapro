@@ -1,3 +1,4 @@
+import { Field } from "react-final-form"
 import { StyleFunctionProps } from "@chakra-ui/theme-tools"
 import defaultTheme from "@chakra-ui/theme"
 
@@ -17,6 +18,16 @@ const components = {
     },
 
     Input: {
+      sizes: {
+        sm: {
+          field: {
+            borderRadius: "base",
+          },
+          addon: {
+            borderRadius: "base",
+          },
+        },
+      },
       variants: {
         outline: (props: StyleFunctionProps) => ({
           ...defaultTheme.components.Input.variants.outline(props),
