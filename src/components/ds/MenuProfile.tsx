@@ -48,6 +48,9 @@ const MenuProfile: FunctionComponent = () => {
               <MenuItem>
                 <MenuLink to="/tableauDeBord/gerer-utilisateurs">Gérer utilisateurs</MenuLink>
               </MenuItem>
+              <MenuItem>
+                <MenuLink to="/tableauDeBord/generer-token-utilisateur">Générer token</MenuLink>
+              </MenuItem>
             </React.Fragment>
           )}
           <MenuDivider />
