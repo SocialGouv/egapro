@@ -59,6 +59,7 @@ describe("updateInformationsSimulation", () => {
       trancheEffectifs: "251 à 999",
       anneeDeclaration: 2018,
       finPeriodeReference: "2020-10-14",
+      periodeSuffisante: true,
     },
   }
 

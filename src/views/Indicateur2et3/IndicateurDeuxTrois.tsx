@@ -57,7 +57,7 @@ const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ stat
       <PageIndicateurDeuxTrois>
         <InfoBlock
           type="warning"
-          title="Vous devez renseignez vos informations d'entreprise avant d’avoir accès à cet indicateur"
+          title="Vous devez renseignez vos informations d'entreprise avant d'avoir accès à cet indicateur"
           text={<TextSimulatorLink to="/informations" label="Renseigner les informations" />}
         />
       </PageIndicateurDeuxTrois>
@@ -70,7 +70,7 @@ const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ stat
       <PageIndicateurDeuxTrois>
         <InfoBlock
           type="warning"
-          title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+          title="Vous devez renseignez vos effectifs avant d'avoir accès à cet indicateur"
           text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
         />
       </PageIndicateurDeuxTrois>
@@ -84,7 +84,7 @@ const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ stat
         <div>
           <InfoBlock
             type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
+            title="Malheureusement votre indicateur n'est pas calculable"
             text="Les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
           />
           <ActionBar>
@@ -102,8 +102,8 @@ const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ stat
         <div>
           <InfoBlock
             type="warning"
-            title="Malheureusement votre indicateur n’est pas calculable"
-            text="Il n’y a pas eu d'augmentation durant la période de référence."
+            title="Malheureusement votre indicateur n'est pas calculable"
+            text="Il n'y a pas eu d'augmentation durant la période de référence."
           />
           <ActionBar>
             <ActionLink onClick={() => validateIndicateurDeuxTrois("None")}>Modifier les données saisies</ActionLink>
@@ -128,7 +128,8 @@ const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ stat
         childrenForm={
           <div>
             <IndicateurDeuxTroisForm
-              finPeriodeReference={state.informations.finPeriodeReference}
+              // la page ne sera visible que si periodeSuffisante est true et donc finPeriodeReference sera renseignée
+              finPeriodeReference={state.informations.finPeriodeReference as string}
               presenceAugmentationPromotion={state.indicateurDeuxTrois.presenceAugmentationPromotion}
               nombreAugmentationPromotionFemmes={state.indicateurDeuxTrois.nombreAugmentationPromotionFemmes}
               nombreAugmentationPromotionHommes={state.indicateurDeuxTrois.nombreAugmentationPromotionHommes}
@@ -167,7 +168,7 @@ const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ stat
 const PageIndicateurDeuxTrois: FunctionComponent = ({ children }) => (
   <Page
     title={title}
-    tagline="Le nombre de femmes et d’hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
+    tagline="Le nombre de femmes et d'hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."
   >
     {children}
   </Page>

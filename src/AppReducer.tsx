@@ -1,6 +1,8 @@
 import deepmerge from "deepmerge"
 import { format } from "date-fns"
-import { AppState, ActionType, CategorieSocioPro, TranchesAges, PeriodeDeclaration } from "./globals"
+
+import type { AppState, ActionType, PeriodeDeclaration } from "./globals"
+import { CategorieSocioPro, TranchesAges } from "./globals"
 import mapEnum from "./utils/mapEnum"
 import { overwriteMerge, combineMerge } from "./utils/merge"
 
@@ -56,6 +58,7 @@ const defaultState: AppState = {
     trancheEffectifs: "50 à 250",
     anneeDeclaration: undefined,
     finPeriodeReference: "",
+    periodeSuffisante: undefined,
   },
   effectif: {
     formValidated: "None",
@@ -153,7 +156,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
   }
   switch (action.type) {
     case "updateInformationsSimulation": {
-      const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference } = action.data
+      const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference, periodeSuffisante } = action.data
       if (trancheEffectifs !== state.informations.trancheEffectifs) {
         return {
           ...state,
@@ -163,6 +166,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
             anneeDeclaration,
             trancheEffectifs,
             finPeriodeReference,
+            periodeSuffisante,
           },
           effectif:
             // We set invalid for all forms because we want the user to revalidate the form because prerequisites may have changed.
@@ -224,6 +228,7 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
           trancheEffectifs,
           anneeDeclaration,
           finPeriodeReference,
+          periodeSuffisante,
         },
         declaration: {
           ...state.declaration,

@@ -4,7 +4,8 @@ export type AppState = {
     nomEntreprise: string
     trancheEffectifs: TrancheEffectifs
     anneeDeclaration: number | undefined
-    finPeriodeReference: string
+    finPeriodeReference?: string
+    periodeSuffisante: boolean | undefined
   }
   effectif: {
     formValidated: FormState
@@ -239,7 +240,8 @@ export type ActionInformationsSimulationData = {
   nomEntreprise: string
   trancheEffectifs: TrancheEffectifs
   anneeDeclaration: number | undefined
-  finPeriodeReference: string
+  finPeriodeReference?: string
+  periodeSuffisante: boolean | undefined
 }
 
 export type ActionEffectifData = {
