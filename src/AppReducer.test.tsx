@@ -1820,21 +1820,20 @@ describe("validateInformationsDeclarant", () => {
   })
 })
 
-// Test retiré car les types TS ne sont pas cohérents avec les jeux de données. (ex: effectifData non renseigné, )
+// Test limité car les types TS ne sont pas cohérents avec les jeux de données. (ex: effectifData non renseigné, etc. )
 // TODO : corriger les types dans global.ts ou bien ajouter les paramètres manquants dans ce test.
 describe("validateDeclaration", () => {
   const action: ActionType = {
     type: "validateDeclaration",
     valid: "Valid",
+    // @ts-ignore: see comment above
     indicateurUnData: {
       coefficient: [],
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
       nombreCoefficients: 6,
-      nonCalculable: false,
       noteFinale: 31,
       resultatFinal: 8.0,
-      remunerationAnnuelle: [],
       sexeSurRepresente: "femmes",
     },
     // @ts-ignore: see comment above
@@ -1886,7 +1885,7 @@ describe("validateDeclaration", () => {
     expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
-  test.only("change default state", () => {
+  test("change default state", () => {
     expect(AppReducer(stateDefault, action)).toMatchSnapshot()
   })
 
