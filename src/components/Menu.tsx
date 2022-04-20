@@ -64,6 +64,7 @@ function CustomNavLink({
       // eslint-disable-next-line react/no-children-prop
       children={({ match }) => (
         <Link
+          fontSize="13"
           sx={{
             lineHeight: 1.25,
             display: "inline-flex",
