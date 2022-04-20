@@ -25,7 +25,7 @@ const dataIndicateurUnCsp = mapEnum(CategorieSocioPro, (categorieSocioPro: Categ
   })),
 }))
 
-const dataIndicateurUnCoefGroup = {
+export const dataIndicateurUnCoefGroup = {
   name: "",
   tranchesAges: mapEnum(TranchesAges, (trancheAge: TranchesAges) => ({
     trancheAge,
