@@ -124,22 +124,22 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
                 <Td>{effectifEtEcartRemuParTranche[0].name}</Td>
                 <Td isNumeric>
                   {effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne)
+                    ? displayPercent(effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne * 100)
                     : ""}
                 </Td>
                 <Td isNumeric>
                   {effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne)
+                    ? displayPercent(effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne * 100)
                     : ""}
                 </Td>
                 <Td isNumeric>
                   {effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne)
+                    ? displayPercent(effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne * 100)
                     : ""}
                 </Td>
                 <Td isNumeric>
                   {effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne)
+                    ? displayPercent(effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne * 100)
                     : ""}
                 </Td>
               </Tr>
