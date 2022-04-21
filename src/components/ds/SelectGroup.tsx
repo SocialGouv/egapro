@@ -22,6 +22,7 @@ type SelectGroupProps = FormControlProps & {
     help?: string
     error?: string
   }
+  isReadOnly?: boolean
 }
 
 const SelectGroup: FunctionComponent<SelectGroupProps> = ({
@@ -31,28 +32,33 @@ const SelectGroup: FunctionComponent<SelectGroupProps> = ({
   options,
   optionLabel,
   message,
+  isReadOnly = false,
   ...rest
 }) => {
   return (
     <Field name={fieldName} component="select">
       {({ input, meta }) => (
-        <FormControl isInvalid={isFieldHasError(meta)} {...rest}>
-          <FormLabel htmlFor={input.name}>{isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}</FormLabel>
-          <Select id={input.name} {...input}>
-            {optionLabel && (
-              <option disabled value="">
-                -- {optionLabel} --
-              </option>
-            )}
-            {options.map((option) => (
-              <option value={option} key={option}>
-                {option}
-              </option>
-            ))}
-          </Select>
-          {message?.help && <FormHelperText>{message.help}</FormHelperText>}
-          {message?.error && <FormErrorMessage>{message.error}</FormErrorMessage>}
-        </FormControl>
+        <>
+          <FormControl isInvalid={isFieldHasError(meta)} {...rest}>
+            <FormLabel htmlFor={input.name}>
+              {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
+            </FormLabel>
+            <Select id={input.name} {...input} isReadOnly={isReadOnly}>
+              {optionLabel && (
+                <option disabled value="">
+                  -- {optionLabel} --
+                </option>
+              )}
+              {options.map((option) => (
+                <option value={option} key={option} disabled={isReadOnly && option !== input.value}>
+                  {option}
+                </option>
+              ))}
+            </Select>
+            {message?.help && <FormHelperText>{message.help}</FormHelperText>}
+            {message?.error && <FormErrorMessage>{message.error}</FormErrorMessage>}
+          </FormControl>
+        </>
       )}
     </Field>
   )
