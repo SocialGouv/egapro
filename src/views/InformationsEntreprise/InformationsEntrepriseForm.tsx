@@ -56,15 +56,13 @@ const validateCodePostal = (codePostal: string, departement: string) => {
   const requiredError = required(codePostal)
   const mustBeNumberError = mustBeNumber(codePostal)
   const mustBe5DigitsError = codePostal && codePostal.length !== 5
-  const mustBeInDepartementError = codePostal && !codePostal.startsWith(dptCode)
-  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError && !mustBeInDepartementError) {
+  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError) {
     return undefined
   } else {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
       mustBe5Digits: mustBe5DigitsError,
-      mustBeInDepartementError: mustBeInDepartementError,
     }
   }
 }
@@ -217,7 +215,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ form, handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, submitFailed, errors }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
