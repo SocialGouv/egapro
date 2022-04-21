@@ -34,6 +34,7 @@ import { departementCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 import FormError from "../../components/FormError"
+import TextField from "../../components/TextField"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -285,7 +286,12 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
             <FakeInputGroup label="Commune">{initialValues.commune}</FakeInputGroup>
             {values.structure === "Unité Economique et Sociale (UES)" && (
               <>
-                <FakeInputGroup label="Nom de l'UES">{initialValues.nomUES}</FakeInputGroup>
+                <TextField
+                  label="Nom de l'UES"
+                  fieldName="nomUES"
+                  errorText="le nom de l'UES n'est pas valide"
+                  readOnly={readOnly}
+                />
                 <NombreEntreprises
                   fieldName="nombreEntreprises"
                   label="Nombre d'entreprises composant l'UES (le déclarant compris)"
