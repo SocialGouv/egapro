@@ -34,6 +34,7 @@ import { departementCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 import FormError from "../../components/FormError"
+import TextField from "../../components/TextField"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -55,15 +56,13 @@ const validateCodePostal = (codePostal: string, departement: string) => {
   const requiredError = required(codePostal)
   const mustBeNumberError = mustBeNumber(codePostal)
   const mustBe5DigitsError = codePostal && codePostal.length !== 5
-  const mustBeInDepartementError = codePostal && !codePostal.startsWith(dptCode)
-  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError && !mustBeInDepartementError) {
+  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError) {
     return undefined
   } else {
     return {
       required: requiredError,
       mustBeNumber: mustBeNumberError,
       mustBe5Digits: mustBe5DigitsError,
-      mustBeInDepartementError: mustBeInDepartementError,
     }
   }
 }
@@ -216,7 +215,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ form, handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, submitFailed, errors }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
@@ -285,7 +284,12 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
             <FakeInputGroup label="Commune">{initialValues.commune}</FakeInputGroup>
             {values.structure === "Unité Economique et Sociale (UES)" && (
               <>
-                <FakeInputGroup label="Nom de l'UES">{initialValues.nomUES}</FakeInputGroup>
+                <TextField
+                  label="Nom de l'UES"
+                  fieldName="nomUES"
+                  errorText="le nom de l'UES n'est pas valide"
+                  readOnly={readOnly}
+                />
                 <NombreEntreprises
                   fieldName="nombreEntreprises"
                   label="Nombre d'entreprises composant l'UES (le déclarant compris)"
