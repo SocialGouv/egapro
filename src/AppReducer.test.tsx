@@ -897,6 +897,7 @@ describe("updateInformationsEntreprise", () => {
       departement: "Hérault",
       adresse: "2 rue du mérou",
       codePostal: "34000",
+      codePays: "",
       commune: "Montpellier",
       structure: "Unité Economique et Sociale (UES)",
       nomUES: "foobar UES",

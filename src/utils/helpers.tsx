@@ -217,7 +217,8 @@ const getEntreprise = (data: AppState): any => {
     département: departementCode[data.informationsEntreprise.departement],
     adresse: data.informationsEntreprise.adresse,
     commune: data.informationsEntreprise.commune,
-    code_postal: data.informationsEntreprise.codePostal,
+    ...(data.informationsEntreprise.codePostal && { code_postal: data.informationsEntreprise.codePostal }),
+    ...(data.informationsEntreprise.codePays && { code_pays: data.informationsEntreprise.codePays }),
     code_naf: data.informationsEntreprise.codeNaf.split(" ")[0], // Only get the code like "01.22Z"
     effectif: {
       // @ts-ignore

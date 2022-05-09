@@ -58,6 +58,7 @@ export type AppState = {
     departement: string
     adresse: string
     codePostal: string
+    codePays: string
     commune: string
     structure: Structure
     nomUES: string
@@ -375,6 +376,7 @@ export type ActionInformationsEntrepriseData = {
   departement: string
   adresse: string
   codePostal: string
+  codePays: string
   commune: string
   structure: Structure
   nomUES: string
@@ -520,6 +522,7 @@ export type EntrepriseType = {
   adresse?: string
   commune?: string
   code_postal?: string
+  code_pays?: string
 }
 
 export type AlertMessageType = {

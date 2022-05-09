@@ -111,6 +111,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
     departement: informationsEntreprise.departement,
     adresse: informationsEntreprise.adresse,
     codePostal: informationsEntreprise.codePostal,
+    codePays: informationsEntreprise.codePays,
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
@@ -127,6 +128,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       departement,
       adresse,
       codePostal,
+      codePays,
       commune,
       structure,
       nomUES,
@@ -142,6 +144,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       departement,
       adresse,
       codePostal,
+      codePays,
       commune,
       structure,
       nomUES,
@@ -229,6 +232,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                     form.change("adresse", sirenData.adresse || "")
                     form.change("commune", sirenData.commune || "")
                     form.change("codePostal", sirenData.code_postal || "")
+                    form.change("codePays", sirenData.code_pays || "")
                   })
                 }
               />
@@ -248,6 +252,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
             <FakeInputGroup label="Adresse">{initialValues.adresse}</FakeInputGroup>
             <FakeInputGroup label="Code postal">{initialValues.codePostal}</FakeInputGroup>
             <FakeInputGroup label="Commune">{initialValues.commune}</FakeInputGroup>
+            <FakeInputGroup label="Code pays">{initialValues.codePays}</FakeInputGroup>
             {values.structure === "Unité Economique et Sociale (UES)" && (
               <>
                 <TextField
