@@ -53,7 +53,7 @@ const RecapitulatifInformations: FunctionComponent<RecapitulatifInformationsProp
           </Heading>
           <SimpleGrid columns={{ xl: 2 }} spacing={6}>
             <FakeInputGroup label="Date de début">{calendarYear(finPeriodeReference, Year.Subtract, 1)}</FakeInputGroup>
-            <FakeInputGroup label="Date de début">{finPeriodeReference}</FakeInputGroup>
+            <FakeInputGroup label="Date de fin">{finPeriodeReference}</FakeInputGroup>
           </SimpleGrid>
         </div>
       )}
