@@ -15,7 +15,7 @@ import {
   EntrepriseType,
 } from "../../globals"
 
-import { mustBeNumber, parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
+import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 
 import ButtonAction from "../../components/ds/ButtonAction"
 import { IconEdit } from "../../components/ds/Icons"
@@ -30,7 +30,6 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import NombreEntreprises, { validator as validateNombreEntreprises } from "../../components/NombreEntreprises"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
-import { departementCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 import FormError from "../../components/FormError"
@@ -47,55 +46,22 @@ const validate = (value: string) => {
   }
 }
 
-const validateCodePostal = (codePostal: string, departement: string) => {
-  let dptCode = departementCode[departement]
-  if (!dptCode) return undefined
-  if (["2A", "2B"].includes(dptCode)) {
-    dptCode = "20"
-  }
-  const requiredError = required(codePostal)
-  const mustBeNumberError = mustBeNumber(codePostal)
-  const mustBe5DigitsError = codePostal && codePostal.length !== 5
-  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError,
-      mustBe5Digits: mustBe5DigitsError,
-    }
-  }
-}
-
 const validateForm = ({
   nomEntreprise,
   siren,
   codeNaf,
-  region,
-  departement,
-  codePostal,
-  commune,
   structure,
   nomUES,
 }: {
   nomEntreprise: string
   siren: string
   codeNaf: string
-  region: string
-  departement: string
-  codePostal: string
-  commune: string
   structure: Structure
   nomUES: string
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
   codeNaf: validate(codeNaf),
-  region: validate(region),
-  departement: validate(departement),
-  adresse: undefined, // address is not filled for some case returned by the API entreprise.
-  codePostal: validateCodePostal(codePostal, departement),
-  commune: validate(commune),
   structure: validate(structure),
   nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
 })
