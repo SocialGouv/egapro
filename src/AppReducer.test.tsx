@@ -1,10 +1,12 @@
-import { CategorieSocioPro, TranchesAges, ActionType } from "./globals"
+import { CategorieSocioPro, TranchesAges, ActionType, AppState } from "./globals"
 
-import AppReducer from "./AppReducer"
+import AppReducer, { dataIndicateurUnCoefGroup } from "./AppReducer"
 
 import stateDefault from "./__fixtures__/stateDefault"
 import stateComplete from "./__fixtures__/stateComplete"
 import stateCompleteAndValidate from "./__fixtures__/stateCompleteAndValidate"
+import deepmerge from "deepmerge"
+import { combineMerge } from "./utils/merge"
 
 const stateUndefined = undefined
 
@@ -27,23 +29,23 @@ afterEach(() => {
 //////////////////
 
 describe("test state used for test before testing", () => {
-  test("stateUndefined", () => expect(stateUndefined).toMatchSnapshot())
-  test("stateDefault", () => expect(stateDefault).toMatchSnapshot())
-  test("stateComplete", () => expect(stateComplete).toMatchSnapshot())
-  test("stateCompleteAndValidate", () => expect(stateCompleteAndValidate).toMatchSnapshot())
+  test("stateUndefined", () => expect(stateUndefined).toStrictEqual(undefined))
+  test("stateDefault", () => expect(stateDefault).toStrictEqual(stateDefault))
+  test("stateComplete", () => expect(stateComplete).toStrictEqual(stateComplete))
+  test("stateCompleteAndValidate", () => expect(stateCompleteAndValidate).toStrictEqual(stateCompleteAndValidate))
 })
 
 describe("resetState", () => {
   test("reset undefined state", () => {
-    expect(AppReducer(stateUndefined, { type: "resetState" })).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, { type: "resetState" })).toStrictEqual(undefined)
   })
 
   test("reset default state", () => {
-    expect(AppReducer(stateDefault, { type: "resetState" })).toMatchSnapshot()
+    expect(AppReducer(stateDefault, { type: "resetState" })).toStrictEqual(undefined)
   })
 
   test("reset complete state", () => {
-    expect(AppReducer(stateComplete, { type: "resetState" })).toMatchSnapshot()
+    expect(AppReducer(stateComplete, { type: "resetState" })).toStrictEqual(undefined)
   })
 })
 
@@ -59,19 +61,34 @@ describe("updateInformationsSimulation", () => {
       trancheEffectifs: "251 à 999",
       anneeDeclaration: 2018,
       finPeriodeReference: "2020-10-14",
+      periodeSuffisante: true,
     },
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { informations, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { informations: informationsInitial, ...restInitial } = stateDefault as AppState
+
+    expect(informations).toStrictEqual({
+      ...informationsInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { informations, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { informations: informationsInitial, ...restInitial } = stateComplete as AppState
+
+    expect(informations).toStrictEqual({
+      ...informationsInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -185,15 +202,23 @@ describe("updateEffectif", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { effectif, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { effectif: effectifInitial, ...restInitial } = stateDefault as AppState
+
+    expect(effectif).toStrictEqual({ ...effectifInitial, ...action.data })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { effectif, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { effectif: effectifInitial, ...restInitial } = stateComplete as AppState
+
+    expect(effectif).toStrictEqual({ ...effectifInitial, ...action.data })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -204,15 +229,23 @@ describe("updateIndicateurUnType", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurUn).toStrictEqual({ ...indicateurUnInitial, ...action.data })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurUn).toStrictEqual({ ...indicateurUnInitial, ...action.data })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -326,15 +359,23 @@ describe("updateIndicateurUnCsp", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurUn).toStrictEqual({ ...indicateurUnInitial, ...action.data })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurUn).toStrictEqual({ ...indicateurUnInitial, ...action.data })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -344,15 +385,29 @@ describe("updateIndicateurUnCoefAddGroup", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurUn).toStrictEqual({
+      ...indicateurUnInitial,
+      coefficient: [...indicateurUnInitial.coefficient, dataIndicateurUnCoefGroup],
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurUn).toStrictEqual({
+      ...indicateurUnInitial,
+      coefficient: [...indicateurUnInitial.coefficient, dataIndicateurUnCoefGroup],
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -363,15 +418,35 @@ describe("updateIndicateurUnCoefDeleteGroup", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefault as AppState
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_, ...restCoefficients] = indicateurUnInitial.coefficient
+
+    expect(indicateurUn).toStrictEqual({
+      ...indicateurUnInitial,
+      coefficient: restCoefficients,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurUn, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_, ...restCoefficients] = indicateurUnInitial.coefficient
+
+    expect(indicateurUn).toStrictEqual({
+      ...indicateurUnInitial,
+      coefficient: restCoefficients,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -395,15 +470,35 @@ describe("updateIndicateurUnCoef", () => {
     }
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefinedWithOneGroup, action)).toMatchSnapshot()
+      expect(AppReducer(stateUndefinedWithOneGroup, action)).toStrictEqual(undefined)
     })
 
     test("change default state", () => {
-      expect(AppReducer(stateDefaultWithOneGroup, action)).toMatchSnapshot()
+      const { indicateurUn, ...rest } = AppReducer(stateDefaultWithOneGroup, action) as AppState
+      const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
+
+      const { coefficient: changedCoefficient } = indicateurUnInitial
+      changedCoefficient[0].name = "Commercial"
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficient: changedCoefficient,
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
 
     test("change complete state", () => {
-      expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+      const { indicateurUn, ...rest } = AppReducer(stateComplete, action) as AppState
+      const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+
+      const { coefficient: changedCoefficient } = indicateurUnInitial
+      changedCoefficient[0].name = "Commercial"
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficient: changedCoefficient,
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 
@@ -441,15 +536,43 @@ describe("updateIndicateurUnCoef", () => {
     }
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefinedWithOneGroup, action)).toMatchSnapshot()
+      expect(AppReducer(stateUndefinedWithOneGroup, action)).toStrictEqual(undefined)
     })
 
     test("change default state", () => {
-      expect(AppReducer(stateDefaultWithOneGroup, action)).toMatchSnapshot()
+      const { indicateurUn, ...rest } = AppReducer(stateDefaultWithOneGroup, action) as AppState
+      const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
+
+      const changedCoefficient = deepmerge(
+        indicateurUnInitial.coefficient,
+        // @ts-ignore
+        action.data.coefficient,
+        { arrayMerge: combineMerge },
+      )
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficient: changedCoefficient,
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
 
     test("change complete state", () => {
-      expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+      const { indicateurUn, ...rest } = AppReducer(stateComplete, action) as AppState
+      const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+
+      const changedCoefficient = deepmerge(
+        indicateurUnInitial.coefficient,
+        // @ts-ignore
+        action.data.coefficient,
+        { arrayMerge: combineMerge },
+      )
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficient: changedCoefficient,
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 
@@ -487,15 +610,43 @@ describe("updateIndicateurUnCoef", () => {
     }
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefinedWithOneGroup, action)).toMatchSnapshot()
+      expect(AppReducer(stateUndefinedWithOneGroup, action)).toStrictEqual(undefined)
     })
 
     test("change default state", () => {
-      expect(AppReducer(stateDefaultWithOneGroup, action)).toMatchSnapshot()
+      const { indicateurUn, ...rest } = AppReducer(stateDefaultWithOneGroup, action) as AppState
+      const { indicateurUn: indicateurUnInitial, ...restInitial } = stateDefaultWithOneGroup as AppState
+
+      const changedCoefficient = deepmerge(
+        indicateurUnInitial.coefficient,
+        // @ts-ignore
+        action.data.coefficient,
+        { arrayMerge: combineMerge },
+      )
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficient: changedCoefficient,
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
 
     test("change complete state", () => {
-      expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+      const { indicateurUn, ...rest } = AppReducer(stateComplete, action) as AppState
+      const { indicateurUn: indicateurUnInitial, ...restInitial } = stateComplete as AppState
+
+      const changedCoefficient = deepmerge(
+        indicateurUnInitial.coefficient,
+        // @ts-ignore
+        action.data.coefficient,
+        { arrayMerge: combineMerge },
+      )
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficient: changedCoefficient,
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 })
@@ -531,15 +682,31 @@ describe("updateIndicateurDeux", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurDeux, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurDeux: indicateurDeuxInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurDeux).toStrictEqual({
+      ...indicateurDeuxInitial,
+      presenceAugmentation: action.data.presenceAugmentation,
+      tauxAugmentation: action.data.tauxAugmentation,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurDeux, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurDeux: indicateurDeuxInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurDeux).toStrictEqual({
+      ...indicateurDeuxInitial,
+      presenceAugmentation: action.data.presenceAugmentation,
+      tauxAugmentation: action.data.tauxAugmentation,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -574,15 +741,31 @@ describe("updateIndicateurTrois", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurTrois, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurTrois: indicateurTroisInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurTrois).toStrictEqual({
+      ...indicateurTroisInitial,
+      presencePromotion: action.data.presencePromotion,
+      tauxPromotion: action.data.tauxPromotion,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurTrois, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurTrois: indicateurTroisInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurTrois).toStrictEqual({
+      ...indicateurTroisInitial,
+      presencePromotion: action.data.presencePromotion,
+      tauxPromotion: action.data.tauxPromotion,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -598,15 +781,35 @@ describe("updateIndicateurDeuxTrois", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurDeuxTrois, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurDeuxTrois: indicateurDeuxTroisInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurDeuxTrois).toStrictEqual({
+      ...indicateurDeuxTroisInitial,
+      presenceAugmentationPromotion: action.data.presenceAugmentationPromotion,
+      nombreAugmentationPromotionFemmes: action.data.nombreAugmentationPromotionFemmes,
+      nombreAugmentationPromotionHommes: action.data.nombreAugmentationPromotionHommes,
+      periodeDeclaration: action.data.periodeDeclaration,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurDeuxTrois, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurDeuxTrois: indicateurDeuxTroisInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurDeuxTrois).toStrictEqual({
+      ...indicateurDeuxTroisInitial,
+      presenceAugmentationPromotion: action.data.presenceAugmentationPromotion,
+      nombreAugmentationPromotionFemmes: action.data.nombreAugmentationPromotionFemmes,
+      nombreAugmentationPromotionHommes: action.data.nombreAugmentationPromotionHommes,
+      periodeDeclaration: action.data.periodeDeclaration,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -621,15 +824,29 @@ describe("updateIndicateurQuatre", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurQuatre, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurQuatre: indicateurQuatreInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurQuatre).toStrictEqual({
+      ...indicateurQuatreInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurQuatre, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurQuatre: indicateurQuatreInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurQuatre).toStrictEqual({
+      ...indicateurQuatreInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -643,15 +860,29 @@ describe("updateIndicateurCinq", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurCinq, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { indicateurCinq: indicateurCinqInitial, ...restInitial } = stateDefault as AppState
+
+    expect(indicateurCinq).toStrictEqual({
+      ...indicateurCinqInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurCinq, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { indicateurCinq: indicateurCinqInitial, ...restInitial } = stateComplete as AppState
+
+    expect(indicateurCinq).toStrictEqual({
+      ...indicateurCinqInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -675,15 +906,29 @@ describe("updateInformationsEntreprise", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { informationsEntreprise, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { informationsEntreprise: informationsEntrepriseInitial, ...restInitial } = stateDefault as AppState
+
+    expect(informationsEntreprise).toStrictEqual({
+      ...informationsEntrepriseInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { informationsEntreprise, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { informationsEntreprise: informationsEntrepriseInitial, ...restInitial } = stateComplete as AppState
+
+    expect(informationsEntreprise).toStrictEqual({
+      ...informationsEntrepriseInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -700,15 +945,29 @@ describe("updateInformationsDeclarant", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { informationsDeclarant, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { informationsDeclarant: informationsDeclarantInitial, ...restInitial } = stateDefault as AppState
+
+    expect(informationsDeclarant).toStrictEqual({
+      ...informationsDeclarantInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { informationsDeclarant, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { informationsDeclarant: informationsDeclarantInitial, ...restInitial } = stateComplete as AppState
+
+    expect(informationsDeclarant).toStrictEqual({
+      ...informationsDeclarantInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -729,15 +988,29 @@ describe("updateDeclaration", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { declaration: declarationInitial, ...restInitial } = stateDefault as AppState
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { declaration: declarationInitial, ...restInitial } = stateComplete as AppState
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -752,15 +1025,45 @@ describe("validateInformationsSimulation", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { informations, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      informations: informationsInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(informations).toStrictEqual({
+      ...informationsInitial,
+      formValidated: "Valid",
+    })
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { informations, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      informations: informationsInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(informations).toStrictEqual({
+      ...informationsInitial,
+      formValidated: "Valid",
+    })
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -772,15 +1075,31 @@ describe("validateEffectif", () => {
     }
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+      expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
     })
 
     test("change default state", () => {
-      expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+      const { effectif, ...rest } = AppReducer(stateDefault, action) as AppState
+      const { effectif: effectifInitial, ...restInitial } = stateDefault as AppState
+
+      expect(effectif).toStrictEqual({
+        ...effectifInitial,
+        formValidated: "Valid",
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
 
     test("change complete state", () => {
-      expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+      const { effectif, ...rest } = AppReducer(stateComplete, action) as AppState
+      const { effectif: effectifInitial, ...restInitial } = stateComplete as AppState
+
+      expect(effectif).toStrictEqual({
+        ...effectifInitial,
+        formValidated: "Valid",
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 
@@ -791,7 +1110,44 @@ describe("validateEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      expect(AppReducer(stateCompleteAndValidate, action)).toMatchSnapshot()
+      const { effectif, indicateurUn, indicateurDeux, indicateurTrois, indicateurDeuxTrois, declaration, ...rest } =
+        AppReducer(stateCompleteAndValidate, action) as AppState
+      const {
+        effectif: effectifInitial,
+        indicateurUn: indicateurUnInitial,
+        indicateurDeux: indicateurDeuxInitial,
+        indicateurTrois: indicateurTroisInitial,
+        indicateurDeuxTrois: indicateurDeuxTroisInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateCompleteAndValidate as AppState
+
+      expect(effectif).toStrictEqual({
+        ...effectifInitial,
+        formValidated: "None",
+      })
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        formValidated: "Invalid",
+        coefficientEffectifFormValidated: "Invalid",
+      })
+      expect(indicateurDeux).toStrictEqual({
+        ...indicateurDeuxInitial,
+        formValidated: "Invalid",
+      })
+      expect(indicateurTrois).toStrictEqual({
+        ...indicateurTroisInitial,
+        formValidated: "Invalid",
+      })
+      expect(indicateurDeuxTrois).toStrictEqual({
+        ...indicateurDeuxTroisInitial,
+        formValidated: "Invalid",
+      })
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: "Invalid",
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 
@@ -804,7 +1160,17 @@ describe("validateEffectif", () => {
     const stateCompleteAndValidateCoef = AppReducer(stateCompleteAndValidate, actionUpdateIndicateurUnType)
 
     test("stateCompleteAndValidateCoef", () => {
-      expect(stateCompleteAndValidateCoef).toMatchSnapshot()
+      const { indicateurUn, ...rest } = stateCompleteAndValidateCoef as AppState
+      const { indicateurUn: indicateurUnInitial, ...restInitial } = stateCompleteAndValidateCoef as AppState
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        csp: actionUpdateIndicateurUnType.data.csp,
+        coef: actionUpdateIndicateurUnType.data.coef,
+        autre: actionUpdateIndicateurUnType.data.autre,
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
 
     const action: ActionType = {
@@ -813,7 +1179,44 @@ describe("validateEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      expect(AppReducer(stateCompleteAndValidateCoef, action)).toMatchSnapshot()
+      const { effectif, indicateurUn, indicateurDeux, indicateurTrois, indicateurDeuxTrois, declaration, ...rest } =
+        AppReducer(stateCompleteAndValidateCoef, action) as AppState
+      const {
+        effectif: effectifInitial,
+        indicateurUn: indicateurUnInitial,
+        indicateurDeux: indicateurDeuxInitial,
+        indicateurTrois: indicateurTroisInitial,
+        indicateurDeuxTrois: indicateurDeuxTroisInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateCompleteAndValidateCoef as AppState
+
+      expect(effectif).toStrictEqual({
+        ...effectifInitial,
+        formValidated: "None",
+      })
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        formValidated: "Invalid",
+        coefficientEffectifFormValidated: "Invalid",
+      })
+      expect(indicateurDeux).toStrictEqual({
+        ...indicateurDeuxInitial,
+        formValidated: "Invalid",
+      })
+      expect(indicateurTrois).toStrictEqual({
+        ...indicateurTroisInitial,
+        formValidated: "Invalid",
+      })
+      expect(indicateurDeuxTrois).toStrictEqual({
+        ...indicateurDeuxTroisInitial,
+        formValidated: "Invalid",
+      })
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: "Invalid",
+      })
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 })
@@ -826,15 +1229,53 @@ describe("validateIndicateurUnCoefGroup", () => {
     }
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+      expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
     })
 
     test("change default state", () => {
-      expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+      const { indicateurUn, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+      const {
+        indicateurUn: indicateurUnInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateDefault as AppState
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficientGroupFormValidated: "Valid",
+        coefficientEffectifFormValidated: indicateurUnInitial.coefficientEffectifFormValidated,
+        formValidated: indicateurUnInitial.formValidated,
+      })
+
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: declarationInitial.formValidated,
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
 
     test("change complete state", () => {
-      expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+      const { indicateurUn, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+      const {
+        indicateurUn: indicateurUnInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateComplete as AppState
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficientGroupFormValidated: "Valid",
+        coefficientEffectifFormValidated: indicateurUnInitial.coefficientEffectifFormValidated,
+        formValidated: indicateurUnInitial.formValidated,
+      })
+
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: declarationInitial.formValidated,
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 
@@ -845,7 +1286,26 @@ describe("validateIndicateurUnCoefGroup", () => {
     }
 
     test("invalid complete validate state", () => {
-      expect(AppReducer(stateCompleteAndValidate, action)).toMatchSnapshot()
+      const { indicateurUn, declaration, ...rest } = AppReducer(stateCompleteAndValidate, action) as AppState
+      const {
+        indicateurUn: indicateurUnInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateCompleteAndValidate as AppState
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficientGroupFormValidated: "None",
+        coefficientEffectifFormValidated: "Invalid",
+        formValidated: "Invalid",
+      })
+
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: "Invalid",
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 })
@@ -858,15 +1318,51 @@ describe("validateIndicateurUnCoefEffectif", () => {
     }
 
     test("nothing undefined state", () => {
-      expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+      expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
     })
 
     test("change default state", () => {
-      expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+      const { indicateurUn, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+      const {
+        indicateurUn: indicateurUnInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateDefault as AppState
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficientEffectifFormValidated: "Valid",
+        formValidated: indicateurUnInitial.formValidated,
+      })
+
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: declarationInitial.formValidated,
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
 
     test("change complete state", () => {
-      expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+      const { indicateurUn, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+      const {
+        indicateurUn: indicateurUnInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateComplete as AppState
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficientEffectifFormValidated: "Valid",
+        formValidated: indicateurUnInitial.formValidated,
+      })
+
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: declarationInitial.formValidated,
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 
@@ -877,7 +1373,25 @@ describe("validateIndicateurUnCoefEffectif", () => {
     }
 
     test("invalid complete validate state", () => {
-      expect(AppReducer(stateCompleteAndValidate, action)).toMatchSnapshot()
+      const { indicateurUn, declaration, ...rest } = AppReducer(stateCompleteAndValidate, action) as AppState
+      const {
+        indicateurUn: indicateurUnInitial,
+        declaration: declarationInitial,
+        ...restInitial
+      } = stateCompleteAndValidate as AppState
+
+      expect(indicateurUn).toStrictEqual({
+        ...indicateurUnInitial,
+        coefficientEffectifFormValidated: "None",
+        formValidated: "Invalid",
+      })
+
+      expect(declaration).toStrictEqual({
+        ...declarationInitial,
+        formValidated: "Invalid",
+      })
+
+      expect(rest).toStrictEqual(restInitial)
     })
   })
 })
@@ -889,15 +1403,49 @@ describe("validateIndicateurUn", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurUn, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      indicateurUn: indicateurUnInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(indicateurUn).toStrictEqual({
+      ...indicateurUnInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurUn, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      indicateurUn: indicateurUnInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(indicateurUn).toStrictEqual({
+      ...indicateurUnInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -908,15 +1456,49 @@ describe("validateIndicateurDeux", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurDeux, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      indicateurDeux: indicateurDeuxInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(indicateurDeux).toStrictEqual({
+      ...indicateurDeuxInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurDeux, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      indicateurDeux: indicateurDeuxInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(indicateurDeux).toStrictEqual({
+      ...indicateurDeuxInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -927,15 +1509,49 @@ describe("validateIndicateurTrois", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurTrois, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      indicateurTrois: indicateurTroisInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(indicateurTrois).toStrictEqual({
+      ...indicateurTroisInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurTrois, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      indicateurTrois: indicateurTroisInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(indicateurTrois).toStrictEqual({
+      ...indicateurTroisInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -946,15 +1562,49 @@ describe("validateIndicateurDeuxTrois", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurDeuxTrois, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      indicateurDeuxTrois: indicateurDeuxTroisInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(indicateurDeuxTrois).toStrictEqual({
+      ...indicateurDeuxTroisInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurDeuxTrois, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      indicateurDeuxTrois: indicateurDeuxTroisInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(indicateurDeuxTrois).toStrictEqual({
+      ...indicateurDeuxTroisInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -965,15 +1615,49 @@ describe("validateIndicateurQuatre", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurQuatre, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      indicateurQuatre: indicateurQuatreInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(indicateurQuatre).toStrictEqual({
+      ...indicateurQuatreInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurQuatre, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      indicateurQuatre: indicateurQuatreInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(indicateurQuatre).toStrictEqual({
+      ...indicateurQuatreInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -984,15 +1668,49 @@ describe("validateIndicateurCinq", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { indicateurCinq, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      indicateurCinq: indicateurCinqInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(indicateurCinq).toStrictEqual({
+      ...indicateurCinqInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { indicateurCinq, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      indicateurCinq: indicateurCinqInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(indicateurCinq).toStrictEqual({
+      ...indicateurCinqInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -1003,15 +1721,49 @@ describe("validateInformationsEntreprise", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { informationsEntreprise, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      informationsEntreprise: informationsEntrepriseInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(informationsEntreprise).toStrictEqual({
+      ...informationsEntrepriseInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { informationsEntreprise, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      informationsEntreprise: informationsEntrepriseInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(informationsEntreprise).toStrictEqual({
+      ...informationsEntrepriseInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
@@ -1022,19 +1774,53 @@ describe("validateInformationsDeclarant", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {
-    expect(AppReducer(stateDefault, action)).toMatchSnapshot()
+    const { informationsDeclarant, declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const {
+      informationsDeclarant: informationsDeclarantInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateDefault as AppState
+
+    expect(informationsDeclarant).toStrictEqual({
+      ...informationsDeclarantInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 
   test("change complete state", () => {
-    expect(AppReducer(stateComplete, action)).toMatchSnapshot()
+    const { informationsDeclarant, declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const {
+      informationsDeclarant: informationsDeclarantInitial,
+      declaration: declarationInitial,
+      ...restInitial
+    } = stateComplete as AppState
+
+    expect(informationsDeclarant).toStrictEqual({
+      ...informationsDeclarantInitial,
+      formValidated: "Valid",
+    })
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      formValidated: declarationInitial.formValidated,
+    })
+
+    expect(rest).toStrictEqual(restInitial)
   })
 })
 
-// Test retiré car les types TS ne sont pas cohérents avec les jeux de données. (ex: effectifData non renseigné, )
+// Test limité car les types TS ne sont pas cohérents avec les jeux de données. (ex: effectifData non renseigné, etc. )
 // TODO : corriger les types dans global.ts ou bien ajouter les paramètres manquants dans ce test.
 describe("validateDeclaration", () => {
   const action: ActionType = {
@@ -1042,12 +1828,13 @@ describe("validateDeclaration", () => {
     valid: "Valid",
     // @ts-ignore: see comment above
     indicateurUnData: {
-      nombreCoefficients: 6,
+      coefficient: [],
       motifNonCalculable: "",
       motifNonCalculablePrecision: "",
+      nombreCoefficients: 6,
+      noteFinale: 31,
       resultatFinal: 8.0,
       sexeSurRepresente: "femmes",
-      noteFinale: 31,
     },
     // @ts-ignore: see comment above
     indicateurDeuxData: {
@@ -1095,7 +1882,7 @@ describe("validateDeclaration", () => {
   }
 
   test("nothing undefined state", () => {
-    expect(AppReducer(stateUndefined, action)).toMatchSnapshot()
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
   })
 
   test("change default state", () => {

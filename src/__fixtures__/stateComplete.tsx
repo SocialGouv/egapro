@@ -15,6 +15,7 @@ const actionUpdateInformationsSimulation: ActionType = {
     trancheEffectifs: "1000 et plus",
     anneeDeclaration: 2020,
     finPeriodeReference: "2019-12-31",
+    periodeSuffisante: true,
   },
 }
 

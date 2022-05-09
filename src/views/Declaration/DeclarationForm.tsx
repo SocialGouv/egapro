@@ -37,9 +37,11 @@ const validate = (value: string) => {
 const validateForm = ({
   finPeriodeReference,
   anneeDeclaration,
+  periodeSuffisante,
 }: {
-  finPeriodeReference: string
+  finPeriodeReference: string | undefined
   anneeDeclaration: number | undefined
+  periodeSuffisante: boolean | undefined
 }) => {
   return ({
     datePublication,
@@ -52,9 +54,9 @@ const validateForm = ({
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
-    if (!datePublication) return
+    if (!datePublication || !periodeSuffisante) return
     const parsedDatePublication = parseDate(datePublication)
-    const parsedFinPeriodeReference = parseDate(finPeriodeReference)
+    const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
 
     return {
       datePublication:
@@ -97,6 +99,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const declaration = state.declaration
   const indicateurUnParCSP = state.indicateurUn.csp
   const finPeriodeReference = state.informations.finPeriodeReference
+  const periodeSuffisante = state.informations.periodeSuffisante
   const anneeDeclaration = state.informations.anneeDeclaration
   const readOnly = isFormValid(state.declaration) && !declaring
 
@@ -178,7 +181,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm({ finPeriodeReference, anneeDeclaration })}
+      validate={validateForm({ finPeriodeReference, anneeDeclaration, periodeSuffisante })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -212,64 +215,68 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                 {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
                   <InputDateGroup
                     fieldName="dateConsultationCSE"
-                    label="Date de consultation du CSE pour l’indicateur relatif à l’écart de rémunération"
+                    label="Date de consultation du CSE pour l'indicateur relatif à l'écart de rémunération"
                     isReadOnly={readOnly}
                   />
                 )}
               </>
             )}
 
-            {(noteIndex !== undefined || after2020) && (
+            {state.informations.periodeSuffisante && (
               <>
-                <InputDateGroup
-                  fieldName="datePublication"
-                  label={
-                    after2020
-                      ? `Date de publication des résultats obtenus${displayNC}`
-                      : "Date de publication du niveau de résultat obtenu"
-                  }
-                  isReadOnly={readOnly}
-                />
-                <RadiosBoolean
-                  fieldName="publicationSurSiteInternet"
-                  value={values.publicationSurSiteInternet}
-                  readOnly={readOnly}
-                  label={
-                    after2020 ? (
-                      <>Avez-vous un site Internet pour publier les résultats obtenus {displayNC}&nbsp;?</>
-                    ) : (
-                      <>Avez-vous un site Internet pour publier le niveau de résultat obtenu&nbsp;?</>
-                    )
-                  }
-                />
+                {(noteIndex !== undefined || after2020) && (
+                  <>
+                    <InputDateGroup
+                      fieldName="datePublication"
+                      label={
+                        after2020
+                          ? `Date de publication des résultats obtenus${displayNC}`
+                          : "Date de publication du niveau de résultat obtenu"
+                      }
+                      isReadOnly={readOnly}
+                    />
+                    <RadiosBoolean
+                      fieldName="publicationSurSiteInternet"
+                      value={values.publicationSurSiteInternet}
+                      readOnly={readOnly}
+                      label={
+                        after2020 ? (
+                          <>Avez-vous un site Internet pour publier les résultats obtenus {displayNC}&nbsp;?</>
+                        ) : (
+                          <>Avez-vous un site Internet pour publier le niveau de résultat obtenu&nbsp;?</>
+                        )
+                      }
+                    />
 
-                {values.publicationSurSiteInternet !== undefined &&
-                  (values.publicationSurSiteInternet === "true" ? (
-                    <InputGroup
-                      label={
-                        after2020
-                          ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus ${displayNC}`
-                          : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"
-                      }
-                      fieldName="lienPublication"
-                      message={{ error: "Veuillez entrer une adresse internet" }}
-                      isReadOnly={readOnly}
-                    />
-                  ) : (
-                    <TextareaGroup
-                      label={
-                        after2020
-                          ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
-                          : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
-                      }
-                      fieldName="modalitesPublication"
-                      message={{ error: "Veuillez préciser les modalités de communication" }}
-                      isReadOnly={readOnly}
-                    />
-                  ))}
+                    {values.publicationSurSiteInternet !== undefined &&
+                      (values.publicationSurSiteInternet === "true" ? (
+                        <InputGroup
+                          label={
+                            after2020
+                              ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus ${displayNC}`
+                              : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"
+                          }
+                          fieldName="lienPublication"
+                          message={{ error: "Veuillez entrer une adresse internet" }}
+                          isReadOnly={readOnly}
+                        />
+                      ) : (
+                        <TextareaGroup
+                          label={
+                            after2020
+                              ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
+                              : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
+                          }
+                          fieldName="modalitesPublication"
+                          message={{ error: "Veuillez préciser les modalités de communication" }}
+                          isReadOnly={readOnly}
+                        />
+                      ))}
+                  </>
+                )}
+                {after2021 && <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />}
               </>
             )}
-            {after2021 && <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />}
             {readOnly && (
               <Text fontSize="sm" fontWeight="bold">
                 Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}
@@ -340,13 +347,13 @@ const FieldPlanRelance = ({
         label={
           isUES ? (
             <>
-              Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l’UES a-t-elle bénéficié, en 2021
-              et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission
+              Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, en 2021
+              et/ou 2022, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission
               « Plan de relance »&nbsp;?
             </>
           ) : (
             <>
-              Avez-vous bénéficié, en 2021 et/ou 2022, d’une aide prévue par la loi du 29 décembre 2020 de finances pour
+              Avez-vous bénéficié, en 2021 et/ou 2022, d'une aide prévue par la loi du 29 décembre 2020 de finances pour
               2021 au titre de la mission « Plan de relance »&nbsp;?
             </>
           )

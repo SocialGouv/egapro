@@ -318,6 +318,33 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     // eslint-disable-next-line react-hooks/exhaustive-deps -- validateDeclaration is not needed to be subscribed on change.
   }, [code, declaring, state])
 
+  if (!state.informations.periodeSuffisante) {
+    return (
+      <PageDeclaration>
+        <LayoutFormAndResult
+          childrenForm={
+            <>
+              <InfoBlock
+                type="warning"
+                text="Vous ne disposez pas d'une période de référence de 12 mois consécutifs, vos indicateurs et votre index ne sont pas calculables."
+              />
+              <DeclarationForm
+                state={state}
+                noteIndex={noteIndex}
+                updateDeclaration={updateDeclaration}
+                resetDeclaration={resetDeclaration}
+                validateDeclaration={validateDeclaration}
+                apiError={apiError}
+                declaring={declaring}
+              />
+            </>
+          }
+          childrenResult={null}
+        />
+      </PageDeclaration>
+    )
+  }
+
   // tous les formulaires ne sont pas encore validés
   if (
     !allIndicateurValid ||

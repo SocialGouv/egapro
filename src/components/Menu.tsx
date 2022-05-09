@@ -1,6 +1,6 @@
 import React, { Fragment } from "react"
 import { Switch, Route, Link as ReachLink } from "react-router-dom"
-import { Box, Heading, List, ListItem, Link } from "@chakra-ui/react"
+import { Box, Heading, List, ListItem, Link, Text } from "@chakra-ui/react"
 import { FormState, TrancheEffectifs } from "../globals"
 import globalStyles from "../utils/globalStyles"
 import { IconValid, IconInvalid } from "./ds/Icons"
@@ -11,6 +11,7 @@ interface CustomNavLinkProps {
   valid?: FormState
   to: string
   activeOnlyWhenExact?: boolean
+  disabled?: boolean
 }
 
 function buildA11yTitle({
@@ -29,7 +30,33 @@ function buildA11yTitle({
   }`
 }
 
-function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact = false }: CustomNavLinkProps) {
+function CustomNavLink({
+  title,
+  label,
+  valid = "None",
+  to,
+  activeOnlyWhenExact = false,
+  disabled = false,
+}: CustomNavLinkProps) {
+  if (disabled) {
+    return (
+      <Text
+        fontSize="13"
+        sx={{
+          lineHeight: 1.25,
+          display: "inline-flex",
+          color: "inherit",
+        }}
+        cursor="not-allowed"
+      >
+        <Box sx={{ flexGrow: 1 }}>
+          {title}
+          {label && <Box>{label}</Box>}
+        </Box>
+      </Text>
+    )
+  }
+
   return (
     <Route
       path={to}
@@ -37,7 +64,7 @@ function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact =
       // eslint-disable-next-line react/no-children-prop
       children={({ match }) => (
         <Link
-          fontSize="sm"
+          fontSize="13"
           sx={{
             lineHeight: 1.25,
             display: "inline-flex",
@@ -73,6 +100,8 @@ function CustomNavLink({ title, label, valid = "None", to, activeOnlyWhenExact =
 
 interface Props {
   trancheEffectifs: TrancheEffectifs
+  periodeSuffisante: boolean | undefined
+
   informationsFormValidated: FormState
   effectifFormValidated: FormState
   indicateurUnFormValidated: FormState
@@ -88,6 +117,7 @@ interface Props {
 
 function Menu({
   trancheEffectifs,
+  periodeSuffisante,
   informationsFormValidated,
   effectifFormValidated,
   indicateurUnFormValidated,
@@ -153,6 +183,7 @@ function Menu({
                     title="Effectifs"
                     label="pris en compte"
                     valid={effectifFormValidated}
+                    disabled={!periodeSuffisante}
                   />
                 </ListItem>
                 <ListItem>
@@ -161,6 +192,7 @@ function Menu({
                     title="Indicateur"
                     label="écart de rémunération"
                     valid={indicateurUnFormValidated}
+                    disabled={!periodeSuffisante}
                   />
                 </ListItem>
                 {(trancheEffectifs !== "50 à 250" && (
@@ -171,6 +203,7 @@ function Menu({
                         title="Indicateur"
                         label="écart de taux d'augmentation"
                         valid={indicateurDeuxFormValidated}
+                        disabled={!periodeSuffisante}
                       />
                     </ListItem>
                     <ListItem>
@@ -179,6 +212,7 @@ function Menu({
                         title="Indicateur"
                         label="écart de taux de promotion"
                         valid={indicateurTroisFormValidated}
+                        disabled={!periodeSuffisante}
                       />
                     </ListItem>
                   </Fragment>
@@ -189,6 +223,7 @@ function Menu({
                       title="Indicateur"
                       label="écart de taux d'augmentation"
                       valid={indicateurDeuxTroisFormValidated}
+                      disabled={!periodeSuffisante}
                     />
                   </ListItem>
                 )}
@@ -198,6 +233,7 @@ function Menu({
                     title="Indicateur"
                     label="retour congé maternité"
                     valid={indicateurQuatreFormValidated}
+                    disabled={!periodeSuffisante}
                   />
                 </ListItem>
                 <ListItem>
@@ -206,8 +242,10 @@ function Menu({
                     title="Indicateur"
                     label="hautes rémunérations"
                     valid={indicateurCinqFormValidated}
+                    disabled={!periodeSuffisante}
                   />
                 </ListItem>
+
                 <ListItem>
                   <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="Récapitulatif" />
                 </ListItem>

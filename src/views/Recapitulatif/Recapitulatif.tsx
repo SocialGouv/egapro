@@ -39,6 +39,8 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
 
   const trancheEffectifs = state.informations.trancheEffectifs
 
+  const periodeSuffisante = state.informations.periodeSuffisante as boolean
+
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
     effectifEtEcartRemuParTranche,
@@ -124,74 +126,79 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
           anneeDeclaration={state.informations.anneeDeclaration}
           finPeriodeReference={state.informations.finPeriodeReference}
           nombreSalaries={totalNombreSalariesHomme + totalNombreSalariesFemme}
+          periodeSuffisante={periodeSuffisante}
         />
-        <RecapitulatifIndex
-          allIndicateurValid={allIndicateurValid}
-          noteIndex={noteIndex}
-          totalPoint={totalPoint}
-          totalPointCalculable={totalPointCalculable}
-        />
-        <RecapitulatifIndicateurUn
-          indicateurUnFormValidated={state.indicateurUn.formValidated}
-          effectifsIndicateurUnCalculable={effectifsIndicateurUnCalculable}
-          effectifEtEcartRemuParTranche={effectifEtEcartRemuParTranche}
-          indicateurEcartRemuneration={indicateurEcartRemuneration}
-          indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
-          indicateurUnParCSP={state.indicateurUn.csp}
-          noteIndicateurUn={noteIndicateurUn}
-        />
-        {(trancheEffectifs !== "50 à 250" && (
+        {periodeSuffisante && (
           <>
-            <RecapitulatifIndicateurDeux
-              indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
-              effectifsIndicateurDeuxCalculable={effectifsIndicateurDeuxCalculable}
-              indicateurDeuxCalculable={indicateurDeuxCalculable}
-              effectifEtEcartAugmentParGroupe={effectifEtEcartAugmentParGroupe}
-              indicateurEcartAugmentation={indicateurEcartAugmentation}
-              indicateurSexeSurRepresente={indicateurDeuxSexeSurRepresente}
-              noteIndicateurDeux={noteIndicateurDeux}
-              correctionMeasure={correctionMeasureIndicateurDeux}
+            <RecapitulatifIndex
+              allIndicateurValid={allIndicateurValid}
+              noteIndex={noteIndex}
+              totalPoint={totalPoint}
+              totalPointCalculable={totalPointCalculable}
             />
-            <RecapitulatifIndicateurTrois
-              indicateurTroisFormValidated={state.indicateurTrois.formValidated}
-              effectifsIndicateurTroisCalculable={effectifsIndicateurTroisCalculable}
-              indicateurTroisCalculable={indicateurTroisCalculable}
-              effectifEtEcartPromoParGroupe={effectifEtEcartPromoParGroupe}
-              indicateurEcartPromotion={indicateurEcartPromotion}
-              indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
-              noteIndicateurTrois={noteIndicateurTrois}
-              correctionMeasure={correctionMeasureIndicateurTrois}
+            <RecapitulatifIndicateurUn
+              indicateurUnFormValidated={state.indicateurUn.formValidated}
+              effectifsIndicateurUnCalculable={effectifsIndicateurUnCalculable}
+              effectifEtEcartRemuParTranche={effectifEtEcartRemuParTranche}
+              indicateurEcartRemuneration={indicateurEcartRemuneration}
+              indicateurSexeSurRepresente={indicateurUnSexeSurRepresente}
+              indicateurUnParCSP={state.indicateurUn.csp}
+              noteIndicateurUn={noteIndicateurUn}
+            />
+            {(trancheEffectifs !== "50 à 250" && (
+              <>
+                <RecapitulatifIndicateurDeux
+                  indicateurDeuxFormValidated={state.indicateurDeux.formValidated}
+                  effectifsIndicateurDeuxCalculable={effectifsIndicateurDeuxCalculable}
+                  indicateurDeuxCalculable={indicateurDeuxCalculable}
+                  effectifEtEcartAugmentParGroupe={effectifEtEcartAugmentParGroupe}
+                  indicateurEcartAugmentation={indicateurEcartAugmentation}
+                  indicateurSexeSurRepresente={indicateurDeuxSexeSurRepresente}
+                  noteIndicateurDeux={noteIndicateurDeux}
+                  correctionMeasure={correctionMeasureIndicateurDeux}
+                />
+                <RecapitulatifIndicateurTrois
+                  indicateurTroisFormValidated={state.indicateurTrois.formValidated}
+                  effectifsIndicateurTroisCalculable={effectifsIndicateurTroisCalculable}
+                  indicateurTroisCalculable={indicateurTroisCalculable}
+                  effectifEtEcartPromoParGroupe={effectifEtEcartPromoParGroupe}
+                  indicateurEcartPromotion={indicateurEcartPromotion}
+                  indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
+                  noteIndicateurTrois={noteIndicateurTrois}
+                  correctionMeasure={correctionMeasureIndicateurTrois}
+                />
+              </>
+            )) || (
+              <RecapitulatifIndicateurDeuxTrois
+                indicateurDeuxTroisFormValidated={state.indicateurDeuxTrois.formValidated}
+                effectifsIndicateurDeuxTroisCalculable={effectifsIndicateurDeuxTroisCalculable}
+                indicateurDeuxTroisCalculable={indicateurDeuxTroisCalculable}
+                indicateurEcartAugmentationPromotion={indicateurEcartAugmentationPromotion}
+                indicateurEcartNombreEquivalentSalaries={indicateurEcartNombreEquivalentSalaries}
+                indicateurSexeSurRepresente={indicateurDeuxTroisSexeSurRepresente}
+                noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
+                correctionMeasure={correctionMeasureIndicateurDeuxTrois}
+                tauxAugmentationPromotionHommes={tauxAugmentationPromotionHommes}
+                tauxAugmentationPromotionFemmes={tauxAugmentationPromotionFemmes}
+                plusPetitNombreSalaries={plusPetitNombreSalaries}
+              />
+            )}
+            <RecapitulatifIndicateurQuatre
+              indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
+              indicateurQuatreCalculable={indicateurQuatreCalculable}
+              indicateurEcartNombreSalarieesAugmentees={indicateurEcartNombreSalarieesAugmentees}
+              presenceCongeMat={state.indicateurQuatre.presenceCongeMat}
+              nombreSalarieesPeriodeAugmentation={state.indicateurQuatre.nombreSalarieesPeriodeAugmentation}
+              noteIndicateurQuatre={noteIndicateurQuatre}
+            />
+            <RecapitulatifIndicateurCinq
+              indicateurCinqFormValidated={state.indicateurCinq.formValidated}
+              indicateurSexeSousRepresente={indicateurCinqSexeSousRepresente}
+              indicateurNombreSalariesSexeSousRepresente={indicateurNombreSalariesSexeSousRepresente}
+              noteIndicateurCinq={noteIndicateurCinq}
             />
           </>
-        )) || (
-          <RecapitulatifIndicateurDeuxTrois
-            indicateurDeuxTroisFormValidated={state.indicateurDeuxTrois.formValidated}
-            effectifsIndicateurDeuxTroisCalculable={effectifsIndicateurDeuxTroisCalculable}
-            indicateurDeuxTroisCalculable={indicateurDeuxTroisCalculable}
-            indicateurEcartAugmentationPromotion={indicateurEcartAugmentationPromotion}
-            indicateurEcartNombreEquivalentSalaries={indicateurEcartNombreEquivalentSalaries}
-            indicateurSexeSurRepresente={indicateurDeuxTroisSexeSurRepresente}
-            noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
-            correctionMeasure={correctionMeasureIndicateurDeuxTrois}
-            tauxAugmentationPromotionHommes={tauxAugmentationPromotionHommes}
-            tauxAugmentationPromotionFemmes={tauxAugmentationPromotionFemmes}
-            plusPetitNombreSalaries={plusPetitNombreSalaries}
-          />
         )}
-        <RecapitulatifIndicateurQuatre
-          indicateurQuatreFormValidated={state.indicateurQuatre.formValidated}
-          indicateurQuatreCalculable={indicateurQuatreCalculable}
-          indicateurEcartNombreSalarieesAugmentees={indicateurEcartNombreSalarieesAugmentees}
-          presenceCongeMat={state.indicateurQuatre.presenceCongeMat}
-          nombreSalarieesPeriodeAugmentation={state.indicateurQuatre.nombreSalarieesPeriodeAugmentation}
-          noteIndicateurQuatre={noteIndicateurQuatre}
-        />
-        <RecapitulatifIndicateurCinq
-          indicateurCinqFormValidated={state.indicateurCinq.formValidated}
-          indicateurSexeSousRepresente={indicateurCinqSexeSousRepresente}
-          indicateurNombreSalariesSexeSousRepresente={indicateurNombreSalariesSexeSousRepresente}
-          noteIndicateurCinq={noteIndicateurCinq}
-        />
       </VStack>
       <Box
         mt={6}
