@@ -378,6 +378,7 @@ Object {
   "informationsEntreprise": Object {
     "adresse": "30 rue des alouettes",
     "codeNaf": "5678",
+    "codePays": "",
     "codePostal": "12345",
     "commune": "Trifouilly",
     "departement": "Drôme",
@@ -780,6 +781,7 @@ Object {
   "informationsEntreprise": Object {
     "adresse": "",
     "codeNaf": "",
+    "codePays": "",
     "codePostal": "",
     "commune": "",
     "departement": "",

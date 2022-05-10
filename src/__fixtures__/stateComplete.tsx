@@ -433,6 +433,7 @@ const actionUpdateInformationsEntreprise: ActionType = {
     departement: "Drôme",
     adresse: "30 rue des alouettes",
     codePostal: "12345",
+    codePays: "",
     commune: "Trifouilly",
     structure: "Unité Economique et Sociale (UES)",
     nomUES: "nom d'une UES",

@@ -111,6 +111,7 @@ const defaultState: AppState = {
     departement: "",
     adresse: "",
     codePostal: "",
+    codePays: "",
     commune: "",
     structure: "Entreprise",
     nomUES: "",
