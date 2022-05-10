@@ -130,7 +130,12 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
     anneeDeclaration: parseIntStateValue(informations.anneeDeclaration),
     finPeriodeReference: informations.finPeriodeReference,
     periodeSuffisante:
-      informations.periodeSuffisante !== undefined ? parseBooleanStateValue(informations.periodeSuffisante) : undefined,
+      informations.periodeSuffisante !== undefined
+        ? parseBooleanStateValue(informations.periodeSuffisante)
+        : // si periodeSuffisante est null et que finPeriodeReference est non null, alors c'est une simu/décla ancienne et on doit considérer que ce champ est à Oui.
+        informations.finPeriodeReference
+        ? "true"
+        : undefined,
   }
 
   const saveForm = (formData: any) => {
