@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.css": "/simulateur/static/css/main.0785ddc3.css",
-    "main.js": "/simulateur/static/js/main.fb9aee26.js",
-    "static/media/gabriela-all-400-normal.woff": "/simulateur/static/media/gabriela-all-400-normal.168797977298dc0e8cbb.woff",
-    "static/media/cabin-all-400-normal.woff": "/simulateur/static/media/cabin-all-400-normal.857a809ff229761c134d.woff",
-    "static/media/gabriela-latin-400-normal.woff2": "/simulateur/static/media/gabriela-latin-400-normal.77a8f3e5d8602d967258.woff2",
-    "static/media/cabin-latin-400-normal.woff2": "/simulateur/static/media/cabin-latin-400-normal.494cb48a046d2d2e69e0.woff2",
-    "static/media/gabriela-cyrillic-400-normal.woff2": "/simulateur/static/media/gabriela-cyrillic-400-normal.7146db6b38f9c8343d21.woff2",
-    "static/media/gabriela-cyrillic-ext-400-normal.woff2": "/simulateur/static/media/gabriela-cyrillic-ext-400-normal.13bbce9ef339460bce8a.woff2",
-    "static/media/cabin-latin-ext-400-normal.woff2": "/simulateur/static/media/cabin-latin-ext-400-normal.b2a81591c42805f600ce.woff2",
-    "static/media/cabin-vietnamese-400-normal.woff2": "/simulateur/static/media/cabin-vietnamese-400-normal.0d1d1146cff1977b630b.woff2",
-    "index.html": "/simulateur/index.html",
-    "main.0785ddc3.css.map": "/simulateur/static/css/main.0785ddc3.css.map",
-    "main.fb9aee26.js.map": "/simulateur/static/js/main.fb9aee26.js.map"
+    "main.css": "/static/css/main.ce56b1ee.css",
+    "main.js": "/static/js/main.0309919a.js",
+    "static/media/gabriela-all-400-normal.woff": "/static/media/gabriela-all-400-normal.168797977298dc0e8cbb.woff",
+    "static/media/cabin-all-400-normal.woff": "/static/media/cabin-all-400-normal.857a809ff229761c134d.woff",
+    "static/media/gabriela-latin-400-normal.woff2": "/static/media/gabriela-latin-400-normal.77a8f3e5d8602d967258.woff2",
+    "static/media/cabin-latin-400-normal.woff2": "/static/media/cabin-latin-400-normal.494cb48a046d2d2e69e0.woff2",
+    "static/media/gabriela-cyrillic-400-normal.woff2": "/static/media/gabriela-cyrillic-400-normal.7146db6b38f9c8343d21.woff2",
+    "static/media/gabriela-cyrillic-ext-400-normal.woff2": "/static/media/gabriela-cyrillic-ext-400-normal.13bbce9ef339460bce8a.woff2",
+    "static/media/cabin-latin-ext-400-normal.woff2": "/static/media/cabin-latin-ext-400-normal.b2a81591c42805f600ce.woff2",
+    "static/media/cabin-vietnamese-400-normal.woff2": "/static/media/cabin-vietnamese-400-normal.0d1d1146cff1977b630b.woff2",
+    "index.html": "/index.html",
+    "main.ce56b1ee.css.map": "/static/css/main.ce56b1ee.css.map",
+    "main.0309919a.js.map": "/static/js/main.0309919a.js.map"
   },
   "entrypoints": [
-    "static/css/main.0785ddc3.css",
-    "static/js/main.fb9aee26.js"
+    "static/css/main.ce56b1ee.css",
+    "static/js/main.0309919a.js"
   ]
 }
