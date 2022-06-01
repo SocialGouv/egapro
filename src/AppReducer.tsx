@@ -126,6 +126,18 @@ const defaultState: AppState = {
     email: "",
     acceptationCGU: false,
   },
+  informationsProgressionCorrection: {
+    formValidated: "None",
+    objectifIndicateur1: undefined,
+    objectifIndicateur2: undefined,
+    objectifIndicateur3: undefined,
+    objectifIndicateur2et3: undefined,
+    objectifIndicateur4: undefined,
+    objectifIndicateur5: undefined,
+    datePublicationObjectifs: "",
+    datePublicationMesures: "",
+    modalitesPublicationObjectifsMesures: "",
+  },
   declaration: {
     formValidated: "None",
     mesuresCorrection: "",
@@ -547,6 +559,28 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
         ...state,
         informationsDeclarant: {
           ...state.informationsDeclarant,
+          formValidated: action.valid,
+        },
+        declaration: {
+          ...state.declaration,
+          formValidated: action.valid === "None" ? "Invalid" : state.declaration.formValidated,
+        },
+      }
+    }
+    case "updateInformationsProgressionCorrection": {
+      return {
+        ...state,
+        informationsProgressionCorrection: {
+          ...state.informationsProgressionCorrection,
+          ...action.data,
+        },
+      }
+    }
+    case "validateInformationsProgressionCorrection": {
+      return {
+        ...state,
+        informationsProgressionCorrection: {
+          ...state.informationsProgressionCorrection,
           formValidated: action.valid,
         },
         declaration: {

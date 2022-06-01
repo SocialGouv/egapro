@@ -12,7 +12,7 @@ import {
   parseTrancheEffectifsFormValue,
   required,
 } from "../../utils/formHelpers"
-import { parseDate } from "../../utils/helpers"
+import { parseDate } from "../../utils/date"
 
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"

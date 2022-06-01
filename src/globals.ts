@@ -73,6 +73,19 @@ export type AppState = {
     email: string
     acceptationCGU: boolean
   }
+  informationsProgressionCorrection: {
+    formValidated: FormState
+    objectifIndicateur1?: number
+    objectifIndicateur2?: number
+    objectifIndicateur3?: number
+    objectifIndicateur2et3?: number
+    objectifIndicateur4?: number
+    objectifIndicateur5?: number
+    datePublicationObjectifs: string
+    datePublicationMesures?: string
+    //siteInternetPublicationObjectifsMesures: string
+    modalitesPublicationObjectifsMesures?: string
+  }
   declaration: {
     formValidated: FormState
     mesuresCorrection: string
@@ -212,6 +225,14 @@ export type ActionType =
     }
   | {
       type: "validateInformationsDeclarant"
+      valid: FormState
+    }
+  | {
+      type: "updateInformationsProgressionCorrection"
+      data: ActionInformationsProgressionCorrectionData
+    }
+  | {
+      type: "validateInformationsProgressionCorrection"
       valid: FormState
     }
   | {
@@ -390,6 +411,19 @@ export type ActionInformationsDeclarantData = {
   tel: string
   email: string
   acceptationCGU: boolean
+}
+
+export type ActionInformationsProgressionCorrectionData = {
+  objectifIndicateur1?: number
+  objectifIndicateur2?: number
+  objectifIndicateur3?: number
+  objectifIndicateur2et3?: number
+  objectifIndicateur4?: number
+  objectifIndicateur5?: number
+  datePublicationObjectifs?: string
+  datePublicationMesures?: string
+  //siteInternetPublicationObjectifsMesures: string
+  modalitesPublicationObjectifsMesures?: string
 }
 
 export type ActionDeclarationData = {

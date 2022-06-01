@@ -28,6 +28,9 @@ function MainScrollView({ children, state, location }: Props) {
       indicateurCinqFormValidated={state ? state.indicateurCinq.formValidated : "None"}
       informationsEntrepriseFormValidated={state ? state.informationsEntreprise.formValidated : "None"}
       informationsDeclarantFormValidated={state ? state.informationsDeclarant.formValidated : "None"}
+      informationsProgressionCorrectionFormValidated={
+        state ? state.informationsProgressionCorrection.formValidated : "None"
+      }
       declarationFormValidated={state ? state.declaration.formValidated : "None"}
     />
   )

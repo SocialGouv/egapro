@@ -5,7 +5,7 @@ import { Redirect, Route, Switch, useParams } from "react-router-dom"
 
 import { AppState, ActionType } from "../globals"
 
-import { logToSentry } from "../utils/helpers"
+import { logToSentry } from "../utils/sentry"
 
 import globalStyles from "../utils/globalStyles"
 import { isUserGrantedForSiren } from "../utils/user"
@@ -31,6 +31,7 @@ import Recapitulatif from "../views/Recapitulatif"
 import AskEmail from "../views/AskEmail"
 import { sirenIsFree } from "../utils/siren"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
+import InformationsProgressionCorrection from "../views/InformationsProgressionCorrection"
 
 interface Props {
   state: AppState | undefined
@@ -204,6 +205,10 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
                 <Route
                   path="/simulateur/:code/informations-declarant"
                   render={(props) => <InformationsDeclarant {...props} state={state} dispatch={dispatch} />}
+                />
+                <Route
+                  path="/simulateur/:code/informations-complementaires"
+                  render={(props) => <InformationsProgressionCorrection {...props} state={state} dispatch={dispatch} />}
                 />
                 <Route
                   path="/simulateur/:code/declaration"
