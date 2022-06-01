@@ -1,7 +1,9 @@
-import { fractionToPercentage, parseDate, percentageToFraction } from "./helpers"
+import { FieldMetaState } from "react-final-form"
+
+import { fractionToPercentage, percentageToFraction } from "./number"
+import { parseDate } from "./date"
 
 import { PeriodeDeclaration, TrancheEffectifs } from "../globals"
-import { FieldMetaState } from "react-final-form"
 
 // INT PARSE
 

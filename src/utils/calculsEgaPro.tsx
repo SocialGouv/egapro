@@ -1,6 +1,6 @@
 import { GroupTranchesAgesEffectif } from "../globals"
 
-import { roundDecimal } from "./helpers"
+import { roundDecimal } from "./number"
 
 /* EFFECTIF CONST */
 

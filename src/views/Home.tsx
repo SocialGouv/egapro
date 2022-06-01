@@ -4,7 +4,7 @@ import { Heading, SimpleGrid } from "@chakra-ui/react"
 
 import { ActionType } from "../globals"
 import { postIndicatorsDatas } from "../utils/api"
-import { logToSentry } from "../utils/helpers"
+import { logToSentry } from "../utils/sentry"
 
 import ButtonAction from "../components/ds/ButtonAction"
 import ButtonLinkNoRouter from "../components/ds/ButtonLinkNoRouter"

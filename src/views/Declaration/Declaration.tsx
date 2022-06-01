@@ -36,7 +36,9 @@ import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
-import { formatDataForAPI, logToSentry } from "../../utils/helpers"
+import { formatDataForAPI } from "../../utils/helpers"
+import { logToSentry } from "../../utils/sentry"
+
 import { useTitle } from "../../utils/hooks"
 import { isFormValid } from "../../utils/formHelpers"
 

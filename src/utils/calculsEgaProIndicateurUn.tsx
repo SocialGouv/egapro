@@ -8,7 +8,7 @@ import {
   GroupTranchesAgesIndicateurUn,
 } from "../globals"
 
-import { roundDecimal } from "./helpers"
+import { roundDecimal } from "./number"
 
 import {
   calculEcartsPonderesParGroupe,

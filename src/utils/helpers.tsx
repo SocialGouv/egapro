@@ -1,8 +1,10 @@
-import * as Sentry from "@sentry/react"
-import { addYears, addDays, format, parse as rootParse, parseISO } from "date-fns"
 import { regionCode, departementCode } from "../components/RegionsDepartements"
 
 import { TranchesAges, CategorieSocioPro, AppState } from "../globals"
+import { toISOString } from "./date"
+import { asPercentage } from "./number"
+
+// Helpers for business models
 
 export function displayNameTranchesAges(trancheAge: TranchesAges): string {
   switch (trancheAge) {
@@ -56,58 +58,6 @@ export function displaySexeSurRepresente(indicateurSexeSurRepresente: "hommes" |
     : "les femmes et les hommes sont à égalité"
 }
 
-/* Utils */
-
-export const roundDecimal = (num: number, decimal: number): number => {
-  const mult = Math.pow(10, decimal)
-  return Math.round(num * mult) / mult
-}
-
-export const fractionToPercentage = (num: number) => roundDecimal(num * 100, 5)
-
-export const percentageToFraction = (num: number) => roundDecimal(num / 100, 5)
-
-/* Dates */
-
-export function parseDate(dateStr: string): Date | undefined {
-  const parsed = parseISO(dateStr)
-  if (parsed.toString() === "Invalid Date") {
-    const rootParsed = rootParse(dateStr, "dd/MM/yyyy", new Date())
-    if (rootParsed.toString() === "Invalid Date") {
-      return
-    }
-    return rootParsed
-  }
-  return parsed
-}
-
-export function dateToString(date: Date | undefined): string {
-  return date !== undefined ? format(date, "dd/MM/yyyy") : ""
-}
-
-export enum Year {
-  Add,
-  Subtract,
-}
-
-// Return a date that is exactly one year later or before:
-// Eg: one year in the future: 2019-01-01 -> 2019-12-31
-export function calendarYear(dateStr: string, operation: Year, numYears: number): string {
-  // Adding a year: we subtract a day to the final result.
-  // Subtracting a year: we add a day to the final result.
-  const year = operation === Year.Add ? numYears : -numYears
-  const day = operation === Year.Add ? -1 : 1
-  const date = parseDate(dateStr)
-  if (date === undefined) {
-    return ""
-  }
-  const yearsAdded = addYears(date, year)
-  const dayAdded = addDays(yearsAdded, day)
-  return format(dayAdded, "dd/MM/yyyy")
-}
-
-/* Misc */
-
 export const messageEcartNombreEquivalentSalaries = (
   indicateurSexeSurRepresente: "hommes" | "femmes" | undefined,
   plusPetitNombreSalaries: "hommes" | "femmes" | undefined,
@@ -141,29 +91,21 @@ export const messageMesureCorrection = (
     : ""
 }
 
-// Format the data from the AppReducer to be compatible with the API new format
-
-const toISOString = (date: string) => {
-  const parsed = parseDate(date)
-  return parsed ? format(parsed, "yyyy-MM-dd") : undefined
-}
-
 export const formatDataForAPI = (id: string, data: AppState) => {
   // Indicateurs
   const output = {
     id,
     source: "simulateur",
-    déclaration: getDeclaration(data),
-    déclarant: getDeclarant(data),
-    entreprise: getEntreprise(data),
-    ...(data.informations.periodeSuffisante && { indicateurs: getIndicateurs(data) }),
+    déclaration: buildDeclaration(data),
+    déclarant: buildDeclarant(data),
+    entreprise: buildEntreprise(data),
+    ...(data.informations.periodeSuffisante && { indicateurs: buildIndicateurs(data) }),
   }
 
   return output
 }
 
-// Déclaration
-const getDeclaration = (data: AppState): any => {
+const buildDeclaration = (data: AppState): any => {
   const declaration: any = {
     année_indicateurs: data.informations.anneeDeclaration,
     période_suffisante: data.informations.periodeSuffisante,
@@ -197,8 +139,7 @@ const getDeclaration = (data: AppState): any => {
   return declaration
 }
 
-// Déclarant
-const getDeclarant = (data: AppState): any => {
+const buildDeclarant = (data: AppState): any => {
   const declarant: any = {
     prénom: data.informationsDeclarant.prenom,
     nom: data.informationsDeclarant.nom,
@@ -208,8 +149,7 @@ const getDeclarant = (data: AppState): any => {
   return declarant
 }
 
-// Entreprise
-const getEntreprise = (data: AppState): any => {
+const buildEntreprise = (data: AppState): any => {
   const entreprise: any = {
     raison_sociale: data.informationsEntreprise.nomEntreprise,
     siren: data.informationsEntreprise.siren,
@@ -249,31 +189,23 @@ const getEntreprise = (data: AppState): any => {
   return entreprise
 }
 
-// Indicateurs
-const getIndicateurs = (data: AppState): any => {
+const buildIndicateurs = (data: AppState): any => {
   const indicateurs: any = {
-    rémunérations: getIndicateur1(data),
-    congés_maternité: getIndicateur4(data),
-    hautes_rémunérations: getIndicateur5(data),
+    rémunérations: buildIndicateur1(data),
+    congés_maternité: buildIndicateur4(data),
+    hautes_rémunérations: buildIndicateur5(data),
   }
   if (data.informations.trancheEffectifs === "50 à 250") {
-    indicateurs.augmentations_et_promotions = getIndicateur2et3(data)
+    indicateurs.augmentations_et_promotions = buildIndicateur2et3(data)
   } else {
-    indicateurs.augmentations = getIndicateur2(data)
-    indicateurs.promotions = getIndicateur3(data)
+    indicateurs.augmentations = buildIndicateur2(data)
+    indicateurs.promotions = buildIndicateur3(data)
   }
   return indicateurs
 }
 
-const asPercentage = (value: number | undefined) => {
-  // Return `33` for "33%" (which is passed in as a value of 0.33)
-  if (value !== undefined) {
-    return value * 100
-  }
-}
-
 // Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
-const getIndicateur1 = (data: AppState): any => {
+const buildIndicateur1 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurUn.motifNonCalculable
   if (motif) {
@@ -318,7 +250,7 @@ const getIndicateur1 = (data: AppState): any => {
 }
 
 // Indicateur 2 relatif à l'écart de taux d'augmentations individuelles(hors promotion) entre les femmes et les homme
-const getIndicateur2 = (data: AppState): any => {
+const buildIndicateur2 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurDeux.motifNonCalculable
   if (motif) {
@@ -341,7 +273,7 @@ const getIndicateur2 = (data: AppState): any => {
 }
 
 // Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes
-const getIndicateur3 = (data: AppState): any => {
+const buildIndicateur3 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurTrois.motifNonCalculable
   if (motif) {
@@ -364,7 +296,7 @@ const getIndicateur3 = (data: AppState): any => {
 }
 
 // Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins
-const getIndicateur2et3 = (data: AppState): any => {
+const buildIndicateur2et3 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurDeuxTrois.motifNonCalculable
   if (motif) {
@@ -392,7 +324,7 @@ const getIndicateur2et3 = (data: AppState): any => {
 }
 
 // Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
-const getIndicateur4 = (data: AppState): any => {
+const buildIndicateur4 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurQuatre.motifNonCalculable
   if (motif) {
@@ -408,7 +340,7 @@ const getIndicateur4 = (data: AppState): any => {
 }
 
 // Indicateur 5 relatif au nombre de salariés du sexe sous- représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
-const getIndicateur5 = (data: AppState): any => {
+const buildIndicateur5 = (data: AppState): any => {
   // @ts-ignore
   const motif = data.indicateurCinq.motifNonCalculable
   if (motif) {
@@ -426,13 +358,4 @@ const getIndicateur5 = (data: AppState): any => {
     indicateur5.population_favorable = sexeSurRepresente
   }
   return indicateur5
-}
-
-/* SENTRY */
-export function logToSentry(error: any, data: any) {
-  if (process.env.REACT_APP_SENTRY_DSN) {
-    Sentry.captureException(error, {
-      extra: data,
-    })
-  }
 }

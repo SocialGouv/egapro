@@ -17,7 +17,7 @@ import {
   mustBeInteger,
   mustBeNumber,
 } from "../../utils/formHelpers"
-import { calendarYear, dateToString, parseDate, Year } from "../../utils/helpers"
+import { calendarYear, dateToString, Year, parseDate } from "../../utils/date"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import BlocForm from "../../components/BlocForm"

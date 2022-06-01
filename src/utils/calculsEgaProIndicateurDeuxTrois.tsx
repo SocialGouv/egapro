@@ -1,7 +1,7 @@
 import { AppState } from "../globals"
 
 import calculIndicateurUn from "./calculsEgaProIndicateurUn"
-import { roundDecimal } from "./helpers"
+import { roundDecimal } from "./number"
 import totalNombreSalaries from "./totalNombreSalaries"
 
 import {

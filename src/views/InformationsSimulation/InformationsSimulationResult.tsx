@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 
 import { FormState, TrancheEffectifs } from "../../globals"
-import { calendarYear, Year } from "../../utils/helpers"
+import { calendarYear, Year } from "../../utils/date"
 
 import ResultSummary from "../../components/ResultSummary"
 

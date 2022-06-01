@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react"
 import { Heading, SimpleGrid } from "@chakra-ui/react"
 
 import { FormState, TrancheEffectifs } from "../../globals"
-import { calendarYear, Year } from "../../utils/helpers"
+import { calendarYear, Year } from "../../utils/date"
 
 import InfoBlock from "../../components/ds/InfoBlock"
 import { TextSimulatorLink } from "../../components/SimulatorLink"

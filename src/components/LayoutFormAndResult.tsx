@@ -3,7 +3,7 @@ import { Box, Grid, GridItem } from "@chakra-ui/react"
 
 interface LayoutFormAndResultProps {
   childrenForm: ReactNode
-  childrenResult: ReactNode
+  childrenResult?: ReactNode
 }
 
 const LayoutFormAndResult: FunctionComponent<LayoutFormAndResultProps> = ({ childrenForm, childrenResult }) => {
