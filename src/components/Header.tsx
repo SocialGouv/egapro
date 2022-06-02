@@ -128,9 +128,9 @@ const Header: FunctionComponent = () => {
                   Menu
                 </MenuButton>
                 <MenuList zIndex={400}>
-                  <MenuGroup title="Mon compte">
-                    {email ? (
-                      <>
+                  {email ? (
+                    <>
+                      <MenuGroup title="Mon compte">
                         <MenuItem
                           as={RouterLink}
                           to="/tableauDeBord/mon-profil"
@@ -156,11 +156,14 @@ const Header: FunctionComponent = () => {
                             </MenuItem>
                           </>
                         )}
+                        <MenuDivider />
                         <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
                           Déconnexion
                         </MenuItem>
-                      </>
-                    ) : (
+                      </MenuGroup>
+                    </>
+                  ) : (
+                    <MenuGroup>
                       <MenuItem
                         as={RouterLink}
                         to="/tableauDeBord/me-connecter"
@@ -168,8 +171,8 @@ const Header: FunctionComponent = () => {
                       >
                         Me connecter
                       </MenuItem>
-                    )}
-                  </MenuGroup>
+                    </MenuGroup>
+                  )}
 
                   {isSmallerThan1280 && (
                     <>
@@ -189,7 +192,6 @@ const Header: FunctionComponent = () => {
       </Box>
       {isSmallerThan1280 && (
         <>
-          {/* @ts-ignore */}
           <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
             <DrawerOverlay />
             <DrawerContent>
