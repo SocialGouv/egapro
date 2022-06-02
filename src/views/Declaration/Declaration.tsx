@@ -41,9 +41,13 @@ import { useTitle } from "../../utils/hooks"
 import { isFormValid } from "../../utils/formHelpers"
 
 function buildHelpers(state: AppState) {
+  const trancheEffectifs = state.informations.trancheEffectifs
+
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
 
-  const nombreSalariesTotal = totalNombreSalariesFemme + totalNombreSalariesHomme
+  const effectifData: DeclarationEffectifData = {
+    nombreSalariesTotal: totalNombreSalariesFemme + totalNombreSalariesHomme,
+  }
 
   const {
     effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
@@ -91,8 +95,6 @@ function buildHelpers(state: AppState) {
     noteIndicateurCinq,
   } = calculIndicateurCinq(state)
 
-  const trancheEffectifs = state.informations.trancheEffectifs
-
   const allIndicateurValid =
     (isFormValid(state.indicateurUn) ||
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
@@ -103,10 +105,6 @@ function buildHelpers(state: AppState) {
       : isFormValid(state.indicateurDeuxTrois) || !effectifsIndicateurDeuxTroisCalculable) &&
     isFormValid(state.indicateurQuatre) &&
     isFormValid(state.indicateurCinq)
-
-  const effectifData: DeclarationEffectifData = {
-    nombreSalariesTotal,
-  }
 
   const indicateurUnData: DeclarationIndicateurUnData = {
     nombreCoefficients: state.indicateurUn.csp ? undefined : state.indicateurUn.coefficient.length,
@@ -206,10 +204,6 @@ function buildHelpers(state: AppState) {
   )
 
   return {
-    effectifsIndicateurUnCalculable,
-    effectifsIndicateurDeuxCalculable,
-    effectifsIndicateurTroisCalculable,
-    effectifsIndicateurDeuxTroisCalculable,
     trancheEffectifs,
     allIndicateurValid,
     effectifData,
@@ -252,12 +246,15 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   const helpers = buildHelpers(state)
 
   const {
-    effectifsIndicateurUnCalculable,
-    effectifsIndicateurDeuxCalculable,
-    effectifsIndicateurTroisCalculable,
-    effectifsIndicateurDeuxTroisCalculable,
+    indicateurUnData,
+    indicateurDeuxData,
+    indicateurTroisData,
+    indicateurDeuxTroisData,
+    indicateurQuatreData,
+    indicateurCinqData,
     trancheEffectifs,
     allIndicateurValid,
+    effectifData,
     noteIndex,
     totalPoint,
     totalPointCalculable,
@@ -273,7 +270,16 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
       return dispatch({
         type: "validateDeclaration",
         valid,
-        ...helpers,
+        effectifData,
+        indicateurUnData,
+        indicateurDeuxData,
+        indicateurTroisData,
+        indicateurDeuxTroisData,
+        indicateurQuatreData,
+        indicateurCinqData,
+        noteIndex,
+        totalPoint,
+        totalPointCalculable,
       })
     }
   }
@@ -375,26 +381,26 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
             </ListItem>
           )}
           {!isFormValid(state.indicateurUn) &&
-            ((!effectifsIndicateurUnCalculable && !state.indicateurUn.csp) || effectifsIndicateurUnCalculable) && (
+            ((indicateurUnData.nonCalculable && !state.indicateurUn.csp) || !indicateurUnData.nonCalculable) && (
               <ListItem>
                 <TextSimulatorLink to="/indicateur1" label="Indicateur écart de rémunération" />
               </ListItem>
             )}
-          {trancheEffectifs !== "50 à 250" && !isFormValid(state.indicateurDeux) && effectifsIndicateurDeuxCalculable && (
+          {trancheEffectifs !== "50 à 250" && !isFormValid(state.indicateurDeux) && !indicateurDeuxData.nonCalculable && (
             <ListItem>
               <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
             </ListItem>
           )}
           {trancheEffectifs !== "50 à 250" &&
             !isFormValid(state.indicateurTrois) &&
-            effectifsIndicateurTroisCalculable && (
+            !indicateurTroisData.nonCalculable && (
               <ListItem>
                 <TextSimulatorLink to="/indicateur3" label="Indicateur écart de taux de promotions" />
               </ListItem>
             )}
           {trancheEffectifs === "50 à 250" &&
             !isFormValid(state.indicateurDeuxTrois) &&
-            effectifsIndicateurDeuxTroisCalculable && (
+            !indicateurDeuxTroisData.nonCalculable && (
               <ListItem>
                 <TextSimulatorLink to="/indicateur2et3" label="Indicateur écart de taux d'augmentations" />
               </ListItem>
