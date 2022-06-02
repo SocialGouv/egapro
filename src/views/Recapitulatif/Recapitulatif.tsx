@@ -6,15 +6,6 @@ import { AppState } from "../../globals"
 
 import { useTitle } from "../../utils/hooks"
 
-import calculIndicateurUn from "../../utils/calculsEgaProIndicateurUn"
-import calculIndicateurDeux from "../../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurTrois from "../../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
-import totalNombreSalaries from "../../utils/totalNombreSalaries"
-
 import Page from "../../components/Page"
 import ActionBar from "../../components/ActionBar"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
@@ -28,6 +19,7 @@ import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
 
+import { buildSummaryFromState } from "../../utils/helpers"
 interface RecapitulatifProps extends RouteComponentProps {
   state: AppState
 }
@@ -37,85 +29,65 @@ const title = "Récapitulatif"
 const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
   useTitle(title)
 
-  const trancheEffectifs = state.informations.trancheEffectifs
-
-  const periodeSuffisante = state.informations.periodeSuffisante as boolean
-
   const {
-    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
-    effectifEtEcartRemuParTranche,
-    indicateurEcartRemuneration,
-    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn,
-  } = calculIndicateurUn(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
-    indicateurCalculable: indicateurDeuxCalculable,
-    effectifEtEcartAugmentParGroupe,
-    indicateurEcartAugmentation,
-    indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
-    noteIndicateurDeux,
-    correctionMeasure: correctionMeasureIndicateurDeux,
-  } = calculIndicateurDeux(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
-    indicateurCalculable: indicateurTroisCalculable,
-    effectifEtEcartPromoParGroupe,
-    indicateurEcartPromotion,
-    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
-    noteIndicateurTrois,
-    correctionMeasure: correctionMeasureIndicateurTrois,
-  } = calculIndicateurTrois(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
-    indicateurCalculable: indicateurDeuxTroisCalculable,
-    indicateurEcartAugmentationPromotion,
-    indicateurEcartNombreEquivalentSalaries,
-    indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
-    noteIndicateurDeuxTrois,
-    correctionMeasure: correctionMeasureIndicateurDeuxTrois,
-    tauxAugmentationPromotionHommes,
-    tauxAugmentationPromotionFemmes,
-    plusPetitNombreSalaries,
-  } = calculIndicateurDeuxTrois(state)
-
-  const {
-    indicateurCalculable: indicateurQuatreCalculable,
-    indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
-
-  const {
-    indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
-    indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
-
-  const allIndicateurValid =
-    (state.indicateurUn.formValidated === "Valid" ||
-      // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
-      (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
-    (trancheEffectifs !== "50 à 250"
-      ? (state.indicateurDeux.formValidated === "Valid" || !effectifsIndicateurDeuxCalculable) &&
-        (state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable)
-      : state.indicateurDeuxTrois.formValidated === "Valid" || !effectifsIndicateurDeuxTroisCalculable) &&
-    state.indicateurQuatre.formValidated === "Valid" &&
-    state.indicateurCinq.formValidated === "Valid"
-
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
     trancheEffectifs,
-    noteIndicateurUn,
-    noteIndicateurDeux,
-    noteIndicateurTrois,
-    noteIndicateurDeuxTrois,
-    noteIndicateurQuatre,
-    noteIndicateurCinq,
-  )
+    periodeSuffisante,
+    allIndicateurValid,
+    noteIndex,
+    totalPoint,
+    totalPointCalculable,
+    totalNombreSalariesHomme,
+    totalNombreSalariesFemme,
 
-  const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
+    indicateurUn: {
+      effectifsIndicateurUnCalculable,
+      effectifEtEcartRemuParTranche,
+      indicateurEcartRemuneration,
+      indicateurUnSexeSurRepresente,
+      noteIndicateurUn,
+    },
+
+    indicateurDeux: {
+      effectifsIndicateurDeuxCalculable,
+      indicateurDeuxCalculable,
+      effectifEtEcartAugmentParGroupe,
+      indicateurEcartAugmentation,
+      indicateurDeuxSexeSurRepresente,
+      noteIndicateurDeux,
+      correctionMeasureIndicateurDeux,
+    },
+
+    indicateurTrois: {
+      effectifsIndicateurTroisCalculable,
+      indicateurTroisCalculable,
+      effectifEtEcartPromoParGroupe,
+      indicateurEcartPromotion,
+      indicateurTroisSexeSurRepresente,
+      noteIndicateurTrois,
+      correctionMeasureIndicateurTrois,
+    },
+
+    indicateurDeuxTrois: {
+      effectifsIndicateurDeuxTroisCalculable,
+      indicateurDeuxTroisCalculable,
+      indicateurEcartAugmentationPromotion,
+      indicateurEcartNombreEquivalentSalaries,
+      indicateurDeuxTroisSexeSurRepresente,
+      noteIndicateurDeuxTrois,
+      correctionMeasureIndicateurDeuxTrois,
+      tauxAugmentationPromotionHommes,
+      tauxAugmentationPromotionFemmes,
+      plusPetitNombreSalaries,
+    },
+
+    indicateurQuatre: { indicateurQuatreCalculable, indicateurEcartNombreSalarieesAugmentees, noteIndicateurQuatre },
+
+    indicateurCinq: {
+      indicateurCinqSexeSousRepresente,
+      indicateurNombreSalariesSexeSousRepresente,
+      noteIndicateurCinq,
+    },
+  } = buildSummaryFromState(state)
 
   return (
     <Page title="Récapitulatif des résultats de vos indicateurs">

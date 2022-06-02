@@ -16,6 +16,7 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
 import ButtonAction from "../../components/ds/ButtonAction"
 import TextareaGroup from "../../components/ds/TextareaGroup"
+import { buildSummaryFromState } from "../../utils/helpers"
 
 const required_error = "Un objectif est requis pour cet indicateur"
 const invalid_type_error = "L'objectif doit être un nombre entre 75 et 100"
@@ -87,20 +88,15 @@ const InformationsProgressionCorrectionForm: FunctionComponent<InformationsProgr
     validateInformationsProgressionCorrection("Valid")
   }
 
+  const { noteIndex, trancheEffectifs } = buildSummaryFromState(state)
+
   // Helper for UI
-  const typeIndex = !state?.declaration?.noteIndex
-    ? "Impossible state"
-    : state.declaration.noteIndex > 85
-    ? "85:100"
-    : state.declaration.noteIndex >= 75
-    ? "75:85"
-    : "0:75"
+  const typeIndex = !noteIndex ? "Impossible state" : noteIndex > 85 ? "85:100" : noteIndex >= 75 ? "75:85" : "0:75"
 
   console.log("typeIndex", typeIndex)
 
-  console.log("noteIndex", state?.declaration?.noteIndex)
-
-  console.log("state", JSON.stringify(state, null, 2))
+  console.log("noteIndex", noteIndex)
+  console.log("trancheEffectifs", trancheEffectifs)
 
   const siteWebLabel =
     typeIndex === "85:100"
