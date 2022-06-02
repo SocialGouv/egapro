@@ -43,7 +43,7 @@ function CustomNavLink({
       <Text
         fontSize="13"
         sx={{
-          lineHeight: 1.25,
+          lineHeight: 1.125,
           display: "inline-flex",
           color: "inherit",
         }}
@@ -66,8 +66,9 @@ function CustomNavLink({
         <Link
           fontSize="13"
           sx={{
-            lineHeight: 1.25,
+            lineHeight: 1.125,
             display: "inline-flex",
+            alignItems: "center",
             color: match ? globalStyles.colors.primary : "inherit",
           }}
           as={ReachLink}
@@ -80,11 +81,11 @@ function CustomNavLink({
           })}
         >
           {valid === "Valid" ? (
-            <Box mr={1} pt={1} sx={{ flexShrink: 0 }}>
+            <Box mr={1} sx={{ flexShrink: 0, transform: "translateY(-1px)" }}>
               <IconValid color="green.400" />
             </Box>
           ) : valid === "Invalid" ? (
-            <Box mr={2} pt={1} sx={{ flexShrink: 0 }}>
+            <Box mr={2} sx={{ flexShrink: 0, transform: "translateY(-1px)" }}>
               <IconInvalid color="red.500" />
             </Box>
           ) : null}
@@ -165,10 +166,10 @@ function Menu({
           }) => (
             <React.Fragment>
               <CustomNavLink to={`/simulateur/${code}`} title="Vos informations" activeOnlyWhenExact={true} />
-              <Heading as="div" size="sm" mb={2} mt={4}>
+              <Heading as="div" size="sm" mb={3} mt={4}>
                 Calcul de l'index
               </Heading>
-              <List spacing={2} sx={listStyles}>
+              <List spacing={3} sx={listStyles}>
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/informations`}
