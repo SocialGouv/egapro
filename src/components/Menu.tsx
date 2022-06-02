@@ -12,6 +12,7 @@ interface CustomNavLinkProps {
   to: string
   activeOnlyWhenExact?: boolean
   disabled?: boolean
+  onClick?: () => void
 }
 
 function buildA11yTitle({
@@ -37,6 +38,7 @@ function CustomNavLink({
   to,
   activeOnlyWhenExact = false,
   disabled = false,
+  onClick,
 }: CustomNavLinkProps) {
   if (disabled) {
     return (
@@ -64,6 +66,7 @@ function CustomNavLink({
       // eslint-disable-next-line react/no-children-prop
       children={({ match }) => (
         <Link
+          onClick={onClick}
           fontSize="13"
           sx={{
             lineHeight: 1.125,
@@ -102,7 +105,6 @@ function CustomNavLink({
 interface Props {
   trancheEffectifs: TrancheEffectifs
   periodeSuffisante: boolean | undefined
-
   informationsFormValidated: FormState
   effectifFormValidated: FormState
   indicateurUnFormValidated: FormState
@@ -114,6 +116,7 @@ interface Props {
   informationsEntrepriseFormValidated: FormState
   informationsDeclarantFormValidated: FormState
   declarationFormValidated: FormState
+  onClose?: () => void
 }
 
 function Menu({
@@ -130,17 +133,15 @@ function Menu({
   informationsEntrepriseFormValidated,
   informationsDeclarantFormValidated,
   declarationFormValidated,
+  onClose,
 }: Props) {
   const listStyles = {
     "@media (max-width: 1279px)": {
       li: {
-        marginTop: "0 !important",
+        display: "flex",
       },
       a: {
         fontSize: "13px !important",
-      },
-      "li:not(:last-child)": {
-        marginRight: 4,
       },
     },
   }
@@ -149,8 +150,8 @@ function Menu({
       as="nav"
       role="navigation"
       id="navigation"
-      py={{ base: 4, xl: 8 }}
-      px={4}
+      py={{ base: 0, md: 4, xl: 8 }}
+      px={{ base: 0, md: 4, xl: 8 }}
       sx={{
         position: "sticky",
         top: "0",
@@ -165,17 +166,23 @@ function Menu({
             },
           }) => (
             <React.Fragment>
-              <CustomNavLink to={`/simulateur/${code}`} title="Vos informations" activeOnlyWhenExact={true} />
+              <CustomNavLink
+                to={`/simulateur/${code}`}
+                title="Vos informations"
+                activeOnlyWhenExact={true}
+                onClick={onClose}
+              />
               <Heading as="div" size="sm" mb={3} mt={4}>
                 Calcul de l'index
               </Heading>
-              <List spacing={3} sx={listStyles}>
+              <List spacing={2} sx={listStyles}>
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}/informations`}
                     title="Informations calcul"
                     label="et période de référence"
                     valid={informationsFormValidated}
+                    onClick={onClose}
                   />
                 </ListItem>
                 <ListItem>
@@ -185,6 +192,7 @@ function Menu({
                     label="pris en compte"
                     valid={effectifFormValidated}
                     disabled={!periodeSuffisante}
+                    onClick={onClose}
                   />
                 </ListItem>
                 <ListItem>
@@ -194,6 +202,7 @@ function Menu({
                     label="écart de rémunération"
                     valid={indicateurUnFormValidated}
                     disabled={!periodeSuffisante}
+                    onClick={onClose}
                   />
                 </ListItem>
                 {(trancheEffectifs !== "50 à 250" && (
@@ -205,6 +214,7 @@ function Menu({
                         label="écart de taux d'augmentation"
                         valid={indicateurDeuxFormValidated}
                         disabled={!periodeSuffisante}
+                        onClick={onClose}
                       />
                     </ListItem>
                     <ListItem>
@@ -214,6 +224,7 @@ function Menu({
                         label="écart de taux de promotion"
                         valid={indicateurTroisFormValidated}
                         disabled={!periodeSuffisante}
+                        onClick={onClose}
                       />
                     </ListItem>
                   </Fragment>
@@ -225,6 +236,7 @@ function Menu({
                       label="écart de taux d'augmentation"
                       valid={indicateurDeuxTroisFormValidated}
                       disabled={!periodeSuffisante}
+                      onClick={onClose}
                     />
                   </ListItem>
                 )}
@@ -235,6 +247,7 @@ function Menu({
                     label="retour congé maternité"
                     valid={indicateurQuatreFormValidated}
                     disabled={!periodeSuffisante}
+                    onClick={onClose}
                   />
                 </ListItem>
                 <ListItem>
@@ -244,11 +257,12 @@ function Menu({
                     label="hautes rémunérations"
                     valid={indicateurCinqFormValidated}
                     disabled={!periodeSuffisante}
+                    onClick={onClose}
                   />
                 </ListItem>
 
                 <ListItem>
-                  <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="Récapitulatif" />
+                  <CustomNavLink to={`/simulateur/${code}/recapitulatif`} title="Récapitulatif" onClick={onClose} />
                 </ListItem>
               </List>
               <Heading as="div" size="sm" mb={2} mt={4}>
@@ -260,6 +274,7 @@ function Menu({
                     to={`/simulateur/${code}/informations-entreprise`}
                     title="Informations entreprise/UES"
                     valid={informationsEntrepriseFormValidated}
+                    onClick={onClose}
                   />
                 </ListItem>
                 <ListItem>
@@ -267,6 +282,7 @@ function Menu({
                     to={`/simulateur/${code}/informations-declarant`}
                     title="Informations déclarant"
                     valid={informationsDeclarantFormValidated}
+                    onClick={onClose}
                   />
                 </ListItem>
                 <ListItem>
@@ -274,6 +290,7 @@ function Menu({
                     to={`/simulateur/${code}/declaration`}
                     title="Déclaration"
                     valid={declarationFormValidated}
+                    onClick={onClose}
                   />
                 </ListItem>
               </List>
