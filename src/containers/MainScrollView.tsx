@@ -19,6 +19,7 @@ const MainScrollView: FunctionComponent<MainScrollViewProps> = ({ children, stat
   const menu = (
     <Menu
       trancheEffectifs={state ? state.informations.trancheEffectifs : "50 à 250"}
+      periodeSuffisante={state ? state.informations.periodeSuffisante : undefined}
       informationsFormValidated={state ? state.informations.formValidated : "None"}
       effectifFormValidated={state ? state.effectif.formValidated : "None"}
       indicateurUnFormValidated={state ? state.indicateurUn.formValidated : "None"}

@@ -1,5 +1,6 @@
 import React from "react"
 import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
+import { useCheckTokenInURL } from "../components/AuthContext"
 import { ActionType, AppState } from "../globals"
 import { postIndicatorsDatas } from "../utils/api"
 
@@ -20,6 +21,8 @@ interface ResetPageProps extends RouteComponentProps {
 function ResetPage({ dispatch, state }: ResetPageProps): null {
   const history = useHistory()
   const location = useLocation()
+
+  useCheckTokenInURL()
 
   React.useEffect(() => {
     dispatch({ type: "resetState" })

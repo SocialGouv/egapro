@@ -4,7 +4,8 @@ export type AppState = {
     nomEntreprise: string
     trancheEffectifs: TrancheEffectifs
     anneeDeclaration: number | undefined
-    finPeriodeReference: string
+    finPeriodeReference?: string
+    periodeSuffisante: boolean | undefined
   }
   effectif: {
     formValidated: FormState
@@ -57,6 +58,7 @@ export type AppState = {
     departement: string
     adresse: string
     codePostal: string
+    codePays: string
     commune: string
     structure: Structure
     nomUES: string
@@ -239,7 +241,8 @@ export type ActionInformationsSimulationData = {
   nomEntreprise: string
   trancheEffectifs: TrancheEffectifs
   anneeDeclaration: number | undefined
-  finPeriodeReference: string
+  finPeriodeReference?: string
+  periodeSuffisante: boolean | undefined
 }
 
 export type ActionEffectifData = {
@@ -373,6 +376,7 @@ export type ActionInformationsEntrepriseData = {
   departement: string
   adresse: string
   codePostal: string
+  codePays: string
   commune: string
   structure: Structure
   nomUES: string
@@ -518,6 +522,7 @@ export type EntrepriseType = {
   adresse?: string
   commune?: string
   code_postal?: string
+  code_pays?: string
 }
 
 export type AlertMessageType = {

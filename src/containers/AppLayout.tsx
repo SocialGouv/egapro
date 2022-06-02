@@ -23,6 +23,7 @@ import { AuthContextProvider, useUser } from "../components/AuthContext"
 import Footer from "../components/Footer"
 import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
 import ResetPage from "../views/ResetPage"
+import GenererTokenUtilisateurPage from "../views/private/GenererTokenUtilisateurPage"
 
 interface Props {
   state: AppState | undefined
@@ -63,6 +64,9 @@ function DashboardRoutes() {
       </PrivateRoute>
       <PrivateRoute path="/tableauDeBord/gerer-utilisateurs" staffOnly exact>
         <GererUtilisateursPage />
+      </PrivateRoute>
+      <PrivateRoute path="/tableauDeBord/generer-token-utilisateur" staffOnly exact>
+        <GenererTokenUtilisateurPage />
       </PrivateRoute>
       <PrivateRoute path="/tableauDeBord/mon-profil" exact>
         <MonProfil />

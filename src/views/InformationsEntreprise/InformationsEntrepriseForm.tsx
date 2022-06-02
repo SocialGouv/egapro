@@ -15,7 +15,7 @@ import {
   EntrepriseType,
 } from "../../globals"
 
-import { mustBeNumber, parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
+import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 
 import ButtonAction from "../../components/ds/ButtonAction"
 import { IconEdit } from "../../components/ds/Icons"
@@ -30,10 +30,10 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import NombreEntreprises, { validator as validateNombreEntreprises } from "../../components/NombreEntreprises"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
-import { departementCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 import FormError from "../../components/FormError"
+import TextField from "../../components/TextField"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -46,57 +46,22 @@ const validate = (value: string) => {
   }
 }
 
-const validateCodePostal = (codePostal: string, departement: string) => {
-  let dptCode = departementCode[departement]
-  if (!dptCode) return undefined
-  if (["2A", "2B"].includes(dptCode)) {
-    dptCode = "20"
-  }
-  const requiredError = required(codePostal)
-  const mustBeNumberError = mustBeNumber(codePostal)
-  const mustBe5DigitsError = codePostal && codePostal.length !== 5
-  const mustBeInDepartementError = codePostal && !codePostal.startsWith(dptCode)
-  if (!requiredError && !mustBeNumberError && !mustBe5DigitsError && !mustBeInDepartementError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-      mustBeNumber: mustBeNumberError,
-      mustBe5Digits: mustBe5DigitsError,
-      mustBeInDepartementError: mustBeInDepartementError,
-    }
-  }
-}
-
 const validateForm = ({
   nomEntreprise,
   siren,
   codeNaf,
-  region,
-  departement,
-  codePostal,
-  commune,
   structure,
   nomUES,
 }: {
   nomEntreprise: string
   siren: string
   codeNaf: string
-  region: string
-  departement: string
-  codePostal: string
-  commune: string
   structure: Structure
   nomUES: string
 }) => ({
   nomEntreprise: validate(nomEntreprise),
   siren: validate(siren),
   codeNaf: validate(codeNaf),
-  region: validate(region),
-  departement: validate(departement),
-  adresse: undefined, // address is not filled for some case returned by the API entreprise.
-  codePostal: validateCodePostal(codePostal, departement),
-  commune: validate(commune),
   structure: validate(structure),
   nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
 })
@@ -146,6 +111,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
     departement: informationsEntreprise.departement,
     adresse: informationsEntreprise.adresse,
     codePostal: informationsEntreprise.codePostal,
+    codePays: informationsEntreprise.codePays,
     commune: informationsEntreprise.commune,
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
@@ -162,6 +128,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       departement,
       adresse,
       codePostal,
+      codePays,
       commune,
       structure,
       nomUES,
@@ -177,6 +144,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       departement,
       adresse,
       codePostal,
+      codePays,
       commune,
       structure,
       nomUES,
@@ -216,7 +184,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ form, handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ form, handleSubmit, values, hasValidationErrors, submitFailed, errors }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
@@ -264,6 +232,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                     form.change("adresse", sirenData.adresse || "")
                     form.change("commune", sirenData.commune || "")
                     form.change("codePostal", sirenData.code_postal || "")
+                    form.change("codePays", sirenData.code_pays || "")
                   })
                 }
               />
@@ -283,9 +252,15 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
             <FakeInputGroup label="Adresse">{initialValues.adresse}</FakeInputGroup>
             <FakeInputGroup label="Code postal">{initialValues.codePostal}</FakeInputGroup>
             <FakeInputGroup label="Commune">{initialValues.commune}</FakeInputGroup>
+            <FakeInputGroup label="Code pays">{initialValues.codePays}</FakeInputGroup>
             {values.structure === "Unité Economique et Sociale (UES)" && (
               <>
-                <FakeInputGroup label="Nom de l'UES">{initialValues.nomUES}</FakeInputGroup>
+                <TextField
+                  label="Nom de l'UES"
+                  fieldName="nomUES"
+                  errorText="le nom de l'UES n'est pas valide"
+                  readOnly={readOnly}
+                />
                 <NombreEntreprises
                   fieldName="nombreEntreprises"
                   label="Nombre d'entreprises composant l'UES (le déclarant compris)"
