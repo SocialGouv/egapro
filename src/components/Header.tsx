@@ -127,7 +127,7 @@ const Header: FunctionComponent = () => {
                 <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
                   Menu
                 </MenuButton>
-                <MenuList>
+                <MenuList zIndex={400}>
                   <MenuGroup title="Mon compte">
                     {email ? (
                       <>
