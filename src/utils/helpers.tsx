@@ -100,15 +100,15 @@ export const messageMesureCorrection = (
     : ""
 }
 
-export const formatDataForAPI = (id: string, data: AppState) => {
+export const formatDataForAPI = (id: string, state: AppState) => {
   // Indicateurs
   const output = {
     id,
     source: "simulateur",
-    déclaration: buildDeclaration(data),
-    déclarant: buildDeclarant(data),
-    entreprise: buildEntreprise(data),
-    ...(data.informations.periodeSuffisante && { indicateurs: buildIndicateurs(data) }),
+    déclaration: buildDeclaration(state),
+    déclarant: buildDeclarant(state),
+    entreprise: buildEntreprise(state),
+    ...(state.informations.periodeSuffisante && { indicateurs: buildIndicateurs(state) }),
   }
 
   return output
@@ -369,8 +369,8 @@ const buildIndicateur5 = (data: AppState): any => {
   return indicateur5
 }
 
-// Build all infos from state, like noteIndex, note of each indicateur, effectifs, etc.
-export function buildSummaryFromState(state: AppState) {
+// Compute and gather all useful data from state, like noteIndex, note of each indicateur, effectifs, etc.
+export function computeValuesFromState(state: AppState) {
   const trancheEffectifs = state.informations.trancheEffectifs
 
   const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
@@ -391,8 +391,8 @@ export function buildSummaryFromState(state: AppState) {
     effectifEtEcartAugmentParGroupe,
     indicateurEcartAugmentation,
     indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
+    correctionMeasure: indicateurDeuxCorrectionMeasure,
     noteIndicateurDeux,
-    correctionMeasure: correctionMeasureIndicateurDeux,
   } = calculIndicateurDeux(state)
 
   const {
@@ -401,8 +401,8 @@ export function buildSummaryFromState(state: AppState) {
     effectifEtEcartPromoParGroupe,
     indicateurEcartPromotion,
     indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
+    correctionMeasure: indicateurTroisCorrectionMeasure,
     noteIndicateurTrois,
-    correctionMeasure: correctionMeasureIndicateurTrois,
   } = calculIndicateurTrois(state)
 
   const {
@@ -411,8 +411,10 @@ export function buildSummaryFromState(state: AppState) {
     indicateurEcartAugmentationPromotion,
     indicateurEcartNombreEquivalentSalaries,
     indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
+    noteEcartTaux: noteEcart,
+    noteEcartNombreSalaries: noteNombreSalaries,
+    correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
     noteIndicateurDeuxTrois,
-    correctionMeasure: correctionMeasureIndicateurDeuxTrois,
     tauxAugmentationPromotionHommes,
     tauxAugmentationPromotionFemmes,
     plusPetitNombreSalaries,
@@ -476,7 +478,7 @@ export function buildSummaryFromState(state: AppState) {
       indicateurEcartAugmentation,
       indicateurDeuxSexeSurRepresente,
       noteIndicateurDeux,
-      correctionMeasureIndicateurDeux,
+      indicateurDeuxCorrectionMeasure,
     },
 
     indicateurTrois: {
@@ -486,7 +488,7 @@ export function buildSummaryFromState(state: AppState) {
       indicateurEcartPromotion,
       indicateurTroisSexeSurRepresente,
       noteIndicateurTrois,
-      correctionMeasureIndicateurTrois,
+      indicateurTroisCorrectionMeasure,
     },
 
     indicateurDeuxTrois: {
@@ -496,7 +498,9 @@ export function buildSummaryFromState(state: AppState) {
       indicateurEcartNombreEquivalentSalaries,
       indicateurDeuxTroisSexeSurRepresente,
       noteIndicateurDeuxTrois,
-      correctionMeasureIndicateurDeuxTrois,
+      indicateurDeuxTroisCorrectionMeasure,
+      noteEcart,
+      noteNombreSalaries,
       tauxAugmentationPromotionHommes,
       tauxAugmentationPromotionFemmes,
       plusPetitNombreSalaries,

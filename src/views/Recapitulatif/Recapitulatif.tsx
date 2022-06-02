@@ -19,7 +19,7 @@ import RecapitulatifIndicateurDeuxTrois from "./RecapitulatifIndicateurDeuxTrois
 import RecapitulatifIndicateurQuatre from "./RecapitulatifIndicateurQuatre"
 import RecapitulatifIndicateurCinq from "./RecapitulatifIndicateurCinq"
 
-import { buildSummaryFromState } from "../../utils/helpers"
+import { computeValuesFromState } from "../../utils/helpers"
 interface RecapitulatifProps extends RouteComponentProps {
   state: AppState
 }
@@ -54,7 +54,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
       indicateurEcartAugmentation,
       indicateurDeuxSexeSurRepresente,
       noteIndicateurDeux,
-      correctionMeasureIndicateurDeux,
+      indicateurDeuxCorrectionMeasure,
     },
 
     indicateurTrois: {
@@ -64,7 +64,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
       indicateurEcartPromotion,
       indicateurTroisSexeSurRepresente,
       noteIndicateurTrois,
-      correctionMeasureIndicateurTrois,
+      indicateurTroisCorrectionMeasure,
     },
 
     indicateurDeuxTrois: {
@@ -74,7 +74,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
       indicateurEcartNombreEquivalentSalaries,
       indicateurDeuxTroisSexeSurRepresente,
       noteIndicateurDeuxTrois,
-      correctionMeasureIndicateurDeuxTrois,
+      indicateurDeuxTroisCorrectionMeasure,
       tauxAugmentationPromotionHommes,
       tauxAugmentationPromotionFemmes,
       plusPetitNombreSalaries,
@@ -87,7 +87,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
       indicateurNombreSalariesSexeSousRepresente,
       noteIndicateurCinq,
     },
-  } = buildSummaryFromState(state)
+  } = computeValuesFromState(state)
 
   return (
     <Page title="Récapitulatif des résultats de vos indicateurs">
@@ -127,7 +127,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
                   indicateurEcartAugmentation={indicateurEcartAugmentation}
                   indicateurSexeSurRepresente={indicateurDeuxSexeSurRepresente}
                   noteIndicateurDeux={noteIndicateurDeux}
-                  correctionMeasure={correctionMeasureIndicateurDeux}
+                  correctionMeasure={indicateurDeuxCorrectionMeasure}
                 />
                 <RecapitulatifIndicateurTrois
                   indicateurTroisFormValidated={state.indicateurTrois.formValidated}
@@ -137,7 +137,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
                   indicateurEcartPromotion={indicateurEcartPromotion}
                   indicateurSexeSurRepresente={indicateurTroisSexeSurRepresente}
                   noteIndicateurTrois={noteIndicateurTrois}
-                  correctionMeasure={correctionMeasureIndicateurTrois}
+                  correctionMeasure={indicateurTroisCorrectionMeasure}
                 />
               </>
             )) || (
@@ -149,7 +149,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
                 indicateurEcartNombreEquivalentSalaries={indicateurEcartNombreEquivalentSalaries}
                 indicateurSexeSurRepresente={indicateurDeuxTroisSexeSurRepresente}
                 noteIndicateurDeuxTrois={noteIndicateurDeuxTrois}
-                correctionMeasure={correctionMeasureIndicateurDeuxTrois}
+                correctionMeasure={indicateurDeuxTroisCorrectionMeasure}
                 tauxAugmentationPromotionHommes={tauxAugmentationPromotionHommes}
                 tauxAugmentationPromotionFemmes={tauxAugmentationPromotionFemmes}
                 plusPetitNombreSalaries={plusPetitNombreSalaries}

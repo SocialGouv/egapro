@@ -16,97 +16,85 @@ import {
   DeclarationEffectifData,
 } from "../../globals"
 
-import calculIndicateurUn, {
-  calculEcartTauxRemunerationParTrancheAgeCoef,
-  calculEcartTauxRemunerationParTrancheAgeCSP,
-} from "../../utils/calculsEgaProIndicateurUn"
-import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
-
-import InfoBlock from "../../components/ds/InfoBlock"
 import Page from "../../components/Page"
+import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 import DeclarationForm from "./DeclarationForm"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
-import totalNombreSalaries from "../../utils/totalNombreSalaries"
-import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
-import { formatDataForAPI } from "../../utils/helpers"
-import { logToSentry } from "../../utils/sentry"
 
+import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
+import { computeValuesFromState, formatDataForAPI } from "../../utils/helpers"
+import { logToSentry } from "../../utils/sentry"
 import { useTitle } from "../../utils/hooks"
 import { isFormValid } from "../../utils/formHelpers"
+import {
+  calculEcartTauxRemunerationParTrancheAgeCoef,
+  calculEcartTauxRemunerationParTrancheAgeCSP,
+} from "../../utils/calculsEgaProIndicateurUn"
+import { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
+import { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
 
-function buildHelpers(state: AppState) {
-  const trancheEffectifs = state.informations.trancheEffectifs
+/**
+ * Compute and gather all data used for validateDeclaration action in reducer.
+ */
+function computeActionPayloadFromState(state: AppState) {
+  const {
+    trancheEffectifs,
+    allIndicateurValid,
+    noteIndex,
+    totalPoint,
+    totalPointCalculable,
+    totalNombreSalariesHomme,
+    totalNombreSalariesFemme,
 
-  const { totalNombreSalariesHomme, totalNombreSalariesFemme } = totalNombreSalaries(state.effectif.nombreSalaries)
+    indicateurUn: {
+      effectifsIndicateurUnCalculable,
+      indicateurEcartRemuneration,
+      indicateurUnSexeSurRepresente,
+      noteIndicateurUn,
+    },
+
+    indicateurDeux: {
+      effectifsIndicateurDeuxCalculable,
+      indicateurEcartAugmentation,
+      indicateurDeuxSexeSurRepresente,
+      noteIndicateurDeux,
+      indicateurDeuxCorrectionMeasure,
+    },
+
+    indicateurTrois: {
+      effectifsIndicateurTroisCalculable,
+      indicateurEcartPromotion,
+      indicateurTroisSexeSurRepresente,
+      noteIndicateurTrois,
+      indicateurTroisCorrectionMeasure,
+    },
+
+    indicateurDeuxTrois: {
+      effectifsIndicateurDeuxTroisCalculable,
+      indicateurEcartAugmentationPromotion,
+      indicateurEcartNombreEquivalentSalaries,
+      indicateurDeuxTroisSexeSurRepresente,
+      noteIndicateurDeuxTrois,
+      indicateurDeuxTroisCorrectionMeasure,
+      noteEcart,
+      noteNombreSalaries,
+    },
+
+    indicateurQuatre: { indicateurQuatreCalculable, indicateurEcartNombreSalarieesAugmentees, noteIndicateurQuatre },
+
+    indicateurCinq: {
+      indicateurCinqSexeSousRepresente,
+      indicateurNombreSalariesSexeSousRepresente,
+      noteIndicateurCinq,
+    },
+  } = computeValuesFromState(state)
 
   const effectifData: DeclarationEffectifData = {
     nombreSalariesTotal: totalNombreSalariesFemme + totalNombreSalariesHomme,
   }
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurUnCalculable,
-    indicateurEcartRemuneration,
-    indicateurSexeSurRepresente: indicateurUnSexeSurRepresente,
-    noteIndicateurUn,
-  } = calculIndicateurUn(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxCalculable,
-    indicateurEcartAugmentation,
-    indicateurSexeSurRepresente: indicateurDeuxSexeSurRepresente,
-    correctionMeasure: indicateurDeuxCorrectionMeasure,
-    noteIndicateurDeux,
-  } = calculIndicateurDeux(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurTroisCalculable,
-    indicateurEcartPromotion,
-    indicateurSexeSurRepresente: indicateurTroisSexeSurRepresente,
-    correctionMeasure: indicateurTroisCorrectionMeasure,
-    noteIndicateurTrois,
-  } = calculIndicateurTrois(state)
-
-  const {
-    effectifsIndicateurCalculable: effectifsIndicateurDeuxTroisCalculable,
-    indicateurEcartAugmentationPromotion,
-    indicateurEcartNombreEquivalentSalaries,
-    indicateurSexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
-    noteEcartTaux: noteEcart,
-    noteEcartNombreSalaries: noteNombreSalaries,
-    correctionMeasure: indicateurDeuxTroisCorrectionMeasure,
-    noteIndicateurDeuxTrois,
-  } = calculIndicateurDeuxTrois(state)
-
-  const {
-    indicateurCalculable: indicateurQuatreCalculable,
-    indicateurEcartNombreSalarieesAugmentees,
-    noteIndicateurQuatre,
-  } = calculIndicateurQuatre(state)
-
-  const {
-    indicateurSexeSousRepresente: indicateurCinqSexeSousRepresente,
-    indicateurNombreSalariesSexeSousRepresente,
-    noteIndicateurCinq,
-  } = calculIndicateurCinq(state)
-
-  const allIndicateurValid =
-    (isFormValid(state.indicateurUn) ||
-      // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
-      (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
-    (trancheEffectifs !== "50 à 250"
-      ? (isFormValid(state.indicateurDeux) || !effectifsIndicateurDeuxCalculable) &&
-        (isFormValid(state.indicateurTrois) || !effectifsIndicateurTroisCalculable)
-      : isFormValid(state.indicateurDeuxTrois) || !effectifsIndicateurDeuxTroisCalculable) &&
-    isFormValid(state.indicateurQuatre) &&
-    isFormValid(state.indicateurCinq)
 
   const indicateurUnData: DeclarationIndicateurUnData = {
     nombreCoefficients: state.indicateurUn.csp ? undefined : state.indicateurUn.coefficient.length,
@@ -195,16 +183,6 @@ function buildHelpers(state: AppState) {
     noteFinale: noteIndicateurCinq,
   }
 
-  const { noteIndex, totalPoint, totalPointCalculable } = calculNoteIndex(
-    trancheEffectifs,
-    noteIndicateurUn,
-    noteIndicateurDeux,
-    noteIndicateurTrois,
-    noteIndicateurDeuxTrois,
-    noteIndicateurQuatre,
-    noteIndicateurCinq,
-  )
-
   return {
     trancheEffectifs,
     allIndicateurValid,
@@ -245,22 +223,19 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     history.push(`/nouvelle-simulation`)
   }, [history])
 
-  const helpers = buildHelpers(state)
+  const data = computeActionPayloadFromState(state)
 
   const {
     indicateurUnData,
     indicateurDeuxData,
     indicateurTroisData,
     indicateurDeuxTroisData,
-    indicateurQuatreData,
-    indicateurCinqData,
     trancheEffectifs,
     allIndicateurValid,
-    effectifData,
     noteIndex,
     totalPoint,
     totalPointCalculable,
-  } = helpers
+  } = data
 
   const validateDeclaration = (valid: FormState) => {
     if (valid === "Valid") {
@@ -272,16 +247,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
       return dispatch({
         type: "validateDeclaration",
         valid,
-        effectifData,
-        indicateurUnData,
-        indicateurDeuxData,
-        indicateurTroisData,
-        indicateurDeuxTroisData,
-        indicateurQuatreData,
-        indicateurCinqData,
-        noteIndex,
-        totalPoint,
-        totalPointCalculable,
+        ...data,
       })
     }
   }

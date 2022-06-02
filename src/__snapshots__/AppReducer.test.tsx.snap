@@ -400,6 +400,18 @@ Object {
     "siren": "1234",
     "structure": "Unité Economique et Sociale (UES)",
   },
+  "informationsProgressionCorrection": Object {
+    "datePublicationMesures": "",
+    "datePublicationObjectifs": "",
+    "formValidated": "None",
+    "modalitesPublicationObjectifsMesures": "",
+    "objectifIndicateur1": undefined,
+    "objectifIndicateur2": undefined,
+    "objectifIndicateur2et3": undefined,
+    "objectifIndicateur3": undefined,
+    "objectifIndicateur4": undefined,
+    "objectifIndicateur5": undefined,
+  },
 }
 `;
 
@@ -793,6 +805,18 @@ Object {
     "region": "",
     "siren": "",
     "structure": "Entreprise",
+  },
+  "informationsProgressionCorrection": Object {
+    "datePublicationMesures": "",
+    "datePublicationObjectifs": "",
+    "formValidated": "None",
+    "modalitesPublicationObjectifsMesures": "",
+    "objectifIndicateur1": undefined,
+    "objectifIndicateur2": undefined,
+    "objectifIndicateur2et3": undefined,
+    "objectifIndicateur3": undefined,
+    "objectifIndicateur4": undefined,
+    "objectifIndicateur5": undefined,
   },
 }
 `;

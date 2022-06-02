@@ -16,7 +16,7 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
 import ButtonAction from "../../components/ds/ButtonAction"
 import TextareaGroup from "../../components/ds/TextareaGroup"
-import { buildSummaryFromState } from "../../utils/helpers"
+import { computeValuesFromState } from "../../utils/helpers"
 
 const required_error = "Un objectif est requis pour cet indicateur"
 const invalid_type_error = "L'objectif doit être un nombre entre 75 et 100"
@@ -88,7 +88,7 @@ const InformationsProgressionCorrectionForm: FunctionComponent<InformationsProgr
     validateInformationsProgressionCorrection("Valid")
   }
 
-  const { noteIndex, trancheEffectifs } = buildSummaryFromState(state)
+  const { noteIndex, trancheEffectifs } = computeValuesFromState(state)
 
   // Helper for UI
   const typeIndex = !noteIndex ? "Impossible state" : noteIndex > 85 ? "85:100" : noteIndex >= 75 ? "75:85" : "0:75"
