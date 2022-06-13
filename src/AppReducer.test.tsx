@@ -972,18 +972,66 @@ describe("updateInformationsDeclarant", () => {
   })
 })
 
+describe("updateInformationsComplementaires", () => {
+  const action: ActionType = {
+    type: "updateInformationsComplementaires",
+    data: {
+      mesuresCorrection: "mmo",
+      datePublication: "01/02/2020",
+      lienPublication: "https://example.com",
+
+      modalitesPublication: "",
+      datePublicationMesures: "02/02/2020",
+      datePublicationObjectifs: "03/02/2020",
+      publicationSurSiteInternet: "false",
+      modalitesPublicationObjectifsMesures: "",
+      objectifIndicateurUn: 10,
+      objectifIndicateurDeux: 10,
+      objectifIndicateurTrois: 10,
+      objectifIndicateurQuatre: 10,
+      objectifIndicateurCinq: 10,
+    },
+  }
+
+  test("nothing undefined state", () => {
+    expect(AppReducer(stateUndefined, action)).toStrictEqual(undefined)
+  })
+
+  test("change default state", () => {
+    const { declaration, ...rest } = AppReducer(stateDefault, action) as AppState
+    const { declaration: declarationInitial, ...restInitial } = stateDefault as AppState
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
+  })
+
+  test("change complete state", () => {
+    const { declaration, ...rest } = AppReducer(stateComplete, action) as AppState
+    const { declaration: declarationInitial, ...restInitial } = stateComplete as AppState
+
+    expect(declaration).toStrictEqual({
+      ...declarationInitial,
+      ...action.data,
+    })
+    expect(rest).toStrictEqual(restInitial)
+  })
+})
+
 describe("updateDeclaration", () => {
   const action: ActionType = {
     type: "updateDeclaration",
     data: {
-      mesuresCorrection: "mmo",
+      // mesuresCorrection: "mmo",
       dateConsultationCSE: "01/02/2017",
-      datePublication: "01/02/2020",
-      lienPublication: "https://example.com",
+      // datePublication: "01/02/2020",
+      // lienPublication: "https://example.com",
 
       // TODO : modalitesPublication est obligatoire d'après la référence TS.
       // J'ajoute une valeur aléatoire pour respecter l'interface. À voir.
-      modalitesPublication: "",
+      // modalitesPublication: "",
       planRelance: false,
     },
   }

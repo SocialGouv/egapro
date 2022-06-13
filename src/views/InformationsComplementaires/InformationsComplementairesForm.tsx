@@ -22,6 +22,7 @@ import MesuresCorrection from "../../components/MesuresCorrection"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
 import RadiosBoolean from "../../components/RadiosBoolean"
+import { dateToString, parseDate } from "../../utils/date"
 
 const required_error = "Requis"
 const invalid_type_error = (min = 0, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
@@ -44,6 +45,21 @@ const objectifValidator = (originValue = 0, max: number, nonCalculable = false) 
         .refine((value) => Number(value) >= originValue && Number(value) <= max, {
           message: invalid_type_error(originValue, max),
         })
+
+/**
+ * Zod validator in relation to the publication dates and the end of reference period.
+ */
+const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date | undefined) =>
+  z.string().refine(
+    (value) => {
+      if (!finPeriodeReference) return true
+      const parsedDatePublication = parseDate(value)
+      return parsedDatePublication !== undefined && parsedDatePublication > finPeriodeReference
+    },
+    {
+      message: `La date ne peut précéder la fin de la période de référence (${dateToString(finPeriodeReference)})`,
+    },
+  )
 
 interface InformationsComplementairesFormProps {
   state: AppState
@@ -144,7 +160,13 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
   const indicateurQuatreNonCalculable = !indicateurQuatreCalculable
 
   // TODO: useCallback with state as dependency.
-  const FormInputs = (trancheEffectifs: TrancheEffectifs) => {
+  const FormInputs = ({
+    trancheEffectifs,
+    finPeriodeReference,
+  }: {
+    trancheEffectifs: TrancheEffectifs
+    finPeriodeReference: string | undefined
+  }) => {
     let augmentationInputs: Record<string, any> = {
       objectifIndicateurDeuxTrois: objectifValidator(
         noteIndicateurDeuxTrois,
@@ -166,6 +188,7 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
         ),
       }
     }
+    const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
 
     return z.object({
       objectifIndicateurUn: objectifValidator(
@@ -179,9 +202,12 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
         indicateurQuatreNonCalculable,
       ),
       objectifIndicateurCinq: objectifValidator(noteIndicateurCinq, MAX_NOTES_INDICATEURS["indicateurCinq"]),
-      datePublicationObjectifs: z.string(),
-      datePublicationMesures: z.string(),
+      datePublication: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+      datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+      datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
       mesuresCorrection: z.string(),
+      publicationSurSiteInternet: z.union([z.literal("true"), z.literal("false")]),
+
       ...augmentationInputs,
     })
   }
@@ -216,7 +242,9 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
     <Form
       onSubmit={onSubmit}
       initialValues={{ ...restInformationsComplementaires }}
-      validate={formValidator(FormInputs(trancheEffectifs))}
+      validate={formValidator(
+        FormInputs({ trancheEffectifs, finPeriodeReference: state.informations.finPeriodeReference }),
+      )}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value

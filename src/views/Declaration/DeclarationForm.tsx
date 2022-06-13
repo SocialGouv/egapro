@@ -16,7 +16,7 @@ import FormStack from "../../components/ds/FormStack"
 import { IconEdit } from "../../components/ds/Icons"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-import MesuresCorrection from "../../components/MesuresCorrection"
+// import MesuresCorrection from "../../components/MesuresCorrection"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import ErrorMessage from "../../components/ErrorMessage"
 import { hasFieldError } from "../../components/Input"
@@ -43,31 +43,32 @@ const validateForm = ({
   periodeSuffisante: boolean | undefined
 }) => {
   return ({
-    datePublication,
-    publicationSurSiteInternet,
+    // datePublication,
+    // publicationSurSiteInternet,
     planRelance,
   }: {
-    datePublication: string
-    publicationSurSiteInternet?: string
+    // datePublication: string
+    // publicationSurSiteInternet?: string
     planRelance: string | undefined
   }) => {
     // Make sure we don't invalidate the form if the field `datePublication`
     // isn't present on the form (because the index can't be calculated).
-    if (!datePublication || !periodeSuffisante) return
-    const parsedDatePublication = parseDate(datePublication)
-    const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
+    // if (!datePublication || !periodeSuffisante) return
+    if (!periodeSuffisante) return
+    // const parsedDatePublication = parseDate(datePublication)
+    // const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
 
     return {
-      datePublication:
-        parsedDatePublication !== undefined &&
-        parsedFinPeriodeReference !== undefined &&
-        parsedDatePublication > parsedFinPeriodeReference
-          ? undefined
-          : {
-              correspondanceFinPeriodeReference: `La date ne peut précéder la fin de la période de référence (${finPeriodeReference})`,
-            },
-      publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
+      // datePublication:
+      //   parsedDatePublication !== undefined &&
+      //   parsedFinPeriodeReference !== undefined &&
+      //   parsedDatePublication > parsedFinPeriodeReference
+      //     ? undefined
+      //     : {
+      //         correspondanceFinPeriodeReference: `La date ne peut précéder la fin de la période de référence (${finPeriodeReference})`,
+      //       },
+      // publicationSurSiteInternet:
+      //   publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
       planRelance:
         anneeDeclaration && anneeDeclaration >= 2021 && planRelance === undefined
           ? "Il vous faut indiquer si vous avez bénéficié du plan de relance"
@@ -103,41 +104,41 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const readOnly = isFormValid(state.declaration) && !declaring
 
   const initialValues = {
-    mesuresCorrection: declaration.mesuresCorrection,
+    // mesuresCorrection: declaration.mesuresCorrection,
     cseMisEnPlace:
       declaration.cseMisEnPlace !== undefined ? parseBooleanStateValue(declaration.cseMisEnPlace) : undefined,
     dateConsultationCSE: declaration.dateConsultationCSE,
-    datePublication: declaration.datePublication,
-    publicationSurSiteInternet:
-      declaration.publicationSurSiteInternet !== undefined
-        ? parseBooleanStateValue(declaration.publicationSurSiteInternet)
-        : undefined,
-    lienPublication: declaration.lienPublication,
-    modalitesPublication: declaration.modalitesPublication,
+    // datePublication: declaration.datePublication,
+    // publicationSurSiteInternet:
+    //   declaration.publicationSurSiteInternet !== undefined
+    //     ? parseBooleanStateValue(declaration.publicationSurSiteInternet)
+    //     : undefined,
+    // lienPublication: declaration.lienPublication,
+    // modalitesPublication: declaration.modalitesPublication,
     planRelance: declaration.planRelance !== undefined ? parseBooleanStateValue(declaration.planRelance) : undefined,
   }
 
   const saveForm = (formData: any) => {
     const {
-      mesuresCorrection,
+      // mesuresCorrection,
       cseMisEnPlace,
       dateConsultationCSE,
-      datePublication,
-      publicationSurSiteInternet,
-      lienPublication,
-      modalitesPublication,
+      // datePublication,
+      // publicationSurSiteInternet,
+      // lienPublication,
+      // modalitesPublication,
       planRelance,
     } = formData
 
     updateDeclaration({
-      mesuresCorrection,
+      // mesuresCorrection,
       cseMisEnPlace: cseMisEnPlace !== undefined ? parseBooleanFormValue(cseMisEnPlace) : undefined,
       dateConsultationCSE,
-      datePublication,
-      publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
-      lienPublication,
-      modalitesPublication,
+      // datePublication,
+      // publicationSurSiteInternet:
+      //   publicationSurSiteInternet !== undefined ? parseBooleanFormValue(publicationSurSiteInternet) : undefined,
+      // lienPublication,
+      // modalitesPublication,
       planRelance: parseBooleanFormValue(planRelance),
     })
   }
@@ -194,13 +195,13 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             {((submitFailed && hasValidationErrors) || Boolean(apiError)) && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            {noteIndex !== undefined && noteIndex < 75 && (
+            {/* {noteIndex !== undefined && noteIndex < 75 && (
               <MesuresCorrection
                 label="Mesures de correction prévues à l'article D. 1142-6"
                 name="mesuresCorrection"
                 readOnly={readOnly}
               />
-            )}
+            )} */}
             {!indicateurUnParCSP && (
               <>
                 {state.informationsEntreprise.structure === "Entreprise" && (

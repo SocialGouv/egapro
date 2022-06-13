@@ -81,25 +81,28 @@ export type AppState = {
     objectifIndicateurDeuxTrois?: number
     objectifIndicateurQuatre?: number
     objectifIndicateurCinq?: number
-    datePublicationObjectifs: string
+    datePublicationObjectifs?: string
     datePublicationMesures?: string
     //siteInternetPublicationObjectifsMesures: string
     modalitesPublicationObjectifsMesures?: string
   }
   declaration: {
     formValidated: FormState
-    mesuresCorrection: string
     cseMisEnPlace: boolean | undefined
     dateConsultationCSE: string
-    datePublication: string
-    publicationSurSiteInternet: boolean | undefined
-    lienPublication: string
     planRelance: boolean | undefined
-    modalitesPublication: string
-    dateDeclaration: string
     noteIndex: number | undefined
     totalPoint: number
     totalPointCalculable: number
+
+    // Tous les champs suivants sont maintenant pris en charge par la page InformationsComplémentaire.
+    // Mais ils sont laissés dans la propriété declaration pour compatibilité.
+    mesuresCorrection: string
+    datePublication: string
+    publicationSurSiteInternet: boolean | undefined
+    lienPublication: string
+    modalitesPublication: string
+    dateDeclaration: string
   }
 }
 
@@ -421,7 +424,7 @@ export type ActionInformationsComplementairesData = {
   objectifIndicateurQuatre?: number
   objectifIndicateurCinq?: number
   datePublication: string
-  publicationSurSiteInternet?: string | undefined
+  publicationSurSiteInternet: string
   lienPublication: string
   modalitesPublication: string
   mesuresCorrection: string
@@ -435,11 +438,11 @@ export type ActionDeclarationData = {
   dateConsultationCSE: string
   planRelance: boolean | undefined
 
-  mesuresCorrection: string
-  datePublication: string
-  publicationSurSiteInternet?: boolean | undefined
-  lienPublication: string
-  modalitesPublication: string
+  // mesuresCorrection: string
+  // datePublication: string
+  // publicationSurSiteInternet?: boolean | undefined
+  // lienPublication: string
+  // modalitesPublication: string
 }
 
 export type ActionEmailDeclarantData = {

@@ -459,14 +459,25 @@ const actionUpdateInformationsDeclarant: ActionType = {
 const actionUpdateDeclaration: ActionType = {
   type: "updateDeclaration",
   data: {
-    mesuresCorrection: "mmo",
+    // mesuresCorrection: "mmo",
     cseMisEnPlace: true,
     dateConsultationCSE: "01/02/2019",
+    // datePublication: "01/02/2020",
+    // publicationSurSiteInternet: true,
+    // lienPublication: "https://example.com",
+    // modalitesPublication: "",
+    planRelance: undefined,
+  },
+}
+
+const actionUpdateInformationsComplementaires: ActionType = {
+  type: "updateInformationsComplementaires",
+  data: {
+    mesuresCorrection: "mmo",
     datePublication: "01/02/2020",
-    publicationSurSiteInternet: true,
+    publicationSurSiteInternet: "true",
     lienPublication: "https://example.com",
     modalitesPublication: "",
-    planRelance: undefined,
   },
 }
 
@@ -485,6 +496,7 @@ const stateDefault = flow(
   reducer(actionUpdateIndicateurCinq),
   reducer(actionUpdateInformationsEntreprise),
   reducer(actionUpdateInformationsDeclarant),
+  reducer(actionUpdateInformationsComplementaires),
   reducer(actionUpdateDeclaration),
 )(undefined)
 

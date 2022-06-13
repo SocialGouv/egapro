@@ -568,11 +568,47 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
       }
     }
     case "updateInformationsComplementaires": {
+      const {
+        objectifIndicateurUn,
+        objectifIndicateurDeux,
+        objectifIndicateurTrois,
+        objectifIndicateurDeuxTrois,
+        objectifIndicateurQuatre,
+        objectifIndicateurCinq,
+        datePublicationObjectifs,
+        datePublicationMesures,
+        modalitesPublicationObjectifsMesures,
+
+        datePublication,
+        publicationSurSiteInternet,
+        lienPublication,
+        modalitesPublication,
+        mesuresCorrection,
+      } = action.data
+
       return {
         ...state,
         informationsComplementaires: {
           ...state.informationsComplementaires,
-          ...action.data,
+          objectifIndicateurUn,
+          objectifIndicateurDeux,
+          objectifIndicateurTrois,
+          objectifIndicateurDeuxTrois,
+          objectifIndicateurQuatre,
+          objectifIndicateurCinq,
+          datePublicationObjectifs,
+          datePublicationMesures,
+          modalitesPublicationObjectifsMesures,
+        },
+        declaration: {
+          ...state.declaration,
+          datePublication,
+          // TODO : vérifier que la transformation en vrai booléen fonctionne.
+          publicationSurSiteInternet:
+            publicationSurSiteInternet === "true" ? true : publicationSurSiteInternet === "false" ? false : undefined,
+          lienPublication,
+          modalitesPublication,
+          mesuresCorrection,
         },
       }
     }
