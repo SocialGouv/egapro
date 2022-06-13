@@ -73,14 +73,14 @@ export type AppState = {
     email: string
     acceptationCGU: boolean
   }
-  informationsProgressionCorrection: {
+  informationsComplementaires: {
     formValidated: FormState
-    objectifIndicateur1?: number
-    objectifIndicateur2?: number
-    objectifIndicateur3?: number
-    objectifIndicateur2et3?: number
-    objectifIndicateur4?: number
-    objectifIndicateur5?: number
+    objectifIndicateurUn?: number
+    objectifIndicateurDeux?: number
+    objectifIndicateurTrois?: number
+    objectifIndicateurDeuxTrois?: number
+    objectifIndicateurQuatre?: number
+    objectifIndicateurCinq?: number
     datePublicationObjectifs: string
     datePublicationMesures?: string
     //siteInternetPublicationObjectifsMesures: string
@@ -228,11 +228,11 @@ export type ActionType =
       valid: FormState
     }
   | {
-      type: "updateInformationsProgressionCorrection"
-      data: ActionInformationsProgressionCorrectionData
+      type: "updateInformationsComplementaires"
+      data: ActionInformationsComplementairesData
     }
   | {
-      type: "validateInformationsProgressionCorrection"
+      type: "validateInformationsComplementaires"
       valid: FormState
     }
   | {
@@ -413,28 +413,33 @@ export type ActionInformationsDeclarantData = {
   acceptationCGU: boolean
 }
 
-export type ActionInformationsProgressionCorrectionData = {
-  objectifIndicateur1?: number
-  objectifIndicateur2?: number
-  objectifIndicateur3?: number
-  objectifIndicateur2et3?: number
-  objectifIndicateur4?: number
-  objectifIndicateur5?: number
+export type ActionInformationsComplementairesData = {
+  objectifIndicateurUn?: number
+  objectifIndicateurDeux?: number
+  objectifIndicateurTrois?: number
+  objectifIndicateurDeuxTrois?: number
+  objectifIndicateurQuatre?: number
+  objectifIndicateurCinq?: number
+  datePublication: string
+  publicationSurSiteInternet?: string | undefined
+  lienPublication: string
+  modalitesPublication: string
+  mesuresCorrection: string
   datePublicationObjectifs?: string
   datePublicationMesures?: string
-  //siteInternetPublicationObjectifsMesures: string
   modalitesPublicationObjectifsMesures?: string
 }
 
 export type ActionDeclarationData = {
-  mesuresCorrection: string
   cseMisEnPlace?: boolean | undefined
   dateConsultationCSE: string
+  planRelance: boolean | undefined
+
+  mesuresCorrection: string
   datePublication: string
   publicationSurSiteInternet?: boolean | undefined
   lienPublication: string
   modalitesPublication: string
-  planRelance: boolean | undefined
 }
 
 export type ActionEmailDeclarantData = {

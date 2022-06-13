@@ -1,2 +1,0 @@
-import InformationsProgressionCorrection from "./InformationsProgressionCorrection"
-export default InformationsProgressionCorrection

@@ -126,14 +126,14 @@ const defaultState: AppState = {
     email: "",
     acceptationCGU: false,
   },
-  informationsProgressionCorrection: {
+  informationsComplementaires: {
     formValidated: "None",
-    objectifIndicateur1: undefined,
-    objectifIndicateur2: undefined,
-    objectifIndicateur3: undefined,
-    objectifIndicateur2et3: undefined,
-    objectifIndicateur4: undefined,
-    objectifIndicateur5: undefined,
+    objectifIndicateurUn: undefined,
+    objectifIndicateurDeux: undefined,
+    objectifIndicateurTrois: undefined,
+    objectifIndicateurDeuxTrois: undefined,
+    objectifIndicateurQuatre: undefined,
+    objectifIndicateurCinq: undefined,
     datePublicationObjectifs: "",
     datePublicationMesures: "",
     modalitesPublicationObjectifsMesures: "",
@@ -567,20 +567,20 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
         },
       }
     }
-    case "updateInformationsProgressionCorrection": {
+    case "updateInformationsComplementaires": {
       return {
         ...state,
-        informationsProgressionCorrection: {
-          ...state.informationsProgressionCorrection,
+        informationsComplementaires: {
+          ...state.informationsComplementaires,
           ...action.data,
         },
       }
     }
-    case "validateInformationsProgressionCorrection": {
+    case "validateInformationsComplementaires": {
       return {
         ...state,
-        informationsProgressionCorrection: {
-          ...state.informationsProgressionCorrection,
+        informationsComplementaires: {
+          ...state.informationsComplementaires,
           formValidated: action.valid,
         },
         declaration: {

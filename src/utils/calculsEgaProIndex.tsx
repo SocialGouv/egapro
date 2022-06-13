@@ -4,6 +4,15 @@ import { TrancheEffectifs } from "../globals"
 // Index //
 ///////////
 
+export const MAX_NOTES_INDICATEURS = {
+  indicateurUn: 40,
+  indicateurDeux: 35,
+  indicateurTrois: 15,
+  indicateurDeuxTrois: 35,
+  indicateurQuatre: 15,
+  indicateurCinq: 10,
+}
+
 export const calculNoteIndex = (
   trancheEffectifs: TrancheEffectifs,
   noteIndicateurUn: number | undefined,

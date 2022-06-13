@@ -112,7 +112,7 @@ interface Props {
   indicateurCinqFormValidated: FormState
   informationsEntrepriseFormValidated: FormState
   informationsDeclarantFormValidated: FormState
-  informationsProgressionCorrectionFormValidated: FormState
+  informationsComplementairesFormValidated: FormState
   declarationFormValidated: FormState
 }
 
@@ -129,7 +129,7 @@ function Menu({
   indicateurCinqFormValidated,
   informationsEntrepriseFormValidated,
   informationsDeclarantFormValidated,
-  informationsProgressionCorrectionFormValidated,
+  informationsComplementairesFormValidated,
   declarationFormValidated,
 }: Props) {
   const listStyles = {
@@ -274,7 +274,8 @@ function Menu({
                   <CustomNavLink
                     to={`/simulateur/${code}/informations-complementaires`}
                     title="Informations complémentaires"
-                    valid={informationsProgressionCorrectionFormValidated}
+                    valid={informationsComplementairesFormValidated}
+                    disabled={!periodeSuffisante}
                   />
                 </ListItem>
                 <ListItem>

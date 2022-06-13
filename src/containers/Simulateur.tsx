@@ -31,7 +31,7 @@ import Recapitulatif from "../views/Recapitulatif"
 import AskEmail from "../views/AskEmail"
 import { sirenIsFree } from "../utils/siren"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
-import InformationsProgressionCorrection from "../views/InformationsProgressionCorrection"
+import InformationsComplementaires from "../views/InformationsComplementaires"
 
 interface Props {
   state: AppState | undefined
@@ -208,7 +208,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
                 />
                 <Route
                   path="/simulateur/:code/informations-complementaires"
-                  render={(props) => <InformationsProgressionCorrection {...props} state={state} dispatch={dispatch} />}
+                  render={(props) => <InformationsComplementaires {...props} state={state} dispatch={dispatch} />}
                 />
                 <Route
                   path="/simulateur/:code/declaration"

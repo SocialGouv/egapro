@@ -13,8 +13,6 @@ import InputDateGroup from "../../components/ds/InputDateGroup"
 import ActionBar from "../../components/ActionBar"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
-import TextareaGroup from "../../components/ds/TextareaGroup"
-import InputGroup from "../../components/ds/InputGroup"
 import { IconEdit } from "../../components/ds/Icons"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
@@ -149,10 +147,10 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
     validateDeclaration("Valid")
   }
 
-  const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
+  // const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
 
-  const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
+  // const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
 
   const isUES = Boolean(state.informationsEntreprise.nomUES)
 
@@ -223,7 +221,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
               </>
             )}
 
-            {state.informations.periodeSuffisante && (
+            {/* {state.informations.periodeSuffisante && (
               <>
                 {(noteIndex !== undefined || after2020) && (
                   <>
@@ -275,9 +273,10 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                       ))}
                   </>
                 )}
-                {after2021 && <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />}
               </>
-            )}
+            )} */}
+
+            {after2021 && <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />}
             {readOnly && (
               <Text fontSize="sm" fontWeight="bold">
                 Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}
