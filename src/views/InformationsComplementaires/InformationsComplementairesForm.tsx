@@ -23,6 +23,7 @@ import InputDateGroup from "../../components/ds/InputDateGroup"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import { dateToString, parseDate } from "../../utils/date"
+import { FormInputs, parseBooleanFormValue } from "../../utils/formHelpers"
 
 const required_error = "Requis"
 const invalid_type_error = (min = 0, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
@@ -128,13 +129,30 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
   readOnly,
 }) => {
   // If formValidated is included in form, FormAutoSave as weird behavior... So we need to exclude it here.
-  const { formValidated, ...restInformationsComplementaires } = state.informationsComplementaires
+  const { formValidated, publicationSurSiteInternet, ...restInformationsComplementaires } =
+    state.informationsComplementaires
 
-  const saveForm = (data: ActionInformationsComplementairesData) => {
-    dispatch({ type: "updateInformationsComplementaires", data })
+  const initialValues = {
+    publicationSurSiteInternet: String(publicationSurSiteInternet),
+    ...restInformationsComplementaires,
   }
 
-  const onSubmit = (formData: ActionInformationsComplementairesData) => {
+  const saveForm = (data: FormInputs<ActionInformationsComplementairesData>) => {
+    console.log("dans saveForm")
+    const { publicationSurSiteInternet, ...restData } = data
+
+    dispatch({
+      type: "updateInformationsComplementaires",
+      data: {
+        publicationSurSiteInternet: parseBooleanFormValue(publicationSurSiteInternet),
+        ...restData,
+        lienPublication: publicationSurSiteInternet === "false" ? "" : data.lienPublication,
+        modalitesPublication: publicationSurSiteInternet === "true" ? "" : data.modalitesPublication,
+      },
+    })
+  }
+
+  const onSubmit = (formData: FormInputs<ActionInformationsComplementairesData>) => {
     dispatch({ type: "validateInformationsComplementaires", valid: "Valid" })
   }
 
@@ -190,26 +208,36 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
     }
     const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
 
-    return z.object({
-      objectifIndicateurUn: objectifValidator(
-        noteIndicateurUn,
-        MAX_NOTES_INDICATEURS["indicateurUn"],
-        indicateurUnNonCalculable,
-      ),
-      objectifIndicateurQuatre: objectifValidator(
-        noteIndicateurQuatre,
-        MAX_NOTES_INDICATEURS["indicateurQuatre"],
-        indicateurQuatreNonCalculable,
-      ),
-      objectifIndicateurCinq: objectifValidator(noteIndicateurCinq, MAX_NOTES_INDICATEURS["indicateurCinq"]),
-      datePublication: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-      datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-      datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-      mesuresCorrection: z.string(),
-      publicationSurSiteInternet: z.union([z.literal("true"), z.literal("false")]),
-
-      ...augmentationInputs,
-    })
+    return z
+      .object({
+        objectifIndicateurUn: objectifValidator(
+          noteIndicateurUn,
+          MAX_NOTES_INDICATEURS["indicateurUn"],
+          indicateurUnNonCalculable,
+        ),
+        objectifIndicateurQuatre: objectifValidator(
+          noteIndicateurQuatre,
+          MAX_NOTES_INDICATEURS["indicateurQuatre"],
+          indicateurQuatreNonCalculable,
+        ),
+        objectifIndicateurCinq: objectifValidator(noteIndicateurCinq, MAX_NOTES_INDICATEURS["indicateurCinq"]),
+        datePublication: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+        datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+        datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+        mesuresCorrection: z.string(),
+        publicationSurSiteInternet: z.union([z.literal("true"), z.literal("false")]),
+        lienPublication: z.string(),
+        modalitesPublication: z.string().optional(),
+        ...augmentationInputs,
+      })
+      .refine((val) => (val.publicationSurSiteInternet === "true" ? val.lienPublication !== "" : true), {
+        message: "erreur sur le champ lienPublication",
+        path: ["lienPublication"],
+      })
+      .refine((val) => (val.publicationSurSiteInternet === "false" ? val.modalitesPublication !== "" : true), {
+        message: "erreur sur le champ modalitesPublication",
+        path: ["modalitesPublication"],
+      })
   }
 
   // Helpers for UI
@@ -241,7 +269,7 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
   return (
     <Form
       onSubmit={onSubmit}
-      initialValues={{ ...restInformationsComplementaires }}
+      initialValues={initialValues}
       validate={formValidator(
         FormInputs({ trancheEffectifs, finPeriodeReference: state.informations.finPeriodeReference }),
       )}
@@ -252,6 +280,8 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
     >
       {({ handleSubmit, hasValidationErrors, submitFailed, values, errors }) => (
         <form onSubmit={handleSubmit}>
+          <pre>{JSON.stringify({ values }, null, 2)}</pre>
+          <pre>{JSON.stringify({ errors }, null, 2)}</pre>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (
@@ -271,7 +301,11 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
                 />
                 <RadiosBoolean
                   fieldName="publicationSurSiteInternet"
-                  value={values.publicationSurSiteInternet ? String(values.publicationSurSiteInternet) : undefined}
+                  value={
+                    values.publicationSurSiteInternet !== undefined
+                      ? String(values.publicationSurSiteInternet)
+                      : undefined
+                  }
                   readOnly={readOnly}
                   label={
                     after2020 ? (
@@ -282,7 +316,7 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
                   }
                 />
 
-                {values.publicationSurSiteInternet === "true" ? (
+                {values.publicationSurSiteInternet === "true" && (
                   <InputGroup
                     label={
                       after2020
@@ -293,7 +327,9 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
                     message={{ error: "Veuillez entrer une adresse internet" }}
                     isReadOnly={readOnly}
                   />
-                ) : (
+                )}
+
+                {values.publicationSurSiteInternet === "false" && (
                   <TextareaGroup
                     label={
                       after2020
@@ -443,13 +479,9 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
               </>
             )}
 
-            {state.declaration.publicationSurSiteInternet && (
+            {state.informationsComplementaires.publicationSurSiteInternet && (
               <>
-                <InputGroup
-                  label={siteWebLabel + " *"}
-                  fieldName="siteInternetPublicationObjectifsMesures"
-                  isReadOnly={true}
-                />
+                <InputGroup label={siteWebLabel} fieldName="lienPublication" isReadOnly={true} showError={false} />
                 <Text>{siteWebDetails}</Text>
               </>
             )}

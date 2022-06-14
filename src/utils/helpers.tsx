@@ -129,19 +129,19 @@ const buildDeclaration = (data: AppState): any => {
     const index = data.declaration.noteIndex
     if (index !== undefined || (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2020)) {
       declaration.publication = {
-        date: toISOString(data.declaration.datePublication),
+        date: toISOString(data.informationsComplementaires.datePublication),
       }
-      if (data.declaration.publicationSurSiteInternet) {
-        declaration.publication.url = data.declaration.lienPublication
+      if (data.informationsComplementaires.publicationSurSiteInternet) {
+        declaration.publication.url = data.informationsComplementaires.lienPublication
       } else {
-        declaration.publication.modalités = data.declaration.modalitesPublication
+        declaration.publication.modalités = data.informationsComplementaires.modalitesPublication
       }
     }
 
     if (index !== undefined) {
       declaration.index = index
       if (index < 75) {
-        declaration.mesures_correctives = data.declaration.mesuresCorrection
+        declaration.mesures_correctives = data.informationsComplementaires.mesuresCorrection
       }
     }
   }

@@ -475,7 +475,7 @@ const actionUpdateInformationsComplementaires: ActionType = {
   data: {
     mesuresCorrection: "mmo",
     datePublication: "01/02/2020",
-    publicationSurSiteInternet: "true",
+    publicationSurSiteInternet: true,
     lienPublication: "https://example.com",
     modalitesPublication: "",
   },

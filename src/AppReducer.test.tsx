@@ -983,7 +983,7 @@ describe("updateInformationsComplementaires", () => {
       modalitesPublication: "",
       datePublicationMesures: "02/02/2020",
       datePublicationObjectifs: "03/02/2020",
-      publicationSurSiteInternet: "false",
+      publicationSurSiteInternet: false,
       modalitesPublicationObjectifsMesures: "",
       objectifIndicateurUn: 10,
       objectifIndicateurDeux: 10,

@@ -137,17 +137,17 @@ const defaultState: AppState = {
     datePublicationObjectifs: "",
     datePublicationMesures: "",
     modalitesPublicationObjectifsMesures: "",
-  },
-  declaration: {
-    formValidated: "None",
     mesuresCorrection: "",
-    cseMisEnPlace: undefined,
-    dateConsultationCSE: "",
     publicationSurSiteInternet: undefined,
     datePublication: "",
     lienPublication: "",
-    planRelance: undefined,
     modalitesPublication: "",
+  },
+  declaration: {
+    formValidated: "None",
+    cseMisEnPlace: undefined,
+    dateConsultationCSE: "",
+    planRelance: undefined,
     dateDeclaration: "",
     noteIndex: undefined,
     totalPoint: 0,
@@ -599,13 +599,9 @@ function AppReducer(state: AppState | undefined, action: ActionType): AppState |
           datePublicationObjectifs,
           datePublicationMesures,
           modalitesPublicationObjectifsMesures,
-        },
-        declaration: {
-          ...state.declaration,
           datePublication,
           // TODO : vérifier que la transformation en vrai booléen fonctionne.
-          publicationSurSiteInternet:
-            publicationSurSiteInternet === "true" ? true : publicationSurSiteInternet === "false" ? false : undefined,
+          publicationSurSiteInternet,
           lienPublication,
           modalitesPublication,
           mesuresCorrection,

@@ -85,6 +85,13 @@ export type AppState = {
     datePublicationMesures?: string
     //siteInternetPublicationObjectifsMesures: string
     modalitesPublicationObjectifsMesures?: string
+
+    // Tous les champs suivants sont maintenant pris en charge par la page InformationsComplémentaire et non plus declaration.
+    mesuresCorrection: string
+    datePublication: string
+    publicationSurSiteInternet: boolean | undefined
+    lienPublication: string
+    modalitesPublication: string
   }
   declaration: {
     formValidated: FormState
@@ -94,14 +101,6 @@ export type AppState = {
     noteIndex: number | undefined
     totalPoint: number
     totalPointCalculable: number
-
-    // Tous les champs suivants sont maintenant pris en charge par la page InformationsComplémentaire.
-    // Mais ils sont laissés dans la propriété declaration pour compatibilité.
-    mesuresCorrection: string
-    datePublication: string
-    publicationSurSiteInternet: boolean | undefined
-    lienPublication: string
-    modalitesPublication: string
     dateDeclaration: string
   }
 }
@@ -424,7 +423,7 @@ export type ActionInformationsComplementairesData = {
   objectifIndicateurQuatre?: number
   objectifIndicateurCinq?: number
   datePublication: string
-  publicationSurSiteInternet: string
+  publicationSurSiteInternet: boolean | undefined
   lienPublication: string
   modalitesPublication: string
   mesuresCorrection: string
@@ -437,12 +436,6 @@ export type ActionDeclarationData = {
   cseMisEnPlace?: boolean | undefined
   dateConsultationCSE: string
   planRelance: boolean | undefined
-
-  // mesuresCorrection: string
-  // datePublication: string
-  // publicationSurSiteInternet?: boolean | undefined
-  // lienPublication: string
-  // modalitesPublication: string
 }
 
 export type ActionEmailDeclarantData = {

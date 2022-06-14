@@ -6,7 +6,6 @@ import { AppState, FormState, ActionDeclarationData } from "../../globals"
 import { resendReceipt } from "../../utils/api"
 import { displayMetaErrors } from "../../utils/form-error-helpers"
 import { isFormValid, parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
-import { parseDate } from "../../utils/date"
 import { logToSentry } from "../../utils/sentry"
 
 import InputDateGroup from "../../components/ds/InputDateGroup"
