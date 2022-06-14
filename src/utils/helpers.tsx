@@ -111,37 +111,52 @@ export const formatDataForAPI = (id: string, state: AppState) => {
     ...(state.informations.periodeSuffisante && { indicateurs: buildIndicateurs(state) }),
   }
 
+  // console.log(JSON.stringify({ output }, null, 2))
+
   return output
 }
 
 const buildDeclaration = (data: AppState): any => {
-  const declaration: any = {
+  const index = data.declaration.noteIndex
+  const {
+    datePublication,
+    lienPublication,
+    publicationSurSiteInternet,
+    modalitesPublication,
+    modalitesPublicationObjectifsMesures,
+    datePublicationObjectifs,
+    datePublicationMesures,
+    mesuresCorrection,
+  } = data.informationsComplementaires
+
+  let declaration: any = {
     année_indicateurs: data.informations.anneeDeclaration,
     période_suffisante: data.informations.periodeSuffisante,
-    ...(data.informations.finPeriodeReference && {
-      fin_période_référence: toISOString(data.informations.finPeriodeReference),
-    }),
-    ...(data.informations.periodeSuffisante && { points: data.declaration.totalPoint }),
-    ...(data.informations.periodeSuffisante && { points_calculables: data.declaration.totalPointCalculable }),
+    ...(index && { index }),
   }
 
   if (data.informations.periodeSuffisante) {
-    const index = data.declaration.noteIndex
     if (index !== undefined || (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2020)) {
-      declaration.publication = {
-        date: toISOString(data.informationsComplementaires.datePublication),
+      const publication = {
+        date: toISOString(datePublication),
+        ...(publicationSurSiteInternet && { url: lienPublication }),
+        ...(!publicationSurSiteInternet && { modalités: modalitesPublication }),
+        ...(modalitesPublicationObjectifsMesures && {
+          modalités_objectifs_mesures: modalitesPublicationObjectifsMesures,
+        }),
+        ...(datePublicationObjectifs && { date_publication_mesures: datePublicationObjectifs }),
+        ...(datePublicationMesures && { date_publication_objectifs: datePublicationMesures }),
       }
-      if (data.informationsComplementaires.publicationSurSiteInternet) {
-        declaration.publication.url = data.informationsComplementaires.lienPublication
-      } else {
-        declaration.publication.modalités = data.informationsComplementaires.modalitesPublication
-      }
-    }
 
-    if (index !== undefined) {
-      declaration.index = index
-      if (index < 75) {
-        declaration.mesures_correctives = data.informationsComplementaires.mesuresCorrection
+      declaration = {
+        ...declaration,
+        ...(data.informations.finPeriodeReference && {
+          fin_période_référence: toISOString(data.informations.finPeriodeReference),
+        }),
+        points: data.declaration.totalPoint,
+        points_calculables: data.declaration.totalPointCalculable,
+        ...(index !== undefined && index < 75 && { mesures_correctives: mesuresCorrection }),
+        publication,
       }
     }
   }
@@ -255,6 +270,11 @@ const buildIndicateur1 = (data: AppState): any => {
       },
     }))
   }
+
+  if (data.informationsComplementaires.objectifIndicateurUn) {
+    indicateur1.objectif_de_progression = data.informationsComplementaires.objectifIndicateurUn
+  }
+
   return indicateur1
 }
 
@@ -278,6 +298,11 @@ const buildIndicateur2 = (data: AppState): any => {
   if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur2.population_favorable = sexeSurRepresente
   }
+
+  if (data.informationsComplementaires.objectifIndicateurDeux) {
+    indicateur2.objectif_de_progression = data.informationsComplementaires.objectifIndicateurDeux
+  }
+
   return indicateur2
 }
 
@@ -301,6 +326,11 @@ const buildIndicateur3 = (data: AppState): any => {
   if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur3.population_favorable = sexeSurRepresente
   }
+
+  if (data.informationsComplementaires.objectifIndicateurTrois) {
+    indicateur3.objectif_de_progression = data.informationsComplementaires.objectifIndicateurTrois
+  }
+
   return indicateur3
 }
 
@@ -329,6 +359,11 @@ const buildIndicateur2et3 = (data: AppState): any => {
   if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur2et3.population_favorable = sexeSurRepresente
   }
+
+  if (data.informationsComplementaires.objectifIndicateurDeuxTrois) {
+    indicateur2et3.objectif_de_progression = data.informationsComplementaires.objectifIndicateurDeuxTrois
+  }
+
   return indicateur2et3
 }
 
@@ -345,6 +380,11 @@ const buildIndicateur4 = (data: AppState): any => {
     // @ts-ignore
     note: data.indicateurQuatre.noteFinale,
   }
+
+  if (data.informationsComplementaires.objectifIndicateurQuatre) {
+    indicateur4.objectif_de_progression = data.informationsComplementaires.objectifIndicateurQuatre
+  }
+
   return indicateur4
 }
 
@@ -366,6 +406,11 @@ const buildIndicateur5 = (data: AppState): any => {
   if (sexeSurRepresente && sexeSurRepresente !== "egalite") {
     indicateur5.population_favorable = sexeSurRepresente
   }
+
+  if (data.informationsComplementaires.objectifIndicateurCinq) {
+    indicateur5.objectif_de_progression = data.informationsComplementaires.objectifIndicateurCinq
+  }
+
   return indicateur5
 }
 

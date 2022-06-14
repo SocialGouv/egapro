@@ -146,8 +146,6 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
       data: {
         publicationSurSiteInternet: parseBooleanFormValue(publicationSurSiteInternet),
         ...restData,
-        lienPublication: publicationSurSiteInternet === "false" ? "" : data.lienPublication,
-        modalitesPublication: publicationSurSiteInternet === "true" ? "" : data.modalitesPublication,
       },
     })
   }
@@ -280,8 +278,6 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
     >
       {({ handleSubmit, hasValidationErrors, submitFailed, values, errors }) => (
         <form onSubmit={handleSubmit}>
-          <pre>{JSON.stringify({ values }, null, 2)}</pre>
-          <pre>{JSON.stringify({ errors }, null, 2)}</pre>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (

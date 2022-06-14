@@ -33,11 +33,11 @@ const validate = (value: string) => {
 }
 
 const validateForm = ({
-  finPeriodeReference,
+  // finPeriodeReference,
   anneeDeclaration,
   periodeSuffisante,
 }: {
-  finPeriodeReference: string | undefined
+  // finPeriodeReference: string | undefined
   anneeDeclaration: number | undefined
   periodeSuffisante: boolean | undefined
 }) => {
@@ -180,14 +180,14 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm({ finPeriodeReference, anneeDeclaration, periodeSuffisante })}
+      validate={validateForm({ anneeDeclaration, periodeSuffisante })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ handleSubmit, values, hasValidationErrors, submitFailed, errors }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack mt={6}>
