@@ -116,3 +116,11 @@ export function isFormValid(formState: { formValidated: string }) {
 export const isFieldHasError = (meta: FieldMetaState<string>): boolean =>
   (meta.error && meta.submitFailed) ||
   (meta.error && meta.touched && Object.values({ ...meta.error, required: false }).includes(true))
+
+/**
+ * Helper type because all inputs in form are considered string.
+ * So with this, we can infer name of properties and we set string as type for all of them.
+ */
+export type FormInputs<K> = {
+  [key in keyof K]: string
+}
