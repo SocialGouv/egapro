@@ -1,3 +1,4 @@
+import { omit, pick } from "lodash"
 import { genericFetch } from "./fetcher"
 
 const commonHeaders = {
@@ -78,7 +79,29 @@ const putResource = (pathname, body) => fetchResource("PUT", pathname, body)
 
 /////////////
 
-export const getIndicatorsDatas = (id) => getResource(`/simulation/${id}`)
+export const getIndicatorsDatas = async (id) => {
+  let simulationData = await getResource(`/simulation/${id}`)
+
+  // L'ancien format des simulations portaient des informations dans le champ declaration plutôt que informationsComplementaires.
+  // On corrige en amont pour ne plus s'en préoccuper.
+
+  const fields = [
+    "mesuresCorrection",
+    "datePublication",
+    "publicationSurSiteInternet",
+    "lienPublication",
+    "modalitesPublication",
+  ]
+
+  const dataFromDeclarationToMove = pick(simulationData.declaration, fields)
+  const dataFromDeclarationToKeep = omit(simulationData.declaration, fields)
+
+  return {
+    ...simulationData,
+    informationsComplementaires: { ...dataFromDeclarationToMove, ...simulationData.informationsComplementaires },
+    declaration: dataFromDeclarationToKeep,
+  }
+}
 
 export const postIndicatorsDatas = (data) => postResource("/simulation", data)
 
