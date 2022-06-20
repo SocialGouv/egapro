@@ -24,6 +24,7 @@ import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import { dateToString, parseDate } from "../../utils/date"
 import { FormInputs, parseBooleanFormValue } from "../../utils/formHelpers"
+import InfoBlock from "../../components/ds/InfoBlock"
 
 const required_error = "Requis"
 const invalid_type_error = (min = 0, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
@@ -74,6 +75,7 @@ type RowProgressionProps = {
   fieldName: string
   isReadOnly: boolean
   isDisabled: boolean
+
   min: number | undefined
   max: number
 }
@@ -84,11 +86,12 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
   fieldName,
   isReadOnly = false,
   isDisabled = false,
+
   min = 0,
   max,
 }) => {
   return (
-    <Grid templateColumns="250px 75px 75px" templateRows="1fr 2fr" gap={2} alignItems="center">
+    <Grid templateColumns="250px 80px 80px" templateRows="1fr 2fr" gap={2} alignItems="center">
       <GridItem />
       <GridItem>
         <Text fontSize="sm" textAlign="center">
@@ -107,17 +110,19 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
         </FakeInputGroup>
       </GridItem>
       <GridItem>
-        <InputGroup
-          label=""
-          fieldName={fieldName}
-          isReadOnly={isReadOnly}
-          isDisabled={isDisabled}
-          textAlign="center"
-          type="number"
-          min={min}
-          max={max}
-          showError={false}
-        />
+        {!isDisabled && (
+          <InputGroup
+            label=""
+            fieldName={fieldName}
+            isReadOnly={isReadOnly}
+            isDisabled={isDisabled}
+            textAlign="center"
+            type="number"
+            min={min}
+            max={max}
+            showError={false}
+          />
+        )}
       </GridItem>
     </Grid>
   )
@@ -138,7 +143,6 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
   }
 
   const saveForm = (data: FormInputs<ActionInformationsComplementairesData>) => {
-    console.log("dans saveForm")
     const { publicationSurSiteInternet, ...restData } = data
 
     dispatch({
@@ -154,6 +158,7 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
     dispatch({ type: "validateInformationsComplementaires", valid: "Valid" })
   }
 
+  // TODO: useCallback with state as dependency.
   const {
     noteIndex,
     trancheEffectifs,
@@ -179,9 +184,11 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
   const FormInputs = ({
     trancheEffectifs,
     finPeriodeReference,
+    noteIndex,
   }: {
     trancheEffectifs: TrancheEffectifs
     finPeriodeReference: string | undefined
+    noteIndex: number | undefined
   }) => {
     let augmentationInputs: Record<string, any> = {
       objectifIndicateurDeuxTrois: objectifValidator(
@@ -213,6 +220,7 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
           MAX_NOTES_INDICATEURS["indicateurUn"],
           indicateurUnNonCalculable,
         ),
+        ...augmentationInputs,
         objectifIndicateurQuatre: objectifValidator(
           noteIndicateurQuatre,
           MAX_NOTES_INDICATEURS["indicateurQuatre"],
@@ -226,7 +234,7 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
         publicationSurSiteInternet: z.union([z.literal("true"), z.literal("false")]),
         lienPublication: z.string(),
         modalitesPublication: z.string().optional(),
-        ...augmentationInputs,
+        modalitesPublicationObjectifsMesures: z.unknown(),
       })
       .refine((val) => (val.publicationSurSiteInternet === "true" ? val.lienPublication !== "" : true), {
         message: "erreur sur le champ lienPublication",
@@ -236,10 +244,23 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
         message: "erreur sur le champ modalitesPublication",
         path: ["modalitesPublication"],
       })
+      .refine(
+        (val) =>
+          !noteIndex
+            ? true
+            : noteIndex < 75 || (noteIndex < 85 && val.publicationSurSiteInternet === "false")
+            ? Boolean(val.modalitesPublicationObjectifsMesures)
+            : !val.modalitesPublicationObjectifsMesures,
+        {
+          message: "erreur sur champ modalitesPublicationObjectifsMesures",
+          path: ["modalitesPublicationObjectifsMesures"],
+        },
+      )
   }
 
   // Helpers for UI
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
+  const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
   const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
   const typeIndex = !noteIndex ? "Impossible state" : noteIndex > 85 ? "85:100" : noteIndex >= 75 ? "75:85" : "0:75"
 
@@ -257,9 +278,24 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
       ? "Pour rappel, les objectifs de progression et les mesures de correction doivent être publiés sur la même page du site internet que celle où figurent les résultats obtenus à chacun des indicateurs et le niveau de résultat à l'Index."
       : ""
 
-  const modaliteQuestion = `Préciser les modalités de communication des objectifs de progression ${
-    typeIndex === "0:75" ? "et des mesures de correction" : ""
-  } auprès de vos salariés`
+  // Make label for modaliteQuestion if needed.
+  const buildModaliteQuestion = (publicationSurSiteInternet: string | undefined) => {
+    let modaliteQuestion = ""
+
+    if (noteIndex && noteIndex < 85 && publicationSurSiteInternet !== undefined) {
+      let subDetail = ""
+      if (publicationSurSiteInternet === "true") {
+        if (noteIndex < 75) subDetail = "mesures de correction"
+      } else {
+        if (noteIndex < 75) subDetail = "objectifs de progression et des mesures de correction"
+        else if (noteIndex >= 75) subDetail = "objectifs de progression"
+      }
+
+      modaliteQuestion = `Préciser les modalités de communication des ${subDetail} auprès de vos salariés`
+    }
+
+    return modaliteQuestion
+  }
 
   if (!state.informations.periodeSuffisante)
     return <Text>Vous n'avez pas à remplir cette page car l'entreprise n'a pas au moins 12 mois d'existence.</Text>
@@ -269,7 +305,7 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
       onSubmit={onSubmit}
       initialValues={initialValues}
       validate={formValidator(
-        FormInputs({ trancheEffectifs, finPeriodeReference: state.informations.finPeriodeReference }),
+        FormInputs({ trancheEffectifs, finPeriodeReference: state.informations.finPeriodeReference, noteIndex }),
       )}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -279,6 +315,9 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
       {({ handleSubmit, hasValidationErrors, submitFailed, values, errors }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
+
+          {/* {JSON.stringify(errors, null, 2)}
+          {JSON.stringify(values, null, 2)} */}
           <FormStack>
             {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
@@ -340,155 +379,178 @@ const InformationsComplementairesForm: FunctionComponent<InformationsComplementa
               </>
             )}
 
-            {/* Objectifs de progression si index < 85 */}
-            {noteIndex !== undefined && noteIndex < 85 && (
-              <>
-                <Text fontWeight="semibold" fontSize="sm">
-                  Conformément à la loi n° 2020-1721 du 29 décembre 2020 de finances pour 2021 et aux articles L.
-                  1142-9-1 et D. 1142-6-1 du code du travail, indiquer{" "}
-                  <span style={{ textDecoration: "underline" }}>les objectifs de progression</span> fixés pour chaque
-                  indicateur pour lequel la note maximale n'a pas été atteinte :
-                </Text>
-                <RowProgression
-                  valueOrigin={
-                    indicateurUnNonCalculable
-                      ? "NC"
-                      : String(noteIndicateurUn) + "/" + MAX_NOTES_INDICATEURS["indicateurUn"]
-                  }
-                  isDisabled={indicateurUnNonCalculable || noteIndicateurUn === MAX_NOTES_INDICATEURS["indicateurUn"]}
-                  fieldName="objectifIndicateurUn"
-                  isReadOnly={readOnly || indicateurUnNonCalculable}
-                  min={noteIndicateurUn}
-                  max={MAX_NOTES_INDICATEURS["indicateurUn"]}
-                >
-                  Écart de rémunération objectif
-                </RowProgression>
-                {trancheEffectifs === "50 à 250" ? (
-                  <>
-                    <RowProgression
-                      valueOrigin={
-                        indicateurDeuxTroisNonCalculable
-                          ? "NC"
-                          : String(noteIndicateurDeuxTrois) + "/" + MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]
-                      }
-                      fieldName="objectifIndicateurDeuxTrois"
-                      isReadOnly={readOnly || indicateurDeuxTroisNonCalculable}
-                      isDisabled={
-                        indicateurDeuxTroisNonCalculable ||
-                        noteIndicateurDeuxTrois === MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]
-                      }
-                      min={noteIndicateurDeuxTrois}
-                      max={MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]}
-                    >
-                      Écart de taux d'augmentations individuelles
-                    </RowProgression>
-                  </>
-                ) : (
-                  <>
-                    <RowProgression
-                      valueOrigin={
-                        indicateurDeuxNonCalculable
-                          ? "NC"
-                          : String(noteIndicateurDeux) + "/" + MAX_NOTES_INDICATEURS["indicateurDeux"]
-                      }
-                      fieldName="objectifIndicateurDeux"
-                      isReadOnly={readOnly || indicateurDeuxNonCalculable}
-                      isDisabled={
-                        indicateurDeuxNonCalculable || noteIndicateurDeux === MAX_NOTES_INDICATEURS["indicateurDeux"]
-                      }
-                      min={noteIndicateurDeux}
-                      max={MAX_NOTES_INDICATEURS["indicateurDeux"]}
-                    >
-                      Écart de taux d'augmentations individuelles
-                    </RowProgression>
-
-                    <RowProgression
-                      valueOrigin={
-                        indicateurTroisNonCalculable
-                          ? "NC"
-                          : String(noteIndicateurTrois) + "/" + MAX_NOTES_INDICATEURS["indicateurTrois"]
-                      }
-                      fieldName="objectifIndicateurTrois"
-                      isReadOnly={readOnly || indicateurTroisNonCalculable}
-                      isDisabled={
-                        indicateurTroisNonCalculable || noteIndicateurTrois === MAX_NOTES_INDICATEURS["indicateurTrois"]
-                      }
-                      min={noteIndicateurTrois}
-                      max={MAX_NOTES_INDICATEURS["indicateurTrois"]}
-                    >
-                      Écart de taux de promotions
-                    </RowProgression>
-                  </>
-                )}
-                <>
-                  <RowProgression
-                    valueOrigin={
-                      indicateurQuatreNonCalculable
-                        ? "NC"
-                        : String(noteIndicateurQuatre) + "/" + MAX_NOTES_INDICATEURS["indicateurQuatre"]
-                    }
-                    fieldName="objectifIndicateurQuatre"
-                    isReadOnly={readOnly || indicateurQuatreNonCalculable}
-                    isDisabled={
-                      indicateurQuatreNonCalculable ||
-                      noteIndicateurQuatre === MAX_NOTES_INDICATEURS["indicateurQuatre"]
-                    }
-                    min={noteIndicateurQuatre}
-                    max={MAX_NOTES_INDICATEURS["indicateurQuatre"]}
-                  >
-                    Retour de congé maternité
-                  </RowProgression>
-                </>
-                <>
-                  <RowProgression
-                    valueOrigin={String(noteIndicateurCinq) + "/" + MAX_NOTES_INDICATEURS["indicateurCinq"]}
-                    fieldName="objectifIndicateurCinq"
-                    isReadOnly={readOnly}
-                    isDisabled={noteIndicateurCinq === MAX_NOTES_INDICATEURS["indicateurCinq"]}
-                    min={noteIndicateurCinq}
-                    max={MAX_NOTES_INDICATEURS["indicateurCinq"]}
-                  >
-                    Dix plus hautes rémunérations
-                  </RowProgression>
-                </>
-                <InputDateGroup
-                  fieldName="datePublicationObjectifs"
-                  label="Date de publication des objectifs de progression"
-                  isReadOnly={readOnly}
-                />
-              </>
-            )}
-
-            {/* Mesures de correction si index < 75 */}
+            {/* Mesures de correction si index < 75 - ce champ est historique et existe depuis des données 2019 */}
             {noteIndex !== undefined && noteIndex < 75 && (
               <>
+                <InfoBlock
+                  type="warning"
+                  text="Votre index étant inférieur à 75, veuillez renseigner les informations suivantes sur les mesures de correction."
+                />
+
                 <MesuresCorrection
                   label="Mesures de correction prévues à l'article D. 1142-6"
                   name="mesuresCorrection"
                   readOnly={readOnly}
                 />
-                <InputDateGroup
-                  fieldName="datePublicationMesures"
-                  label="Date de publication des mesures de correction"
-                  isReadOnly={readOnly}
-                />
               </>
             )}
 
-            {state.informationsComplementaires.publicationSurSiteInternet && (
+            {(noteIndex !== undefined || after2021) && (
               <>
-                <InputGroup label={siteWebLabel} fieldName="lienPublication" isReadOnly={true} showError={false} />
-                <Text>{siteWebDetails}</Text>
-              </>
-            )}
+                {/* Mesures de correction si index < 75 - ce champ est arrivé en 2022, pour des données 2021 */}
+                {noteIndex !== undefined && noteIndex < 75 && (
+                  <>
+                    <InputDateGroup
+                      fieldName="datePublicationMesures"
+                      label="Date de publication des mesures de correction"
+                      isReadOnly={readOnly}
+                    />
+                  </>
+                )}
 
-            {/* Modalités pour objectifs et/ou les mesures, si index < 85 */}
-            {noteIndex !== undefined && noteIndex < 85 && (
-              <TextareaGroup
-                label={modaliteQuestion}
-                fieldName="modalitesPublicationObjectifsMesures"
-                isReadOnly={readOnly}
-              />
+                {/* Objectifs de progression si index < 85 */}
+                {noteIndex !== undefined && noteIndex < 85 && (
+                  <>
+                    <InfoBlock
+                      type="warning"
+                      text="Votre index étant inférieur à 85, veuillez renseigner vos objectifs de progression pour les indicateurs calculables."
+                    />
+                    <Text fontWeight="semibold" fontSize="sm">
+                      Conformément à la loi n° 2020-1721 du 29 décembre 2020 de finances pour 2021 et aux articles L.
+                      1142-9-1 et D. 1142-6-1 du code du travail, indiquer{" "}
+                      <span style={{ textDecoration: "underline" }}>les objectifs de progression</span> fixés pour
+                      chaque indicateur pour lequel la note maximale n'a pas été atteinte :
+                    </Text>
+                    <RowProgression
+                      valueOrigin={
+                        indicateurUnNonCalculable
+                          ? "NC"
+                          : String(noteIndicateurUn) + "/" + MAX_NOTES_INDICATEURS["indicateurUn"]
+                      }
+                      fieldName="objectifIndicateurUn"
+                      isReadOnly={readOnly || indicateurUnNonCalculable}
+                      isDisabled={
+                        indicateurUnNonCalculable || noteIndicateurUn === MAX_NOTES_INDICATEURS["indicateurUn"]
+                      }
+                      min={noteIndicateurUn}
+                      max={MAX_NOTES_INDICATEURS["indicateurUn"]}
+                    >
+                      Écart de rémunération objectif
+                    </RowProgression>
+                    {trancheEffectifs === "50 à 250" ? (
+                      <>
+                        <RowProgression
+                          valueOrigin={
+                            indicateurDeuxTroisNonCalculable
+                              ? "NC"
+                              : String(noteIndicateurDeuxTrois) + "/" + MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]
+                          }
+                          fieldName="objectifIndicateurDeuxTrois"
+                          isReadOnly={readOnly || indicateurDeuxTroisNonCalculable}
+                          isDisabled={
+                            indicateurDeuxTroisNonCalculable ||
+                            noteIndicateurDeuxTrois === MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]
+                          }
+                          min={noteIndicateurDeuxTrois}
+                          max={MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]}
+                        >
+                          Écart de taux d'augmentations individuelles
+                        </RowProgression>
+                      </>
+                    ) : (
+                      <>
+                        <RowProgression
+                          valueOrigin={
+                            indicateurDeuxNonCalculable
+                              ? "NC"
+                              : String(noteIndicateurDeux) + "/" + MAX_NOTES_INDICATEURS["indicateurDeux"]
+                          }
+                          fieldName="objectifIndicateurDeux"
+                          isReadOnly={readOnly || indicateurDeuxNonCalculable}
+                          isDisabled={
+                            indicateurDeuxNonCalculable ||
+                            noteIndicateurDeux === MAX_NOTES_INDICATEURS["indicateurDeux"]
+                          }
+                          min={noteIndicateurDeux}
+                          max={MAX_NOTES_INDICATEURS["indicateurDeux"]}
+                        >
+                          Écart de taux d'augmentations individuelles
+                        </RowProgression>
+
+                        <RowProgression
+                          valueOrigin={
+                            indicateurTroisNonCalculable
+                              ? "NC"
+                              : String(noteIndicateurTrois) + "/" + MAX_NOTES_INDICATEURS["indicateurTrois"]
+                          }
+                          fieldName="objectifIndicateurTrois"
+                          isReadOnly={readOnly || indicateurTroisNonCalculable}
+                          isDisabled={
+                            indicateurTroisNonCalculable ||
+                            noteIndicateurTrois === MAX_NOTES_INDICATEURS["indicateurTrois"]
+                          }
+                          min={noteIndicateurTrois}
+                          max={MAX_NOTES_INDICATEURS["indicateurTrois"]}
+                        >
+                          Écart de taux de promotions
+                        </RowProgression>
+                      </>
+                    )}
+                    <>
+                      <RowProgression
+                        valueOrigin={
+                          indicateurQuatreNonCalculable
+                            ? "NC"
+                            : String(noteIndicateurQuatre) + "/" + MAX_NOTES_INDICATEURS["indicateurQuatre"]
+                        }
+                        fieldName="objectifIndicateurQuatre"
+                        isReadOnly={readOnly || indicateurQuatreNonCalculable}
+                        isDisabled={
+                          indicateurQuatreNonCalculable ||
+                          noteIndicateurQuatre === MAX_NOTES_INDICATEURS["indicateurQuatre"]
+                        }
+                        min={noteIndicateurQuatre}
+                        max={MAX_NOTES_INDICATEURS["indicateurQuatre"]}
+                      >
+                        Retour de congé maternité
+                      </RowProgression>
+                    </>
+                    <>
+                      <RowProgression
+                        valueOrigin={String(noteIndicateurCinq) + "/" + MAX_NOTES_INDICATEURS["indicateurCinq"]}
+                        fieldName="objectifIndicateurCinq"
+                        isReadOnly={readOnly}
+                        isDisabled={noteIndicateurCinq === MAX_NOTES_INDICATEURS["indicateurCinq"]}
+                        min={noteIndicateurCinq}
+                        max={MAX_NOTES_INDICATEURS["indicateurCinq"]}
+                      >
+                        Dix plus hautes rémunérations
+                      </RowProgression>
+                    </>
+                    <InputDateGroup
+                      fieldName="datePublicationObjectifs"
+                      label="Date de publication des objectifs de progression"
+                      isReadOnly={readOnly}
+                    />
+                  </>
+                )}
+
+                {state.informationsComplementaires.publicationSurSiteInternet && (
+                  <>
+                    <InputGroup label={siteWebLabel} fieldName="lienPublication" isReadOnly={true} showError={false} />
+                    <Text>{siteWebDetails}</Text>
+                  </>
+                )}
+
+                {/* Modalités pour objectifs et/ou les mesures, si index < 85 */}
+                {noteIndex !== undefined && noteIndex < 85 && (
+                  <TextareaGroup
+                    label={buildModaliteQuestion(values.publicationSurSiteInternet)}
+                    fieldName="modalitesPublicationObjectifsMesures"
+                    isReadOnly={readOnly}
+                  />
+                )}
+              </>
             )}
           </FormStack>
 
