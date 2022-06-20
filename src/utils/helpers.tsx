@@ -144,8 +144,8 @@ const buildDeclaration = (data: AppState): any => {
         ...(modalitesPublicationObjectifsMesures && {
           modalités_objectifs_mesures: modalitesPublicationObjectifsMesures,
         }),
-        ...(datePublicationObjectifs && { date_publication_mesures: datePublicationObjectifs }),
-        ...(datePublicationMesures && { date_publication_objectifs: datePublicationMesures }),
+        ...(datePublicationObjectifs && { date_publication_mesures: toISOString(datePublicationObjectifs) }),
+        ...(datePublicationMesures && { date_publication_objectifs: toISOString(datePublicationMesures) }),
       }
 
       declaration = {
@@ -272,7 +272,7 @@ const buildIndicateur1 = (data: AppState): any => {
   }
 
   if (data.informationsComplementaires.objectifIndicateurUn) {
-    indicateur1.objectif_de_progression = data.informationsComplementaires.objectifIndicateurUn
+    indicateur1.objectif_de_progression = Number(data.informationsComplementaires.objectifIndicateurUn)
   }
 
   return indicateur1
@@ -300,7 +300,7 @@ const buildIndicateur2 = (data: AppState): any => {
   }
 
   if (data.informationsComplementaires.objectifIndicateurDeux) {
-    indicateur2.objectif_de_progression = data.informationsComplementaires.objectifIndicateurDeux
+    indicateur2.objectif_de_progression = Number(data.informationsComplementaires.objectifIndicateurDeux)
   }
 
   return indicateur2
@@ -328,7 +328,7 @@ const buildIndicateur3 = (data: AppState): any => {
   }
 
   if (data.informationsComplementaires.objectifIndicateurTrois) {
-    indicateur3.objectif_de_progression = data.informationsComplementaires.objectifIndicateurTrois
+    indicateur3.objectif_de_progression = Number(data.informationsComplementaires.objectifIndicateurTrois)
   }
 
   return indicateur3
@@ -361,7 +361,7 @@ const buildIndicateur2et3 = (data: AppState): any => {
   }
 
   if (data.informationsComplementaires.objectifIndicateurDeuxTrois) {
-    indicateur2et3.objectif_de_progression = data.informationsComplementaires.objectifIndicateurDeuxTrois
+    indicateur2et3.objectif_de_progression = Number(data.informationsComplementaires.objectifIndicateurDeuxTrois)
   }
 
   return indicateur2et3
@@ -382,7 +382,7 @@ const buildIndicateur4 = (data: AppState): any => {
   }
 
   if (data.informationsComplementaires.objectifIndicateurQuatre) {
-    indicateur4.objectif_de_progression = data.informationsComplementaires.objectifIndicateurQuatre
+    indicateur4.objectif_de_progression = Number(data.informationsComplementaires.objectifIndicateurQuatre)
   }
 
   return indicateur4
@@ -408,7 +408,7 @@ const buildIndicateur5 = (data: AppState): any => {
   }
 
   if (data.informationsComplementaires.objectifIndicateurCinq) {
-    indicateur5.objectif_de_progression = data.informationsComplementaires.objectifIndicateurCinq
+    indicateur5.objectif_de_progression = Number(data.informationsComplementaires.objectifIndicateurCinq)
   }
 
   return indicateur5
