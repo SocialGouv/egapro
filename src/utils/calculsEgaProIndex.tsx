@@ -5,12 +5,12 @@ import { TrancheEffectifs } from "../globals"
 ///////////
 
 export const MAX_NOTES_INDICATEURS = {
-  indicateurUn: 40,
-  indicateurDeux: 35,
-  indicateurTrois: 15,
-  indicateurDeuxTrois: 35,
-  indicateurQuatre: 15,
-  indicateurCinq: 10,
+  indicateurUn: 40, // Indicateur écart de rémunération
+  indicateurDeux: 35, // Indicateur écart de taux d'augmentation individuelle hors promotion
+  indicateurTrois: 15, // Indicateur écart de taux de promotion
+  indicateurDeuxTrois: 35, // Indicateur écart de taux d'augmentation
+  indicateurQuatre: 15, // Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité
+  indicateurCinq: 10, // Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
 }
 
 export const calculNoteIndex = (
