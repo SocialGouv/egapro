@@ -17,6 +17,16 @@ const components = {
     },
 
     Input: {
+      sizes: {
+        sm: {
+          field: {
+            borderRadius: "base",
+          },
+          addon: {
+            borderRadius: "base",
+          },
+        },
+      },
       variants: {
         outline: (props: StyleFunctionProps) => ({
           ...defaultTheme.components.Input.variants.outline(props),

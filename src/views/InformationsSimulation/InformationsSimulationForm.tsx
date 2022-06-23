@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
+import { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
-import { Text, FormControl, FormLabel } from "@chakra-ui/react"
+import { Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
@@ -28,7 +29,6 @@ import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import { displayMetaErrors } from "../../utils/form-error-helpers"
-import { FunctionComponent } from "react"
 import FormError from "../../components/FormError"
 
 const validateForm = ({
@@ -70,14 +70,10 @@ const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onCli
     isReadOnly={readOnly}
     label="Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)"
   >
-    <ButtonAction
-      ml={2}
-      label="sélectionner la fin de l'année civile"
-      onClick={onClick}
-      disabled={readOnly}
-      size="sm"
-      variant="ghost"
-    />
+    <Button mt={2} onClick={onClick} disabled={readOnly} variant="solid" size="sm" px="8" py="5" colorScheme="primary">
+      Sélectionner la fin
+      <br /> de l'année civile
+    </Button>
   </InputDateGroup>
 )
 

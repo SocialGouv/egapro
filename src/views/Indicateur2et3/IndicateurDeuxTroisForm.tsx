@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
+import { FormControl, FormLabel, Stack } from "@chakra-ui/react"
 
 import { FormState, ActionIndicateurDeuxTroisData, PeriodeDeclaration, GroupeEffectif } from "../../globals"
 
@@ -23,13 +24,14 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import BlocForm from "../../components/BlocForm"
 import FieldInputsMenWomen from "../../components/FieldInputsMenWomen"
 import RadiosBoolean from "../../components/RadiosBoolean"
-import RadioButtons from "../../components/RadioButtons"
 import ActionBar from "../../components/ActionBar"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import FormError from "../../components/FormError"
 import FormStack from "../../components/ds/FormStack"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
+import InputRadio from "../../components/ds/InputRadio"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -108,26 +110,39 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
             {submitFailed && hasValidationErrors && (
               <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
-            <RadioButtons
-              fieldName="periodeDeclaration"
-              label="Sur quelle période souhaitez-vous calculer votre indicateur ?"
-              value={values.periodeDeclaration}
-              readOnly={readOnly}
-              choices={[
-                {
-                  label: `Période de référence de l'index (du ${oneYear} au ${dateFinPeriodeReference})`,
-                  value: "unePeriodeReference",
-                },
-                {
-                  label: `Période de référence de 2 ans (du ${twoYears} au ${dateFinPeriodeReference})`,
-                  value: "deuxPeriodesReference",
-                },
-                {
-                  label: `Période de référence de 3 ans (du ${threeYears} au ${dateFinPeriodeReference})`,
-                  value: "troisPeriodesReference",
-                },
-              ]}
-            />
+            <FormControl isReadOnly={readOnly}>
+              <FormLabel as="div">Sur quelle période souhaitez-vous calculer votre indicateur&nbsp;?</FormLabel>
+              {console.log("values.periodeDeclaration", values.periodeDeclaration)}
+              <InputRadioGroup defaultValue={values.periodeDeclaration}>
+                <Stack>
+                  <InputRadio
+                    value={values.periodeDeclaration}
+                    fieldName="periodeDeclaration"
+                    choiceValue="unePeriodeReference"
+                    isReadOnly={readOnly}
+                  >
+                    Période de référence de l'index (du {oneYear} au {dateFinPeriodeReference})
+                  </InputRadio>
+                  <InputRadio
+                    value={values.periodeDeclaration}
+                    fieldName="periodeDeclaration"
+                    choiceValue="deuxPeriodesReference"
+                    isReadOnly={readOnly}
+                  >
+                    Période de référence de 2 ans (du {twoYears} au
+                    {dateFinPeriodeReference})
+                  </InputRadio>
+                  <InputRadio
+                    value={values.periodeDeclaration}
+                    fieldName="periodeDeclaration"
+                    choiceValue="troisPeriodesReference"
+                    isReadOnly={readOnly}
+                  >
+                    Période de référence de 3 ans (du ${threeYears} au {dateFinPeriodeReference})
+                  </InputRadio>
+                </Stack>
+              </InputRadioGroup>
+            </FormControl>
             <RadiosBoolean
               fieldName="presenceAugmentationPromotion"
               value={values.presenceAugmentationPromotion}
