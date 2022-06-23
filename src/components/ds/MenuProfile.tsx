@@ -20,9 +20,7 @@ const MenuLink: FunctionComponent<MenuLinkProps> = ({ children, to }) => {
   )
 }
 
-type MenuProfileProps = {
-  onOpenHelp: () => void
-}
+type MenuProfileProps = () => void
 
 const MenuProfile: FunctionComponent<MenuProfileProps> = (openHelp) => {
   const history = useHistory()
@@ -40,7 +38,6 @@ const MenuProfile: FunctionComponent<MenuProfileProps> = (openHelp) => {
           Menu
         </MenuButton>
         <MenuList>
-          {/* @ts-ignore */}
           <MenuItem onClick={openHelp}>Aide</MenuItem>
           <MenuItem>
             <MenuLink to="/tableauDeBord/mon-profil">Mon Profil</MenuLink>
