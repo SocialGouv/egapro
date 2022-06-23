@@ -144,8 +144,8 @@ const buildDeclaration = (data: AppState): any => {
         ...(modalitesPublicationObjectifsMesures && {
           modalités_objectifs_mesures: modalitesPublicationObjectifsMesures,
         }),
-        ...(datePublicationObjectifs && { date_publication_mesures: toISOString(datePublicationObjectifs) }),
-        ...(datePublicationMesures && { date_publication_objectifs: toISOString(datePublicationMesures) }),
+        ...(datePublicationObjectifs && { date_publication_objectifs: toISOString(datePublicationObjectifs) }),
+        ...(datePublicationMesures && { date_publication_mesures: toISOString(datePublicationMesures) }),
       }
 
       declaration = {
