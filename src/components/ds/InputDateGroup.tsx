@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react"
 import fr from "date-fns/locale/fr"
 import DatePicker, { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
-import { Box, Flex, Input, FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/react"
+import { Input, FormControl, FormErrorMessage, FormLabel, Stack } from "@chakra-ui/react"
 import { Field } from "react-final-form"
 
 import { isFieldHasError, validateDate } from "../../utils/formHelpers"
@@ -41,15 +41,17 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
           {...rest}
         >
           <FormLabel htmlFor={input.name}>{label}</FormLabel>
-          <Input
-            as={DatePicker}
-            locale="fr"
-            dateFormat="dd/MM/yyyy"
-            selected={parseDate(input.value)}
-            // @ts-ignore
-            onChange={(date) => (date ? input.onChange(dateToString(date)) : "")}
-          />
-          {children}
+          <Stack direction={["column", "row"]}>
+            <Input
+              as={DatePicker}
+              locale="fr"
+              dateFormat="dd/MM/yyyy"
+              selected={parseDate(input.value)}
+              // @ts-ignore
+              onChange={(date) => (date ? input.onChange(dateToString(date)) : "")}
+            />
+            {children}
+          </Stack>
           <FormErrorMessage>{displayMetaErrors(meta.error)}</FormErrorMessage>
         </FormControl>
       )}
