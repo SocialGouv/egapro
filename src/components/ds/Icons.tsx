@@ -5,6 +5,7 @@ import {
   LightBulbIcon,
   UserIcon,
   UserCircleIcon,
+  UserGroupIcon,
   CalendarIcon,
   CurrencyEuroIcon,
   TrendingUpIcon,
@@ -13,6 +14,10 @@ import {
   XCircleIcon as XCircleLineIcon,
   OfficeBuildingIcon,
   TrashIcon,
+  MenuIcon,
+  QuestionMarkCircleIcon,
+  LogoutIcon,
+  LoginIcon,
   ExternalLinkIcon,
   ChevronRightIcon,
   PencilIcon,
@@ -21,7 +26,9 @@ import {
 
 type SvgComponent = ChakraComponent<"svg", Record<string, unknown>>
 
-const Icon: SvgComponent = ((props: IconProps) => <IconChakra aria-hidden="true" {...props} />) as SvgComponent
+const Icon: SvgComponent = ((props: IconProps) => (
+  <IconChakra aria-hidden="true" sx={{ verticalAlign: "middle" }} {...props} />
+)) as SvgComponent
 
 export const IconText = ({ children }: { children: ReactNode }) => {
   return (
@@ -80,6 +87,16 @@ export const IconOfficeBuilding: SvgComponent = (props) => <Icon as={OfficeBuild
 export const IconDelete: SvgComponent = (props) => <Icon as={TrashIcon} {...props} />
 
 export const IconPlusCircle: SvgComponent = (props) => <Icon as={PlusCircleIcon} {...props} />
+
+export const IconMenu: SvgComponent = (props) => <Icon as={MenuIcon} {...props} />
+
+export const IconLogout: SvgComponent = (props) => <Icon as={LogoutIcon} {...props} />
+
+export const IconLogin: SvgComponent = (props) => <Icon as={LoginIcon} {...props} />
+
+export const IconQuestionMarkCircle: SvgComponent = (props) => <Icon as={QuestionMarkCircleIcon} {...props} />
+
+export const IconUserGroup: SvgComponent = (props) => <Icon as={UserGroupIcon} {...props} />
 
 export const IconDrag: SvgComponent = (props) => (
   <Icon {...props}>

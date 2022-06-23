@@ -5,7 +5,6 @@ import { Route, Switch, Redirect, RouteProps } from "react-router-dom"
 
 import { AppState, ActionType } from "../globals"
 
-import { useLayoutType } from "../components/GridContext"
 import Header from "../components/Header"
 
 import CGU from "../views/CGU"
@@ -16,7 +15,7 @@ import PageNotFound from "../views/PageNotFound"
 
 import Simulateur from "./Simulateur"
 import MainScrollView from "./MainScrollView"
-import MobileLayout from "./MobileLayout"
+import { SinglePageLayout } from "./SinglePageLayout"
 import Accessibilite from "../views/Accessibilite"
 import MesEntreprises from "../views/private/MesEntreprises"
 import MonProfil from "../views/private/MonProfil"
@@ -78,8 +77,6 @@ function DashboardRoutes() {
 }
 
 function AppLayout({ state, dispatch }: Props) {
-  const layoutType = useLayoutType()
-
   return (
     <AuthContextProvider>
       <Switch>
@@ -93,39 +90,47 @@ function AppLayout({ state, dispatch }: Props) {
           <DashboardRoutes />
         </Route>
 
-        {layoutType === "mobile" ? (
-          <MobileLayout />
-        ) : (
-          <>
-            <Flex direction="column">
-              <Header />
-              <MainScrollView state={state}>
-                <Switch>
-                  <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
-                  <Route path="/simulateur/:code">
-                    <Simulateur state={state} dispatch={dispatch} />
-                  </Route>
-                  <Route path="/mentions-legales" exact>
-                    <MentionsLegales />
-                  </Route>
-                  <Route path="/accessibilite" exact>
-                    <Accessibilite />
-                  </Route>
-                  <Route path="/cgu" exact>
-                    <CGU />
-                  </Route>
-                  <Route path="/politique-confidentialite" exact>
-                    <PolitiqueConfidentialite />
-                  </Route>
-                  <Route>
-                    <PageNotFound />
-                  </Route>
-                </Switch>
-              </MainScrollView>
-              <Footer />
-            </Flex>
-          </>
-        )}
+        <Route path="/politique-confidentialite" exact>
+          <SinglePageLayout>
+            <PolitiqueConfidentialite />
+          </SinglePageLayout>
+        </Route>
+
+        <Route path="/accessibilite" exact>
+          <SinglePageLayout>
+            <Accessibilite />
+          </SinglePageLayout>
+        </Route>
+
+        <Route path="/cgu" exact>
+          <SinglePageLayout>
+            <CGU />
+          </SinglePageLayout>
+        </Route>
+
+        <Route path="/mentions-legales" exact>
+          <SinglePageLayout>
+            <MentionsLegales />
+          </SinglePageLayout>
+        </Route>
+
+        <>
+          <Flex direction="column">
+            <Header />
+            <MainScrollView state={state}>
+              <Switch>
+                <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
+                <Route path="/simulateur/:code">
+                  <Simulateur state={state} dispatch={dispatch} />
+                </Route>
+                <Route>
+                  <PageNotFound />
+                </Route>
+              </Switch>
+            </MainScrollView>
+            <Footer />
+          </Flex>
+        </>
       </Switch>
     </AuthContextProvider>
   )
