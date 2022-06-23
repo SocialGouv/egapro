@@ -75,7 +75,7 @@ const MainScrollView: FunctionComponent<MainScrollViewProps> = ({ children, stat
                   leftIcon={<IconMenu boxSize={6} />}
                 />
               </Box>
-              <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
+              <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="md">
                 <DrawerOverlay />
                 <DrawerContent>
                   <DrawerHeader>Calcul et déclaration de l'index</DrawerHeader>
