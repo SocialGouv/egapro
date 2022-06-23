@@ -145,8 +145,14 @@ const Header: FunctionComponent = () => {
                         >
                           Mes entreprises
                         </MenuItem>
-                        {staff && (
-                          <>
+                        <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
+                          Déconnexion
+                        </MenuItem>
+                      </MenuGroup>
+                      {staff && (
+                        <>
+                          <MenuDivider />
+                          <MenuGroup title="Administration">
                             <MenuItem
                               as={RouterLink}
                               to="/tableauDeBord/gerer-utilisateurs"
@@ -154,13 +160,9 @@ const Header: FunctionComponent = () => {
                             >
                               Gérer utilisateurs
                             </MenuItem>
-                          </>
-                        )}
-                        <MenuDivider />
-                        <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
-                          Déconnexion
-                        </MenuItem>
-                      </MenuGroup>
+                          </MenuGroup>
+                        </>
+                      )}
                     </>
                   ) : (
                     <MenuGroup>
