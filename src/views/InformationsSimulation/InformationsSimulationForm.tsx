@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import { Text, FormControl, FormLabel } from "@chakra-ui/react"
+import { Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
 
@@ -50,14 +50,10 @@ const FieldPeriodeReference = ({ readOnly, onClick }: { readOnly: boolean; onCli
     isReadOnly={readOnly}
     label="Date de fin de la période de référence choisie pour le calcul de votre Index (jj/mm/aaaa)"
   >
-    <ButtonAction
-      mt={2}
-      label="Sélectionner la fin de l'année civile"
-      onClick={onClick}
-      disabled={readOnly}
-      variant="link"
-      size="sm"
-    />
+    <Button mt={2} onClick={onClick} disabled={readOnly} variant="solid" size="sm" px="8" py="5" colorScheme="primary">
+      Sélectionner la fin
+      <br /> de l'année civile
+    </Button>
   </InputDateGroup>
 )
 
