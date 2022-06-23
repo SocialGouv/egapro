@@ -101,6 +101,7 @@ const components = {
             py: "2",
             lineHeight: "1",
             fontSize: "xs",
+            textAlign: "center",
           },
           td: {
             px: "2",

@@ -4,11 +4,18 @@ import ButtonAction from "./ds/ButtonAction"
 
 interface FormSubmitProps {
   loading?: boolean
+  disabled?: boolean
   label?: string
+  size?: "sm" | "md" | "lg" | "xs"
 }
 
-const FormSubmit: FunctionComponent<FormSubmitProps> = ({ loading = false, label = "Valider les informations" }) => {
-  return <ButtonAction label={label} type="submit" disabled={loading} loading={loading} size="lg" />
+const FormSubmit: FunctionComponent<FormSubmitProps> = ({
+  loading = false,
+  disabled = false,
+  label = "Valider les informations",
+  size = "lg",
+}) => {
+  return <ButtonAction label={label} type="submit" disabled={disabled || loading} loading={loading} size={size} />
 }
 
 export default FormSubmit

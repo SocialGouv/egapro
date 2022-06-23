@@ -76,6 +76,9 @@ const FAQ: FunctionComponent<FAQProps> = ({ closeMenu }) => (
                   "/accessibilite",
                   "/cgu",
                   "/politique-confidentialite",
+                  "/tableauDeBord/me-connecter",
+                  "/tableauDeBord/mes-entreprises",
+                  "/tableauDeBord/mon-profil",
                 ]}
                 exact
                 render={() => <FAQHome />}

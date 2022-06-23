@@ -1,15 +1,15 @@
-import React, { ReactNode } from "react"
+import React, { FunctionComponent, ReactNode } from "react"
 import { Box, Heading, Text } from "@chakra-ui/react"
 
-interface Props {
+interface PageProps {
   title: string
   tagline?: string | Array<string>
   children: ReactNode
 }
 
-function Page({ title, tagline, children }: Props) {
+const Page: FunctionComponent<PageProps> = ({ title, tagline, children }) => {
   return (
-    <React.Fragment>
+    <>
       <Heading as="h1" size="lg">
         {title}
       </Heading>
@@ -21,7 +21,7 @@ function Page({ title, tagline, children }: Props) {
           ))
         : tagline && <Text mt={4}>{tagline}</Text>}
       {children && <Box pt={6}>{children}</Box>}
-    </React.Fragment>
+    </>
   )
 }
 

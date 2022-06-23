@@ -156,7 +156,7 @@ export const formatDataForAPI = (id: string, data: AppState) => {
     déclaration: getDeclaration(data),
     déclarant: getDeclarant(data),
     entreprise: getEntreprise(data),
-    indicateurs: getIndicateurs(data),
+    ...(data.informations.periodeSuffisante && { indicateurs: getIndicateurs(data) }),
   }
 
   return output
@@ -166,27 +166,32 @@ export const formatDataForAPI = (id: string, data: AppState) => {
 const getDeclaration = (data: AppState): any => {
   const declaration: any = {
     année_indicateurs: data.informations.anneeDeclaration,
-    fin_période_référence: toISOString(data.informations.finPeriodeReference),
-    points: data.declaration.totalPoint,
-    points_calculables: data.declaration.totalPointCalculable,
-  }
-  const index = data.declaration.noteIndex
-
-  if (index !== undefined || (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2020)) {
-    declaration.publication = {
-      date: toISOString(data.declaration.datePublication),
-    }
-    if (data.declaration.publicationSurSiteInternet) {
-      declaration.publication.url = data.declaration.lienPublication
-    } else {
-      declaration.publication.modalités = data.declaration.modalitesPublication
-    }
+    période_suffisante: data.informations.periodeSuffisante,
+    ...(data.informations.finPeriodeReference && {
+      fin_période_référence: toISOString(data.informations.finPeriodeReference),
+    }),
+    ...(data.informations.periodeSuffisante && { points: data.declaration.totalPoint }),
+    ...(data.informations.periodeSuffisante && { points_calculables: data.declaration.totalPointCalculable }),
   }
 
-  if (index !== undefined) {
-    declaration.index = index
-    if (index < 75) {
-      declaration.mesures_correctives = data.declaration.mesuresCorrection
+  if (data.informations.periodeSuffisante) {
+    const index = data.declaration.noteIndex
+    if (index !== undefined || (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2020)) {
+      declaration.publication = {
+        date: toISOString(data.declaration.datePublication),
+      }
+      if (data.declaration.publicationSurSiteInternet) {
+        declaration.publication.url = data.declaration.lienPublication
+      } else {
+        declaration.publication.modalités = data.declaration.modalitesPublication
+      }
+    }
+
+    if (index !== undefined) {
+      declaration.index = index
+      if (index < 75) {
+        declaration.mesures_correctives = data.declaration.mesuresCorrection
+      }
     }
   }
   return declaration
@@ -212,11 +217,12 @@ const getEntreprise = (data: AppState): any => {
     département: departementCode[data.informationsEntreprise.departement],
     adresse: data.informationsEntreprise.adresse,
     commune: data.informationsEntreprise.commune,
-    code_postal: data.informationsEntreprise.codePostal,
+    ...(data.informationsEntreprise.codePostal && { code_postal: data.informationsEntreprise.codePostal }),
+    ...(data.informationsEntreprise.codePays && { code_pays: data.informationsEntreprise.codePays }),
     code_naf: data.informationsEntreprise.codeNaf.split(" ")[0], // Only get the code like "01.22Z"
     effectif: {
       // @ts-ignore
-      total: data.effectif.nombreSalariesTotal,
+      ...(data.informations.periodeSuffisante && { total: data.effectif.nombreSalariesTotal }),
       tranche:
         data.informations.trancheEffectifs === "50 à 250"
           ? "50:250"
@@ -232,7 +238,11 @@ const getEntreprise = (data: AppState): any => {
     }
   }
 
-  if (data.informations.anneeDeclaration && data.informations.anneeDeclaration >= 2021) {
+  if (
+    data.informations.periodeSuffisante &&
+    data.informations.anneeDeclaration &&
+    data.informations.anneeDeclaration >= 2021
+  ) {
     entreprise.plan_relance = data.declaration.planRelance
   }
 

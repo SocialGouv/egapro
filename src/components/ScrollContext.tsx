@@ -40,6 +40,7 @@ function ScrollProvider({ children, style }: { children: ReactNode; style: any }
 
 const styles = {
   scroll: css({
+    border: "10px solid red !important",
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
     "@media print": {

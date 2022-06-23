@@ -1,3 +1,5 @@
+import { genericFetch } from "./fetcher"
+
 const commonHeaders = {
   Accept: "application/json",
 }
@@ -37,6 +39,20 @@ function checkStatusAndParseJson(response) {
   }
 }
 
+/**
+ * Get origin of the API.
+ */
+function getOrigin() {
+  let origin = "/api"
+  if (window.location.href.includes("localhost:")) {
+    origin = "http://127.0.0.1:2626"
+  }
+
+  if (process.env.REACT_APP_EGAPRO_API_URL) origin = process.env.REACT_APP_EGAPRO_API_URL
+
+  return origin
+}
+
 /////////////
 
 function fetchResource(method, pathname, body) {
@@ -50,12 +66,8 @@ function fetchResource(method, pathname, body) {
     },
     body: body ? JSON.stringify(body) : undefined,
   }
-  let origin = "/api"
-  if (window.location.href.includes("localhost:")) {
-    origin = "http://127.0.0.1:2626"
-  }
 
-  if (process.env.REACT_APP_EGAPRO_API_URL) origin = process.env.REACT_APP_EGAPRO_API_URL
+  const origin = getOrigin()
 
   return fetch(origin + pathname, requestObj).then(checkStatusAndParseJson)
 }
@@ -102,4 +114,18 @@ export const sendEmailIndicatorsDatas = (id, email) => postResource(`/simulation
 export const findIndicatorsDataForRaisonSociale = (raisonSociale, { size, from, sortBy, order }) => {
   const encodedRaisonSociale = encodeURIComponent(raisonSociale)
   return getResource(`/search?q=${encodedRaisonSociale}&size=${size}&from=${from}&sortBy=${sortBy}&order=${order}`)
+}
+
+// TODO : migrate all this business functions in model directory ?
+
+/**
+ * Get a token from API for an other user.
+ * Only for staff member.
+ *
+ * @param {*} email
+ * @returns { token: string}
+ */
+export async function generateImpersonateToken(email) {
+  const origin = getOrigin()
+  return genericFetch(origin + `/token?email=${email}`)
 }

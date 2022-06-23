@@ -3,7 +3,7 @@ import { useHistory, Link as RouterLink } from "react-router-dom"
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from "@chakra-ui/menu"
 import { Button, Link } from "@chakra-ui/react"
 
-import { IconPeopleCircle } from "./Icons"
+import { IconMenu } from "./Icons"
 import { useUser } from "../AuthContext"
 import ButtonLink from "./ButtonLink"
 
@@ -20,7 +20,9 @@ const MenuLink: FunctionComponent<MenuLinkProps> = ({ children, to }) => {
   )
 }
 
-const MenuProfile: FunctionComponent = () => {
+type MenuProfileProps = () => void
+
+const MenuProfile: FunctionComponent<MenuProfileProps> = (openHelp) => {
   const history = useHistory()
   const { email, logout, staff } = useUser()
 
@@ -32,10 +34,11 @@ const MenuProfile: FunctionComponent = () => {
   if (email) {
     return (
       <Menu>
-        <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconPeopleCircle boxSize={6} />}>
-          Mon compte
+        <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
+          Menu
         </MenuButton>
         <MenuList>
+          <MenuItem onClick={openHelp}>Aide</MenuItem>
           <MenuItem>
             <MenuLink to="/tableauDeBord/mon-profil">Mon Profil</MenuLink>
           </MenuItem>
@@ -47,6 +50,9 @@ const MenuProfile: FunctionComponent = () => {
               <MenuDivider />
               <MenuItem>
                 <MenuLink to="/tableauDeBord/gerer-utilisateurs">Gérer utilisateurs</MenuLink>
+              </MenuItem>
+              <MenuItem>
+                <MenuLink to="/tableauDeBord/generer-token-utilisateur">Générer token</MenuLink>
               </MenuItem>
             </React.Fragment>
           )}
