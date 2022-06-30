@@ -145,6 +145,13 @@ const Header: FunctionComponent = () => {
                         >
                           Mes entreprises
                         </MenuItem>
+                        <MenuItem
+                          as={RouterLink}
+                          to="/tableauDeBord/mes-declarations"
+                          icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}
+                        >
+                          Mes déclarations
+                        </MenuItem>
                         <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
                           Déconnexion
                         </MenuItem>

@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from "react"
 
 import { FormState, TrancheEffectifs } from "../../globals"
-import { calendarYear, Year } from "../../utils/helpers"
 
 import ResultSummary from "../../components/ResultSummary"
+import { calendarYear, Year } from "../../utils/date"
 
 interface InformationsSimulationResultProps {
   nomEntreprise: string

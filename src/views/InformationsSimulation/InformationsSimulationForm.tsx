@@ -13,7 +13,6 @@ import {
   parseTrancheEffectifsFormValue,
   required,
 } from "../../utils/formHelpers"
-import { parseDate } from "../../utils/helpers"
 
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
@@ -30,6 +29,7 @@ import RadiosBoolean from "../../components/RadiosBoolean"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import { displayMetaErrors } from "../../utils/form-error-helpers"
 import FormError from "../../components/FormError"
+import { parseDate } from "../../utils/date"
 
 const validateForm = ({
   nomEntreprise,

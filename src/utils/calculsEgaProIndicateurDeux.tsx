@@ -1,7 +1,5 @@
 import { AppState, CategorieSocioPro, GroupeEffectif, GroupeIndicateurDeux } from "../globals"
 
-import { roundDecimal } from "./helpers"
-
 import {
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
@@ -11,6 +9,7 @@ import {
   calculEffectifsIndicateurCalculable,
 } from "./calculsEgaPro"
 import calculIndicateurUn from "./calculsEgaProIndicateurUn"
+import { roundDecimal } from "./number"
 
 const baremEcartAugmentation = [20, 20, 20, 10, 10, 10, 5, 5, 5, 5, 5, 0]
 

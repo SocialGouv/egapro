@@ -1,7 +1,6 @@
 import { AppState } from "../globals"
 
 import calculIndicateurUn from "./calculsEgaProIndicateurUn"
-import { roundDecimal } from "./helpers"
 import totalNombreSalaries from "./totalNombreSalaries"
 
 import {
@@ -10,6 +9,7 @@ import {
   calculIndicateurSexeSurRepresente,
   calculIndicateurEcartAugmentationAbsolute,
 } from "../utils/calculsEgaProIndicateurDeux"
+import { roundDecimal } from "./number"
 
 const barem = [35, 35, 35, 25, 25, 25, 15, 15, 15, 15, 15, 0]
 

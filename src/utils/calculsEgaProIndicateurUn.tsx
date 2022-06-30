@@ -8,8 +8,6 @@ import {
   GroupTranchesAgesIndicateurUn,
 } from "../globals"
 
-import { roundDecimal } from "./helpers"
-
 import {
   calculEcartsPonderesParGroupe,
   calculTotalEcartPondere,
@@ -18,6 +16,7 @@ import {
   EffectifGroup,
   calculEffectifsIndicateurCalculable,
 } from "./calculsEgaPro"
+import { roundDecimal } from "./number"
 
 /* INDICATEUR 1 CONST */
 
