@@ -26,7 +26,7 @@ import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
 import ResetPage from "../views/ResetPage"
 import GenererTokenUtilisateurPage from "../views/private/GenererTokenUtilisateurPage"
 import MesDeclarations from "../views/private/MesDeclarations"
-import ObjectifsMesures from "../views/private/ObjectifsMesures"
+import ObjectifsMesuresPage from "../views/private/ObjectifsMesuresPage"
 
 interface Props {
   state: AppState | undefined
@@ -69,7 +69,7 @@ function DashboardRoutes() {
         <MesDeclarations />
       </PrivateRoute>
       <PrivateRoute path="/tableauDeBord/objectifs-mesures/:siren/:year" exact>
-        <ObjectifsMesures />
+        <ObjectifsMesuresPage />
       </PrivateRoute>
       <PrivateRoute path="/tableauDeBord/gerer-utilisateurs" staffOnly exact>
         <GererUtilisateursPage />

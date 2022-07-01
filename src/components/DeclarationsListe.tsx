@@ -1,13 +1,11 @@
 import React from "react"
-import { Box, Flex, HStack, ListIcon, ListItem, Text } from "@chakra-ui/layout"
+import { Box, ListIcon, ListItem, Text } from "@chakra-ui/layout"
 import { Spinner } from "@chakra-ui/spinner"
 import { IconButton } from "@chakra-ui/button"
 import { useDisclosure } from "@chakra-ui/hooks"
 import { Link as RouterLink } from "react-router-dom"
 import { Link, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from "@chakra-ui/react"
 
-import { useSoloToastMessage } from "../utils/hooks"
-import PrimaryButton from "./ds/PrimaryButton"
 import ButtonAction from "./ds/ButtonAction"
 import Modal from "./ds/Modal"
 import { IconDelete, IconDrag } from "./ds/Icons"
@@ -83,7 +81,7 @@ function formatPoints(declaration: any) {
 }
 
 export default function DeclarationsListe({ siren }: { siren: string }) {
-  const { declarations, message, isLoading } = useDeclarations(siren)
+  const { declarations, isLoading } = useDeclarations(siren)
   // useSoloToastMessage("declarations-liste-toast", message)
 
   const yearsDeclarations = Object.keys(declarations).sort().reverse()
@@ -123,7 +121,7 @@ export default function DeclarationsListe({ siren }: { siren: string }) {
                     <Td>{formatDate(declarations[annee]?.data?.déclaration?.date)}</Td>
                     <Td>{formatPeriodeSuffisante(declarations[annee])}</Td>
                     <Td>
-                      <Link as={RouterLink} to="/">
+                      <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
                         Ajouter
                       </Link>
                     </Td>
