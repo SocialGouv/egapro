@@ -121,9 +121,13 @@ export default function DeclarationsListe({ siren }: { siren: string }) {
                     <Td>{formatDate(declarations[annee]?.data?.déclaration?.date)}</Td>
                     <Td>{formatPeriodeSuffisante(declarations[annee])}</Td>
                     <Td>
-                      <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
-                        Ajouter
-                      </Link>
+                      {declarations[annee]?.data?.déclaration?.index < 85 ? (
+                        <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
+                          Ajouter
+                        </Link>
+                      ) : (
+                        "OK"
+                      )}
                     </Td>
                   </Tr>
                 ))}
