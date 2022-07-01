@@ -297,7 +297,7 @@ const buildIndicateurs = (state: AppState): Indicateurs => {
   return indicateurs
 }
 
-export type Indicateur1NonCalculable = { non_calculable: string }
+export type IndicateurNonCalculable = { non_calculable: string }
 
 export type Indicateur1Calculable = {
   mode: string
@@ -317,7 +317,7 @@ export type Indicateur1Calculable = {
   objectif_de_progression?: number
 }
 
-type Indicateur1 = Indicateur1NonCalculable | Indicateur1Calculable
+type Indicateur1 = IndicateurNonCalculable | Indicateur1Calculable
 
 // Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
 const buildIndicateur1 = (state: AppState): Indicateur1 => {
@@ -364,8 +364,6 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
   return indicateur1
 }
 
-export type Indicateur2NonCalculable = { non_calculable: string }
-
 export type Indicateur2Calculable = {
   résultat: any
   note: any
@@ -374,7 +372,7 @@ export type Indicateur2Calculable = {
   objectif_de_progression?: number
 }
 
-type Indicateur2 = Indicateur2NonCalculable | Indicateur2Calculable
+type Indicateur2 = IndicateurNonCalculable | Indicateur2Calculable
 
 // Indicateur 2 relatif à l'écart de taux d'augmentations individuelles(hors promotion) entre les femmes et les homme
 const buildIndicateur2 = (state: AppState): Indicateur2 => {
@@ -405,9 +403,7 @@ export type Indicateur3Calculable = {
   objectif_de_progression?: number
 }
 
-export type Indicateur3NonCalculable = { non_calculable: string }
-
-type Indicateur3 = Indicateur3NonCalculable | Indicateur3Calculable
+type Indicateur3 = IndicateurNonCalculable | Indicateur3Calculable
 
 // Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes
 const buildIndicateur3 = (state: AppState): Indicateur3 => {
@@ -440,9 +436,7 @@ export type Indicateur2et3Calculable = {
   objectif_de_progression?: number
 }
 
-export type Indicateur2et3NonCalculable = { non_calculable: string }
-
-type Indicateur2et3 = Indicateur2et3NonCalculable | Indicateur2et3Calculable
+type Indicateur2et3 = IndicateurNonCalculable | Indicateur2et3Calculable
 
 // Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins
 const buildIndicateur2et3 = (state: AppState): Indicateur2et3 => {
@@ -475,9 +469,7 @@ export type Indicateur4Calculable = {
   objectif_de_progression?: number
 }
 
-export type Indicateur4NonCalculable = { non_calculable: string }
-
-type Indicateur4 = Indicateur4NonCalculable | Indicateur4Calculable
+type Indicateur4 = IndicateurNonCalculable | Indicateur4Calculable
 
 // Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
 const buildIndicateur4 = (state: AppState): Indicateur4 => {

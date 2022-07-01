@@ -1,3 +1,4 @@
+// AppState is like a store which represents the state of the wizard.
 export type AppState = {
   informations: {
     formValidated: FormState
@@ -10,7 +11,7 @@ export type AppState = {
   effectif: {
     formValidated: FormState
     nombreSalaries: Array<GroupeEffectif>
-  }
+  } & Partial<DeclarationEffectifData>
   indicateurUn: {
     formValidated: FormState
     csp: boolean
@@ -20,35 +21,35 @@ export type AppState = {
     coefficientGroupFormValidated: FormState
     coefficientEffectifFormValidated: FormState
     coefficient: Array<GroupeCoefficient>
-  }
+  } & Partial<DeclarationIndicateurUnData>
   indicateurDeux: {
     formValidated: FormState
     presenceAugmentation: boolean
     tauxAugmentation: Array<GroupeIndicateurDeux>
-  }
+  } & Partial<DeclarationIndicateurDeuxData>
   indicateurTrois: {
     formValidated: FormState
     presencePromotion: boolean
     tauxPromotion: Array<GroupeIndicateurTrois>
-  }
+  } & Partial<DeclarationIndicateurTroisData>
   indicateurDeuxTrois: {
     formValidated: FormState
     presenceAugmentationPromotion: boolean
     nombreAugmentationPromotionFemmes: number | undefined
     nombreAugmentationPromotionHommes: number | undefined
     periodeDeclaration: PeriodeDeclaration
-  }
+  } & Partial<DeclarationIndicateurDeuxTroisData>
   indicateurQuatre: {
     formValidated: FormState
     presenceCongeMat: boolean
     nombreSalarieesPeriodeAugmentation: number | undefined
     nombreSalarieesAugmentees: number | undefined
-  }
+  } & Partial<DeclarationIndicateurQuatreData>
   indicateurCinq: {
     formValidated: FormState
     nombreSalariesHommes: number | undefined
     nombreSalariesFemmes: number | undefined
-  }
+  } & Partial<DeclarationIndicateurCinqData>
   informationsEntreprise: {
     formValidated: FormState
     nomEntreprise: string
