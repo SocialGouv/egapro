@@ -31,6 +31,7 @@ import {
 } from "../../utils/helpers"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import Page from "../../components/Page"
+import { useToastMessage } from "../../utils/hooks"
 
 const required_error = "Requis"
 const invalid_type_error = (min = 0, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
@@ -50,8 +51,8 @@ const objectifValidator = (originValue = 0, max: number, nonCalculable = false) 
           required_error,
         })
         .nonempty({ message: required_error })
-        .refine((value) => Number(value) >= originValue && Number(value) <= max, {
-          message: invalid_type_error(originValue, max),
+        .refine((value) => Number(value) > originValue && Number(value) <= max, {
+          message: invalid_type_error(originValue + 1, max),
         })
 
 /**
@@ -140,6 +141,8 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
   const { declaration } = useDeclaration(siren, Number(year))
 
+  const { toastSuccess } = useToastMessage({})
+
   const index = declaration.data.déclaration.index
 
   const trancheEffectifs = parseTrancheEffectifsFormValue(declaration.data.entreprise.effectif.tranche)
@@ -148,17 +151,31 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
   const initialValues = {
     objectifIndicateurUn: (declaration.data.indicateurs?.rémunérations as Indicateur1Calculable)
-      ?.objectif_de_progression,
+      ?.objectif_de_progression
+      ? String((declaration.data.indicateurs?.rémunérations as Indicateur1Calculable)?.objectif_de_progression)
+      : undefined,
     objectifIndicateurDeux: (declaration.data.indicateurs?.augmentations as Indicateur2Calculable)
-      ?.objectif_de_progression,
+      ?.objectif_de_progression
+      ? String((declaration.data.indicateurs?.augmentations as Indicateur2Calculable)?.objectif_de_progression)
+      : undefined,
     objectifIndicateurTrois: (declaration.data.indicateurs?.promotions as Indicateur3Calculable)
-      ?.objectif_de_progression,
+      ?.objectif_de_progression
+      ? String((declaration.data.indicateurs?.promotions as Indicateur3Calculable)?.objectif_de_progression)
+      : undefined,
     objectifIndicateurDeuxTrois: (declaration.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable)
-      ?.objectif_de_progression,
+      ?.objectif_de_progression
+      ? String(
+          (declaration.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable)
+            ?.objectif_de_progression,
+        )
+      : undefined,
     objectifIndicateurQuatre: (declaration.data.indicateurs?.congés_maternité as Indicateur4Calculable)
-      ?.objectif_de_progression,
-    objectifIndicateurCinq: (declaration.data.indicateurs?.hautes_rémunérations as Indicateur5)
-      ?.objectif_de_progression,
+      ?.objectif_de_progression
+      ? String((declaration.data.indicateurs?.congés_maternité as Indicateur4Calculable)?.objectif_de_progression)
+      : undefined,
+    objectifIndicateurCinq: (declaration.data.indicateurs?.hautes_rémunérations as Indicateur5)?.objectif_de_progression
+      ? String((declaration.data.indicateurs?.hautes_rémunérations as Indicateur5)?.objectif_de_progression)
+      : undefined,
     datePublicationMesures: declaration.data.déclaration.publication?.date_publication_mesures,
     datePublicationObjectifs: declaration.data.déclaration.publication?.date_publication_objectifs,
     modalitesPublicationObjectifsMesures: declaration.data.déclaration.publication?.modalités_objectifs_mesures,
@@ -166,6 +183,13 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
   const onSubmit = (formData: typeof initialValues) => {
     console.log("dans onSubmit", JSON.stringify(formData, null, 2))
+    toastSuccess("Les informations ont bien été sauvegardées")
+
+    const newDeclaration = { ...declaration, ...formData }
+    console.log("declaration", JSON.stringify(declaration, null, 2))
+    console.log("formData", JSON.stringify(formData, null, 2))
+
+    // const newDeclaration2 = { ...declaration.data, toto: declaration.data.indicateurs?.rémunérations }
   }
 
   const {
@@ -239,28 +263,15 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
           indicateurQuatreNonCalculable,
         ),
         objectifIndicateurCinq: objectifValidator(noteIndicateurCinq, MAX_NOTES_INDICATEURS["indicateurCinq"]),
-        datePublication: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
         datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
         datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-        mesuresCorrection: z.string(),
-        publicationSurSiteInternet: z.union([z.literal("true"), z.literal("false")]),
-        lienPublication: z.string(),
-        modalitesPublication: z.string().optional(),
         modalitesPublicationObjectifsMesures: z.unknown(),
-      })
-      .refine((val) => (val.publicationSurSiteInternet === "true" ? val.lienPublication !== "" : true), {
-        message: "erreur sur le champ lienPublication",
-        path: ["lienPublication"],
-      })
-      .refine((val) => (val.publicationSurSiteInternet === "false" ? val.modalitesPublication !== "" : true), {
-        message: "erreur sur le champ modalitesPublication",
-        path: ["modalitesPublication"],
       })
       .refine(
         (val) =>
           !noteIndex
             ? true
-            : noteIndex < 75 || (noteIndex < 85 && val.publicationSurSiteInternet === "false")
+            : noteIndex < 75 || (noteIndex < 85 && publicationSurSiteInternet === false)
             ? Boolean(val.modalitesPublicationObjectifsMesures)
             : !val.modalitesPublicationObjectifsMesures,
         {
@@ -334,7 +345,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
           {({ handleSubmit, hasValidationErrors, submitFailed, values, errors }) => (
             <form onSubmit={handleSubmit}>
               {/* {JSON.stringify(errors, null, 2)}
-          {JSON.stringify(values, null, 2)} */}
+              {JSON.stringify(values, null, 2)} */}
               <FormStack>
                 {submitFailed && hasValidationErrors && (
                   <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />

@@ -5,7 +5,7 @@ import type { FetcherReturn } from "./types"
 
 import type { DeclarationTotale } from "../utils/helpers"
 
-type ReturnType = {
+export type DeclarationForAPI = {
   siren: string
   year: number
   data: DeclarationTotale
@@ -13,7 +13,10 @@ type ReturnType = {
   declared_at: number
 }
 
-export function useDeclaration(siren: string, year: number | undefined): FetcherReturn & { declaration: ReturnType } {
+export function useDeclaration(
+  siren: string,
+  year: number | undefined,
+): FetcherReturn & { declaration: DeclarationForAPI } {
   const { data, error, mutate } = useSWR(siren && year ? `/declaration/${siren}/${year}` : null, fetcher)
 
   const isLoading = !data && !error

@@ -23,6 +23,8 @@ import calculIndicateurCinq from "../utils/calculsEgaProIndicateurCinq"
 import { calculNoteIndex } from "../utils/calculsEgaProIndex"
 import totalNombreSalaries from "../utils/totalNombreSalaries"
 
+import type { DeclarationForAPI } from "../hooks/useDeclaration"
+
 export function displayNameTranchesAges(trancheAge: TranchesAges): string {
   switch (trancheAge) {
     case TranchesAges.MoinsDe30ans:
@@ -109,7 +111,7 @@ export const messageMesureCorrection = (
 }
 
 export type DeclarationTotale = {
-  id: string
+  id?: string // id de la simulation initiale !! N'est pas rendu par l'API pour GET /declaration
   source: string
   déclarant: Declarant
   entreprise: Entreprise
@@ -131,6 +133,8 @@ export const formatDataForAPI = (id: string, state: AppState) => {
 }
 
 export type Declaration = {
+  date?: string
+  brouillon?: boolean
   index?: number | undefined
   mesures_correctives?: string | undefined
   points_calculables?: number | undefined
@@ -307,11 +311,11 @@ export type Indicateur1Calculable = {
   date_consultation_cse?: string | undefined
   catégories?: Array<{
     nom: string
-    tranches: {
-      ":29": number | undefined
-      "30:39": number | undefined
-      "40:49": number | undefined
-      "50:": number | undefined
+    tranches?: {
+      ":29"?: number | undefined
+      "30:39"?: number | undefined
+      "40:49"?: number | undefined
+      "50:"?: number | undefined
     }
   }>
   objectif_de_progression?: number
@@ -665,4 +669,8 @@ export function computeValuesFromState(state: AppState) {
       noteIndicateurCinq,
     },
   }
+}
+
+export function addObjectifsAndMesures(declaration: DeclarationForAPI, data: any) {
+  return {}
 }
