@@ -136,6 +136,18 @@ type Params = {
 
 const title = "Remplir les objectifs de progression et mesures de correction"
 
+export type ObjectifsMesuresFormSchema = {
+  objectifIndicateurUn?: string | undefined
+  objectifIndicateurDeux?: string | undefined
+  objectifIndicateurTrois?: string | undefined
+  objectifIndicateurDeuxTrois?: string | undefined
+  objectifIndicateurQuatre?: string | undefined
+  objectifIndicateurCinq?: string | undefined
+  datePublicationMesures?: string | undefined
+  datePublicationObjectifs?: string | undefined
+  modalitesPublicationObjectifsMesures: string | undefined
+}
+
 const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   const { siren, year } = useParams<Params>()
 

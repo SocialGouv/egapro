@@ -1,5 +1,6 @@
 import { DeclarationForAPI } from "../hooks/useDeclaration"
-import { addObjectifsAndMesures } from "./helpers"
+import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
+import { patchDeclarationWithObjectifsMesures } from "./helpers"
 
 const declaration: DeclarationForAPI = {
   siren: "326964418",
@@ -87,14 +88,6 @@ const declaration: DeclarationForAPI = {
   declared_at: 1656407985,
 }
 
-const data = {
-  objectifIndicateurUn: "12",
-  objectifIndicateurDeuxTrois: "1",
-  datePublicationMesures: "2022-06-28",
-  datePublicationObjectifs: "2022-06-27",
-  modalitesPublicationObjectifsMesures: "voici les modalités",
-}
-
 const expectedDeclaration: DeclarationForAPI = {
   siren: "326964418",
   year: 2021,
@@ -139,7 +132,7 @@ const expectedDeclaration: DeclarationForAPI = {
           },
         ],
         population_favorable: "femmes",
-        objectif_de_progression: 10,
+        objectif_de_progression: 12,
       },
       congés_maternité: {
         non_calculable: "absrcm",
@@ -154,7 +147,7 @@ const expectedDeclaration: DeclarationForAPI = {
         note_en_pourcentage: 0,
         population_favorable: "femmes",
         note_nombre_salariés: 0,
-        objectif_de_progression: 1,
+        objectif_de_progression: 8,
         résultat_nombre_salariés: 50,
       },
     },
@@ -166,9 +159,9 @@ const expectedDeclaration: DeclarationForAPI = {
       publication: {
         date: "2022-06-27",
         modalités: "123123",
-        date_publication_mesures: "2022-06-28",
-        date_publication_objectifs: "2022-06-27",
-        modalités_objectifs_mesures: "voici les modalités",
+        date_publication_mesures: "2022-06-30",
+        date_publication_objectifs: "2022-06-29",
+        modalités_objectifs_mesures: "voici les modalités amendées",
       },
       année_indicateurs: 2021,
       points_calculables: 85,
@@ -181,8 +174,17 @@ const expectedDeclaration: DeclarationForAPI = {
   declared_at: 1656407985,
 }
 
+const data: ObjectifsMesuresFormSchema = {
+  objectifIndicateurUn: "12",
+  objectifIndicateurDeuxTrois: "8",
+  datePublicationMesures: "2022-06-30",
+  datePublicationObjectifs: "2022-06-29",
+  modalitesPublicationObjectifsMesures: "voici les modalités amendées",
+}
+
 test("Transform declaration with objectifs and mesures", () => {
-  expect(addObjectifsAndMesures(declaration, data)).toEqual({})
+  expect(patchDeclarationWithObjectifsMesures(declaration, data)).toEqual(expectedDeclaration)
 })
 
+// Mandatory to run in Jest
 export {}

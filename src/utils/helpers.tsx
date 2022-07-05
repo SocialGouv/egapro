@@ -24,6 +24,7 @@ import { calculNoteIndex } from "../utils/calculsEgaProIndex"
 import totalNombreSalaries from "../utils/totalNombreSalaries"
 
 import type { DeclarationForAPI } from "../hooks/useDeclaration"
+import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
 
 export function displayNameTranchesAges(trancheAge: TranchesAges): string {
   switch (trancheAge) {
@@ -148,7 +149,7 @@ export type Declaration = {
     modalités_objectifs_mesures?: string | undefined
     modalités?: string | undefined
     url?: string | undefined
-    date: string | undefined
+    date?: string | undefined
   }
 }
 
@@ -671,6 +672,94 @@ export function computeValuesFromState(state: AppState) {
   }
 }
 
-export function addObjectifsAndMesures(declaration: DeclarationForAPI, data: any) {
-  return {}
+export function patchDeclarationWithObjectifsMesures(declaration: DeclarationForAPI, data: ObjectifsMesuresFormSchema) {
+  const rémunérations = !declaration.data.indicateurs
+    ? null
+    : isNonCalculable(declaration.data.indicateurs?.rémunérations)
+    ? null
+    : {
+        ...declaration.data.indicateurs.rémunérations,
+        ...(data.objectifIndicateurUn && { objectif_de_progression: Number(data.objectifIndicateurUn) }),
+      }
+
+  const augmentations = !declaration.data.indicateurs?.augmentations
+    ? null
+    : isNonCalculable(declaration.data.indicateurs?.augmentations)
+    ? null
+    : {
+        ...declaration.data.indicateurs.augmentations,
+        ...(data.objectifIndicateurDeux && { objectif_de_progression: Number(data.objectifIndicateurDeux) }),
+      }
+
+  const promotions = !declaration.data.indicateurs?.promotions
+    ? null
+    : isNonCalculable(declaration.data.indicateurs?.promotions)
+    ? null
+    : {
+        ...declaration.data.indicateurs.promotions,
+        ...(data.objectifIndicateurTrois && { objectif_de_progression: Number(data.objectifIndicateurTrois) }),
+      }
+
+  const augmentations_et_promotions = !declaration.data.indicateurs?.augmentations_et_promotions
+    ? null
+    : isNonCalculable(declaration.data.indicateurs?.augmentations_et_promotions)
+    ? null
+    : {
+        ...declaration.data.indicateurs.augmentations_et_promotions,
+        ...(data.objectifIndicateurDeuxTrois && { objectif_de_progression: Number(data.objectifIndicateurDeuxTrois) }),
+      }
+
+  const congés_maternité = !declaration.data.indicateurs
+    ? null
+    : isNonCalculable(declaration.data.indicateurs?.congés_maternité)
+    ? null
+    : {
+        ...declaration.data.indicateurs.congés_maternité,
+        ...(data.objectifIndicateurQuatre && { objectif_de_progression: Number(data.objectifIndicateurQuatre) }),
+      }
+
+  const hautes_rémunérations = !declaration.data.indicateurs
+    ? null
+    : {
+        ...declaration.data.indicateurs.hautes_rémunérations,
+        ...(data.objectifIndicateurCinq && { objectif_de_progression: Number(data.objectifIndicateurCinq) }),
+      }
+
+  const res: DeclarationForAPI = {
+    ...declaration,
+    data: {
+      ...declaration.data,
+      déclaration: {
+        ...declaration.data.déclaration,
+        publication: {
+          ...declaration.data.déclaration.publication,
+          ...(data.datePublicationMesures && { date_publication_mesures: data.datePublicationMesures }),
+          ...(data.datePublicationObjectifs && { date_publication_objectifs: data.datePublicationObjectifs }),
+          ...(data.modalitesPublicationObjectifsMesures && {
+            modalités_objectifs_mesures: data.modalitesPublicationObjectifsMesures,
+          }),
+        },
+      },
+
+      ...(declaration.data.indicateurs && {
+        indicateurs: {
+          ...declaration.data.indicateurs,
+          ...(rémunérations && { rémunérations: rémunérations as Indicateur1Calculable }),
+          ...(augmentations && { augmentations: augmentations as Indicateur2Calculable }),
+          ...(promotions && { promotions: promotions as Indicateur3Calculable }),
+          ...(augmentations_et_promotions && {
+            augmentations_et_promotions: augmentations_et_promotions as Indicateur2et3Calculable,
+          }),
+          ...(congés_maternité && { congés_maternité: congés_maternité as Indicateur4Calculable }),
+          ...(hautes_rémunérations && { hautes_rémunérations: hautes_rémunérations as Indicateur5 }),
+        },
+      }),
+    },
+  }
+
+  return res
+}
+
+function isNonCalculable(indicateur: any): indicateur is IndicateurNonCalculable {
+  return indicateur?.non_calculable !== undefined
 }
