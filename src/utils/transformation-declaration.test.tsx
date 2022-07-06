@@ -1,6 +1,6 @@
 import { DeclarationForAPI } from "../hooks/useDeclaration"
 import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
-import { patchDeclarationWithObjectifsMesures } from "./helpers"
+import { updateDeclarationWithObjectifsMesures } from "./helpers"
 
 const declaration: DeclarationForAPI = {
   siren: "326964418",
@@ -183,7 +183,7 @@ const data: ObjectifsMesuresFormSchema = {
 }
 
 test("Transform declaration with objectifs and mesures", () => {
-  expect(patchDeclarationWithObjectifsMesures(declaration, data)).toEqual(expectedDeclaration)
+  expect(updateDeclarationWithObjectifsMesures(declaration, data)).toEqual(expectedDeclaration)
 })
 
 // Mandatory to run in Jest

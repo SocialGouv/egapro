@@ -32,7 +32,7 @@ export function useDeclaration(
   }
 }
 
-export function useDeclarations(siren: string): FetcherReturn & { declarations: any } {
+export function useDeclarations(siren: string): FetcherReturn & { declarations: Record<string, DeclarationForAPI> } {
   // Naive way to fetch the last 3 declarations. Waiting for the API to have an endpoint to retrieve all declarations for a SIREN.
   const { declaration: declaration2021, error: error2021, isLoading: isLoading2021 } = useDeclaration(siren, 2021)
   const { declaration: declaration2020, error: error2020, isLoading: isLoading2020 } = useDeclaration(siren, 2020)

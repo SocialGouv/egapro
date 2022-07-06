@@ -120,7 +120,7 @@ export type DeclarationTotale = {
   indicateurs?: Indicateurs | undefined
 }
 
-export const formatDataForAPI = (id: string, state: AppState) => {
+export const formatDataForAPI = (id: string, state: AppState): DeclarationTotale => {
   const output = {
     id,
     source: "simulateur",
@@ -672,7 +672,10 @@ export function computeValuesFromState(state: AppState) {
   }
 }
 
-export function patchDeclarationWithObjectifsMesures(declaration: DeclarationForAPI, data: ObjectifsMesuresFormSchema) {
+export function updateDeclarationWithObjectifsMesures(
+  declaration: DeclarationForAPI,
+  data: ObjectifsMesuresFormSchema,
+) {
   const rémunérations = !declaration.data.indicateurs
     ? null
     : isNonCalculable(declaration.data.indicateurs?.rémunérations)
@@ -733,8 +736,10 @@ export function patchDeclarationWithObjectifsMesures(declaration: DeclarationFor
         ...declaration.data.déclaration,
         publication: {
           ...declaration.data.déclaration.publication,
-          ...(data.datePublicationMesures && { date_publication_mesures: data.datePublicationMesures }),
-          ...(data.datePublicationObjectifs && { date_publication_objectifs: data.datePublicationObjectifs }),
+          ...(data.datePublicationMesures && { date_publication_mesures: toISOString(data.datePublicationMesures) }),
+          ...(data.datePublicationObjectifs && {
+            date_publication_objectifs: toISOString(data.datePublicationObjectifs),
+          }),
           ...(data.modalitesPublicationObjectifsMesures && {
             modalités_objectifs_mesures: data.modalitesPublicationObjectifsMesures,
           }),
@@ -744,14 +749,12 @@ export function patchDeclarationWithObjectifsMesures(declaration: DeclarationFor
       ...(declaration.data.indicateurs && {
         indicateurs: {
           ...declaration.data.indicateurs,
-          ...(rémunérations && { rémunérations: rémunérations as Indicateur1Calculable }),
-          ...(augmentations && { augmentations: augmentations as Indicateur2Calculable }),
-          ...(promotions && { promotions: promotions as Indicateur3Calculable }),
-          ...(augmentations_et_promotions && {
-            augmentations_et_promotions: augmentations_et_promotions as Indicateur2et3Calculable,
-          }),
-          ...(congés_maternité && { congés_maternité: congés_maternité as Indicateur4Calculable }),
-          ...(hautes_rémunérations && { hautes_rémunérations: hautes_rémunérations as Indicateur5 }),
+          ...(rémunérations && { rémunérations }),
+          ...(augmentations && { augmentations }),
+          ...(promotions && { promotions }),
+          ...(augmentations_et_promotions && { augmentations_et_promotions }),
+          ...(congés_maternité && { congés_maternité }),
+          ...(hautes_rémunérations && { hautes_rémunérations }),
         },
       }),
     },

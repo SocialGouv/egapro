@@ -1,7 +1,7 @@
 import { Grid, GridItem, Text } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import { useParams } from "react-router-dom"
+import { useHistory, useParams } from "react-router-dom"
 import { z } from "zod"
 
 import type { TrancheEffectifs } from "../../globals"
@@ -28,16 +28,19 @@ import {
   Indicateur4Calculable,
   Indicateur5,
   IndicateurNonCalculable,
+  updateDeclarationWithObjectifsMesures,
 } from "../../utils/helpers"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import Page from "../../components/Page"
 import { useToastMessage } from "../../utils/hooks"
+import { putDeclaration } from "../../utils/api"
+import ButtonAction from "../../components/ds/ButtonAction"
 
 const required_error = "Requis"
 const invalid_type_error = (min = 0, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
 
 /**
- * Zod validator for an objective indicator .
+ * Zod validator for an objective indicator.
  *
  * @param originValue The actual value for this indicator.
  * @param max The maximum value for this in ddicator.
@@ -149,11 +152,12 @@ export type ObjectifsMesuresFormSchema = {
 }
 
 const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
+  const history = useHistory()
   const { siren, year } = useParams<Params>()
 
   const { declaration } = useDeclaration(siren, Number(year))
 
-  const { toastSuccess } = useToastMessage({})
+  const { toastSuccess, toastError } = useToastMessage({})
 
   const index = declaration.data.déclaration.index
 
@@ -193,15 +197,19 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     modalitesPublicationObjectifsMesures: declaration.data.déclaration.publication?.modalités_objectifs_mesures,
   }
 
-  const onSubmit = (formData: typeof initialValues) => {
-    console.log("dans onSubmit", JSON.stringify(formData, null, 2))
-    toastSuccess("Les informations ont bien été sauvegardées")
+  const onSubmit = async (formData: typeof initialValues) => {
+    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration, formData)
 
-    const newDeclaration = { ...declaration, ...formData }
-    console.log("declaration", JSON.stringify(declaration, null, 2))
-    console.log("formData", JSON.stringify(formData, null, 2))
-
-    // const newDeclaration2 = { ...declaration.data, toto: declaration.data.indicateurs?.rémunérations }
+    try {
+      await putDeclaration(newDeclaration.data)
+      toastSuccess("Les informations ont bien été sauvegardées")
+    } catch (error) {
+      console.error(
+        "Erreur lors de la sauvegarde des informations d'objectifs de progression et mesures de correction",
+        error,
+      )
+      toastError("Erreur lors de la sauvegarde des informations")
+    }
   }
 
   const {
@@ -352,9 +360,9 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
           // mandatory to not change user inputs
           // because we want to keep wrong string inside the input
           // we don't want to block string value
-          initialValuesEqual={() => true}
+          // initialValuesEqual={() => true}
         >
-          {({ handleSubmit, hasValidationErrors, submitFailed, values, errors }) => (
+          {({ handleSubmit, hasValidationErrors, submitFailed, values, errors, submitting }) => (
             <form onSubmit={handleSubmit}>
               {/* {JSON.stringify(errors, null, 2)}
               {JSON.stringify(values, null, 2)} */}
@@ -540,7 +548,12 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
               </FormStack>
 
               <ActionBar>
-                <FormSubmit />
+                <FormSubmit
+                  label="Mettre à jour"
+                  loading={submitting}
+                  disabled={Boolean(Object.keys(errors as Record<string, any>).length)}
+                />
+                <ButtonAction label="Retour à la liste" variant="outline" size="lg" onClick={history.goBack} />
               </ActionBar>
             </form>
           )}
