@@ -195,6 +195,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     datePublicationMesures: declaration.data.déclaration.publication?.date_publication_mesures,
     datePublicationObjectifs: declaration.data.déclaration.publication?.date_publication_objectifs,
     modalitesPublicationObjectifsMesures: declaration.data.déclaration.publication?.modalités_objectifs_mesures,
+    lienPublication: declaration.data.déclaration.publication?.url,
   }
 
   const onSubmit = async (formData: typeof initialValues) => {

@@ -20,7 +20,7 @@ const MesDeclarations: FunctionComponent = () => {
   const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
 
   return (
-    <SinglePageLayout>
+    <SinglePageLayout size="container.xl">
       <Page title={title}>
         {!sirens?.length ? (
           <Text>Vous ne gérez pas encore d'entreprise.</Text>

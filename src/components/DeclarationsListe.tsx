@@ -1,61 +1,58 @@
 import React from "react"
-import { Box, ListIcon, ListItem, Text } from "@chakra-ui/layout"
+import { Box, Text } from "@chakra-ui/layout"
 import { Spinner } from "@chakra-ui/spinner"
-import { IconButton } from "@chakra-ui/button"
-import { useDisclosure } from "@chakra-ui/hooks"
 import { Link as RouterLink } from "react-router-dom"
 import { Link, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from "@chakra-ui/react"
 
-import ButtonAction from "./ds/ButtonAction"
-import Modal from "./ds/Modal"
-import { IconDelete, IconDrag } from "./ds/Icons"
 import { useDeclarations } from "../hooks/useDeclaration"
 import { format, parseISO } from "date-fns"
+import { IconInvalid, IconValid } from "./ds/Icons"
+import { DeclarationTotale } from "../utils/helpers"
 
-function DeclarationItem({
-  owner,
-  siren,
-  removeUser,
-}: {
-  owner: string
-  siren: string
-  removeUser: (owner: string, siren: string) => void
-}) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+// function DeclarationItem({
+//   owner,
+//   siren,
+//   removeUser,
+// }: {
+//   owner: string
+//   siren: string
+//   removeUser: (owner: string, siren: string) => void
+// }) {
+//   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  return (
-    <ListItem key={owner} verticalAlign="center">
-      <ListIcon as={IconDrag} color="green.500" />
-      {owner}&nbsp;
-      <IconButton
-        variant="none"
-        colorScheme="teal"
-        aria-label="Supprimer cet utilisateur"
-        icon={<IconDelete />}
-        onClick={onOpen}
-        h="6"
-      />
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title="Supprimer l'utilisateur"
-        footer={
-          <>
-            <ButtonAction
-              colorScheme="red"
-              onClick={() => removeUser(owner, siren)}
-              label="Supprimer l'utilisateur"
-              leftIcon={<IconDelete />}
-            />
-            <ButtonAction colorScheme="gray" onClick={onClose} label="Annuler" />
-          </>
-        }
-      >
-        <Text>Cette opération est irréversible.</Text>
-      </Modal>
-    </ListItem>
-  )
-}
+//   return (
+//     <ListItem key={owner} verticalAlign="center">
+//       <ListIcon as={IconDrag} color="green.500" />
+//       {owner}&nbsp;
+//       <IconButton
+//         variant="none"
+//         colorScheme="teal"
+//         aria-label="Supprimer cet utilisateur"
+//         icon={<IconDelete />}
+//         onClick={onOpen}
+//         h="6"
+//       />
+//       <Modal
+//         isOpen={isOpen}
+//         onClose={onClose}
+//         title="Supprimer l'utilisateur"
+//         footer={
+//           <>
+//             <ButtonAction
+//               colorScheme="red"
+//               onClick={() => removeUser(owner, siren)}
+//               label="Supprimer l'utilisateur"
+//               leftIcon={<IconDelete />}
+//             />
+//             <ButtonAction colorScheme="gray" onClick={onClose} label="Annuler" />
+//           </>
+//         }
+//       >
+//         <Text>Cette opération est irréversible.</Text>
+//       </Modal>
+//     </ListItem>
+//   )
+// }
 
 function formatDate(stringDate: string | undefined) {
   if (!stringDate) return ""
@@ -103,7 +100,7 @@ export default function DeclarationsListe({ siren }: { siren: string }) {
               <Thead>
                 <Tr>
                   <Th>SIREN</Th>
-                  <Th>Année</Th>
+                  <Th>Année indicateurs</Th>
                   <Th>Index</Th>
                   <Th>Points</Th>
                   <Th>Date de déclaration</Th>
@@ -114,6 +111,7 @@ export default function DeclarationsListe({ siren }: { siren: string }) {
               <Tbody>
                 {yearsDeclarations.map((annee: string) => (
                   <Tr key={annee}>
+                    {/* {JSON.stringify(declarations[annee].data, null, 2)} */}
                     <Td>{siren}</Td>
                     <Td>{annee}</Td>
                     <Td>{declarations[annee]?.data?.déclaration?.index}</Td>
@@ -121,12 +119,22 @@ export default function DeclarationsListe({ siren }: { siren: string }) {
                     <Td>{formatDate(declarations[annee]?.data?.déclaration?.date)}</Td>
                     <Td>{formatPeriodeSuffisante(declarations[annee])}</Td>
                     <Td>
-                      {declarations[annee]?.data?.déclaration?.index < 85 ? (
-                        <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
-                          Ajouter
-                        </Link>
+                      {statusDeclaration(declarations[annee]?.data) === "À renseigner" ? (
+                        <>
+                          <IconInvalid mr="2" color="red.500" />
+                          <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
+                            À renseigner
+                          </Link>
+                        </>
+                      ) : statusDeclaration(declarations[annee]?.data) === "Renseignés" ? (
+                        <>
+                          <IconValid mr="2" color="green.500" />
+                          <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
+                            Déjà renseignés
+                          </Link>
+                        </>
                       ) : (
-                        "OK"
+                        <Box>{statusDeclaration(declarations[annee]?.data)}</Box>
                       )}
                     </Td>
                   </Tr>
@@ -138,4 +146,15 @@ export default function DeclarationsListe({ siren }: { siren: string }) {
       )}
     </Box>
   )
+}
+
+type Status = "Non applicable" | "À renseigner" | "Index supérieur à 85" | "Renseignés" | "Année non applicable"
+
+function statusDeclaration({ déclaration }: DeclarationTotale): Status {
+  if (déclaration.index === undefined || !déclaration.année_indicateurs || !déclaration.publication)
+    return "Non applicable"
+  if (déclaration.année_indicateurs < 2021) return "Année non applicable"
+  if (déclaration.index >= 85) return "Index supérieur à 85"
+  if (!déclaration.publication.modalités_objectifs_mesures) return "À renseigner"
+  return "Renseignés"
 }

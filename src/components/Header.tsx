@@ -27,6 +27,7 @@ import {
 } from "@chakra-ui/react"
 
 import {
+  IconEdit,
   IconLogin,
   IconLogout,
   IconMenu,
@@ -148,7 +149,7 @@ const Header: FunctionComponent = () => {
                         <MenuItem
                           as={RouterLink}
                           to="/tableauDeBord/mes-declarations"
-                          icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}
+                          icon={<IconEdit boxSize={5} color="gray.400" />}
                         >
                           Mes déclarations
                         </MenuItem>
