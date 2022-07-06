@@ -3,6 +3,12 @@ import { parse as rootParse, parseISO } from "date-fns"
 
 /* Dates */
 
+/**
+ * Parse an ISO date or a french date.
+ *
+ * @param dateStr Date string to parse
+ * @returns string
+ */
 export function parseDate(dateStr: string): Date | undefined {
   const parsed = parseISO(dateStr)
   if (parsed.toString() === "Invalid Date") {
