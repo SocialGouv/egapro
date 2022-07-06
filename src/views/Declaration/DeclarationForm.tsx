@@ -162,6 +162,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const onClick = () => {
     setLoading(true)
 
+    // TODO : state.informations.anneeDeclaration may be undefined in TS. That seems not good because the endpoint expects a year.
     resendReceipt(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
       .then(() => {
         setLoading(false)
