@@ -4,9 +4,9 @@ export type AppState = {
     formValidated: FormState
     nomEntreprise: string
     trancheEffectifs: TrancheEffectifs
-    anneeDeclaration: number | undefined
+    anneeDeclaration: number | undefined // uniquement un number quand une déclaration est valide
     finPeriodeReference?: string
-    periodeSuffisante: boolean | undefined
+    periodeSuffisante: boolean | undefined // uniquement un boolean quand une déclaration est valide
   }
   effectif: {
     formValidated: FormState
@@ -92,9 +92,9 @@ export type AppState = {
     cseMisEnPlace: boolean | undefined
     dateConsultationCSE: string
     datePublication: string
-    publicationSurSiteInternet: boolean | undefined
+    publicationSurSiteInternet: boolean | undefined // uniquement un boolean quand une déclaration est valide
     lienPublication: string
-    planRelance: boolean | undefined
+    planRelance: boolean | undefined // uniquement un boolean quand une déclaration est valide
     modalitesPublication: string
     dateDeclaration: string
     noteIndex: number | undefined
