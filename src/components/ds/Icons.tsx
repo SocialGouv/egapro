@@ -7,6 +7,7 @@ import {
   UserCircleIcon,
   UserGroupIcon,
   CalendarIcon,
+  CheckIcon,
   CurrencyEuroIcon,
   TrendingUpIcon,
   ArrowNarrowLeftIcon,
@@ -55,6 +56,8 @@ export const IconPeopleCircle: SvgComponent = (props) => <Icon as={UserCircleIco
 export const IconCalendar: SvgComponent = (props) => <Icon as={CalendarIcon} {...props} />
 
 export const IconMoney: SvgComponent = (props) => <Icon as={CurrencyEuroIcon} {...props} />
+
+export const IconCheck: SvgComponent = (props) => <Icon as={CheckIcon} {...props} />
 
 export const IconGrow: SvgComponent = (props) => <Icon as={TrendingUpIcon} {...props} />
 
