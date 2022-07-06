@@ -7,6 +7,7 @@ type ButtonLinkProps = ButtonProps & {
   to: string
 }
 
+// Link with React Router Link.
 function ButtonLink({
   label,
   to,

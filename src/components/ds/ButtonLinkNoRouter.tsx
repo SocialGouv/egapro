@@ -6,6 +6,7 @@ type ButtonLinkNoRouterProps = ButtonProps & {
   to: string
 }
 
+// Link with a for external links.
 function ButtonLinkNoRouter({
   label,
   to,
