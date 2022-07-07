@@ -369,7 +369,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
               {JSON.stringify(values, null, 2)} */}
               <FormStack>
                 {submitFailed && hasValidationErrors && (
-                  <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+                  <FormError message="Le formulaire ne peut pas être validé. Veuillez corriger les erreurs, svp." />
                 )}
 
                 {(index !== undefined || after2021) && (
@@ -549,11 +549,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
               </FormStack>
 
               <ActionBar>
-                <FormSubmit
-                  label="Mettre à jour"
-                  loading={submitting}
-                  disabled={Boolean(Object.keys(errors as Record<string, any>).length)}
-                />
+                <FormSubmit label="Mettre à jour" loading={submitting} />
                 <ButtonAction label="Retour à la liste" variant="outline" size="lg" onClick={history.goBack} />
               </ActionBar>
             </form>

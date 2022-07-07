@@ -40,7 +40,7 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
           isReadOnly={isReadOnly}
           {...rest}
         >
-          <FormLabel htmlFor={input.name}>{label}</FormLabel>
+          <FormLabel htmlFor={input.name}>{label}xxx</FormLabel>
           <Stack direction={["column", "row"]}>
             <Input
               as={DatePicker}
@@ -49,6 +49,7 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
               selected={parseDate(input.value)}
               // @ts-ignore
               onChange={(date) => (date ? input.onChange(dateToString(date)) : "")}
+              {...((isFieldHasError(meta) || (meta.error && meta.touched)) && { borderColor: "#E53E3E" })}
             />
             {children}
           </Stack>
