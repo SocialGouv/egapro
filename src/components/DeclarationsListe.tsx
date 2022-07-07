@@ -151,7 +151,7 @@ export default function DeclarationsListe({ siren }: { siren: string }) {
 type Status = "Non applicable" | "À renseigner" | "Index supérieur à 85" | "Renseignés" | "Année non applicable"
 
 function statusDeclaration({ déclaration }: DeclarationTotale): Status {
-  if (déclaration.index === undefined || !déclaration.année_indicateurs || !déclaration.publication)
+  if (!déclaration || déclaration.index === undefined || !déclaration.année_indicateurs || !déclaration.publication)
     return "Non applicable"
   if (déclaration.année_indicateurs < 2021) return "Année non applicable"
   if (déclaration.index >= 85) return "Index supérieur à 85"
