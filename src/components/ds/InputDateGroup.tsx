@@ -40,7 +40,7 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
           isReadOnly={isReadOnly}
           {...rest}
         >
-          <FormLabel htmlFor={input.name}>{label}xxx</FormLabel>
+          <FormLabel htmlFor={input.name}>{label}</FormLabel>
           <Stack direction={["column", "row"]}>
             <Input
               as={DatePicker}
