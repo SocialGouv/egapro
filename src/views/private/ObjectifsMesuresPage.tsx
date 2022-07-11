@@ -203,7 +203,14 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
     try {
       await putDeclaration(newDeclaration.data)
-      toastSuccess("Les informations ont bien été sauvegardées")
+      const message =
+        typeIndex === "0:75"
+          ? "Vous venez de transmettre aux services du ministre chargé du travail vos objectifs de progression et mesures de correction"
+          : typeIndex === "75:85"
+          ? "Vous venez de transmettre aux services du ministre chargé du travail vos objectifs de progression"
+          : "Les informations ont bien été sauvegardées"
+
+      toastSuccess(message)
     } catch (error) {
       console.error(
         "Erreur lors de la sauvegarde des informations d'objectifs de progression et mesures de correction",
