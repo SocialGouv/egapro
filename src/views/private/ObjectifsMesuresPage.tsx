@@ -157,7 +157,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
   const { declaration } = useDeclaration(siren, Number(year))
 
-  const { toastSuccess, toastError } = useToastMessage({})
+  const { toastSuccess, toastError } = useToastMessage({ duration: 10000 })
 
   const index = declaration.data.déclaration.index
 
