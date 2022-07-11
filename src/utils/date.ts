@@ -48,7 +48,7 @@ export function calendarYear(dateStr: string, operation: Year, numYears: number)
 
 // Format the data from the AppReducer to be compatible with the API new format
 
-export const toISOString = (date: string) => {
+export const toISOString = (date: string): string | undefined => {
   const parsed = parseDate(date)
   return parsed ? format(parsed, "yyyy-MM-dd") : undefined
 }

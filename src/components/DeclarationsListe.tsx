@@ -77,7 +77,7 @@ function formatPoints(declaration: any) {
   return ""
 }
 
-export default function DeclarationsListe({ siren }: { siren: string }) {
+const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
   const { declarations, isLoading } = useDeclarations(siren)
   // useSoloToastMessage("declarations-liste-toast", message)
 
@@ -158,3 +158,5 @@ function statusDeclaration({ déclaration }: DeclarationTotale): Status {
   if (!déclaration.publication.modalités_objectifs_mesures) return "À renseigner"
   return "Renseignés"
 }
+
+export default DeclarationsListe

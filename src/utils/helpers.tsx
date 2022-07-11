@@ -675,7 +675,7 @@ export function computeValuesFromState(state: AppState) {
 export function updateDeclarationWithObjectifsMesures(
   declaration: DeclarationForAPI,
   data: ObjectifsMesuresFormSchema,
-) {
+): DeclarationForAPI {
   const rémunérations = !declaration.data.indicateurs
     ? null
     : isNonCalculable(declaration.data.indicateurs?.rémunérations)

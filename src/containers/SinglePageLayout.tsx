@@ -9,7 +9,7 @@ interface Props {
   size?: "container.sm" | "container.md" | "container.lg" | "container.xl"
 }
 
-export function SinglePageLayout({ children, size = "container.lg" }: Props) {
+const SinglePageLayout: React.FunctionComponent<Props> = ({ children, size = "container.lg" }) => {
   return (
     <Flex direction="column" minHeight="100vh">
       <Header />
@@ -20,3 +20,5 @@ export function SinglePageLayout({ children, size = "container.lg" }: Props) {
     </Flex>
   )
 }
+
+export { SinglePageLayout }
