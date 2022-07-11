@@ -34,7 +34,6 @@ function formatPoints(declaration: any) {
 
 const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
   const { declarations, isLoading } = useDeclarations(siren)
-  // useSoloToastMessage("declarations-liste-toast", message)
 
   const yearsDeclarations = Object.keys(declarations).sort().reverse()
 
@@ -56,10 +55,9 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                 <Tr>
                   <Th>SIREN</Th>
                   <Th>Année indicateurs</Th>
-                  <Th>Index</Th>
-                  <Th>Points</Th>
+                  <Th>Structure</Th>
                   <Th>Date de déclaration</Th>
-                  <Th>Période suffisante</Th>
+                  <Th>Index</Th>
                   <Th>Objectifs et mesures</Th>
                 </Tr>
               </Thead>
@@ -68,10 +66,9 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Tr key={annee}>
                     <Td>{siren}</Td>
                     <Td>{annee}</Td>
-                    <Td>{declarations[annee]?.data?.déclaration?.index}</Td>
-                    <Td>{formatPoints(declarations[annee])}</Td>
+                    <Td>{declarations[annee]?.data?.entreprise.ues ? "UES" : "Entreprise"}</Td>
                     <Td>{formatDate(declarations[annee]?.data?.déclaration?.date)}</Td>
-                    <Td>{formatPeriodeSuffisante(declarations[annee])}</Td>
+                    <Td>{declarations[annee]?.data?.déclaration?.index}</Td>
                     <Td>
                       {statusDeclaration(declarations[annee]?.data) === "À renseigner" ? (
                         <>
