@@ -126,6 +126,18 @@ const defaultState: AppState = {
     email: "",
     acceptationCGU: false,
   },
+  informationsComplementaires: {
+    formValidated: "None",
+    objectifIndicateurUn: undefined,
+    objectifIndicateurDeux: undefined,
+    objectifIndicateurTrois: undefined,
+    objectifIndicateurDeuxTrois: undefined,
+    objectifIndicateurQuatre: undefined,
+    objectifIndicateurCinq: undefined,
+    datePublicationObjectifs: "",
+    datePublicationMesures: "",
+    modalitesPublicationObjectifsMesures: "",
+  },
   declaration: {
     formValidated: "None",
     mesuresCorrection: "",

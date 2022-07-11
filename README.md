@@ -15,6 +15,7 @@ yarn start
 ```
 
 Le site est alors accessible sur http://localhost:3000.
+En local, l'API doit tourner sur http://localhost:2626.
 
 ## Tests
 

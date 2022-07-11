@@ -24,6 +24,10 @@ export type InputGroupProps = FormControlProps & {
   hasError?: boolean
   validate?: any
   type?: React.HTMLInputTypeAttribute
+  textAlign?: string
+  min?: number
+  max?: number
+  showError?: boolean
   message?: {
     help?: React.ReactElement | string
     error?: React.ReactElement | string
@@ -36,11 +40,15 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
   placeholder,
   fieldName,
   message,
-  autocomplete,
+  autocomplete = "off",
   isLoading,
   hasError,
   type = "text",
+  textAlign = "left",
   validate,
+  min,
+  max,
+  showError = true,
   ...rest
 }) => {
   const msgStyle = { flexDirection: "column", alignItems: "flex-start" }
@@ -53,7 +61,16 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
               {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
             </FormLabel>
             <Box position="relative">
-              <Input id={input.name} placeholder={placeholder} autoComplete={autocomplete} type={type} {...input} />
+              <Input
+                id={input.name}
+                placeholder={placeholder}
+                autoComplete={autocomplete}
+                type={type}
+                {...input}
+                {...(textAlign && { textAlign })}
+                {...(type === "number" && min && { min })}
+                {...(type === "number" && max && { max })}
+              />
               {isLoading && (
                 <Box position="absolute" right={2} top={2} zIndex={2} pointerEvents="none">
                   <ActivityIndicator />
@@ -61,8 +78,10 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
               )}
             </Box>
             {message?.help && <FormHelperText sx={msgStyle}>{message.help}</FormHelperText>}
-            {message?.error && <FormErrorMessage sx={msgStyle}>{message.error}</FormErrorMessage>}
-            {!message?.error && meta?.error && <FormErrorMessage sx={msgStyle}>{meta.error}</FormErrorMessage>}
+            {showError && message?.error && <FormErrorMessage sx={msgStyle}>{message.error}</FormErrorMessage>}
+            {showError && !message?.error && meta?.error && (
+              <FormErrorMessage sx={msgStyle}>{meta.error}</FormErrorMessage>
+            )}
           </FormControl>
         )
       }}

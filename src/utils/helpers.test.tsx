@@ -1,11 +1,5 @@
-import {
-  calendarYear,
-  dateToString,
-  displaySexeSurRepresente,
-  messageEcartNombreEquivalentSalaries,
-  parseDate,
-  Year,
-} from "./helpers"
+import { calendarYear, dateToString, parseDate, Year } from "./date"
+import { displaySexeSurRepresente, messageEcartNombreEquivalentSalaries } from "./helpers"
 
 describe("parseDate", () => {
   test("parses date as ISO format", () => {

@@ -5,8 +5,6 @@ import { Redirect, Route, Switch, useParams } from "react-router-dom"
 
 import { AppState, ActionType } from "../globals"
 
-import { logToSentry } from "../utils/helpers"
-
 import globalStyles from "../utils/globalStyles"
 import { isUserGrantedForSiren } from "../utils/user"
 import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api"
@@ -31,6 +29,7 @@ import Recapitulatif from "../views/Recapitulatif"
 import AskEmail from "../views/AskEmail"
 import { sirenIsFree } from "../utils/siren"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
+import { logToSentry } from "../utils/sentry"
 
 interface Props {
   state: AppState | undefined

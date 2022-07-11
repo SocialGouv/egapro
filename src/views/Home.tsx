@@ -4,13 +4,13 @@ import { Heading, SimpleGrid } from "@chakra-ui/react"
 
 import { ActionType } from "../globals"
 import { postIndicatorsDatas } from "../utils/api"
-import { logToSentry } from "../utils/helpers"
 
 import ButtonAction from "../components/ds/ButtonAction"
 import ButtonLinkNoRouter from "../components/ds/ButtonLinkNoRouter"
 import Card from "../components/ds/Card"
 import Page from "../components/Page"
 import ErrorMessage from "../components/ErrorMessage"
+import { logToSentry } from "../utils/sentry"
 
 interface HomeProps extends RouteComponentProps {
   dispatch: (action: ActionType) => void

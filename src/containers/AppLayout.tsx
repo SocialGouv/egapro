@@ -25,6 +25,8 @@ import Footer from "../components/Footer"
 import GererUtilisateursPage from "../views/private/GererUtilisateursPage"
 import ResetPage from "../views/ResetPage"
 import GenererTokenUtilisateurPage from "../views/private/GenererTokenUtilisateurPage"
+import MesDeclarations from "../views/private/MesDeclarations"
+import ObjectifsMesuresPage from "../views/private/ObjectifsMesuresPage"
 
 interface Props {
   state: AppState | undefined
@@ -42,7 +44,7 @@ function PrivateRoute({ children, staffOnly, ...rest }: RouteProps & { staffOnly
   if (staffOnly) {
     if (!staff) {
       return isAuthenticated ? (
-        <Redirect to="/tableauDeBord/mes-entreprises" />
+        <Redirect to="/tableauDeBord/mes-declarations" />
       ) : (
         <Redirect to="/tableauDeBord/me-connecter" />
       )
@@ -62,6 +64,12 @@ function DashboardRoutes() {
       </Route>
       <PrivateRoute path="/tableauDeBord/mes-entreprises" exact>
         <MesEntreprises />
+      </PrivateRoute>
+      <PrivateRoute path="/tableauDeBord/mes-declarations" exact>
+        <MesDeclarations />
+      </PrivateRoute>
+      <PrivateRoute path="/tableauDeBord/objectifs-mesures/:siren/:year" exact>
+        <ObjectifsMesuresPage />
       </PrivateRoute>
       <PrivateRoute path="/tableauDeBord/gerer-utilisateurs" staffOnly exact>
         <GererUtilisateursPage />

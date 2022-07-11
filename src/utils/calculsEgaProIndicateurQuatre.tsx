@@ -1,6 +1,5 @@
 import { AppState } from "../globals"
-
-import { roundDecimal } from "./helpers"
+import { roundDecimal } from "./number"
 
 //////////////////
 // INDICATEUR 4 //

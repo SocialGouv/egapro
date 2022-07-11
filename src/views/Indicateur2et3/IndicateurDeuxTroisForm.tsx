@@ -18,7 +18,6 @@ import {
   mustBeInteger,
   mustBeNumber,
 } from "../../utils/formHelpers"
-import { calendarYear, dateToString, parseDate, Year } from "../../utils/helpers"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 
 import BlocForm from "../../components/BlocForm"
@@ -32,6 +31,7 @@ import FormError from "../../components/FormError"
 import FormStack from "../../components/ds/FormStack"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import InputRadio from "../../components/ds/InputRadio"
+import { calendarYear, dateToString, parseDate, Year } from "../../utils/date"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
@@ -112,7 +112,6 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
             )}
             <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">Sur quelle période souhaitez-vous calculer votre indicateur&nbsp;?</FormLabel>
-              {console.log("values.periodeDeclaration", values.periodeDeclaration)}
               <InputRadioGroup defaultValue={values.periodeDeclaration}>
                 <Stack>
                   <InputRadio

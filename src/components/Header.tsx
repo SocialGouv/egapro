@@ -27,6 +27,7 @@ import {
 } from "@chakra-ui/react"
 
 import {
+  IconEdit,
   IconLogin,
   IconLogout,
   IconMenu,
@@ -144,6 +145,13 @@ const Header: FunctionComponent = () => {
                           icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}
                         >
                           Mes entreprises
+                        </MenuItem>
+                        <MenuItem
+                          as={RouterLink}
+                          to="/tableauDeBord/mes-declarations"
+                          icon={<IconEdit boxSize={5} color="gray.400" />}
+                        >
+                          Mes déclarations
                         </MenuItem>
                         <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
                           Déconnexion

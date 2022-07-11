@@ -1,4 +1,6 @@
+import { AppState } from "../globals"
 import { genericFetch } from "./fetcher"
+import { DeclarationTotale } from "./helpers"
 
 const commonHeaders = {
   Accept: "application/json",
@@ -12,7 +14,9 @@ const commonContentHeaders = {
 ////////////
 
 class ApiError extends Error {
-  constructor(response, jsonBody, ...params) {
+  response: Response
+  jsonBody: Record<string, any>
+  constructor(response: Response, jsonBody: Record<string, any>, ...params: any) {
     super(...params)
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, ApiError)
@@ -23,12 +27,13 @@ class ApiError extends Error {
   }
 }
 
-function checkStatusAndParseJson(response) {
+// TODO: refactor this.
+async function checkStatusAndParseJson(response: Response): Promise<any> {
   if (response.status === 204) {
     return { response }
   }
 
-  let jsonPromise = response.json() // there's always a body
+  const jsonPromise = response.json() // there's always a body
   if (response.status >= 200 && response.status < 300) {
     return jsonPromise.then((jsonBody) => ({ response, jsonBody }))
   } else {
@@ -55,7 +60,7 @@ function getOrigin() {
 
 /////////////
 
-function fetchResource(method, pathname, body) {
+async function fetchResource(method: string, pathname: string, body?: Record<string, any>) {
   const headers = body ? commonContentHeaders : commonHeaders
 
   const requestObj = {
@@ -72,22 +77,24 @@ function fetchResource(method, pathname, body) {
   return fetch(origin + pathname, requestObj).then(checkStatusAndParseJson)
 }
 
-const getResource = (pathname) => fetchResource("GET", pathname)
-const postResource = (pathname, body) => fetchResource("POST", pathname, body)
-const putResource = (pathname, body) => fetchResource("PUT", pathname, body)
+const getResource = (pathname: string) => fetchResource("GET", pathname)
+const postResource = (pathname: string, body: Record<string, any>) => fetchResource("POST", pathname, body)
+const putResource = (pathname: string, body: Record<string, any>) => fetchResource("PUT", pathname, body)
 
 /////////////
 
-export const getIndicatorsDatas = (id) => getResource(`/simulation/${id}`)
+export const getIndicatorsDatas = (id: string) => getResource(`/simulation/${id}`)
 
-export const postIndicatorsDatas = (data) => postResource("/simulation", data)
+export const postIndicatorsDatas = (data: AppState | Record<string, never>) => postResource("/simulation", data)
 
-export const putIndicatorsDatas = (id, data) => putResource(`/simulation/${id}`, { id, data })
+export const putIndicatorsDatas = (id: string, data: AppState) => putResource(`/simulation/${id}`, { id, data })
 
-export const putDeclaration = (data) =>
-  putResource(`/declaration/${data.entreprise.siren}/${data.déclaration.année_indicateurs}`, data)
+export const putDeclaration = (declaration: DeclarationTotale) => {
+  const { entreprise, déclaration } = declaration
+  return putResource(`/declaration/${entreprise.siren}/${déclaration.année_indicateurs}`, declaration)
+}
 
-export const validateSiren = (siren) => getResource(`/validate-siren?siren=${siren}`)
+export const validateSiren = (siren: string) => getResource(`/validate-siren?siren=${siren}`)
 
 /**
  * Return the owners of the given siren. This endpoint returns only if the user is granted.
@@ -96,11 +103,12 @@ export const validateSiren = (siren) => getResource(`/validate-siren?siren=${sir
  * @param {*} siren
  * @returns { owners: string[] }
  */
-export const ownersForSiren = (siren) => getResource(`/ownership/${siren}`)
+export const ownersForSiren = (siren: string) => getResource(`/ownership/${siren}`)
 
-export const resendReceipt = (siren, year) => postResource(`/declaration/${siren}/${year}/receipt`, {})
+// TODO : We made year optional, because state.informations.anneeDeclaration may be undefined in TS type. That seems not good because the endpoint expects a year.
+export const resendReceipt = (siren: string, year?: number) => postResource(`/declaration/${siren}/${year}/receipt`, {})
 
-export const sendValidationEmail = (email) =>
+export const sendValidationEmail = (email: string) =>
   postResource("/token", {
     email,
     url: `${window.location.href}?token=`,
@@ -109,9 +117,13 @@ export const sendValidationEmail = (email) =>
 export const getTokenInfo = () => getResource(`/me`)
 
 // KILL THIS ENDPOINT
-export const sendEmailIndicatorsDatas = (id, email) => postResource(`/simulation/${id}/send-code`, { email })
+export const sendEmailIndicatorsDatas = (id: string, email: string) =>
+  postResource(`/simulation/${id}/send-code`, { email })
 
-export const findIndicatorsDataForRaisonSociale = (raisonSociale, { size, from, sortBy, order }) => {
+export const findIndicatorsDataForRaisonSociale = (
+  raisonSociale: string,
+  { size, from, sortBy, order }: { size: string; from: string; sortBy: string; order: string },
+) => {
   const encodedRaisonSociale = encodeURIComponent(raisonSociale)
   return getResource(`/search?q=${encodedRaisonSociale}&size=${size}&from=${from}&sortBy=${sortBy}&order=${order}`)
 }
@@ -125,7 +137,7 @@ export const findIndicatorsDataForRaisonSociale = (raisonSociale, { size, from, 
  * @param {*} email
  * @returns { token: string}
  */
-export async function generateImpersonateToken(email) {
+export async function generateImpersonateToken(email: string) {
   const origin = getOrigin()
   return genericFetch(origin + `/token?email=${email}`)
 }
