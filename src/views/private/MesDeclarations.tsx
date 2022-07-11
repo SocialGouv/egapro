@@ -15,7 +15,7 @@ const MesDeclarations: FunctionComponent = () => {
   useTitle(title)
 
   const { ownership: sirens } = useUser()
-  const orderedSirens = sirens.sort()
+  const orderedSirens = [...sirens].sort()
 
   const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
 

@@ -9,51 +9,6 @@ import { format, parseISO } from "date-fns"
 import { IconInvalid, IconValid } from "./ds/Icons"
 import { DeclarationTotale } from "../utils/helpers"
 
-// function DeclarationItem({
-//   owner,
-//   siren,
-//   removeUser,
-// }: {
-//   owner: string
-//   siren: string
-//   removeUser: (owner: string, siren: string) => void
-// }) {
-//   const { isOpen, onOpen, onClose } = useDisclosure()
-
-//   return (
-//     <ListItem key={owner} verticalAlign="center">
-//       <ListIcon as={IconDrag} color="green.500" />
-//       {owner}&nbsp;
-//       <IconButton
-//         variant="none"
-//         colorScheme="teal"
-//         aria-label="Supprimer cet utilisateur"
-//         icon={<IconDelete />}
-//         onClick={onOpen}
-//         h="6"
-//       />
-//       <Modal
-//         isOpen={isOpen}
-//         onClose={onClose}
-//         title="Supprimer l'utilisateur"
-//         footer={
-//           <>
-//             <ButtonAction
-//               colorScheme="red"
-//               onClick={() => removeUser(owner, siren)}
-//               label="Supprimer l'utilisateur"
-//               leftIcon={<IconDelete />}
-//             />
-//             <ButtonAction colorScheme="gray" onClick={onClose} label="Annuler" />
-//           </>
-//         }
-//       >
-//         <Text>Cette opération est irréversible.</Text>
-//       </Modal>
-//     </ListItem>
-//   )
-// }
-
 function formatDate(stringDate: string | undefined) {
   if (!stringDate) return ""
 
@@ -111,7 +66,6 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
               <Tbody>
                 {yearsDeclarations.map((annee: string) => (
                   <Tr key={annee}>
-                    {/* {JSON.stringify(declarations[annee].data, null, 2)} */}
                     <Td>{siren}</Td>
                     <Td>{annee}</Td>
                     <Td>{declarations[annee]?.data?.déclaration?.index}</Td>

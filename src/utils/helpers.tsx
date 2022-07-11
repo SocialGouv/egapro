@@ -370,8 +370,8 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
 }
 
 export type Indicateur2Calculable = {
-  résultat: any
-  note: any
+  résultat: number | undefined
+  note: number | undefined
   catégories: (number | undefined)[]
   population_favorable?: "hommes" | "femmes"
   objectif_de_progression?: number

@@ -37,7 +37,7 @@ import { putDeclaration } from "../../utils/api"
 import ButtonAction from "../../components/ds/ButtonAction"
 
 const required_error = "Requis"
-const invalid_type_error = (min = 0, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
+const invalid_type_error = (min: number, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
 
 /**
  * Zod validator for an objective indicator.
@@ -46,7 +46,7 @@ const invalid_type_error = (min = 0, max: number) => `L'objectif doit être un n
  * @param max The maximum value for this in ddicator.
  * @param nonCalculable If true, the value is not calculable.
  */
-const objectifValidator = (originValue = 0, max: number, nonCalculable = false) =>
+const objectifValidator = (originValue: number, max: number, nonCalculable = false) =>
   nonCalculable || originValue === max
     ? z.undefined()
     : z
@@ -249,7 +249,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   }) => {
     let augmentationInputs: Record<string, any> = {
       objectifIndicateurDeuxTrois: objectifValidator(
-        noteIndicateurDeuxTrois,
+        noteIndicateurDeuxTrois || 0,
         MAX_NOTES_INDICATEURS["indicateurDeuxTrois"],
         indicateurDeuxTroisNonCalculable,
       ),
@@ -257,12 +257,12 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     if (trancheEffectifs !== "50 à 250") {
       augmentationInputs = {
         objectifIndicateurDeux: objectifValidator(
-          noteIndicateurDeux,
+          noteIndicateurDeux || 0,
           MAX_NOTES_INDICATEURS["indicateurDeux"],
           indicateurDeuxNonCalculable,
         ),
         objectifIndicateurTrois: objectifValidator(
-          noteIndicateurTrois,
+          noteIndicateurTrois || 0,
           MAX_NOTES_INDICATEURS["indicateurTrois"],
           indicateurTroisNonCalculable,
         ),
@@ -273,17 +273,17 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     return z
       .object({
         objectifIndicateurUn: objectifValidator(
-          noteIndicateurUn,
+          noteIndicateurUn || 0,
           MAX_NOTES_INDICATEURS["indicateurUn"],
           indicateurUnNonCalculable,
         ),
         ...augmentationInputs,
         objectifIndicateurQuatre: objectifValidator(
-          noteIndicateurQuatre,
+          noteIndicateurQuatre || 0,
           MAX_NOTES_INDICATEURS["indicateurQuatre"],
           indicateurQuatreNonCalculable,
         ),
-        objectifIndicateurCinq: objectifValidator(noteIndicateurCinq, MAX_NOTES_INDICATEURS["indicateurCinq"]),
+        objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
         datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
         datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
         modalitesPublicationObjectifsMesures: z.unknown(),
@@ -363,10 +363,8 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
           // we don't want to block string value
           // initialValuesEqual={() => true}
         >
-          {({ handleSubmit, hasValidationErrors, submitFailed, values, errors, submitting }) => (
+          {({ handleSubmit, hasValidationErrors, submitFailed, submitting }) => (
             <form onSubmit={handleSubmit}>
-              {/* {JSON.stringify(errors, null, 2)}
-              {JSON.stringify(values, null, 2)} */}
               <FormStack>
                 {submitFailed && hasValidationErrors && (
                   <FormError message="Le formulaire ne peut pas être validé. Veuillez corriger les erreurs, svp." />
