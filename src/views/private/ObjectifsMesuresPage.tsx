@@ -14,6 +14,7 @@ import FormStack from "../../components/ds/FormStack"
 import InfoBlock from "../../components/ds/InfoBlock"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import InputGroup from "../../components/ds/InputGroup"
+import LegalText from "../../components/ds/LegalText"
 import TextareaGroup from "../../components/ds/TextareaGroup"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
@@ -35,12 +36,6 @@ import {
   updateDeclarationWithObjectifsMesures,
 } from "../../utils/helpers"
 import { useToastMessage } from "../../utils/hooks"
-
-const LegalText: React.FC = ({ children }) => (
-  <Text fontStyle="italic" fontSize="sm">
-    {children}
-  </Text>
-)
 
 const Title: React.FC = ({ children }) => (
   <Box>
