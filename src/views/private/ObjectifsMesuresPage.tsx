@@ -567,12 +567,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
               </FormStack>
 
               <ActionBar>
-                <FormSubmit
-                  label={
-                    declaration.data.déclaration.publication?.modalités_objectifs_mesures ? "Modifier" : "Déclarer"
-                  }
-                  loading={submitting}
-                />
+                <FormSubmit label="Déclarer" loading={submitting} />
                 <ButtonAction label="Retour" variant="outline" size="lg" onClick={history.goBack} />
               </ActionBar>
             </form>
