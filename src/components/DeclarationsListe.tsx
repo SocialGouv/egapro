@@ -18,20 +18,6 @@ function formatDate(stringDate: string | undefined) {
   return format(date, "dd/MM/yyyy")
 }
 
-function formatPeriodeSuffisante(declaration: any) {
-  return declaration.data?.déclaration?.période_suffisante === undefined ||
-    declaration.data?.déclaration?.période_suffisante === true
-    ? "Oui"
-    : "Non"
-}
-
-function formatPoints(declaration: any) {
-  if (declaration?.data?.déclaration?.points && declaration?.data?.déclaration?.points_calculables) {
-    return declaration?.data?.déclaration?.points + " / " + declaration?.data?.déclaration?.points_calculables
-  }
-  return ""
-}
-
 const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
   const { declarations, isLoading } = useDeclarations(siren)
 
