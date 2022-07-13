@@ -111,7 +111,7 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
         </Text>
       </GridItem>
       <GridItem textAlign="center">
-        <Text fontSize="sm">Objectif&nbsp;*</Text>
+        <Text fontSize="sm">Objectif</Text>
       </GridItem>
       <GridItem>
         <Text>{children}</Text>
@@ -378,6 +378,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
         <Form
           onSubmit={onSubmit}
           initialValues={initialValues}
+          validateOnBlur
           validate={formValidator(
             FormInputs({
               trancheEffectifs,
@@ -559,7 +560,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                         <TextareaGroup
                           label={modalite}
                           fieldName="modalitesPublicationObjectifsMesures"
-                          message={{ error: "Veuillez préciser les modalités de communication" }}
                           isReadOnly={false}
                         />
                       ))}

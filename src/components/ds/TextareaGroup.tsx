@@ -30,11 +30,12 @@ const TextareaGroup: FunctionComponent<TextareaGroupProps> = ({
 }) => (
   <Field name={fieldName} validate={required} component="textarea">
     {({ input, meta }) => (
-      <FormControl isInvalid={isFieldHasError(meta)} {...rest}>
+      <FormControl isInvalid={isFieldHasError(meta) || (meta.error && meta.touched)} {...rest}>
         <FormLabel htmlFor={input.name}>{isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}</FormLabel>
         <Textarea id={input.name} {...input} />
         {message?.help && <FormHelperText>{message.help}</FormHelperText>}
         {message?.error && <FormErrorMessage>{message.error}</FormErrorMessage>}
+        {!message?.error && meta?.error && <FormErrorMessage>{meta.error}</FormErrorMessage>}
       </FormControl>
     )}
   </Field>
