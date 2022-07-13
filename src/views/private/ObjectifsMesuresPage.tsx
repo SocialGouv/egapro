@@ -4,7 +4,7 @@ import { Form } from "react-final-form"
 import { useHistory, useParams } from "react-router-dom"
 import { z } from "zod"
 
-import type { TrancheEffectifs } from "../../globals"
+import type { TrancheEffectifsAPI } from "../../globals"
 
 import ActionBar from "../../components/ActionBar"
 import ButtonAction from "../../components/ds/ButtonAction"
@@ -24,7 +24,6 @@ import { useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration } from "../../utils/api"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
 import { dateToString, parseDate } from "../../utils/date"
-import { parseTrancheEffectifsFormValue } from "../../utils/formHelpers"
 import {
   Indicateur1Calculable,
   Indicateur2Calculable,
@@ -78,7 +77,9 @@ const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date | undefined) 
       return parsedDatePublication !== undefined && parsedDatePublication > finPeriodeReference
     },
     {
-      message: `La date ne peut précéder la fin de la période de référence (${dateToString(finPeriodeReference)})`,
+      message: `La date ne peut précéder la fin de la période de référence choisie pour le calcul de votre index (${dateToString(
+        finPeriodeReference,
+      )})`,
     },
   )
 
@@ -223,7 +224,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     publicationSurSiteInternet,
   )
 
-  const trancheEffectifs = parseTrancheEffectifsFormValue(declaration.data.entreprise.effectif.tranche)
+  const trancheEffectifs = declaration.data.entreprise.effectif.tranche as TrancheEffectifsAPI
 
   const after2021 = Boolean(
     declaration.data.déclaration.année_indicateurs && declaration.data.déclaration.année_indicateurs >= 2021,
@@ -307,7 +308,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     finPeriodeReference,
     index,
   }: {
-    trancheEffectifs: TrancheEffectifs
+    trancheEffectifs: TrancheEffectifsAPI
     finPeriodeReference: string | undefined
     index: number | undefined
   }) => {
@@ -318,7 +319,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
         indicateurDeuxTroisNonCalculable,
       ),
     }
-    if (trancheEffectifs !== "50 à 250") {
+    if (trancheEffectifs !== "50:250") {
       augmentationInputs = {
         objectifIndicateurDeux: objectifValidator(
           noteIndicateurDeux || 0,
@@ -392,7 +393,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
             <form onSubmit={handleSubmit}>
               <FormStack>
                 {submitFailed && hasValidationErrors && (
-                  <FormError message="Le formulaire ne peut pas être validé. Veuillez corriger les erreurs, svp." />
+                  <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
                 )}
 
                 {(index !== undefined || after2021) && (
@@ -427,7 +428,12 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                         Écart de rémunération objectif
                       </RowProgression>
 
-                      {trancheEffectifs === "50 à 250" ? (
+                      <LegalText>
+                        Attention, cet objectif doit permettre d’assurer le respect des dispositions relatives à
+                        l’égalité de rémunération prévues à l’article L. 3221-2 du code du travail.
+                      </LegalText>
+
+                      {trancheEffectifs === "50:250" ? (
                         <>
                           <RowProgression
                             valueOrigin={
