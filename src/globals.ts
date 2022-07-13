@@ -1,4 +1,4 @@
-// AppState is like a store which represents the state of the wizard.
+// AppState is like a store which represents the state of the wizard in the simulation. Declaration has another shape (see DeclarationTotale).
 export type AppState = {
   informations: {
     formValidated: FormState
