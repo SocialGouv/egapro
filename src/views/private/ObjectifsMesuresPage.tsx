@@ -557,12 +557,15 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                     )}
 
                     {/* Modalités pour objectifs et/ou les mesures, si index < 85 */}
-                    <TextareaGroup
-                      label={modalite}
-                      fieldName="modalitesPublicationObjectifsMesures"
-                      message={{ error: "Veuillez préciser les modalités de communication" }}
-                      isReadOnly={false}
-                    />
+                    {!publicationSurSiteInternet ||
+                      (index < 75 && (
+                        <TextareaGroup
+                          label={modalite}
+                          fieldName="modalitesPublicationObjectifsMesures"
+                          message={{ error: "Veuillez préciser les modalités de communication" }}
+                          isReadOnly={false}
+                        />
+                      ))}
                   </>
                 )}
               </FormStack>
