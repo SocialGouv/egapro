@@ -92,7 +92,7 @@ function statusDeclaration({ déclaration }: DeclarationTotale): Status {
     return "Non applicable"
   if (déclaration.année_indicateurs < 2021) return "Année non applicable"
   if (déclaration.index >= 85) return "Index supérieur à 85"
-  if (!déclaration.publication.modalités_objectifs_mesures) return "À renseigner"
+  if (!déclaration.publication.date_publication_objectifs) return "À renseigner"
   return "Renseignés"
 }
 
