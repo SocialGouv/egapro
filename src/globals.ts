@@ -76,12 +76,12 @@ export type AppState = {
   }
   informationsComplementaires: {
     formValidated: FormState
-    objectifIndicateurUn?: number
-    objectifIndicateurDeux?: number
-    objectifIndicateurTrois?: number
-    objectifIndicateurDeuxTrois?: number
-    objectifIndicateurQuatre?: number
-    objectifIndicateurCinq?: number
+    objectifIndicateurUn?: string
+    objectifIndicateurDeux?: string
+    objectifIndicateurTrois?: string
+    objectifIndicateurDeuxTrois?: string
+    objectifIndicateurQuatre?: string
+    objectifIndicateurCinq?: string
     datePublicationObjectifs?: string
     datePublicationMesures?: string
     modalitesPublicationObjectifsMesures?: string

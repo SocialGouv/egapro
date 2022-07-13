@@ -45,7 +45,6 @@ const Title: React.FC = ({ children }) => (
 )
 
 const required_error = "Requis"
-const invalid_type_error = (min: number, max: number) => `L'objectif doit être un nombre entre ${min} et ${max}`
 
 /**
  * Zod validator for an objective indicator.
@@ -61,10 +60,8 @@ const objectifValidator = (originValue: number, max: number, nonCalculable = fal
         .string({
           required_error,
         })
-        .nonempty({ message: required_error })
-        .refine((value) => Number(value) > originValue && Number(value) <= max, {
-          message: invalid_type_error(originValue + 1, max),
-        })
+        .min(1, { message: required_error })
+        .max(30, { message: "L'objectif doit être un texte de 30 caractères max." })
 
 /**
  * Zod validator in relation to the publication dates and the end of reference period.
@@ -131,7 +128,7 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
             isReadOnly={isReadOnly}
             isDisabled={isDisabled}
             textAlign="center"
-            type="number"
+            type="text"
             min={min}
             max={max}
             showError={false}
