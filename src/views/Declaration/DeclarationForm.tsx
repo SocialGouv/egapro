@@ -310,7 +310,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                 />
               )}
 
-              {after2021 && (
+              {after2021 && noteIndex !== undefined && noteIndex >= 85 && (
                 <Box my="4">
                   <Divider mt="8" mb="4" />
                   <LegalText>{legalText}</LegalText>
