@@ -8,7 +8,6 @@ import { DeclarationForAPI, useDeclarations } from "../hooks/useDeclaration"
 import { format, parseISO } from "date-fns"
 import { IconInvalid, IconValid } from "./ds/Icons"
 import { DeclarationTotale } from "../utils/helpers"
-import { TrancheEffectifs } from "../globals"
 
 function formatDate(stringDate: string | undefined) {
   if (!stringDate) return ""
