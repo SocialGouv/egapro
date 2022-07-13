@@ -35,6 +35,7 @@ import {
   updateDeclarationWithObjectifsMesures,
 } from "../../utils/helpers"
 import { useToastMessage } from "../../utils/hooks"
+import InputGroupRow from "../../components/ds/InputGroupRow"
 
 const Title: React.FC = ({ children }) => (
   <Box>
@@ -102,7 +103,7 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
   max,
 }) => {
   return (
-    <Grid templateColumns="250px 80px 80px" templateRows="1fr 2fr" gap={2} alignItems="center">
+    <Grid templateColumns="250px 80px 80px" templateRows="1fr 2fr" gap={2} alignItems="top">
       <GridItem />
       <GridItem>
         <Text fontSize="sm" textAlign="center">
@@ -122,16 +123,15 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
       </GridItem>
       <GridItem>
         {!isDisabled && (
-          <InputGroup
+          <InputGroupRow
             label=""
             fieldName={fieldName}
             isReadOnly={isReadOnly}
             isDisabled={isDisabled}
-            textAlign="center"
+            textAlign="left"
             type="text"
-            min={min}
-            max={max}
-            showError={false}
+            htmlSize={30}
+            width="auto"
           />
         )}
       </GridItem>
