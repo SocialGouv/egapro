@@ -105,7 +105,10 @@ export type AppState = {
 
 export type PeriodeDeclaration = "unePeriodeReference" | "deuxPeriodesReference" | "troisPeriodesReference"
 
+// TrancheEffectifs uniquement utilisé par les Forms. Pour le retour d'API, on a un autre format (ex: "1000:")
 export type TrancheEffectifs = "50 à 250" | "251 à 999" | "1000 et plus"
+
+export type TrancheEffectifsAPI = "50:250" | "251:999" | "1000:"
 
 export type FormState = "None" | "Valid" | "Invalid"
 
