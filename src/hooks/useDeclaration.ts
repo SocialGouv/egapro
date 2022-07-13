@@ -44,11 +44,12 @@ export function useDeclarations(siren: string): FetcherReturn & { declarations: 
 
   const isLoading = isLoading2021 && isLoading2020 && isLoading2019
 
+  // data.déclaration.brouillon == true uniquement pour les déclarations faites via la déclaration directe et non finalisées.
   return {
     declarations: {
-      ...(declaration2021 && { 2021: declaration2021 }),
-      ...(declaration2020 && { 2020: declaration2020 }),
-      ...(declaration2019 && { 2019: declaration2019 }),
+      ...(declaration2021 && declaration2021.data.déclaration.brouillon !== true && { 2021: declaration2021 }),
+      ...(declaration2020 && declaration2020.data.déclaration.brouillon !== true && { 2020: declaration2020 }),
+      ...(declaration2019 && declaration2019.data.déclaration.brouillon !== true && { 2019: declaration2019 }),
     },
     isLoading,
     error: null,

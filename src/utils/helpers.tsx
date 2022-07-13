@@ -10,6 +10,8 @@ import {
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
   DeclarationIndicateurCinqData,
+  TrancheEffectifsAPI,
+  TrancheEffectifs,
 } from "../globals"
 import { toISOString } from "./date"
 import { asPercentage } from "./number"
@@ -209,7 +211,7 @@ const buildDeclarant = (state: AppState): Declarant => {
 type Entreprise = {
   code_naf: string
   effectif: {
-    tranche: string
+    tranche: TrancheEffectifsAPI
     total?: any
   }
   code_pays?: string | undefined
@@ -232,6 +234,9 @@ type Entreprise = {
   plan_relance?: boolean | undefined
 }
 
+const trancheFromFormToApi = (tranche: TrancheEffectifs): TrancheEffectifsAPI =>
+  tranche === "50 à 250" ? "50:250" : tranche === "251 à 999" ? "251:999" : "1000:"
+
 // Entreprise
 const buildEntreprise = (state: AppState): Entreprise => {
   const entreprise: Entreprise = {
@@ -245,14 +250,8 @@ const buildEntreprise = (state: AppState): Entreprise => {
     ...(state.informationsEntreprise.codePays && { code_pays: state.informationsEntreprise.codePays }),
     code_naf: state.informationsEntreprise.codeNaf.split(" ")[0], // Only get the code like "01.22Z"
     effectif: {
-      // @ts-ignore
       ...(state.informations.periodeSuffisante && { total: state.effectif.nombreSalariesTotal }),
-      tranche:
-        state.informations.trancheEffectifs === "50 à 250"
-          ? "50:250"
-          : state.informations.trancheEffectifs === "251 à 999"
-          ? "251:999"
-          : "1000:",
+      tranche: trancheFromFormToApi(state.informations.trancheEffectifs),
     },
   }
   if (state.informationsEntreprise.structure !== "Entreprise") {

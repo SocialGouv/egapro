@@ -20,7 +20,7 @@ export const parseFloatStateValue = (value: number | undefined) =>
 
 // Boolean PARSE
 
-export const parseBooleanFormValue = (value: string) => value === "true"
+export const parseBooleanFormValue = (value: string | undefined) => value === "true"
 
 export const parseBooleanStateValue = (value: boolean) => String(value)
 
@@ -34,19 +34,6 @@ export const parsePeriodeDeclarationFormValue = (value: string): PeriodeDeclarat
       return "troisPeriodesReference" as PeriodeDeclaration
     default:
       return "unePeriodeReference" as PeriodeDeclaration
-  }
-}
-
-// TrancheEffectif PARSE
-
-export const parseTrancheEffectifsFormValue = (value: string): TrancheEffectifs => {
-  switch (value) {
-    case "251 à 999":
-      return "251 à 999" as TrancheEffectifs
-    case "1000 et plus":
-      return "1000 et plus" as TrancheEffectifs
-    default:
-      return "50 à 250" as TrancheEffectifs
   }
 }
 

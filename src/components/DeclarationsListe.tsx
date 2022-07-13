@@ -4,10 +4,11 @@ import { Spinner } from "@chakra-ui/spinner"
 import { Link as RouterLink } from "react-router-dom"
 import { Link, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from "@chakra-ui/react"
 
-import { useDeclarations } from "../hooks/useDeclaration"
+import { DeclarationForAPI, useDeclarations } from "../hooks/useDeclaration"
 import { format, parseISO } from "date-fns"
 import { IconInvalid, IconValid } from "./ds/Icons"
 import { DeclarationTotale } from "../utils/helpers"
+import { TrancheEffectifs } from "../globals"
 
 function formatDate(stringDate: string | undefined) {
   if (!stringDate) return ""
@@ -16,6 +17,12 @@ function formatDate(stringDate: string | undefined) {
   if (date.toString() === "Invalid Date") return
 
   return format(date, "dd/MM/yyyy")
+}
+
+const trancheFromApiToForm = (declaration: DeclarationForAPI | undefined): string => {
+  const tranche = declaration?.data.entreprise.effectif?.tranche
+  if (!tranche) return ""
+  return tranche === "50:250" ? "Entre 50 et 250" : tranche === "251:999" ? "Entre 251 et 999" : "1000 et plus"
 }
 
 const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
@@ -42,6 +49,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Th>SIREN</Th>
                   <Th>Année indicateurs</Th>
                   <Th>Structure</Th>
+                  <Th>Tranche d'effectifs</Th>
                   <Th>Date de déclaration</Th>
                   <Th>Index</Th>
                   <Th>Objectifs et mesures</Th>
@@ -53,6 +61,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                     <Td>{siren}</Td>
                     <Td>{annee}</Td>
                     <Td>{declarations[annee]?.data?.entreprise.ues ? "UES" : "Entreprise"}</Td>
+                    <Td>{trancheFromApiToForm(declarations[annee])}</Td>
                     <Td>{formatDate(declarations[annee]?.data?.déclaration?.date)}</Td>
                     <Td>{declarations[annee]?.data?.déclaration?.index}</Td>
                     <Td>
