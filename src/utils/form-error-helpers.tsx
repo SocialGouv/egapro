@@ -5,6 +5,6 @@ export const displayMetaErrors: FunctionComponent<{ [key: string]: string }> = (
   <Fragment>
     {Object.keys(error)
       .map((key) => error[key])
-      .join(", ")}
+      .join(". ")}
   </Fragment>
 )

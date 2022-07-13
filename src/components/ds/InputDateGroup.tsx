@@ -7,6 +7,7 @@ import { Field } from "react-final-form"
 
 import { isFieldHasError, validateDate } from "../../utils/formHelpers"
 import { dateToString, parseDate } from "../../utils/date"
+import { displayMetaErrors } from "../../utils/form-error-helpers"
 
 registerLocale("fr", fr)
 
@@ -15,15 +16,6 @@ interface InputDateGroupProps {
   fieldName: string
   isReadOnly: boolean
 }
-
-const displayMetaErrors = (error: { [key: string]: string }) =>
-  error ? (
-    <>
-      {Object.keys(error)
-        .map((key) => error[key])
-        .join(", ")}
-    </>
-  ) : null
 
 const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
   label,
