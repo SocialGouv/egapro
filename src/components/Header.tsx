@@ -24,6 +24,7 @@ import {
   MenuItem,
   MenuList,
   Button,
+  ButtonGroup,
 } from "@chakra-ui/react"
 
 import {
@@ -33,16 +34,21 @@ import {
   IconMenu,
   IconOfficeBuilding,
   IconPeople,
+  IconPeopleCircle,
   IconQuestionMarkCircle,
   IconUserGroup,
 } from "./ds/Icons"
 import Logo from "./ds/Logo"
 import { useUser } from "./AuthContext"
 import FAQ from "../views/FAQ"
+import ButtonLink from "./ds/ButtonLink"
+import ButtonAction from "./ds/ButtonAction"
 
 const Header: FunctionComponent = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
+  const [isBiggerThan640AndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isMobile] = useMediaQuery("(max-width: 639px)")
   const history = useHistory()
   const { email, logout, staff } = useUser()
@@ -124,78 +130,95 @@ const Header: FunctionComponent = () => {
             </Flex>
             <Spacer />
             <Box>
-              <Menu>
-                <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
-                  Menu
-                </MenuButton>
-                <MenuList zIndex={400}>
-                  {email ? (
-                    <>
-                      <MenuGroup title="Mon compte">
-                        <MenuItem
-                          as={RouterLink}
-                          to="/tableauDeBord/mon-profil"
-                          icon={<IconPeople boxSize={5} color="gray.400" />}
-                        >
-                          Mon Profil
-                        </MenuItem>
-                        <MenuItem
-                          as={RouterLink}
-                          to="/tableauDeBord/mes-entreprises"
-                          icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}
-                        >
-                          Mes entreprises
-                        </MenuItem>
-                        <MenuItem
-                          as={RouterLink}
-                          to="/tableauDeBord/mes-declarations"
-                          icon={<IconEdit boxSize={5} color="gray.400" />}
-                        >
-                          Mes déclarations
-                        </MenuItem>
-                        <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
-                          Déconnexion
-                        </MenuItem>
-                      </MenuGroup>
-                      {staff && (
-                        <>
-                          <MenuDivider />
-                          <MenuGroup title="Administration">
-                            <MenuItem
-                              as={RouterLink}
-                              to="/tableauDeBord/gerer-utilisateurs"
-                              icon={<IconUserGroup boxSize={5} color="gray.400" />}
-                            >
-                              Gérer utilisateurs
-                            </MenuItem>
-                          </MenuGroup>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <MenuGroup>
+              {email ? (
+                <Menu>
+                  <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
+                    Menu
+                  </MenuButton>
+                  <MenuList zIndex={400}>
+                    <MenuGroup title="Mon compte">
                       <MenuItem
                         as={RouterLink}
-                        to="/tableauDeBord/me-connecter"
-                        icon={<IconLogin boxSize={5} color="gray.400" />}
+                        to="/tableauDeBord/mon-profil"
+                        icon={<IconPeople boxSize={5} color="gray.400" />}
                       >
-                        Me connecter
+                        Mon Profil
+                      </MenuItem>
+                      <MenuItem
+                        as={RouterLink}
+                        to="/tableauDeBord/mes-entreprises"
+                        icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}
+                      >
+                        Mes entreprises
+                      </MenuItem>
+                      <MenuItem
+                        as={RouterLink}
+                        to="/tableauDeBord/mes-declarations"
+                        icon={<IconEdit boxSize={5} color="gray.400" />}
+                      >
+                        Mes déclarations
+                      </MenuItem>
+                      <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
+                        Déconnexion
                       </MenuItem>
                     </MenuGroup>
-                  )}
-
-                  {isSmallerThan1280 && (
+                    {staff && (
+                      <>
+                        <MenuDivider />
+                        <MenuGroup title="Administration">
+                          <MenuItem
+                            as={RouterLink}
+                            to="/tableauDeBord/gerer-utilisateurs"
+                            icon={<IconUserGroup boxSize={5} color="gray.400" />}
+                          >
+                            Gérer utilisateurs
+                          </MenuItem>
+                        </MenuGroup>
+                      </>
+                    )}
+                    {isSmallerThan1280 && (
+                      <>
+                        <MenuDivider />
+                        <MenuGroup title="Informations">
+                          <MenuItem onClick={onOpen} icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}>
+                            Aide
+                          </MenuItem>
+                        </MenuGroup>
+                      </>
+                    )}
+                  </MenuList>
+                </Menu>
+              ) : (
+                <ButtonGroup>
+                  {isMobile && (
                     <>
-                      <MenuDivider />
-                      <MenuGroup title="Informations">
-                        <MenuItem onClick={onOpen} icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}>
-                          Aide
-                        </MenuItem>
-                      </MenuGroup>
+                      <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
+                      <ButtonAction onClick={onOpen} label={"Aide"} variant="ghost" size="xs" />
                     </>
                   )}
-                </MenuList>
-              </Menu>
+                  {isBiggerThan640AndSmallerThan1280 && (
+                    <>
+                      <ButtonLink
+                        to="/tableauDeBord/me-connecter"
+                        label={"Me connecter"}
+                        leftIcon={<IconPeopleCircle />}
+                        variant="ghost"
+                      />
+                      <ButtonAction onClick={onOpen} label={"Aide"} leftIcon={<IconPeopleCircle />} variant="ghost" />
+                    </>
+                  )}
+                  {isLargerThan1280 && (
+                    <>
+                      <ButtonLink
+                        to="/tableauDeBord/me-connecter"
+                        label={"Me connecter"}
+                        leftIcon={<IconPeopleCircle />}
+                        variant="ghost"
+                      />
+                    </>
+                  )}
+                </ButtonGroup>
+              )}
             </Box>
           </Flex>
         </Container>
