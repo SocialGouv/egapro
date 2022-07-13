@@ -29,7 +29,6 @@ import {
 
 import {
   IconEdit,
-  IconLogin,
   IconLogout,
   IconMenu,
   IconOfficeBuilding,
@@ -47,7 +46,7 @@ import ButtonAction from "./ds/ButtonAction"
 const Header: FunctionComponent = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
-  const [isBiggerThan640AndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
+  const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isMobile] = useMediaQuery("(max-width: 639px)")
   const history = useHistory()
@@ -196,7 +195,7 @@ const Header: FunctionComponent = () => {
                       <ButtonAction onClick={onOpen} label={"Aide"} variant="ghost" size="xs" />
                     </>
                   )}
-                  {isBiggerThan640AndSmallerThan1280 && (
+                  {isBiggerThanMobileAndSmallerThan12800 && (
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
