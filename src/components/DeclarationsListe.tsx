@@ -62,7 +62,13 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                     <Td>{declarations[annee]?.data?.entreprise.ues ? "UES" : "Entreprise"}</Td>
                     <Td>{trancheFromApiToForm(declarations[annee])}</Td>
                     <Td>{formatDate(declarations[annee]?.data?.déclaration?.date)}</Td>
-                    <Td>{declarations[annee]?.data?.déclaration?.index}</Td>
+                    <Td>
+                      {declarations[annee]?.data?.déclaration?.index === undefined ? (
+                        <span title="Non calculable">NC</span>
+                      ) : (
+                        declarations[annee]?.data?.déclaration?.index
+                      )}
+                    </Td>
                     <Td>
                       {statusDeclaration(declarations[annee]?.data) === "À renseigner" ? (
                         <>
