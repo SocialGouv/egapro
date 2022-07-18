@@ -62,7 +62,7 @@ const objectifValidator = (originValue: number, max: number, nonCalculable = fal
           required_error,
         })
         .min(1, { message: required_error })
-        .max(30, { message: "L'objectif doit être un texte de 30 caractères max." })
+        .max(60, { message: "L'objectif doit être un texte de 60 caractères max." })
 
 /**
  * Zod validator in relation to the publication dates and the end of reference period.
@@ -130,7 +130,7 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
             isDisabled={isDisabled}
             textAlign="left"
             type="text"
-            htmlSize={30}
+            htmlSize={60}
             width="auto"
           />
         )}
@@ -556,15 +556,14 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                       </>
                     )}
 
-                    {/* Modalités pour objectifs et/ou les mesures, si index < 85 */}
-                    {!publicationSurSiteInternet ||
-                      (index < 75 && (
-                        <TextareaGroup
-                          label={modalite}
-                          fieldName="modalitesPublicationObjectifsMesures"
-                          isReadOnly={false}
-                        />
-                      ))}
+                    {/* Modalités pour objectifs et/ou les mesures */}
+                    {(!publicationSurSiteInternet || index < 75) && (
+                      <TextareaGroup
+                        label={modalite}
+                        fieldName="modalitesPublicationObjectifsMesures"
+                        isReadOnly={false}
+                      />
+                    )}
                   </>
                 )}
               </FormStack>
