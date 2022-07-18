@@ -117,7 +117,7 @@ const Header: FunctionComponent = () => {
                 </Link>
               </Box>
               <Box fontFamily="custom">
-                <Link as={RouterLink} to="/" fontSize={isMobile ? "lg" : "2xl"} color="gray.900">
+                <Link as={RouterLink} to="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
                   Index Egapro
                 </Link>
                 {!isMobile && (
@@ -180,7 +180,7 @@ const Header: FunctionComponent = () => {
                         <MenuDivider />
                         <MenuGroup title="Informations">
                           <MenuItem onClick={onOpen} icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}>
-                            Aide
+                            Consulter l'aide
                           </MenuItem>
                         </MenuGroup>
                       </>
@@ -188,14 +188,14 @@ const Header: FunctionComponent = () => {
                   </MenuList>
                 </Menu>
               ) : (
-                <ButtonGroup>
+                <ButtonGroup gap="0">
                   {isMobile && (
                     <>
                       <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
-                      <ButtonAction onClick={onOpen} label={"Aide"} variant="ghost" size="xs" />
+                      <ButtonAction onClick={onOpen} label={"Consulter l'aide"} variant="ghost" size="xs" />
                     </>
                   )}
-                  {isBiggerThanMobileAndSmallerThan12800 && (
+                  {isBiggerThanMobileAndSmallerThan1280 && (
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
@@ -203,7 +203,12 @@ const Header: FunctionComponent = () => {
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
                       />
-                      <ButtonAction onClick={onOpen} label={"Aide"} leftIcon={<IconPeopleCircle />} variant="ghost" />
+                      <ButtonAction
+                        onClick={onOpen}
+                        label={"Consulter l'aide"}
+                        leftIcon={<IconPeopleCircle />}
+                        variant="ghost"
+                      />
                     </>
                   )}
                   {isLargerThan1280 && (
