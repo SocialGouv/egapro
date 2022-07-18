@@ -21,7 +21,7 @@ import FormSubmit from "../../components/FormSubmit"
 import Page from "../../components/Page"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
 import { useDeclaration } from "../../hooks/useDeclaration"
-import { putDeclaration } from "../../utils/api"
+import { putDeclaration, resendReceipt } from "../../utils/api"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
 import { dateToString, parseDate } from "../../utils/date"
 import {
@@ -265,6 +265,8 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
     try {
       await putDeclaration(newDeclaration.data)
+
+      await resendReceipt(siren, Number(year))
 
       toastSuccess(finalMessage)
     } catch (error) {
