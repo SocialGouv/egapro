@@ -62,6 +62,9 @@ function DashboardRoutes() {
       <PrivateRoute path="/tableauDeBord/mes-declarations" exact>
         <MesDeclarations />
       </PrivateRoute>
+      <PrivateRoute path="/tableauDeBord/mes-declarations/:siren" exact>
+        <MesDeclarations />
+      </PrivateRoute>
       <PrivateRoute path="/tableauDeBord/objectifs-mesures/:siren/:year" exact>
         <ObjectifsMesuresPage />
       </PrivateRoute>

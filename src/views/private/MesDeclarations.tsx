@@ -8,16 +8,20 @@ import Page from "../../components/Page"
 import { useUser } from "../../components/AuthContext"
 import InfoEntreprise from "../../components/InfoEntreprise"
 import DeclarationsListe from "../../components/DeclarationsListe"
+import { useHistory, useParams } from "react-router-dom"
 
 const title = "Mes déclarations"
 
 const MesDeclarations: FunctionComponent = () => {
   useTitle(title)
+  const history = useHistory()
+
+  const { siren: sirenFromUrl } = useParams<{ siren?: string }>()
 
   const { ownership: sirens } = useUser()
   const orderedSirens = [...sirens].sort()
 
-  const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
+  const siren = sirenFromUrl || orderedSirens?.[0]
 
   return (
     <SinglePageLayout size="container.xl">
@@ -29,8 +33,8 @@ const MesDeclarations: FunctionComponent = () => {
             <FormControl id="siren">
               <FormLabel>SIREN</FormLabel>
               <Select
-                onChange={(event) => setChosenSiren(event?.target?.value)}
-                defaultValue={chosenSiren}
+                onChange={(event) => history.push(`/tableauDeBord/mes-declarations/${event?.target?.value}`)}
+                defaultValue={siren}
                 aria-label="Liste des SIREN"
               >
                 {orderedSirens.map((siren) => (
@@ -42,8 +46,8 @@ const MesDeclarations: FunctionComponent = () => {
             </FormControl>
 
             <Flex mt="6" direction="column">
-              <InfoEntreprise siren={chosenSiren} />
-              <DeclarationsListe siren={chosenSiren} />
+              <InfoEntreprise siren={siren} />
+              <DeclarationsListe siren={siren} />
             </Flex>
           </>
         )}
