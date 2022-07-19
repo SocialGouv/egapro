@@ -334,36 +334,23 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     }
     const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
 
-    return z
-      .object({
-        objectifIndicateurUn: objectifValidator(
-          noteIndicateurUn || 0,
-          MAX_NOTES_INDICATEURS["indicateurUn"],
-          indicateurUnNonCalculable,
-        ),
-        ...augmentationInputs,
-        objectifIndicateurQuatre: objectifValidator(
-          noteIndicateurQuatre || 0,
-          MAX_NOTES_INDICATEURS["indicateurQuatre"],
-          indicateurQuatreNonCalculable,
-        ),
-        objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
-        datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-        datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-        modalitesPublicationObjectifsMesures: z.unknown(),
-      })
-      .refine(
-        (val) =>
-          !index
-            ? true
-            : index < 75 || (index < 85 && publicationSurSiteInternet === false)
-            ? Boolean(val.modalitesPublicationObjectifsMesures)
-            : !val.modalitesPublicationObjectifsMesures,
-        {
-          message: "erreur sur champ modalitesPublicationObjectifsMesures",
-          path: ["modalitesPublicationObjectifsMesures"],
-        },
-      )
+    return z.object({
+      objectifIndicateurUn: objectifValidator(
+        noteIndicateurUn || 0,
+        MAX_NOTES_INDICATEURS["indicateurUn"],
+        indicateurUnNonCalculable,
+      ),
+      ...augmentationInputs,
+      objectifIndicateurQuatre: objectifValidator(
+        noteIndicateurQuatre || 0,
+        MAX_NOTES_INDICATEURS["indicateurQuatre"],
+        indicateurQuatreNonCalculable,
+      ),
+      objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
+      datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+      datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+      modalitesPublicationObjectifsMesures: z.unknown(),
+    })
   }
 
   // This is not supposed to happen due to routing but it is safer to guard against it.

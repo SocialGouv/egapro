@@ -39,8 +39,12 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
               locale="fr"
               dateFormat="dd/MM/yyyy"
               selected={parseDate(input.value)}
-              // @ts-ignore
-              onChange={(date) => (date ? input.onChange(dateToString(date)) : "")}
+              onChange={(date) => {
+                // @ts-ignore
+                if (date) input.onChange(dateToString(date))
+              }}
+              // required to see the input as touched and trigger the validation if Final form is set as validateOnBlur.
+              onCalendarClose={() => input.onBlur()}
               {...((isFieldHasError(meta) || (meta.error && meta.touched)) && { borderColor: "#E53E3E" })}
             />
             {children}
