@@ -71,8 +71,7 @@ const InputGroupRow: React.FC<InputGroupRowProps> = ({
                 autoComplete={autocomplete}
                 type={type}
                 width={width}
-                // {...(htmlSize && { htmlSize })}
-                htmlSize={30}
+                {...(htmlSize && { htmlSize })}
                 {...input}
                 {...(textAlign && { textAlign })}
                 {...(type === "number" && min && { min })}
