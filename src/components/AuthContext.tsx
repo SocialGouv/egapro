@@ -13,6 +13,7 @@ const initialContext = {
   login: (token: string) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   logout: () => {},
+  loading: true, // Required because with a hard refresh, we attempt to autologin with token in localStorage.
 }
 
 const AuthContext = React.createContext(initialContext)
@@ -29,6 +30,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
         localStorage.setItem("token", token)
 
         try {
+          setContext({ ...context, loading: true })
           const tokenInfo = await getTokenInfo()
 
           if (tokenInfo) {
@@ -40,6 +42,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
               ...(tokenInfo?.jsonBody?.ownership && { ownership: tokenInfo?.jsonBody?.ownership }),
               ...(tokenInfo?.jsonBody?.staff && { staff: tokenInfo?.jsonBody?.staff }),
               isAuthenticated: Boolean(tokenInfo?.jsonBody?.email),
+              loading: false,
             }
 
             setContext(newContext)
@@ -50,6 +53,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
           localStorage.setItem("token", "")
           localStorage.setItem("tokenInfo", "")
+          setContext({ ...context, loading: false })
         }
       }
     },
@@ -59,7 +63,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const logout = React.useCallback(function logout() {
     localStorage.setItem("token", "")
     localStorage.setItem("tokenInfo", "")
-    setContext(initialContext)
+    setContext({ ...initialContext, loading: false })
   }, [])
 
   React.useEffect(() => {
