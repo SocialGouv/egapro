@@ -43,7 +43,7 @@ function PrivateRoute({ children, staffOnly, ...rest }: RouteProps & { staffOnly
 
   if (isLoadingAuth) return <Spinner />
 
-  if (!isAuthenticated) return <Redirect to="/tableauDeBord/me-connecter" />
+  if (!isAuthenticated) return <Mire />
 
   if (staffOnly && !staff) return <Redirect to="/tableauDeBord/mes-declarations" />
 

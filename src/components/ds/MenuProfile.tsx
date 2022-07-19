@@ -22,6 +22,7 @@ const MenuLink: FunctionComponent<MenuLinkProps> = ({ children, to }) => {
 
 type MenuProfileProps = () => void
 
+// TODO : composant à supprimer ? Fait dans Header
 const MenuProfile: FunctionComponent<MenuProfileProps> = (openHelp) => {
   const history = useHistory()
   const { email, logout, staff } = useUser()
