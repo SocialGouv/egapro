@@ -19,6 +19,7 @@ export type TextareaGroupProps = FormControlProps & {
     help?: string
     error?: string
   }
+  autovalidation?: boolean // If true, the field will be validated via default validators. If no, you can use your own validator (see ObjectifsMesuresPage.tsx).
 }
 
 const TextareaGroup: FunctionComponent<TextareaGroupProps> = ({
@@ -26,9 +27,10 @@ const TextareaGroup: FunctionComponent<TextareaGroupProps> = ({
   label,
   fieldName,
   message,
+  autovalidation = true,
   ...rest
 }) => (
-  <Field name={fieldName} validate={required} component="textarea">
+  <Field name={fieldName} {...(autovalidation && { validate: required })} component="textarea">
     {({ input, meta }) => (
       <FormControl isInvalid={isFieldHasError(meta) || (meta.error && meta.touched)} {...rest}>
         <FormLabel htmlFor={input.name}>{isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}</FormLabel>

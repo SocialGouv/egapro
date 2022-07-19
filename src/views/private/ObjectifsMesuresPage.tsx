@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem, Heading, Text } from "@chakra-ui/react"
+import { Box, Grid, GridItem, Heading, Spinner, Text } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
 import { useHistory, useParams } from "react-router-dom"
@@ -36,6 +36,7 @@ import {
 } from "../../utils/helpers"
 import { useToastMessage } from "../../utils/hooks"
 import InputGroupRow from "../../components/ds/InputGroupRow"
+import ButtonLink from "../../components/ds/ButtonLink"
 
 const Title: React.FC = ({ children }) => (
   <Box>
@@ -209,9 +210,19 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   const history = useHistory()
   const { siren, year } = useParams<Params>()
 
-  const { declaration } = useDeclaration(siren, Number(year))
+  const { declaration, isLoading, isError } = useDeclaration(siren, Number(year))
 
   const { toastSuccess, toastError } = useToastMessage({ duration: 10000 })
+
+  if (isLoading) return <Spinner />
+
+  if (isError)
+    return (
+      <>
+        <Text textColor="#E53E3E">Il n'y a pas de délcaration pour ce SIREN et cette année.</Text>
+        <ButtonAction onClick={() => history.goBack()} label="Retour" />
+      </>
+    )
 
   const index = declaration.data.déclaration.index
   const publicationSurSiteInternet = Boolean(declaration?.data.déclaration?.publication?.url)
@@ -334,23 +345,49 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     }
     const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
 
-    return z.object({
-      objectifIndicateurUn: objectifValidator(
-        noteIndicateurUn || 0,
-        MAX_NOTES_INDICATEURS["indicateurUn"],
-        indicateurUnNonCalculable,
-      ),
-      ...augmentationInputs,
-      objectifIndicateurQuatre: objectifValidator(
-        noteIndicateurQuatre || 0,
-        MAX_NOTES_INDICATEURS["indicateurQuatre"],
-        indicateurQuatreNonCalculable,
-      ),
-      objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
-      datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-      datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-      modalitesPublicationObjectifsMesures: z.unknown(),
-    })
+    return z
+      .object({
+        objectifIndicateurUn: objectifValidator(
+          noteIndicateurUn || 0,
+          MAX_NOTES_INDICATEURS["indicateurUn"],
+          indicateurUnNonCalculable,
+        ),
+        ...augmentationInputs,
+        objectifIndicateurQuatre: objectifValidator(
+          noteIndicateurQuatre || 0,
+          MAX_NOTES_INDICATEURS["indicateurQuatre"],
+          indicateurQuatreNonCalculable,
+        ),
+        objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
+        datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+        datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference).optional(),
+        modalitesPublicationObjectifsMesures: z.string().optional(),
+      })
+      .refine(
+        (val) =>
+          !index
+            ? true
+            : index < 75 || (index < 85 && publicationSurSiteInternet === false)
+            ? typeof val.modalitesPublicationObjectifsMesures === "string" &&
+              val.modalitesPublicationObjectifsMesures.trim().length
+            : val.modalitesPublicationObjectifsMesures === undefined,
+        {
+          message: "Ce champ ne peut être vide",
+          path: ["modalitesPublicationObjectifsMesures"],
+        },
+      )
+      .refine(
+        (val) =>
+          !index
+            ? true
+            : index < 75
+            ? val.datePublicationMesures !== undefined
+            : val.datePublicationMesures === undefined,
+        {
+          message: "Ce champ ne peut être vide",
+          path: ["datePublicationMesures"],
+        },
+      )
   }
 
   // This is not supposed to happen due to routing but it is safer to guard against it.
@@ -376,7 +413,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
             }),
           )}
         >
-          {({ handleSubmit, hasValidationErrors, submitFailed, submitting }) => (
+          {({ handleSubmit, hasValidationErrors, submitFailed, submitting, values, errors }) => (
             <form onSubmit={handleSubmit}>
               <FormStack>
                 {submitFailed && hasValidationErrors && (
@@ -518,6 +555,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                       fieldName="datePublicationObjectifs"
                       label="Date de publication des objectifs de progression"
                       isReadOnly={false}
+                      autovalidation={false}
                     />
 
                     {index < 75 && (
@@ -526,6 +564,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                           fieldName="datePublicationMesures"
                           label="Date de publication des mesures de correction"
                           isReadOnly={false}
+                          autovalidation={false}
                         />
                       </>
                     )}
@@ -549,6 +588,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                         label={modalite}
                         fieldName="modalitesPublicationObjectifsMesures"
                         isReadOnly={false}
+                        autovalidation={false}
                       />
                     )}
                   </>
@@ -557,7 +597,13 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
               <ActionBar>
                 <FormSubmit label="Déclarer" loading={submitting} />
-                <ButtonAction label="Retour" variant="outline" size="lg" onClick={history.goBack} />
+                <ButtonLink
+                  to="/tableauDeBord/mes-declarations"
+                  label="Retour"
+                  variant="outline"
+                  colorScheme="primary"
+                  size="lg"
+                />
               </ActionBar>
             </form>
           )}

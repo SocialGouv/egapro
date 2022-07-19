@@ -15,6 +15,7 @@ interface InputDateGroupProps {
   label: string
   fieldName: string
   isReadOnly: boolean
+  autovalidation?: boolean // If true, the field will be validated via default validators. If no, you can use your own validator (see ObjectifsMesuresPage.tsx).
 }
 
 const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
@@ -22,10 +23,11 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
   fieldName,
   isReadOnly,
   children,
+  autovalidation = true,
   ...rest
 }) => {
   return (
-    <Field name={fieldName} validate={validateDate} component="input">
+    <Field name={fieldName} {...(autovalidation && { validate: validateDate })} component="input">
       {({ input, meta }) => (
         <FormControl
           isInvalid={isFieldHasError(meta) || (meta.error && meta.touched)}

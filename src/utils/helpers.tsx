@@ -142,7 +142,7 @@ export type Declaration = {
   mesures_correctives?: string | undefined
   points_calculables?: number | undefined
   points?: number | undefined
-  fin_période_référence?: string | undefined
+  fin_période_référence?: string | undefined // undefined si période_suffisante est à false.
   année_indicateurs: number | undefined
   période_suffisante: boolean | undefined
   publication?: {
