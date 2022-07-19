@@ -43,7 +43,8 @@ export type ValidatorFunction = (value: string, allValues?: any) => undefined | 
 export type AsyncValidatorFunction = (value: string, allValues?: string[]) => Promise<undefined | string>
 export type FormValidatorFunction = (values: Record<string, unknown>) => undefined | string
 
-export const required: ValidatorFunction = (value) => (value ? undefined : "Ce champ ne peut être vide")
+export const required: ValidatorFunction = (value: string | undefined) =>
+  value && value.trim && value.trim().length ? undefined : "Ce champ ne peut être vide"
 
 export const mustBeNumber: ValidatorFunction = (value) =>
   isNaN(Number(value)) ? "Renseignez une valeur numérique" : undefined
