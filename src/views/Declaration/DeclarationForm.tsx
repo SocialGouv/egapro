@@ -317,7 +317,9 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
 
                   <ButtonAction
                     label={buttonLabel}
-                    onClick={() => history.push(`/tableauDeBord/mes-declarations`)}
+                    onClick={() =>
+                      history.push(`/tableauDeBord/mes-declarations/${state.informationsEntreprise.siren}`)
+                    }
                     mt="8"
                   />
                   <Text mt="8">
