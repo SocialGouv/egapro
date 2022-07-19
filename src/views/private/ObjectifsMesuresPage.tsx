@@ -46,7 +46,7 @@ const Title: React.FC = ({ children }) => (
   </Box>
 )
 
-const required_error = "Requis"
+const required_error = "Ce champ ne peut être vide"
 
 /**
  * Zod validator for an objective indicator.
@@ -69,18 +69,21 @@ const objectifValidator = (originValue: number, max: number, nonCalculable = fal
  * Zod validator in relation to the publication dates and the end of reference period.
  */
 const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date | undefined) =>
-  z.string().refine(
-    (value) => {
-      if (!finPeriodeReference) return true
-      const parsedDatePublication = parseDate(value)
-      return parsedDatePublication !== undefined && parsedDatePublication > finPeriodeReference
-    },
-    {
-      message: `La date ne peut précéder la fin de la période de référence choisie pour le calcul de votre index (${dateToString(
-        finPeriodeReference,
-      )})`,
-    },
-  )
+  z
+    .string({ required_error })
+    .min(1, { message: required_error })
+    .refine(
+      (value) => {
+        if (!finPeriodeReference) return true
+        const parsedDatePublication = parseDate(value)
+        return parsedDatePublication !== undefined && parsedDatePublication > finPeriodeReference
+      },
+      {
+        message: `La date ne peut précéder la fin de la période de référence choisie pour le calcul de votre index (${dateToString(
+          finPeriodeReference,
+        )})`,
+      },
+    )
 
 type RowProgressionProps = {
   children: string
@@ -104,7 +107,7 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
   max,
 }) => {
   return (
-    <Grid templateColumns="250px 80px 80px" templateRows="1fr 2fr" gap={2} alignItems="top">
+    <Grid templateColumns="250px 80px 400px" templateRows="1fr 2fr" gap={2} alignItems="top">
       <GridItem />
       <GridItem>
         <Text fontSize="sm" textAlign="center">
@@ -112,7 +115,9 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
         </Text>
       </GridItem>
       <GridItem textAlign="center">
-        <Text fontSize="sm">Objectif</Text>
+        <Text fontSize="sm" textAlign="left">
+          Objectif
+        </Text>
       </GridItem>
       <GridItem>
         <Text>{children}</Text>
@@ -345,49 +350,51 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     }
     const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
 
-    return z
-      .object({
-        objectifIndicateurUn: objectifValidator(
-          noteIndicateurUn || 0,
-          MAX_NOTES_INDICATEURS["indicateurUn"],
-          indicateurUnNonCalculable,
-        ),
-        ...augmentationInputs,
-        objectifIndicateurQuatre: objectifValidator(
-          noteIndicateurQuatre || 0,
-          MAX_NOTES_INDICATEURS["indicateurQuatre"],
-          indicateurQuatreNonCalculable,
-        ),
-        objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
-        datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-        datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference).optional(),
-        modalitesPublicationObjectifsMesures: z.string().optional(),
-      })
-      .refine(
-        (val) =>
-          !index
-            ? true
-            : index < 75 || (index < 85 && publicationSurSiteInternet === false)
-            ? typeof val.modalitesPublicationObjectifsMesures === "string" &&
-              val.modalitesPublicationObjectifsMesures.trim().length
-            : val.modalitesPublicationObjectifsMesures === undefined,
-        {
-          message: "Ce champ ne peut être vide",
-          path: ["modalitesPublicationObjectifsMesures"],
-        },
-      )
-      .refine(
-        (val) =>
-          !index
-            ? true
-            : index < 75
-            ? val.datePublicationMesures !== undefined
-            : val.datePublicationMesures === undefined,
-        {
-          message: "Ce champ ne peut être vide",
-          path: ["datePublicationMesures"],
-        },
-      )
+    return z.object({
+      objectifIndicateurUn: objectifValidator(
+        noteIndicateurUn || 0,
+        MAX_NOTES_INDICATEURS["indicateurUn"],
+        indicateurUnNonCalculable,
+      ),
+      ...augmentationInputs,
+      objectifIndicateurQuatre: objectifValidator(
+        noteIndicateurQuatre || 0,
+        MAX_NOTES_INDICATEURS["indicateurQuatre"],
+        indicateurQuatreNonCalculable,
+      ),
+      objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
+      datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+      datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference).optional(),
+      modalitesPublicationObjectifsMesures: z.string().optional(),
+    })
+    // TODO : ces règles ne sont pas contrôlées par zod. Je ne sais pas pourquoi...
+    // En contournement, on se base sur l'autovalidation des champs date et textarea, qui impose qu'il y ait un contenu si le widget s'affiche.
+    // .refine(
+    //   (val) =>
+    //     !index
+    //       ? true
+    //       : index < 75 || (index < 85 && publicationSurSiteInternet === false)
+    //       ? typeof val.modalitesPublicationObjectifsMesures === "string" &&
+    //         val.modalitesPublicationObjectifsMesures.trim().length
+    //       : val.modalitesPublicationObjectifsMesures === undefined,
+    //   {
+    //     message: required_error,
+    //     path: ["modalitesPublicationObjectifsMesures"],
+    //   },
+    // )
+    // .refine(
+    //   (val) => {
+    //     return !index
+    //       ? true
+    //       : index < 75
+    //       ? val.datePublicationMesures !== undefined
+    //       : val.datePublicationMesures === undefined
+    //   },
+    //   {
+    //     message: required_error,
+    //     path: ["datePublicationMesures"],
+    //   },
+    // )
   }
 
   // This is not supposed to happen due to routing but it is safer to guard against it.
@@ -555,7 +562,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                       fieldName="datePublicationObjectifs"
                       label="Date de publication des objectifs de progression"
                       isReadOnly={false}
-                      autovalidation={false}
                     />
 
                     {index < 75 && (
@@ -564,7 +570,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                           fieldName="datePublicationMesures"
                           label="Date de publication des mesures de correction"
                           isReadOnly={false}
-                          autovalidation={false}
                         />
                       </>
                     )}
@@ -588,7 +593,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                         label={modalite}
                         fieldName="modalitesPublicationObjectifsMesures"
                         isReadOnly={false}
-                        autovalidation={false}
                       />
                     )}
                   </>
