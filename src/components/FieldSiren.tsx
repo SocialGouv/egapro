@@ -40,9 +40,10 @@ async function checkSiren(siren: string) {
     console.error(error?.response?.status, error)
 
     if (error?.response?.status === 404) {
+      if (/Le Siren saisi correspond à une entreprise fermée/i.test(error?.jsonBody?.error)) {
+        throw new Error(CLOSED_SIREN)
+      }
       throw new Error(UNKNOWN_SIREN)
-    } else if (/Le Siren saisi correspond à une entreprise fermée/i.test(error?.jsonBody?.error)) {
-      throw new Error(CLOSED_SIREN)
     }
 
     if (
