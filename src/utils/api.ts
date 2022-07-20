@@ -108,6 +108,9 @@ export const ownersForSiren = (siren: string) => getResource(`/ownership/${siren
 // TODO : We made year optional, because state.informations.anneeDeclaration may be undefined in TS type. That seems not good because the endpoint expects a year.
 export const resendReceipt = (siren: string, year?: number) => postResource(`/declaration/${siren}/${year}/receipt`, {})
 
+export const sendReceiptObjectifsMesures = (siren: string, year?: number) =>
+  postResource(`/declaration/${siren}/${year}/objectifs-receipt`, {})
+
 export const sendValidationEmail = (email: string) =>
   postResource("/token", {
     email,
