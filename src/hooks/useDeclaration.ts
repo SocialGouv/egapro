@@ -17,7 +17,30 @@ export function useDeclaration(
   siren: string,
   year: number | undefined,
 ): FetcherReturn & { declaration: DeclarationForAPI } {
-  const { data, error, mutate } = useSWR(siren && year ? `/declaration/${siren}/${year}` : null, fetcher)
+  const normalizedSiren = siren && siren.length === 9 ? siren : undefined
+
+  const { data, error, mutate } = useSWR(
+    normalizedSiren && year ? `/declaration/${normalizedSiren}/${year}` : null,
+    fetcher,
+    {
+      onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+        // Never retry on 404.
+        if (error.status === 404) return
+
+        // Never retry on 403 (Forbidden).
+        if (error.status === 403) return
+
+        // Never retry on 422 (Unprocessable Entity). SIREN seen invalid by our API.
+        if (error.status === 422) return
+
+        // Only retry up to 3 times.
+        if (retryCount >= 3) return
+
+        // Retry after 5 seconds.
+        setTimeout(() => revalidate({ retryCount }), 5000)
+      },
+    },
+  )
 
   const isLoading = !data && !error
   const isError = Boolean(error)
