@@ -54,7 +54,6 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
 
       try {
         const indicatorsData = await getIndicatorsDatas(code)
-        setLoading(false)
 
         const simuData = indicatorsData?.jsonBody?.data
 
@@ -78,6 +77,8 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
             }
           }
         }
+
+        setLoading(false)
 
         dispatch({
           type: "initiateState",
