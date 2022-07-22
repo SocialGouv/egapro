@@ -17,7 +17,30 @@ export function useDeclaration(
   siren: string,
   year: number | undefined,
 ): FetcherReturn & { declaration: DeclarationForAPI } {
-  const { data, error, mutate } = useSWR(siren && year ? `/declaration/${siren}/${year}` : null, fetcher)
+  const normalizedSiren = siren && siren.length === 9 ? siren : undefined
+
+  const { data, error, mutate } = useSWR(
+    normalizedSiren && year ? `/declaration/${normalizedSiren}/${year}` : null,
+    fetcher,
+    {
+      onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+        // Never retry on 404.
+        if (error.status === 404) return
+
+        // Never retry on 403 (Forbidden).
+        if (error.status === 403) return
+
+        // Never retry on 422 (Unprocessable Entity). SIREN seen invalid by our API.
+        if (error.status === 422) return
+
+        // Only retry up to 3 times.
+        if (retryCount >= 3) return
+
+        // Retry after 5 seconds.
+        setTimeout(() => revalidate({ retryCount }), 5000)
+      },
+    },
+  )
 
   const isLoading = !data && !error
   const isError = Boolean(error)
@@ -44,11 +67,12 @@ export function useDeclarations(siren: string): FetcherReturn & { declarations: 
 
   const isLoading = isLoading2021 && isLoading2020 && isLoading2019
 
+  // data.déclaration.brouillon == true uniquement pour les déclarations faites via la déclaration directe et non finalisées.
   return {
     declarations: {
-      ...(declaration2021 && { 2021: declaration2021 }),
-      ...(declaration2020 && { 2020: declaration2020 }),
-      ...(declaration2019 && { 2019: declaration2019 }),
+      ...(declaration2021 && declaration2021.data.déclaration.brouillon !== true && { 2021: declaration2021 }),
+      ...(declaration2020 && declaration2020.data.déclaration.brouillon !== true && { 2020: declaration2020 }),
+      ...(declaration2019 && declaration2019.data.déclaration.brouillon !== true && { 2019: declaration2019 }),
     },
     isLoading,
     error: null,

@@ -21,7 +21,7 @@ const moizeConfig = {
 
 const memoizedValidateSiren = moize(moizeConfig)(validateSiren)
 
-const NOT_ALLOWED_MESSAGE = "Vous n'êtes pas autorisé à déclarer pour ce SIREN."
+const NOT_ALLOWED_MESSAGE = "L'email saisi n'est pas rattaché au Siren de votre entreprise."
 
 const UNKNOWN_SIREN =
   "Ce SIREN n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
@@ -40,9 +40,10 @@ async function checkSiren(siren: string) {
     console.error(error?.response?.status, error)
 
     if (error?.response?.status === 404) {
+      if (/Le Siren saisi correspond à une entreprise fermée/i.test(error?.jsonBody?.error)) {
+        throw new Error(CLOSED_SIREN)
+      }
       throw new Error(UNKNOWN_SIREN)
-    } else if (/Le Siren saisi correspond à une entreprise fermée/i.test(error?.jsonBody?.error)) {
-      throw new Error(CLOSED_SIREN)
     }
 
     if (
@@ -131,17 +132,18 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({ name, label, readOnly,
           <>
             <div>{field.meta.error}</div>
             {field.meta.error === NOT_ALLOWED_MESSAGE && (
-              <div>
-                Pour faire une demande d'autorisation à l'équipe Egapro,&nbsp;
+              <div style={{ marginTop: 10 }}>
+                Pour poursuivre votre déclaration, vous devez faire une demande de rattachement en cliquant&nbsp;
                 <Link
                   isExternal
                   textDecoration="underline"
                   href={`mailto:dgt.ega-pro@travail.gouv.fr?subject=EgaPro - Demander à être déclarant d'un SIREN&body=Bonjour, je souhaite être déclarant pour le SIREN ${field.input.value}. Mon email de déclaration est ${email}. Cordialement.`}
                 >
-                  cliquez ici&nbsp;
+                  ici&nbsp;
                   <IconExternalLink sx={{ transform: "translateY(.125rem)" }} />
                 </Link>
-                .
+                &nbsp;(si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à
+                dgt.ega-pro@travail.gouv.fr).
               </div>
             )}
           </>

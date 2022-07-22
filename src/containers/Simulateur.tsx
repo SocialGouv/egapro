@@ -44,7 +44,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
   const { code } = useParams<Params>()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-  const { email, isAuthenticated } = useUser()
+  const { email, isAuthenticated, loading: isLoadingAuth } = useUser()
 
   // useEffect de récupération du token et des données de la déclaration.
   useEffect(() => {
@@ -54,7 +54,6 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
 
       try {
         const indicatorsData = await getIndicatorsDatas(code)
-        setLoading(false)
 
         const simuData = indicatorsData?.jsonBody?.data
 
@@ -79,6 +78,8 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
           }
         }
 
+        setLoading(false)
+
         dispatch({
           type: "initiateState",
           data: {
@@ -101,8 +102,8 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
       }
     }
 
-    runEffect()
-  }, [code, dispatch, isAuthenticated, email])
+    if (!isLoadingAuth) runEffect()
+  }, [code, dispatch, isAuthenticated, isLoadingAuth, email])
 
   // useEffect pour synchroniser le state dans la db, de façon asynchrone (après 2 secondes de debounce).
   useDebounceEffect(
@@ -126,6 +127,8 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
 
   // Check to see if the link is a magic link.
   useCheckTokenInURL()
+
+  if (isLoadingAuth) return <ActivityIndicator />
 
   if (!loading && errorMessage === "Veuillez renseigner votre email pour accéder à cette simulation-déclaration.") {
     return <AskEmail reason={errorMessage} />

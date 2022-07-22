@@ -1,10 +1,10 @@
-/** @jsxImportSource @emotion/react */
-import { Fragment, FunctionComponent } from "react"
+import React from "react"
 
-export const displayMetaErrors: FunctionComponent<{ [key: string]: string }> = (error) => (
-  <Fragment>
-    {Object.keys(error)
-      .map((key) => error[key])
-      .join(", ")}
-  </Fragment>
-)
+export const displayMetaErrors: React.FC<{ [key: string]: string }> = (error) =>
+  error ? (
+    <>
+      {Object.keys(error)
+        .map((key) => error[key])
+        .join(". ")}
+    </>
+  ) : null

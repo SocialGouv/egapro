@@ -54,7 +54,7 @@ const Header: FunctionComponent = () => {
 
   const disconnectUser = () => {
     logout()
-    history.go(0)
+    history.push("/tableauDeBord/me-connecter")
   }
   return (
     <>

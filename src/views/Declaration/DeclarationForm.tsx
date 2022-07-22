@@ -1,11 +1,10 @@
 import React, { FunctionComponent, useState } from "react"
-import { Form, useField } from "react-final-form"
-import { Box, Text } from "@chakra-ui/react"
+import { Form } from "react-final-form"
+import { Box, Divider, Text } from "@chakra-ui/react"
 
 import { AppState, FormState, ActionDeclarationData } from "../../globals"
 import { resendReceipt } from "../../utils/api"
-import { displayMetaErrors } from "../../utils/form-error-helpers"
-import { isFormValid, parseBooleanFormValue, parseBooleanStateValue, required } from "../../utils/formHelpers"
+import { isFormValid, parseBooleanFormValue, parseBooleanStateValue } from "../../utils/formHelpers"
 
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import ActionBar from "../../components/ActionBar"
@@ -19,21 +18,12 @@ import FormSubmit from "../../components/FormSubmit"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import ErrorMessage from "../../components/ErrorMessage"
-import { hasFieldError } from "../../components/Input"
 import FormError from "../../components/FormError"
 import { parseDate } from "../../utils/date"
 import { logToSentry } from "../../utils/sentry"
-
-const validate = (value: string) => {
-  const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
-}
+import LegalText from "../../components/ds/LegalText"
+import { useHistory } from "react-router-dom"
+import FieldPlanRelance from "../../components/FieldPlanRelance"
 
 const validateForm = ({
   finPeriodeReference,
@@ -78,6 +68,24 @@ const validateForm = ({
   }
 }
 
+function buildWordings(index: number | undefined) {
+  const legalText =
+    index === undefined || index > 85
+      ? ""
+      : index < 75
+      ? "Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises ayant obtenu un Index inférieur à 75 points doivent publier, par une communication externe et au sein de l’entreprise, les mesures de correction qu’elles ont définies par accord ou, à défaut, par décision unilatérale. Par ailleurs, celles ayant obtenu un Index inférieur à 85 points doivent fixer, également par accord ou, à défaut, par décision unilatérale, et publier des objectifs de progression de chacun des indicateurs de l’Index. Une fois l’accord ou la décision déposé, les informations relatives aux mesures de correction, les objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux services du ministre chargé du travail et au comité social et économique."
+      : "Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises ayant obtenu un Index inférieur à 85 points doivent fixer par accord ou, à défaut, par décision unilatérale, et publier des objectifs de progression de chacun des indicateurs de l’Index. Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux services du ministre chargé du travail et au comité social et économique."
+
+  const buttonLabel =
+    index === undefined || index > 85
+      ? ""
+      : index < 75
+      ? "Déclarer les objectifs de progression et les mesures de correction maintenant"
+      : "Déclarer les objectifs de progression maintenant"
+
+  return { legalText, buttonLabel }
+}
+
 interface DeclarationFormProps {
   state: AppState
   noteIndex: number | undefined
@@ -97,6 +105,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   apiError,
   declaring,
 }) => {
+  const history = useHistory()
+
   const declaration = state.declaration
   const indicateurUnParCSP = state.indicateurUn.csp
   const finPeriodeReference = state.informations.finPeriodeReference
@@ -118,6 +128,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
     modalitesPublication: declaration.modalitesPublication,
     planRelance: declaration.planRelance !== undefined ? parseBooleanStateValue(declaration.planRelance) : undefined,
   }
+
+  const { legalText, buttonLabel } = buildWordings(noteIndex)
 
   const saveForm = (formData: any) => {
     const {
@@ -280,13 +292,43 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
               </>
             )}
             {readOnly && (
-              <Text fontSize="sm" fontWeight="bold">
-                Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}
+              <Text fontWeight="bold">
+                Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}.
               </Text>
             )}
           </FormStack>
           {readOnly ? (
             <>
+              {declaration.formValidated === "Valid" && (
+                <ButtonAction
+                  leftIcon={<IconEdit />}
+                  label="Modifier les données saisies"
+                  onClick={() => validateDeclaration("None")}
+                  variant="link"
+                  size="sm"
+                  mt="4"
+                />
+              )}
+
+              {after2021 && noteIndex !== undefined && noteIndex < 85 && (
+                <Box my="4">
+                  <Divider mt="8" mb="4" />
+                  <LegalText>{legalText}</LegalText>
+
+                  <ButtonAction
+                    label={buttonLabel}
+                    onClick={() =>
+                      history.push(`/tableauDeBord/mes-declarations/${state.informationsEntreprise.siren}`)
+                    }
+                    mt="8"
+                  />
+                  <Text mt="8">
+                    Si vous souhaitez les déclarer ultérieurement, vous pouvez vous connecter à votre espace et aller
+                    sur "Mes déclarations"
+                  </Text>
+                </Box>
+              )}
+
               <ActionBar>
                 <ButtonAction
                   onClick={onClick}
@@ -295,25 +337,13 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   loading={loading}
                   variant="outline"
                 />
-                {declaration.formValidated === "Valid" && (
-                  <ButtonAction
-                    leftIcon={<IconEdit />}
-                    label="Modifier les données saisies"
-                    onClick={() => validateDeclaration("None")}
-                    variant="link"
-                    size="sm"
-                  />
-                )}
-              </ActionBar>
-              <Box mt={6}>
                 <ButtonAction
                   onClick={resetDeclaration}
-                  size="lg"
                   label="Effectuer une nouvelle simulation et déclaration"
                   disabled={loading}
                   loading={loading}
                 />
-              </Box>
+              </ActionBar>
             </>
           ) : (
             <ActionBar>
@@ -323,46 +353,6 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
         </form>
       )}
     </Form>
-  )
-}
-
-const FieldPlanRelance = ({
-  readOnly,
-  after2021,
-  isUES,
-}: {
-  readOnly: boolean
-  after2021: boolean
-  isUES: boolean
-}) => {
-  const field = useField("planRelance", { validate })
-  const error = hasFieldError(field.meta)
-
-  if (!after2021) return null
-
-  return (
-    <>
-      <RadiosBoolean
-        fieldName="planRelance"
-        value={field.input.value}
-        readOnly={readOnly}
-        label={
-          isUES ? (
-            <>
-              Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, en 2021
-              et/ou 2022, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission
-              « Plan de relance »&nbsp;?
-            </>
-          ) : (
-            <>
-              Avez-vous bénéficié, en 2021 et/ou 2022, d'une aide prévue par la loi du 29 décembre 2020 de finances pour
-              2021 au titre de la mission « Plan de relance »&nbsp;?
-            </>
-          )
-        }
-      />
-      <p>{error && displayMetaErrors(field.meta.error)}</p>
-    </>
   )
 }
 

@@ -10,6 +10,8 @@ import {
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
   DeclarationIndicateurCinqData,
+  TrancheEffectifsAPI,
+  TrancheEffectifs,
 } from "../globals"
 import { toISOString } from "./date"
 import { asPercentage } from "./number"
@@ -140,7 +142,7 @@ export type Declaration = {
   mesures_correctives?: string | undefined
   points_calculables?: number | undefined
   points?: number | undefined
-  fin_période_référence?: string | undefined
+  fin_période_référence?: string | undefined // undefined si période_suffisante est à false.
   année_indicateurs: number | undefined
   période_suffisante: boolean | undefined
   publication?: {
@@ -209,7 +211,7 @@ const buildDeclarant = (state: AppState): Declarant => {
 type Entreprise = {
   code_naf: string
   effectif: {
-    tranche: string
+    tranche: TrancheEffectifsAPI
     total?: any
   }
   code_pays?: string | undefined
@@ -232,6 +234,9 @@ type Entreprise = {
   plan_relance?: boolean | undefined
 }
 
+const trancheFromFormToApi = (tranche: TrancheEffectifs): TrancheEffectifsAPI =>
+  tranche === "50 à 250" ? "50:250" : tranche === "251 à 999" ? "251:999" : "1000:"
+
 // Entreprise
 const buildEntreprise = (state: AppState): Entreprise => {
   const entreprise: Entreprise = {
@@ -245,14 +250,8 @@ const buildEntreprise = (state: AppState): Entreprise => {
     ...(state.informationsEntreprise.codePays && { code_pays: state.informationsEntreprise.codePays }),
     code_naf: state.informationsEntreprise.codeNaf.split(" ")[0], // Only get the code like "01.22Z"
     effectif: {
-      // @ts-ignore
       ...(state.informations.periodeSuffisante && { total: state.effectif.nombreSalariesTotal }),
-      tranche:
-        state.informations.trancheEffectifs === "50 à 250"
-          ? "50:250"
-          : state.informations.trancheEffectifs === "251 à 999"
-          ? "251:999"
-          : "1000:",
+      tranche: trancheFromFormToApi(state.informations.trancheEffectifs),
     },
   }
   if (state.informationsEntreprise.structure !== "Entreprise") {
@@ -319,7 +318,7 @@ export type Indicateur1Calculable = {
       "50:"?: number | undefined
     }
   }>
-  objectif_de_progression?: number
+  objectif_de_progression?: string
 }
 
 type Indicateur1 = IndicateurNonCalculable | Indicateur1Calculable
@@ -363,7 +362,7 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
   }
 
   if (state.informationsComplementaires.objectifIndicateurUn) {
-    indicateur1.objectif_de_progression = Number(state.informationsComplementaires.objectifIndicateurUn)
+    indicateur1.objectif_de_progression = state.informationsComplementaires.objectifIndicateurUn
   }
 
   return indicateur1
@@ -374,7 +373,7 @@ export type Indicateur2Calculable = {
   note: number | undefined
   catégories: (number | undefined)[]
   population_favorable?: "hommes" | "femmes"
-  objectif_de_progression?: number
+  objectif_de_progression?: string
 }
 
 type Indicateur2 = IndicateurNonCalculable | Indicateur2Calculable
@@ -394,7 +393,7 @@ const buildIndicateur2 = (state: AppState): Indicateur2 => {
   }
 
   if (state.informationsComplementaires.objectifIndicateurDeux) {
-    indicateur2.objectif_de_progression = Number(state.informationsComplementaires.objectifIndicateurDeux)
+    indicateur2.objectif_de_progression = state.informationsComplementaires.objectifIndicateurDeux
   }
 
   return indicateur2
@@ -405,7 +404,7 @@ export type Indicateur3Calculable = {
   note: number | undefined
   catégories: (number | undefined)[]
   population_favorable?: "hommes" | "femmes"
-  objectif_de_progression?: number
+  objectif_de_progression?: string
 }
 
 type Indicateur3 = IndicateurNonCalculable | Indicateur3Calculable
@@ -425,7 +424,7 @@ const buildIndicateur3 = (state: AppState): Indicateur3 => {
   }
 
   if (state.informationsComplementaires.objectifIndicateurTrois) {
-    indicateur3.objectif_de_progression = Number(state.informationsComplementaires.objectifIndicateurTrois)
+    indicateur3.objectif_de_progression = state.informationsComplementaires.objectifIndicateurTrois
   }
 
   return indicateur3
@@ -438,7 +437,7 @@ export type Indicateur2et3Calculable = {
   note_nombre_salariés: number | undefined
   note: number | undefined
   population_favorable?: "femmes" | "hommes" | undefined
-  objectif_de_progression?: number
+  objectif_de_progression?: string
 }
 
 type Indicateur2et3 = IndicateurNonCalculable | Indicateur2et3Calculable
@@ -462,7 +461,7 @@ const buildIndicateur2et3 = (state: AppState): Indicateur2et3 => {
   }
 
   if (state.informationsComplementaires.objectifIndicateurDeuxTrois) {
-    indicateur2et3.objectif_de_progression = Number(state.informationsComplementaires.objectifIndicateurDeuxTrois)
+    indicateur2et3.objectif_de_progression = state.informationsComplementaires.objectifIndicateurDeuxTrois
   }
 
   return indicateur2et3
@@ -471,7 +470,7 @@ const buildIndicateur2et3 = (state: AppState): Indicateur2et3 => {
 export type Indicateur4Calculable = {
   résultat: number | undefined
   note: number | undefined
-  objectif_de_progression?: number
+  objectif_de_progression?: string
 }
 
 type Indicateur4 = IndicateurNonCalculable | Indicateur4Calculable
@@ -490,7 +489,7 @@ const buildIndicateur4 = (state: AppState): Indicateur4 => {
   }
 
   if (state.informationsComplementaires.objectifIndicateurQuatre) {
-    indicateur4.objectif_de_progression = Number(state.informationsComplementaires.objectifIndicateurQuatre)
+    indicateur4.objectif_de_progression = state.informationsComplementaires.objectifIndicateurQuatre
   }
 
   return indicateur4
@@ -500,7 +499,7 @@ export type Indicateur5 = {
   population_favorable?: "femmes" | "hommes" | undefined
   résultat: number | undefined
   note: number | undefined
-  objectif_de_progression?: number
+  objectif_de_progression?: string
 }
 
 // Indicateur 5 relatif au nombre de salariés du sexe sous- représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
@@ -515,7 +514,7 @@ const buildIndicateur5 = (state: AppState): Indicateur5 => {
   }
 
   if (state.informationsComplementaires.objectifIndicateurCinq) {
-    indicateur5.objectif_de_progression = Number(state.informationsComplementaires.objectifIndicateurCinq)
+    indicateur5.objectif_de_progression = state.informationsComplementaires.objectifIndicateurCinq
   }
 
   return indicateur5
@@ -682,7 +681,7 @@ export function updateDeclarationWithObjectifsMesures(
     ? null
     : {
         ...declaration.data.indicateurs.rémunérations,
-        ...(data.objectifIndicateurUn && { objectif_de_progression: Number(data.objectifIndicateurUn) }),
+        ...(data.objectifIndicateurUn && { objectif_de_progression: data.objectifIndicateurUn }),
       }
 
   const augmentations = !declaration.data.indicateurs?.augmentations
@@ -691,7 +690,7 @@ export function updateDeclarationWithObjectifsMesures(
     ? null
     : {
         ...declaration.data.indicateurs.augmentations,
-        ...(data.objectifIndicateurDeux && { objectif_de_progression: Number(data.objectifIndicateurDeux) }),
+        ...(data.objectifIndicateurDeux && { objectif_de_progression: data.objectifIndicateurDeux }),
       }
 
   const promotions = !declaration.data.indicateurs?.promotions
@@ -700,7 +699,7 @@ export function updateDeclarationWithObjectifsMesures(
     ? null
     : {
         ...declaration.data.indicateurs.promotions,
-        ...(data.objectifIndicateurTrois && { objectif_de_progression: Number(data.objectifIndicateurTrois) }),
+        ...(data.objectifIndicateurTrois && { objectif_de_progression: data.objectifIndicateurTrois }),
       }
 
   const augmentations_et_promotions = !declaration.data.indicateurs?.augmentations_et_promotions
@@ -709,7 +708,7 @@ export function updateDeclarationWithObjectifsMesures(
     ? null
     : {
         ...declaration.data.indicateurs.augmentations_et_promotions,
-        ...(data.objectifIndicateurDeuxTrois && { objectif_de_progression: Number(data.objectifIndicateurDeuxTrois) }),
+        ...(data.objectifIndicateurDeuxTrois && { objectif_de_progression: data.objectifIndicateurDeuxTrois }),
       }
 
   const congés_maternité = !declaration.data.indicateurs
@@ -718,14 +717,14 @@ export function updateDeclarationWithObjectifsMesures(
     ? null
     : {
         ...declaration.data.indicateurs.congés_maternité,
-        ...(data.objectifIndicateurQuatre && { objectif_de_progression: Number(data.objectifIndicateurQuatre) }),
+        ...(data.objectifIndicateurQuatre && { objectif_de_progression: data.objectifIndicateurQuatre }),
       }
 
   const hautes_rémunérations = !declaration.data.indicateurs
     ? null
     : {
         ...declaration.data.indicateurs.hautes_rémunérations,
-        ...(data.objectifIndicateurCinq && { objectif_de_progression: Number(data.objectifIndicateurCinq) }),
+        ...(data.objectifIndicateurCinq && { objectif_de_progression: data.objectifIndicateurCinq }),
       }
 
   const res: DeclarationForAPI = {

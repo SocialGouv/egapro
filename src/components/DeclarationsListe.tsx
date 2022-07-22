@@ -4,7 +4,7 @@ import { Spinner } from "@chakra-ui/spinner"
 import { Link as RouterLink } from "react-router-dom"
 import { Link, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from "@chakra-ui/react"
 
-import { useDeclarations } from "../hooks/useDeclaration"
+import { DeclarationForAPI, useDeclarations } from "../hooks/useDeclaration"
 import { format, parseISO } from "date-fns"
 import { IconInvalid, IconValid } from "./ds/Icons"
 import { DeclarationTotale } from "../utils/helpers"
@@ -18,23 +18,14 @@ function formatDate(stringDate: string | undefined) {
   return format(date, "dd/MM/yyyy")
 }
 
-function formatPeriodeSuffisante(declaration: any) {
-  return declaration.data?.déclaration?.période_suffisante === undefined ||
-    declaration.data?.déclaration?.période_suffisante === true
-    ? "Oui"
-    : "Non"
-}
-
-function formatPoints(declaration: any) {
-  if (declaration?.data?.déclaration?.points && declaration?.data?.déclaration?.points_calculables) {
-    return declaration?.data?.déclaration?.points + " / " + declaration?.data?.déclaration?.points_calculables
-  }
-  return ""
+const trancheFromApiToForm = (declaration: DeclarationForAPI | undefined): string => {
+  const tranche = declaration?.data.entreprise.effectif?.tranche
+  if (!tranche) return ""
+  return tranche === "50:250" ? "Entre 50 et 250" : tranche === "251:999" ? "Entre 251 et 999" : "1000 et plus"
 }
 
 const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
   const { declarations, isLoading } = useDeclarations(siren)
-  // useSoloToastMessage("declarations-liste-toast", message)
 
   const yearsDeclarations = Object.keys(declarations).sort().reverse()
 
@@ -56,10 +47,10 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                 <Tr>
                   <Th>SIREN</Th>
                   <Th>Année indicateurs</Th>
-                  <Th>Index</Th>
-                  <Th>Points</Th>
+                  <Th>Structure</Th>
+                  <Th>Tranche d'effectifs</Th>
                   <Th>Date de déclaration</Th>
-                  <Th>Période suffisante</Th>
+                  <Th>Index</Th>
                   <Th>Objectifs et mesures</Th>
                 </Tr>
               </Thead>
@@ -68,10 +59,16 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Tr key={annee}>
                     <Td>{siren}</Td>
                     <Td>{annee}</Td>
-                    <Td>{declarations[annee]?.data?.déclaration?.index}</Td>
-                    <Td>{formatPoints(declarations[annee])}</Td>
+                    <Td>{declarations[annee]?.data?.entreprise.ues ? "UES" : "Entreprise"}</Td>
+                    <Td>{trancheFromApiToForm(declarations[annee])}</Td>
                     <Td>{formatDate(declarations[annee]?.data?.déclaration?.date)}</Td>
-                    <Td>{formatPeriodeSuffisante(declarations[annee])}</Td>
+                    <Td>
+                      {declarations[annee]?.data?.déclaration?.index === undefined ? (
+                        <span title="Non calculable">NC</span>
+                      ) : (
+                        declarations[annee]?.data?.déclaration?.index
+                      )}
+                    </Td>
                     <Td>
                       {statusDeclaration(declarations[annee]?.data) === "À renseigner" ? (
                         <>
@@ -109,7 +106,7 @@ function statusDeclaration({ déclaration }: DeclarationTotale): Status {
     return "Non applicable"
   if (déclaration.année_indicateurs < 2021) return "Année non applicable"
   if (déclaration.index >= 85) return "Index supérieur à 85"
-  if (!déclaration.publication.modalités_objectifs_mesures) return "À renseigner"
+  if (!déclaration.publication.date_publication_objectifs) return "À renseigner"
   return "Renseignés"
 }
 

@@ -13,6 +13,7 @@ const initialContext = {
   login: (token: string) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   logout: () => {},
+  loading: false,
 }
 
 const AuthContext = React.createContext(initialContext)
@@ -25,6 +26,9 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
   const login = React.useCallback(
     async (token: string) => {
+      let newContext: typeof initialContext = { ...context, loading: true }
+      setContext(newContext)
+
       if (token) {
         localStorage.setItem("token", token)
 
@@ -34,15 +38,13 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
           if (tokenInfo) {
             localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "")
 
-            const newContext = {
+            newContext = {
               ...context,
               ...(tokenInfo?.jsonBody?.email && { email: tokenInfo?.jsonBody?.email }),
               ...(tokenInfo?.jsonBody?.ownership && { ownership: tokenInfo?.jsonBody?.ownership }),
               ...(tokenInfo?.jsonBody?.staff && { staff: tokenInfo?.jsonBody?.staff }),
               isAuthenticated: Boolean(tokenInfo?.jsonBody?.email),
             }
-
-            setContext(newContext)
           }
         } catch (error) {
           // If token has expired, we remove it from localStorage and state.
@@ -52,6 +54,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
           localStorage.setItem("tokenInfo", "")
         }
       }
+      setContext({ ...newContext, loading: false })
     },
     [context],
   )
@@ -59,7 +62,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const logout = React.useCallback(function logout() {
     localStorage.setItem("token", "")
     localStorage.setItem("tokenInfo", "")
-    setContext(initialContext)
+    setContext({ ...initialContext, loading: false })
   }, [])
 
   React.useEffect(() => {

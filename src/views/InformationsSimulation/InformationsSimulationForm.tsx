@@ -10,7 +10,6 @@ import {
   parseBooleanStateValue,
   parseIntFormValue,
   parseIntStateValue,
-  parseTrancheEffectifsFormValue,
   required,
 } from "../../utils/formHelpers"
 
@@ -134,12 +133,12 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
         : undefined,
   }
 
-  const saveForm = (formData: any) => {
+  const saveForm = (formData: typeof initialValues) => {
     const { nomEntreprise, trancheEffectifs, anneeDeclaration, finPeriodeReference, periodeSuffisante } = formData
 
     updateInformationsSimulation({
       nomEntreprise,
-      trancheEffectifs: parseTrancheEffectifsFormValue(trancheEffectifs),
+      trancheEffectifs,
       anneeDeclaration: parseIntFormValue(anneeDeclaration),
       ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
       periodeSuffisante: parseBooleanFormValue(periodeSuffisante),

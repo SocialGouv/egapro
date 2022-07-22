@@ -7,6 +7,7 @@ import { Field } from "react-final-form"
 
 import { isFieldHasError, validateDate } from "../../utils/formHelpers"
 import { dateToString, parseDate } from "../../utils/date"
+import { displayMetaErrors } from "../../utils/form-error-helpers"
 
 registerLocale("fr", fr)
 
@@ -14,26 +15,19 @@ interface InputDateGroupProps {
   label: string
   fieldName: string
   isReadOnly: boolean
+  autovalidation?: boolean // If true, the field will be validated via default validators. If no, you can use your own validator (see ObjectifsMesuresPage.tsx).
 }
-
-const displayMetaErrors = (error: { [key: string]: string }) =>
-  error ? (
-    <>
-      {Object.keys(error)
-        .map((key) => error[key])
-        .join(", ")}
-    </>
-  ) : null
 
 const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
   label,
   fieldName,
   isReadOnly,
   children,
+  autovalidation = true,
   ...rest
 }) => {
   return (
-    <Field name={fieldName} validate={validateDate} component="input">
+    <Field name={fieldName} {...(autovalidation && { validate: validateDate })} component="input">
       {({ input, meta }) => (
         <FormControl
           isInvalid={isFieldHasError(meta) || (meta.error && meta.touched)}
@@ -47,8 +41,12 @@ const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
               locale="fr"
               dateFormat="dd/MM/yyyy"
               selected={parseDate(input.value)}
-              // @ts-ignore
-              onChange={(date) => (date ? input.onChange(dateToString(date)) : "")}
+              onChange={(date) => {
+                // @ts-ignore
+                if (date) input.onChange(dateToString(date))
+              }}
+              // required to see the input as touched and trigger the validation if Final form is set as validateOnBlur.
+              onCalendarClose={() => input.onBlur()}
               {...((isFieldHasError(meta) || (meta.error && meta.touched)) && { borderColor: "#E53E3E" })}
             />
             {children}
