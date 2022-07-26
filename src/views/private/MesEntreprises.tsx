@@ -1,13 +1,14 @@
+import { Flex, FormControl, FormLabel, Select } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
-import { Select, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react"
 
 import { useTitle } from "../../utils/hooks"
 
-import { SinglePageLayout } from "../../containers/SinglePageLayout"
-import Page from "../../components/Page"
 import { useUser } from "../../components/AuthContext"
 import InfoEntreprise from "../../components/InfoEntreprise"
+import NoSiren from "../../components/ds/NoSiren"
+import Page from "../../components/Page"
 import UtilisateursEntreprise from "../../components/UtilisateursEntreprise"
+import { SinglePageLayout } from "../../containers/SinglePageLayout"
 
 const title = "Mes entreprises"
 
@@ -23,7 +24,7 @@ const MesEntreprises: FunctionComponent = () => {
     <SinglePageLayout>
       <Page title={title}>
         {!sirens?.length ? (
-          <Text>Vous ne gérez pas encore d'entreprise.</Text>
+          <NoSiren />
         ) : (
           <>
             <FormControl id="siren">

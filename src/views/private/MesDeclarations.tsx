@@ -1,14 +1,15 @@
+import { Flex, FormControl, FormLabel, Select } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
-import { Select, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react"
+import { useHistory, useParams } from "react-router-dom"
 
 import { useTitle } from "../../utils/hooks"
 
-import { SinglePageLayout } from "../../containers/SinglePageLayout"
-import Page from "../../components/Page"
 import { useUser } from "../../components/AuthContext"
-import InfoEntreprise from "../../components/InfoEntreprise"
 import DeclarationsListe from "../../components/DeclarationsListe"
-import { useHistory, useParams } from "react-router-dom"
+import InfoEntreprise from "../../components/InfoEntreprise"
+import NoSiren from "../../components/ds/NoSiren"
+import Page from "../../components/Page"
+import { SinglePageLayout } from "../../containers/SinglePageLayout"
 
 const title = "Mes déclarations"
 
@@ -27,7 +28,7 @@ const MesDeclarations: FunctionComponent = () => {
     <SinglePageLayout size="container.xl">
       <Page title={title}>
         {!sirens?.length ? (
-          <Text>Vous ne gérez pas encore d'entreprise.</Text>
+          <NoSiren />
         ) : (
           <>
             <FormControl id="siren">
