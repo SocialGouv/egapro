@@ -111,8 +111,6 @@ function buildHelpers(state: AppState) {
     nombreCoefficients: state.indicateurUn.csp ? undefined : state.indicateurUn.coefficient.length,
     nonCalculable: !effectifsIndicateurUnCalculable,
     motifNonCalculable: !effectifsIndicateurUnCalculable ? "egvi40pcet" : "",
-    // TODO: demander le motif de non calculabilité si "autre" ?
-    motifNonCalculablePrecision: "",
     remunerationAnnuelle: calculEcartTauxRemunerationParTrancheAgeCSP(state.indicateurUn.remunerationAnnuelle),
     coefficient: calculEcartTauxRemunerationParTrancheAgeCoef(state.indicateurUn.coefficient),
     resultatFinal: indicateurEcartRemuneration,
@@ -127,8 +125,6 @@ function buildHelpers(state: AppState) {
       : state.indicateurDeux.presenceAugmentation
       ? ""
       : "absaugi",
-    // TODO: demander le motif de non calculabilité si "autre" ?
-    motifNonCalculablePrecision: "",
     tauxAugmentation: calculEcartTauxAugmentationParCSP(state.indicateurDeux.tauxAugmentation),
     resultatFinal: indicateurEcartAugmentation,
     sexeSurRepresente: indicateurDeuxSexeSurRepresente,
@@ -143,8 +139,6 @@ function buildHelpers(state: AppState) {
       : state.indicateurTrois.presencePromotion
       ? ""
       : "absprom",
-    // TODO: demander le motif de non calculabilité si "autre" ?
-    motifNonCalculablePrecision: "",
     tauxPromotion: calculEcartTauxPromotionParCSP(state.indicateurTrois.tauxPromotion),
     resultatFinal: indicateurEcartPromotion,
     sexeSurRepresente: indicateurTroisSexeSurRepresente,
@@ -159,8 +153,6 @@ function buildHelpers(state: AppState) {
       : state.indicateurDeuxTrois.presenceAugmentationPromotion
       ? ""
       : "absaugi",
-    // TODO: demander le motif de non calculabilité si "autre" ?
-    motifNonCalculablePrecision: "",
     resultatFinalEcart: indicateurEcartAugmentationPromotion,
     resultatFinalNombreSalaries: indicateurEcartNombreEquivalentSalaries,
     sexeSurRepresente: indicateurDeuxTroisSexeSurRepresente,
@@ -177,8 +169,6 @@ function buildHelpers(state: AppState) {
         ? "absaugpdtcm"
         : ""
       : "absretcm",
-    // TODO: demander le motif de non calculabilité si "autre" ?
-    motifNonCalculablePrecision: "",
     resultatFinal: indicateurEcartNombreSalarieesAugmentees,
     noteFinale: noteIndicateurQuatre,
   }

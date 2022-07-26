@@ -294,7 +294,6 @@ export type DeclarationIndicateurUnData = {
   nombreCoefficients: number | undefined
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet"
-  motifNonCalculablePrecision: string
   remunerationAnnuelle: Array<GroupeIndicateurUn>
   coefficient: Array<GroupeCoefficient>
   resultatFinal: number | undefined
@@ -310,7 +309,7 @@ export type ActionIndicateurDeuxData = {
 export type DeclarationIndicateurDeuxData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet" | "absaugi"
-  motifNonCalculablePrecision: string
+
   tauxAugmentation: Array<GroupeIndicateurDeux>
   resultatFinal: number | undefined
   sexeSurRepresente: undefined | "femmes" | "hommes"
@@ -326,7 +325,7 @@ export type ActionIndicateurTroisData = {
 export type DeclarationIndicateurTroisData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "egvi40pcet" | "absprom"
-  motifNonCalculablePrecision: string
+
   tauxPromotion: Array<GroupeIndicateurTrois>
   resultatFinal: number | undefined
   sexeSurRepresente: undefined | "femmes" | "hommes"
@@ -344,7 +343,7 @@ export type ActionIndicateurDeuxTroisData = {
 export type DeclarationIndicateurDeuxTroisData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "etsno5f5h" | "absaugi"
-  motifNonCalculablePrecision: string
+
   resultatFinalEcart: number | undefined
   resultatFinalNombreSalaries: number | undefined
   sexeSurRepresente: undefined | "femmes" | "hommes"
@@ -368,7 +367,7 @@ export type ActionIndicateurQuatreData = {
 export type DeclarationIndicateurQuatreData = {
   nonCalculable: boolean
   motifNonCalculable: "" | "absaugpdtcm" | "absretcm"
-  motifNonCalculablePrecision: string
+
   resultatFinal: number | undefined
   noteFinale: number | undefined
 }

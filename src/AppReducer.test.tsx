@@ -1831,7 +1831,6 @@ describe("validateDeclaration", () => {
     indicateurUnData: {
       coefficient: [],
       motifNonCalculable: "",
-      motifNonCalculablePrecision: "",
       nombreCoefficients: 6,
       noteFinale: 31,
       resultatFinal: 8.0,
@@ -1840,7 +1839,6 @@ describe("validateDeclaration", () => {
     // @ts-ignore: see comment above
     indicateurDeuxData: {
       motifNonCalculable: "",
-      motifNonCalculablePrecision: "",
       resultatFinal: 5.0,
       sexeSurRepresente: "femmes",
       noteFinale: 10,
@@ -1849,7 +1847,6 @@ describe("validateDeclaration", () => {
     // @ts-ignore: see comment above
     indicateurTroisData: {
       motifNonCalculable: "",
-      motifNonCalculablePrecision: "",
       resultatFinal: 3.0,
       sexeSurRepresente: "femmes",
       noteFinale: 15,
@@ -1858,7 +1855,6 @@ describe("validateDeclaration", () => {
     // @ts-ignore: see comment above
     indicateurDeuxTroisData: {
       motifNonCalculable: "",
-      motifNonCalculablePrecision: "",
       resultatFinalEcart: 25,
       resultatFinalNombreSalaries: 5,
       sexeSurRepresente: "femmes",
@@ -1868,7 +1864,6 @@ describe("validateDeclaration", () => {
     // @ts-ignore: see comment above
     indicateurQuatreData: {
       motifNonCalculable: "",
-      motifNonCalculablePrecision: "",
       resultatFinal: 80.0,
       noteFinale: 0,
     },
