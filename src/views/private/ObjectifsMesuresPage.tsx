@@ -224,7 +224,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   if (isError)
     return (
       <>
-        <Text textColor="#E53E3E">Il n'y a pas de délcaration pour ce SIREN et cette année.</Text>
+        <Text textColor="#E53E3E">Il n'y a pas de déclaration pour ce SIREN et cette année.</Text>
         <ButtonAction onClick={() => history.goBack()} label="Retour" />
       </>
     )
