@@ -48,12 +48,13 @@ function CustomNavLink({
           lineHeight: 1.125,
           display: "inline-flex",
           color: "inherit",
-          flexGrow: 1,
         }}
         cursor="not-allowed"
       >
-        {title}
-        {label && <>{label}</>}
+        <Box sx={{ flexGrow: 1 }}>
+          {title}
+          {label && <Box>{label}</Box>}
+        </Box>
       </Text>
     )
   }
