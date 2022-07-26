@@ -285,6 +285,9 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     }
   }
 
+  // Main routin to first, update the simulation and then, update the declaration.
+  // This is rerun whenever state changes and declarating is set to true.
+  // declaring, is true when form is valid. It is set to false when form was submitted with no API error and also when API call fails.
   useEffect(() => {
     if (declaring) {
       const data = formatDataForAPI(code, state)
