@@ -206,9 +206,11 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack mt={6}>
-            {((submitFailed && hasValidationErrors) || Boolean(apiError)) && (
+            {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
+            {Boolean(apiError) && <FormError message={apiError || "Erreur lors de la sauvegarde des données."} />}
+
             {noteIndex !== undefined && noteIndex < 75 && (
               <MesuresCorrection
                 label="Mesures de correction prévues à l'article D. 1142-6"
