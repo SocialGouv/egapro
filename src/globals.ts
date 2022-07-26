@@ -293,7 +293,7 @@ export type ActionIndicateurUnCoefData = {
 export type DeclarationIndicateurUnData = {
   nombreCoefficients: number | undefined
   nonCalculable: boolean
-  motifNonCalculable: string
+  motifNonCalculable: "" | "egvi40pcet"
   motifNonCalculablePrecision: string
   remunerationAnnuelle: Array<GroupeIndicateurUn>
   coefficient: Array<GroupeCoefficient>
@@ -309,7 +309,7 @@ export type ActionIndicateurDeuxData = {
 
 export type DeclarationIndicateurDeuxData = {
   nonCalculable: boolean
-  motifNonCalculable: string
+  motifNonCalculable: "" | "egvi40pcet" | "absaugi"
   motifNonCalculablePrecision: string
   tauxAugmentation: Array<GroupeIndicateurDeux>
   resultatFinal: number | undefined
@@ -325,7 +325,7 @@ export type ActionIndicateurTroisData = {
 
 export type DeclarationIndicateurTroisData = {
   nonCalculable: boolean
-  motifNonCalculable: string
+  motifNonCalculable: "" | "egvi40pcet" | "absprom"
   motifNonCalculablePrecision: string
   tauxPromotion: Array<GroupeIndicateurTrois>
   resultatFinal: number | undefined
@@ -343,7 +343,7 @@ export type ActionIndicateurDeuxTroisData = {
 
 export type DeclarationIndicateurDeuxTroisData = {
   nonCalculable: boolean
-  motifNonCalculable: string
+  motifNonCalculable: "" | "etsno5f5h" | "absaugi"
   motifNonCalculablePrecision: string
   resultatFinalEcart: number | undefined
   resultatFinalNombreSalaries: number | undefined
@@ -367,7 +367,7 @@ export type ActionIndicateurQuatreData = {
 
 export type DeclarationIndicateurQuatreData = {
   nonCalculable: boolean
-  motifNonCalculable: string
+  motifNonCalculable: "" | "absaugpdtcm" | "absretcm"
   motifNonCalculablePrecision: string
   resultatFinal: number | undefined
   noteFinale: number | undefined
