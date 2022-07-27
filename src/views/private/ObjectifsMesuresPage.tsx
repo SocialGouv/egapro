@@ -402,7 +402,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   }
 
   // This is not supposed to happen due to routing but it is safer to guard against it.
-  if (!declaration?.data.déclaration.période_suffisante)
+  if (declaration.data.déclaration.période_suffisante === false)
     return <Text>Vous n'avez pas à remplir cette page car l'entreprise n'a pas au moins 12 mois d'existence.</Text>
 
   if (index === undefined) return <Text>Vous n'avez pas à remplir cette page car l'index est non calculable.</Text>
