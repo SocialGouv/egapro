@@ -275,44 +275,34 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     }
   }
 
+  async function sendDeclaration(code: string, state: AppState) {
+    const data = formatDataForAPI(code, state)
+
+    try {
+      await putIndicatorsDatas(code, state)
+      await putDeclaration(data)
+      setApiError(undefined)
+      setDeclaring(false)
+    } catch (error: any) {
+      setDeclaring(false)
+      const message = error.jsonBody?.error
+        ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
+        : "Erreur lors de la sauvegarde des données"
+      setApiError(message)
+      // Indicate in the UI that the declaration is not valid.
+      validateDeclaration("None")
+      if (error.response.status !== 403) {
+        // Don't log on 403 because it's an expected error: "Votre déclaration ne peut être validée : Cette déclaration a déjà été créée par un autre utilisateur".
+        logToSentry(error, data)
+      }
+    }
+  }
+
   useEffect(() => {
     if (declaring) {
-      const data = formatDataForAPI(code, state)
-      putIndicatorsDatas(code, state)
-        .then(() => {
-          putDeclaration(data)
-            .then(() => {
-              setApiError(undefined)
-              setDeclaring(false)
-            })
-            .catch((error) => {
-              setDeclaring(false)
-              const message =
-                error.jsonBody && error.jsonBody.error
-                  ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
-                  : "Erreur lors de la sauvegarde des données"
-              setApiError(message)
-              validateDeclaration("None")
-              if (error.response.status !== 403) {
-                // Don't log on 403 because it's n expected error:
-                // "Votre déclaration ne peut être validée : Cette déclaration a déjà
-                // été créée par un autre utilisateur".
-                logToSentry(error, data)
-              }
-            })
-        })
-        .catch((error) => {
-          setDeclaring(false)
-          const message =
-            error.jsonBody && error.jsonBody.error
-              ? `Votre déclaration ne peut être validée : ${error.jsonBody.error}`
-              : "Erreur lors de la sauvegarde des données"
-          setApiError(message)
-          validateDeclaration("None")
-          logToSentry(error, data)
-        })
+      sendDeclaration(code, state)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- validateDeclaration is not needed to be subscribed on change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribe to changes.
   }, [code, declaring, state])
 
   if (!state.informations.periodeSuffisante) {
