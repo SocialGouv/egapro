@@ -158,8 +158,6 @@ export type Declaration = {
 // Déclaration
 const buildDeclaration = (state: AppState): Declaration => {
   const index = state.declaration.noteIndex
-  const { modalitesPublicationObjectifsMesures, datePublicationObjectifs, datePublicationMesures } =
-    state.informationsComplementaires
 
   const declaration: Declaration = {
     année_indicateurs: state.informations.anneeDeclaration,

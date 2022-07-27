@@ -2,6 +2,7 @@ import deepmerge from "deepmerge"
 import { format } from "date-fns"
 
 import type { AppState, ActionType, PeriodeDeclaration } from "./globals"
+
 import { CategorieSocioPro, TranchesAges } from "./globals"
 import mapEnum from "./utils/mapEnum"
 import { overwriteMerge, combineMerge } from "./utils/merge"
@@ -125,18 +126,6 @@ const defaultState: AppState = {
     tel: "",
     email: "",
     acceptationCGU: false,
-  },
-  informationsComplementaires: {
-    formValidated: "None",
-    objectifIndicateurUn: undefined,
-    objectifIndicateurDeux: undefined,
-    objectifIndicateurTrois: undefined,
-    objectifIndicateurDeuxTrois: undefined,
-    objectifIndicateurQuatre: undefined,
-    objectifIndicateurCinq: undefined,
-    datePublicationObjectifs: "",
-    datePublicationMesures: "",
-    modalitesPublicationObjectifsMesures: "",
   },
   declaration: {
     formValidated: "None",

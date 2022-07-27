@@ -74,18 +74,6 @@ export type AppState = {
     email: string
     acceptationCGU: boolean
   }
-  informationsComplementaires: {
-    formValidated: FormState
-    objectifIndicateurUn?: string
-    objectifIndicateurDeux?: string
-    objectifIndicateurTrois?: string
-    objectifIndicateurDeuxTrois?: string
-    objectifIndicateurQuatre?: string
-    objectifIndicateurCinq?: string
-    datePublicationObjectifs?: string
-    datePublicationMesures?: string
-    modalitesPublicationObjectifsMesures?: string
-  }
   declaration: {
     formValidated: FormState
     mesuresCorrection: string
