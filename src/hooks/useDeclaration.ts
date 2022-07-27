@@ -16,10 +16,10 @@ export type DeclarationForAPI = {
 export function useDeclaration(
   siren: string,
   year: number | undefined,
-): FetcherReturn & { declaration: DeclarationForAPI } {
+): FetcherReturn & { declaration: DeclarationForAPI | undefined } {
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined
 
-  const { data, error, mutate } = useSWR(
+  const { data, error, mutate } = useSWR<DeclarationForAPI>(
     normalizedSiren && year ? `/declaration/${normalizedSiren}/${year}` : null,
     fetcher,
     {

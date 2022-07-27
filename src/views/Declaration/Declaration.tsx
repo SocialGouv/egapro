@@ -38,6 +38,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
 import { formatDataForAPI } from "../../utils/helpers"
 import { useTitle } from "../../utils/hooks"
+import { useDeclaration } from "../../hooks/useDeclaration"
 import { isFormValid } from "../../utils/formHelpers"
 import { logToSentry } from "../../utils/sentry"
 
@@ -225,6 +226,8 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
 
+  const { declaration } = useDeclaration(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
+
   const updateDeclaration = useCallback(
     (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
     [dispatch],
@@ -276,7 +279,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   }
 
   async function sendDeclaration(code: string, state: AppState) {
-    const data = formatDataForAPI(code, state)
+    const data = formatDataForAPI({ id: code, state, declarationBase: declaration })
 
     try {
       await putIndicatorsDatas(code, state)
@@ -302,7 +305,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
     if (declaring) {
       sendDeclaration(code, state)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribe to changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sendDeclaration is a function and doesn't need to be subscribed to changes.
   }, [code, declaring, state])
 
   if (!state.informations.periodeSuffisante) {

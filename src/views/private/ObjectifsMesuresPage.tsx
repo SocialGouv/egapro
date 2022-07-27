@@ -20,7 +20,7 @@ import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import Page from "../../components/Page"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
-import { useDeclaration } from "../../hooks/useDeclaration"
+import { DeclarationForAPI, useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration, sendReceiptObjectifsMesures } from "../../utils/api"
 import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
 import { dateToString, parseDate } from "../../utils/date"
@@ -229,7 +229,9 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
       </>
     )
 
-  const index = declaration.data.déclaration.index
+  // From now on, declaration is necessarily defined, otherwise, we would have returned earlier.
+
+  const index = declaration?.data.déclaration.index
   const publicationSurSiteInternet = Boolean(declaration?.data.déclaration?.publication?.url)
 
   const { title, warningText, legalText, finalMessage, siteWebLabel, siteWebReminder, modalite } = buildWordings(
@@ -237,50 +239,52 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     publicationSurSiteInternet,
   )
 
-  const trancheEffectifs = declaration.data.entreprise.effectif.tranche as TrancheEffectifsAPI
+  const trancheEffectifs = declaration?.data.entreprise.effectif.tranche as TrancheEffectifsAPI
 
   const after2021 = Boolean(
-    declaration.data.déclaration.année_indicateurs && declaration.data.déclaration.année_indicateurs >= 2021,
+    declaration?.data.déclaration.année_indicateurs && declaration?.data.déclaration.année_indicateurs >= 2021,
   )
 
   const initialValues = {
-    objectifIndicateurUn: (declaration.data.indicateurs?.rémunérations as Indicateur1Calculable)
+    objectifIndicateurUn: (declaration?.data.indicateurs?.rémunérations as Indicateur1Calculable)
       ?.objectif_de_progression
-      ? String((declaration.data.indicateurs?.rémunérations as Indicateur1Calculable)?.objectif_de_progression)
+      ? String((declaration?.data.indicateurs?.rémunérations as Indicateur1Calculable)?.objectif_de_progression)
       : undefined,
-    objectifIndicateurDeux: (declaration.data.indicateurs?.augmentations as Indicateur2Calculable)
+    objectifIndicateurDeux: (declaration?.data.indicateurs?.augmentations as Indicateur2Calculable)
       ?.objectif_de_progression
-      ? String((declaration.data.indicateurs?.augmentations as Indicateur2Calculable)?.objectif_de_progression)
+      ? String((declaration?.data.indicateurs?.augmentations as Indicateur2Calculable)?.objectif_de_progression)
       : undefined,
-    objectifIndicateurTrois: (declaration.data.indicateurs?.promotions as Indicateur3Calculable)
+    objectifIndicateurTrois: (declaration?.data.indicateurs?.promotions as Indicateur3Calculable)
       ?.objectif_de_progression
-      ? String((declaration.data.indicateurs?.promotions as Indicateur3Calculable)?.objectif_de_progression)
+      ? String((declaration?.data.indicateurs?.promotions as Indicateur3Calculable)?.objectif_de_progression)
       : undefined,
-    objectifIndicateurDeuxTrois: (declaration.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable)
-      ?.objectif_de_progression
+    objectifIndicateurDeuxTrois: (
+      declaration?.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable
+    )?.objectif_de_progression
       ? String(
-          (declaration.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable)
+          (declaration?.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable)
             ?.objectif_de_progression,
         )
       : undefined,
-    objectifIndicateurQuatre: (declaration.data.indicateurs?.congés_maternité as Indicateur4Calculable)
+    objectifIndicateurQuatre: (declaration?.data.indicateurs?.congés_maternité as Indicateur4Calculable)
       ?.objectif_de_progression
-      ? String((declaration.data.indicateurs?.congés_maternité as Indicateur4Calculable)?.objectif_de_progression)
+      ? String((declaration?.data.indicateurs?.congés_maternité as Indicateur4Calculable)?.objectif_de_progression)
       : undefined,
-    objectifIndicateurCinq: (declaration.data.indicateurs?.hautes_rémunérations as Indicateur5)?.objectif_de_progression
-      ? String((declaration.data.indicateurs?.hautes_rémunérations as Indicateur5)?.objectif_de_progression)
+    objectifIndicateurCinq: (declaration?.data.indicateurs?.hautes_rémunérations as Indicateur5)
+      ?.objectif_de_progression
+      ? String((declaration?.data.indicateurs?.hautes_rémunérations as Indicateur5)?.objectif_de_progression)
       : undefined,
-    datePublicationMesures: declaration.data.déclaration.publication?.date_publication_mesures,
-    datePublicationObjectifs: declaration.data.déclaration.publication?.date_publication_objectifs,
-    modalitesPublicationObjectifsMesures: declaration.data.déclaration.publication?.modalités_objectifs_mesures,
-    lienPublication: declaration.data.déclaration.publication?.url,
+    datePublicationMesures: declaration?.data.déclaration.publication?.date_publication_mesures,
+    datePublicationObjectifs: declaration?.data.déclaration.publication?.date_publication_objectifs,
+    modalitesPublicationObjectifsMesures: declaration?.data.déclaration.publication?.modalités_objectifs_mesures,
+    lienPublication: declaration?.data.déclaration.publication?.url,
   }
 
   const onSubmit = async (formData: typeof initialValues) => {
-    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration, formData)
+    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration as DeclarationForAPI, formData)
 
     try {
-      await putDeclaration(newDeclaration.data)
+      await putDeclaration(newDeclaration?.data)
 
       await sendReceiptObjectifsMesures(siren, Number(year))
 
@@ -301,7 +305,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     augmentations_et_promotions,
     congés_maternité,
     hautes_rémunérations,
-  } = declaration.data.indicateurs || {}
+  } = declaration?.data.indicateurs || {}
 
   const noteIndicateurUn = (rémunérations as Indicateur1Calculable)?.note
   const indicateurUnNonCalculable = Boolean((rémunérations as IndicateurNonCalculable)?.non_calculable)
@@ -398,7 +402,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   }
 
   // This is not supposed to happen due to routing but it is safer to guard against it.
-  if (!declaration.data.déclaration.période_suffisante)
+  if (!declaration?.data.déclaration.période_suffisante)
     return <Text>Vous n'avez pas à remplir cette page car l'entreprise n'a pas au moins 12 mois d'existence.</Text>
 
   if (index === undefined) return <Text>Vous n'avez pas à remplir cette page car l'index est non calculable.</Text>
@@ -415,7 +419,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
           validate={formValidator(
             FormInputs({
               trancheEffectifs,
-              finPeriodeReference: declaration.data.déclaration.fin_période_référence,
+              finPeriodeReference: declaration?.data.déclaration.fin_période_référence,
               index,
             }),
           )}
