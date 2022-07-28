@@ -5,26 +5,8 @@ import { useHistory, useParams } from "react-router-dom"
 import { z } from "zod"
 
 import type { TrancheEffectifsAPI } from "../../globals"
-
-import ActionBar from "../../components/ActionBar"
-import ButtonAction from "../../components/ds/ButtonAction"
-import FakeInputGroup from "../../components/ds/FakeInputGroup"
-import { formValidator } from "../../components/ds/form-lib"
-import FormStack from "../../components/ds/FormStack"
-import InfoBlock from "../../components/ds/InfoBlock"
-import InputDateGroup from "../../components/ds/InputDateGroup"
-import InputGroup from "../../components/ds/InputGroup"
-import LegalText from "../../components/ds/LegalText"
-import TextareaGroup from "../../components/ds/TextareaGroup"
-import FormError from "../../components/FormError"
-import FormSubmit from "../../components/FormSubmit"
-import Page from "../../components/Page"
-import { SinglePageLayout } from "../../containers/SinglePageLayout"
-import { DeclarationForAPI, useDeclaration } from "../../hooks/useDeclaration"
-import { putDeclaration, sendReceiptObjectifsMesures } from "../../utils/api"
-import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
-import { dateToString, parseDate } from "../../utils/date"
-import {
+import type {
+  DeclarationAPI,
   Indicateur1Calculable,
   Indicateur2Calculable,
   Indicateur2et3Calculable,
@@ -32,11 +14,30 @@ import {
   Indicateur4Calculable,
   Indicateur5,
   IndicateurNonCalculable,
-  updateDeclarationWithObjectifsMesures,
-} from "../../utils/helpers"
-import { useToastMessage } from "../../utils/hooks"
-import InputGroupRow from "../../components/ds/InputGroupRow"
+} from "../../utils/declarationBuilder"
+
+import ActionBar from "../../components/ActionBar"
+import ButtonAction from "../../components/ds/ButtonAction"
 import ButtonLink from "../../components/ds/ButtonLink"
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import { formValidator } from "../../components/ds/form-lib"
+import FormStack from "../../components/ds/FormStack"
+import InfoBlock from "../../components/ds/InfoBlock"
+import InputDateGroup from "../../components/ds/InputDateGroup"
+import InputGroup from "../../components/ds/InputGroup"
+import InputGroupRow from "../../components/ds/InputGroupRow"
+import LegalText from "../../components/ds/LegalText"
+import TextareaGroup from "../../components/ds/TextareaGroup"
+import FormError from "../../components/FormError"
+import FormSubmit from "../../components/FormSubmit"
+import Page from "../../components/Page"
+import { SinglePageLayout } from "../../containers/SinglePageLayout"
+import { useDeclaration } from "../../hooks/useDeclaration"
+import { putDeclaration, sendReceiptObjectifsMesures } from "../../utils/api"
+import { MAX_NOTES_INDICATEURS } from "../../utils/calculsEgaProIndex"
+import { dateToString, parseDate } from "../../utils/date"
+import { updateDeclarationWithObjectifsMesures } from "../../utils/declarationBuilder"
+import { useToastMessage } from "../../utils/hooks"
 
 const Title: React.FC = ({ children }) => (
   <Box>
@@ -281,7 +282,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   }
 
   const onSubmit = async (formData: typeof initialValues) => {
-    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration as DeclarationForAPI, formData)
+    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration as DeclarationAPI, formData)
 
     try {
       await putDeclaration(newDeclaration?.data)
@@ -402,7 +403,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   }
 
   // This is not supposed to happen due to routing but it is safer to guard against it.
-  if (declaration.data.déclaration.période_suffisante === false)
+  if (declaration?.data.déclaration.période_suffisante === false)
     return <Text>Vous n'avez pas à remplir cette page car l'entreprise n'a pas au moins 12 mois d'existence.</Text>
 
   if (index === undefined) return <Text>Vous n'avez pas à remplir cette page car l'index est non calculable.</Text>

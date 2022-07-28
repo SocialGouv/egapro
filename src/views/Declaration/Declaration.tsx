@@ -1,46 +1,44 @@
-import React, { useCallback, ReactNode, useState, useEffect, FunctionComponent } from "react"
-import { RouteComponentProps, useHistory } from "react-router-dom"
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
+import React, { FunctionComponent, ReactNode, useCallback, useEffect, useState } from "react"
+import { RouteComponentProps, useHistory } from "react-router-dom"
 
-import {
-  AppState,
-  FormState,
-  ActionType,
+import type {
   ActionDeclarationData,
-  DeclarationIndicateurUnData,
+  ActionType,
+  AppState,
+  DeclarationEffectifData,
+  DeclarationIndicateurCinqData,
   DeclarationIndicateurDeuxData,
-  DeclarationIndicateurTroisData,
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
-  DeclarationIndicateurCinqData,
-  DeclarationEffectifData,
+  DeclarationIndicateurTroisData,
+  DeclarationIndicateurUnData,
+  FormState,
 } from "../../globals"
 
+import InfoBlock from "../../components/ds/InfoBlock"
+import LayoutFormAndResult from "../../components/LayoutFormAndResult"
+import Page from "../../components/Page"
+import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { useDeclaration } from "../../hooks/useDeclaration"
+import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
+import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
+import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
+import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
+import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
+import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
+import calculIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
 import calculIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCoef,
   calculEcartTauxRemunerationParTrancheAgeCSP,
 } from "../../utils/calculsEgaProIndicateurUn"
-import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurTrois, { calculEcartTauxPromotionParCSP } from "../../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurDeuxTrois from "../../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
-import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
-
-import InfoBlock from "../../components/ds/InfoBlock"
-import Page from "../../components/Page"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
-
-import DeclarationForm from "./DeclarationForm"
-import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
-import totalNombreSalaries from "../../utils/totalNombreSalaries"
-import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
-import { formatDataForAPI } from "../../utils/helpers"
-import { useTitle } from "../../utils/hooks"
-import { useDeclaration } from "../../hooks/useDeclaration"
+import { formatDataForAPI } from "../../utils/declarationBuilder"
 import { isFormValid } from "../../utils/formHelpers"
+import { useTitle } from "../../utils/hooks"
 import { logToSentry } from "../../utils/sentry"
+import totalNombreSalaries from "../../utils/totalNombreSalaries"
+import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
+import DeclarationForm from "./DeclarationForm"
 
 function buildHelpers(state: AppState) {
   const trancheEffectifs = state.informations.trancheEffectifs

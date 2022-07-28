@@ -1,13 +1,14 @@
-import React from "react"
 import { Box, Text } from "@chakra-ui/layout"
+import { Link, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import { Spinner } from "@chakra-ui/spinner"
-import { Link as RouterLink } from "react-router-dom"
-import { Link, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from "@chakra-ui/react"
-
-import { DeclarationForAPI, useDeclarations } from "../hooks/useDeclaration"
 import { format, parseISO } from "date-fns"
+import React from "react"
+import { Link as RouterLink } from "react-router-dom"
+
+import type { DeclarationAPI, DeclarationDataField } from "../utils/declarationBuilder"
+
+import { useDeclarations } from "../hooks/useDeclaration"
 import { IconInvalid, IconValid } from "./ds/Icons"
-import { DeclarationTotale } from "../utils/helpers"
 
 function formatDate(stringDate: string | undefined) {
   if (!stringDate) return ""
@@ -18,7 +19,7 @@ function formatDate(stringDate: string | undefined) {
   return format(date, "dd/MM/yyyy")
 }
 
-const trancheFromApiToForm = (declaration: DeclarationForAPI | undefined): string => {
+const trancheFromApiToForm = (declaration: DeclarationAPI | undefined): string => {
   const tranche = declaration?.data.entreprise.effectif?.tranche
   if (!tranche) return ""
   return tranche === "50:250" ? "Entre 50 et 250" : tranche === "251:999" ? "Entre 251 et 999" : "1000 et plus"
@@ -101,7 +102,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
 
 type Status = "Non applicable" | "À renseigner" | "Index supérieur à 85" | "Renseignés" | "Année non applicable"
 
-function statusDeclaration({ déclaration }: DeclarationTotale): Status {
+function statusDeclaration({ déclaration }: DeclarationDataField): Status {
   if (
     !déclaration ||
     déclaration.index === undefined ||
