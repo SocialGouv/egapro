@@ -47,7 +47,7 @@ export type DeclarationDataField = {
  * @param state the state of the simulation
  * @param declarationBase the previous declaration if any
  */
-export const formatDataForAPI = ({
+export const buildDeclarationFromSimulation = ({
   id,
   state,
   declarationBase,

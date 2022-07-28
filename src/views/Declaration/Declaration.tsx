@@ -32,7 +32,7 @@ import calculIndicateurUn, {
   calculEcartTauxRemunerationParTrancheAgeCoef,
   calculEcartTauxRemunerationParTrancheAgeCSP,
 } from "../../utils/calculsEgaProIndicateurUn"
-import { formatDataForAPI } from "../../utils/declarationBuilder"
+import { buildDeclarationFromSimulation } from "../../utils/declarationBuilder"
 import { isFormValid } from "../../utils/formHelpers"
 import { useTitle } from "../../utils/hooks"
 import { logToSentry } from "../../utils/sentry"
@@ -277,7 +277,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   }
 
   async function sendDeclaration(code: string, state: AppState) {
-    const data = formatDataForAPI({ id: code, state, declarationBase: declaration })
+    const data = buildDeclarationFromSimulation({ id: code, state, declarationBase: declaration })
 
     try {
       await putIndicatorsDatas(code, state)
