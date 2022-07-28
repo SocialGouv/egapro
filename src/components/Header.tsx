@@ -1,32 +1,37 @@
-import React, { FunctionComponent } from "react"
-import { useHistory, Link as RouterLink } from "react-router-dom"
 import {
   Box,
+  Button,
+  ButtonGroup,
   Container,
-  Link,
-  Flex,
-  Text,
-  ListItem,
-  List,
-  HStack,
-  useDisclosure,
   Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
   DrawerBody,
-  useMediaQuery,
-  Spacer,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerOverlay,
+  Flex,
+  HStack,
+  Link,
+  List,
+  ListItem,
   Menu,
   MenuButton,
   MenuDivider,
   MenuGroup,
   MenuItem,
   MenuList,
-  Button,
-  ButtonGroup,
+  Spacer,
+  Text,
+  useDisclosure,
+  useMediaQuery,
 } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
+import { Link as RouterLink, useHistory } from "react-router-dom"
 
+import { LinkIcon } from "@chakra-ui/icons"
+import FAQ from "../views/FAQ"
+import { useUser } from "./AuthContext"
+import ButtonAction from "./ds/ButtonAction"
+import ButtonLink from "./ds/ButtonLink"
 import {
   IconEdit,
   IconLogout,
@@ -38,10 +43,6 @@ import {
   IconUserGroup,
 } from "./ds/Icons"
 import Logo from "./ds/Logo"
-import { useUser } from "./AuthContext"
-import FAQ from "../views/FAQ"
-import ButtonLink from "./ds/ButtonLink"
-import ButtonAction from "./ds/ButtonAction"
 
 const Header: FunctionComponent = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -171,6 +172,13 @@ const Header: FunctionComponent = () => {
                             icon={<IconUserGroup boxSize={5} color="gray.400" />}
                           >
                             Gérer utilisateurs
+                          </MenuItem>
+                          <MenuItem
+                            as={RouterLink}
+                            to="/tableauDeBord/generer-token-utilisateur"
+                            icon={<LinkIcon boxSize={5} color="gray.400" />}
+                          >
+                            Générer token
                           </MenuItem>
                         </MenuGroup>
                       </>
