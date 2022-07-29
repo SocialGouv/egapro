@@ -51,3 +51,12 @@ export const toISOString = (date: string): string | undefined => {
   const parsed = parseDate(date)
   return parsed ? format(parsed, "yyyy-MM-dd") : undefined
 }
+
+export function formatDate(stringDate: string | undefined): string | undefined {
+  if (!stringDate) return ""
+
+  const date = parseISO(stringDate)
+  if (date.toString() === "Invalid Date") return
+
+  return format(date, "dd/MM/yyyy")
+}

@@ -1,119 +1,37 @@
-import { regionCode, departementCode } from "../components/RegionsDepartements"
-
-import {
-  TranchesAges,
-  CategorieSocioPro,
+import type {
   AppState,
-  DeclarationIndicateurUnData,
+  DeclarationIndicateurCinqData,
   DeclarationIndicateurDeuxData,
-  DeclarationIndicateurTroisData,
   DeclarationIndicateurDeuxTroisData,
   DeclarationIndicateurQuatreData,
-  DeclarationIndicateurCinqData,
-  TrancheEffectifsAPI,
+  DeclarationIndicateurTroisData,
+  DeclarationIndicateurUnData,
   TrancheEffectifs,
+  TrancheEffectifsAPI,
 } from "../globals"
+import type { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
+
+import { departementCode, regionCode } from "../components/RegionsDepartements"
+import { calculNoteIndex } from "./calculsEgaProIndex"
+import calculIndicateurCinq from "./calculsEgaProIndicateurCinq"
+import calculIndicateurDeux from "./calculsEgaProIndicateurDeux"
+import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
+import calculIndicateurQuatre from "./calculsEgaProIndicateurQuatre"
+import calculIndicateurTrois from "./calculsEgaProIndicateurTrois"
+import calculIndicateurUn from "./calculsEgaProIndicateurUn"
 import { toISOString } from "./date"
 import { asPercentage } from "./number"
+import totalNombreSalaries from "./totalNombreSalaries"
 
-import calculIndicateurUn from "../utils/calculsEgaProIndicateurUn"
-import calculIndicateurDeux from "../utils/calculsEgaProIndicateurDeux"
-import calculIndicateurTrois from "../utils/calculsEgaProIndicateurTrois"
-import calculIndicateurDeuxTrois from "../utils/calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurQuatre from "../utils/calculsEgaProIndicateurQuatre"
-import calculIndicateurCinq from "../utils/calculsEgaProIndicateurCinq"
-import { calculNoteIndex } from "../utils/calculsEgaProIndex"
-import totalNombreSalaries from "../utils/totalNombreSalaries"
-
-import type { DeclarationForAPI } from "../hooks/useDeclaration"
-import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
-
-export function displayNameTranchesAges(trancheAge: TranchesAges): string {
-  switch (trancheAge) {
-    case TranchesAges.MoinsDe30ans:
-      return "moins de 30 ans"
-    case TranchesAges.De30a39ans:
-      return "30 à 39 ans"
-    case TranchesAges.De40a49ans:
-      return "40 à 49 ans"
-    case TranchesAges.PlusDe50ans:
-      return "50 ans et plus"
-    default:
-      return "ERROR"
-  }
+export type DeclarationAPI = {
+  siren: string
+  year: number
+  data: DeclarationDataField
+  modified_at: number
+  declared_at: number
 }
 
-export function displayNameCategorieSocioPro(categorieSocioPro: CategorieSocioPro): string {
-  switch (categorieSocioPro) {
-    case CategorieSocioPro.Ouvriers:
-      return "ouvriers"
-    case CategorieSocioPro.Employes:
-      return "employés"
-    case CategorieSocioPro.Techniciens:
-      return "techniciens et agents de maîtrise"
-    case CategorieSocioPro.Cadres:
-      return "ingénieurs et cadres"
-    default:
-      return "ERROR"
-  }
-}
-
-export function displayFractionPercent(num: number, digits = 2): string {
-  return displayPercent(num * 100, digits)
-}
-
-export function displayFractionPercentWithEmptyData(num?: number, digits = 2): string {
-  return num ? displayFractionPercent(num, digits) : "0%"
-}
-
-export function displayPercent(num: number, digits = 1): string {
-  return num.toLocaleString("fr-FR", { maximumFractionDigits: digits }) + "%"
-}
-
-export function displayInt(num: number): string {
-  return num.toLocaleString("fr-FR")
-}
-
-export function displaySexeSurRepresente(indicateurSexeSurRepresente: "hommes" | "femmes" | undefined): string {
-  return indicateurSexeSurRepresente !== undefined
-    ? `écart favorable aux ${indicateurSexeSurRepresente}`
-    : "les femmes et les hommes sont à égalité"
-}
-
-export const messageEcartNombreEquivalentSalaries = (
-  indicateurSexeSurRepresente: "hommes" | "femmes" | undefined,
-  plusPetitNombreSalaries: "hommes" | "femmes" | undefined,
-): string => {
-  if (indicateurSexeSurRepresente === "hommes" && plusPetitNombreSalaries === "femmes") {
-    return "* si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
-  } else if (indicateurSexeSurRepresente === "hommes" && plusPetitNombreSalaries === "hommes") {
-    return "* si ce nombre d'hommes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
-  } else if (indicateurSexeSurRepresente === "hommes" && plusPetitNombreSalaries === undefined) {
-    return "* si ce nombre de femmes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
-  } else if (indicateurSexeSurRepresente === "femmes" && plusPetitNombreSalaries === "femmes") {
-    return "* si ce nombre de femmes n'avait pas reçu d'augmentation parmi les bénéficiaires, les taux d'augmentation seraient égaux entre hommes et femmes."
-  } else if (indicateurSexeSurRepresente === "femmes" && plusPetitNombreSalaries === "hommes") {
-    return "* si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
-  } else if (indicateurSexeSurRepresente === "femmes" && plusPetitNombreSalaries === undefined) {
-    return "* si ce nombre d'hommes supplémentaires avait bénéficié d'une augmentation, les taux d'augmentation seraient égaux entre hommes et femmes."
-  } else {
-    return ""
-  }
-}
-
-export const messageMesureCorrection = (
-  sexeSurRepresente: undefined | "femmes" | "hommes",
-  ecartDe: string,
-  noteMax: string,
-) => {
-  return sexeSurRepresente === "femmes"
-    ? `** L’écart de taux ${ecartDe} est en faveur des femmes tandis que l’écart de rémunération est en faveur des hommes, donc l’écart de taux ${ecartDe} est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
-    : sexeSurRepresente === "hommes"
-    ? `** L’écart de taux ${ecartDe} est en faveur des hommes tandis que l’écart de rémunération est en faveur des femmes, donc l’écart de taux ${ecartDe} est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
-    : ""
-}
-
-export type DeclarationTotale = {
+export type DeclarationDataField = {
   id?: string // id de la simulation initiale !! N'est pas rendu par l'API pour GET /declaration
   source: string
   déclarant: Declarant
@@ -122,14 +40,29 @@ export type DeclarationTotale = {
   indicateurs?: Indicateurs | undefined
 }
 
-export const formatDataForAPI = (id: string, state: AppState): DeclarationTotale => {
+/*
+ * Transform the simulation in declaration.
+ *
+ * @param id the id of the simulation
+ * @param state the state of the simulation
+ * @param declarationBase the previous declaration if any
+ */
+export const buildDeclarationFromSimulation = ({
+  id,
+  state,
+  declarationBase,
+}: {
+  id: string
+  state: AppState
+  declarationBase?: DeclarationAPI | undefined
+}): DeclarationDataField => {
   const output = {
     id,
     source: "simulateur",
-    déclaration: buildDeclaration(state),
+    déclaration: buildDeclaration(state, declarationBase),
     déclarant: buildDeclarant(state),
     entreprise: buildEntreprise(state),
-    ...(state.informations.periodeSuffisante && { indicateurs: buildIndicateurs(state) }),
+    ...(state.informations.periodeSuffisante && { indicateurs: buildIndicateurs(state, declarationBase) }),
   }
 
   return output
@@ -156,10 +89,8 @@ export type Declaration = {
 }
 
 // Déclaration
-const buildDeclaration = (state: AppState): Declaration => {
+const buildDeclaration = (state: AppState, declarationBase: DeclarationAPI | undefined): Declaration => {
   const index = state.declaration.noteIndex
-  const { modalitesPublicationObjectifsMesures, datePublicationObjectifs, datePublicationMesures } =
-    state.informationsComplementaires
 
   const declaration: Declaration = {
     année_indicateurs: state.informations.anneeDeclaration,
@@ -176,17 +107,31 @@ const buildDeclaration = (state: AppState): Declaration => {
   if (state.informations.periodeSuffisante) {
     if (index !== undefined || (state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)) {
       declaration.publication = {
+        ...declarationBase?.data.déclaration.publication,
         date: toISOString(state.declaration.datePublication),
         ...(state.declaration.publicationSurSiteInternet && { url: state.declaration.lienPublication }),
         ...(!state.declaration.publicationSurSiteInternet && { modalités: state.declaration.modalitesPublication }),
-        ...(modalitesPublicationObjectifsMesures && {
-          modalités_objectifs_mesures: modalitesPublicationObjectifsMesures,
-        }),
-        ...(datePublicationObjectifs && { date_publication_objectifs: toISOString(datePublicationObjectifs) }),
-        ...(datePublicationMesures && { date_publication_mesures: toISOString(datePublicationMesures) }),
       }
     }
   }
+
+  // Clean the objectifs/mesures of declaration if the data have changed
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 75 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete declaration.publication?.date_publication_mesures
+  }
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete declaration.publication?.date_publication_objectifs
+    delete declaration.publication?.modalités_objectifs_mesures
+  }
+
   return declaration
 }
 
@@ -286,17 +231,17 @@ export type Indicateurs = {
 }
 
 // Indicateurs
-const buildIndicateurs = (state: AppState): Indicateurs => {
+const buildIndicateurs = (state: AppState, declarationBase: DeclarationAPI | undefined): Indicateurs => {
   const indicateurs: Indicateurs = {
-    rémunérations: buildIndicateur1(state),
-    congés_maternité: buildIndicateur4(state),
-    hautes_rémunérations: buildIndicateur5(state),
+    rémunérations: buildIndicateur1(state, declarationBase),
+    congés_maternité: buildIndicateur4(state, declarationBase),
+    hautes_rémunérations: buildIndicateur5(state, declarationBase),
   }
   if (state.informations.trancheEffectifs === "50 à 250") {
-    indicateurs.augmentations_et_promotions = buildIndicateur2et3(state)
+    indicateurs.augmentations_et_promotions = buildIndicateur2et3(state, declarationBase)
   } else {
-    indicateurs.augmentations = buildIndicateur2(state)
-    indicateurs.promotions = buildIndicateur3(state)
+    indicateurs.augmentations = buildIndicateur2(state, declarationBase)
+    indicateurs.promotions = buildIndicateur3(state, declarationBase)
   }
   return indicateurs
 }
@@ -324,7 +269,7 @@ export type Indicateur1Calculable = {
 type Indicateur1 = IndicateurNonCalculable | Indicateur1Calculable
 
 // Indicateur 1 relatif à l'écart de rémunération entre les femmes et les hommes
-const buildIndicateur1 = (state: AppState): Indicateur1 => {
+const buildIndicateur1 = (state: AppState, declarationBase: DeclarationAPI | undefined): Indicateur1 => {
   const indicateurUn = state.indicateurUn as AppState["indicateurUn"] & DeclarationIndicateurUnData
 
   if (indicateurUn.motifNonCalculable) {
@@ -361,8 +306,20 @@ const buildIndicateur1 = (state: AppState): Indicateur1 => {
     }))
   }
 
-  if (state.informationsComplementaires.objectifIndicateurUn) {
-    indicateur1.objectif_de_progression = state.informationsComplementaires.objectifIndicateurUn
+  // We must preserve the objectif de progression, if it exists.
+  if ((declarationBase?.data.indicateurs?.rémunérations as Indicateur1Calculable)?.objectif_de_progression) {
+    indicateur1.objectif_de_progression = (
+      declarationBase?.data.indicateurs?.rémunérations as Indicateur1Calculable
+    ).objectif_de_progression
+  }
+
+  // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete indicateur1.objectif_de_progression
   }
 
   return indicateur1
@@ -379,7 +336,7 @@ export type Indicateur2Calculable = {
 type Indicateur2 = IndicateurNonCalculable | Indicateur2Calculable
 
 // Indicateur 2 relatif à l'écart de taux d'augmentations individuelles(hors promotion) entre les femmes et les homme
-const buildIndicateur2 = (state: AppState): Indicateur2 => {
+const buildIndicateur2 = (state: AppState, declarationBase: DeclarationAPI | undefined): Indicateur2 => {
   const indicateurDeux = state.indicateurDeux as AppState["indicateurDeux"] & DeclarationIndicateurDeuxData
 
   if (indicateurDeux.motifNonCalculable) {
@@ -392,8 +349,20 @@ const buildIndicateur2 = (state: AppState): Indicateur2 => {
     ...(indicateurDeux.sexeSurRepresente && { population_favorable: indicateurDeux.sexeSurRepresente }),
   }
 
-  if (state.informationsComplementaires.objectifIndicateurDeux) {
-    indicateur2.objectif_de_progression = state.informationsComplementaires.objectifIndicateurDeux
+  // We must preserve the objectif de progression, if it exists.
+  if ((declarationBase?.data.indicateurs?.augmentations as Indicateur2Calculable)?.objectif_de_progression) {
+    indicateur2.objectif_de_progression = (
+      declarationBase?.data.indicateurs?.augmentations as Indicateur2Calculable
+    ).objectif_de_progression
+  }
+
+  // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete indicateur2.objectif_de_progression
   }
 
   return indicateur2
@@ -410,7 +379,7 @@ export type Indicateur3Calculable = {
 type Indicateur3 = IndicateurNonCalculable | Indicateur3Calculable
 
 // Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes
-const buildIndicateur3 = (state: AppState): Indicateur3 => {
+const buildIndicateur3 = (state: AppState, declarationBase: DeclarationAPI | undefined): Indicateur3 => {
   const indicateurTrois = state.indicateurTrois as AppState["indicateurTrois"] & DeclarationIndicateurTroisData
 
   if (indicateurTrois.motifNonCalculable) {
@@ -423,8 +392,20 @@ const buildIndicateur3 = (state: AppState): Indicateur3 => {
     ...(indicateurTrois.sexeSurRepresente && { population_favorable: indicateurTrois.sexeSurRepresente }),
   }
 
-  if (state.informationsComplementaires.objectifIndicateurTrois) {
-    indicateur3.objectif_de_progression = state.informationsComplementaires.objectifIndicateurTrois
+  // We must preserve the objectif de progression, if it exists.
+  if ((declarationBase?.data.indicateurs?.promotions as Indicateur3Calculable)?.objectif_de_progression) {
+    indicateur3.objectif_de_progression = (
+      declarationBase?.data.indicateurs?.promotions as Indicateur3Calculable
+    ).objectif_de_progression
+  }
+
+  // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete indicateur3.objectif_de_progression
   }
 
   return indicateur3
@@ -443,7 +424,7 @@ export type Indicateur2et3Calculable = {
 type Indicateur2et3 = IndicateurNonCalculable | Indicateur2et3Calculable
 
 // Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins
-const buildIndicateur2et3 = (state: AppState): Indicateur2et3 => {
+const buildIndicateur2et3 = (state: AppState, declarationBase: DeclarationAPI | undefined): Indicateur2et3 => {
   const indicateurDeuxTrois = state.indicateurDeuxTrois as AppState["indicateurDeuxTrois"] &
     DeclarationIndicateurDeuxTroisData
 
@@ -460,8 +441,23 @@ const buildIndicateur2et3 = (state: AppState): Indicateur2et3 => {
     ...(indicateurDeuxTrois.sexeSurRepresente && { population_favorable: indicateurDeuxTrois.sexeSurRepresente }),
   }
 
-  if (state.informationsComplementaires.objectifIndicateurDeuxTrois) {
-    indicateur2et3.objectif_de_progression = state.informationsComplementaires.objectifIndicateurDeuxTrois
+  // We must preserve the objectif de progression, if it exists.
+  if (
+    (declarationBase?.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable)
+      ?.objectif_de_progression
+  ) {
+    indicateur2et3.objectif_de_progression = (
+      declarationBase?.data.indicateurs?.augmentations_et_promotions as Indicateur2et3Calculable
+    ).objectif_de_progression
+  }
+
+  // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete indicateur2et3.objectif_de_progression
   }
 
   return indicateur2et3
@@ -476,7 +472,7 @@ export type Indicateur4Calculable = {
 type Indicateur4 = IndicateurNonCalculable | Indicateur4Calculable
 
 // Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
-const buildIndicateur4 = (state: AppState): Indicateur4 => {
+const buildIndicateur4 = (state: AppState, declarationBase: DeclarationAPI | undefined): Indicateur4 => {
   const indicateurQuatre = state.indicateurQuatre as AppState["indicateurQuatre"] & DeclarationIndicateurQuatreData
 
   if (indicateurQuatre.motifNonCalculable) {
@@ -488,8 +484,20 @@ const buildIndicateur4 = (state: AppState): Indicateur4 => {
     note: indicateurQuatre.noteFinale,
   }
 
-  if (state.informationsComplementaires.objectifIndicateurQuatre) {
-    indicateur4.objectif_de_progression = state.informationsComplementaires.objectifIndicateurQuatre
+  // We must preserve the objectif de progression, if it exists.
+  if ((declarationBase?.data.indicateurs?.congés_maternité as Indicateur4Calculable)?.objectif_de_progression) {
+    indicateur4.objectif_de_progression = (
+      declarationBase?.data.indicateurs?.congés_maternité as Indicateur4Calculable
+    ).objectif_de_progression
+  }
+
+  // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete indicateur4.objectif_de_progression
   }
 
   return indicateur4
@@ -503,7 +511,7 @@ export type Indicateur5 = {
 }
 
 // Indicateur 5 relatif au nombre de salariés du sexe sous- représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
-const buildIndicateur5 = (state: AppState): Indicateur5 => {
+const buildIndicateur5 = (state: AppState, declarationBase: DeclarationAPI | undefined): Indicateur5 => {
   const indicateurCinq = state.indicateurCinq as AppState["indicateurCinq"] & DeclarationIndicateurCinqData
 
   const indicateur5: Indicateur5 = {
@@ -513,10 +521,21 @@ const buildIndicateur5 = (state: AppState): Indicateur5 => {
       indicateurCinq.sexeSurRepresente !== "egalite" && { population_favorable: indicateurCinq.sexeSurRepresente }),
   }
 
-  if (state.informationsComplementaires.objectifIndicateurCinq) {
-    indicateur5.objectif_de_progression = state.informationsComplementaires.objectifIndicateurCinq
+  // We must preserve the objectif de progression, if it exists.
+  if ((declarationBase?.data.indicateurs?.hautes_rémunérations as Indicateur5)?.objectif_de_progression) {
+    indicateur5.objectif_de_progression = (
+      declarationBase?.data.indicateurs?.hautes_rémunérations as Indicateur5
+    ).objectif_de_progression
   }
 
+  // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
+    delete indicateur5.objectif_de_progression
+  }
   return indicateur5
 }
 
@@ -672,9 +691,9 @@ export function computeValuesFromState(state: AppState) {
 }
 
 export function updateDeclarationWithObjectifsMesures(
-  declaration: DeclarationForAPI,
+  declaration: DeclarationAPI,
   data: ObjectifsMesuresFormSchema,
-): DeclarationForAPI {
+): DeclarationAPI {
   const rémunérations = !declaration.data.indicateurs
     ? null
     : isNonCalculable(declaration.data.indicateurs?.rémunérations)
@@ -727,7 +746,7 @@ export function updateDeclarationWithObjectifsMesures(
         ...(data.objectifIndicateurCinq && { objectif_de_progression: data.objectifIndicateurCinq }),
       }
 
-  const res: DeclarationForAPI = {
+  const res: DeclarationAPI = {
     ...declaration,
     data: {
       ...declaration.data,

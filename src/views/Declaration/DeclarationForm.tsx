@@ -1,29 +1,29 @@
+import { Box, Divider, Text } from "@chakra-ui/react"
 import React, { FunctionComponent, useState } from "react"
 import { Form } from "react-final-form"
-import { Box, Divider, Text } from "@chakra-ui/react"
+import { useHistory } from "react-router-dom"
 
-import { AppState, FormState, ActionDeclarationData } from "../../globals"
+import { ActionDeclarationData, AppState, FormState } from "../../globals"
 import { resendReceipt } from "../../utils/api"
+import { parseDate } from "../../utils/date"
 import { isFormValid, parseBooleanFormValue, parseBooleanStateValue } from "../../utils/formHelpers"
+import { logToSentry } from "../../utils/sentry"
 
-import InputDateGroup from "../../components/ds/InputDateGroup"
 import ActionBar from "../../components/ActionBar"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
-import TextareaGroup from "../../components/ds/TextareaGroup"
-import InputGroup from "../../components/ds/InputGroup"
 import { IconEdit } from "../../components/ds/Icons"
+import InputDateGroup from "../../components/ds/InputDateGroup"
+import InputGroup from "../../components/ds/InputGroup"
+import LegalText from "../../components/ds/LegalText"
+import TextareaGroup from "../../components/ds/TextareaGroup"
+import ErrorMessage from "../../components/ErrorMessage"
+import FieldPlanRelance from "../../components/FieldPlanRelance"
 import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import RadiosBoolean from "../../components/RadiosBoolean"
-import ErrorMessage from "../../components/ErrorMessage"
-import FormError from "../../components/FormError"
-import { parseDate } from "../../utils/date"
-import { logToSentry } from "../../utils/sentry"
-import LegalText from "../../components/ds/LegalText"
-import { useHistory } from "react-router-dom"
-import FieldPlanRelance from "../../components/FieldPlanRelance"
 
 const validateForm = ({
   finPeriodeReference,
@@ -106,6 +106,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   declaring,
 }) => {
   const history = useHistory()
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(undefined)
 
   const declaration = state.declaration
   const indicateurUnParCSP = state.indicateurUn.csp
@@ -113,6 +115,10 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const periodeSuffisante = state.informations.periodeSuffisante
   const anneeDeclaration = state.informations.anneeDeclaration
   const readOnly = isFormValid(state.declaration) && !declaring
+  const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
+  const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
+  const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
+  const isUES = Boolean(state.informationsEntreprise.nomUES)
 
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
@@ -131,18 +137,16 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
 
   const { legalText, buttonLabel } = buildWordings(noteIndex)
 
-  const saveForm = (formData: any) => {
-    const {
-      mesuresCorrection,
-      cseMisEnPlace,
-      dateConsultationCSE,
-      datePublication,
-      publicationSurSiteInternet,
-      lienPublication,
-      modalitesPublication,
-      planRelance,
-    } = formData
-
+  function saveForm({
+    mesuresCorrection,
+    cseMisEnPlace,
+    dateConsultationCSE,
+    datePublication,
+    publicationSurSiteInternet,
+    lienPublication,
+    modalitesPublication,
+    planRelance,
+  }: typeof initialValues) {
     updateDeclaration({
       mesuresCorrection,
       cseMisEnPlace: cseMisEnPlace !== undefined ? parseBooleanFormValue(cseMisEnPlace) : undefined,
@@ -156,36 +160,24 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
     })
   }
 
-  const onSubmit = (formData: typeof initialValues) => {
+  function onSubmit(formData: typeof initialValues) {
     saveForm(formData)
     validateDeclaration("Valid")
   }
 
-  const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
-  const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
-
-  const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
-
-  const isUES = Boolean(state.informationsEntreprise.nomUES)
-
-  const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(undefined)
-
-  const onClick = () => {
+  async function onClick() {
     setLoading(true)
 
-    // TODO : state.informations.anneeDeclaration may be undefined in TS. That seems not good because the endpoint expects a year.
-    resendReceipt(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
-      .then(() => {
-        setLoading(false)
-      })
-      .catch((error) => {
-        setLoading(false)
-        const errorMessage =
-          (error.jsonBody && error.jsonBody.message) || "Erreur lors du renvoi de l'accusé de réception"
-        setErrorMessage(errorMessage)
-        logToSentry(error, undefined)
-      })
+    try {
+      // TODO : state.informations.anneeDeclaration may be undefined in TS. That seems not good because the endpoint expects a year.
+      await resendReceipt(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
+      setLoading(false)
+    } catch (error: any) {
+      setLoading(false)
+      const errorMessage = error.jsonBody?.message || "Erreur lors du renvoi de l'accusé de réception"
+      setErrorMessage(errorMessage)
+      logToSentry(error, undefined)
+    }
   }
 
   if (!loading && errorMessage) {
@@ -206,9 +198,11 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack mt={6}>
-            {((submitFailed && hasValidationErrors) || Boolean(apiError)) && (
+            {submitFailed && hasValidationErrors && (
               <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
             )}
+            {Boolean(apiError) && <FormError message={apiError || "Erreur lors de la sauvegarde des données."} />}
+
             {noteIndex !== undefined && noteIndex < 75 && (
               <MesuresCorrection
                 label="Mesures de correction prévues à l'article D. 1142-6"

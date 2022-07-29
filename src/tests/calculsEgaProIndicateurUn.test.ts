@@ -6,7 +6,7 @@ import {
   calculEcartApresApplicationSeuilPertinenceCoef,
   calculIndicateurEcartRemuneration,
   calculNote,
-} from "./calculsEgaProIndicateurUn"
+} from "../utils/calculsEgaProIndicateurUn"
 
 //////////////////
 // INDICATEUR 1 //

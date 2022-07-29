@@ -1,25 +1,18 @@
 import useSWR from "swr"
-import { fetcher } from "../utils/fetcher"
-import { genericErrorMessage } from "../utils/makeMessage"
+
+import type { DeclarationAPI } from "../utils/declarationBuilder"
 import type { FetcherReturn } from "./types"
 
-import type { DeclarationTotale } from "../utils/helpers"
-
-export type DeclarationForAPI = {
-  siren: string
-  year: number
-  data: DeclarationTotale
-  modified_at: number
-  declared_at: number
-}
+import { fetcher } from "../utils/fetcher"
+import { genericErrorMessage } from "../utils/makeMessage"
 
 export function useDeclaration(
   siren: string,
   year: number | undefined,
-): FetcherReturn & { declaration: DeclarationForAPI } {
+): FetcherReturn & { declaration: DeclarationAPI | undefined } {
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined
 
-  const { data, error, mutate } = useSWR(
+  const { data, error, mutate } = useSWR<DeclarationAPI>(
     normalizedSiren && year ? `/declaration/${normalizedSiren}/${year}` : null,
     fetcher,
     {
@@ -55,7 +48,7 @@ export function useDeclaration(
   }
 }
 
-export function useDeclarations(siren: string): FetcherReturn & { declarations: Record<string, DeclarationForAPI> } {
+export function useDeclarations(siren: string): FetcherReturn & { declarations: Record<string, DeclarationAPI> } {
   // Naive way to fetch the last 3 declarations. Waiting for the API to have an endpoint to retrieve all declarations for a SIREN.
   const { declaration: declaration2021, error: error2021, isLoading: isLoading2021 } = useDeclaration(siren, 2021)
   const { declaration: declaration2020, error: error2020, isLoading: isLoading2020 } = useDeclaration(siren, 2020)

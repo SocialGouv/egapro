@@ -2,7 +2,7 @@ import {
   calculIndicateurCalculable,
   calculIndicateurEcartNombreSalarieesAugmentees,
   calculNote,
-} from "./calculsEgaProIndicateurQuatre"
+} from "../utils/calculsEgaProIndicateurQuatre"
 
 //////////////////
 // INDICATEUR 4 //

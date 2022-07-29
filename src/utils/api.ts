@@ -1,6 +1,7 @@
-import { AppState } from "../globals"
+import type { AppState } from "../globals"
+import type { DeclarationDataField } from "../utils/declarationBuilder"
+
 import { genericFetch } from "./fetcher"
-import { DeclarationTotale } from "./helpers"
 
 const commonHeaders = {
   Accept: "application/json",
@@ -89,7 +90,7 @@ export const postIndicatorsDatas = (data: AppState | Record<string, never>) => p
 
 export const putIndicatorsDatas = (id: string, data: AppState) => putResource(`/simulation/${id}`, { id, data })
 
-export const putDeclaration = (declaration: DeclarationTotale) => {
+export const putDeclaration = (declaration: DeclarationDataField) => {
   const { entreprise, déclaration } = declaration
   return putResource(`/declaration/${entreprise.siren}/${déclaration.année_indicateurs}`, declaration)
 }

@@ -74,7 +74,6 @@ const actionValidateDeclaration: ActionType = {
     nombreCoefficients: 6,
     nonCalculable: false,
     motifNonCalculable: "",
-    motifNonCalculablePrecision: "",
     remunerationAnnuelle: [],
     coefficient: [],
     resultatFinal: 8.0,
@@ -84,7 +83,6 @@ const actionValidateDeclaration: ActionType = {
   indicateurDeuxData: {
     nonCalculable: false,
     motifNonCalculable: "",
-    motifNonCalculablePrecision: "",
     tauxAugmentation: [],
     resultatFinal: 5.0,
     sexeSurRepresente: "femmes",
@@ -94,7 +92,6 @@ const actionValidateDeclaration: ActionType = {
   indicateurTroisData: {
     nonCalculable: false,
     motifNonCalculable: "",
-    motifNonCalculablePrecision: "",
     tauxPromotion: [],
     resultatFinal: 3.0,
     sexeSurRepresente: "femmes",
@@ -104,7 +101,6 @@ const actionValidateDeclaration: ActionType = {
   indicateurDeuxTroisData: {
     nonCalculable: false,
     motifNonCalculable: "",
-    motifNonCalculablePrecision: "",
     resultatFinalEcart: 25,
     resultatFinalNombreSalaries: 5,
     sexeSurRepresente: "femmes",
@@ -116,7 +112,6 @@ const actionValidateDeclaration: ActionType = {
   indicateurQuatreData: {
     nonCalculable: false,
     motifNonCalculable: "",
-    motifNonCalculablePrecision: "",
     resultatFinal: 80.0,
     noteFinale: 0,
   },

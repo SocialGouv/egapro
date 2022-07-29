@@ -1,8 +1,9 @@
-import { DeclarationForAPI } from "../hooks/useDeclaration"
-import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
-import { updateDeclarationWithObjectifsMesures } from "./helpers"
+import type { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
+import type { DeclarationAPI } from "../utils/declarationBuilder"
 
-const declaration: DeclarationForAPI = {
+import { updateDeclarationWithObjectifsMesures } from "../utils/declarationBuilder"
+
+const declaration: DeclarationAPI = {
   siren: "326964418",
   year: 2021,
   data: {
@@ -88,7 +89,7 @@ const declaration: DeclarationForAPI = {
   declared_at: 1656407985,
 }
 
-const expectedDeclaration: DeclarationForAPI = {
+const expectedDeclaration: DeclarationAPI = {
   siren: "326964418",
   year: 2021,
   data: {

@@ -2,7 +2,7 @@ import {
   calculIndicateurSexeSousRepresente,
   calculIndicateurNombreSalariesSexeSousRepresente,
   calculNote,
-} from "./calculsEgaProIndicateurCinq"
+} from "../utils/calculsEgaProIndicateurCinq"
 
 describe("calculIndicateurSexeSousRepresente", () => {
   test("men and women shoulnt be undefined", () => {
