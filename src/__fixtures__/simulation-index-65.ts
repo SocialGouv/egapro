@@ -188,7 +188,7 @@ export const simulationWithIndex65: { id: string; data: AppState } = {
       dateConsultationCSE: "",
       publicationSurSiteInternet: true,
       datePublication: "09/07/2022",
-      lienPublication: "http://www.loremipsum.com",
+      lienPublication: "https://www.loremipsum.com",
       planRelance: false,
       modalitesPublication: "",
       dateDeclaration: "28/07/2022 16:02",
@@ -210,7 +210,7 @@ export const expectedDeclarationWithIndex65 = {
     points_calculables: 100,
     mesures_correctives: "mmo",
     index: 65,
-    publication: { date: "2022-07-09", url: "http://www.loremipsum.com" },
+    publication: { date: "2022-07-09", url: "https://www.loremipsum.com" },
   },
   déclarant: { prénom: "Jake", nom: "Macintosh", téléphone: "0202020202", email: "admin@gmail.com" },
   entreprise: {
