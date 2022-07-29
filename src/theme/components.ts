@@ -72,6 +72,7 @@ const components = {
             _readOnly: {
               background: "primary.200",
               borderColor: "transparent",
+              pointerEvents: "none",
             },
           },
         }),
