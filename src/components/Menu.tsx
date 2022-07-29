@@ -1,6 +1,6 @@
 import React, { Fragment } from "react"
 import { Switch, Route, Link as ReachLink } from "react-router-dom"
-import { Box, Heading, List, ListItem, Link, Text } from "@chakra-ui/react"
+import { Box, Heading, List, ListItem, Link } from "@chakra-ui/react"
 import { FormState, TrancheEffectifs } from "../globals"
 import globalStyles from "../utils/globalStyles"
 import { IconValid, IconInvalid } from "./ds/Icons"
@@ -42,7 +42,7 @@ function CustomNavLink({
 }: CustomNavLinkProps) {
   if (disabled) {
     return (
-      <Text
+      <Box
         fontSize="13"
         sx={{
           lineHeight: 1.125,
@@ -55,7 +55,7 @@ function CustomNavLink({
           {title}
           {label && <Box>{label}</Box>}
         </Box>
-      </Text>
+      </Box>
     )
   }
 
