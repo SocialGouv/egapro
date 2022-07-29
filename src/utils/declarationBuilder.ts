@@ -116,10 +116,18 @@ const buildDeclaration = (state: AppState, declarationBase: DeclarationAPI | und
   }
 
   // Clean the objectifs/mesures of declaration if the data have changed
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 75) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 75 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete declaration.publication?.date_publication_mesures
   }
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 85) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete declaration.publication?.date_publication_objectifs
     delete declaration.publication?.modalités_objectifs_mesures
   }
@@ -306,7 +314,11 @@ const buildIndicateur1 = (state: AppState, declarationBase: DeclarationAPI | und
   }
 
   // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 85) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete indicateur1.objectif_de_progression
   }
 
@@ -345,7 +357,11 @@ const buildIndicateur2 = (state: AppState, declarationBase: DeclarationAPI | und
   }
 
   // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 85) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete indicateur2.objectif_de_progression
   }
 
@@ -384,7 +400,11 @@ const buildIndicateur3 = (state: AppState, declarationBase: DeclarationAPI | und
   }
 
   // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 85) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete indicateur3.objectif_de_progression
   }
 
@@ -432,7 +452,11 @@ const buildIndicateur2et3 = (state: AppState, declarationBase: DeclarationAPI | 
   }
 
   // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 85) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete indicateur2et3.objectif_de_progression
   }
 
@@ -468,7 +492,11 @@ const buildIndicateur4 = (state: AppState, declarationBase: DeclarationAPI | und
   }
 
   // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 85) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete indicateur4.objectif_de_progression
   }
 
@@ -501,7 +529,11 @@ const buildIndicateur5 = (state: AppState, declarationBase: DeclarationAPI | und
   }
 
   // We must delete the objectifs de progression, if the index has changed and do not requires now to fill this field.
-  if (!state.declaration.noteIndex || state.declaration.noteIndex >= 85) {
+  if (
+    !state.declaration.noteIndex ||
+    state.declaration.noteIndex >= 85 ||
+    (state.informations.anneeDeclaration && state.informations.anneeDeclaration < 2021)
+  ) {
     delete indicateur5.objectif_de_progression
   }
   return indicateur5

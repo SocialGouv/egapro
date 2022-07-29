@@ -1,16 +1,16 @@
+import {
+  buildDeclarationFromSimulation,
+  DeclarationAPI,
+  Indicateur1Calculable,
+  updateDeclarationWithObjectifsMesures,
+} from "../utils/declarationBuilder"
 import { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
 import { expectedDeclarationWithIndex65, simulationWithIndex65 } from "../__fixtures__/simulation-index-65"
+import { expectedDeclarationWithIndex80, simulationWithIndex80 } from "../__fixtures__/simulation-index-80"
 import {
   expectedDeclarationWithNoPeriodeSuffisante,
   simulationWithNoPeriodeSuffisante,
 } from "../__fixtures__/simulation-no-periode-suffisante"
-
-import {
-  DeclarationAPI,
-  buildDeclarationFromSimulation,
-  Indicateur1Calculable,
-  updateDeclarationWithObjectifsMesures,
-} from "./declarationBuilder"
 
 describe("A regular simulation transformed in declaration", () => {
   test("Test for a simulation with not periode suffisante", () => {
@@ -20,6 +20,9 @@ describe("A regular simulation transformed in declaration", () => {
     })
 
     expect(declaration).toEqual(expectedDeclarationWithNoPeriodeSuffisante)
+
+    expect(declaration.déclaration.index).toMatchInlineSnapshot(`undefined`)
+    expect(declaration.entreprise.effectif.tranche).toMatchInlineSnapshot(`"50:250"`)
   })
 
   test("Test for a simulation with index of 65", () => {
@@ -29,6 +32,18 @@ describe("A regular simulation transformed in declaration", () => {
     })
 
     expect(declaration).toEqual(expectedDeclarationWithIndex65)
+    expect(declaration.déclaration.index).toMatchInlineSnapshot(`65`)
+    expect(declaration.entreprise.effectif.tranche).toMatchInlineSnapshot(`"50:250"`)
+  })
+  test("Test for a simulation with index of 80", () => {
+    const declaration = buildDeclarationFromSimulation({
+      id: "ea1709b4-0db7-11ed-86ff-0242c0a82004",
+      state: simulationWithIndex80.data,
+    })
+
+    expect(declaration).toEqual(expectedDeclarationWithIndex80)
+    expect(declaration.déclaration.index).toMatchInlineSnapshot(`80`)
+    expect(declaration.entreprise.effectif.tranche).toMatchInlineSnapshot(`"50:250"`)
   })
 })
 
@@ -53,6 +68,9 @@ describe("A declaration issued from simulation must preserved or removed objecti
       modified_at: 1656517469,
       declared_at: 1656407985,
     }
+
+    expect(declarationAPI.data.déclaration.index).toMatchInlineSnapshot(`65`)
+    expect(declarationAPI.data.entreprise.effectif.tranche).toMatchInlineSnapshot(`"50:250"`)
 
     // 2. Update declaration with objectifs and mesures
     const declarationWithOPMC = updateDeclarationWithObjectifsMesures(declarationAPI, objectifsMesuresData)
@@ -83,6 +101,11 @@ describe("A declaration issued from simulation must preserved or removed objecti
       declared_at: 1656407985,
     }
 
+    // 2. Check index and tranche.
+
+    expect(declarationAPI.data.déclaration.index).toMatchInlineSnapshot(`65`)
+    expect(declarationAPI.data.entreprise.effectif.tranche).toMatchInlineSnapshot(`"50:250"`)
+
     // 2. Update declaration with objectifs and mesures.
     const declarationWithOPMC = updateDeclarationWithObjectifsMesures(declarationAPI, objectifsMesuresData)
 
@@ -97,7 +120,8 @@ describe("A declaration issued from simulation must preserved or removed objecti
         rémunérations,
       } = declarationWithOPMC.data.indicateurs || {}
 
-      // 3. Check that indicateurs are well set.
+      // 3. Check indicateurs.
+
       expect((rémunérations as Indicateur1Calculable)?.note).toBe(40)
       expect(augmentations).toBeUndefined()
       expect(promotions).toBeUndefined()
@@ -122,10 +146,11 @@ describe("A declaration issued from simulation must preserved or removed objecti
       })
     }
 
+    // 4. Modify the tranche.
     const cloneSimulation = { ...simulationWithIndex65 }
     cloneSimulation.data.informations.trancheEffectifs = "1000 et plus" // for entreprise with tranche > 250, indicateur2&3 is replaced by indicateur2 and indicateur3
 
-    // 4. Resend declaration.
+    // 5. Resend declaration.
     const declarationUpdated = buildDeclarationFromSimulation({
       id: "e1b52342-0e60-11ed-a33f-0242c0a82004",
       state: cloneSimulation.data,
@@ -142,8 +167,11 @@ describe("A declaration issued from simulation must preserved or removed objecti
         rémunérations,
       } = declarationUpdated.indicateurs || {}
 
-      // 3. Check that indicateurs are well set.
+      // 6. Check index and tranche.
+      expect(declarationUpdated.déclaration.index).toMatchInlineSnapshot(`65`)
+      expect(declarationUpdated.entreprise.effectif.tranche).toMatchInlineSnapshot(`"1000:"`)
 
+      // 7. Check that indicateurs are well set.
       expect((rémunérations as Indicateur1Calculable)?.note).toBe(40) // hasn't changed
 
       // new indicateur

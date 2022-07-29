@@ -102,7 +102,7 @@ type StatusObjectifsMesures =
 /**
  * Return the status of the declaration, OP MC wise.
  */
-function statusDeclaration(declaration: DeclarationAPI): StatusObjectifsMesures {
+export function statusDeclaration(declaration: DeclarationAPI): StatusObjectifsMesures {
   const { after2021, index, initialValuesObjectifsMesures, objectifsMesuresSchema } =
     buildHelpersObjectifsMesures(declaration)
 
