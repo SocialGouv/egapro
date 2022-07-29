@@ -3,7 +3,7 @@ import {
   calculEcartPondere,
   calculTotalEcartPondere,
   calculEffectifsIndicateurCalculable,
-} from "./calculsEgaPro"
+} from "../utils/calculsEgaPro"
 
 //////////////////
 // COMMON ////////

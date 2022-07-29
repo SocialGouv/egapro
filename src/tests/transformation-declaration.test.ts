@@ -1,7 +1,7 @@
 import type { ObjectifsMesuresFormSchema } from "../views/private/ObjectifsMesuresPage"
-import type { DeclarationAPI } from "./declarationBuilder"
+import type { DeclarationAPI } from "../utils/declarationBuilder"
 
-import { updateDeclarationWithObjectifsMesures } from "./declarationBuilder"
+import { updateDeclarationWithObjectifsMesures } from "../utils/declarationBuilder"
 
 const declaration: DeclarationAPI = {
   siren: "326964418",

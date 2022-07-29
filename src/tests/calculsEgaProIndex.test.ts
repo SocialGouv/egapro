@@ -1,4 +1,4 @@
-import { calculNoteIndex } from "./calculsEgaProIndex"
+import { calculNoteIndex } from "../utils/calculsEgaProIndex"
 
 describe("calculNoteIndex for 250 employees and above", () => {
   test("can't calcul note because totalPointCalculable is under 75", () => {

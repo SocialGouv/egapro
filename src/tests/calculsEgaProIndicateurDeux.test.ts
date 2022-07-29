@@ -5,7 +5,7 @@ import {
   calculIndicateurEcartAugmentation,
   calculIndicateurSexeSurRepresente,
   calculNote,
-} from "./calculsEgaProIndicateurDeux"
+} from "../utils/calculsEgaProIndicateurDeux"
 
 //////////////////
 // INDICATEUR 2 //

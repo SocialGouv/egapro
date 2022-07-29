@@ -1,4 +1,4 @@
-import { calculNote } from "./calculsEgaProIndicateurTrois"
+import { calculNote } from "../utils/calculsEgaProIndicateurTrois"
 
 //////////////////
 // INDICATEUR 3 //

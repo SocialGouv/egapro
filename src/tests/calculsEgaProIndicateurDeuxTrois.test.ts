@@ -1,6 +1,6 @@
 import stateComplete from "../__fixtures__/stateComplete"
-import { calculBarem, calculNote } from "./calculsEgaProIndicateurDeuxTrois"
-import calculIndicateurDeuxTrois from "./calculsEgaProIndicateurDeuxTrois"
+import { calculBarem, calculNote } from "../utils/calculsEgaProIndicateurDeuxTrois"
+import calculIndicateurDeuxTrois from "../utils/calculsEgaProIndicateurDeuxTrois"
 import { AppState, PeriodeDeclaration } from "../globals"
 
 ///////////////////////
