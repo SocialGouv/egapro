@@ -56,7 +56,11 @@ const required_error = "Ce champ ne peut être vide"
  * @param max The maximum value for this in ddicator.
  * @param nonCalculable If true, the value is not calculable.
  */
-export const objectifValidator = (originValue: number, max: number, nonCalculable = false) =>
+export const objectifValidator = (
+  originValue: number,
+  max: number,
+  nonCalculable = false,
+): z.ZodUndefined | z.ZodString =>
   nonCalculable || originValue === max
     ? z.undefined()
     : z

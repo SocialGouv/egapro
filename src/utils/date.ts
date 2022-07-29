@@ -52,7 +52,7 @@ export const toISOString = (date: string): string | undefined => {
   return parsed ? format(parsed, "yyyy-MM-dd") : undefined
 }
 
-export function formatDate(stringDate: string | undefined) {
+export function formatDate(stringDate: string | undefined): string | undefined {
   if (!stringDate) return ""
 
   const date = parseISO(stringDate)
