@@ -56,7 +56,7 @@ const required_error = "Ce champ ne peut être vide"
  * @param max The maximum value for this in ddicator.
  * @param nonCalculable If true, the value is not calculable.
  */
-const objectifValidator = (originValue: number, max: number, nonCalculable = false) =>
+export const objectifValidator = (originValue: number, max: number, nonCalculable = false) =>
   nonCalculable || originValue === max
     ? z.undefined()
     : z
@@ -212,33 +212,19 @@ function buildWordings(index: number | undefined, publicationSurSiteInternet: bo
   return { title, warningText, legalText, finalMessage, siteWebLabel, siteWebReminder, modalite }
 }
 
-const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
-  const history = useHistory()
-  const { siren, year } = useParams<Params>()
-
-  const { declaration, isLoading, isError } = useDeclaration(siren, Number(year))
-
-  const { toastSuccess, toastError } = useToastMessage({ duration: 10000 })
-
-  if (isLoading) return <Spinner />
-
-  if (isError)
-    return (
-      <>
-        <Text textColor="#E53E3E">Il n'y a pas de déclaration pour ce SIREN et cette année.</Text>
-        <ButtonAction onClick={() => history.goBack()} label="Retour" />
-      </>
-    )
-
-  // From now on, declaration is necessarily defined, otherwise, we would have returned earlier.
-
+/**
+ * Different helpers for managing the data for objectifs and mesures.
+ *
+ * Helpers are :
+ * - property deeply nested which are returned flat in the return object.
+ * - computed property (like after2021 or initialValuesObjectifsMesures)
+ * - function like objectifsMesuresSchema for validating this part of the declaration object.
+ *
+ * These helpers are used by UI and by DeclarationListe to reuse the zod validation.
+ */
+export function buildHelpersObjectifsMesures(declaration: DeclarationAPI | undefined) {
   const index = declaration?.data.déclaration.index
   const publicationSurSiteInternet = Boolean(declaration?.data.déclaration?.publication?.url)
-
-  const { title, warningText, legalText, finalMessage, siteWebLabel, siteWebReminder, modalite } = buildWordings(
-    index,
-    publicationSurSiteInternet,
-  )
 
   const trancheEffectifs = declaration?.data.entreprise.effectif.tranche as TrancheEffectifsAPI
 
@@ -246,7 +232,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     declaration?.data.déclaration.année_indicateurs && declaration?.data.déclaration.année_indicateurs >= 2021,
   )
 
-  const initialValues = {
+  const initialValuesObjectifsMesures = {
     objectifIndicateurUn: (declaration?.data.indicateurs?.rémunérations as Indicateur1Calculable)
       ?.objectif_de_progression
       ? String((declaration?.data.indicateurs?.rémunérations as Indicateur1Calculable)?.objectif_de_progression)
@@ -281,24 +267,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
     lienPublication: declaration?.data.déclaration.publication?.url,
   }
 
-  const onSubmit = async (formData: typeof initialValues) => {
-    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration as DeclarationAPI, formData)
-
-    try {
-      await putDeclaration(newDeclaration?.data)
-
-      await sendReceiptObjectifsMesures(siren, Number(year))
-
-      toastSuccess(finalMessage)
-    } catch (error) {
-      console.error(
-        "Erreur lors de la sauvegarde des informations d'objectifs de progression et mesures de correction",
-        error,
-      )
-      toastError("Erreur lors de la sauvegarde des informations")
-    }
-  }
-
   const {
     rémunérations,
     augmentations,
@@ -323,84 +291,159 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
   const indicateurQuatreNonCalculable = Boolean((congés_maternité as IndicateurNonCalculable)?.non_calculable)
   const noteIndicateurCinq = (hautes_rémunérations as Indicateur5)?.note
 
-  const FormInputs = ({
-    trancheEffectifs,
-    finPeriodeReference,
-    index,
-  }: {
-    trancheEffectifs: TrancheEffectifsAPI
-    finPeriodeReference: string | undefined
-    index: number | undefined
-  }) => {
-    let augmentationInputs: Record<string, any> = {
-      objectifIndicateurDeuxTrois: objectifValidator(
-        noteIndicateurDeuxTrois || 0,
-        MAX_NOTES_INDICATEURS["indicateurDeuxTrois"],
-        indicateurDeuxTroisNonCalculable,
-      ),
-    }
-    if (trancheEffectifs !== "50:250") {
-      augmentationInputs = {
-        objectifIndicateurDeux: objectifValidator(
-          noteIndicateurDeux || 0,
-          MAX_NOTES_INDICATEURS["indicateurDeux"],
-          indicateurDeuxNonCalculable,
-        ),
-        objectifIndicateurTrois: objectifValidator(
-          noteIndicateurTrois || 0,
-          MAX_NOTES_INDICATEURS["indicateurTrois"],
-          indicateurTroisNonCalculable,
-        ),
-      }
-    }
-    const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
+  const parsedFinPeriodeReference = declaration?.data.déclaration.fin_période_référence
+    ? parseDate(declaration?.data.déclaration.fin_période_référence)
+    : undefined
 
-    return z.object({
-      objectifIndicateurUn: objectifValidator(
-        noteIndicateurUn || 0,
-        MAX_NOTES_INDICATEURS["indicateurUn"],
-        indicateurUnNonCalculable,
-      ),
-      ...augmentationInputs,
-      objectifIndicateurQuatre: objectifValidator(
-        noteIndicateurQuatre || 0,
-        MAX_NOTES_INDICATEURS["indicateurQuatre"],
-        indicateurQuatreNonCalculable,
-      ),
-      objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
-      datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
-      datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference).optional(),
-      modalitesPublicationObjectifsMesures: z.string().optional(),
-    })
-    // TODO : ces règles ne sont pas contrôlées par zod. Je ne sais pas pourquoi...
-    // En contournement, on se base sur l'autovalidation des champs date et textarea, qui impose qu'il y ait un contenu si le widget s'affiche.
-    // .refine(
-    //   (val) =>
-    //     !index
-    //       ? true
-    //       : index < 75 || (index < 85 && publicationSurSiteInternet === false)
-    //       ? typeof val.modalitesPublicationObjectifsMesures === "string" &&
-    //         val.modalitesPublicationObjectifsMesures.trim().length
-    //       : val.modalitesPublicationObjectifsMesures === undefined,
-    //   {
-    //     message: required_error,
-    //     path: ["modalitesPublicationObjectifsMesures"],
-    //   },
-    // )
-    // .refine(
-    //   (val) => {
-    //     return !index
-    //       ? true
-    //       : index < 75
-    //       ? val.datePublicationMesures !== undefined
-    //       : val.datePublicationMesures === undefined
-    //   },
-    //   {
-    //     message: required_error,
-    //     path: ["datePublicationMesures"],
-    //   },
-    // )
+  // Beginning of zod validation schema
+  let augmentationInputs: Record<string, any> = {
+    objectifIndicateurDeuxTrois: objectifValidator(
+      noteIndicateurDeuxTrois || 0,
+      MAX_NOTES_INDICATEURS["indicateurDeuxTrois"],
+      indicateurDeuxTroisNonCalculable,
+    ),
   }
+  if (trancheEffectifs !== "50:250") {
+    augmentationInputs = {
+      objectifIndicateurDeux: objectifValidator(
+        noteIndicateurDeux || 0,
+        MAX_NOTES_INDICATEURS["indicateurDeux"],
+        indicateurDeuxNonCalculable,
+      ),
+      objectifIndicateurTrois: objectifValidator(
+        noteIndicateurTrois || 0,
+        MAX_NOTES_INDICATEURS["indicateurTrois"],
+        indicateurTroisNonCalculable,
+      ),
+    }
+  }
+
+  const objectifsMesuresSchema = !after2021
+    ? z.object({
+        objectifIndicateurUn: z.undefined(),
+        objectifIndicateurDeux: z.undefined(),
+        objectifIndicateurTrois: z.undefined(),
+        objectifIndicateurDeuxTrois: z.undefined(),
+        objectifIndicateurQuatre: z.undefined(),
+        objectifIndicateurCinq: z.undefined(),
+        datePublicationObjectifs: z.undefined(),
+        datePublicationMesures: z.undefined(),
+        modalitesPublicationObjectifsMesures: z.undefined(),
+      })
+    : z
+        .object({
+          objectifIndicateurUn: objectifValidator(
+            noteIndicateurUn || 0,
+            MAX_NOTES_INDICATEURS["indicateurUn"],
+            indicateurUnNonCalculable,
+          ),
+          ...augmentationInputs,
+          objectifIndicateurQuatre: objectifValidator(
+            noteIndicateurQuatre || 0,
+            MAX_NOTES_INDICATEURS["indicateurQuatre"],
+            indicateurQuatreNonCalculable,
+          ),
+          objectifIndicateurCinq: objectifValidator(noteIndicateurCinq || 0, MAX_NOTES_INDICATEURS["indicateurCinq"]),
+          datePublicationObjectifs: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference),
+          datePublicationMesures: isDateBeforeFinPeriodeReference(parsedFinPeriodeReference).optional(),
+          modalitesPublicationObjectifsMesures: z.string().optional(),
+        })
+        // NB : ces règles en zod ne sont pas appelées par React Final Form. Je ne sais pas pourquoi, mais j'imagine que c'est parce que le refine
+        // se situe au niveau racine et pas au niveau d'un des champs. Il faudrait passer en React Hook Form qui supporte zod officiellement.
+        // Côté form, on contourne en se basant sur l'autovalidation des champs date et textarea, qui impose qu'il y ait un contenu si le widget s'affiche.
+        // Côté valiation des données d'un formulaire, c'est appelé correctement.
+        .refine(
+          (val) =>
+            !index
+              ? true
+              : index < 75 || (index < 85 && publicationSurSiteInternet === false)
+              ? typeof val.modalitesPublicationObjectifsMesures === "string" &&
+                val.modalitesPublicationObjectifsMesures.trim().length
+              : val.modalitesPublicationObjectifsMesures === undefined,
+          {
+            message: required_error,
+            path: ["modalitesPublicationObjectifsMesures"],
+          },
+        )
+        .refine(
+          (val) => {
+            return !index
+              ? true
+              : index < 75
+              ? val.datePublicationMesures !== undefined
+              : val.datePublicationMesures === undefined
+          },
+          {
+            message: required_error,
+            path: ["datePublicationMesures"],
+          },
+        )
+
+  return {
+    index,
+    publicationSurSiteInternet,
+    trancheEffectifs,
+    after2021,
+    initialValuesObjectifsMesures,
+    noteIndicateurUn,
+    indicateurUnNonCalculable,
+    noteIndicateurDeux,
+    indicateurDeuxNonCalculable,
+    noteIndicateurTrois,
+    indicateurTroisNonCalculable,
+    noteIndicateurDeuxTrois,
+    indicateurDeuxTroisNonCalculable,
+    noteIndicateurQuatre,
+    indicateurQuatreNonCalculable,
+    noteIndicateurCinq,
+    objectifsMesuresSchema,
+  }
+}
+
+const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
+  const history = useHistory()
+  const { siren, year } = useParams<Params>()
+
+  const { declaration, isLoading, isError } = useDeclaration(siren, Number(year))
+
+  const { toastSuccess, toastError } = useToastMessage({ duration: 10000 })
+
+  if (isLoading) return <Spinner />
+
+  if (isError)
+    return (
+      <>
+        <Text textColor="#E53E3E">Il n'y a pas de déclaration pour ce SIREN et cette année.</Text>
+        <ButtonAction onClick={() => history.goBack()} label="Retour" />
+      </>
+    )
+
+  // From now on, declaration is necessarily defined, otherwise, we would have returned earlier.
+
+  const {
+    index,
+    publicationSurSiteInternet,
+    trancheEffectifs,
+    after2021,
+    initialValuesObjectifsMesures,
+    noteIndicateurUn,
+    indicateurUnNonCalculable,
+    noteIndicateurDeux,
+    indicateurDeuxNonCalculable,
+    noteIndicateurTrois,
+    indicateurTroisNonCalculable,
+    noteIndicateurDeuxTrois,
+    indicateurDeuxTroisNonCalculable,
+    noteIndicateurQuatre,
+    indicateurQuatreNonCalculable,
+    noteIndicateurCinq,
+    objectifsMesuresSchema,
+  } = buildHelpersObjectifsMesures(declaration)
+
+  const { title, warningText, legalText, finalMessage, siteWebLabel, siteWebReminder, modalite } = buildWordings(
+    index,
+    publicationSurSiteInternet,
+  )
 
   // This is not supposed to happen due to routing but it is safer to guard against it.
   if (declaration?.data.déclaration.période_suffisante === false)
@@ -410,20 +453,30 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
 
   if (index > 85) return <Text>Vous n'avez pas à remplir cette page car votre index est supérieur à 85.</Text>
 
+  const onSubmit = async (formData: typeof initialValuesObjectifsMesures) => {
+    const newDeclaration = updateDeclarationWithObjectifsMesures(declaration as DeclarationAPI, formData)
+
+    try {
+      await putDeclaration(newDeclaration?.data)
+      await sendReceiptObjectifsMesures(siren, Number(year))
+      toastSuccess(finalMessage)
+    } catch (error) {
+      console.error(
+        "Erreur lors de la sauvegarde des informations d'objectifs de progression et mesures de correction",
+        error,
+      )
+      toastError("Erreur lors de la sauvegarde des informations")
+    }
+  }
+
   return (
     <SinglePageLayout>
       <Page title={title}>
         <Form
           onSubmit={onSubmit}
-          initialValues={initialValues}
+          initialValues={initialValuesObjectifsMesures}
           validateOnBlur
-          validate={formValidator(
-            FormInputs({
-              trancheEffectifs,
-              finPeriodeReference: declaration?.data.déclaration.fin_période_référence,
-              index,
-            }),
-          )}
+          validate={formValidator(objectifsMesuresSchema)}
         >
           {({ handleSubmit, hasValidationErrors, submitFailed, submitting, values, errors }) => (
             <form onSubmit={handleSubmit}>

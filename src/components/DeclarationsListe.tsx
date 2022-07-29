@@ -1,23 +1,15 @@
 import { Box, Text } from "@chakra-ui/layout"
 import { Link, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import { Spinner } from "@chakra-ui/spinner"
-import { format, parseISO } from "date-fns"
 import React from "react"
 import { Link as RouterLink } from "react-router-dom"
 
-import type { DeclarationAPI, DeclarationDataField } from "../utils/declarationBuilder"
+import type { DeclarationAPI } from "../utils/declarationBuilder"
 
 import { useDeclarations } from "../hooks/useDeclaration"
+import { buildHelpersObjectifsMesures } from "../views/private/ObjectifsMesuresPage"
 import { IconInvalid, IconValid } from "./ds/Icons"
-
-function formatDate(stringDate: string | undefined) {
-  if (!stringDate) return ""
-
-  const date = parseISO(stringDate)
-  if (date.toString() === "Invalid Date") return
-
-  return format(date, "dd/MM/yyyy")
-}
+import { formatDate } from "../utils/date"
 
 const trancheFromApiToForm = (declaration: DeclarationAPI | undefined): string => {
   const tranche = declaration?.data.entreprise.effectif?.tranche
@@ -71,14 +63,14 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                       )}
                     </Td>
                     <Td>
-                      {statusDeclaration(declarations[annee]?.data) === "À renseigner" ? (
+                      {statusDeclaration(declarations[annee]) === "À renseigner" ? (
                         <>
                           <IconInvalid mr="2" color="red.500" />
                           <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
                             À renseigner
                           </Link>
                         </>
-                      ) : statusDeclaration(declarations[annee]?.data) === "Renseignés" ? (
+                      ) : statusDeclaration(declarations[annee]) === "Renseignés" ? (
                         <>
                           <IconValid mr="2" color="green.500" />
                           <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
@@ -86,7 +78,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                           </Link>
                         </>
                       ) : (
-                        <Box>{statusDeclaration(declarations[annee]?.data)}</Box>
+                        <Box>{statusDeclaration(declarations[annee])}</Box>
                       )}
                     </Td>
                   </Tr>
@@ -100,20 +92,29 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
   )
 }
 
-type Status = "Non applicable" | "À renseigner" | "Index supérieur à 85" | "Renseignés" | "Année non applicable"
+type StatusObjectifsMesures =
+  | "Non applicable"
+  | "À renseigner"
+  | "Index supérieur à 85"
+  | "Renseignés"
+  | "Année non applicable"
 
-function statusDeclaration({ déclaration }: DeclarationDataField): Status {
-  if (
-    !déclaration ||
-    déclaration.index === undefined ||
-    !déclaration.année_indicateurs ||
-    !déclaration.publication ||
-    déclaration.période_suffisante === false
-  )
-    return "Non applicable"
-  if (déclaration.année_indicateurs < 2021) return "Année non applicable"
-  if (déclaration.index >= 85) return "Index supérieur à 85"
-  if (!déclaration.publication.date_publication_objectifs) return "À renseigner"
+/**
+ * Return the status of the declaration, OP MC wise.
+ */
+function statusDeclaration(declaration: DeclarationAPI): StatusObjectifsMesures {
+  const { after2021, index, initialValuesObjectifsMesures, objectifsMesuresSchema } =
+    buildHelpersObjectifsMesures(declaration)
+
+  if (!declaration.data.déclaration || index === undefined) return "Non applicable"
+  if (!after2021) return "Année non applicable"
+  if (index >= 85) return "Index supérieur à 85"
+
+  try {
+    objectifsMesuresSchema.parse(initialValuesObjectifsMesures)
+  } catch (e) {
+    return "À renseigner"
+  }
   return "Renseignés"
 }
 
