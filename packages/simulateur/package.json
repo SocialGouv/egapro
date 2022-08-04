@@ -15,7 +15,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^1.1.1",
     "@chakra-ui/react": "^1.7.1",
-    "@emotion/react": "^11.8.2",
+    "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11",
     "@fontsource/cabin": "^4.5.0",
     "@fontsource/gabriela": "^4.5.4",
