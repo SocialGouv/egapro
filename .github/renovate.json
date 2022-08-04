@@ -1,4 +1,0 @@
-{
-  "enabled": false,
-  "extends": ["github>SocialGouv/renovate-config:light", "group:allNonMajor"]
-}

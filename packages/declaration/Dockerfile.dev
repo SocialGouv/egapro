@@ -1,0 +1,13 @@
+FROM jekyll/jekyll:4
+
+ARG EGAPRO_API_URL
+
+ENV EGAPRO_API_URL=${EGAPRO_API_URL}
+
+COPY Gemfile .
+
+COPY _config.yml .
+
+RUN echo "EGAPRO_API_URL: ${EGAPRO_API_URL}" >> _config.yml
+
+CMD ["jekyll", "serve"]

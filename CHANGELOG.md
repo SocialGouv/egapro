@@ -1,534 +1,507 @@
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
-## [2.10.1](https://github.com/SocialGouv/egapro/compare/v2.10.0...v2.10.1) (2020-05-14)
+## [1.4.3](https://github.com/SocialGouv/index-egapro/compare/v1.4.2...v1.4.3) (2022-08-04)
 
 
 ### Bug Fixes
 
-* **deps:** update dependency react-scripts to v3.4.1 ([#612](https://github.com/SocialGouv/egapro/issues/612)) ([9205531](https://github.com/SocialGouv/egapro/commit/92055312638edb8aa6dfd038b8ae9acd9c06382b))
-* **import solen:** message d'erreur explicite ([5f197e3](https://github.com/SocialGouv/egapro/commit/5f197e36ae057decc9899d0d4d104c89058c638f))
-* **import-export-cronjob:** fix secrets ([ab9d1f9](https://github.com/SocialGouv/egapro/commit/ab9d1f950c196f7f2546a6550e8ac6d7c9fbaece))
+* rename workflows ([#12](https://github.com/SocialGouv/index-egapro/issues/12)) ([0b59b97](https://github.com/SocialGouv/index-egapro/commit/0b59b97e4c862f71ec7b59d4d5865fd32acdbd88))
+* show print output in stdout ([#6](https://github.com/SocialGouv/index-egapro/issues/6)) ([d21ce93](https://github.com/SocialGouv/index-egapro/commit/d21ce93708cf2b7ebcf042bfc0ac6127c7e6ab97))
 
-
-
-
-
-# [2.10.0](https://github.com/SocialGouv/egapro/compare/v2.9.5...v2.10.0) (2020-05-04)
+## [1.4.2](https://github.com/SocialGouv/index-egapro/compare/v1.4.1...v1.4.2) (2022-08-04)
 
 
 ### Bug Fixes
 
-* fix aucun résultats affiché lors du chargement ([#650](https://github.com/SocialGouv/egapro/issues/650)) ([ad24082](https://github.com/SocialGouv/egapro/commit/ad2408228e695c3ab508b4227f8afe6bae6f41e4))
-* fix sorting with highligted elements ([#681](https://github.com/SocialGouv/egapro/issues/681)) ([7f0f359](https://github.com/SocialGouv/egapro/commit/7f0f35945261aed7272c4a554f29665767160063))
-* **import-export:** use local and prod kinto admin passwords ([#682](https://github.com/SocialGouv/egapro/issues/682)) ([07f00c3](https://github.com/SocialGouv/egapro/commit/07f00c3534dbef228858a2b381fccd9645c40ab2))
+* decouple workflows ([#11](https://github.com/SocialGouv/index-egapro/issues/11)) ([1c05efc](https://github.com/SocialGouv/index-egapro/commit/1c05efcd0ab9b88f199e738bec439f8a7f254e90))
+
+## [1.4.1](https://github.com/SocialGouv/index-egapro/compare/v1.4.0...v1.4.1) (2022-08-04)
+
+
+### Bug Fixes
+
+* app version ([#10](https://github.com/SocialGouv/index-egapro/issues/10)) ([c4d78a3](https://github.com/SocialGouv/index-egapro/commit/c4d78a394336cf863b69b52298f957f437ab63ae))
+
+# [1.4.0](https://github.com/SocialGouv/index-egapro/compare/v1.3.7...v1.4.0) (2022-08-04)
 
 
 ### Features
 
-* **import-export:** ajout d'un "ENV_SUFFIX" pour permettre le déploiement en dev de l'import-export et indexing elasticsearch ([#647](https://github.com/SocialGouv/egapro/issues/647)) ([5c9a059](https://github.com/SocialGouv/egapro/commit/5c9a059e5342b9296565ffe38119c25fa0914d1e))
-* add social networks metadata ([#683](https://github.com/SocialGouv/egapro/issues/683)) ([36faa70](https://github.com/SocialGouv/egapro/commit/36faa7013818835de2a0a75fa3a74231f57baab4))
-* add user feedback button ([#635](https://github.com/SocialGouv/egapro/issues/635)) ([d953435](https://github.com/SocialGouv/egapro/commit/d95343574cefd2624fa49b0a448714107569bf44))
-* ajout responsive à la page consulter index ([#679](https://github.com/SocialGouv/egapro/issues/679)) ([1963574](https://github.com/SocialGouv/egapro/commit/1963574b78c6db36dc574da90fea55a2383560e3))
-* highlight searched terms in consulter index page ([#678](https://github.com/SocialGouv/egapro/issues/678)) ([b964ccf](https://github.com/SocialGouv/egapro/commit/b964ccf418e31b1f4cf7ee21a25f8f3847a94a2e))
-* mise à jour de l'input de recherche sur la page de consultation ([#649](https://github.com/SocialGouv/egapro/issues/649)) ([3586212](https://github.com/SocialGouv/egapro/commit/358621219f4cef163cd4c4a95549770d1444ddaa))
-* **migration:** Migration des données dans le pipeline gitlab ([#680](https://github.com/SocialGouv/egapro/issues/680)) ([df0fef8](https://github.com/SocialGouv/egapro/commit/df0fef87e4a38da5bde6cde0b4a446cae5433c2f))
+* add tests api in CI ([07023b8](https://github.com/SocialGouv/index-egapro/commit/07023b818c805fc22c9a6c51f739e8504b04d4ef))
+* change glob on branch for tests yaml ([09c45f7](https://github.com/SocialGouv/index-egapro/commit/09c45f7d1f6a0c6baefeb7d3f8e79b18f47fd98c))
 
-
-
-
-
-## [2.9.5](https://github.com/SocialGouv/egapro/compare/v2.9.4...v2.9.5) (2020-04-01)
-
-**Note:** Version bump only for package egapro
-
-
-
-
-
-## [2.9.4](https://github.com/SocialGouv/egapro/compare/v2.9.3...v2.9.4) (2020-03-30)
+## [1.3.7](https://github.com/SocialGouv/index-egapro/compare/v1.3.6...v1.3.7) (2022-08-03)
 
 
 ### Bug Fixes
 
-* **docker:** fix local docker-compose ([#637](https://github.com/SocialGouv/egapro/issues/637)) ([5a4f1f3](https://github.com/SocialGouv/egapro/commit/5a4f1f3))
-* **import-export:** proper git checkout for a tag (bis) ([#639](https://github.com/SocialGouv/egapro/issues/639)) ([191b1de](https://github.com/SocialGouv/egapro/commit/191b1de))
+* redirecto from ([56482ca](https://github.com/SocialGouv/index-egapro/commit/56482cadac2bd2e542c427a4d47e31392ca8d1d8))
 
-
-
-
-
-## [2.9.3](https://github.com/SocialGouv/egapro/compare/v2.9.2...v2.9.3) (2020-03-30)
+## [1.3.6](https://github.com/SocialGouv/index-egapro/compare/v1.3.5...v1.3.6) (2022-08-03)
 
 
 ### Bug Fixes
 
-* **import-export:** proper git checkout for a tag ([#638](https://github.com/SocialGouv/egapro/issues/638)) ([efd7515](https://github.com/SocialGouv/egapro/commit/efd7515))
+* build host ([b5ad428](https://github.com/SocialGouv/index-egapro/commit/b5ad4288f91f983db8825207e0cd0bcae5b7bacd))
+* certSecretName ([72c40ea](https://github.com/SocialGouv/index-egapro/commit/72c40ea9b87a52c2292cce04a53e89044a6cfe87))
 
-
-
-
-
-## [2.9.2](https://github.com/SocialGouv/egapro/compare/v2.9.1...v2.9.2) (2020-03-30)
+## [1.3.5](https://github.com/SocialGouv/index-egapro/compare/v1.3.4...v1.3.5) (2022-08-03)
 
 
 ### Bug Fixes
 
-* **app:** utilisation de createProxyMiddleware suite à maj de ht… ([#626](https://github.com/SocialGouv/egapro/issues/626)) ([f811bf9](https://github.com/SocialGouv/egapro/commit/f811bf9))
-* **ci:** déplacement du job import-export dans l'étape 06-release ([#636](https://github.com/SocialGouv/egapro/issues/636)) ([27c5b0d](https://github.com/SocialGouv/egapro/commit/27c5b0d))
-* **deps:** pin dependencies ([#577](https://github.com/SocialGouv/egapro/issues/577)) ([d157773](https://github.com/SocialGouv/egapro/commit/d157773))
-* **deps:** update dependency @elastic/elasticsearch to v7.6.1 ([#594](https://github.com/SocialGouv/egapro/issues/594)) ([35194f0](https://github.com/SocialGouv/egapro/commit/35194f0))
-* **deps:** update dependency @emotion/core to v10.0.28 ([#579](https://github.com/SocialGouv/egapro/issues/579)) ([68fe52b](https://github.com/SocialGouv/egapro/commit/68fe52b))
-* **deps:** update dependency date-fns to v2.10.0 ([#561](https://github.com/SocialGouv/egapro/issues/561)) ([78b9d96](https://github.com/SocialGouv/egapro/commit/78b9d96))
-* **deps:** update dependency date-fns to v2.11.0 ([#595](https://github.com/SocialGouv/egapro/issues/595)) ([26a6c0c](https://github.com/SocialGouv/egapro/commit/26a6c0c))
-* **deps:** update dependency fuse.js to v3.6.1 ([#580](https://github.com/SocialGouv/egapro/issues/580)) ([7ecd0b8](https://github.com/SocialGouv/egapro/commit/7ecd0b8))
-* **deps:** update dependency http-proxy-middleware to v0.21.0 ([#532](https://github.com/SocialGouv/egapro/issues/532)) ([264e8fb](https://github.com/SocialGouv/egapro/commit/264e8fb))
-* **deps:** update dependency http-proxy-middleware to v1 ([#535](https://github.com/SocialGouv/egapro/issues/535)) ([ebf3aad](https://github.com/SocialGouv/egapro/commit/ebf3aad))
-* **deps:** update dependency http-proxy-middleware to v1.0.2 ([#598](https://github.com/SocialGouv/egapro/issues/598)) ([99f33d2](https://github.com/SocialGouv/egapro/commit/99f33d2))
-* **deps:** update dependency http-proxy-middleware to v1.0.3 ([#600](https://github.com/SocialGouv/egapro/issues/600)) ([5aac745](https://github.com/SocialGouv/egapro/commit/5aac745))
-* **deps:** update dependency koa-bodyparser to v4.3.0 ([#618](https://github.com/SocialGouv/egapro/issues/618)) ([cd695ce](https://github.com/SocialGouv/egapro/commit/cd695ce))
-* **deps:** update dependency koa-router to v8.0.8 ([#531](https://github.com/SocialGouv/egapro/issues/531)) ([ffbf0aa](https://github.com/SocialGouv/egapro/commit/ffbf0aa))
-* **deps:** update dependency nodemailer to v6.4.4 ([#553](https://github.com/SocialGouv/egapro/issues/553)) ([909df2e](https://github.com/SocialGouv/egapro/commit/909df2e))
-* **deps:** update dependency nodemailer to v6.4.5 ([#586](https://github.com/SocialGouv/egapro/issues/586)) ([7bad02d](https://github.com/SocialGouv/egapro/commit/7bad02d))
-* **deps:** update dependency nodemailer to v6.4.6 ([#610](https://github.com/SocialGouv/egapro/issues/610)) ([2dc8cc4](https://github.com/SocialGouv/egapro/commit/2dc8cc4))
-* **deps:** update dependency pino to v5.17.0 ([#581](https://github.com/SocialGouv/egapro/issues/581)) ([cc5a88f](https://github.com/SocialGouv/egapro/commit/cc5a88f))
-* **deps:** update dependency react-datepicker to v2.14.0 ([#552](https://github.com/SocialGouv/egapro/issues/552)) ([4537cc2](https://github.com/SocialGouv/egapro/commit/4537cc2))
-* **deps:** update dependency react-datepicker to v2.14.1 ([#614](https://github.com/SocialGouv/egapro/issues/614)) ([3fcc723](https://github.com/SocialGouv/egapro/commit/3fcc723))
-* **deps:** update dependency react-scripts to v3.4.0 ([#529](https://github.com/SocialGouv/egapro/issues/529)) ([93e3e22](https://github.com/SocialGouv/egapro/commit/93e3e22))
-* **deps:** update dependency react-table to v7.0.0 ([#585](https://github.com/SocialGouv/egapro/issues/585)) ([6299e43](https://github.com/SocialGouv/egapro/commit/6299e43))
-* **deps:** update react monorepo to v16.13.0 ([#582](https://github.com/SocialGouv/egapro/issues/582)) ([bdb5085](https://github.com/SocialGouv/egapro/commit/bdb5085))
-* **deps:** update react monorepo to v16.13.1 ([#608](https://github.com/SocialGouv/egapro/issues/608)) ([b628504](https://github.com/SocialGouv/egapro/commit/b628504))
-* **deps:** update sentry monorepo to v5.13.2 ([#543](https://github.com/SocialGouv/egapro/issues/543)) ([ed733e6](https://github.com/SocialGouv/egapro/commit/ed733e6))
-* **deps:** update sentry monorepo to v5.14.0 ([#587](https://github.com/SocialGouv/egapro/issues/587)) ([7857208](https://github.com/SocialGouv/egapro/commit/7857208))
-* fix search being too wide ([#574](https://github.com/SocialGouv/egapro/issues/574)) ([be29f3e](https://github.com/SocialGouv/egapro/commit/be29f3e))
-* **deps:** update sentry monorepo to v5.14.1 ([#590](https://github.com/SocialGouv/egapro/issues/590)) ([20c240c](https://github.com/SocialGouv/egapro/commit/20c240c))
-* **deps:** update sentry monorepo to v5.14.2 ([#593](https://github.com/SocialGouv/egapro/issues/593)) ([cd06db4](https://github.com/SocialGouv/egapro/commit/cd06db4))
-* **deps:** update sentry monorepo to v5.15.0 ([#609](https://github.com/SocialGouv/egapro/issues/609)) ([d568fb6](https://github.com/SocialGouv/egapro/commit/d568fb6))
-* **egapro:** suppression de l'utilisation du conditional chaining (pas compatible react-scripts) ([#583](https://github.com/SocialGouv/egapro/issues/583)) ([e804d8e](https://github.com/SocialGouv/egapro/commit/e804d8e))
-* **import:** amélioration de l'import solen ([#524](https://github.com/SocialGouv/egapro/issues/524)) ([0addf1d](https://github.com/SocialGouv/egapro/commit/0addf1d))
-* modification du title de la page de consultation en Consultation Index Egapro ([#634](https://github.com/SocialGouv/egapro/issues/634)) ([f7a6490](https://github.com/SocialGouv/egapro/commit/f7a6490))
+* ingress redirecto from ([b261967](https://github.com/SocialGouv/index-egapro/commit/b2619670e9b65b7c2b3fb1a3889c3fca6550ba05))
+
+## [1.3.4](https://github.com/SocialGouv/index-egapro/compare/v1.3.3...v1.3.4) (2022-08-03)
+
+
+### Bug Fixes
+
+* secrets api ([f822abe](https://github.com/SocialGouv/index-egapro/commit/f822abe0176992f9043d2e2e4d2dee7da542a0f5))
+
+## [1.3.3](https://github.com/SocialGouv/index-egapro/compare/v1.3.2...v1.3.3) (2022-08-03)
+
+
+### Bug Fixes
+
+* ingress redirect ([9ca220a](https://github.com/SocialGouv/index-egapro/commit/9ca220ad3e3fc3ec6aded26a03c53c8733fe645b))
+
+## [1.3.2](https://github.com/SocialGouv/index-egapro/compare/v1.3.1...v1.3.2) (2022-08-03)
+
+
+### Bug Fixes
+
+* smtp ([97a3cff](https://github.com/SocialGouv/index-egapro/commit/97a3cffd45d7c7010e02ba67f0e4abafb9aa55b3))
+
+## [1.3.1](https://github.com/SocialGouv/index-egapro/compare/v1.3.0...v1.3.1) (2022-08-03)
+
+
+### Bug Fixes
+
+* concurrency gotoprod ([12ea44b](https://github.com/SocialGouv/index-egapro/commit/12ea44b0dfcf049fc503f15d833d69df8bda88de))
+
+# [1.3.0](https://github.com/SocialGouv/index-egapro/compare/v1.2.5...v1.3.0) (2022-08-03)
 
 
 ### Features
 
-* **kinto:** update to the latest version of kinto-server docker image ([#589](https://github.com/SocialGouv/egapro/issues/589)) ([fa22b63](https://github.com/SocialGouv/egapro/commit/fa22b63))
+* rollback 18 juillet pour déclaration ([221989f](https://github.com/SocialGouv/index-egapro/commit/221989f8f263c98752e95d14fa5eb657a3d31af3))
+* sync with the code of declaration of 2022-07-22 ([e70db17](https://github.com/SocialGouv/index-egapro/commit/e70db175c223dce1d94ff5cbbf5e0a60cd197d84))
+
+## [1.2.5](https://github.com/SocialGouv/index-egapro/compare/v1.2.4...v1.2.5) (2022-08-03)
 
 
+### Bug Fixes
+
+* use socialgouv/releaserc ([5de3296](https://github.com/SocialGouv/index-egapro/commit/5de3296e7bd66b765538471e8d7aca65285421b4))
+
+## [1.2.4](https://github.com/SocialGouv/index-egapro/compare/v1.2.3...v1.2.4) (2022-08-03)
 
 
+### Bug Fixes
 
-## [2.9.1](https://github.com/SocialGouv/egapro/compare/v2.9.0...v2.9.1) (2020-03-06)
+* jekyll css cache with time suffix ([6433603](https://github.com/SocialGouv/index-egapro/commit/6433603a320956e358aa936f48e2a36df410b4f5))
+* test concurrency ([4abed19](https://github.com/SocialGouv/index-egapro/commit/4abed19cfa5751d70bbb0e6f5e716b6b1a773abb))
 
-**Note:** Version bump only for package egapro
-
-
-
+## [1.2.3](https://github.com/SocialGouv/index-egapro/compare/v1.2.2...v1.2.3) (2022-08-03)
 
 
-# [2.9.0](https://github.com/SocialGouv/egapro/compare/v2.8.0...v2.9.0) (2020-03-05)
+### Bug Fixes
+
+* push event ([0813501](https://github.com/SocialGouv/index-egapro/commit/08135018a2775df84272f82fc52adaf62e41b511))
+
+## [1.2.2](https://github.com/SocialGouv/index-egapro/compare/v1.2.1...v1.2.2) (2022-08-03)
+
+
+### Bug Fixes
+
+* test remove cache ([2758e08](https://github.com/SocialGouv/index-egapro/commit/2758e083a46c8ba4373f52ecd7006a59afceb481))
+
+## [1.2.1](https://github.com/SocialGouv/index-egapro/compare/v1.2.0...v1.2.1) (2022-08-03)
+
+
+### Bug Fixes
+
+* tags workflows ([f77a14c](https://github.com/SocialGouv/index-egapro/commit/f77a14c366505801a84bafd979494be36a1491bf))
+
+# [1.2.0](https://github.com/SocialGouv/index-egapro/compare/v1.1.0...v1.2.0) (2022-08-03)
+
+
+### Bug Fixes
+
+* add egapro cli shortcut from api container ([5aed9bf](https://github.com/SocialGouv/index-egapro/commit/5aed9bfed85cbbbbbad6f8113b23c16f04bce92f))
+* character (wip) ([83a980d](https://github.com/SocialGouv/index-egapro/commit/83a980deded810bf95d4b58ba71c3efe63e528e0))
+* go to prod ([7e72b12](https://github.com/SocialGouv/index-egapro/commit/7e72b128ccc26e8140e55d4ad77f68805245bf47))
+* monorepo linters ([a3037db](https://github.com/SocialGouv/index-egapro/commit/a3037dbbd9ce73b3f122327955f152f6ed3e166f))
+* monorepo linters ([ede97b7](https://github.com/SocialGouv/index-egapro/commit/ede97b726506bcbde0862c733a2d101a64b66eb2))
+* nginx4spa ([a6c102e](https://github.com/SocialGouv/index-egapro/commit/a6c102e658b88991a88648a18876e84d01e1dd3f))
+* override ks repositoryName ([7eb5add](https://github.com/SocialGouv/index-egapro/commit/7eb5add27fc14645f1b526a9d19f939f944f365a))
+* prod from prod branch ([b33ee77](https://github.com/SocialGouv/index-egapro/commit/b33ee77ba2ead0c86877342ffdbd67db675972d1))
+* redirect declaration baseUrl ([67287bc](https://github.com/SocialGouv/index-egapro/commit/67287bc5a17c0c322a6ce95e1a82bbaf6c84a5af))
+* rollback to utf8 for utils.js ([a856db9](https://github.com/SocialGouv/index-egapro/commit/a856db9367f611b59f8be93d93073ae37141b43c))
+* test for non utf8 char ([001e201](https://github.com/SocialGouv/index-egapro/commit/001e20124bbceb92959ae54f1b6ec20fb3379fc6))
+* tests ([1d13119](https://github.com/SocialGouv/index-egapro/commit/1d1311928bad157c0f8b0bb149cbc8f60760b896))
+* tests cache hash ([ebf1fad](https://github.com/SocialGouv/index-egapro/commit/ebf1fadca03bfd871030944190ec5c45f5406a42))
+* tests readd unbuggy cache ([7021df0](https://github.com/SocialGouv/index-egapro/commit/7021df08e4b9fa2a59467ef3a08604838fd9dfae))
+* try to fix gh cache for tests ([0961a03](https://github.com/SocialGouv/index-egapro/commit/0961a0386b4a34250ca8e30a497bebd3844ccd31))
+* try utf8 with bom for utils.js (wip) ([676af09](https://github.com/SocialGouv/index-egapro/commit/676af09ac8d637efa5c85ff728a7232b96fe91e1))
+* up nginx version ([5e2f97b](https://github.com/SocialGouv/index-egapro/commit/5e2f97bfbb2d62f67153f495ba2aab604ede7549))
+* utf8 problem (wip) ([19bc85e](https://github.com/SocialGouv/index-egapro/commit/19bc85e8031e718f59dd684fc22585b25771a703))
+* utils.js in utf-8 w/o bom ([bb77601](https://github.com/SocialGouv/index-egapro/commit/bb77601cf4c81eba8bc7d249c0dcf7a601857c83))
+* utils.js in utf8 with bom to prevent error with nginx ([3c822bb](https://github.com/SocialGouv/index-egapro/commit/3c822bb6e670fbc85b500be8634fbafac02bbc4f))
 
 
 ### Features
 
-* consulter index UI fixes ([c9a032f](https://github.com/SocialGouv/egapro/commit/c9a032f))
+* diff app with legacy consulter ([10eacb2](https://github.com/SocialGouv/index-egapro/commit/10eacb2c60af99adeb3ab2ec6567996285ca36c6))
+* diff migration with legacy API ([84303de](https://github.com/SocialGouv/index-egapro/commit/84303dea93663c3fb720fa0fa06947187bf38996))
+* diff migration with legacy declaration ([ccedebc](https://github.com/SocialGouv/index-egapro/commit/ccedebc07e22a5647298650d6df4e8b639a663ba))
+* diff migration with legacy simulateur ([5e763b8](https://github.com/SocialGouv/index-egapro/commit/5e763b8d2cff40b269e9541db5478fffd21639cf))
+* diff migration with legacy simulateur ([46ac667](https://github.com/SocialGouv/index-egapro/commit/46ac667b45b9e54ea2cb13174f6ed3807a111d94))
+* fetch all other repos code + end monorepo implem ([9715565](https://github.com/SocialGouv/index-egapro/commit/97155659b4ac997b2c3ce012fc1e51a6c0d5b411))
+* fix url for declaration in simu homepage ([ebaed95](https://github.com/SocialGouv/index-egapro/commit/ebaed957461e11c0aced274d15b625ecdd3f7eed))
+* save utils.js as iso-8859-1 (wip) ([a602df3](https://github.com/SocialGouv/index-egapro/commit/a602df30b466845a3bb368fdcac85ebf748401ec))
+* update README ([6295adb](https://github.com/SocialGouv/index-egapro/commit/6295adbc436b450885aa724860761ce3e739acf1))
+* yarn.lock ([b11092c](https://github.com/SocialGouv/index-egapro/commit/b11092c260c049166f8747df82d6b22b6a9795a1))
 
-
-
-
-
-# [2.8.0](https://github.com/SocialGouv/egapro/compare/v2.7.1...v2.8.0) (2020-02-27)
+# [1.1.0](https://github.com/SocialGouv/index-egapro/compare/v1.0.0...v1.1.0) (2022-07-15)
 
 
 ### Bug Fixes
 
-* fix email templates not being loaded on build version ([#556](https://github.com/SocialGouv/egapro/issues/556)) ([28f11e4](https://github.com/SocialGouv/egapro/commit/28f11e4))
-* **downtime alert:** suppression de l'annonce d'interruption de service ([#541](https://github.com/SocialGouv/egapro/issues/541)) ([21bc23c](https://github.com/SocialGouv/egapro/commit/21bc23c))
+* add basic-auth sealed secret ([a9ce26e](https://github.com/SocialGouv/index-egapro/commit/a9ce26e785ac4c9dc8117a3b755cab710d4c94a6))
+* add create db on review ([54406fd](https://github.com/SocialGouv/index-egapro/commit/54406fda774109f2c5ebdefab0f4b26c1ac237f9))
+* app emotion monorepo ([de2c3de](https://github.com/SocialGouv/index-egapro/commit/de2c3de7b2e32fe4b076c38b283d8ffb488e6050))
+* build context ([94af3ac](https://github.com/SocialGouv/index-egapro/commit/94af3ac5f1f51cf645088987ead5d3faa8c7a038))
+* encoding to utf8 ([b4d38b0](https://github.com/SocialGouv/index-egapro/commit/b4d38b0b87160d90a934ed0cb6f7bae7d00dd98a))
+* files ingress host ([ceaddd3](https://github.com/SocialGouv/index-egapro/commit/ceaddd30706cdb6f3429cd2bdf6832a4ae7b9b49))
+* files probes using tcp port ([1a74895](https://github.com/SocialGouv/index-egapro/commit/1a748955ce770afa394ac14b1aee189969726300))
+* kontinuous set env ([d3a029f](https://github.com/SocialGouv/index-egapro/commit/d3a029f2a1133c4a1b680a2004e5a0c27a701851))
+* lint to fix encoding ([5be66e7](https://github.com/SocialGouv/index-egapro/commit/5be66e7d5526240af679bc351c17cb665c78df31))
+* mv sealed secrets ([2817b83](https://github.com/SocialGouv/index-egapro/commit/2817b83ee6003fd9095ef7fe1de560478c6ed1fa))
+* remove rewrite for ingress files ([bc4bce6](https://github.com/SocialGouv/index-egapro/commit/bc4bce6c79b20824a3af8b0be0d34a9f246b62a7))
+* rootless api + unhost symlink + fix warn ([3b4b990](https://github.com/SocialGouv/index-egapro/commit/3b4b9906edb4c8a5421d61cb083517e4544d05e5))
+* simulateur emotion monorepo ([fa28833](https://github.com/SocialGouv/index-egapro/commit/fa28833bce2ce6bbf7cf2307d6cbb33253dfe064))
+* testing issue ([30c1f8c](https://github.com/SocialGouv/index-egapro/commit/30c1f8ce36f7480dc3d8e26ebd1114334d966e0a))
+* up dot notation ks convention ([2dac5dc](https://github.com/SocialGouv/index-egapro/commit/2dac5dc1690c119f606ba9249a3bd389a11477c4))
+* up to ks explicit chart ([29757b6](https://github.com/SocialGouv/index-egapro/commit/29757b665ff06c0b79f092e2c821aaf6a2c7b58d))
+* up to ks explicit chart ([0c54a74](https://github.com/SocialGouv/index-egapro/commit/0c54a74f5c1224c78132d8e530fcc1bca82e5a32))
 
 
 ### Features
 
-* **declaration:** envoi d'un email de confirmation de la déclaration ([#551](https://github.com/SocialGouv/egapro/issues/551)) ([1d9af47](https://github.com/SocialGouv/egapro/commit/1d9af47))
+* add .gitignore for declaration ([4168bd5](https://github.com/SocialGouv/index-egapro/commit/4168bd540e6424aaf07d22b62583b058dba5eb30))
+* add healthchecks ([3bf3b2b](https://github.com/SocialGouv/index-egapro/commit/3bf3b2bef2c61db8ceea1e1c482fcf35e4656910))
+* add prod dockerfiles +declaration url as var ([0698e3b](https://github.com/SocialGouv/index-egapro/commit/0698e3bb861fb4288b7d4a13af83035c84e0a700))
+* cronjobs gen files ([f616c6c](https://github.com/SocialGouv/index-egapro/commit/f616c6c483f9300e67a573b64fc58b00524f9d8b))
+* declaration docker ([e94d7b7](https://github.com/SocialGouv/index-egapro/commit/e94d7b777d26481c53071286fbbd5b33b5113c9f))
+* expose files ([b2f43c6](https://github.com/SocialGouv/index-egapro/commit/b2f43c6f58972ee4e0f7ff13bb05df64271d1f99))
+* kube ingress ([9f4e855](https://github.com/SocialGouv/index-egapro/commit/9f4e8556ff804b279f5be5f94d1f38dd879b7dd1))
+* maildev + improve scripts ([7d49a8b](https://github.com/SocialGouv/index-egapro/commit/7d49a8b9753a6278bd5ba8f1f6d1af99e7a4aa16))
+* monorepo and kontinuous ([2374acc](https://github.com/SocialGouv/index-egapro/commit/2374acc951b87ecfe24bc5931e1611c398a808dc))
+* remove temporary folder from git ([8387d00](https://github.com/SocialGouv/index-egapro/commit/8387d00bc0615a22de68f6cf19e1200681f1215c))
+* simulateur dev integration ([c795aea](https://github.com/SocialGouv/index-egapro/commit/c795aeadcba1f4f9d2eaaa22d311796b957ccf7c))
+* test api script in local mode ([e247ec9](https://github.com/SocialGouv/index-egapro/commit/e247ec93a92a3a8f98c60a0148013564c7bc713c))
+* update for declaration app ([df88675](https://github.com/SocialGouv/index-egapro/commit/df886759423eba05ddf43370200cb170021c4273))
+* watchdog python ([fa58a28](https://github.com/SocialGouv/index-egapro/commit/fa58a28fef9df4ee4f4c513cb9d7a90fb0fed0b0))
+* **docker:** config ([9703783](https://github.com/SocialGouv/index-egapro/commit/97037837b907d15ef65f013f417c9657a69d8db7))
 
-
-
-
-
-## [2.7.1](https://github.com/SocialGouv/egapro/compare/v2.7.0...v2.7.1) (2020-02-20)
+# 1.0.0 (2022-07-15)
 
 
 ### Bug Fixes
 
-* commit version during release stage ([#542](https://github.com/SocialGouv/egapro/issues/542)) ([4536215](https://github.com/SocialGouv/egapro/commit/4536215)), closes [#310](https://github.com/SocialGouv/egapro/issues/310) [#310](https://github.com/SocialGouv/egapro/issues/310) [#481](https://github.com/SocialGouv/egapro/issues/481)
-
-
-
-
-
-# [2.6.0](https://github.com/SocialGouv/egapro/compare/v2.5.0...v2.6.0) (2020-02-14)
-
-
-### Bug Fixes
-
-* **declaration:** afficher une ligne de moins que le nombre d'entreprises composant l'UES dans le formulaire "informations entreprise/UES" ([#528](https://github.com/SocialGouv/egapro/issues/528)) ([8bd3b0e](https://github.com/SocialGouv/egapro/commit/8bd3b0e))
-* **deps:** update dependency koa-router to v8.0.7 ([#502](https://github.com/SocialGouv/egapro/issues/502)) ([39a2f8e](https://github.com/SocialGouv/egapro/commit/39a2f8e))
-* **deps:** update dependency react-app-polyfill to v1.0.6 ([#488](https://github.com/SocialGouv/egapro/issues/488)) ([8e06ce8](https://github.com/SocialGouv/egapro/commit/8e06ce8))
-* **deps:** update dependency react-datepicker to v2.12.1 ([#510](https://github.com/SocialGouv/egapro/issues/510)) ([7296f10](https://github.com/SocialGouv/egapro/commit/7296f10))
-* **deps:** update dependency react-scripts to v3.3.1 ([#489](https://github.com/SocialGouv/egapro/issues/489)) ([f2a2457](https://github.com/SocialGouv/egapro/commit/f2a2457))
-* **deps:** update sentry monorepo ([#477](https://github.com/SocialGouv/egapro/issues/477)) ([7584c4d](https://github.com/SocialGouv/egapro/commit/7584c4d))
+* shift years in home page ([ca63ae4](https://github.com/SocialGouv/index-egapro/commit/ca63ae4d6cf40011023d90d117b891d2422b1d9b))
+* **recherche:** use cursor pointer for year cell ([f04d5c8](https://github.com/SocialGouv/index-egapro/commit/f04d5c8f1312334dd6ff11f80582c6c33c7e32d6))
+* **recherche:** use cursor pointer for year cell ([b0fec87](https://github.com/SocialGouv/index-egapro/commit/b0fec87f5ea8331479ad84d545490622c8a0f1c7))
+* bug with empty filter ([25f9f6a](https://github.com/SocialGouv/index-egapro/commit/25f9f6ada0eeddbec5f14db091f682cc78282bd6))
+* eslint ([1bf1929](https://github.com/SocialGouv/index-egapro/commit/1bf1929a4baab823142691f5642a78c06ee539cb))
+* footer wording ([89dd2a1](https://github.com/SocialGouv/index-egapro/commit/89dd2a143a336d33a66bdc1149efa0ab1fcd8998))
+* naf misnamed in form ([1c03431](https://github.com/SocialGouv/index-egapro/commit/1c034315011c1d34bfb032e0dbb9bba40d336dd0))
+* no need of isExternal for csv file ([28b6f44](https://github.com/SocialGouv/index-egapro/commit/28b6f445a4c80f5c5ab5f0f789a22501077e6f26))
+* query was misnamed ([8578d56](https://github.com/SocialGouv/index-egapro/commit/8578d5614d9eae59cb17b081eddf5fa942f92893))
+* react problem ([045daf0](https://github.com/SocialGouv/index-egapro/commit/045daf0e9b170af530e51a88a794986cf48a72fb))
+* Remove extra out folder ([3028cbf](https://github.com/SocialGouv/index-egapro/commit/3028cbfed626bad262d7495d7ce81579cf5fe7f5))
+* remove some useless hidden links ([826161d](https://github.com/SocialGouv/index-egapro/commit/826161d1326ea993c4d6456ef1dd5ce5805d6fc9))
+* Replace path by directory ([9454bbd](https://github.com/SocialGouv/index-egapro/commit/9454bbdd8b6ffac5900b253fefcd40a2abd1cdea))
+* Update release workflow ([fb33931](https://github.com/SocialGouv/index-egapro/commit/fb3393163311d4222b571047edfe26b59219e249))
+* upload release ([3aa475e](https://github.com/SocialGouv/index-egapro/commit/3aa475eafd530b9dd349dbc6dcf94849ecc2793b))
 
 
 ### Features
 
-* **declaration:** affichage d'un bandeau pour prévenir d'une interruption de service ([#526](https://github.com/SocialGouv/egapro/issues/526)) ([b830ba5](https://github.com/SocialGouv/egapro/commit/b830ba5))
-* **declaration:** ajout de l'iframe de désactivation de matomo dans la politique de confidentialité ([#522](https://github.com/SocialGouv/egapro/issues/522)) ([a8ae5cf](https://github.com/SocialGouv/egapro/commit/a8ae5cf))
+* **netlify:** use PUBLIC_URL for simu ([f415fcf](https://github.com/SocialGouv/index-egapro/commit/f415fcfbcc60af3932a185d52eda5aa86ba1100b))
+* **netlify:** wip ([fb80569](https://github.com/SocialGouv/index-egapro/commit/fb80569ae2f8dcb2ca6aa85e5a26fb20ea1e98e0))
+* **netlify:** wip ([2ad88f4](https://github.com/SocialGouv/index-egapro/commit/2ad88f41d33586e74b8ca25a1d86c560f6ad20d7))
+* **netlify:** wip ([5fabdff](https://github.com/SocialGouv/index-egapro/commit/5fabdff5c061a5b4ebe0acc5de48bb3023c6a001))
+* **netlify:** wip ([8441940](https://github.com/SocialGouv/index-egapro/commit/84419400813c03e79070baf9736a623d5ef0a4d3))
+* **netlify:** wip ([08ea86e](https://github.com/SocialGouv/index-egapro/commit/08ea86e7d846b7165617669986b10ca7a0735bfa))
+* a11y ([75bd6d0](https://github.com/SocialGouv/index-egapro/commit/75bd6d01dda598602d3bb81f3df5194d3c8fef7f))
+* add a banner for list ([38429a7](https://github.com/SocialGouv/index-egapro/commit/38429a7b51f10e709b475743d07da172e3e3f5ef))
+* add a GH action for making a release ([dfec207](https://github.com/SocialGouv/index-egapro/commit/dfec207a1b08bd5d8a9ed62a991818804a1fc8ce))
+* add a GH action for making a release ([f130236](https://github.com/SocialGouv/index-egapro/commit/f130236cf9c53e13c07014de305af160da33212b))
+* add basePath in Next configuration ([df9bf29](https://github.com/SocialGouv/index-egapro/commit/df9bf29fc661e4e0dbb0de742f9063924c971ea7))
+* add csv link ([fb5be19](https://github.com/SocialGouv/index-egapro/commit/fb5be193b1b1703e5bfa0e161cee6d8d67c8bb5f))
+* add eslint config + ts autocompletion ([42ca0e2](https://github.com/SocialGouv/index-egapro/commit/42ca0e26a73e958f6dd9e3bf426356b73ad7e93d))
+* add export script ([435d4d7](https://github.com/SocialGouv/index-egapro/commit/435d4d74695532a0f83aeb3b8aad0c824a76f909))
+* add filters for search ([22f1e19](https://github.com/SocialGouv/index-egapro/commit/22f1e199323b6953bd415f1d1efdc74c65da732a))
+* add filters on stats on homepage ([bd097ac](https://github.com/SocialGouv/index-egapro/commit/bd097ace3039609dd35018987f0501b02fcdf7c5))
+* add filters on stats on homepage ([c7cc21b](https://github.com/SocialGouv/index-egapro/commit/c7cc21b25736df0d3d02091af6578f7a22062443))
+* add indicators for list ([fe54223](https://github.com/SocialGouv/index-egapro/commit/fe542230a81bd6a8952c17e086a41257651efe3d))
+* add intermediary notes ([681dd93](https://github.com/SocialGouv/index-egapro/commit/681dd9304639486a64074e9292c2162d2f846d02))
+* add layout ([ac08b0a](https://github.com/SocialGouv/index-egapro/commit/ac08b0a8af3bd16c7f663857b5c74c031d314505))
+* add matomo ([4ce1604](https://github.com/SocialGouv/index-egapro/commit/4ce1604ee528b7d7d953d663bda485ccd7b412b0))
+* add matomo ([e16027f](https://github.com/SocialGouv/index-egapro/commit/e16027fdcf456a145a78546abb7839d2421b52eb))
+* add moize for useSearch caching ([3ee5bfb](https://github.com/SocialGouv/index-egapro/commit/3ee5bfb6dc2e81f17ca84ebb29e08adb6fc78593))
+* add spinner when loading ([11b5b3d](https://github.com/SocialGouv/index-egapro/commit/11b5b3d55a36861cd07fc5bd522a7ba46bb66649))
+* add tabIndex for all Tooltips ([1986c00](https://github.com/SocialGouv/index-egapro/commit/1986c003595f851610fb7d3a150f0f94c3029783))
+* add test lib ([b0de988](https://github.com/SocialGouv/index-egapro/commit/b0de988c5ccdf37174e99902d1a81ca44b073bf4))
+* add tooltip for list ([12ed290](https://github.com/SocialGouv/index-egapro/commit/12ed290663a65c96ba6502aef5a083535d48c79c))
+* change just the color of input placeholder ([f2ed4ae](https://github.com/SocialGouv/index-egapro/commit/f2ed4ae495fe8b5fedeaef62586a388609dd636a))
+* color dark/light for link ([2ebe73f](https://github.com/SocialGouv/index-egapro/commit/2ebe73f282f9031a40b99311f7b8d91c862dc534))
+* don't send year to recherche page ([049809b](https://github.com/SocialGouv/index-egapro/commit/049809bc4428bd633178b3c74644c5bd2804b9ef))
+* feature flag system ([96dfa07](https://github.com/SocialGouv/index-egapro/commit/96dfa07fc7167d05b488c7f8e82af56b462f4032))
+* first commit ([9434274](https://github.com/SocialGouv/index-egapro/commit/943427425bddacef8b511843c1da26d5c9c11d80))
+* first iteration with search api ([68fd2a9](https://github.com/SocialGouv/index-egapro/commit/68fd2a92e417d4327a1554f5bc83426a7874006b))
+* get date of csv ([2999fba](https://github.com/SocialGouv/index-egapro/commit/2999fbaaf5aa4ec708be22562e81b6db778685fb))
+* improve csv button ([dc7bb63](https://github.com/SocialGouv/index-egapro/commit/dc7bb637772ab14d1d3f9e7a473b194512970675))
+* improve home page ([269725f](https://github.com/SocialGouv/index-egapro/commit/269725f5a0b18e2c8197c8999477b1cf5b7ccdf6))
+* improve UI ([af61853](https://github.com/SocialGouv/index-egapro/commit/af61853f6c452440d1f015295d5b2d9ac3e3da7c))
+* infinite loading for search company ([4d08ace](https://github.com/SocialGouv/index-egapro/commit/4d08acecdf9aca8bb02e082abfc01c9d8cfefc1e))
+* load all departements at start ([5470a86](https://github.com/SocialGouv/index-egapro/commit/5470a867eb2eb30fa54177d791b9ad6c83455e80))
+* make departements dependent of region ([0dd843a](https://github.com/SocialGouv/index-egapro/commit/0dd843a38b15532ca950c3df2e6df741be609f38))
+* netlify (wip) ([3c7b5a8](https://github.com/SocialGouv/index-egapro/commit/3c7b5a854d701a3312164e85f433a27d25e4cfec))
+* netlify preview GH workflow ([9167e9c](https://github.com/SocialGouv/index-egapro/commit/9167e9c352fcb1d3d8e645555bdf48d8a01d46b9))
+* new gh action for ci ([cfb6c02](https://github.com/SocialGouv/index-egapro/commit/cfb6c02401093f5b76164d365932e04f23740a30))
+* new GH action for making zip artifact ([758e2ea](https://github.com/SocialGouv/index-egapro/commit/758e2ea69e90b82c9f925913d11a793d104174ab))
+* only 4 numbers for 50:250 company ([515d3a8](https://github.com/SocialGouv/index-egapro/commit/515d3a847ac0ea43b912425c8a0ff765dc7aa509))
+* refactor in uncontrolled form ([ab2d961](https://github.com/SocialGouv/index-egapro/commit/ab2d961c51585ece15364ced7e2897d729ab2607))
+* remove useless footer links ([e4e85c1](https://github.com/SocialGouv/index-egapro/commit/e4e85c115386db280bc56db8b62136dc09afebb8))
+* same name for ues (weird differences of api) ([9691ecc](https://github.com/SocialGouv/index-egapro/commit/9691ecc1b290bf125970a91545e48444ae24b852))
+* search is now in 2 pages ([12b8aea](https://github.com/SocialGouv/index-egapro/commit/12b8aeaf30a6e568459bda4e4ff1ed7184cac7c6))
+* sessionStorage instead of localStorage ([dbdee54](https://github.com/SocialGouv/index-egapro/commit/dbdee54c0c6f9352d7eb831fe62350861116e0d9))
+* test autodevops GH action ([3c77bc8](https://github.com/SocialGouv/index-egapro/commit/3c77bc80a76bab0577f3e3e19c192d479465be11))
+* test GH action ([955aae9](https://github.com/SocialGouv/index-egapro/commit/955aae96bc5dff478348fcaeb25eb73dfcf603b3))
+* try to anticipate a new year in UI ([6e1ac25](https://github.com/SocialGouv/index-egapro/commit/6e1ac25667ebc6ee8beed0890d67b4070bceb16d))
+* UI improvements ([7b085c2](https://github.com/SocialGouv/index-egapro/commit/7b085c2b7f8c8f677b51e7b07d10641862299b4a))
+* UI improvements ([e946f7f](https://github.com/SocialGouv/index-egapro/commit/e946f7f36ec23d14c7eb8f60db07c3da9f81a7c1))
+* update GH action release ([c6b3b40](https://github.com/SocialGouv/index-egapro/commit/c6b3b404a891a603f9b6d66aec20f14c87acf7a0))
+* update GH action release ([0deacb7](https://github.com/SocialGouv/index-egapro/commit/0deacb772bb9accc3341e74eec05916fd87d5644))
+* use config.CURRENT_YEAR ([bc0ba3d](https://github.com/SocialGouv/index-egapro/commit/bc0ba3dc8423ac25684a23bdf427444a28181167))
+* wording ([e737edc](https://github.com/SocialGouv/index-egapro/commit/e737edcb5387d1d6d581a5fb910aa27a4c0afe99))
 
-
-
-
-
-# [2.5.0](https://github.com/SocialGouv/egapro/compare/v2.4.1...v2.5.0) (2020-02-11)
-
-
-### Features
-
-* **api:** ajout d'un endpoint /stats ([#520](https://github.com/SocialGouv/egapro/issues/520)) ([cfb474d](https://github.com/SocialGouv/egapro/commit/cfb474d))
-
-
-
-
-
-## [2.4.1](https://github.com/SocialGouv/egapro/compare/v2.4.0...v2.4.1) (2020-02-11)
-
-
-### Bug Fixes
-
-* **declaration:** forcer la déclaration de l'indicateur 1 par CSP si il n'est pas calculable par coefficient ([#515](https://github.com/SocialGouv/egapro/issues/515)) ([9e84ce5](https://github.com/SocialGouv/egapro/commit/9e84ce5))
-* **layout:** amélioration du layout tablet ([#516](https://github.com/SocialGouv/egapro/issues/516)) ([cb8e3c2](https://github.com/SocialGouv/egapro/commit/cb8e3c2))
-* **layout:** suppression d'un warning sur un <ul> dans un <p> ([0ae3bd0](https://github.com/SocialGouv/egapro/commit/0ae3bd0))
-* **layout:** suppression de plusieurs warnings sur des <ul> et <table> dans un <p> ([64d3636](https://github.com/SocialGouv/egapro/commit/64d3636))
-
-
-
-
-
-# [2.4.0](https://github.com/SocialGouv/egapro/compare/v2.3.1...v2.4.0) (2020-02-06)
-
-
-### Bug Fixes
-
-* **declaration:** changement de la home pour parler de la déclaration ([#508](https://github.com/SocialGouv/egapro/issues/508)) ([3b9afe1](https://github.com/SocialGouv/egapro/commit/3b9afe1))
-* **declaration:** charte graphique correcte pour le numéro "allô Index Egapro" ([#506](https://github.com/SocialGouv/egapro/issues/506)) ([972a511](https://github.com/SocialGouv/egapro/commit/972a511))
-* **declaration:** datePublication et lienPublication déplacés dans informationsComplementaires ([#424](https://github.com/SocialGouv/egapro/issues/424)) ([d4b76e0](https://github.com/SocialGouv/egapro/commit/d4b76e0))
-* **declaration:** fix typo ([573ca38](https://github.com/SocialGouv/egapro/commit/573ca38))
-* **declaration:** impression de la totalité du récapitulatif ([#467](https://github.com/SocialGouv/egapro/issues/467)) ([62f4663](https://github.com/SocialGouv/egapro/commit/62f4663))
-* **declaration:** ne pas demander le nom de l'UES si la structure est Entreprise ([#426](https://github.com/SocialGouv/egapro/issues/426)) ([99a434b](https://github.com/SocialGouv/egapro/commit/99a434b))
-* **declaration:** permettre la validation de "informations complémentaires" si la date de consultation du CSE n'est pas demandée ([#450](https://github.com/SocialGouv/egapro/issues/450)) ([3b05327](https://github.com/SocialGouv/egapro/commit/3b05327))
-* **declaration:** prise en compte des retours de la DGT (ter) ([#501](https://github.com/SocialGouv/egapro/issues/501)) ([1c110e3](https://github.com/SocialGouv/egapro/commit/1c110e3))
-* **declaration:** renommage du bouton de la déclaration de 'valider' en 'déclarer' ([e475204](https://github.com/SocialGouv/egapro/commit/e475204))
-* **declaration:** suppression des champs des effectifs globaux ([#439](https://github.com/SocialGouv/egapro/issues/439)) ([38372f1](https://github.com/SocialGouv/egapro/commit/38372f1))
-* **deps:** update dependency @sentry/node to v5.11.1 ([#420](https://github.com/SocialGouv/egapro/issues/420)) ([d9c1555](https://github.com/SocialGouv/egapro/commit/d9c1555))
-* **deps:** update dependency final-form to v4.18.7 ([#461](https://github.com/SocialGouv/egapro/issues/461)) ([5b86181](https://github.com/SocialGouv/egapro/commit/5b86181))
-* **deps:** update dependency koa-router to v8 ([#457](https://github.com/SocialGouv/egapro/issues/457)) ([0808942](https://github.com/SocialGouv/egapro/commit/0808942))
-* **import solen:** import des données de l'indicateur1 même dans le cas d'une modalité AMC (autre) ([#494](https://github.com/SocialGouv/egapro/issues/494)) ([99b8b6a](https://github.com/SocialGouv/egapro/commit/99b8b6a))
-* **indicateur5:** ne demander qu'une seule donnée et calculer l'autre automatiquement ([#445](https://github.com/SocialGouv/egapro/issues/445)) ([a2be1c6](https://github.com/SocialGouv/egapro/commit/a2be1c6))
-* **tests:** fix inotify watch ([#490](https://github.com/SocialGouv/egapro/issues/490)) ([6cf2a0a](https://github.com/SocialGouv/egapro/commit/6cf2a0a))
-* **website:** changement du titre en Index Egapro ([6ed9b73](https://github.com/SocialGouv/egapro/commit/6ed9b73))
-
-
-### Features
-
-* **declaration:** affichage de l'index global sur la page de déclaration ([#446](https://github.com/SocialGouv/egapro/issues/446)) ([b090eea](https://github.com/SocialGouv/egapro/commit/b090eea))
-* **declaration:** ajout de la donnée calculée dans kinto ([#495](https://github.com/SocialGouv/egapro/issues/495)) ([0fd67c0](https://github.com/SocialGouv/egapro/commit/0fd67c0))
-* **declaration:** ajout du champ "nombre d'entreprises" pour les UES ([#465](https://github.com/SocialGouv/egapro/issues/465)) ([e00e20a](https://github.com/SocialGouv/egapro/commit/e00e20a))
-* **declaration:** ajout du numéro "Allô Index Egapro" ([#470](https://github.com/SocialGouv/egapro/issues/470)) ([9e747aa](https://github.com/SocialGouv/egapro/commit/9e747aa))
-* **declaration:** l'année de déclaration se choisit dans une liste déroulante ([#474](https://github.com/SocialGouv/egapro/issues/474)) ([622e579](https://github.com/SocialGouv/egapro/commit/622e579))
-* **declaration:** le champ codeNaf est une liste de choix ([#454](https://github.com/SocialGouv/egapro/issues/454)) ([b99ad07](https://github.com/SocialGouv/egapro/commit/b99ad07))
-* **declaration:** les champs région et département sont des listes de choix ([#459](https://github.com/SocialGouv/egapro/issues/459)) ([1dd4efd](https://github.com/SocialGouv/egapro/commit/1dd4efd))
-* **declaration:** ne demande la date de consultation du CSE que si indicateur 1 pas par CSP ([#443](https://github.com/SocialGouv/egapro/issues/443)) ([6aa9015](https://github.com/SocialGouv/egapro/commit/6aa9015))
-* **declaration:** rajout d'une modalité "autre" à la déclaration de l'indicateur 1 ([#499](https://github.com/SocialGouv/egapro/issues/499)) ([c998453](https://github.com/SocialGouv/egapro/commit/c998453))
-* **declaration:** une déclaration ne peut être validée qu'une fois que tous les indicateurs ont été validés ([#428](https://github.com/SocialGouv/egapro/issues/428)) ([34af657](https://github.com/SocialGouv/egapro/commit/34af657))
-* **declaration:** validation des SIRENs ([#447](https://github.com/SocialGouv/egapro/issues/447)) ([d76f7f5](https://github.com/SocialGouv/egapro/commit/d76f7f5))
-* **declaration:** validation du format de l'adresse email ([#458](https://github.com/SocialGouv/egapro/issues/458)) ([473eb63](https://github.com/SocialGouv/egapro/commit/473eb63))
-* **declaration:** validation du format du numéro de téléphone ([#463](https://github.com/SocialGouv/egapro/issues/463)) ([68f0b99](https://github.com/SocialGouv/egapro/commit/68f0b99))
-* **import:** Script d'import utilisable en tant qu'API Python ([#415](https://github.com/SocialGouv/egapro/issues/415)) ([a7ae8eb](https://github.com/SocialGouv/egapro/commit/a7ae8eb))
-* **RGPD:** ajout d'une page 'mentions légales' ([#473](https://github.com/SocialGouv/egapro/issues/473)) ([ab531a6](https://github.com/SocialGouv/egapro/commit/ab531a6))
-* **RGPD:** conformité RGPD ([#483](https://github.com/SocialGouv/egapro/issues/483)) ([d04b17f](https://github.com/SocialGouv/egapro/commit/d04b17f))
-
-
-
-
-
-## [2.3.1](https://github.com/SocialGouv/egapro/compare/v2.3.0...v2.3.1) (2020-01-13)
-
-
-### Bug Fixes
-
-* **deps:** update dependency @emotion/core to v10.0.27 ([#374](https://github.com/SocialGouv/egapro/issues/374)) ([67d52ec](https://github.com/SocialGouv/egapro/commit/67d52ec))
-* **deps:** update dependency @types/react-datepicker to v2.10.0 ([#377](https://github.com/SocialGouv/egapro/issues/377)) ([9907601](https://github.com/SocialGouv/egapro/commit/9907601))
-* **deps:** update dependency nodemailer to v6.4.2 ([#357](https://github.com/SocialGouv/egapro/issues/357)) ([d38df25](https://github.com/SocialGouv/egapro/commit/d38df25))
-* **deps:** update dependency pino to v5.15.0 ([#361](https://github.com/SocialGouv/egapro/issues/361)) ([6ccbce7](https://github.com/SocialGouv/egapro/commit/6ccbce7))
-* **liens vers solen:** suppression des liens direct vers SOLEN en faveur d'un lien vers le site du ministère ([ccf9a22](https://github.com/SocialGouv/egapro/commit/ccf9a22))
-
-
-
-
-
-# [2.3.0](https://github.com/SocialGouv/egapro/compare/v2.2.1...v2.3.0) (2019-12-10)
-
-
-### Bug Fixes
-
-* **deps:** update dependency react-piwik to v1.8.0 ([#332](https://github.com/SocialGouv/egapro/issues/332)) ([bae37d7](https://github.com/SocialGouv/egapro/commit/bae37d7))
+# [1.21.0](https://github.com/SocialGouv/egapro-next/compare/v1.20.0...v1.21.0) (2022-05-25)
 
 
 ### Features
 
-* **integration tests:** ajout de tests end to end via cypress ([#327](https://github.com/SocialGouv/egapro/issues/327)) ([9629209](https://github.com/SocialGouv/egapro/commit/9629209))
-* **version:** ajout du numéro de version déployé dans le footer ([#339](https://github.com/SocialGouv/egapro/issues/339)) ([ab79127](https://github.com/SocialGouv/egapro/commit/ab79127))
+* **netlify:** use PUBLIC_URL for simu ([f415fcf](https://github.com/SocialGouv/egapro-next/commit/f415fcfbcc60af3932a185d52eda5aa86ba1100b))
 
-
-
-
-
-## [2.2.1](https://github.com/SocialGouv/egapro/compare/v2.2.0...v2.2.1) (2019-11-26)
-
-
-### Bug Fixes
-
-* **deps:** update dependency react-piwik to v1.7.0 ([#331](https://github.com/SocialGouv/egapro/issues/331)) ([ccf4d81](https://github.com/SocialGouv/egapro/commit/ccf4d81))
-
-
-
-
-
-# [2.2.0](https://github.com/SocialGouv/egapro/compare/v2.1.0...v2.2.0) (2019-11-25)
-
-
-### Bug Fixes
-
-* **deps:** update dependency @types/react-datepicker to v2.9.5 ([#324](https://github.com/SocialGouv/egapro/issues/324)) ([4675b73](https://github.com/SocialGouv/egapro/commit/4675b73))
+# [1.20.0](https://github.com/SocialGouv/egapro-next/compare/v1.19.0...v1.20.0) (2022-05-25)
 
 
 ### Features
 
-* **bouton mon avis:** ajout d'un bouton "mon avis" en fin de récapitulatif ([#326](https://github.com/SocialGouv/egapro/issues/326)) ([97003ba](https://github.com/SocialGouv/egapro/commit/97003ba))
+* **netlify:** wip ([fb80569](https://github.com/SocialGouv/egapro-next/commit/fb80569ae2f8dcb2ca6aa85e5a26fb20ea1e98e0))
 
-
-
-
-
-# [2.1.0](https://github.com/SocialGouv/egapro/compare/v2.0.2...v2.1.0) (2019-11-25)
-
-
-### Bug Fixes
-
-* **css:** suppression des z-index, whitespace sur les datepicker ([#276](https://github.com/SocialGouv/egapro/issues/276)) ([c5b5987](https://github.com/SocialGouv/egapro/commit/c5b5987))
-* **css in js:** fix typo in strokeWidth and strokeLinecap attributes ([8d59500](https://github.com/SocialGouv/egapro/commit/8d59500))
-* **deps:** update dependency @sentry/node to v5.8.0 ([#295](https://github.com/SocialGouv/egapro/issues/295)) ([211d490](https://github.com/SocialGouv/egapro/commit/211d490))
-* **deps:** update dependency @sentry/node to v5.9.0 ([#297](https://github.com/SocialGouv/egapro/issues/297)) ([62a3518](https://github.com/SocialGouv/egapro/commit/62a3518))
-* **deps:** update dependency @types/react-datepicker to v2.9.4 ([#286](https://github.com/SocialGouv/egapro/issues/286)) ([30803cf](https://github.com/SocialGouv/egapro/commit/30803cf))
-* **deps:** update dependency date-fns to v2.7.0 ([#283](https://github.com/SocialGouv/egapro/issues/283)) ([14f3eee](https://github.com/SocialGouv/egapro/commit/14f3eee))
-* **deps:** update dependency date-fns to v2.8.0 ([#306](https://github.com/SocialGouv/egapro/issues/306)) ([422e535](https://github.com/SocialGouv/egapro/commit/422e535))
-* **deps:** update dependency date-fns to v2.8.1 ([#317](https://github.com/SocialGouv/egapro/issues/317)) ([e116195](https://github.com/SocialGouv/egapro/commit/e116195))
-* **deps:** update dependency final-form to v4.18.6 ([#282](https://github.com/SocialGouv/egapro/issues/282)) ([e2cf474](https://github.com/SocialGouv/egapro/commit/e2cf474))
-* **deps:** update dependency final-form-arrays to v3.0.2 ([#309](https://github.com/SocialGouv/egapro/issues/309)) ([e9ce72b](https://github.com/SocialGouv/egapro/commit/e9ce72b))
-* **deps:** update dependency fuse.js to v3.4.6 ([#313](https://github.com/SocialGouv/egapro/issues/313)) ([e60cdbf](https://github.com/SocialGouv/egapro/commit/e60cdbf))
-* **deps:** update dependency pino to v5.13.6 ([#289](https://github.com/SocialGouv/egapro/issues/289)) ([6a7aa53](https://github.com/SocialGouv/egapro/commit/6a7aa53))
-* **deps:** update dependency pino to v5.14.0 ([#316](https://github.com/SocialGouv/egapro/issues/316)) ([705106e](https://github.com/SocialGouv/egapro/commit/705106e))
-* **deps:** update dependency react-datepicker to v2.10.0 ([#293](https://github.com/SocialGouv/egapro/issues/293)) ([3733fcd](https://github.com/SocialGouv/egapro/commit/3733fcd))
-* **deps:** update dependency react-datepicker to v2.10.1 ([#315](https://github.com/SocialGouv/egapro/issues/315)) ([9468820](https://github.com/SocialGouv/egapro/commit/9468820))
-* **deps:** update react monorepo to v16.12.0 ([#299](https://github.com/SocialGouv/egapro/issues/299)) ([b4a7d40](https://github.com/SocialGouv/egapro/commit/b4a7d40))
-* **matomo:** mise à jour de l'url de matomo ([#321](https://github.com/SocialGouv/egapro/issues/321)) ([566c970](https://github.com/SocialGouv/egapro/commit/566c970))
+# [1.19.0](https://github.com/SocialGouv/egapro-next/compare/v1.18.0...v1.19.0) (2022-05-24)
 
 
 ### Features
 
-* **effectifs pris en compte:** affichage d'un avertissement si les effectifs pris en compte sont incohérents avec la tranche d'effectifs ([#288](https://github.com/SocialGouv/egapro/issues/288)) ([831a481](https://github.com/SocialGouv/egapro/commit/831a481))
-* **FAQ:** le lien vers les référents pointe sur le site du ministère ([#303](https://github.com/SocialGouv/egapro/issues/303)) ([6c25a0b](https://github.com/SocialGouv/egapro/commit/6c25a0b))
+* **netlify:** wip ([2ad88f4](https://github.com/SocialGouv/egapro-next/commit/2ad88f41d33586e74b8ca25a1d86c560f6ad20d7))
 
-
-
-
-
-## [2.0.2](https://github.com/SocialGouv/egapro/compare/v2.0.1...v2.0.2) (2019-11-05)
-
-
-### Bug Fixes
-
-* **50 à 250:** suppression de la phrase 'pour le moment' sur la page d'accueil mobile ([4690530](https://github.com/SocialGouv/egapro/commit/4690530))
-
-
-
-
-
-## [2.0.1](https://github.com/SocialGouv/egapro/compare/v2.0.0...v2.0.1) (2019-11-04)
-
-
-### Bug Fixes
-
-* **page mobile:** reformulation 'calcul pas disponible' ([4d8d5b1](https://github.com/SocialGouv/egapro/commit/4d8d5b1))
-
-
-
-
-
-# [2.0.0](https://github.com/SocialGouv/egapro/compare/v1.4.0...v2.0.0) (2019-11-04)
-
-
-### Bug Fixes
-
-* **50 à 250:** suppression de la phrase 'pour le moment' sur la page d'accueil ([a7f1218](https://github.com/SocialGouv/egapro/commit/a7f1218))
-
-
-
-
-
-## [1.4.3](https://github.com/SocialGouv/egapro/compare/v1.4.0...v1.4.3) (2019-11-04)
-
-
-### Bug Fixes
-
-* **50 à 250:** suppression de la phrase 'pour le moment' sur la page d'accueil ([a7f1218](https://github.com/SocialGouv/egapro/commit/a7f1218))
-
-
-
-
-
-## [1.4.2](https://github.com/SocialGouv/egapro/compare/v1.4.0...v1.4.2) (2019-11-04)
-
-
-### Bug Fixes
-
-* **50 à 250:** suppression de la phrase 'pour le moment' sur la page d'accueil ([a7f1218](https://github.com/SocialGouv/egapro/commit/a7f1218))
-
-
-
-
-
-## [1.4.1](https://github.com/SocialGouv/egapro/compare/v1.4.0...v1.4.1) (2019-11-04)
-
-
-### Bug Fixes
-
-* **50 à 250:** suppression de la phrase 'pour le moment' sur la page d'accueil ([a7f1218](https://github.com/SocialGouv/egapro/commit/a7f1218))
-
-
-
-
-
-# [1.4.0](https://github.com/SocialGouv/egapro/compare/v1.2.4...v1.4.0) (2019-11-04)
-
-
-### Bug Fixes
-
-* **50 à 250:** le bouton 'suivant' de l'indicateur 1 dépend de la tranche d'effectifs ([#253](https://github.com/SocialGouv/egapro/issues/253)) ([4e5d9b3](https://github.com/SocialGouv/egapro/commit/4e5d9b3))
-* **deps:** pin dependencies ([#261](https://github.com/SocialGouv/egapro/issues/261)) ([0645795](https://github.com/SocialGouv/egapro/commit/0645795))
-* **deps:** pin dependency date-fns to 2.6.0 ([#234](https://github.com/SocialGouv/egapro/issues/234)) ([0173b7f](https://github.com/SocialGouv/egapro/commit/0173b7f))
-* **deps:** update dependency @emotion/core to v10.0.22 ([#229](https://github.com/SocialGouv/egapro/issues/229)) ([2cc6d87](https://github.com/SocialGouv/egapro/commit/2cc6d87))
-* **deps:** update dependency deepmerge to v4.1.1 ([#169](https://github.com/SocialGouv/egapro/issues/169)) ([0099c7a](https://github.com/SocialGouv/egapro/commit/0099c7a))
-* **deps:** update dependency deepmerge to v4.1.2 ([#211](https://github.com/SocialGouv/egapro/issues/211)) ([12aa679](https://github.com/SocialGouv/egapro/commit/12aa679))
-* **deps:** update dependency deepmerge to v4.2.0 ([#212](https://github.com/SocialGouv/egapro/issues/212)) ([01ddefc](https://github.com/SocialGouv/egapro/commit/01ddefc))
-* **deps:** update dependency deepmerge to v4.2.1 ([#228](https://github.com/SocialGouv/egapro/issues/228)) ([19ca3da](https://github.com/SocialGouv/egapro/commit/19ca3da))
-* **deps:** update dependency deepmerge to v4.2.2 ([#258](https://github.com/SocialGouv/egapro/issues/258)) ([e0e2ee4](https://github.com/SocialGouv/egapro/commit/e0e2ee4))
-* **deps:** update dependency dotenv to v8.2.0 ([#193](https://github.com/SocialGouv/egapro/issues/193)) ([e1b4f0f](https://github.com/SocialGouv/egapro/commit/e1b4f0f))
-* **deps:** update dependency koa to v2.10.0 ([#178](https://github.com/SocialGouv/egapro/issues/178)) ([6845060](https://github.com/SocialGouv/egapro/commit/6845060))
-* **deps:** update dependency koa to v2.11.0 ([#251](https://github.com/SocialGouv/egapro/issues/251)) ([e7c0d38](https://github.com/SocialGouv/egapro/commit/e7c0d38))
-* **deps:** update dependency koa to v2.9.0 ([#177](https://github.com/SocialGouv/egapro/issues/177)) ([9080588](https://github.com/SocialGouv/egapro/commit/9080588))
-* **deps:** update dependency nodemailer to v6.3.1 ([#171](https://github.com/SocialGouv/egapro/issues/171)) ([98fe406](https://github.com/SocialGouv/egapro/commit/98fe406))
-* **deps:** update dependency pino to v5.13.5 ([#180](https://github.com/SocialGouv/egapro/issues/180)) ([fbc5e11](https://github.com/SocialGouv/egapro/commit/fbc5e11))
-* **deps:** update react monorepo to v16.11.0 ([#227](https://github.com/SocialGouv/egapro/issues/227)) ([daf1733](https://github.com/SocialGouv/egapro/commit/daf1733))
-* **deps:** update sentry monorepo to v5.7.0 ([#174](https://github.com/SocialGouv/egapro/issues/174)) ([2086eb1](https://github.com/SocialGouv/egapro/commit/2086eb1))
-* **deps:** update sentry monorepo to v5.7.1 ([#185](https://github.com/SocialGouv/egapro/issues/185)) ([d6830ac](https://github.com/SocialGouv/egapro/commit/d6830ac))
-* **indicateur 2et3:** Intégration des reviews ([b793224](https://github.com/SocialGouv/egapro/commit/b793224))
-* **indicateur 2et3:** Renommage de l'indicateur 2et3 "indicateur écart de taux d'augmentations" ([50f3062](https://github.com/SocialGouv/egapro/commit/50f3062)), closes [#204](https://github.com/SocialGouv/egapro/issues/204)
-* **indicateur 2et3:** Renommage des périodes de déclaration ([e4a5068](https://github.com/SocialGouv/egapro/commit/e4a5068)), closes [#206](https://github.com/SocialGouv/egapro/issues/206)
-* **indicateur2et3:** meilleure présentation de l'écart de taux d'augmentation ([#246](https://github.com/SocialGouv/egapro/issues/246)) ([6ae6bdf](https://github.com/SocialGouv/egapro/commit/6ae6bdf))
-* **informations:** supprimer les liens vers les indicateurs invalidés lors d'une modification des informations ([#256](https://github.com/SocialGouv/egapro/issues/256)) ([6eefde9](https://github.com/SocialGouv/egapro/commit/6eefde9))
-* **informations:** toujours mettre à jour le menu quand on change d'effectifs ([#247](https://github.com/SocialGouv/egapro/issues/247)) ([93c3c02](https://github.com/SocialGouv/egapro/commit/93c3c02))
+# [1.18.0](https://github.com/SocialGouv/egapro-next/compare/v1.17.0...v1.18.0) (2022-05-24)
 
 
 ### Features
 
-* **50 à 250:** Nouvelle page indicateur 2 et 3 écart de taux d'augmentations et de promotions ([#166](https://github.com/SocialGouv/egapro/issues/166)) ([7c5544b](https://github.com/SocialGouv/egapro/commit/7c5544b))
-* **50 à 250:** Nouvelle page informations entreprise et période de référence ([bc8cc4d](https://github.com/SocialGouv/egapro/commit/bc8cc4d)), closes [#181](https://github.com/SocialGouv/egapro/issues/181)
-* **indicateur 2et3:** Affichage et prise en compte conditionnelle des indicateurs selon la tranche d'effectifs ([72700ef](https://github.com/SocialGouv/egapro/commit/72700ef)), closes [#207](https://github.com/SocialGouv/egapro/issues/207)
-* **indicateur 2et3:** Validation des champs "nombre de salariés augmentés" sur l'indicateur 2et3 ([16f06c5](https://github.com/SocialGouv/egapro/commit/16f06c5)), closes [#203](https://github.com/SocialGouv/egapro/issues/203)
-* **informations:** invalider les effectifs lors d'un changement d'informations ([#245](https://github.com/SocialGouv/egapro/issues/245)) ([3093e12](https://github.com/SocialGouv/egapro/commit/3093e12))
-* **informations:** invalider toutes les données lors d'une modification des informations ([#254](https://github.com/SocialGouv/egapro/issues/254)) ([f4789e9](https://github.com/SocialGouv/egapro/commit/f4789e9))
-* **informations:** utilisation d'un datepicker compatible IE11 ([#260](https://github.com/SocialGouv/egapro/issues/260)) ([5c48f66](https://github.com/SocialGouv/egapro/commit/5c48f66))
+* **netlify:** wip ([5fabdff](https://github.com/SocialGouv/egapro-next/commit/5fabdff5c061a5b4ebe0acc5de48bb3023c6a001))
 
-
-
-
-
-## [1.2.4](https://github.com/SocialGouv/egapro/compare/v1.2.3...v1.2.4) (2019-10-08)
-
-**Note:** Version bump only for package egapro
-
-
-
-
-
-## [1.2.3](https://github.com/SocialGouv/egapro/compare/v1.2.2...v1.2.3) (2019-08-20)
-
-
-### Bug Fixes
-
-* prevent useless effectifs error no step 1 ([ee97163](https://github.com/SocialGouv/egapro/commit/ee97163))
-
-
-
-
-
-## [1.2.2](https://github.com/SocialGouv/egapro/compare/v1.2.1...v1.2.2) (2019-07-31)
-
-**Note:** Version bump only for package egapro
-
-
-
-
-
-## [1.2.1](https://github.com/SocialGouv/egapro/compare/v1.3.0...v1.2.1) (2019-07-23)
-
-**Note:** Version bump only for package egapro
-
-
-
-
-
-# [1.2.0](https://github.com/SocialGouv/egapro/compare/v1.1.0...v1.2.0) (2019-07-16)
+# [1.17.0](https://github.com/SocialGouv/egapro-next/compare/v1.16.0...v1.17.0) (2022-05-24)
 
 
 ### Features
 
-* **api:** add api to get package.json version ([#92](https://github.com/SocialGouv/egapro/issues/92)) ([c9b1196](https://github.com/SocialGouv/egapro/commit/c9b1196))
-* **email:** active email ([#90](https://github.com/SocialGouv/egapro/issues/90)) ([6b31eb8](https://github.com/SocialGouv/egapro/commit/6b31eb8))
+* **netlify:** wip ([8441940](https://github.com/SocialGouv/egapro-next/commit/84419400813c03e79070baf9736a623d5ef0a4d3))
 
-
-
-
-
-# 1.1.0 (2019-07-03)
-
-
-### Bug Fixes
-
-* **build:** update tsconfig.json ([d5bf45f](https://github.com/SocialGouv/egapro/commit/d5bf45f))
+# [1.16.0](https://github.com/SocialGouv/egapro-next/compare/v1.15.0...v1.16.0) (2022-05-24)
 
 
 ### Features
 
-* **.env:** use .env file at the root directory ([57d5b6f](https://github.com/SocialGouv/egapro/commit/57d5b6f))
-* **api:** change update api response ([3c193b0](https://github.com/SocialGouv/egapro/commit/3c193b0))
-* **api:** change update api signature ([fbe44d4](https://github.com/SocialGouv/egapro/commit/fbe44d4))
-* **api:** update response status and body ([e89e71d](https://github.com/SocialGouv/egapro/commit/e89e71d))
-* **emails:** add api to send email ([b27cbc0](https://github.com/SocialGouv/egapro/commit/b27cbc0))
-* **indicator-data:** add model, repo, service, api ([fbcc539](https://github.com/SocialGouv/egapro/commit/fbcc539))
-* **kinto:** add kinto package ([79523cb](https://github.com/SocialGouv/egapro/commit/79523cb))
-* **lint:** update tslint and fix all problems ([9e44dce](https://github.com/SocialGouv/egapro/commit/9e44dce))
-* **logger:** change logging strategy ([e3d20c8](https://github.com/SocialGouv/egapro/commit/e3d20c8))
-* **mail:** add mail service and configuration ([61568cc](https://github.com/SocialGouv/egapro/commit/61568cc))
-* **proxy:** handle proxy with express for api ([c28c8ee](https://github.com/SocialGouv/egapro/commit/c28c8ee))
-* **sentry:** connect api to sentry ([6ed7f17](https://github.com/SocialGouv/egapro/commit/6ed7f17))
+* **netlify:** wip ([08ea86e](https://github.com/SocialGouv/egapro-next/commit/08ea86e7d846b7165617669986b10ca7a0735bfa))
+
+# [1.15.0](https://github.com/SocialGouv/egapro-next/compare/v1.14.0...v1.15.0) (2022-05-24)
+
+
+### Features
+
+* netlify (wip) ([3c7b5a8](https://github.com/SocialGouv/egapro-next/commit/3c7b5a854d701a3312164e85f433a27d25e4cfec))
+
+# [1.14.0](https://github.com/SocialGouv/egapro-next/compare/v1.13.0...v1.14.0) (2022-05-24)
+
+
+### Features
+
+* netlify preview GH workflow ([9167e9c](https://github.com/SocialGouv/egapro-next/commit/9167e9c352fcb1d3d8e645555bdf48d8a01d46b9))
+
+# [1.13.0](https://github.com/SocialGouv/egapro-next/compare/v1.12.0...v1.13.0) (2022-03-10)
+
+
+### Features
+
+* add matomo ([4ce1604](https://github.com/SocialGouv/egapro-next/commit/4ce1604ee528b7d7d953d663bda485ccd7b412b0))
+* add matomo ([e16027f](https://github.com/SocialGouv/egapro-next/commit/e16027fdcf456a145a78546abb7839d2421b52eb))
+
+# [1.12.0](https://github.com/SocialGouv/egapro-next/compare/v1.11.0...v1.12.0) (2022-03-08)
+
+
+### Bug Fixes
+
+* shift years in home page ([ca63ae4](https://github.com/SocialGouv/egapro-next/commit/ca63ae4d6cf40011023d90d117b891d2422b1d9b))
+
+
+### Features
+
+* only 4 numbers for 50:250 company ([515d3a8](https://github.com/SocialGouv/egapro-next/commit/515d3a847ac0ea43b912425c8a0ff765dc7aa509))
+
+# [1.11.0](https://github.com/SocialGouv/egapro-next/compare/v1.10.1...v1.11.0) (2022-03-07)
+
+
+### Features
+
+* add moize for useSearch caching ([3ee5bfb](https://github.com/SocialGouv/egapro-next/commit/3ee5bfb6dc2e81f17ca84ebb29e08adb6fc78593))
+* sessionStorage instead of localStorage ([dbdee54](https://github.com/SocialGouv/egapro-next/commit/dbdee54c0c6f9352d7eb831fe62350861116e0d9))
+
+## [1.10.1](https://github.com/SocialGouv/egapro-next/compare/v1.10.0...v1.10.1) (2022-03-07)
+
+
+### Bug Fixes
+
+* **recherche:** use cursor pointer for year cell ([f04d5c8](https://github.com/SocialGouv/egapro-next/commit/f04d5c8f1312334dd6ff11f80582c6c33c7e32d6))
+* **recherche:** use cursor pointer for year cell ([b0fec87](https://github.com/SocialGouv/egapro-next/commit/b0fec87f5ea8331479ad84d545490622c8a0f1c7))
+
+# [1.10.0](https://github.com/SocialGouv/egapro-next/compare/v1.9.1...v1.10.0) (2022-03-07)
+
+
+### Features
+
+* improve UI ([af61853](https://github.com/SocialGouv/egapro-next/commit/af61853f6c452440d1f015295d5b2d9ac3e3da7c))
+
+## [1.9.1](https://github.com/SocialGouv/egapro-next/compare/v1.9.0...v1.9.1) (2022-03-03)
+
+
+### Bug Fixes
+
+* query was misnamed ([8578d56](https://github.com/SocialGouv/egapro-next/commit/8578d5614d9eae59cb17b081eddf5fa942f92893))
+
+# [1.9.0](https://github.com/SocialGouv/egapro-next/compare/v1.8.0...v1.9.0) (2022-03-03)
+
+
+### Features
+
+* improve csv button ([dc7bb63](https://github.com/SocialGouv/egapro-next/commit/dc7bb637772ab14d1d3f9e7a473b194512970675))
+
+# [1.8.0](https://github.com/SocialGouv/egapro-next/compare/v1.7.0...v1.8.0) (2022-03-03)
+
+
+### Bug Fixes
+
+* naf misnamed in form ([1c03431](https://github.com/SocialGouv/egapro-next/commit/1c034315011c1d34bfb032e0dbb9bba40d336dd0))
+
+
+### Features
+
+* UI improvements ([7b085c2](https://github.com/SocialGouv/egapro-next/commit/7b085c2b7f8c8f677b51e7b07d10641862299b4a))
+
+# [1.7.0](https://github.com/SocialGouv/egapro-next/compare/v1.6.2...v1.7.0) (2022-03-03)
+
+
+### Features
+
+* new gh action for ci ([cfb6c02](https://github.com/SocialGouv/egapro-next/commit/cfb6c02401093f5b76164d365932e04f23740a30))
+
+## [1.6.2](https://github.com/SocialGouv/egapro-next/compare/v1.6.1...v1.6.2) (2022-03-03)
+
+
+### Bug Fixes
+
+* no need of isExternal for csv file ([28b6f44](https://github.com/SocialGouv/egapro-next/commit/28b6f445a4c80f5c5ab5f0f789a22501077e6f26))
+
+## [1.6.1](https://github.com/SocialGouv/egapro-next/compare/v1.6.0...v1.6.1) (2022-03-03)
+
+
+### Bug Fixes
+
+* footer wording ([89dd2a1](https://github.com/SocialGouv/egapro-next/commit/89dd2a143a336d33a66bdc1149efa0ab1fcd8998))
+
+# [1.6.0](https://github.com/SocialGouv/egapro-next/compare/v1.5.4...v1.6.0) (2022-03-02)
+
+
+### Features
+
+* add a banner for list ([38429a7](https://github.com/SocialGouv/egapro-next/commit/38429a7b51f10e709b475743d07da172e3e3f5ef))
+* UI improvements ([e946f7f](https://github.com/SocialGouv/egapro-next/commit/e946f7f36ec23d14c7eb8f60db07c3da9f81a7c1))
+* wording ([e737edc](https://github.com/SocialGouv/egapro-next/commit/e737edcb5387d1d6d581a5fb910aa27a4c0afe99))
+
+## [1.5.4](https://github.com/SocialGouv/egapro-next/compare/v1.5.3...v1.5.4) (2022-03-01)
+
+
+### Bug Fixes
+
+* upload release ([3aa475e](https://github.com/SocialGouv/egapro-next/commit/3aa475eafd530b9dd349dbc6dcf94849ecc2793b))
+
+## [1.5.3](https://github.com/SocialGouv/egapro-next/compare/v1.5.2...v1.5.3) (2022-03-01)
+
+
+### Bug Fixes
+
+* Replace path by directory ([9454bbd](https://github.com/SocialGouv/egapro-next/commit/9454bbdd8b6ffac5900b253fefcd40a2abd1cdea))
+
+## [1.5.2](https://github.com/SocialGouv/egapro-next/compare/v1.5.1...v1.5.2) (2022-03-01)
+
+
+### Bug Fixes
+
+* Remove extra out folder ([3028cbf](https://github.com/SocialGouv/egapro-next/commit/3028cbfed626bad262d7495d7ce81579cf5fe7f5))
+
+## [1.5.1](https://github.com/SocialGouv/egapro-next/compare/v1.5.0...v1.5.1) (2022-03-01)
+
+
+### Bug Fixes
+
+* Update release workflow ([fb33931](https://github.com/SocialGouv/egapro-next/commit/fb3393163311d4222b571047edfe26b59219e249))
+
+# [1.5.0](https://github.com/SocialGouv/egapro-next/compare/v1.4.0...v1.5.0) (2022-03-01)
+
+
+### Features
+
+* new GH action for making zip artifact ([758e2ea](https://github.com/SocialGouv/egapro-next/commit/758e2ea69e90b82c9f925913d11a793d104174ab))
+
+# [1.4.0](https://github.com/SocialGouv/egapro-next/compare/v1.3.0...v1.4.0) (2022-03-01)
+
+
+### Features
+
+* update GH action release ([c6b3b40](https://github.com/SocialGouv/egapro-next/commit/c6b3b404a891a603f9b6d66aec20f14c87acf7a0))
+
+# [1.3.0](https://github.com/SocialGouv/egapro-next/compare/v1.2.0...v1.3.0) (2022-03-01)
+
+
+### Features
+
+* update GH action release ([0deacb7](https://github.com/SocialGouv/egapro-next/commit/0deacb772bb9accc3341e74eec05916fd87d5644))
+
+# [1.2.0](https://github.com/SocialGouv/egapro-next/compare/v1.1.0...v1.2.0) (2022-03-01)
+
+
+### Features
+
+* test GH action ([955aae9](https://github.com/SocialGouv/egapro-next/commit/955aae96bc5dff478348fcaeb25eb73dfcf603b3))
+
+# [1.1.0](https://github.com/SocialGouv/egapro-next/compare/v1.0.0...v1.1.0) (2022-03-01)
+
+
+### Features
+
+* test autodevops GH action ([3c77bc8](https://github.com/SocialGouv/egapro-next/commit/3c77bc80a76bab0577f3e3e19c192d479465be11))

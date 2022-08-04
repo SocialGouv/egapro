@@ -1,0 +1,129 @@
+app:
+  _chart: app
+  needs: [build-app]
+  imagePackage: app
+  probesPath: /consulter-index/healthz
+  containerPort: 3000
+  host: "{{ .Values.global.host }}"
+  .ingress.path: /consulter-index(/|$)(.*)
+  certSecretName: api-crt
+
+declaration:
+  _chart: app
+  needs: [build-declaration]
+  imagePackage: declaration
+  probesPath: /index.html
+  containerPort: 8080
+  host: "{{ .Values.global.host }}"
+  .ingress.path: /declaration(/|$)(.*)
+  .ingress.rewriteTarget: /$2
+  certSecretName: api-crt
+
+simulateur:
+  _chart: app
+  needs: [build-simulateur]
+  imagePackage: simulateur
+  probesPath: /index.html
+  containerPort: 8080
+  host: "{{ .Values.global.host }}"
+  .ingress.path: /
+  certSecretName: api-crt
+
+api:
+  _chart: app
+  needs: [build-api]
+  imagePackage: api
+  probesPath: /healthz
+  containerPort: 2626
+  host: "{{ .Values.global.host }}"
+  .ingress.path: /api(/|$)(.*)
+  .ingress.rewriteTarget: /$2
+  certSecretName: api-crt
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+  vars:
+    EGAPRO_DBHOST: "$(PGHOST)"
+    EGAPRO_DBNAME: "$(PGDATABASE)"
+    EGAPRO_DBPORT: "$(PGPORT)"
+    EGAPRO_DBUSER: "$(PGUSER)"
+    EGAPRO_DBPASS: "$(PGPASSWORD)"
+    EGAPRO_DBSSL: "$(PGSSLMODE)"
+  # addVolumes:
+  #   - files
+
+files:
+  _chart: app
+  image: ghcr.io/socialgouv/docker/nginx:7.0.1
+  containerPort: 8080
+  probesPort: 8080
+  host: "{{ .Values.global.host }}"
+  .ingress.enabled: false
+  volumes:
+    - name: files
+      persistentVolumeClaim:
+        claimName: files
+  volumeMounts:
+    - name: files
+      mountPath: /usr/share/nginx/html
+
+project:
+  apiJobs:
+    - name: export-public-data
+      command: egapro export-public-data /mnt/files/index-egalite-fh.csv
+    - name: dump-dgt
+      command: egapro dump-dgt /mnt/files/dgt.xlsx
+    - name: full
+      command: egapro full /mnt/files/full.ndjson
+    - name: export-indexes
+      command: egapro export-indexes /mnt/files/indexes.csv
+  whitelist:
+    # DigDash dev
+    - "94.23.250.213"
+    # DigDash prod 1 and 2
+    - "37.187.27.197"
+    - "37.187.137.149"
+    # Invenis prod
+    - "217.182.142.112"
+  files:
+    public:
+      - index-egalite-fh.csv
+    restricted:
+      - dgt.xlsx
+      - full.ndjson
+      - indexes.csv
+
+
+jobs:
+  _chart: jobs
+  runs:
+    build-app:
+      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      with:
+        imagePackage: app
+        dockerfile: packages/app/Dockerfile
+    
+    build-api:
+      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      with:
+        imagePackage: api
+        context: packages/api
+
+    build-declaration:
+      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      with:
+        imagePackage: declaration
+        context: packages/declaration
+        buildArgs:
+          BASE_URL: "https://{{ .Values.global.host }}/declaration"
+          EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+
+    build-simulateur:
+      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      with:
+        imagePackage: simulateur
+        dockerfile: packages/simulateur/Dockerfile
+        buildArgs:
+          REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+          REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
+          REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"

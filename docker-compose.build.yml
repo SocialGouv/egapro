@@ -1,0 +1,102 @@
+version: "3.8"
+
+services:
+  maildev:
+    image: djfarrelly/maildev
+    command: bin/maildev --web 1080 --smtp 1025 --hide-extensions STARTTLS
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+    restart: always
+
+  api:
+    image: egapro_api
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile
+    environment:
+      EGAPRO_SEND_EMAILS: "True"
+      EGAPRO_SMTP_HOST: maildev
+      EGAPRO_SMTP_PORT: 1025
+      EGAPRO_SMTP_LOGIN: ""
+      EGAPRO_SMTP_PASSWORD: ""
+      EGAPRO_SMTP_SSL: ""
+      EGAPRO_TEST_DBHOST: test_db
+      EGAPRO_DBHOST: ${EGAPRO_DBHOST:-db}
+      EGAPRO_DBNAME: ${EGAPRO_DBNAME:-egapro}
+      EGAPRO_DBPORT: ${EGAPRO_DBPORT:-5432}
+      EGAPRO_DBUSER: ${EGAPRO_DBUSER:-postgres}
+      EGAPRO_DBPASS: ${EGAPRO_DBPASS:-postgres}
+      EGAPRO_STAFF: ${EGAPRO_STAFF:-""}
+    ports:
+      - 2626:2626
+    depends_on:
+      - db
+      - test_db
+    restart: "no"
+
+  declaration:
+    image: egapro_declaration
+    build:
+      context: ./packages/declaration
+      dockerfile: Dockerfile
+      args:
+        EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
+        EGAPRO_SENTRY_DSN: ${EGAPRO_SENTRY_DSN:-https://b2f84ee9dc6044abbeb0f417f4335a26@sentry.fabrique.social.gouv.fr/48}
+        BASE_URL: ""
+    ports:
+      - 4000:8080
+    depends_on:
+      - api
+    restart: always
+
+  db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: egapro
+    ports:
+      - 5437:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  test_db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test_egapro
+    ports:
+      - 5436:5432
+    volumes:
+      - ./packages/api/egapro/sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
+
+  app:
+    image: egapro_app
+    build:
+      context: .
+      dockerfile: ./packages/app/Dockerfile 
+    ports:
+      - 3000:3000
+    restart: "no"
+
+  simulateur:
+    image: egapro_simulateur
+    build:
+      context: .
+      dockerfile: ./packages/simulateur/Dockerfile
+      args:
+        REACT_APP_EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
+        REACT_APP_DECLARATION_URL: ${REACT_APP_DECLARATION_URL:-http://localhost:4000/}
+        REACT_APP_SENTRY_DSN: ${EGAPRO_SENTRY_DSN:-https://b2f84ee9dc6044abbeb0f417f4335a26@sentry.fabrique.social.gouv.fr/48}
+    ports:
+      - 3001:8080
+    restart: "no"
+
+
+volumes:
+  pgdata:
+  api_egginfos:

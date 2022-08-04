@@ -1,0 +1,18 @@
+api:
+  needs: [build-api,create-db]
+  vars:
+    EGAPRO_SEND_EMAILS: "True"
+    EGAPRO_SMTP_HOST: maildev
+    EGAPRO_SMTP_PORT: "1025"
+    EGAPRO_SMTP_LOGIN: ""
+    EGAPRO_SMTP_PASSWORD: ""
+    EGAPRO_SMTP_SSL: ""
+
+maildev: {}
+
+jobs-dev:
+  runs:
+    create-db:
+      use: SocialGouv/kontinuous/plugins/fabrique/jobs/create-db
+      with:
+        pgAdminSecretRefName: azure-pg-admin-user

@@ -1,0 +1,11 @@
+Bonjour,
+
+Vous avez commencé votre calcul de l’Index de l’égalité professionnelle femmes-hommes.
+
+Vous pouvez accéder aux données saisies en cliquant sur le lien suivant: https://index-egapro.travail.gouv.fr/simulateur/{{ id }}
+
+
+Bien cordialement,
+
+
+Direction Générale du Travail
