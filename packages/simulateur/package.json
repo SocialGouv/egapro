@@ -29,7 +29,7 @@
     "framer-motion": "^6.2.8",
     "fuse.js": "3.6.1",
     "lodash": "^4.17.21",
-    "moize": "^6.1.0",
+    "moize": "^6.1.1",
     "react": "17.0.2",
     "react-app-polyfill": "3.0.0",
     "react-datepicker": "4.7.0",
