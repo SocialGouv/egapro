@@ -1,0 +1,39 @@
+on:
+  push:
+    branches: ["**"]
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
+
+name: Tests
+jobs:
+  check-all:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Commit
+        uses: actions/checkout@v2
+
+      # - name: Cache yarn dependencies
+      #   uses: actions/cache@v2
+      #   id: cache-dependencies
+      #   with:
+      #     path: node_modules
+      #     key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile --force --non-interactive
+
+      - name: Up for tests API
+        run: docker-compose up --build -d api db test_db
+
+      - name: Check types
+        run: yarn check-all
+
+      - name: Down for tests API
+        run: docker-compose down
+
+
+
+

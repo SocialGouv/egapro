@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS idx_naf;
+ALTER TABLE search DROP COLUMN code_naf;
+ALTER TABLE search ADD COLUMN section_naf CHAR;

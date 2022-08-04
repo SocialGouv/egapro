@@ -1,0 +1,15 @@
+global:
+  host: index-egapro.travail.gouv.fr
+
+simulateur:
+  host: index-egapro.travail.gouv.fr
+  redirectFrom:
+    - "egapro.fabrique.social.gouv.fr"
+
+  
+api:
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: smtp

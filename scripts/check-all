@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+yarn workspaces run lint
+yarn workspaces run type-check
+yarn workspaces run test --watchAll=false
+
+# Tests API
+yarn test:api

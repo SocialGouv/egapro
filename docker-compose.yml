@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  maildev:
+    image: djfarrelly/maildev
+    command: bin/maildev --web 1080 --smtp 1025 --hide-extensions STARTTLS
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+    restart: always
+
+  api:
+    image: egapro_api
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./packages/api:/app
+      - api_egginfos:/app/egapro.egg-info
+    environment:
+      EGAPRO_SEND_EMAILS: "True"
+      EGAPRO_SMTP_HOST: maildev
+      EGAPRO_SMTP_PORT: 1025
+      EGAPRO_SMTP_LOGIN: ""
+      EGAPRO_SMTP_PASSWORD: ""
+      EGAPRO_SMTP_SSL: ""
+      EGAPRO_TEST_DBHOST: test_db
+      EGAPRO_DBHOST: ${EGAPRO_DBHOST:-db}
+      EGAPRO_DBNAME: ${EGAPRO_DBNAME:-egapro}
+      EGAPRO_DBPORT: ${EGAPRO_DBPORT:-5432}
+      EGAPRO_DBUSER: ${EGAPRO_DBUSER:-postgres}
+      EGAPRO_DBPASS: ${EGAPRO_DBPASS:-postgres}
+      EGAPRO_STAFF: ${EGAPRO_STAFF:-""}
+    ports:
+      - 2626:2626
+    depends_on:
+      - db
+      - test_db
+    restart: "no"
+
+  declaration:
+    image: egapro_declaration
+    build:
+      context: ./packages/declaration
+      dockerfile: Dockerfile.dev
+      args:
+        EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
+    volumes:
+      - ./packages/declaration/_doc:/srv/jekyll/_doc
+      - ./packages/declaration/src:/srv/jekyll/src
+      - ./packages/declaration/favicon.ico:/srv/jekyll/_site/favicon.ico
+    # environment:
+    #   EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
+    ports:
+      - 4000:4000
+    depends_on:
+      - api
+    restart: always
+
+  db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: egapro
+    ports:
+      - 5437:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  test_db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test_egapro
+    ports:
+      - 5436:5432
+    volumes:
+      - ./packages/api/egapro/sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
+
+volumes:
+  pgdata:
+  api_egginfos:

@@ -1,0 +1,80 @@
+---
+layout: tunnel
+title: "Commencer la déclaration ou Accéder à votre déclaration"
+prevButtonLabel: "Nouvelle déclaration"
+---
+<h1>{{ page.title }}</h1>
+
+<p>
+  Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations correspondantes à la déclaration.
+</p>
+
+<fieldset>
+  <div class="row">
+    {% include select.html type="number" name="déclaration.année_indicateurs" label="Année au titre de laquelle les indicateurs sont calculés" required=true empty=true %}
+  </div>
+</fieldset>
+<fieldset>
+  <div class="row">
+    {% include input.html type="regex" name="entreprise.siren" label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale)" required="true" pattern="[0-9]{9}" placeholder="9 chiffres" oninput="checkSirenValidity(event)" %}
+  </div>
+  <div id="errorSiren" style="display: none; color: red" />
+
+</fieldset>
+
+<script>
+  document.preFormSubmit = async _ => {
+    const anneeIndicateurs = Number(selectField("déclaration.année_indicateurs").value)
+    const message = `Vous allez procéder ou accéder à la déclaration de votre index de l’égalité professionnelle pour l’année ${anneeIndicateurs + 1} au titre des données de ${anneeIndicateurs}.`
+    const answer = confirm(message)
+
+    const errorSiren = document.querySelector("#errorSiren")
+    errorSiren.innerHTML = ""
+
+    if (answer) {
+      // Make sure we don't overwrite a declaration with empty data
+      // eg on commencer.html if we have no localStorage.
+      delete localStorage.data
+      app.resetData()
+      app.siren = selectField('entreprise.siren').value
+      app.annee = selectField('déclaration.année_indicateurs').value
+      const response = await app.loadRemoteData()
+
+      if (!response.ok) {
+        if (response.data.error) {
+
+          if (response.data.error.startsWith("Vous n'avez pas les droits nécessaires pour le siren")) {
+            errorSiren.style.display = "block"
+
+            errorSiren.innerHTML = `L'email saisi n'est pas rattaché au Siren de votre entreprise. <br/>Pour poursuivre votre déclaration, vous devez faire une demande de rattachement en cliquant <a target="_blank" rel="noreferrer noopener" href="mailto:dgt.ega-pro@travail.gouv.fr?subject=EgaPro - Demander à être déclarant d'un SIREN&body=Bonjour, je souhaite être déclarant pour le SIREN ${app.siren}. Mon email de déclaration est ${localStorage.email}. Cordialement.">ici.</a><br/> (si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à dgt.ega-pro@travail.gouv.fr).`
+
+            notify.error(
+              "L'email saisi n'est pas rattaché au Siren de votre entreprise.",
+              undefined,
+              // Don't log this message which is expected to happen.
+              false)
+
+
+          } else {
+            notify.error(
+              response.data.error,
+              undefined,
+              true)
+          }
+
+        }
+        return false
+      }
+      app.dataToLocalStorage()
+    }
+    return answer
+  }
+
+  document.onready = function() {
+    const years = app.config.years.reverse().map(year => ({label: year, value: year}))
+    buildSelectOptions(
+      selectField('déclaration.année_indicateurs'), years)
+
+    document.querySelector('button[rel=next]').disabled = !app.token
+  }
+</script>
