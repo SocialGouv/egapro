@@ -1,3 +1,10 @@
+## [2.11.2](https://github.com/SocialGouv/egapro/compare/v2.11.1...v2.11.2) (2022-08-05)
+
+
+### Bug Fixes
+
+* naming ([#920](https://github.com/SocialGouv/egapro/issues/920)) ([cefc265](https://github.com/SocialGouv/egapro/commit/cefc2657f6f2a14513364d1eef1bfe8e5ef4d837))
+
 ## [2.11.1](https://github.com/SocialGouv/egapro/compare/v2.11.0...v2.11.1) (2022-08-05)
 
 
