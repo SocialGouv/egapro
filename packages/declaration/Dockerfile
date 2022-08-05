@@ -14,7 +14,7 @@ RUN echo "EGAPRO_API_URL: ${EGAPRO_API_URL}" >> _config.yml
 
 ARG EGAPRO_SENTRY_DSN
 ENV EGAPRO_SENTRY_DSN=${EGAPRO_SENTRY_DSN}
-RUN echo "sentry-dsn: '$SENTRY_DSN'" >> _config.yml
+RUN echo "sentry-dsn: '$EGAPRO_SENTRY_DSN'" >> _config.yml
 
 RUN echo "version: `date +"%Y.%m.%d"`" >> _config.yml
 
