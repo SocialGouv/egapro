@@ -20,7 +20,7 @@
     "@fontsource/gabriela": "^4.5.2",
     "@socialgouv/matomo-next": "^1.2.2",
     "date-fns": "^2.28.0",
-    "final-form": "^4.20.6",
+    "final-form": "^4.20.7",
     "framer-motion": "^6",
     "jest": "^27.5.1",
     "moize": "^6.1.0",
