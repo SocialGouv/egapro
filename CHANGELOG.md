@@ -1,3 +1,10 @@
+## [2.11.3](https://github.com/SocialGouv/egapro/compare/v2.11.2...v2.11.3) (2022-08-05)
+
+
+### Bug Fixes
+
+* drop db admin secret ref ([#924](https://github.com/SocialGouv/egapro/issues/924)) ([a9e709f](https://github.com/SocialGouv/egapro/commit/a9e709fb0ceb6332e3f99947af7cbd313ffe4dc2))
+
 ## [2.11.2](https://github.com/SocialGouv/egapro/compare/v2.11.1...v2.11.2) (2022-08-05)
 
 
