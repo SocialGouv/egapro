@@ -130,3 +130,10 @@ jobs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+
+deactivate:
+  jobs-deactivate:
+    runs:
+      deactivate:
+        with:
+          db: true
