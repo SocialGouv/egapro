@@ -20,7 +20,6 @@ import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import Page from "../../components/Page"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-import { useDeclaration } from "../../hooks/useDeclaration"
 import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
@@ -224,8 +223,6 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
 
-  const { declaration } = useDeclaration(state.informationsEntreprise.siren, state.informations.anneeDeclaration)
-
   const updateDeclaration = useCallback(
     (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
     [dispatch],
@@ -277,7 +274,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   }
 
   async function sendDeclaration(code: string, state: AppState) {
-    const data = buildDeclarationFromSimulation({ id: code, state, declarationBase: declaration })
+    const data = buildDeclarationFromSimulation({ id: code, state })
 
     try {
       await putIndicatorsDatas(code, state)

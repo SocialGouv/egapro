@@ -9,7 +9,7 @@
     "dev": "scripts/dev",
     "dev:app": "yarn workspace app run dev",
     "dev:api": "docker-compose up --build api",
-    "dev:declaration": "docker-compose up --build declaration",
+    "dev:declaration": "docker-compose build declaration && docker-compose up declaration",
     "dev:simulateur": "yarn workspace simulateur run dev",
     "dev:maildev": "docker-compose up --build maildev",
     "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
