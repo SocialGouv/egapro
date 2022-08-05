@@ -1,3 +1,10 @@
+## [2.11.4](https://github.com/SocialGouv/egapro/compare/v2.11.3...v2.11.4) (2022-08-05)
+
+
+### Bug Fixes
+
+* OP MC ([#922](https://github.com/SocialGouv/egapro/issues/922)) ([7c958a8](https://github.com/SocialGouv/egapro/commit/7c958a80ec365616b508ad395c0e975ff04d9ea1))
+
 ## [2.11.3](https://github.com/SocialGouv/egapro/compare/v2.11.2...v2.11.3) (2022-08-05)
 
 
