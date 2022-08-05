@@ -1,3 +1,10 @@
+## [2.11.1](https://github.com/SocialGouv/egapro/compare/v2.11.0...v2.11.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* env staff and sentry ([#914](https://github.com/SocialGouv/egapro/issues/914)) ([b732e5a](https://github.com/SocialGouv/egapro/commit/b732e5ab6dec0ac9ead4618d78fdcdbcb7030059))
+
 # [2.11.0](https://github.com/SocialGouv/egapro/compare/v2.10.1...v2.11.0) (2022-08-04)
 
 
