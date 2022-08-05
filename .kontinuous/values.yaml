@@ -42,6 +42,8 @@ api:
   envFrom:
     - secretRef:
         name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: "staff"
   vars:
     EGAPRO_DBHOST: "$(PGHOST)"
     EGAPRO_DBNAME: "$(PGDATABASE)"
@@ -49,6 +51,7 @@ api:
     EGAPRO_DBUSER: "$(PGUSER)"
     EGAPRO_DBPASS: "$(PGPASSWORD)"
     EGAPRO_DBSSL: "$(PGSSLMODE)"
+    EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
   # addVolumes:
   #   - files
 
@@ -127,3 +130,11 @@ jobs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+
+deactivate:
+  jobs-deactivate:
+    runs:
+      deactivate:
+        with:
+          db: true
+          pgAdminSecretRefName: azure-pg-admin-user

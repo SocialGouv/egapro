@@ -1,3 +1,24 @@
+## [2.11.3](https://github.com/SocialGouv/egapro/compare/v2.11.2...v2.11.3) (2022-08-05)
+
+
+### Bug Fixes
+
+* drop db admin secret ref ([#924](https://github.com/SocialGouv/egapro/issues/924)) ([a9e709f](https://github.com/SocialGouv/egapro/commit/a9e709fb0ceb6332e3f99947af7cbd313ffe4dc2))
+
+## [2.11.2](https://github.com/SocialGouv/egapro/compare/v2.11.1...v2.11.2) (2022-08-05)
+
+
+### Bug Fixes
+
+* naming ([#920](https://github.com/SocialGouv/egapro/issues/920)) ([cefc265](https://github.com/SocialGouv/egapro/commit/cefc2657f6f2a14513364d1eef1bfe8e5ef4d837))
+
+## [2.11.1](https://github.com/SocialGouv/egapro/compare/v2.11.0...v2.11.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* env staff and sentry ([#914](https://github.com/SocialGouv/egapro/issues/914)) ([b732e5a](https://github.com/SocialGouv/egapro/commit/b732e5ab6dec0ac9ead4618d78fdcdbcb7030059))
+
 # [2.11.0](https://github.com/SocialGouv/egapro/compare/v2.10.1...v2.11.0) (2022-08-04)
 
 
