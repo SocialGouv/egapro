@@ -1,19 +1,40 @@
 {
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.preferences.importModuleSpecifier": "project-relative",
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
-    "editor.formatOnSave": false,
-    "workbench.colorCustomizations": {
-        "statusBar.background": "#F9E79F", // Change this color!
-        "statusBar.foreground": "#212F3D"
+    "[typescript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "files.exclude": {
-        "**/.git": true,
-        "**/.DS_Store": true,
-        "**/Thumbs.db": true,
-        "**/.history": true
+    "[javascript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "git.ignoreLimitWarning": true,
-    // https://github.com/colinhacks/zod/issues/443
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "files.associations": {
+        ".env*": "dotenv",
+    },
+    "vsicons.associations.files": [
+        {
+            "icon": "tsconfig",
+            "extensions": [
+                "tsconfig.build.json",
+                "tsconfig.paths.json",
+            ],
+            "filename": true
+        },
+        {
+            "icon": "todo",
+            "extensions": [
+                "TODO.md",
+            ],
+            "filename": true
+        },
+        {
+            "icon": "docker",
+            "extensions": [
+                "docker-compose.build.yml",
+            ],
+            "filename": true
+        },
+    ]
 }
