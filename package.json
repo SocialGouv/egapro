@@ -5,6 +5,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "engines": {
+    "node": "16"
+  },
   "scripts": {
     "dev": "scripts/dev",
     "dev:app": "yarn workspace app run dev",
