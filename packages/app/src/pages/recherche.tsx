@@ -27,16 +27,16 @@ import {
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons"
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi"
 
-import type { CompaniesType, CompanyType, TrancheType } from "@/types/models/company"
+import type { CompaniesType, CompanyType, TrancheType } from "../types/models/company"
 
-import ButtonAction from "@/components/ds/ButtonAction"
-import { SinglePageLayout } from "@/components/ds/SinglePageLayout"
-import { AlertSpinner } from "@/components/ds/AlertSpinner"
-import { SearchCompanyParams, useSearch } from "@/models/useSearch"
-import { filterDepartements, useConfig } from "@/models/useConfig"
-import { capitalize } from "@/utils/string"
-import { useCallbackOnMount } from "@/utils/hooks"
-import { Banner } from "@/components/ds/Banner"
+import ButtonAction from "../components/ds/ButtonAction"
+import { SinglePageLayout } from "../components/ds/SinglePageLayout"
+import { AlertSpinner } from "../components/ds/AlertSpinner"
+import { SearchCompanyParams, useSearch } from "../models/useSearch"
+import { filterDepartements, useConfig } from "../models/useConfig"
+import { capitalize } from "../utils/string"
+import { useCallbackOnMount } from "../utils/hooks"
+import { Banner } from "../components/ds/Banner"
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig()

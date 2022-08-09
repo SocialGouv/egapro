@@ -1,10 +1,10 @@
 import useSWRImmutable from "swr/immutable"
 import React from "react"
 
-import type { SelectItemsType } from "@/types/utils/select"
+import type { SelectItemsType } from "../types/utils/select"
 
-import type { FetcherReturnImmutable } from "@/utils/fetcher"
-import { fetcher } from "@/utils/fetcher"
+import type { FetcherReturnImmutable } from "../utils/fetcher"
+import { fetcher } from "../utils/fetcher"
 
 export type ConfigTypeApi = {
   YEARS: number[]

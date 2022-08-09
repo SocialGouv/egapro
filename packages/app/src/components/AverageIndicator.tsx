@@ -14,11 +14,11 @@ import {
 } from "@chakra-ui/react"
 import { InfoOutlineIcon } from "@chakra-ui/icons"
 
-import ButtonAction from "@/components/ds/ButtonAction"
-import { StatsParams, useStats } from "@/models/useStats"
-import { filterDepartements, useConfig } from "@/models/useConfig"
-import { capitalize } from "@/utils/string"
-import { buildUrlParamsString } from "@/utils/url"
+import ButtonAction from "./ds/ButtonAction"
+import { StatsParams, useStats } from "../models/useStats"
+import { filterDepartements, useConfig } from "../models/useConfig"
+import { capitalize } from "../utils/string"
+import { buildUrlParamsString } from "../utils/url"
 
 export function FilterSelect({ name, onChange, value, children, ...rest }: SelectProps) {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100")
