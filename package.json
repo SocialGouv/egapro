@@ -5,6 +5,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "engines": {
+    "node": "16"
+  },
   "scripts": {
     "dev": "scripts/dev",
     "dev:app": "yarn workspace app run dev",
@@ -22,10 +25,7 @@
     "test:api:docker": "docker exec -it $(basename $PWD)_api_1 /usr/local/bin/py.test -vv --cov",
     "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov"
   },
-  "devDependencies": {},
-  "dependencies": {
-    "concurrently": "^7.2.2",
-    "@emotion/react": "^11.8.2",
-    "@emotion/styled": "^11"
+  "devDependencies": {
+    "concurrently": "^7.2.2"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "editorconfig.editorconfig",
+    "dbaeumer.vscode-eslint",
+    "vscode-icons-team.vscode-icons"
+  ],
+  "unwantedRecommendations": [
+    "nrwl.angular-console",
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    "esbenp.prettier-vscode",
+    "eg2.tslint",
+    "firsttris.vscode-jest-runner",
+    "stylelint.vscode-stylelint"
+  ]
+}
