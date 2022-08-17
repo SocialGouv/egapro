@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "scripts/dev",
+    "dev:apiv2db": "docker-compose up --build apiv2_db apiv2_pgadmin",
     "dev:app": "yarn workspace app run dev",
     "dev:api": "docker-compose up --build api",
     "dev:declaration": "docker-compose build declaration && docker-compose up declaration",
