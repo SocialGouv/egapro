@@ -236,8 +236,9 @@ async def load_from_recherche_entreprises(siren):
     if not data:
         return {}
     raison_sociale = data.get("simpleLabel")
-    radiation = data.get("etatAdministratifUniteLegale") != "A"
-    if radiation:
+    limit = date(constants.CURRENT_YEAR, 3, 1)
+    radiation = data.get("dateCession")
+    if radiation and date.fromisoformat(radiation) < limit:
         raise ValueError(
             "Le Siren saisi correspond à une entreprise fermée, "
             "veuillez vérifier votre saisie"
@@ -281,7 +282,7 @@ async def load_from_api_entreprises(siren):
         return {}
     entreprise = data.get("entreprise", {})
     radiation = entreprise.get("date_radiation")
-    limit = date(constants.CURRENT_YEAR, 1, 1)
+    limit = date(constants.CURRENT_YEAR, 3, 1)
     if radiation and date.fromisoformat(radiation) < limit:
         raise ValueError(
             "Le Siren saisi correspond à une entreprise fermée, "
