@@ -124,7 +124,9 @@ jobs:
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
 
     build-simulateur:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      memoryLimit: 4Gi
+      memoryRequest: 2Gi
       with:
         imagePackage: simulateur
         dockerfile: packages/simulateur/Dockerfile
