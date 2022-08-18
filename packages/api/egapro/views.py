@@ -165,6 +165,29 @@ async def declare(request, response, siren, year):
             url = request.domain + data.uri
             emails.success.send(owners, url=url, **data)
 
+@tokens.require
+@app.route("/declarations/{siren}", methods=["GET"])
+async def get_declarations(request, response, siren):
+    declarations = []
+    limit = request.query.int("limit", 10)
+    years = sorted(constants.YEARS, reverse=True)
+
+    for year in years:
+        try:
+            record = await db.declaration.get(siren, year)
+
+            resource = record.as_resource()
+            if record.data.path("déclarant.nom"):
+                await helpers.patch_from_recherche_entreprises(resource["data"])
+            declarations.append(resource)
+        except:
+            pass
+        if len(declarations) == limit:
+            break
+
+    if not declarations:
+        raise HttpError(404, f"No declarations with siren {siren} for any year")
+    response.json = declarations
 
 @tokens.require
 @app.route("/declarations/{siren}", methods=["GET"])
