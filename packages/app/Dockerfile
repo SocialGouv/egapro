@@ -18,6 +18,8 @@ RUN yarn install --frozen-lockfile
 
 COPY packages/app/ ./
 
+ENV NODE_OPTIONS="--max-old-space-size=8192"
+
 RUN yarn build && \
   yarn install --production && \
   if [ -z "$NEXT_PUBLIC_IS_PRODUCTION_DEPLOYMENT" ]; then \
