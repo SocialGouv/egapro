@@ -1,6 +1,6 @@
 // Build an URLSearchParams from an object.
 export function buildUrlParams(params: Record<string, string | string[]> = {}): URLSearchParams {
-  var searchParams = new URLSearchParams()
+  const searchParams = new URLSearchParams()
 
   const entries = Object.entries(params)
 
