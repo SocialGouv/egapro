@@ -96,9 +96,6 @@ type RowProgressionProps = {
   fieldName: string
   isReadOnly: boolean
   isDisabled: boolean
-
-  min: number | undefined
-  max: number
 }
 
 const RowProgression: FunctionComponent<RowProgressionProps> = ({
@@ -107,9 +104,6 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
   fieldName,
   isReadOnly = false,
   isDisabled = false,
-
-  min = 0,
-  max,
 }) => {
   return (
     <Grid templateColumns="250px 80px 400px" templateRows="1fr 2fr" gap={2} alignItems="top">
@@ -515,8 +509,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                         isDisabled={
                           indicateurUnNonCalculable || noteIndicateurUn === MAX_NOTES_INDICATEURS["indicateurUn"]
                         }
-                        min={noteIndicateurUn}
-                        max={MAX_NOTES_INDICATEURS["indicateurUn"]}
                       >
                         Écart de rémunération objectif
                       </RowProgression>
@@ -540,8 +532,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                               indicateurDeuxTroisNonCalculable ||
                               noteIndicateurDeuxTrois === MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]
                             }
-                            min={noteIndicateurDeuxTrois}
-                            max={MAX_NOTES_INDICATEURS["indicateurDeuxTrois"]}
                           >
                             Écart de taux d'augmentations individuelles
                           </RowProgression>
@@ -560,8 +550,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                               indicateurDeuxNonCalculable ||
                               noteIndicateurDeux === MAX_NOTES_INDICATEURS["indicateurDeux"]
                             }
-                            min={noteIndicateurDeux}
-                            max={MAX_NOTES_INDICATEURS["indicateurDeux"]}
                           >
                             Écart de taux d'augmentations individuelles
                           </RowProgression>
@@ -578,8 +566,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                               indicateurTroisNonCalculable ||
                               noteIndicateurTrois === MAX_NOTES_INDICATEURS["indicateurTrois"]
                             }
-                            min={noteIndicateurTrois}
-                            max={MAX_NOTES_INDICATEURS["indicateurTrois"]}
                           >
                             Écart de taux de promotions
                           </RowProgression>
@@ -598,8 +584,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                             indicateurQuatreNonCalculable ||
                             noteIndicateurQuatre === MAX_NOTES_INDICATEURS["indicateurQuatre"]
                           }
-                          min={noteIndicateurQuatre}
-                          max={MAX_NOTES_INDICATEURS["indicateurQuatre"]}
                         >
                           Retour de congé maternité
                         </RowProgression>
@@ -610,8 +594,6 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                           fieldName="objectifIndicateurCinq"
                           isReadOnly={false}
                           isDisabled={noteIndicateurCinq === MAX_NOTES_INDICATEURS["indicateurCinq"]}
-                          min={noteIndicateurCinq}
-                          max={MAX_NOTES_INDICATEURS["indicateurCinq"]}
                         >
                           Dix plus hautes rémunérations
                         </RowProgression>

@@ -4,7 +4,7 @@ import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/rea
 
 import Logo from "@/components/ds/Logo"
 import TextLink from "@/components/ds/TextLink"
-import packageConfig from "../../package.json"
+import packageConfig from "../../../package.json"
 import { ExternalLinkIcon } from "@chakra-ui/icons"
 
 function Footer() {

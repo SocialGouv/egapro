@@ -9,6 +9,6 @@ concurrency:
   group: ${{ github.workflow }}
 
 jobs:
-  stream-webhook:
+  kontinuous:
     uses: SocialGouv/kontinuous/.github/workflows/workflow-gotoprod-manual.yaml@v1
     secrets: inherit

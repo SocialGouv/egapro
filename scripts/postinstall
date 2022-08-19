@@ -6,7 +6,7 @@ if [ "$PRODUCTION" = "" ]; then
   ## DEV ONLY
   
   if [ -n .env ]; then
-    cp .env.sample .env
+    cp .env.dist .env
   fi
 
   ROOT_DIR=$PWD
