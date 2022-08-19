@@ -432,10 +432,17 @@ async def get_jsonschema(request, response):
 @app.route("/validate-siren")
 async def validate_siren(request, response):
     siren = request.query.get("siren")
+    year = request.query.get("year")
+    
+    try:
+        year = int(year)
+    except ValueError:
+        raise HttpError(422, f"Ce n'est pas une année valide: `{year}`")
+
     if not siren_is_valid(siren):
         raise HttpError(422, f"Numéro SIREN invalide: {siren}")
     try:
-        metadata = await helpers.get_entreprise_details(siren)
+        metadata = await helpers.get_entreprise_details(siren, year)
     except ValueError as err:
         raise HttpError(404, str(err))
     response.json = metadata
