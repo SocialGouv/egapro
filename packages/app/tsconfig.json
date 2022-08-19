@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
       "@/components/*": [
         "components/*"
@@ -36,12 +36,10 @@
   },
   "include": [
     "next-env.d.ts",
-    "lib.dom.d.ts",
     "**/*.ts",
     "**/*.tsx",
   ],
   "exclude": [
     "node_modules"
   ]
-  // "exclude": ["node_modules"]
 }

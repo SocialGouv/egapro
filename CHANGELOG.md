@@ -1,3 +1,24 @@
+## [2.11.4](https://github.com/SocialGouv/egapro/compare/v2.11.3...v2.11.4) (2022-08-05)
+
+
+### Bug Fixes
+
+* OP MC ([#922](https://github.com/SocialGouv/egapro/issues/922)) ([7c958a8](https://github.com/SocialGouv/egapro/commit/7c958a80ec365616b508ad395c0e975ff04d9ea1))
+
+## [2.11.3](https://github.com/SocialGouv/egapro/compare/v2.11.2...v2.11.3) (2022-08-05)
+
+
+### Bug Fixes
+
+* drop db admin secret ref ([#924](https://github.com/SocialGouv/egapro/issues/924)) ([a9e709f](https://github.com/SocialGouv/egapro/commit/a9e709fb0ceb6332e3f99947af7cbd313ffe4dc2))
+
+## [2.11.2](https://github.com/SocialGouv/egapro/compare/v2.11.1...v2.11.2) (2022-08-05)
+
+
+### Bug Fixes
+
+* naming ([#920](https://github.com/SocialGouv/egapro/issues/920)) ([cefc265](https://github.com/SocialGouv/egapro/commit/cefc2657f6f2a14513364d1eef1bfe8e5ef4d837))
+
 ## [2.11.1](https://github.com/SocialGouv/egapro/compare/v2.11.0...v2.11.1) (2022-08-05)
 
 

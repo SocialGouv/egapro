@@ -1,4 +1,4 @@
-const styles = {
+const globals = {
   styles: {
     global: {
       "html, body, #root": {
@@ -10,4 +10,4 @@ const styles = {
     },
   },
 }
-export default styles
+export default globals
