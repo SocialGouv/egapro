@@ -3,10 +3,13 @@ version: "3.8"
 services:
   maildev:
     image: djfarrelly/maildev
-    command: bin/maildev --web 1080 --smtp 1025 --hide-extensions STARTTLS
+    command: bin/maildev --hide-extensions STARTTLS
     ports:
-      - "1025:1025"
-      - "1080:1080"
+      - "${MAILDEV_SMTP_PORT}:${MAILDEV_SMTP_PORT}"
+      - "${MAILDEV_WEB_PORT}:${MAILDEV_WEB_PORT}"
+    environment:
+      MAILDEV_WEB_PORT: ${MAILDEV_WEB_PORT}
+      MAILDEV_SMTP_PORT: ${MAILDEV_SMTP_PORT}
     restart: always
 
   api:
@@ -20,7 +23,7 @@ services:
     environment:
       EGAPRO_SEND_EMAILS: "True"
       EGAPRO_SMTP_HOST: maildev
-      EGAPRO_SMTP_PORT: 1025
+      EGAPRO_SMTP_PORT: ${MAILDEV_SMTP_PORT}
       EGAPRO_SMTP_LOGIN: ""
       EGAPRO_SMTP_PASSWORD: ""
       EGAPRO_SMTP_SSL: ""
@@ -81,6 +84,41 @@ services:
     volumes:
       - ./packages/api/egapro/sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
 
+  # TODO: delete when typescript API is done
+  apiv2_db:
+    restart: always
+    build:
+      context: ./packages/app/docker/db
+    environment:
+      POSTGRES_USER: ${APIV2_POSTGRES_USER:-postgress}
+      POSTGRES_PASSWORD: ${APIV2_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${APIV2_POSTGRES_DB:-egapro}
+    ports:
+      - ${APIV2_POSTGRES_PORT:-5438}:5432
+    volumes:
+      - apiv2_pgdata:/var/lib/postgresql/data
+    networks:
+      - apiv2
+
+  apiv2_pgadmin:
+    restart: always
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${APIV2_PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${APIV2_PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - ${APIV2_PGADMIN_PORT:-5050}:80
+    volumes:
+      - apiv2_pgadmin:/var/lib/pgadmin
+    networks:
+      - apiv2
+
+networks:
+  apiv2:
+
+
 volumes:
   pgdata:
+  apiv2_pgdata:
+  apiv2_pgadmin:
   api_egginfos:
