@@ -1,6 +1,6 @@
 app:
-  _chart: app
-  needs: [build-app]
+  ~chart: app
+  ~needs: [build-app]
   imagePackage: app
   probesPath: /consulter-index/healthz
   containerPort: 3000
@@ -9,8 +9,8 @@ app:
   certSecretName: api-crt
 
 declaration:
-  _chart: app
-  needs: [build-declaration]
+  ~chart: app
+  ~needs: [build-declaration]
   imagePackage: declaration
   probesPath: /index.html
   containerPort: 8080
@@ -20,8 +20,8 @@ declaration:
   certSecretName: api-crt
 
 simulateur:
-  _chart: app
-  needs: [build-simulateur]
+  ~chart: app
+  ~needs: [build-simulateur]
   imagePackage: simulateur
   probesPath: /index.html
   containerPort: 8080
@@ -30,8 +30,8 @@ simulateur:
   certSecretName: api-crt
 
 api:
-  _chart: app
-  needs: [build-api]
+  ~chart: app
+  ~needs: [build-api]
   imagePackage: api
   probesPath: /healthz
   containerPort: 2626
@@ -56,7 +56,7 @@ api:
   #   - files
 
 files:
-  _chart: app
+  ~chart: app
   image: ghcr.io/socialgouv/docker/nginx:7.0.1
   containerPort: 8080
   probesPort: 8080
@@ -98,7 +98,7 @@ project:
 
 
 jobs:
-  _chart: jobs
+  ~chart: jobs
   runs:
     build-app:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
