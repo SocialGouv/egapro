@@ -1,3 +1,10 @@
+## [2.11.5](https://github.com/SocialGouv/egapro/compare/v2.11.4...v2.11.5) (2022-08-22)
+
+
+### Bug Fixes
+
+* fabrique/jobs to contrib/jobs ([#949](https://github.com/SocialGouv/egapro/issues/949)) ([5beebd9](https://github.com/SocialGouv/egapro/commit/5beebd90ca4b4ffffc4ce62ad8f5556fb1f1c51d))
+
 ## [2.11.4](https://github.com/SocialGouv/egapro/compare/v2.11.3...v2.11.4) (2022-08-05)
 
 
