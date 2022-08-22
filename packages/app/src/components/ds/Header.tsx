@@ -1,13 +1,14 @@
-import React from "react"
-import NextLink from "next/link"
-import { Box, Container, Link, Flex, Text, ListItem, List, HStack, Button, useColorMode } from "@chakra-ui/react"
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { Box, Container, Link, Flex, Text, ListItem, List, HStack, Button, useColorMode } from "@chakra-ui/react";
+import NextLink from "next/link";
+import type { FC } from "react";
+import React from "react";
 
-import Logo from "./Logo"
-import { MoonIcon, SunIcon } from "@chakra-ui/icons"
-import { isOpenFeature } from "../../utils/feature"
+import { isOpenFeature } from "../../utils/feature";
+import { Logo } from "./Logo";
 
-function Header() {
-  const { colorMode, toggleColorMode } = useColorMode()
+export const Header: FC = () => {
+  const { colorMode, toggleColorMode } = useColorMode();
 
   return (
     <Box
@@ -73,7 +74,5 @@ function Header() {
         </Flex>
       </Container>
     </Box>
-  )
-}
-
-export default Header
+  );
+};

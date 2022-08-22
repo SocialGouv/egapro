@@ -1,40 +1,41 @@
 {
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.preferences.importModuleSpecifier": "project-relative",
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.importModuleSpecifier": "project-relative",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "files.associations": {
+    ".env*": "dotenv",
+  },
+  "vsicons.associations.files": [
+    {
+      "icon": "tsconfig",
+      "extensions": [
+        "tsconfig.build.json",
+        "tsconfig.paths.json",
+      ],
+      "filename": true
     },
-    "[typescript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    {
+      "icon": "todo",
+      "extensions": [
+        "TODO.md",
+      ],
+      "filename": true
     },
-    "[javascript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    {
+      "icon": "docker",
+      "extensions": [
+        "docker-compose.build.yml",
+      ],
+      "filename": true
     },
-    "files.associations": {
-        ".env*": "dotenv",
-    },
-    "vsicons.associations.files": [
-        {
-            "icon": "tsconfig",
-            "extensions": [
-                "tsconfig.build.json",
-                "tsconfig.paths.json",
-            ],
-            "filename": true
-        },
-        {
-            "icon": "todo",
-            "extensions": [
-                "TODO.md",
-            ],
-            "filename": true
-        },
-        {
-            "icon": "docker",
-            "extensions": [
-                "docker-compose.build.yml",
-            ],
-            "filename": true
-        },
-    ]
+  ],
+  "docker.languageserver.formatter.ignoreMultilineInstructions": true
 }

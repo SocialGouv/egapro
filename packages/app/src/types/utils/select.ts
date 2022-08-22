@@ -1,1 +1,1 @@
-export type SelectItemsType = [string, string][]
+export type SelectItemsType = Array<[string, string]>;

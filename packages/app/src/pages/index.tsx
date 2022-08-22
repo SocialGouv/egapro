@@ -1,4 +1,3 @@
-import React, { ReactElement } from "react"
 import {
   Box,
   Center,
@@ -10,43 +9,45 @@ import {
   Text,
   useColorModeValue,
   VStack,
-} from "@chakra-ui/react"
-import { HiDownload } from "react-icons/hi"
-import { useRouter } from "next/router"
-import Head from "next/head"
-import { format } from "date-fns"
+} from "@chakra-ui/react";
+import { format } from "date-fns";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import type { ReactElement } from "react";
+import React from "react";
+import { HiDownload } from "react-icons/hi";
 
-import ButtonAction from "../components/ds/ButtonAction"
-import { SinglePageLayout } from "../components/ds/SinglePageLayout"
-import { AverageIndicator } from "../components/AverageIndicator"
+import { AverageIndicator } from "../components/AverageIndicator";
+import { ButtonAction } from "../components/ds/ButtonAction";
+import { SinglePageLayout } from "../components/ds/SinglePageLayout";
 
 async function getDateCsv(): Promise<string> {
   try {
-    const responseCsv = await fetch("/index-egalite-fh.csv", { method: "HEAD" })
-    const date = responseCsv?.headers?.get("last-modified")
+    const responseCsv = await fetch("/index-egalite-fh.csv", { method: "HEAD" });
+    const date = responseCsv?.headers?.get("last-modified");
 
     if (date) {
-      const lastModified = new Date(date)
-      return format(lastModified, "dd/MM/yyyy")
+      const lastModified = new Date(date);
+      return format(lastModified, "dd/MM/yyyy");
     }
   } catch (error) {
-    console.error("Error on fetch HEAD /index-egalite-fh.csv", error)
+    console.error("Error on fetch HEAD /index-egalite-fh.csv", error);
   }
-  return ""
+  return "";
 }
 
 function FormSearchSiren() {
-  const router = useRouter()
-  const formRef = React.useRef(null)
-  const bgSelect = useColorModeValue("white", "blue.700")
+  const router = useRouter();
+  const formRef = React.useRef(null);
+  const bgSelect = useColorModeValue("white", "blue.700");
 
   function handleSubmit(event: React.SyntheticEvent) {
-    event.preventDefault()
-    const data = new FormData(formRef.current || undefined)
+    event.preventDefault();
+    const data = new FormData(formRef.current || undefined);
 
-    const { q } = Object.fromEntries(data)
+    const { q } = Object.fromEntries(data);
 
-    router.push("/recherche" + (q ? `?q=${q}` : ""))
+    router.push("/recherche" + (q ? `?q=${q}` : ""));
   }
 
   return (
@@ -68,18 +69,18 @@ function FormSearchSiren() {
         </Flex>
       </Box>
     </form>
-  )
+  );
 }
 
 function DownloadCsvFileZone() {
-  const [dateCsv, setDateCsv] = React.useState("")
+  const [dateCsv, setDateCsv] = React.useState("");
 
   React.useEffect(() => {
     async function runEffect() {
-      setDateCsv(await getDateCsv())
+      setDateCsv(await getDateCsv());
     }
-    runEffect()
-  }, [])
+    runEffect();
+  }, []);
 
   return (
     <>
@@ -99,7 +100,7 @@ function DownloadCsvFileZone() {
         </Center>
       )}
     </>
-  )
+  );
 }
 
 export default function HomePage() {
@@ -116,9 +117,9 @@ export default function HomePage() {
 
       <AverageIndicator />
     </VStack>
-  )
+  );
 }
 
 HomePage.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
-}
+  return <SinglePageLayout>{page}</SinglePageLayout>;
+};

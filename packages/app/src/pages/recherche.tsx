@@ -1,7 +1,5 @@
-import React, { ReactElement } from "react"
-import Head from "next/head"
-import { useRouter } from "next/router"
-import { ParsedUrlQuery } from "querystring"
+import type { ParsedUrlQuery } from "querystring";
+import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   Alert,
   AlertDescription,
@@ -23,42 +21,46 @@ import {
   Tooltip,
   useColorModeValue,
   useDisclosure,
-} from "@chakra-ui/react"
-import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons"
-import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi"
+} from "@chakra-ui/react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import type { ReactElement } from "react";
+import React from "react";
+import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
-import type { CompaniesType, CompanyType, TrancheType } from "../types/models/company"
+import { AlertSpinner } from "../components/ds/AlertSpinner";
+import { Banner } from "../components/ds/Banner";
+import { ButtonAction } from "../components/ds/ButtonAction";
+import { SinglePageLayout } from "../components/ds/SinglePageLayout";
+import { filterDepartements, useConfig } from "../models/useConfig";
+import type { SearchCompanyParams } from "../models/useSearch";
+import { useSearch } from "../models/useSearch";
+import type { CompaniesType, CompanyType, TrancheType } from "../types/models/company";
 
-import ButtonAction from "../components/ds/ButtonAction"
-import { SinglePageLayout } from "../components/ds/SinglePageLayout"
-import { AlertSpinner } from "../components/ds/AlertSpinner"
-import { SearchCompanyParams, useSearch } from "../models/useSearch"
-import { filterDepartements, useConfig } from "../models/useConfig"
-import { capitalize } from "../utils/string"
-import { useCallbackOnMount } from "../utils/hooks"
-import { Banner } from "../components/ds/Banner"
+import { useCallbackOnMount } from "../utils/hooks";
+import { capitalize } from "../utils/string";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
-  const { config } = useConfig()
+  const { config } = useConfig();
 
-  if (!config) return ""
+  if (!config) return "";
 
-  const { DEPARTEMENTS, REGIONS } = config
+  const { DEPARTEMENTS, REGIONS } = config;
 
-  let result = ""
+  let result = "";
   if (departement) {
-    result = DEPARTEMENTS[departement]
+    result = DEPARTEMENTS[departement];
   }
   if (region) {
-    result += ", " + REGIONS[region]
+    result += ", " + REGIONS[region];
   }
-  return result
+  return result;
 }
 const workforceLabels: Record<TrancheType, string[]> = {
   "50:250": ["50 à 250", "salariés"],
   "251:999": ["251 à 999", "salariés"],
   "1000:": ["1000", "salariés ou plus"],
-}
+};
 
 function UES() {
   return (
@@ -68,25 +70,25 @@ function UES() {
         <TagLabel>UES</TagLabel>
       </Tag>
     </Tooltip>
-  )
+  );
 }
 
 function Company({ company }: { company: CompanyType }) {
-  const { isOpen, onToggle } = useDisclosure()
-  const [yearSelected, setYearSelected] = React.useState<number>()
-  const highlightColor = useColorModeValue("blue.100", "blue.800")
-  const linkColor = useColorModeValue("primary.600", "primary.100")
+  const { isOpen, onToggle } = useDisclosure();
+  const [yearSelected, setYearSelected] = React.useState<number>();
+  const highlightColor = useColorModeValue("blue.100", "blue.800");
+  const linkColor = useColorModeValue("primary.600", "primary.100");
 
   const years = Object.keys(company.notes)
-    .map((elt) => Number(elt))
+    .map(elt => Number(elt))
     .sort()
-    .reverse()
+    .reverse();
 
   function selectOrToggle(year: number) {
     if (yearSelected === year) {
-      setYearSelected(undefined)
+      setYearSelected(undefined);
     } else {
-      setYearSelected(year)
+      setYearSelected(year);
     }
   }
 
@@ -128,7 +130,7 @@ function Company({ company }: { company: CompanyType }) {
             </Text>
           </Box>
         </Flex>
-        {years.map((year) => (
+        {years.map(year => (
           <Flex
             key={year}
             maxW="15%"
@@ -296,7 +298,7 @@ function Company({ company }: { company: CompanyType }) {
           </Text>
           {isOpen && (
             <OrderedList mt={1}>
-              {company.entreprise.ues.entreprises?.map((element) => (
+              {company.entreprise.ues.entreprises?.map(element => (
                 <ListItem key={element.siren} fontSize="sm" ml={4}>
                   {element.raison_sociale + " (" + element.siren + ")"}
                 </ListItem>
@@ -306,21 +308,21 @@ function Company({ company }: { company: CompanyType }) {
         </Box>
       )}
     </Flex>
-  )
+  );
 }
 
-function DisplayCompanies({ companies, error }: { companies: CompaniesType; error: any }) {
+function DisplayCompanies({ companies, error }: { companies: CompaniesType; error: unknown }) {
   if (error) {
     return (
       <Alert status="error" mt={4}>
         <AlertIcon />
         Il y a eu une erreur lors de la recherche.
       </Alert>
-    )
+    );
   }
 
   if (!companies) {
-    return null
+    return null;
   }
 
   if (companies?.count === 0) {
@@ -342,7 +344,7 @@ function DisplayCompanies({ companies, error }: { companies: CompaniesType; erro
         </AlertTitle>
         <AlertDescription maxWidth="sm">Veuillez modifier vos paramètres de recherche.</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   return (
@@ -353,77 +355,77 @@ function DisplayCompanies({ companies, error }: { companies: CompaniesType; erro
           {companies?.count > 1 ? "s" : ""}
         </Box>
       )}
-      {companies?.data?.map((company) => (
+      {companies?.data?.map(company => (
         <Company company={company} key={company.entreprise?.siren} />
       ))}
     </>
-  )
+  );
 }
 
 /**
  * Inputs in URLSearchParams can be string or array of string. We need to have a consistent type as a string.
  */
 function normalizeInputs(parsedUrlQuery: ParsedUrlQuery) {
-  const { q, region, departement, section_naf } = parsedUrlQuery
+  const { q, region, departement, section_naf } = parsedUrlQuery;
 
   return {
     ...(q && { q: Array.isArray(q) ? q[0] : q }),
     ...(region && { region: Array.isArray(region) ? region[0] : region }),
     ...(departement && { departement: Array.isArray(departement) ? departement[0] : departement }),
     ...(section_naf && { section_naf: Array.isArray(section_naf) ? section_naf[0] : section_naf }),
-  }
+  };
 }
 
 export default function SearchPage() {
-  const { config } = useConfig()
-  const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {}
+  const { config } = useConfig();
+  const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
 
-  const router = useRouter()
-  const inputs = normalizeInputs(router.query)
-  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([])
-  const [search, setSearch] = React.useState<SearchCompanyParams>(inputs)
+  const router = useRouter();
+  const inputs = normalizeInputs(router.query);
+  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([]);
+  const [search, setSearch] = React.useState<SearchCompanyParams>(inputs);
 
-  const { companies, isLoading, error, size, setSize } = useSearch(inputs)
+  const { companies, isLoading, error, size, setSize } = useSearch(inputs);
 
-  const { q, region, departement, section_naf } = inputs
+  const { q, region, departement, section_naf } = inputs;
 
   const reset = useCallbackOnMount(() => {
-    setDepartements(filterDepartements(config))
-    setSearch({})
-  })
+    setDepartements(filterDepartements(config));
+    setSearch({});
+  });
 
   React.useEffect(() => {
     // inital load of departments.
-    reset()
-  }, [config, reset]) // config change only at start.
+    reset();
+  }, [config, reset]); // config change only at start.
 
   React.useEffect(() => {
     if (region) {
-      setDepartements(filterDepartements(config, region))
+      setDepartements(filterDepartements(config, region));
     }
 
-    setSearch({ q, region, departement, section_naf })
-  }, [q, region, departement, section_naf, config])
+    setSearch({ q, region, departement, section_naf });
+  }, [q, region, departement, section_naf, config]);
 
   function handleSubmit(event: React.SyntheticEvent) {
-    event.preventDefault()
+    event.preventDefault();
 
-    router.replace({ pathname: "/recherche", query: search })
+    router.replace({ pathname: "/recherche", query: search });
   }
 
   function handleChange(event: React.SyntheticEvent) {
-    const { name, value } = event.currentTarget as HTMLInputElement
+    const { name, value } = event.currentTarget as HTMLInputElement;
 
-    let departement = getValue("departement")
+    let departement = getValue("departement");
 
     if (name === "region") {
-      setDepartements(filterDepartements(config, value))
-      departement = ""
+      setDepartements(filterDepartements(config, value));
+      departement = "";
     }
-    setSearch({ ...search, departement, [name]: value })
+    setSearch({ ...search, departement, [name]: value });
   }
 
-  const getValue = (name: keyof SearchCompanyParams) => search[name] || ""
+  const getValue = (name: keyof SearchCompanyParams) => search[name] || "";
 
   return (
     <>
@@ -516,9 +518,9 @@ export default function SearchPage() {
         </Box>
       )}
     </>
-  )
+  );
 }
 
 SearchPage.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
-}
+  return <SinglePageLayout>{page}</SinglePageLayout>;
+};

@@ -1,11 +1,15 @@
 {
-    "extends": "../tsconfig.json",
-    "compilerOptions": {
-        "baseUrl": "./",
-        "paths": {
-            "@/*": [
-                "../src/*"
-            ]
-        }
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "../src/*"
+      ]
     }
+  },
+  // override tests folder exclusion
+  "exclude": [
+    "../node_modules"
+  ]
 }
