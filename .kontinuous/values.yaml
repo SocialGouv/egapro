@@ -101,19 +101,19 @@ jobs:
   _chart: jobs
   runs:
     build-app:
-      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
       with:
         imagePackage: app
         dockerfile: packages/app/Dockerfile
     
     build-api:
-      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
       with:
         imagePackage: api
         context: packages/api
 
     build-declaration:
-      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
       with:
         imagePackage: declaration
         context: packages/declaration
@@ -122,7 +122,7 @@ jobs:
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
 
     build-simulateur:
-      use: SocialGouv/kontinuous/plugins/fabrique/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
       with:
         imagePackage: simulateur
         dockerfile: packages/simulateur/Dockerfile
