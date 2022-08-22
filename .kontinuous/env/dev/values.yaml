@@ -13,6 +13,6 @@ maildev: {}
 jobs-dev:
   runs:
     create-db:
-      use: SocialGouv/kontinuous/plugins/fabrique/jobs/create-db
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/create-db
       with:
         pgAdminSecretRefName: azure-pg-admin-user
