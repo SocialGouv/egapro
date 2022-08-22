@@ -1,3 +1,10 @@
+## [2.11.6](https://github.com/SocialGouv/egapro/compare/v2.11.5...v2.11.6) (2022-08-22)
+
+
+### Bug Fixes
+
+* **ci:** up kontinuous syntax ([#951](https://github.com/SocialGouv/egapro/issues/951)) ([05bad66](https://github.com/SocialGouv/egapro/commit/05bad6676592048064aa6dfe4719321297561690))
+
 ## [2.11.5](https://github.com/SocialGouv/egapro/compare/v2.11.4...v2.11.5) (2022-08-22)
 
 
