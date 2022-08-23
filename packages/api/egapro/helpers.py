@@ -225,7 +225,7 @@ async def get(*args, **kwargs):
         return response.json()
 
 
-async def load_from_recherche_entreprises(siren, year=None):
+async def load_from_recherche_entreprises(siren, year=constants.INVALID_YEAR):
     if not siren:
         return {}
     if config.API_ENTREPRISES:
@@ -267,7 +267,7 @@ async def load_from_recherche_entreprises(siren, year=None):
     }
 
 
-async def load_from_api_entreprises(siren, year=None):
+async def load_from_api_entreprises(siren, year=constants.INVALID_YEAR):
     if not siren or not config.API_ENTREPRISES:
         return {}
     logger.debug("Calling API Entreprises for siren %s", siren)
@@ -314,7 +314,7 @@ async def load_from_api_entreprises(siren, year=None):
 
 
 @lru_cache(maxsize=1024)
-async def get_entreprise_details(siren, year=None):
+async def get_entreprise_details(siren, year=constants.INVALID_YEAR):
     if config.API_ENTREPRISES:
         data = await load_from_api_entreprises(siren, year)
     else:

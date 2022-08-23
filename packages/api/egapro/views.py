@@ -432,7 +432,7 @@ async def get_jsonschema(request, response):
 @app.route("/validate-siren")
 async def validate_siren(request, response):
     siren = request.query.get("siren")
-    year = request.query.get("year")
+    year = request.query.get("year", default=constants.INVALID_YEAR)
     
     try:
         year = int(year)
