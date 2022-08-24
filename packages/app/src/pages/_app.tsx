@@ -9,6 +9,7 @@ import type { AppProps } from "next/app";
 import type { ReactElement, ReactNode } from "react";
 import React from "react";
 
+import { config } from "../common/config";
 import { theme } from "../theme";
 
 type NextPageWithLayout = NextPage & {
@@ -21,10 +22,7 @@ type AppPropsWithLayout = AppProps & {
 
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   React.useEffect(() => {
-    init({
-      url: process.env.NEXT_PUBLIC_MATOMO_URL ?? "",
-      siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",
-    });
+    init(config.matomo);
   }, []);
 
   // Use the layout defined at the page level, if available

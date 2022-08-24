@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/indicateurs/base_indicateur.json",
+  "type": "object",
+  "$ref": "#/definitions/base",
+  "definitions": {
+    "base": {
+      "type": "object",
+      "properties": {
+        "résultat": {
+          "type": "number"
+        },
+        "note": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "objectif_de_progression": {
+          "type": "string"
+        }
+      }
+    },
+    "with_population_favorable": {
+      "$id": "#with_population_favorable",
+      "allOf": [
+        {
+          "$ref": "#/definitions/base"
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "population_favorable": {
+          "$ref": "../common.json#population_favorable"
+        }
+      }
+    }
+  }
+}

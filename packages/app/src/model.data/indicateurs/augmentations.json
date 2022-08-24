@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/indicateurs/augmentations.json",
+  "type": "object",
+  "properties": {
+    "non_calculable": {
+      "type": "string",
+      "enum": [
+        "egvi40pcet",
+        "absaugi",
+        "am"
+      ],
+      "description": "Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)"
+    },
+    "catégories": {
+      "type": "array",
+      "items": [
+        {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      ]
+    },
+    "résultat": true,
+    "population_favorable": true,
+    "note": true,
+    "objectif_de_progression": true
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "$ref": "./base_indicateur.json#with_population_favorable"
+    }
+  ],
+  "description": "Indicateur 2 relatif à l'écart de taux d'augmentations individuelles (hors promotion) entre les femmes et les homme"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/année_indicateurs.json",
+  "type": "integer",
+  "enum": [
+    2018,
+    2019,
+    2020,
+    2021
+  ]
+}

@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { config } from "../common/config";
+
+const API_URL = config.api_url;
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
 

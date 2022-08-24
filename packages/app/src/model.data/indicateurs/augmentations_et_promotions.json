@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/indicateurs/augmentations_et_promotions.json",
+  "type": "object",
+  "properties": {
+    "non_calculable": {
+      "type": "string",
+      "enum": [
+        "absrcm",
+        "absaugpdtcm",
+        "am"
+      ]
+    },
+    "résultat": true,
+    "population_favorable": false,
+    "note": true,
+    "objectif_de_progression": true
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "$ref": "./base_indicateur.json#with_population_favorable"
+    }
+  ],
+  "description": "Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins"
+}
