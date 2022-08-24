@@ -2,6 +2,7 @@ YEARS = [2018, 2019, 2020, 2021]
 
 CURRENT_YEAR = YEARS[-1]
 
+INVALID_YEAR = 0
 
 EFFECTIFS = {
     "50:250": "De 50 à 250 inclus",
