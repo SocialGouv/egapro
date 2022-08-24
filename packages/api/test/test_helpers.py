@@ -22,6 +22,7 @@ RECHERCHE_ENTREPRISE_SAMPLE = {
     ],
     "etablissements": 5,
     "etatAdministratifUniteLegale": "A",
+    "dateCessation": "2021-01-01",
     "highlightLabel": "FOOBAR",
     "label": "FOOBAR",
     "matching": 2,
@@ -371,19 +372,20 @@ async def test_recherche_entreprise(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_recherche_entreprise_with_date_radiation(monkeypatch):
-    RECHERCHE_ENTREPRISE_SAMPLE["etatAdministratifUniteLegale"] = "C"
+    limit = "2021-03-01"
+    RECHERCHE_ENTREPRISE_SAMPLE["dateCessation"] < limit
 
     async def mock_get(*args, **kwargs):
         return RECHERCHE_ENTREPRISE_SAMPLE
 
     monkeypatch.setattr("egapro.helpers.get", mock_get)
     with pytest.raises(ValueError) as info:
-        await helpers.get_entreprise_details("481912999")
+        await helpers.get_entreprise_details("481912999", 2022)
     assert str(info.value) == (
         "Le Siren saisi correspond à une entreprise fermée, "
         "veuillez vérifier votre saisie"
     )
-    RECHERCHE_ENTREPRISE_SAMPLE["etatAdministratifUniteLegale"] = "A"
+    RECHERCHE_ENTREPRISE_SAMPLE["dateCessation"] > limit
 
 
 @pytest.mark.asyncio
@@ -495,7 +497,7 @@ async def test_recherche_entreprise_with_date_radiation_current_year(monkeypatch
     monkeypatch.setattr("egapro.config.API_ENTREPRISES", "foobar")  # Use API Entreprise
     monkeypatch.setattr("egapro.helpers.get", mock_get)
     with pytest.raises(ValueError) as info:
-        await helpers.get_entreprise_details("481912999")
+        await helpers.get_entreprise_details("481912999", 2022)
     assert str(info.value) == (
         "Le Siren saisi correspond à une entreprise fermée, "
         "veuillez vérifier votre saisie"
