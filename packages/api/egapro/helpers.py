@@ -225,19 +225,21 @@ async def get(*args, **kwargs):
         return response.json()
 
 
-async def load_from_recherche_entreprises(siren):
+async def load_from_recherche_entreprises(siren, year=constants.INVALID_YEAR):
     if not siren:
         return {}
     if config.API_ENTREPRISES:
-        return await load_from_api_entreprises(siren)
+        return await load_from_api_entreprises(siren, year)
     logger.debug("Calling Recherche Entreprises for siren %s", siren)
     url = f"https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/{siren}"
     data = await get(url)
     if not data:
         return {}
     raison_sociale = data.get("simpleLabel")
-    radiation = data.get("etatAdministratifUniteLegale") != "A"
-    if radiation:
+    limit = date(year+1, 3, 1)
+    radiation = data.get("dateCessation")
+    # if dateCessation comes before limit date, raise an error
+    if year and radiation and date.fromisoformat(radiation) < limit:
         raise ValueError(
             "Le Siren saisi correspond à une entreprise fermée, "
             "veuillez vérifier votre saisie"
@@ -265,7 +267,7 @@ async def load_from_recherche_entreprises(siren):
     }
 
 
-async def load_from_api_entreprises(siren):
+async def load_from_api_entreprises(siren, year=constants.INVALID_YEAR):
     if not siren or not config.API_ENTREPRISES:
         return {}
     logger.debug("Calling API Entreprises for siren %s", siren)
@@ -281,8 +283,8 @@ async def load_from_api_entreprises(siren):
         return {}
     entreprise = data.get("entreprise", {})
     radiation = entreprise.get("date_radiation")
-    limit = date(constants.CURRENT_YEAR, 1, 1)
-    if radiation and date.fromisoformat(radiation) < limit:
+    limit = date(year+1, 3, 1)
+    if year and radiation and date.fromisoformat(radiation) < limit:
         raise ValueError(
             "Le Siren saisi correspond à une entreprise fermée, "
             "veuillez vérifier votre saisie"
@@ -312,11 +314,11 @@ async def load_from_api_entreprises(siren):
 
 
 @lru_cache(maxsize=1024)
-async def get_entreprise_details(siren):
+async def get_entreprise_details(siren, year=constants.INVALID_YEAR):
     if config.API_ENTREPRISES:
-        data = await load_from_api_entreprises(siren)
+        data = await load_from_api_entreprises(siren, year)
     else:
-        data = await load_from_recherche_entreprises(siren)
+        data = await load_from_recherche_entreprises(siren, year)
     data = {k: v for k, v in data.items() if v is not None}
     if not data:
         raise ValueError(f"Numéro SIREN inconnu: {siren}")

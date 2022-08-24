@@ -178,7 +178,7 @@ async def test_validate_siren(client, monkeypatch):
         "région": "11",
     }
 
-    async def patch(siren):
+    async def patch(siren, year):
         return metadata
 
     monkeypatch.setattr("egapro.helpers.get_entreprise_details", patch)
@@ -194,7 +194,7 @@ async def test_validate_siren(client, monkeypatch):
 
 
 async def test_validate_unknown_siren(client, monkeypatch):
-    async def patch(siren):
+    async def patch(siren, year):
         return {}
 
     monkeypatch.setattr("egapro.helpers.load_from_recherche_entreprises", patch)
