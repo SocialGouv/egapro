@@ -203,7 +203,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             )}
             {Boolean(apiError) && <FormError message={apiError || "Erreur lors de la sauvegarde des données."} />}
 
-            {noteIndex !== undefined && noteIndex < 75 && (
+            {noteIndex !== undefined && noteIndex < 75 && periodeSuffisante && (
               <MesuresCorrection
                 label="Mesures de correction prévues à l'article D. 1142-6"
                 name="mesuresCorrection"
