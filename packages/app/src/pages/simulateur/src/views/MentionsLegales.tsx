@@ -1,13 +1,13 @@
-import React from "react"
+import React, { ReactElement } from "react"
 import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
-
+import { NextPageWithLayout } from "../../../_app"
 import { useTitle } from "../utils/hooks"
-
 import Page from "../components/Page"
+import { SinglePageLayout } from "../containers/SinglePageLayout"
 
 const title = "Mentions légales"
 
-const MentionsLegales = () => {
+const MentionsLegales: NextPageWithLayout = () => {
   useTitle(title)
 
   return (
@@ -70,6 +70,10 @@ const MentionsLegales = () => {
       </Text>
     </Page>
   )
+}
+
+MentionsLegales.getLayout = function getLayout(page: ReactElement) {
+  return <SinglePageLayout>{page}</SinglePageLayout>
 }
 
 export default MentionsLegales

@@ -1,12 +1,14 @@
-import React, { FunctionComponent } from "react"
+import React, { ReactElement } from "react"
 import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
 
 import { useTitle } from "../utils/hooks"
 import Page from "../components/Page"
+import { NextPageWithLayout } from "../../../_app"
+import { SinglePageLayout } from "../containers/SinglePageLayout"
 
 const title = "Accessibilité"
 
-const Accessibilite: FunctionComponent = () => {
+const Accessibilite: NextPageWithLayout = () => {
   useTitle(title)
 
   return (
@@ -83,6 +85,10 @@ const Accessibilite: FunctionComponent = () => {
       </Text>
     </Page>
   )
+}
+
+Accessibilite.getLayout = function getLayout(page: ReactElement) {
+  return <SinglePageLayout>{page}</SinglePageLayout>
 }
 
 export default Accessibilite

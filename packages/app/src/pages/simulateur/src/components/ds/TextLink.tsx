@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
 import { Link, LinkProps } from "@chakra-ui/react"
-import { Link as LinkRouter } from "react-router-dom"
+import NextLink from "next/link"
 
 type TextLinkProps = {
   to: string
@@ -15,9 +15,11 @@ const TextLink: FunctionComponent<TextLinkProps> = ({ isExternal, children, to, 
     )
   } else {
     return (
-      <Link as={LinkRouter} textDecoration="underline" color="inherit" to={to} {...rest}>
-        {children}
-      </Link>
+      <NextLink href={to}>
+        <Link textDecoration="underline" color="inherit" {...rest}>
+          {children}
+        </Link>
+      </NextLink>
     )
   }
 }

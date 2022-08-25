@@ -25,7 +25,8 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react"
 import React, { FunctionComponent } from "react"
-import { Link as RouterLink, useHistory } from "react-router-dom"
+import { useRouter } from "next/router"
+import NextLink from "next/link"
 
 import { LinkIcon } from "@chakra-ui/icons"
 import FAQ from "../views/FAQ"
@@ -50,12 +51,12 @@ const Header: FunctionComponent = () => {
   const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isMobile] = useMediaQuery("(max-width: 639px)")
-  const history = useHistory()
+  const router = useRouter()
   const { email, logout, staff } = useUser()
 
   const disconnectUser = () => {
     logout()
-    history.push("/tableauDeBord/me-connecter")
+    router.push("/tableauDeBord/me-connecter")
   }
   return (
     <>
@@ -106,21 +107,24 @@ const Header: FunctionComponent = () => {
           <Flex align="center" py={4}>
             <Flex direction="row" align="center">
               <Box pr={6}>
-                <Link
-                  href="https://travail-emploi.gouv.fr/"
-                  isExternal
-                  width={isMobile ? 16 : 20}
-                  sx={{
-                    display: "block",
-                  }}
-                >
-                  <Logo />
-                </Link>
+                <NextLink href="https://travail-emploi.gouv.fr/">
+                  <Link
+                    isExternal
+                    width={isMobile ? 16 : 20}
+                    sx={{
+                      display: "block",
+                    }}
+                  >
+                    <Logo />
+                  </Link>
+                </NextLink>
               </Box>
               <Box fontFamily="custom">
-                <Link as={RouterLink} to="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
-                  Index Egapro
-                </Link>
+                <NextLink href="/">
+                  <Link fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
+                    Index Egapro
+                  </Link>
+                </NextLink>
                 {!isMobile && (
                   <Text fontSize="xs">
                     L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
@@ -137,27 +141,15 @@ const Header: FunctionComponent = () => {
                   </MenuButton>
                   <MenuList zIndex={400}>
                     <MenuGroup title="Mon compte">
-                      <MenuItem
-                        as={RouterLink}
-                        to="/tableauDeBord/mon-profil"
-                        icon={<IconPeople boxSize={5} color="gray.400" />}
-                      >
-                        Mon Profil
-                      </MenuItem>
-                      <MenuItem
-                        as={RouterLink}
-                        to="/tableauDeBord/mes-entreprises"
-                        icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}
-                      >
-                        Mes entreprises
-                      </MenuItem>
-                      <MenuItem
-                        as={RouterLink}
-                        to="/tableauDeBord/mes-declarations"
-                        icon={<IconEdit boxSize={5} color="gray.400" />}
-                      >
-                        Mes déclarations
-                      </MenuItem>
+                      <NextLink href="/tableauDeBord/mon-profil">
+                        <MenuItem icon={<IconPeople boxSize={5} color="gray.400" />}>Mon Profil</MenuItem>
+                      </NextLink>
+                      <NextLink href="/tableauDeBord/mes-entreprises">
+                        <MenuItem icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}>Mes entreprises</MenuItem>
+                      </NextLink>
+                      <NextLink href="/tableauDeBord/mes-declarations">
+                        <MenuItem icon={<IconEdit boxSize={5} color="gray.400" />}>Mes déclarations</MenuItem>
+                      </NextLink>
                       <MenuItem onClick={disconnectUser} icon={<IconLogout boxSize={5} color="gray.400" />}>
                         Déconnexion
                       </MenuItem>
@@ -166,20 +158,14 @@ const Header: FunctionComponent = () => {
                       <>
                         <MenuDivider />
                         <MenuGroup title="Administration">
-                          <MenuItem
-                            as={RouterLink}
-                            to="/tableauDeBord/gerer-utilisateurs"
-                            icon={<IconUserGroup boxSize={5} color="gray.400" />}
-                          >
-                            Gérer utilisateurs
-                          </MenuItem>
-                          <MenuItem
-                            as={RouterLink}
-                            to="/tableauDeBord/generer-token-utilisateur"
-                            icon={<LinkIcon boxSize={5} color="gray.400" />}
-                          >
-                            Générer token
-                          </MenuItem>
+                          <NextLink href="/tableauDeBord/gerer-utilisateurs">
+                            <MenuItem icon={<IconUserGroup boxSize={5} color="gray.400" />}>
+                              Gérer utilisateurs
+                            </MenuItem>
+                          </NextLink>
+                          <NextLink href="/tableauDeBord/generer-token-utilisateur">
+                            <MenuItem icon={<LinkIcon boxSize={5} color="gray.400" />}>Générer token</MenuItem>
+                          </NextLink>
                         </MenuGroup>
                       </>
                     )}

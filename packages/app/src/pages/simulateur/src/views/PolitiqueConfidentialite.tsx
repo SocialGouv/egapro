@@ -4,8 +4,10 @@ import { Text, Heading, Link, Box, UnorderedList, ListItem, Table, Thead, Tbody,
 import Page from "../components/Page"
 import { useTitle } from "../utils/hooks"
 import ButtonAction from "../components/ds/ButtonAction"
+import { SinglePageLayout } from "../containers/SinglePageLayout"
+import { NextPageWithLayout } from "../../../_app"
 
-const CGU = () => {
+const PolitiqueConfidentialite: NextPageWithLayout = () => {
   useTitle("Politique de confidentialité")
   const [hasTarteAuCitron, setTarteAuCitron] = useState(false)
 
@@ -293,4 +295,8 @@ const CGU = () => {
   )
 }
 
-export default CGU
+PolitiqueConfidentialite.getLayout = function getLayout(page: ReactElement) {
+  return <SinglePageLayout>{page}</SinglePageLayout>
+}
+
+export default PolitiqueConfidentialite

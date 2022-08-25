@@ -1,13 +1,13 @@
-import React, { FunctionComponent } from "react"
+import React, { ReactElement } from "react"
 import { Text, Heading, Link } from "@chakra-ui/react"
-
+import { NextPageWithLayout } from "../../../_app"
 import { useTitle } from "../utils/hooks"
-
 import Page from "../components/Page"
+import { SinglePageLayout } from "../containers/SinglePageLayout"
 
 const title = "Conditions d'utilisation"
 
-const CGU: FunctionComponent = () => {
+const CGU: NextPageWithLayout = () => {
   useTitle(title)
 
   return (
@@ -112,6 +112,10 @@ const CGU: FunctionComponent = () => {
       </Text>
     </Page>
   )
+}
+
+CGU.getLayout = function getLayout(page: ReactElement) {
+  return <SinglePageLayout>{page}</SinglePageLayout>
 }
 
 export default CGU

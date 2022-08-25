@@ -1,13 +1,14 @@
 import React from "react"
-import { Link as ReachLink } from "react-router-dom"
+import NextLink from "next/link"
+import getConfig from "next/config"
 import { Box, Container, List, ListItem, Text, Link } from "@chakra-ui/react"
 
 import Logo from "./ds/Logo"
 import TextLink from "./ds/TextLink"
-import packageConfig from "../../package.json"
+const { publicRuntimeConfig } = getConfig()
 
 function Footer() {
-  const version = process.env.REACT_APP_VERSION || packageConfig.version
+  const version = publicRuntimeConfig?.version
 
   return (
     <Box
@@ -40,9 +41,11 @@ function Footer() {
           }}
         >
           <Box pr={8}>
-            <Link href="https://travail-emploi.gouv.fr/" isExternal pt={2} sx={{ display: "block" }}>
-              <Logo />
-            </Link>
+            <NextLink href="https://travail-emploi.gouv.fr/">
+              <Link isExternal pt={2} sx={{ display: "block" }}>
+                <Logo />
+              </Link>
+            </NextLink>
           </Box>
 
           <List
@@ -54,29 +57,29 @@ function Footer() {
             }}
           >
             <ListItem>
-              <Link href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" isExternal>
-                Télécharger la liste des référents Egapro (XLSX, 22 Ko)
-              </Link>
+              <NextLink href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx">
+                <Link isExternal>Télécharger la liste des référents Egapro (XLSX, 22 Ko)</Link>
+              </NextLink>
             </ListItem>
             <ListItem>
-              <Link as={ReachLink} to="/mentions-legales">
-                Mentions légales
-              </Link>
+              <NextLink href="/mentions-legales">
+                <Link>Mentions légales</Link>
+              </NextLink>
             </ListItem>
             <ListItem>
-              <Link href={process.env.PUBLIC_URL + "/a11y/declaration-accessibilite-rgaa-4-1.pdf"}>
-                Accessibilité&nbsp;: partiellement conforme
-              </Link>
+              <NextLink href={process.env.PUBLIC_URL + "/a11y/declaration-accessibilite-rgaa-4-1.pdf"}>
+                <Link>Accessibilité&nbsp;: partiellement conforme</Link>
+              </NextLink>
             </ListItem>
             <ListItem>
-              <Link as={ReachLink} to="/cgu">
-                Conditions générales d'utilisation
-              </Link>
+              <NextLink href="/cgu">
+                <Link>Conditions générales d'utilisation</Link>
+              </NextLink>
             </ListItem>
             <ListItem>
-              <Link as={ReachLink} to="/politique-confidentialite">
-                Politique de confidentialité
-              </Link>
+              <NextLink href="/politique-confidentialite">
+                <Link>Politique de confidentialité</Link>
+              </NextLink>
             </ListItem>
           </List>
         </Box>

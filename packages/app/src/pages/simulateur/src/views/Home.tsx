@@ -1,8 +1,8 @@
-import React, { FunctionComponent, useState } from "react"
-import { RouteComponentProps } from "react-router-dom"
+import React, { ReactElement, useState } from "react"
 import { Heading, SimpleGrid } from "@chakra-ui/react"
+import { useRouter } from "next/router"
 
-import { ActionType } from "../globals"
+// import { ActionType } from "../globals"
 import { postIndicatorsDatas } from "../utils/api"
 
 import ButtonAction from "../components/ds/ButtonAction"
@@ -11,24 +11,31 @@ import Card from "../components/ds/Card"
 import Page from "../components/Page"
 import ErrorMessage from "../components/ErrorMessage"
 import { logToSentry } from "../utils/sentry"
+import type { NextPageWithLayout } from "../../../_app"
+// import MainScrollView from "../containers/MainScrollView"
+import { SinglePageLayout } from "../containers/SinglePageLayout"
 
-interface HomeProps extends RouteComponentProps {
+/*
+interface HomeProps {
   dispatch: (action: ActionType) => void
 }
+*/
 
-const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => {
+const Home: NextPageWithLayout = () => {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(undefined)
 
   const onClick = () => {
     setLoading(true)
-    dispatch({ type: "resetState" })
+    // dispatch({ type: 'resetState' })
 
     postIndicatorsDatas({})
       .then(({ jsonBody: { id } }) => {
         setLoading(false)
 
-        history.push(`/simulateur/${id}`, location.state ? location.state : {})
+        // history.push(`/simulateur/${id}`, location.state ? location.state : {})
+        router.push(`/simulateur/${id}`)
       })
       .catch((error) => {
         setLoading(false)
@@ -87,7 +94,7 @@ const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => 
                 formulaire suivant."
           action={
             <ButtonLinkNoRouter
-              to={process.env.REACT_APP_DECLARATION_URL || "/declaration/"}
+              to={process.env.NEXT_PUBLIC_DECLARATION_URL || "/declaration/"}
               label="Déclarer directement"
               fullWidth
             />
@@ -96,6 +103,20 @@ const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => 
       </SimpleGrid>
     </Page>
   )
+}
+
+/**
+Home.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <SinglePageLayout>
+      <MainScrollView state={undefined}>{page}</MainScrollView>
+    </SinglePageLayout>
+  )
+}
+*/
+
+Home.getLayout = function getLayout(page: ReactElement) {
+  return <SinglePageLayout>{page}</SinglePageLayout>
 }
 
 export default Home

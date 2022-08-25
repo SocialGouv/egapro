@@ -11,7 +11,7 @@ import type { AppProps } from "next/app"
 
 import theme from "../theme"
 
-type NextPageWithLayout = NextPage & {
+export type NextPageWithLayout = NextPage & {
   // eslint-disable-next-line no-unused-vars
   getLayout?: (page: ReactElement) => ReactNode
 }

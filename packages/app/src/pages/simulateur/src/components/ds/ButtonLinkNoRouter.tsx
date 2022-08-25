@@ -1,4 +1,5 @@
 import React from "react"
+import NextLink from "next/link"
 import { Button } from "@chakra-ui/react"
 import { ButtonProps } from "./ButtonAction"
 
@@ -18,20 +19,21 @@ function ButtonLinkNoRouter({
   fullWidth,
 }: ButtonLinkNoRouterProps) {
   return (
-    <Button
-      href={to}
-      as="a"
-      colorScheme={colorScheme}
-      variant={variant}
-      leftIcon={leftIcon}
-      rightIcon={rightIcon}
-      size={size}
-      sx={{
-        width: fullWidth ? "100%" : "auto",
-      }}
-    >
-      {label}
-    </Button>
+    <NextLink href={to}>
+      <Button
+        as="a"
+        colorScheme={colorScheme}
+        variant={variant}
+        leftIcon={leftIcon}
+        rightIcon={rightIcon}
+        size={size}
+        sx={{
+          width: fullWidth ? "100%" : "auto",
+        }}
+      >
+        {label}
+      </Button>
+    </NextLink>
   )
 }
 
