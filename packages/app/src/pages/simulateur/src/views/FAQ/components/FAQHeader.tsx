@@ -1,10 +1,10 @@
-import React, { FunctionComponent } from "react"
+import React, { FunctionComponent, useMemo } from "react"
 import { Box, Button, Heading } from "@chakra-ui/react"
-import { Switch, Link, Route, RouteComponentProps } from "react-router-dom"
+import { useRouter } from "next/router"
+import NextLink from "next/link"
 import { IconBack } from "../../../components/ds/Icons"
 
 export type FAQHeaderProps = {
-  location: RouteComponentProps["location"]
   closeMenu?: () => void
 }
 
@@ -15,27 +15,35 @@ const FAQHeaderBackButton = ({ onClick }: { onClick: () => void }) => (
 )
 
 const FAQHeaderHomeButton = () => (
-  <Button as={Link} to={{ state: { faq: "/" } }} size="xs" leftIcon={<IconBack />} variant="link">
-    Voir toute l’aide
-  </Button>
+  <NextLink href="/simulateur/home">
+    <Button size="xs" leftIcon={<IconBack />} variant="link">
+      Voir toute l’aide
+    </Button>
+  </NextLink>
 )
 
-const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ location, closeMenu }) => (
-  <Box
-    height={20}
-    mx={6}
-    textAlign="center"
-    borderBottom="1px solid"
-    borderColor="gray.200"
-    position="relative"
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-  >
-    <Box position="absolute" top="50%" left={0} transform="translateY(calc(-50% + .125rem))" fontSize="xs">
-      <Switch location={location}>
-        {closeMenu && <Route exact path="/" render={() => <FAQHeaderBackButton onClick={closeMenu} />} />}
-        <Route exact path="/section/:section" render={() => <FAQHeaderHomeButton />} />
+const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ location, closeMenu }) => {
+  const router = useRouter()
+
+  const pathname = useMemo(() => router?.pathname, [router])
+
+  return (
+    <Box
+      height={20}
+      mx={6}
+      textAlign="center"
+      borderBottom="1px solid"
+      borderColor="gray.200"
+      position="relative"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Box position="absolute" top="50%" left={0} transform="translateY(calc(-50% + .125rem))" fontSize="xs">
+        {closeMenu && pathname === "/simulateur/home" && <FAQHeaderBackButton onClick={closeMenu} />}
+
+        {pathname.match("/^section//") && <FAQHeaderHomeButton />}
+        {/*
         <Route
           exact
           path={["/part/:part/question/:indexQuestion", "/contact"]}
@@ -46,12 +54,13 @@ const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ location, closeMenu }) =
           path="/section/:section/detail-calcul"
           render={({ history }) => <FAQHeaderBackButton onClick={() => history.goBack()} />}
         />
-      </Switch>
+  */}
+      </Box>
+      <Heading as="h2" fontFamily="custom" fontWeight="medium" size="md" color="gray.700">
+        Aide
+      </Heading>
     </Box>
-    <Heading as="h2" fontFamily="custom" fontWeight="medium" size="md" color="gray.700">
-      Aide
-    </Heading>
-  </Box>
-)
+  )
+}
 
 export default FAQHeader

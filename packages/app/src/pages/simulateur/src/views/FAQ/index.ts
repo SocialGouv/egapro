@@ -1,2 +1,2 @@
-import FAQ from "./FAQ"
-export default FAQ
+import FAQRouter from "./FAQRouter"
+export default FAQRouter

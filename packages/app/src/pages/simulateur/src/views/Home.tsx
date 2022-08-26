@@ -13,7 +13,7 @@ import ErrorMessage from "../components/ErrorMessage"
 import { logToSentry } from "../utils/sentry"
 import type { NextPageWithLayout } from "../../../_app"
 // import MainScrollView from "../containers/MainScrollView"
-import { SinglePageLayout } from "../containers/SinglePageLayout"
+import StaticPageWithFaqLayout from "../containers/StaticPageWithFaqLayout"
 
 /*
 interface HomeProps {
@@ -116,7 +116,7 @@ Home.getLayout = function getLayout(page: ReactElement) {
 */
 
 Home.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
+  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
 }
 
 export default Home
