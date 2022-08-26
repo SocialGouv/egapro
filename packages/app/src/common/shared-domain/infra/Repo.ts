@@ -1,4 +1,4 @@
-import type { Any } from "@instamed/utils";
+import type { Any } from "../../utils/types";
 import type { Entity } from "../domain";
 
 export interface SimpleRepo {

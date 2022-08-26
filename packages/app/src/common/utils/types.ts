@@ -83,14 +83,14 @@ export type GetEventListener<TEE extends EventEmitter, TEvent extends ListEventE
  * @deprecated
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Any = any;
+export type Any = any; //NOSONAR
 
 /**
  * Force expand a type for debug purpose. Don't work on every type.
  * @deprecated
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type __DEBUG_TYPE__<T> = { [P in keyof T]: T[P] } & {};
+export type __DEBUG_TYPE__<T> = { [P in keyof T]: T[P] } & {}; //NOSONAR
 
 /**
  * Get direct subkeys of a given non array object and/or unpack a subarray type to use its keys as subkeys.

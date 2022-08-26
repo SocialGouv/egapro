@@ -1,0 +1,8 @@
+{
+  "$schema": "./model.data/schema-with-validation.json",
+  "déclaration": {
+    "brouillon": true,
+    "période_suffisante": false
+  },
+  "indicateurs": {}
+}
