@@ -4,7 +4,7 @@ import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
 import { useTitle } from "../utils/hooks"
 import Page from "../components/Page"
 import { NextPageWithLayout } from "../../../_app"
-import { SinglePageLayout } from "../containers/SinglePageLayout"
+import StaticPageWithFaqLayout from "../containers/StaticPageWithFaqLayout"
 
 const title = "Accessibilité"
 
@@ -88,7 +88,7 @@ const Accessibilite: NextPageWithLayout = () => {
 }
 
 Accessibilite.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
+  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
 }
 
 export default Accessibilite

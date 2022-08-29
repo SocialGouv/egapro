@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
 import { LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
-import { Link as LinkRouter } from "react-router-dom"
+import NextLink from "next/link"
 import { IconArrowRight } from "../../../components/ds/Icons"
 
 interface FAQSectionRowProps {
@@ -28,24 +28,25 @@ const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, 
       },
     }}
   >
-    <LinkOverlay
-      as={LinkRouter}
-      to={{ state: { faq: `/section/${section}` } }}
-      pr={4}
-      color="primary.500"
-      fontWeight="bold"
-      fontSize="sm"
-      display="block"
-      lineHeight={1.2}
-      sx={{
-        transition: "color .1s ease-in-out",
-        _hover: {
-          color: "primary.700",
-        },
-      }}
-    >
-      {title}
-    </LinkOverlay>
+    <NextLink href={`/section/${section}`}>
+      <LinkOverlay
+        // to={{ state: { faq: `/section/${section}` } }}
+        pr={4}
+        color="primary.500"
+        fontWeight="bold"
+        fontSize="sm"
+        display="block"
+        lineHeight={1.2}
+        sx={{
+          transition: "color .1s ease-in-out",
+          _hover: {
+            color: "primary.700",
+          },
+        }}
+      >
+        {title}
+      </LinkOverlay>
+    </NextLink>
     <IconArrowRight
       boxSize="3"
       color="gray.400"

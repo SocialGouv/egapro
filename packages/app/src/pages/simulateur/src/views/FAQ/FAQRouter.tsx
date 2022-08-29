@@ -40,16 +40,27 @@ const mapDefaultPathnameToFAQPathname = (location: FAQRouteComponentProps["locat
     return location.state.faq
   }
   const splittedLocationPathname = location.pathname.split("/").filter(Boolean)
-  if (
-    splittedLocationPathname[0] !== "simulateur" ||
-    splittedLocationPathname.length !== 3
-  ) {
+  if (splittedLocationPathname[0] !== "simulateur" || splittedLocationPathname.length !== 3) {
     return location.pathname
   }
   const faqPath = FAQPaths[splittedLocationPathname[2]]
   return faqPath ? faqPath : location.pathname
 }
 */
+
+const StaticPageComponentNames: string[] = [
+  "Home",
+  "MentionsLegales",
+  "Accessibilite",
+  "CGU",
+  "PolitiqueConfidentialite",
+]
+
+function extractPagePath(pathname: string): string {
+  const splittedPath = pathname.split("/")
+  const pathIndex = splittedPath.length - 1
+  return splittedPath[pathIndex]
+}
 
 interface FAQRouterProps {
   closeMenu?: () => void
@@ -58,11 +69,14 @@ interface FAQRouterProps {
 const FAQRouter: FunctionComponent<FAQRouterProps> = ({ closeMenu }) => {
   const router = useRouter()
   const pathname = useMemo(() => router?.pathname, [router])
+  const pagePath = useMemo(() => (pathname ? extractPagePath(pathname) : ""), [pathname])
+  const isCurrentPageStatic = useMemo(() => StaticPageComponentNames.includes(pagePath), [pagePath])
 
   return (
     <Box as="aside" id="search" role="search" bg="white">
       <FAQHeader closeMenu={closeMenu} />
       <Box p={6} overflowY="auto" maxHeight="100vh" sx={{ WebkitOverflowScrolling: "touch" }} key={pathname}>
+        {isCurrentPageStatic && <FAQHome />}
         {/*
       <Switch location={locationFAQ}>
         <Route

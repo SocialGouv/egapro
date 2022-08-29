@@ -3,7 +3,7 @@ import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
 import { NextPageWithLayout } from "../../../_app"
 import { useTitle } from "../utils/hooks"
 import Page from "../components/Page"
-import { SinglePageLayout } from "../containers/SinglePageLayout"
+import StaticPageWithFaqLayout from "../containers/StaticPageWithFaqLayout"
 
 const title = "Mentions légales"
 
@@ -73,7 +73,7 @@ const MentionsLegales: NextPageWithLayout = () => {
 }
 
 MentionsLegales.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
+  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
 }
 
 export default MentionsLegales

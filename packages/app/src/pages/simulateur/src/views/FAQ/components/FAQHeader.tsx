@@ -6,6 +6,7 @@ import { IconBack } from "../../../components/ds/Icons"
 
 export type FAQHeaderProps = {
   closeMenu?: () => void
+  location?: { pathname: string; search: string; hash: string; state: undefined } // toRemove
 }
 
 const FAQHeaderBackButton = ({ onClick }: { onClick: () => void }) => (
@@ -22,7 +23,7 @@ const FAQHeaderHomeButton = () => (
   </NextLink>
 )
 
-const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ location, closeMenu }) => {
+const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ closeMenu }) => {
   const router = useRouter()
 
   const pathname = useMemo(() => router?.pathname, [router])
@@ -40,7 +41,7 @@ const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ location, closeMenu }) =
       alignItems="center"
     >
       <Box position="absolute" top="50%" left={0} transform="translateY(calc(-50% + .125rem))" fontSize="xs">
-        {closeMenu && pathname === "/simulateur/home" && <FAQHeaderBackButton onClick={closeMenu} />}
+        {closeMenu && pathname === "/home" && <FAQHeaderBackButton onClick={closeMenu} />}
 
         {pathname.match("/^section//") && <FAQHeaderHomeButton />}
         {/*

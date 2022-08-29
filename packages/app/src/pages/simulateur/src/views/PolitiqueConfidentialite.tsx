@@ -4,7 +4,7 @@ import { Text, Heading, Link, Box, UnorderedList, ListItem, Table, Thead, Tbody,
 import Page from "../components/Page"
 import { useTitle } from "../utils/hooks"
 import ButtonAction from "../components/ds/ButtonAction"
-import { SinglePageLayout } from "../containers/SinglePageLayout"
+import StaticPageWithFaqLayout from "../containers/StaticPageWithFaqLayout"
 import { NextPageWithLayout } from "../../../_app"
 
 const PolitiqueConfidentialite: NextPageWithLayout = () => {
@@ -296,7 +296,7 @@ const PolitiqueConfidentialite: NextPageWithLayout = () => {
 }
 
 PolitiqueConfidentialite.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
+  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
 }
 
 export default PolitiqueConfidentialite

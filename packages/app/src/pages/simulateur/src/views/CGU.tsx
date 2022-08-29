@@ -3,7 +3,7 @@ import { Text, Heading, Link } from "@chakra-ui/react"
 import { NextPageWithLayout } from "../../../_app"
 import { useTitle } from "../utils/hooks"
 import Page from "../components/Page"
-import { SinglePageLayout } from "../containers/SinglePageLayout"
+import StaticPageWithFaqLayout from "../containers/StaticPageWithFaqLayout"
 
 const title = "Conditions d'utilisation"
 
@@ -115,7 +115,7 @@ const CGU: NextPageWithLayout = () => {
 }
 
 CGU.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
+  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
 }
 
 export default CGU
