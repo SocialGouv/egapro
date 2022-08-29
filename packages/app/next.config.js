@@ -7,15 +7,11 @@ const nextConfig = {
   rewrites: async () => {
     return [
       {
-        source: "/cgu",
-        destination: "/simulateur/src/views/CGU",
-      },
-      {
         source: "/consulter-index",
         destination: "/",
       },
       {
-        source: "/recherche",
+        source: "/consulter-index/recherche",
         destination: "/recherche",
       },
       {
@@ -23,8 +19,12 @@ const nextConfig = {
         destination: "/api/health",
       },
       {
-        source: "/simulateur/home",
+        source: "/home",
         destination: "/simulateur/src/views/Home",
+      },
+      {
+        source: "/cgu",
+        destination: "/simulateur/src/views/CGU",
       },
       {
         source: "/mentions-legales",
