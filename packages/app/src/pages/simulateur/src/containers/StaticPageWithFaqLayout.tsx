@@ -1,4 +1,4 @@
-import React, { useEffect, ReactNode, FunctionComponent } from "react"
+import React, { useEffect, useMemo, ReactNode, FunctionComponent } from "react"
 import { Container, Box, Flex, Grid, useMediaQuery } from "@chakra-ui/react"
 import { useRouter } from "next/router"
 import FAQRouter from "../views/FAQ"
@@ -12,7 +12,8 @@ interface StaticPageWithFaqLayoutProps {
 const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> = ({ children }) => {
   const router = useRouter()
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
-
+  const gridTemplateColumnsVal = useMemo(() => (isLargerThan1280 ? "200px 1fr 380px" : "200px 1fr"), [isLargerThan1280])
+  const gridTemplateAreasVal = useMemo(() => (isLargerThan1280 ? "'nav main aside'" : "'nav main'"), [isLargerThan1280])
   return (
     <Flex direction="column">
       <Header />
@@ -29,9 +30,9 @@ const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> =
           <Grid
             sx={{
               "@media screen": {
-                gridTemplateColumns: isLargerThan1280 ? "200px 1fr 380px" : isLargerThan1280 ? "200px 1fr" : "1fr",
+                gridTemplateColumns: gridTemplateColumnsVal,
                 gridTemplateRows: "auto",
-                gridTemplateAreas: isLargerThan1280 ? "'nav main aside'" : isLargerThan1280 ? "'nav main'" : "'main'",
+                gridTemplateAreas: gridTemplateAreasVal,
                 height: "100%",
               },
             }}
