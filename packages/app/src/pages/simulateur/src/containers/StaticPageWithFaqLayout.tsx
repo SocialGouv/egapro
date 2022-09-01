@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, ReactNode, FunctionComponent } from "react"
+import React, { useEffect, useMemo, useState, ReactNode, FunctionComponent } from "react"
 import { Container, Box, Flex, Grid, useMediaQuery } from "@chakra-ui/react"
 import { useRouter } from "next/router"
 import FAQRouter from "../views/FAQ"
@@ -11,7 +11,15 @@ interface StaticPageWithFaqLayoutProps {
 
 const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> = ({ children }) => {
   const router = useRouter()
-  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
+  const [isLargerThan1280, setIsLargerThan1280] = useState<Boolean>(false)
+  const [mediaQuery] = useMediaQuery("(min-width: 1280px)")
+
+  useEffect(() => {
+    if (mediaQuery !== isLargerThan1280) {
+      setIsLargerThan1280(mediaQuery)
+    }
+  }, [isLargerThan1280, mediaQuery])
+
   const gridTemplateColumnsVal = useMemo(() => (isLargerThan1280 ? "200px 1fr 380px" : "200px 1fr"), [isLargerThan1280])
   const gridTemplateAreasVal = useMemo(() => (isLargerThan1280 ? "'nav main aside'" : "'nav main'"), [isLargerThan1280])
   return (
@@ -79,7 +87,14 @@ interface Props {
 }
 
 const Content: React.FunctionComponent<Props> = ({ children, pathname }: { children: ReactNode; pathname: string }) => {
-  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
+  const [isLargerThan1280, setIsLargerThan1280] = useState<Boolean>(false)
+  const [mediaQuery] = useMediaQuery("(min-width: 1280px)")
+
+  useEffect(() => {
+    if (mediaQuery !== isLargerThan1280) {
+      setIsLargerThan1280(mediaQuery)
+    }
+  }, [isLargerThan1280, mediaQuery])
 
   useEffect(() => {
     window.scrollTo(0, 0)

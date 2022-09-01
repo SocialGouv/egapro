@@ -24,7 +24,7 @@ import {
   useDisclosure,
   useMediaQuery,
 } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
+import React, { FunctionComponent, useEffect, useState } from "react"
 import { useRouter } from "next/router"
 import NextLink from "next/link"
 
@@ -47,10 +47,6 @@ import Logo from "./ds/Logo"
 
 const Header: FunctionComponent = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
-  const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
-  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
-  const [isMobile] = useMediaQuery("(max-width: 639px)")
   const router = useRouter()
   const { email, logout, staff } = useUser()
 
@@ -58,6 +54,42 @@ const Header: FunctionComponent = () => {
     logout()
     router.push("/tableauDeBord/me-connecter")
   }
+  const [isMobile, setIsMobile] = useState<Boolean>(false)
+  const [isSmallerThan639] = useMediaQuery("(max-width: 639px)")
+
+  useEffect(() => {
+    if (isSmallerThan639 !== isMobile) {
+      setIsMobile(isSmallerThan639)
+    }
+  }, [isMobile, isSmallerThan639])
+
+  const [isFAQMenuDisplayed, setIsFAQMenuDisplayed] = useState<Boolean>(false)
+  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
+
+  useEffect(() => {
+    if (isSmallerThan1280 !== isFAQMenuDisplayed) {
+      setIsFAQMenuDisplayed(isSmallerThan1280)
+    }
+  }, [isFAQMenuDisplayed, isSmallerThan1280])
+
+  const [isXLScreen, setIsXLScreen] = useState<Boolean>(false)
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
+
+  useEffect(() => {
+    if (isLargerThan1280 !== isXLScreen) {
+      setIsXLScreen(isLargerThan1280)
+    }
+  }, [isXLScreen, isLargerThan1280])
+
+  const [isDesktop, setIsDesktop] = useState<Boolean>(false)
+  const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
+
+  useEffect(() => {
+    if (isBiggerThanMobileAndSmallerThan1280 !== isDesktop) {
+      setIsDesktop(isBiggerThanMobileAndSmallerThan1280)
+    }
+  }, [isDesktop, isBiggerThanMobileAndSmallerThan1280])
+
   return (
     <>
       <Box
@@ -169,7 +201,7 @@ const Header: FunctionComponent = () => {
                         </MenuGroup>
                       </>
                     )}
-                    {isSmallerThan1280 && (
+                    {isFAQMenuDisplayed && (
                       <>
                         <MenuDivider />
                         <MenuGroup title="Informations">
@@ -189,7 +221,7 @@ const Header: FunctionComponent = () => {
                       <ButtonAction onClick={onOpen} label={"Consulter l'aide"} variant="ghost" size="xs" />
                     </>
                   )}
-                  {isBiggerThanMobileAndSmallerThan1280 && (
+                  {isDesktop && (
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
@@ -205,7 +237,7 @@ const Header: FunctionComponent = () => {
                       />
                     </>
                   )}
-                  {isLargerThan1280 && (
+                  {isXLScreen && (
                     <>
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
@@ -221,7 +253,7 @@ const Header: FunctionComponent = () => {
           </Flex>
         </Container>
       </Box>
-      {isSmallerThan1280 && (
+      {isFAQMenuDisplayed && (
         <>
           <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
             <DrawerOverlay />
