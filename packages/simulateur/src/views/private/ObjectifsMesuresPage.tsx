@@ -136,7 +136,10 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
             textAlign="left"
             type="text"
             htmlSize={60}
+            maxLength={60}
+            showRemainingCharacters
             width="auto"
+            placeholder="Votre objectif en 60 caractères maximum"
           />
         )}
       </GridItem>
