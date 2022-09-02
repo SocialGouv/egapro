@@ -266,9 +266,23 @@ BIG_COMPANY = models.Data(
     }
 )
 
+def test_objective_email_with_small_company():
+    txt, html, *args = emails.objectives(url=SMALL_COMPANY.uri, **SMALL_COMPANY)
+    subject = args[0]
+    assert subject == "Déclaration des objectifs de progression et mesures de correction de l’index égalité professionnelle femmes-hommes"
+
+def test_objective_email_with_small_company_without_measures():
+    SMALL_COMPANY["déclaration"]["index"] = 80
+    txt, html, *args = emails.objectives(url=SMALL_COMPANY.uri, **SMALL_COMPANY)
+    subject = args[0]
+    assert subject == "Déclaration des objectifs de progression de l’index égalité professionnelle femmes-homme"
+    SMALL_COMPANY["déclaration"]["index"] = 65
+
 
 def test_success_email_with_small_company():
-    txt, html, subject = emails.success(url=SMALL_COMPANY.uri, **SMALL_COMPANY)
+    txt, html, *args = emails.success(url=SMALL_COMPANY.uri, **SMALL_COMPANY)
+    subject = args[0]
+    assert subject == "Déclaration de l’index égalité professionnelle femmes-hommes"
     # fmt: off
     assert html == """<html>
   <body>
@@ -313,13 +327,17 @@ Les services de l’administration du travail."""
 
 
 def test_success_email_with_small_company_non_calculable_index():
-    txt, html, subject = emails.success(url=SMALL_COMPANY_NC.uri, **SMALL_COMPANY_NC)
+    txt, html, *args = emails.success(url=SMALL_COMPANY_NC.uri, **SMALL_COMPANY_NC)
+    subject = args[0]
     assert "Vous avez déclaré un index global non calculable," in html
     assert "Vous avez déclaré un index global non calculable," in txt
+    assert subject == "Déclaration de l’index égalité professionnelle femmes-hommes"
+
 
 
 def test_success_email_with_big_company():
-    txt, html, subject = emails.success(url=BIG_COMPANY.uri, **BIG_COMPANY)
+    txt, html, *args = emails.success(url=BIG_COMPANY.uri, **BIG_COMPANY)
+    subject = args[0]
     assert "Indicateur écart de taux d'augmentation : 20" in html
     assert "Indicateur écart de taux de promotion : 15" in html
     assert "Indicateur écart de taux d'augmentations individuelles" not in html
@@ -327,6 +345,7 @@ def test_success_email_with_big_company():
     assert "Indicateur écart de taux de promotion : 15" in txt
     assert "Indicateur écart de taux d'augmentations individuelles" not in txt
     assert "(pour les entreprises de plus de 250 salariés)" not in txt
+    assert subject == "Déclaration de l’index égalité professionnelle femmes-hommes"
 
 
 def test_success_email_attachment_big_company():
