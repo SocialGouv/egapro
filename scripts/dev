@@ -5,4 +5,5 @@ set -e
 exec yarn concurrently \
   "docker-compose up --build" \
   "yarn workspace app run dev" \
+  "yarn workspace app start-storybook -p 6006" \
   "yarn workspace simulateur run dev"

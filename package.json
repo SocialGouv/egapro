@@ -16,6 +16,7 @@
     "dev:declaration": "docker-compose build declaration && docker-compose up declaration",
     "dev:simulateur": "yarn workspace simulateur run dev",
     "dev:maildev": "docker-compose up --build maildev",
+    "dev:storybook": "yarn workspace app start-storybook -p 6006",
     "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
     "egapro": "docker exec -it $(basename $PWD)_api_1 egapro",
     "egapro:local": "packages/api/egapro/bin/egapro",
@@ -27,6 +28,29 @@
     "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^6.5.10",
+    "@storybook/addon-essentials": "^6.5.10",
+    "@storybook/addon-interactions": "^6.5.10",
+    "@storybook/addon-links": "^6.5.10",
+    "@storybook/builder-webpack5": "^6.5.10",
+    "@storybook/manager-webpack5": "^6.5.10",
+    "@storybook/node-logger": "^6.5.10",
+    "@storybook/preset-create-react-app": "^3.2.0",
+    "@storybook/react": "^6.5.10",
+    "@storybook/testing-library": "^0.0.13",
     "concurrently": "^7.2.2"
+  },
+  "dependencies": {},
+  "eslintConfig": {
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
+    ]
   }
 }

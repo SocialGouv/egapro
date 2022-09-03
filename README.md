@@ -22,13 +22,15 @@ yarn dev:app
 yarn dev:simulateur
 yarn dev:declaration
 yarn dev:maildev
+yarn dev:storybook
 ```
 
-- [api         -> http://localhost:2626](http://localhost:2626)
-- [app         -> http://localhost:3000/consulter-index/](http://localhost:3000/consulter-index/)
-- [simulateur  -> http://localhost:3001](http://localhost:3001)
+- [api -> http://localhost:2626](http://localhost:2626)
+- [app -> http://localhost:3000/consulter-index/](http://localhost:3000/consulter-index/)
+- [simulateur -> http://localhost:3001](http://localhost:3001)
 - [declaration -> http://localhost:4000](http://localhost:4000)
-- [maildev     -> http://localhost:1080](http://localhost:1080)
+- [maildev -> http://localhost:1080](http://localhost:1080)
+- [storybook -> http://localhost:6006](http://localhost:6006)
 
 All in one
 
@@ -54,21 +56,21 @@ Cette commande lance le linter, la compilation des types TS et les tests.
 
 ### Comment ajouter une librairie dans un workspace
 
-````bash
+```bash
 yarn workspace simulateur add moment
-````
+```
 
 ### Comment lancer un script dans un package
 
-````bash
+```bash
 yarn workspace simulateur run test
-````
+```
 
 ### Comment lancer un script dans tous les workspaces
 
-````bash
+```bash
 yarn workspaces run lint
-````
+```
 
 ## Fichiers
 
