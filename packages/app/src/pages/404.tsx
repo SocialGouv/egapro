@@ -4,7 +4,7 @@ import Head from "next/head";
 import type { ReactElement } from "react";
 import { useEffect } from "react";
 
-import { SinglePageLayout } from "../components/ds/SinglePageLayout";
+import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 export default function NotFoundPage() {
   useEffect(() => {

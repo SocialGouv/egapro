@@ -2,6 +2,15 @@
   "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
     "strict": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@common/*": [
+        "common/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ]
+    }
   },
   "include": [
     "next-env.d.ts",
