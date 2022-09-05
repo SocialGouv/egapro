@@ -5,7 +5,14 @@
         "paths": {
             "@/*": [
                 "../src/*"
+            ],
+            "@common/*": [
+                "../src/common/*"
+            ],
+            "@components/*": [
+                "../src/components/*"
             ]
         }
-    }
+    },
+    "exclude": []
 }

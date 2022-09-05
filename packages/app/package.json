@@ -10,7 +10,7 @@
     "lint": "next lint",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
-    "type-check": "tsc --pretty --noEmit"
+    "type-check": "tsc --pretty --noEmit && tsc --pretty --noEmit -p __tests__/tsconfig.json"
   },
   "dependencies": {
     "@chakra-ui/icons": "^1.1.5",
