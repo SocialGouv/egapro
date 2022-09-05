@@ -102,7 +102,7 @@ jobs:
   runs:
     build-app:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      # memoryLimit: 4Gi
+      memoryLimit: 4Gi
       memoryRequest: 2Gi
       with:
         imagePackage: app
@@ -125,7 +125,7 @@ jobs:
 
     build-simulateur:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      # memoryLimit: 4Gi
+      memoryLimit: 4Gi
       memoryRequest: 2Gi
       with:
         imagePackage: simulateur
