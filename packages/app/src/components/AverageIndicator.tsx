@@ -7,7 +7,7 @@ import React from "react";
 import type { StatsParams } from "../hooks";
 import { filterDepartements, useConfig } from "../hooks";
 import { useStats } from "../hooks";
-import ButtonAction from "./ds/ButtonAction";
+import { ButtonAction } from "./ds/ButtonAction";
 import { capitalize } from "@common/utils/string";
 import { buildUrlParamsString } from "@common/utils/url";
 

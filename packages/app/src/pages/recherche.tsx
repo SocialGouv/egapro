@@ -35,7 +35,7 @@ import type { CompaniesType, CompanyType, TrancheType } from "@common/models/com
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
-import ButtonAction from "@components/ds/ButtonAction";
+import { ButtonAction } from "@components/ds/ButtonAction";
 import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
