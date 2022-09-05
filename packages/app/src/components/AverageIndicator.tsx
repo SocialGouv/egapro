@@ -4,12 +4,12 @@ import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColor
 import { useRouter } from "next/router";
 import React from "react";
 
-import { filterDepartements, useConfig } from "../models/useConfig";
-import type { StatsParams } from "../models/useStats";
-import { useStats } from "../models/useStats";
-import { capitalize } from "../utils/string";
-import { buildUrlParamsString } from "../utils/url";
+import type { StatsParams } from "../hooks";
+import { filterDepartements, useConfig } from "../hooks";
+import { useStats } from "../hooks";
 import { ButtonAction } from "./ds/ButtonAction";
+import { capitalize } from "@common/utils/string";
+import { buildUrlParamsString } from "@common/utils/url";
 
 export function FilterSelect({ name, onChange, value, children, ...rest }: SelectProps) {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100");

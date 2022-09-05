@@ -16,10 +16,9 @@ import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 import React from "react";
 import { HiDownload } from "react-icons/hi";
-
-import { AverageIndicator } from "../components/AverageIndicator";
-import { ButtonAction } from "../components/ds/ButtonAction";
-import { SinglePageLayout } from "../components/ds/SinglePageLayout";
+import { AverageIndicator } from "@components/AverageIndicator";
+import { ButtonAction } from "@components/ds/ButtonAction";
+import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 async function getDateCsv(): Promise<string> {
   try {

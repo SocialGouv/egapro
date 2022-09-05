@@ -28,17 +28,15 @@ import type { ReactElement } from "react";
 import React from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
-import { AlertSpinner } from "../components/ds/AlertSpinner";
-import { Banner } from "../components/ds/Banner";
-import { ButtonAction } from "../components/ds/ButtonAction";
-import { SinglePageLayout } from "../components/ds/SinglePageLayout";
-import { filterDepartements, useConfig } from "../models/useConfig";
-import type { SearchCompanyParams } from "../models/useSearch";
-import { useSearch } from "../models/useSearch";
-import type { CompaniesType, CompanyType, TrancheType } from "../types/models/company";
-
-import { useCallbackOnMount } from "../utils/hooks";
-import { capitalize } from "../utils/string";
+import type { SearchCompanyParams } from "../hooks";
+import { useSearch } from "../hooks";
+import { filterDepartements, useConfig, useCallbackOnMount } from "../hooks";
+import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
+import { capitalize } from "@common/utils/string";
+import { AlertSpinner } from "@components/ds/AlertSpinner";
+import { Banner } from "@components/ds/Banner";
+import { ButtonAction } from "@components/ds/ButtonAction";
+import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig();

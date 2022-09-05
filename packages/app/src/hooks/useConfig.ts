@@ -1,10 +1,8 @@
 import React from "react";
 import useSWRImmutable from "swr/immutable";
 
-import type { SelectItemsType } from "../types/utils/select";
-
-import type { FetcherReturnImmutable } from "../utils/fetcher";
-import { fetcher } from "../utils/fetcher";
+import type { FetcherReturnImmutable } from "./utils";
+import { fetcher } from "./utils";
 
 export type ConfigTypeApi = {
   DEPARTEMENTS: Record<string, string>;
@@ -25,6 +23,8 @@ export type ConfigTypeFormatted = ConfigTypeApi & {
   REGIONS_TRIES: Array<[string, string]>;
   SECTIONS_NAF_TRIES: Array<[string, string]>;
 };
+
+type SelectItemsType = Array<[string, string]>;
 
 /**
  * Return all departments found in config API endpoint, possibly filtered by region.
