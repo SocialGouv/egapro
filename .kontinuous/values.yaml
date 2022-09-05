@@ -102,6 +102,8 @@ jobs:
   runs:
     build-app:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      memoryLimit: 4Gi
+      memoryRequest: 2Gi
       with:
         imagePackage: app
         dockerfile: packages/app/Dockerfile
@@ -123,6 +125,8 @@ jobs:
 
     build-simulateur:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      memoryLimit: 4Gi
+      memoryRequest: 2Gi
       with:
         imagePackage: simulateur
         dockerfile: packages/simulateur/Dockerfile
