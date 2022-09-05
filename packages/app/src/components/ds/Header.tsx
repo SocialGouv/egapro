@@ -4,7 +4,7 @@ import { Box, Container, Link, Flex, Text, ListItem, List, HStack, Button, useCo
 
 import Logo from "./Logo"
 import { MoonIcon, SunIcon } from "@chakra-ui/icons"
-import { isOpenFeature } from "../../utils/feature"
+import { isOpenFeature } from "@common/utils/feature"
 
 function Header() {
   const { colorMode, toggleColorMode } = useColorMode()

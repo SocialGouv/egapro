@@ -1,11 +1,11 @@
 import useSWRInfinite, { SWRInfiniteKeyLoader } from "swr/infinite"
 import moize from "moize"
 
-import type { FetcherInfiniteReturn } from "../utils/fetcher"
-import type { CompaniesType, CompanyType } from "../types/models/company"
+import type { FetcherInfiniteReturn } from "./utils"
+import type { CompaniesType, CompanyType } from "@common/models/company"
 
-import { fetcher } from "../utils/fetcher"
-import { buildUrlParams } from "../utils/url"
+import { fetcher } from "./utils"
+import { buildUrlParams } from "@common/utils/url"
 
 export type SearchCompanyParams = {
   q?: string
