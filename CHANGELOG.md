@@ -1,3 +1,17 @@
+## [2.11.7](https://github.com/SocialGouv/egapro/compare/v2.11.6...v2.11.7) (2022-08-25)
+
+
+### Bug Fixes
+
+* **simulateur:** Missing condition to display Mesures de correction prevues ([#958](https://github.com/SocialGouv/egapro/issues/958)) ([e132303](https://github.com/SocialGouv/egapro/commit/e1323033a02254c044312e35a6134600a314d7f6))
+
+## [2.11.6](https://github.com/SocialGouv/egapro/compare/v2.11.5...v2.11.6) (2022-08-22)
+
+
+### Bug Fixes
+
+* **ci:** up kontinuous syntax ([#951](https://github.com/SocialGouv/egapro/issues/951)) ([05bad66](https://github.com/SocialGouv/egapro/commit/05bad6676592048064aa6dfe4719321297561690))
+
 ## [2.11.5](https://github.com/SocialGouv/egapro/compare/v2.11.4...v2.11.5) (2022-08-22)
 
 

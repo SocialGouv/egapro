@@ -15,7 +15,7 @@ COPY packages/simulateur/tsconfig.json ./
 COPY packages/simulateur/.eslintrc.js ./
 COPY packages/simulateur/src ./src
 
-ARG REACT_APP_EGAPRO_API_URL=https://dev.egapro.fabrique.social.gouv.fr/api
+ARG REACT_APP_EGAPRO_API_URL=https://egapro-preprod.dev.fabrique.social.gouv.fr/api
 ENV REACT_APP_EGAPRO_API_URL=$REACT_APP_EGAPRO_API_URL
 
 ARG REACT_APP_DECLARATION_URL="/declaration/"
