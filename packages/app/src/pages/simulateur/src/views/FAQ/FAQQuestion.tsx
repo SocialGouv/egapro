@@ -1,5 +1,5 @@
-import React, { FunctionComponent } from "react"
-import { RouteComponentProps } from "react-router-dom"
+import React, { useMemo, FunctionComponent } from "react"
+import { useRouter } from "next/router"
 import { Box, Button, Heading, Text } from "@chakra-ui/react"
 
 import { FAQPartType } from "../../globals"
@@ -11,21 +11,28 @@ import { IconBack } from "../../components/ds/Icons"
 interface FAQSectionProps {
   part: FAQPartType
   indexQuestion: number
-  history: RouteComponentProps["history"]
+  section: string
 }
 
-const FAQSection: FunctionComponent<FAQSectionProps> = ({ part, indexQuestion, history }) => {
-  const faqPart = faqData[part]
-  const faqQuestion = faqPart.qr[indexQuestion]
+const FAQQuestion: FunctionComponent<FAQSectionProps> = ({ part, indexQuestion, section }) => {
+  const router = useRouter()
+  const pathname = useMemo(() => router.pathname, [router])
+  const faqPart = useMemo(() => (part ? faqData[part as FAQPartType] : undefined), [part])
+  const faqQuestion = useMemo(() => (faqPart ? faqPart.qr[Number(indexQuestion)] : undefined), [faqPart])
+
+  const handleClick = () => {
+    // hack for `as` parameter https://nextjs.org/docs/api-reference/next/router#routerpush
+    router.push({ pathname, query: { part: undefined, indexQuestion: undefined, section } }, { href: "" })
+  }
 
   return (
     <React.Fragment>
-      <FAQTitle mb={6}>{faqPart.title}</FAQTitle>
+      <FAQTitle mb={6}>{faqPart?.title}</FAQTitle>
       <Box mb={6}>
         <Heading as="p" fontSize="md" fontWeight="bold" mb={4}>
-          {faqQuestion.question}
+          {faqQuestion?.question}
         </Heading>
-        {faqQuestion.reponse.map((reponsePara, index) => (
+        {faqQuestion?.reponse?.map((reponsePara, index) => (
           <Text
             key={index}
             fontSize="sm"
@@ -39,11 +46,11 @@ const FAQSection: FunctionComponent<FAQSectionProps> = ({ part, indexQuestion, h
           </Text>
         ))}
       </Box>
-      <Button onClick={() => history.goBack()} size="sm" leftIcon={<IconBack />} variant="link">
+      <Button onClick={handleClick} size="sm" leftIcon={<IconBack />} variant="link">
         Retour aux questions
       </Button>
     </React.Fragment>
   )
 }
 
-export default FAQSection
+export default FAQQuestion

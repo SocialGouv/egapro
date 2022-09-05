@@ -68,6 +68,9 @@ interface FAQRouterProps {
 
 const FAQRouter: FunctionComponent<FAQRouterProps> = ({ closeMenu }) => {
   const router = useRouter()
+  const {
+    query: { section, part, indexQuestion },
+  } = router
   const pathname = useMemo(() => router?.pathname, [router])
   const pagePath = useMemo(() => (pathname ? extractPagePath(pathname) : ""), [pathname])
   const isCurrentPageStatic = useMemo(() => StaticPageComponentNames.includes(pagePath), [pagePath])
@@ -76,7 +79,12 @@ const FAQRouter: FunctionComponent<FAQRouterProps> = ({ closeMenu }) => {
     <Box as="aside" id="search" role="search" bg="white">
       <FAQHeader closeMenu={closeMenu} />
       <Box p={6} overflowY="auto" maxHeight="100vh" sx={{ WebkitOverflowScrolling: "touch" }} key={pathname}>
-        {isCurrentPageStatic && <FAQHome />}
+        {isCurrentPageStatic && !section && !part && <FAQHome />}
+        {!!section && !part && <FAQSection section={section as FAQSectionType} />}
+
+        {part && !!indexQuestion && (
+          <FAQQuestion part={part as FAQPartType} indexQuestion={Number(indexQuestion)} section={section} />
+        )}
         {/*
       <Switch location={locationFAQ}>
         <Route

@@ -83,7 +83,7 @@ const FAQSection: FunctionComponent<FAQSectionProps> = ({ section }) => {
                         },
                       }}
                     >
-                      <FAQQuestionRow part={part} index={index} question={question} />
+                      <FAQQuestionRow part={part} index={index} question={question} section={section} />
                     </ListItem>
                   ))
                 })}

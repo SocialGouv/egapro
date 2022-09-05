@@ -1,6 +1,6 @@
-import React, { FunctionComponent } from "react"
+import React, { useMemo, FunctionComponent } from "react"
 import { LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
-import NextLink from "next/link"
+import { useRouter } from "next/router"
 import { IconArrowRight } from "../../../components/ds/Icons"
 
 interface FAQSectionRowProps {
@@ -9,28 +9,36 @@ interface FAQSectionRowProps {
   detail: string
 }
 
-const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, detail }) => (
-  <LinkBox
-    py={2}
-    px={2}
-    mx={-2}
-    borderRadius="md"
-    sx={{
-      transition: "background-color .1s ease-in-out",
-      _hover: {
-        backgroundColor: "primary.100",
-        ".section-icon": {
-          color: "primary.600",
+const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, detail }) => {
+  const router = useRouter()
+  const pathname = useMemo(() => router.pathname, [router])
+
+  const handleClick = () => {
+    // hack for `as` parameter https://nextjs.org/docs/api-reference/next/router#routerpush
+    router.push({ pathname, query: { section } }, { href: "" })
+  }
+
+  return (
+    <LinkBox
+      py={2}
+      px={2}
+      mx={-2}
+      borderRadius="md"
+      sx={{
+        transition: "background-color .1s ease-in-out",
+        _hover: {
+          backgroundColor: "primary.100",
+          ".section-icon": {
+            color: "primary.600",
+          },
+          ".section-detail": {
+            color: "primary.700",
+          },
         },
-        ".section-detail": {
-          color: "primary.700",
-        },
-      },
-    }}
-  >
-    <NextLink href={`/section/${section}`}>
+      }}
+      onClick={handleClick}
+    >
       <LinkOverlay
-        // to={{ state: { faq: `/section/${section}` } }}
         pr={4}
         color="primary.500"
         fontWeight="bold"
@@ -39,35 +47,33 @@ const FAQSectionRow: FunctionComponent<FAQSectionRowProps> = ({ section, title, 
         lineHeight={1.2}
         sx={{
           transition: "color .1s ease-in-out",
-          _hover: {
-            color: "primary.700",
-          },
+          _hover: { color: "primary.700" },
         }}
       >
         {title}
       </LinkOverlay>
-    </NextLink>
-    <IconArrowRight
-      boxSize="3"
-      color="gray.400"
-      className="section-icon"
-      sx={{
-        position: "absolute",
-        top: 2.5,
-        right: 2,
-      }}
-    />
-    <Text
-      fontSize="sm"
-      color="gray.600"
-      className="section-detail"
-      sx={{
-        transition: "color .1s ease-in-out",
-      }}
-    >
-      {detail}
-    </Text>
-  </LinkBox>
-)
+      <IconArrowRight
+        boxSize="3"
+        color="gray.400"
+        className="section-icon"
+        sx={{
+          position: "absolute",
+          top: 2.5,
+          right: 2,
+        }}
+      />
+      <Text
+        fontSize="sm"
+        color="gray.600"
+        className="section-detail"
+        sx={{
+          transition: "color .1s ease-in-out",
+        }}
+      >
+        {detail}
+      </Text>
+    </LinkBox>
+  )
+}
 
 export default FAQSectionRow

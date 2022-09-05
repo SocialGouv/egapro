@@ -1,5 +1,4 @@
 import React, { FunctionComponent } from "react"
-import { RouteComponentProps } from "react-router-dom"
 
 import { FAQSectionType } from "../../globals"
 
@@ -17,7 +16,6 @@ import { faqSections } from "../../data/faq"
 
 interface FAQSectionDetailCalculProps {
   section: FAQSectionType
-  history: RouteComponentProps["history"]
 }
 
 const FAQSectionDetailCalcul: FunctionComponent<FAQSectionDetailCalculProps> = ({

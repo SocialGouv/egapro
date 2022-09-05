@@ -25,7 +25,7 @@ const FAQHeaderHomeButton = () => (
 
 const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ closeMenu }) => {
   const router = useRouter()
-
+  const { query: section } = router
   const pathname = useMemo(() => router?.pathname, [router])
 
   return (
@@ -41,9 +41,9 @@ const FAQHeader: FunctionComponent<FAQHeaderProps> = ({ closeMenu }) => {
       alignItems="center"
     >
       <Box position="absolute" top="50%" left={0} transform="translateY(calc(-50% + .125rem))" fontSize="xs">
-        {closeMenu && pathname === "/home" && <FAQHeaderBackButton onClick={closeMenu} />}
+        {closeMenu && pathname === "/simulateur/Home" && <FAQHeaderBackButton onClick={closeMenu} />}
 
-        {pathname.match("/^section//") && <FAQHeaderHomeButton />}
+        {section && <FAQHeaderHomeButton />}
         {/*
         <Route
           exact

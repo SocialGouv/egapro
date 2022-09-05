@@ -19,20 +19,20 @@ const nextConfig = {
         destination: "/api/health",
       },
       {
-        source: "/home",
-        destination: "/simulateur/src/views/Home",
+        source: "/simulateur/home",
+        destination: "/simulateur/Home",
       },
       {
-        source: "/cgu",
-        destination: "/simulateur/src/views/CGU",
+        source: "/simulateur/cgu",
+        destination: "/simulateur/CGU",
       },
       {
-        source: "/mentions-legales",
-        destination: "/simulateur/src/views/MentionsLegales",
+        source: "/simulateur/mentions-legales",
+        destination: "/simulateur/MentionsLegales",
       },
       {
-        source: "/politique-confidentialite",
-        destination: "/simulateur/src/views/PolitiqueConfidentialite",
+        source: "/simulateur/politique-confidentialite",
+        destination: "/simulateur/PolitiqueConfidentialite",
       },
     ]
   },
