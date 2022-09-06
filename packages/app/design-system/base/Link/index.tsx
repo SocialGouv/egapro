@@ -4,7 +4,6 @@ import clsx from "clsx"
 import { iconStyles } from "../../utils/icon-styles"
 
 export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href?: string
   size?: "sm" | "lg"
   iconLeft?: iconStyles
   iconRight?: iconStyles

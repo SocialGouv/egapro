@@ -1,6 +1,5 @@
 import React from "react"
 import { ComponentStory, ComponentMeta } from "@storybook/react"
-import { action } from "@storybook/addon-actions"
 
 import ButtonAsLink from "./index"
 
@@ -19,30 +18,46 @@ export default {
 const Template: ComponentStory<typeof ButtonAsLink> = (args) => <ButtonAsLink href="#" {...args} />
 
 export const Default = Template.bind({})
-Default.args = { label: "ButtonAsLink" }
+Default.args = { children: "Button" }
 
 export const WithSize = () => (
   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-    <ButtonAsLink href="#" size="sm" label="Button" />
-    <ButtonAsLink href="#" label="Button" />
-    <ButtonAsLink href="#" size="lg" label="Button" />
+    <ButtonAsLink href="#" size="sm">
+      Button
+    </ButtonAsLink>
+    <ButtonAsLink href="#">Button</ButtonAsLink>
+    <ButtonAsLink href="#" size="lg">
+      Button
+    </ButtonAsLink>
   </div>
 )
 
 export const WithVariant = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <ButtonAsLink href="#" label="Button" />
-    <ButtonAsLink href="#" variant="secondary" label="Button" />
-    <ButtonAsLink href="#" variant="tertiary" label="Button" />
-    <ButtonAsLink href="#" variant="tertiary-no-border" label="Button" />
+    <ButtonAsLink href="#">Button</ButtonAsLink>
+    <ButtonAsLink href="#" variant="secondary">
+      Button
+    </ButtonAsLink>
+    <ButtonAsLink href="#" variant="tertiary">
+      Button
+    </ButtonAsLink>
+    <ButtonAsLink href="#" variant="tertiary-no-border">
+      Button
+    </ButtonAsLink>
   </div>
 )
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <ButtonAsLink href="#" label="Button" iconLeft="fr-icon-user-fill" />
-    <ButtonAsLink href="#" label="Button" iconRight="fr-icon-user-fill" />
-    <ButtonAsLink href="#" label="Button" iconOnly="fr-icon-user-fill" />
+    <ButtonAsLink href="#" iconLeft="fr-icon-user-fill">
+      Button
+    </ButtonAsLink>
+    <ButtonAsLink href="#" iconRight="fr-icon-user-fill">
+      Button
+    </ButtonAsLink>
+    <ButtonAsLink href="#" iconOnly="fr-icon-user-fill">
+      Button
+    </ButtonAsLink>
   </div>
 )
 WithIcon.parameters = {
@@ -55,9 +70,15 @@ WithIcon.parameters = {
 
 export const IsDisabled = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <ButtonAsLink onClick={action("button-click")} label="Button" />
-    <ButtonAsLink variant="secondary" label="Button" />
-    <ButtonAsLink variant="tertiary" label="Button" />
-    <ButtonAsLink variant="tertiary-no-border" label="Button" />
+    <ButtonAsLink isDisabled>Button</ButtonAsLink>
+    <ButtonAsLink variant="secondary" isDisabled>
+      Button
+    </ButtonAsLink>
+    <ButtonAsLink variant="tertiary" isDisabled>
+      Button
+    </ButtonAsLink>
+    <ButtonAsLink variant="tertiary-no-border" isDisabled>
+      Button
+    </ButtonAsLink>
   </div>
 )

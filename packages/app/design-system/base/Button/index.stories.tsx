@@ -19,30 +19,46 @@ export default {
 const Template: ComponentStory<typeof Button> = (args) => <Button onClick={action("button-click")} {...args} />
 
 export const Default = Template.bind({})
-Default.args = { label: "Button" }
+Default.args = { children: "Button" }
 
 export const WithSize = () => (
   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-    <Button size="sm" onClick={action("button-click")} label="Button" />
-    <Button onClick={action("button-click")} label="Button" />
-    <Button size="lg" onClick={action("button-click")} label="Button" />
+    <Button size="sm" onClick={action("button-click")}>
+      Button
+    </Button>
+    <Button onClick={action("button-click")}>Button</Button>
+    <Button size="lg" onClick={action("button-click")}>
+      Button
+    </Button>
   </div>
 )
 
 export const WithVariant = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <Button onClick={action("button-click")} label="Button" />
-    <Button variant="secondary" onClick={action("button-click")} label="Button" />
-    <Button variant="tertiary" onClick={action("button-click")} label="Button" />
-    <Button variant="tertiary-no-border" onClick={action("button-click")} label="Button" />
+    <Button onClick={action("button-click")}>Button</Button>
+    <Button variant="secondary" onClick={action("button-click")}>
+      Button
+    </Button>
+    <Button variant="tertiary" onClick={action("button-click")}>
+      Button
+    </Button>
+    <Button variant="tertiary-no-border" onClick={action("button-click")}>
+      Button
+    </Button>
   </div>
 )
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <Button onClick={action("button-click")} label="Button" iconLeft="fr-icon-user-fill" />
-    <Button onClick={action("button-click")} label="Button" iconRight="fr-icon-user-fill" />
-    <Button onClick={action("button-click")} label="Button" iconOnly="fr-icon-user-fill" />
+    <Button onClick={action("button-click")} iconLeft="fr-icon-user-fill">
+      Button
+    </Button>
+    <Button onClick={action("button-click")} iconRight="fr-icon-user-fill">
+      Button
+    </Button>
+    <Button onClick={action("button-click")} iconOnly="fr-icon-user-fill">
+      Button
+    </Button>
   </div>
 )
 WithIcon.parameters = {
@@ -55,9 +71,17 @@ WithIcon.parameters = {
 
 export const IsDisabled = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <Button onClick={action("button-click")} label="Button" disabled />
-    <Button variant="secondary" onClick={action("button-click")} label="Button" disabled />
-    <Button variant="tertiary" onClick={action("button-click")} label="Button" disabled />
-    <Button variant="tertiary-no-border" onClick={action("button-click")} label="Button" disabled />
+    <Button onClick={action("button-click")} isDisabled>
+      Button
+    </Button>
+    <Button variant="secondary" onClick={action("button-click")} isDisabled>
+      Button
+    </Button>
+    <Button variant="tertiary" onClick={action("button-click")} isDisabled>
+      Button
+    </Button>
+    <Button variant="tertiary-no-border" onClick={action("button-click")} isDisabled>
+      Button
+    </Button>
   </div>
 )

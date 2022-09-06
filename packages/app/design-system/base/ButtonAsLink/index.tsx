@@ -1,15 +1,36 @@
-import React from "react"
+import React, { FunctionComponent } from "react"
 import { buttonStyles, buttonStylesProps } from "../../utils/button-styles"
 
-export type ButtonProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
+export type ButtonAsLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
   buttonStylesProps & {
-    label: string
+    isDisabled?: boolean
+    isCurrent?: boolean
   }
 
-const ButtonAsLink = ({ variant, size, label, iconLeft, iconRight, iconOnly, ...rest }: ButtonProps) => {
+const ButtonAsLink: FunctionComponent<ButtonAsLinkProps> = ({
+  href,
+  variant,
+  size,
+  children,
+  iconLeft,
+  iconRight,
+  iconOnly,
+  target,
+  isDisabled,
+  isCurrent,
+  ...rest
+}) => {
   return (
-    <a className={buttonStyles(variant, size, iconLeft, iconRight, iconOnly)} title={iconOnly && label} {...rest}>
-      {label}
+    <a
+      href={href || undefined}
+      aria-current={isCurrent ? "page" : undefined}
+      aria-disabled={isDisabled || !href ? true : undefined}
+      className={buttonStyles(variant, size, iconLeft, iconRight, iconOnly)}
+      target={target}
+      rel={target === "_blank" ? "noopener noreferrer" : undefined}
+      {...rest}
+    >
+      {children}
     </a>
   )
 }
