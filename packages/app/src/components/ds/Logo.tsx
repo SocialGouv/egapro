@@ -6,7 +6,7 @@ export type LogoProps = Record<string, unknown>
 const Logo: FunctionComponent<LogoProps> = () => {
   return (
     <Image
-      src={"/consulter-index/icons/marianne.svg"}
+      src={"/icons/marianne.svg"}
       alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
       width={88}
     />
