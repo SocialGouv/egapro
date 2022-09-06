@@ -1,3 +1,10 @@
+# [2.12.0](https://github.com/SocialGouv/egapro/compare/v2.11.7...v2.12.0) (2022-09-06)
+
+
+### Features
+
+* repatriate missing commit ([#992](https://github.com/SocialGouv/egapro/issues/992)) ([14d0f68](https://github.com/SocialGouv/egapro/commit/14d0f68f4a509f6676d001a79a6ef61b40e8d7f2))
+
 ## [2.11.7](https://github.com/SocialGouv/egapro/compare/v2.11.6...v2.11.7) (2022-08-25)
 
 
