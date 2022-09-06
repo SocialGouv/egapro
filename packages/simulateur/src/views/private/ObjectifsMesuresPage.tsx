@@ -25,7 +25,7 @@ import FormStack from "../../components/ds/FormStack"
 import InfoBlock from "../../components/ds/InfoBlock"
 import InputDateGroup from "../../components/ds/InputDateGroup"
 import InputGroup from "../../components/ds/InputGroup"
-import InputGroupRow from "../../components/ds/InputGroupRow"
+import TextareaCounter from "../../components/ds/TextareaCounter"
 import LegalText from "../../components/ds/LegalText"
 import TextareaGroup from "../../components/ds/TextareaGroup"
 import FormError from "../../components/FormError"
@@ -68,7 +68,7 @@ export const objectifValidator = (
           required_error,
         })
         .min(1, { message: required_error })
-        .max(60, { message: "L'objectif doit être un texte de 60 caractères max." })
+        .max(300, { message: "L'objectif doit être un texte de 300 caractères max." })
 
 /**
  * Zod validator in relation to the publication dates and the end of reference period.
@@ -106,7 +106,7 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
   isDisabled = false,
 }) => {
   return (
-    <Grid templateColumns="250px 80px 400px" templateRows="1fr 2fr" gap={2} alignItems="top">
+    <Grid templateColumns="250px 80px 400px" templateRows="1fr 4fr" gap={2} alignItems="top">
       <GridItem />
       <GridItem>
         <Text fontSize="sm" textAlign="center">
@@ -128,18 +128,16 @@ const RowProgression: FunctionComponent<RowProgressionProps> = ({
       </GridItem>
       <GridItem>
         {!isDisabled && (
-          <InputGroupRow
+          <TextareaCounter
             label=""
             fieldName={fieldName}
             isReadOnly={isReadOnly}
             isDisabled={isDisabled}
             textAlign="left"
-            type="text"
             htmlSize={60}
-            maxLength={60}
+            maxLength={300}
             showRemainingCharacters
-            width="auto"
-            placeholder="Votre objectif en 60 caractères maximum"
+            placeholder="Votre objectif en 300 caractères maximum"
           />
         )}
       </GridItem>
