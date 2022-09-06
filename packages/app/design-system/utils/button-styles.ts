@@ -1,20 +1,20 @@
 import clsx from "clsx"
-import { iconClass } from "./icon-class"
+import { iconStyles } from "./icon-styles"
 
-export type buttonClassProps = {
+export type buttonStylesProps = {
   variant?: "secondary" | "tertiary" | "tertiary-no-border"
   size?: "sm" | "lg"
-  iconLeft?: iconClass
-  iconRight?: iconClass
-  iconOnly?: iconClass
+  iconLeft?: iconStyles
+  iconRight?: iconStyles
+  iconOnly?: iconStyles
 }
 
-export const buttonClass = (
-  variant: buttonClassProps["variant"],
-  size: buttonClassProps["size"],
-  iconLeft: buttonClassProps["iconLeft"],
-  iconRight: buttonClassProps["iconRight"],
-  iconOnly: buttonClassProps["iconOnly"]
+export const buttonStyles = (
+  variant: buttonStylesProps["variant"],
+  size: buttonStylesProps["size"],
+  iconLeft: buttonStylesProps["iconLeft"],
+  iconRight: buttonStylesProps["iconRight"],
+  iconOnly: buttonStylesProps["iconOnly"],
 ): string =>
   clsx(
     "fr-btn",
@@ -25,5 +25,5 @@ export const buttonClass = (
     size === "lg" && "fr-btn--lg",
     iconLeft && `fr-btn--icon-left ${iconLeft}`,
     iconRight && `fr-btn--icon-right ${iconRight}`,
-    iconOnly && iconOnly
+    iconOnly && iconOnly,
   )

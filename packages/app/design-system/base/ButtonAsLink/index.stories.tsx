@@ -7,9 +7,6 @@ import ButtonAsLink from "./index"
 export default {
   title: "Base/ButtonAsLink",
   component: ButtonAsLink,
-  args: {
-    label: "ButtonAsLink",
-  },
   parameters: {
     docs: {
       description: {
@@ -19,12 +16,10 @@ export default {
   },
 } as ComponentMeta<typeof ButtonAsLink>
 
-const Template: ComponentStory<typeof ButtonAsLink> = (args) => (
-  <ButtonAsLink href="#" {...args} />
-)
+const Template: ComponentStory<typeof ButtonAsLink> = (args) => <ButtonAsLink href="#" {...args} />
 
 export const Default = Template.bind({})
-Default.args = {}
+Default.args = { label: "ButtonAsLink" }
 
 export const WithSize = () => (
   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>

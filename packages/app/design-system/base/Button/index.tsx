@@ -1,25 +1,16 @@
 import React from "react"
-import { buttonClass, buttonClassProps } from "../../utils/button-class"
+import { buttonStyles, buttonStylesProps } from "../../utils/button-styles"
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
-  buttonClassProps & {
+  buttonStylesProps & {
     label: string
     isDisabled?: boolean
   }
 
-const Button = ({
-  variant,
-  size,
-  label,
-  iconLeft,
-  iconRight,
-  iconOnly,
-  isDisabled,
-  ...rest
-}: ButtonProps) => {
+const Button = ({ variant, size, label, iconLeft, iconRight, iconOnly, isDisabled, ...rest }: ButtonProps) => {
   return (
     <button
-      className={buttonClass(variant, size, iconLeft, iconRight, iconOnly)}
+      className={buttonStyles(variant, size, iconLeft, iconRight, iconOnly)}
       disabled={isDisabled}
       title={iconOnly && label}
       {...rest}

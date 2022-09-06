@@ -7,9 +7,6 @@ import Button from "./index"
 export default {
   title: "Base/Button",
   component: Button,
-  args: {
-    label: "Button",
-  },
   parameters: {
     docs: {
       description: {
@@ -19,12 +16,10 @@ export default {
   },
 } as ComponentMeta<typeof Button>
 
-const Template: ComponentStory<typeof Button> = (args) => (
-  <Button onClick={action("button-click")} {...args} />
-)
+const Template: ComponentStory<typeof Button> = (args) => <Button onClick={action("button-click")} {...args} />
 
 export const Default = Template.bind({})
-Default.args = {}
+Default.args = { label: "Button" }
 
 export const WithSize = () => (
   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
@@ -37,41 +32,17 @@ export const WithSize = () => (
 export const WithVariant = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
     <Button onClick={action("button-click")} label="Button" />
-    <Button
-      variant="secondary"
-      onClick={action("button-click")}
-      label="Button"
-    />
-    <Button
-      variant="tertiary"
-      onClick={action("button-click")}
-      label="Button"
-    />
-    <Button
-      variant="tertiary-no-border"
-      onClick={action("button-click")}
-      label="Button"
-    />
+    <Button variant="secondary" onClick={action("button-click")} label="Button" />
+    <Button variant="tertiary" onClick={action("button-click")} label="Button" />
+    <Button variant="tertiary-no-border" onClick={action("button-click")} label="Button" />
   </div>
 )
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <Button
-      onClick={action("button-click")}
-      label="Button"
-      iconLeft="fr-icon-theme-fill"
-    />
-    <Button
-      onClick={action("button-click")}
-      label="Button"
-      iconRight="fr-icon-theme-fill"
-    />
-    <Button
-      onClick={action("button-click")}
-      label="Button"
-      iconOnly="fr-icon-theme-fill"
-    />
+    <Button onClick={action("button-click")} label="Button" iconLeft="fr-icon-theme-fill" />
+    <Button onClick={action("button-click")} label="Button" iconRight="fr-icon-theme-fill" />
+    <Button onClick={action("button-click")} label="Button" iconOnly="fr-icon-theme-fill" />
   </div>
 )
 WithIcon.parameters = {
@@ -85,23 +56,8 @@ WithIcon.parameters = {
 export const IsDisabled = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
     <Button onClick={action("button-click")} label="Button" disabled />
-    <Button
-      variant="secondary"
-      onClick={action("button-click")}
-      label="Button"
-      disabled
-    />
-    <Button
-      variant="tertiary"
-      onClick={action("button-click")}
-      label="Button"
-      disabled
-    />
-    <Button
-      variant="tertiary-no-border"
-      onClick={action("button-click")}
-      label="Button"
-      disabled
-    />
+    <Button variant="secondary" onClick={action("button-click")} label="Button" disabled />
+    <Button variant="tertiary" onClick={action("button-click")} label="Button" disabled />
+    <Button variant="tertiary-no-border" onClick={action("button-click")} label="Button" disabled />
   </div>
 )

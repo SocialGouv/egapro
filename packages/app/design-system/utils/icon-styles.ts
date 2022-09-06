@@ -1,4 +1,4 @@
-export type iconClass =
+export type iconStyles =
   | "fr-icon-arrow-left-s-fill"
   | "fr-icon-arrow-left-s-line"
   | "fr-icon-arrow-right-s-fill"
