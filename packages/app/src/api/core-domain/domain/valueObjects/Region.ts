@@ -1,6 +1,6 @@
-import { REGIONS } from "../../../../common/dict";
-import { EnumString } from "../../../../common/shared-domain/domain/valueObjects/EnumString";
-import { Object } from "../../../../common/utils/overload";
+import { REGIONS } from "@common/dict";
+import { EnumString } from "@common/shared-domain/domain/valueObjects";
+import { Object } from "@common/utils/overload";
 
 const REGION_KEYS = Object.keys(REGIONS);
 

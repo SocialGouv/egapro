@@ -1,1 +1,1 @@
-export * from "./IDeclarationRepo"
+export * from "./IDeclarationRepo";

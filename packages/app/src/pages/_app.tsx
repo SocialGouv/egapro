@@ -2,14 +2,13 @@ import "@fontsource/gabriela";
 import "@fontsource/cabin";
 
 import { ChakraProvider } from "@chakra-ui/react";
+import { config } from "@common/config";
 import { init } from "@socialgouv/matomo-next";
-
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import type { ReactElement, ReactNode } from "react";
 import React from "react";
 
-import { config } from "../common/config";
 import { theme } from "../theme";
 
 type NextPageWithLayout = NextPage & {

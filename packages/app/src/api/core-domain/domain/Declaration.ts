@@ -1,5 +1,6 @@
-import type { PositiveNumber } from "../../../common/shared-domain";
-import { AggregateRoot } from "../../../common/shared-domain";
+import { AggregateRoot } from "@common/shared-domain";
+import type { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+
 import type { DeclarationData } from "./DeclarationData";
 import type { Siren } from "./valueObjects/Siren";
 

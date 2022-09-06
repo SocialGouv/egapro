@@ -1,6 +1,6 @@
-import { WORKFORCES } from "../../../../../common/dict";
-import { EnumString } from "../../../../../common/shared-domain/domain/valueObjects/EnumString";
-import { Object } from "../../../../../common/utils/overload";
+import { WORKFORCES } from "@common/dict";
+import { EnumString } from "@common/shared-domain/domain/valueObjects";
+import { Object } from "@common/utils/overload";
 
 const WORKFORCE_KEYS = Object.keys(WORKFORCES);
 

@@ -1,7 +1,7 @@
-import type { EntityPropsToJson } from "../../../../../common/shared-domain";
-import { JsonEntity } from "../../../../../common/shared-domain";
-import { Percentage } from "../../../../../common/shared-domain/domain/valueObjects/Percentage";
-import { PositiveInteger } from "../../../../../common/shared-domain/domain/valueObjects/PositiveInteger";
+import type { EntityPropsToJson } from "@common/shared-domain";
+import { JsonEntity } from "@common/shared-domain";
+import { Percentage, PositiveInteger } from "@common/shared-domain/domain/valueObjects";
+
 import { NotComputableReason } from "../../valueObjects/declaration/indicators/NotComputableReason";
 
 export interface MaternityLeavesIndicatorProps {

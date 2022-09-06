@@ -1,6 +1,5 @@
-export * from "./ValueObject";
-export * from "./Entity";
-export * from "./ValidationError";
 export * from "./AggregateRoot";
-
-export * from "./valueObjects";
+export * from "./Entity";
+export * from "./Specification";
+export * from "./ValidationError";
+export * from "./ValueObject";

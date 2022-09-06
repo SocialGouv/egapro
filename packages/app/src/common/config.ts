@@ -1,4 +1,4 @@
-import { ensureEnvVar as baseEnsureEnvVar } from "../common/utils/os";
+import { ensureEnvVar as baseEnsureEnvVar } from "@common/utils/os";
 
 const ensureEnvVar = baseEnsureEnvVar<ProcessEnvCustomKeys>;
 const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {

@@ -1,4 +1,5 @@
 import escapeStringRegexp from "escape-string-regexp";
+
 import { SimpleStringValueObject } from "./SimpleStringValueObject";
 
 export class EnumString extends SimpleStringValueObject<EnumString> {

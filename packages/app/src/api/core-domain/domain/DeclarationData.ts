@@ -1,5 +1,6 @@
-import type { EntityPropsToJson } from "../../../common/shared-domain";
-import { JsonEntity } from "../../../common/shared-domain";
+import type { EntityPropsToJson } from "@common/shared-domain";
+import { JsonEntity } from "@common/shared-domain";
+
 import { Company } from "./declaration/Company";
 import { Declarant } from "./declaration/Declarant";
 import { DeclarationInfo } from "./declaration/DeclarationInfo";

@@ -1,4 +1,4 @@
-import { Enum } from "../../../../../../common/shared-domain";
+import { Enum } from "@common/shared-domain/domain/valueObjects";
 
 export class CorrectiveMeasures extends Enum<typeof CorrectiveMeasures.Enum> {
   constructor(value: CorrectiveMeasures.Enum) {

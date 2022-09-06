@@ -1,4 +1,4 @@
-import { Enum } from "../../../../../../common/shared-domain";
+import { Enum } from "@common/shared-domain/domain/valueObjects";
 
 export class NotComputableReason extends Enum<typeof NotComputableReason.Enum> {
   constructor(value: NotComputableReason.Enum) {

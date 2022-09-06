@@ -10,15 +10,14 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
+import { AverageIndicator } from "@components/AverageIndicator";
+import { ButtonAction, SinglePageLayout } from "@components/ds";
 import { format } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 import React from "react";
 import { HiDownload } from "react-icons/hi";
-import { AverageIndicator } from "@components/AverageIndicator";
-import { ButtonAction } from "@components/ds/ButtonAction";
-import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 async function getDateCsv(): Promise<string> {
   try {

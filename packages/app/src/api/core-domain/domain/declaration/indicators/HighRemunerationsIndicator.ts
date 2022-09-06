@@ -1,6 +1,7 @@
-import type { EntityPropsToJson } from "../../../../../common/shared-domain";
-import { JsonEntity } from "../../../../../common/shared-domain";
-import { PositiveInteger } from "../../../../../common/shared-domain/domain/valueObjects/PositiveInteger";
+import type { EntityPropsToJson } from "@common/shared-domain";
+import { JsonEntity } from "@common/shared-domain";
+import { PositiveInteger } from "@common/shared-domain/domain/valueObjects";
+
 import { FavorablePopulation } from "../../valueObjects/declaration/indicators/FavorablePopulation";
 import { HighRemunerationsResult } from "../../valueObjects/declaration/indicators/HighRemunerationsResult";
 

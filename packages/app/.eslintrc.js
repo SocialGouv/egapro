@@ -7,8 +7,8 @@ const config = {
     node: true,
     es2020: true,
   },
-  extends: ["eslint:recommended", "next/core-web-vitals", "prettier"],
-  plugins: ["prettier", "unused-imports"],
+  extends: ["eslint:recommended", "next/core-web-vitals", "plugin:import/recommended", "plugin:prettier/recommended"],
+  plugins: ["prettier", "unused-imports", "simple-import-sort"],
   rules: {
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
@@ -32,17 +32,15 @@ const config = {
         argsIgnorePattern: "^_",
       },
     ],
-    "import/order": [
-      "warn",
-      {
-        alphabetize: {
-          order: "asc",
-        },
-      },
-    ],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "import/order": "off",
     "import/no-default-export": "error",
     "import/no-extraneous-dependencies": "off",
     "import/no-internal-modules": "off",
+    "import/newline-after-import": "error",
+    "import/export": "off",
+    "sort-import": "off",
     "prettier/prettier": [
       "error",
       {

@@ -1,13 +1,14 @@
-import type { EntityPropsToJson } from "../../../../common/shared-domain";
-import { PositiveNumber } from "../../../../common/shared-domain";
-import { JsonEntity } from "../../../../common/shared-domain";
+import type { EntityPropsToJson } from "@common/shared-domain";
+import { JsonEntity } from "@common/shared-domain";
+import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
+
 import { CountryCode } from "../valueObjects/CountryCode";
+import { CompanyWorkforceRange } from "../valueObjects/declaration/CompanyWorkforceRange";
 import { Department } from "../valueObjects/Department";
 import { FrenchPostalCode } from "../valueObjects/FrenchPostalCode";
 import { NafCode } from "../valueObjects/NafCode";
 import { Region } from "../valueObjects/Region";
 import { Siren } from "../valueObjects/Siren";
-import { CompanyWorkforceRange } from "../valueObjects/declaration/CompanyWorkforceRange";
 import { UES } from "./company/UES";
 
 type Workforce = {

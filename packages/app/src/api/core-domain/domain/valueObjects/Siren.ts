@@ -1,4 +1,4 @@
-import { ValidationError, ValueObject } from "../../../../common/shared-domain";
+import { ValidationError, ValueObject } from "@common/shared-domain";
 
 export class Siren extends ValueObject<string> {
   constructor(private siren: string) {

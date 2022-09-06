@@ -1,4 +1,4 @@
-import { Enum } from "../../../../../../common/shared-domain";
+import { Enum } from "@common/shared-domain/domain/valueObjects";
 
 export class RemunerationsMode extends Enum<typeof RemunerationsMode.Enum> {
   constructor(value: RemunerationsMode.Enum) {

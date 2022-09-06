@@ -1,4 +1,4 @@
-import { Enum } from "../../../../../../common/shared-domain";
+import { Enum } from "@common/shared-domain/domain/valueObjects";
 
 export class FavorablePopulation extends Enum<typeof FavorablePopulation.Enum> {
   constructor(value: FavorablePopulation.Enum) {
