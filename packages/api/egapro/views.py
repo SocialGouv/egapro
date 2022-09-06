@@ -367,6 +367,22 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
+@app.route("/repartition-equilibree/validate-email", methods=["POST"])
+async def validate_email(request, response):
+    email = request.json.get("email")
+    if not email:
+        raise HttpError(400, "Missing email key")
+    token = tokens.create(email)
+    if request.ip in config.ALLOWED_IPS:
+        response.json = { "token": token }
+    else:
+        link = request.json.get("url", f"{request.domain}/repartition-equilibree/?token={token}")
+        if "localhost" in link or "127.0.0.1" in link:
+            print(link)
+            loggers.logger.info(link)
+        body = emails.ACCESS_GRANTED.format(link=link)
+        emails.send(email, "Validation de l'email", body)
+        response.status = 204
 
 @app.route("/search")
 async def search(request, response):
