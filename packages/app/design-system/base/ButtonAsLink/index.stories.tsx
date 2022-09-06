@@ -40,9 +40,9 @@ export const WithVariant = () => (
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <ButtonAsLink href="#" label="Button" iconLeft="fr-icon-theme-fill" />
-    <ButtonAsLink href="#" label="Button" iconRight="fr-icon-theme-fill" />
-    <ButtonAsLink href="#" label="Button" iconOnly="fr-icon-theme-fill" />
+    <ButtonAsLink href="#" label="Button" iconLeft="fr-icon-user-fill" />
+    <ButtonAsLink href="#" label="Button" iconRight="fr-icon-user-fill" />
+    <ButtonAsLink href="#" label="Button" iconOnly="fr-icon-user-fill" />
   </div>
 )
 WithIcon.parameters = {

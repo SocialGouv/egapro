@@ -40,9 +40,9 @@ export const WithVariant = () => (
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <Button onClick={action("button-click")} label="Button" iconLeft="fr-icon-theme-fill" />
-    <Button onClick={action("button-click")} label="Button" iconRight="fr-icon-theme-fill" />
-    <Button onClick={action("button-click")} label="Button" iconOnly="fr-icon-theme-fill" />
+    <Button onClick={action("button-click")} label="Button" iconLeft="fr-icon-user-fill" />
+    <Button onClick={action("button-click")} label="Button" iconRight="fr-icon-user-fill" />
+    <Button onClick={action("button-click")} label="Button" iconOnly="fr-icon-user-fill" />
   </div>
 )
 WithIcon.parameters = {
