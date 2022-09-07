@@ -4,6 +4,7 @@ import { NextPageWithLayout } from "../_app"
 import { useTitle } from "./src/utils/hooks"
 import Page from "./src/components/Page"
 import StaticPageWithFaqLayout from "./src/containers/StaticPageWithFaqLayout"
+import { AuthContextProvider } from "./src/components/AuthContext"
 
 const title = "Mentions légales"
 
@@ -73,7 +74,11 @@ const MentionsLegales: NextPageWithLayout = () => {
 }
 
 MentionsLegales.getLayout = function getLayout(page: ReactElement) {
-  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
+  return (
+    <AuthContextProvider>
+      <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
+    </AuthContextProvider>
+  )
 }
 
 export default MentionsLegales

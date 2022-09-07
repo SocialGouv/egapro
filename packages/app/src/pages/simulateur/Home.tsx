@@ -14,6 +14,7 @@ import { logToSentry } from "./src/utils/sentry"
 import type { NextPageWithLayout } from "../_app"
 // import MainScrollView from "./src/containers/MainScrollView"
 import StaticPageWithFaqLayout from "./src/containers/StaticPageWithFaqLayout"
+import { AuthContextProvider } from "./src/components/AuthContext"
 
 /*
 interface HomeProps {
@@ -106,7 +107,11 @@ const Home: NextPageWithLayout = () => {
 }
 
 Home.getLayout = function getLayout(page: ReactElement) {
-  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
+  return (
+    <AuthContextProvider>
+      <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
+    </AuthContextProvider>
+  )
 }
 
 export default Home

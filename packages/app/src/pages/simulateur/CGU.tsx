@@ -4,6 +4,7 @@ import { NextPageWithLayout } from "../_app"
 import { useTitle } from "./src/utils/hooks"
 import Page from "./src/components/Page"
 import StaticPageWithFaqLayout from "./src/containers/StaticPageWithFaqLayout"
+import { AuthContextProvider } from "./src/components/AuthContext"
 
 const title = "Conditions d'utilisation"
 
@@ -115,7 +116,11 @@ const CGU: NextPageWithLayout = () => {
 }
 
 CGU.getLayout = function getLayout(page: ReactElement) {
-  return <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
+  return (
+    <AuthContextProvider>
+      <StaticPageWithFaqLayout>{page}</StaticPageWithFaqLayout>
+    </AuthContextProvider>
+  )
 }
 
 export default CGU
