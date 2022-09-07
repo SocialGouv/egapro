@@ -1,3 +1,10 @@
+# [2.13.0](https://github.com/SocialGouv/egapro/compare/v2.12.0...v2.13.0) (2022-09-07)
+
+
+### Features
+
+* add counter to show reamining chars ([#972](https://github.com/SocialGouv/egapro/issues/972)) ([62ad922](https://github.com/SocialGouv/egapro/commit/62ad92210859e9c9a9e1ca1c86e84774b1a797dd))
+
 # [2.12.0](https://github.com/SocialGouv/egapro/compare/v2.11.7...v2.12.0) (2022-09-06)
 
 
