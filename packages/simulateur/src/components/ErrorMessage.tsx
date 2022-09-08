@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
 
-function ErrorMessage(errorMessage: string | undefined) {
+const ErrorMessage: React.FC = ({ children }) => {
   return (
     <div css={styles.errorMessage}>
-      <p>{errorMessage || "Erreur"}</p>
+      <p>{children || "Erreur"}</p>
     </div>
   )
 }

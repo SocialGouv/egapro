@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react"
+import React, { FunctionComponent, ReactNode, useState } from "react"
 import { Form } from "react-final-form"
 import { z } from "zod"
 import { Box, Heading, Text, Image } from "@chakra-ui/react"
@@ -24,7 +24,7 @@ const FormInput = z.object({
 
 interface AskEmailProps {
   tagLine?: string
-  reason?: string
+  reason?: string | ReactNode
 }
 
 const title = "Validation de l'email"
