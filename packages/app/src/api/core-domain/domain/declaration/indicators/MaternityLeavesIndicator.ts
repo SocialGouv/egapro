@@ -6,7 +6,7 @@ import { NotComputableReason } from "../../valueObjects/declaration/indicators/N
 
 export interface MaternityLeavesIndicatorProps {
   notComputableReason?: NotComputableReason;
-  progressObjective: string;
+  progressObjective?: string;
   result: Percentage;
   score: PositiveInteger;
 }
@@ -18,7 +18,7 @@ export class MaternityLeavesIndicator extends JsonEntity<MaternityLeavesIndicato
   }
 
   /** `objectif_de_progression` */
-  get progressObjective(): string {
+  get progressObjective(): string | undefined {
     return this.props.progressObjective;
   }
 

@@ -13,7 +13,7 @@ export interface DeclarationInfoProps {
   date: Date;
   draft: boolean;
   endReferencePeriod: Date;
-  index: DeclarationIndex;
+  index?: DeclarationIndex;
   indicatorsYear: IndicatorsYear;
   points: PositiveNumber;
   publication: Publication;
@@ -47,11 +47,11 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
   }
 
   /** Résultat final sur 100 points */
-  get index(): DeclarationIndex {
+  get index(): DeclarationIndex | undefined {
     return this.props.index;
   }
 
-  /** `année_indicateurs` */
+  /** `année_indicateurs` - Peut être absent en cas de vieilles données */
   get indicatorsYear(): IndicatorsYear {
     return this.props.indicatorsYear;
   }
@@ -71,17 +71,27 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
   }
 
   public fromJson(json: EntityPropsToJson<DeclarationInfoProps>) {
-    return new DeclarationInfo({
+    const props: DeclarationInfoProps = {
       computablePoints: new PositiveNumber(json.computablePoints),
       correctiveMeasures: new CorrectiveMeasures(json.correctiveMeasures),
       date: new Date(json.date),
       draft: json.draft,
       endReferencePeriod: new Date(json.endReferencePeriod),
-      index: new DeclarationIndex(json.index),
       indicatorsYear: new IndicatorsYear(json.indicatorsYear),
       points: new PositiveNumber(json.points),
       publication: Publication.fromJson(json.publication),
       sufficientPeriod: json.sufficientPeriod,
-    }) as this;
+    };
+
+    // TODO: activate if old datas needs it
+    // if (json.indicatorsYear) {
+    //   props.indicatorsYear = new IndicatorsYear(json.indicatorsYear);
+    // }
+
+    if (json.index) {
+      props.index = new DeclarationIndex(json.index);
+    }
+
+    return new DeclarationInfo(props) as this;
   }
 }

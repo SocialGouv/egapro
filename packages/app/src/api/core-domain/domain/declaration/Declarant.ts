@@ -4,9 +4,9 @@ import { Email } from "@common/shared-domain/domain/valueObjects";
 
 export interface DeclarantProps {
   email: Email;
-  firstname: string;
-  lastname: string;
-  phone: string;
+  firstname?: string;
+  lastname?: string;
+  phone?: string;
 }
 
 export class Declarant extends JsonEntity<DeclarantProps, never> {
@@ -15,24 +15,26 @@ export class Declarant extends JsonEntity<DeclarantProps, never> {
   }
 
   /** `prénom` */
-  get firstname(): string {
+  get firstname(): string | undefined {
     return this.props.firstname;
   }
 
   /** `nom` */
-  get lastname(): string {
+  get lastname(): string | undefined {
     return this.props.lastname;
   }
 
   /** `téléphone` */
-  get phone(): string {
+  get phone(): string | undefined {
     return this.props.phone;
   }
 
   public fromJson(json: EntityPropsToJson<DeclarantProps>) {
-    return new Declarant({
+    const props: DeclarantProps = {
       ...json,
       email: new Email(json.email),
-    }) as this;
+    };
+
+    return new Declarant(props) as this;
   }
 }

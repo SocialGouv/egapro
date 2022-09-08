@@ -47,6 +47,16 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
     return this.props.highRemunerations;
   }
 
+  public getAllIndicators() {
+    return [
+      this.remunerations,
+      this.salaryRaises,
+      this.salaryRaisesAndPromotions,
+      this.maternityLeaves,
+      this.highRemunerations,
+    ] as const;
+  }
+
   public fromJson(json: EntityPropsToJson<IndicatorsProps>) {
     return new Indicators({
       remunerations: RemunerationsIndicator.fromJson(json.remunerations),

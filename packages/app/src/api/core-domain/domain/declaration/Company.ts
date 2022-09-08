@@ -21,7 +21,7 @@ export interface CompanyProps {
   countryCode: CountryCode;
   department: Department;
   hasRecoveryPlan: boolean;
-  nafCode: NafCode;
+  nafCode?: NafCode;
   name: string;
   postalCode: FrenchPostalCode;
   region: Region;
@@ -57,7 +57,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
   }
 
   /** `code_naf` */
-  get nafCode(): NafCode {
+  get nafCode(): NafCode | undefined {
     return this.props.nafCode;
   }
 
@@ -90,7 +90,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
   }
 
   public fromJson(json: EntityPropsToJson<CompanyProps>) {
-    return new Company({
+    const props: CompanyProps = {
       name: json.name,
       siren: new Siren(json.siren),
       region: new Region(json.region),
@@ -98,7 +98,6 @@ export class Company extends JsonEntity<CompanyProps, never> {
       adress: json.adress,
       city: json.city,
       postalCode: new FrenchPostalCode(json.postalCode),
-      nafCode: new NafCode(json.nafCode),
       countryCode: new CountryCode(json.countryCode),
       hasRecoveryPlan: json.hasRecoveryPlan,
       workforce: {
@@ -106,6 +105,12 @@ export class Company extends JsonEntity<CompanyProps, never> {
         total: new PositiveNumber(json.workforce.total),
       },
       ues: UES.fromJson(json.ues),
-    }) as this;
+    };
+
+    if (json.nafCode) {
+      props.nafCode = new NafCode(json.nafCode);
+    }
+
+    return new Company(props) as this;
   }
 }

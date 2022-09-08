@@ -4,10 +4,10 @@ import { Url } from "@common/shared-domain/domain/valueObjects";
 
 export interface PublicationProps {
   date: Date;
-  measuresPublishDate: Date;
+  measuresPublishDate?: Date;
   modalities: string;
-  objectivesMeasuresModalities: string;
-  objectivesPublishDate: Date;
+  objectivesMeasuresModalities?: string;
+  objectivesPublishDate?: Date;
   url: Url;
 }
 
@@ -18,7 +18,7 @@ export class Publication extends JsonEntity<PublicationProps, never> {
   }
 
   /** `date_publication_mesures` */
-  get measuresPublishDate(): Date {
+  get measuresPublishDate(): Date | undefined {
     return this.props.measuresPublishDate;
   }
 
@@ -28,12 +28,12 @@ export class Publication extends JsonEntity<PublicationProps, never> {
   }
 
   /** `modalités_objectifs_mesures` */
-  get objectivesMeasuresModalities(): string {
+  get objectivesMeasuresModalities(): string | undefined {
     return this.props.objectivesMeasuresModalities;
   }
 
   /** `date_publication_objectifs` */
-  get objectivesPublishDate(): Date {
+  get objectivesPublishDate(): Date | undefined {
     return this.props.objectivesPublishDate;
   }
 
@@ -42,13 +42,18 @@ export class Publication extends JsonEntity<PublicationProps, never> {
   }
 
   public fromJson(json: EntityPropsToJson<PublicationProps>) {
-    return new Publication({
+    const props: PublicationProps = {
       date: new Date(json.date),
-      measuresPublishDate: new Date(json.measuresPublishDate),
       modalities: json.modalities,
       objectivesMeasuresModalities: json.objectivesMeasuresModalities,
-      objectivesPublishDate: new Date(json.objectivesPublishDate),
       url: new Url(json.url),
-    }) as this;
+    };
+    if (json.measuresPublishDate) {
+      props.measuresPublishDate = new Date(json.measuresPublishDate);
+    }
+    if (json.objectivesPublishDate) {
+      props.objectivesPublishDate = new Date(json.objectivesPublishDate);
+    }
+    return new Publication(props) as this;
   }
 }

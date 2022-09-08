@@ -22,7 +22,7 @@ export interface RemunerationsIndicatorProps {
   favorablePopulation: FavorablePopulation;
   mode: RemunerationsMode;
   notComputableReason?: NotComputableReason;
-  progressObjective: string;
+  progressObjective?: string;
   result: Percentage;
   score: PositiveInteger;
 }
@@ -53,7 +53,7 @@ export class RemunerationsIndicator extends JsonEntity<RemunerationsIndicatorPro
   }
 
   /** `objectif_de_progression` */
-  get progressObjective(): string {
+  get progressObjective(): string | undefined {
     return this.props.progressObjective;
   }
 

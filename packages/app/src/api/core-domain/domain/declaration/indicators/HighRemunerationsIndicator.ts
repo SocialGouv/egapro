@@ -7,7 +7,7 @@ import { HighRemunerationsResult } from "../../valueObjects/declaration/indicato
 
 export interface HighRemunerationsIndicatorProps {
   favorablePopulation: FavorablePopulation;
-  progressObjective: string;
+  progressObjective?: string;
   result: HighRemunerationsResult;
   score: PositiveInteger;
 }
@@ -19,7 +19,7 @@ export class HighRemunerationsIndicator extends JsonEntity<HighRemunerationsIndi
   }
 
   /** `objectif_de_progression` */
-  get progressObjective(): string {
+  get progressObjective(): string | undefined {
     return this.props.progressObjective;
   }
 

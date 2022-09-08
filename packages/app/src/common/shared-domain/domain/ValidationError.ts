@@ -1,1 +1,3 @@
-export class ValidationError extends Error {}
+import { AppError } from "../error";
+
+export class ValidationError extends AppError {}

@@ -12,7 +12,7 @@ export interface SalaryRaisesAndPromotionsIndicatorProps {
   favorablePopulation: FavorablePopulation;
   notComputableReason?: NotComputableReason;
   percentScore: Percentage;
-  progressObjective: string;
+  progressObjective?: string;
   result: Percentage;
   score: PositiveInteger;
 }
@@ -29,7 +29,7 @@ export class SalaryRaisesAndPromotionsIndicator extends JsonEntity<SalaryRaisesA
   }
 
   /** `objectif_de_progression` */
-  get progressObjective(): string {
+  get progressObjective(): string | undefined {
     return this.props.progressObjective;
   }
 
