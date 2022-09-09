@@ -1,3 +1,31 @@
+# [2.14.0](https://github.com/SocialGouv/egapro/compare/v2.13.1...v2.14.0) (2022-09-09)
+
+
+### Features
+
+* wordings ([#1007](https://github.com/SocialGouv/egapro/issues/1007)) ([be7f194](https://github.com/SocialGouv/egapro/commit/be7f1941be4a8ab9145299bd05331b5e3b997475))
+
+## [2.13.1](https://github.com/SocialGouv/egapro/compare/v2.13.0...v2.13.1) (2022-09-09)
+
+
+### Bug Fixes
+
+* user rights have to be updated after a declaration ([#1006](https://github.com/SocialGouv/egapro/issues/1006)) ([886ec8b](https://github.com/SocialGouv/egapro/commit/886ec8ba4ccccc39c3bed7ed39d769db69ad7f4e))
+
+# [2.13.0](https://github.com/SocialGouv/egapro/compare/v2.12.0...v2.13.0) (2022-09-07)
+
+
+### Features
+
+* add counter to show reamining chars ([#972](https://github.com/SocialGouv/egapro/issues/972)) ([62ad922](https://github.com/SocialGouv/egapro/commit/62ad92210859e9c9a9e1ca1c86e84774b1a797dd))
+
+# [2.12.0](https://github.com/SocialGouv/egapro/compare/v2.11.7...v2.12.0) (2022-09-06)
+
+
+### Features
+
+* repatriate missing commit ([#992](https://github.com/SocialGouv/egapro/issues/992)) ([14d0f68](https://github.com/SocialGouv/egapro/commit/14d0f68f4a509f6676d001a79a6ef61b40e8d7f2))
+
 ## [2.11.7](https://github.com/SocialGouv/egapro/compare/v2.11.6...v2.11.7) (2022-08-25)
 
 

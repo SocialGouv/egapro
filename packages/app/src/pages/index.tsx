@@ -51,7 +51,7 @@ function FormSearchSiren() {
   return (
     <form onSubmit={handleSubmit} style={{ textAlign: "center" }} ref={formRef} noValidate>
       <Heading as="h1" fontFamily="gabriela" size="lg" mb={["8", "12"]} mt={["0", "4"]}>
-        Rechercher l'index de l'égalité professionnelle d'une entreprise
+        Consulter l'index de l'égalité professionnelle d'une entreprise
       </Heading>
       <Box>
         <Flex align="center" justifyContent="center" mx={["0", "16"]}>

@@ -39,7 +39,7 @@ const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => 
   }
 
   if (!loading && errorMessage) {
-    return ErrorMessage(errorMessage)
+    return <ErrorMessage>{errorMessage}</ErrorMessage>
   }
 
   return (
