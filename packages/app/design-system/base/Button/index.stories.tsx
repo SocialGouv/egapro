@@ -5,7 +5,7 @@ import { action } from "@storybook/addon-actions"
 import Button from "./index"
 
 export default {
-  title: "Base/Button",
+  title: "Base/Form/Button",
   component: Button,
   parameters: {
     docs: {

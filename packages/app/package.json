@@ -36,6 +36,8 @@
     "swr": "^1.2.1"
   },
   "devDependencies": {
+    "@storybook/node-logger": "^6.5.10",
+    "@storybook/preset-create-react-app": "^3.2.0",
     "@babel/core": "^7.18.13",
     "@storybook/addon-a11y": "^6.5.10",
     "@storybook/addon-actions": "^6.5.10",

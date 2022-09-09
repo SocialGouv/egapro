@@ -2,6 +2,11 @@ module.exports = {
   stories: [
     "../design-system/**/*.stories.@(js|jsx|ts|tsx|mdx)"
   ],
+  refs: {
+    '@chakra-ui/react': {
+      disable: true,
+    },
+  },
   addons: [
     "@storybook/addon-links",
     "@storybook/addon-essentials",
