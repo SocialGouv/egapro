@@ -110,7 +110,7 @@ const config = {
       },
     },
     {
-      files: ["__tests__/*.ts?(x)"],
+      files: ["__tests__/**/*.ts?(x)"],
       extends: ["plugin:testing-library/react", "plugin:jest-dom/recommended"],
       plugins: ["jest"],
       env: {
@@ -131,6 +131,24 @@ const config = {
       },
       rules: {
         "import/no-default-export": "off",
+      },
+    },
+    {
+      files: ["src/pages/api/**/*.ts"],
+      env: {
+        browser: false,
+      },
+      parserOptions: {
+        project: ["src/pages/api/tsconfig.json"],
+        sourceType: "module",
+      },
+      settings: {
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ["src/pages/api/tsconfig.json"],
+          },
+        },
       },
     },
   ],
