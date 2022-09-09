@@ -162,24 +162,7 @@
           "$ref": "./indicateurs/congés_maternité.json"
         },
         "hautes_rémunérations": {
-          "type": "object",
-          "properties": {
-            "résultat": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 5,
-              "description": "Nombre de 0 à 5 du sexe sous représenté parmi les 10 plus hautes rémunérations"
-            },
-            "note": true,
-            "objectif_de_progression": true
-          },
-          "additionalProperties": false,
-          "allOf": [
-            {
-              "$ref": "./indicateurs/base_indicateur.json#with_population_favorable"
-            }
-          ],
-          "description": "Indicateur 5 relatif au nombre de salariés du sexe sous-représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations"
+          "$ref": "./indicateurs/hautes_rémunérations.json"
         }
       },
       "additionalProperties": false

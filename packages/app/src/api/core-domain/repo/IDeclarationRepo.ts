@@ -1,5 +1,5 @@
 import type { Repo } from "@common/shared-domain";
 
-import type { Any } from "../../../common/utils/types";
+import type { Declaration } from "../../../common/core-domain/domain/Declaration";
 
-export type IDeclarationRepo = Repo<Any, Any>;
+export type IDeclarationRepo = Repo<Declaration>;

@@ -1,5 +1,7 @@
 import { ensureEnvVar as baseEnsureEnvVar } from "@common/utils/os";
 
+import { isTruthy } from "./utils/string";
+
 const ensureEnvVar = baseEnsureEnvVar<ProcessEnvCustomKeys>;
 const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {
   if (typeof window === "undefined") {
@@ -19,10 +21,14 @@ export const config = {
       smtpPort: +ensureApiEnvVar("MAILER_SMTP_PORT", "1025"),
     },
     postgres: {
+      host: ensureApiEnvVar("POSTGRES_HOST"),
       user: ensureApiEnvVar("POSTGRES_USER"),
       password: ensureApiEnvVar("POSTGRES_PASSWORD"),
       db: ensureApiEnvVar("POSTGRES_DB"),
       port: +ensureApiEnvVar("POSTGRES_PORT"),
+      ssl: isTruthy(ensureApiEnvVar("POSTGRES_SSL", "0")),
+      poolMinSize: +ensureApiEnvVar("POSTGRES_POOL_MIN_SIZE", "2"),
+      poolMaxSize: +ensureApiEnvVar("POSTGRES_POOL_MAX_SIZE", "10"),
     },
   },
 } as const;

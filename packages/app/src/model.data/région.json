@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/région.json",
+  "$id": "#region",
   "type": "string",
   "enum": [
     "01",

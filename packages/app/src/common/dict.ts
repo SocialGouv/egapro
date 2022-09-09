@@ -35,7 +35,7 @@ export const REGIONS = {
   "94": "Corse",
 } as const;
 
-export const DEPARTMENTS = {
+export const COUNTIES = {
   "01": "Ain",
   "02": "Aisne",
   "03": "Allier",
@@ -139,7 +139,7 @@ export const DEPARTMENTS = {
   "976": "Mayotte",
 } as const;
 
-export const REGIONS_TO_DEPARTMENTS = {
+export const REGIONS_TO_COUNTIES = {
   "84": ["01", "03", "07", "15", "26", "38", "42", "43", "63", "69", "73", "74"],
   "27": ["21", "25", "39", "58", "70", "71", "89", "90"],
   "53": ["35", "22", "56", "29"],
@@ -160,9 +160,12 @@ export const REGIONS_TO_DEPARTMENTS = {
   "76": ["09", "11", "12", "30", "31", "32", "34", "46", "48", "65", "66", "81", "82"],
 };
 
-export const DEPARTMENT_TO_REGION = Object.entries(REGIONS_TO_DEPARTMENTS).reduce(
-  (accReg, [reg, deps]) => ({ ...accReg, ...deps.reduce((accDep, dep) => ({ ...accDep, [dep]: reg }), {}) }),
-  {} as Record<keyof typeof DEPARTMENTS, keyof typeof REGIONS>,
+export const COUNTY_TO_REGION = Object.entries(REGIONS_TO_COUNTIES).reduce(
+  (accReg, [reg, counties]) => ({
+    ...accReg,
+    ...counties.reduce((accCounty, dep) => ({ ...accCounty, [dep]: reg }), {}),
+  }),
+  {} as Record<keyof typeof COUNTIES, keyof typeof REGIONS>,
 );
 
 interface Country {

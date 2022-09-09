@@ -11,7 +11,8 @@
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --pretty --noEmit && tsc --pretty --noEmit -p __tests__/tsconfig.json",
-    "generateEnvDeclaration": "ts-node --project scripts/tsconfig.json scripts/generateEnvDeclaration.ts"
+    "generateEnvDeclaration": "ts-node --project scripts/tsconfig.json scripts/generateEnvDeclaration.ts",
+    "generateModelsFromSchema": "ts-node --project scripts/tsconfig.json scripts/generateModelsFromSchema.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^1.1.5",
@@ -26,10 +27,10 @@
     "final-form": "^4.20.6",
     "framer-motion": "^6",
     "jest": "^27.5.1",
-    "knex": "^2.2.0",
+    "knex": "^2.3.0",
     "moize": "^6.1.0",
     "next": "12.0.10",
-    "pg": "^8.7.3",
+    "pg": "^8.8.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-final-form": "^6.5.8",
@@ -58,6 +59,7 @@
     "eslint-plugin-testing-library": "^5.0.5",
     "eslint-plugin-typescript-sort-keys": "^2.1.0",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "json-schema-to-typescript": "^11.0.2",
     "prettier": "^2.5.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"

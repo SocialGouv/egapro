@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/validation.json",
+  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/schema-with-validation.json",
   "$comment": "Règles de validation métier",
   "allOf": [
     {

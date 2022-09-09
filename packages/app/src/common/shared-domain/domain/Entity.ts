@@ -1,5 +1,6 @@
 import type { Any, Objectize, SimpleObject } from "../../utils/types";
 import type { ValueObject } from "./ValueObject";
+import type { Enum } from "./valueObjects";
 
 export type UUID = string;
 export abstract class Entity<P, Id = UUID> {
@@ -16,12 +17,14 @@ export abstract class JsonEntity<P, Id = UUID> extends Entity<P, Id> {
 
 type UnboxProp<T> = T extends Any[]
   ? EntityPropsToJson<T>
+  : T extends Enum<infer E>
+  ? Enum.ToString<E>
   : T extends ValueObject<infer V>
   ? V
   : T extends Entity<infer TProps, Any>
   ? EntityPropsToJson<TProps>
   : T extends Date
-  ? number
+  ? string
   : T extends SimpleObject
   ? EntityPropsToJson<T>
   : T;
