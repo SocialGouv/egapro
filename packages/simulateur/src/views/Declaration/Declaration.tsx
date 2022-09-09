@@ -38,6 +38,7 @@ import { logToSentry } from "../../utils/sentry"
 import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
 import DeclarationForm from "./DeclarationForm"
+import { useUser } from "../../components/AuthContext"
 
 function buildHelpers(state: AppState) {
   const trancheEffectifs = state.informations.trancheEffectifs
@@ -219,6 +220,7 @@ const title = "Déclaration"
 const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
   useTitle(title)
   const history = useHistory()
+  const { refreshAuth } = useUser()
 
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
@@ -281,6 +283,8 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
       await putDeclaration(data)
       setApiError(undefined)
       setDeclaring(false)
+      // Refresh authentification infos because the user may get another ownership now.
+      refreshAuth()
     } catch (error: any) {
       setDeclaring(false)
       const message = error.jsonBody?.error
