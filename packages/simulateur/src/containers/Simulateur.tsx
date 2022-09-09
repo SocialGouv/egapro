@@ -1,35 +1,37 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, ReactNode, useEffect, useState } from "react"
 import { Redirect, Route, Switch, useParams } from "react-router-dom"
 
-import { AppState, ActionType } from "../globals"
+import { ActionType, AppState } from "../globals"
 
-import globalStyles from "../utils/globalStyles"
-import { isUserGrantedForSiren } from "../utils/user"
 import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api"
+import globalStyles from "../utils/globalStyles"
 import { useDebounceEffect } from "../utils/hooks"
+import { isUserGrantedForSiren } from "../utils/user"
 
 import ActivityIndicator from "../components/ActivityIndicator"
 import ErrorMessage from "../components/ErrorMessage"
 
+import { Text } from "@chakra-ui/react"
+import { useCheckTokenInURL, useUser } from "../components/AuthContext"
+import MailtoLink from "../components/MailtoLink"
+import { logToSentry } from "../utils/sentry"
+import { sirenIsFree } from "../utils/siren"
+import AskEmail from "../views/AskEmail"
 import Declaration from "../views/Declaration"
 import Effectif from "../views/Effectif"
 import HomeSimulateur from "../views/HomeSimulateur"
 import IndicateurUn from "../views/Indicateur1"
 import IndicateurDeux from "../views/Indicateur2"
-import IndicateurTrois from "../views/Indicateur3"
 import IndicateurDeuxTrois from "../views/Indicateur2et3"
+import IndicateurTrois from "../views/Indicateur3"
 import IndicateurQuatre from "../views/Indicateur4"
 import IndicateurCinq from "../views/Indicateur5"
-import InformationsEntreprise from "../views/InformationsEntreprise"
 import InformationsDeclarant from "../views/InformationsDeclarant"
+import InformationsEntreprise from "../views/InformationsEntreprise"
 import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
-import AskEmail from "../views/AskEmail"
-import { sirenIsFree } from "../utils/siren"
-import { useCheckTokenInURL, useUser } from "../components/AuthContext"
-import { logToSentry } from "../utils/sentry"
 
 interface Props {
   state: AppState | undefined
@@ -43,7 +45,7 @@ type Params = {
 function Simulateur({ state, dispatch }: Props): JSX.Element {
   const { code } = useParams<Params>()
   const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
+  const [errorMessage, setErrorMessage] = useState<string | undefined | ReactNode>(undefined)
   const { email, isAuthenticated, loading: isLoadingAuth } = useUser()
 
   // useEffect de récupération du token et des données de la déclaration.
@@ -72,7 +74,17 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
             if (!isUserGrantedForSiren(siren) && !freeSiren) {
               // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
               setErrorMessage(
-                "Vous n'êtes pas autorisé à accéder à cette simulation-déclaration, veuillez contacter votre référent de l'égalité professionnelle.",
+                <>
+                  <Text>L'email saisi n'est pas rattaché au Siren de votre entreprise. </Text>
+                  <Text mt="4">
+                    Vous devez faire faire une demande rattachement en indiquant votre Siren et email en cliquant&nbsp;
+                    <MailtoLink siren={siren} email={email}>
+                      ici
+                    </MailtoLink>
+                    &nbsp;(si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à
+                    dgt.ega-pro@travail.gouv.fr).
+                  </Text>
+                </>,
               )
             }
           }
@@ -135,7 +147,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
   }
 
   if (!loading && errorMessage) {
-    return ErrorMessage(errorMessage)
+    return <ErrorMessage>{errorMessage}</ErrorMessage>
   }
 
   if (loading || !state) {
