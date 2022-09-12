@@ -8,6 +8,16 @@ app:
   .ingress.path: /consulter-index(/|$)(.*)
   certSecretName: api-crt
 
+storybook:
+  ~chart: app
+  ~needs: [build-storybook]
+  imagePackage: storybook
+  probesPath: /
+  containerPort: 8080
+  host: "{{ .Values.global.host }}"
+  .ingress.path: /storybook
+  certSecretName: api-crt
+
 declaration:
   ~chart: app
   ~needs: [build-declaration]
@@ -108,6 +118,14 @@ jobs:
         imagePackage: app
         dockerfile: packages/app/Dockerfile
     
+    build-storybook:
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      memoryLimit: 4Gi
+      memoryRequest: 2Gi
+      with:
+        imagePackage: storybook
+        dockerfile: packages/app/.storybook/Dockerfile
+    
     build-api:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
       with:
@@ -134,7 +152,6 @@ jobs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
-
 deactivate:
   jobs-deactivate:
     runs:

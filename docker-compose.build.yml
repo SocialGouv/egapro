@@ -83,6 +83,15 @@ services:
       - 3000:3000
     restart: "no"
 
+  storybook:
+    image: egapro_storybook
+    build:
+      context: .
+      dockerfile: ./packages/app/.storybook/Dockerfile
+    ports:
+      - 8080:8080
+    restart: "no"
+
   simulateur:
     image: egapro_simulateur
     build:
@@ -95,7 +104,6 @@ services:
     ports:
       - 3001:8080
     restart: "no"
-
 
 volumes:
   pgdata:
