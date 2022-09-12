@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 import clsx from "clsx"
 
-import { iconStyles } from "../../utils/icon-styles"
+import { iconStyles } from "../../../utils/icon-styles"
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   isError?: boolean

@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { buttonStyles, buttonStylesProps } from "../../utils/button-styles"
+import { buttonStyles, buttonStylesProps } from "../../../utils/button-styles"
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   buttonStylesProps & {
