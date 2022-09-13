@@ -27,6 +27,12 @@ ENV REACT_APP_SENTRY_DSN=${REACT_APP_SENTRY_DSN}
 ARG REACT_APP_VERSION
 ENV REACT_APP_VERSION=${REACT_APP_VERSION}
 
+ARG REACT_APP_ROOT_PATH
+ENV REACT_APP_ROOT_PATH=${REACT_APP_ROOT_PATH}
+
+ARG PUBLIC_URL
+ENV PUBLIC_URL=${PUBLIC_URL}
+
 ENV NODE_ENV=production
 RUN yarn build && yarn --frozen-lockfile --production
 
@@ -34,3 +40,7 @@ RUN yarn build && yarn --frozen-lockfile --production
 FROM ghcr.io/socialgouv/docker/nginx4spa:7.1.0
 
 COPY --from=builder --chown=nginx:nginx /app/build /usr/share/nginx/html
+
+RUN mkdir /usr/share/nginx/html/simulateur
+RUN cd /usr/share/nginx/html/simulateur && \
+  ln -s ../* ./$1

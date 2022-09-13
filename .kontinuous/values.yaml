@@ -145,6 +145,8 @@ jobs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+          REACT_APP_ROOT_PATH: "/simulateur"
+          PUBLIC_URL: "/simulateur"
 
 deactivate:
   jobs-deactivate:
