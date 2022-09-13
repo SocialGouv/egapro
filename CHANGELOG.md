@@ -1,3 +1,10 @@
+# [2.15.0](https://github.com/SocialGouv/egapro/compare/v2.14.0...v2.15.0) (2022-09-13)
+
+
+### Features
+
+* comment env in order to have api on localhost ([#1012](https://github.com/SocialGouv/egapro/issues/1012)) ([3238a72](https://github.com/SocialGouv/egapro/commit/3238a727ad74039f1a0f088fcf1f7e3116c561b8))
+
 # [2.14.0](https://github.com/SocialGouv/egapro/compare/v2.13.1...v2.14.0) (2022-09-09)
 
 
