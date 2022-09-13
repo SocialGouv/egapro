@@ -39,6 +39,8 @@ const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = (
 
   const alreadyDeclared = declaration?.data?.id === code
 
+  const year = state?.informations?.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+
   return (
     <PageInformationsEntreprise>
       <LayoutFormAndResult
@@ -49,6 +51,7 @@ const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = (
             updateInformationsEntreprise={updateInformationsEntreprise}
             validateInformationsEntreprise={validateInformationsEntreprise}
             alreadyDeclared={alreadyDeclared}
+            year={year}
           />
         }
         childrenResult={null}
