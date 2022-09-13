@@ -2,13 +2,11 @@ import React, { useEffect, useCallback, useState, ReactElement } from "react"
 import { Text, Heading, Link, Box, UnorderedList, ListItem, Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react"
 
 import { NextPageWithLayout } from "./_app"
-import { useTitle } from "../hooks"
 import ButtonAction from "@components/ds/ButtonAction"
 import { SinglePageLayout } from "@components/ds/SinglePageLayout"
 import Page from "@components/Page"
 
 const PolitiqueConfidentialite: NextPageWithLayout = () => {
-  useTitle("Politique de confidentialité")
   const [hasTarteAuCitron, setTarteAuCitron] = useState(false)
 
   const openTarteAuCitron = useCallback(() => {

@@ -24,7 +24,7 @@ jobs:
     build-app:
       with:
         buildArgs:
-          REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
+          NEXT_PUBLIC_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
 
     build-declaration:
       with:

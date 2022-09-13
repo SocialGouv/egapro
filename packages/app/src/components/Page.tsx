@@ -1,4 +1,5 @@
 import React, { FunctionComponent, ReactNode } from "react"
+import Head from "next/head"
 import { Box, Heading, Text } from "@chakra-ui/react"
 
 interface PageProps {
@@ -10,6 +11,9 @@ interface PageProps {
 const Page: FunctionComponent<PageProps> = ({ title, tagline, children }) => {
   return (
     <>
+      <Head>
+        <title>{`${title} - Index Egapro`}</title>
+      </Head>
       <Heading as="h1" size="lg">
         {title}
       </Heading>

@@ -2,15 +2,12 @@ import React, { ReactElement } from "react"
 import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
 
 import type { NextPageWithLayout } from "./_app"
-import { useTitle } from "../hooks"
 import { SinglePageLayout } from "@components/ds/SinglePageLayout"
 import Page from "@components/Page"
 
 const title = "Accessibilité"
 
 const Accessibilite: NextPageWithLayout = () => {
-  useTitle(title)
-
   return (
     <Page title={title}>
       <Heading as="h2" size="md" mb={3}>

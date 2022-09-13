@@ -2,15 +2,12 @@ import React, { ReactElement } from "react"
 import { Text, Heading, Link } from "@chakra-ui/react"
 
 import type { NextPageWithLayout } from "./_app"
-import { useTitle } from "../hooks"
 import Page from "@components/Page"
 import { SinglePageLayout } from "@components/ds/SinglePageLayout"
 
 const title = "Conditions d'utilisation"
 
 const CGU: NextPageWithLayout = () => {
-  useTitle(title)
-
   return (
     <Page title={title}>
       <Text>
