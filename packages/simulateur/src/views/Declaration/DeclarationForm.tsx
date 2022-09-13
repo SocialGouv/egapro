@@ -181,7 +181,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   }
 
   if (!loading && errorMessage) {
-    return ErrorMessage(errorMessage)
+    return <ErrorMessage>{errorMessage}</ErrorMessage>
   }
 
   return (

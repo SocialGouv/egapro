@@ -25,10 +25,9 @@ const customJestConfig = {
   moduleDirectories: ["node_modules", "<rootDir>/"],
   testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
-    "^@/components/(.*)$": "<rootDir>/src/components/$1",
-    "^@/models/(.*)$": "<rootDir>/src/models/$1",
-    "^@/utils/(.*)$": "<rootDir>/src/utils/$1",
-    "^@/types/(.*)$": "<rootDir>/src/types/$1",
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^@common/(.*)$": "<rootDir>/src/common/$1",
+    "^@components/(.*)$": "<rootDir>/src/components/$1"
   },
 }
 

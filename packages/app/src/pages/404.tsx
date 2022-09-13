@@ -3,7 +3,7 @@ import Head from "next/head"
 import { push } from "@socialgouv/matomo-next"
 import { Box, Text } from "@chakra-ui/react"
 
-import { SinglePageLayout } from "@/components/ds/SinglePageLayout"
+import { SinglePageLayout } from "@components/ds/SinglePageLayout"
 
 export default function NotFoundPage() {
   useEffect(() => {

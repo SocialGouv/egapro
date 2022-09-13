@@ -165,7 +165,6 @@ async def declare(request, response, siren, year):
             url = request.domain + data.uri
             emails.success.send(owners, url=url, **data)
 
-
 @tokens.require
 @app.route("/declarations/{siren}", methods=["GET"])
 async def get_declarations(request, response, siren):

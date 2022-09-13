@@ -13,6 +13,8 @@ const initialContext = {
   login: (token: string) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   logout: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  refreshAuth: () => {},
   loading: false,
 }
 
@@ -59,6 +61,15 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     [context],
   )
 
+  const refreshAuth = React.useCallback(async () => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      await login(token)
+    } else {
+      console.debug("Impossible de rafraîchir les données de l'utilisateur car aucun token n'est présent")
+    }
+  }, [login])
+
   const logout = React.useCallback(function logout() {
     localStorage.setItem("token", "")
     localStorage.setItem("tokenInfo", "")
@@ -71,7 +82,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return <AuthContext.Provider value={{ ...context, logout, login }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ ...context, logout, login, refreshAuth }}>{children}</AuthContext.Provider>
 }
 
 export function useUser(): typeof initialContext {
