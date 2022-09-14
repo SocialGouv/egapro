@@ -30,7 +30,7 @@ export type FetcherInfiniteReturn = FetcherReturnImmutable & {
  * @returns the JSON response
  * @throws an error if the response is not ok
  */
-export const genericFetch = async (endpoint: string, options?: any) => {
+const genericFetch = async (endpoint: string, options?: any) => {
   options = {
     ...options,
     headers: {

@@ -16,9 +16,9 @@ import { useRouter } from "next/router"
 import Head from "next/head"
 import { format } from "date-fns"
 
-import ButtonAction from "@/components/ds/ButtonAction"
-import { SinglePageLayout } from "@/components/ds/SinglePageLayout"
-import { AverageIndicator } from "@/components/AverageIndicator"
+import ButtonAction from "@components/ds/ButtonAction"
+import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import { AverageIndicator } from "@components/AverageIndicator"
 
 async function getDateCsv(): Promise<string> {
   try {
@@ -52,7 +52,7 @@ function FormSearchSiren() {
   return (
     <form onSubmit={handleSubmit} style={{ textAlign: "center" }} ref={formRef} noValidate>
       <Heading as="h1" fontFamily="gabriela" size="lg" mb={["8", "12"]} mt={["0", "4"]}>
-        Rechercher l'index de l'égalité professionnelle d'une entreprise
+        Consulter l'index de l'égalité professionnelle d'une entreprise
       </Heading>
       <Box>
         <Flex align="center" justifyContent="center" mx={["0", "16"]}>

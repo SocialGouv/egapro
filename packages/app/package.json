@@ -10,7 +10,7 @@
     "lint": "next lint",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
-    "type-check": "tsc --pretty --noEmit",
+    "type-check": "tsc --pretty --noEmit && tsc --pretty --noEmit -p __tests__/tsconfig.json",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -53,6 +53,7 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",
     "@testing-library/user-event": "^13.5.0",
+    "@tsconfig/next": "^1.0.2",
     "@types/node": "16",
     "@types/react": "17.0.39",
     "babel-loader": "^8.2.5",

@@ -1,8 +1,8 @@
 import React, { ReactNode } from "react"
 import { Box, Container, Flex } from "@chakra-ui/layout"
 
-import Header from "@/components/ds/Header"
-import Footer from "@/components/ds/Footer"
+import Header from "./Header"
+import Footer from "./Footer"
 
 interface Props {
   children: ReactNode

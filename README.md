@@ -54,23 +54,31 @@ Cette commande lance le linter, la compilation des types TS et les tests.
 
 ## FAQ
 
-### Comment ajouter une librairie dans un workspace
+### Comment ajouter une librairie dans un workspace ?
 
 ```bash
 yarn workspace simulateur add moment
 ```
 
-### Comment lancer un script dans un package
+### Comment lancer un script dans un package ?
 
 ```bash
 yarn workspace simulateur run test
 ```
 
-### Comment lancer un script dans tous les workspaces
+### Comment lancer un script dans tous les workspaces ?
 
 ```bash
 yarn workspaces run lint
 ```
+
+### Quel est le maildev pour un environnement de recette ?
+
+Ajouter le préfixe `maildev-` devant l'URL.
+
+Si l'environnement est `https://egapro-feat-limit-char-11oson.dev.fabrique.social.gouv.fr/`.
+
+Le maildev se trouvera alors à `https://maildev-egapro-feat-limit-char-11oson.dev.fabrique.social.gouv.fr/`
 
 ## Fichiers
 

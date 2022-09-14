@@ -2,8 +2,8 @@ import React from "react"
 // import NextLink from "next/link"
 import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/react"
 
-import Logo from "@/components/ds/Logo"
-import TextLink from "@/components/ds/TextLink"
+import Logo from "./Logo"
+import TextLink from "./TextLink"
 import packageConfig from "../../../package.json"
 import { ExternalLinkIcon } from "@chakra-ui/icons"
 

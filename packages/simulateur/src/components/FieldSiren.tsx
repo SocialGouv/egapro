@@ -1,14 +1,13 @@
-import React, { FunctionComponent } from "react"
 import moize from "moize"
-import { Link } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 import { useField } from "react-final-form"
 
-import { composeValidators, required, ValidatorFunction } from "../utils/formHelpers"
-import { ownersForSiren, validateSiren } from "../utils/api"
 import { EntrepriseType } from "../globals"
+import { ownersForSiren, validateSiren } from "../utils/api"
+import { composeValidators, required, ValidatorFunction } from "../utils/formHelpers"
 import { useUser } from "./AuthContext"
-import { IconExternalLink } from "./ds/Icons"
 import InputGroup from "./ds/InputGroup"
+import MailtoLink from "./MailtoLink"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres."
@@ -134,14 +133,9 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({ name, label, readOnly,
             {field.meta.error === NOT_ALLOWED_MESSAGE && (
               <div style={{ marginTop: 10 }}>
                 Pour poursuivre votre déclaration, vous devez faire une demande de rattachement en cliquant&nbsp;
-                <Link
-                  isExternal
-                  textDecoration="underline"
-                  href={`mailto:dgt.ega-pro@travail.gouv.fr?subject=EgaPro - Demander à être déclarant d'un SIREN&body=Bonjour, je souhaite être déclarant pour le SIREN ${field.input.value}. Mon email de déclaration est ${email}. Cordialement.`}
-                >
-                  ici&nbsp;
-                  <IconExternalLink sx={{ transform: "translateY(.125rem)" }} />
-                </Link>
+                <MailtoLink siren={field.input.value} email={email}>
+                  ici
+                </MailtoLink>
                 &nbsp;(si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à
                 dgt.ega-pro@travail.gouv.fr).
               </div>
