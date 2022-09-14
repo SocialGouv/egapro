@@ -5,13 +5,18 @@ import ButtonAsLink from "../../ButtonAsLink"
 import Logo from "../../Logo"
 
 export type HeaderBodyProps = {
-  isMobileMenuOpen?: boolean;
-  showMenuMobile: () => void;
+  isMobileMenuOpen?: boolean
+  showMenuMobile: () => void
   mobileMenuId: string
   buttonMobileMenuId: string
 }
 
-const HeaderBody: FunctionComponent<HeaderBodyProps> = ({isMobileMenuOpen,showMenuMobile,mobileMenuId,buttonMobileMenuId}) => {
+const HeaderBody: FunctionComponent<HeaderBodyProps> = ({
+  isMobileMenuOpen,
+  showMenuMobile,
+  mobileMenuId,
+  buttonMobileMenuId,
+}) => {
   return (
     <div className="fr-header__body">
       <div className="fr-container">
@@ -37,14 +42,13 @@ const HeaderBody: FunctionComponent<HeaderBodyProps> = ({isMobileMenuOpen,showMe
             </div>
             <div className="fr-header__service">
               <Link href="/">
-                <a
-                  title="Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion"
-                >
+                <a title="Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion">
                   <p className="fr-header__service-title">Egapro</p>
                 </a>
               </Link>
               <p className="fr-header__service-tagline">
-                Index de l’égalité professionnelle et répartition équilibrée femmes – hommes
+                Index de l’égalité professionnelle et répartition équilibrée
+                femmes – hommes
               </p>
             </div>
           </div>
@@ -53,7 +57,10 @@ const HeaderBody: FunctionComponent<HeaderBodyProps> = ({isMobileMenuOpen,showMe
               <ul className="fr-btns-group">
                 <li>
                   <Link href="/login" passHref>
-                    <ButtonAsLink iconLeft="fr-icon-user-fill" variant="tertiary">
+                    <ButtonAsLink
+                      iconLeft="fr-icon-user-fill"
+                      variant="tertiary"
+                    >
                       Se connecter
                     </ButtonAsLink>
                   </Link>

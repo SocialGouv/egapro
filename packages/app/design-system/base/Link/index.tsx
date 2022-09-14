@@ -32,7 +32,7 @@ const Link: FunctionComponent<LinkProps> = ({
         size === "sm" && "fr-link--sm",
         size === "lg" && "fr-link--lg",
         iconLeft && `fr-link--icon-left ${iconLeft}`,
-        iconRight && `fr-link--icon-right ${iconRight}`,
+        iconRight && `fr-link--icon-right ${iconRight}`
       )}
       target={target}
       rel={target === "_blank" ? "noopener noreferrer" : undefined}
