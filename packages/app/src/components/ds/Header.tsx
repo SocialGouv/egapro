@@ -25,7 +25,7 @@ import { IconPeopleCircle } from "./Icons"
 function Header() {
   const { colorMode, toggleColorMode } = useColorMode()
 
-  const [isMobile, setIsMobile] = useState<Boolean>(false)
+  const [isMobile, setIsMobile] = useState<boolean>(false)
   const [isSmallerThan639] = useMediaQuery("(max-width: 639px)")
 
   useEffect(() => {
@@ -34,7 +34,7 @@ function Header() {
     }
   }, [isMobile, isSmallerThan639])
 
-  const [isFAQMenuDisplayed, setIsFAQMenuDisplayed] = useState<Boolean>(false)
+  const [isFAQMenuDisplayed, setIsFAQMenuDisplayed] = useState<boolean>(false)
   const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
 
   useEffect(() => {
@@ -43,7 +43,7 @@ function Header() {
     }
   }, [isFAQMenuDisplayed, isSmallerThan1280])
 
-  const [isXLScreen, setIsXLScreen] = useState<Boolean>(false)
+  const [isXLScreen, setIsXLScreen] = useState<boolean>(false)
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
 
   useEffect(() => {
@@ -52,7 +52,7 @@ function Header() {
     }
   }, [isXLScreen, isLargerThan1280])
 
-  const [isDesktop, setIsDesktop] = useState<Boolean>(false)
+  const [isDesktop, setIsDesktop] = useState<boolean>(false)
   const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
 
   useEffect(() => {

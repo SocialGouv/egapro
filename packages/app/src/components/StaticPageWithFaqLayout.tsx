@@ -3,7 +3,6 @@ import { Container, Box, Flex, Grid, useMediaQuery } from "@chakra-ui/react"
 import { useRouter } from "next/router"
 import Header from "./ds/Header"
 import Footer from "./ds/Footer"
-// import FAQRouter from "../views/FAQ"
 
 export interface StaticPageWithFaqLayoutProps {
   children: ReactNode
@@ -69,9 +68,7 @@ const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> =
                     display: "none",
                   },
                 }}
-              >
-                {/* <FAQRouter /> */}
-              </Box>
+              />
             )}
           </Grid>
         </Container>
