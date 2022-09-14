@@ -14,7 +14,8 @@ module.exports = {
     "storybook-dark-mode",
     "@storybook/addon-a11y",
     "@storybook/addon-storysource",
-    "@storybook/addon-docs"
+    "@storybook/addon-docs",
+    "storybook-addon-next-router"
   ],
   framework: "@storybook/react",
   core: {
