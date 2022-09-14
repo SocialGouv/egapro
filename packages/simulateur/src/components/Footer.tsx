@@ -3,11 +3,8 @@ import { Box, Container, List, ListItem, Text, Link } from "@chakra-ui/react"
 
 import Logo from "./ds/Logo"
 import TextLink from "./ds/TextLink"
-import packageConfig from "../../package.json"
 
 function Footer() {
-  const version = process.env.REACT_APP_VERSION || packageConfig.version
-
   return (
     <Box
       id="footer"
@@ -95,7 +92,7 @@ function Footer() {
             >
               donnez-nous votre avis
             </TextLink>{" "}
-            <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
+            <TextLink to={`https://github.com/SocialGouv/egapro`} isExternal>
               contribuez sur Github
             </TextLink>
           </Text>
