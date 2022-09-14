@@ -21,7 +21,7 @@ const Link: FunctionComponent<LinkProps> = ({
   isDisabled,
   isCurrent,
   ...rest
-}: LinkProps) => {
+}) => {
   return (
     <a
       href={href || undefined}
