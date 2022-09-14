@@ -39,8 +39,8 @@ const Mire: FunctionComponent = () => {
       })
   }
 
-  if (staff) return <Redirect to="/tableauDeBord/gerer-utilisateurs" />
-  if (isAuthenticated) return <Redirect to="/tableauDeBord/mes-declarations" />
+  if (staff) return <Redirect to="/mon-espace/gerer-utilisateurs" />
+  if (isAuthenticated) return <Redirect to="/mon-espace/mes-declarations" />
 
   return (
     <SinglePageLayout>

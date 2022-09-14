@@ -231,7 +231,7 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
   )
 
   const resetDeclaration = useCallback(() => {
-    history.push(`/nouvelle-simulation`)
+    history.push(`simulateur/nouvelle-simulation`)
   }, [history])
 
   const helpers = buildHelpers(state)

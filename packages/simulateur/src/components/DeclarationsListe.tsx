@@ -66,14 +66,14 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                       {statusDeclaration(declarations[annee]) === "À renseigner" ? (
                         <>
                           <IconInvalid mr="2" color="red.500" />
-                          <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
+                          <Link as={RouterLink} to={"/mon-espace/objectifs-mesures/" + siren + "/" + annee}>
                             À renseigner
                           </Link>
                         </>
                       ) : statusDeclaration(declarations[annee]) === "Renseignés" ? (
                         <>
                           <IconValid mr="2" color="green.500" />
-                          <Link as={RouterLink} to={"/tableauDeBord/objectifs-mesures/" + siren + "/" + annee}>
+                          <Link as={RouterLink} to={"/mon-espace/objectifs-mesures/" + siren + "/" + annee}>
                             Déjà renseignés
                           </Link>
                         </>

@@ -7,16 +7,10 @@ import { AppState, ActionType } from "../globals"
 
 import Header from "../components/Header"
 
-import CGU from "../views/CGU"
-import Home from "../views/Home"
-import MentionsLegales from "../views/MentionsLegales"
-import PolitiqueConfidentialite from "../views/PolitiqueConfidentialite"
 import PageNotFound from "../views/PageNotFound"
 
 import Simulateur from "./Simulateur"
 import MainScrollView from "./MainScrollView"
-import { SinglePageLayout } from "./SinglePageLayout"
-import Accessibilite from "../views/Accessibilite"
 import MesEntreprises from "../views/private/MesEntreprises"
 import MonProfil from "../views/private/MonProfil"
 import Mire from "../views/Mire"
@@ -45,7 +39,7 @@ function PrivateRoute({ children, staffOnly, ...rest }: RouteProps & { staffOnly
 
   if (!isAuthenticated) return <Mire />
 
-  if (staffOnly && !staff) return <Redirect to="/tableauDeBord/mes-declarations" />
+  if (staffOnly && !staff) return <Redirect to="/mon-espace/mes-declarations" />
 
   return <Route {...rest} render={() => children} />
 }
@@ -53,28 +47,28 @@ function PrivateRoute({ children, staffOnly, ...rest }: RouteProps & { staffOnly
 function DashboardRoutes() {
   return (
     <Switch>
-      <Route path="/tableauDeBord/me-connecter" exact>
+      <Route path="/mon-espace/me-connecter" exact>
         <Mire />
       </Route>
-      <PrivateRoute path="/tableauDeBord/mes-entreprises" exact>
+      <PrivateRoute path="/mon-espace/mes-entreprises" exact>
         <MesEntreprises />
       </PrivateRoute>
-      <PrivateRoute path="/tableauDeBord/mes-declarations" exact>
+      <PrivateRoute path="/mon-espace/mes-declarations" exact>
         <MesDeclarations />
       </PrivateRoute>
-      <PrivateRoute path="/tableauDeBord/mes-declarations/:siren" exact>
+      <PrivateRoute path="/mon-espace/mes-declarations/:siren" exact>
         <MesDeclarations />
       </PrivateRoute>
-      <PrivateRoute path="/tableauDeBord/objectifs-mesures/:siren/:year" exact>
+      <PrivateRoute path="/mon-espace/objectifs-mesures/:siren/:year" exact>
         <ObjectifsMesuresPage />
       </PrivateRoute>
-      <PrivateRoute path="/tableauDeBord/gerer-utilisateurs" staffOnly exact>
+      <PrivateRoute path="/mon-espace/gerer-utilisateurs" staffOnly exact>
         <GererUtilisateursPage />
       </PrivateRoute>
-      <PrivateRoute path="/tableauDeBord/generer-token-utilisateur" staffOnly exact>
+      <PrivateRoute path="/mon-espace/generer-token-utilisateur" staffOnly exact>
         <GenererTokenUtilisateurPage />
       </PrivateRoute>
-      <PrivateRoute path="/tableauDeBord/mon-profil" exact>
+      <PrivateRoute path="/mon-espace/mon-profil" exact>
         <MonProfil />
       </PrivateRoute>
     </Switch>
@@ -86,37 +80,13 @@ function AppLayout({ state, dispatch }: Props) {
     <AuthContextProvider>
       <Switch>
         <Route
-          path="/nouvelle-simulation"
+          path="/simulateur/nouvelle-simulation"
           exact
           render={(props) => <ResetPage {...props} dispatch={dispatch} state={state} />}
         />
 
-        <Route path="/tableauDeBord/">
+        <Route path="/mon-espace/">
           <DashboardRoutes />
-        </Route>
-
-        <Route path="/politique-confidentialite" exact>
-          <SinglePageLayout>
-            <PolitiqueConfidentialite />
-          </SinglePageLayout>
-        </Route>
-
-        <Route path="/accessibilite" exact>
-          <SinglePageLayout>
-            <Accessibilite />
-          </SinglePageLayout>
-        </Route>
-
-        <Route path="/cgu" exact>
-          <SinglePageLayout>
-            <CGU />
-          </SinglePageLayout>
-        </Route>
-
-        <Route path="/mentions-legales" exact>
-          <SinglePageLayout>
-            <MentionsLegales />
-          </SinglePageLayout>
         </Route>
 
         <>
@@ -124,7 +94,6 @@ function AppLayout({ state, dispatch }: Props) {
             <Header />
             <MainScrollView state={state}>
               <Switch>
-                <Route path="/" exact render={(props) => <Home {...props} dispatch={dispatch} />} />
                 <Route path="/simulateur/:code">
                   <Simulateur state={state} dispatch={dispatch} />
                 </Route>
