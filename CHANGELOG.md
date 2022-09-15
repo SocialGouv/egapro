@@ -1,3 +1,10 @@
+## [2.16.1](https://github.com/SocialGouv/egapro/compare/v2.16.0...v2.16.1) (2022-09-15)
+
+
+### Bug Fixes
+
+* **app:** update favicon ([#1016](https://github.com/SocialGouv/egapro/issues/1016)) ([0c5be74](https://github.com/SocialGouv/egapro/commit/0c5be74f45f0502fe37b0e2076f5def9a5cdf285))
+
 # [2.16.0](https://github.com/SocialGouv/egapro/compare/v2.15.0...v2.16.0) (2022-09-14)
 
 
