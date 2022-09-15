@@ -136,7 +136,9 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({ name, label, readOnly,
                 <MailtoLink siren={field.input.value} email={email}>
                   ici
                 </MailtoLink>
-                &nbsp;(si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à
+                .
+                <br />
+                (si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à<br />
                 dgt.ega-pro@travail.gouv.fr).
               </div>
             )}
