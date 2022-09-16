@@ -34,7 +34,7 @@ const MesDeclarations: FunctionComponent = () => {
             <FormControl id="siren">
               <FormLabel>SIREN</FormLabel>
               <Select
-                onChange={(event) => history.push(`/tableauDeBord/mes-declarations/${event?.target?.value}`)}
+                onChange={(event) => history.push(`/mon-espace/mes-declarations/${event?.target?.value}`)}
                 defaultValue={siren}
                 aria-label="Liste des SIREN"
               >

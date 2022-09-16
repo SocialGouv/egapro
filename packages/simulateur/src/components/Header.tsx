@@ -55,7 +55,7 @@ const Header: FunctionComponent = () => {
 
   const disconnectUser = () => {
     logout()
-    history.push("/tableauDeBord/me-connecter")
+    history.push("/mon-espace/me-connecter")
   }
   return (
     <>
@@ -118,7 +118,7 @@ const Header: FunctionComponent = () => {
                 </Link>
               </Box>
               <Box fontFamily="custom">
-                <Link as={RouterLink} to="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
+                <Link href="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
                   Index Egapro
                 </Link>
                 {!isMobile && (
@@ -139,21 +139,21 @@ const Header: FunctionComponent = () => {
                     <MenuGroup title="Mon compte">
                       <MenuItem
                         as={RouterLink}
-                        to="/tableauDeBord/mon-profil"
+                        to="/mon-espace/mon-profil"
                         icon={<IconPeople boxSize={5} color="gray.400" />}
                       >
                         Mon Profil
                       </MenuItem>
                       <MenuItem
                         as={RouterLink}
-                        to="/tableauDeBord/mes-entreprises"
+                        to="/mon-espace/mes-entreprises"
                         icon={<IconOfficeBuilding boxSize={5} color="gray.400" />}
                       >
                         Mes entreprises
                       </MenuItem>
                       <MenuItem
                         as={RouterLink}
-                        to="/tableauDeBord/mes-declarations"
+                        to="/mon-espace/mes-declarations"
                         icon={<IconEdit boxSize={5} color="gray.400" />}
                       >
                         Mes déclarations
@@ -168,14 +168,14 @@ const Header: FunctionComponent = () => {
                         <MenuGroup title="Administration">
                           <MenuItem
                             as={RouterLink}
-                            to="/tableauDeBord/gerer-utilisateurs"
+                            to="/mon-espace/gerer-utilisateurs"
                             icon={<IconUserGroup boxSize={5} color="gray.400" />}
                           >
                             Gérer utilisateurs
                           </MenuItem>
                           <MenuItem
                             as={RouterLink}
-                            to="/tableauDeBord/generer-token-utilisateur"
+                            to="/mon-espace/generer-token-utilisateur"
                             icon={<LinkIcon boxSize={5} color="gray.400" />}
                           >
                             Générer token
@@ -199,14 +199,14 @@ const Header: FunctionComponent = () => {
                 <ButtonGroup gap="0">
                   {isMobile && (
                     <>
-                      <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
+                      <ButtonLink to="/mon-espace/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
                       <ButtonAction onClick={onOpen} label={"Consulter l'aide"} variant="ghost" size="xs" />
                     </>
                   )}
                   {isBiggerThanMobileAndSmallerThan1280 && (
                     <>
                       <ButtonLink
-                        to="/tableauDeBord/me-connecter"
+                        to="/mon-espace/me-connecter"
                         label={"Me connecter"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
@@ -222,7 +222,7 @@ const Header: FunctionComponent = () => {
                   {isLargerThan1280 && (
                     <>
                       <ButtonLink
-                        to="/tableauDeBord/me-connecter"
+                        to="/mon-espace/me-connecter"
                         label={"Me connecter"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"

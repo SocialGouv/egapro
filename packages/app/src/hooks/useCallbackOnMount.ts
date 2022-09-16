@@ -1,7 +1,7 @@
-import React from "react"
+import { useCallback } from "react"
 
 export function useCallbackOnMount(callback: Function) {
-  return React.useCallback(() => {
+  return useCallback(() => {
     callback()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

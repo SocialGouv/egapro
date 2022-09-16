@@ -81,35 +81,50 @@ Object {
               class="css-1ebpvxu"
             >
               <div
-                class="css-tj0ab2"
+                class="css-u4p24i"
               >
-                <a
-                  class="chakra-link css-13o7eu2"
-                  href="https://travail-emploi.gouv.fr/"
-                  rel="noopener noreferrer"
-                  target="_blank"
+                <div
+                  class="css-tj0ab2"
                 >
-                  <img
-                    alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
-                    class="chakra-image css-6t4orf"
-                    src="/consulter-index/icons/marianne.svg"
-                  />
-                </a>
+                  <a
+                    class="chakra-link css-13o7eu2"
+                    href="https://travail-emploi.gouv.fr/"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <img
+                      alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+                      class="chakra-image css-6t4orf"
+                      src="/icons/marianne.svg"
+                    />
+                  </a>
+                </div>
+                <div
+                  class="css-nbt6tq"
+                >
+                  <a
+                    class="chakra-link css-1n49pl7"
+                    href="/"
+                  >
+                    Index Egapro
+                  </a>
+                  <p
+                    class="chakra-text css-1lj023j"
+                  >
+                    L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                  </p>
+                </div>
               </div>
               <div
-                class="css-nbt6tq"
+                class="css-17xejub"
+              />
+              <div
+                class="css-0"
               >
-                <a
-                  class="chakra-link css-1n49pl7"
-                  href="/"
-                >
-                  Index Egapro
-                </a>
-                <p
-                  class="chakra-text css-1lj023j"
-                >
-                  L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
-                </p>
+                <div
+                  class="chakra-button__group css-1jyoh1z"
+                  role="group"
+                />
               </div>
             </div>
           </div>
@@ -148,7 +163,7 @@ Object {
                   <img
                     alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                     class="chakra-image css-6t4orf"
-                    src="/consulter-index/icons/marianne.svg"
+                    src="/icons/marianne.svg"
                   />
                 </a>
               </div>
@@ -192,6 +207,43 @@ Object {
                         </g>
                       </svg>
                     </div>
+                  </a>
+                </li>
+                <li
+                  class="css-0"
+                >
+                  <a
+                    class="chakra-link css-0"
+                  >
+                    Mentions légales
+                  </a>
+                </li>
+                <li
+                  class="css-0"
+                >
+                  <a
+                    class="chakra-link css-0"
+                    href="/a11y/declaration-accessibilite-rgaa-4-1.pdf"
+                  >
+                    Accessibilité : partiellement conforme
+                  </a>
+                </li>
+                <li
+                  class="css-0"
+                >
+                  <a
+                    class="chakra-link css-0"
+                  >
+                    Conditions générales d'utilisation
+                  </a>
+                </li>
+                <li
+                  class="css-0"
+                >
+                  <a
+                    class="chakra-link css-0"
+                  >
+                    Politique de confidentialité
                   </a>
                 </li>
               </ul>
@@ -282,35 +334,50 @@ Object {
             class="css-1ebpvxu"
           >
             <div
-              class="css-tj0ab2"
+              class="css-u4p24i"
             >
-              <a
-                class="chakra-link css-13o7eu2"
-                href="https://travail-emploi.gouv.fr/"
-                rel="noopener noreferrer"
-                target="_blank"
+              <div
+                class="css-tj0ab2"
               >
-                <img
-                  alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
-                  class="chakra-image css-6t4orf"
-                  src="/consulter-index/icons/marianne.svg"
-                />
-              </a>
+                <a
+                  class="chakra-link css-13o7eu2"
+                  href="https://travail-emploi.gouv.fr/"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <img
+                    alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+                    class="chakra-image css-6t4orf"
+                    src="/icons/marianne.svg"
+                  />
+                </a>
+              </div>
+              <div
+                class="css-nbt6tq"
+              >
+                <a
+                  class="chakra-link css-1n49pl7"
+                  href="/"
+                >
+                  Index Egapro
+                </a>
+                <p
+                  class="chakra-text css-1lj023j"
+                >
+                  L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                </p>
+              </div>
             </div>
             <div
-              class="css-nbt6tq"
+              class="css-17xejub"
+            />
+            <div
+              class="css-0"
             >
-              <a
-                class="chakra-link css-1n49pl7"
-                href="/"
-              >
-                Index Egapro
-              </a>
-              <p
-                class="chakra-text css-1lj023j"
-              >
-                L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
-              </p>
+              <div
+                class="chakra-button__group css-1jyoh1z"
+                role="group"
+              />
             </div>
           </div>
         </div>
@@ -349,7 +416,7 @@ Object {
                 <img
                   alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                   class="chakra-image css-6t4orf"
-                  src="/consulter-index/icons/marianne.svg"
+                  src="/icons/marianne.svg"
                 />
               </a>
             </div>
@@ -393,6 +460,43 @@ Object {
                       </g>
                     </svg>
                   </div>
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                >
+                  Mentions légales
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                  href="/a11y/declaration-accessibilite-rgaa-4-1.pdf"
+                >
+                  Accessibilité : partiellement conforme
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                >
+                  Conditions générales d'utilisation
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                >
+                  Politique de confidentialité
                 </a>
               </li>
             </ul>

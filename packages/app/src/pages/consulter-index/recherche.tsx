@@ -32,8 +32,8 @@ import type { CompaniesType, CompanyType, TrancheType } from "@common/models/com
 import ButtonAction from "@components/ds/ButtonAction"
 import { SinglePageLayout } from "@components/ds/SinglePageLayout"
 import { AlertSpinner } from "@components/ds/AlertSpinner"
-import { SearchCompanyParams, useSearch } from "../hooks"
-import { filterDepartements, useConfig, useCallbackOnMount } from "../hooks"
+import { SearchCompanyParams, useSearch } from "../../hooks"
+import { filterDepartements, useConfig, useCallbackOnMount } from "../../hooks"
 import { capitalize } from "@common/utils/string"
 import { Banner } from "@components/ds/Banner"
 
@@ -407,7 +407,7 @@ export default function SearchPage() {
   function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
 
-    router.replace({ pathname: "/recherche", query: search })
+    router.replace({ pathname: "/consulter-index/recherche", query: search })
   }
 
   function handleChange(event: React.SyntheticEvent) {
