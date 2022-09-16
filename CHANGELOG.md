@@ -1,3 +1,10 @@
+# [2.17.0](https://github.com/SocialGouv/egapro/compare/v2.16.1...v2.17.0) (2022-09-16)
+
+
+### Features
+
+* added get declaration endpoint for rep-eq ([#1014](https://github.com/SocialGouv/egapro/issues/1014)) ([e4fc80f](https://github.com/SocialGouv/egapro/commit/e4fc80fa39df8b26271c178684de36c784b06a16))
+
 ## [2.16.1](https://github.com/SocialGouv/egapro/compare/v2.16.0...v2.16.1) (2022-09-15)
 
 
