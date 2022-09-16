@@ -16,6 +16,7 @@ type EntrepriseUESInputProps = {
   index: number
   readOnly: boolean
   updateSirenData: (sirenData: EntrepriseType) => void
+  year: number
 }
 
 const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({
@@ -24,6 +25,7 @@ const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({
   index,
   readOnly,
   updateSirenData,
+  year,
 }) => {
   const checkDuplicates = (value: string, allValues: any) => {
     const sirenList = allValues.entreprisesUES.map((entreprise: EntrepriseUES) => entreprise.siren)
@@ -58,7 +60,8 @@ const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({
             name={siren}
             readOnly={readOnly}
             updateSirenData={updateSirenData}
-            validator={composeValidators(checkDuplicates, sirenValidator(updateSirenData))}
+            year={year}
+            validator={composeValidators(checkDuplicates, sirenValidator(year)(updateSirenData))}
           />
         )}
         <FakeInputGroup label="Nom de l'entreprise">{nomField.input.value}</FakeInputGroup>
