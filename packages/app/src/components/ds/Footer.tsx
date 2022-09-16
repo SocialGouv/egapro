@@ -1,5 +1,5 @@
 import React from "react"
-// import NextLink from "next/link"
+import NextLink from "next/link"
 import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/react"
 
 import Logo from "./Logo"
@@ -8,7 +8,7 @@ import packageConfig from "../../../package.json"
 import { ExternalLinkIcon } from "@chakra-ui/icons"
 
 function Footer() {
-  const version = process.env.REACT_APP_VERSION || packageConfig.version
+  const version = process.env.NEXT_PUBLIC_VERSION || packageConfig.version
 
   return (
     <Box
@@ -61,13 +61,13 @@ function Footer() {
                 </Flex>
               </Link>
             </ListItem>
-            {/* <ListItem>
+            <ListItem>
               <NextLink href="/mentions-legales">
                 <Link>Mentions légales</Link>
               </NextLink>
             </ListItem>
             <ListItem>
-              <Link href={process.env.PUBLIC_URL + "/a11y/declaration-accessibilite-rgaa-4-1.pdf"}>
+              <Link href="/a11y/declaration-accessibilite-rgaa-4-1.pdf">
                 Accessibilité&nbsp;: partiellement conforme
               </Link>
             </ListItem>
@@ -80,7 +80,7 @@ function Footer() {
               <NextLink href="/politique-confidentialite">
                 <Link>Politique de confidentialité</Link>
               </NextLink>
-            </ListItem> */}
+            </ListItem>
           </List>
         </Box>
 

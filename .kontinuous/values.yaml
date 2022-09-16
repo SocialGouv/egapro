@@ -2,10 +2,10 @@ app:
   ~chart: app
   ~needs: [build-app]
   imagePackage: app
-  probesPath: /consulter-index/healthz
+  probesPath: /healthz
   containerPort: 3000
   host: "{{ .Values.global.host }}"
-  .ingress.path: /consulter-index(/|$)(.*)
+  .ingress.path: /
   certSecretName: api-crt
 
 storybook:
@@ -36,7 +36,18 @@ simulateur:
   probesPath: /index.html
   containerPort: 8080
   host: "{{ .Values.global.host }}"
-  .ingress.path: /
+  .ingress.path: /simulateur(/|$)(.*)
+  certSecretName: api-crt
+
+# Clone du container simulateur pour la partie mon-espace (hack temporaire)
+mon-espace:
+  ~chart: app
+  ~needs: [build-simulateur]
+  imagePackage: simulateur
+  probesPath: /index.html
+  containerPort: 8080
+  host: "{{ .Values.global.host }}"
+  .ingress.path: /mon-espace(/|$)(.*)
   certSecretName: api-crt
 
 api:
@@ -152,6 +163,9 @@ jobs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+          REACT_APP_ROOT_PATH: "/simulateur"
+          PUBLIC_URL: "/simulateur"
+
 deactivate:
   jobs-deactivate:
     runs:

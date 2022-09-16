@@ -56,7 +56,7 @@ Object {
                 <img
                   alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                   class="chakra-image css-6t4orf"
-                  src="/consulter-index/icons/marianne.svg"
+                  src="/icons/marianne.svg"
                 />
               </a>
             </div>
@@ -100,6 +100,43 @@ Object {
                       </g>
                     </svg>
                   </div>
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                >
+                  Mentions légales
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                  href="/a11y/declaration-accessibilite-rgaa-4-1.pdf"
+                >
+                  Accessibilité : partiellement conforme
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                >
+                  Conditions générales d'utilisation
+                </a>
+              </li>
+              <li
+                class="css-0"
+              >
+                <a
+                  class="chakra-link css-0"
+                >
+                  Politique de confidentialité
                 </a>
               </li>
             </ul>
@@ -164,7 +201,7 @@ Object {
               <img
                 alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                 class="chakra-image css-6t4orf"
-                src="/consulter-index/icons/marianne.svg"
+                src="/icons/marianne.svg"
               />
             </a>
           </div>
@@ -208,6 +245,43 @@ Object {
                     </g>
                   </svg>
                 </div>
+              </a>
+            </li>
+            <li
+              class="css-0"
+            >
+              <a
+                class="chakra-link css-0"
+              >
+                Mentions légales
+              </a>
+            </li>
+            <li
+              class="css-0"
+            >
+              <a
+                class="chakra-link css-0"
+                href="/a11y/declaration-accessibilite-rgaa-4-1.pdf"
+              >
+                Accessibilité : partiellement conforme
+              </a>
+            </li>
+            <li
+              class="css-0"
+            >
+              <a
+                class="chakra-link css-0"
+              >
+                Conditions générales d'utilisation
+              </a>
+            </li>
+            <li
+              class="css-0"
+            >
+              <a
+                class="chakra-link css-0"
+              >
+                Politique de confidentialité
               </a>
             </li>
           </ul>

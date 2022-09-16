@@ -21,6 +21,8 @@
     "@emotion/styled": "^11",
     "@fontsource/cabin": "^4.5.2",
     "@fontsource/gabriela": "^4.5.2",
+    "@heroicons/react": "^1.0.5",
+    "@sentry/react": "^6.19.1",
     "@gouvfr/dsfr": "^1.7.2",
     "@socialgouv/matomo-next": "^1.2.2",
     "date-fns": "^2.28.0",

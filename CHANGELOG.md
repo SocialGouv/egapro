@@ -1,3 +1,39 @@
+# [2.19.0](https://github.com/SocialGouv/egapro/compare/v2.18.0...v2.19.0) (2022-09-16)
+
+
+### Features
+
+* add a br before email ([#1018](https://github.com/SocialGouv/egapro/issues/1018)) ([80515d2](https://github.com/SocialGouv/egapro/commit/80515d220bd368a4fbcdd54ac2671f446bc133ce))
+* refactor with new endpoint /declarations ([#1011](https://github.com/SocialGouv/egapro/issues/1011)) ([8047d40](https://github.com/SocialGouv/egapro/commit/8047d40e7391ddc9e09dfdec49379aa7214a4345))
+
+# [2.18.0](https://github.com/SocialGouv/egapro/compare/v2.17.0...v2.18.0) (2022-09-16)
+
+
+### Features
+
+* adapt to changes on validate-siren endpoint ([#1013](https://github.com/SocialGouv/egapro/issues/1013)) ([fdd94e7](https://github.com/SocialGouv/egapro/commit/fdd94e774534c3369084d827df7a1aa6bdcf0644))
+
+# [2.17.0](https://github.com/SocialGouv/egapro/compare/v2.16.1...v2.17.0) (2022-09-16)
+
+
+### Features
+
+* added get declaration endpoint for rep-eq ([#1014](https://github.com/SocialGouv/egapro/issues/1014)) ([e4fc80f](https://github.com/SocialGouv/egapro/commit/e4fc80fa39df8b26271c178684de36c784b06a16))
+
+## [2.16.1](https://github.com/SocialGouv/egapro/compare/v2.16.0...v2.16.1) (2022-09-15)
+
+
+### Bug Fixes
+
+* **app:** update favicon ([#1016](https://github.com/SocialGouv/egapro/issues/1016)) ([0c5be74](https://github.com/SocialGouv/egapro/commit/0c5be74f45f0502fe37b0e2076f5def9a5cdf285))
+
+# [2.16.0](https://github.com/SocialGouv/egapro/compare/v2.15.0...v2.16.0) (2022-09-14)
+
+
+### Features
+
+* migration homepage from simu to app ([#1003](https://github.com/SocialGouv/egapro/issues/1003)) ([ec1c43c](https://github.com/SocialGouv/egapro/commit/ec1c43c4ca662b245bd46a622ea9d50bfa20b5e3))
+
 # [2.15.0](https://github.com/SocialGouv/egapro/compare/v2.14.0...v2.15.0) (2022-09-13)
 
 
