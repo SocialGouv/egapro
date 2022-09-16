@@ -31,9 +31,9 @@ const INVALID_SIREN = "Le SIREN est invalide."
 
 const FOREIGN_SIREN = "Le SIREN saisi correspond à une entreprise étrangère."
 
-async function checkSiren(siren: string) {
+async function checkSiren(siren: string, year: number) {
   try {
-    const result = await memoizedValidateSiren(siren)
+    const result = await memoizedValidateSiren(siren, year)
     return result
   } catch (error: any) {
     console.error(error?.response?.status, error)
@@ -56,43 +56,46 @@ async function checkSiren(siren: string) {
   }
 }
 
-export const checkSirenWithoutOwner = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
-  try {
-    const result = await checkSiren(siren)
+export const checkSirenWithoutOwner =
+  (year: number) => (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
+    try {
+      const result = await checkSiren(siren, year)
+      updateSirenData(result.jsonBody)
+    } catch (error: unknown) {
+      updateSirenData({})
+      return (error as Error).message
+    }
+  }
+
+export const checkSirenWithOwner =
+  (year: number) => (updateSirenData: (data: EntrepriseType) => void) => async (siren: string, allValues: any) => {
+    let result
+
+    try {
+      result = await checkSiren(siren, year)
+    } catch (error: unknown) {
+      updateSirenData({})
+      return (error as Error).message
+    }
+
+    try {
+      await ownersForSiren(siren)
+    } catch (error) {
+      console.error(error)
+      updateSirenData({})
+      return NOT_ALLOWED_MESSAGE
+    }
+
     updateSirenData(result.jsonBody)
-  } catch (error: unknown) {
-    updateSirenData({})
-    return (error as Error).message
-  }
-}
-
-export const checkSirenWithOwner = (updateSirenData: (data: EntrepriseType) => void) => async (siren: string) => {
-  let result
-  try {
-    result = await checkSiren(siren)
-  } catch (error: unknown) {
-    updateSirenData({})
-    return (error as Error).message
   }
 
-  try {
-    await ownersForSiren(siren)
-  } catch (error) {
-    console.error(error)
-    updateSirenData({})
-    return NOT_ALLOWED_MESSAGE
-  }
-
-  updateSirenData(result.jsonBody)
-}
-
-export const sirenValidator = (updateSirenData: (data: EntrepriseType) => void) =>
+export const sirenValidator = (year: number) => (updateSirenData: (data: EntrepriseType) => void) =>
   // By default, check the siren with the owner.
-  composeValidators(required, nineDigits, checkSirenWithoutOwner(updateSirenData))
+  composeValidators(required, nineDigits, checkSirenWithoutOwner(year)(updateSirenData))
 
-export const sirenValidatorWithOwner = (updateSirenData: (data: EntrepriseType) => void) =>
+export const sirenValidatorWithOwner = (year: number) => (updateSirenData: (data: EntrepriseType) => void) =>
   // By default, check the siren with the owner.
-  composeValidators(required, nineDigits, checkSirenWithOwner(updateSirenData))
+  composeValidators(required, nineDigits, checkSirenWithOwner(year)(updateSirenData))
 
 type FieldSirenProps = {
   name: string
@@ -100,11 +103,21 @@ type FieldSirenProps = {
   readOnly: boolean
   updateSirenData: (sirenData: EntrepriseType) => void
   validator?: ValidatorFunction
+  year: number
 }
 
-const FieldSiren: FunctionComponent<FieldSirenProps> = ({ name, label, readOnly, updateSirenData, validator }) => {
+const FieldSiren: FunctionComponent<FieldSirenProps> = ({
+  name,
+  label,
+  readOnly,
+  updateSirenData,
+  validator,
+  year,
+}) => {
   const field = useField(name, {
-    validate: validator ? validator : sirenValidatorWithOwner(updateSirenData),
+    // We need to stick year in a curry function, to make the validator have access to it in checkSiren...
+    // This would be better with context, to get access to the year without prop drilling and with React Hook Form, which doesn't constrain on which validator to use.
+    validate: validator ? validator : sirenValidatorWithOwner(year)(updateSirenData),
     validateFields: [],
   })
   const { meta } = field
