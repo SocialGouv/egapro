@@ -1,3 +1,11 @@
+# [2.19.0](https://github.com/SocialGouv/egapro/compare/v2.18.0...v2.19.0) (2022-09-16)
+
+
+### Features
+
+* add a br before email ([#1018](https://github.com/SocialGouv/egapro/issues/1018)) ([80515d2](https://github.com/SocialGouv/egapro/commit/80515d220bd368a4fbcdd54ac2671f446bc133ce))
+* refactor with new endpoint /declarations ([#1011](https://github.com/SocialGouv/egapro/issues/1011)) ([8047d40](https://github.com/SocialGouv/egapro/commit/8047d40e7391ddc9e09dfdec49379aa7214a4345))
+
 # [2.18.0](https://github.com/SocialGouv/egapro/compare/v2.17.0...v2.18.0) (2022-09-16)
 
 
