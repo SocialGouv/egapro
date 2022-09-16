@@ -1,3 +1,10 @@
+# [2.18.0](https://github.com/SocialGouv/egapro/compare/v2.17.0...v2.18.0) (2022-09-16)
+
+
+### Features
+
+* adapt to changes on validate-siren endpoint ([#1013](https://github.com/SocialGouv/egapro/issues/1013)) ([fdd94e7](https://github.com/SocialGouv/egapro/commit/fdd94e774534c3369084d827df7a1aa6bdcf0644))
+
 # [2.17.0](https://github.com/SocialGouv/egapro/compare/v2.16.1...v2.17.0) (2022-09-16)
 
 
