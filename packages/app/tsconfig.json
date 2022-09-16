@@ -5,21 +5,10 @@
     "strict": true,
     "baseUrl": "./src",
     "paths": {
-      "@common/*": [
-        "common/*"
-      ],
-      "@components/*": [
-        "components/*"
-      ]
+      "@common/*": ["common/*"],
+      "@components/*": ["components/*"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "node_modules",
-    "__tests__"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "__tests__"]
 }

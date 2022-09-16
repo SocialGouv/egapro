@@ -16,7 +16,6 @@ const SideMenu: FunctionComponent<SideMenuProps> = ({
   const [isExpanded, setExpanded] = useState(false)
   const wrapperId = "fr-sidemenu-wrapper"
   const { item, collapse } = useCollapse(wrapperId, isExpanded)
-  console.log("xxxxx", collapse)
   return (
     <nav className="fr-sidemenu" aria-label="Menu latéral">
       <div className="fr-sidemenu__inner">
