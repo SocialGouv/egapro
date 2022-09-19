@@ -3,9 +3,17 @@ module.exports = {
     browser: true,
     node: true,
     es2020: true,
-    "jest/globals": true
+    "jest/globals": true,
   },
-  extends: ["next/core-web-vitals", "eslint:recommended", "plugin:react/recommended", "plugin:jsx-a11y/recommended", "plugin:prettier/recommended", "plugin:testing-library/react", "plugin:jest-dom/recommended", "plugin:storybook/recommended"],
+  extends: [
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:prettier/recommended",
+    "plugin:testing-library/react",
+    "plugin:jest-dom/recommended",
+  ],
   plugins: ["jest"],
   rules: {
     "react/prop-types": "off",
@@ -19,14 +27,20 @@ module.exports = {
     //   "warn"
     // ],
     // "@typescript-eslint/ban-ts-comment": "off", // TODO : à supprimer ?
-    "react/no-unescaped-entities": ["error", {
-      forbid: [">", "}"]
-    }],
+    "react/no-unescaped-entities": [
+      "error",
+      {
+        forbid: [">", "}"],
+      },
+    ],
     // ajout qui autorise les apostrophes dans le JSX.
-    "prettier/prettier": ["error", {
-      trailingComma: "all",
-      semi: false,
-      printWidth: 120
-    }]
-  }
-};
+    "prettier/prettier": [
+      "error",
+      {
+        trailingComma: "all",
+        semi: false,
+        printWidth: 120,
+      },
+    ],
+  },
+}
