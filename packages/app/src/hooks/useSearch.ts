@@ -1,11 +1,12 @@
-import type { CompaniesType, CompanyType } from "@common/models/company";
-import { buildUrlParams } from "@common/utils/url";
 import moize from "moize";
 import type { SWRInfiniteKeyLoader } from "swr/infinite";
 import useSWRInfinite from "swr/infinite";
 
 import type { FetcherInfiniteReturn } from "./utils";
 import { fetcher } from "./utils";
+import type { CompaniesType, CompanyType } from "@common/models/company";
+
+import { buildUrlParams } from "@common/utils/url";
 
 export type SearchCompanyParams = {
   departement?: string;

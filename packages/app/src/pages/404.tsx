@@ -1,11 +1,10 @@
 import { Box, Text } from "@chakra-ui/react";
-import { SinglePageLayout } from "@components/ds";
 import { push } from "@socialgouv/matomo-next";
+import type { NextPage } from "next";
 import Head from "next/head";
-import type { ReactElement } from "react";
 import { useEffect } from "react";
 
-export default function NotFoundPage() {
+const NotFoundPage: NextPage = () => {
   useEffect(() => {
     push(["trackEvent", "404", "Page non trouvée"]);
   }, []);
@@ -23,8 +22,6 @@ export default function NotFoundPage() {
       </Box>
     </>
   );
-}
-
-NotFoundPage.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>;
 };
+
+export default NotFoundPage;

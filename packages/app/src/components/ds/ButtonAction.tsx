@@ -1,6 +1,5 @@
 import type { ButtonProps as ButtonChakraProps } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
-import type { FC } from "react";
 import React from "react";
 
 export type ButtonProps = ButtonChakraProps & {
@@ -20,7 +19,7 @@ export type ButtonActionProps = ButtonProps & {
   type?: "button" | "reset" | "submit" | undefined;
 };
 
-export const ButtonAction: FC<ButtonActionProps> = ({
+export const ButtonAction: React.FC<ButtonActionProps> = ({
   label,
   colorScheme = "primary",
   variant = "solid",
