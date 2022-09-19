@@ -1,4 +1,4 @@
-import React from "react";
+import { useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
 
 import type { FetcherReturnImmutable } from "./utils";
@@ -60,7 +60,7 @@ export function useConfig(): FetcherReturnImmutable & { config: ConfigTypeFormat
   };
 
   // We want to ensure that the data is always the same object on every render, once there is a value.
-  const newData = React.useMemo(
+  const newData = useMemo(
     () => (!data ? null : { ...data, ...addon }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data],

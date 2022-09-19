@@ -8,7 +8,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import * as React from "react";
+import React, { useEffect } from "react";
 import { FiInfo } from "react-icons/fi";
 
 export const Banner = () => {
@@ -16,7 +16,7 @@ export const Banner = () => {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const bgColor = useColorModeValue("yellow.100", "yellow.400");
 
-  React.useEffect(() => {
+  useEffect(() => {
     // First case : on mount, the variable in sessionStorage is undefined.
     if (sessionStorage.getItem("banner.dontShow") === null || sessionStorage.getItem("banner.dontShow") === "false")
       onOpen();

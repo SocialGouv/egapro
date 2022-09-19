@@ -1,124 +1,65 @@
-import {
-  Box,
-  Center,
-  Flex,
-  Heading,
-  Input,
-  LinkBox,
-  LinkOverlay,
-  Text,
-  useColorModeValue,
-  VStack,
-} from "@chakra-ui/react";
-import { format } from "date-fns";
-import Head from "next/head";
+import { Heading, SimpleGrid } from "@chakra-ui/react";
+import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import type { ReactElement } from "react";
-import React from "react";
-import { HiDownload } from "react-icons/hi";
-import { AverageIndicator } from "@components/AverageIndicator";
+
+import { Page } from "@components/Page";
 import { ButtonAction } from "@components/ds/ButtonAction";
-import { SinglePageLayout } from "@components/ds/SinglePageLayout";
+import { ButtonLinkNoRouter } from "@components/ds/ButtonLinkNoRouter";
+import { Card } from "@components/ds/Card";
 
-async function getDateCsv(): Promise<string> {
-  try {
-    const responseCsv = await fetch("/index-egalite-fh.csv", { method: "HEAD" });
-    const date = responseCsv?.headers?.get("last-modified");
-
-    if (date) {
-      const lastModified = new Date(date);
-      return format(lastModified, "dd/MM/yyyy");
-    }
-  } catch (error) {
-    console.error("Error on fetch HEAD /index-egalite-fh.csv", error);
-  }
-  return "";
-}
-
-function FormSearchSiren() {
+const Home: NextPage = () => {
   const router = useRouter();
-  const formRef = React.useRef(null);
-  const bgSelect = useColorModeValue("white", "blue.700");
 
-  function handleSubmit(event: React.SyntheticEvent) {
-    event.preventDefault();
-    const data = new FormData(formRef.current || undefined);
-
-    const { q } = Object.fromEntries(data);
-
-    router.push("/recherche" + (q ? `?q=${q}` : ""));
-  }
+  const onClick = () => {
+    router.push(`/simulateur/nouvelle-simulation`);
+  };
 
   return (
-    <form onSubmit={handleSubmit} style={{ textAlign: "center" }} ref={formRef} noValidate>
-      <Heading as="h1" fontFamily="gabriela" size="lg" mb={["8", "12"]} mt={["0", "4"]}>
-        Consulter l'index de l'égalité professionnelle d'une entreprise
+    <Page
+      title="Bienvenue sur Index Egapro"
+      tagline={[
+        "L’Index de l'égalité professionnelle a été conçu pour faire progresser au sein des entreprises l’égalité salariale entre les femmes et les hommes.",
+        "Il permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression. Lorsque des disparités salariales sont constatées, des mesures de correction doivent être prises.",
+      ]}
+    >
+      <Heading as="h2" size="md" mb={6}>
+        Comment calculer et déclarer l’index égalité femmes-hommes&nbsp;?
       </Heading>
-      <Box>
-        <Flex align="center" justifyContent="center" mx={["0", "16"]}>
-          <Input
-            placeholder="Saisissez le nom ou le SIREN d'une entreprise"
-            size="lg"
-            name="q"
-            type="text"
-            bgColor={bgSelect}
-            mr="4"
-          />
-          <ButtonAction label="Rechercher" type="submit" />
-        </Flex>
-      </Box>
-    </form>
+      <SimpleGrid columns={{ base: 1, sm: 2, md: 1, lg: 2 }} spacing={6}>
+        <Card
+          img={{
+            url: "illustration-simulator.svg",
+          }}
+          legend="Choix 1"
+          title={{
+            node: "h3",
+            text: "Calcul et déclaration de l'index",
+          }}
+          content="Vous pouvez calculer votre index égalité professionnelle F/H sur Index Egapro et le déclarer, si vous le souhaitez, suite au calcul."
+          action={<ButtonAction onClick={onClick} label="Commencer le calcul" fullWidth />}
+        />
+        <Card
+          img={{
+            url: "illustration-publish.svg",
+          }}
+          legend="Choix 2"
+          title={{
+            node: "h3",
+            text: "Déclaration directe de l'index",
+          }}
+          content="Vous pouvez déclarer votre index égalité professionnelle F/H calculé par ailleurs directement via le
+                formulaire suivant."
+          action={
+            <ButtonLinkNoRouter
+              to={process.env.NEXT_PUBLIC_DECLARATION_URL || "/declaration/"}
+              label="Déclarer directement"
+              fullWidth
+            />
+          }
+        />
+      </SimpleGrid>
+    </Page>
   );
-}
-
-function DownloadCsvFileZone() {
-  const [dateCsv, setDateCsv] = React.useState("");
-
-  React.useEffect(() => {
-    async function runEffect() {
-      setDateCsv(await getDateCsv());
-    }
-    runEffect();
-  }, []);
-
-  return (
-    <>
-      {dateCsv && (
-        <Center w="100vw" paddingTop="0" paddingBottom="12">
-          <Flex justify="center" align="center" mx={["4", "0"]} direction={["column", "row"]}>
-            <Text fontSize={["md", "lg"]} mr={["0", "6"]} mb={["4", "0"]} textAlign="center">
-              Télécharger le fichier des entreprises au {dateCsv}
-            </Text>
-
-            <LinkBox>
-              <LinkOverlay href="/index-egalite-fh.csv">
-                <ButtonAction variant="outline" leftIcon={<HiDownload />} label="Télécharger (CSV)" />
-              </LinkOverlay>
-            </LinkBox>
-          </Flex>
-        </Center>
-      )}
-    </>
-  );
-}
-
-export default function HomePage() {
-  return (
-    <VStack spacing={["3", "6"]}>
-      <Head>
-        <title>Index Egapro</title>
-      </Head>
-
-      <FormSearchSiren />
-      <Box h="8" />
-
-      <DownloadCsvFileZone />
-
-      <AverageIndicator />
-    </VStack>
-  );
-}
-
-HomePage.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>;
 };
+
+export default Home;

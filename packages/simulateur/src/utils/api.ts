@@ -95,7 +95,11 @@ export const putDeclaration = (declaration: DeclarationDataField) => {
   return putResource(`/declaration/${entreprise.siren}/${déclaration.année_indicateurs}`, declaration)
 }
 
-export const validateSiren = (siren: string) => getResource(`/validate-siren?siren=${siren}`)
+export const validateSiren = (siren: string, year?: number | undefined) => {
+  return year
+    ? getResource(`/validate-siren?siren=${siren}&year=${year}`)
+    : getResource(`/validate-siren?siren=${siren}`)
+}
 
 /**
  * Return the owners of the given siren. This endpoint returns only if the user is granted.

@@ -647,7 +647,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
               <ActionBar>
                 <FormSubmit label="Déclarer" loading={submitting} />
                 <ButtonLink
-                  to={`/tableauDeBord/mes-declarations/${siren}`}
+                  to={`/mon-espace/mes-declarations/${siren}`}
                   label="Retour"
                   variant="outline"
                   colorScheme="primary"

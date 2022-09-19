@@ -22,21 +22,21 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
+import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
-import type { SearchCompanyParams } from "../hooks";
-import { useSearch } from "../hooks";
-import { filterDepartements, useConfig, useCallbackOnMount } from "../hooks";
+import type { SearchCompanyParams } from "../../hooks";
+import { useSearch } from "../../hooks";
+import { filterDepartements, useConfig, useCallbackOnMount } from "../../hooks";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
 import { ButtonAction } from "@components/ds/ButtonAction";
-import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig();
@@ -73,7 +73,7 @@ function UES() {
 
 function Company({ company }: { company: CompanyType }) {
   const { isOpen, onToggle } = useDisclosure();
-  const [yearSelected, setYearSelected] = React.useState<number>();
+  const [yearSelected, setYearSelected] = useState<number>();
   const highlightColor = useColorModeValue("blue.100", "blue.800");
   const linkColor = useColorModeValue("primary.600", "primary.100");
 
@@ -374,14 +374,14 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQuery) {
   };
 }
 
-export default function SearchPage() {
+export const SearchPage: NextPage = () => {
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
 
   const router = useRouter();
   const inputs = normalizeInputs(router.query);
-  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([]);
-  const [search, setSearch] = React.useState<SearchCompanyParams>(inputs);
+  const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
+  const [search, setSearch] = useState<SearchCompanyParams>(inputs);
 
   const { companies, isLoading, error, size, setSize } = useSearch(inputs);
 
@@ -392,12 +392,12 @@ export default function SearchPage() {
     setSearch({});
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     // inital load of departments.
     reset();
   }, [config, reset]); // config change only at start.
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (region) {
       setDepartements(filterDepartements(config, region));
     }
@@ -408,7 +408,7 @@ export default function SearchPage() {
   function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
 
-    router.replace({ pathname: "/recherche", query: search });
+    router.replace({ pathname: "/consulter-index/recherche", query: search });
   }
 
   function handleChange(event: React.SyntheticEvent) {
@@ -517,8 +517,6 @@ export default function SearchPage() {
       )}
     </>
   );
-}
-
-SearchPage.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>;
 };
+
+export default SearchPage;

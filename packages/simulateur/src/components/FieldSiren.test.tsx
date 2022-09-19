@@ -57,7 +57,7 @@ jest.mock("../utils/api", () => ({
   },
 }))
 
-const validator = sirenValidatorWithOwner(jest.fn())
+const validator = sirenValidatorWithOwner(2020)(jest.fn())
 
 let consoleErrorMock: jest.SpyInstance
 

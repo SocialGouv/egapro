@@ -1,14 +1,10 @@
 import React from "react"
-import { Link as ReachLink } from "react-router-dom"
 import { Box, Container, List, ListItem, Text, Link } from "@chakra-ui/react"
 
 import Logo from "./ds/Logo"
 import TextLink from "./ds/TextLink"
-import packageConfig from "../../package.json"
 
 function Footer() {
-  const version = process.env.REACT_APP_VERSION || packageConfig.version
-
   return (
     <Box
       id="footer"
@@ -59,9 +55,7 @@ function Footer() {
               </Link>
             </ListItem>
             <ListItem>
-              <Link as={ReachLink} to="/mentions-legales">
-                Mentions légales
-              </Link>
+              <Link href="/mentions-legales">Mentions légales</Link>
             </ListItem>
             <ListItem>
               <Link href={process.env.PUBLIC_URL + "/a11y/declaration-accessibilite-rgaa-4-1.pdf"}>
@@ -69,14 +63,10 @@ function Footer() {
               </Link>
             </ListItem>
             <ListItem>
-              <Link as={ReachLink} to="/cgu">
-                Conditions générales d'utilisation
-              </Link>
+              <Link href="/cgu">Conditions générales d'utilisation</Link>
             </ListItem>
             <ListItem>
-              <Link as={ReachLink} to="/politique-confidentialite">
-                Politique de confidentialité
-              </Link>
+              <Link href="/politique-confidentialite">Politique de confidentialité</Link>
             </ListItem>
           </List>
         </Box>
@@ -102,7 +92,7 @@ function Footer() {
             >
               donnez-nous votre avis
             </TextLink>{" "}
-            <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
+            <TextLink to={`https://github.com/SocialGouv/egapro`} isExternal>
               contribuez sur Github
             </TextLink>
           </Text>

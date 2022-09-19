@@ -1,15 +1,65 @@
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { Box, Container, Link, Flex, Text, ListItem, List, HStack, Button, useColorMode } from "@chakra-ui/react";
+import {
+  Box,
+  Container,
+  Link,
+  Flex,
+  Text,
+  ListItem,
+  List,
+  HStack,
+  Button,
+  useColorMode,
+  Spacer,
+  ButtonGroup,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import NextLink from "next/link";
-import type { FC } from "react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
+import { ButtonLink } from "./ButtonLink";
+import { IconPeopleCircle } from "./Icons";
 import { Logo } from "./Logo";
 import { isOpenFeature } from "@common/utils/feature";
 
-export const Header: FC = () => {
+export const Header: React.FC = () => {
   const { colorMode, toggleColorMode } = useColorMode();
 
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isSmallerThan639] = useMediaQuery("(max-width: 639px)");
+
+  useEffect(() => {
+    if (isSmallerThan639 !== isMobile) {
+      setIsMobile(isSmallerThan639);
+    }
+  }, [isMobile, isSmallerThan639]);
+
+  const [isFAQMenuDisplayed, setIsFAQMenuDisplayed] = useState<boolean>(false);
+  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)");
+
+  useEffect(() => {
+    if (isSmallerThan1280 !== isFAQMenuDisplayed) {
+      setIsFAQMenuDisplayed(isSmallerThan1280);
+    }
+  }, [isFAQMenuDisplayed, isSmallerThan1280]);
+
+  const [isXLScreen, setIsXLScreen] = useState<boolean>(false);
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)");
+
+  useEffect(() => {
+    if (isLargerThan1280 !== isXLScreen) {
+      setIsXLScreen(isLargerThan1280);
+    }
+  }, [isXLScreen, isLargerThan1280]);
+
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)");
+
+  useEffect(() => {
+    if (isBiggerThanMobileAndSmallerThan1280 !== isDesktop) {
+      setIsDesktop(isBiggerThanMobileAndSmallerThan1280);
+    }
+  }, [isDesktop, isBiggerThanMobileAndSmallerThan1280]);
   return (
     <Box
       as="header"
@@ -45,32 +95,58 @@ export const Header: FC = () => {
       </Box>
       <Container maxW="container.xl" id="menu">
         <Flex align="center" py={4}>
-          <Box pr={6}>
-            <Link
-              href="https://travail-emploi.gouv.fr/"
-              isExternal
-              sx={{
-                display: "block",
-              }}
-            >
-              <Logo />
-            </Link>
-          </Box>
-          <Box fontFamily="gabriela">
-            <NextLink href="/" passHref>
-              <Link fontSize="2xl">Index Egapro</Link>
-            </NextLink>
-            <Text fontSize="xs">
-              L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
-            </Text>
-          </Box>
-          {isOpenFeature(process.env.NEXT_PUBLIC_FEATURE_DARK_MODE) && (
-            <Box ml="auto">
-              <Button aria-label="Changer le mode de couleur" onClick={toggleColorMode}>
-                {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              </Button>
+          <Flex direction="row" align="center">
+            <Box pr={6}>
+              <Link
+                href="https://travail-emploi.gouv.fr/"
+                isExternal
+                sx={{
+                  display: "block",
+                }}
+              >
+                <Logo />
+              </Link>
             </Box>
-          )}
+            <Box fontFamily="gabriela">
+              <NextLink href="/" passHref>
+                <Link fontSize="2xl">Index Egapro</Link>
+              </NextLink>
+              <Text fontSize="xs">
+                L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+              </Text>
+            </Box>
+            {isOpenFeature(process.env.NEXT_PUBLIC_FEATURE_DARK_MODE) && (
+              <Box ml="auto">
+                <Button aria-label="Changer le mode de couleur" onClick={toggleColorMode}>
+                  {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+                </Button>
+              </Box>
+            )}
+          </Flex>
+          <Spacer />
+          <Box>
+            <ButtonGroup gap="0">
+              {isMobile && (
+                <ButtonLink to="/mon-espace/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
+              )}
+              {isDesktop && (
+                <ButtonLink
+                  to="/mon-espace/me-connecter"
+                  label={"Me connecter"}
+                  leftIcon={<IconPeopleCircle />}
+                  variant="ghost"
+                />
+              )}
+              {isXLScreen && (
+                <ButtonLink
+                  to="/mon-espace/me-connecter"
+                  label={"Me connecter"}
+                  leftIcon={<IconPeopleCircle />}
+                  variant="ghost"
+                />
+              )}
+            </ButtonGroup>
+          </Box>
         </Flex>
       </Container>
     </Box>
