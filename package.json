@@ -30,17 +30,5 @@
   "devDependencies": {
      "concurrently": "^7.2.2"
   },
-  "dependencies": {},
-  "eslintConfig": {
-    "overrides": [
-      {
-        "files": [
-          "**/*.stories.*"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      }
-    ]
-  }
+  "dependencies": {}
 }
