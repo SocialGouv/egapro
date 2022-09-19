@@ -1,7 +1,10 @@
 import type { Declaration, DeclarationPK } from "@common/core-domain/domain/Declaration";
 import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
+import { UnexpectedRepositoryError } from "@common/shared-domain";
+import type { Any } from "@common/utils/types";
 import { DB } from "api/core-domain/infra/db/knex";
+import {} from "net";
 
 import type { IDeclarationRepo } from "../IDeclarationRepo";
 
@@ -19,9 +22,17 @@ export class KnexPgDeclarationRepo implements IDeclarationRepo {
   }
 
   public async getAllBySiren(siren: Siren): Promise<Declaration[]> {
-    const raw = await this.db.select("*").where("siren", siren.getValue()).limit(this.requestLimit);
+    try {
+      const raw = await this.db.select("*").where("siren", siren.getValue()).limit(this.requestLimit);
 
-    return raw.map(declarationMap.toDomain);
+      return raw.map(declarationMap.toDomain);
+    } catch (error: unknown) {
+      console.error(error);
+      if ((error as Any).code === "ECONNREFUSED") {
+        throw new UnexpectedRepositoryError("Database unreachable. Please verify connection.", error as Error);
+      }
+      throw error;
+    }
   }
 
   public delete(item: Declaration): Promise<void> {
@@ -38,16 +49,17 @@ export class KnexPgDeclarationRepo implements IDeclarationRepo {
   public getOne(id: DeclarationPK): Promise<Declaration | null> {
     throw new Error("Method not implemented.");
   }
-  public save(item: Declaration): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async save(item: Declaration): Promise<void> {
+    const raw = declarationMap.toPersistence!(item);
+    await this.db.insert(raw);
   }
   public update(item: Declaration): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
   private get requestLimit() {
-    const ret = this.nextRequestLimit ?? Infinity;
-    this.nextRequestLimit = Infinity;
+    const ret = this.nextRequestLimit ?? 0;
+    this.nextRequestLimit = 0;
     return ret;
   }
 }

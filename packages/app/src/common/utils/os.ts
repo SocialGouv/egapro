@@ -2,6 +2,6 @@ export const sleep = (milliseconds: number) => new Promise<void>(resolve => setT
 
 export const ensureEnvVar = <T extends keyof NodeJS.ProcessEnv>(key: T, defaultValue?: string): string => {
   const out = process.env[key];
-  if (!out && typeof defaultValue === "undefined") throw new Error(`${key} env var not found.`);
+  if (typeof out === "undefined" && typeof defaultValue === "undefined") throw new Error(`${key} env var not found.`);
   return out ?? String(defaultValue);
 };

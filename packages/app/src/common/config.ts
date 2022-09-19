@@ -11,20 +11,20 @@ const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {
 };
 
 export const config = {
-  api_url: ensureEnvVar("NEXT_PUBLIC_API_URL"),
+  api_url: process.env.NEXT_PUBLIC_API_URL ?? "",
   matomo: {
-    url: ensureEnvVar("NEXT_PUBLIC_MATOMO_URL", ""),
-    siteId: ensureEnvVar("NEXT_PUBLIC_MATOMO_SITE_ID", ""),
+    url: process.env.NEXT_PUBLIC_MATOMO_URL ?? "",
+    siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",
   },
   api: {
     maildev: {
       smtpPort: +ensureApiEnvVar("MAILER_SMTP_PORT", "1025"),
     },
     postgres: {
-      host: ensureApiEnvVar("POSTGRES_HOST", ""),
-      user: ensureApiEnvVar("POSTGRES_USER", ""),
-      password: ensureApiEnvVar("POSTGRES_PASSWORD", ""),
-      db: ensureApiEnvVar("POSTGRES_DB", ""),
+      host: ensureApiEnvVar("POSTGRES_HOST"),
+      user: ensureApiEnvVar("POSTGRES_USER"),
+      password: ensureApiEnvVar("POSTGRES_PASSWORD"),
+      db: ensureApiEnvVar("POSTGRES_DB"),
       port: +ensureApiEnvVar("POSTGRES_PORT", "-1"),
       ssl: isTruthy(ensureApiEnvVar("POSTGRES_SSL", "0")),
       poolMinSize: +ensureApiEnvVar("POSTGRES_POOL_MIN_SIZE", "2"),

@@ -22,7 +22,7 @@ const handler: NextApiHandler = async (req, res) => {
       if (error.previousError instanceof ValidationError) {
         return res.status(422).send(error.previousError.message);
       }
-      res.status(400).send(error.appErrorStack());
+      res.status(400).send(error.appErrorList().map(e => e.message));
     } else {
       console.error(error);
       res.status(500).send(null);
