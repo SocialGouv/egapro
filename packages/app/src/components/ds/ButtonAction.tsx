@@ -1,24 +1,25 @@
-import React, { FunctionComponent } from "react"
-import { Button, ButtonProps as ButtonChakraProps } from "@chakra-ui/react"
+import type { ButtonProps as ButtonChakraProps } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
+import React from "react";
 
 export type ButtonProps = ButtonChakraProps & {
-  label: string
-  colorScheme?: "primary" | "gray" | "orange"
-  variant?: "solid" | "outline" | "ghost" | "link"
-  leftIcon?: React.ReactElement
-  rightIcon?: React.ReactElement
-  size?: "xs" | "sm" | "md" | "lg"
-  fullWidth?: boolean
-}
+  colorScheme?: "gray" | "orange" | "primary";
+  fullWidth?: boolean;
+  label: string;
+  leftIcon?: React.ReactElement;
+  rightIcon?: React.ReactElement;
+  size?: "lg" | "md" | "sm" | "xs";
+  variant?: "ghost" | "link" | "outline" | "solid";
+};
 
 export type ButtonActionProps = ButtonProps & {
-  onClick?: () => void
-  disabled?: boolean
-  loading?: boolean
-  type?: "button" | "submit" | "reset" | undefined
-}
+  disabled?: boolean;
+  loading?: boolean;
+  onClick?: () => void;
+  type?: "button" | "reset" | "submit" | undefined;
+};
 
-const ButtonAction: FunctionComponent<ButtonActionProps> = ({
+export const ButtonAction: React.FC<ButtonActionProps> = ({
   label,
   colorScheme = "primary",
   variant = "solid",
@@ -49,6 +50,4 @@ const ButtonAction: FunctionComponent<ButtonActionProps> = ({
   >
     {label}
   </Button>
-)
-
-export default ButtonAction
+);

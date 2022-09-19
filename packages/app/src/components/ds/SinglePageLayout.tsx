@@ -1,11 +1,12 @@
-import React, { ReactNode } from "react"
-import { Box, Container, Flex } from "@chakra-ui/layout"
+import { Box, Container, Flex } from "@chakra-ui/layout";
+import type { ReactNode } from "react";
+import React from "react";
 
-import Header from "./Header"
-import Footer from "./Footer"
+import { Footer } from "./Footer";
+import { Header } from "./Header";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export function SinglePageLayout({ children }: Props) {
@@ -17,5 +18,5 @@ export function SinglePageLayout({ children }: Props) {
       </Box>
       <Footer />
     </Flex>
-  )
+  );
 }

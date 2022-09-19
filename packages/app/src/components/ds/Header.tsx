@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react"
-import NextLink from "next/link"
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import {
   Box,
   Container,
@@ -14,52 +13,53 @@ import {
   Spacer,
   ButtonGroup,
   useMediaQuery,
-} from "@chakra-ui/react"
+} from "@chakra-ui/react";
+import NextLink from "next/link";
+import React, { useEffect, useState } from "react";
 
-import Logo from "./Logo"
-import { MoonIcon, SunIcon } from "@chakra-ui/icons"
-import { isOpenFeature } from "@common/utils/feature"
-import ButtonLink from "./ButtonLink"
-import { IconPeopleCircle } from "./Icons"
+import { ButtonLink } from "./ButtonLink";
+import { IconPeopleCircle } from "./Icons";
+import { Logo } from "./Logo";
+import { isOpenFeature } from "@common/utils/feature";
 
-function Header() {
-  const { colorMode, toggleColorMode } = useColorMode()
+export const Header: React.FC = () => {
+  const { colorMode, toggleColorMode } = useColorMode();
 
-  const [isMobile, setIsMobile] = useState<boolean>(false)
-  const [isSmallerThan639] = useMediaQuery("(max-width: 639px)")
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isSmallerThan639] = useMediaQuery("(max-width: 639px)");
 
   useEffect(() => {
     if (isSmallerThan639 !== isMobile) {
-      setIsMobile(isSmallerThan639)
+      setIsMobile(isSmallerThan639);
     }
-  }, [isMobile, isSmallerThan639])
+  }, [isMobile, isSmallerThan639]);
 
-  const [isFAQMenuDisplayed, setIsFAQMenuDisplayed] = useState<boolean>(false)
-  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
+  const [isFAQMenuDisplayed, setIsFAQMenuDisplayed] = useState<boolean>(false);
+  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)");
 
   useEffect(() => {
     if (isSmallerThan1280 !== isFAQMenuDisplayed) {
-      setIsFAQMenuDisplayed(isSmallerThan1280)
+      setIsFAQMenuDisplayed(isSmallerThan1280);
     }
-  }, [isFAQMenuDisplayed, isSmallerThan1280])
+  }, [isFAQMenuDisplayed, isSmallerThan1280]);
 
-  const [isXLScreen, setIsXLScreen] = useState<boolean>(false)
-  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
+  const [isXLScreen, setIsXLScreen] = useState<boolean>(false);
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)");
 
   useEffect(() => {
     if (isLargerThan1280 !== isXLScreen) {
-      setIsXLScreen(isLargerThan1280)
+      setIsXLScreen(isLargerThan1280);
     }
-  }, [isXLScreen, isLargerThan1280])
+  }, [isXLScreen, isLargerThan1280]);
 
-  const [isDesktop, setIsDesktop] = useState<boolean>(false)
-  const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)");
 
   useEffect(() => {
     if (isBiggerThanMobileAndSmallerThan1280 !== isDesktop) {
-      setIsDesktop(isBiggerThanMobileAndSmallerThan1280)
+      setIsDesktop(isBiggerThanMobileAndSmallerThan1280);
     }
-  }, [isDesktop, isBiggerThanMobileAndSmallerThan1280])
+  }, [isDesktop, isBiggerThanMobileAndSmallerThan1280]);
   return (
     <Box
       as="header"
@@ -150,7 +150,5 @@ function Header() {
         </Flex>
       </Container>
     </Box>
-  )
-}
-
-export default Header
+  );
+};

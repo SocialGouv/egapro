@@ -1,13 +1,12 @@
-import React, { ReactElement } from "react"
-import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
+import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react";
+import type { NextPage } from "next";
+import React from "react";
 
-import type { NextPageWithLayout } from "./_app"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
-import Page from "@components/Page"
+import { Page } from "@components/Page";
 
-const title = "Accessibilité"
+const title = "Accessibilité";
 
-const Accessibilite: NextPageWithLayout = () => {
+const Accessibilite: NextPage = () => {
   return (
     <Page title={title}>
       <Heading as="h2" size="md" mb={3}>
@@ -81,11 +80,7 @@ const Accessibilite: NextPageWithLayout = () => {
         </Link>
       </Text>
     </Page>
-  )
-}
+  );
+};
 
-Accessibilite.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
-}
-
-export default Accessibilite
+export default Accessibilite;

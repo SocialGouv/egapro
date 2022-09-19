@@ -1,13 +1,12 @@
-import React, { ReactElement } from "react"
-import { Text, Heading, Link } from "@chakra-ui/react"
+import { Text, Heading, Link } from "@chakra-ui/react";
+import type { NextPage } from "next";
+import React from "react";
 
-import type { NextPageWithLayout } from "./_app"
-import Page from "@components/Page"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import { Page } from "@components/Page";
 
-const title = "Conditions d'utilisation"
+const title = "Conditions d'utilisation";
 
-const CGU: NextPageWithLayout = () => {
+const CGU: NextPage = () => {
   return (
     <Page title={title}>
       <Text>
@@ -109,11 +108,7 @@ const CGU: NextPageWithLayout = () => {
         nécessaire.
       </Text>
     </Page>
-  )
-}
+  );
+};
 
-CGU.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
-}
-
-export default CGU
+export default CGU;

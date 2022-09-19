@@ -1,11 +1,7 @@
-import React from "react"
-import { Alert, AlertTitle, Spinner } from "@chakra-ui/react"
+import { Alert, AlertTitle, Spinner } from "@chakra-ui/react";
+import React from "react";
 
-type AlertSpinnerProps = {
-  children: React.ReactNode
-}
-
-export function AlertSpinner({ children }: AlertSpinnerProps) {
+export const AlertSpinner: React.FC = ({ children }) => {
   return (
     <Alert
       status="info"
@@ -23,5 +19,5 @@ export function AlertSpinner({ children }: AlertSpinnerProps) {
         {children}
       </AlertTitle>
     </Alert>
-  )
-}
+  );
+};

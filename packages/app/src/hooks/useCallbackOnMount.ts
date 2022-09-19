@@ -1,8 +1,9 @@
-import { useCallback } from "react"
+import { useCallback } from "react";
+import type { AnyFunction } from "@common/utils/types";
 
-export function useCallbackOnMount(callback: Function) {
+export function useCallbackOnMount(callback: AnyFunction) {
   return useCallback(() => {
-    callback()
+    callback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 }

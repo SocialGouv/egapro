@@ -1,14 +1,13 @@
-import React, { FunctionComponent, ReactNode } from "react"
-import Head from "next/head"
-import { Box, Heading, Text } from "@chakra-ui/react"
+import { Box, Heading, Text } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
-interface PageProps {
-  title: string
-  tagline?: string | Array<string>
-  children: ReactNode
+export interface PageProps {
+  tagline?: string[] | string;
+  title: string;
 }
 
-const Page: FunctionComponent<PageProps> = ({ title, tagline, children }) => {
+export const Page: React.FC<PageProps> = ({ title, tagline, children }) => {
   return (
     <>
       <Head>
@@ -26,7 +25,5 @@ const Page: FunctionComponent<PageProps> = ({ title, tagline, children }) => {
         : tagline && <Text mt={4}>{tagline}</Text>}
       {children && <Box pt={6}>{children}</Box>}
     </>
-  )
-}
-
-export default Page
+  );
+};

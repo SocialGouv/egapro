@@ -1,30 +1,37 @@
-import React, { useEffect, useCallback, useState, ReactElement } from "react"
-import { Text, Heading, Link, Box, UnorderedList, ListItem, Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react"
+import { Text, Heading, Link, Box, UnorderedList, ListItem, Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react";
+import type { NextPage } from "next";
+import React, { useEffect, useCallback, useState } from "react";
 
-import { NextPageWithLayout } from "./_app"
-import ButtonAction from "@components/ds/ButtonAction"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
-import Page from "@components/Page"
+import { Page } from "@components/Page";
+import { ButtonAction } from "@components/ds/ButtonAction";
 
-const PolitiqueConfidentialite: NextPageWithLayout = () => {
-  const [hasTarteAuCitron, setTarteAuCitron] = useState(false)
+declare global {
+  interface Window {
+    tarteaucitron?: {
+      userInterface: {
+        openPanel: VoidFunction;
+      };
+    };
+  }
+}
+
+const PolitiqueConfidentialite: NextPage = () => {
+  const [hasTarteAuCitron, setTarteAuCitron] = useState(false);
 
   const openTarteAuCitron = useCallback(() => {
-    // @ts-ignore
     if (window && window.tarteaucitron) {
-      // @ts-ignore
-      window.tarteaucitron.userInterface.openPanel()
+      window.tarteaucitron.userInterface.openPanel();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     // We need a delay to wait for tarteaucitron to be loaded.
     const timeout = setTimeout(() => {
-      setTarteAuCitron(typeof document !== "undefined" && !!document.getElementById("tarteaucitronClosePanel"))
-    }, 1000)
+      setTarteAuCitron(typeof document !== "undefined" && !!document.getElementById("tarteaucitronClosePanel"));
+    }, 1000);
 
-    return () => clearTimeout(timeout)
-  }, [])
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <Page title="Protection des données à caractère personnel">
@@ -290,11 +297,7 @@ const PolitiqueConfidentialite: NextPageWithLayout = () => {
         </Text>
       )}
     </Page>
-  )
-}
+  );
+};
 
-PolitiqueConfidentialite.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
-}
-
-export default PolitiqueConfidentialite
+export default PolitiqueConfidentialite;
