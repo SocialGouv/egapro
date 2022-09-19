@@ -19,13 +19,7 @@ interface AlertMD extends AlertPropsCommon {
 
 type AlertProps = AlertSM | AlertMD
 
-const Alert = ({
-  type = "info",
-  size = "md",
-  title,
-  description,
-  ...rest
-}: AlertProps) => {
+const Alert = ({ type = "info", size = "md", title, description, ...rest }: AlertProps) => {
   return (
     <div
       role="alert"
@@ -35,7 +29,7 @@ const Alert = ({
         type === "success" && "fr-alert--success",
         type === "info" && "fr-alert--info",
         type === "warning" && "fr-alert--warning",
-        size === "sm" && "fr-alert--sm"
+        size === "sm" && "fr-alert--sm",
       )}
       {...rest}
     >

@@ -8,11 +8,7 @@ export type SideMenuProps = {
   buttonLabel: string
 }
 
-const SideMenu: FunctionComponent<SideMenuProps> = ({
-  title,
-  buttonLabel,
-  children,
-}) => {
+const SideMenu: FunctionComponent<SideMenuProps> = ({ title, buttonLabel, children }) => {
   const [isExpanded, setExpanded] = useState(false)
   const wrapperId = "fr-sidemenu-wrapper"
   const { item, collapse } = useCollapse(wrapperId, isExpanded)

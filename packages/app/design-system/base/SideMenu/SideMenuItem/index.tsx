@@ -5,20 +5,8 @@ export type SideMenuProps = {
   isCurrent?: boolean
 }
 
-const SideMenu: FunctionComponent<SideMenuProps> = ({
-  isCurrent,
-  children,
-}) => {
-  return (
-    <li
-      className={clsx(
-        "fr-sidemenu__item",
-        isCurrent && "fr-sidemenu__item--active"
-      )}
-    >
-      {children}
-    </li>
-  )
+const SideMenu: FunctionComponent<SideMenuProps> = ({ isCurrent, children }) => {
+  return <li className={clsx("fr-sidemenu__item", isCurrent && "fr-sidemenu__item--active")}>{children}</li>
 }
 
 export default SideMenu
