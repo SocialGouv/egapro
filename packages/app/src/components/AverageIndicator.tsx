@@ -1,14 +1,14 @@
 import { InfoOutlineIcon } from "@chakra-ui/icons";
 import type { SelectProps } from "@chakra-ui/react";
 import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColorModeValue } from "@chakra-ui/react";
-import { capitalize } from "@common/utils/string";
-import { buildUrlParamsString } from "@common/utils/url";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import type { StatsParams } from "../hooks";
 import { filterDepartements, useConfig, useStats } from "../hooks";
 import { ButtonAction } from "./ds/ButtonAction";
+import { capitalize } from "@common/utils/string";
+import { buildUrlParamsString } from "@common/utils/url";
 
 export function FilterSelect({ name, onChange, value, children, ...rest }: SelectProps) {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100");
@@ -27,8 +27,8 @@ export function AverageIndicator() {
 
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [], PUBLIC_YEARS_TRIES = [], LAST_PUBLIC_YEAR = "" } = config ?? {};
-  const [filters, setFilters] = React.useState<StatsParams>({});
-  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([]);
+  const [filters, setFilters] = useState<StatsParams>({});
+  const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
   const { stats, isLoading } = useStats(filters);
 
   const { year: _year, ...filtersWithoutYear } = filters;
@@ -36,11 +36,11 @@ export function AverageIndicator() {
   // Need to destructure and restructure to avoid TS error. Don't know why...
   const urlSearchParams = buildUrlParamsString({ ...filtersWithoutYear });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setFilters({ year: LAST_PUBLIC_YEAR });
   }, [LAST_PUBLIC_YEAR]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // inital load of departments.
     setDepartements(filterDepartements(config));
   }, [config]); // config change only at start.

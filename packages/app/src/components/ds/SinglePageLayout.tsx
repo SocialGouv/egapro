@@ -1,4 +1,4 @@
-import { Box, Container, Flex } from "@chakra-ui/react";
+import { Box, Container, Flex } from "@chakra-ui/layout";
 import type { ReactNode } from "react";
 import React from "react";
 

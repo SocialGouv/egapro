@@ -52,6 +52,41 @@ const config = {
         arrowParens: "avoid",
       },
     ],
+        "@typescript-eslint/sort-type-union-intersection-members": "warn",
+      },
+    },
+    {
+      files: ["src/pages/**/*.ts?(x)"],
+      rules: {
+        "import/no-default-export": "off",
+      },
+    },
+    {
+<<<<<<< HEAD
+      files: ["__tests__/**/*.ts?(x)"],
+=======
+      files: ["__tests__/*.ts?(x)"],
+>>>>>>> 03394188b88253f1a853174e90321e8e3c8d5fe0
+      extends: ["plugin:testing-library/react", "plugin:jest-dom/recommended"],
+      plugins: ["jest"],
+      env: {
+        jest: true,
+        "jest/globals": true,
+      },
+      parserOptions: {
+        project: ["__tests__/tsconfig.json"],
+        sourceType: "module",
+      },
+      settings: {
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ["__tests__/tsconfig.json"],
+          },
+        },
+      },
+      rules: {
+        "import/no-default-export": "off",
   },
   overrides: [
     {

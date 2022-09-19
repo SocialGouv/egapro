@@ -48,11 +48,11 @@ insert_final_newline = false
 indent_size = 2
 insert_final_newline = false
 
-[**/*.{ts,js,tsx,jsx}]
+[**/*.{t,j}s?]
 indent_size = 2
 trim_trailing_whitespace = false
 
-[**/*.{c,sc,le}ss]
+[**/*.{?c,le}ss]
 indent_size = 2
 trim_trailing_whitespace = false
 
