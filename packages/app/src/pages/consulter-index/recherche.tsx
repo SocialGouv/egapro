@@ -143,7 +143,7 @@ function Company({ company }: { company: CompanyType }) {
             zIndex="20"
             justify="center"
             align="center"
-            grow="1"
+            grow={1}
             cursor="pointer"
           >
             <Box>
