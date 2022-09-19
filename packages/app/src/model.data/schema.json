@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/schema.json",
-  "title": "Model.data schema",
+  "title": "DeclarationDTO",
   "type": "object",
   "properties": {
     "id": {

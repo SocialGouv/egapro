@@ -20,7 +20,7 @@ export const declarationMap: Mapper<Declaration, DeclarationDTO, DeclarationRaw>
         ? DeclarationData.fromJson<DeclarationData>({
             id: raw.data.id,
             company: {
-              adress: raw.data.entreprise.adresse,
+              address: raw.data.entreprise.adresse,
               city: raw.data.entreprise.commune,
               countryCode: raw.data.entreprise.code_pays,
               county: raw.data.entreprise.département,
@@ -209,7 +209,7 @@ function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
     },
     entreprise: {
       siren: data.company.siren.getValue(),
-      adresse: data.company.adress,
+      adresse: data.company.address,
       code_naf: data.company.nafCode?.getValue() as CodeNaf,
       code_pays: data.company.countryCode?.getValue() as CodePays,
       code_postal: data.company.postalCode?.getValue(),

@@ -34,7 +34,7 @@ export const config = {
 } as const;
 
 interface ServicesConfig {
-  db: "knex-pg";
+  db: "knex-pg" | "mock" | "prisma";
 }
 
 export const services: ServicesConfig = {

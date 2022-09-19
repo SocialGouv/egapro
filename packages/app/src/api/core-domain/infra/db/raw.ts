@@ -1,4 +1,4 @@
-import type { ModelDataSchema as DeclarationDataRaw } from "@common/models/generated";
+import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
 
 export interface DeclarationRaw {
   data?: DeclarationDataRaw;

@@ -16,7 +16,7 @@ type Workforce = {
   total?: PositiveNumber;
 };
 export interface CompanyProps {
-  adress?: string;
+  address?: string;
   city?: string;
   countryCode?: CountryCode;
   county?: County;
@@ -32,8 +32,8 @@ export interface CompanyProps {
 
 export class Company extends JsonEntity<CompanyProps, never> {
   /** `adresse` */
-  get adress(): string | undefined {
-    return this.props.adress;
+  get address(): string | undefined {
+    return this.props.address;
   }
 
   /** `commune` */
@@ -93,7 +93,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
     const props: CompanyProps = {
       name: json.name,
       siren: new Siren(json.siren),
-      adress: json.adress,
+      address: json.address,
       city: json.city,
       hasRecoveryPlan: json.hasRecoveryPlan,
     };

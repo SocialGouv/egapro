@@ -1,1 +1,1 @@
-export type { ModelDataSchema as DeclarationDTO } from "../../models/generated";
+export type { DeclarationDTO } from "../../models/generated";

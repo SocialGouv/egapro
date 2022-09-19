@@ -1,5 +1,8 @@
 import { declarationRepo } from "@api/core-domain/repo";
-import { GetAllDeclarations, GetAllDeclarationsError } from "@api/core-domain/useCases/GetAllDeclarationsBySiren";
+import {
+  GetAllDeclarationsBySiren,
+  GetAllDeclarationsBySirenError,
+} from "@api/core-domain/useCases/GetAllDeclarationsBySiren";
 import { ValidationError } from "@common/shared-domain";
 import type { NextApiHandler } from "next";
 
@@ -11,10 +14,11 @@ const handler: NextApiHandler = async (req, res) => {
   const siren = req.query.siren as string;
 
   try {
-    const useCase = new GetAllDeclarations(declarationRepo);
-    res.status(200).json(await useCase.execute({ siren }));
+    const useCase = new GetAllDeclarationsBySiren(declarationRepo);
+    const ret = await useCase.execute({ siren });
+    res.status(200).json(ret);
   } catch (error: unknown) {
-    if (error instanceof GetAllDeclarationsError) {
+    if (error instanceof GetAllDeclarationsBySirenError) {
       if (error.previousError instanceof ValidationError) {
         return res.status(422).send(error.previousError.message);
       }

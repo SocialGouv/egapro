@@ -1139,7 +1139,7 @@ export type HautesRemunerations = WithPopulationFavorable & {
   résultat?: number;
 };
 
-export interface ModelDataSchema {
+export interface DeclarationDTO {
   id?: string;
   source: "solen" | "simulateur" | "formulaire" | "api";
   déclaration: {

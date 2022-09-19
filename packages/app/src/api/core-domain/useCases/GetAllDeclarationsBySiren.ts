@@ -10,7 +10,7 @@ interface Input {
   siren: string;
 }
 
-export class GetAllDeclarations implements UseCase<Input, DeclarationDTO[]> {
+export class GetAllDeclarationsBySiren implements UseCase<Input, DeclarationDTO[]> {
   constructor(private readonly declarationRepo: IDeclarationRepo) {}
 
   public async execute({ siren }: Input): Promise<DeclarationDTO[]> {
@@ -18,9 +18,9 @@ export class GetAllDeclarations implements UseCase<Input, DeclarationDTO[]> {
       const validatedSiren = new Siren(siren);
       return (await this.declarationRepo.getAllBySiren(validatedSiren)).map(declarationMap.toDTO);
     } catch (error: unknown) {
-      throw new GetAllDeclarationsError("Cannot get all configs", error as Error);
+      throw new GetAllDeclarationsBySirenError("Cannot get all configs", error as Error);
     }
   }
 }
 
-export class GetAllDeclarationsError extends AppError {}
+export class GetAllDeclarationsBySirenError extends AppError {}

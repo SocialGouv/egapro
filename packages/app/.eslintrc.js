@@ -133,24 +133,6 @@ const config = {
         "import/no-default-export": "off",
       },
     },
-    {
-      files: ["src/pages/api/**/*.ts"],
-      env: {
-        browser: false,
-      },
-      parserOptions: {
-        project: ["src/pages/api/tsconfig.json"],
-        sourceType: "module",
-      },
-      settings: {
-        "import/resolver": {
-          typescript: {
-            alwaysTryTypes: true,
-            project: ["src/pages/api/tsconfig.json"],
-          },
-        },
-      },
-    },
   ],
 };
 
