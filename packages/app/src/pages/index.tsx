@@ -1,11 +1,10 @@
 import { Heading, SimpleGrid } from "@chakra-ui/react";
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-
-import { Page } from "@components/Page";
 import { ButtonAction } from "@components/ds/ButtonAction";
 import { ButtonLinkNoRouter } from "@components/ds/ButtonLinkNoRouter";
 import { Card } from "@components/ds/Card";
+import { Page } from "@components/Page";
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
   const router = useRouter();

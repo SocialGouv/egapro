@@ -1,31 +1,31 @@
-import type { IconProps, ChakraComponent } from "@chakra-ui/react";
-import { Icon as IconChakra, Box } from "@chakra-ui/react";
+import type { ChakraComponent, IconProps } from "@chakra-ui/react";
+import { Box, Icon as IconChakra } from "@chakra-ui/react";
 import {
-  LightBulbIcon,
-  UserIcon,
-  UserCircleIcon,
-  UserGroupIcon,
+  ArrowNarrowLeftIcon,
   CalendarIcon,
   CheckIcon,
-  CurrencyEuroIcon,
-  TrendingUpIcon,
-  ArrowNarrowLeftIcon,
-  ExclamationIcon,
-  XCircleIcon as XCircleLineIcon,
-  OfficeBuildingIcon,
-  TrashIcon,
-  MenuIcon,
-  QuestionMarkCircleIcon,
-  LogoutIcon,
-  LoginIcon,
-  ExternalLinkIcon,
   ChevronRightIcon,
+  CurrencyEuroIcon,
+  ExclamationIcon,
+  ExternalLinkIcon,
+  LightBulbIcon,
+  LoginIcon,
+  LogoutIcon,
+  MenuIcon,
+  OfficeBuildingIcon,
   PencilIcon,
   PlusCircleIcon,
+  QuestionMarkCircleIcon,
+  TrashIcon,
+  TrendingUpIcon,
+  UserCircleIcon,
+  UserGroupIcon,
+  UserIcon,
+  XCircleIcon as XCircleLineIcon,
 } from "@heroicons/react/outline";
-import { SearchIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/solid";
-import React from "react";
+import { CheckCircleIcon, SearchIcon, XCircleIcon } from "@heroicons/react/solid";
 import type { ReactNode } from "react";
+import React from "react";
 
 type SvgComponent = ChakraComponent<"svg", Record<string, unknown>>;
 

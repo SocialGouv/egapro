@@ -1,26 +1,26 @@
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import {
   Box,
-  Container,
-  Link,
-  Flex,
-  Text,
-  ListItem,
-  List,
-  HStack,
   Button,
-  useColorMode,
-  Spacer,
   ButtonGroup,
+  Container,
+  Flex,
+  HStack,
+  Link,
+  List,
+  ListItem,
+  Spacer,
+  Text,
+  useColorMode,
   useMediaQuery,
 } from "@chakra-ui/react";
+import { isOpenFeature } from "@common/utils/feature";
 import NextLink from "next/link";
 import React, { useEffect, useState } from "react";
 
 import { ButtonLink } from "./ButtonLink";
 import { IconPeopleCircle } from "./Icons";
 import { Logo } from "./Logo";
-import { isOpenFeature } from "@common/utils/feature";
 
 export const Header: React.FC = () => {
   const { colorMode, toggleColorMode } = useColorMode();

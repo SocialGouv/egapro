@@ -1,5 +1,5 @@
-import { useCallback } from "react";
 import type { AnyFunction } from "@common/utils/types";
+import { useCallback } from "react";
 
 export function useCallbackOnMount(callback: AnyFunction) {
   return useCallback(() => {

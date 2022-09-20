@@ -1,5 +1,5 @@
 import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/react";
+import { Box, Container, Flex, Link, List, ListItem, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 import React from "react";
 
