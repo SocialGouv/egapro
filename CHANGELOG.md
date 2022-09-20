@@ -1,3 +1,17 @@
+# [2.21.0-beta.1](https://github.com/SocialGouv/egapro/compare/v2.20.0...v2.21.0-beta.1) (2022-09-20)
+
+
+### Bug Fixes
+
+* **app:** update favicon ([#1016](https://github.com/SocialGouv/egapro/issues/1016)) ([1e0ef9d](https://github.com/SocialGouv/egapro/commit/1e0ef9dc44689ff8ac9999b4fb7c7d37f159974d))
+
+
+### Features
+
+* adapt to changes on validate-siren endpoint ([#1013](https://github.com/SocialGouv/egapro/issues/1013)) ([c40ac7d](https://github.com/SocialGouv/egapro/commit/c40ac7d7f00327563d249d4b706bceb85711669b))
+* add a br before email ([#1018](https://github.com/SocialGouv/egapro/issues/1018)) ([5cf7164](https://github.com/SocialGouv/egapro/commit/5cf71649a3a3f25ea38b5e263649eafa6750fe37))
+* add a br in wording ([#1024](https://github.com/SocialGouv/egapro/issues/1024)) ([3532441](https://github.com/SocialGouv/egapro/commit/3532441a7247d4d994b121e126c06874235ad1a8))
+
 # [2.20.0](https://github.com/SocialGouv/egapro/compare/v2.19.0...v2.20.0) (2022-09-20)
 
 
