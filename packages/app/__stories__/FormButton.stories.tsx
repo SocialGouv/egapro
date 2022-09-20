@@ -1,8 +1,7 @@
-import React from "react"
-import { ComponentStory, ComponentMeta } from "@storybook/react"
-import { action } from "@storybook/addon-actions"
+import { action } from "@storybook/addon-actions";
+import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormButton } from "../src/design-system"
+import { FormButton } from "../src/design-system";
 
 export default {
   title: "Base/Form/FormButton",
@@ -14,12 +13,12 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof FormButton>
+} as ComponentMeta<typeof FormButton>;
 
-const Template: ComponentStory<typeof FormButton> = (args) => <FormButton onClick={action("button-click")} {...args} />
+const Template: ComponentStory<typeof FormButton> = args => <FormButton onClick={action("button-click")} {...args} />;
 
-export const Default = Template.bind({})
-Default.args = { children: "FormButton" }
+export const Default = Template.bind({});
+Default.args = { children: "FormButton" };
 
 export const WithSize = () => (
   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
@@ -31,7 +30,7 @@ export const WithSize = () => (
       FormButton
     </FormButton>
   </div>
-)
+);
 
 export const WithVariant = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
@@ -46,7 +45,7 @@ export const WithVariant = () => (
       FormButton
     </FormButton>
   </div>
-)
+);
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
@@ -60,14 +59,14 @@ export const WithIcon = () => (
       FormButton
     </FormButton>
   </div>
-)
+);
 WithIcon.parameters = {
   docs: {
     description: {
       story: `Liste des icônes disponibles : <a href="https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones" target="_blank">voir la liste officielle</a>`,
     },
   },
-}
+};
 
 export const IsDisabled = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
@@ -84,4 +83,4 @@ export const IsDisabled = () => (
       FormButton
     </FormButton>
   </div>
-)
+);

@@ -1,12 +1,10 @@
-import React, { FunctionComponent } from "react"
-
 export type FooterBodyProps = {
-  logo: React.ReactNode
-  description: string
-  items?: React.ReactNode
-}
+  description: string;
+  items?: React.ReactNode;
+  logo: React.ReactNode;
+};
 
-export const FooterBody: FunctionComponent<FooterBodyProps> = ({ logo, description, items }) => {
+export const FooterBody = ({ logo, description, items }: FooterBodyProps) => {
   return (
     <div className="fr-footer__body">
       <div className="fr-footer__brand fr-enlarge-link">{logo}</div>
@@ -15,5 +13,5 @@ export const FooterBody: FunctionComponent<FooterBodyProps> = ({ logo, descripti
         {items && <ul className="fr-footer__content-list">{items}</ul>}
       </div>
     </div>
-  )
-}
+  );
+};

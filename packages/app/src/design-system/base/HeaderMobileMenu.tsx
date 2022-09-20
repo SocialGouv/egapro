@@ -1,15 +1,15 @@
-import React, { FunctionComponent } from "react"
-import Link from "next/link"
-import clsx from "clsx"
+import clsx from "clsx";
+import Link from "next/link";
+import type { FunctionComponent } from "react";
 
-import { ButtonAsLink } from "./ButtonAsLink"
+import { ButtonAsLink } from "./ButtonAsLink";
 
 export type HeaderMobileMenuProps = {
-  isMobileMenuOpen?: boolean
-  closeMenuMobile: () => void
-  mobileMenuId: string
-  buttonMobileMenuId: string
-}
+  buttonMobileMenuId: string;
+  closeMenuMobile: () => void;
+  isMobileMenuOpen?: boolean;
+  mobileMenuId: string;
+};
 
 export const HeaderMobileMenu: FunctionComponent<HeaderMobileMenuProps> = ({
   isMobileMenuOpen,
@@ -38,5 +38,5 @@ export const HeaderMobileMenu: FunctionComponent<HeaderMobileMenuProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

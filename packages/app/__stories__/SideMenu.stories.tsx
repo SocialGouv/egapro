@@ -1,16 +1,15 @@
-import React from "react"
-import { ComponentStory, ComponentMeta } from "@storybook/react"
+import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { SideMenu, SideMenuItem, SideMenuLink } from "../src/design-system"
+import { SideMenu, SideMenuItem, SideMenuLink } from "../src/design-system";
 
 export default {
   title: "Base/SideMenu",
   component: SideMenu,
-} as ComponentMeta<typeof SideMenu>
+} as ComponentMeta<typeof SideMenu>;
 
-const Template: ComponentStory<typeof SideMenu> = (args) => <SideMenu {...args} />
+const Template: ComponentStory<typeof SideMenu> = args => <SideMenu {...args} />;
 
-export const Default = Template.bind({})
+export const Default = Template.bind({});
 Default.args = {
   title: "Déclaration des écarts de représentation F/H dans les postes de direction",
   buttonLabel: "Dans cette rubrique",
@@ -28,4 +27,4 @@ Default.args = {
       </SideMenuItem>
     </>
   ),
-}
+};

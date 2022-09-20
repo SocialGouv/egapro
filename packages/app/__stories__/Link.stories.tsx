@@ -1,7 +1,6 @@
-import React from "react"
-import { ComponentStory, ComponentMeta } from "@storybook/react"
+import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Link } from "../src/design-system"
+import { Link } from "../src/design-system";
 
 export default {
   title: "Base/Link",
@@ -13,12 +12,12 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof Link>
+} as ComponentMeta<typeof Link>;
 
-const Template: ComponentStory<typeof Link> = (args) => <Link {...args} />
+const Template: ComponentStory<typeof Link> = args => <Link {...args} />;
 
-export const Default = Template.bind({})
-Default.args = { children: "Lien simple", href: "#" }
+export const Default = Template.bind({});
+Default.args = { children: "Lien simple", href: "#" };
 
 export const WithSize = () => (
   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
@@ -30,7 +29,7 @@ export const WithSize = () => (
       Lien simple
     </Link>
   </div>
-)
+);
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
@@ -41,11 +40,11 @@ export const WithIcon = () => (
       Lien simple
     </Link>
   </div>
-)
+);
 WithIcon.parameters = {
   docs: {
     description: {
       story: `Liste des icônes disponibles : <a href="https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones" target="_blank">voir la liste officielle</a>`,
     },
   },
-}
+};

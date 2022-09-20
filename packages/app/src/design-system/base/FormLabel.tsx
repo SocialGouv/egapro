@@ -1,11 +1,11 @@
-import React, { FunctionComponent } from "react"
-import clsx from "clsx"
+import clsx from "clsx";
+import type { FunctionComponent } from "react";
 
 export type FormLabelProps = {
-  htmlFor: string
-  as?: "label" | "legend"
-  hint?: string
-}
+  as?: "label" | "legend";
+  hint?: string;
+  htmlFor: string;
+};
 
 export const FormLabel: FunctionComponent<FormLabelProps> = ({ as: HtmlTag = "label", htmlFor, hint, children }) => {
   return (
@@ -17,5 +17,5 @@ export const FormLabel: FunctionComponent<FormLabelProps> = ({ as: HtmlTag = "la
         </span>
       )}
     </HtmlTag>
-  )
-}
+  );
+};

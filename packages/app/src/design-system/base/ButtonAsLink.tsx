@@ -1,11 +1,12 @@
-import React, { FunctionComponent } from "react"
-import { buttonStyles, buttonStylesProps } from "../utils/button-styles"
+import type { FunctionComponent } from "react";
+import type { buttonStylesProps } from "../utils/button-styles";
+import { buttonStyles } from "../utils/button-styles";
 
-export type ButtonAsLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
-  buttonStylesProps & {
-    isDisabled?: boolean
-    isCurrent?: boolean
-  }
+export type ButtonAsLinkProps = buttonStylesProps &
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    isCurrent?: boolean;
+    isDisabled?: boolean;
+  };
 
 export const ButtonAsLink: FunctionComponent<ButtonAsLinkProps> = ({
   href,
@@ -32,5 +33,5 @@ export const ButtonAsLink: FunctionComponent<ButtonAsLinkProps> = ({
     >
       {children}
     </a>
-  )
-}
+  );
+};

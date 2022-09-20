@@ -106,7 +106,7 @@ const config = {
       },
     },
     {
-      files: ["src/pages/**/*.ts?(x)"],
+      files: ["src/pages/**/*.ts?(x)", "__stories__/**/*.ts?(x)"],
       rules: {
         "import/no-default-export": "off",
       },

@@ -1,7 +1,6 @@
-import React from "react"
-import { ComponentStory, ComponentMeta } from "@storybook/react"
+import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormInput } from "../src/design-system"
+import { FormInput } from "../src/design-system";
 
 export default {
   title: "Base/Form/FormInput",
@@ -13,11 +12,11 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof FormInput>
+} as ComponentMeta<typeof FormInput>;
 
-const Template: ComponentStory<typeof FormInput> = (args) => <FormInput {...args} />
+const Template: ComponentStory<typeof FormInput> = args => <FormInput {...args} />;
 
-export const Default = Template.bind({})
+export const Default = Template.bind({});
 Default.args = {
   id: "xxx",
   placeholder: "Placeholder",
@@ -26,16 +25,16 @@ Default.args = {
   isValid: false,
   isDisabled: false,
   icon: undefined,
-}
+};
 
-export const IsError = Template.bind({})
-IsError.args = { ...Default.args, isError: true }
+export const IsError = Template.bind({});
+IsError.args = { ...Default.args, isError: true };
 
-export const IsValid = Template.bind({})
-IsValid.args = { ...Default.args, isValid: true }
+export const IsValid = Template.bind({});
+IsValid.args = { ...Default.args, isValid: true };
 
-export const IsDisabled = Template.bind({})
-IsDisabled.args = { ...Default.args, isDisabled: true }
+export const IsDisabled = Template.bind({});
+IsDisabled.args = { ...Default.args, isDisabled: true };
 
-export const WithIcon = Template.bind({})
-WithIcon.args = { ...Default.args, icon: "fr-icon-warning-line" }
+export const WithIcon = Template.bind({});
+WithIcon.args = { ...Default.args, icon: "fr-icon-warning-line" };

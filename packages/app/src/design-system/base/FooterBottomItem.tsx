@@ -1,7 +1,5 @@
-import React, { FunctionComponent } from "react"
+import type { FunctionComponent } from "react";
 
-export type FooterBottomItemProps = {}
-
-export const FooterBottomItem: FunctionComponent<FooterBottomItemProps> = ({ children }) => {
-  return <li className="fr-footer__bottom-item">{children}</li>
-}
+export const FooterBottomItem: FunctionComponent = ({ children }) => {
+  return <li className="fr-footer__bottom-item">{children}</li>;
+};

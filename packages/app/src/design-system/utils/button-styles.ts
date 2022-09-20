@@ -1,13 +1,13 @@
-import clsx from "clsx"
-import { iconStyles } from "./icon-styles"
+import clsx from "clsx";
+import type { iconStyles } from "./icon-styles";
 
 export type buttonStylesProps = {
-  variant?: "secondary" | "tertiary" | "tertiary-no-border"
-  size?: "sm" | "lg"
-  iconLeft?: iconStyles
-  iconRight?: iconStyles
-  iconOnly?: iconStyles
-}
+  iconLeft?: iconStyles;
+  iconOnly?: iconStyles;
+  iconRight?: iconStyles;
+  size?: "lg" | "sm";
+  variant?: "secondary" | "tertiary-no-border" | "tertiary";
+};
 
 export const buttonStyles = (
   variant: buttonStylesProps["variant"],
@@ -26,4 +26,4 @@ export const buttonStyles = (
     iconLeft && `fr-btn--icon-left ${iconLeft}`,
     iconRight && `fr-btn--icon-right ${iconRight}`,
     iconOnly && iconOnly,
-  )
+  );

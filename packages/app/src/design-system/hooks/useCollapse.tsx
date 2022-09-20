@@ -1,26 +1,26 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 
-export default function useCollapse(id: string, isExpanded: boolean) {
+export function useCollapse(id: string, isExpanded: boolean) {
   const expandedItem = (isExpanded: boolean) => {
     if (isExpanded) {
       return {
         class: "fr-collapse fr-collapse--expanded",
         stateHeight: "none",
-      }
+      };
     } else {
       return {
         class: "fr-collapse",
         stateHeight: undefined,
-      }
+      };
     }
-  }
-  const [collapse, setCollapse] = useState("0px")
-  const item = expandedItem(isExpanded)
+  };
+  const [collapse, setCollapse] = useState("0px");
+  const item = expandedItem(isExpanded);
   useEffect(() => {
-    const element = document.getElementById(id)
+    const element = document.getElementById(id);
     if (element) {
-      setCollapse(`-${element.getBoundingClientRect().height}px`)
+      setCollapse(`-${element.getBoundingClientRect().height}px`);
     }
-  }, [id])
-  return { item, collapse }
+  }, [id]);
+  return { item, collapse };
 }

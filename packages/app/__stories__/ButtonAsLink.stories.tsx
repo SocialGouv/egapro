@@ -1,7 +1,6 @@
-import React from "react"
-import { ComponentStory, ComponentMeta } from "@storybook/react"
+import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { ButtonAsLink } from "../src/design-system"
+import { ButtonAsLink } from "../src/design-system";
 
 export default {
   title: "Base/ButtonAsLink",
@@ -13,12 +12,12 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof ButtonAsLink>
+} as ComponentMeta<typeof ButtonAsLink>;
 
-const Template: ComponentStory<typeof ButtonAsLink> = (args) => <ButtonAsLink href="#" {...args} />
+const Template: ComponentStory<typeof ButtonAsLink> = args => <ButtonAsLink href="#" {...args} />;
 
-export const Default = Template.bind({})
-Default.args = { children: "Button" }
+export const Default = Template.bind({});
+Default.args = { children: "Button" };
 
 export const WithSize = () => (
   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
@@ -30,7 +29,7 @@ export const WithSize = () => (
       Button
     </ButtonAsLink>
   </div>
-)
+);
 
 export const WithVariant = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
@@ -45,7 +44,7 @@ export const WithVariant = () => (
       Button
     </ButtonAsLink>
   </div>
-)
+);
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
@@ -59,14 +58,14 @@ export const WithIcon = () => (
       Button
     </ButtonAsLink>
   </div>
-)
+);
 WithIcon.parameters = {
   docs: {
     description: {
       story: `Liste des icônes disponibles : <a href="https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones" target="_blank">voir la liste officielle</a>`,
     },
   },
-}
+};
 
 export const IsDisabled = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
@@ -81,4 +80,4 @@ export const IsDisabled = () => (
       Button
     </ButtonAsLink>
   </div>
-)
+);

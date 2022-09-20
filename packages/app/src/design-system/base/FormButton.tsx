@@ -1,10 +1,11 @@
-import React, { FunctionComponent } from "react"
-import { buttonStyles, buttonStylesProps } from "../utils/button-styles"
+import type { FunctionComponent } from "react";
+import type { buttonStylesProps } from "../utils/button-styles";
+import { buttonStyles } from "../utils/button-styles";
 
-export type FormButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
-  buttonStylesProps & {
-    isDisabled?: boolean
-  }
+export type FormButtonProps = buttonStylesProps &
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    isDisabled?: boolean;
+  };
 
 export const FormButton: FunctionComponent<FormButtonProps> = ({
   variant,
@@ -26,5 +27,5 @@ export const FormButton: FunctionComponent<FormButtonProps> = ({
     >
       {children}
     </button>
-  )
-}
+  );
+};

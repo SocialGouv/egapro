@@ -1,23 +1,22 @@
-import React from "react"
-import clsx from "clsx"
+import clsx from "clsx";
 
 interface AlertPropsCommon {
-  type?: "error" | "warning" | "success" | "info"
+  type?: "error" | "info" | "success" | "warning";
 }
 
 interface AlertSM extends AlertPropsCommon {
-  description: string
-  size?: "sm"
-  title?: string
+  description: string;
+  size?: "sm";
+  title?: string;
 }
 
 interface AlertMD extends AlertPropsCommon {
-  description?: string
-  size?: "md"
-  title: string
+  description?: string;
+  size?: "md";
+  title: string;
 }
 
-export type AlertProps = AlertSM | AlertMD
+export type AlertProps = AlertMD | AlertSM;
 
 export const Alert = ({ type = "info", size = "md", title, description, ...rest }: AlertProps) => {
   return (
@@ -36,5 +35,5 @@ export const Alert = ({ type = "info", size = "md", title, description, ...rest 
       {size === "md" && <p className="fr-alert__title">{title}</p>}
       {description && <p>{description}</p>}
     </div>
-  )
-}
+  );
+};

@@ -1,12 +1,10 @@
-import React from "react"
-
-import { FooterBody } from "./FooterBody"
-import { FooterBodyItem } from "./FooterBodyItem"
-import { FooterBottom } from "./FooterBottom"
-import { FooterBottomItem } from "./FooterBottomItem"
-import { FooterBottomLink } from "./FooterBottomLink"
-import { FooterContentLink } from "./FooterContentLink"
-import { Logo } from "./Logo"
+import { FooterBody } from "./FooterBody";
+import { FooterBodyItem } from "./FooterBodyItem";
+import { FooterBottom } from "./FooterBottom";
+import { FooterBottomItem } from "./FooterBottomItem";
+import { FooterBottomLink } from "./FooterBottomLink";
+import { FooterContentLink } from "./FooterContentLink";
+import { Logo } from "./Logo";
 
 export const Footer = () => {
   return (
@@ -46,5 +44,5 @@ export const Footer = () => {
         </FooterBottom>
       </div>
     </footer>
-  )
-}
+  );
+};

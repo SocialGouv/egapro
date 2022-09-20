@@ -1,8 +1,4 @@
-import React, { FunctionComponent } from "react"
-
-export type LogoProps = {}
-
-export const Logo: FunctionComponent<LogoProps> = () => {
+export const Logo = () => {
   return (
     <p className="fr-logo">
       Ministère <br />
@@ -10,5 +6,5 @@ export const Logo: FunctionComponent<LogoProps> = () => {
       <br /> de l’Emploi
       <br /> et de l’Insertion
     </p>
-  )
-}
+  );
+};

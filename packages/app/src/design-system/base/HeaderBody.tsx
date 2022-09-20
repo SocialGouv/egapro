@@ -1,15 +1,15 @@
-import React, { FunctionComponent } from "react"
-import Link from "next/link"
+import Link from "next/link";
+import type { FunctionComponent } from "react";
 
-import { ButtonAsLink } from "./ButtonAsLink"
-import { Logo } from "./Logo"
+import { ButtonAsLink } from "./ButtonAsLink";
+import { Logo } from "./Logo";
 
 export type HeaderBodyProps = {
-  isMobileMenuOpen?: boolean
-  showMenuMobile: () => void
-  mobileMenuId: string
-  buttonMobileMenuId: string
-}
+  buttonMobileMenuId: string;
+  isMobileMenuOpen?: boolean;
+  mobileMenuId: string;
+  showMenuMobile: () => void;
+};
 
 export const HeaderBody: FunctionComponent<HeaderBodyProps> = ({
   isMobileMenuOpen,
@@ -67,5 +67,5 @@ export const HeaderBody: FunctionComponent<HeaderBodyProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

@@ -1,15 +1,15 @@
-import React, { FunctionComponent } from "react"
-import clsx from "clsx"
+import clsx from "clsx";
+import type { FunctionComponent } from "react";
 
-import { iconStyles } from "../utils/icon-styles"
+import type { iconStyles } from "../utils/icon-styles";
 
 export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  size?: "sm" | "lg"
-  iconLeft?: iconStyles
-  iconRight?: iconStyles
-  isDisabled?: boolean
-  isCurrent?: boolean
-}
+  iconLeft?: iconStyles;
+  iconRight?: iconStyles;
+  isCurrent?: boolean;
+  isDisabled?: boolean;
+  size?: "lg" | "sm";
+};
 
 export const Link: FunctionComponent<LinkProps> = ({
   href,
@@ -40,5 +40,5 @@ export const Link: FunctionComponent<LinkProps> = ({
     >
       {children}
     </a>
-  )
-}
+  );
+};

@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
     "strict": true,
     "baseUrl": "./src",
     "paths": {

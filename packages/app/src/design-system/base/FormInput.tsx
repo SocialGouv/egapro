@@ -1,15 +1,15 @@
-import React, { FunctionComponent } from "react"
-import clsx from "clsx"
+import clsx from "clsx";
+import type { FunctionComponent } from "react";
 
-import { iconStyles } from "../utils/icon-styles"
+import type { iconStyles } from "../utils/icon-styles";
 
 export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  isError?: boolean
-  isValid?: boolean
-  isDisabled?: boolean
-  icon?: iconStyles
-  id: string
-}
+  icon?: iconStyles;
+  id: string;
+  isDisabled?: boolean;
+  isError?: boolean;
+  isValid?: boolean;
+};
 
 export const FormInput: FunctionComponent<FormInputProps> = ({
   type = "text",
@@ -31,5 +31,5 @@ export const FormInput: FunctionComponent<FormInputProps> = ({
         {...rest}
       />
     </div>
-  )
-}
+  );
+};

@@ -1,7 +1,6 @@
-import React from "react"
-import { ComponentStory, ComponentMeta } from "@storybook/react"
+import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Alert } from "../src/design-system"
+import { Alert } from "../src/design-system";
 
 export default {
   title: "Base/Alert",
@@ -13,18 +12,18 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof Alert>
+} as ComponentMeta<typeof Alert>;
 
-const Template: ComponentStory<typeof Alert> = (args) => <Alert {...args} />
+const Template: ComponentStory<typeof Alert> = args => <Alert {...args} />;
 
-export const Default = Template.bind({})
+export const Default = Template.bind({});
 Default.args = {
   title: "Titre du message",
   description: "Description détaillée du message",
-}
+};
 
-export const SizeSm = Template.bind({})
+export const SizeSm = Template.bind({});
 SizeSm.args = {
   size: "sm",
   description: "Information : titre de l'information",
-}
+};
