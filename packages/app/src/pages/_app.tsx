@@ -4,7 +4,6 @@ import "@fontsource/cabin";
 import { ChakraProvider } from "@chakra-ui/react";
 import { config } from "@common/config";
 import { init } from "@socialgouv/matomo-next";
-
 import type { AppProps } from "next/app";
 import React, { useEffect } from "react";
 

@@ -1,8 +1,7 @@
-import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react";
+import { Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Page } from "@components/Page";
 import type { NextPage } from "next";
 import React from "react";
-
-import { Page } from "@components/Page";
 
 const title = "Accessibilité";
 

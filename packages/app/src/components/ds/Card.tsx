@@ -1,4 +1,4 @@
-import { Box, Heading, Image, Text, Flex } from "@chakra-ui/react";
+import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
 import React from "react";
 
 export type CardProps = {

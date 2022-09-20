@@ -1,9 +1,8 @@
-import { Text, Heading, Link, Box, UnorderedList, ListItem, Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react";
-import type { NextPage } from "next";
-import React, { useEffect, useCallback, useState } from "react";
-
-import { Page } from "@components/Page";
+import { Box, Heading, Link, ListItem, Table, Tbody, Td, Text, Th, Thead, Tr, UnorderedList } from "@chakra-ui/react";
 import { ButtonAction } from "@components/ds/ButtonAction";
+import { Page } from "@components/Page";
+import type { NextPage } from "next";
+import React, { useCallback, useEffect, useState } from "react";
 
 declare global {
   interface Window {

@@ -1,8 +1,7 @@
-import { Text, Heading, Link } from "@chakra-ui/react";
+import { Heading, Link, Text } from "@chakra-ui/react";
+import { Page } from "@components/Page";
 import type { NextPage } from "next";
 import React from "react";
-
-import { Page } from "@components/Page";
 
 const title = "Conditions d'utilisation";
 

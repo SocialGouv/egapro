@@ -1,7 +1,8 @@
-import { Container, Box, Flex, Grid, useMediaQuery } from "@chakra-ui/react";
+import { Box, Container, Flex, Grid, useMediaQuery } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import type { ReactNode, FunctionComponent } from "react";
+import type { FunctionComponent, ReactNode } from "react";
 import React, { useEffect, useMemo, useState } from "react";
+
 import { Footer } from "./ds/Footer";
 import { Header } from "./ds/Header";
 
