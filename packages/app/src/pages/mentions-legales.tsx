@@ -1,13 +1,12 @@
-import React, { ReactElement } from "react"
-import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
+import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react";
+import type { NextPage } from "next";
+import React from "react";
 
-import { NextPageWithLayout } from "./_app"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
-import Page from "@components/Page"
+import { Page } from "@components/Page";
 
-const title = "Mentions légales"
+const title = "Mentions légales";
 
-const MentionsLegales: NextPageWithLayout = () => {
+const MentionsLegales: NextPage = () => {
   return (
     <Page title={title}>
       <Heading as="h2" size="md" mb={3}>
@@ -67,11 +66,7 @@ const MentionsLegales: NextPageWithLayout = () => {
         plateforme ne seront à l’origine d’envoi d'emails pour demander la saisie d’informations personnelles.
       </Text>
     </Page>
-  )
-}
+  );
+};
 
-MentionsLegales.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
-}
-
-export default MentionsLegales
+export default MentionsLegales;

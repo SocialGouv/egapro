@@ -1,13 +1,13 @@
-import React from "react"
-import { Flex, LinkBox, LinkOverlay, Spacer } from "@chakra-ui/react"
+import { Flex, LinkBox, LinkOverlay, Spacer } from "@chakra-ui/react";
+import React from "react";
 
 type LinkButtonProps = {
-  children: React.ReactNode
-  color?: string
-  href: string
-  isExternal?: boolean
-  leftIcon?: React.ReactNode
-}
+  children: React.ReactNode;
+  color?: string;
+  href: string;
+  isExternal?: boolean;
+  leftIcon?: React.ReactNode;
+};
 
 export function LinkButton({
   children,
@@ -38,5 +38,5 @@ export function LinkButton({
         </Flex>
       </LinkOverlay>
     </LinkBox>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import { StyleFunctionProps } from "@chakra-ui/theme-tools"
+import type { StyleFunctionProps } from "@chakra-ui/theme-tools";
 
-const components = {
+export const components = {
   components: {
     Button: {
       baseStyle: {
@@ -47,6 +47,4 @@ const components = {
       },
     },
   },
-}
-
-export default components
+};

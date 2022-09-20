@@ -67,6 +67,8 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-storybook": "^0.6.4",
     "eslint-plugin-testing-library": "^5.0.5",
+    "eslint-plugin-typescript-sort-keys": "^2.1.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.5.1",
     "storybook-addon-next-router": "^4.0.0",
     "storybook-dark-mode": "^1.1.0",

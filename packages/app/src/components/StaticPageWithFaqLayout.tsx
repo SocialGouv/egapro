@@ -1,26 +1,33 @@
-import React, { useEffect, useMemo, useState, ReactNode, FunctionComponent } from "react"
-import { Container, Box, Flex, Grid, useMediaQuery } from "@chakra-ui/react"
-import { useRouter } from "next/router"
-import Header from "./ds/Header"
-import Footer from "./ds/Footer"
+import { Container, Box, Flex, Grid, useMediaQuery } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import type { ReactNode, FunctionComponent } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Footer } from "./ds/Footer";
+import { Header } from "./ds/Header";
 
 export interface StaticPageWithFaqLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
-const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> = ({ children }) => {
-  const router = useRouter()
-  const [isLargerThan1280, setIsLargerThan1280] = useState<boolean>(false)
-  const [mediaQuery] = useMediaQuery("(min-width: 1280px)")
+export const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> = ({ children }) => {
+  const router = useRouter();
+  const [isLargerThan1280, setIsLargerThan1280] = useState<boolean>(false);
+  const [mediaQuery] = useMediaQuery("(min-width: 1280px)");
 
   useEffect(() => {
     if (mediaQuery !== isLargerThan1280) {
-      setIsLargerThan1280(mediaQuery)
+      setIsLargerThan1280(mediaQuery);
     }
-  }, [isLargerThan1280, mediaQuery])
+  }, [isLargerThan1280, mediaQuery]);
 
-  const gridTemplateColumnsVal = useMemo(() => (isLargerThan1280 ? "200px 1fr 380px" : "200px 1fr"), [isLargerThan1280])
-  const gridTemplateAreasVal = useMemo(() => (isLargerThan1280 ? "'nav main aside'" : "'nav main'"), [isLargerThan1280])
+  const gridTemplateColumnsVal = useMemo(
+    () => (isLargerThan1280 ? "200px 1fr 380px" : "200px 1fr"),
+    [isLargerThan1280],
+  );
+  const gridTemplateAreasVal = useMemo(
+    () => (isLargerThan1280 ? "'nav main aside'" : "'nav main'"),
+    [isLargerThan1280],
+  );
   return (
     <Flex direction="column">
       <Header />
@@ -75,27 +82,26 @@ const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> =
       </Flex>
       <Footer />
     </Flex>
-  )
+  );
+};
+
+interface ContentProps {
+  pathname: string;
 }
 
-interface Props {
-  children: ReactNode
-  pathname: string
-}
-
-const Content: React.FunctionComponent<Props> = ({ children, pathname }: { children: ReactNode; pathname: string }) => {
-  const [isLargerThan1280, setIsLargerThan1280] = useState<boolean>(false)
-  const [mediaQuery] = useMediaQuery("(min-width: 1280px)")
+const Content: React.FC<ContentProps> = ({ children, pathname }) => {
+  const [isLargerThan1280, setIsLargerThan1280] = useState<boolean>(false);
+  const [mediaQuery] = useMediaQuery("(min-width: 1280px)");
 
   useEffect(() => {
     if (mediaQuery !== isLargerThan1280) {
-      setIsLargerThan1280(mediaQuery)
+      setIsLargerThan1280(mediaQuery);
     }
-  }, [isLargerThan1280, mediaQuery])
+  }, [isLargerThan1280, mediaQuery]);
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <Box
@@ -113,6 +119,5 @@ const Content: React.FunctionComponent<Props> = ({ children, pathname }: { child
     >
       {children}
     </Box>
-  )
-}
-export default StaticPageWithFaqLayout
+  );
+};

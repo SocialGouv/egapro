@@ -1,20 +1,18 @@
-import { Heading, SimpleGrid } from "@chakra-ui/react"
-import { ReactElement } from "react"
-import { useRouter } from "next/router"
+import { Heading, SimpleGrid } from "@chakra-ui/react";
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
 
-import type { NextPageWithLayout } from "./_app"
-import ButtonAction from "@components/ds/ButtonAction"
-import ButtonLinkNoRouter from "@components/ds/ButtonLinkNoRouter"
-import Card from "@components/ds/Card"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
-import Page from "@components/Page"
+import { Page } from "@components/Page";
+import { ButtonAction } from "@components/ds/ButtonAction";
+import { ButtonLinkNoRouter } from "@components/ds/ButtonLinkNoRouter";
+import { Card } from "@components/ds/Card";
 
-const Home: NextPageWithLayout = () => {
-  const router = useRouter()
+const Home: NextPage = () => {
+  const router = useRouter();
 
   const onClick = () => {
-    router.push(`/simulateur/nouvelle-simulation`)
-  }
+    router.push(`/simulateur/nouvelle-simulation`);
+  };
 
   return (
     <Page
@@ -61,11 +59,7 @@ const Home: NextPageWithLayout = () => {
         />
       </SimpleGrid>
     </Page>
-  )
-}
+  );
+};
 
-Home.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>
-}
-
-export default Home
+export default Home;

@@ -1,13 +1,15 @@
-import React from "react"
-import { Button } from "@chakra-ui/react"
-import { ButtonProps } from "./ButtonAction"
+import { Button } from "@chakra-ui/react";
+import React from "react";
+import type { ButtonProps } from "./ButtonAction";
 
-type ButtonLinkNoRouterProps = ButtonProps & {
-  to: string
-}
+export type ButtonLinkNoRouterProps = ButtonProps & {
+  to: string;
+};
 
-// Link with a for external links.
-function ButtonLinkNoRouter({
+/**
+ * Link with a for external links.
+ */
+export const ButtonLinkNoRouter: React.FC<ButtonLinkNoRouterProps> = ({
   label,
   to,
   colorScheme = "primary",
@@ -16,23 +18,19 @@ function ButtonLinkNoRouter({
   rightIcon,
   size = "md",
   fullWidth,
-}: ButtonLinkNoRouterProps) {
-  return (
-    <Button
-      href={to}
-      as="a"
-      colorScheme={colorScheme}
-      variant={variant}
-      leftIcon={leftIcon}
-      rightIcon={rightIcon}
-      size={size}
-      sx={{
-        width: fullWidth ? "100%" : "auto",
-      }}
-    >
-      {label}
-    </Button>
-  )
-}
-
-export default ButtonLinkNoRouter
+}) => (
+  <Button
+    href={to}
+    as="a"
+    colorScheme={colorScheme}
+    variant={variant}
+    leftIcon={leftIcon}
+    rightIcon={rightIcon}
+    size={size}
+    sx={{
+      width: fullWidth ? "100%" : "auto",
+    }}
+  >
+    {label}
+  </Button>
+);

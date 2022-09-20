@@ -1,13 +1,13 @@
-import { render, screen } from "@testing-library/react"
-import { Span } from "@/components/Span"
+import { render, screen } from "@testing-library/react";
+import { Span } from "@/components/Span";
 
 test("should display Span component", () => {
-  render(<Span name="world" />)
+  render(<Span name="world" />);
 
-  expect(screen.getByText("Hello world")).toBeInTheDocument()
-})
+  expect(screen.getByText("Hello world")).toBeInTheDocument();
+});
 
 test("should match snapshot", () => {
-  const view = render(<Span name="world" />)
-  expect(view).toMatchSnapshot()
-})
+  const view = render(<Span name="world" />);
+  expect(view).toMatchSnapshot();
+});

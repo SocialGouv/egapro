@@ -1,6 +1,6 @@
-import { createBreakpoints } from "@chakra-ui/theme-tools"
+import { createBreakpoints } from "@chakra-ui/theme-tools";
 
-const tokens = {
+export const tokens = {
   fonts: {
     heading: "Cabin",
     body: "Cabin",
@@ -48,5 +48,4 @@ const tokens = {
       900: "#333566",
     },
   },
-}
-export default tokens
+};
