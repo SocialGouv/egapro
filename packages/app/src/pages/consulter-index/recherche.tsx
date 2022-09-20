@@ -30,7 +30,7 @@ import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company"
 
 import ButtonAction from "@components/ds/ButtonAction"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import SinglePageLayout from "@components/ds/SinglePageLayout"
 import { AlertSpinner } from "@components/ds/AlertSpinner"
 import { SearchCompanyParams, useSearch } from "../../hooks"
 import { filterDepartements, useConfig, useCallbackOnMount } from "../../hooks"

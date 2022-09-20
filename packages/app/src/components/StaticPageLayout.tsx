@@ -4,11 +4,11 @@ import { useRouter } from "next/router"
 import Header from "./ds/Header"
 import Footer from "./ds/Footer"
 
-export interface StaticPageWithFaqLayoutProps {
+export interface StaticPageLayoutProps {
   children: ReactNode
 }
 
-const StaticPageWithFaqLayout: FunctionComponent<StaticPageWithFaqLayoutProps> = ({ children }) => {
+const StaticPageLayout: FunctionComponent<StaticPageLayoutProps> = ({ children }) => {
   const router = useRouter()
   const [isLargerThan1280, setIsLargerThan1280] = useState<boolean>(false)
   const [mediaQuery] = useMediaQuery("(min-width: 1280px)")
@@ -115,4 +115,4 @@ const Content: React.FunctionComponent<Props> = ({ children, pathname }: { child
     </Box>
   )
 }
-export default StaticPageWithFaqLayout
+export default StaticPageLayout

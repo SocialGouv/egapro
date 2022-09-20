@@ -6,7 +6,7 @@ import type { NextPageWithLayout } from "./_app"
 import ButtonAction from "@components/ds/ButtonAction"
 import ButtonLinkNoRouter from "@components/ds/ButtonLinkNoRouter"
 import Card from "@components/ds/Card"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import SinglePageLayout from "@components/ds/SinglePageLayout"
 import Page from "@components/Page"
 
 const Home: NextPageWithLayout = () => {

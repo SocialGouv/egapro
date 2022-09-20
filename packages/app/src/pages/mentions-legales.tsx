@@ -2,7 +2,7 @@ import React, { ReactElement } from "react"
 import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
 
 import { NextPageWithLayout } from "./_app"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import SinglePageLayout from "@components/ds/SinglePageLayout"
 import Page from "@components/Page"
 
 const title = "Mentions légales"

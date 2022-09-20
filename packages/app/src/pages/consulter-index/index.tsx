@@ -17,7 +17,7 @@ import Head from "next/head"
 import { format } from "date-fns"
 
 import ButtonAction from "@components/ds/ButtonAction"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import SinglePageLayout from "@components/ds/SinglePageLayout"
 import { AverageIndicator } from "@components/AverageIndicator"
 
 async function getDateCsv(): Promise<string> {

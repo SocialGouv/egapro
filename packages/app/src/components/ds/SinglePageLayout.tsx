@@ -8,7 +8,7 @@ interface Props {
   children: ReactNode
 }
 
-export function SinglePageLayout({ children }: Props) {
+export default function SinglePageLayout({ children }: Props) {
   return (
     <Flex direction="column" minHeight="100vh">
       <Header />

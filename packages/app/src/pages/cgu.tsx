@@ -3,7 +3,7 @@ import { Text, Heading, Link } from "@chakra-ui/react"
 
 import type { NextPageWithLayout } from "./_app"
 import Page from "@components/Page"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import SinglePageLayout from "@components/ds/SinglePageLayout"
 
 const title = "Conditions d'utilisation"
 

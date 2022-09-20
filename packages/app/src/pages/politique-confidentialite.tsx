@@ -3,7 +3,7 @@ import { Text, Heading, Link, Box, UnorderedList, ListItem, Table, Thead, Tbody,
 
 import { NextPageWithLayout } from "./_app"
 import ButtonAction from "@components/ds/ButtonAction"
-import { SinglePageLayout } from "@components/ds/SinglePageLayout"
+import SinglePageLayout from "@components/ds/SinglePageLayout"
 import Page from "@components/Page"
 
 const PolitiqueConfidentialite: NextPageWithLayout = () => {
