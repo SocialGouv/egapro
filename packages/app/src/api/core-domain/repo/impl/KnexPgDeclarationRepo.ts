@@ -50,7 +50,7 @@ export class KnexPgDeclarationRepo implements IDeclarationRepo {
     throw new Error("Method not implemented.");
   }
   public async save(item: Declaration): Promise<void> {
-    const raw = declarationMap.toPersistence!(item);
+    const raw = declarationMap.toPersistence(item);
     await this.db.insert(raw);
   }
   public update(item: Declaration): Promise<void> {
