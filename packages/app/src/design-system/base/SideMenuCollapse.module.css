@@ -1,0 +1,17 @@
+.current {
+    position: relative;
+    color: var(--text-active-blue-france);
+}
+
+.current:before {
+    --idle: transparent;
+    --hover: var(--border-active-blue-france-hover);
+    --active: var(--border-active-blue-france-active);
+    background-color: var(--border-active-blue-france);
+    bottom: 0.75rem;
+    content: "";
+    left: 0;
+    position: absolute;
+    top: 0.75rem;
+    width: 2px;
+}

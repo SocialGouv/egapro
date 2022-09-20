@@ -13,8 +13,8 @@
     "migrate": "ts-node -O '{\"module\": \"commonjs\"}' src/migrations/*.ts"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^1.1.1",
-    "@chakra-ui/react": "^1.7.1",
+    "@chakra-ui/icons": "^1.1.5",
+    "@chakra-ui/react": "^1.8.9",
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11",
     "@fontsource/cabin": "^4.5.0",
