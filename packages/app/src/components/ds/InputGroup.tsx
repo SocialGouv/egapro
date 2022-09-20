@@ -1,37 +1,31 @@
-import React, { FunctionComponent } from "react"
-import {
-  Box,
-  FormControl,
-  FormControlProps,
-  Input,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
-  VisuallyHidden,
-} from "@chakra-ui/react"
-import { Field, FieldMetaState } from "react-final-form"
+import type { FormControlProps } from "@chakra-ui/react";
+import { Box, FormControl, Input, FormErrorMessage, FormHelperText, FormLabel, VisuallyHidden } from "@chakra-ui/react";
+import type { FC } from "react";
+import React from "react";
+import type { FieldMetaState } from "react-final-form";
+import { Field } from "react-final-form";
 
-import ActivityIndicator from "./ActivityIndicator"
+import { ActivityIndicator } from "./ActivityIndicator";
 
 export type InputGroupProps = FormControlProps & {
-  label: string
-  isLabelHidden?: boolean
-  fieldName: string
-  autocomplete?: string
-  isLoading?: boolean
-  hasError?: boolean
+  autocomplete?: string;
+  fieldName: string;
+  hasError?: boolean;
+  isLabelHidden?: boolean;
+  isLoading?: boolean;
+  label: string;
   message?: {
-    help?: React.ReactElement | string
-    error?: React.ReactElement | string
-  }
-  placeholder?: string
-}
+    error?: React.ReactElement | string;
+    help?: React.ReactElement | string;
+  };
+  placeholder?: string;
+};
 
 export const isFieldHasError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
-  (meta.error && meta.touched && Object.values({ ...meta.error, required: false }).includes(true))
+  (meta.error && meta.touched && Object.values({ ...meta.error, required: false }).includes(true));
 
-const InputGroup: FunctionComponent<InputGroupProps> = ({
+export const InputGroup: FC<InputGroupProps> = ({
   isLabelHidden,
   label,
   fieldName,
@@ -42,7 +36,7 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
   placeholder,
   ...rest
 }) => {
-  const msgStyle = { flexDirection: "column", alignItems: "flex-start" }
+  const msgStyle = { flexDirection: "column", alignItems: "flex-start" };
   return (
     <Field name={fieldName} component="input">
       {({ input, meta }) => (
@@ -61,7 +55,5 @@ const InputGroup: FunctionComponent<InputGroupProps> = ({
         </FormControl>
       )}
     </Field>
-  )
-}
-
-export default InputGroup
+  );
+};

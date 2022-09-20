@@ -1,14 +1,14 @@
-import React from "react"
-// import NextLink from "next/link"
-import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/react"
+import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/react";
+import type { FC } from "react";
+import React from "react";
 
-import Logo from "./Logo"
-import TextLink from "./TextLink"
-import packageConfig from "../../../package.json"
-import { ExternalLinkIcon } from "@chakra-ui/icons"
+import packageConfig from "../../../package.json";
+import { Logo } from "./Logo";
+import { TextLink } from "./TextLink";
 
-function Footer() {
-  const version = process.env.REACT_APP_VERSION || packageConfig.version
+export const Footer: FC = () => {
+  const version = process.env.REACT_APP_VERSION || packageConfig.version;
 
   return (
     <Box
@@ -113,7 +113,5 @@ function Footer() {
         </Box>
       </Container>
     </Box>
-  )
-}
-
-export default Footer
+  );
+};

@@ -1,4 +1,3 @@
-import * as React from "react"
 import {
   CloseButton,
   HStack,
@@ -8,27 +7,28 @@ import {
   useBreakpointValue,
   useColorModeValue,
   useDisclosure,
-} from "@chakra-ui/react"
-import { FiInfo } from "react-icons/fi"
+} from "@chakra-ui/react";
+import * as React from "react";
+import { FiInfo } from "react-icons/fi";
 
 export const Banner = () => {
-  const { isOpen, onClose, onOpen } = useDisclosure()
-  const isMobile = useBreakpointValue({ base: true, md: false })
-  const bgColor = useColorModeValue("yellow.100", "yellow.400")
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const isMobile = useBreakpointValue({ base: true, md: false });
+  const bgColor = useColorModeValue("yellow.100", "yellow.400");
 
   React.useEffect(() => {
     // First case : on mount, the variable in sessionStorage is undefined.
     if (sessionStorage.getItem("banner.dontShow") === null || sessionStorage.getItem("banner.dontShow") === "false")
-      onOpen()
+      onOpen();
     // Second case : the variable in sessionStorage exists and the user opted to don't show the banner.
-    if (sessionStorage.getItem("banner.dontShow") === "true") onClose()
-  }, [onClose, onOpen])
+    if (sessionStorage.getItem("banner.dontShow") === "true") onClose();
+  }, [onClose, onOpen]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   function handleClose() {
-    sessionStorage.setItem("banner.dontShow", "true")
-    onClose()
+    sessionStorage.setItem("banner.dontShow", "true");
+    onClose();
   }
 
   return (
@@ -55,5 +55,5 @@ export const Banner = () => {
       </HStack>
       <CloseButton aria-label="Fermer le panneau d'information" onClick={handleClose} />
     </HStack>
-  )
-}
+  );
+};

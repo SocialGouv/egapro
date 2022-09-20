@@ -1,76 +1,65 @@
-import React from "react"
-import { useRouter } from "next/router"
-import {
-  Box,
-  Center,
-  Container,
-  Select,
-  SelectProps,
-  Spinner,
-  Stack,
-  Text,
-  Tooltip,
-  useColorModeValue,
-} from "@chakra-ui/react"
-import { InfoOutlineIcon } from "@chakra-ui/icons"
+import { InfoOutlineIcon } from "@chakra-ui/icons";
+import type { SelectProps } from "@chakra-ui/react";
+import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColorModeValue } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React from "react";
 
-import ButtonAction from "./ds/ButtonAction"
-import { capitalize } from "@common/utils/string"
-import { buildUrlParamsString } from "@common/utils/url"
-import { filterDepartements, useConfig } from "../hooks"
-import { StatsParams, useStats } from "../hooks"
+import type { StatsParams } from "../hooks";
+import { filterDepartements, useConfig, useStats } from "../hooks";
+import { ButtonAction } from "./ds/ButtonAction";
+import { capitalize } from "@common/utils/string";
+import { buildUrlParamsString } from "@common/utils/url";
 
 export function FilterSelect({ name, onChange, value, children, ...rest }: SelectProps) {
-  const borderSelect = useColorModeValue("cyan.200", "cyan.100")
-  const bgSelect = useColorModeValue("white", "blue.700")
+  const borderSelect = useColorModeValue("cyan.200", "cyan.100");
+  const bgSelect = useColorModeValue("white", "blue.700");
 
   return (
     <Select name={name} onChange={onChange} value={value} borderColor={borderSelect} bgColor={bgSelect} {...rest}>
       {children}
     </Select>
-  )
+  );
 }
 
 export function AverageIndicator() {
-  const router = useRouter()
-  const bgColor = useColorModeValue("blue.100", "blue.800")
+  const router = useRouter();
+  const bgColor = useColorModeValue("blue.100", "blue.800");
 
-  const { config } = useConfig()
-  const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [], PUBLIC_YEARS_TRIES = [], LAST_PUBLIC_YEAR = "" } = config ?? {}
-  const [filters, setFilters] = React.useState<StatsParams>({})
-  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([])
-  const { stats, isLoading } = useStats(filters)
+  const { config } = useConfig();
+  const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [], PUBLIC_YEARS_TRIES = [], LAST_PUBLIC_YEAR = "" } = config ?? {};
+  const [filters, setFilters] = React.useState<StatsParams>({});
+  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([]);
+  const { stats, isLoading } = useStats(filters);
 
-  // eslint-disable-next-line no-unused-vars
-  const { year, ...filtersWithoutYear } = filters
+  const { year: _year, ...filtersWithoutYear } = filters;
 
   // Need to destructure and restructure to avoid TS error. Don't know why...
-  const urlSearchParams = buildUrlParamsString({ ...filtersWithoutYear })
+  const urlSearchParams = buildUrlParamsString({ ...filtersWithoutYear });
 
   React.useEffect(() => {
-    setFilters({ year: LAST_PUBLIC_YEAR })
-  }, [LAST_PUBLIC_YEAR])
+    setFilters({ year: LAST_PUBLIC_YEAR });
+  }, [LAST_PUBLIC_YEAR]);
 
   React.useEffect(() => {
     // inital load of departments.
-    setDepartements(filterDepartements(config))
-  }, [config]) // config change only at start.
+    setDepartements(filterDepartements(config));
+  }, [config]); // config change only at start.
 
-  const getAverage = () => (!stats ? "" : stats?.avg?.toFixed(0))
+  const getAverage = () => (!stats ? "" : stats?.avg?.toFixed(0));
 
   function handleChange(event: React.SyntheticEvent) {
-    const { name, value } = event.currentTarget as HTMLInputElement
+    const { name, value } = event.currentTarget as HTMLInputElement;
 
-    let departement = getValue("departement")
+    let departement = getValue("departement");
 
     if (name === "region") {
-      setDepartements(filterDepartements(config, value))
-      departement = ""
+      setDepartements(filterDepartements(config, value));
+      departement = "";
     }
-    setFilters({ ...filters, departement, [name]: value })
+    setFilters({ ...filters, departement, [name]: value });
   }
 
-  const getValue = (name: keyof StatsParams) => filters[name] || ""
+  const getValue = (name: keyof StatsParams) => filters[name] || "";
 
   return (
     <Center bgColor={bgColor} w="100vw" py={8}>
@@ -106,7 +95,7 @@ export function AverageIndicator() {
               value={getValue("year")}
               aria-label="filtre sur l'année"
             >
-              {PUBLIC_YEARS_TRIES.map((year) => (
+              {PUBLIC_YEARS_TRIES.map(year => (
                 <option key={year} value={String(year)}>
                   {year + 1}
                 </option>
@@ -162,5 +151,5 @@ export function AverageIndicator() {
         />
       </Box>
     </Center>
-  )
+  );
 }

@@ -1,7 +1,7 @@
 type SpanProps = {
-  name: string
-}
+  name: string;
+};
 
 export function Span({ name }: SpanProps) {
-  return <span>Hello {name}</span>
+  return <span>Hello {name}</span>;
 }

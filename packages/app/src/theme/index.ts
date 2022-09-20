@@ -1,9 +1,9 @@
-import { extendTheme } from "@chakra-ui/react"
-import tokens from "./tokens"
-import globals from "./globals"
-import components from "./components"
+import { extendTheme } from "@chakra-ui/react";
+import { components } from "./components";
+import { globals } from "./globals";
+import { tokens } from "./tokens";
 
-const theme = extendTheme({
+export const theme = extendTheme({
   config: {
     initialColorMode: "light",
     useSystemColorMode: false,
@@ -11,6 +11,4 @@ const theme = extendTheme({
   ...globals,
   ...tokens,
   ...components,
-})
-
-export default theme
+});

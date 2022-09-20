@@ -46,7 +46,9 @@
     "eslint-plugin-jest-dom": "^4.0.1",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-testing-library": "^5.0.5",
+    "eslint-plugin-typescript-sort-keys": "^2.1.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.5.1",
-    "typescript": "4.5.5"
+    "typescript": "^4.7.4"
   }
 }
