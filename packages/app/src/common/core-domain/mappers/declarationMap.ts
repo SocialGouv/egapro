@@ -8,7 +8,8 @@ import { DeclarationData } from "../domain/DeclarationData";
 import { Siren } from "../domain/valueObjects/Siren";
 import type { DeclarationDTO } from "../dtos/DeclarationDTO";
 
-export const declarationMap: Mapper<Declaration, DeclarationDTO, DeclarationRaw> = {
+export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, DeclarationRaw>> = {
+  // TODO convert without validation if perf are not good
   toDomain(raw) {
     return new Declaration({
       declarant: new Email(raw.declarant),
