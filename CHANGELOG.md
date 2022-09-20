@@ -1,3 +1,10 @@
+## [2.21.1](https://github.com/SocialGouv/egapro/compare/v2.21.0...v2.21.1) (2022-09-20)
+
+
+### Bug Fixes
+
+* **ci:** remove type-check validation because why not ([e1cea56](https://github.com/SocialGouv/egapro/commit/e1cea56c6a317a5edc6c6049deb956c847b24a55))
+
 # [2.21.0](https://github.com/SocialGouv/egapro/compare/v2.14...v2.21.0) (2022-09-20)
 
 
