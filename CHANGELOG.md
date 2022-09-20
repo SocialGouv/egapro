@@ -1,3 +1,10 @@
+# [2.20.0](https://github.com/SocialGouv/egapro/compare/v2.19.0...v2.20.0) (2022-09-20)
+
+
+### Features
+
+* add a br in wording ([#1024](https://github.com/SocialGouv/egapro/issues/1024)) ([1795e4f](https://github.com/SocialGouv/egapro/commit/1795e4f15d2c6acfe2bb99317a2f8939d627d90c))
+
 # [2.19.0](https://github.com/SocialGouv/egapro/compare/v2.18.0...v2.19.0) (2022-09-16)
 
 
