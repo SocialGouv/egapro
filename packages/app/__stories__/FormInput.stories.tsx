@@ -1,7 +1,7 @@
 import React from "react"
 import { ComponentStory, ComponentMeta } from "@storybook/react"
 
-import { FormInput } from "../design-system"
+import { FormInput } from "../src/design-system"
 
 export default {
   title: "Base/Form/FormInput",

@@ -1,7 +1,7 @@
 import React from "react"
 import { ComponentStory, ComponentMeta } from "@storybook/react"
 
-import { ButtonAsLink } from "../design-system"
+import { ButtonAsLink } from "../src/design-system"
 
 export default {
   title: "Base/ButtonAsLink",

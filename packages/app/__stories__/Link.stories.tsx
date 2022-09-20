@@ -1,7 +1,7 @@
 import React from "react"
 import { ComponentStory, ComponentMeta } from "@storybook/react"
 
-import { Link } from "../design-system"
+import { Link } from "../src/design-system"
 
 export default {
   title: "Base/Link",

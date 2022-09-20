@@ -1,7 +1,7 @@
 import React from "react"
 import { ComponentStory, ComponentMeta } from "@storybook/react"
 
-import { Header } from "../design-system"
+import { Header } from "../src/design-system"
 
 export default {
   title: "Base/Header",

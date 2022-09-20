@@ -1,7 +1,7 @@
 import React from "react"
 import { ComponentStory, ComponentMeta } from "@storybook/react"
 
-import { SideMenu, SideMenuItem, SideMenuLink } from "../design-system"
+import { SideMenu, SideMenuItem, SideMenuLink } from "../src/design-system"
 
 export default {
   title: "Base/SideMenu",
