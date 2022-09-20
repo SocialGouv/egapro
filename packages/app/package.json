@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@chakra-ui/icons": "^1.1.5",
-    "@chakra-ui/react": "^1.8.3",
+    "@chakra-ui/react": "^1.8.9",
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11",
     "@fontsource/cabin": "^4.5.2",
@@ -49,6 +49,6 @@
     "eslint-plugin-typescript-sort-keys": "^2.1.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.8"
   }
 }
