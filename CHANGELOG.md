@@ -1,3 +1,9 @@
+# [2.21.0](https://github.com/SocialGouv/egapro/compare/v2.14...v2.21.0) (2022-09-20)
+
+
+### Chores
+
+* switch master branches
 # [2.14.0](https://github.com/SocialGouv/egapro/compare/v2.13.1...v2.14.0) (2022-09-09)
 
 
