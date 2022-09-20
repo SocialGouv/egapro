@@ -1,6 +1,6 @@
 module.exports = {
   stories: [
-    "../design-system/**/*.stories.@(js|jsx|ts|tsx|mdx)"
+    "../__stories__/**/*.stories.@(js|jsx|ts|tsx|mdx)"
   ],
   refs: {
     '@chakra-ui/react': {
