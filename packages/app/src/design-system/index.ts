@@ -24,9 +24,13 @@ import type { SideMenuCollapseProps } from "./base/SideMenuCollapse";
 import type { SideMenuLinkProps } from "./base/SideMenuLink";
 import { SideMenuLink } from "./base/SideMenuLink";
 import { SideMenuList } from "./base/SideMenuList";
+import type { AppProps } from "./layout/App";
+import { App } from "./layout/App";
+import { Container } from "./layout/Container";
 
 export {
   Alert,
+  App,
   ButtonAsLink,
   Footer,
   FormButton,
@@ -41,9 +45,11 @@ export {
   SideMenuLink,
   SideMenuList,
   SideMenuCollapse,
+  Container,
 };
 export type {
   AlertProps,
+  AppProps,
   ButtonAsLinkProps,
   FormButtonProps,
   FormGroupProps,
