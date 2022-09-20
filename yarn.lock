@@ -2096,6 +2096,11 @@
   resolved "https://registry.yarnpkg.com/@gouvfr/dsfr/-/dsfr-1.7.2.tgz#c522fce21a14989a10e30583160118c39c9c05d1"
   integrity sha512-hPNtz+gHcc8m7ZPANxSOFMz4Ap+M9FHOudqoMR/+Kjl5FCOqwA6u/aoYnMJ8KqedS1k5XThFMp7jiktr53qXYw==
 
+"@headlessui/react@^1.7.2":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@headlessui/react/-/react-1.7.2.tgz#e6a6a8d38342064a53182f1eb2bf6d9c1e53ba6a"
+  integrity sha512-snLv2lxwsf2HNTOBNgHYdvoYZ3ChJE8QszPi1d/hl9js8KrFrUulTaQBfSyPbJP5BybVreWh9DxCgz9S0Z6hKQ==
+
 "@heroicons/react@^1.0.5":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-1.0.6.tgz#35dd26987228b39ef2316db3b1245c42eb19e324"

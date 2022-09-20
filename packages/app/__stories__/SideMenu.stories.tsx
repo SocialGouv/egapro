@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { SideMenu, SideMenuItem, SideMenuLink } from "../src/design-system";
+import { SideMenu, SideMenuCollapse, SideMenuLink, SideMenuList } from "../src/design-system";
 
 export default {
   title: "Base/SideMenu",
@@ -14,17 +14,25 @@ Default.args = {
   title: "Déclaration des écarts de représentation F/H dans les postes de direction",
   buttonLabel: "Dans cette rubrique",
   children: (
-    <>
-      <SideMenuItem isCurrent>
-        <SideMenuLink href="#" isCurrent>
-          Êtes-vous assujetti&nbsp;?
-        </SideMenuLink>
-      </SideMenuItem>
-      <SideMenuItem>
+    <SideMenuList>
+      <SideMenuLink href="#" isCurrent>
+        Êtes-vous assujetti&nbsp;?
+      </SideMenuLink>
+      <SideMenuLink href="#" target="_self">
+        Validation de l’email
+      </SideMenuLink>
+      <SideMenuCollapse title="Écarts de représentation">
+        <SideMenuLink href="#">Cadres dirigeants</SideMenuLink>
         <SideMenuLink href="#" target="_self">
-          Validation de l’email
+          Membres des instances dirigeantes
         </SideMenuLink>
-      </SideMenuItem>
-    </>
+      </SideMenuCollapse>
+      <SideMenuCollapse title="Écarts de représentation" isCurrent isExpandedDefault>
+        <SideMenuLink href="#">Cadres dirigeants</SideMenuLink>
+        <SideMenuLink href="#" target="_self" isCurrent>
+          Membres des instances dirigeantes
+        </SideMenuLink>
+      </SideMenuCollapse>
+    </SideMenuList>
   ),
 };

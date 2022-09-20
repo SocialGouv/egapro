@@ -36,7 +36,7 @@ export const SideMenu: FunctionComponent<SideMenuProps> = ({ title, buttonLabel,
           }}
         >
           <div className="fr-sidemenu__title">{title}</div>
-          <ul className="fr-sidemenu__list">{children}</ul>
+          {children}
         </div>
       </div>
     </nav>

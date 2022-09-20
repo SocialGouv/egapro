@@ -19,10 +19,11 @@ import { Link } from "./base/Link";
 import { Logo } from "./base/Logo";
 import type { SideMenuProps } from "./base/SideMenu";
 import { SideMenu } from "./base/SideMenu";
-import type { SideMenuItemProps } from "./base/SideMenuItem";
-import { SideMenuItem } from "./base/SideMenuItem";
+import { SideMenuCollapse } from "./base/SideMenuCollapse";
+import type { SideMenuCollapseProps } from "./base/SideMenuCollapse";
 import type { SideMenuLinkProps } from "./base/SideMenuLink";
 import { SideMenuLink } from "./base/SideMenuLink";
+import { SideMenuList } from "./base/SideMenuList";
 
 export {
   Alert,
@@ -37,8 +38,9 @@ export {
   Link,
   Logo,
   SideMenu,
-  SideMenuItem,
   SideMenuLink,
+  SideMenuList,
+  SideMenuCollapse,
 };
 export type {
   AlertProps,
@@ -50,6 +52,6 @@ export type {
   FormLabelProps,
   LinkProps,
   SideMenuProps,
-  SideMenuItemProps,
   SideMenuLinkProps,
+  SideMenuCollapseProps,
 };
