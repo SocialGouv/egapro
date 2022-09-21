@@ -16,7 +16,7 @@ export const SideMenu: FunctionComponent<SideMenuProps> = ({ title, buttonLabel,
   const { item, collapse } = useCollapse(wrapperId, isExpanded);
   return (
     <nav className={clsx("fr-sidemenu", className)} aria-label="Menu latéral">
-      <div className="fr-sidemenu__inner">
+      <div className="fr-sidemenu__inner fr-py-12v">
         <button
           className="fr-sidemenu__btn"
           hidden
