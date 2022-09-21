@@ -98,3 +98,10 @@ indicateurs:
     population_favorable: femmes|hommes|egalite
     =note: integer
     objectif_de_progression: string
+répartition_équilibrée:
+  +pourcentage_femmes_cadres: number
+  +pourcentage_hommes_cadres: number
+  +pourcentage_femmes_membres: number
+  +pourcentage_hommes_membres: number
+  motif_non_calculabilité_cadres: aucun_cadre_dirigeant|un_seul_cadre_dirigeant
+  motif_non_calculabilité_membres: aucune_instance_dirigeante

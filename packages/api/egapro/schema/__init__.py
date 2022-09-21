@@ -263,7 +263,7 @@ def extrapolate(definition):
             out["maximum"] = type_(max_)
         return out
     if "|" in definition:
-        enum = definition.split("|")
+        enum = [value for value in definition.split("|") if value]        
         return {"type": "string", "enum": enum}
     if definition.startswith("[") and definition.endswith("]"):
         values = definition[1:-1].split(",")
