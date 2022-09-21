@@ -1,7 +1,7 @@
 export type RepartitionEquilibreeAPI = {
   siren: string
   year: number
-  data: RepartitionEqulibreeDataField
+  data: RepartitionEquilibreeDataField
   modified_at: number
   declared_at: number
 }
@@ -25,17 +25,17 @@ type Entreprise = {
   code_pays?: string | undefined
 }
 
-export type RepartitionEqulibreeDataField = {
+export type RepartitionEquilibreeDataField = {
   déclarant: Declarant
   entreprise: Entreprise
   déclaration: DeclarationRepartitionEquilibree
-  indicateurs: IndicateursRepartitionEquilibree
-  publication: PublicationRepartitionEquilibree
+  repartition_équilibrée: IndicateursRepartitionEquilibree
 }
 
 type DeclarationRepartitionEquilibree = {
   année_indicateurs: number
   fin_période_référence: Date
+  publication: PublicationRepartitionEquilibree
 }
 
 type PublicationRepartitionEquilibree = {
@@ -49,6 +49,6 @@ type IndicateursRepartitionEquilibree = {
   pourcentage_hommes_cadres: number
   pourcentage_femmes_membres: number
   pourcentage_hommes_membres: number
-  motif_non_calculabilité_cadres: "Il n'y a aucun cadre dirigeant" | "Il n'y a qu'un seul cadre dirigeant" | undefined
-  motif_non_calculabilité_membres: "Il n'y a aucune instance dirigeante" | undefined
+  motif_non_calculabilité_cadres: "aucun_cadre_dirigeant" | "un_seul_cadre_dirigeant" | undefined
+  motif_non_calculabilité_membres: "aucune_instance_dirigeante" | undefined
 }
