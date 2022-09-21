@@ -1,5 +1,6 @@
 export type TrancheType = "50:250" | "251:999" | "1000:";
 
+//TODO : à refactorer avec des types francisées ??
 export type CompanyType = {
   entreprise: {
     code_naf: string;
