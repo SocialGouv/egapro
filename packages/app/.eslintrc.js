@@ -9,6 +9,7 @@ const config = {
   },
   extends: ["eslint:recommended", "next/core-web-vitals", "prettier"],
   plugins: ["prettier", "unused-imports"],
+  ignorePatterns: ["!.storybook", "!**/.*.js?(x)", "node_modules"],
   rules: {
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
