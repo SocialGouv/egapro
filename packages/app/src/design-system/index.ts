@@ -27,6 +27,9 @@ import { SideMenuList } from "./base/SideMenuList";
 import type { AppProps } from "./layout/App";
 import { App } from "./layout/App";
 import { Container } from "./layout/Container";
+import type { ContainerProps } from "./layout/Container";
+import { ContentWithAside } from "./layout/ContentWithAside";
+import type { ContentWithAsideProps } from "./layout/ContentWithAside";
 
 export {
   Alert,
@@ -46,6 +49,7 @@ export {
   SideMenuList,
   SideMenuCollapse,
   Container,
+  ContentWithAside,
 };
 export type {
   AlertProps,
@@ -60,4 +64,6 @@ export type {
   SideMenuProps,
   SideMenuLinkProps,
   SideMenuCollapseProps,
+  ContentWithAsideProps,
+  ContainerProps,
 };

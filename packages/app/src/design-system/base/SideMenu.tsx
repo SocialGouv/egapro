@@ -6,15 +6,16 @@ import { useCollapse } from "../hooks/useCollapse";
 
 export type SideMenuProps = {
   buttonLabel: string;
+  className?: string;
   title: string;
 };
 
-export const SideMenu: FunctionComponent<SideMenuProps> = ({ title, buttonLabel, children }) => {
+export const SideMenu: FunctionComponent<SideMenuProps> = ({ title, buttonLabel, children, className }) => {
   const [isExpanded, setExpanded] = useState(false);
   const wrapperId = "fr-sidemenu-wrapper";
   const { item, collapse } = useCollapse(wrapperId, isExpanded);
   return (
-    <nav className="fr-sidemenu" aria-label="Menu latéral">
+    <nav className={clsx("fr-sidemenu", className)} aria-label="Menu latéral">
       <div className="fr-sidemenu__inner">
         <button
           className="fr-sidemenu__btn"
