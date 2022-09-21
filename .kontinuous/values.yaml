@@ -16,6 +16,7 @@ storybook:
   containerPort: 8080
   host: "{{ .Values.global.host }}"
   .ingress.path: /storybook
+  .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
 declaration:
