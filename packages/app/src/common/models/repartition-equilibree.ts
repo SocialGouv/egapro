@@ -28,10 +28,11 @@ type Entreprise = {
 }
 
 export type RepartitionEquilibreeDataField = {
+  source: "répartition_équilibrée"
   déclarant: Declarant
   entreprise: Entreprise
   déclaration: DeclarationRepartitionEquilibree
-  repartition_équilibrée: IndicateursRepartitionEquilibree
+  répartition_équilibrée: IndicateursRepartitionEquilibree
 }
 
 type DeclarationRepartitionEquilibree = {
