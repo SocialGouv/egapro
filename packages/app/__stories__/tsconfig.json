@@ -3,20 +3,20 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "../src/*"
-      ],
       "@common/*": [
         "../src/common/*"
       ],
       "@components/*": [
         "../src/components/*"
-      ]
-    }
+      ],
+      "@/*": [
+        "../src/*"
+      ],
+    },
   },
-  // override tests folder exclusion
+  // override stories folder exclusion
   "exclude": [
     "../node_modules",
-    "../__stories__/"
+    "../__tests__/",
   ]
 }
