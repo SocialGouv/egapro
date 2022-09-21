@@ -15,10 +15,11 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules",
-    "__tests__"
+    "__tests__",
+    "__stories__"
   ]
 }
