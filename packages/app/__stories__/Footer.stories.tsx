@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Footer } from "../src/design-system";
+import { Footer } from "@/design-system";
 
 export default {
   title: "Base/Footer",

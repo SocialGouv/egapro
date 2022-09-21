@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Logo } from "../src/design-system";
+import { Logo } from "@/design-system";
 
 export default {
   title: "Base/Logo",

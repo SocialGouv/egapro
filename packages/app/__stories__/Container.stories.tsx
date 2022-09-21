@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Container } from "../src/design-system";
+import { Container } from "@/design-system";
 
 export default {
   title: "Layout/Container",

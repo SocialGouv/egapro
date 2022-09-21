@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { App, Container, ContentWithAside, SideMenu, SideMenuList, SideMenuLink } from "../src/design-system";
+import { App, Container, ContentWithAside, SideMenu, SideMenuList, SideMenuLink } from "@/design-system";
 
 export default {
   title: "Layout/App",

@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormGroupMessage } from "../src/design-system";
+import { FormGroupMessage } from "@/design-system";
 
 export default {
   title: "Base/Form/FormGroupMessage",

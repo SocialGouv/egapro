@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormLabel } from "../src/design-system";
+import { FormLabel } from "@/design-system";
 
 export default {
   title: "Base/Form/FormLabel",

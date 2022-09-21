@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { SideMenu, SideMenuCollapse, SideMenuLink, SideMenuList } from "../src/design-system";
+import { SideMenu, SideMenuCollapse, SideMenuLink, SideMenuList } from "@/design-system";
 
 export default {
   title: "Base/SideMenu",

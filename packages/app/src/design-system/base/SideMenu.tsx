@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { CSSProperties, FunctionComponent } from "react";
 import { useState } from "react";
 
 import { useCollapse } from "../hooks/useCollapse";
@@ -29,12 +29,12 @@ export const SideMenu: FunctionComponent<SideMenuProps> = ({ title, buttonLabel,
         <div
           className={clsx("fr-collapse", isExpanded && "fr-collapse--expanded")}
           id={wrapperId}
-          style={{
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore : custom var
-            "--collapse-max-height": item.stateHeight,
-            "--collapse": collapse,
-          }}
+          style={
+            {
+              "--collapse-max-height": item.stateHeight,
+              "--collapse": collapse,
+            } as CSSProperties
+          }
         >
           <div className="fr-sidemenu__title">{title}</div>
           {children}

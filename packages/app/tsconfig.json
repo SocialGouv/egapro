@@ -1,7 +1,6 @@
 {
   "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
-    "jsx": "preserve",
     "strict": true,
     "baseUrl": "./src",
     "paths": {
@@ -20,6 +19,7 @@
   ],
   "exclude": [
     "node_modules",
-    "__tests__"
+    "__tests__",
+    "__stories__"
   ]
 }

@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { ContentWithAside } from "../src/design-system";
+import { ContentWithAside } from "@/design-system";
 
 export default {
   title: "Layout/ContentWithAside",

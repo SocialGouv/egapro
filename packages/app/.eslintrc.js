@@ -106,9 +106,28 @@ const config = {
       },
     },
     {
-      files: ["src/pages/**/*.ts?(x)", "__stories__/**/*.ts?(x)"],
+      files: ["src/pages/**/*.ts?(x)"],
       rules: {
         "import/no-default-export": "off",
+      },
+    },
+    {
+      files: ["__stories__/**/*.tsx"],
+      extends: ["plugin:storybook/recommended"],
+      rules: {
+        "import/no-default-export": "off",
+      },
+      parserOptions: {
+        project: ["__stories__/tsconfig.json"],
+        sourceType: "module",
+      },
+      settings: {
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ["__stories__/tsconfig.json"],
+          },
+        },
       },
     },
     {
