@@ -1,3 +1,5 @@
+import { COUNTIES, COUNTRIES, NAF, REGIONS } from "../dict"
+
 export type RepartitionEquilibreeAPI = {
   siren: string
   year: number
@@ -16,13 +18,13 @@ type Declarant = {
 type Entreprise = {
   siren: string
   raison_sociale: string
-  code_naf: string
-  région: string
-  département: string
+  code_naf: keyof typeof NAF
+  région: keyof typeof REGIONS
+  département: keyof typeof COUNTIES
   adresse: string
   code_postal?: string | undefined
   commune: string
-  code_pays?: string | undefined
+  code_pays?: keyof typeof COUNTRIES | undefined
 }
 
 export type RepartitionEquilibreeDataField = {
