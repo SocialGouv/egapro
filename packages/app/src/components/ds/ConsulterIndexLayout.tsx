@@ -1,15 +1,12 @@
 import { Box, Container, Flex } from "@chakra-ui/layout";
-import type { ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 import React from "react";
 
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 
-interface Props {
-  children: ReactNode;
-}
-
-export function SinglePageLayout({ children }: Props) {
+// eslint-disable-next-line @typescript-eslint/ban-types -- no props
+export const ConsulterIndexLayout = ({ children }: PropsWithChildren<{}>) => {
   return (
     <Flex direction="column" minHeight="100vh">
       <Header />
@@ -19,4 +16,4 @@ export function SinglePageLayout({ children }: Props) {
       <Footer />
     </Flex>
   );
-}
+};

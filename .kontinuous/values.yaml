@@ -2,10 +2,10 @@ app:
   ~chart: app
   ~needs: [build-app]
   imagePackage: app
-  probesPath: /consulter-index/healthz
+  probesPath: /healthz
   containerPort: 3000
   host: "{{ .Values.global.host }}"
-  .ingress.path: /consulter-index(/|$)(.*)
+  .ingress.path: /
   certSecretName: api-crt
 
 storybook:
