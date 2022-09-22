@@ -8,8 +8,8 @@ const nextConfig = {
         source: "/healthz",
         destination: "/api/health",
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
