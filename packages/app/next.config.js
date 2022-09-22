@@ -1,12 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  basePath: "/consulter-index",
+  trailingSlash: true,
   rewrites: async () => {
     return [
       {
         source: "/healthz",
         destination: "/api/health",
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/consulter-index",
+        permanent: true,
       },
     ];
   },
