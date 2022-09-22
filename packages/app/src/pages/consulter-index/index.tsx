@@ -13,12 +13,10 @@ import {
 import { format } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { ReactElement } from "react";
 import React from "react";
 import { HiDownload } from "react-icons/hi";
 import { AverageIndicator } from "@components/AverageIndicator";
 import { ButtonAction } from "@components/ds/ButtonAction";
-import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 async function getDateCsv(): Promise<string> {
   try {
@@ -46,7 +44,7 @@ function FormSearchSiren() {
 
     const { q } = Object.fromEntries(data);
 
-    router.push("/recherche" + (q ? `?q=${q}` : ""));
+    router.push("consulter-index/recherche" + (q ? `?q=${q}` : ""));
   }
 
   return (
@@ -118,7 +116,3 @@ export default function HomePage() {
     </VStack>
   );
 }
-
-HomePage.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>;
-};
