@@ -1,3 +1,10 @@
+# [2.22.0](https://github.com/SocialGouv/egapro/compare/v2.21.1...v2.22.0) (2022-09-22)
+
+
+### Features
+
+* **app:** New select component ([#1042](https://github.com/SocialGouv/egapro/issues/1042)) ([c270322](https://github.com/SocialGouv/egapro/commit/c27032234809daa1cb9d2a91f3f5f7b43b6af343))
+
 ## [2.21.1](https://github.com/SocialGouv/egapro/compare/v2.21.0...v2.21.1) (2022-09-20)
 
 
