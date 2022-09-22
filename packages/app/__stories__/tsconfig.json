@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@common/*": [
+        "../src/common/*"
+      ],
+      "@components/*": [
+        "../src/components/*"
+      ],
+      "@/*": [
+        "../src/*"
+      ],
+    },
+  },
+  // override stories folder exclusion
+  "exclude": [
+    "../node_modules",
+    "../__tests__/",
+  ]
+}
