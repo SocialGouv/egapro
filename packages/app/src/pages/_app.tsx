@@ -1,25 +1,22 @@
 import "@fontsource/gabriela";
 import "@fontsource/cabin";
 
-import { ChakraProvider } from "@chakra-ui/react";
 import { init } from "@socialgouv/matomo-next";
 
+import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import type { ReactElement, ReactNode } from "react";
 import React from "react";
 
-import { theme } from "../theme";
-import type { SimpleObject } from "@common/utils/types";
-import { ConsulterIndexLayout } from "@components/ds/ConsulterIndexLayout";
-
-const layouts: SimpleObject<(page: ReactElement) => ReactNode> = {
-  "consulter-index": page => <ConsulterIndexLayout>{page}</ConsulterIndexLayout>,
-  "repartition-equilibree": page => <div style={{ backgroundColor: "red", color: "yellow" }}>{page}</div>,
-  // TODO remove -- only for demo purpose
-  "repartition-equilibree/mapage": page => <>{page}</>,
+type NextPageWithLayout = NextPage & {
+  getLayout?: (page: ReactElement) => ReactNode;
 };
 
-export default function MyApp({ Component, pageProps, router }: AppProps) {
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   React.useEffect(() => {
     init({
       url: process.env.NEXT_PUBLIC_MATOMO_URL ?? "",
@@ -27,10 +24,12 @@ export default function MyApp({ Component, pageProps, router }: AppProps) {
     });
   }, []);
 
-  const base = router.pathname.split("/")[1];
-  const getLayout = layouts[base] ?? (page => page);
+  // Use the layout defined at the page level, if available
+
+  const getLayout = Component.getLayout ?? (page => page);
 
   const componentWithLayout = getLayout(<Component {...pageProps} />);
 
-  return <ChakraProvider theme={theme}>{componentWithLayout}</ChakraProvider>;
+  // return <ChakraProvider theme={theme}>{componentWithLayout}</ChakraProvider>;
+  return <>{componentWithLayout}</>;
 }
