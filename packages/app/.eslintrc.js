@@ -112,25 +112,6 @@ const config = {
       },
     },
     {
-      files: ["__stories__/**/*.tsx"],
-      extends: ["plugin:storybook/recommended"],
-      rules: {
-        "import/no-default-export": "off",
-      },
-      parserOptions: {
-        project: ["__stories__/tsconfig.json"],
-        sourceType: "module",
-      },
-      settings: {
-        "import/resolver": {
-          typescript: {
-            alwaysTryTypes: true,
-            project: ["__stories__/tsconfig.json"],
-          },
-        },
-      },
-    },
-    {
       files: ["__tests__/*.ts?(x)"],
       extends: ["plugin:testing-library/react", "plugin:jest-dom/recommended"],
       plugins: ["jest"],

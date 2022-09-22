@@ -83,7 +83,7 @@ Object {
               <a
                 class="chakra-link css-13o7eu2"
                 href="https://travail-emploi.gouv.fr/"
-                rel="noopener"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 <img
@@ -164,7 +164,7 @@ Object {
             <a
               class="chakra-link css-13o7eu2"
               href="https://travail-emploi.gouv.fr/"
-              rel="noopener"
+              rel="noopener noreferrer"
               target="_blank"
             >
               <img
