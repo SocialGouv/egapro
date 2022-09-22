@@ -86,14 +86,6 @@ async def on_headers(request, response):
     if request.method not in ["GET", "OPTIONS"]:
         raise HttpError(405, "Ooops, le site est en maintenance")
 
-def add_error(err_type, err_msg):
-    def decorator(view):
-        @wraps(view)
-        async def wrapper(request, response, siren, *args, **kwargs):
-            request["error"] = (err_type, err_msg)
-            return await view(request, response, siren, *args, **kwargs)
-        return wrapper
-    return decorator
 
 def ensure_owner(view):
     @wraps(view)
@@ -108,11 +100,8 @@ def ensure_owner(view):
                 "Non owner (%s) accessing owned resource %s %s", declarant, siren, args
             )
             if not request["staff"]:
-                if "error" not in request:
-                    msg = f"Vous n'avez pas les droits nécessaires pour le siren {siren}"
-                    raise HttpError(403, msg)
-                else:
-                    raise HttpError(*request["error"])
+                msg = f"Vous n'avez pas les droits nécessaires pour le siren {siren}"
+                raise HttpError(403, msg)
         return await view(request, response, siren, *args, **kwargs)
 
     return wrapper
@@ -177,7 +166,6 @@ async def declare(request, response, siren, year):
             emails.success.send(owners, url=url, **data)
 
 @tokens.require
-@ensure_owner
 @app.route("/declarations/{siren}", methods=["GET"])
 async def get_declarations(request, response, siren):
     declarations = []
@@ -378,13 +366,6 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
-
-@app.route("/repartition-equilibree/declaration/{siren}/{year}", methods=["GET"])
-@tokens.require
-@add_error(403, constants.ERROR_ENSURE_OWNER)
-@ensure_owner
-async def rep_eq_get_declaration(request, response, siren, year):
-    get_declaration(request, response, siren, year)
 
 @app.route("/search")
 async def search(request, response):

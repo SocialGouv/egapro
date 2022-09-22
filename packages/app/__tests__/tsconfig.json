@@ -16,7 +16,6 @@
   },
   // override tests folder exclusion
   "exclude": [
-    "../node_modules",
-    "../__stories__/"
+    "../node_modules"
   ]
 }

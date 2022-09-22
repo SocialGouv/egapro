@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from egapro import db, schema, utils, constants
+from egapro import db, schema, utils
 
 pytestmark = pytest.mark.asyncio
 
@@ -375,8 +375,6 @@ async def test_cannot_load_not_owned_declaration(client, declaration):
     assert resp.status == 403
     assert json.loads(resp.body) == {
         "error": "Vous n'avez pas les droits nécessaires pour le siren 514027945"
-    } or {
-        "error": constants.ERROR_ENSURE_OWNER
     }
 
 
