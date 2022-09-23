@@ -1,44 +1,33 @@
 import clsx from "clsx";
-import type { FunctionComponent, HTMLAttributes, ReactNode } from "react";
-import type { SimpleObject } from "@common/utils/types";
+import type { PropsWithChildren } from "react";
 
-export type CalloutProps = HTMLAttributes<HTMLDivElement> & {
+import type { iconStyles } from "../utils/icon-styles";
+import styles from "./Callout.module.css";
+
+export type CalloutProps = PropsWithChildren<{
   buttonLabel?: string;
+  buttonOnClick?: VoidFunction;
   className?: string;
-  color?: string;
-  cta?: VoidFunction;
+  icon?: iconStyles;
   title?: string;
-  titleSize?: "lg" | "md" | "sm" | "xl" | "xs";
-};
+  titleAs?: "h2" | "h3" | "h4" | "h5" | "h6" | "p";
+}>;
 
-export const Callout: FunctionComponent<CalloutProps> = ({
+export const Callout = ({
   buttonLabel,
-  children,
   className,
-  color,
-  cta,
+  buttonOnClick,
   title,
-  titleSize,
-  ...rest
-}) => {
-  const getColor = (colorInput: string): string => `fr-callout--${colorInput}`;
-
-  const titleSizes: SimpleObject<(_title: string) => ReactNode> = {
-    xs: _title => <h2 className="fr-callout__title">{_title}</h2>,
-    sm: _title => <h3 className="fr-callout__title">{_title}</h3>,
-    md: _title => <h4 className="fr-callout__title">{_title}</h4>,
-    lg: _title => <h5 className="fr-callout__title">{_title}</h5>,
-    xl: _title => <h6 className="fr-callout__title">{_title}</h6>,
-  };
-
-  const getTitle = (titleSize && titleSizes[titleSize]) ?? (title => <h3 className="fr-callout__title">{title}</h3>);
-
+  titleAs: HtmlTag = "p",
+  children,
+  icon,
+}: CalloutProps) => {
   return (
-    <div className={clsx("fr-callout", "fr-fi-information-line", color && getColor(color), className)}>
-      {title && getTitle(title)}
-      <p className="fr-callout__text">{children}</p>
-      {buttonLabel && (
-        <button className="fr-btn" onClick={cta}>
+    <div className={clsx("fr-callout", icon, className)}>
+      {title && <HtmlTag className={clsx("fr-callout__title", styles.title)}>{title}</HtmlTag>}
+      <div className="fr-callout__text">{children}</div>
+      {buttonLabel && buttonOnClick && (
+        <button className="fr-btn" onClick={buttonOnClick}>
           {buttonLabel}
         </button>
       )}

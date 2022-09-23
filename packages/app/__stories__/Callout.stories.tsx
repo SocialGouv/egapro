@@ -1,16 +1,10 @@
+import { action } from "@storybook/addon-actions";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-
 import { Callout } from "@/design-system";
 
 export default {
   title: "Base/Callout",
   component: Callout,
-  argTypes: {
-    titleSize: {
-      options: ["lg", "md", "sm", "xl", "xs"],
-      control: { type: "radio" },
-    },
-  },
   parameters: {
     docs: {
       description: {
@@ -28,29 +22,23 @@ const Template: ComponentStory<typeof Callout> = args => (
 );
 
 export const Default = Template.bind({});
-Default.args = {
-  id: "xxx",
-  buttonLabel: "Cliquer ici",
-  title: "Small title",
-  titleSize: "sm",
+Default.args = {};
+
+export const WithIcon = Template.bind({});
+WithIcon.args = {
+  icon: "fr-fi-information-line",
 };
 
-export const Colored = Template.bind({});
-Colored.args = {
-  id: "xxx",
-  title: "Extra small title",
-  titleSize: "xs",
-  color: "green-emeraude",
+export const WithTitle = Template.bind({});
+WithTitle.args = {
+  title: "Titre mise en avant",
+  icon: "fr-fi-information-line",
 };
 
-export const Cta = Template.bind({});
-Cta.args = {
-  id: "xxx",
+export const WithButton = Template.bind({});
+WithButton.args = {
+  icon: "fr-fi-information-line",
+  title: "Titre mise en avant",
   buttonLabel: "Cliquer là",
-  title: "With CTA",
-  titleSize: "xs",
-  color: "brown-caramel",
-  cta: () => {
-    alert("Yo");
-  },
+  buttonOnClick: action("button-click"),
 };
