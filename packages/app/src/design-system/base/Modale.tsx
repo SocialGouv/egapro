@@ -1,17 +1,20 @@
 import { Dialog } from "@headlessui/react";
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
+import React from "react";
+import type { FormButtonProps } from "./FormButton";
 
 import styles from "./Modale.module.css";
 
 export type ModaleProps = PropsWithChildren<
   React.ReactHTMLElement<HTMLDivElement> & {
+    buttons?: Array<React.ReactElement<FormButtonProps>>;
     isOpen: boolean;
     onClose: () => void;
   }
 >;
 
-export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
+export const Modale = ({ isOpen, onClose, children, buttons }: ModaleProps) => {
   return (
     <Dialog as="dialog" open={isOpen} onClose={onClose} className={clsx("fr-modal", isOpen && styles.open)}>
       <Dialog.Panel>
@@ -32,6 +35,15 @@ export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
                   {children}
                 </div>
               </div>
+              {buttons && (
+                <div className="fr-modal__footer">
+                  <ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-lg fr-btns-group--icon-left">
+                    {buttons.map((el, index) => (
+                      <li key={index}>{el}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
