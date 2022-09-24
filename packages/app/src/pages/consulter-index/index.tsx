@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
-import type { ReactElement } from "react";
+import type { PropsWithChildren } from "react";
 import { HiDownload } from "react-icons/hi";
 
 import { AverageIndicator } from "@components/AverageIndicator";
@@ -120,6 +120,4 @@ export default function HomePage() {
   );
 }
 
-HomePage.getLayout = function getLayout(page: ReactElement) {
-  return <ConsulterIndexLayout>{page}</ConsulterIndexLayout>;
-};
+HomePage.getLayout = ({ children }: PropsWithChildren) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;

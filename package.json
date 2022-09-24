@@ -2,9 +2,29 @@
   "name": "~egapro-dev",
   "version": "2.14.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/next",
+      "**/react",
+      "**/react-dom",
+      "**/@types/react",
+      "**/@types/react-dom",
+      "**/@types/node",
+      "**/framer-motion",
+      "**/@emotion/react",
+      "**/@emotion/styled",
+      "**/@chakra-ui/react",
+      "**/@chakra-ui/icons",
+      "**/framer-motion/**",
+      "**/@emotion/react/**",
+      "**/@emotion/styled/**",
+      "**/@chakra-ui/react/**",
+      "**/@chakra-ui/icons/**"
+    ]
+  },
   "engines": {
     "node": "16"
   },

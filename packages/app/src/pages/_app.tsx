@@ -3,13 +3,12 @@ import "@fontsource/cabin";
 
 import { init } from "@socialgouv/matomo-next";
 
-import type { NextPage } from "next";
 import type { AppProps } from "next/app";
-import type { ReactElement, ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 import React from "react";
 
-type NextPageWithLayout = NextPage & {
-  getLayout?: (page: ReactElement) => ReactNode;
+type NextPageWithLayout = AppProps["Component"] & {
+  getLayout?: (props: PropsWithChildren) => JSX.Element;
 };
 
 type AppPropsWithLayout = AppProps & {
@@ -26,10 +25,12 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   // Use the layout defined at the page level, if available
 
-  const getLayout = Component.getLayout ?? (page => page);
-
-  const componentWithLayout = getLayout(<Component {...pageProps} />);
+  const Layout = Component.getLayout ?? (({ children }) => <>{children}</>);
 
   // return <ChakraProvider theme={theme}>{componentWithLayout}</ChakraProvider>;
-  return <>{componentWithLayout}</>;
+  return (
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
+  );
 }
