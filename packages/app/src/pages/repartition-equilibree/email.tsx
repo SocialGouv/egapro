@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,9 +18,13 @@ const formSchema = z.object({
 type FormType = z.infer<typeof formSchema>;
 
 export default function EmailPage() {
+  const [isTokenRequested, setTokenRequested] = React.useState(false);
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting, isSubmitted, isDirty, isValid },
   } = useForm<FormType>({
     resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
@@ -28,35 +33,58 @@ export default function EmailPage() {
     },
   });
 
-  const onSubmit = ({ email }: FormType) => {
-    requestEmailForToken(email);
+  const email = watch("email");
+
+  const onSubmit = async ({ email }: FormType) => {
+    try {
+      await requestEmailForToken(email);
+      setTokenRequested(true);
+    } catch (error) {
+      setTokenRequested(false);
+    }
   };
 
   return (
     <>
       <h1>{title}</h1>
-      <p>L’email saisi doit être valide.</p>
-      <p>
-        Pour pouvoir poursuivre la transmission des informations requises, celui-ci doit correspondre à celui de la
-        personne à contacter par les services de l’inspection du travail en cas de besoin et sera celui auquel sera
-        adressé l’accusé de réception en fin de procédure.
-      </p>
-      <p>
-        Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l’email utilisé pour
-        la déclaration.
-      </p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FormGroup>
-          <FormLabel htmlFor="email">Adresse email</FormLabel>
-          <FormInput id="email" {...register("email")} />
-          {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
-        </FormGroup>
+      {isTokenRequested ? (
+        <>
+          <p>Un mail vous a été envoyé.</p>
+          <p>
+            Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisi (<strong>{email}</strong>) soit
+            incorrect, ou bien que le mail ait été déplacé dans votre dossier de courriers indésirables ou dans le
+            dossier SPAM.
+          </p>
+          <p>En cas d'échec, la procédure devra être reprise avec un autre email.</p>
+          <FormButton onClick={() => router.back()}>Réessayer</FormButton>
+        </>
+      ) : (
+        <>
+          <p>L’email saisi doit être valide.</p>
+          <p>
+            Pour pouvoir poursuivre la transmission des informations requises, celui-ci doit correspondre à celui de la
+            personne à contacter par les services de l’inspection du travail en cas de besoin et sera celui auquel sera
+            adressé l’accusé de réception en fin de procédure.
+          </p>
+          <p>
+            Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l’email utilisé
+            pour la déclaration.
+          </p>
 
-        <FormButton type="submit" isDisabled={!isDirty || isSubmitting || (isSubmitted && !isValid)}>
-          Envoyer
-        </FormButton>
-      </form>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <FormGroup>
+              <FormLabel htmlFor="email">Adresse email</FormLabel>
+              <FormInput id="email" {...register("email")} />
+              {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
+            </FormGroup>
+
+            <FormButton type="submit" isDisabled={!isDirty || isSubmitting || (isSubmitted && !isValid)}>
+              Envoyer
+            </FormButton>
+          </form>
+        </>
+      )}
     </>
   );
 }
