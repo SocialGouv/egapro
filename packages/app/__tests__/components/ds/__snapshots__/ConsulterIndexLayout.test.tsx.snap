@@ -3,7 +3,9 @@
 exports[`should match snapshot 1`] = `
 Object {
   "asFragment": [Function],
-  "baseElement": <body>
+  "baseElement": <body
+    class="chakra-ui-light"
+  >
     <div
       id="chakra-toast-portal"
     >
@@ -41,20 +43,20 @@ Object {
           role="banner"
         >
           <div
-            class="css-whfgkw"
+            class="css-9v6k7z"
           >
             <div
-              class="chakra-container css-tflc3m"
+              class="chakra-container css-jf7n8r"
             >
               <ul
-                class="chakra-stack css-dr17qb"
+                class="chakra-stack css-9zlpoh"
                 role="list"
               >
                 <li
                   class="css-0"
                 >
                   <a
-                    class="chakra-link css-0"
+                    class="chakra-link css-f4h6uy"
                     href="#main"
                   >
                     Aller au contenu
@@ -64,7 +66,7 @@ Object {
                   class="css-0"
                 >
                   <a
-                    class="chakra-link css-0"
+                    class="chakra-link css-f4h6uy"
                     href="#footer"
                   >
                     Aller au pied de page
@@ -74,17 +76,17 @@ Object {
             </div>
           </div>
           <div
-            class="chakra-container css-tflc3m"
+            class="chakra-container css-jf7n8r"
             id="menu"
           >
             <div
-              class="css-1ebpvxu"
+              class="css-1ibkps6"
             >
               <div
-                class="css-tj0ab2"
+                class="css-whilru"
               >
                 <a
-                  class="chakra-link css-13o7eu2"
+                  class="chakra-link css-zemsud"
                   href="https://travail-emploi.gouv.fr/"
                   rel="noopener"
                   target="_blank"
@@ -97,16 +99,16 @@ Object {
                 </a>
               </div>
               <div
-                class="css-nbt6tq"
+                class="css-1fm0la2"
               >
                 <a
-                  class="chakra-link css-1n49pl7"
+                  class="chakra-link css-bk31cd"
                   href="/"
                 >
                   Index Egapro
                 </a>
                 <p
-                  class="chakra-text css-1lj023j"
+                  class="chakra-text css-dw5ttn"
                 >
                   L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
                 </p>
@@ -115,32 +117,32 @@ Object {
           </div>
         </header>
         <main
-          class="css-1epwzd8"
+          class="css-opostm"
           id="main"
           role="main"
         >
           <div
-            class="chakra-container css-f91va8"
+            class="chakra-container css-1xo1xlh"
           >
             Hello
           </div>
         </main>
         <footer
-          class="css-1dthsy1"
+          class="css-1aolk1p"
           id="footer"
           role="contentinfo"
         >
           <div
-            class="chakra-container css-14xld82"
+            class="chakra-container css-qhj0ic"
           >
             <div
               class="css-v3i7xg"
             >
               <div
-                class="css-111wug5"
+                class="css-wzhq7s"
               >
                 <a
-                  class="chakra-link css-1xbuty4"
+                  class="chakra-link css-1rt0a8l"
                   href="https://travail-emploi.gouv.fr/"
                   rel="noopener"
                   target="_blank"
@@ -153,14 +155,14 @@ Object {
                 </a>
               </div>
               <ul
-                class="css-2xogyv"
+                class="css-11ji3cx"
                 role="list"
               >
                 <li
                   class="css-0"
                 >
                   <a
-                    class="chakra-link css-0"
+                    class="chakra-link css-f4h6uy"
                     href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
                     rel="noopener"
                     target="_blank"
@@ -170,7 +172,7 @@ Object {
                     >
                       Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
                       <svg
-                        class="chakra-icon css-417j41"
+                        class="chakra-icon css-1j5r502"
                         focusable="false"
                         viewBox="0 0 24 24"
                       >
@@ -200,17 +202,17 @@ Object {
               class="css-1tqkm5s"
             >
               <i
-                class="chakra-text css-g5hezf"
+                class="chakra-text css-itvw0n"
               >
                 Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
               </i>
               <p
-                class="chakra-text css-iesxu2"
+                class="chakra-text css-vc8k71"
               >
                 Pour nous aider à l'améliorer
                  
                 <a
-                  class="chakra-link css-1qsits3"
+                  class="chakra-link css-ipgem3"
                   href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
                   rel="noopener"
                   target="_blank"
@@ -219,7 +221,7 @@ Object {
                 </a>
                 , 
                 <a
-                  class="chakra-link css-1qsits3"
+                  class="chakra-link css-ipgem3"
                   href="https://github.com/SocialGouv/egapro/tree/1.21.0"
                   rel="noopener"
                   target="_blank"
@@ -242,20 +244,20 @@ Object {
         role="banner"
       >
         <div
-          class="css-whfgkw"
+          class="css-9v6k7z"
         >
           <div
-            class="chakra-container css-tflc3m"
+            class="chakra-container css-jf7n8r"
           >
             <ul
-              class="chakra-stack css-dr17qb"
+              class="chakra-stack css-9zlpoh"
               role="list"
             >
               <li
                 class="css-0"
               >
                 <a
-                  class="chakra-link css-0"
+                  class="chakra-link css-f4h6uy"
                   href="#main"
                 >
                   Aller au contenu
@@ -265,7 +267,7 @@ Object {
                 class="css-0"
               >
                 <a
-                  class="chakra-link css-0"
+                  class="chakra-link css-f4h6uy"
                   href="#footer"
                 >
                   Aller au pied de page
@@ -275,17 +277,17 @@ Object {
           </div>
         </div>
         <div
-          class="chakra-container css-tflc3m"
+          class="chakra-container css-jf7n8r"
           id="menu"
         >
           <div
-            class="css-1ebpvxu"
+            class="css-1ibkps6"
           >
             <div
-              class="css-tj0ab2"
+              class="css-whilru"
             >
               <a
-                class="chakra-link css-13o7eu2"
+                class="chakra-link css-zemsud"
                 href="https://travail-emploi.gouv.fr/"
                 rel="noopener"
                 target="_blank"
@@ -298,16 +300,16 @@ Object {
               </a>
             </div>
             <div
-              class="css-nbt6tq"
+              class="css-1fm0la2"
             >
               <a
-                class="chakra-link css-1n49pl7"
+                class="chakra-link css-bk31cd"
                 href="/"
               >
                 Index Egapro
               </a>
               <p
-                class="chakra-text css-1lj023j"
+                class="chakra-text css-dw5ttn"
               >
                 L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
               </p>
@@ -316,32 +318,32 @@ Object {
         </div>
       </header>
       <main
-        class="css-1epwzd8"
+        class="css-opostm"
         id="main"
         role="main"
       >
         <div
-          class="chakra-container css-f91va8"
+          class="chakra-container css-1xo1xlh"
         >
           Hello
         </div>
       </main>
       <footer
-        class="css-1dthsy1"
+        class="css-1aolk1p"
         id="footer"
         role="contentinfo"
       >
         <div
-          class="chakra-container css-14xld82"
+          class="chakra-container css-qhj0ic"
         >
           <div
             class="css-v3i7xg"
           >
             <div
-              class="css-111wug5"
+              class="css-wzhq7s"
             >
               <a
-                class="chakra-link css-1xbuty4"
+                class="chakra-link css-1rt0a8l"
                 href="https://travail-emploi.gouv.fr/"
                 rel="noopener"
                 target="_blank"
@@ -354,14 +356,14 @@ Object {
               </a>
             </div>
             <ul
-              class="css-2xogyv"
+              class="css-11ji3cx"
               role="list"
             >
               <li
                 class="css-0"
               >
                 <a
-                  class="chakra-link css-0"
+                  class="chakra-link css-f4h6uy"
                   href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
                   rel="noopener"
                   target="_blank"
@@ -371,7 +373,7 @@ Object {
                   >
                     Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
                     <svg
-                      class="chakra-icon css-417j41"
+                      class="chakra-icon css-1j5r502"
                       focusable="false"
                       viewBox="0 0 24 24"
                     >
@@ -401,17 +403,17 @@ Object {
             class="css-1tqkm5s"
           >
             <i
-              class="chakra-text css-g5hezf"
+              class="chakra-text css-itvw0n"
             >
               Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
             </i>
             <p
-              class="chakra-text css-iesxu2"
+              class="chakra-text css-vc8k71"
             >
               Pour nous aider à l'améliorer
                
               <a
-                class="chakra-link css-1qsits3"
+                class="chakra-link css-ipgem3"
                 href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
                 rel="noopener"
                 target="_blank"
@@ -420,7 +422,7 @@ Object {
               </a>
               , 
               <a
-                class="chakra-link css-1qsits3"
+                class="chakra-link css-ipgem3"
                 href="https://github.com/SocialGouv/egapro/tree/1.21.0"
                 rel="noopener"
                 target="_blank"
