@@ -1,5 +1,5 @@
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
-export const FooterBodyItem: FunctionComponent = ({ children }) => {
+export const FooterBodyItem = ({ children }: PropsWithChildren) => {
   return <li className="fr-footer__content-item">{children}</li>;
 };

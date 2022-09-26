@@ -1,21 +1,15 @@
 import clsx from "clsx";
-import type { iconStyles } from "./icon-styles";
+import type { IconStyles } from "./icon-styles";
 
-export type buttonStylesProps = {
-  iconLeft?: iconStyles;
-  iconOnly?: iconStyles;
-  iconRight?: iconStyles;
+export type ButtonStylesProps = {
+  iconLeft?: IconStyles;
+  iconOnly?: IconStyles;
+  iconRight?: IconStyles;
   size?: "lg" | "sm";
   variant?: "secondary" | "tertiary-no-border" | "tertiary";
 };
 
-export const buttonStyles = (
-  variant: buttonStylesProps["variant"],
-  size: buttonStylesProps["size"],
-  iconLeft: buttonStylesProps["iconLeft"],
-  iconRight: buttonStylesProps["iconRight"],
-  iconOnly: buttonStylesProps["iconOnly"],
-): string =>
+export const buttonStyles = ({ variant, size, iconLeft, iconRight, iconOnly }: ButtonStylesProps): string =>
   clsx(
     "fr-btn",
     variant === "secondary" && "fr-btn--secondary",

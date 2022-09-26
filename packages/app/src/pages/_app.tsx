@@ -27,7 +27,6 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   const Layout = Component.getLayout ?? (({ children }) => <>{children}</>);
 
-  // return <ChakraProvider theme={theme}>{componentWithLayout}</ChakraProvider>;
   return (
     <Layout>
       <Component {...pageProps} />

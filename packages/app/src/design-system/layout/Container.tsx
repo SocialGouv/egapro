@@ -1,10 +1,10 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
-export type ContainerProps = {
+export type ContainerProps = PropsWithChildren<{
   className?: string;
-};
+}>;
 
-export const Container: FunctionComponent<ContainerProps> = ({ children, className }) => {
+export const Container = ({ children, className }: ContainerProps) => {
   return <div className={clsx("fr-container", className)}>{children}</div>;
 };
