@@ -22,7 +22,7 @@ export default function EmailPage() {
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitted, isDirty, isValid },
   } = useForm<FormType>({
-    resolver: zodResolver(formSchema as Zod.ZodType<any, any, any>), // Configuration the validation with the zod schema.
+    resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
     defaultValues: {
       email: "",
     },

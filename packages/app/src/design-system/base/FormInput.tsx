@@ -9,7 +9,7 @@ export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   isDisabled?: boolean;
   isError?: boolean;
   isValid?: boolean;
-  type: string;
+  type?: string;
 };
 
 export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
