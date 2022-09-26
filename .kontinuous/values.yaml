@@ -37,7 +37,7 @@ simulateur:
   probesPath: /index.html
   containerPort: 8080
   host: "{{ .Values.global.host }}"
-  .ingress.path: /
+  .ingress.path: /index
   certSecretName: api-crt
 
 api:
