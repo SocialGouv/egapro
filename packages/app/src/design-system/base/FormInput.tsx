@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import React from "react";
 
 import type { iconStyles } from "../utils/icon-styles";
 
@@ -9,18 +9,11 @@ export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   isDisabled?: boolean;
   isError?: boolean;
   isValid?: boolean;
+  type: string;
 };
 
-export const FormInput: FunctionComponent<FormInputProps> = ({
-  type = "text",
-  isError,
-  isValid,
-  isDisabled,
-  icon,
-  id,
-  ...rest
-}) => {
-  return (
+export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
+  ({ type = "text", isError, isValid, isDisabled, icon, id, ...rest }, ref) => (
     <div className={clsx("fr-input-wrap", icon, type === "date" && "fr-icon-calendar-line")}>
       <input
         id={id}
@@ -28,8 +21,12 @@ export const FormInput: FunctionComponent<FormInputProps> = ({
         type={type}
         disabled={isDisabled}
         aria-describedby={`${id}-msg`}
+        aria-invalid={isError || "false"}
+        ref={ref}
         {...rest}
       />
     </div>
-  );
-};
+  ),
+);
+
+FormInput.displayName = "FormInput";
