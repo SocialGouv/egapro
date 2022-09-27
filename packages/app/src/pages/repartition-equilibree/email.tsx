@@ -1,14 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { requestEmailForToken } from "@common/utils/api";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
-import { FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
+import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
 
 const title = "Validation de l'email";
+
+const ERROR_COLLAPSE_TIMEOUT = 5000;
 
 const formSchema = z.object({
   email: z.string().min(1, "L'email est requis.").email({ message: "L'email est invalide." }),
@@ -17,9 +18,21 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
+type FeatureStatus =
+  | {
+      message: string;
+      type: "error";
+    }
+  | {
+      type: "idle";
+    }
+  | {
+      type: "loading";
+    }
+  | { message: string; type: "success" };
+
 export default function EmailPage() {
-  const [isTokenRequested, setTokenRequested] = React.useState(false);
-  const router = useRouter();
+  const [status, setStatus] = React.useState<FeatureStatus>({ type: "idle" });
 
   const {
     register,
@@ -38,17 +51,31 @@ export default function EmailPage() {
   const onSubmit = async ({ email }: FormType) => {
     try {
       await requestEmailForToken(email);
-      setTokenRequested(true);
+      setStatus({ type: "success", message: "Un mail vous a été envoyé." });
     } catch (error) {
-      setTokenRequested(false);
+      setStatus({ type: "error", message: "Erreur lors de l'envoi du mail" });
     }
   };
+
+  // Remove error message after some timeout.
+  React.useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (status.type === "error") {
+      timeoutId = setTimeout(() => {
+        setStatus({ type: "idle" });
+      }, ERROR_COLLAPSE_TIMEOUT);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [status]);
 
   return (
     <>
       <h1>{title}</h1>
 
-      {isTokenRequested ? (
+      {status.type === "error" ? (
+        <Alert description={status.message} title="Erreur" type="error" />
+      ) : status.type === "success" ? (
         <>
           <p>Un mail vous a été envoyé.</p>
           <p>
@@ -57,11 +84,10 @@ export default function EmailPage() {
             dossier SPAM.
           </p>
           <p>En cas d'échec, la procédure devra être reprise avec un autre email.</p>
-          <FormButton onClick={() => router.back()}>Réessayer</FormButton>
+          <FormButton onClick={() => setStatus({ type: "idle" })}>Réessayer</FormButton>
         </>
       ) : (
         <>
-          <p>L’email saisi doit être valide.</p>
           <p>
             Pour pouvoir poursuivre la transmission des informations requises, celui-ci doit correspondre à celui de la
             personne à contacter par les services de l’inspection du travail en cas de besoin et sera celui auquel sera
