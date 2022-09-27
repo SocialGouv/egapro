@@ -38,6 +38,7 @@ simulateur:
   containerPort: 8080
   host: "{{ .Values.global.host }}"
   .ingress.path: /index(/|$)(.*)
+  .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
 api:
