@@ -7,6 +7,7 @@ import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import type { ReactElement, ReactNode } from "react";
 import React from "react";
+import { AuthContextProvider } from "@components/AuthContext";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -31,5 +32,5 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const componentWithLayout = getLayout(<Component {...pageProps} />);
 
   // return <ChakraProvider theme={theme}>{componentWithLayout}</ChakraProvider>;
-  return <>{componentWithLayout}</>;
+  return <AuthContextProvider>{componentWithLayout}</AuthContextProvider>;
 }

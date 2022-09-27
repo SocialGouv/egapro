@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { requestEmailForToken } from "@common/utils/api";
+import { useCheckTokenInURL, useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
 
@@ -31,8 +33,14 @@ type FeatureStatus =
     }
   | { message: string; type: "success" };
 
+/*
+ * TODO: peut on découpler en 2 composants, pour ne pas avoir la partie qui gère l'authentification avec la partie formulaire ?
+ */
+
 export default function EmailPage() {
+  const router = useRouter();
   const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
+  const { isAuthenticated } = useUser();
 
   const {
     register,
@@ -46,6 +54,25 @@ export default function EmailPage() {
     },
   });
 
+  // Remove error message after some timeout.
+  React.useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (featureStatus.type === "error") {
+      timeoutId = setTimeout(() => {
+        setFeatureStatus({ type: "idle" });
+      }, ERROR_COLLAPSE_TIMEOUT);
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [featureStatus]);
+
+  // Handle the case where the user has clicked in a mail and is redirected with a token.
+  useCheckTokenInURL();
+
+  if (isAuthenticated) router.push("/repartition-equilibree/commencer");
+
   const email = watch("email");
 
   const onSubmit = async ({ email }: FormType) => {
@@ -57,18 +84,6 @@ export default function EmailPage() {
       setFeatureStatus({ type: "error", message: "Erreur lors de l'envoi du mail" });
     }
   };
-
-  // Remove error message after some timeout.
-  React.useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (featureStatus.type === "error") {
-      timeoutId = setTimeout(() => {
-        setFeatureStatus({ type: "idle" });
-      }, ERROR_COLLAPSE_TIMEOUT);
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [featureStatus]);
 
   return (
     <>
