@@ -32,13 +32,13 @@ type FeatureStatus =
   | { message: string; type: "success" };
 
 export default function EmailPage() {
-  const [status, setStatus] = React.useState<FeatureStatus>({ type: "idle" });
+  const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting, isSubmitted, isDirty, isValid },
+    formState: { errors, isSubmitted, isDirty, isValid },
   } = useForm<FormType>({
     resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
     defaultValues: {
@@ -50,32 +50,33 @@ export default function EmailPage() {
 
   const onSubmit = async ({ email }: FormType) => {
     try {
+      setFeatureStatus({ type: "loading" });
       await requestEmailForToken(email);
-      setStatus({ type: "success", message: "Un mail vous a été envoyé." });
+      setFeatureStatus({ type: "success", message: "Un mail vous a été envoyé." });
     } catch (error) {
-      setStatus({ type: "error", message: "Erreur lors de l'envoi du mail" });
+      setFeatureStatus({ type: "error", message: "Erreur lors de l'envoi du mail" });
     }
   };
 
   // Remove error message after some timeout.
   React.useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    if (status.type === "error") {
+    if (featureStatus.type === "error") {
       timeoutId = setTimeout(() => {
-        setStatus({ type: "idle" });
+        setFeatureStatus({ type: "idle" });
       }, ERROR_COLLAPSE_TIMEOUT);
     }
 
     return () => clearTimeout(timeoutId);
-  }, [status]);
+  }, [featureStatus]);
 
   return (
     <>
       <h1>{title}</h1>
 
-      {status.type === "error" ? (
-        <Alert description={status.message} title="Erreur" type="error" />
-      ) : status.type === "success" ? (
+      {featureStatus.type === "error" ? (
+        <Alert description={featureStatus.message} title="Erreur" type="error" />
+      ) : featureStatus.type === "success" ? (
         <>
           <p>Un mail vous a été envoyé.</p>
           <p>
@@ -84,7 +85,7 @@ export default function EmailPage() {
             dossier SPAM.
           </p>
           <p>En cas d'échec, la procédure devra être reprise avec un autre email.</p>
-          <FormButton onClick={() => setStatus({ type: "idle" })}>Réessayer</FormButton>
+          <FormButton onClick={() => setFeatureStatus({ type: "idle" })}>Réessayer</FormButton>
         </>
       ) : (
         <>
@@ -105,7 +106,10 @@ export default function EmailPage() {
               {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
             </FormGroup>
 
-            <FormButton type="submit" isDisabled={!isDirty || isSubmitting || (isSubmitted && !isValid)}>
+            <FormButton
+              type="submit"
+              isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}
+            >
               Envoyer
             </FormButton>
           </form>
