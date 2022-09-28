@@ -1,7 +1,7 @@
 import { action } from "@storybook/addon-actions";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormButton, Modale, ModaleTitle } from "@/design-system";
+import { FormButton, Modale, ModaleDescription, ModaleTitle } from "@/design-system";
 
 export default {
   title: "Base/Modale",
@@ -11,10 +11,10 @@ export default {
 const Template: ComponentStory<typeof Modale> = args => (
   <Modale {...args}>
     <ModaleTitle>zsdasdasdad</ModaleTitle>
-    <p>
+    <ModaleDescription>
       Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos distinctio quam voluptatibus magni sapiente! Sunt
       repellendus dolores similique et perferendis ipsum, voluptatibus minus, eum sint eaque aliquam esse velit iste.
-    </p>
+    </ModaleDescription>
     <FormButton variant="tertiary" onClick={action("button-pressed")}>
       xxxx 1
     </FormButton>

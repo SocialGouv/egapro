@@ -12,9 +12,38 @@ export type ModaleProps = PropsWithChildren<
   }
 >;
 
+type AuthorizedChildType = {
+  type: {
+    displayName: string;
+  };
+};
+
+const compatibleComponents = ["FormButton", "ModaleTitle", "ModaleDescription"];
+
+export const ModaleDescription = ({ children }: { children: string }) => <p>{children}</p>;
+
+ModaleDescription.displayName = "ModaleDescription";
+
 export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
-  console.log(Children.toArray(children));
-  const getButtonsArray = Children.toArray(children).filter(child => child.type.displayName === "FormButton");
+  Children.toArray(children).forEach(child => {
+    if (
+      !(child as any).type ||
+      !(child as any).type?.displayName ||
+      !compatibleComponents.includes((child as any).type?.displayName)
+    ) {
+      console.error(child);
+      throw new Error(
+        `Ce composant n'est pas compatible avec le composant maître Modale. Seuls les composants ${compatibleComponents.join(
+          ", ",
+        )} sont acceptés.`,
+      );
+    }
+  });
+
+  const buttons = Children.toArray(children).filter(
+    child => (child as AuthorizedChildType).type.displayName === "FormButton",
+  );
+
   return (
     <Dialog as="dialog" open={isOpen} onClose={onClose} className={clsx("fr-modal", isOpen && styles.open)}>
       <Dialog.Panel>
@@ -29,10 +58,10 @@ export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
                 </div>
                 <div className="fr-modal__content">{children}</div>
               </div>
-              {getButtonsArray && (
+              {buttons.length && (
                 <div className="fr-modal__footer">
                   <ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-lg fr-btns-group--icon-left">
-                    {getButtonsArray.map((el, index) => (
+                    {buttons.map((el, index) => (
                       <li key={index}>{el}</li>
                     ))}
                   </ul>

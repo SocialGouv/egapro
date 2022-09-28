@@ -15,4 +15,4 @@ export const ModaleTitle = ({ as = "h1", children }: ModaleTitleProps) => {
   );
 };
 
-ModaleTitle.displayName = "xxxxxxxx";
+ModaleTitle.displayName = "ModaleTitle";
