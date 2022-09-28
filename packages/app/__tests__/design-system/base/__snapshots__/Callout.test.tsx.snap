@@ -8,21 +8,7 @@ Object {
       <div
         class="fr-callout"
       >
-        <p
-          class="fr-callout__title title"
-        >
-          Titre mise en avant
-        </p>
-        <div
-          class="fr-callout__text"
-        >
-          Test de mise en avant
-        </div>
-        <button
-          class="fr-btn"
-        >
-          Cliquer là
-        </button>
+        Test de mise en avant
       </div>
     </div>
   </body>,
@@ -30,21 +16,7 @@ Object {
     <div
       class="fr-callout"
     >
-      <p
-        class="fr-callout__title title"
-      >
-        Titre mise en avant
-      </p>
-      <div
-        class="fr-callout__text"
-      >
-        Test de mise en avant
-      </div>
-      <button
-        class="fr-btn"
-      >
-        Cliquer là
-      </button>
+      Test de mise en avant
     </div>
   </div>,
   "debug": [Function],
