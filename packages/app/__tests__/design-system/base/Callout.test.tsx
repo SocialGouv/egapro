@@ -4,8 +4,13 @@ import { Callout } from "@/design-system/base/Callout";
 test("should match snapshot", () => {
   const mockClick = jest.fn();
   const view = render(
-    <Callout title={"Titre mise en avant"} buttonLabel={"Cliquer là"} buttonOnClick={mockClick}>
-      Test de mise en avant
+    <Callout icon="fr-fi-information-line">
+      <Callout.Title>Titre mise en avant</Callout.Title>
+      <Callout.Description>
+        Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
+        aux familles déjà allocataires qui remplissent les conditions.
+      </Callout.Description>
+      <Callout.Button onClick={mockClick}>Cliquer là</Callout.Button>
     </Callout>,
   );
   expect(view).toMatchSnapshot();
