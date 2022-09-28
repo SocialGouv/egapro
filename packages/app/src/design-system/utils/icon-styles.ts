@@ -1,4 +1,5 @@
 export type iconStyles =
+  | "fr-fi-information-line"
   | "fr-icon-arrow-down-s-line"
   | "fr-icon-arrow-left-line"
   | "fr-icon-arrow-right-line"

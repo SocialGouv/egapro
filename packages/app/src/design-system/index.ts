@@ -1,5 +1,6 @@
 export * from "./base/Alert";
 export * from "./base/ButtonAsLink";
+export * from "./base/Callout";
 export * from "./base/Footer";
 export * from "./base/FormButton";
 export * from "./base/FormGroup";
