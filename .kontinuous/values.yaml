@@ -119,6 +119,8 @@ jobs:
       with:
         imagePackage: app
         dockerfile: packages/app/Dockerfile
+        buildArgs:
+          NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
 
     build-storybook:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
