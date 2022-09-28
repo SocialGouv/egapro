@@ -10,15 +10,6 @@ const nextConfig = {
       },
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/consulter-index",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;

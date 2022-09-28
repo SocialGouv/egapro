@@ -37,7 +37,8 @@ simulateur:
   probesPath: /index.html
   containerPort: 8080
   host: "{{ .Values.global.host }}"
-  .ingress.path: /
+  .ingress.path: /index(/|$)(.*)
+  .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
 api:
@@ -121,7 +122,7 @@ jobs:
 
     build-storybook:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 4Gi
+      memoryLimit: 8Gi
       memoryRequest: 2Gi
       with:
         imagePackage: storybook
@@ -154,6 +155,7 @@ jobs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+          PUBLIC_URL: "/index"
 
 deactivate:
   jobs-deactivate:
