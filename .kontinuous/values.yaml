@@ -113,7 +113,7 @@ jobs:
   runs:
     build-app:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 12Gi
+      memoryLimit: 14Gi
       memoryRequest: 2Gi
       with:
         imagePackage: app
