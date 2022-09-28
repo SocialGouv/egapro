@@ -147,3 +147,13 @@ export function useLogoutIfExpiredToken(error: FetchError) {
     }
   }, [error, logout]);
 }
+
+export const useTokenAndRedirect = (redirectUrl: string) => {
+  const router = useRouter();
+  // Handle the case where the user has clicked in a mail in a link with a token.
+  useCheckTokenInURL();
+
+  const { isAuthenticated } = useUser();
+
+  if (isAuthenticated) router.push(redirectUrl);
+};

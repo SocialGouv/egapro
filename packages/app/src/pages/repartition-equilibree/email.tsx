@@ -1,11 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { requestEmailForToken } from "@common/utils/api";
-import { useCheckTokenInURL, useUser } from "@components/AuthContext";
+import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
 
@@ -14,7 +13,7 @@ const title = "Validation de l'email";
 const ERROR_COLLAPSE_TIMEOUT = 5000;
 
 const formSchema = z.object({
-  email: z.string().min(1, "L'email est requis.").email({ message: "L'email est invalide." }),
+  email: z.string().min(1, "L'adresse mail est requise.").email({ message: "L'adresse mail est invalide." }),
 });
 
 // Infer the TS type according to the zod schema.
@@ -33,14 +32,10 @@ type FeatureStatus =
     }
   | { message: string; type: "success" };
 
-/*
- * TODO: peut on découpler en 2 composants, pour ne pas avoir la partie qui gère l'authentification avec la partie formulaire ?
- */
-
 export default function EmailPage() {
-  const router = useRouter();
+  useTokenAndRedirect("/repartition-equilibree/commencer");
+
   const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
-  const { isAuthenticated } = useUser();
 
   const {
     register,
@@ -68,11 +63,6 @@ export default function EmailPage() {
     };
   }, [featureStatus]);
 
-  // Handle the case where the user has clicked in a mail and is redirected with a token.
-  useCheckTokenInURL();
-
-  if (isAuthenticated) router.push("/repartition-equilibree/commencer");
-
   const email = watch("email");
 
   const onSubmit = async ({ email }: FormType) => {
@@ -93,7 +83,11 @@ export default function EmailPage() {
         <Alert description={featureStatus.message} title="Erreur" type="error" />
       ) : featureStatus.type === "success" ? (
         <>
-          <p>Un mail vous a été envoyé.</p>
+          <p>Vous allez recevoir un mail sur l'adresse mail que vous avez indiquée à l'étape précédente.</p>
+
+          <p>
+            <strong>Ouvrez ce mail et cliquez sur le lien de validation.</strong>
+          </p>
           <p>
             Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisi (<strong>{email}</strong>) soit
             incorrect, ou bien que le mail ait été déplacé dans votre dossier de courriers indésirables ou dans le
