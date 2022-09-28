@@ -85,10 +85,12 @@ export default function EmailPage() {
     <>
       <h1>{title}</h1>
 
-      <>
-        <Alert description={informationMessage} title="Information" type="info" />
-        <br />
-      </>
+      {featureStatus.type !== "success" && (
+        <>
+          <Alert description={informationMessage} title="Information" type="info" />
+          <br />
+        </>
+      )}
 
       {featureStatus.type === "error" && (
         <>
@@ -126,10 +128,10 @@ export default function EmailPage() {
             pour la déclaration.
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <FormGroup>
               <FormLabel htmlFor="email">Adresse email</FormLabel>
-              <FormInput id="email" {...register("email")} />
+              <FormInput id="email" type="email" {...register("email")} />
               {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
             </FormGroup>
 
