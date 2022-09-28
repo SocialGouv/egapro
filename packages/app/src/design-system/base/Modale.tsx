@@ -1,9 +1,10 @@
 import { Dialog } from "@headlessui/react";
 import clsx from "clsx";
-import type { PropsWithChildren } from "react";
-import React, { Children } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
+import React, { Children} from "react";
 
 import styles from "./Modale.module.css";
+import {compatibleComponents} from '../utils/compatible-components'
 
 export type ModaleProps = PropsWithChildren<
   React.ReactHTMLElement<HTMLDivElement> & {
@@ -14,34 +15,22 @@ export type ModaleProps = PropsWithChildren<
 
 type AuthorizedChildType = {
   type: {
-    displayName: string;
+    name: string;
   };
 };
 
-const compatibleComponents = ["FormButton", "ModaleTitle", "ModaleDescription"];
-
-export const ModaleDescription = ({ children }: { children: string }) => <p>{children}</p>;
-
-ModaleDescription.displayName = "ModaleDescription";
-
 export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
-  Children.toArray(children).forEach(child => {
-    if (
-      !(child as any).type ||
-      !(child as any).type?.displayName ||
-      !compatibleComponents.includes((child as any).type?.displayName)
-    ) {
-      console.error(child);
-      throw new Error(
-        `Ce composant n'est pas compatible avec le composant maître Modale. Seuls les composants ${compatibleComponents.join(
-          ", ",
-        )} sont acceptés.`,
-      );
-    }
-  });
+  const arrayOfChildren = Children.toArray(children)
+  compatibleComponents( ["FormButton", "ModaleTitle", "ModaleContent"], arrayOfChildren)
 
-  const buttons = Children.toArray(children).filter(
-    child => (child as AuthorizedChildType).type.displayName === "FormButton",
+  const buttons = arrayOfChildren.filter(
+    child => (child as AuthorizedChildType).type.name === "FormButton",
+  );
+  const title = arrayOfChildren.filter(
+    child => (child as AuthorizedChildType).type.name === "ModaleTitle",
+  );
+  const content = arrayOfChildren.filter(
+    child => (child as AuthorizedChildType).type.name === "ModaleContent",
   );
 
   return (
@@ -56,7 +45,10 @@ export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
                     Fermer
                   </button>
                 </div>
-                <div className="fr-modal__content">{children}</div>
+                <div className="fr-modal__content">
+                  {title}
+                  {content}
+                </div>
               </div>
               {buttons.length && (
                 <div className="fr-modal__footer">
@@ -74,3 +66,20 @@ export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
     </Dialog>
   );
 };
+
+
+Modale.Title = function ModaleTitle ({ as = "h1", children }: {
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  children: ReactNode 
+})  {
+  return (
+    <Dialog.Title as={as} className="fr-modal__title">
+      <span className="fr-fi-arrow-right-line fr-fi--lg" />
+      {children}
+    </Dialog.Title>
+  );
+};
+
+
+Modale.Content = function ModaleContent({ children }: { children: ReactNode }) { return <div>{children}</div>};
+
