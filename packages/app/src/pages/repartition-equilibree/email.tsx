@@ -32,6 +32,9 @@ type FeatureStatus =
     }
   | { message: string; type: "success" };
 
+const informationMessage =
+  "L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.";
+
 export default function EmailPage() {
   useTokenAndRedirect("/repartition-equilibree/commencer");
 
@@ -71,7 +74,10 @@ export default function EmailPage() {
       await requestEmailForToken(email);
       setFeatureStatus({ type: "success", message: "Un mail vous a été envoyé." });
     } catch (error) {
-      setFeatureStatus({ type: "error", message: "Erreur lors de l'envoi du mail" });
+      setFeatureStatus({
+        type: "error",
+        message: "Erreur lors de l'envoi de l'email, veuillez vérifier que l'adresse est correcte.",
+      });
     }
   };
 
@@ -79,9 +85,19 @@ export default function EmailPage() {
     <>
       <h1>{title}</h1>
 
-      {featureStatus.type === "error" ? (
-        <Alert description={featureStatus.message} title="Erreur" type="error" />
-      ) : featureStatus.type === "success" ? (
+      <>
+        <Alert description={informationMessage} title="Information" type="info" />
+        <br />
+      </>
+
+      {featureStatus.type === "error" && (
+        <>
+          <Alert description={featureStatus.message} title="Erreur" type="error" />
+          <br />
+        </>
+      )}
+
+      {featureStatus.type === "success" && (
         <>
           <p>Vous allez recevoir un mail sur l'adresse mail que vous avez indiquée à l'étape précédente.</p>
 
@@ -96,7 +112,9 @@ export default function EmailPage() {
           <p>En cas d'échec, la procédure devra être reprise avec un autre email.</p>
           <FormButton onClick={() => setFeatureStatus({ type: "idle" })}>Réessayer</FormButton>
         </>
-      ) : (
+      )}
+
+      {featureStatus.type !== "success" && (
         <>
           <p>
             Pour pouvoir poursuivre la transmission des informations requises, celui-ci doit correspondre à celui de la
