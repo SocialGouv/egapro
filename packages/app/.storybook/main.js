@@ -1,12 +1,15 @@
-const path = require('path');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const path = require("path");
+const { mergeConfig } = require("vite");
+const tsConfigPaths = require("vite-tsconfig-paths").default;
 
+const storiesDir = path.resolve(__dirname, "../__stories__/");
+
+/** @type {import("@storybook/builder-vite").StorybookViteConfig} */
 module.exports = {
-  stories: [
-    "../__stories__/**/*.stories.@(js|jsx|ts|tsx|mdx)"
-  ],
+  framework: "@storybook/react",
+  stories: [path.join(storiesDir, "**/*.stories.@(js|jsx|ts|tsx|mdx)")],
   refs: {
-    '@chakra-ui/react': {
+    "@chakra-ui/react": {
       disable: true,
     },
   },
@@ -18,16 +21,31 @@ module.exports = {
     "@storybook/addon-a11y",
     "@storybook/addon-storysource",
     "@storybook/addon-docs",
-    "storybook-addon-next-router"
+    "storybook-addon-next-router",
   ],
-  framework: "@storybook/react",
-  core: {
-    "builder": "@storybook/builder-webpack5"
+  features: {
+    storyStoreV7: true,
   },
-  async webpackFinal(config, { configType }) {
-    config.resolve.plugins = [new TsconfigPathsPlugin({
-        configFile: path.resolve(__dirname, "../__stories__/tsconfig.json")
-    })];
-    return config;
-  }
-}
+  core: {
+    builder: "@storybook/builder-vite",
+    disableTelemetry: true,
+  },
+  async viteFinal(config) {
+    /** @type {import("vite").InlineConfig} */
+    const custom = {
+      plugins: [
+        tsConfigPaths({
+          projects: [path.join(storiesDir, "tsconfig.json")],
+        }),
+      ],
+      // Add dependencies to pre-optimization
+      optimizeDeps: {
+        include: ["storybook-dark-mode", "storybook-addon-next-router"],
+      },
+      esbuild: {
+        target: "esnext",
+      },
+    };
+    return mergeConfig(config, custom);
+  },
+};

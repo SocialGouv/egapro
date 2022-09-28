@@ -13,6 +13,7 @@ export * from "./base/SideMenu";
 export * from "./base/SideMenuCollapse";
 export * from "./base/SideMenuLink";
 export * from "./base/SideMenuList";
+export * from "./base/FormSelect";
 export * from "./layout/App";
 export * from "./layout/Container";
 export * from "./layout/ContentWithAside";

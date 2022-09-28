@@ -1,15 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  basePath: "/consulter-index",
+  trailingSlash: true,
   rewrites: async () => {
     return [
       {
         source: "/healthz",
         destination: "/api/health",
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

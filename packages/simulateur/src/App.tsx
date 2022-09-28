@@ -37,7 +37,7 @@ const ErrorFallback: FunctionComponent<ErrorFallbackProps> = ({ error, resetErro
   )
 }
 
-const history = createBrowserHistory()
+const history = createBrowserHistory({ basename: process.env.PUBLIC_URL })
 
 const piwik: any = new ReactPiwik({
   url: "matomo.fabrique.social.gouv.fr",

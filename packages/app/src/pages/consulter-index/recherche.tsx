@@ -24,19 +24,17 @@ import {
 } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { ReactElement } from "react";
 import React from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
-import type { SearchCompanyParams } from "../hooks";
-import { useSearch } from "../hooks";
-import { filterDepartements, useConfig, useCallbackOnMount } from "../hooks";
+import type { SearchCompanyParams } from "../../hooks";
+import { useSearch } from "../../hooks";
+import { filterDepartements, useConfig, useCallbackOnMount } from "../../hooks";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
 import { ButtonAction } from "@components/ds/ButtonAction";
-import { SinglePageLayout } from "@components/ds/SinglePageLayout";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig();
@@ -408,7 +406,7 @@ export default function SearchPage() {
   function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
 
-    router.replace({ pathname: "/recherche", query: search });
+    router.replace({ pathname: "./recherche", query: search });
   }
 
   function handleChange(event: React.SyntheticEvent) {
@@ -518,7 +516,3 @@ export default function SearchPage() {
     </>
   );
 }
-
-SearchPage.getLayout = function getLayout(page: ReactElement) {
-  return <SinglePageLayout>{page}</SinglePageLayout>;
-};
