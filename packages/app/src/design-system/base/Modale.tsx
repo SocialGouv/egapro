@@ -1,20 +1,20 @@
 import { Dialog } from "@headlessui/react";
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
-import React from "react";
-import type { FormButtonProps } from "./FormButton";
+import React, { Children } from "react";
 
 import styles from "./Modale.module.css";
 
 export type ModaleProps = PropsWithChildren<
   React.ReactHTMLElement<HTMLDivElement> & {
-    buttons?: Array<React.ReactElement<FormButtonProps>>;
     isOpen: boolean;
     onClose: () => void;
   }
 >;
 
-export const Modale = ({ isOpen, onClose, children, buttons }: ModaleProps) => {
+export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
+  console.log(Children.toArray(children));
+  const getButtonsArray = Children.toArray(children).filter(child => child.type.displayName === "FormButton");
   return (
     <Dialog as="dialog" open={isOpen} onClose={onClose} className={clsx("fr-modal", isOpen && styles.open)}>
       <Dialog.Panel>
@@ -27,18 +27,12 @@ export const Modale = ({ isOpen, onClose, children, buttons }: ModaleProps) => {
                     Fermer
                   </button>
                 </div>
-                <div className="fr-modal__content">
-                  <Dialog.Title as="h1" className="fr-modal__title">
-                    <span className="fr-fi-arrow-right-line fr-fi--lg" />
-                    Deactivate account
-                  </Dialog.Title>
-                  {children}
-                </div>
+                <div className="fr-modal__content">{children}</div>
               </div>
-              {buttons && (
+              {getButtonsArray && (
                 <div className="fr-modal__footer">
                   <ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-lg fr-btns-group--icon-left">
-                    {buttons.map((el, index) => (
+                    {getButtonsArray.map((el, index) => (
                       <li key={index}>{el}</li>
                     ))}
                   </ul>

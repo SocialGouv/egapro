@@ -8,6 +8,7 @@ export * from "./base/FormInput";
 export * from "./base/FormLabel";
 export * from "./base/Header";
 export * from "./base/Modale";
+export * from "./base/ModaleTitle";
 export * from "./base/Link";
 export * from "./base/Logo";
 export * from "./base/SideMenu";
