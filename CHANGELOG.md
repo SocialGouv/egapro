@@ -1,3 +1,10 @@
+## [2.22.2](https://github.com/SocialGouv/egapro/compare/v2.22.1...v2.22.2) (2022-09-28)
+
+
+### Bug Fixes
+
+* restore fetch all years functionality ([#1066](https://github.com/SocialGouv/egapro/issues/1066)) ([b6b2485](https://github.com/SocialGouv/egapro/commit/b6b24855bc7a9379e185144bacbb6a128ff10d53))
+
 ## [2.22.1](https://github.com/SocialGouv/egapro/compare/v2.22.0...v2.22.1) (2022-09-22)
 
 
