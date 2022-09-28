@@ -7,6 +7,7 @@ import { requestEmailForToken } from "@common/utils/api";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
+import { Callout } from "design-system/base/Callout";
 
 const title = "Validation de l'email";
 
@@ -142,6 +143,16 @@ export default function EmailPage() {
               Envoyer
             </FormButton>
           </form>
+
+          <br />
+          <Callout>
+            <Callout.Title>Politique de confidentialité et protection de la vie privée</Callout.Title>
+            <Callout.Description>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisl, duis ac egestas donec tincidunt lorem.
+              Sodales risus amet nisl sed. Init tartatum designsystemus. Diam molestie vitae, diam, sed tincidunt
+              facilisi. Arcu faucibus mattis varius pretium. Duis ullamcorper malesuada massa ipsum sit.
+            </Callout.Description>
+          </Callout>
         </>
       )}
     </>
