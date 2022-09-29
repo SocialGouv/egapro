@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
 
+export type AuthorizedChildType = {
+  type: {
+    name: string;
+  };
+};
+
 export const compatibleComponents = (items: string[], array: ReactNode[]) => {
   array.forEach(child => {
     if (!(child as any).type || !(child as any).type?.name || !items.includes((child as any).type?.name)) {

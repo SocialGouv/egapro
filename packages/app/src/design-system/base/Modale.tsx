@@ -1,10 +1,11 @@
 import { Dialog } from "@headlessui/react";
 import clsx from "clsx";
 import type { PropsWithChildren, ReactNode } from "react";
-import React, { Children} from "react";
+import React, { Children } from "react";
 
+import type { AuthorizedChildType } from "../utils/compatible-components";
+import { compatibleComponents } from "../utils/compatible-components";
 import styles from "./Modale.module.css";
-import {compatibleComponents} from '../utils/compatible-components'
 
 export type ModaleProps = PropsWithChildren<
   React.ReactHTMLElement<HTMLDivElement> & {
@@ -13,25 +14,13 @@ export type ModaleProps = PropsWithChildren<
   }
 >;
 
-type AuthorizedChildType = {
-  type: {
-    name: string;
-  };
-};
-
 export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
-  const arrayOfChildren = Children.toArray(children)
-  compatibleComponents( ["FormButton", "ModaleTitle", "ModaleContent"], arrayOfChildren)
+  const arrayOfChildren = Children.toArray(children);
+  compatibleComponents(["FormButton", "ModaleTitle", "ModaleContent"], arrayOfChildren);
 
-  const buttons = arrayOfChildren.filter(
-    child => (child as AuthorizedChildType).type.name === "FormButton",
-  );
-  const title = arrayOfChildren.filter(
-    child => (child as AuthorizedChildType).type.name === "ModaleTitle",
-  );
-  const content = arrayOfChildren.filter(
-    child => (child as AuthorizedChildType).type.name === "ModaleContent",
-  );
+  const buttons = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormButton");
+  const title = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ModaleTitle");
+  const content = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ModaleContent");
 
   return (
     <Dialog as="dialog" open={isOpen} onClose={onClose} className={clsx("fr-modal", isOpen && styles.open)}>
@@ -67,11 +56,13 @@ export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
   );
 };
 
-
-Modale.Title = function ModaleTitle ({ as = "h1", children }: {
+Modale.Title = function ModaleTitle({
+  as = "h1",
+  children,
+}: {
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-  children: ReactNode 
-})  {
+  children: ReactNode;
+}) {
   return (
     <Dialog.Title as={as} className="fr-modal__title">
       <span className="fr-fi-arrow-right-line fr-fi--lg" />
@@ -80,6 +71,6 @@ Modale.Title = function ModaleTitle ({ as = "h1", children }: {
   );
 };
 
-
-Modale.Content = function ModaleContent({ children }: { children: ReactNode }) { return <div>{children}</div>};
-
+Modale.Content = function ModaleContent({ children }: { children: ReactNode }) {
+  return <div>{children}</div>;
+};
