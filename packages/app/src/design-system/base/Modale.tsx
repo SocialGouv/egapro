@@ -5,6 +5,8 @@ import React, { Children } from "react";
 
 import type { AuthorizedChildType } from "../utils/compatible-components";
 import { compatibleComponents } from "../utils/compatible-components";
+import type { FormButtonProps } from "./FormButton";
+import { FormButton } from "./FormButton";
 import styles from "./Modale.module.css";
 
 export type ModaleProps = PropsWithChildren<
@@ -16,9 +18,9 @@ export type ModaleProps = PropsWithChildren<
 
 export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
   const arrayOfChildren = Children.toArray(children);
-  compatibleComponents(["FormButton", "ModaleTitle", "ModaleContent"], arrayOfChildren);
+  compatibleComponents("Modale", ["ModaleButton", "ModaleTitle", "ModaleContent"], arrayOfChildren);
 
-  const buttons = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormButton");
+  const buttons = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ModaleButton");
   const title = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ModaleTitle");
   const content = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ModaleContent");
 
@@ -73,4 +75,8 @@ Modale.Title = function ModaleTitle({
 
 Modale.Content = function ModaleContent({ children }: { children: ReactNode }) {
   return <div>{children}</div>;
+};
+
+Modale.Button = function ModaleButton(props: FormButtonProps) {
+  return <FormButton {...props} />;
 };

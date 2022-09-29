@@ -14,49 +14,49 @@ export default {
   },
 } as ComponentMeta<typeof Callout>;
 
-export const Default: ComponentStory<typeof Callout> = () => {
+export const Default: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout>
-      <Callout.Description>
+    <Callout {...args}>
+      <Callout.Content>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+      </Callout.Content>
     </Callout>
   );
 };
 
-export const WithIcon: ComponentStory<typeof Callout> = () => {
+export const WithIcon: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout icon="fr-fi-information-line">
-      <Callout.Description>
+    <Callout icon="fr-fi-information-line" {...args}>
+      <Callout.Content>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+      </Callout.Content>
     </Callout>
   );
 };
 
-export const WithTitle: ComponentStory<typeof Callout> = () => {
+export const WithTitle: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout icon="fr-fi-information-line">
+    <Callout icon="fr-fi-information-line" {...args}>
       <Callout.Title>Titre mise en avant</Callout.Title>
-      <Callout.Description>
+      <Callout.Content>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+      </Callout.Content>
     </Callout>
   );
 };
 
-export const WithButton: ComponentStory<typeof Callout> = () => {
+export const WithButton: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout icon="fr-fi-information-line">
-      <Callout.Title>Titre mise en avant</Callout.Title>
-      <Callout.Description>
-        Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
-        aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+    <Callout icon="fr-fi-information-line" {...args}>
       <Callout.Button onClick={action("button-click")}>Cliquer là</Callout.Button>
+      <Callout.Content>
+        Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
+        aux familles déjà allocataires qui remplissent les conditions.
+      </Callout.Content>
+      <Callout.Title>Titre mise en avant</Callout.Title>
     </Callout>
   );
 };
