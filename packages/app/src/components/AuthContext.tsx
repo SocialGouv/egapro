@@ -55,8 +55,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
         try {
           const tokenInfo = await getTokenInfo();
-
-          console.log("tokenInfo", tokenInfo);
+          console.debug("Connexion OK", { tokenInfo });
 
           if (tokenInfo) {
             localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo) || "");
@@ -71,7 +70,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
           }
         } catch (error) {
           // If token has expired, we remove it from localStorage and state.
-          console.error(error);
+          console.error("Connexion erreur", error);
 
           localStorage.setItem("token", "");
           localStorage.setItem("tokenInfo", "");
@@ -116,19 +115,23 @@ export function useUser(): typeof initialContext {
 
 /**
  * Check if a token is present in the URL bar. If so, run login with it.
+ *
+ * Use this hook carefully, i.e. on pages which expect to be a landing page of an email token lin, because the useEffect in this function is called at every render.
  */
 export function useCheckTokenInURL() {
-  const { login } = useUser();
+  const { login, loading } = useUser();
   const router = useRouter();
 
-  // useEffect called at every render, to try to login with the token in the URL.
+  // This useEffect is called at every render, becacuse we need to try to login with the token in the URL.
   React.useEffect(() => {
     async function runEffect() {
       const urlParams = new URLSearchParams(window.location.search);
 
       const tokenInURL = urlParams.get("token");
 
-      if (tokenInURL) {
+      // Check also loading to not attempt a login call if a precedent login call is already initiated.
+      if (tokenInURL && !loading) {
+        console.debug("Token trouvé dans l'URL. Tentative de connexion...");
         await login(tokenInURL);
         // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
         router.push({ search: "" });
