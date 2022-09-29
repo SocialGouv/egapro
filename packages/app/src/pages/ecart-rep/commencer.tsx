@@ -1,7 +1,9 @@
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 
+const title = "Commencer";
+
 export default function CommencerPage() {
-  return <h1>Commencer</h1>;
+  return <h1>{title}</h1>;
 }
 
 CommencerPage.getLayout = function getLayout(page: React.ReactElement) {

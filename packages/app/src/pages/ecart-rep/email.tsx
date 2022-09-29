@@ -7,7 +7,6 @@ import { requestEmailForToken } from "@common/utils/api";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
-import { Callout } from "design-system/base/Callout";
 
 const title = "Validation de l'email";
 
@@ -34,10 +33,10 @@ type FeatureStatus =
   | { message: string; type: "success" };
 
 const informationMessage =
-  "L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.";
+  "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
 
 export default function EmailPage() {
-  useTokenAndRedirect("/repartition-equilibree/commencer");
+  useTokenAndRedirect("./commencer");
 
   const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
 
@@ -120,13 +119,13 @@ export default function EmailPage() {
       {featureStatus.type !== "success" && (
         <>
           <p>
-            Pour pouvoir poursuivre la transmission des informations requises, celui-ci doit correspondre à celui de la
-            personne à contacter par les services de l’inspection du travail en cas de besoin et sera celui auquel sera
-            adressé l’accusé de réception en fin de procédure.
+            L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail en
+            cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.
           </p>
+
           <p>
-            Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l’email utilisé
-            pour la déclaration.
+            Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé
+            pour la déclaration ou un des emails rattachés au Siren de votre entreprise.
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -145,14 +144,6 @@ export default function EmailPage() {
           </form>
 
           <br />
-          <Callout>
-            <Callout.Title>Politique de confidentialité et protection de la vie privée</Callout.Title>
-            <Callout.Description>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisl, duis ac egestas donec tincidunt lorem.
-              Sodales risus amet nisl sed. Init tartatum designsystemus. Diam molestie vitae, diam, sed tincidunt
-              facilisi. Arcu faucibus mattis varius pretium. Duis ullamcorper malesuada massa ipsum sit.
-            </Callout.Description>
-          </Callout>
         </>
       )}
     </>
