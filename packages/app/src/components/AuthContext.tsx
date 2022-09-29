@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import React from "react";
 
-import type { FetchError } from "hooks/utils";
-import { EXPIRED_TOKEN_MESSAGE, fetcher } from "hooks/utils";
+import type { FetchError } from "../hooks/utils";
+
+import { EXPIRED_TOKEN_MESSAGE, fetcher } from "../hooks/utils";
 
 // TODO: type à confirmer par rapport au endpoint /!\
 type DeclarationSummary = {

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import type { FunctionComponent } from "react";
 
+import { useUser } from "../../components/AuthContext";
 import { FormButton } from "./FormButton";
 import { Logo } from "./Logo";
-import { useUser } from "@components/AuthContext";
 
 export type HeaderBodyProps = {
   buttonMobileMenuId: string;
