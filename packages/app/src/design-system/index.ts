@@ -8,6 +8,7 @@ export * from "./base/FormGroup";
 export * from "./base/FormGroupMessage";
 export * from "./base/FormInput";
 export * from "./base/FormLabel";
+export * from "./base/FormRadio";
 export * from "./base/Header";
 export * from "./base/Modale";
 export * from "./base/Link";
