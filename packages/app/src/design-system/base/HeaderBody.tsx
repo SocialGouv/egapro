@@ -24,7 +24,7 @@ export const HeaderBody: FunctionComponent<HeaderBodyProps> = ({
 
   const disconnectUser = () => {
     logout();
-    router.push("/ecart-rep/email");
+    router.push("/ecart-rep/");
   };
 
   return (

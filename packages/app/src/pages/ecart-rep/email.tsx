@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requestEmailForToken } from "@common/utils/api";
 import { useTokenAndRedirect } from "@components/AuthContext";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepartitionEquilibreeUnauthenticatedLayout } from "@components/layouts/RepartitionEquilibreeUnauthenticatedLayout";
 import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
 
 const title = "Validation de l'email";
@@ -151,5 +151,5 @@ export default function EmailPage() {
 }
 
 EmailPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeLayout>{page}</RepartitionEquilibreeLayout>;
+  return <RepartitionEquilibreeUnauthenticatedLayout>{page}</RepartitionEquilibreeUnauthenticatedLayout>;
 };
