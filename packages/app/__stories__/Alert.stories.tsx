@@ -13,16 +13,31 @@ export default {
   },
 } as ComponentMeta<typeof Alert>;
 
-const Template: ComponentStory<typeof Alert> = args => <Alert {...args} />;
+const Template: ComponentStory<typeof Alert> = args => (
+  <Alert {...args}>
+    <Alert.Title>Titre du message</Alert.Title>
+    <Alert.Content>
+      <p>Description détaillée du message</p>
+    </Alert.Content>
+  </Alert>
+);
 
 export const Default = Template.bind({});
-Default.args = {
-  title: "Titre du message",
-  description: "Description détaillée du message",
-};
+Default.args = {};
 
 export const SizeSm = Template.bind({});
 SizeSm.args = {
+  ...Default.args,
   size: "sm",
-  description: "Information : titre de l'information",
+};
+
+export const CustomTitleNode: ComponentStory<typeof Alert> = () => {
+  return (
+    <Alert>
+      <Alert.Title as="h1">Titre du message</Alert.Title>
+      <Alert.Content>
+        <p>Description détaillée du message</p>
+      </Alert.Content>
+    </Alert>
+  );
 };

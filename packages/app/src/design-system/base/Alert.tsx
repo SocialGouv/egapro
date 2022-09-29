@@ -1,26 +1,29 @@
 import clsx from "clsx";
+import type { PropsWithChildren, ReactNode } from "react";
+import { Children } from "react";
 
-interface AlertPropsCommon {
+import type { MarginProps } from "../utils/spacing";
+import { Box } from "./Box";
+
+type AlertProps = Omit<MarginProps, "ml" | "mr" | "mx"> & {
+  children?: ReactNode;
+  size?: "md" | "sm";
   type?: "error" | "info" | "success" | "warning";
-}
+};
 
-interface AlertSM extends AlertPropsCommon {
-  description: string;
-  size?: "sm";
-  title?: string;
-}
+type AuthorizedChildType = {
+  type: {
+    name: string;
+  };
+};
 
-interface AlertMD extends AlertPropsCommon {
-  description?: string;
-  size?: "md";
-  title: string;
-}
+export const Alert = ({ type = "info", size = "md", children, ...rest }: AlertProps) => {
+  const content = Children.toArray(children).filter(
+    child => (child as AuthorizedChildType).type.name === "AlertContent",
+  );
 
-export type AlertProps = AlertMD | AlertSM;
-
-export const Alert = ({ type = "info", size = "md", title, description, ...rest }: AlertProps) => {
   return (
-    <div
+    <Box
       role="alert"
       className={clsx(
         "fr-alert",
@@ -32,8 +35,23 @@ export const Alert = ({ type = "info", size = "md", title, description, ...rest 
       )}
       {...rest}
     >
-      {size === "md" && <p className="fr-alert__title">{title}</p>}
-      {description && <p>{description}</p>}
-    </div>
+      {size === "md" ? children : content}
+    </Box>
   );
+};
+
+Alert.Title = function AlertTitle({
+  as: HtmlTag = "p",
+  children,
+  ...rest
+}: PropsWithChildren<{ as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" }>) {
+  return (
+    <HtmlTag className="fr-alert__title" {...rest}>
+      {children}
+    </HtmlTag>
+  );
+};
+
+Alert.Content = function AlertContent({ children }: { children: ReactNode }) {
+  return <>{children}</>;
 };
