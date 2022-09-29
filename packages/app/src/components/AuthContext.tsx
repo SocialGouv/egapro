@@ -28,12 +28,12 @@ const initialContext = {
   ownership: [] as string[],
   staff: false,
   isAuthenticated: false,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  login: (token: string) => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, unused-imports/no-unused-vars
+  login: async (token: string) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   logout: () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  refreshAuth: () => {},
+  refreshAuth: async () => {},
   loading: false,
 };
 
