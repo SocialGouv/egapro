@@ -435,7 +435,7 @@ async def put_repartition(request, response, siren, year):
         # are unwanted, mainly because when someone loads the frontend app a PUT is
         # automatically sent, without any action from the user.)
         loggers.logger.info(f"{siren}/{year} BY {declarant} FROM {request.ip}")
-        if not current or not current.data.validated:
+        if not current:
             owners = await db.ownership.emails(siren)
             if not owners:  # Staff member
                 owners = request["email"]

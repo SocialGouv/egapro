@@ -111,9 +111,9 @@ async def test_put_repartition_with_json_list_and_namespace(client):
     assert resp.status == 422
 
 
-async def test_cannot_put_in_readonly(client, declaration, monkeypatch, body):
+async def test_cannot_put_in_readonly(client, repartition, monkeypatch, body):
     monkeypatch.setattr("egapro.config.READONLY", True)
-    await declaration(
+    await repartition(
         "514027945",
         2019,
         "foo@bar.org",
@@ -188,7 +188,7 @@ async def test_basic_repartition_should_save_data(client, body, monkeypatch):
         },
     }
     assert data == expected
-    # Just to make sure we have the same result on an existing declaration
+    # Just to make sure we have the same result on an existing repartition
     resp = await client.put("/repartition-equilibree/514027945/2019", body=body)
     assert resp.status == 204
     resp = await client.get("/repartition-equilibree/514027945/2019")
@@ -227,8 +227,8 @@ async def test_entreprise_adresse_is_not_mandatory(client, body):
     assert "adresse" not in data["data"]["entreprise"]
 
 
-async def test_cannot_load_not_owned_repartition(client, declaration):
-    await declaration("514027945", 2019, "foo@bar.baz")
+async def test_cannot_load_not_owned_repartition(client, repartition):
+    await repartition("514027945", 2019, "foo@bar.baz")
 
     client.login("other@email.com")
     resp = await client.get("/repartition-equilibree/514027945/2019")
@@ -240,8 +240,8 @@ async def test_cannot_load_not_owned_repartition(client, declaration):
     }
 
 
-async def test_staff_can_load_not_owned_repartition(client, monkeypatch, declaration):
-    await declaration(siren="514027945", year=2019, owner="foo@bar.baz")
+async def test_staff_can_load_not_owned_repartition(client, monkeypatch, repartition):
+    await repartition(siren="514027945", year=2019, owner="foo@bar.baz")
     monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
     client.login("Staff@email.com")
     resp = await client.get("/repartition-equilibree/514027945/2019")
@@ -249,9 +249,9 @@ async def test_staff_can_load_not_owned_repartition(client, monkeypatch, declara
 
 
 async def test_staff_can_put_not_owned_repartition(
-    client, monkeypatch, declaration, body
+    client, monkeypatch, repartition, body
 ):
-    await declaration(siren="514027945", year=2019, owner="foo@bar.baz")
+    await repartition(siren="514027945", year=2019, owner="foo@bar.baz")
     monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
     client.login("Staff@email.com")
     body["entreprise"]["raison_sociale"] = "New Name"
@@ -304,13 +304,8 @@ async def test_confirmed_repartition_should_send_email(client, monkeypatch, body
     await db.ownership.put("514027945", "foo@bar.org")
     # Add another owner, that should be in the email recipients
     await db.ownership.put("514027945", "foo@foo.foo")
-    body["déclaration"]["brouillon"] = True
     monkeypatch.setattr("egapro.emails.send", sender)
     monkeypatch.setattr("egapro.emails.REPLY_TO", {"12": "Foo Bar <foo@baz.fr>"})
-    resp = await client.put("/repartition-equilibree/514027945/2019", body=body)
-    assert resp.status == 204
-    assert not sender.call_count
-    del body["déclaration"]["brouillon"]
     resp = await client.put("/repartition-equilibree/514027945/2019", body=body)
     assert resp.status == 204
     assert sender.call_count == 1
@@ -327,10 +322,6 @@ async def test_confirmed_repartition_should_send_email_for_legacy_call(
     body["source"] = "simulateur"
     body["déclaration"]["brouillon"] = True
     monkeypatch.setattr("egapro.emails.send", sender)
-    resp = await client.put("/repartition-equilibree/514027945/2019", body=body)
-    assert resp.status == 204
-    assert not sender.call_count
-    del body["déclaration"]["brouillon"]
     resp = await client.put("/repartition-equilibree/514027945/2019", body=body)
     assert resp.status == 204
     assert sender.call_count == 1
@@ -408,17 +399,17 @@ async def test_put_repartition_without_source(client, body):
     }
 
 
-async def test_non_staff_cannot_delete(client, declaration):
+async def test_non_staff_cannot_delete(client, repartition):
     client.login("foo@bar.org")
-    await declaration("514027945", 2019, "foo@bar.org")
+    await repartition("514027945", 2019, "foo@bar.org")
     resp = await client.delete("/repartition-equilibree/514027945/2019")
     assert resp.status == 403 or 405
     assert json.loads(resp.body) == {"error": "Vous n'avez pas l'autorisation"} or {"error": "Method Not Allowed"}
 
 
-async def test_staff_can_delete(client, declaration, monkeypatch):
+async def test_staff_can_delete(client, repartition, monkeypatch):
     monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
     client.login("Staff@email.com")
-    await declaration("514027945", 2019, "foo@bar.org")
+    await repartition("514027945", 2019, "foo@bar.org")
     resp = await client.delete("/repartition-equilibree/514027945/2019")
     assert resp.status == 204 or 405
