@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { RepartitionEquilibreeUnauthenticatedLayout } from "@components/layouts/RepartitionEquilibreeUnauthenticatedLayout";
+import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 
 const title = "Êtes-vous assujetti ?";
 
@@ -16,5 +16,5 @@ export default function AssujettiPage() {
 }
 
 AssujettiPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeUnauthenticatedLayout>{page}</RepartitionEquilibreeUnauthenticatedLayout>;
+  return <RepartitionEquilibreeStartLayout>{page}</RepartitionEquilibreeStartLayout>;
 };

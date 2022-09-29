@@ -11,7 +11,7 @@ import { App, Container, ContentWithAside, SideMenu, SideMenuLink, SideMenuList 
 // Layout for unauthenticated users.
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- no props
-export const RepartitionEquilibreeUnauthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
+export const RepartitionEquilibreeStartLayout = ({ children }: PropsWithChildren<{}>) => {
   return (
     <App>
       <Container>
