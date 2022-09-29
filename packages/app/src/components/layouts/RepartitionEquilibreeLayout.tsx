@@ -6,7 +6,7 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 import type { PropsWithChildren } from "react";
 import React from "react";
 
-import { App, Container, ContentWithAside, SideMenu } from "@design-system";
+import { App, Container, ContentWithAside, SideMenu, SideMenuLink, SideMenuList } from "@design-system";
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- no props
 export const RepartitionEquilibreeLayout = ({ children }: PropsWithChildren<{}>) => {
@@ -16,14 +16,12 @@ export const RepartitionEquilibreeLayout = ({ children }: PropsWithChildren<{}>)
         <ContentWithAside
           aside={
             <SideMenu buttonLabel={"Dans cette rubrique"} title={"Répartition équilibrée"}>
-              {/* <SideMenuList>
-                <SideMenuLink href="#" isCurrent>
-                  Êtes-vous assujetti&nbsp;?
-                </SideMenuLink>
-                <SideMenuLink href="#" target="_self">
+              <SideMenuList>
+                <SideMenuLink href="#">Êtes-vous assujetti&nbsp;?</SideMenuLink>
+                <SideMenuLink href="#" target="_self" isCurrent>
                   Validation de l’email
                 </SideMenuLink>
-              </SideMenuList> */}
+              </SideMenuList>
             </SideMenu>
           }
           content={children}
