@@ -87,14 +87,20 @@ export default function EmailPage() {
 
       {featureStatus.type !== "success" && (
         <>
-          <Alert description={informationMessage} title="Information" type="info" />
+          <Alert type="info">
+            <Alert.Title>Information</Alert.Title>
+            <Alert.Content>{informationMessage}</Alert.Content>
+          </Alert>
           <br />
         </>
       )}
 
       {featureStatus.type === "error" && (
         <>
-          <Alert description={featureStatus.message} title="Erreur" type="error" />
+          <Alert type="error">
+            <Alert.Title>Erreur</Alert.Title>
+            <Alert.Content>{featureStatus.message}</Alert.Content>
+          </Alert>
           <br />
         </>
       )}
