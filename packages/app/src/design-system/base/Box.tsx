@@ -1,17 +1,36 @@
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 
-import type { MarginProps } from "design-system/utils/spacing";
+import type { SpacingProps } from "design-system/utils/spacing";
 
-export type BoxProps = MarginProps &
-  React.HTMLAttributes<HTMLDivElement> & {
-    children?: ReactNode;
-    className?: string;
-  };
+export type BoxProps = PropsWithChildren<
+  React.HTMLAttributes<HTMLDivElement> &
+    SpacingProps & {
+      as?: "article" | "div" | "footer" | "header";
+      className?: string;
+    }
+>;
 
-export const Box = ({ className, mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py, children, ...rest }: BoxProps) => {
+export const Box = ({
+  as: HtmlTag = "div",
+  className,
+  mt,
+  mr,
+  mb,
+  ml,
+  mx,
+  my,
+  pt,
+  pr,
+  pb,
+  pl,
+  px,
+  py,
+  children,
+  ...rest
+}: BoxProps) => {
   return (
-    <div
+    <HtmlTag
       className={clsx(
         mt && `fr-mt-md-${mt}`,
         mb && `fr-mb-md-${mb}`,
@@ -30,6 +49,6 @@ export const Box = ({ className, mt, mr, mb, ml, mx, my, pt, pr, pb, pl, px, py,
       {...rest}
     >
       {children}
-    </div>
+    </HtmlTag>
   );
 };

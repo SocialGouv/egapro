@@ -1,30 +1,21 @@
-export type SpacingProps =
-  | "0"
-  | "1v"
-  | "1w"
-  | "2w"
-  | "3v"
-  | "3w"
-  | "4w"
-  | "5w"
-  | "6w"
-  | "7w"
-  | "8w"
-  | "9w"
-  | "12w"
-  | "15w";
+import type { theme } from "./theme";
+export type Props = keyof typeof theme["space"];
 
-export type MarginProps = {
-  mb?: SpacingProps;
-  ml?: SpacingProps;
-  mr?: SpacingProps;
-  mt?: SpacingProps;
-  mx?: SpacingProps | "auto";
-  my?: SpacingProps;
-  pb?: SpacingProps;
-  pl?: SpacingProps;
-  pr?: SpacingProps;
-  pt?: SpacingProps;
-  px?: SpacingProps;
-  py?: SpacingProps;
+export type SpacingProps = {
+  mb?: Props;
+  ml?: Props;
+  mr?: Props;
+  mt?: Props;
+  mx?: Props | "auto";
+  my?: Props;
+  pb?: Props;
+  pl?: Props;
+  pr?: Props;
+  pt?: Props;
+  px?: Props;
+  py?: Props;
 };
+
+export type MarginProps = Omit<SpacingProps, "pb" | "pl" | "pr" | "pt" | "px" | "py">;
+
+export type PaddingProps = Omit<SpacingProps, "mb" | "ml" | "mr" | "mt" | "mx" | "my">;
