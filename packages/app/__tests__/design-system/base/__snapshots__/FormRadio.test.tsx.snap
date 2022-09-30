@@ -22,7 +22,7 @@ Object {
             class="fr-fieldset__content"
           >
             <div
-              class="fr-radio-group fr-radio-group--sm"
+              class="fr-radio-group"
             >
               <input
                 id="inputId1"
@@ -36,7 +36,7 @@ Object {
               </label>
             </div>
             <div
-              class="fr-radio-group fr-radio-group--sm"
+              class="fr-radio-group"
             >
               <input
                 id="inputId2"
@@ -50,7 +50,7 @@ Object {
               </label>
             </div>
             <div
-              class="fr-radio-group fr-radio-group--sm"
+              class="fr-radio-group"
             >
               <input
                 id="inputId3"
@@ -65,8 +65,7 @@ Object {
             </div>
           </div>
           <p
-            class="fr-fieldset fr-valid-text"
-            id="radio-valid-desc-valid"
+            class="fr-valid-text"
           >
             Validé
           </p>
@@ -92,7 +91,7 @@ Object {
           class="fr-fieldset__content"
         >
           <div
-            class="fr-radio-group fr-radio-group--sm"
+            class="fr-radio-group"
           >
             <input
               id="inputId1"
@@ -106,7 +105,7 @@ Object {
             </label>
           </div>
           <div
-            class="fr-radio-group fr-radio-group--sm"
+            class="fr-radio-group"
           >
             <input
               id="inputId2"
@@ -120,7 +119,7 @@ Object {
             </label>
           </div>
           <div
-            class="fr-radio-group fr-radio-group--sm"
+            class="fr-radio-group"
           >
             <input
               id="inputId3"
@@ -135,8 +134,7 @@ Object {
           </div>
         </div>
         <p
-          class="fr-fieldset fr-valid-text"
-          id="radio-valid-desc-valid"
+          class="fr-valid-text"
         >
           Validé
         </p>
