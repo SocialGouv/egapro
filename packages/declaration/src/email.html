@@ -35,7 +35,7 @@ Pour pouvoir permettre de poursuivre la transmission des informations requises, 
         if (response.data && response.data.error) {
           notify.error(`Erreur lors de l'envoi de l'email: ${response.data.error}`)
         } else {
-          notify.error("Erreur lors de l'envoi de l'email, veuillez vérifier qu'elle est correcte")
+          notify.error("Erreur lors de l'envoi de l'email, veuillez vérifier que l'adresse est correcte")
         }
     }
   })

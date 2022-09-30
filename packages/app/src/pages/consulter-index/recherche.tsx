@@ -24,6 +24,7 @@ import {
 } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import type { ReactElement } from "react";
 import React from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
@@ -35,6 +36,7 @@ import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
 import { ButtonAction } from "@components/ds/ButtonAction";
+import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig();
@@ -516,3 +518,7 @@ export default function SearchPage() {
     </>
   );
 }
+
+SearchPage.getLayout = function getLayout(page: ReactElement) {
+  return <ConsulterIndexLayout>{page}</ConsulterIndexLayout>;
+};

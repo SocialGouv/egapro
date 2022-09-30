@@ -53,6 +53,13 @@ Cette commande lance le linter, la compilation des types TS et les tests.
 
 ## FAQ
 
+### Comment lancer la compilation TS ?
+
+```bash
+cd packages/app
+yarn workspace app run tsc
+```
+
 ### Comment ajouter une librairie dans un workspace ?
 
 ````bash

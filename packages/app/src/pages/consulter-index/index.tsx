@@ -14,9 +14,12 @@ import { format } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
+import type { ReactElement } from "react";
 import { HiDownload } from "react-icons/hi";
+
 import { AverageIndicator } from "@components/AverageIndicator";
 import { ButtonAction } from "@components/ds/ButtonAction";
+import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 
 async function getDateCsv(): Promise<string> {
   try {
@@ -116,3 +119,7 @@ export default function HomePage() {
     </VStack>
   );
 }
+
+HomePage.getLayout = function getLayout(page: ReactElement) {
+  return <ConsulterIndexLayout>{page}</ConsulterIndexLayout>;
+};

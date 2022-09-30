@@ -1,4 +1,4 @@
-import type { COUNTIES, COUNTRIES, NAF, REGIONS } from "../dict";
+import type { COUNTIES, COUNTRIES, NAF, REGIONS } from "@common/dict";
 
 export type RepartitionEquilibreeAPI = {
   data: RepartitionEquilibreeDataField;

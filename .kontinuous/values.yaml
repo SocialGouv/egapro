@@ -114,11 +114,13 @@ jobs:
   runs:
     build-app:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 10Gi
+      memoryLimit: 14Gi
       memoryRequest: 2Gi
       with:
         imagePackage: app
         dockerfile: packages/app/Dockerfile
+        buildArgs:
+          NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
 
     build-storybook:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
