@@ -2,7 +2,7 @@ import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import { FormRadioGroup } from "@/design-system";
 
 export default {
-  title: "Base/FormRadioGroup",
+  title: "Base/Form/FormRadioGroup",
   component: FormRadioGroup,
   parameters: {
     docs: {
