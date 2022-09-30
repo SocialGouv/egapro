@@ -29,10 +29,22 @@ export const FormRadioGroup = ({
   ...rest
 }: FormRadioGroupProps) => {
   const arrayOfChildren = Children.toArray(children);
-  compatibleComponents(["FormRadioInput", "FormRadioLegend", "ValidationMessage"], arrayOfChildren);
-  const legend = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormRadioLegend");
-  const content = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormRadioInput");
-  const validation = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ValidationMessage");
+  const acceptedComponentsNames = ["FormRadioLegend", "FormRadioInput", "ValidationMessage"];
+  compatibleComponents(acceptedComponentsNames, arrayOfChildren);
+  const [legend, radio, validation] =  arrayOfChildren.reduce(function (prev: Array<ReactNode>, next) {
+    let acceptedIdx: number = acceptedComponentsNames.findIndex(componentName => componentName === (next as AuthorizedChildType).type.name)
+    if (acceptedIdx > -1) {
+      let cloned
+      if(prev[acceptedIdx]){
+        cloned = (prev[acceptedIdx] as Array<ReactNode>).slice()
+        cloned.push(next)
+      }
+      prev[acceptedIdx] = prev[acceptedIdx] ? cloned : [next]
+    }
+
+    return prev
+  }, [])
+
   return (
     <Box
       className={clsx("fr-form-group", size === "sm" && "fr-radio-group--sm", inline && "fr-fieldset--inline")}
@@ -45,8 +57,8 @@ export const FormRadioGroup = ({
         aria-labelledby={ariaLabelledby}
       >
         {legend}
-        <div className="fr-fieldset__content">{content}</div>
-        {validation.length > 0 && validation}
+        <div className="fr-fieldset__content">{radio}</div>
+        {validation}
       </fieldset>
     </Box>
   );
