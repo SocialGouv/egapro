@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
 
 import type { iconStyles } from "../utils/icon-styles";
 
@@ -11,15 +10,7 @@ export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   isValid?: boolean;
 };
 
-export const FormInput: FunctionComponent<FormInputProps> = ({
-  type = "text",
-  isError,
-  isValid,
-  isDisabled,
-  icon,
-  id,
-  ...rest
-}) => {
+export const FormInput = ({ type = "text", isError, isValid, isDisabled, icon, id, ...rest }: FormInputProps) => {
   return (
     <div className={clsx("fr-input-wrap", icon, type === "date" && "fr-icon-calendar-line")}>
       <input

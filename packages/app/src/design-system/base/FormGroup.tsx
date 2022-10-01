@@ -1,12 +1,12 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
-export type FormGroupProps = {
+export type FormGroupProps = PropsWithChildren<{
   isError?: boolean;
   isValid?: boolean;
-};
+}>;
 
-export const FormGroup: FunctionComponent<FormGroupProps> = ({ isValid, isError, children }) => {
+export const FormGroup = ({ isValid, isError, children }: FormGroupProps) => {
   return (
     <div className={clsx("fr-input-group", isValid && "fr-input-group--valid", isError && "fr-input-group--error")}>
       {children}

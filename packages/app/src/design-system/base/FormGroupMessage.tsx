@@ -1,12 +1,12 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
-export type FormGroupMessageProps = {
+export type FormGroupMessageProps = PropsWithChildren<{
   id: string;
   isValid?: boolean;
-};
+}>;
 
-export const FormGroupMessage: FunctionComponent<FormGroupMessageProps> = ({ isValid, id, children }) => {
+export const FormGroupMessage = ({ isValid, id, children }: FormGroupMessageProps) => {
   return (
     <p id={`${id}-msg`} className={clsx(isValid ? "fr-valid-text" : "fr-error-text")}>
       {children}

@@ -1,16 +1,16 @@
 import clsx from "clsx";
-import type { CSSProperties, FunctionComponent } from "react";
+import type { CSSProperties, PropsWithChildren } from "react";
 import { useState } from "react";
 
 import { useCollapse } from "../hooks/useCollapse";
 
-export type SideMenuProps = {
+export type SideMenuProps = PropsWithChildren<{
   buttonLabel: string;
   className?: string;
   title: string;
-};
+}>;
 
-export const SideMenu: FunctionComponent<SideMenuProps> = ({ title, buttonLabel, children, className }) => {
+export const SideMenu = ({ title, buttonLabel, children, className }: SideMenuProps) => {
   const [isExpanded, setExpanded] = useState(false);
   const wrapperId = "fr-sidemenu-wrapper";
   const { item, collapse } = useCollapse(wrapperId, isExpanded);

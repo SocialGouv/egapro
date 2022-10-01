@@ -1,15 +1,16 @@
 import clsx from "clsx";
-import type { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 import { Children } from "react";
 
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
-type AlertProps = Omit<MarginProps, "ml" | "mr" | "mx"> & {
-  children?: ReactNode;
-  size?: "md" | "sm";
-  type?: "error" | "info" | "success" | "warning";
-};
+type AlertProps = PropsWithChildren<
+  Omit<MarginProps, "ml" | "mr" | "mx"> & {
+    size?: "md" | "sm";
+    type?: "error" | "info" | "success" | "warning";
+  }
+>;
 
 type AuthorizedChildType = {
   type: {
@@ -52,6 +53,6 @@ Alert.Title = function AlertTitle({
   );
 };
 
-Alert.Content = function AlertContent({ children }: { children: ReactNode }) {
+Alert.Content = function AlertContent({ children }: PropsWithChildren<Record<string, unknown>>) {
   return <>{children}</>;
 };

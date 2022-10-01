@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { FunctionComponent } from "react";
 
 import { ButtonAsLink } from "./ButtonAsLink";
 import { Logo } from "./Logo";
@@ -11,12 +10,7 @@ export type HeaderBodyProps = {
   showMenuMobile: () => void;
 };
 
-export const HeaderBody: FunctionComponent<HeaderBodyProps> = ({
-  isMobileMenuOpen,
-  showMenuMobile,
-  mobileMenuId,
-  buttonMobileMenuId,
-}) => {
+export const HeaderBody = ({ isMobileMenuOpen, showMenuMobile, mobileMenuId, buttonMobileMenuId }: HeaderBodyProps) => {
   return (
     <div className="fr-header__body">
       <div className="fr-container">

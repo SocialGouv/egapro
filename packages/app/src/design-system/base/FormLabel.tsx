@@ -1,13 +1,13 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
-export type FormLabelProps = {
+export type FormLabelProps = PropsWithChildren<{
   as?: "label" | "legend";
   hint?: string;
   htmlFor: string;
-};
+}>;
 
-export const FormLabel: FunctionComponent<FormLabelProps> = ({ as: HtmlTag = "label", htmlFor, hint, children }) => {
+export const FormLabel = ({ as: HtmlTag = "label", htmlFor, hint, children }: FormLabelProps) => {
   return (
     <HtmlTag className={clsx("fr-label", HtmlTag === "legend" && "fr-pl-0")} htmlFor={htmlFor}>
       {children}
