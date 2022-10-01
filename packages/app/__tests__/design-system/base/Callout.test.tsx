@@ -6,10 +6,10 @@ test("should match snapshot", () => {
   const view = render(
     <Callout icon="fr-fi-information-line">
       <Callout.Title>Titre mise en avant</Callout.Title>
-      <Callout.Description>
+      <Callout.Content>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+      </Callout.Content>
       <Callout.Button onClick={mockClick}>Cliquer là</Callout.Button>
     </Callout>,
   );
