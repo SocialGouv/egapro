@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormInput, FormGroup, FormLabel, FormGroupMessage } from "@/design-system";
+import { FormInput, FormGroup, FormSelect } from "@/design-system";
 
 export default {
   title: "Base/Form/FormGroup",
@@ -10,13 +10,13 @@ export default {
 
 const Template: ComponentStory<typeof FormGroup> = args => (
   <FormGroup {...args}>
-    <FormLabel htmlFor="xxx">Label champ de saisie</FormLabel>
+    <FormGroup.Label htmlFor="xxx">Label champ de saisie</FormGroup.Label>
     <FormInput id="xxx" isValid={args.isValid} isError={args.isError} />
-    {args.isError && <FormGroupMessage id="xxx">Texte d’erreur obligatoire</FormGroupMessage>}
+    {args.isError && <FormGroup.Message id="xxx">Texte d’erreur obligatoire</FormGroup.Message>}
     {args.isValid && (
-      <FormGroupMessage id="xxx" isValid>
+      <FormGroup.Message id="xxx" isValid>
         Texte de validation
-      </FormGroupMessage>
+      </FormGroup.Message>
     )}
   </FormGroup>
 );
@@ -36,3 +36,21 @@ export const IsError = Template.bind({});
 IsError.args = {
   isError: true,
 };
+
+export const WithFormSelect: ComponentStory<typeof FormGroup> = args => (
+  <FormGroup {...args}>
+    <FormGroup.Label htmlFor="xxx">Label champ de saisie</FormGroup.Label>
+    <FormSelect id="xxx" isValid={args.isValid} isError={args.isError}>
+      <option value="1">Option 1</option>
+      <option value="2">Option 2</option>
+      <option value="3">Option 3</option>
+      <option value="4">Option 4</option>
+    </FormSelect>
+    {args.isError && <FormGroup.Message id="xxx">Texte d’erreur obligatoire</FormGroup.Message>}
+    {args.isValid && (
+      <FormGroup.Message id="xxx" isValid>
+        Texte de validation
+      </FormGroup.Message>
+    )}
+  </FormGroup>
+);
