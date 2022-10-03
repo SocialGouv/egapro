@@ -23,6 +23,7 @@ def pytest_configure(config):
             await conn.execute("DROP TABLE IF EXISTS search")
             await conn.execute("DROP TABLE IF EXISTS archive")
             await conn.execute("DROP TABLE IF EXISTS ownership")
+            await conn.execute("DROP TABLE IF EXISTS repartition_equilibree") 
         await db.init()
 
     asyncio.run(configure())
@@ -43,6 +44,7 @@ def pytest_runtest_setup(item):
             await conn.execute("TRUNCATE TABLE search;")
             await conn.execute("TRUNCATE TABLE archive;")
             await conn.execute("TRUNCATE TABLE ownership;")
+            await conn.execute("TRUNCATE TABLE repartition_equilibree;")
         await db.terminate()
 
         helpers.get_entreprise_details.cache_clear()
@@ -53,6 +55,35 @@ def pytest_runtest_setup(item):
 @pytest.fixture
 def app():  # Requested by Roll testing utilities.
     return egapro_app
+
+
+@pytest.fixture
+def repartition():
+    async def factory(
+        siren="123456782",
+        year=2020,
+        owner="bar@foo.com",
+        company="Repartition Eq",
+        departement="26",
+        region="84",
+        modified_at=None,
+        **data,
+    ):
+        data.setdefault("entreprise", {})
+        data.setdefault("déclaration", {})
+        data.setdefault("déclarant", {})
+        data["entreprise"].setdefault("raison_sociale", company)
+        data["entreprise"].setdefault("département", departement)
+        data["entreprise"].setdefault("région", region)
+        data["entreprise"].setdefault("siren", siren)
+        data["déclarant"].setdefault("email", owner)
+        data["déclarant"].setdefault("prénom", "Martin")
+        data["déclarant"].setdefault("nom", "Martine")
+        await db.repartition.put(siren, year, data, modified_at=modified_at)
+        await db.ownership.put(siren, owner)
+        return data
+
+    return factory
 
 
 @pytest.fixture
