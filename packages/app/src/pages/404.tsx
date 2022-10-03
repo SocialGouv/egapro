@@ -3,8 +3,7 @@ import { push } from "@socialgouv/matomo-next";
 import Head from "next/head";
 import type { ReactElement } from "react";
 import { useEffect } from "react";
-
-import { ConsulterIndexLayout } from "@components/ds/ConsulterIndexLayout";
+import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 
 export default function NotFoundPage() {
   useEffect(() => {

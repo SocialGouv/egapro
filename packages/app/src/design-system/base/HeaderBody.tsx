@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
+import type { FunctionComponent } from "react";
 
-import { ButtonAsLink } from "./ButtonAsLink";
+import { useUser } from "../../components/AuthContext";
+import { FormButton } from "./FormButton";
 import { Logo } from "./Logo";
 
 export type HeaderBodyProps = {
@@ -10,7 +13,20 @@ export type HeaderBodyProps = {
   showMenuMobile: () => void;
 };
 
-export const HeaderBody = ({ isMobileMenuOpen, showMenuMobile, mobileMenuId, buttonMobileMenuId }: HeaderBodyProps) => {
+export const HeaderBody: FunctionComponent<HeaderBodyProps> = ({
+  isMobileMenuOpen,
+  showMenuMobile,
+  mobileMenuId,
+  buttonMobileMenuId,
+}) => {
+  const { isAuthenticated, logout } = useUser();
+  const router = useRouter();
+
+  const disconnectUser = () => {
+    logout();
+    router.push("/ecart-rep/");
+  };
+
   return (
     <div className="fr-header__body">
       <div className="fr-container">
@@ -45,19 +61,19 @@ export const HeaderBody = ({ isMobileMenuOpen, showMenuMobile, mobileMenuId, but
               </p>
             </div>
           </div>
-          <div className="fr-header__tools">
-            <div className="fr-header__tools-links">
-              <ul className="fr-btns-group">
-                <li>
-                  <Link href="/login" passHref>
-                    <ButtonAsLink iconLeft="fr-icon-user-fill" variant="tertiary">
-                      Se connecter
-                    </ButtonAsLink>
-                  </Link>
-                </li>
-              </ul>
+          {isAuthenticated && (
+            <div className="fr-header__tools">
+              <div className="fr-header__tools-links">
+                <ul className="fr-btns-group">
+                  <li>
+                    <FormButton variant="secondary" onClick={disconnectUser}>
+                      Se déconnecter
+                    </FormButton>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

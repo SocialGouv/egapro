@@ -5,7 +5,6 @@ import { FormInput, FormGroup, FormSelect } from "@/design-system";
 export default {
   title: "Base/Form/FormGroup",
   component: FormGroup,
-  subcomponent: { FormInput },
 } as ComponentMeta<typeof FormGroup>;
 
 const Template: ComponentStory<typeof FormGroup> = args => (
@@ -38,7 +37,7 @@ IsError.args = {
 };
 
 export const WithFormSelect: ComponentStory<typeof FormGroup> = args => (
-  <FormGroup {...args}>
+  <FormGroup isValid {...args}>
     <FormGroup.Label htmlFor="xxx">Label champ de saisie</FormGroup.Label>
     <FormSelect id="xxx" isValid={args.isValid} isError={args.isError}>
       <option value="1">Option 1</option>

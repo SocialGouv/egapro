@@ -9,6 +9,9 @@
       ],
       "@components/*": [
         "components/*"
+      ],
+      "@design-system": [
+        "design-system/index"
       ]
     }
   },

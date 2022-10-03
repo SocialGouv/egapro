@@ -1,28 +1,15 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
-import { Children } from "react";
-import type { AuthorizedChildType } from "../utils/compatible-components";
-import { compatibleComponents } from "../utils/compatible-components";
-
 export type FormGroupProps = PropsWithChildren<{
   isError?: boolean;
   isValid?: boolean;
 }>;
 
+// TODO: Add filtering children
 export const FormGroup = ({ isValid, isError, children }: FormGroupProps) => {
-  const arrayOfChildren = Children.toArray(children);
-  compatibleComponents("FormGroup", ["FormInput", "FormSelect", "FormGroupLabel", "FormGroupMessage"], arrayOfChildren);
-  const label = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormGroupLabel");
-  const input = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormInput");
-  const select = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormSelect");
-
-  const message = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormGroupMessage");
   return (
     <div className={clsx("fr-input-group", isValid && "fr-input-group--valid", isError && "fr-input-group--error")}>
-      {label}
-      {input}
-      {select}
-      {message}
+      {children}
     </div>
   );
 };
