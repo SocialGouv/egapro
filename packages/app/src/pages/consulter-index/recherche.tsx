@@ -24,13 +24,13 @@ import {
 } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
 import React from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
 import type { SearchCompanyParams } from "../../hooks";
 import { useSearch } from "../../hooks";
 import { filterDepartements, useConfig, useCallbackOnMount } from "../../hooks";
+import type { NextPageWithLayout } from "../_app";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
@@ -374,7 +374,7 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQuery) {
   };
 }
 
-export default function SearchPage() {
+const SearchPage: NextPageWithLayout = () => {
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
 
@@ -517,6 +517,8 @@ export default function SearchPage() {
       )}
     </>
   );
-}
+};
 
-SearchPage.getLayout = ({ children }: PropsWithChildren) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+SearchPage.getLayout = ({ children }) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+
+export default SearchPage;

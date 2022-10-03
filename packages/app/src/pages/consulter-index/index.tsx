@@ -14,9 +14,9 @@ import { format } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
-import type { PropsWithChildren } from "react";
 import { HiDownload } from "react-icons/hi";
 
+import type { NextPageWithLayout } from "../_app";
 import { AverageIndicator } from "@components/AverageIndicator";
 import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
@@ -103,7 +103,7 @@ function DownloadCsvFileZone() {
   );
 }
 
-export default function HomePage() {
+const HomePage: NextPageWithLayout = () => {
   return (
     <VStack spacing={["3", "6"]}>
       <Head>
@@ -118,6 +118,8 @@ export default function HomePage() {
       <AverageIndicator />
     </VStack>
   );
-}
+};
 
-HomePage.getLayout = ({ children }: PropsWithChildren) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+HomePage.getLayout = ({ children }) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+
+export default HomePage;

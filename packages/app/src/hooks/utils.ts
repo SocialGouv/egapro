@@ -74,6 +74,6 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
  * @param key the path to use after the API_URL (named key because it is used in cache for useSWR)
  * @param options the request options (optional)
  */
-export const fetcher = async (key: string, options: RequestInit) => {
+export const fetcher = async (key: string, options?: RequestInit) => {
   return genericFetch(API_URL + key, options);
 };
