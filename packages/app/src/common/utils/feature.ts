@@ -1,3 +1,3 @@
-export function isOpenFeature(value: string | undefined) {
+export const isOpenFeature = (value: string | undefined) => {
   return /on/i.test(value || "");
-}
+};

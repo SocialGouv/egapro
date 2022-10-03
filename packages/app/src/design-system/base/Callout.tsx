@@ -1,12 +1,12 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
 
-import type { iconStyles } from "../utils/icon-styles";
+import type { IconStyles } from "../utils/icon-styles";
 import styles from "./Callout.module.css";
 
 export type CalloutProps = PropsWithChildren<{
   className?: string;
-  icon?: iconStyles;
+  icon?: IconStyles;
 }>;
 
 export const Callout = ({ children, className, icon }: CalloutProps) => {

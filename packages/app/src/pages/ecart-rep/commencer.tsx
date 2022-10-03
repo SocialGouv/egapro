@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
-import * as React from "react";
 
+import { useEffect } from "react";
 import type { NextPageWithLayout } from "../_app";
 import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -11,7 +11,7 @@ const CommencerPage: NextPageWithLayout = () => {
   const { isAuthenticated } = useUser();
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) router.push("/ecart-rep");
   }, [isAuthenticated, router]);
 

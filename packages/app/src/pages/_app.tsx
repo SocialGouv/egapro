@@ -4,6 +4,7 @@ import "@fontsource/cabin";
 import { init } from "@socialgouv/matomo-next";
 import type { AppProps } from "next/app";
 import type { PropsWithChildren } from "react";
+import { useEffect } from "react";
 
 import React from "react";
 
@@ -18,7 +19,7 @@ type AppPropsWithLayout = AppProps & {
 };
 
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
-  React.useEffect(() => {
+  useEffect(() => {
     init({
       url: process.env.NEXT_PUBLIC_MATOMO_URL ?? "",
       siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",

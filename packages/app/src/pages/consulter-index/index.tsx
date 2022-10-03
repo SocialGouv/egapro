@@ -13,7 +13,7 @@ import {
 import { format } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { HiDownload } from "react-icons/hi";
 
 import type { NextPageWithLayout } from "../_app";
@@ -38,7 +38,7 @@ async function getDateCsv(): Promise<string> {
 
 function FormSearchSiren() {
   const router = useRouter();
-  const formRef = React.useRef(null);
+  const formRef = useRef(null);
   const bgSelect = useColorModeValue("white", "blue.700");
 
   function handleSubmit(event: React.SyntheticEvent) {
@@ -73,9 +73,9 @@ function FormSearchSiren() {
 }
 
 function DownloadCsvFileZone() {
-  const [dateCsv, setDateCsv] = React.useState("");
+  const [dateCsv, setDateCsv] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function runEffect() {
       setDateCsv(await getDateCsv());
     }

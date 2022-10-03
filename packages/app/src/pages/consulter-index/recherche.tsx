@@ -24,7 +24,7 @@ import {
 } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
 import type { SearchCompanyParams } from "../../hooks";
@@ -73,7 +73,7 @@ function UES() {
 
 function Company({ company }: { company: CompanyType }) {
   const { isOpen, onToggle } = useDisclosure();
-  const [yearSelected, setYearSelected] = React.useState<number>();
+  const [yearSelected, setYearSelected] = useState<number>();
   const highlightColor = useColorModeValue("blue.100", "blue.800");
   const linkColor = useColorModeValue("primary.600", "primary.100");
 
@@ -380,8 +380,8 @@ const SearchPage: NextPageWithLayout = () => {
 
   const router = useRouter();
   const inputs = normalizeInputs(router.query);
-  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([]);
-  const [search, setSearch] = React.useState<SearchCompanyParams>(inputs);
+  const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
+  const [search, setSearch] = useState<SearchCompanyParams>(inputs);
 
   const { companies, isLoading, error, size, setSize } = useSearch(inputs);
 
@@ -392,12 +392,12 @@ const SearchPage: NextPageWithLayout = () => {
     setSearch({});
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     // inital load of departments.
     reset();
   }, [config, reset]); // config change only at start.
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (region) {
       setDepartements(filterDepartements(config, region));
     }

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as React from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -39,7 +39,7 @@ const informationMessage =
 const EmailPage: NextPageWithLayout = () => {
   useTokenAndRedirect("./commencer");
 
-  const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
+  const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
   const {
     register,
@@ -47,14 +47,14 @@ const EmailPage: NextPageWithLayout = () => {
     watch,
     formState: { errors, isSubmitted, isDirty, isValid },
   } = useForm<FormType>({
-    resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
+    resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
     defaultValues: {
       email: "",
     },
   });
 
   // Remove error message after some timeout.
-  React.useEffect(() => {
+  useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     if (featureStatus.type === "error") {
       timeoutId = setTimeout(() => {
@@ -65,7 +65,7 @@ const EmailPage: NextPageWithLayout = () => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [featureStatus]);
+  }, [featureStatus, setFeatureStatus]);
 
   const email = watch("email");
 

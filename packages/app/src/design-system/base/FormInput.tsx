@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { forwardRef } from "react";
 
 import type { IconStyles } from "../utils/icon-styles";
 
@@ -11,7 +12,7 @@ export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   type?: string;
 };
 
-export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
+export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ type = "text", isError, isValid, isDisabled, icon, id, ...rest }, ref) => (
     <div className={clsx("fr-input-wrap", icon, type === "date" && "fr-icon-calendar-line")}>
       <input

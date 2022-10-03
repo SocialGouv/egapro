@@ -1,22 +1,22 @@
 import { Flex, LinkBox, LinkOverlay, Spacer } from "@chakra-ui/react";
+import type { PropsWithChildren } from "react";
 import React from "react";
 
-type LinkButtonProps = {
-  children: React.ReactNode;
+export type LinkButtonProps = PropsWithChildren<{
   color?: string;
   href: string;
   isExternal?: boolean;
   leftIcon?: React.ReactNode;
-};
+}>;
 
-export function LinkButton({
+export const LinkButton = ({
   children,
   color = "primary.500",
   href,
   isExternal = false,
   leftIcon = null,
   ...rest
-}: LinkButtonProps) {
+}: LinkButtonProps) => {
   return (
     <LinkBox>
       <LinkOverlay href={href} isExternal={isExternal}>
@@ -39,4 +39,4 @@ export function LinkButton({
       </LinkOverlay>
     </LinkBox>
   );
-}
+};

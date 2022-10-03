@@ -28,3 +28,5 @@ const NotFoundPage: NextPageWithLayout = () => {
 NotFoundPage.getLayout = ({ children }) => {
   return <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
 };
+
+export default NotFoundPage;
