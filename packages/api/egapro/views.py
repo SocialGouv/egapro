@@ -379,12 +379,68 @@ async def get_token(request, response):
     response.json = {"token": token}
 
 
-@app.route("/repartition-equilibree/declaration/{siren}/{year}", methods=["GET"])
+@app.route("/repartition-equilibree/{siren}/{year}", methods=["GET"])
 @tokens.require
 @add_error(403, constants.ERROR_ENSURE_OWNER)
 @ensure_owner
-async def rep_eq_get_declaration(request, response, siren, year):
-    get_declaration(request, response, siren, year)
+async def get_repartition(request, response, siren, year):
+    try:
+        record = await db.repartition.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No répartition équilibrée with siren {siren} and year {year}")
+    resource = record.as_resource()
+    if record.data.path("déclarant.nom"):
+        await helpers.patch_from_recherche_entreprises(resource["data"])
+    response.json = resource
+
+@app.route("/repartition-equilibree/{siren}/{year}", methods=["PUT"])
+@tokens.require
+@ensure_owner
+async def put_repartition(request, response, siren, year):
+    try:
+        year = int(year)
+    except ValueError:
+        raise HttpError(422, f"Ce n'est pas une année valide: `{year}`")
+    if not siren_is_valid(siren):
+        raise HttpError(422, f"Numéro SIREN invalide: {siren}")
+    if year not in constants.YEARS:
+        years = ", ".join([str(y) for y in constants.YEARS])
+        raise HttpError(
+            422, f"Il est possible de déclarer seulement pour les années {years}"
+        )
+    data = request.data
+    declarant = request["email"]
+    data.setdefault("déclarant", {})
+    # Use token email as default for declarant email.
+    if not data["déclarant"].get("email"):
+        data["déclarant"]["email"] = declarant
+    schema.validate(data.raw)
+    helpers.compute_notes(data)
+    schema.cross_validate(data.raw, rep_eq=True)
+    try:
+        current = await db.repartition.get(siren, year)
+    except db.NoData:
+        current = None
+    else:
+        # Do not force new declarant, in case this is a staff person editing
+        declared_at = current["declared_at"]
+        expired = declared_at and declared_at < utils.remove_one_year(utils.utcnow())
+        if expired and not request["staff"]:
+            raise HttpError(403, "Le délai de modification est écoulé.")
+    await db.repartition.put(siren, year, data)
+    response.status = 204
+    if not request["staff"]:
+        await db.ownership.put(siren, request["email"])
+        # Do not send the success email on update for now (we send too much emails that
+        # are unwanted, mainly because when someone loads the frontend app a PUT is
+        # automatically sent, without any action from the user.)
+        loggers.logger.info(f"{siren}/{year} BY {declarant} FROM {request.ip}")
+        if not current:
+            owners = await db.ownership.emails(siren)
+            if not owners:  # Staff member
+                owners = request["email"]
+            url = request.domain + data.uri
+            emails.success.send(owners, url=url, **data)
 
 @app.route("/search")
 async def search(request, response):
