@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { App, Container, ContentWithAside, SideMenu, SideMenuList, SideMenuLink } from "@/design-system";
+import { App, Container, ContentWithAside, SideMenu } from "@/design-system";
 
 export default {
   title: "Layout/App",
@@ -12,18 +12,16 @@ const Template: ComponentStory<typeof App> = () => (
     <Container>
       <ContentWithAside
         aside={
-          <SideMenu
-            buttonLabel={"Dans cette rubrique"}
-            title={"Déclaration des écarts de représentation F/H dans les postes de direction"}
-          >
-            <SideMenuList>
-              <SideMenuLink href="#" isCurrent>
+          <SideMenu buttonLabel={"Dans cette rubrique"}>
+            <SideMenu.Title>Déclaration des écarts de représentation F/H dans les postes de direction</SideMenu.Title>
+            <SideMenu.List>
+              <SideMenu.Link href="#" isCurrent>
                 Êtes-vous assujetti&nbsp;?
-              </SideMenuLink>
-              <SideMenuLink href="#" target="_self">
+              </SideMenu.Link>
+              <SideMenu.Link href="#" target="_self">
                 Validation de l’email
-              </SideMenuLink>
-            </SideMenuList>
+              </SideMenu.Link>
+            </SideMenu.List>
           </SideMenu>
         }
         content={
