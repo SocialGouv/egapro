@@ -1,6 +1,6 @@
 import { action } from "@storybook/addon-actions";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Callout } from "@/design-system";
+import { Callout, CalloutButton, CalloutContent, CalloutTitle } from "@/design-system";
 
 export default {
   title: "Base/Callout",
@@ -17,10 +17,10 @@ export default {
 export const Default: ComponentStory<typeof Callout> = args => {
   return (
     <Callout {...args}>
-      <Callout.Content>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Content>
+      </CalloutContent>
     </Callout>
   );
 };
@@ -28,10 +28,10 @@ export const Default: ComponentStory<typeof Callout> = args => {
 export const WithIcon: ComponentStory<typeof Callout> = args => {
   return (
     <Callout icon="fr-fi-information-line" {...args}>
-      <Callout.Content>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Content>
+      </CalloutContent>
     </Callout>
   );
 };
@@ -39,11 +39,11 @@ export const WithIcon: ComponentStory<typeof Callout> = args => {
 export const WithTitle: ComponentStory<typeof Callout> = args => {
   return (
     <Callout icon="fr-fi-information-line" {...args}>
-      <Callout.Title>Titre mise en avant</Callout.Title>
-      <Callout.Content>
+      <CalloutTitle>Titre mise en avant</CalloutTitle>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Content>
+      </CalloutContent>
     </Callout>
   );
 };
@@ -51,12 +51,12 @@ export const WithTitle: ComponentStory<typeof Callout> = args => {
 export const WithButton: ComponentStory<typeof Callout> = args => {
   return (
     <Callout icon="fr-fi-information-line" {...args}>
-      <Callout.Button onClick={action("button-click")}>Cliquer là</Callout.Button>
-      <Callout.Content>
+      <CalloutTitle>Titre mise en avant</CalloutTitle>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Content>
-      <Callout.Title>Titre mise en avant</Callout.Title>
+      </CalloutContent>
+      <CalloutButton onClick={action("button-click")}>Cliquer là</CalloutButton>
     </Callout>
   );
 };

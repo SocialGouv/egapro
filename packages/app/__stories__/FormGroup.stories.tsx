@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormInput, FormGroup, FormSelect } from "@/design-system";
+import { FormInput, FormGroup, FormSelect, FormGroupLabel, FormGroupMessage } from "@/design-system";
 
 export default {
   title: "Base/Form/FormGroup",
@@ -9,13 +9,13 @@ export default {
 
 const Template: ComponentStory<typeof FormGroup> = args => (
   <FormGroup {...args}>
-    <FormGroup.Label htmlFor="xxx">Label champ de saisie</FormGroup.Label>
+    <FormGroupLabel htmlFor="xxx">Label champ de saisie</FormGroupLabel>
     <FormInput id="xxx" isValid={args.isValid} isError={args.isError} />
-    {args.isError && <FormGroup.Message id="xxx">Texte d’erreur obligatoire</FormGroup.Message>}
+    {args.isError && <FormGroupMessage id="xxx">Texte d’erreur obligatoire</FormGroupMessage>}
     {args.isValid && (
-      <FormGroup.Message id="xxx" isValid>
+      <FormGroupMessage id="xxx" isValid>
         Texte de validation
-      </FormGroup.Message>
+      </FormGroupMessage>
     )}
   </FormGroup>
 );
@@ -37,19 +37,19 @@ IsError.args = {
 };
 
 export const WithFormSelect: ComponentStory<typeof FormGroup> = args => (
-  <FormGroup isValid {...args}>
-    <FormGroup.Label htmlFor="xxx">Label champ de saisie</FormGroup.Label>
+  <FormGroup {...args}>
+    <FormGroupLabel htmlFor="xxx">Label champ de saisie</FormGroupLabel>
     <FormSelect id="xxx" isValid={args.isValid} isError={args.isError}>
       <option value="1">Option 1</option>
       <option value="2">Option 2</option>
       <option value="3">Option 3</option>
       <option value="4">Option 4</option>
     </FormSelect>
-    {args.isError && <FormGroup.Message id="xxx">Texte d’erreur obligatoire</FormGroup.Message>}
+    {args.isError && <FormGroupMessage id="xxx">Texte d’erreur obligatoire</FormGroupMessage>}
     {args.isValid && (
-      <FormGroup.Message id="xxx" isValid>
+      <FormGroupMessage id="xxx" isValid>
         Texte de validation
-      </FormGroup.Message>
+      </FormGroupMessage>
     )}
   </FormGroup>
 );

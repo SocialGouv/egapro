@@ -1,6 +1,6 @@
 import { Dialog } from "@headlessui/react";
 import clsx from "clsx";
-import type { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 import React, { Children } from "react";
 
 import type { AuthorizedChildType } from "../utils/compatible-components";
@@ -58,25 +58,21 @@ export const Modale = ({ isOpen, onClose, children }: ModaleProps) => {
   );
 };
 
-Modale.Title = function ModaleTitle({
-  as = "h1",
-  children,
-}: {
+export type ModaleTitleProps = PropsWithChildren<{
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-  children: ReactNode;
-}) {
-  return (
-    <Dialog.Title as={as} className="fr-modal__title">
-      <span className="fr-fi-arrow-right-line fr-fi--lg" />
-      {children}
-    </Dialog.Title>
-  );
-};
+}>;
 
-Modale.Content = function ModaleContent({ children }: { children: ReactNode }) {
-  return <div>{children}</div>;
-};
+export const ModaleTitle = ({ as = "h1", children }: ModaleTitleProps) => (
+  <Dialog.Title as={as} className="fr-modal__title">
+    <span className="fr-fi-arrow-right-line fr-fi--lg" />
+    {children}
+  </Dialog.Title>
+);
 
-Modale.Button = function ModaleButton(props: FormButtonProps) {
-  return <FormButton {...props} />;
-};
+export type ModaleContentProps = PropsWithChildren<Record<never, never>>;
+
+export const ModaleContent = ({ children }: ModaleContentProps) => <div>{children}</div>;
+
+export type ModaleButtonProps = FormButtonProps;
+
+export const ModaleButton = (props: ModaleButtonProps) => <FormButton {...props} />;

@@ -1,9 +1,6 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
-import { Children } from "react";
 
-import { compatibleComponents } from "../utils/compatible-components";
-import type { AuthorizedChildType } from "../utils/compatible-components";
 import type { iconStyles } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
@@ -18,38 +15,31 @@ export type CalloutProps = PropsWithChildren<
   }
 >;
 
-export const Callout = ({ children, className, icon, ...rest }: CalloutProps) => {
-  const arrayOfChildren = Children.toArray(children);
-  compatibleComponents("Callout", ["CalloutButton", "CalloutTitle", "CalloutContent"], arrayOfChildren);
-  const title = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "CalloutTitle");
-  const content = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "CalloutContent");
-  const button = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "CalloutButton");
+export const Callout = ({ children, icon, className, ...rest }: CalloutProps) => {
   return (
     <Box className={clsx("fr-callout", icon, className)} {...rest}>
-      {title}
-      {content}
-      {button}
+      {children}
     </Box>
   );
 };
 
-type CalloutTitleProps = PropsWithChildren<{
+export type CalloutTitleProps = PropsWithChildren<{
   className?: string;
   titleAs?: "h2" | "h3" | "h4" | "h5" | "h6" | "p";
 }>;
 
-Callout.Title = function CalloutTitle({ children, className, titleAs: HtmlTag = "p" }: CalloutTitleProps) {
+export const CalloutTitle = ({ children, className, titleAs: HtmlTag = "p" }: CalloutTitleProps) => {
   return <HtmlTag className={clsx("fr-callout__title", styles.title, className)}>{children}</HtmlTag>;
 };
 
-type CalloutDescriptionProps = PropsWithChildren<{
-  className?: string;
-}>;
+export type CalloutContentProps = PropsWithChildren<Record<never, never>>;
 
-Callout.Content = function CalloutContent({ children, className }: CalloutDescriptionProps) {
-  return <div className={clsx("fr-callout__text", className)}>{children}</div>;
+export const CalloutContent = ({ children }: CalloutContentProps) => {
+  return <div className={clsx("fr-callout__text")}>{children}</div>;
 };
 
-Callout.Button = function CalloutButton({ ...props }: FormButtonProps) {
+export type CalloutButtonProps = FormButtonProps;
+
+export const CalloutButton = ({ ...props }: CalloutButtonProps) => {
   return <FormButton {...props} />;
 };

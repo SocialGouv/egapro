@@ -1,6 +1,16 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { App, Container, ContentWithAside, SideMenu } from "@/design-system";
+import {
+  App,
+  Container,
+  ContentWithAside,
+  ContentWithAsideMain,
+  ContentWithAsideSideMenu,
+  SideMenu,
+  SideMenuLink,
+  SideMenuList,
+  SideMenuTitle,
+} from "@/design-system";
 
 export default {
   title: "Layout/App",
@@ -11,20 +21,20 @@ const Template: ComponentStory<typeof App> = () => (
   <App>
     <Container>
       <ContentWithAside>
-        <ContentWithAside.SideMenu>
+        <ContentWithAsideSideMenu>
           <SideMenu buttonLabel={"Dans cette rubrique"}>
-            <SideMenu.Title>Déclaration des écarts de représentation F/H dans les postes de direction</SideMenu.Title>
-            <SideMenu.List>
-              <SideMenu.Link href="#" isCurrent>
+            <SideMenuTitle>Déclaration des écarts de représentation F/H dans les postes de direction</SideMenuTitle>
+            <SideMenuList>
+              <SideMenuLink href="#" isCurrent>
                 Êtes-vous assujetti&nbsp;?
-              </SideMenu.Link>
-              <SideMenu.Link href="#" target="_self">
+              </SideMenuLink>
+              <SideMenuLink href="#" target="_self">
                 Validation de l’email
-              </SideMenu.Link>
-            </SideMenu.List>
+              </SideMenuLink>
+            </SideMenuList>
           </SideMenu>
-        </ContentWithAside.SideMenu>
-        <ContentWithAside.Main>
+        </ContentWithAsideSideMenu>
+        <ContentWithAsideMain>
           <h1>Êtes-vous assujetti&nbsp;?</h1>
           <p>
             <strong>
@@ -35,7 +45,7 @@ const Template: ComponentStory<typeof App> = () => (
             d’une part, leurs cadres dirigeants, et d’autre part, les membres de leurs instances dirigeantes, en
             parallèle de la publication et de la déclaration de leur Index de l’égalité professionnelle.
           </p>
-        </ContentWithAside.Main>
+        </ContentWithAsideMain>
       </ContentWithAside>
     </Container>
   </App>

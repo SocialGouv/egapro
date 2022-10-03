@@ -9,6 +9,7 @@ Object {
         class="fr-form-group"
       >
         <fieldset
+          aria-labelledby="legendId xxxx"
           class="fr-fieldset fr-fieldset--valid"
           role="group"
         >
@@ -66,6 +67,7 @@ Object {
           </div>
           <p
             class="fr-valid-text"
+            id="xxxx"
           >
             Validé
           </p>
@@ -78,6 +80,7 @@ Object {
       class="fr-form-group"
     >
       <fieldset
+        aria-labelledby="legendId xxxx"
         class="fr-fieldset fr-fieldset--valid"
         role="group"
       >
@@ -135,6 +138,7 @@ Object {
         </div>
         <p
           class="fr-valid-text"
+          id="xxxx"
         >
           Validé
         </p>

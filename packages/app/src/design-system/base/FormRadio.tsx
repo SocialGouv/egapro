@@ -1,9 +1,7 @@
 import clsx from "clsx";
-import type { PropsWithChildren, ReactNode } from "react";
-import React, { Children } from "react";
+import type { PropsWithChildren } from "react";
+import React from "react";
 
-import type { AuthorizedChildType } from "../utils/compatible-components";
-import { compatibleComponents } from "../utils/compatible-components";
 import { Box } from "./Box";
 import type { MarginProps } from "design-system/utils/spacing";
 
@@ -28,11 +26,6 @@ export const FormRadioGroup = ({
   ariaLabelledby,
   ...rest
 }: FormRadioGroupProps) => {
-  const arrayOfChildren = Children.toArray(children);
-  compatibleComponents("FormRadio", ["FormRadioInput", "FormRadioLegend", "ValidationMessage"], arrayOfChildren);
-  const legend = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormRadioLegend");
-  const content = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "FormRadioInput");
-  const validation = arrayOfChildren.filter(child => (child as AuthorizedChildType).type.name === "ValidationMessage");
   return (
     <Box
       className={clsx("fr-form-group", size === "sm" && "fr-radio-group--sm", inline && "fr-fieldset--inline")}
@@ -44,46 +37,50 @@ export const FormRadioGroup = ({
         role="group"
         aria-labelledby={ariaLabelledby}
       >
-        {legend}
-        <div className="fr-fieldset__content">{content}</div>
-        {validation.length > 0 && validation}
+        {children}
       </fieldset>
     </Box>
   );
 };
 
-FormRadioGroup.Legend = function FormRadioLegend({ children, id }: PropsWithChildren<{ id: string }>) {
-  return (
-    <legend className="fr-fieldset__legend fr-text--regular" id={id}>
+export type FormRadioGroupLegendProps = PropsWithChildren<{ id: string }>;
+
+export const FormRadioGroupLegend = ({ children, id }: FormRadioGroupLegendProps) => (
+  <legend className="fr-fieldset__legend fr-text--regular" id={id}>
+    {children}
+  </legend>
+);
+
+export type FormRadioGroupContentProps = PropsWithChildren<Record<never, never>>;
+
+export const FormRadioGroupContent = ({ children }: FormRadioGroupContentProps) => (
+  <div className="fr-fieldset__content">{children}</div>
+);
+
+export type FormRadioGroupInputProps = PropsWithChildren<{ id: string }>;
+
+export const FormRadioGroupInput = ({ children, id }: FormRadioGroupInputProps) => (
+  <div className="fr-radio-group">
+    <input id={id} type="radio" />
+    <label className="fr-label" htmlFor={id}>
       {children}
-    </legend>
-  );
-};
+    </label>
+  </div>
+);
 
-FormRadioGroup.Input = function FormRadioInput({ children, id }: { children: ReactNode; id: string }) {
-  return (
-    <div className="fr-radio-group">
-      <input id={id} type="radio" />
-      <label className="fr-label" htmlFor={id}>
-        {children}
-      </label>
-    </div>
-  );
-};
+export type FormRadioGroupValidationMessageProps = PropsWithChildren<{
+  id: string;
+  isError?: boolean;
+  isValid?: boolean;
+}>;
 
-FormRadioGroup.ValidationMessage = function ValidationMessage({
+export const FormRadioGroupValidationMessage = ({
   children,
   isError,
   isValid,
   id,
-}: PropsWithChildren<{
-  id: string;
-  isError?: boolean;
-  isValid?: boolean;
-}>) {
-  return (
-    <p id={id} className={clsx(isError && "fr-error-text", isValid && "fr-valid-text")}>
-      {children}
-    </p>
-  );
-};
+}: FormRadioGroupValidationMessageProps) => (
+  <p id={id} className={clsx(isError && "fr-error-text", isValid && "fr-valid-text")}>
+    {children}
+  </p>
+);

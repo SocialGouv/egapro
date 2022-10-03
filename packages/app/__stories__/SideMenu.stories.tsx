@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { SideMenu } from "@/design-system";
+import { SideMenu, SideMenuCollapse, SideMenuLink, SideMenuList, SideMenuTitle } from "@/design-system";
 
 export default {
   title: "Base/SideMenu",
@@ -9,28 +9,28 @@ export default {
 
 const Template: ComponentStory<typeof SideMenu> = args => (
   <SideMenu {...args}>
-    <SideMenu.Title>Déclaration des écarts de représentation F/H dans les postes de direction</SideMenu.Title>
-    <SideMenu.List>
-      <SideMenu.Link href="#" isCurrent>
+    <SideMenuTitle>Déclaration des écarts de représentation F/H dans les postes de direction</SideMenuTitle>
+    <SideMenuList>
+      <SideMenuLink href="#" isCurrent>
         Êtes-vous assujetti&nbsp;?
-      </SideMenu.Link>
-      <SideMenu.Link href="#" target="_self">
+      </SideMenuLink>
+      <SideMenuLink href="#" target="_self">
         Validation de l’email
-      </SideMenu.Link>
-      <SideMenu.Collapse title="Écarts de représentation">
-        <SideMenu.Link href="#">Cadres dirigeants</SideMenu.Link>
-        <SideMenu.Link href="#" target="_self">
+      </SideMenuLink>
+      <SideMenuCollapse title="Écarts de représentation">
+        <SideMenuLink href="#">Cadres dirigeants</SideMenuLink>
+        <SideMenuLink href="#" target="_self">
           Membres des instances dirigeantes
-        </SideMenu.Link>
-      </SideMenu.Collapse>
-      <SideMenu.Collapse title="Écarts de représentation" isCurrent isExpandedDefault>
-        <SideMenu.Link href="#">Cadres dirigeants</SideMenu.Link>
-        <SideMenu.Link href="#" target="_self" isCurrent>
+        </SideMenuLink>
+      </SideMenuCollapse>
+      <SideMenuCollapse title="Écarts de représentation" isCurrent isExpandedDefault>
+        <SideMenuLink href="#">Cadres dirigeants</SideMenuLink>
+        <SideMenuLink href="#" target="_self" isCurrent>
           Membres des instances dirigeantes
-        </SideMenu.Link>
-      </SideMenu.Collapse>
-      <SideMenu.Link href="#">Lorem ipsum</SideMenu.Link>
-    </SideMenu.List>
+        </SideMenuLink>
+      </SideMenuCollapse>
+      <SideMenuLink href="#">Lorem ipsum</SideMenuLink>
+    </SideMenuList>
   </SideMenu>
 );
 
