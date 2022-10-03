@@ -27,8 +27,8 @@ import { generateImpersonateToken } from "../../utils/api"
 
 const title = "Générer le token pour un utilisateur"
 
-const URL_SIMU = "/nouvelle-simulation"
-const URL_DECLA = "/declaration/"
+const URL_SIMU = `${process.env.PUBLIC_URL}/nouvelle-simulation`
+const URL_DECLA = `${process.env.PUBLIC_URL}/declaration/`
 
 const getOrigin = window?.location?.origin || ""
 

@@ -1,5 +1,9 @@
 FROM jekyll/jekyll:4
 
+ARG BASE_URL
+
+ENV BASE_URL=${BASE_URL}
+
 ARG EGAPRO_API_URL
 
 ENV EGAPRO_API_URL=${EGAPRO_API_URL}
@@ -8,6 +12,11 @@ COPY Gemfile .
 
 COPY _config.yml .
 
+RUN echo "BASE_URL: ${BASE_URL}" >> _config.yml
+
 RUN echo "EGAPRO_API_URL: ${EGAPRO_API_URL}" >> _config.yml
 
-CMD ["jekyll", "serve"]
+RUN apk add --no-cache bash
+
+# TODO: à faire fonctionner ENTRYPOINT ["bin/bash", "-c", "jekyll serve --baseurl $BASE_URL"]
+ENTRYPOINT [ "jekyll", "serve",  "--baseurl", "/index"]

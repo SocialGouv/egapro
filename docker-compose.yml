@@ -47,6 +47,7 @@ services:
       context: ./packages/declaration
       dockerfile: Dockerfile.dev
       args:
+        BASE_URL: ${BASE_URL:-//index}
         EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
     volumes:
       - ./packages/declaration/_doc:/srv/jekyll/_doc

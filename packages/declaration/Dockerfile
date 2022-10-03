@@ -20,6 +20,8 @@ RUN echo "version: `date +"%Y.%m.%d"`" >> _config.yml
 
 ARG BASE_URL
 ENV BASE_URL=${BASE_URL}
+RUN echo "BASE_URL: '$BASE_URL'" >> _config.yml
+
 RUN if [ -z "$BASE_URL" ]; then jekyll build; else jekyll build --baseurl $BASE_URL; fi
 
 FROM ghcr.io/socialgouv/docker/nginx:7.1.0
