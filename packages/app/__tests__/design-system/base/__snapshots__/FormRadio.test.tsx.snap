@@ -27,6 +27,7 @@ Object {
             >
               <input
                 id="inputId1"
+                name="inputName"
                 type="radio"
               />
               <label
@@ -41,6 +42,7 @@ Object {
             >
               <input
                 id="inputId2"
+                name="inputName"
                 type="radio"
               />
               <label
@@ -55,6 +57,7 @@ Object {
             >
               <input
                 id="inputId3"
+                name="inputName"
                 type="radio"
               />
               <label
@@ -98,6 +101,7 @@ Object {
           >
             <input
               id="inputId1"
+              name="inputName"
               type="radio"
             />
             <label
@@ -112,6 +116,7 @@ Object {
           >
             <input
               id="inputId2"
+              name="inputName"
               type="radio"
             />
             <label
@@ -126,6 +131,7 @@ Object {
           >
             <input
               id="inputId3"
+              name="inputName"
               type="radio"
             />
             <label

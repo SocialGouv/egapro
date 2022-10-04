@@ -57,11 +57,15 @@ export const FormRadioGroupContent = ({ children }: FormRadioGroupContentProps) 
   <div className="fr-fieldset__content">{children}</div>
 );
 
-export type FormRadioGroupInputProps = PropsWithChildren<{ id: string }>;
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
+export type FormRadioGroupInputProps = Pick<InputProps, "checked" | "children" | "onChange" | "value"> & {
+  id: NonNullable<InputProps["id"]>;
+  name: NonNullable<InputProps["name"]>;
+};
 
-export const FormRadioGroupInput = ({ children, id }: FormRadioGroupInputProps) => (
+export const FormRadioGroupInput = ({ children, id, ...inputProps }: FormRadioGroupInputProps) => (
   <div className="fr-radio-group">
-    <input id={id} type="radio" />
+    <input id={id} type="radio" {...inputProps} />
     <label className="fr-label" htmlFor={id}>
       {children}
     </label>

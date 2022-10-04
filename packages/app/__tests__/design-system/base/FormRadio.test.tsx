@@ -12,9 +12,15 @@ test("should match snapshot", () => {
     <FormRadioGroup isValid ariaLabelledby="legendId xxxx">
       <FormRadioGroupLegend id="legendId">Légende</FormRadioGroupLegend>
       <FormRadioGroupContent>
-        <FormRadioGroupInput id="inputId1">radio 1</FormRadioGroupInput>
-        <FormRadioGroupInput id="inputId2">radio 2</FormRadioGroupInput>
-        <FormRadioGroupInput id="inputId3">radio 3</FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId1" name="inputName">
+          radio 1
+        </FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId2" name="inputName">
+          radio 2
+        </FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId3" name="inputName">
+          radio 3
+        </FormRadioGroupInput>
       </FormRadioGroupContent>
       <FormRadioGroupValidationMessage isValid id="xxxx">
         Validé
