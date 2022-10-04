@@ -19,17 +19,6 @@ storybook:
   .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
-declaration:
-  ~chart: app
-  ~needs: [build-declaration]
-  imagePackage: declaration
-  probesPath: /index.html
-  containerPort: 8080
-  host: "{{ .Values.global.host }}"
-  .ingress.path: /index/declaration(/|$)(.*)
-  .ingress.rewriteTarget: /$2
-  certSecretName: api-crt
-
 simulateur:
   ~chart: app
   ~needs: [build-simulateur]
@@ -38,6 +27,17 @@ simulateur:
   containerPort: 8080
   host: "{{ .Values.global.host }}"
   .ingress.path: /index(/|$)(^(?!declaration).*)
+  .ingress.rewriteTarget: /$2
+  certSecretName: api-crt
+
+declaration:
+  ~chart: app
+  ~needs: [build-declaration]
+  imagePackage: declaration
+  probesPath: /index.html
+  containerPort: 8080
+  host: "{{ .Values.global.host }}"
+  .ingress.path: /index/declaration(/|$)(.*)
   .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
