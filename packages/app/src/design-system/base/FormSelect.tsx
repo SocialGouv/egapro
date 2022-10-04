@@ -1,15 +1,17 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
-export type FormSelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
-  className?: string;
-  isDisabled?: boolean;
-  isError?: boolean;
-  isValid?: boolean;
-  placeholder?: string;
-};
+export type FormSelectProps = PropsWithChildren<
+  React.SelectHTMLAttributes<HTMLSelectElement> & {
+    className?: string;
+    isDisabled?: boolean;
+    isError?: boolean;
+    isValid?: boolean;
+    placeholder?: string;
+  }
+>;
 
-export const FormSelect: FunctionComponent<FormSelectProps> = ({
+export const FormSelect = ({
   placeholder,
   className,
   isDisabled,
@@ -17,7 +19,7 @@ export const FormSelect: FunctionComponent<FormSelectProps> = ({
   isError,
   children,
   ...rest
-}) => {
+}: FormSelectProps) => {
   return (
     <select
       className={clsx("fr-select", isError && "fr-select--error", isValid && "fr-select--valid", className)}

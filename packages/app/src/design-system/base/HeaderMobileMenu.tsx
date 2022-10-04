@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import Link from "next/link";
-import type { FunctionComponent } from "react";
 
 import { ButtonAsLink } from "./ButtonAsLink";
 
@@ -11,12 +10,12 @@ export type HeaderMobileMenuProps = {
   mobileMenuId: string;
 };
 
-export const HeaderMobileMenu: FunctionComponent<HeaderMobileMenuProps> = ({
+export const HeaderMobileMenu = ({
   isMobileMenuOpen,
   closeMenuMobile,
   mobileMenuId,
   buttonMobileMenuId,
-}) => {
+}: HeaderMobileMenuProps) => {
   return (
     <div
       className={clsx("fr-header__menu fr-modal", isMobileMenuOpen && "fr-modal--opened")}

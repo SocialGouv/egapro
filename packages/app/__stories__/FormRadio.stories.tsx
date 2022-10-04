@@ -1,5 +1,11 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { FormRadioGroup } from "@/design-system";
+import {
+  FormRadioGroup,
+  FormRadioGroupContent,
+  FormRadioGroupInput,
+  FormRadioGroupLegend,
+  FormRadioGroupValidationMessage,
+} from "@/design-system";
 
 export default {
   title: "Base/Form/FormRadioGroup",
@@ -15,10 +21,12 @@ export default {
 
 const Template: ComponentStory<typeof FormRadioGroup> = args => (
   <FormRadioGroup {...args}>
-    <FormRadioGroup.Legend id="legendId">Légende</FormRadioGroup.Legend>
-    <FormRadioGroup.Input id="inputId1">radio 1</FormRadioGroup.Input>
-    <FormRadioGroup.Input id="inputId2">radio 2</FormRadioGroup.Input>
-    <FormRadioGroup.Input id="inputId3">radio 3</FormRadioGroup.Input>
+    <FormRadioGroupLegend id="legendId">Légende</FormRadioGroupLegend>
+    <FormRadioGroupContent>
+      <FormRadioGroupInput id="inputId1">radio 1</FormRadioGroupInput>
+      <FormRadioGroupInput id="inputId2">radio 2</FormRadioGroupInput>
+      <FormRadioGroupInput id="inputId3">radio 3</FormRadioGroupInput>
+    </FormRadioGroupContent>
   </FormRadioGroup>
 );
 
@@ -40,13 +48,15 @@ Inline.args = {
 export const IsValid: ComponentStory<typeof FormRadioGroup> = args => {
   return (
     <FormRadioGroup isValid ariaLabelledby="legendId xxxx" {...args}>
-      <FormRadioGroup.Legend id="legendId">Légende</FormRadioGroup.Legend>
-      <FormRadioGroup.Input id="inputId1">radio 1</FormRadioGroup.Input>
-      <FormRadioGroup.Input id="inputId2">radio 2</FormRadioGroup.Input>
-      <FormRadioGroup.Input id="inputId3">radio 3</FormRadioGroup.Input>
-      <FormRadioGroup.ValidationMessage isValid id="xxxx">
+      <FormRadioGroupLegend id="legendId">Légende</FormRadioGroupLegend>
+      <FormRadioGroupContent>
+        <FormRadioGroupInput id="inputId1">radio 1</FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId2">radio 2</FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId3">radio 3</FormRadioGroupInput>
+      </FormRadioGroupContent>
+      <FormRadioGroupValidationMessage isValid id="xxxx">
         Validé
-      </FormRadioGroup.ValidationMessage>
+      </FormRadioGroupValidationMessage>
     </FormRadioGroup>
   );
 };
@@ -54,13 +64,15 @@ export const IsValid: ComponentStory<typeof FormRadioGroup> = args => {
 export const IsError: ComponentStory<typeof FormRadioGroup> = args => {
   return (
     <FormRadioGroup isError ariaLabelledby="legendId oooo" {...args}>
-      <FormRadioGroup.Legend id="legendId">Légende</FormRadioGroup.Legend>
-      <FormRadioGroup.Input id="inputId1">radio 1</FormRadioGroup.Input>
-      <FormRadioGroup.Input id="inputId2">radio 2</FormRadioGroup.Input>
-      <FormRadioGroup.Input id="inputId3">radio 3</FormRadioGroup.Input>
-      <FormRadioGroup.ValidationMessage isError id="oooo">
+      <FormRadioGroupLegend id="legendId">Légende</FormRadioGroupLegend>
+      <FormRadioGroupContent>
+        <FormRadioGroupInput id="inputId1">radio 1</FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId2">radio 2</FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId3">radio 3</FormRadioGroupInput>
+      </FormRadioGroupContent>
+      <FormRadioGroupValidationMessage isError id="oooo">
         Error
-      </FormRadioGroup.ValidationMessage>
+      </FormRadioGroupValidationMessage>
     </FormRadioGroup>
   );
 };

@@ -1,27 +1,17 @@
 import clsx from "clsx";
-import type { PropsWithChildren, ReactNode } from "react";
-import { Children } from "react";
+import type { PropsWithChildren } from "react";
 
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
-type AlertProps = Omit<MarginProps, "ml" | "mr" | "mx"> & {
-  children?: ReactNode;
-  size?: "md" | "sm";
-  type?: "error" | "info" | "success" | "warning";
-};
-
-type AuthorizedChildType = {
-  type: {
-    name: string;
-  };
-};
+export type AlertProps = PropsWithChildren<
+  Omit<MarginProps, "ml" | "mr" | "mx"> & {
+    size?: "md" | "sm";
+    type?: "error" | "info" | "success" | "warning";
+  }
+>;
 
 export const Alert = ({ type = "info", size = "md", children, ...rest }: AlertProps) => {
-  const content = Children.toArray(children).filter(
-    child => (child as AuthorizedChildType).type.name === "AlertContent",
-  );
-
   return (
     <Box
       role="alert"
@@ -35,23 +25,17 @@ export const Alert = ({ type = "info", size = "md", children, ...rest }: AlertPr
       )}
       {...rest}
     >
-      {size === "md" ? children : content}
+      {children}
     </Box>
   );
 };
 
-Alert.Title = function AlertTitle({
-  as: HtmlTag = "p",
-  children,
-  ...rest
-}: PropsWithChildren<{ as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" }>) {
+export type AlertTitleProps = PropsWithChildren<{ as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" }>;
+
+export const AlertTitle = ({ as: HtmlTag = "p", children, ...rest }: AlertTitleProps) => {
   return (
     <HtmlTag className="fr-alert__title" {...rest}>
       {children}
     </HtmlTag>
   );
-};
-
-Alert.Content = function AlertContent({ children }: { children: ReactNode }) {
-  return <>{children}</>;
 };
