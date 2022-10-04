@@ -22,7 +22,10 @@
       "**/@emotion/react/**",
       "**/@emotion/styled/**",
       "**/@chakra-ui/react/**",
-      "**/@chakra-ui/icons/**"
+      "**/@chakra-ui/icons/**",
+      "**/@testing-library/react/**",
+      "**/@testing-library/user-event/**",
+      "**/jest/**"
     ]
   },
   "engines": {

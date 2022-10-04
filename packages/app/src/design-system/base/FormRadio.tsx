@@ -4,8 +4,8 @@ import React, { Children } from "react";
 
 import type { AuthorizedChildType } from "../utils/compatible-components";
 import { compatibleComponents } from "../utils/compatible-components";
+import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
-import type { MarginProps } from "design-system/utils/spacing";
 
 export type FormRadioGroupProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
