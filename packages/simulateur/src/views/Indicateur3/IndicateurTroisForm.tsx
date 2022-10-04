@@ -159,7 +159,7 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
 
             {values.presencePromotion === "true" && (
               <BlocForm
-                title="Poucentage de promotions"
+                title="Pourcentage de promotions"
                 // footer={[
                 //   displayFractionPercent(totalTauxPromotionFemmes),
                 //   displayFractionPercent(totalTauxPromotionHommes)
