@@ -1,10 +1,12 @@
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
 import { Footer } from "../base/Footer";
 import { Header } from "../base/Header";
 import styles from "./App.module.css";
 
-export const App: FunctionComponent = ({ children }) => {
+export type AppProps = PropsWithChildren<Record<never, never>>;
+
+export const App = ({ children }: AppProps) => {
   return (
     <div className={styles.app}>
       <Header />

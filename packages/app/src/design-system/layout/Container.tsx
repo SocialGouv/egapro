@@ -1,10 +1,19 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
-export type ContainerProps = {
-  className?: string;
-};
+import { Box } from "../base/Box";
+import type { SpacingProps } from "../utils/spacing";
 
-export const Container: FunctionComponent<ContainerProps> = ({ children, className }) => {
-  return <div className={clsx("fr-container", className)}>{children}</div>;
+export type ContainerProps = PropsWithChildren<
+  Omit<SpacingProps, "ml" | "mr" | "mx" | "pl" | "pr" | "px"> & {
+    className?: string;
+  }
+>;
+
+export const Container = ({ children, className, ...rest }: ContainerProps) => {
+  return (
+    <Box className={clsx("fr-container", className)} {...rest}>
+      {children}
+    </Box>
+  );
 };

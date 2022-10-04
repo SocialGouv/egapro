@@ -9,6 +9,7 @@ Object {
         class="fr-form-group"
       >
         <fieldset
+          aria-labelledby="legendId xxxx"
           class="fr-fieldset fr-fieldset--valid"
           role="group"
         >
@@ -26,8 +27,8 @@ Object {
             >
               <input
                 id="inputId1"
+                name="inputName"
                 type="radio"
-                value=""
               />
               <label
                 class="fr-label"
@@ -41,8 +42,8 @@ Object {
             >
               <input
                 id="inputId2"
+                name="inputName"
                 type="radio"
-                value=""
               />
               <label
                 class="fr-label"
@@ -56,8 +57,8 @@ Object {
             >
               <input
                 id="inputId3"
+                name="inputName"
                 type="radio"
-                value=""
               />
               <label
                 class="fr-label"
@@ -69,6 +70,7 @@ Object {
           </div>
           <p
             class="fr-valid-text"
+            id="xxxx"
           >
             Validé
           </p>
@@ -81,6 +83,7 @@ Object {
       class="fr-form-group"
     >
       <fieldset
+        aria-labelledby="legendId xxxx"
         class="fr-fieldset fr-fieldset--valid"
         role="group"
       >
@@ -98,8 +101,8 @@ Object {
           >
             <input
               id="inputId1"
+              name="inputName"
               type="radio"
-              value=""
             />
             <label
               class="fr-label"
@@ -113,8 +116,8 @@ Object {
           >
             <input
               id="inputId2"
+              name="inputName"
               type="radio"
-              value=""
             />
             <label
               class="fr-label"
@@ -128,8 +131,8 @@ Object {
           >
             <input
               id="inputId3"
+              name="inputName"
               type="radio"
-              value=""
             />
             <label
               class="fr-label"
@@ -141,6 +144,7 @@ Object {
         </div>
         <p
           class="fr-valid-text"
+          id="xxxx"
         >
           Validé
         </p>
