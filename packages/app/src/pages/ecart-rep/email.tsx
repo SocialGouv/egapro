@@ -6,7 +6,7 @@ import { z } from "zod";
 import { requestEmailForToken } from "@common/utils/api";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
-import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
+import { Alert, AlertTitle, FormButton, FormGroup, FormGroupLabel, FormGroupMessage, FormInput } from "@design-system";
 
 const title = "Validation de l'email";
 
@@ -88,8 +88,8 @@ export default function EmailPage() {
       {featureStatus.type !== "success" && (
         <>
           <Alert type="info">
-            <Alert.Title>Information</Alert.Title>
-            <Alert.Content>{informationMessage}</Alert.Content>
+            <AlertTitle>Information</AlertTitle>
+            <p>{informationMessage}</p>
           </Alert>
           <br />
         </>
@@ -98,8 +98,8 @@ export default function EmailPage() {
       {featureStatus.type === "error" && (
         <>
           <Alert type="error">
-            <Alert.Title>Erreur</Alert.Title>
-            <Alert.Content>{featureStatus.message}</Alert.Content>
+            <AlertTitle>Erreur</AlertTitle>
+            <p>{featureStatus.message}</p>
           </Alert>
           <br />
         </>
@@ -136,7 +136,7 @@ export default function EmailPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <FormGroup>
-              <FormLabel htmlFor="email">Adresse email</FormLabel>
+              <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
               <FormInput id="email" type="email" {...register("email")} />
               {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
             </FormGroup>
