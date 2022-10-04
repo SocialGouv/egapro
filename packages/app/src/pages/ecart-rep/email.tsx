@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { requestEmailForToken } from "@common/utils/api";
+import type { FeatureStatus } from "@common/utils/feature";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { Alert, FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel } from "@design-system";
@@ -18,19 +19,6 @@ const formSchema = z.object({
 
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
-
-type FeatureStatus =
-  | {
-      message: string;
-      type: "error";
-    }
-  | {
-      type: "idle";
-    }
-  | {
-      type: "loading";
-    }
-  | { message: string; type: "success" };
 
 const informationMessage =
   "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
