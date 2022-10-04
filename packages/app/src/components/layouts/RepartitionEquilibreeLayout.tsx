@@ -6,7 +6,17 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 import type { PropsWithChildren } from "react";
 import React from "react";
 
-import { App, Container, ContentWithAside, SideMenu, SideMenuLink, SideMenuList } from "@design-system";
+import {
+  App,
+  Container,
+  ContentWithAside,
+  ContentWithAsideMain,
+  ContentWithAsideSideMenu,
+  SideMenu,
+  SideMenuLink,
+  SideMenuList,
+  SideMenuTitle,
+} from "@design-system";
 
 // Layout for authenticated users (i.e. the wizard).
 
@@ -15,9 +25,10 @@ export const RepartitionEquilibreeLayout = ({ children }: PropsWithChildren<{}>)
   return (
     <App>
       <Container>
-        <ContentWithAside
-          aside={
-            <SideMenu buttonLabel={"Dans cette rubrique"} title={"Répartition équilibrée"}>
+        <ContentWithAside>
+          <ContentWithAsideSideMenu>
+            <SideMenu buttonLabel={"Dans cette rubrique"}>
+              <SideMenuTitle>Répartition équilibrée</SideMenuTitle>
               <SideMenuList>
                 <SideMenuLink href="#">Commencer ou accéder à une déclaration</SideMenuLink>
                 <SideMenuLink href="#">Informations déclarant</SideMenuLink>
@@ -30,9 +41,9 @@ export const RepartitionEquilibreeLayout = ({ children }: PropsWithChildren<{}>)
                 <SideMenuLink href="#">Transmission</SideMenuLink>
               </SideMenuList>
             </SideMenu>
-          }
-          content={children}
-        />
+          </ContentWithAsideSideMenu>
+          <ContentWithAsideMain>{children}</ContentWithAsideMain>
+        </ContentWithAside>
       </Container>
     </App>
   );
