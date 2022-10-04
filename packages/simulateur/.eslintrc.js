@@ -17,6 +17,7 @@ module.exports = {
     "plugin:jest-dom/recommended",
   ],
   rules: {
+    "react/no-unknown-property": "off",
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "jsx-a11y/anchor-is-valid": "off",

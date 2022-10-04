@@ -1,13 +1,13 @@
-import React, { FunctionComponent } from "react"
+import React, { PropsWithChildren } from "react"
 import { FormLabel, Input, Box, Text } from "@chakra-ui/react"
 
-export type FakeInputGroupProps = {
+export type FakeInputGroupProps = PropsWithChildren<{
   label: string
   message?: string | React.ReactElement
   textAlign?: "left" | "center" | "right"
-}
+}>
 
-const FakeInputGroup: FunctionComponent<FakeInputGroupProps> = ({ label, children, message, textAlign }) => {
+const FakeInputGroup = ({ label, children, message, textAlign }: FakeInputGroupProps) => {
   return (
     <Box>
       <FormLabel as="div">{label}</FormLabel>

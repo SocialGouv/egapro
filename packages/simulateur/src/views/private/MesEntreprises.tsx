@@ -1,5 +1,5 @@
 import { Flex, FormControl, FormLabel, Select } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
+import React from "react"
 
 import { useTitle } from "../../utils/hooks"
 
@@ -12,7 +12,7 @@ import { SinglePageLayout } from "../../containers/SinglePageLayout"
 
 const title = "Mes entreprises"
 
-const MesEntreprises: FunctionComponent = () => {
+const MesEntreprises = () => {
   useTitle(title)
 
   const { ownership: sirens } = useUser()

@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { ReactElement } from "react";
 import picture from "../../public/picture-1.svg";
+import type { NextPageWithLayout } from "./_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 
-export default function Home() {
+const Home: NextPageWithLayout = () => {
   return (
     <section>
       <div className="bg-grey-975 fr-py-10w">
@@ -105,8 +105,10 @@ export default function Home() {
       </div>
     </section>
   );
-}
-
-Home.getLayout = function getLayout(page: ReactElement) {
-  return <BasicLayout>{page}</BasicLayout>;
 };
+
+Home.getLayout = ({ children }) => {
+  return <BasicLayout>{children}</BasicLayout>;
+};
+
+export default Home;

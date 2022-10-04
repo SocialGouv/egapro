@@ -48,7 +48,7 @@ const piwik: any = new ReactPiwik({
 // track the initial pageview
 ReactPiwik.push(["trackPageView"])
 
-const App: FunctionComponent = () => {
+const App = () => {
   const [state, dispatchReducer] = useReducer(AppReducer, undefined)
 
   const dispatch = useCallback(

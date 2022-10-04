@@ -5,27 +5,6 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/next",
-      "**/react",
-      "**/react-dom",
-      "**/@types/react",
-      "**/@types/react-dom",
-      "**/@types/node",
-      "**/framer-motion",
-      "**/@emotion/react",
-      "**/@emotion/styled",
-      "**/@chakra-ui/react",
-      "**/@chakra-ui/icons",
-      "**/framer-motion/**",
-      "**/@emotion/react/**",
-      "**/@emotion/styled/**",
-      "**/@chakra-ui/react/**",
-      "**/@chakra-ui/icons/**",
-      "**/@testing-library/react/**",
-      "**/@testing-library/user-event/**",
-      "**/jest/**"
     ]
   },
   "engines": {

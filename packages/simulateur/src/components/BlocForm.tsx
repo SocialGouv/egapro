@@ -1,13 +1,13 @@
-import React, { FunctionComponent } from "react"
+import React, { PropsWithChildren } from "react"
 import { Box, Grid, GridItem, VStack, Text } from "@chakra-ui/react"
 
-interface BlocFormProps {
+export type BlocFormProps = PropsWithChildren<{
   title?: string
   label?: string
   footer?: string | [string, string]
-}
+}>
 
-const BlocForm: FunctionComponent<BlocFormProps> = ({ title, label, footer, children }) => {
+const BlocForm = ({ title, label, footer, children }: BlocFormProps) => {
   return (
     <Box position="relative" bg="white" p={4} borderRadius="lg" borderWidth="1px">
       <Text fontWeight="semibold" lineHeight="tight" textTransform="uppercase" fontSize="sm" mb={4}>
@@ -24,7 +24,7 @@ const BlocForm: FunctionComponent<BlocFormProps> = ({ title, label, footer, chil
           ) : (
             <>
               <GridItem pr={5}>
-                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                <Text fontWeight="semibold" noOfLines={1} lineHeight="1" mt={1}>
                   {footer[0]}
                 </Text>
                 <Text fontSize="xs" color="women">
@@ -32,7 +32,7 @@ const BlocForm: FunctionComponent<BlocFormProps> = ({ title, label, footer, chil
                 </Text>
               </GridItem>
               <GridItem pr={5}>
-                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                <Text fontWeight="semibold" noOfLines={1} lineHeight="1" mt={1}>
                   {footer[1]}
                 </Text>
                 <Text fontSize="xs" color="men">
@@ -47,7 +47,7 @@ const BlocForm: FunctionComponent<BlocFormProps> = ({ title, label, footer, chil
   )
 }
 
-export const BlocFormLight: FunctionComponent = ({ children }) => {
+export const BlocFormLight = ({ children }: PropsWithChildren) => {
   return (
     <Box position="relative">
       <div>

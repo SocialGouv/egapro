@@ -1,4 +1,4 @@
-import React from "react"
+import React, { PropsWithChildren } from "react"
 
 import { useHistory } from "react-router-dom"
 import { getTokenInfo } from "../utils/api"
@@ -23,7 +23,7 @@ AuthContext.displayName = "AuthContext"
 
 // TODO : ne plus utiliser que ce contexte. En particulier, dans Simulateur, il y a tout un traitement qui utilise getTokenInfo directement.
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
+export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   const [context, setContext] = React.useState(initialContext)
 
   const login = React.useCallback(

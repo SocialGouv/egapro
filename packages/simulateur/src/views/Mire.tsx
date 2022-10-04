@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React from "react"
 import { Box, Text } from "@chakra-ui/layout"
 import { Form } from "react-final-form"
 import { Redirect, useHistory } from "react-router"
@@ -13,7 +13,7 @@ import { SinglePageLayout } from "../containers/SinglePageLayout"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
 
-const Mire: FunctionComponent = () => {
+const Mire = () => {
   useTitle(title)
 
   const history = useHistory()

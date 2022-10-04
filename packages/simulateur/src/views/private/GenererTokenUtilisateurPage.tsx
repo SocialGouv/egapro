@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React from "react"
 import {
   Flex,
   FormControl,
@@ -41,7 +41,7 @@ type Status =
   | { type: "success"; token: string }
   | { type: "error"; error: string }
 
-const GenererTokenUtilisateurPage: FunctionComponent = () => {
+const GenererTokenUtilisateurPage = () => {
   useTitle(title)
 
   const { staff } = useUser()

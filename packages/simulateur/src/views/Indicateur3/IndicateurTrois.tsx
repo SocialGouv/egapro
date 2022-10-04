@@ -1,4 +1,4 @@
-import React, { useCallback, FunctionComponent } from "react"
+import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
 import { RouteComponentProps } from "react-router-dom"
 import { Text } from "@chakra-ui/react"
 
@@ -135,7 +135,7 @@ const IndicateurTrois: FunctionComponent<IndicateurTroisProps> = ({ state, dispa
   )
 }
 
-const PageIndicateurTrois: FunctionComponent = ({ children }) => {
+const PageIndicateurTrois = ({ children }: PropsWithChildren) => {
   return (
     <Page
       title={title}
