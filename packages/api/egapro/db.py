@@ -37,6 +37,13 @@ class DeclarationRecord(Record):
         data = self.get("draft") or self.get("data")
         return models.Data(data)
 
+class RepartitionRecord(Record):
+    fields = ["siren", "year", "data", "modified_at", "declared_at"]
+
+    @property
+    def data(self):
+        data = self.get("data")
+        return models.Data(data)
 
 class table:
 
@@ -69,6 +76,55 @@ class table:
     async def execute(cls, sql, *params):
         async with cls.pool.acquire() as conn:
             return await conn.execute(sql, *params)
+
+class repartition(table):
+    record_class = RepartitionRecord
+    table_name = "repartition_equilibree"
+
+    @classmethod
+    async def all(cls):
+        return await cls.fetch(f"SELECT * from {cls.table_name}")
+
+    @classmethod
+    async def get(cls, siren, year):
+        return await cls.fetchrow(
+            f"SELECT * FROM {cls.table_name} WHERE siren=$1 AND year=$2", siren, int(year)        
+        )
+    
+    @classmethod
+    async def get_declared_at(cls, siren, year):
+        try:
+            return await cls.fetchval(
+                f"SELECT declared_at FROM {cls.table_name} WHERE siren=$1 AND year=$2",
+                siren,
+                int(year),
+            )
+        except NoData:
+            return None
+    
+    @classmethod
+    async def put(cls, siren, year, data, modified_at=None):
+        data = models.Data(data)
+        # Allow to force modified_at, eg. during migrations.
+        if modified_at is None:
+            modified_at = utils.utcnow()
+        year = int(year)
+        data.setdefault("déclaration", {})
+        data["déclaration"]["année_indicateurs"] = year
+        data.setdefault("entreprise", {})
+        data["entreprise"]["siren"] = siren
+        ft = helpers.extract_ft(data)
+        declared_at = await cls.get_declared_at(siren, year)
+        
+        if not declared_at:
+            declared_at = modified_at
+        if declared_at:
+            data["déclaration"]["date"] = declared_at.isoformat()
+        
+        query = sql.insert_repartition
+        args = (siren, year, modified_at, declared_at, data.raw, ft)
+        async with cls.pool.acquire() as conn:
+            await conn.execute(query, *args)
 
 
 class declaration(table):
