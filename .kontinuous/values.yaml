@@ -26,7 +26,7 @@ simulateur:
   probesPath: /index.html
   containerPort: 8080
   host: "{{ .Values.global.host }}"
-  .ingress.path: /index/(^(?!declaration).*)
+  .ingress.path: /index/(/^(?!declaration|$)(.*)
   .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
