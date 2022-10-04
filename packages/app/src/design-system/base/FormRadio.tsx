@@ -60,10 +60,12 @@ FormRadioGroup.Legend = function FormRadioLegend({ children, id }: PropsWithChil
   );
 };
 
-FormRadioGroup.Input = function FormRadioInput({ children, id }: { children: ReactNode; id: string }) {
+export type OnChangeHandlerType = (event: React.ChangeEvent<HTMLInputElement>) => void;
+
+FormRadioGroup.Input = function FormRadioInput({ children, id, name, value, checked, onChange }: { children: ReactNode, id: string, name: string, value: string, checked: boolean, onChange: OnChangeHandlerType }) {
   return (
     <div className="fr-radio-group">
-      <input id={id} type="radio" />
+      <input type="radio" id={id} name={name} value={value} checked={checked} onChange={onChange} />
       <label className="fr-label" htmlFor={id}>
         {children}
       </label>
