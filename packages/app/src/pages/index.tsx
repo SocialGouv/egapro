@@ -91,9 +91,9 @@ export default function Home() {
                   <div className="fr-card__footer">
                     <ul className="fr-btns-group fr-btns-group--inline-null fr-btns-group--equisized">
                       <li>
-                        <a className="fr-btn" href="/ecart-rep">
-                          Déclarer mes Écarts
-                        </a>
+                        <Link href="/ecart-rep">
+                          <a className="fr-btn">Déclarer mes Écarts</a>
+                        </Link>
                       </li>
                     </ul>
                   </div>
