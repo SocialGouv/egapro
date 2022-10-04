@@ -1,3 +1,10 @@
+## [2.22.3](https://github.com/SocialGouv/egapro/compare/v2.22.2...v2.22.3) (2022-10-04)
+
+
+### Bug Fixes
+
+* typo sur Pourcentages ([#1110](https://github.com/SocialGouv/egapro/issues/1110)) ([7cdc328](https://github.com/SocialGouv/egapro/commit/7cdc32862892985930a14087b162b60f7c8f1791))
+
 ## [2.22.2](https://github.com/SocialGouv/egapro/compare/v2.22.1...v2.22.2) (2022-09-28)
 
 
