@@ -1,13 +1,17 @@
 import clsx from "clsx";
 import * as React from "react";
 
-export type FormSelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
-  className?: string;
-  isDisabled?: boolean;
-  isError?: boolean;
-  isValid?: boolean;
-  placeholder?: string;
-};
+import type { PropsWithChildren } from "react";
+
+export type FormSelectProps = PropsWithChildren<
+  React.SelectHTMLAttributes<HTMLSelectElement> & {
+    className?: string;
+    isDisabled?: boolean;
+    isError?: boolean;
+    isValid?: boolean;
+    placeholder?: string;
+  }
+>;
 
 export const FormSelect = React.forwardRef<HTMLSelectElement, FormSelectProps>(
   ({ placeholder, className, isDisabled, isValid, isError, children, ...rest }, ref) => {

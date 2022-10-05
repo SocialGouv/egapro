@@ -1,20 +1,30 @@
 import { render } from "@testing-library/react";
-import { FormRadioGroup } from "@/design-system/base/FormRadio";
+import {
+  FormRadioGroup,
+  FormRadioGroupContent,
+  FormRadioGroupInput,
+  FormRadioGroupLegend,
+  FormRadioGroupValidationMessage,
+} from "@/design-system/base/FormRadio";
 
 test("should match snapshot", () => {
   const view = render(
-    <FormRadioGroup isValid>
-      <FormRadioGroup.Legend id="legendId">Légende</FormRadioGroup.Legend>
-      <FormRadioGroup.Input id="inputId1" size="sm">
-        radio 1
-      </FormRadioGroup.Input>
-      <FormRadioGroup.Input id="inputId2" size="sm">
-        radio 2
-      </FormRadioGroup.Input>
-      <FormRadioGroup.Input id="inputId3" size="sm">
-        radio 3
-      </FormRadioGroup.Input>
-      <FormRadioGroup.ValidationMessage isValid>Validé</FormRadioGroup.ValidationMessage>
+    <FormRadioGroup isValid ariaLabelledby="legendId xxxx">
+      <FormRadioGroupLegend id="legendId">Légende</FormRadioGroupLegend>
+      <FormRadioGroupContent>
+        <FormRadioGroupInput id="inputId1" name="inputName">
+          radio 1
+        </FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId2" name="inputName">
+          radio 2
+        </FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId3" name="inputName">
+          radio 3
+        </FormRadioGroupInput>
+      </FormRadioGroupContent>
+      <FormRadioGroupValidationMessage isValid id="xxxx">
+        Validé
+      </FormRadioGroupValidationMessage>
     </FormRadioGroup>,
   );
   expect(view).toMatchSnapshot();
