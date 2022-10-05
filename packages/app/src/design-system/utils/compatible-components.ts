@@ -9,12 +9,12 @@ export type AuthorizedChildType = {
 
 /** @deprecated */
 // TODO: remove
-export const compatibleComponents = (items: string[], array: ReactNode[]) => {
+export const compatibleComponents = (component: string, items: string[], array: ReactNode[]) => {
   array.forEach(child => {
     if (!(child as Any).type || !(child as Any).type?.name || !items.includes((child as Any).type?.name)) {
       console.error(child);
       throw new Error(
-        `Ce composant n'est pas compatible avec le composant maître Modale. Seuls les composants ${items.join(
+        `Un enfant direct du composant ${component} n'est pas compatible. Seuls les composants ${items.join(
           ", ",
         )} sont acceptés.`,
       );

@@ -1,6 +1,6 @@
 import { action } from "@storybook/addon-actions";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Callout } from "@/design-system";
+import { Callout, CalloutButton, CalloutContent, CalloutTitle } from "@/design-system";
 
 export default {
   title: "Base/Callout",
@@ -14,49 +14,49 @@ export default {
   },
 } as ComponentMeta<typeof Callout>;
 
-export const Default: ComponentStory<typeof Callout> = () => {
+export const Default: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout>
-      <Callout.Description>
+    <Callout {...args}>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+      </CalloutContent>
     </Callout>
   );
 };
 
-export const WithIcon: ComponentStory<typeof Callout> = () => {
+export const WithIcon: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout icon="fr-fi-information-line">
-      <Callout.Description>
+    <Callout icon="fr-fi-information-line" {...args}>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+      </CalloutContent>
     </Callout>
   );
 };
 
-export const WithTitle: ComponentStory<typeof Callout> = () => {
+export const WithTitle: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout icon="fr-fi-information-line">
-      <Callout.Title>Titre mise en avant</Callout.Title>
-      <Callout.Description>
+    <Callout icon="fr-fi-information-line" {...args}>
+      <CalloutTitle>Titre mise en avant</CalloutTitle>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
+      </CalloutContent>
     </Callout>
   );
 };
 
-export const WithButton: ComponentStory<typeof Callout> = () => {
+export const WithButton: ComponentStory<typeof Callout> = args => {
   return (
-    <Callout icon="fr-fi-information-line">
-      <Callout.Title>Titre mise en avant</Callout.Title>
-      <Callout.Description>
+    <Callout icon="fr-fi-information-line" {...args}>
+      <CalloutTitle>Titre mise en avant</CalloutTitle>
+      <CalloutContent>
         Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : les CAF versent automatiquement l’ARS
         aux familles déjà allocataires qui remplissent les conditions.
-      </Callout.Description>
-      <Callout.Button onClick={action("button-click")}>Cliquer là</Callout.Button>
+      </CalloutContent>
+      <CalloutButton onClick={action("button-click")}>Cliquer là</CalloutButton>
     </Callout>
   );
 };

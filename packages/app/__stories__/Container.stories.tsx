@@ -7,8 +7,8 @@ export default {
   component: Container,
 } as ComponentMeta<typeof Container>;
 
-const Template: ComponentStory<typeof Container> = () => (
-  <Container>
+const Template: ComponentStory<typeof Container> = args => (
+  <Container {...args}>
     <p>
       Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores eveniet perferendis repudiandae sapiente rem,
       alias recusandae atque molestiae eius architecto quis natus assumenda nemo, consequuntur iste facere vel dolores
