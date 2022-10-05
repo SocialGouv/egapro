@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import * as React from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -8,7 +8,7 @@ import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormGroupMessage, FormInput, FormGroupLabel, FormSelect } from "@design-system";
-import { save } from "services/apiClient/form-manager";
+import { useFormManager } from "services/apiClient/form-manager";
 import { checkSiren, fetchSiren } from "services/apiClient/siren";
 
 const title = "Commencer ou accéder à une déclaration";
@@ -34,39 +34,62 @@ const formSchema = z
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
+const buildConfirmMessage = (siren: string) =>
+  `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
+
 export default function CommencerPage() {
   const { isAuthenticated } = useUser();
   const router = useRouter();
+  const { formData, save } = useFormManager();
 
   const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
 
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors, isSubmitted, isDirty, isValid },
+    setValue,
+    reset,
+    formState: { errors, isSubmitted, isValid },
   } = useForm<FormType>({
     resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
-    defaultValues: {
-      year: "2021",
-      siren: "504920166",
-    },
   });
+
+  const resetAsyncForm = React.useCallback(async () => {
+    reset({ siren: formData?.entreprise?.siren, year: String(formData.year) });
+  }, [reset, formData]);
+
+  React.useEffect(() => {
+    resetAsyncForm();
+  }, [resetAsyncForm]);
 
   React.useEffect(() => {
     if (!isAuthenticated) router.push("/ecart-rep/email");
   }, [isAuthenticated, router]);
 
   const onSubmit = async ({ year, siren }: FormType) => {
-    setFeatureStatus({ type: "loading" });
+    const startFresh = async () => {
+      setFeatureStatus({ type: "loading" });
 
-    const entreprise = await fetchSiren(siren, Number(year));
+      const entreprise = await fetchSiren(siren, Number(year));
 
-    save({ entreprise, year: Number(year) });
+      save({ entreprise, year: Number(year) });
 
-    setFeatureStatus({ type: "idle" });
+      setFeatureStatus({ type: "idle" });
 
-    router.push("/ecart-rep/entreprise");
+      router.push("/ecart-rep/entreprise");
+    };
+
+    if (formData.entreprise?.siren && siren !== formData.entreprise.siren) {
+      if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
+        // Start a new declaration of repartition.
+        startFresh();
+      } else {
+        // Rollback.
+        setValue("siren", formData.entreprise.siren);
+        return;
+      }
+    }
+    startFresh();
   };
 
   return (
@@ -99,7 +122,7 @@ export default function CommencerPage() {
           </FormGroupLabel>
           <FormInput
             id="siren"
-            placeholder="Ex: 504920166"
+            placeholder="Ex: 504920166, 403461742"
             type="text"
             {...register("siren")}
             isError={Boolean(errors.siren)}
