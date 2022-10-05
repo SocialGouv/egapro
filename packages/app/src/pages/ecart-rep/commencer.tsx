@@ -4,19 +4,17 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { formatZodErrors } from "@common/utils/debug";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
-import { FormButton, FormGroup, FormInput, FormLabel, FormSelect } from "@design-system";
+import { FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel, FormSelect } from "@design-system";
 
 const title = "Commencer ou accéder à une déclaration";
 
-const SIZE_SIREN_ERROR = "Un numéro Siren a 9 caractères";
-
 const formSchema = z.object({
-  year: z.string(), // No control needed because this is a select with options we provide.
-  siren: z.string().min(9, SIZE_SIREN_ERROR).max(9, SIZE_SIREN_ERROR),
+  year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
+  // siren: z.string().min(9, SIZE_SIREN_ERROR).max(9, SIZE_SIREN_ERROR),
+  siren: z.string().regex(/^[0-9]{9}$/, "Le Siren est invalide."),
 });
 
 // Infer the TS type according to the zod schema.
@@ -66,19 +64,34 @@ export default function CommencerPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormGroup>
-          <FormSelect id="year" placeholder="Sélectionnez une année" {...register("year")}>
+          <FormSelect
+            id="year"
+            placeholder="Sélectionnez une année"
+            {...register("year")}
+            isError={Boolean(errors.year)}
+            aria-describedby="year-message-error-msg"
+          >
             <option value="2022">2022</option>
             <option value="2021">2021</option>
           </FormSelect>
+          {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
         </FormGroup>
         <FormGroup>
-          <FormLabel htmlFor="siren">Numéro Siren de l'entreprise</FormLabel>
-          <FormInput id="siren" placeholder="9 caractères" type="text" {...register("siren")} />
+          <FormLabel htmlFor="siren" hint="9 chiffres">
+            Numéro Siren de l'entreprise
+          </FormLabel>
+          <FormInput
+            id="siren"
+            placeholder="Ex: 504920166"
+            type="text"
+            {...register("siren")}
+            isError={Boolean(errors.siren)}
+            maxLength={9}
+          />
+          {errors.siren && <FormGroupMessage id="siren-message">{errors.siren.message}</FormGroupMessage>}
         </FormGroup>
-        <FormButton isDisabled={false}>Suivant</FormButton>
 
-        {formatZodErrors(errors as any)}
-        <pre>{JSON.stringify(watch(), null, 2)}</pre>
+        <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty}>Suivant</FormButton>
       </form>
     </>
   );
