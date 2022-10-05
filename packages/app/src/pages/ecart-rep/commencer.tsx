@@ -87,7 +87,7 @@ export default function CommencerPage() {
             placeholder="Sélectionnez une année"
             {...register("year")}
             isError={Boolean(errors.year)}
-            aria-describedby="year-message-error-msg"
+            aria-describedby="year-message-error"
           >
             <option value="2021">2021</option>
           </FormSelect>
