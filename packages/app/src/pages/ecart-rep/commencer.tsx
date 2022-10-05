@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
-import { FormButton, FormGroup, FormGroupMessage, FormInput, FormLabel, FormSelect } from "@design-system";
+import { FormButton, FormGroup, FormGroupMessage, FormInput, FormGroupLabel, FormSelect } from "@design-system";
 
 const title = "Commencer ou accéder à une déclaration";
 
@@ -77,9 +77,9 @@ export default function CommencerPage() {
           {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
         </FormGroup>
         <FormGroup>
-          <FormLabel htmlFor="siren" hint="9 chiffres">
+          <FormGroupLabel htmlFor="siren" hint="9 chiffres">
             Numéro Siren de l'entreprise
-          </FormLabel>
+          </FormGroupLabel>
           <FormInput
             id="siren"
             placeholder="Ex: 504920166"
