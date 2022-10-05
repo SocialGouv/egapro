@@ -14,9 +14,9 @@ test("AskEmail should not accept empty email", () => {
   expect(screen.getByText("L'adresse mail est requise")).toBeInTheDocument()
 })
 
-test("AskEmail should not invalid email", () => {
+test("AskEmail should not accept invalid email", async () => {
   render(<AskEmail />)
-  userEvent.type(screen.getByLabelText(/Email/i), "invalid")
+  await userEvent.type(screen.getByLabelText(/Email/i), "invalid")
   expect(screen.getByLabelText(/Email/i)).toHaveValue("invalid")
   fireEvent.submit(screen.getByRole("button", { name: "Envoyer" }))
   expect(screen.getByText("L'adresse mail est invalide")).toBeInTheDocument()
@@ -27,7 +27,7 @@ test("AskEmail should accept valid email", async () => {
   ;(mockApi.sendValidationEmail as jest.Mock).mockImplementation(() => Promise.resolve())
 
   render(<AskEmail />)
-  userEvent.type(screen.getByLabelText(/Email/i), "john@maclane.us")
+  await userEvent.type(screen.getByLabelText(/Email/i), "john@maclane.us")
   expect(screen.getByLabelText(/Email/i)).toHaveValue("john@maclane.us")
   fireEvent.submit(screen.getByRole("button", { name: "Envoyer" }))
 

@@ -7,8 +7,6 @@ import userEvent from "@testing-library/user-event"
 import GenererTokenUtilisateurPage from "./GenererTokenUtilisateurPage"
 import * as mockContext from "../../components/AuthContext"
 import * as mockApi from "../../utils/api"
-import { ChakraProvider } from "@chakra-ui/react"
-import theme from "../../theme"
 
 beforeAll(() => {
   window.matchMedia = (query) => ({
@@ -29,11 +27,9 @@ afterAll(() => {
 
 test("Generer token page is only for staff member", () => {
   render(
-    // <ChakraProvider theme={theme}>
     <BrowserRouter>
       <GenererTokenUtilisateurPage />
     </BrowserRouter>,
-    // </ChakraProvider>,
   )
 
   expect(screen.getByText("Vous n'êtes pas membre du staff.")).toBeInTheDocument()
@@ -44,11 +40,9 @@ test("Generer token page should not accept empty email", async () => {
   jest.spyOn(mockContext, "useUser").mockReturnValue({ staff: true })
 
   render(
-    // <ChakraProvider theme={theme}>
     <BrowserRouter>
       <GenererTokenUtilisateurPage />
     </BrowserRouter>,
-    // </ChakraProvider>,
   )
   expect(screen.getByLabelText(/Email/i)).toHaveValue("")
   fireEvent.submit(screen.getByRole("button", { name: /générer/i }))
@@ -62,13 +56,11 @@ test("Generer token page should be ok with a valid email", async () => {
   jest.spyOn(mockApi, "generateImpersonateToken").mockReturnValue(Promise.resolve({ token: "token-123456789" }))
 
   render(
-    // <ChakraProvider theme={theme}>
     <BrowserRouter>
       <GenererTokenUtilisateurPage />
     </BrowserRouter>,
-    // </ChakraProvider>,
   )
-  userEvent.type(screen.getByLabelText(/email/i), "john@maclane.com")
+  await userEvent.type(screen.getByLabelText(/email/i), "john@maclane.com")
   fireEvent.submit(screen.getByRole("button", { name: /générer/i }))
   await screen.findByText(/Lien d'authentification vers le simulateur/i)
   await screen.findByText(/Lien d'authentification vers la déclaration/i)
