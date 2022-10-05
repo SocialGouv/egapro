@@ -3,11 +3,11 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { requestEmailForToken } from "@common/utils/api";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { Alert, AlertTitle, FormButton, FormGroup, FormGroupLabel, FormGroupMessage, FormInput } from "@design-system";
+import { requestEmailForToken } from "services/apiClient/token";
 
 const title = "Validation de l'email";
 

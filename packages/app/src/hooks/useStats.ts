@@ -1,7 +1,8 @@
 import useSWR from "swr";
 
-import type { FetcherReturn } from "./utils";
-import { fetcher } from "./utils";
+import type { FetcherReturn } from "@common/utils/fetcher";
+
+import { fetcher } from "@common/utils/fetcher";
 import { buildUrlParamsString } from "@common/utils/url";
 
 export type StatsType = {
