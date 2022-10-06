@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Flex, FormControl, FormLabel, Text, Input } from "@chakra-ui/react"
 
 import { useTitle } from "../../utils/hooks"
@@ -16,7 +16,7 @@ const GererUtilisateursPage = () => {
 
   const { staff } = useUser()
 
-  const [siren, setSiren] = React.useState("")
+  const [siren, setSiren] = useState("")
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target?.value
     setSiren(value ? value.replace(/\s/g, "") : value)

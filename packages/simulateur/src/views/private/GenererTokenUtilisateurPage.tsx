@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
   Flex,
   FormControl,
@@ -46,9 +46,9 @@ const GenererTokenUtilisateurPage = () => {
 
   const { staff } = useUser()
 
-  const [email, setEmail] = React.useState("")
-  const [error, setError] = React.useState("")
-  const [status, setStatus] = React.useState<Status>({ type: "idle" })
+  const [email, setEmail] = useState("")
+  const [error, setError] = useState("")
+  const [status, setStatus] = useState<Status>({ type: "idle" })
 
   const linkSimu = status.type === "success" ? buildUrl(status.token, "simu") : ""
   const linkDecla = status.type === "success" ? buildUrl(status.token, "decla") : ""

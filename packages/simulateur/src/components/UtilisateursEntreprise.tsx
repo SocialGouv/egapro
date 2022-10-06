@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Box, Flex, HStack, List, ListIcon, ListItem, Text } from "@chakra-ui/layout"
 import { Spinner } from "@chakra-ui/spinner"
 import { IconButton } from "@chakra-ui/button"
@@ -62,14 +62,14 @@ function UtilisateurItem({
 }
 
 export default function UtilisateursEntreprise({ siren }: { siren: string }) {
-  const [email, setEmail] = React.useState("")
+  const [email, setEmail] = useState("")
   const { toastSuccess, toastError } = useToastMessage({})
   const [showAddForm, setShowAddForm] = useBoolean()
 
   const { owners, message, isLoading, mutate } = useOwnersOfSiren(siren)
   useSoloToastMessage("utilisateurs-entreprise-toast", message)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setShowAddForm.off()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- setShowAddForm is not added because the properties returned by useBoolean are stable values.
   }, [siren])

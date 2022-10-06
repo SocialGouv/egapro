@@ -1,14 +1,13 @@
-import React from "react"
+import React, { PropsWithChildren } from "react"
 import { Link } from "@chakra-ui/react"
 import { IconExternalLink } from "./ds/Icons"
 
-type Props = {
+export type MailtoLinkProps = PropsWithChildren<{
   siren?: string
   email: string
-  children?: string
-}
+}>
 
-const MailtoLink: React.FC<Props> = ({ siren = "", email, children = "ici" }) => {
+const MailtoLink = ({ siren = "", email, children = "ici" }: MailtoLinkProps) => {
   return (
     <Link
       isExternal
