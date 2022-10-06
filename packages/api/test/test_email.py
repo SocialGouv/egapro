@@ -296,7 +296,7 @@ def test_success_email_with_small_company():
       <li>Indicateur retour de congés maternité : non calculable</li>
       <li>Indicateur hautes rémunérations: 0</li>
     </ul>
-    <p>Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant : <a href="/declaration/?siren=514027945&year=2019">/declaration/?siren=514027945&year=2019</a></p>
+    <p>Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant : <a href="/index/declaration/?siren=514027945&year=2019">/index/declaration/?siren=514027945&year=2019</a></p>
     <p>Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.</p>
     <p>Veuillez agréer, Madame, Monsieur, nos salutations distinguées,</p>
     <p>Les services de l’administration du travail</p>
@@ -315,7 +315,7 @@ Vous avez déclaré un index global de 65, décliné par indicateurs comme suit 
 
 Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant :
 
-/declaration/?siren=514027945&year=2019
+/index/declaration/?siren=514027945&year=2019
 
 Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.
 
