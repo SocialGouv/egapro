@@ -306,7 +306,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
               )}
 
               {/* Objectifs de progression et mesures de correction */}
-              {after2021 && estCalculable(noteIndex) && noteIndex < 85 && (
+              {after2021 && periodeSuffisante && estCalculable(noteIndex) && noteIndex < 85 && (
                 <Box my="4">
                   <Divider mt="8" mb="4" />
                   <LegalText>{legalText}</LegalText>
