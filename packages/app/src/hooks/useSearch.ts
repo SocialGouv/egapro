@@ -1,11 +1,11 @@
 import moize from "moize";
-import type { SWRInfiniteKeyLoader } from "swr/infinite";
 import useSWRInfinite from "swr/infinite";
 
-import type { FetcherInfiniteReturn } from "./utils";
-import { fetcher } from "./utils";
-import type { CompaniesType, CompanyType } from "@common/models/company";
+import type { SWRInfiniteKeyLoader } from "swr/infinite";
+import type { FetcherInfiniteReturn } from "../common/utils/fetcher";
 
+import { fetcher } from "../common/utils/fetcher";
+import type { CompaniesType, CompanyType } from "@common/models/company";
 import { buildUrlParams } from "@common/utils/url";
 
 export type SearchCompanyParams = {
@@ -36,7 +36,7 @@ const getKey = (search?: SearchCompanyParams) => {
 const moizedFetcher = moize(moizeConfig)(fetcher);
 
 export const useSearch = (search?: SearchCompanyParams): FetcherInfiniteReturn & { companies: CompaniesType } => {
-  const { data: companies, error, size, setSize } = useSWRInfinite(getKey(search), moizedFetcher);
+  const { data: companies, error, size, setSize } = useSWRInfinite<CompaniesType>(getKey(search), moizedFetcher);
 
   const isLoading = !companies && !error;
   const isError = Boolean(error);
@@ -50,7 +50,7 @@ export const useSearch = (search?: SearchCompanyParams): FetcherInfiniteReturn &
   }
 
   const flattenCompanies = {
-    count: companies?.[0].count,
+    count: companies?.[0].count || 0,
     data: newData,
   };
 

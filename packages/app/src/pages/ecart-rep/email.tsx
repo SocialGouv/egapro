@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { requestEmailForToken } from "../../services/apiClient/token";
 import type { NextPageWithLayout } from "../_app";
-import { requestEmailForToken } from "@common/utils/api";
+import type { FeatureStatus } from "@common/utils/feature";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { Alert, AlertTitle, FormButton, FormGroup, FormGroupLabel, FormGroupMessage, FormInput } from "@design-system";
@@ -19,19 +20,6 @@ const formSchema = z.object({
 
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
-
-type FeatureStatus =
-  | {
-      message: string;
-      type: "error";
-    }
-  | {
-      type: "idle";
-    }
-  | {
-      type: "loading";
-    }
-  | { message: string; type: "success" };
 
 const informationMessage =
   "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";

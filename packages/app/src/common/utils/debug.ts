@@ -3,5 +3,5 @@ export const formatZodErrors = (errors: Record<string, { message: string }>) => 
     [key]: errors[key].message,
   }));
 
-  return res;
+  return JSON.stringify(res, null, 2);
 };
