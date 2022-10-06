@@ -282,7 +282,7 @@ async function setDraftStatus() {
 
 function goToSimulationApp() {
   const id = app.data.id
-  const simulation = window.open(`${location.origin}/simulateur/${id}`, '_blank');
+  const simulation = window.open(`${location.origin}/index/simulateur/${id}`, '_blank');
   simulation.focus()
 }
 
