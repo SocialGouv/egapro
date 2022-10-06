@@ -6,10 +6,11 @@ import { z } from "zod";
 
 import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
+import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormGroupMessage, FormInput, FormGroupLabel, FormSelect } from "@design-system";
 import { useFormManager } from "services/apiClient/form-manager";
-import { checkSirenWithOwner, fetchSiren } from "services/apiClient/siren";
+import { checkSiren, fetchSiren } from "services/apiClient/siren";
 
 const title = "Commencer ou accéder à une déclaration";
 
@@ -20,10 +21,9 @@ const formSchema = z
     siren: z.string().regex(/^[0-9]{9}$/, "Le Siren est invalide."),
   })
   .refine(async ({ year, siren }) => {
-    console.log("dans refine", year, siren);
     if (!year || !siren) return false;
     try {
-      await checkSirenWithOwner(siren, Number(year));
+      await checkSiren(siren, Number(year));
       return true;
     } catch (error) {
       console.error("errror", error);
@@ -40,7 +40,7 @@ const buildConfirmMessage = (siren: string) =>
 export default function CommencerPage() {
   const { isAuthenticated } = useUser();
   const router = useRouter();
-  const { formData, save } = useFormManager();
+  const { formData, saveFormData } = useFormManager();
 
   const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
 
@@ -70,26 +70,29 @@ export default function CommencerPage() {
     const startFresh = async () => {
       setFeatureStatus({ type: "loading" });
 
-      const entreprise = await fetchSiren(siren, Number(year));
-
-      save({ entreprise, year: Number(year) });
-
-      setFeatureStatus({ type: "idle" });
-
-      router.push("/ecart-rep/entreprise");
+      try {
+        const entreprise = await fetchSiren(siren, Number(year));
+        saveFormData({ entreprise, year: Number(year) });
+        setFeatureStatus({ type: "idle" });
+        router.push("/ecart-rep/entreprise");
+      } catch (error) {
+        console.error("erreur dans fetchSiren");
+        setFeatureStatus({ type: "error", message: "Erreur dans fetchSiren" });
+      }
     };
 
     if (formData.entreprise?.siren && siren !== formData.entreprise.siren) {
       if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
         // Start a new declaration of repartition.
-        startFresh();
+        await startFresh();
       } else {
         // Rollback.
         setValue("siren", formData.entreprise.siren);
         return;
       }
+    } else {
+      await startFresh();
     }
-    startFresh();
   };
 
   return (
@@ -101,39 +104,42 @@ export default function CommencerPage() {
         correspondantes à la déclaration.
       </p>
 
-      <p>Année au titre de laquelle les écarts de représentation sont calculés.</p>
+      <ClientOnly>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <FormGroup>
+            <FormGroupLabel htmlFor="year">
+              Année au titre de laquelle les écarts de représentation sont calculés
+            </FormGroupLabel>
+            <FormSelect
+              id="year"
+              placeholder="Sélectionnez une année"
+              {...register("year")}
+              isError={Boolean(errors.year)}
+              aria-describedby="year-message-error"
+            >
+              <option value="2021">2021</option>
+            </FormSelect>
+            {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="siren" hint="9 chiffres">
+              Numéro Siren de l'entreprise
+            </FormGroupLabel>
+            <FormInput
+              id="siren"
+              placeholder="Ex: 504920166, 403461742"
+              type="text"
+              {...register("siren")}
+              isError={Boolean(errors.siren)}
+              maxLength={9}
+            />
+            {errors.siren && <FormGroupMessage id="siren-message">{errors.siren.message}</FormGroupMessage>}
+          </FormGroup>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <FormGroup>
-          <FormSelect
-            id="year"
-            placeholder="Sélectionnez une année"
-            {...register("year")}
-            isError={Boolean(errors.year)}
-            aria-describedby="year-message-error"
-          >
-            <option value="2021">2021</option>
-          </FormSelect>
-          {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
-        </FormGroup>
-        <FormGroup>
-          <FormGroupLabel htmlFor="siren" hint="9 chiffres">
-            Numéro Siren de l'entreprise
-          </FormGroupLabel>
-          <FormInput
-            id="siren"
-            placeholder="Ex: 504920166, 403461742"
-            type="text"
-            {...register("siren")}
-            isError={Boolean(errors.siren)}
-            maxLength={9}
-          />
-          {errors.siren && <FormGroupMessage id="siren-message">{errors.siren.message}</FormGroupMessage>}
-        </FormGroup>
-
-        {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
-        <FormButton isDisabled={(isSubmitted && !isValid) || featureStatus.type === "loading"}>Suivant</FormButton>
-      </form>
+          {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
+          <FormButton isDisabled={(isSubmitted && !isValid) || featureStatus.type === "loading"}>Suivant</FormButton>
+        </form>
+      </ClientOnly>
     </>
   );
 }

@@ -23,9 +23,10 @@ export const get = () => {
 export const useFormManager = () => {
   const [formData, setFormData] = React.useState<RepartitionEquilibreeForm>({});
 
+  // Get data from local storage on component's mount.
   React.useEffect(() => {
     setFormData(get());
   }, []);
 
-  return { formData, save };
+  return { formData, saveFormData: save };
 };
