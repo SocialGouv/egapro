@@ -12,7 +12,7 @@ export type FetcherReturn = {
   isError: boolean;
   isLoading: boolean;
 
-  mutate: (data: unknown) => void;
+  mutate: (data: any) => void;
 };
 
 export type FetcherReturnImmutable = Omit<FetcherReturn, "mutate">;

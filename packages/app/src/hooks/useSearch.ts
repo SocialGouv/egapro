@@ -36,7 +36,7 @@ function getKey(search?: SearchCompanyParams) {
 const moizedFetcher = moize(moizeConfig)(fetcher);
 
 export function useSearch(search?: SearchCompanyParams): FetcherInfiniteReturn & { companies: CompaniesType } {
-  const { data: companies, error, size, setSize } = useSWRInfinite(getKey(search), moizedFetcher);
+  const { data: companies, error, size, setSize } = useSWRInfinite<CompaniesType>(getKey(search), moizedFetcher);
 
   const isLoading = !companies && !error;
   const isError = Boolean(error);
@@ -50,7 +50,7 @@ export function useSearch(search?: SearchCompanyParams): FetcherInfiniteReturn &
   }
 
   const flattenCompanies = {
-    count: companies?.[0].count,
+    count: companies?.[0].count || 0,
     data: newData,
   };
 

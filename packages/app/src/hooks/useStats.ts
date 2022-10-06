@@ -19,11 +19,11 @@ export type StatsParams = {
   year?: string;
 };
 
-export function useStats(params?: StatsParams): FetcherReturn & { stats: StatsType | null } {
+export function useStats(params?: StatsParams): FetcherReturn & { stats: StatsType | undefined } {
   const urlParams = buildUrlParamsString(params);
   const key = "/stats?" + urlParams;
 
-  const { data, error, mutate } = useSWR(key, fetcher);
+  const { data, error, mutate } = useSWR<StatsType>(key, fetcher);
 
   const isLoading = !data && !error;
   const isError = Boolean(error);
