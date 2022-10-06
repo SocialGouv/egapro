@@ -1,3 +1,10 @@
+## [2.22.4](https://github.com/SocialGouv/egapro/compare/v2.22.3...v2.22.4) (2022-10-06)
+
+
+### Bug Fixes
+
+* bug on mesures correction + CSE ([#1108](https://github.com/SocialGouv/egapro/issues/1108)) ([0fcee84](https://github.com/SocialGouv/egapro/commit/0fcee84fe14e2fe1ad777d1a86b64ac6b7df7277))
+
 ## [2.22.3](https://github.com/SocialGouv/egapro/compare/v2.22.2...v2.22.3) (2022-10-04)
 
 
