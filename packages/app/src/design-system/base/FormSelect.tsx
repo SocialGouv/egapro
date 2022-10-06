@@ -14,7 +14,7 @@ export type FormSelectProps = PropsWithChildren<
 >;
 
 export const FormSelect = React.forwardRef<HTMLSelectElement, FormSelectProps>(
-  ({ placeholder, className, isDisabled, isValid, isError, children, ...rest }, ref) => {
+  ({ placeholder, className, isDisabled, isValid, isError, children, value, ...rest }, ref) => {
     return (
       <select
         className={clsx("fr-select", isError && "fr-select--error", isValid && "fr-select--valid", className)}
@@ -23,7 +23,7 @@ export const FormSelect = React.forwardRef<HTMLSelectElement, FormSelectProps>(
         ref={ref}
       >
         {placeholder && (
-          <option value="" selected disabled hidden>
+          <option value={value} disabled hidden>
             {placeholder}
           </option>
         )}
