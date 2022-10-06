@@ -1,14 +1,15 @@
-import type { ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 import { forwardRef } from "react";
 import type { buttonStylesProps } from "../utils/button-styles";
 import { buttonStyles } from "../utils/button-styles";
 
-export type ButtonAsLinkProps = buttonStylesProps &
-  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-    children?: ReactNode;
-    isCurrent?: boolean;
-    isDisabled?: boolean;
-  };
+export type ButtonAsLinkProps = PropsWithChildren<
+  buttonStylesProps &
+    React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+      isCurrent?: boolean;
+      isDisabled?: boolean;
+    }
+>;
 
 export type ButtonAsLinkRef = HTMLAnchorElement;
 

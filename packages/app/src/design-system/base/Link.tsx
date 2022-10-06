@@ -1,17 +1,19 @@
 import clsx from "clsx";
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
 import type { iconStyles } from "../utils/icon-styles";
 
-export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  iconLeft?: iconStyles;
-  iconRight?: iconStyles;
-  isCurrent?: boolean;
-  isDisabled?: boolean;
-  size?: "lg" | "sm";
-};
+export type LinkProps = PropsWithChildren<
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    iconLeft?: iconStyles;
+    iconRight?: iconStyles;
+    isCurrent?: boolean;
+    isDisabled?: boolean;
+    size?: "lg" | "sm";
+  }
+>;
 
-export const Link: FunctionComponent<LinkProps> = ({
+export const Link = ({
   href,
   children,
   size,
@@ -21,7 +23,7 @@ export const Link: FunctionComponent<LinkProps> = ({
   isDisabled,
   isCurrent,
   ...rest
-}) => {
+}: LinkProps) => {
   return (
     <a
       href={href || undefined}

@@ -1,19 +1,15 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { SideMenu, SideMenuCollapse, SideMenuLink, SideMenuList } from "@/design-system";
+import { SideMenu, SideMenuCollapse, SideMenuLink, SideMenuList, SideMenuTitle } from "@/design-system";
 
 export default {
   title: "Base/SideMenu",
   component: SideMenu,
 } as ComponentMeta<typeof SideMenu>;
 
-const Template: ComponentStory<typeof SideMenu> = args => <SideMenu {...args} />;
-
-export const Default = Template.bind({});
-Default.args = {
-  title: "Déclaration des écarts de représentation F/H dans les postes de direction",
-  buttonLabel: "Dans cette rubrique",
-  children: (
+const Template: ComponentStory<typeof SideMenu> = args => (
+  <SideMenu {...args}>
+    <SideMenuTitle>Déclaration des écarts de représentation F/H dans les postes de direction</SideMenuTitle>
     <SideMenuList>
       <SideMenuLink href="#" isCurrent>
         Êtes-vous assujetti&nbsp;?
@@ -33,6 +29,12 @@ Default.args = {
           Membres des instances dirigeantes
         </SideMenuLink>
       </SideMenuCollapse>
+      <SideMenuLink href="#">Lorem ipsum</SideMenuLink>
     </SideMenuList>
-  ),
+  </SideMenu>
+);
+
+export const Default = Template.bind({});
+Default.args = {
+  buttonLabel: "Dans cette rubrique",
 };

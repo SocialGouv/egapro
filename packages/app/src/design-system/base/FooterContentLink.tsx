@@ -1,8 +1,8 @@
-import type { FunctionComponent } from "react";
+import type { PropsWithChildren } from "react";
 
 export type FooterContentLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
-export const FooterContentLink: FunctionComponent<FooterContentLinkProps> = ({ children, ...rest }) => {
+export const FooterContentLink = ({ children, ...rest }: PropsWithChildren<FooterContentLinkProps>) => {
   return (
     <a className="fr-footer__content-link" {...rest}>
       {children}
