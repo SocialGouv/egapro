@@ -91,6 +91,9 @@ export type Declaration = {
 const buildDeclaration = (state: AppState): Declaration => {
   const index = state.declaration.noteIndex
 
+  // Condition for adding mesuresCorrection.
+  const mesuresCorrectionToBeAdded = index !== undefined && index < 75 && state.informations.periodeSuffisante
+
   const declaration: Declaration = {
     année_indicateurs: state.informations.anneeDeclaration,
     période_suffisante: state.informations.periodeSuffisante,
@@ -99,8 +102,8 @@ const buildDeclaration = (state: AppState): Declaration => {
     }),
     ...(state.informations.periodeSuffisante && { points: state.declaration.totalPoint }),
     ...(state.informations.periodeSuffisante && { points_calculables: state.declaration.totalPointCalculable }),
-    ...(index !== undefined && index < 75 && { mesures_correctives: state.declaration.mesuresCorrection }),
-    ...(index && { index }),
+    ...(mesuresCorrectionToBeAdded && { mesures_correctives: state.declaration.mesuresCorrection }),
+    ...(index && state.informations.periodeSuffisante && { index }),
   }
 
   if (state.informations.periodeSuffisante) {

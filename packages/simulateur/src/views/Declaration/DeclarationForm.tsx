@@ -24,6 +24,7 @@ import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import RadiosBoolean from "../../components/RadiosBoolean"
+import { estCalculable } from "../../utils/helpers"
 
 const validateForm = ({
   finPeriodeReference,
@@ -70,14 +71,14 @@ const validateForm = ({
 
 function buildWordings(index: number | undefined) {
   const legalText =
-    index === undefined || index > 85
+    !estCalculable(index) || index > 85
       ? ""
       : index < 75
       ? "Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises ayant obtenu un Index inférieur à 75 points doivent publier, par une communication externe et au sein de l’entreprise, les mesures de correction qu’elles ont définies par accord ou, à défaut, par décision unilatérale. Par ailleurs, celles ayant obtenu un Index inférieur à 85 points doivent fixer, également par accord ou, à défaut, par décision unilatérale, et publier des objectifs de progression de chacun des indicateurs de l’Index. Une fois l’accord ou la décision déposé, les informations relatives aux mesures de correction, les objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux services du ministre chargé du travail et au comité social et économique."
       : "Conformément à l’article 13 de la loi n° 2021-1774 du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle et au décret n° 2022-243 du 25 février 2022, les entreprises ayant obtenu un Index inférieur à 85 points doivent fixer par accord ou, à défaut, par décision unilatérale, et publier des objectifs de progression de chacun des indicateurs de l’Index. Une fois l’accord ou la décision déposé, les objectifs de progression ainsi que leurs modalités de publication doivent être transmis aux services du ministre chargé du travail et au comité social et économique."
 
   const buttonLabel =
-    index === undefined || index > 85
+    !estCalculable(index) || index > 85
       ? ""
       : index < 75
       ? "Déclarer les objectifs de progression et les mesures de correction maintenant"
@@ -117,7 +118,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const readOnly = isFormValid(state.declaration) && !declaring
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
-  const displayNC = noteIndex === undefined && after2020 ? " aux indicateurs calculables" : ""
+  const displayNC = !estCalculable(noteIndex) && after2020 ? " aux indicateurs calculables" : ""
   const isUES = Boolean(state.informationsEntreprise.nomUES)
 
   const initialValues = {
@@ -203,36 +204,36 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             )}
             {Boolean(apiError) && <FormError message={apiError || "Erreur lors de la sauvegarde des données."} />}
 
-            {noteIndex !== undefined && noteIndex < 75 && periodeSuffisante && (
-              <MesuresCorrection
-                label="Mesures de correction prévues à l'article D. 1142-6"
-                name="mesuresCorrection"
-                readOnly={readOnly}
-              />
-            )}
-            {!indicateurUnParCSP && (
+            {periodeSuffisante && (
               <>
-                {state.informationsEntreprise.structure === "Entreprise" && (
-                  <RadiosBoolean
-                    fieldName="cseMisEnPlace"
-                    value={values.cseMisEnPlace}
+                {estCalculable(noteIndex) && noteIndex < 75 && (
+                  <MesuresCorrection
+                    label="Mesures de correction prévues à l'article D. 1142-6"
+                    name="mesuresCorrection"
                     readOnly={readOnly}
-                    label={<>Un CSE a-t-il été mis en place&nbsp;?</>}
                   />
                 )}
-                {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
-                  <InputDateGroup
-                    fieldName="dateConsultationCSE"
-                    label="Date de consultation du CSE pour l'indicateur relatif à l'écart de rémunération"
-                    isReadOnly={readOnly}
-                  />
+                {!indicateurUnParCSP && (
+                  <>
+                    {state.informationsEntreprise.structure === "Entreprise" && (
+                      <RadiosBoolean
+                        fieldName="cseMisEnPlace"
+                        value={values.cseMisEnPlace}
+                        readOnly={readOnly}
+                        label={<>Un CSE a-t-il été mis en place&nbsp;?</>}
+                      />
+                    )}
+                    {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
+                      <InputDateGroup
+                        fieldName="dateConsultationCSE"
+                        label="Date de consultation du CSE pour l'indicateur relatif à l'écart de rémunération"
+                        isReadOnly={readOnly}
+                      />
+                    )}
+                  </>
                 )}
-              </>
-            )}
-
-            {state.informations.periodeSuffisante && (
-              <>
-                {(noteIndex !== undefined || after2020) && (
+                {/* Show publication data only if if index is calculable for cases before 2020 and for all index (even non calculable) after. */}
+                {(estCalculable(noteIndex) || after2020) && (
                   <>
                     <InputDateGroup
                       fieldName="datePublication"
@@ -256,35 +257,37 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                       }
                     />
 
-                    {values.publicationSurSiteInternet !== undefined &&
-                      (values.publicationSurSiteInternet === "true" ? (
-                        <InputGroup
-                          label={
-                            after2020
-                              ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus ${displayNC}`
-                              : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"
-                          }
-                          fieldName="lienPublication"
-                          message={{ error: "Veuillez entrer une adresse internet" }}
-                          isReadOnly={readOnly}
-                        />
-                      ) : (
-                        <TextareaGroup
-                          label={
-                            after2020
-                              ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
-                              : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
-                          }
-                          fieldName="modalitesPublication"
-                          message={{ error: "Veuillez préciser les modalités de communication" }}
-                          isReadOnly={readOnly}
-                        />
-                      ))}
+                    {values.publicationSurSiteInternet === "true" && (
+                      <InputGroup
+                        label={
+                          after2020
+                            ? `Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les résultats obtenus ${displayNC}`
+                            : "Indiquer l'adresse exacte de la page Internet (URL) sur laquelle sera publié le niveau de résultat obtenu"
+                        }
+                        fieldName="lienPublication"
+                        message={{ error: "Veuillez entrer une adresse internet" }}
+                        isReadOnly={readOnly}
+                      />
+                    )}
+
+                    {values.publicationSurSiteInternet === "false" && (
+                      <TextareaGroup
+                        label={
+                          after2020
+                            ? `Préciser les modalités de communication des résultats obtenus${displayNC} auprès de vos salariés`
+                            : "Préciser les modalités de communication du niveau de résultat obtenu auprès de vos salariés"
+                        }
+                        fieldName="modalitesPublication"
+                        message={{ error: "Veuillez préciser les modalités de communication" }}
+                        isReadOnly={readOnly}
+                      />
+                    )}
                   </>
                 )}
-                {after2021 && <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />}
+                <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />
               </>
             )}
+
             {readOnly && (
               <Text fontWeight="bold">
                 Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}.
@@ -304,7 +307,8 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                 />
               )}
 
-              {after2021 && noteIndex !== undefined && noteIndex < 85 && (
+              {/* Objectifs de progression et mesures de correction */}
+              {after2021 && periodeSuffisante && estCalculable(noteIndex) && noteIndex < 85 && (
                 <Box my="4">
                   <Divider mt="8" mb="4" />
                   <LegalText>{legalText}</LegalText>
