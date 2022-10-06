@@ -77,7 +77,7 @@ export async function checkSiren(siren: string, year: number) {
   }
 }
 
-export const checkSirenWithOwner = async (year: number, siren: string) => {
+export const checkSirenWithOwner = async (siren: string, year: number) => {
   let result;
 
   try {

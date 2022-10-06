@@ -9,7 +9,7 @@ import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormGroupMessage, FormInput, FormGroupLabel, FormSelect } from "@design-system";
 import { useFormManager } from "services/apiClient/form-manager";
-import { checkSiren, fetchSiren } from "services/apiClient/siren";
+import { checkSirenWithOwner, fetchSiren } from "services/apiClient/siren";
 
 const title = "Commencer ou accéder à une déclaration";
 
@@ -23,7 +23,7 @@ const formSchema = z
     console.log("dans refine", year, siren);
     if (!year || !siren) return false;
     try {
-      await checkSiren(siren, Number(year));
+      await checkSirenWithOwner(siren, Number(year));
       return true;
     } catch (error) {
       console.error("errror", error);
