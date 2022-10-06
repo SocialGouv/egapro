@@ -295,8 +295,8 @@ async def test_resend_receipt_endpoint(client, monkeypatch, declaration):
     assert sender.call_count == 1
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
-    assert "/declaration/?siren=514027945&year=2020" in txt
-    assert "/declaration/?siren=514027945&year=2020" in html
+    assert "/index/declaration/?siren=514027945&year=2020" in txt
+    assert "/index/declaration/?siren=514027945&year=2020" in html
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2021.pdf"
 
 
@@ -323,8 +323,8 @@ async def test_resend_receipt_endpoint_by_staff(client, monkeypatch, declaration
     assert sender.call_count == 1
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
-    assert "/declaration/?siren=514027945&year=2020" in txt
-    assert "/declaration/?siren=514027945&year=2020" in html
+    assert "/index/declaration/?siren=514027945&year=2020" in txt
+    assert "/index/declaration/?siren=514027945&year=2020" in html
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2021.pdf"
 
 

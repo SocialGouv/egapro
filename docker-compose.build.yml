@@ -43,7 +43,7 @@ services:
       args:
         EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
         EGAPRO_SENTRY_DSN: ${EGAPRO_SENTRY_DSN:-https://b2f84ee9dc6044abbeb0f417f4335a26@sentry.fabrique.social.gouv.fr/48}
-        BASE_URL: ""
+        BASE_URL: "/index"
     ports:
       - 4000:8080
     depends_on:
@@ -78,7 +78,7 @@ services:
     image: egapro_app
     build:
       context: .
-      dockerfile: ./packages/app/Dockerfile 
+      dockerfile: ./packages/app/Dockerfile
     ports:
       - 3000:3000
     restart: "no"
@@ -95,7 +95,6 @@ services:
     ports:
       - 3001:8080
     restart: "no"
-
 
 volumes:
   pgdata:

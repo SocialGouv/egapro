@@ -1,4 +1,4 @@
-import { fetcher } from "hooks/utils";
+import { fetcher } from "@common/utils/fetcher";
 
 export const requestEmailForToken = (email: string) =>
   fetcher("/token", {

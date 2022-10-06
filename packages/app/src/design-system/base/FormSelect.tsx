@@ -1,4 +1,6 @@
 import clsx from "clsx";
+import * as React from "react";
+
 import type { PropsWithChildren } from "react";
 
 export type FormSelectProps = PropsWithChildren<
@@ -11,27 +13,24 @@ export type FormSelectProps = PropsWithChildren<
   }
 >;
 
-export const FormSelect = ({
-  placeholder,
-  className,
-  isDisabled,
-  isValid,
-  isError,
-  children,
-  ...rest
-}: FormSelectProps) => {
-  return (
-    <select
-      className={clsx("fr-select", isError && "fr-select--error", isValid && "fr-select--valid", className)}
-      disabled={isDisabled}
-      {...rest}
-    >
-      {placeholder && (
-        <option value="" selected disabled hidden>
-          {placeholder}
-        </option>
-      )}
-      {children}
-    </select>
-  );
-};
+export const FormSelect = React.forwardRef<HTMLSelectElement, FormSelectProps>(
+  ({ placeholder, className, isDisabled, isValid, isError, children, value, ...rest }, ref) => {
+    return (
+      <select
+        className={clsx("fr-select", isError && "fr-select--error", isValid && "fr-select--valid", className)}
+        disabled={isDisabled}
+        {...rest}
+        ref={ref}
+      >
+        {placeholder && (
+          <option value={value} disabled hidden>
+            {placeholder}
+          </option>
+        )}
+        {children}
+      </select>
+    );
+  },
+);
+
+FormSelect.displayName = "FormSelect";

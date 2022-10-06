@@ -357,7 +357,7 @@ async def send_token(request, response):
     if request.ip in config.ALLOWED_IPS:
         response.json = {"token": token}
     else:
-        url = request.json.get("url", f"{request.domain}/declaration/?token=")
+        url = request.json.get("url", f"{request.domain}/index/declaration/?token=")
         link = f"{url}{token}"
         if "localhost" in link or "127.0.0.1" in link:
             print(link)
@@ -507,7 +507,7 @@ async def get_jsonschema(request, response):
 async def validate_siren(request, response):
     siren = request.query.get("siren")
     year = request.query.get("year", default=constants.INVALID_YEAR)
-    
+
     try:
         year = int(year)
     except ValueError:
