@@ -257,7 +257,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                       }
                     />
 
-                    {values.publicationSurSiteInternet === "true" ? (
+                    {values.publicationSurSiteInternet === "true" && (
                       <InputGroup
                         label={
                           after2020
@@ -268,7 +268,9 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                         message={{ error: "Veuillez entrer une adresse internet" }}
                         isReadOnly={readOnly}
                       />
-                    ) : (
+                    )}
+
+                    {values.publicationSurSiteInternet === "false" && (
                       <TextareaGroup
                         label={
                           after2020
