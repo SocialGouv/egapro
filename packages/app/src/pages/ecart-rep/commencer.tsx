@@ -9,7 +9,6 @@ import { checkSiren, fetchSiren } from "../../services/apiClient/siren";
 import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
-import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   FormButton,
@@ -50,7 +49,7 @@ const buildConfirmMessage = (siren: string) =>
 const CommencerPage: NextPageWithLayout = () => {
   const { isAuthenticated } = useUser();
   const router = useRouter();
-  const { formData, saveFormData } = useFormManager();
+  const { formData, saveFormData, resetFormData } = useFormManager();
 
   const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
@@ -65,7 +64,10 @@ const CommencerPage: NextPageWithLayout = () => {
   });
 
   const resetAsyncForm = useCallback(async () => {
-    reset({ siren: formData?.entreprise?.siren, year: String(formData.year) });
+    reset({
+      siren: formData?.entreprise?.siren,
+      year: formData?.year === undefined ? undefined : String(formData?.year),
+    });
   }, [reset, formData]);
 
   useEffect(() => {
@@ -82,9 +84,10 @@ const CommencerPage: NextPageWithLayout = () => {
 
       try {
         const entreprise = await fetchSiren(siren, Number(year));
+        resetFormData();
         saveFormData({ entreprise, year: Number(year) });
         setFeatureStatus({ type: "idle" });
-        router.push("/ecart-rep/entreprise");
+        router.push("/ecart-rep/declarant");
       } catch (error) {
         console.error("erreur dans fetchSiren");
         setFeatureStatus({ type: "error", message: "Erreur dans fetchSiren" });
@@ -114,47 +117,44 @@ const CommencerPage: NextPageWithLayout = () => {
         correspondantes à la déclaration.
       </p>
 
-      <ClientOnly>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <FormLayout>
-            <FormGroup>
-              <FormGroupLabel htmlFor="year">
-                Année au titre de laquelle les écarts de représentation sont calculés
-              </FormGroupLabel>
-              <FormSelect
-                id="year"
-                placeholder="Sélectionnez une année"
-                {...register("year")}
-                isError={Boolean(errors.year)}
-                aria-describedby="year-message-error"
-              >
-                <option value="2021">2021</option>
-              </FormSelect>
-              {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
-            </FormGroup>
-            <FormGroup>
-              <FormGroupLabel htmlFor="siren" hint="9 chiffres">
-                Numéro Siren de l'entreprise
-              </FormGroupLabel>
-              <FormInput
-                id="siren"
-                placeholder="Ex: 504920166, 403461742"
-                type="text"
-                {...register("siren")}
-                isError={Boolean(errors.siren)}
-                maxLength={9}
-              />
-              {errors.siren && <FormGroupMessage id="siren-message">{errors.siren.message}</FormGroupMessage>}
-            </FormGroup>
-            <FormLayoutButtonGroup>
-              {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
-              <FormButton isDisabled={(isSubmitted && !isValid) || featureStatus.type === "loading"}>
-                Suivant
-              </FormButton>
-            </FormLayoutButtonGroup>
-          </FormLayout>
-        </form>
-      </ClientOnly>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <FormLayout>
+          <FormGroup>
+            <FormGroupLabel htmlFor="year">
+              Année au titre de laquelle les écarts de représentation sont calculés
+            </FormGroupLabel>
+            <FormSelect
+              id="year"
+              placeholder="Sélectionnez une année"
+              {...register("year")}
+              isError={Boolean(errors.year)}
+              aria-describedby="year-message-error"
+            >
+              <option value="2021">2021</option>
+            </FormSelect>
+            {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="siren" hint="9 chiffres">
+              Numéro Siren de l'entreprise
+            </FormGroupLabel>
+            <FormInput
+              id="siren"
+              placeholder="Ex: 504920166, 403461742"
+              type="text"
+              {...register("siren")}
+              isError={Boolean(errors.siren)}
+              aria-describedby="siren-message-error"
+              maxLength={9}
+            />
+            {errors.siren && <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormLayoutButtonGroup>
+            {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
+            <FormButton isDisabled={(isSubmitted && !isValid) || featureStatus.type === "loading"}>Suivant</FormButton>
+          </FormLayoutButtonGroup>
+        </FormLayout>
+      </form>
     </>
   );
 };
