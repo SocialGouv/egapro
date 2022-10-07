@@ -1,109 +1,152 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import getYear from "date-fns/getYear";
+import { formatISO, getYear, parse, parseISO } from "date-fns";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect } from "react";
+import type { MouseEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import type { FeatureStatus } from "@common/utils/feature";
-import { useUser } from "@components/AuthContext";
+// import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
-import { FormGroup, FormGroupMessage, FormGroupLabel, FormInput, FormButton } from "@design-system";
+import {
+  ButtonAsLink,
+  FormGroup,
+  FormGroupMessage,
+  FormGroupLabel,
+  FormInput,
+  FormButton,
+  FormLayout,
+  FormLayoutButtonGroup,
+} from "@design-system";
 
 const title = "Période de référence";
+
+const dateFormat = "YYYY-MM-DD";
 
 const dateValidationError =
   "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés";
 
+const formSchema = z
+  .object({
+    year: z.number().min(4, "L'année est requise."),
+    endOfPeriod: z.preprocess(arg => {
+      if (typeof arg == "string" || arg instanceof Date) return formatISO(new Date(arg));
+    }, z.string()),
+  })
+  .refine(
+    async ({ year, endOfPeriod }) => {
+      if (!year || !endOfPeriod) return false;
+      const yearToBeChecked = getYear(parseISO(endOfPeriod));
+      return year === yearToBeChecked;
+    },
+    {
+      message: dateValidationError,
+    },
+  );
+
 const PeriodeReference: NextPageWithLayout = () => {
-  const { isAuthenticated } = useUser();
+  // const { isAuthenticated } = useUser();
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
-  const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
-  useEffect(() => {
-    if (!isAuthenticated) router.push("/ecart-rep/email");
-  }, [isAuthenticated, router]);
-
-  const formSchema = useMemo(
-    () =>
-      z
-        .object({
-          year: z.string().min(4, "L'année est requise."),
-          endOfPeriod: z.instanceof(Date, { message: "La date de fin de période de référence." }),
-        })
-        .refine(async ({ year, endOfPeriod }) => {
-          if (!year || !endOfPeriod) return false;
-          const yearToBeChecked = getYear(endOfPeriod);
-          // console.log(yearToBeChecked);
-          return (
-            yearToBeChecked === formData?.year,
-            {
-              message: dateValidationError,
-            }
-          );
-        }),
-    [formData],
-  );
+  const { year } = formData;
+  // useEffect(() => {
+  //   if (!isAuthenticated) router.push("/ecart-rep/email");
+  // }, [isAuthenticated, router]);
 
   type FormType = z.infer<typeof formSchema>;
 
   const {
-    register,
-    handleSubmit,
     formState: { errors, isDirty, isValid },
+    getValues,
+    handleSubmit,
+    register,
+    reset,
+    setValue,
+    // watch,
   } = useForm<FormType>({
     mode: "onChange",
-    resolver: zodResolver(formSchema as any),
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      year: "",
+      year: 0,
       endOfPeriod: undefined,
     },
   });
 
+  // const endOfPeriod = watch("endOfPeriod");
+
+  const resetAsyncForm = useCallback(async () => {
+    reset({ endOfPeriod: formData?.endOfPeriod, year: formData?.year });
+  }, [reset, formData]);
+
+  useEffect(() => {
+    resetAsyncForm();
+  }, [resetAsyncForm]);
+
+  const handleClick = (_event: MouseEvent) => () => {
+    const currentYear = getYear(new Date());
+    const endOfYear = formatISO(parse(`${currentYear}-12-31`, dateFormat, new Date()));
+    setValue("endOfPeriod", endOfYear);
+  };
+
   const onSubmit = async ({ year, endOfPeriod }: FormType) => {
-    setFeatureStatus({ type: "loading" });
-    console.log("submit", year, endOfPeriod);
-    setFeatureStatus({ type: "idle" });
+    saveFormData({ year: year, endOfPeriod: endOfPeriod });
+    router.push("/ecart-rapartition");
   };
 
   return (
     <>
       <h1>{title}</h1>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <FormGroup>
-          <FormGroupLabel htmlFor="year">
-            Année au titre de laquelle les écarts de représentation sont calculés.
-          </FormGroupLabel>
-          <FormInput
-            id="year"
-            {...register("year")}
-            isError={Boolean(errors.year)}
-            aria-describedby="year-message-error-msg"
-            value={formData ? formData.year : ""}
-            readOnly
-          />
-          {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
-        </FormGroup>
-        <FormGroup>
-          <FormGroupLabel htmlFor="endOfPeriod">
-            Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des
-            écarts
-          </FormGroupLabel>
-          <FormInput
-            id="endOfPeriod"
-            placeholder="Sélectionner une date"
-            type="date"
-            {...register("endOfPeriod")}
-            isError={Boolean(errors.endOfPeriod)}
-          />
-          {errors.endOfPeriod && (
-            <FormGroupMessage id="endOfPeriod-message">{errors.endOfPeriod.message}</FormGroupMessage>
-          )}
-        </FormGroup>
-        <FormButton isDisabled={!isValid || isDirty}>Suivant</FormButton>
+        <FormLayout>
+          <FormGroup>
+            <FormGroupLabel htmlFor="year">
+              Année au titre de laquelle les écarts de représentation sont calculés.
+            </FormGroupLabel>
+            <FormInput
+              id="year"
+              type="text"
+              {...register("year")}
+              isError={Boolean(errors.year)}
+              readOnly
+              aria-describedby="year-message-error-msg"
+            />
+            {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="endOfPeriod">
+              Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul
+              des écarts
+            </FormGroupLabel>
+            <FormInput
+              id="endOfPeriod"
+              type="date"
+              {...register("endOfPeriod")}
+              isError={Boolean(errors.endOfPeriod)}
+              placeholder="Sélectionner une date"
+              aria-describedby="endOfPeriod-message-error"
+            />
+            {errors.endOfPeriod && (
+              <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
+            )}
+            <br />
+            <FormButton onClick={handleClick}>Sélectionner la fin de l'année civile</FormButton>
+          </FormGroup>
+          <FormLayoutButtonGroup>
+            <Link href="entreprise" passHref>
+              <ButtonAsLink size="sm">Précédent</ButtonAsLink>
+            </Link>
+            <FormButton type="submit" isDisabled={!isValid || !isDirty}>
+              Suivant
+            </FormButton>
+          </FormLayoutButtonGroup>
+          {`isValid ${isValid}`}
+          <br />
+          {`formData ${JSON.stringify(formData, null, 2)}`}
+        </FormLayout>
       </form>
     </>
   );

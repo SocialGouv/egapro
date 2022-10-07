@@ -5,6 +5,7 @@ import type { EntrepriseType } from "./siren";
 const KEY = "répartition-équilibrée-form";
 
 type RepartitionEquilibreeForm = {
+  endOfPeriod?: string;
   entreprise?: EntrepriseType;
   year?: number;
   // TODO: add properties for the future pages
