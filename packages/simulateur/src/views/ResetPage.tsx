@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
 import { useCheckTokenInURL } from "../components/AuthContext"
 import { ActionType, AppState } from "../globals"
