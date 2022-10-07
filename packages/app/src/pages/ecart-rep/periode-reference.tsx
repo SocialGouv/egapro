@@ -143,9 +143,6 @@ const PeriodeReference: NextPageWithLayout = () => {
               Suivant
             </FormButton>
           </FormLayoutButtonGroup>
-          {`isValid ${isValid}`}
-          <br />
-          {`formData ${JSON.stringify(formData, null, 2)}`}
         </FormLayout>
       </form>
     </>
