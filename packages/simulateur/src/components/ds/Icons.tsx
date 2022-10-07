@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react"
+import React, { PropsWithChildren } from "react"
 import { Icon as IconChakra, Box, IconProps, ChakraComponent } from "@chakra-ui/react"
 import { SearchIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/solid"
 import {
@@ -31,7 +31,7 @@ const Icon: SvgComponent = ((props: IconProps) => (
   <IconChakra aria-hidden="true" sx={{ verticalAlign: "middle" }} {...props} />
 )) as SvgComponent
 
-export const IconText = ({ children }: { children: ReactNode }) => {
+export const IconText = ({ children }: PropsWithChildren) => {
   return (
     <Box fontSize="xs" fontWeight="bold" lineHeight={1} aria-hidden="true">
       {children}

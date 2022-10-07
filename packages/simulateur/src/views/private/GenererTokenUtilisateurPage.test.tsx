@@ -8,6 +8,19 @@ import GenererTokenUtilisateurPage from "./GenererTokenUtilisateurPage"
 import * as mockContext from "../../components/AuthContext"
 import * as mockApi from "../../utils/api"
 
+beforeAll(() => {
+  window.matchMedia = (query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // Deprecated
+    removeListener: jest.fn(), // Deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })
+})
+
 afterAll(() => {
   jest.restoreAllMocks()
 })
@@ -47,7 +60,7 @@ test("Generer token page should be ok with a valid email", async () => {
       <GenererTokenUtilisateurPage />
     </BrowserRouter>,
   )
-  userEvent.type(screen.getByLabelText(/email/i), "john@maclane.com")
+  await userEvent.type(screen.getByLabelText(/email/i), "john@maclane.com")
   fireEvent.submit(screen.getByRole("button", { name: /générer/i }))
   await screen.findByText(/Lien d'authentification vers le simulateur/i)
   await screen.findByText(/Lien d'authentification vers la déclaration/i)

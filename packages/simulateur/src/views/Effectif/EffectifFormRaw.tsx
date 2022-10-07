@@ -187,7 +187,7 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
             <Grid templateColumns="1fr 5.5rem 5.5rem" gap={2} mt={6} px={4} textAlign="right">
               <GridItem pr={2}>Total des effectifs&nbsp;:</GridItem>
               <GridItem pr={5}>
-                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                <Text fontWeight="semibold" noOfLines={1} lineHeight="1" mt={1}>
                   {displayInt(totalNbSalarieFemme)}
                 </Text>
                 <Text fontSize="xs" color="women">
@@ -195,7 +195,7 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
                 </Text>
               </GridItem>
               <GridItem pr={5}>
-                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                <Text fontWeight="semibold" noOfLines={1} lineHeight="1" mt={1}>
                   {displayInt(totalNbSalarieHomme)}
                 </Text>
                 <Text fontSize="xs" color="men">
@@ -207,7 +207,7 @@ const EffectifFormRaw: FunctionComponent<EffectifFormRawProps> = ({
             <Grid templateColumns="1fr 5.5rem 5.5rem" gap={2} mt={4} px={4} textAlign="right">
               <GridItem pr={2}>Soit&nbsp;:</GridItem>
               <GridItem pr={5} colSpan={2}>
-                <Text fontWeight="semibold" isTruncated lineHeight="1" mt={1}>
+                <Text fontWeight="semibold" noOfLines={1} lineHeight="1" mt={1}>
                   {displayInt(totalNbSalarieHomme + totalNbSalarieFemme)}
                 </Text>
                 <Text fontSize="xs">Personnes</Text>

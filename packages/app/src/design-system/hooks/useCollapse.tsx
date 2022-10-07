@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export function useCollapse(id: string, isExpanded: boolean) {
+export const useCollapse = (id: string, isExpanded: boolean) => {
   const expandedItem = (isExpanded: boolean) => {
     if (isExpanded) {
       return {
@@ -23,4 +23,4 @@ export function useCollapse(id: string, isExpanded: boolean) {
     }
   }, [id]);
   return { item, collapse };
-}
+};

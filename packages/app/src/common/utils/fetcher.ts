@@ -1,3 +1,5 @@
+import type { Any } from "./types";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
@@ -12,7 +14,7 @@ export type FetcherReturn = {
   isError: boolean;
   isLoading: boolean;
 
-  mutate: (data: unknown) => void;
+  mutate: (data: Any) => void;
 };
 
 export type FetcherReturnImmutable = Omit<FetcherReturn, "mutate">;
@@ -74,6 +76,7 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
  * @param key the path to use after the API_URL (named key because it is used in cache for useSWR)
  * @param options the request options (optional)
  */
-export const fetcher = async (key: string, options?: RequestInit) => {
+export const fetcher = async <T>(key: string, options?: RequestInit): Promise<T> => {
+  // TODO: better typings relation with genericFetch
   return genericFetch(API_URL + key, options);
 };

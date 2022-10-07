@@ -9,7 +9,6 @@ import { App } from "@design-system";
 
 // Layout for unauthenticated users.
 
-// eslint-disable-next-line @typescript-eslint/ban-types -- no props
-export const BasicLayout = ({ children }: PropsWithChildren<{}>) => {
+export const BasicLayout = ({ children }: PropsWithChildren) => {
   return <App>{children}</App>;
 };

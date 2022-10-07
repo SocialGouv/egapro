@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React, { useState } from "react"
 import {
   Flex,
   FormControl,
@@ -28,7 +28,7 @@ import { generateImpersonateToken } from "../../utils/api"
 const title = "Générer le token pour un utilisateur"
 
 const URL_SIMU = "/nouvelle-simulation"
-const URL_DECLA = "/declaration/"
+const URL_DECLA = "/index/declaration/"
 
 const getOrigin = window?.location?.origin || ""
 
@@ -41,14 +41,14 @@ type Status =
   | { type: "success"; token: string }
   | { type: "error"; error: string }
 
-const GenererTokenUtilisateurPage: FunctionComponent = () => {
+const GenererTokenUtilisateurPage = () => {
   useTitle(title)
 
   const { staff } = useUser()
 
-  const [email, setEmail] = React.useState("")
-  const [error, setError] = React.useState("")
-  const [status, setStatus] = React.useState<Status>({ type: "idle" })
+  const [email, setEmail] = useState("")
+  const [error, setError] = useState("")
+  const [status, setStatus] = useState<Status>({ type: "idle" })
 
   const linkSimu = status.type === "success" ? buildUrl(status.token, "simu") : ""
   const linkDecla = status.type === "success" ? buildUrl(status.token, "decla") : ""

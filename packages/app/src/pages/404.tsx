@@ -1,11 +1,11 @@
 import { Box, Text } from "@chakra-ui/react";
 import { push } from "@socialgouv/matomo-next";
 import Head from "next/head";
-import type { ReactElement } from "react";
 import { useEffect } from "react";
+import type { NextPageWithLayout } from "./_app";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 
-export default function NotFoundPage() {
+const NotFoundPage: NextPageWithLayout = () => {
   useEffect(() => {
     push(["trackEvent", "404", "Page non trouvée"]);
   }, []);
@@ -23,8 +23,10 @@ export default function NotFoundPage() {
       </Box>
     </>
   );
-}
-
-NotFoundPage.getLayout = function getLayout(page: ReactElement) {
-  return <ConsulterIndexLayout>{page}</ConsulterIndexLayout>;
 };
+
+NotFoundPage.getLayout = ({ children }) => {
+  return <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+};
+
+export default NotFoundPage;

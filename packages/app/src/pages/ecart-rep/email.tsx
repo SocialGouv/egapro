@@ -1,12 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { requestEmailForToken } from "@common/utils/api";
+import { requestEmailForToken } from "../../services/apiClient/token";
+import type { NextPageWithLayout } from "../_app";
+import type { FeatureStatus } from "@common/utils/feature";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
-import { Alert, AlertTitle, FormButton, FormGroup, FormGroupLabel, FormGroupMessage, FormInput } from "@design-system";
+import {
+  Alert,
+  AlertTitle,
+  FormButton,
+  FormGroup,
+  FormGroupLabel,
+  FormGroupMessage,
+  FormInput,
+  FormLayout,
+  FormLayoutButtonGroup,
+} from "@design-system";
 
 const title = "Validation de l'email";
 
@@ -19,26 +31,13 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-type FeatureStatus =
-  | {
-      message: string;
-      type: "error";
-    }
-  | {
-      type: "idle";
-    }
-  | {
-      type: "loading";
-    }
-  | { message: string; type: "success" };
-
 const informationMessage =
   "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
 
-export default function EmailPage() {
+const EmailPage: NextPageWithLayout = () => {
   useTokenAndRedirect("./commencer");
 
-  const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
+  const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
   const {
     register,
@@ -46,14 +45,14 @@ export default function EmailPage() {
     watch,
     formState: { errors, isSubmitted, isDirty, isValid },
   } = useForm<FormType>({
-    resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
+    resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
     defaultValues: {
       email: "",
     },
   });
 
   // Remove error message after some timeout.
-  React.useEffect(() => {
+  useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     if (featureStatus.type === "error") {
       timeoutId = setTimeout(() => {
@@ -64,7 +63,7 @@ export default function EmailPage() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [featureStatus]);
+  }, [featureStatus, setFeatureStatus]);
 
   const email = watch("email");
 
@@ -128,34 +127,35 @@ export default function EmailPage() {
             L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail en
             cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.
           </p>
-
           <p>
             Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé
             pour la déclaration ou un des emails rattachés au Siren de votre entreprise.
           </p>
-
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <FormGroup>
-              <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
-              <FormInput id="email" type="email" {...register("email")} />
-              {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
-            </FormGroup>
-
-            <FormButton
-              type="submit"
-              isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}
-            >
-              Envoyer
-            </FormButton>
+            <FormLayout>
+              <FormGroup>
+                <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
+                <FormInput id="email" type="email" {...register("email")} />
+                {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
+              </FormGroup>
+              <FormLayoutButtonGroup>
+                <FormButton
+                  type="submit"
+                  isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}
+                >
+                  Envoyer
+                </FormButton>
+              </FormLayoutButtonGroup>
+            </FormLayout>
           </form>
-
-          <br />
         </>
       )}
     </>
   );
-}
-
-EmailPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeStartLayout>{page}</RepartitionEquilibreeStartLayout>;
 };
+
+EmailPage.getLayout = ({ children }) => {
+  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+};
+
+export default EmailPage;

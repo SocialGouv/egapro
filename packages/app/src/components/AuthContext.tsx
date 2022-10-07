@@ -1,9 +1,12 @@
 import { useRouter } from "next/router";
-import React from "react";
+import type { PropsWithChildren } from "react";
+import { useCallback, useState } from "react";
+import { useContext } from "react";
+import React, { createContext, useEffect } from "react";
 
-import type { FetchError } from "../hooks/utils";
+import type { FetchError } from "../common/utils/fetcher";
 
-import { EXPIRED_TOKEN_MESSAGE, fetcher } from "../hooks/utils";
+import { EXPIRED_TOKEN_MESSAGE, fetcher } from "../common/utils/fetcher";
 
 // TODO: type à confirmer par rapport au endpoint /!\
 type DeclarationSummary = {
@@ -38,15 +41,15 @@ const initialContext = {
   loading: false,
 };
 
-const AuthContext = React.createContext(initialContext);
+const AuthContext = createContext(initialContext);
 AuthContext.displayName = "AuthContext";
 
 // TODO : ne plus utiliser que ce contexte. En particulier, dans Simulateur, il y a tout un traitement qui utilise getTokenInfo directement.
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const [context, setContext] = React.useState(initialContext);
+export const AuthContextProvider = ({ children }: PropsWithChildren) => {
+  const [context, setContext] = useState(initialContext);
 
-  const login = React.useCallback(
+  const login = useCallback(
     async (token: string) => {
       let newContext: typeof initialContext = { ...context, loading: true };
       setContext(newContext);
@@ -82,7 +85,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     [context],
   );
 
-  const refreshAuth = React.useCallback(async () => {
+  const refreshAuth = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (token) {
       await login(token);
@@ -91,40 +94,40 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     }
   }, [login]);
 
-  const logout = React.useCallback(function logout() {
+  const logout = useCallback(function logout() {
     localStorage.setItem("token", "");
     localStorage.setItem("tokenInfo", "");
     setContext({ ...initialContext, loading: false });
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // tentative de login au mount du composant
     login(localStorage.getItem("token") || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <AuthContext.Provider value={{ ...context, logout, login, refreshAuth }}>{children}</AuthContext.Provider>;
-}
+};
 
-export function useUser(): typeof initialContext {
-  const context = React.useContext(AuthContext);
+export const useUser = (): typeof initialContext => {
+  const context = useContext(AuthContext);
 
   if (!context) throw new Error("useUser must be used in a <AuthContextProvider />");
 
   return context;
-}
+};
 
 /**
  * Check if a token is present in the URL bar. If so, run login with it.
  *
  * Use this hook carefully, i.e. on pages which expect to be a landing page of an email token lin, because the useEffect in this function is called at every render.
  */
-export function useCheckTokenInURL() {
+export const useCheckTokenInURL = () => {
   const { login, loading } = useUser();
   const router = useRouter();
 
   // This useEffect is called at every render, becacuse we need to try to login with the token in the URL.
-  React.useEffect(() => {
+  useEffect(() => {
     async function runEffect() {
       const urlParams = new URLSearchParams(window.location.search);
 
@@ -141,16 +144,16 @@ export function useCheckTokenInURL() {
 
     runEffect();
   });
-}
+};
 
-export function useLogoutIfExpiredToken(error: FetchError) {
+export const useLogoutIfExpiredToken = (error: FetchError) => {
   const { logout } = useUser();
-  React.useEffect(() => {
+  useEffect(() => {
     if (error?.info === EXPIRED_TOKEN_MESSAGE) {
       logout();
     }
   }, [error, logout]);
-}
+};
 
 export const useTokenAndRedirect = (redirectUrl: string) => {
   const router = useRouter();

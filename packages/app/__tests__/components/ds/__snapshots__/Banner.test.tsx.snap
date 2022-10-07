@@ -1,88 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`should match snapshot 1`] = `
-Object {
+{
   "asFragment": [Function],
-  "baseElement": <body>
-    <div
-      id="chakra-toast-portal"
-    >
-      <ul
-        id="chakra-toast-manager-top"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
-      />
-      <ul
-        id="chakra-toast-manager-top-left"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-top-right"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom-left"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom-right"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-    </div>
+  "baseElement": <body
+    class="chakra-ui-light"
+  >
     <div>
       <div
-        class="chakra-stack css-n5lqjs"
+        class="chakra-stack css-ndtc64"
       >
         <div
-          class="chakra-stack css-15lgeks"
+          class="chakra-stack css-g9cw6v"
         >
-          <div
-            class="css-105dps8"
-          >
-            <svg
-              class="chakra-icon css-1lz7u3x"
-              fill="none"
-              focusable="false"
-              height="1em"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-              />
-              <line
-                x1="12"
-                x2="12"
-                y1="16"
-                y2="12"
-              />
-              <line
-                x1="12"
-                x2="12.01"
-                y1="8"
-                y2="8"
-              />
-            </svg>
-          </div>
           <p
-            class="chakra-text css-1uh24pi"
+            class="chakra-text css-7wnz5b"
           >
             Les informations de l'entreprise ou de l'UES ainsi que la tranche d'effectifs, correspondent à la dernière déclaration.
           </p>
         </div>
         <button
           aria-label="Fermer le panneau d'information"
-          class="css-6sdaxy"
+          class="css-tosese"
           type="button"
         >
           <svg
@@ -98,59 +37,68 @@ Object {
           </svg>
         </button>
       </div>
+      <span
+        hidden=""
+        id="__chakra_env"
+      />
+    </div>
+    <div
+      class="chakra-portal"
+    >
+      <ul
+        aria-live="polite"
+        id="chakra-toast-manager-top"
+        role="region"
+        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
+      />
+      <ul
+        aria-live="polite"
+        id="chakra-toast-manager-top-left"
+        role="region"
+        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+      />
+      <ul
+        aria-live="polite"
+        id="chakra-toast-manager-top-right"
+        role="region"
+        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+      />
+      <ul
+        aria-live="polite"
+        id="chakra-toast-manager-bottom-left"
+        role="region"
+        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+      />
+      <ul
+        aria-live="polite"
+        id="chakra-toast-manager-bottom"
+        role="region"
+        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
+      />
+      <ul
+        aria-live="polite"
+        id="chakra-toast-manager-bottom-right"
+        role="region"
+        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
+      />
     </div>
   </body>,
   "container": <div>
     <div
-      class="chakra-stack css-n5lqjs"
+      class="chakra-stack css-ndtc64"
     >
       <div
-        class="chakra-stack css-15lgeks"
+        class="chakra-stack css-g9cw6v"
       >
-        <div
-          class="css-105dps8"
-        >
-          <svg
-            class="chakra-icon css-1lz7u3x"
-            fill="none"
-            focusable="false"
-            height="1em"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="1em"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <line
-              x1="12"
-              x2="12"
-              y1="16"
-              y2="12"
-            />
-            <line
-              x1="12"
-              x2="12.01"
-              y1="8"
-              y2="8"
-            />
-          </svg>
-        </div>
         <p
-          class="chakra-text css-1uh24pi"
+          class="chakra-text css-7wnz5b"
         >
           Les informations de l'entreprise ou de l'UES ainsi que la tranche d'effectifs, correspondent à la dernière déclaration.
         </p>
       </div>
       <button
         aria-label="Fermer le panneau d'information"
-        class="css-6sdaxy"
+        class="css-tosese"
         type="button"
       >
         <svg
@@ -166,6 +114,10 @@ Object {
         </svg>
       </button>
     </div>
+    <span
+      hidden=""
+      id="__chakra_env"
+    />
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

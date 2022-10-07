@@ -1,14 +1,14 @@
-import React, { FunctionComponent } from "react"
+import React, { PropsWithChildren } from "react"
 
 import ResultSummary, { ResultSummaryProps } from "../../../components/ResultSummary"
 import { Grid, GridItem, Heading } from "@chakra-ui/react"
 
-interface RecapBlocProps {
+export type RecapBlocProps = PropsWithChildren<{
   title: string
   resultSummary: ResultSummaryProps
-}
+}>
 
-const RecapBloc: FunctionComponent<RecapBlocProps> = ({ title, children, resultSummary }) => {
+const RecapBloc = ({ title, children, resultSummary }: RecapBlocProps) => {
   return (
     <Grid
       templateColumns={{ sm: "1fr", md: "1fr 240px" }}

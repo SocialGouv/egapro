@@ -1,7 +1,7 @@
-type SpanProps = {
+export type SpanProps = {
   name: string;
 };
 
-export function Span({ name }: SpanProps) {
+export const Span = ({ name }: SpanProps) => {
   return <span>Hello {name}</span>;
-}
+};

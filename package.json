@@ -2,9 +2,11 @@
   "name": "~egapro-dev",
   "version": "2.14.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "engines": {
     "node": "16"
   },

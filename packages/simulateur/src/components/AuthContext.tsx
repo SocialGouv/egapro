@@ -1,4 +1,4 @@
-import React from "react"
+import React, { PropsWithChildren, useCallback, useContext, useEffect, useState } from "react"
 
 import { useHistory } from "react-router-dom"
 import { getTokenInfo } from "../utils/api"
@@ -23,10 +23,10 @@ AuthContext.displayName = "AuthContext"
 
 // TODO : ne plus utiliser que ce contexte. En particulier, dans Simulateur, il y a tout un traitement qui utilise getTokenInfo directement.
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const [context, setContext] = React.useState(initialContext)
+export const AuthContextProvider = ({ children }: PropsWithChildren) => {
+  const [context, setContext] = useState(initialContext)
 
-  const login = React.useCallback(
+  const login = useCallback(
     async (token: string) => {
       let newContext: typeof initialContext = { ...context, loading: true }
       setContext(newContext)
@@ -61,7 +61,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     [context],
   )
 
-  const refreshAuth = React.useCallback(async () => {
+  const refreshAuth = useCallback(async () => {
     const token = localStorage.getItem("token")
     if (token) {
       await login(token)
@@ -70,13 +70,13 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     }
   }, [login])
 
-  const logout = React.useCallback(function logout() {
+  const logout = useCallback(function logout() {
     localStorage.setItem("token", "")
     localStorage.setItem("tokenInfo", "")
     setContext({ ...initialContext, loading: false })
   }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     // tentative de login au mount du composant
     login(localStorage.getItem("token") || "")
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,7 +86,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 }
 
 export function useUser(): typeof initialContext {
-  const context = React.useContext(AuthContext)
+  const context = useContext(AuthContext)
 
   if (!context) throw new Error("useUser must be used in a <AuthContextProvider />")
 
@@ -101,7 +101,7 @@ export function useCheckTokenInURL() {
   const history = useHistory()
 
   // useEffect called at every render, to try to login with the token in the URL.
-  React.useEffect(() => {
+  useEffect(() => {
     async function runEffect() {
       const urlParams = new URLSearchParams(window.location.search)
 
@@ -120,7 +120,7 @@ export function useCheckTokenInURL() {
 
 export function useLogoutIfExpiredToken(error: FetchError) {
   const { logout } = useUser()
-  React.useEffect(() => {
+  useEffect(() => {
     if (error?.info === EXPIRED_TOKEN_MESSAGE) {
       logout()
     }

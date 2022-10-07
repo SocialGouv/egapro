@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { FunctionComponent } from "react";
 
 import { useUser } from "../../components/AuthContext";
 import { FormButton } from "./FormButton";
@@ -13,12 +12,7 @@ export type HeaderBodyProps = {
   showMenuMobile: () => void;
 };
 
-export const HeaderBody: FunctionComponent<HeaderBodyProps> = ({
-  isMobileMenuOpen,
-  showMenuMobile,
-  mobileMenuId,
-  buttonMobileMenuId,
-}) => {
+export const HeaderBody = ({ isMobileMenuOpen, showMenuMobile, mobileMenuId, buttonMobileMenuId }: HeaderBodyProps) => {
   const { isAuthenticated, logout } = useUser();
   const router = useRouter();
 

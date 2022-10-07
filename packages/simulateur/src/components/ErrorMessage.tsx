@@ -1,7 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
+import { PropsWithChildren } from "react"
 
-const ErrorMessage: React.FC = ({ children }) => {
+const ErrorMessage = ({ children }: PropsWithChildren) => {
   return (
     <div css={styles.errorMessage}>
       <p>{children || "Erreur"}</p>
