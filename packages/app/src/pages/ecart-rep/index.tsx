@@ -1,8 +1,10 @@
 import Image from "next/image";
+import NextLink from "next/link";
 
 import picture from "../../../public/picture-1.svg";
 import type { NextPageWithLayout } from "../_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
+import { ButtonAsLink } from "@design-system";
 
 export const EcartRep: NextPageWithLayout = () => (
   <section>
@@ -30,9 +32,9 @@ export const EcartRep: NextPageWithLayout = () => (
               <strong>membres des instances dirigeantes</strong> des grandes entreprises, accompagnée d’une{" "}
               <strong>obligation de transparence</strong> en la matière.
             </p>
-            <a href="#" className="fr-btn">
-              Déclarer les écarts éventuels de représentation femmes-hommes
-            </a>
+            <NextLink href="/ecart-rep/assujetti/" passHref>
+              <ButtonAsLink>Déclarer les écarts éventuels de représentation femmes-hommes</ButtonAsLink>
+            </NextLink>
           </div>
           <div className="fr-col-lg-5 fr-col-12">
             <Image src={picture} alt="" layout="responsive" />
