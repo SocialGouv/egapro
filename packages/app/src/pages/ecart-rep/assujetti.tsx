@@ -75,3 +75,5 @@ const AssujettiPage: NextPageWithLayout = () => {
 AssujettiPage.getLayout = ({ children }) => {
   return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
 };
+
+export default AssujettiPage;
