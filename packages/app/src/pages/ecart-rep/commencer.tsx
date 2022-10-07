@@ -84,7 +84,6 @@ const CommencerPage: NextPageWithLayout = () => {
 
       try {
         const entreprise = await fetchSiren(siren, Number(year));
-        resetFormData();
         saveFormData({ entreprise, year: Number(year) });
         setFeatureStatus({ type: "idle" });
         router.push("/ecart-rep/declarant");
@@ -97,6 +96,7 @@ const CommencerPage: NextPageWithLayout = () => {
     if (formData.entreprise?.siren && siren !== formData.entreprise.siren) {
       if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
         // Start a new declaration of repartition.
+        resetFormData();
         await startFresh();
       } else {
         // Rollback.
