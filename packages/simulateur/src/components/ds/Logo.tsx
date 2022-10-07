@@ -7,7 +7,7 @@ const Logo: FunctionComponent<LogoProps> = () => {
   return (
     <Image
       src={process.env.PUBLIC_URL + "/marianne.svg"}
-      alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+      alt="Aller à la page d'accueil du Ministère du travail, du plein emploi et de l'insertion"
       width={88}
     />
   )
