@@ -26,9 +26,6 @@ type OwnersType = { owners?: string[] };
 /**
  * Return the owners of the given siren. This endpoint returns only if the user is granted.
  * Otherwise, it returns an error.
- *
- * @param {*} siren
- * @returns { owners: string[] }
  */
 export const ownersForSiren = async (siren: string) => {
   return fetcher<OwnersType>(`/ownership/${siren}`);

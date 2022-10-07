@@ -2,16 +2,17 @@
   "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
     "strict": true,
-    "baseUrl": "./",
+    // to trick auto imports
+    "baseUrl": "../../",
     "paths": {
       "@common/*": [
-        "src/common/*"
+        "packages/app/src/common/*"
       ],
       "@components/*": [
-        "src/components/*"
+        "packages/app/src/components/*"
       ],
       "@design-system": [
-        "src/design-system/index"
+        "packages/app/src/design-system/index"
       ]
     }
   },
