@@ -1,12 +1,13 @@
-import * as React from "react";
+import NextLink from "next/link";
 import { useState } from "react";
 
+import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
-import { ButtonAsLink, Callout, FormRadioGroup, FormRadioGroupInput } from "@design-system";
+import { ButtonAsLink, Callout, FormRadioGroup, FormRadioGroupInput, Link } from "@design-system";
 
 const title = "Êtes-vous assujetti ?";
 
-export default function AssujettiPage() {
+const AssujettiPage: NextPageWithLayout = () => {
   const [isAssujetti, setAssujetti] = useState("oui");
 
   function handleAssujettiChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -54,13 +55,23 @@ export default function AssujettiPage() {
         </FormRadioGroup>
       </form>
 
-      {(isAssujetti === "non" && <Callout>Lorem ipsum dolor amet...</Callout>) || (
-        <ButtonAsLink href="/ecart-rep/email">Suivant</ButtonAsLink>
+      {(isAssujetti === "non" && (
+        <Callout>
+          Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
+          les femmes et les hommes.{" "}
+          <NextLink href="/ecart-rep/">
+            <Link>Retour à la page d'accueil.</Link>
+          </NextLink>
+        </Callout>
+      )) || (
+        <NextLink href="/ecart-rep/email">
+          <ButtonAsLink>Suivant</ButtonAsLink>
+        </NextLink>
       )}
     </>
   );
-}
+};
 
-AssujettiPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeStartLayout>{page}</RepartitionEquilibreeStartLayout>;
+AssujettiPage.getLayout = ({ children }) => {
+  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
 };
