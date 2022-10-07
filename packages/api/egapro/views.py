@@ -192,7 +192,6 @@ async def get_declarations(request, response, siren):
 
 @app.route("/declaration/{siren}/{year}", methods=["GET"])
 @tokens.require
-@ensure_owner
 async def get_declaration(request, response, siren, year):
     try:
         record = await db.declaration.get(siren, year)
