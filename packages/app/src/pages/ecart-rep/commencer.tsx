@@ -21,8 +21,6 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-import { useFormManager } from "services/apiClient/form-manager";
-import { checkSiren, fetchSiren } from "services/apiClient/siren";
 
 const title = "Commencer ou accéder à une déclaration";
 

@@ -19,7 +19,6 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-import { requestEmailForToken } from "services/apiClient/token";
 
 const title = "Validation de l'email";
 
