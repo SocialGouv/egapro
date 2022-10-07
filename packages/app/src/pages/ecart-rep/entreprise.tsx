@@ -6,7 +6,6 @@ import type { NextPageWithLayout } from "../_app";
 import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
-import { useFormManager } from "services/apiClient/form-manager";
 
 const title = "Informations entreprise";
 
