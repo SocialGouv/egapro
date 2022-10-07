@@ -14,7 +14,7 @@ const title = "Informations déclarant";
 const formSchema = z.object({
   nom: z.string().min(1, { message: "Le nom est requis" }),
   prenom: z.string().min(1, { message: "Le prénom est requis" }),
-  telephone: z.string().min(1, { message: "Le téléphone est requis" }),
+  telephone: z.string().regex(/\d/gi).min(1, { message: "Le téléphone est requis" }),
   email: z.string().email(),
 });
 
