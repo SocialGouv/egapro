@@ -8,7 +8,7 @@ import { BasicLayout } from "@components/layouts/BasicLayout";
 const Home: NextPageWithLayout = () => {
   return (
     <section>
-      <div className="bg-grey-975 fr-py-10w">
+      <div className="fr-pt-10w fr-pb-4w" style={{ background: "#f6f6f6" }}>
         <div className="fr-container">
           <div className="fr-grid-row fr-grid-row--gutters">
             <div className="fr-col-lg-7 fr-col-12">
@@ -24,13 +24,13 @@ const Home: NextPageWithLayout = () => {
                 le 1er mars.
               </p>
             </div>
-            <div className="fr-col-lg-5 fr-col-12">
+            <div className="fr-col-lg-5 fr-col-md-6 fr-col-12 fr-mx-auto">
               <Image src={picture} alt="" layout="responsive" />
             </div>
           </div>
         </div>
       </div>
-      <div className="fr-container">
+      <div className="fr-container fr-mt-8w">
         <div className="fr-pb-8w">
           <div className="fr-grid-row fr-grid-row--gutters">
             <div className="fr-col-md-6 fr-col-12">

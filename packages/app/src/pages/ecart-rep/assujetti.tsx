@@ -59,12 +59,12 @@ const AssujettiPage: NextPageWithLayout = () => {
         <Callout>
           Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
           les femmes et les hommes.{" "}
-          <NextLink href="/ecart-rep/">
+          <NextLink href="/ecart-rep/" passHref>
             <Link>Retour à la page d'accueil.</Link>
           </NextLink>
         </Callout>
       )) || (
-        <NextLink href="/ecart-rep/email">
+        <NextLink href="/ecart-rep/email" passHref>
           <ButtonAsLink>Suivant</ButtonAsLink>
         </NextLink>
       )}
