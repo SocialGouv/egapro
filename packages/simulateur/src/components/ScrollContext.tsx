@@ -1,18 +1,21 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 /** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react"
-import { useRef, useContext, useCallback, createContext, ReactNode } from "react"
+import { css, SerializedStyles } from "@emotion/react"
+import { useRef, useContext, useCallback, createContext, PropsWithChildren } from "react"
 
 // Context
 
 export const ScrollContext = createContext({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  scrollTo: (coord: number) => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  scrollTo: (_coord: number) => {},
 })
 
 // Provider
 
-function ScrollProvider({ children, style }: { children: ReactNode; style: any }) {
+export type ScrollProviderProps = PropsWithChildren<{
+  style: SerializedStyles
+}>
+
+function ScrollProvider({ children, style }: ScrollProviderProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const scrollEl = scrollRef.current
 

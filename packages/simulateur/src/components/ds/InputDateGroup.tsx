@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React, { PropsWithChildren } from "react"
 import fr from "date-fns/locale/fr"
 import DatePicker, { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
@@ -11,21 +11,21 @@ import { displayMetaErrors } from "../../utils/form-error-helpers"
 
 registerLocale("fr", fr)
 
-interface InputDateGroupProps {
+type InputDateGroupProps = PropsWithChildren<{
   label: string
   fieldName: string
   isReadOnly: boolean
   autovalidation?: boolean // If true, the field will be validated via default validators. If no, you can use your own validator (see ObjectifsMesuresPage.tsx).
-}
+}>
 
-const InputDateGroup: FunctionComponent<InputDateGroupProps> = ({
+const InputDateGroup = ({
   label,
   fieldName,
   isReadOnly,
   children,
   autovalidation = true,
   ...rest
-}) => {
+}: InputDateGroupProps) => {
   return (
     <Field name={fieldName} {...(autovalidation && { validate: validateDate })} component="input">
       {({ input, meta }) => (

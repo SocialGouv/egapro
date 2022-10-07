@@ -1,4 +1,4 @@
-import React, { useCallback, FunctionComponent } from "react"
+import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
 import { Text, VStack } from "@chakra-ui/react"
 import { RouteComponentProps } from "react-router-dom"
 
@@ -165,7 +165,7 @@ const IndicateurDeuxTrois: FunctionComponent<IndicateurDeuxTroisProps> = ({ stat
   )
 }
 
-const PageIndicateurDeuxTrois: FunctionComponent = ({ children }) => (
+const PageIndicateurDeuxTrois = ({ children }: PropsWithChildren) => (
   <Page
     title={title}
     tagline="Le nombre de femmes et d'hommes ayant été augmentés durant la période de référence, ou pendant les deux ou trois dernières années."

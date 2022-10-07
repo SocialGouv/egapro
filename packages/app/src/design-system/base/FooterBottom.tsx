@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
 
-export const FooterBottom = ({ children }: PropsWithChildren<Record<never, never>>) => {
+export const FooterBottom = ({ children }: PropsWithChildren) => {
   return (
     <div className="fr-footer__bottom">
       <ul className="fr-footer__bottom-list">{children}</ul>

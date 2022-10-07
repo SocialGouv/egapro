@@ -4,9 +4,7 @@ import { Footer } from "../base/Footer";
 import { Header } from "../base/Header";
 import styles from "./App.module.css";
 
-export type AppProps = PropsWithChildren<Record<never, never>>;
-
-export const App = ({ children }: AppProps) => {
+export const App = ({ children }: PropsWithChildren) => {
   return (
     <div className={styles.app}>
       <Header />

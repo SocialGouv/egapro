@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
-import * as React from "react";
 
+import { useEffect } from "react";
+import { useFormManager } from "../../services/apiClient/form-manager";
+import type { NextPageWithLayout } from "../_app";
 import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
@@ -8,14 +10,14 @@ import { useFormManager } from "services/apiClient/form-manager";
 
 const title = "Informations entreprise";
 
-export default function InformationsEntreprise() {
+const InformationsEntreprise: NextPageWithLayout = () => {
   const { isAuthenticated } = useUser();
 
   const { formData } = useFormManager();
 
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) router.push("/ecart-rep/email");
   }, [isAuthenticated, router]);
 
@@ -77,8 +79,10 @@ export default function InformationsEntreprise() {
       </form>
     </>
   );
-}
-
-InformationsEntreprise.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeLayout>{page}</RepartitionEquilibreeLayout>;
 };
+
+InformationsEntreprise.getLayout = ({ children }) => {
+  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+};
+
+export default InformationsEntreprise;

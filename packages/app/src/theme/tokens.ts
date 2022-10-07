@@ -1,5 +1,3 @@
-import { createBreakpoints } from "@chakra-ui/theme-tools";
-
 export const tokens = {
   fonts: {
     heading: "Cabin",
@@ -7,13 +5,13 @@ export const tokens = {
     gabriela: "Gabriela",
     cabin: "Cabin",
   },
-  breakpoints: createBreakpoints({
+  breakpoints: {
     sm: "30em",
     md: "48em",
     lg: "64rem",
     xl: "80rem",
     "2xl": "96em",
-  }),
+  },
   sizes: {
     container: {
       xl: "1400px",

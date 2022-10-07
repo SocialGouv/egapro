@@ -1,10 +1,10 @@
-import React, { FunctionComponent, ReactElement } from "react"
+import React, { FunctionComponent, PropsWithChildren, ReactElement } from "react"
 import { Box } from "@chakra-ui/react"
 
-export type SummaryProps = {
+export type SummaryProps = PropsWithChildren<{
   colorScheme?: string
   footer?: ReactElement
-}
+}>
 
 const Summary: FunctionComponent<SummaryProps> = ({ children, footer, colorScheme = "white" }) => {
   return (

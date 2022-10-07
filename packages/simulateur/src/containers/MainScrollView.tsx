@@ -1,4 +1,4 @@
-import React, { useEffect, ReactNode, FunctionComponent } from "react"
+import React, { useEffect, PropsWithChildren } from "react"
 import {
   Container,
   Box,
@@ -22,12 +22,38 @@ import FAQ from "../views/FAQ"
 import ButtonAction from "../components/ds/ButtonAction"
 import { IconMenu } from "../components/ds/Icons"
 
-interface MainScrollViewProps extends RouteComponentProps {
-  children: ReactNode
-  state: AppState | undefined
+export type ContentProps = PropsWithChildren<{ pathname: string }>
+
+const Content = ({ children, pathname }: ContentProps) => {
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return (
+    <Box
+      px={isLargerThan1280 ? 8 : 0}
+      py={isLargerThan1280 ? 10 : 6}
+      sx={{
+        gridArea: "main",
+        borderRight: isLargerThan1280 ? "1px solid #E3E4ED" : "none",
+        "@media print": {
+          paddingLeft: 0,
+          paddingRight: 0,
+          borderRight: "none",
+        },
+      }}
+    >
+      {children}
+    </Box>
+  )
+}
+interface MainScrollViewProps extends PropsWithChildren<RouteComponentProps> {
+  state?: AppState
 }
 
-const MainScrollView: FunctionComponent<MainScrollViewProps> = ({ children, state, location }) => {
+const MainScrollView = ({ children, state, location }: MainScrollViewProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isSmallerThan1279] = useMediaQuery("(max-width: 1279px)")
@@ -129,32 +155,6 @@ const MainScrollView: FunctionComponent<MainScrollViewProps> = ({ children, stat
         </Container>
       </Flex>
     </>
-  )
-}
-
-function Content({ children, pathname }: { children: ReactNode; pathname: string }) {
-  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
-
-  return (
-    <Box
-      px={isLargerThan1280 ? 8 : 0}
-      py={isLargerThan1280 ? 10 : 6}
-      sx={{
-        gridArea: "main",
-        borderRight: isLargerThan1280 ? "1px solid #E3E4ED" : "none",
-        "@media print": {
-          paddingLeft: 0,
-          paddingRight: 0,
-          borderRight: "none",
-        },
-      }}
-    >
-      {children}
-    </Box>
   )
 }
 export default withRouter(MainScrollView)

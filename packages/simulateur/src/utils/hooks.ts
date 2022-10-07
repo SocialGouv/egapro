@@ -134,7 +134,7 @@ export function useSoloToastMessage(id: string, message: AlertMessageType | null
 
   const toastMessage = showToastMessageNoDuplicate(toast, toastId, options)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (message) {
       toastMessage(message)
     } else {

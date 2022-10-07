@@ -24,13 +24,13 @@ import {
 } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { ReactElement } from "react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
 import type { SearchCompanyParams } from "../../hooks";
 import { useSearch } from "../../hooks";
 import { filterDepartements, useConfig, useCallbackOnMount } from "../../hooks";
+import type { NextPageWithLayout } from "../_app";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
@@ -73,7 +73,7 @@ function UES() {
 
 function Company({ company }: { company: CompanyType }) {
   const { isOpen, onToggle } = useDisclosure();
-  const [yearSelected, setYearSelected] = React.useState<number>();
+  const [yearSelected, setYearSelected] = useState<number>();
   const highlightColor = useColorModeValue("blue.100", "blue.800");
   const linkColor = useColorModeValue("primary.600", "primary.100");
 
@@ -374,14 +374,14 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQuery) {
   };
 }
 
-export default function SearchPage() {
+const SearchPage: NextPageWithLayout = () => {
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
 
   const router = useRouter();
   const inputs = normalizeInputs(router.query);
-  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([]);
-  const [search, setSearch] = React.useState<SearchCompanyParams>(inputs);
+  const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
+  const [search, setSearch] = useState<SearchCompanyParams>(inputs);
 
   const { companies, isLoading, error, size, setSize } = useSearch(inputs);
 
@@ -392,12 +392,12 @@ export default function SearchPage() {
     setSearch({});
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     // inital load of departments.
     reset();
   }, [config, reset]); // config change only at start.
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (region) {
       setDepartements(filterDepartements(config, region));
     }
@@ -517,8 +517,8 @@ export default function SearchPage() {
       )}
     </>
   );
-}
-
-SearchPage.getLayout = function getLayout(page: ReactElement) {
-  return <ConsulterIndexLayout>{page}</ConsulterIndexLayout>;
 };
+
+SearchPage.getLayout = ({ children }) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+
+export default SearchPage;

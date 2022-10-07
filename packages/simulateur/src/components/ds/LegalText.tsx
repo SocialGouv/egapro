@@ -1,7 +1,7 @@
-import React from "react"
+import React, { PropsWithChildren } from "react"
 import { Text } from "@chakra-ui/react"
 
-const LegalText: React.FC = ({ children }) => (
+const LegalText = ({ children }: PropsWithChildren) => (
   <Text fontStyle="italic" fontSize="sm">
     {children}
   </Text>

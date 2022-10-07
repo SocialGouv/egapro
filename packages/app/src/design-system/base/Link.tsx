@@ -1,17 +1,14 @@
 import clsx from "clsx";
-import type { PropsWithChildren } from "react";
 
-import type { iconStyles } from "../utils/icon-styles";
+import type { IconStyles } from "../utils/icon-styles";
 
-export type LinkProps = PropsWithChildren<
-  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-    iconLeft?: iconStyles;
-    iconRight?: iconStyles;
-    isCurrent?: boolean;
-    isDisabled?: boolean;
-    size?: "lg" | "sm";
-  }
->;
+export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  iconLeft?: IconStyles;
+  iconRight?: IconStyles;
+  isCurrent?: boolean;
+  isDisabled?: boolean;
+  size?: "lg" | "sm";
+};
 
 export const Link = ({
   href,

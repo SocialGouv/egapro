@@ -12,14 +12,14 @@ export type StatsType = {
   min: number;
 };
 
-export type StatsParams = {
+export type UseStatsParams = {
   departement?: string;
   region?: string;
   section_naf?: string;
   year?: string;
 };
 
-export function useStats(params?: StatsParams): FetcherReturn & { stats: StatsType | undefined } {
+export const useStats = (params?: UseStatsParams): FetcherReturn & { stats: StatsType | undefined } => {
   const urlParams = buildUrlParamsString(params);
   const key = "/stats?" + urlParams;
 
@@ -35,4 +35,4 @@ export function useStats(params?: StatsParams): FetcherReturn & { stats: StatsTy
     isError,
     mutate,
   };
-}
+};

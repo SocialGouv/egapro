@@ -1,9 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { useFormManager } from "../../services/apiClient/form-manager";
+import { checkSiren, fetchSiren } from "../../services/apiClient/siren";
+import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
 import { ClientOnly } from "@components/ClientOnly";
@@ -46,12 +49,12 @@ type FormType = z.infer<typeof formSchema>;
 const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
-export default function CommencerPage() {
+const CommencerPage: NextPageWithLayout = () => {
   const { isAuthenticated } = useUser();
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
 
-  const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
+  const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
   const {
     register,
@@ -60,18 +63,18 @@ export default function CommencerPage() {
     reset,
     formState: { errors, isSubmitted, isValid },
   } = useForm<FormType>({
-    resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
+    resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
   });
 
-  const resetAsyncForm = React.useCallback(async () => {
+  const resetAsyncForm = useCallback(async () => {
     reset({ siren: formData?.entreprise?.siren, year: String(formData.year) });
   }, [reset, formData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     resetAsyncForm();
   }, [resetAsyncForm]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) router.push("/ecart-rep/email");
   }, [isAuthenticated, router]);
 
@@ -156,8 +159,10 @@ export default function CommencerPage() {
       </ClientOnly>
     </>
   );
-}
-
-CommencerPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeLayout>{page}</RepartitionEquilibreeLayout>;
 };
+
+CommencerPage.getLayout = ({ children }) => {
+  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+};
+
+export default CommencerPage;

@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React from "react"
 import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
 
 import { useTitle } from "../utils/hooks"
@@ -6,7 +6,7 @@ import Page from "../components/Page"
 
 const title = "Accessibilité"
 
-const Accessibilite: FunctionComponent = () => {
+const Accessibilite = () => {
   useTitle(title)
 
   return (

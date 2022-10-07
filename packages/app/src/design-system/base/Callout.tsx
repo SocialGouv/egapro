@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
 
-import type { iconStyles } from "../utils/icon-styles";
+import type { IconStyles } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 import styles from "./Callout.module.css";
@@ -11,7 +11,7 @@ import { FormButton } from "./FormButton";
 export type CalloutProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
     className?: string;
-    icon?: iconStyles;
+    icon?: IconStyles;
   }
 >;
 
