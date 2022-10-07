@@ -1,12 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import * as React from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import type { NextPageWithLayout } from "../_app";
 import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { FormButton, FormGroup, FormGroupLabel, FormInput, FormGroupMessage } from "@design-system";
+
 const title = "Informations déclarant";
 
 const formSchema = z.object({
@@ -19,12 +21,12 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-export default function DeclarantPage() {
+const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
 
   const { email } = useUser();
 
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   if (!isAuthenticated) router.push("/ecart-rep/email");
   // }, [isAuthenticated, router]);
 
@@ -35,13 +37,13 @@ export default function DeclarantPage() {
     formState: { errors, isValid, isDirty },
   } = useForm<FormType>({
     mode: "onChange",
-    resolver: zodResolver(formSchema as any),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: email,
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (email) {
       setValue("email", email);
     }
@@ -82,8 +84,10 @@ export default function DeclarantPage() {
       </form>
     </>
   );
-}
-
-DeclarantPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeStartLayout>{page}</RepartitionEquilibreeStartLayout>;
 };
+
+DeclarantPage.getLayout = ({ children }) => {
+  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+};
+
+export default DeclarantPage;
