@@ -6,7 +6,17 @@ import { z } from "zod";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
-import { Alert, AlertTitle, FormButton, FormGroup, FormGroupLabel, FormGroupMessage, FormInput } from "@design-system";
+import {
+  Alert,
+  AlertTitle,
+  FormButton,
+  FormGroup,
+  FormGroupLabel,
+  FormGroupMessage,
+  FormInput,
+  FormLayout,
+  FormLayoutButtonGroup,
+} from "@design-system";
 import { requestEmailForToken } from "services/apiClient/token";
 
 const title = "Validation de l'email";
@@ -116,28 +126,27 @@ export default function EmailPage() {
             L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail en
             cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.
           </p>
-
           <p>
             Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé
             pour la déclaration ou un des emails rattachés au Siren de votre entreprise.
           </p>
-
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <FormGroup>
-              <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
-              <FormInput id="email" type="email" {...register("email")} />
-              {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
-            </FormGroup>
-
-            <FormButton
-              type="submit"
-              isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}
-            >
-              Envoyer
-            </FormButton>
+            <FormLayout>
+              <FormGroup>
+                <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
+                <FormInput id="email" type="email" {...register("email")} />
+                {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
+              </FormGroup>
+              <FormLayoutButtonGroup>
+                <FormButton
+                  type="submit"
+                  isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}
+                >
+                  Envoyer
+                </FormButton>
+              </FormLayoutButtonGroup>
+            </FormLayout>
           </form>
-
-          <br />
         </>
       )}
     </>
