@@ -1,3 +1,10 @@
+## [2.22.5](https://github.com/SocialGouv/egapro/compare/v2.22.4...v2.22.5) (2022-10-07)
+
+
+### Bug Fixes
+
+* add new logo ([#1126](https://github.com/SocialGouv/egapro/issues/1126)) ([a63a194](https://github.com/SocialGouv/egapro/commit/a63a1947dbb764c4f292381c9a09a8e21997ebe7))
+
 ## [2.22.4](https://github.com/SocialGouv/egapro/compare/v2.22.3...v2.22.4) (2022-10-06)
 
 
