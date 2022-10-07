@@ -11,6 +11,7 @@ import {
   Container,
   ContentWithAside,
   ContentWithAsideMain,
+  ContentWithAsideSideMenu,
   SideMenu,
   SideMenuLink,
   SideMenuList,
@@ -25,17 +26,19 @@ export const RepartitionEquilibreeStartLayout = ({ children }: PropsWithChildren
     <App>
       <Container>
         <ContentWithAside>
-          <SideMenu buttonLabel={"Dans cette rubrique"}>
-            <SideMenuTitle>Répartition équilibrée</SideMenuTitle>
-            <SideMenuList>
-              <SideMenuLink href="#">Êtes-vous assujetti&nbsp;?</SideMenuLink>
-              <SideMenuLink href="#" target="_self" isCurrent>
-                Validation de l’email
-              </SideMenuLink>
-            </SideMenuList>
-          </SideMenu>
+          <ContentWithAsideSideMenu>
+            <SideMenu buttonLabel={"Dans cette rubrique"}>
+              <SideMenuTitle>Répartition équilibrée</SideMenuTitle>
+              <SideMenuList>
+                <SideMenuLink href="#">Êtes-vous assujetti&nbsp;?</SideMenuLink>
+                <SideMenuLink href="#" target="_self" isCurrent>
+                  Validation de l’email
+                </SideMenuLink>
+              </SideMenuList>
+            </SideMenu>
+          </ContentWithAsideSideMenu>
+          <ContentWithAsideMain>{children}</ContentWithAsideMain>
         </ContentWithAside>
-        <ContentWithAsideMain>{children}</ContentWithAsideMain>
       </Container>
     </App>
   );

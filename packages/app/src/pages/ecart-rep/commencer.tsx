@@ -11,7 +11,18 @@ import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
-import { FormButton, FormGroup, FormGroupMessage, FormInput, FormGroupLabel, FormSelect } from "@design-system";
+import {
+  FormButton,
+  FormGroup,
+  FormGroupMessage,
+  FormInput,
+  FormGroupLabel,
+  FormSelect,
+  FormLayout,
+  FormLayoutButtonGroup,
+} from "@design-system";
+import { useFormManager } from "services/apiClient/form-manager";
+import { checkSiren, fetchSiren } from "services/apiClient/siren";
 
 const title = "Commencer ou accéder à une déclaration";
 
@@ -27,7 +38,7 @@ const formSchema = z
       await checkSiren(siren, Number(year));
       return true;
     } catch (error) {
-      console.error("errror", error);
+      console.error("error", error);
       return false;
     }
   });
@@ -107,38 +118,43 @@ const CommencerPage: NextPageWithLayout = () => {
 
       <ClientOnly>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <FormGroup>
-            <FormGroupLabel htmlFor="year">
-              Année au titre de laquelle les écarts de représentation sont calculés
-            </FormGroupLabel>
-            <FormSelect
-              id="year"
-              placeholder="Sélectionnez une année"
-              {...register("year")}
-              isError={Boolean(errors.year)}
-              aria-describedby="year-message-error"
-            >
-              <option value="2021">2021</option>
-            </FormSelect>
-            {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="siren" hint="9 chiffres">
-              Numéro Siren de l'entreprise
-            </FormGroupLabel>
-            <FormInput
-              id="siren"
-              placeholder="Ex: 504920166, 403461742"
-              type="text"
-              {...register("siren")}
-              isError={Boolean(errors.siren)}
-              maxLength={9}
-            />
-            {errors.siren && <FormGroupMessage id="siren-message">{errors.siren.message}</FormGroupMessage>}
-          </FormGroup>
-
-          {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
-          <FormButton isDisabled={(isSubmitted && !isValid) || featureStatus.type === "loading"}>Suivant</FormButton>
+          <FormLayout>
+            <FormGroup>
+              <FormGroupLabel htmlFor="year">
+                Année au titre de laquelle les écarts de représentation sont calculés
+              </FormGroupLabel>
+              <FormSelect
+                id="year"
+                placeholder="Sélectionnez une année"
+                {...register("year")}
+                isError={Boolean(errors.year)}
+                aria-describedby="year-message-error"
+              >
+                <option value="2021">2021</option>
+              </FormSelect>
+              {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
+            </FormGroup>
+            <FormGroup>
+              <FormGroupLabel htmlFor="siren" hint="9 chiffres">
+                Numéro Siren de l'entreprise
+              </FormGroupLabel>
+              <FormInput
+                id="siren"
+                placeholder="Ex: 504920166, 403461742"
+                type="text"
+                {...register("siren")}
+                isError={Boolean(errors.siren)}
+                maxLength={9}
+              />
+              {errors.siren && <FormGroupMessage id="siren-message">{errors.siren.message}</FormGroupMessage>}
+            </FormGroup>
+            <FormLayoutButtonGroup>
+              {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
+              <FormButton isDisabled={(isSubmitted && !isValid) || featureStatus.type === "loading"}>
+                Suivant
+              </FormButton>
+            </FormLayoutButtonGroup>
+          </FormLayout>
         </form>
       </ClientOnly>
     </>

@@ -6,6 +6,13 @@ import {
   ContentWithAside,
   ContentWithAsideMain,
   ContentWithAsideSideMenu,
+  FormButton,
+  FormGroup,
+  FormGroupLabel,
+  FormInput,
+  FormLayout,
+  FormLayoutButtonGroup,
+  FormSelect,
   SideMenu,
   SideMenuLink,
   SideMenuList,
@@ -45,6 +52,27 @@ const Template: ComponentStory<typeof App> = () => (
             d’une part, leurs cadres dirigeants, et d’autre part, les membres de leurs instances dirigeantes, en
             parallèle de la publication et de la déclaration de leur Index de l’égalité professionnelle.
           </p>
+          <FormLayout>
+            <FormGroup>
+              <FormGroupLabel htmlFor="xxx">Label champ de saisie</FormGroupLabel>
+              <FormInput id="xxx" />
+            </FormGroup>
+            <FormGroup>
+              <FormGroupLabel htmlFor="yyy">Label champ de saisie</FormGroupLabel>
+              <FormInput id="yyy" />
+            </FormGroup>
+            <FormGroupLabel htmlFor="zzz">Label champ de saisie</FormGroupLabel>
+            <FormSelect id="zzz">
+              <option value="1">Option 1</option>
+              <option value="2">Option 2</option>
+              <option value="3">Option 3</option>
+              <option value="4">Option 4</option>
+            </FormSelect>
+            <FormLayoutButtonGroup>
+              <FormButton variant="tertiary">button</FormButton>
+              <FormButton>button</FormButton>
+            </FormLayoutButtonGroup>
+          </FormLayout>
         </ContentWithAsideMain>
       </ContentWithAside>
     </Container>
