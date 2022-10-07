@@ -1,4 +1,4 @@
-import React, { useCallback, FunctionComponent } from "react"
+import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsDeclarantData } from "../../globals"
@@ -46,7 +46,7 @@ const InformationsDeclarant: FunctionComponent<InformationsDeclarantProps> = ({ 
   )
 }
 
-const PageInformationsDeclarant: FunctionComponent = ({ children }) => (
+const PageInformationsDeclarant = ({ children }: PropsWithChildren) => (
   <Page title={title} tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email">
     {children}
   </Page>

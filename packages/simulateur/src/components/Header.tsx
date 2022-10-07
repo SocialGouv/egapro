@@ -24,7 +24,7 @@ import {
   useDisclosure,
   useMediaQuery,
 } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
+import React from "react"
 import { Link as RouterLink, useHistory } from "react-router-dom"
 
 import { LinkIcon } from "@chakra-ui/icons"
@@ -44,7 +44,7 @@ import {
 } from "./ds/Icons"
 import Logo from "./ds/Logo"
 
-const Header: FunctionComponent = () => {
+const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
   const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")

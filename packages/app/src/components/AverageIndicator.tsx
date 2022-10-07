@@ -2,15 +2,15 @@ import { InfoOutlineIcon } from "@chakra-ui/icons";
 import type { SelectProps } from "@chakra-ui/react";
 import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColorModeValue } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-import type { StatsParams } from "../hooks";
+import type { UseStatsParams } from "../hooks";
 import { filterDepartements, useConfig, useStats } from "../hooks";
 import { ButtonAction } from "./ds/ButtonAction";
 import { capitalize } from "@common/utils/string";
 import { buildUrlParamsString } from "@common/utils/url";
 
-export function FilterSelect({ name, onChange, value, children, ...rest }: SelectProps) {
+export const FilterSelect = ({ name, onChange, value, children, ...rest }: SelectProps) => {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100");
   const bgSelect = useColorModeValue("white", "blue.700");
 
@@ -19,16 +19,16 @@ export function FilterSelect({ name, onChange, value, children, ...rest }: Selec
       {children}
     </Select>
   );
-}
+};
 
-export function AverageIndicator() {
+export const AverageIndicator = () => {
   const router = useRouter();
   const bgColor = useColorModeValue("blue.100", "blue.800");
 
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [], PUBLIC_YEARS_TRIES = [], LAST_PUBLIC_YEAR = "" } = config ?? {};
-  const [filters, setFilters] = React.useState<StatsParams>({});
-  const [departements, setDepartements] = React.useState<ReturnType<typeof filterDepartements>>([]);
+  const [filters, setFilters] = useState<UseStatsParams>({});
+  const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
   const { stats, isLoading } = useStats(filters);
 
   const { year: _year, ...filtersWithoutYear } = filters;
@@ -36,11 +36,11 @@ export function AverageIndicator() {
   // Need to destructure and restructure to avoid TS error. Don't know why...
   const urlSearchParams = buildUrlParamsString({ ...filtersWithoutYear });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setFilters({ year: LAST_PUBLIC_YEAR });
   }, [LAST_PUBLIC_YEAR]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // inital load of departments.
     setDepartements(filterDepartements(config));
   }, [config]); // config change only at start.
@@ -59,7 +59,7 @@ export function AverageIndicator() {
     setFilters({ ...filters, departement, [name]: value });
   }
 
-  const getValue = (name: keyof StatsParams) => filters[name] || "";
+  const getValue = (name: keyof UseStatsParams) => filters[name] || "";
 
   return (
     <Center bgColor={bgColor} w="100vw" py={8}>
@@ -152,4 +152,4 @@ export function AverageIndicator() {
       </Box>
     </Center>
   );
-}
+};

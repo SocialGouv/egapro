@@ -1,5 +1,5 @@
 import { Heading, ListItem, UnorderedList } from "@chakra-ui/react"
-import React, { FunctionComponent, ReactNode, useCallback, useEffect, useState } from "react"
+import React, { PropsWithChildren, useCallback, useEffect, useState } from "react"
 import { RouteComponentProps, useHistory } from "react-router-dom"
 
 import type {
@@ -209,6 +209,17 @@ function buildHelpers(state: AppState) {
   }
 }
 
+const PageDeclaration = ({ children }: PropsWithChildren) => {
+  return (
+    <Page
+      title={title}
+      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration."
+    >
+      {children}
+    </Page>
+  )
+}
+
 interface DeclarationProps extends RouteComponentProps {
   code: string
   state: AppState
@@ -217,7 +228,7 @@ interface DeclarationProps extends RouteComponentProps {
 
 const title = "Déclaration"
 
-const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatch }) => {
+const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
   useTitle(title)
   const history = useHistory()
   const { refreshAuth } = useUser()
@@ -438,17 +449,6 @@ const Declaration: FunctionComponent<DeclarationProps> = ({ code, state, dispatc
         childrenResult={null}
       />
     </PageDeclaration>
-  )
-}
-
-function PageDeclaration({ children }: { children: ReactNode }) {
-  return (
-    <Page
-      title={title}
-      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration."
-    >
-      {children}
-    </Page>
   )
 }
 

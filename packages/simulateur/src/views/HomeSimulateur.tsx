@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React from "react"
 import {
   Text,
   Input,
@@ -20,7 +20,7 @@ import { ButtonSimulatorLink } from "../components/SimulatorLink"
 
 const title = "Début d'un calcul d'index"
 
-const HomeSimulateur: FunctionComponent = () => {
+const HomeSimulateur = () => {
   useTitle(title)
   const link = window.location.href
   const { hasCopied, onCopy } = useClipboard(link)

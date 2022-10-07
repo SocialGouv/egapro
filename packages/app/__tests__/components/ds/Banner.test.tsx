@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render } from "./utils";
 import { Banner } from "@/components/ds/Banner";
 
 beforeAll(() => {

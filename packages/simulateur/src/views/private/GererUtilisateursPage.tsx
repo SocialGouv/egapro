@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React, { useState } from "react"
 import { Flex, FormControl, FormLabel, Text, Input } from "@chakra-ui/react"
 
 import { useTitle } from "../../utils/hooks"
@@ -11,12 +11,12 @@ import UtilisateursEntreprise from "../../components/UtilisateursEntreprise"
 
 const title = "Gérer les utilisateurs"
 
-const GererUtilisateursPage: FunctionComponent = () => {
+const GererUtilisateursPage = () => {
   useTitle(title)
 
   const { staff } = useUser()
 
-  const [siren, setSiren] = React.useState("")
+  const [siren, setSiren] = useState("")
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target?.value
     setSiren(value ? value.replace(/\s/g, "") : value)

@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React, { useState } from "react"
 import { Box, Text } from "@chakra-ui/layout"
 import { Form } from "react-final-form"
 import { Redirect, useHistory } from "react-router"
@@ -13,13 +13,13 @@ import { SinglePageLayout } from "../containers/SinglePageLayout"
 
 const title = "Accéder à mes entreprises et déclarations transmises"
 
-const Mire: FunctionComponent = () => {
+const Mire = () => {
   useTitle(title)
 
   const history = useHistory()
   const { toastSuccess, toastError } = useToastMessage({})
-  const [submitted, setSubmitted] = React.useState(false)
-  const [email, setEmail] = React.useState("")
+  const [submitted, setSubmitted] = useState(false)
+  const [email, setEmail] = useState("")
   const { isAuthenticated, staff } = useUser()
 
   useCheckTokenInURL()

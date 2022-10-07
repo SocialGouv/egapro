@@ -1,3 +1,5 @@
+import type { Any } from "./types";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
@@ -12,7 +14,7 @@ export type FetcherReturn = {
   isError: boolean;
   isLoading: boolean;
 
-  mutate: (data: any) => void;
+  mutate: (data: Any) => void;
 };
 
 export type FetcherReturnImmutable = Omit<FetcherReturn, "mutate">;

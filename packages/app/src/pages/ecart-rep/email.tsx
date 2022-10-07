@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { requestEmailForToken } from "../../services/apiClient/token";
+import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { Alert, AlertTitle, FormButton, FormGroup, FormGroupLabel, FormGroupMessage, FormInput } from "@design-system";
-import { requestEmailForToken } from "services/apiClient/token";
 
 const title = "Validation de l'email";
 
@@ -23,10 +24,10 @@ type FormType = z.infer<typeof formSchema>;
 const informationMessage =
   "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
 
-export default function EmailPage() {
+const EmailPage: NextPageWithLayout = () => {
   useTokenAndRedirect("./commencer");
 
-  const [featureStatus, setFeatureStatus] = React.useState<FeatureStatus>({ type: "idle" });
+  const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
   const {
     register,
@@ -34,14 +35,14 @@ export default function EmailPage() {
     watch,
     formState: { errors, isSubmitted, isDirty, isValid },
   } = useForm<FormType>({
-    resolver: zodResolver(formSchema as any), // Configuration the validation with the zod schema.
+    resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
     defaultValues: {
       email: "",
     },
   });
 
   // Remove error message after some timeout.
-  React.useEffect(() => {
+  useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     if (featureStatus.type === "error") {
       timeoutId = setTimeout(() => {
@@ -52,7 +53,7 @@ export default function EmailPage() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [featureStatus]);
+  }, [featureStatus, setFeatureStatus]);
 
   const email = watch("email");
 
@@ -142,8 +143,10 @@ export default function EmailPage() {
       )}
     </>
   );
-}
-
-EmailPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <RepartitionEquilibreeStartLayout>{page}</RepartitionEquilibreeStartLayout>;
 };
+
+EmailPage.getLayout = ({ children }) => {
+  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+};
+
+export default EmailPage;

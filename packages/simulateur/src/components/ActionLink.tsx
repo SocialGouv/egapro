@@ -1,14 +1,13 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
-import { ReactNode } from "react"
+import { PropsWithChildren } from "react"
 
-interface Props {
-  children: ReactNode
+export type ActionLinkProps = PropsWithChildren<{
   onClick: () => void
   style?: any
-}
+}>
 
-function ActionLink({ children, onClick, style }: Props) {
+const ActionLink = ({ children, onClick, style }: ActionLinkProps) => {
   return (
     <button type="button" css={[styles.button, style]} onClick={onClick}>
       {children}

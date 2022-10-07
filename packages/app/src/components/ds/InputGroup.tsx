@@ -1,6 +1,5 @@
 import type { FormControlProps } from "@chakra-ui/react";
 import { Box, FormControl, Input, FormErrorMessage, FormHelperText, FormLabel, VisuallyHidden } from "@chakra-ui/react";
-import type { FC } from "react";
 import React from "react";
 import type { FieldMetaState } from "react-final-form";
 import { Field } from "react-final-form";
@@ -25,7 +24,7 @@ export const isFieldHasError = (meta: FieldMetaState<string>) =>
   (meta.error && meta.submitFailed) ||
   (meta.error && meta.touched && Object.values({ ...meta.error, required: false }).includes(true));
 
-export const InputGroup: FC<InputGroupProps> = ({
+export const InputGroup = ({
   isLabelHidden,
   label,
   fieldName,
@@ -35,7 +34,7 @@ export const InputGroup: FC<InputGroupProps> = ({
   hasError,
   placeholder,
   ...rest
-}) => {
+}: InputGroupProps) => {
   const msgStyle = { flexDirection: "column", alignItems: "flex-start" };
   return (
     <Field name={fieldName} component="input">

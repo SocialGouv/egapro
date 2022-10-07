@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 
 import type { EntrepriseType } from "./siren";
 
@@ -21,10 +21,10 @@ export const get = () => {
 };
 
 export const useFormManager = () => {
-  const [formData, setFormData] = React.useState<RepartitionEquilibreeForm>({});
+  const [formData, setFormData] = useState<RepartitionEquilibreeForm>({});
 
   // Get data from local storage on component's mount.
-  React.useEffect(() => {
+  useEffect(() => {
     setFormData(get());
   }, []);
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, useContext, ReactNode } from "react"
+import React, { useEffect, useState, useCallback, useMemo, useContext, PropsWithChildren } from "react"
 
 import globalStyles from "../utils/globalStyles"
 const { grid } = globalStyles
@@ -39,7 +39,7 @@ export const GridContext = React.createContext({
 
 // Provider
 
-function GridProvider({ children }: { children: ReactNode }) {
+function GridProvider({ children }: PropsWithChildren) {
   const [columnWidth, setColumnWidth] = useState(findColumnWidth(window.innerWidth))
   const [layoutType, setLayoutType] = useState(findLayoutType(window.innerWidth))
 

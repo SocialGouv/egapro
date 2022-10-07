@@ -16,13 +16,13 @@ const validate = (value: string) => {
   }
 }
 
-type Props = {
+export type FieldPlanRelanceProps = {
   readOnly: boolean
   after2021: boolean
   isUES: boolean
 }
 
-const FieldPlanRelance: React.FC<Props> = ({ readOnly, after2021, isUES }) => {
+const FieldPlanRelance = ({ readOnly, after2021, isUES }: FieldPlanRelanceProps) => {
   const field = useField("planRelance", { validate })
   const error = hasFieldError(field.meta)
 

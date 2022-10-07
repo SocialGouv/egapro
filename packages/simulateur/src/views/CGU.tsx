@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React from "react"
 import { Text, Heading, Link } from "@chakra-ui/react"
 
 import { useTitle } from "../utils/hooks"
@@ -7,7 +7,7 @@ import Page from "../components/Page"
 
 const title = "Conditions d'utilisation"
 
-const CGU: FunctionComponent = () => {
+const CGU = () => {
   useTitle(title)
 
   return (

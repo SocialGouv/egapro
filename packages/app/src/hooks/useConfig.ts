@@ -1,4 +1,4 @@
-import React from "react";
+import { useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
 
 import type { FetcherReturnImmutable } from "../common/utils/fetcher";
@@ -32,7 +32,7 @@ type SelectItemsType = Array<[string, string]>;
  * @param config The config return by useConfig
  * @param region The region id
  */
-export function filterDepartements(config: ConfigTypeFormatted | null, region?: string): SelectItemsType {
+export const filterDepartements = (config: ConfigTypeFormatted | null, region?: string): SelectItemsType => {
   if (!config) return [];
 
   const { DEPARTEMENTS_TRIES, REGIONS_TO_DEPARTEMENTS } = config;
@@ -40,9 +40,9 @@ export function filterDepartements(config: ConfigTypeFormatted | null, region?: 
   return !region
     ? DEPARTEMENTS_TRIES
     : DEPARTEMENTS_TRIES.filter(([key, _]) => REGIONS_TO_DEPARTEMENTS[region].includes(key));
-}
+};
 
-export function useConfig(): FetcherReturnImmutable & { config: ConfigTypeFormatted | null } {
+export const useConfig = (): FetcherReturnImmutable & { config: ConfigTypeFormatted | null } => {
   const { data, error } = useSWRImmutable<ConfigTypeApi>("/config", fetcher);
 
   const isLoading = !data && !error;
@@ -60,7 +60,7 @@ export function useConfig(): FetcherReturnImmutable & { config: ConfigTypeFormat
   };
 
   // We want to ensure that the data is always the same object on every render, once there is a value.
-  const newData = React.useMemo(
+  const newData = useMemo(
     () => (!data ? null : { ...data, ...addon }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data],
@@ -72,4 +72,4 @@ export function useConfig(): FetcherReturnImmutable & { config: ConfigTypeFormat
     isLoading,
     isError,
   };
-}
+};

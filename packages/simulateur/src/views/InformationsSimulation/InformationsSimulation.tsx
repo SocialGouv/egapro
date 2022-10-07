@@ -1,4 +1,4 @@
-import React, { useCallback, ReactNode, FunctionComponent } from "react"
+import React, { useCallback, PropsWithChildren } from "react"
 import { useParams } from "react-router-dom"
 import { Box } from "@chakra-ui/react"
 
@@ -21,9 +21,20 @@ type Params = {
   code: string
 }
 
+const PageInformationsSimulation = ({ children }: PropsWithChildren) => {
+  return (
+    <Page
+      title={title}
+      tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
+    >
+      {children}
+    </Page>
+  )
+}
+
 const title = "Informations calcul et période de référence"
 
-const InformationsSimulation: FunctionComponent<InformationsSimulationProps> = ({ state, dispatch }) => {
+const InformationsSimulation = ({ state, dispatch }: InformationsSimulationProps) => {
   useTitle(title)
   const { code } = useParams<Params>()
 
@@ -74,17 +85,6 @@ const InformationsSimulation: FunctionComponent<InformationsSimulationProps> = (
           </Box>
         )}
     </PageInformationsSimulation>
-  )
-}
-
-function PageInformationsSimulation({ children }: { children: ReactNode }) {
-  return (
-    <Page
-      title={title}
-      tagline="Renseignez la tranche d'effectifs assujettis de votre entreprise ou unité économique et sociale (UES), l'année au titre de laquelle les indicateurs sont calculés ainsi que la date de fin de la période de référence."
-    >
-      {children}
-    </Page>
   )
 }
 

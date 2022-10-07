@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
 import React from "react";
+import type { MarginProps } from "../utils/spacing";
 
 import { Box } from "./Box";
-import type { MarginProps } from "design-system/utils/spacing";
 
 export type FormRadioGroupProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {

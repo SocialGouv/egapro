@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React, { FunctionComponent, PropsWithChildren } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, ActionType } from "../../globals"
@@ -73,7 +73,7 @@ const IndicateurUn: FunctionComponent<IndicateurUnProps> = ({ state, dispatch })
   )
 }
 
-const PageIndicateurUn: FunctionComponent = ({ children }) => (
+const PageIndicateurUn = ({ children }: PropsWithChildren) => (
   <Page
     title={title}
     tagline={[

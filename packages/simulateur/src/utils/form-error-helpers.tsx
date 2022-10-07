@@ -1,6 +1,8 @@
 import React from "react"
 
-export const displayMetaErrors: React.FC<{ [key: string]: string }> = (error) =>
+export type MetaErrorProps = { [key: string]: string }
+
+export const displayMetaErrors = (error: MetaErrorProps) =>
   error ? (
     <>
       {Object.keys(error)

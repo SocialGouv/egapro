@@ -1,4 +1,4 @@
-import React, { useCallback, FunctionComponent } from "react"
+import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
 import { Text } from "@chakra-ui/react"
 import { RouteComponentProps } from "react-router-dom"
 
@@ -135,7 +135,7 @@ const IndicateurDeux: FunctionComponent<IndicateurDeuxProps> = ({ state, dispatc
   )
 }
 
-const PageIndicateurDeux: FunctionComponent = ({ children }) => (
+const PageIndicateurDeux = ({ children }: PropsWithChildren) => (
   <Page
     title={title}
     tagline="Le pourcentage de femmes et d’hommes ayant été augmentés durant la période de référence, doit être renseigné par CSP."

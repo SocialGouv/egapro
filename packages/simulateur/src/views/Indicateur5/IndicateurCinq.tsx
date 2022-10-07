@@ -1,4 +1,4 @@
-import React, { useCallback, FunctionComponent } from "react"
+import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionIndicateurCinqData } from "../../globals"
@@ -59,7 +59,7 @@ const IndicateurCinq: FunctionComponent<IndicateurCinqProps> = ({ state, dispatc
   )
 }
 
-const PageIndicateurCinq: FunctionComponent = ({ children }) => (
+const PageIndicateurCinq = ({ children }: PropsWithChildren) => (
   <Page
     title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations"
     tagline="Renseignez le nombre de femmes et d'hommes parmi les 10 plus hautes rémunérations durant la période de référence."

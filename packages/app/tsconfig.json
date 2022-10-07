@@ -2,16 +2,16 @@
   "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
     "strict": true,
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "paths": {
       "@common/*": [
-        "common/*"
+        "src/common/*"
       ],
       "@components/*": [
-        "components/*"
+        "src/components/*"
       ],
       "@design-system": [
-        "design-system/index"
+        "src/design-system/index"
       ]
     }
   },
