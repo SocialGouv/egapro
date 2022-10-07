@@ -90,7 +90,7 @@ Object {
                   target="_blank"
                 >
                   <img
-                    alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+                    alt="Aller à la page d'accueil du Ministère du travail, du plein emploi et de l'insertion"
                     class="chakra-image css-6t4orf"
                     src="/consulter-index/icons/marianne.svg"
                   />
@@ -146,7 +146,7 @@ Object {
                   target="_blank"
                 >
                   <img
-                    alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+                    alt="Aller à la page d'accueil du Ministère du travail, du plein emploi et de l'insertion"
                     class="chakra-image css-6t4orf"
                     src="/consulter-index/icons/marianne.svg"
                   />
@@ -168,7 +168,7 @@ Object {
                     <div
                       class="css-gmuwbf"
                     >
-                      Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
+                      Télécharger la liste des référents Egapro (XLSX, 22 Ko)
                       <svg
                         class="chakra-icon css-417j41"
                         focusable="false"
@@ -208,7 +208,7 @@ Object {
                 class="chakra-text css-iesxu2"
               >
                 Pour nous aider à l'améliorer
-                 
+
                 <a
                   class="chakra-link css-1qsits3"
                   href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
@@ -217,7 +217,7 @@ Object {
                 >
                   donnez-nous votre avis
                 </a>
-                , 
+                ,
                 <a
                   class="chakra-link css-1qsits3"
                   href="https://github.com/SocialGouv/egapro/tree/1.21.0"
@@ -291,7 +291,7 @@ Object {
                 target="_blank"
               >
                 <img
-                  alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+                  alt="Aller à la page d'accueil du Ministère du travail, du plein emploi et de l'insertion"
                   class="chakra-image css-6t4orf"
                   src="/consulter-index/icons/marianne.svg"
                 />
@@ -347,7 +347,7 @@ Object {
                 target="_blank"
               >
                 <img
-                  alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+                  alt="Aller à la page d'accueil du Ministère du travail, du plein emploi et de l'insertion"
                   class="chakra-image css-6t4orf"
                   src="/consulter-index/icons/marianne.svg"
                 />
@@ -369,7 +369,7 @@ Object {
                   <div
                     class="css-gmuwbf"
                   >
-                    Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
+                    Télécharger la liste des référents Egapro (XLSX, 22 Ko)
                     <svg
                       class="chakra-icon css-417j41"
                       focusable="false"
@@ -409,7 +409,7 @@ Object {
               class="chakra-text css-iesxu2"
             >
               Pour nous aider à l'améliorer
-               
+
               <a
                 class="chakra-link css-1qsits3"
                 href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
@@ -418,7 +418,7 @@ Object {
               >
                 donnez-nous votre avis
               </a>
-              , 
+              ,
               <a
                 class="chakra-link css-1qsits3"
                 href="https://github.com/SocialGouv/egapro/tree/1.21.0"

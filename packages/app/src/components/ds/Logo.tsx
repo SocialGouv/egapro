@@ -8,7 +8,7 @@ export const Logo: FC<LogoProps> = () => {
   return (
     <Image
       src={"/consulter-index/icons/marianne.svg"}
-      alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
+      alt="Aller à la page d'accueil du Ministère du travail, du plein emploi et de l'insertion"
       width={88}
     />
   );
