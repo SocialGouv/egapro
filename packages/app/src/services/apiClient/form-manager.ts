@@ -7,7 +7,7 @@ const KEY = "répartition-équilibrée-form";
 type RepartitionEquilibreeForm = {
   endOfPeriod?: string;
   entreprise?: EntrepriseType;
-  year?: number;
+  year?: number | undefined;
   // TODO: add properties for the future pages
 };
 

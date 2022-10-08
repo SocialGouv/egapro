@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formatISO, getYear, parse, parseISO } from "date-fns";
+import { endOfYear, format, formatISO, getYear, isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
-import type { MouseEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -24,77 +23,74 @@ import {
 
 const title = "Période de référence";
 
-const dateFormat = "YYYY-MM-DD";
-
 const dateValidationError =
   "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés";
 
+const inputDateFormat = "yyyy-MM-dd";
 const formSchema = z
   .object({
-    year: z.number().min(4, "L'année est requise."),
-    endOfPeriod: z.preprocess(arg => {
-      if (typeof arg == "string" || arg instanceof Date) return formatISO(new Date(arg));
-    }, z.string()),
+    year: z.string().min(1, "L'année est requise."),
+    endOfPeriod: z.string().refine(
+      val => {
+        return isValid(val) || isValid(parseISO(val));
+      },
+      { message: "La période est requise." },
+    ),
   })
   .refine(
-    async ({ year, endOfPeriod }) => {
+    ({ year, endOfPeriod }) => {
       if (!year || !endOfPeriod) return false;
-      const yearToBeChecked = getYear(parseISO(endOfPeriod));
-      return year === yearToBeChecked;
+      const endOfPeriodDateFormat: Date = new Date(endOfPeriod);
+      const yearOfEndOfPeriod = getYear(endOfPeriodDateFormat);
+      return yearOfEndOfPeriod === Number(year);
     },
     {
       message: dateValidationError,
     },
   );
 
+type FormType = z.infer<typeof formSchema>;
+
 const PeriodeReference: NextPageWithLayout = () => {
   // const { isAuthenticated } = useUser();
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
-
-  const { year } = formData;
   // useEffect(() => {
   //   if (!isAuthenticated) router.push("/ecart-rep/email");
   // }, [isAuthenticated, router]);
 
-  type FormType = z.infer<typeof formSchema>;
-
   const {
     formState: { errors, isDirty, isValid },
-    getValues,
     handleSubmit,
     register,
     reset,
     setValue,
-    // watch,
   } = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      year: 0,
-      endOfPeriod: undefined,
-    },
   });
 
-  // const endOfPeriod = watch("endOfPeriod");
-
   const resetAsyncForm = useCallback(async () => {
-    reset({ endOfPeriod: formData?.endOfPeriod, year: formData?.year });
+    reset({
+      endOfPeriod:
+        formData?.endOfPeriod === undefined ? undefined : format(parseISO(formData?.endOfPeriod), "yyyy-MM-dd"),
+      year: formData?.year === undefined ? undefined : String(formData?.year),
+    });
   }, [reset, formData]);
 
   useEffect(() => {
     resetAsyncForm();
   }, [resetAsyncForm]);
 
-  const handleClick = (_event: MouseEvent) => () => {
-    const currentYear = getYear(new Date());
-    const endOfYear = formatISO(parse(`${currentYear}-12-31`, dateFormat, new Date()));
-    setValue("endOfPeriod", endOfYear);
+  const handleClick = () => {
+    const eoy = endOfYear(new Date());
+    const eoyFormatted = format(eoy, inputDateFormat);
+    setValue("endOfPeriod", eoyFormatted);
   };
 
-  const onSubmit = async ({ year, endOfPeriod }: FormType) => {
-    saveFormData({ year: year, endOfPeriod: endOfPeriod });
-    router.push("/ecart-rapartition");
+  const onSubmit = async ({ endOfPeriod }: FormType) => {
+    saveFormData({ endOfPeriod: formatISO(new Date(endOfPeriod)) });
+    router.push("ecart-repartition");
   };
 
   return (
@@ -133,7 +129,7 @@ const PeriodeReference: NextPageWithLayout = () => {
               <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
             )}
             <br />
-            <FormButton onClick={handleClick}>Sélectionner la fin de l'année civile</FormButton>
+            <FormButton onClick={() => handleClick()}>Sélectionner la fin de l'année civile</FormButton>
           </FormGroup>
           <FormLayoutButtonGroup>
             <Link href="entreprise" passHref>
