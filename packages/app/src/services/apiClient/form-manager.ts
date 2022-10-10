@@ -43,6 +43,7 @@ type RepartitionEquilibreeForm = {
 
 export const save = (data: Partial<RepartitionEquilibreeForm>) => {
   const actualForm = get();
+
   localStorage.setItem(KEY, JSON.stringify({ ...actualForm, ...data }));
 };
 

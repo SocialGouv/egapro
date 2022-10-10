@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { endOfYear, format, formatISO, getYear, isValid, parseISO } from "date-fns";
+import { endOfYear, getYear, formatISO, isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
@@ -23,29 +23,22 @@ import {
 
 const title = "Période de référence";
 
-const dateValidationError =
-  "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés";
-
-const inputDateFormat = "yyyy-MM-dd";
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."),
-    endOfPeriod: z.string().refine(
-      val => {
-        return isValid(val) || isValid(parseISO(val));
-      },
-      { message: "La période est requise." },
-    ),
+    endOfPeriod: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
+      message: "La date de fin de période de référence est de la forme jj/mm/aaaa.",
+    }),
   })
   .refine(
     ({ year, endOfPeriod }) => {
       if (!year || !endOfPeriod) return false;
-      const endOfPeriodDateFormat: Date = new Date(endOfPeriod);
-      const yearOfEndOfPeriod = getYear(endOfPeriodDateFormat);
-      return yearOfEndOfPeriod === Number(year);
+      const endOfPeriodDateFormat = new Date(endOfPeriod);
+      return getYear(endOfPeriodDateFormat) === Number(year);
     },
     {
-      message: dateValidationError,
+      message:
+        "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
     },
   );
 
@@ -60,20 +53,18 @@ const PeriodeReference: NextPageWithLayout = () => {
   // }, [isAuthenticated, router]);
 
   const {
-    formState: { errors, isDirty, isValid },
+    formState: { errors, isDirty, isValid, isSubmitted },
     handleSubmit,
     register,
     reset,
     setValue,
   } = useForm<FormType>({
-    mode: "onChange",
     resolver: zodResolver(formSchema),
   });
 
   const resetAsyncForm = useCallback(async () => {
     reset({
-      endOfPeriod:
-        formData?.endOfPeriod === undefined ? undefined : format(parseISO(formData?.endOfPeriod), inputDateFormat),
+      endOfPeriod: formData?.endOfPeriod === undefined ? undefined : formData?.endOfPeriod,
       year: formData?.year === undefined ? undefined : String(formData?.year),
     });
   }, [reset, formData]);
@@ -83,14 +74,18 @@ const PeriodeReference: NextPageWithLayout = () => {
   }, [resetAsyncForm]);
 
   const handleClick = () => {
-    const eoy = endOfYear(new Date());
-    const eoyFormatted = format(eoy, inputDateFormat);
-    setValue("endOfPeriod", eoyFormatted);
+    if (formData?.year) {
+      setValue(
+        "endOfPeriod",
+        formatISO(endOfYear(new Date().setFullYear(formData?.year)), { representation: "date" }),
+        { shouldDirty: true, shouldValidate: true },
+      );
+    }
   };
 
   const onSubmit = async ({ endOfPeriod }: FormType) => {
-    saveFormData({ endOfPeriod: formatISO(new Date(endOfPeriod)) });
-    router.push("ecart-repartition");
+    saveFormData({ endOfPeriod });
+    router.push("/ecart-rep/ecart-representation");
   };
 
   return (
@@ -129,13 +124,17 @@ const PeriodeReference: NextPageWithLayout = () => {
               <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
             )}
             <br />
-            <FormButton onClick={() => handleClick()}>Sélectionner la fin de l'année civile</FormButton>
+            <FormButton type="button" onClick={handleClick}>
+              Sélectionner la fin de l'année civile
+            </FormButton>
           </FormGroup>
           <FormLayoutButtonGroup>
             <Link href="entreprise" passHref>
-              <ButtonAsLink size="sm">Précédent</ButtonAsLink>
+              <ButtonAsLink size="sm" variant="secondary">
+                Précédent
+              </ButtonAsLink>
             </Link>
-            <FormButton type="submit" isDisabled={!isValid || !isDirty}>
+            <FormButton type="submit" isDisabled={!isValid || (isSubmitted && !isDirty)}>
               Suivant
             </FormButton>
           </FormLayoutButtonGroup>
