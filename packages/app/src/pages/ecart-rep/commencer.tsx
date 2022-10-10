@@ -5,10 +5,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
-import { checkSiren, fetchSiren } from "../../services/apiClient/siren";
+import { checkSiren, fetchSiren, ownersForSiren } from "../../services/apiClient/siren";
 import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
+import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   FormButton,
@@ -23,20 +24,35 @@ import {
 
 const title = "Commencer ou accéder à une déclaration";
 
+const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
+
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
     // siren: z.string().min(9, SIZE_SIREN_ERROR).max(9, SIZE_SIREN_ERROR),
     siren: z.string().regex(/^[0-9]{9}$/, "Le Siren est invalide."),
   })
-  .refine(async ({ year, siren }) => {
+  .superRefine(async ({ year, siren }, ctx) => {
     if (!year || !siren) return false;
     try {
       await checkSiren(siren, Number(year));
-      return true;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("error", error);
-      return false;
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: error instanceof Error ? error.message : "Le n° Siren est invalide",
+        path: ["siren"],
+      });
+    }
+    try {
+      await ownersForSiren(siren);
+    } catch (error: unknown) {
+      console.error("error", error);
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: OWNER_ERROR,
+        path: ["siren"],
+      });
     }
   });
 
@@ -47,7 +63,7 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  const { isAuthenticated } = useUser();
+  const { isAuthenticated, email } = useUser();
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
 
@@ -62,6 +78,10 @@ const CommencerPage: NextPageWithLayout = () => {
   } = useForm<FormType>({
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
   });
+
+  const buildSirenMessage = (message: string | undefined) => {
+    return message !== OWNER_ERROR ? message : <MailtoLinkForNonOwner email={email} />;
+  };
 
   const resetAsyncForm = useCallback(async () => {
     reset({
@@ -140,14 +160,16 @@ const CommencerPage: NextPageWithLayout = () => {
             </FormGroupLabel>
             <FormInput
               id="siren"
-              placeholder="Ex: 504920166, 403461742"
+              placeholder="Ex: 504920166, 403461742, 403696735"
               type="text"
               {...register("siren")}
               isError={Boolean(errors.siren)}
               aria-describedby="siren-message-error"
               maxLength={9}
             />
-            {errors.siren && <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>}
+            {errors.siren && (
+              <FormGroupMessage id="siren-message-error">{buildSirenMessage(errors.siren.message)}</FormGroupMessage>
+            )}
           </FormGroup>
           <FormLayoutButtonGroup>
             {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
