@@ -33,7 +33,7 @@ export const WithSize = () => (
 
 export const WithIcon = () => (
   <div style={{ display: "flex", gap: "1rem" }}>
-    <Link href="#" iconLeft="fr-icon-arrow-left-line">
+    <Link href="#" iconLeft="fr-icon-arrow-right-line">
       Lien simple
     </Link>
     <Link href="#" iconRight="fr-icon-arrow-right-line">
