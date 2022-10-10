@@ -73,7 +73,7 @@ const PeriodeReference: NextPageWithLayout = () => {
   const resetAsyncForm = useCallback(async () => {
     reset({
       endOfPeriod:
-        formData?.endOfPeriod === undefined ? undefined : format(parseISO(formData?.endOfPeriod), "yyyy-MM-dd"),
+        formData?.endOfPeriod === undefined ? undefined : format(parseISO(formData?.endOfPeriod), inputDateFormat),
       year: formData?.year === undefined ? undefined : String(formData?.year),
     });
   }, [reset, formData]);
