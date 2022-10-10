@@ -1,5 +1,6 @@
 import { Disclosure } from "@headlessui/react";
 import clsx from "clsx";
+import { useRouter } from "next/router";
 import type { CSSProperties, PropsWithChildren } from "react";
 import { useState } from "react";
 
@@ -57,13 +58,17 @@ export type SideMenuLinkProps = PropsWithChildren<
   }
 >;
 
-export const SideMenuLink = ({ isCurrent, children, ...rest }: SideMenuLinkProps) => (
-  <li className={clsx("fr-sidemenu__item", isCurrent && "fr-sidemenu__item--active")}>
-    <a className="fr-sidemenu__link" aria-current={isCurrent ? "page" : undefined} target="_self" {...rest}>
-      {children}
-    </a>
-  </li>
-);
+export const SideMenuLink = ({ isCurrent, children, ...rest }: SideMenuLinkProps) => {
+  const router = useRouter();
+  const currentRoute = router.pathname;
+  return (
+    <li className={clsx("fr-sidemenu__item", isCurrent && "fr-sidemenu__item--active")}>
+      <a className="fr-sidemenu__link" aria-current={isCurrent ? "page" : undefined} target="_self" {...rest}>
+        {children}
+      </a>
+    </li>
+  );
+};
 
 export type SideMenuCollapseProps = PropsWithChildren<{
   isCurrent?: boolean;
