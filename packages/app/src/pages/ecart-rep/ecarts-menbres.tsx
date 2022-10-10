@@ -5,6 +5,13 @@ import {
   Alert,
   AlertTitle,
   ButtonAsLink,
+  Card,
+  CardBody,
+  CardBodyContent,
+  CardBodyContentDescription,
+  CardBodyContentLegend,
+  CardBodyContentTitle,
+  CardBodyFooter,
   FormButton,
   FormGroup,
   FormGroupLabel,
@@ -16,6 +23,8 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
   FormSelect,
+  Link,
+  LinkGroup,
 } from "@design-system";
 
 const title = "Écarts de représentation";
@@ -73,29 +82,26 @@ const EcartsMenbres: NextPageWithLayout = () => {
           </FormGroup>
         </FormLayout>
       </form>
-      {/*
-        <Card mt="4w">
-          <CardBody>
-            <CardBodyContent>
-              <CardBodyContentLegend icon="fr-icon-arrow-right-line">Définition</CardBodyContentLegend>
-              <CardBodyContentTitle>Membres des instances dirigeantes</CardBodyContentTitle>
-              <CardBodyContentDescription>
-                Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout acte
-                ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la direction
-                générale dans l'exercice de leurs missions.
-              </CardBodyContentDescription>
-            </CardBodyContent>
-            <CardBodyFooter>
-              <LinkGroup>
-                // TODO: add real path
-                <NextLink href="/" passHref>
-                  <Link iconRight="fr-icon-arrow-right-line">Lien simple</Link>
-                </NextLink>
-              </LinkGroup>
-            </CardBodyFooter>
-          </CardBody>
-        </Card>
-      */}
+      <Card mt="4w">
+        <CardBody>
+          <CardBodyContent>
+            <CardBodyContentLegend icon="fr-icon-arrow-right-line">Définition</CardBodyContentLegend>
+            <CardBodyContentTitle>Membres des instances dirigeantes</CardBodyContentTitle>
+            <CardBodyContentDescription>
+              Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout acte
+              ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la direction
+              générale dans l'exercice de leurs missions.
+            </CardBodyContentDescription>
+          </CardBodyContent>
+          <CardBodyFooter>
+            <LinkGroup>
+              <Link target="_blank" href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044566715">
+                En savoir plus
+              </Link>
+            </LinkGroup>
+          </CardBodyFooter>
+        </CardBody>
+      </Card>
     </>
   );
 };

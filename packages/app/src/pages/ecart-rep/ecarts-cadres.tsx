@@ -5,6 +5,13 @@ import {
   Alert,
   AlertTitle,
   ButtonAsLink,
+  Card,
+  CardBody,
+  CardBodyContent,
+  CardBodyContentDescription,
+  CardBodyContentLegend,
+  CardBodyContentTitle,
+  CardBodyFooter,
   FormButton,
   FormGroup,
   FormGroupLabel,
@@ -16,6 +23,8 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
   FormSelect,
+  Link,
+  LinkGroup,
 } from "@design-system";
 
 const title = "Écarts de représentation";
@@ -75,29 +84,28 @@ const EcartsCadres: NextPageWithLayout = () => {
           </FormGroup>
         </FormLayout>
       </form>
-      {/*
-        <Card mt="4w">
-          <CardBody>
-            <CardBodyContent>
-              <CardBodyContentLegend icon="fr-icon-arrow-right-line">Définition</CardBodyContentLegend>
-              <CardBodyContentTitle>Membres des instances dirigeantes</CardBodyContentTitle>
-              <CardBodyContentDescription>
-                Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout acte
-                ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la direction
-                générale dans l'exercice de leurs missions.
-              </CardBodyContentDescription>
-            </CardBodyContent>
-            <CardBodyFooter>
-              <LinkGroup>
-                // TODO: add real path
-                <NextLink href="/" passHref>
-                  <Link iconRight="fr-icon-arrow-right-line">Lien simple</Link>
-                </NextLink>
-              </LinkGroup>
-            </CardBodyFooter>
-          </CardBody>
-        </Card>
-      */}
+      <Card mt="4w">
+        <CardBody>
+          <CardBodyContent>
+            <CardBodyContentLegend icon="fr-icon-arrow-right-line">Définition</CardBodyContentLegend>
+            <CardBodyContentTitle>Cadres dirigeants</CardBodyContentTitle>
+            <CardBodyContentDescription>
+              Sont considérés comme ayant la qualité de cadre dirigeant les cadres auxquels sont confiées des
+              responsabilités dont l'importance implique une grande indépendance dans l'organisation de leur emploi du
+              temps, qui sont habilités à prendre des décisions de façon largement autonome et qui perçoivent une
+              rémunération se situant dans les niveaux les plus élevés des systèmes de rémunération pratiqués dans leur
+              entreprise ou établissement.
+            </CardBodyContentDescription>
+          </CardBodyContent>
+          <CardBodyFooter>
+            <LinkGroup>
+              <Link href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902439/" target="_blank">
+                En savoir plus
+              </Link>
+            </LinkGroup>
+          </CardBodyFooter>
+        </CardBody>
+      </Card>
     </>
   );
 };
