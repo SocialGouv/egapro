@@ -1,22 +1,28 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./",
+    "strict": true,
+    // to trick auto imports
+    "baseUrl": "./../",
     "paths": {
       "@/*": [
-        "../src/*"
+        "src/*"
       ],
       "@common/*": [
-        "../src/common/*"
+        "src/common/*"
       ],
       "@components/*": [
-        "../src/components/*"
+        "src/components/*"
+      ],
+      "@design-system": [
+        "src/design-system/index"
       ]
-    }
+    },
+    "plugins": [{"name": "typescript-plugin-css-modules"}]
   },
   // override tests folder exclusion
   "exclude": [
-    "../node_modules",
-    "../__stories__/"
+    "node_modules",
+    "__stories__/"
   ]
 }

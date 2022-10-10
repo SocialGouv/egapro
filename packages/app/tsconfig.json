@@ -14,7 +14,8 @@
       "@design-system": [
         "packages/app/src/design-system/index"
       ]
-    }
+    },
+    "plugins": [{"name": "typescript-plugin-css-modules"}]
   },
   "include": [
     "next-env.d.ts",
