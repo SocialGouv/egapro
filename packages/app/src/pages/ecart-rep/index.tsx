@@ -1,7 +1,7 @@
 import Image from "next/image";
 import NextLink from "next/link";
 
-import picture from "../../../public/picture-1.svg";
+import picture from "../../../public/ecart-rep.svg";
 import type { NextPageWithLayout } from "../_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import { ButtonAsLink } from "@design-system";
