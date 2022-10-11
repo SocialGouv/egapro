@@ -1,10 +1,10 @@
+import type { ApiError } from "next/dist/server/api-utils";
+
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import { useCallback, useState } from "react";
 import { useContext } from "react";
 import React, { createContext, useEffect } from "react";
-
-import type { FetchError } from "../common/utils/fetcher";
 
 import { EXPIRED_TOKEN_MESSAGE, fetcher } from "../common/utils/fetcher";
 
@@ -146,10 +146,10 @@ export const useCheckTokenInURL = () => {
   });
 };
 
-export const useLogoutIfExpiredToken = (error: FetchError) => {
+export const useLogoutIfExpiredToken = (error: ApiError) => {
   const { logout } = useUser();
   useEffect(() => {
-    if (error?.info === EXPIRED_TOKEN_MESSAGE) {
+    if (error.message === EXPIRED_TOKEN_MESSAGE) {
       logout();
     }
   }, [error, logout]);
