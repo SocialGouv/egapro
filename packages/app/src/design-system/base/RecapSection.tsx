@@ -10,15 +10,13 @@ export const RecapSection = ({ children, ...rest }: PropsWithChildren<Record<nev
 );
 
 export const RecapSectionTitle = ({ children }: PropsWithChildren<Record<never, never>>) => (
-  <Box as="h3" mb="2w" className="fr-h5">
-    {children}
-  </Box>
+  <h3 className="fr-h5 fr-mb-1w">{children}</h3>
 );
 
 export const RecapSectionItems = ({ children, ...rest }: PropsWithChildren<Record<never, never>>) => (
-  <Box as="ul" className={styles.list} {...rest}>
+  <ul className={styles.list} {...rest}>
     {children}
-  </Box>
+  </ul>
 );
 
 export const RecapSectionItem = ({ children }: PropsWithChildren<Record<never, never>>) => <li>{children}</li>;

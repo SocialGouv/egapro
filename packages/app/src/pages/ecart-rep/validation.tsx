@@ -2,7 +2,6 @@ import NextLink from "next/link";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
-  Box,
   ButtonAsLink,
   FormButton,
   FormLayout,
@@ -37,9 +36,7 @@ const Validation: NextPageWithLayout = () => {
         Pour terminer la procédure, cliquez sur “Valider et transmettre les résultats” ci-dessous. Vous recevrez un
         accusé de réception par email.
       </p>
-      <Box as="h2" mt="6w">
-        Récapitulatif
-      </Box>
+      <h2 className="fr-mt-6w">Récapitulatif</h2>
       <p>Déclaration des écarts de représentation Femmes/Hommes pour l’année 2023 au titre des données 2022.</p>
       <RecapSection>
         <RecapSectionTitle>Informations déclarant</RecapSectionTitle>
