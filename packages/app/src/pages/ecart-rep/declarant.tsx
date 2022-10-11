@@ -47,7 +47,7 @@ const DeclarantPage: NextPageWithLayout = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isValid, isDirty },
+    formState: { errors, isValid },
   } = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),

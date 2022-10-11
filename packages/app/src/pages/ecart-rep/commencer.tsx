@@ -1,14 +1,15 @@
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
-import { checkSiren, fetchSiren } from "../../services/apiClient/siren";
+import { checkSiren, fetchSiren, ownersForSiren } from "../../services/apiClient/siren";
 import type { NextPageWithLayout } from "../_app";
-import type { FeatureStatus } from "@common/utils/feature";
 import { useUser } from "@components/AuthContext";
+import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   FormButton,
@@ -19,24 +20,39 @@ import {
   FormSelect,
   FormLayout,
   FormLayoutButtonGroup,
+  Alert,
 } from "@design-system";
 
 const title = "Commencer ou accéder à une déclaration";
 
+const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
+
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
-    // siren: z.string().min(9, SIZE_SIREN_ERROR).max(9, SIZE_SIREN_ERROR),
     siren: z.string().regex(/^[0-9]{9}$/, "Le Siren est invalide."),
   })
-  .refine(async ({ year, siren }) => {
+  .superRefine(async ({ year, siren }, ctx) => {
     if (!year || !siren) return false;
     try {
       await checkSiren(siren, Number(year));
-      return true;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("error", error);
-      return false;
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: error instanceof Error ? error.message : "Le n° Siren est invalide",
+        path: ["siren"],
+      });
+    }
+    try {
+      await ownersForSiren(siren);
+    } catch (error: unknown) {
+      console.error("error", error);
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: OWNER_ERROR,
+        path: ["siren"],
+      });
     }
   });
 
@@ -50,15 +66,14 @@ const CommencerPage: NextPageWithLayout = () => {
   const { isAuthenticated } = useUser();
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
-
-  const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
+  const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const {
     register,
     handleSubmit,
     setValue,
     reset,
-    formState: { errors, isSubmitted, isValid },
+    formState: { errors, isSubmitted, isValid, isSubmitting },
   } = useForm<FormType>({
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
   });
@@ -80,16 +95,12 @@ const CommencerPage: NextPageWithLayout = () => {
 
   const onSubmit = async ({ year, siren }: FormType) => {
     const startFresh = async () => {
-      setFeatureStatus({ type: "loading" });
-
       try {
         const entreprise = await fetchSiren(siren, Number(year));
         saveFormData({ entreprise, year: Number(year) });
-        setFeatureStatus({ type: "idle" });
         router.push("/ecart-rep/declarant");
       } catch (error) {
         console.error("erreur dans fetchSiren");
-        setFeatureStatus({ type: "error", message: "Erreur dans fetchSiren" });
       }
     };
 
@@ -117,6 +128,14 @@ const CommencerPage: NextPageWithLayout = () => {
         correspondantes à la déclaration.
       </p>
 
+      <div ref={animationParent} style={{ marginBottom: 20 }}>
+        {errors.siren && errors.siren.message === OWNER_ERROR && (
+          <Alert type="error">
+            <MailtoLinkForNonOwner />
+          </Alert>
+        )}
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <FormGroup>
@@ -140,18 +159,19 @@ const CommencerPage: NextPageWithLayout = () => {
             </FormGroupLabel>
             <FormInput
               id="siren"
-              placeholder="Ex: 504920166, 403461742"
+              placeholder="Ex: 504920166, 403461742, 403696735"
               type="text"
               {...register("siren")}
               isError={Boolean(errors.siren)}
               aria-describedby="siren-message-error"
               maxLength={9}
             />
-            {errors.siren && <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>}
+            {errors.siren && errors.siren.message !== OWNER_ERROR && (
+              <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>
+            )}
           </FormGroup>
           <FormLayoutButtonGroup>
-            {/* <FormButton isDisabled={(isSubmitted && !isValid) || !isDirty || featureStatus.type === "loading"}> */}
-            <FormButton isDisabled={(isSubmitted && !isValid) || featureStatus.type === "loading"}>Suivant</FormButton>
+            <FormButton isDisabled={(isSubmitted && !isValid) || isSubmitting}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
