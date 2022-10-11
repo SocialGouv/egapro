@@ -1,28 +1,23 @@
 import { useRouter } from "next/router";
 
-import { useEffect } from "react";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
 
 const title = "Informations entreprise";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
-  const { isAuthenticated } = useUser();
-
+  // No need to use React Hook Form here, because we only show read only data.
   const { formData } = useFormManager();
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (!isAuthenticated) router.push("/ecart-rep/email");
-  }, [isAuthenticated, router]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) router.push("/ecart-rep/email");
+  // }, [isAuthenticated, router]);
 
-  const onSubmit = async () => {
-    router.push("/ecart-rep/");
-  };
+  if (!formData?.entreprise?.siren) return <p>Loading...</p>;
 
   return (
     <>
@@ -33,7 +28,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
         automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).
       </p>
 
-      <form onSubmit={onSubmit} noValidate>
+      <form noValidate>
         <FormLayout>
           <FormGroup>
             <FormGroupLabel htmlFor="siren">Siren</FormGroupLabel>
@@ -72,7 +67,12 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormInput id="code-pays" type="text" readOnly value={formData.entreprise?.code_pays} />
           </FormGroup>
           <FormLayoutButtonGroup>
-            <FormButton>Suivant</FormButton>
+            <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/declarant")}>
+              Précédent
+            </FormButton>
+            <FormButton type="button" onClick={() => router.push("/ecart-rep/periode-reference")}>
+              Suivant
+            </FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
