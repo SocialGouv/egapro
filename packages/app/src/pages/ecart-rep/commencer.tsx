@@ -1,3 +1,4 @@
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -20,6 +21,7 @@ import {
   FormSelect,
   FormLayout,
   FormLayoutButtonGroup,
+  Alert,
 } from "@design-system";
 
 const title = "Commencer ou accéder à une déclaration";
@@ -63,9 +65,10 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  const { isAuthenticated, email } = useUser();
+  const { isAuthenticated } = useUser();
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
+  const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
 
@@ -80,7 +83,7 @@ const CommencerPage: NextPageWithLayout = () => {
   });
 
   const buildSirenMessage = (message: string | undefined) => {
-    return message !== OWNER_ERROR ? message : <MailtoLinkForNonOwner email={email} />;
+    return message !== OWNER_ERROR ? message : <MailtoLinkForNonOwner />;
   };
 
   const resetAsyncForm = useCallback(async () => {
@@ -137,6 +140,12 @@ const CommencerPage: NextPageWithLayout = () => {
         correspondantes à la déclaration.
       </p>
 
+      <div ref={animationParent} style={{ marginBottom: 20 }}>
+        {errors.siren && errors.siren.message === OWNER_ERROR && (
+          <Alert type="error">{buildSirenMessage(errors.siren.message)}</Alert>
+        )}
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <FormGroup>
@@ -167,8 +176,8 @@ const CommencerPage: NextPageWithLayout = () => {
               aria-describedby="siren-message-error"
               maxLength={9}
             />
-            {errors.siren && (
-              <FormGroupMessage id="siren-message-error">{buildSirenMessage(errors.siren.message)}</FormGroupMessage>
+            {errors.siren && errors.siren.message !== OWNER_ERROR && (
+              <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>
             )}
           </FormGroup>
           <FormLayoutButtonGroup>
