@@ -13,8 +13,10 @@ export type HeaderBodyProps = {
 };
 
 export const HeaderBody = ({ isMobileMenuOpen, showMenuMobile, mobileMenuId, buttonMobileMenuId }: HeaderBodyProps) => {
-  const { isAuthenticated, logout } = useUser();
+  const { user, logout } = useUser();
   const router = useRouter();
+
+  const isAuthenticated = Boolean(user?.email);
 
   const disconnectUser = () => {
     logout();

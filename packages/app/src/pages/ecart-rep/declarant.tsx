@@ -36,7 +36,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { email } = useUser();
+  const { user } = useUser();
   const { formData, saveFormData } = useFormManager();
 
   // useEffect(() => {
@@ -52,7 +52,7 @@ const DeclarantPage: NextPageWithLayout = () => {
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: email,
+      email: user?.email,
     },
   });
 
@@ -64,13 +64,13 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   const resetAsyncForm = useCallback(async () => {
     reset({
-      email,
+      email: user?.email,
       nom: formData?.declarant?.nom,
       prenom: formData?.declarant?.prenom,
       telephone: formData?.declarant?.telephone,
       accord_rgpd: formData?.declarant?.accord_rgpd,
     });
-  }, [reset, formData, email]);
+  }, [reset, formData, user?.email]);
 
   useEffect(() => {
     resetAsyncForm();
