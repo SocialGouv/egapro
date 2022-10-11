@@ -131,7 +131,7 @@ const PeriodeReference: NextPageWithLayout = () => {
             </FormButton>
           </FormGroup>
           <FormLayoutButtonGroup>
-            <Link href="entreprise" passHref>
+            <Link href="/ecart-rep/entreprise" passHref>
               <ButtonAsLink size="sm" variant="secondary">
                 Précédent
               </ButtonAsLink>
