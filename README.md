@@ -65,6 +65,14 @@ yarn workspace simulateur add moment
 yarn workspace simulateur run test
 ````
 
+### Comment lancer la déclaration en local ?
+
+```bash
+yarn dev:api
+yarn dev:maildev
+yarn dev:declaration
+```
+
 ### Comment lancer un script dans tous les workspaces ?
 
 ````bash
