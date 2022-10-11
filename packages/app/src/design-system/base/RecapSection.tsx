@@ -15,21 +15,23 @@ export const RecapSectionTitle = ({ children }: PropsWithChildren<Record<never, 
   </Box>
 );
 
-export const RecapSectionContent = ({ children, ...rest }: PropsWithChildren<Record<never, never>>) => (
+export const RecapSectionItems = ({ children, ...rest }: PropsWithChildren<Record<never, never>>) => (
   <Box as="ul" className={styles.list} {...rest}>
     {children}
   </Box>
 );
 
-export type RecapSectionContentItemProps = {
-  data: string;
-  legend: string;
-};
+export const RecapSectionItem = ({ children }: PropsWithChildren<Record<never, never>>) => <li>{children}</li>;
 
-export const RecapSectionContentItem = ({ legend, data }: RecapSectionContentItemProps) => (
-  <li>
-    <strong>{legend}</strong>&nbsp;:
+export const RecapSectionItemLegend = ({ children }: PropsWithChildren<Record<never, never>>) => (
+  <>
+    <strong>{children}</strong>&nbsp;:
+  </>
+);
+
+export const RecapSectionItemContent = ({ children }: PropsWithChildren<Record<never, never>>) => (
+  <>
     <br />
-    {data}
-  </li>
+    {children}
+  </>
 );

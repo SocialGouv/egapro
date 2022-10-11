@@ -1,6 +1,13 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { RecapSection, RecapSectionContent, RecapSectionTitle, RecapSectionContentItem } from "@/design-system";
+import {
+  RecapSection,
+  RecapSectionItems,
+  RecapSectionItem,
+  RecapSectionTitle,
+  RecapSectionItemLegend,
+  RecapSectionItemContent,
+} from "@/design-system";
 
 export default {
   title: "Base/RecapSection",
@@ -10,10 +17,16 @@ export default {
 const Template: ComponentStory<typeof RecapSection> = () => (
   <RecapSection>
     <RecapSectionTitle>Informations déclarant</RecapSectionTitle>
-    <RecapSectionContent>
-      <RecapSectionContentItem legend="Nom Prénom" data="Laetitia Collombet" />
-      <RecapSectionContentItem legend="Adresse mail" data="laetitia.collombet@travail.gouv.fr" />
-    </RecapSectionContent>
+    <RecapSectionItems>
+      <RecapSectionItem>
+        <RecapSectionItemLegend>Nom Prénom</RecapSectionItemLegend>
+        <RecapSectionItemContent>Lætitia Collombet</RecapSectionItemContent>
+      </RecapSectionItem>
+      <RecapSectionItem>
+        <RecapSectionItemLegend>Adresse mail</RecapSectionItemLegend>
+        <RecapSectionItemContent>laetitia.collombet@travail.gouv.f</RecapSectionItemContent>
+      </RecapSectionItem>
+    </RecapSectionItems>
   </RecapSection>
 );
 

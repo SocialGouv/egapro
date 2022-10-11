@@ -8,8 +8,10 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
   RecapSection,
-  RecapSectionContent,
-  RecapSectionContentItem,
+  RecapSectionItem,
+  RecapSectionItemContent,
+  RecapSectionItemLegend,
+  RecapSectionItems,
   RecapSectionTitle,
 } from "@design-system";
 
@@ -41,54 +43,93 @@ const Validation: NextPageWithLayout = () => {
       <p>Déclaration des écarts de représentation Femmes/Hommes pour l’année 2023 au titre des données 2022.</p>
       <RecapSection>
         <RecapSectionTitle>Informations déclarant</RecapSectionTitle>
-        <RecapSectionContent>
-          <RecapSectionContentItem legend="Nom Prénom" data="Laetitia Collombet" />
-          <RecapSectionContentItem legend="Adresse mail" data="laetitia.collombet@travail.gouv.fr" />
-        </RecapSectionContent>
+        <RecapSectionItems>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Nom Prénom</RecapSectionItemLegend>
+            <RecapSectionItemContent>Lætitia Collombet</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Adresse mail</RecapSectionItemLegend>
+            <RecapSectionItemContent>laetitia.collombet@travail.gouv.f</RecapSectionItemContent>
+          </RecapSectionItem>
+        </RecapSectionItems>
       </RecapSection>
       <RecapSection>
         <RecapSectionTitle>Informations entreprise</RecapSectionTitle>
-        <RecapSectionContent>
-          <RecapSectionContentItem legend="Raison sociale" data="CENTRE HOSPITALIER REGIONAL DE MARSEILLE" />
-          <RecapSectionContentItem legend="Siren" data="261300081" />
-          <RecapSectionContentItem legend="Code NAF" data="86.10Z - Activités hospitalières" />
-          <RecapSectionContentItem legend="Adresse" data="80 RUE BROCHIER 13005 MARSEILLE 5" />
-        </RecapSectionContent>
+        <RecapSectionItems>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Raison sociale</RecapSectionItemLegend>
+            <RecapSectionItemContent>CENTRE HOSPITALIER REGIONAL DE MARSEILLE</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Siren</RecapSectionItemLegend>
+            <RecapSectionItemContent>261300081</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Code NAF</RecapSectionItemLegend>
+            <RecapSectionItemContent>86.10Z - Activités hospitalières</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Adresse</RecapSectionItemLegend>
+            <RecapSectionItemContent>80 RUE BROCHIER 13005 MARSEILLE 5</RecapSectionItemContent>
+          </RecapSectionItem>
+        </RecapSectionItems>
       </RecapSection>
-
       <RecapSection>
         <RecapSectionTitle>Période de référence</RecapSectionTitle>
-        <RecapSectionContent>
-          <RecapSectionContentItem legend="Année au titre de laquelle les écarts sont calculés" data="2021" />
-          <RecapSectionContentItem
-            legend="Date de fin de la période de douze mois consécutifs correspondant à l’exercice comptable pour le calcul des écarts"
-            data="31/12/2021"
-          />
-        </RecapSectionContent>
+        <RecapSectionItems>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Année au titre de laquelle les écarts sont calculés</RecapSectionItemLegend>
+            <RecapSectionItemContent>2021</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>
+              Date de fin de la période de douze mois consécutifs correspondant à l’exercice comptable pour le calcul
+              des écarts
+            </RecapSectionItemLegend>
+            <RecapSectionItemContent>31/12/2021</RecapSectionItemContent>
+          </RecapSectionItem>
+        </RecapSectionItems>
       </RecapSection>
-
       <RecapSection>
         <RecapSectionTitle>Écart de représentation parmi les cadres dirigeants</RecapSectionTitle>
-        <RecapSectionContent>
-          <RecapSectionContentItem legend="Pourcentage de femmes parmi les cadres dirigeants" data="53 %" />
-          <RecapSectionContentItem legend="Pourcentage d’hommes parmi les cadres dirigeants" data="47 %" />
-        </RecapSectionContent>
+        <RecapSectionItems>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Pourcentage de femmes parmi les cadres dirigeants</RecapSectionItemLegend>
+            <RecapSectionItemContent>53&nbsp;%</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Pourcentage d’hommes parmi les cadres dirigeants</RecapSectionItemLegend>
+            <RecapSectionItemContent>47&nbsp;%</RecapSectionItemContent>
+          </RecapSectionItem>
+        </RecapSectionItems>
       </RecapSection>
       <RecapSection>
         <RecapSectionTitle>Écart de représentation parmi les membres des instances dirigeantes</RecapSectionTitle>
-        <RecapSectionContent>
-          <RecapSectionContentItem legend="Motif de non calculabilité" data="Il n'y a aucune instance dirigeante" />
-        </RecapSectionContent>
+        <RecapSectionItems>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Motif de non calculabilité</RecapSectionItemLegend>
+            <RecapSectionItemContent>Il n'y a aucune instance dirigeante</RecapSectionItemContent>
+          </RecapSectionItem>
+        </RecapSectionItems>
       </RecapSection>
       <RecapSection>
         <RecapSectionTitle>Publication</RecapSectionTitle>
-        <RecapSectionContent>
-          <RecapSectionContentItem legend="Date de publication" data="01/09/2022" />
-          <RecapSectionContentItem legend="Site internet de publication" data="http://siteinternet.fr" />
-          <RecapSectionContentItem legend="Modalités de communication auprès des salariés" data="Affichage" />
-        </RecapSectionContent>
+        <RecapSectionItems>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Date de publication</RecapSectionItemLegend>
+            <RecapSectionItemContent>01/09/2022</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Site internet de publication</RecapSectionItemLegend>
+            <RecapSectionItemContent>http://siteinternet.fr</RecapSectionItemContent>
+          </RecapSectionItem>
+          <RecapSectionItem>
+            <RecapSectionItemLegend>Modalités de communication auprès des salariés</RecapSectionItemLegend>
+            <RecapSectionItemContent>Affichage</RecapSectionItemContent>
+          </RecapSectionItem>
+        </RecapSectionItems>
       </RecapSection>
-
       <form>
         <FormLayout>
           <FormLayoutButtonGroup>
