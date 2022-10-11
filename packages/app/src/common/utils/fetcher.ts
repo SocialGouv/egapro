@@ -1,13 +1,9 @@
+import { ApiError } from "next/dist/server/api-utils";
 import type { Any } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
-
-export type FetchError = Error & {
-  info?: string;
-  status?: number;
-};
 
 export type FetcherReturn = {
   error: unknown;
@@ -48,23 +44,22 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
   }
 
   if (!response.ok) {
-    const error = new Error("Erreur API") as FetchError;
-    error.status = response.status;
+    // const error = new Error("Erreur API") as FetchError;
+
+    let apiMessage = "Erreur API";
 
     try {
-      let info = (await response.json())?.error;
-      if (info) {
+      apiMessage = (await response.json())?.error;
+      if (apiMessage) {
         // Use a generic message error for expired token.
-        if (/Invalid token/i.test(info) || /No authentication token was provided/i.test(info)) {
-          info = EXPIRED_TOKEN_MESSAGE;
+        if (/Invalid token/i.test(apiMessage) || /No authentication token was provided/i.test(apiMessage)) {
+          apiMessage = EXPIRED_TOKEN_MESSAGE;
         }
       }
-      error.info = info;
     } catch (_ignoreError) {
       // Ignore error, for API which doesn't return JSON.
     }
-
-    throw error;
+    throw new ApiError(response.status, apiMessage);
   }
 
   return response.json();
