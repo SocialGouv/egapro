@@ -54,10 +54,10 @@ async def test_cannot_put_declaration_without_token(client, body):
     assert resp.status == 401
 
 
-async def test_cannot_get_declaration_without_token(client):
-    client.logout()
-    resp = await client.get("/declaration/514027945/2019")
-    assert resp.status == 401
+# async def test_cannot_get_declaration_without_token(client):
+#     client.logout()
+#     resp = await client.get("/declaration/514027945/2019")
+#     assert resp.status == 401
 
 
 async def test_invalid_siren_should_raise(client, body):
