@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 
-import type { FormEvent } from "react";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -20,11 +19,6 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 
   if (!formData?.entreprise?.siren) return <p>Loading...</p>;
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    router.push("/ecart-rep/");
-  };
-
   return (
     <>
       <h1>{title}</h1>
@@ -34,7 +28,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
         automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).
       </p>
 
-      <form noValidate onSubmit={onSubmit}>
+      <form noValidate>
         <FormLayout>
           <FormGroup>
             <FormGroupLabel htmlFor="siren">Siren</FormGroupLabel>
@@ -76,7 +70,9 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/declarant")}>
               Précédent
             </FormButton>
-            <FormButton onClick={() => router.push("/ecart-rep/")}>Suivant</FormButton>
+            <FormButton type="button" onClick={() => router.push("/ecart-rep/periode-reference")}>
+              Suivant
+            </FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>

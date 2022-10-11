@@ -12,6 +12,7 @@ const repartitionEquilibreeDefault: RepartitionEquilibreeForm = {
     telephone: "",
     accord_rgpd: undefined,
   },
+  endOfPeriod: "",
   entreprise: {
     adresse: "",
     code_naf: "",
@@ -35,12 +36,14 @@ type RepartitionEquilibreeForm = {
     prenom: string;
     telephone: string;
   };
+  endOfPeriod?: string;
   entreprise?: EntrepriseType;
   year?: number | undefined;
 };
 
 export const save = (data: Partial<RepartitionEquilibreeForm>) => {
   const actualForm = get();
+
   localStorage.setItem(KEY, JSON.stringify({ ...actualForm, ...data }));
 };
 
