@@ -367,15 +367,15 @@ async def test_staff_can_edit_declaration_after_one_year(
     assert resp.status == 204
 
 
-async def test_cannot_load_not_owned_declaration(client, declaration):
-    await declaration("514027945", 2019, "foo@bar.baz")
+# async def test_cannot_load_not_owned_declaration(client, declaration):
+#     await declaration("514027945", 2019, "foo@bar.baz")
 
-    client.login("other@email.com")
-    resp = await client.get("/declaration/514027945/2019")
-    assert resp.status == 403
-    assert json.loads(resp.body) == {
-        "error": "Vous n'avez pas les droits nécessaires pour le siren 514027945"
-    }
+#     client.login("other@email.com")
+#     resp = await client.get("/declaration/514027945/2019")
+#     assert resp.status == 403
+#     assert json.loads(resp.body) == {
+#         "error": "Vous n'avez pas les droits nécessaires pour le siren 514027945"
+#     }
 
 
 async def test_draft_declaration_is_not_owned(client, declaration, body):
