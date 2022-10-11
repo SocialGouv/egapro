@@ -133,8 +133,13 @@ const config = {
     },
     {
       files: ["__tests__/*.ts?(x)"],
-      extends: ["plugin:testing-library/react", "plugin:jest-dom/recommended"],
-      plugins: ["jest"],
+      extends: [
+        "plugin:testing-library/react",
+        "plugin:jest-dom/recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+      ],
+      plugins: ["jest", "@typescript-eslint", "typescript-sort-keys"],
       env: {
         jest: true,
         "jest/globals": true,

@@ -58,8 +58,6 @@
     "@tsconfig/next": "^1.0.3",
     "@types/node": "16",
     "@types/react": "^18",
-    "@typescript-eslint/eslint-plugin": "^5.40.0",
-    "@typescript-eslint/parser": "^5.40.0",
     "babel-loader": "^8.2.5",
     "concurrently": "^7.2.2",
     "eslint": "^8.24.0",
