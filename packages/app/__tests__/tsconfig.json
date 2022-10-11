@@ -20,6 +20,11 @@
     },
     "plugins": [{"name": "typescript-plugin-css-modules"}]
   },
+  "include": [
+    "./../next-env.d.ts",
+    "./../**/*.ts",
+    "./../**/*.tsx"
+  ],
   // override tests folder exclusion
   "exclude": [
     "node_modules",

@@ -6,7 +6,7 @@ export default {
   component: Box,
 } as ComponentMeta<typeof Box>;
 
-const Template: ComponentStory<typeof Box> = args => <Box my="6v" {...args} />;
+const Template: ComponentStory<typeof Box> = args => <Box my="6w" {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
