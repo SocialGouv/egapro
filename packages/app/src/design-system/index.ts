@@ -20,3 +20,5 @@ export * from "./layout/App";
 export * from "./layout/Container";
 export * from "./layout/ContentWithAside";
 export * from "./layout/FormLayout";
+export * from "./img/ImgEcartRep";
+export * from "./img/ImgHome";
