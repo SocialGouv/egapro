@@ -74,14 +74,14 @@ const EcartsCadres: NextPageWithLayout = () => {
               <option value="0">Il n'y a aucun cadre dirigeant</option>
               <option value="1">Il n'y a qu'un seul cadre dirigeant</option>
             </FormSelect>
-            <FormLayoutButtonGroup>
-              {/* TODO: add real path */}
-              <NextLink href="/" passHref>
-                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-              </NextLink>
-              <FormButton isDisabled>Suivant</FormButton>
-            </FormLayoutButtonGroup>
           </FormGroup>
+          <FormLayoutButtonGroup>
+            {/* TODO: add real path */}
+            <NextLink href="/" passHref>
+              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+            </NextLink>
+            <FormButton isDisabled>Suivant</FormButton>
+          </FormLayoutButtonGroup>
         </FormLayout>
       </form>
       <Card mt="4w">

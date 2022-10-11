@@ -73,13 +73,13 @@ const EcartsMenbres: NextPageWithLayout = () => {
             <FormSelect id="not-calculability-reason">
               <option value="0">Il n'y a aucune instance dirigeante</option>
             </FormSelect>
-            <FormLayoutButtonGroup>
-              <NextLink href="/ecart-rep/ecarts-cadres" passHref>
-                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-              </NextLink>
-              <FormButton isDisabled>Suivant</FormButton>
-            </FormLayoutButtonGroup>
           </FormGroup>
+          <FormLayoutButtonGroup>
+            <NextLink href="/ecart-rep/ecarts-cadres" passHref>
+              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+            </NextLink>
+            <FormButton isDisabled>Suivant</FormButton>
+          </FormLayoutButtonGroup>
         </FormLayout>
       </form>
       <Card mt="4w">
