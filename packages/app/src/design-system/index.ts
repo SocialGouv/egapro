@@ -6,6 +6,7 @@ export * from "./base/Callout";
 export * from "./base/Card";
 export * from "./base/Footer";
 export * from "./base/FormButton";
+export * from "./base/FormCheckbox";
 export * from "./base/FormGroup";
 export * from "./base/FormInput";
 export * from "./base/FormRadio";
