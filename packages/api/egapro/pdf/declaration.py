@@ -62,7 +62,6 @@ def main(data):
     pdf = Receipt(data)
     tranche_effectif = data.path("entreprise.effectif.tranche")
 
-    NONE_CELL = ((None, None))
     cells = (
         ("Nom Prénom", "{nom} {prénom}".format(**data["déclarant"])),
         ("Adresse mail", data.path("déclarant.email")),
@@ -304,8 +303,8 @@ def main(data):
             data.path("indicateurs.promotions.objectif_de_progression"),
         ),
     ) if effectif_tranche != "50:250" else (
-        (NONE_CELL, NONE_CELL),
-        (NONE_CELL, NONE_CELL),
+        (None, None),
+        (None, None),
     )
 
     indicateur2et3_cell = (
@@ -319,7 +318,7 @@ def main(data):
             ),
         )
         if effectif_tranche == "50:250"
-        else (NONE_CELL, NONE_CELL)
+        else ((None, None), (None, None))
     )
 
     if index is not None and date_pub_objectifs is not None:
