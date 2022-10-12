@@ -54,12 +54,6 @@ async def test_cannot_put_declaration_without_token(client, body):
     assert resp.status == 401
 
 
-# async def test_cannot_get_declaration_without_token(client):
-#     client.logout()
-#     resp = await client.get("/declaration/514027945/2019")
-#     assert resp.status == 401
-
-
 async def test_invalid_siren_should_raise(client, body):
     resp = await client.put("/declaration/111111111/2019", body=body)
     assert resp.status == 422
@@ -365,17 +359,6 @@ async def test_staff_can_edit_declaration_after_one_year(
     client.login("Staff@email.com")
     resp = await client.put("/declaration/514027945/2019", body)
     assert resp.status == 204
-
-
-# async def test_cannot_load_not_owned_declaration(client, declaration):
-#     await declaration("514027945", 2019, "foo@bar.baz")
-
-#     client.login("other@email.com")
-#     resp = await client.get("/declaration/514027945/2019")
-#     assert resp.status == 403
-#     assert json.loads(resp.body) == {
-#         "error": "Vous n'avez pas les droits nécessaires pour le siren 514027945"
-#     }
 
 
 async def test_draft_declaration_is_not_owned(client, declaration, body):
