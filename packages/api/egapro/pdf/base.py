@@ -65,6 +65,10 @@ class PDF(fpdf.FPDF):
         table = []
 
         # filter empty cells of NoneType value
+        for c in cells:
+            print("cell: ", c)
+            if c == (None, None):
+                print("cell is None")
         cells = (c for c in cells if c != (None, None))
 
         for key, value in cells:
@@ -72,7 +76,7 @@ class PDF(fpdf.FPDF):
             height, key_width, value_width = self.compute_row_height(key, value)
             h += height
             table.append((key, value, height, key_width, value_width))
-        self._perform_page_break_if_need_be(h)
+        self.add_page() if title == "Objectifs de progression" else self._perform_page_break_if_need_be(h)
         self.write_headline(title)
         for key, value, height, key_width, value_width in table:
             self.write_pair(key, value, height, key_width, value_width)
