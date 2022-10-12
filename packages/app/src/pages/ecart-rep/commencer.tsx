@@ -5,6 +5,7 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { useCheckTokenInURL } from "../../hooks/useCheckTokenInURL";
 import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import { checkSiren, fetchSiren, ownersForSiren } from "../../services/apiClient/siren";
@@ -64,6 +65,7 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
+  useCheckTokenInURL();
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();

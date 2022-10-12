@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useCheckTokenInURL } from "../../hooks/useCheckTokenInURL";
 import { useUser } from "../../hooks/useUser";
 import { requestEmailForToken } from "../../services/apiClient/token";
 import type { NextPageWithLayout } from "../_app";
@@ -38,7 +37,6 @@ const informationMessage =
   "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
 
 const EmailPage: NextPageWithLayout = () => {
-  useCheckTokenInURL();
   const router = useRouter();
   const { user } = useUser();
   const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
@@ -76,7 +74,7 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email);
+      await requestEmailForToken(email, `${window.location.origin}/ecart-rep/commencer?token=`);
       setFeatureStatus({ type: "success", message: "Un mail vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({
