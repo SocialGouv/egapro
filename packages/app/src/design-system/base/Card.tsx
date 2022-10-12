@@ -14,7 +14,7 @@ export type CardProps = PropsWithChildren<
 export const Card = ({ children, size, ...rest }: CardProps) => {
   return (
     <Box className={clsx("fr-card", size === "sm" && "fr-card--sm", size === "lg" && "fr-card--lg")} {...rest}>
-      <div className="fr-card__body">{children}</div>
+      {children}
     </Box>
   );
 };
