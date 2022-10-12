@@ -1,7 +1,5 @@
-import Image from "next/image";
 import NextLink from "next/link";
 
-import picture from "../../../public/picture-1.svg";
 import type { NextPageWithLayout } from "../_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
@@ -22,6 +20,7 @@ import {
   AlertTitle,
   Callout,
   CalloutContent,
+  ImgEcartRep,
 } from "@design-system";
 
 export const EcartRep: NextPageWithLayout = () => (
@@ -53,7 +52,7 @@ export const EcartRep: NextPageWithLayout = () => (
           </NextLink>
         </GridCol>
         <GridCol lg={5}>
-          <Image src={picture} alt="" layout="responsive" />
+          <ImgEcartRep />
         </GridCol>
       </Grid>
       <Grid haveGutters mt="6w">
@@ -92,7 +91,7 @@ export const EcartRep: NextPageWithLayout = () => (
                 </CardBodyContentDescription>
               </CardBodyContent>
               <CardBodyFooter>
-                <ButtonAsLink href="https://travail-emploi.gouv.fr/" target="_blank">
+                <ButtonAsLink variant="secondary" href="https://travail-emploi.gouv.fr/" target="_blank">
                   Consulter le site du Ministère du Travail
                 </ButtonAsLink>
               </CardBodyFooter>

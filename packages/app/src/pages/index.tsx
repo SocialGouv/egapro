@@ -1,7 +1,5 @@
-import Image from "next/image";
 import NextLink from "next/link";
 
-import picture from "../../public/picture-1.svg";
 import type { NextPageWithLayout } from "./_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
@@ -16,6 +14,7 @@ import {
   Container,
   Grid,
   GridCol,
+  ImgHome,
 } from "@design-system";
 
 const Home: NextPageWithLayout = () => {
@@ -38,7 +37,7 @@ const Home: NextPageWithLayout = () => {
               </p>
             </GridCol>
             <GridCol md={6} lg={5} className="fr-mx-auto">
-              <Image src={picture} alt="" layout="responsive" />
+              <ImgHome />
             </GridCol>
           </Grid>
         </Container>
