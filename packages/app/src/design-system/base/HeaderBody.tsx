@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 
-import { useUser } from "../../components/AuthContext";
+import { useUser } from "../../hooks/useUser";
 import { FormButton } from "./FormButton";
 import { Logo } from "./Logo";
 
@@ -13,14 +12,10 @@ export type HeaderBodyProps = {
 };
 
 export const HeaderBody = ({ isMobileMenuOpen, showMenuMobile, mobileMenuId, buttonMobileMenuId }: HeaderBodyProps) => {
-  const { user, logout } = useUser();
-  const router = useRouter();
-
-  const isAuthenticated = Boolean(user?.email);
+  const { isAuthenticated, logout } = useUser({ redirectTo: "/ecart-rep/email" });
 
   const disconnectUser = () => {
     logout();
-    router.push("/ecart-rep/");
   };
 
   return (

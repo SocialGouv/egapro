@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 
+import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import { useUser } from "@components/AuthContext";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
@@ -13,19 +13,11 @@ const InformationsEntreprise: NextPageWithLayout = () => {
   // No need to use React Hook Form here, because we only show read only data.
   const router = useRouter();
   const { formData } = useFormManager();
-  const { user, error } = useUser({ redirectTo: "/ecart-rep/email" });
+  const { isAuthenticated } = useUser({ redirectTo: "/ecart-rep/email" });
 
-  console.log("user", user);
+  if (!isAuthenticated) return <p>Chargement ...</p>;
 
-  // if (authProcess === "finished" && !isAuthenticated) return <p>Loading...</p>;
-
-  if (error) return <p>Vous n'avez pas les droits</p>;
-
-  if (!user) {
-    return <p>Loading...</p>;
-  }
-
-  if (!formData?.entreprise?.siren) return <p>Loading...</p>;
+  if (!formData?.entreprise?.siren) return <p>Chargement ...</p>;
 
   return (
     <>

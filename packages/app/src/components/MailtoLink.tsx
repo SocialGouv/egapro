@@ -1,4 +1,4 @@
-import { useUser } from "./AuthContext";
+import { useUser } from "../hooks/useUser";
 
 export const MailtoLinkForNonOwner = () => {
   const { user } = useUser();

@@ -5,10 +5,10 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import { checkSiren, fetchSiren, ownersForSiren } from "../../services/apiClient/siren";
 import type { NextPageWithLayout } from "../_app";
-import { useUser } from "@components/AuthContext";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -63,12 +63,10 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  const { user } = useUser();
+  const { isAuthenticated } = useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
-
-  const isAuthenticated = Boolean(user?.email);
 
   const {
     register,
@@ -91,9 +89,7 @@ const CommencerPage: NextPageWithLayout = () => {
     resetAsyncForm();
   }, [resetAsyncForm]);
 
-  useEffect(() => {
-    if (!isAuthenticated) router.push("/ecart-rep/email");
-  }, [isAuthenticated, router]);
+  if (!isAuthenticated) return <p>Chargement ...</p>;
 
   const onSubmit = async ({ year, siren }: FormType) => {
     const startFresh = async () => {

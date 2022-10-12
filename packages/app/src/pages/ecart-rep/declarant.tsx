@@ -4,9 +4,9 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import {
   FormButton,
@@ -31,17 +31,12 @@ const formSchema = z.object({
   accord_rgpd: z.boolean().refine(accord_rgpd => accord_rgpd, { message: "L'accord est requis" }),
 });
 
-// Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isAuthenticated } = useUser();
   const { formData, saveFormData } = useFormManager();
-
-  // useEffect(() => {
-  //   if (!isAuthenticated) router.push("/ecart-rep/email");
-  // }, [isAuthenticated, router]);
 
   const {
     register,
@@ -56,12 +51,6 @@ const DeclarantPage: NextPageWithLayout = () => {
     },
   });
 
-  // useEffect(() => {
-  //   if (email) {
-  //     setValue("email", email);
-  //   }
-  // }, [email, setValue]);
-
   const resetAsyncForm = useCallback(async () => {
     reset({
       email: user?.email,
@@ -75,6 +64,8 @@ const DeclarantPage: NextPageWithLayout = () => {
   useEffect(() => {
     resetAsyncForm();
   }, [resetAsyncForm]);
+
+  if (!isAuthenticated) return <p>Chargement ...</p>;
 
   const onSubmit = async ({ nom, prenom, telephone, email, accord_rgpd }: FormType) => {
     saveFormData({ declarant: { prenom: prenom, nom: nom, telephone: telephone, email, accord_rgpd } });

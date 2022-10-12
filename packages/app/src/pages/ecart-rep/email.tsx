@@ -1,12 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { useCheckTokenInURL } from "../../hooks/useCheckTokenInURL";
+import { useUser } from "../../hooks/useUser";
 import { requestEmailForToken } from "../../services/apiClient/token";
 import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
-import { useTokenAndRedirect } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import {
   Alert,
@@ -35,9 +37,12 @@ const informationMessage =
   "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
 
 const EmailPage: NextPageWithLayout = () => {
-  useTokenAndRedirect("./commencer");
-
+  useCheckTokenInURL();
+  const router = useRouter();
+  const { user } = useUser();
   const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
+  // Si la personne est authentifiée, on reroute sur commencer.
+  if (user) router.push("/ecart-rep/commencer");
 
   const {
     register,

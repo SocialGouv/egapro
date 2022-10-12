@@ -28,11 +28,9 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   const Layout = Component.getLayout ?? (({ children }) => <>{children}</>);
 
   return (
-    // <AuthContextProvider>
     <Layout>
       <Component {...pageProps} />
     </Layout>
-    // </AuthContextProvider>
   );
 };
 

@@ -6,9 +6,9 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-// import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -45,12 +45,9 @@ const formSchema = z
 type FormType = z.infer<typeof formSchema>;
 
 const PeriodeReference: NextPageWithLayout = () => {
-  // const { isAuthenticated } = useUser();
   const router = useRouter();
+  const { isAuthenticated } = useUser({ redirectTo: "/ecart-rep/email" });
   const { formData, saveFormData } = useFormManager();
-  // useEffect(() => {
-  //   if (!isAuthenticated) router.push("/ecart-rep/email");
-  // }, [isAuthenticated, router]);
 
   const {
     formState: { errors, isDirty, isValid, isSubmitted },
@@ -72,6 +69,8 @@ const PeriodeReference: NextPageWithLayout = () => {
   useEffect(() => {
     resetAsyncForm();
   }, [resetAsyncForm]);
+
+  if (!isAuthenticated) return <p>Chargement ...</p>;
 
   const handleClick = () => {
     if (formData?.year) {
