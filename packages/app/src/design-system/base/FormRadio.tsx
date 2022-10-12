@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
+import { forwardRef } from "react";
 import React from "react";
 import type { MarginProps } from "../utils/spacing";
 
@@ -63,14 +64,20 @@ export type FormRadioGroupInputProps = Pick<InputProps, "checked" | "children" |
   name: NonNullable<InputProps["name"]>;
 };
 
-export const FormRadioGroupInput = ({ children, id, ...inputProps }: FormRadioGroupInputProps) => (
-  <div className="fr-radio-group">
-    <input id={id} type="radio" {...inputProps} />
-    <label className="fr-label" htmlFor={id}>
-      {children}
-    </label>
-  </div>
+export const FormRadioGroupInput = forwardRef<HTMLInputElement, FormRadioGroupInputProps>(
+  ({ children, id, ...inputProps }, ref) => {
+    return (
+      <div className="fr-radio-group">
+        <input id={id} type="radio" {...inputProps} ref={ref} />
+        <label className="fr-label" htmlFor={id}>
+          {children}
+        </label>
+      </div>
+    );
+  },
 );
+
+FormRadioGroupInput.displayName = "FormRadioGroupInput";
 
 export type FormRadioGroupValidationMessageProps = PropsWithChildren<{
   id: string;
