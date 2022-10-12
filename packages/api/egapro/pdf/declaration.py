@@ -62,6 +62,7 @@ def main(data):
     pdf = Receipt(data)
     tranche_effectif = data.path("entreprise.effectif.tranche")
 
+    # Generate cells for PDF production here
     cells = (
         ("Nom Prénom", "{nom} {prénom}".format(**data["déclarant"])),
         ("Adresse mail", data.path("déclarant.email")),
