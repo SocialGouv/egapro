@@ -5,8 +5,6 @@ import type { IconStyles } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
-import styles from "./Card.module.css";
-
 export type CardProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
     isEnlargeLink?: boolean;
@@ -23,7 +21,6 @@ export const Card = ({ children, size, isEnlargeLink, noBorder, isHorizontal, ..
         "fr-card",
         size === "sm" && "fr-card--sm",
         size === "lg" && "fr-card--lg",
-        styles.card,
         isEnlargeLink && "fr-enlarge-link",
         noBorder && "fr-card--no-border",
         isHorizontal && "fr-card--horizontal",

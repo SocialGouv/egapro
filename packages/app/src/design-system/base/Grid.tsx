@@ -21,15 +21,22 @@ export const Grid = ({ children, haveGutters, justifyCenter, ...rest }: GridProp
 type ColsNumberType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
 export type GridColProps = PropsWithChildren<Record<never, never>> & {
+  className?: string;
   lg?: ColsNumberType;
   md?: ColsNumberType;
   sm?: ColsNumberType;
   xl?: ColsNumberType;
 };
 
-export const GridCol = ({ sm = 12, md, lg, xl, children, ...rest }: GridColProps) => (
+export const GridCol = ({ sm = 12, md, lg, xl, className, children, ...rest }: GridColProps) => (
   <div
-    className={clsx(sm && `fr-col-${sm}`, md && `fr-col-md-${md}`, lg && `fr-col-lg-${lg}`, xl && `fr-col-xl-${xl}`)}
+    className={clsx(
+      sm && `fr-col-${sm}`,
+      md && `fr-col-md-${md}`,
+      lg && `fr-col-lg-${lg}`,
+      xl && `fr-col-xl-${xl}`,
+      className,
+    )}
     {...rest}
   >
     {children}
