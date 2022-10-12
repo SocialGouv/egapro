@@ -1,10 +1,8 @@
-import Image from "next/image";
 import NextLink from "next/link";
 
-import picture from "../../../public/picture-1.svg";
 import type { NextPageWithLayout } from "../_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
-import { ButtonAsLink } from "@design-system";
+import { ButtonAsLink, ImgEcartRep } from "@design-system";
 
 export const EcartRep: NextPageWithLayout = () => (
   <section>
@@ -36,8 +34,8 @@ export const EcartRep: NextPageWithLayout = () => (
               <ButtonAsLink>Déclarer les écarts éventuels de représentation femmes-hommes</ButtonAsLink>
             </NextLink>
           </div>
-          <div className="fr-col-lg-5 fr-col-12">
-            <Image src={picture} alt="" layout="responsive" />
+          <div className="fr-col-lg-5 fr-col-md-6 fr-col-12 fr-mx-auto">
+            <ImgEcartRep />
           </div>
         </div>
         <div className="fr-grid-row fr-grid-row--gutters fr-mt-6w">
