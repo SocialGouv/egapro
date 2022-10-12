@@ -16,6 +16,7 @@ import {
   FormButton,
   FormGroup,
   FormGroupLabel,
+  FormGroupMessage,
   FormInput,
   FormLayout,
   FormLayoutButtonGroup,
@@ -28,13 +29,17 @@ import {
 
 const title = "Publication";
 
-const formSchema = z.object({
-  publishingContent: z.string(),
-  publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
-    message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
-  }),
-  publishingWebsiteUrl: z.string().url(),
-});
+const formSchema = z
+  .object({
+    publishingContent: z.string(),
+    publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
+      message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
+    }),
+    publishingWebsiteUrl: z.string().url(),
+  })
+  .refine(({ publishingContent, publishingDate, publishingWebsiteUrl }) => {
+    return (publishingContent && publishingDate) || (publishingWebsiteUrl && publishingDate);
+  });
 
 type FormType = z.infer<typeof formSchema>;
 
@@ -54,6 +59,7 @@ const Publication: NextPageWithLayout = () => {
     reset,
     setValue,
   } = useForm<FormType>({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
   });
 
@@ -73,8 +79,8 @@ const Publication: NextPageWithLayout = () => {
     setHasWebsite(strRadioToBool(e.target.value));
   }
 
-  const onSubmit = async ({ publishingDate, publishingWebsiteUrl }: FormType) => {
-    saveFormData({ publishingDate, publishingWebsiteUrl });
+  const onSubmit = async ({ publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
+    saveFormData({ publishingContent, publishingDate, publishingWebsiteUrl });
     router.push("/ecart-rep/recapitulatif");
   };
 
@@ -96,6 +102,9 @@ const Publication: NextPageWithLayout = () => {
           <FormGroup>
             <FormGroupLabel htmlFor="publishingDate">Date de publication des écarts calculables</FormGroupLabel>
             <FormInput id="publishingDate" type="date" {...register("publishingDate")} />
+            {errors.publishingDate && (
+              <FormGroupMessage id="publishingDate-message-error">{errors.publishingDate.message}</FormGroupMessage>
+            )}
           </FormGroup>
           <FormRadioGroup inline>
             <FormRadioGroupLegend id="hasWebsite">
@@ -128,26 +137,45 @@ const Publication: NextPageWithLayout = () => {
               <FormGroupLabel htmlFor="publishingWebsiteUrl">
                 Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables
               </FormGroupLabel>
-              <FormInput id="publishingWebsiteUrl" placeholder="https://" />
+              <FormInput
+                id="publishingWebsiteUrl"
+                placeholder="https://"
+                {...register("publishingWebsiteUrl")}
+                aria-describedby="publishingWebsiteUrl-message-error"
+              />
+              {errors.publishingWebsiteUrl && (
+                <FormGroupMessage id="publishingWebsiteUrl-message-error">
+                  {errors.publishingWebsiteUrl.message}
+                </FormGroupMessage>
+              )}
             </FormGroup>
           ) : (
             <FormGroup>
               <FormGroupLabel htmlFor="publishingContent">
                 Préciser les modalités de communication des écarts calculables auprès de vos salariés
               </FormGroupLabel>
-              <FormTextarea id="publishingContent" />
+              <FormTextarea
+                id="publishingContent"
+                {...register("publishingContent")}
+                aria-describedby="publishingContent-message-error"
+              />
+              {errors.publishingContent && (
+                <FormGroupMessage id="publishingContent-message-error">
+                  {errors.publishingContent.message}
+                </FormGroupMessage>
+              )}
             </FormGroup>
           )}
 
           <FormLayoutButtonGroup>
-            {/* TODO: add real path */}
-            <Link href="/" passHref>
+            <Link href="/ecart-rep/ecart-representation" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </Link>
-            <FormButton isDisabled>Suivant</FormButton>
+            <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
+      {`isValid ${isValid}`}
     </>
   );
 };
