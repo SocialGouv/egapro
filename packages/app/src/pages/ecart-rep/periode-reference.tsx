@@ -31,8 +31,7 @@ const formSchema = z
     }),
   })
   .superRefine(({ year, endOfPeriod }, ctx) => {
-    const endOfPeriodDateFormat = new Date(endOfPeriod);
-    if (getYear(endOfPeriodDateFormat) !== Number(year)) {
+    if (getYear(new Date(endOfPeriod)) !== Number(year)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
