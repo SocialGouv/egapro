@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import { ClientOnly } from "@components/ClientOnly";
+import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
 
@@ -12,12 +12,8 @@ const title = "Informations entreprise";
 const InformationsEntreprise: NextPageWithLayout = () => {
   // No need to use React Hook Form here, because we only show read only data.
   const router = useRouter();
+  useUser({ redirectTo: "/ecart-rep/email" });
   const { formData } = useFormManager();
-  const { isAuthenticated } = useUser({ redirectTo: "/ecart-rep/email" });
-
-  if (!isAuthenticated) return <p>Chargement ...</p>;
-
-  if (!formData?.entreprise?.siren) return <p>Chargement ...</p>;
 
   return (
     <>
@@ -28,7 +24,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
         automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).
       </p>
 
-      <ClientOnly>
+      <ClientAuthenticatedOnly>
         <form noValidate>
           <FormLayout>
             <FormGroup>
@@ -77,7 +73,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
-      </ClientOnly>
+      </ClientAuthenticatedOnly>
     </>
   );
 };

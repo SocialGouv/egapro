@@ -7,7 +7,8 @@ import { z } from "zod";
 import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
+import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
+import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   FormButton,
   FormGroup,
@@ -35,7 +36,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user, isAuthenticated } = useUser();
+  const { user } = useUser({ redirectTo: "/ecart-rep/email" });
   const { formData, saveFormData } = useFormManager();
 
   const {
@@ -65,8 +66,6 @@ const DeclarantPage: NextPageWithLayout = () => {
     resetAsyncForm();
   }, [resetAsyncForm]);
 
-  if (!isAuthenticated) return <p>Chargement ...</p>;
-
   const onSubmit = async ({ nom, prenom, telephone, email, accord_rgpd }: FormType) => {
     saveFormData({ declarant: { prenom: prenom, nom: nom, telephone: telephone, email, accord_rgpd } });
     router.push("/ecart-rep/entreprise");
@@ -77,77 +76,79 @@ const DeclarantPage: NextPageWithLayout = () => {
       <h1>{title}</h1>
       <p>Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email</p>
 
-      <FormLayout>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <FormGroup>
-            <FormGroupLabel htmlFor="nom">Nom du déclarant</FormGroupLabel>
-            <FormInput
-              id="nom"
-              type="text"
-              isError={Boolean(errors.nom)}
-              {...register("nom")}
-              aria-describedby="nom-message-error"
-            />
-            {errors.nom && <FormGroupMessage id="nom-message-error">{errors.nom.message}</FormGroupMessage>}
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="prenom">Prénom du déclarant</FormGroupLabel>
-            <FormInput
-              id="prenom"
-              type="text"
-              isError={Boolean(errors.prenom)}
-              {...register("prenom")}
-              aria-describedby="prenom-message-error"
-            />
-            {errors.prenom && <FormGroupMessage id="prenom-message-error">{errors.prenom.message}</FormGroupMessage>}
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="telephone">Numéro de téléphone</FormGroupLabel>
-            <FormInput
-              id="telephone"
-              type="tel"
-              isError={Boolean(errors.telephone)}
-              {...register("telephone")}
-              aria-describedby="telephone-message-error"
-            />
-            {errors.telephone && (
-              <FormGroupMessage id="telephone-message-error">{errors.telephone.message}</FormGroupMessage>
-            )}
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="email">Email</FormGroupLabel>
-            <FormInput id="email" type="text" readOnly {...register("email")} />
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="accord_rgpd">
-              J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
-              vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
-              consulter nos Conditions Générales d'Utilisation.
-            </FormGroupLabel>
-            <input
-              type="checkbox"
-              id="accord_rgpd"
-              {...register("accord_rgpd")}
-              aria-describedby="accord_rgpd-message-error"
-            />
-            {errors.accord_rgpd && (
-              <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
-            )}
-          </FormGroup>
-          <FormLayoutButtonGroup>
-            <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/commencer")}>
-              Précédent
-            </FormButton>
-            <FormButton isDisabled={!isValid}>Suivant</FormButton>
-          </FormLayoutButtonGroup>
-        </form>
-      </FormLayout>
+      <ClientAuthenticatedOnly>
+        <FormLayout>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <FormGroup>
+              <FormGroupLabel htmlFor="nom">Nom du déclarant</FormGroupLabel>
+              <FormInput
+                id="nom"
+                type="text"
+                isError={Boolean(errors.nom)}
+                {...register("nom")}
+                aria-describedby="nom-message-error"
+              />
+              {errors.nom && <FormGroupMessage id="nom-message-error">{errors.nom.message}</FormGroupMessage>}
+            </FormGroup>
+            <FormGroup>
+              <FormGroupLabel htmlFor="prenom">Prénom du déclarant</FormGroupLabel>
+              <FormInput
+                id="prenom"
+                type="text"
+                isError={Boolean(errors.prenom)}
+                {...register("prenom")}
+                aria-describedby="prenom-message-error"
+              />
+              {errors.prenom && <FormGroupMessage id="prenom-message-error">{errors.prenom.message}</FormGroupMessage>}
+            </FormGroup>
+            <FormGroup>
+              <FormGroupLabel htmlFor="telephone">Numéro de téléphone</FormGroupLabel>
+              <FormInput
+                id="telephone"
+                type="tel"
+                isError={Boolean(errors.telephone)}
+                {...register("telephone")}
+                aria-describedby="telephone-message-error"
+              />
+              {errors.telephone && (
+                <FormGroupMessage id="telephone-message-error">{errors.telephone.message}</FormGroupMessage>
+              )}
+            </FormGroup>
+            <FormGroup>
+              <FormGroupLabel htmlFor="email">Email</FormGroupLabel>
+              <FormInput id="email" type="text" readOnly {...register("email")} />
+            </FormGroup>
+            <FormGroup>
+              <FormGroupLabel htmlFor="accord_rgpd">
+                J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
+                vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
+                consulter nos Conditions Générales d'Utilisation.
+              </FormGroupLabel>
+              <input
+                type="checkbox"
+                id="accord_rgpd"
+                {...register("accord_rgpd")}
+                aria-describedby="accord_rgpd-message-error"
+              />
+              {errors.accord_rgpd && (
+                <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
+              )}
+            </FormGroup>
+            <FormLayoutButtonGroup>
+              <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/commencer")}>
+                Précédent
+              </FormButton>
+              <FormButton isDisabled={!isValid}>Suivant</FormButton>
+            </FormLayoutButtonGroup>
+          </form>
+        </FormLayout>
+      </ClientAuthenticatedOnly>
     </>
   );
 };
 
 DeclarantPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
 };
 
 export default DeclarantPage;

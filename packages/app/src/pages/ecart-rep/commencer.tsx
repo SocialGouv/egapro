@@ -9,6 +9,7 @@ import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import { checkSiren, fetchSiren, ownersForSiren } from "../../services/apiClient/siren";
 import type { NextPageWithLayout } from "../_app";
+import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -63,7 +64,7 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  const { isAuthenticated } = useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
@@ -88,8 +89,6 @@ const CommencerPage: NextPageWithLayout = () => {
   useEffect(() => {
     resetAsyncForm();
   }, [resetAsyncForm]);
-
-  if (!isAuthenticated) return <p>Chargement ...</p>;
 
   const onSubmit = async ({ year, siren }: FormType) => {
     const startFresh = async () => {
@@ -134,45 +133,47 @@ const CommencerPage: NextPageWithLayout = () => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <FormLayout>
-          <FormGroup>
-            <FormGroupLabel htmlFor="year">
-              Année au titre de laquelle les écarts de représentation sont calculés
-            </FormGroupLabel>
-            <FormSelect
-              id="year"
-              placeholder="Sélectionnez une année"
-              {...register("year")}
-              isError={Boolean(errors.year)}
-              aria-describedby="year-message-error"
-            >
-              <option value="2021">2021</option>
-            </FormSelect>
-            {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="siren" hint="9 chiffres">
-              Numéro Siren de l'entreprise
-            </FormGroupLabel>
-            <FormInput
-              id="siren"
-              placeholder="Ex: 504920166, 403461742, 403696735"
-              type="text"
-              {...register("siren")}
-              isError={Boolean(errors.siren)}
-              aria-describedby="siren-message-error"
-              maxLength={9}
-            />
-            {errors.siren && errors.siren.message !== OWNER_ERROR && (
-              <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>
-            )}
-          </FormGroup>
-          <FormLayoutButtonGroup>
-            <FormButton isDisabled={(isSubmitted && !isValid) || isSubmitting}>Suivant</FormButton>
-          </FormLayoutButtonGroup>
-        </FormLayout>
-      </form>
+      <ClientAuthenticatedOnly>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <FormLayout>
+            <FormGroup>
+              <FormGroupLabel htmlFor="year">
+                Année au titre de laquelle les écarts de représentation sont calculés
+              </FormGroupLabel>
+              <FormSelect
+                id="year"
+                placeholder="Sélectionnez une année"
+                {...register("year")}
+                isError={Boolean(errors.year)}
+                aria-describedby="year-message-error"
+              >
+                <option value="2021">2021</option>
+              </FormSelect>
+              {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
+            </FormGroup>
+            <FormGroup>
+              <FormGroupLabel htmlFor="siren" hint="9 chiffres">
+                Numéro Siren de l'entreprise
+              </FormGroupLabel>
+              <FormInput
+                id="siren"
+                placeholder="Ex: 504920166, 403461742, 403696735"
+                type="text"
+                {...register("siren")}
+                isError={Boolean(errors.siren)}
+                aria-describedby="siren-message-error"
+                maxLength={9}
+              />
+              {errors.siren && errors.siren.message !== OWNER_ERROR && (
+                <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>
+              )}
+            </FormGroup>
+            <FormLayoutButtonGroup>
+              <FormButton isDisabled={(isSubmitted && !isValid) || isSubmitting}>Suivant</FormButton>
+            </FormLayoutButtonGroup>
+          </FormLayout>
+        </form>
+      </ClientAuthenticatedOnly>
     </>
   );
 };
