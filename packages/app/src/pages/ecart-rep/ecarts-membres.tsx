@@ -29,7 +29,7 @@ import {
 
 const title = "Écarts de représentation";
 
-const EcartsMenbres: NextPageWithLayout = () => {
+const EcartsMembres: NextPageWithLayout = () => {
   return (
     <>
       <h1>{title}</h1>
@@ -106,8 +106,8 @@ const EcartsMenbres: NextPageWithLayout = () => {
   );
 };
 
-EcartsMenbres.getLayout = ({ children }) => {
+EcartsMembres.getLayout = ({ children }) => {
   return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
 };
 
-export default EcartsMenbres;
+export default EcartsMembres;

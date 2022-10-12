@@ -42,11 +42,11 @@ export const RepartitionEquilibreeLayout = ({ children }: PropsWithChildren<{}>)
                   isExpandedDefault
                   title="Écarts de représentation"
                   isCurrent={
-                    currentRoute === "/ecart-rep/ecarts-cadres" || currentRoute === "/ecart-rep/ecarts-menbres"
+                    currentRoute === "/ecart-rep/ecarts-cadres" || currentRoute === "/ecart-rep/ecarts-membres"
                   }
                 >
                   <AsideLink path="ecarts-cadres">Cadres dirigeants</AsideLink>
-                  <AsideLink path="ecarts-menbres">Membres des instances dirigeantes</AsideLink>
+                  <AsideLink path="ecarts-membres">Membres des instances dirigeantes</AsideLink>
                 </SideMenuCollapse>
                 <AsideLink path="#">Publication</AsideLink>
                 <AsideLink path="#">Récapitulatif</AsideLink>
