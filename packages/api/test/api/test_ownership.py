@@ -36,10 +36,10 @@ async def test_add_owner(client, monkeypatch):
     client.login("staff@email.com")
     resp = await client.put("/ownership/123456782/ba@na.na")
     assert resp.status == 204
-    assert await db.ownership.emails("123456782") == [
+    assert sorted(await db.ownership.emails("123456782")) == [
+        "ba@na.na",
         "foo@bar.baz",
         "foo@foo.foo",
-        "ba@na.na",
     ]
 
 
