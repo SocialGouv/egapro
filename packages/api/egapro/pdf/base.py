@@ -65,10 +65,6 @@ class PDF(fpdf.FPDF):
         table = []
 
         # filter empty cells of NoneType value
-        for c in cells:
-            print("cell: ", c)
-            if c == (None, None):
-                print("cell is None")
         cells = (c for c in cells if c != (None, None))
 
         for key, value in cells:
