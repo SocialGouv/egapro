@@ -11,6 +11,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
 jobs:
-  kontinuous:
-    uses: SocialGouv/kontinuous/.github/workflows/workflow-webhook.yaml@v1
-    secrets: inherit
+  # kontinuous:
+  #   uses: SocialGouv/kontinuous/.github/workflows/workflow-webhook.yaml@v1
+  #   secrets: inherit
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: SocialGouv/kontinuous@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          rancherProjectId: ${{ secrets.RANCHER_PROJECT_ID }}
+          ciNamespace: "${{ secrets.RANCHER_PROJECT_NAME }}-ci"
+          disableDiff: "true"
