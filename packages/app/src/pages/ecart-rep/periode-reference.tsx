@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, getYear, formatISO, isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -31,17 +31,16 @@ const formSchema = z
       message: "La date de fin de période de référence est de la forme jj/mm/aaaa.",
     }),
   })
-  .refine(
-    ({ year, endOfPeriod }) => {
-      if (!year || !endOfPeriod) return false;
-      const endOfPeriodDateFormat = new Date(endOfPeriod);
-      return getYear(endOfPeriodDateFormat) === Number(year);
-    },
-    {
-      message:
-        "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
-    },
-  );
+  .superRefine(({ year, endOfPeriod }, ctx) => {
+    if (getYear(new Date(endOfPeriod)) !== Number(year)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
+        path: ["endOfPeriod"],
+      });
+    }
+  });
 
 type FormType = z.infer<typeof formSchema>;
 
@@ -57,19 +56,22 @@ const PeriodeReference: NextPageWithLayout = () => {
     reset,
     setValue,
   } = useForm<FormType>({
+    mode: "onBlur",
     resolver: zodResolver(formSchema),
   });
 
-  const resetAsyncForm = useCallback(async () => {
+  const resetForm = useCallback(() => {
     reset({
       endOfPeriod: formData?.endOfPeriod === undefined ? undefined : formData?.endOfPeriod,
       year: formData?.year === undefined ? undefined : String(formData?.year),
     });
+    // formData needed otherwise localstorage data is not loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, formData]);
 
   useEffect(() => {
-    resetAsyncForm();
-  }, [resetAsyncForm]);
+    resetForm();
+  }, [resetForm]);
 
   const handleClick = () => {
     if (formData?.year) {
