@@ -4,7 +4,9 @@ import {
   CardBody,
   CardBodyContent,
   CardBodyContentDescription,
-  CardBodyContentLegend,
+  CardBodyContentDetails,
+  CardBodyContentEnd,
+  CardBodyContentStart,
   CardBodyContentTitle,
   CardBodyFooter,
   Link,
@@ -28,7 +30,9 @@ export const Default: ComponentStory<typeof Card> = args => {
     <Card {...args}>
       <CardBody>
         <CardBodyContent>
-          <CardBodyContentLegend icon="fr-icon-arrow-right-line">Définition</CardBodyContentLegend>
+          <CardBodyContentStart>
+            <CardBodyContentDetails icon="fr-icon-arrow-right-line">Définition</CardBodyContentDetails>
+          </CardBodyContentStart>
           <CardBodyContentTitle>Membres des instances dirigeantes</CardBodyContentTitle>
           <CardBodyContentDescription>
             Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout acte
@@ -43,6 +47,24 @@ export const Default: ComponentStory<typeof Card> = args => {
             </Link>
           </LinkGroup>
         </CardBodyFooter>
+      </CardBody>
+    </Card>
+  );
+};
+
+export const IsEnlargeLink: ComponentStory<typeof Card> = args => {
+  return (
+    <Card isEnlargeLink {...args}>
+      <CardBody>
+        <CardBodyContent>
+          <CardBodyContentTitle>
+            <a href="#">Télécharger le récapitulatif</a>
+          </CardBodyContentTitle>
+          <CardBodyContentDescription>Année 2022 au titre des données 2021.</CardBodyContentDescription>
+          <CardBodyContentEnd>
+            <CardBodyContentDetails>PDF – 61,88 Ko</CardBodyContentDetails>
+          </CardBodyContentEnd>
+        </CardBodyContent>
       </CardBody>
     </Card>
   );

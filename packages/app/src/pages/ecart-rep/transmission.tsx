@@ -11,11 +11,12 @@ import {
   CardBody,
   CardBodyContent,
   CardBodyContentDescription,
+  CardBodyContentDetails,
+  CardBodyContentEnd,
   CardBodyContentTitle,
-  CardBodyFooter,
   FormButton,
-  LinkGroup,
-  Link,
+  Grid,
+  GridCol,
 } from "@design-system";
 
 const title = "Transmission de la procédure";
@@ -51,28 +52,29 @@ const Transmission: NextPageWithLayout = () => {
           </ButtonGroup>
         </form>
       </Box>
-
-      <Card>
-        <CardBody>
-          <CardBodyContent>
-            <CardBodyContentTitle>Télécharger le récapitulatif</CardBodyContentTitle>
-            <CardBodyContentDescription>Année 2022 au titre des données 2021.</CardBodyContentDescription>
-          </CardBodyContent>
-          <CardBodyFooter>
-            <LinkGroup>
-              <Link href="#" iconRight="fr-icon-arrow-right-line">
-                Lien simple
-              </Link>
-            </LinkGroup>
-          </CardBodyFooter>
-        </CardBody>
-      </Card>
+      <Grid mt="6w">
+        <GridCol lg={6}>
+          <Card size="sm" isEnlargeLink>
+            <CardBody>
+              <CardBodyContent>
+                <CardBodyContentTitle>
+                  <a href="#">Télécharger le récapitulatif</a>
+                </CardBodyContentTitle>
+                <CardBodyContentDescription>Année 2022 au titre des données 2021.</CardBodyContentDescription>
+                <CardBodyContentEnd>
+                  <CardBodyContentDetails>PDF – 61,88 Ko</CardBodyContentDetails>
+                </CardBodyContentEnd>
+              </CardBodyContent>
+            </CardBody>
+          </Card>
+        </GridCol>
+      </Grid>
     </>
   );
 };
 
 Transmission.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepartitionEquilibreeLayout haveBottomSection={true}>{children}</RepartitionEquilibreeLayout>;
 };
 
 export default Transmission;

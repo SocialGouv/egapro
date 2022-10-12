@@ -9,6 +9,7 @@ export * from "./base/FormButton";
 export * from "./base/FormGroup";
 export * from "./base/FormInput";
 export * from "./base/FormRadio";
+export * from "./base/Grid";
 export * from "./base/Header";
 export * from "./base/Modale";
 export * from "./base/Link";
