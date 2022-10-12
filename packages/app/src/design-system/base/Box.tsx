@@ -5,7 +5,7 @@ import type { SpacingProps } from "../utils/spacing";
 export type BoxProps = PropsWithChildren<
   React.HTMLAttributes<HTMLDivElement> &
     SpacingProps & {
-      as?: "article" | "div" | "footer";
+      as?: "article" | "div" | "footer" | "section";
       className?: string;
     }
 >;

@@ -4,107 +4,114 @@ import NextLink from "next/link";
 import picture from "../../../public/picture-1.svg";
 import type { NextPageWithLayout } from "../_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
-import { ButtonAsLink } from "@design-system";
+import {
+  Box,
+  ButtonAsLink,
+  Card,
+  CardBodyFooter,
+  CardBody,
+  CardBodyContent,
+  CardBodyContentDescription,
+  CardBodyContentDetails,
+  CardBodyContentStart,
+  CardBodyContentTitle,
+  Container,
+  Grid,
+  GridCol,
+  Alert,
+  AlertTitle,
+  Callout,
+  CalloutContent,
+} from "@design-system";
 
 export const EcartRep: NextPageWithLayout = () => (
-  <section>
-    <div className="fr-py-10w">
-      <div className="fr-container">
-        <div className="fr-grid-row fr-grid-row--gutters">
-          <div className="fr-col-lg-7 fr-col-12">
-            <h1 className="fr-h1">
-              <span className="fr-h3 fr-mb-0" style={{ display: "block" }}>
-                Bienvenue sur
-              </span>{" "}
-              la déclaration des écarts de représentation F/H dans les postes de direction
-            </h1>
-            <p className="fr-text--md">
-              <a
-                href="https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000044559192"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ds-link ds-text-sm fr-link--md"
-              >
-                La loi du 24 décembre 2021
-              </a>{" "}
-              visant à accélérer l’égalité économique et professionnelle a créé une obligation de représentation
-              équilibrée entre les femmes et les hommes parmi les <strong>cadres dirigeants</strong> et les{" "}
-              <strong>membres des instances dirigeantes</strong> des grandes entreprises, accompagnée d’une{" "}
-              <strong>obligation de transparence</strong> en la matière.
-            </p>
-            <NextLink href="/ecart-rep/assujetti/" passHref>
-              <ButtonAsLink>Déclarer les écarts éventuels de représentation femmes-hommes</ButtonAsLink>
-            </NextLink>
-          </div>
-          <div className="fr-col-lg-5 fr-col-12">
-            <Image src={picture} alt="" layout="responsive" />
-          </div>
-        </div>
-        <div className="fr-grid-row fr-grid-row--gutters fr-mt-6w">
-          <div className="fr-col-md-6 fr-col-12">
-            <div className="fr-card fr-card--sm">
-              <div className="fr-card__body fr-card__start">
-                <div className="fr-card__content">
-                  <div className="fr-card__detail">Transmission de déclaration</div>
-                  <h2 className="fr-card__title">Suis-je éligible&nbsp;?</h2>
-                  <div className="fr-card__desc">
-                    <div>
-                      Les entreprises qui emploient au moins 1 000 salariés pour le troisième exercice consécutif
-                      doivent publier et déclarer chaque année au plus tard le 1er mars leurs écarts éventuels de
-                      représentation entre les femmes et les hommes parmi, d’une part, leurs cadres dirigeants, et
-                      d’autre part, les membres de leurs instances dirigeantes, en parallèle de la publication et de la
-                      déclaration de leur Index de l’égalité professionnelle.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="fr-col-md-6 fr-col-12">
-            <div className="fr-card fr-card--sm">
-              <div className="fr-card__body fr-card__start">
-                <div className="fr-card__content">
-                  <div className="fr-card__detail">
+  <Box py="9w" as="section">
+    <Container>
+      <Grid>
+        <GridCol lg={7}>
+          <h1>
+            <span className="fr-h3 fr-mb-0" style={{ display: "block" }}>
+              Bienvenue sur
+            </span>{" "}
+            la déclaration des écarts de représentation F/H dans les postes de direction
+          </h1>
+          <p>
+            <a
+              href="https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000044559192"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              La loi du 24 décembre 2021
+            </a>{" "}
+            visant à accélérer l’égalité économique et professionnelle a créé une obligation de représentation
+            équilibrée entre les femmes et les hommes parmi les <strong>cadres dirigeants</strong> et les{" "}
+            <strong>membres des instances dirigeantes</strong> des grandes entreprises, accompagnée d’une{" "}
+            <strong>obligation de transparence</strong> en la matière.
+          </p>
+          <NextLink href="/ecart-rep/assujetti/" passHref>
+            <ButtonAsLink>Déclarer les écarts éventuels de représentation femmes-hommes</ButtonAsLink>
+          </NextLink>
+        </GridCol>
+        <GridCol lg={5}>
+          <Image src={picture} alt="" layout="responsive" />
+        </GridCol>
+      </Grid>
+      <Grid haveGutters mt="6w">
+        <GridCol lg={6}>
+          <Card>
+            <CardBody>
+              <CardBodyContent>
+                <CardBodyContentStart>
+                  <CardBodyContentDetails>Suis-je éligible&nbsp;?</CardBodyContentDetails>
+                </CardBodyContentStart>
+                <CardBodyContentTitle titleAs="h2">Transmission de déclaration</CardBodyContentTitle>
+                <CardBodyContentDescription>
+                  Les entreprises qui emploient au moins 1 000 salariés pour le troisième exercice consécutif doivent
+                  publier et déclarer chaque année au plus tard le 1er mars leurs écarts éventuels de représentation
+                  entre les femmes et les hommes parmi, d’une part, leurs cadres dirigeants, et d’autre part, les
+                  membres de leurs instances dirigeantes, en parallèle de la publication et de la déclaration de leur
+                  Index de l’égalité professionnelle.
+                </CardBodyContentDescription>
+              </CardBodyContent>
+            </CardBody>
+          </Card>
+        </GridCol>
+        <GridCol lg={6}>
+          <Card>
+            <CardBody>
+              <CardBodyContent>
+                <CardBodyContentStart>
+                  <CardBodyContentDetails>
                     Déclaration de vos écarts éventuels de représentation femmes-hommes
-                  </div>
-                  <h2 className="fr-card__title">Besoin d’aide&nbsp;?</h2>
-                  <div className="fr-card__desc">
-                    <div>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisl, duis ac egestas donec tincidunt
-                      lorem. Sodales risus amet nisl sed. Init tartatum designsystemus.
-                    </div>
-                  </div>
-                </div>
-                <div className="fr-card__footer">
-                  <ul className="fr-btns-group fr-btns-group--inline-null fr-btns-group--equisized">
-                    <li>
-                      <a
-                        href="https://travail-emploi.gouv.fr/"
-                        className="fr-btn fr-btn--secondary"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Consulter le site du Ministère du Travail
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="fr-mt-5w">
-          <div className="ds-alert fr-alert fr-alert--warning">
-            <i className="ds-alert__icon ri-alert-fill "></i>
-            <h2 className="fr-alert__title">Calendrier exceptionnel en 2022</h2>
-            <p>
-              En 2022, pour la première année d’application, les entreprises ont jusqu’au 1er septembre 2022 pour
-              procéder à cette publication.
-            </p>
-          </div>
-        </div>
-        <div className="fr-mt-5w">
-          <div className="fr-callout">
+                  </CardBodyContentDetails>
+                </CardBodyContentStart>
+                <CardBodyContentTitle titleAs="h2">Besoin d’aide&nbsp;?</CardBodyContentTitle>
+                <CardBodyContentDescription>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisl, duis ac egestas donec tincidunt lorem.
+                  Sodales risus amet nisl sed. Init tartatum designsystemus.
+                </CardBodyContentDescription>
+              </CardBodyContent>
+              <CardBodyFooter>
+                <ButtonAsLink href="https://travail-emploi.gouv.fr/" target="_blank">
+                  Consulter le site du Ministère du Travail
+                </ButtonAsLink>
+              </CardBodyFooter>
+            </CardBody>
+          </Card>
+        </GridCol>
+      </Grid>
+      <Box mt="5w">
+        <Alert type="warning">
+          <AlertTitle>Calendrier exceptionnel en 2022</AlertTitle>
+          <p>
+            En 2022, pour la première année d’application, les entreprises ont jusqu’au 1er septembre 2022 pour procéder
+            à cette publication.
+          </p>
+        </Alert>
+      </Box>
+      <Box mt="5w">
+        <Callout>
+          <CalloutContent>
             <ul>
               <li className="fr-mb-4v">
                 <strong>À compter de 2023</strong>, les entreprises devront publier et déclarer leurs écarts éventuels
@@ -126,11 +133,11 @@ export const EcartRep: NextPageWithLayout = () => (
                 objectifs de progression et les mesures de correction retenues.
               </li>
             </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+          </CalloutContent>
+        </Callout>
+      </Box>
+    </Container>
+  </Box>
 );
 
 EcartRep.getLayout = ({ children }) => {
