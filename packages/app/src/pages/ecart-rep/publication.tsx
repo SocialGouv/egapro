@@ -32,11 +32,11 @@ const title = "Publication";
 const formSchema = z
   .object({
     hasWebsite: z.union([z.literal("true"), z.literal("false")]),
-    publishingContent: z.string().optional(),
+    publishingContent: z.string().trim().optional(),
     publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
       message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
     }),
-    publishingWebsiteUrl: z.string().url().optional(),
+    publishingWebsiteUrl: z.string().trim().url().optional(),
   })
   .superRefine(({ hasWebsite, publishingContent, publishingWebsiteUrl }, ctx) => {
     if (hasWebsite === "true" && !publishingWebsiteUrl) {
@@ -45,7 +45,6 @@ const formSchema = z
         message: "L'adresse exacte de la page internet est obligatoire",
         path: ["publishingWebsiteUrl"],
       });
-      return z.NEVER;
     }
     if (hasWebsite === "false" && !publishingContent) {
       ctx.addIssue({
