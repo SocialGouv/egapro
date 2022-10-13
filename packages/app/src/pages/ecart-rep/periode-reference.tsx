@@ -87,7 +87,7 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   const onSubmit = async ({ endOfPeriod }: FormType) => {
     saveFormData({ endOfPeriod });
-    router.push("/ecart-rep/ecart-representation");
+    router.push("/ecart-rep/ecarts-cadres");
   };
 
   return (

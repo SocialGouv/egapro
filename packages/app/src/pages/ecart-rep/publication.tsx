@@ -31,7 +31,7 @@ const title = "Publication";
 
 const formSchema = z
   .object({
-    hasWebsite: z.enum(["true", "false"]).optional(),
+    hasWebsite: z.union([z.literal("true"), z.literal("false")]),
     publishingContent: z.string().optional(),
     publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
       message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
@@ -71,7 +71,6 @@ const Publication: NextPageWithLayout = () => {
     handleSubmit,
     register,
     reset,
-    setValue,
     watch,
   } = useForm<FormType>({
     mode: "onBlur",
@@ -95,17 +94,6 @@ const Publication: NextPageWithLayout = () => {
     resetForm();
   }, [resetForm]);
 
-  const handleHasWebsiteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const hasWebsiteValue = e.target.value;
-    if (hasWebsiteValue === "true") {
-      setValue("publishingContent", undefined);
-    } else {
-      setValue("publishingWebsiteUrl", undefined);
-    }
-    setValue("hasWebsite", hasWebsiteValue, { shouldDirty: true, shouldValidate: true });
-    saveFormData({ hasWebsite: strRadioToBool(hasWebsiteValue) });
-  };
-
   const onSubmit = async ({ hasWebsite, publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
     saveFormData({
       hasWebsite: strRadioToBool(hasWebsite),
@@ -113,7 +101,7 @@ const Publication: NextPageWithLayout = () => {
       publishingDate,
       publishingWebsiteUrl,
     });
-    router.push("/ecart-rep/recapitulatif");
+    router.push("/ecart-rep/validation");
   };
 
   return (
@@ -143,29 +131,14 @@ const Publication: NextPageWithLayout = () => {
               Avez-vous un site Internet pour publier les écarts calculables&nbsp;?
             </FormRadioGroupLegend>
             <FormRadioGroupContent>
-              <FormRadioGroupInput
-                {...register("hasWebsite")}
-                id="yes"
-                name="hasWebsite"
-                checked={hasWebsite === "true"}
-                value="true"
-                onChange={handleHasWebsiteChange}
-              >
+              <FormRadioGroupInput {...register("hasWebsite")} id="yes" name="hasWebsite" value="true">
                 Oui
               </FormRadioGroupInput>
-              <FormRadioGroupInput
-                {...register("hasWebsite")}
-                id="no"
-                name="hasWebsite"
-                checked={hasWebsite === "false"}
-                value="false"
-                onChange={handleHasWebsiteChange}
-              >
+              <FormRadioGroupInput {...register("hasWebsite")} id="no" name="hasWebsite" value="false">
                 Non
               </FormRadioGroupInput>
             </FormRadioGroupContent>
           </FormRadioGroup>
-
           {hasWebsite === "true" ? (
             <FormGroup>
               <FormGroupLabel htmlFor="publishingWebsiteUrl">
@@ -201,7 +174,7 @@ const Publication: NextPageWithLayout = () => {
             </FormGroup>
           )}
           <FormLayoutButtonGroup>
-            <Link href="/ecart-rep/ecart-representation" passHref>
+            <Link href="/ecart-rep/ecarts-membres" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </Link>
             <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
