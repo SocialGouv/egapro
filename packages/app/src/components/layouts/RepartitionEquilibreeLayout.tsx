@@ -3,10 +3,12 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
+import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
 import styles from "./RepartitionEquilibreeLayout.module.css";
 
+import { AsideLink } from "./RepartitionEquilibreeStartLayout";
 import {
   App,
   Box,
@@ -24,17 +26,18 @@ import {
   Grid,
   GridCol,
   SideMenu,
-  SideMenuLink,
+  SideMenuCollapse,
   SideMenuList,
   SideMenuTitle,
 } from "@design-system";
 
 // Layout for authenticated users (i.e. the wizard).
-
 export const RepartitionEquilibreeLayout = ({
   children,
   haveBottomSection,
 }: PropsWithChildren<{ haveBottomSection?: boolean }>) => {
+  const router = useRouter();
+  const currentRoute = router.pathname;
   return (
     <App>
       <Container>
@@ -43,15 +46,24 @@ export const RepartitionEquilibreeLayout = ({
             <SideMenu buttonLabel={"Dans cette rubrique"}>
               <SideMenuTitle>Répartition équilibrée</SideMenuTitle>
               <SideMenuList>
-                <SideMenuLink href="#">Commencer ou accéder à une déclaration</SideMenuLink>
-                <SideMenuLink href="#">Informations déclarant</SideMenuLink>
-                <SideMenuLink href="#">Informations entreprise</SideMenuLink>
-                <SideMenuLink href="#">Période de référence</SideMenuLink>
-                <SideMenuLink href="#">Écarts de représentation</SideMenuLink>
-                <SideMenuLink href="#">Publication</SideMenuLink>
-                <SideMenuLink href="#">Récapitulatif</SideMenuLink>
-                <SideMenuLink href="#">Validation</SideMenuLink>
-                <SideMenuLink href="#">Transmission</SideMenuLink>
+                <AsideLink path="commencer">Commencer ou accéder à une déclaration</AsideLink>
+                <AsideLink path="declarant">Informations déclarant</AsideLink>
+                <AsideLink path="entreprise">Informations entreprise</AsideLink>
+                <AsideLink path="#">Période de référence</AsideLink>
+                <SideMenuCollapse
+                  isExpandedDefault
+                  title="Écarts de représentation"
+                  isCurrent={
+                    currentRoute === "/ecart-rep/ecarts-cadres" || currentRoute === "/ecart-rep/ecarts-membres"
+                  }
+                >
+                  <AsideLink path="ecarts-cadres">Cadres dirigeants</AsideLink>
+                  <AsideLink path="ecarts-membres">Membres des instances dirigeantes</AsideLink>
+                </SideMenuCollapse>
+                <AsideLink path="#">Publication</AsideLink>
+                <AsideLink path="#">Récapitulatif</AsideLink>
+                <AsideLink path="#">Validation</AsideLink>
+                <AsideLink path="#">Transmission</AsideLink>
               </SideMenuList>
             </SideMenu>
           </ContentWithAsideSideMenu>

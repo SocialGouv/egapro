@@ -1,7 +1,7 @@
 import { Disclosure } from "@headlessui/react";
 import clsx from "clsx";
 import type { CSSProperties, PropsWithChildren } from "react";
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 
 import { useCollapse } from "../hooks/useCollapse";
 import styles from "./SideMenu.module.css";
@@ -57,13 +57,17 @@ export type SideMenuLinkProps = PropsWithChildren<
   }
 >;
 
-export const SideMenuLink = ({ isCurrent, children, ...rest }: SideMenuLinkProps) => (
-  <li className={clsx("fr-sidemenu__item", isCurrent && "fr-sidemenu__item--active")}>
-    <a className="fr-sidemenu__link" aria-current={isCurrent ? "page" : undefined} target="_self" {...rest}>
-      {children}
-    </a>
-  </li>
+export const SideMenuLink = forwardRef<HTMLAnchorElement, SideMenuLinkProps>(
+  ({ isCurrent, children, ...rest }, ref) => (
+    <li className={clsx("fr-sidemenu__item", isCurrent && "fr-sidemenu__item--active")}>
+      <a className="fr-sidemenu__link" aria-current={isCurrent ? "page" : undefined} target="_self" {...rest} ref={ref}>
+        {children}
+      </a>
+    </li>
+  ),
 );
+
+SideMenuLink.displayName = "SideMenuLink";
 
 export type SideMenuCollapseProps = PropsWithChildren<{
   isCurrent?: boolean;
