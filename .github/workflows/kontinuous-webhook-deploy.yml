@@ -19,7 +19,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: SocialGouv/kontinuous@v1
+      - uses: SocialGouv/kontinuous@kapp2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           kubeconfig: ${{ secrets.KUBECONFIG }}
