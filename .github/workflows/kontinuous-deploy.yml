@@ -11,9 +11,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
 jobs:
-  # kontinuous:
-  #   uses: SocialGouv/kontinuous/.github/workflows/workflow-webhook.yaml@v1
-  #   secrets: inherit
   load-vars:
     name: Load vars
     runs-on: ubuntu-latest
