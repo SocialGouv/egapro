@@ -26,3 +26,5 @@ jobs:
           rancherProjectId: ${{ secrets.RANCHER_PROJECT_ID }}
           ciNamespace: "${{ secrets.RANCHER_PROJECT_NAME }}-ci"
           disableDiff: "true"
+
+
