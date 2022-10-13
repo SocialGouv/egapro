@@ -11,9 +11,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
 jobs:
-  load-vars:
+  vars:
     name: Load vars
     runs-on: ubuntu-latest
+    outputs:
+      host: ${{ needs.vars.outputs.host }}
+      gitbranch: ${{ needs.vars.outputs.gitbranch }}
+      appsentrydsn: ${{ needs.vars.outputs.appsentrydsn }}
     steps:
       - name: Vars
         id: vars
@@ -37,6 +41,7 @@ jobs:
   build-images:
     name: Build images
     runs-on: ubuntu-latest
+    needs: vars
     strategy:
       fail-fast: false
       matrix:
@@ -44,22 +49,22 @@ jobs:
           - imagePackage: app
             dockerfile: packages/app/Dockerfile
             buildArgs: |
-              REACT_APP_SENTRY_DSN=${{ steps.vars.outputs.appsentrydsn }}
+              REACT_APP_SENTRY_DSN=${{ needs.vars.outputs.appsentrydsn }}
           - imagePackage: api
             context: packages/api
           - imagePackage: declaration
             context: packages/declaration
             buildArgs: |
-              BASE_URL="https://${{ steps.vars.outputs.host }}/declaration"
-              EGAPRO_API_URL="https://${{ steps.vars.outputs.host }}/api"
-              EGAPRO_SENTRY_DSN=${{ steps.vars.outputs.appsentrydsn }}
+              BASE_URL="https://${{ needs.vars.outputs.host }}/declaration"
+              EGAPRO_API_URL="https://${{ needs.vars.outputs.host }}/api"
+              EGAPRO_SENTRY_DSN=${{ needs.vars.outputs.appsentrydsn }}
           - imagePackage: simulateur
             dockerfile: packages/simulateur/Dockerfile
             buildArgs: |
-              REACT_APP_EGAPRO_API_URL="https://${{ steps.vars.outputs.host }}/api"
-              REACT_APP_DECLARATION_URL="https://${{ steps.vars.outputs.host }}/declaration"
-              REACT_APP_VERSION="${{ steps.vars.outputs.gitbranch }}"
-              REACT_APP_SENTRY_DSN=${{ steps.vars.outputs.appsentrydsn }}
+              REACT_APP_EGAPRO_API_URL="https://${{ needs.vars.outputs.host }}/api"
+              REACT_APP_DECLARATION_URL="https://${{ needs.vars.outputs.host }}/declaration"
+              REACT_APP_VERSION="${{ needs.vars.outputs.gitbranch }}"
+              REACT_APP_SENTRY_DSN=${{ needs.vars.outputs.appsentrydsn }}
 
     steps:
       - name: Register docker images
