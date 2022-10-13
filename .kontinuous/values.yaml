@@ -1,6 +1,9 @@
+global:
+  imageRepository: ""
+
 app:
   ~chart: app
-  ~needs: [build-app]
+  # ~needs: [build-app]
   imagePackage: app
   probesPath: /healthz
   containerPort: 3000
@@ -10,7 +13,7 @@ app:
 
 storybook:
   ~chart: app
-  ~needs: [build-storybook]
+  # ~needs: [build-storybook]
   imagePackage: storybook
   probesPath: /
   containerPort: 8080
@@ -21,7 +24,7 @@ storybook:
 
 declaration:
   ~chart: app
-  ~needs: [build-declaration]
+  # ~needs: [build-declaration]
   imagePackage: declaration
   probesPath: /index.html
   containerPort: 8080
@@ -32,7 +35,7 @@ declaration:
 
 simulateur:
   ~chart: app
-  ~needs: [build-simulateur]
+  # ~needs: [build-simulateur]
   imagePackage: simulateur
   probesPath: /index.html
   containerPort: 8080
@@ -43,7 +46,7 @@ simulateur:
 
 api:
   ~chart: app
-  ~needs: [build-api]
+  # ~needs: [build-api]
   imagePackage: api
   probesPath: /healthz
   containerPort: 2626
@@ -108,56 +111,44 @@ project:
       - full.ndjson
       - indexes.csv
 
+# jobs:
+#   ~chart: jobs
+#   runs:
+#     build-app:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       memoryLimit: 10Gi
+#       memoryRequest: 2Gi
+#       with:
+#         imagePackage: app
+#         dockerfile: packages/app/Dockerfile
 
-jobs:
-  ~chart: jobs
-  runs:
-    build-app:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 14Gi
-      memoryRequest: 2Gi
-      with:
-        imagePackage: app
-        dockerfile: packages/app/Dockerfile
-        buildArgs:
-          NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
+#     build-api:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       with:
+#         imagePackage: api
+#         context: packages/api
 
-    build-storybook:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 8Gi
-      memoryRequest: 2Gi
-      with:
-        imagePackage: storybook
-        dockerfile: packages/app/.storybook/Dockerfile
+#     build-declaration:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       with:
+#         imagePackage: declaration
+#         context: packages/declaration
+#         buildArgs:
+#           BASE_URL: "https://{{ .Values.global.host }}/index/declaration"
+#           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
 
-
-    build-api:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      with:
-        imagePackage: api
-        context: packages/api
-
-    build-declaration:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      with:
-        imagePackage: declaration
-        context: packages/declaration
-        buildArgs:
-          BASE_URL: "https://{{ .Values.global.host }}/index/declaration"
-          EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
-
-    build-simulateur:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 10Gi
-      memoryRequest: 2Gi
-      with:
-        imagePackage: simulateur
-        dockerfile: packages/simulateur/Dockerfile
-        buildArgs:
-          REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
-          REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index/declaration"
-          REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
-          PUBLIC_URL: "/index"
+#     build-simulateur:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       memoryLimit: 10Gi
+#       memoryRequest: 2Gi
+#       with:
+#         imagePackage: simulateur
+#         dockerfile: packages/simulateur/Dockerfile
+#         buildArgs:
+#            REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+#            REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index/declaration"
+#            REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+#            PUBLIC_URL: "/index"
 
 deactivate:
   jobs-deactivate:

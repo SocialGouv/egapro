@@ -20,7 +20,7 @@ spec:
                 claimName: files
           containers:
             - name: job
-              image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ $.Values.global.imageRepository }}/api:{{ $.Values.global.imageTag }}"
+              image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ if $.Values.global.imageRepository }}{{ $.Values.global.imageRepository }}/{{ end }}api:{{ $.Values.global.imageTag }}"
               volumeMounts:
                 - name: files
                   mountPath: /mnt/files

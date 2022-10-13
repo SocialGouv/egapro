@@ -3,6 +3,8 @@ repositoryName: egapro
 dependencies:
   fabrique:
     import: SocialGouv/kontinuous/plugins/fabrique
+    options:
+      registry: "ghcr.io/socialgouv"
 
 environmentPatterns:
   prod: false

@@ -1,0 +1,99 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "v*"
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
+
+jobs:
+  vars:
+    name: Load vars
+    runs-on: ubuntu-latest
+    outputs:
+      host: ${{ needs.vars.outputs.host }}
+      gitbranch: ${{ needs.vars.outputs.gitbranch }}
+      appsentrydsn: ${{ needs.vars.outputs.appsentrydsn }}
+    steps:
+      - name: Vars
+        id: vars
+        shell: bash
+        run: |
+          RAW_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          KS_ENV=$(npx kontinuous env)
+          if [ "$KS_ENV" = "dev" ]; then
+            HOST=$(npx kontinuous slugify "egapro-${RAW_BRANCH}").dev.fabrique.social.gouv.fr
+            GH_ENV="dev"
+          elif [ "$KS_ENV" = "preprod" ]; then
+            HOST=egapro-preprod.dev.fabrique.social.gouv.fr
+            GH_ENV="preprod"
+          else
+            HOST=index-egapro.travail.gouv.fr
+            APP_SENTRY_DSN="https://92bd32ba4e6411eb95f19aaf3eb391a2@sentry.fabrique.social.gouv.fr/49"
+            GH_ENV="production"
+          fi
+
+          echo "host=$(echo -n ${HOST})" >> $GITHUB_OUTPUT
+          echo "gitbranch=$(echo -n ${RAW_BRANCH})" >> $GITHUB_OUTPUT
+          echo "appsentrydsn=$(echo -n ${APP_SENTRY_DSN})" >> $GITHUB_OUTPUT
+          echo "ghenv=$(echo -n ${GH_ENV})" >> $GITHUB_OUTPUT
+
+  build-images:
+    name: Build images
+    runs-on: ubuntu-latest
+    needs: vars
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - imagePackage: app
+            dockerfile: packages/app/Dockerfile
+            buildArgs: |
+              NEXT_PUBLIC_API_URL: "https://${{ needs.vars.outputs.host }}/api"
+              REACT_APP_SENTRY_DSN=${{ needs.vars.outputs.appsentrydsn }}
+          - imagePackage: api
+            context: packages/api
+          - imagePackage: declaration
+            context: packages/declaration
+            buildArgs: |
+              BASE_URL="https://${{ needs.vars.outputs.host }}/index/declaration"
+              EGAPRO_API_URL="https://${{ needs.vars.outputs.host }}/api"
+              EGAPRO_SENTRY_DSN=${{ needs.vars.outputs.appsentrydsn }}
+          - imagePackage: simulateur
+            dockerfile: packages/simulateur/Dockerfile
+            buildArgs: |
+              REACT_APP_EGAPRO_API_URL="https://${{ needs.vars.outputs.host }}/api"
+              REACT_APP_DECLARATION_URL="https://${{ needs.vars.outputs.host }}/index/declaration"
+              REACT_APP_VERSION="${{ needs.vars.outputs.gitbranch }}"
+              PUBLIC_URL: "/index"PUBLIC_URL: "/index"
+          - imagePackage: storybook
+            dockerfile: packages/app/.storybook/Dockerfile
+
+
+    steps:
+      - name: Register docker images
+        uses: SocialGouv/actions/autodevops-build-register@v1
+        with:
+          imagePackage: ${{ matrix.imagePackage }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: "${{ matrix.dockerfile }}"
+          dockercontext: "${{ matrix.context }}"
+          dockerbuildargs: ${{ matrix.buildArgs }}
+
+  deploy:
+    name: Deploy ${{ needs.vars.outputs.ghenv }}
+    runs-on: ubuntu-latest
+    needs: build-images
+    environment: ${{ needs.vars.outputs.ghenv }}
+    steps:
+      - uses: SocialGouv/kontinuous@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          rancherProjectId: ${{ secrets.RANCHER_PROJECT_ID }}
+          ciNamespace: "${{ secrets.RANCHER_PROJECT_NAME }}-ci"
+          disableDiff: "true"
