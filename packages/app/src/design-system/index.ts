@@ -2,6 +2,7 @@ export * from "./base/Alert";
 export * from "./base/ButtonAsLink";
 export * from "./base/ButtonGroup";
 export * from "./base/Box";
+export * from "./base/Breadcrumb";
 export * from "./base/Callout";
 export * from "./base/Card";
 export * from "./base/Footer";
