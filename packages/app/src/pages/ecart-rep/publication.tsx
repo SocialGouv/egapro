@@ -31,7 +31,7 @@ const title = "Publication";
 
 const formSchema = z
   .object({
-    hasWebsite: z.string().min(1),
+    hasWebsite: z.enum(["true", "false"]).optional(),
     publishingContent: z.string().optional(),
     publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
       message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",

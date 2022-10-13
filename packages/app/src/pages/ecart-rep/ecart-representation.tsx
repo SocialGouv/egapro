@@ -20,7 +20,7 @@ const EcartRepresentationPage: NextPageWithLayout = () => {
                 Précédent
               </ButtonAsLink>
             </Link>
-            <Link href="/xxx" passHref>
+            <Link href="/ecart-rep/publication" passHref>
               <ButtonAsLink size="sm" isDisabled>
                 Suivant
               </ButtonAsLink>
