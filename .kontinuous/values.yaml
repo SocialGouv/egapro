@@ -97,43 +97,43 @@ project:
       - indexes.csv
 
 
-jobs:
-  ~chart: jobs
-  runs:
-    build-app:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 10Gi
-      memoryRequest: 2Gi
-      with:
-        imagePackage: app
-        dockerfile: packages/app/Dockerfile
-    
-    build-api:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      with:
-        imagePackage: api
-        context: packages/api
+# jobs:
+#   ~chart: jobs
+#   runs:
+#     build-app:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       memoryLimit: 10Gi
+#       memoryRequest: 2Gi
+#       with:
+#         imagePackage: app
+#         dockerfile: packages/app/Dockerfile
 
-    build-declaration:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      with:
-        imagePackage: declaration
-        context: packages/declaration
-        buildArgs:
-          BASE_URL: "https://{{ .Values.global.host }}/declaration"
-          EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+#     build-api:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       with:
+#         imagePackage: api
+#         context: packages/api
 
-    build-simulateur:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
-      memoryLimit: 10Gi
-      memoryRequest: 2Gi
-      with:
-        imagePackage: simulateur
-        dockerfile: packages/simulateur/Dockerfile
-        buildArgs:
-          REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
-          REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
-          REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+#     build-declaration:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       with:
+#         imagePackage: declaration
+#         context: packages/declaration
+#         buildArgs:
+#           BASE_URL: "https://{{ .Values.global.host }}/declaration"
+#           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+
+#     build-simulateur:
+#       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+#       memoryLimit: 10Gi
+#       memoryRequest: 2Gi
+#       with:
+#         imagePackage: simulateur
+#         dockerfile: packages/simulateur/Dockerfile
+#         buildArgs:
+#           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+#           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/declaration"
+#           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
 
 deactivate:
   jobs-deactivate:

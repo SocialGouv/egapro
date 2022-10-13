@@ -14,6 +14,65 @@ jobs:
   # kontinuous:
   #   uses: SocialGouv/kontinuous/.github/workflows/workflow-webhook.yaml@v1
   #   secrets: inherit
+  load-vars:
+    name: Load vars
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vars
+        id: vars
+        shell: bash
+        run: |
+          RAW_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          KS_ENV=$(npx kontinuous env)
+          if [ "$KS_ENV" = "dev" ]; then
+            HOST=$(npx kontinuous slugify "egapro-${RAW_BRANCH}").dev.fabrique.social.gouv.fr
+          elif [ "$KS_ENV" = "preprod" ]; then
+            HOST=egapro-preprod.dev.fabrique.social.gouv.fr
+          else
+            HOST=index-egapro.travail.gouv.fr
+            APP_SENTRY_DSN="https://92bd32ba4e6411eb95f19aaf3eb391a2@sentry.fabrique.social.gouv.fr/49"
+          fi
+
+          echo "::set-output name=host::$(echo -n ${HOST})"
+          echo "::set-output name=gitbranch::$(echo -n ${RAW_BRANCH})"
+          echo "::set-output name=appsentrydsn::$(echo -n ${APP_SENTRY_DSN})"
+
+  build-images:
+    name: Build images
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - imagePackage: app
+            dockerfile: packages/app/Dockerfile
+            buildArgs: |
+              REACT_APP_SENTRY_DSN=${{ steps.vars.outputs.appsentrydsn }}
+          - imagePackage: api
+            context: packages/api
+          - imagePackage: declaration
+            context: packages/declaration
+            buildArgs: |
+              BASE_URL="https://${{ steps.vars.outputs.host }}/declaration"
+              EGAPRO_API_URL="https://${{ steps.vars.outputs.host }}/api"
+              EGAPRO_SENTRY_DSN=${{ steps.vars.outputs.appsentrydsn }}
+          - imagePackage: simulateur
+            dockerfile: packages/simulateur/Dockerfile
+            buildArgs: |
+              REACT_APP_EGAPRO_API_URL="https://${{ steps.vars.outputs.host }}/api"
+              REACT_APP_DECLARATION_URL="https://${{ steps.vars.outputs.host }}/declaration"
+              REACT_APP_VERSION="${{ steps.vars.outputs.gitbranch }}"
+              REACT_APP_SENTRY_DSN=${{ steps.vars.outputs.appsentrydsn }}
+
+    steps:
+      - name: Register docker images
+        uses: SocialGouv/actions/autodevops-build-register@v1
+        with:
+          imagePackage: ${{ matrix.imagePackage }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: "${{ matrix.dockerfile }}"
+          dockercontext: "${{ matrix.context }}"
+          dockerbuildargs: ${{ matrix.buildArgs }}
 
   deploy:
     name: Deploy

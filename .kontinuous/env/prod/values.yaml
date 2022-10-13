@@ -7,7 +7,7 @@ simulateur:
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
 
-  
+
 api:
   vars:
     EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
@@ -19,19 +19,19 @@ api:
     - secretRef:
         name: smtp
 
-jobs:
-  runs:
-    build-app:
-      with:
-        buildArgs:
-          REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
-    
-    build-declaration:
-      with:
-        buildArgs:
-          EGAPRO_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
+# jobs:
+#   runs:
+#     build-app:
+#       with:
+#         buildArgs:
+#           REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
 
-    build-simulateur:
-      with:
-        buildArgs:
-          REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
+#     build-declaration:
+#       with:
+#         buildArgs:
+#           EGAPRO_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
+
+#     build-simulateur:
+#       with:
+#         buildArgs:
+#           REACT_APP_SENTRY_DSN: "{{ .Values.global.sentryFront }}"
