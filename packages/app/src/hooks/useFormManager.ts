@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-import type { EntrepriseType } from "./siren";
+import type { EntrepriseType } from "../services/apiClient/siren";
 
 const KEY = "répartition-équilibrée-form";
 
@@ -41,19 +40,19 @@ type RepartitionEquilibreeForm = {
   year?: number | undefined;
 };
 
-export const save = (data: Partial<RepartitionEquilibreeForm>) => {
-  const actualForm = get();
+export const updateFormData = (data: Partial<RepartitionEquilibreeForm>) => {
+  const actualForm = getFormData();
 
   localStorage.setItem(KEY, JSON.stringify({ ...actualForm, ...data }));
 };
 
-export const get = () => {
+export const getFormData = () => {
   const data = localStorage.getItem(KEY);
 
   return data === null ? {} : JSON.parse(data);
 };
 
-export const destroy = () => {
+export const destroyFormData = () => {
   localStorage.removeItem(KEY);
 };
 
@@ -61,14 +60,14 @@ export const useFormManager = () => {
   const [formData, setFormData] = useState<RepartitionEquilibreeForm>(repartitionEquilibreeDefault);
 
   const resetFormData = () => {
-    destroy();
+    destroyFormData();
     setFormData(repartitionEquilibreeDefault);
   };
 
   // Get data from local storage on component's mount.
   useEffect(() => {
-    setFormData(get());
+    setFormData(getFormData());
   }, []);
 
-  return { formData, saveFormData: save, resetFormData };
+  return { formData, updateFormData, resetFormData, destroyFormData };
 };

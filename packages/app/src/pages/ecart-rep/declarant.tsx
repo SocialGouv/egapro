@@ -4,8 +4,8 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../hooks/useFormManager";
+import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -37,7 +37,7 @@ type FormType = z.infer<typeof formSchema>;
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { user } = useUser({ redirectTo: "/ecart-rep/email" });
-  const { formData, saveFormData } = useFormManager();
+  const { formData, updateFormData } = useFormManager();
 
   const {
     register,
@@ -67,7 +67,7 @@ const DeclarantPage: NextPageWithLayout = () => {
   }, [resetAsyncForm]);
 
   const onSubmit = async ({ nom, prenom, telephone, email, accord_rgpd }: FormType) => {
-    saveFormData({ declarant: { prenom: prenom, nom: nom, telephone: telephone, email, accord_rgpd } });
+    updateFormData({ declarant: { prenom: prenom, nom: nom, telephone: telephone, email, accord_rgpd } });
     router.push("/ecart-rep/entreprise");
   };
 

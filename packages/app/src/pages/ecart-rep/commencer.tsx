@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useCheckTokenInURL } from "../../hooks/useCheckTokenInURL";
-import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../hooks/useFormManager";
+import { useUser } from "../../hooks/useUser";
 import { checkSiren, fetchSiren, ownersForSiren } from "../../services/apiClient/siren";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
@@ -68,7 +68,7 @@ const CommencerPage: NextPageWithLayout = () => {
   useCheckTokenInURL();
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
-  const { formData, saveFormData, resetFormData } = useFormManager();
+  const { formData, updateFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const {
@@ -96,7 +96,7 @@ const CommencerPage: NextPageWithLayout = () => {
     const startFresh = async () => {
       try {
         const entreprise = await fetchSiren(siren, Number(year));
-        saveFormData({ entreprise, year: Number(year) });
+        updateFormData({ entreprise, year: Number(year) });
         router.push("/ecart-rep/declarant");
       } catch (error) {
         console.error("erreur dans fetchSiren");
@@ -159,7 +159,7 @@ const CommencerPage: NextPageWithLayout = () => {
               </FormGroupLabel>
               <FormInput
                 id="siren"
-                placeholder="Ex: 504920166, 403461742, 403696735"
+                placeholder="Ex: 504920166, 403461742, 403696735, 888888997"
                 type="text"
                 {...register("siren")}
                 isError={Boolean(errors.siren)}

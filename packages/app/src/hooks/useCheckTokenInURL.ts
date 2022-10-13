@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { useFormManager } from "./useFormManager";
 
 import { useUser } from "./useUser";
 
@@ -10,6 +11,7 @@ import { useUser } from "./useUser";
  */
 export const useCheckTokenInURL = () => {
   const router = useRouter();
+  const { destroyFormData } = useFormManager();
   const { login, loading } = useUser();
 
   // This useEffect is called at every render, because we attempt to login if there is a token in the URL.
@@ -20,6 +22,8 @@ export const useCheckTokenInURL = () => {
     // Check also loading to not attempt a login call if a precedent login call is already initiated.
     if (token && !loading) {
       console.debug("Token trouvé dans l'URL. Tentative de connexion...");
+      // For a new connection, we remove the data in local storage.
+      destroyFormData();
       login(token);
       // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
       router.push({ search: "" });

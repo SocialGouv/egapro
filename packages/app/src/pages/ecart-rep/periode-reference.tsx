@@ -6,8 +6,8 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../hooks/useFormManager";
+import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -47,7 +47,7 @@ type FormType = z.infer<typeof formSchema>;
 const PeriodeReference: NextPageWithLayout = () => {
   const router = useRouter();
   useUser({ redirectTo: "/ecart-rep/email" });
-  const { formData, saveFormData } = useFormManager();
+  const { formData, updateFormData } = useFormManager();
 
   const {
     formState: { errors, isDirty, isValid, isSubmitted },
@@ -66,7 +66,6 @@ const PeriodeReference: NextPageWithLayout = () => {
       year: formData?.year === undefined ? undefined : String(formData?.year),
     });
     // formData needed otherwise localstorage data is not loaded
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, formData]);
 
   useEffect(() => {
@@ -84,7 +83,7 @@ const PeriodeReference: NextPageWithLayout = () => {
   };
 
   const onSubmit = async ({ endOfPeriod }: FormType) => {
-    saveFormData({ endOfPeriod });
+    updateFormData({ endOfPeriod });
     router.push("/ecart-rep/ecart-representation");
   };
 
