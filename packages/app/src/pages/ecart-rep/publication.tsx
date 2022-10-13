@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -31,14 +31,29 @@ const title = "Publication";
 
 const formSchema = z
   .object({
-    publishingContent: z.string(),
+    hasWebsite: z.string().min(1),
+    publishingContent: z.string().optional(),
     publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
       message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
     }),
-    publishingWebsiteUrl: z.string().url(),
+    publishingWebsiteUrl: z.string().url().optional(),
   })
-  .refine(({ publishingContent, publishingDate, publishingWebsiteUrl }) => {
-    return (publishingContent && publishingDate) || (publishingWebsiteUrl && publishingDate);
+  .superRefine(({ hasWebsite, publishingContent, publishingWebsiteUrl }, ctx) => {
+    if (hasWebsite === "true" && !publishingWebsiteUrl) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "L'adresse exacte de la page internet est obligatoire",
+        path: ["publishingWebsiteUrl"],
+      });
+      return z.NEVER;
+    }
+    if (hasWebsite === "false" && !publishingContent) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La description des modalités de communication des écarts est oblicatoire",
+        path: ["publishingContent"],
+      });
+    }
   });
 
 type FormType = z.infer<typeof formSchema>;
@@ -49,7 +64,6 @@ const strRadioToBool = (radioInput: string): boolean => {
 };
 
 const Publication: NextPageWithLayout = () => {
-  const [hasWebsite, setHasWebsite] = useState<boolean>(true);
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const {
@@ -58,29 +72,47 @@ const Publication: NextPageWithLayout = () => {
     register,
     reset,
     setValue,
+    watch,
   } = useForm<FormType>({
-    mode: "onChange",
+    mode: "onBlur",
     resolver: zodResolver(formSchema),
   });
 
-  const resetAsyncForm = useCallback(async () => {
-    reset({
-      publishingContent: formData?.publishingContent,
-      publishingDate: formData?.publishingDate === undefined ? undefined : formData?.publishingDate,
-      publishingWebsiteUrl: formData?.publishingWebsiteUrl,
-    });
+  const hasWebsite = watch("hasWebsite");
+
+  const resetForm = useCallback(() => {
+    if (formData) {
+      reset({
+        hasWebsite: formData?.hasWebsite ? "true" : "false",
+        publishingContent: formData?.publishingContent,
+        publishingDate: formData?.publishingDate === undefined ? undefined : formData?.publishingDate,
+        publishingWebsiteUrl: formData?.publishingWebsiteUrl,
+      });
+    }
   }, [reset, formData]);
 
   useEffect(() => {
-    resetAsyncForm();
-  }, [resetAsyncForm]);
+    resetForm();
+  }, [resetForm]);
 
-  function handleHasWebsiteChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setHasWebsite(strRadioToBool(e.target.value));
-  }
+  const handleHasWebsiteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const hasWebsiteValue = e.target.value;
+    if (hasWebsiteValue === "true") {
+      setValue("publishingContent", undefined);
+    } else {
+      setValue("publishingWebsiteUrl", undefined);
+    }
+    setValue("hasWebsite", hasWebsiteValue, { shouldDirty: true, shouldValidate: true });
+    saveFormData({ hasWebsite: strRadioToBool(hasWebsiteValue) });
+  };
 
-  const onSubmit = async ({ publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
-    saveFormData({ publishingContent, publishingDate, publishingWebsiteUrl });
+  const onSubmit = async ({ hasWebsite, publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
+    saveFormData({
+      hasWebsite: strRadioToBool(hasWebsite),
+      publishingContent,
+      publishingDate,
+      publishingWebsiteUrl,
+    });
     router.push("/ecart-rep/recapitulatif");
   };
 
@@ -112,18 +144,20 @@ const Publication: NextPageWithLayout = () => {
             </FormRadioGroupLegend>
             <FormRadioGroupContent>
               <FormRadioGroupInput
+                {...register("hasWebsite")}
                 id="yes"
                 name="hasWebsite"
-                checked={hasWebsite}
+                checked={hasWebsite === "true"}
                 value="true"
                 onChange={handleHasWebsiteChange}
               >
                 Oui
               </FormRadioGroupInput>
               <FormRadioGroupInput
+                {...register("hasWebsite")}
                 id="no"
                 name="hasWebsite"
-                checked={!hasWebsite}
+                checked={hasWebsite === "false"}
                 value="false"
                 onChange={handleHasWebsiteChange}
               >
@@ -132,7 +166,7 @@ const Publication: NextPageWithLayout = () => {
             </FormRadioGroupContent>
           </FormRadioGroup>
 
-          {hasWebsite ? (
+          {hasWebsite === "true" ? (
             <FormGroup>
               <FormGroupLabel htmlFor="publishingWebsiteUrl">
                 Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables
@@ -166,7 +200,6 @@ const Publication: NextPageWithLayout = () => {
               )}
             </FormGroup>
           )}
-
           <FormLayoutButtonGroup>
             <Link href="/ecart-rep/ecart-representation" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
@@ -175,7 +208,6 @@ const Publication: NextPageWithLayout = () => {
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
-      {`isValid ${isValid}`}
     </>
   );
 };

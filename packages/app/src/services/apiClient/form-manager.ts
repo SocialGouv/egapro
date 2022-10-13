@@ -24,9 +24,10 @@ const repartitionEquilibreeDefault: RepartitionEquilibreeForm = {
     région: "",
     siren: "",
   },
-  publishingContent: "",
+  hasWebsite: true,
+  publishingContent: undefined,
   publishingDate: undefined,
-  publishingWebsiteUrl: "",
+  publishingWebsiteUrl: undefined,
   year: undefined,
 };
 
@@ -41,9 +42,10 @@ type RepartitionEquilibreeForm = {
   };
   endOfPeriod?: string;
   entreprise?: EntrepriseType;
+  hasWebsite: boolean;
   publishingContent?: string;
   publishingDate?: string;
-  publishingWebsiteUrl: string;
+  publishingWebsiteUrl?: string;
   year?: number | undefined;
 };
 
