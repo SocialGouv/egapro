@@ -26,7 +26,7 @@ type AsideLinkProps = PropsWithChildren<{
   path: string;
 }>;
 
-const AsideLink = ({ path, children }: AsideLinkProps) => {
+export const AsideLink = ({ path, children }: AsideLinkProps) => {
   const router = useRouter();
   const currentRoute = router.pathname;
   return (
