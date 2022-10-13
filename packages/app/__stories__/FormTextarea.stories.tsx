@@ -19,7 +19,7 @@ Default.args = {
 };
 
 export const IsError = Template.bind({});
-IsError.args = { ...Default.args, isError: true };
+IsError.args = { ...Default.args, isError: true, "aria-describedby": "id-of-error message" };
 
 export const IsValid = Template.bind({});
 IsValid.args = { ...Default.args, isValid: true };

@@ -14,7 +14,6 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       id={id}
       className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid")}
       disabled={isDisabled}
-      aria-describedby={`${id}-msg`}
       aria-invalid={isError || "false"}
       ref={ref}
       {...rest}
