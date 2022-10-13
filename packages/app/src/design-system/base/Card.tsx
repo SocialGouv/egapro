@@ -5,6 +5,8 @@ import type { IconStyles } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
+import styles from "./Card.module.css";
+
 export type CardProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
     size?: "lg" | "sm";
@@ -13,8 +15,11 @@ export type CardProps = PropsWithChildren<
 
 export const Card = ({ children, size, ...rest }: CardProps) => {
   return (
-    <Box className={clsx("fr-card", size === "sm" && "fr-card--sm", size === "lg" && "fr-card--lg")} {...rest}>
-      <div className="fr-card__body">{children}</div>
+    <Box
+      className={clsx("fr-card", size === "sm" && "fr-card--sm", size === "lg" && "fr-card--lg", styles.card)}
+      {...rest}
+    >
+      {children}
     </Box>
   );
 };
