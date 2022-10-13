@@ -4,7 +4,7 @@ dependencies:
   fabrique:
     import: SocialGouv/kontinuous/plugins/fabrique
     options:
-      registry: "ghcr.io/socialgouv"
+      registry: "ghcr.io/socialgouv/egapro"
 
 environmentPatterns:
   prod: false
