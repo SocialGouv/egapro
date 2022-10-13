@@ -284,7 +284,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                     )}
                   </>
                 )}
-                <FieldPlanRelance readOnly={readOnly} after2021={after2021} isUES={isUES} />
+                {after2021 && <FieldPlanRelance readOnly={readOnly} isUES={isUES} />}
               </>
             )}
 
