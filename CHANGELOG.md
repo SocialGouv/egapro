@@ -1,3 +1,10 @@
+## [2.22.6](https://github.com/SocialGouv/egapro/compare/v2.22.5...v2.22.6) (2022-10-13)
+
+
+### Bug Fixes
+
+* planRelance was required even for decla before 2021. Fixed ([#1159](https://github.com/SocialGouv/egapro/issues/1159)) ([08128df](https://github.com/SocialGouv/egapro/commit/08128df87d835d1bb450c118a266e4317da20902))
+
 ## [2.22.5](https://github.com/SocialGouv/egapro/compare/v2.22.4...v2.22.5) (2022-10-07)
 
 
