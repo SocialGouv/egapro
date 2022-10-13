@@ -45,10 +45,8 @@ class PDF(fpdf.FPDF):
 
         align = "R" if key != " " else "L"
         self.set_font("Marianne", "", 11)
-        self.multi_cell(
-            value_width, height, value, ln=3, align=align, max_line_height=5
-        )
-        self.ln(height)
+        self.multi_cell(value_width, height, value, ln=3, align=align, max_line_height=5)
+        self.ln(height*1.25)
 
     def write_headline(self, value):
         self.ln(8)
