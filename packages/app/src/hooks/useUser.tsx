@@ -3,6 +3,7 @@ import { useCallback, useEffect } from "react";
 import create from "zustand";
 import { persist } from "zustand/middleware";
 
+import { useFormManager } from "../services/apiClient/form-manager";
 import { useMe } from "./useMe";
 
 type UserStore = {
@@ -40,33 +41,36 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   const redirectTo = props.redirectTo;
   const router = useRouter();
 
-  const token = useUserStore(state => state.token);
-  const setToken = useUserStore(state => state.setToken);
-
+  const { token, setToken } = useUserStore(state => state);
   const { user, error } = useMe(token);
+
+  const { resetFormData } = useFormManager();
 
   const logout = useCallback(() => {
     console.debug("logout");
     setToken("");
   }, [setToken]);
 
-  // Automatic login via URL.
+  // Automatic login via URL if checkTokenInURL is present.
   useEffect(() => {
     if (props.checkTokenInURL) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("token");
+      const token = new URLSearchParams(window.location.search).get("token");
 
       // Check also loading to not attempt a login call if a precedent login call is already initiated.
       if (token) {
         console.debug("Token trouvé dans l'URL. Tentative de connexion...");
+
+        resetFormData(); // Remove data in local storage on each new connection.
+
         setToken(token || "");
+
         // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
         router.push({ search: "" });
       }
     }
-  });
+  }, [token, resetFormData, props.checkTokenInURL, router, setToken]);
 
-  // Automatic redirect if not authenticated.
+  // Automatic redirect if not authenticated and redirectTo is present.
   useEffect(() => {
     if (props.redirectTo) {
       if (!token) {

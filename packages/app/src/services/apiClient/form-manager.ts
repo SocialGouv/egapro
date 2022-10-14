@@ -1,10 +1,23 @@
-import { useEffect, useState } from "react";
+import create from "zustand";
+import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
-const KEY = "répartition-équilibrée-form";
+//TODO: add properties for the future pages
+type RepartitionEquilibreeForm = {
+  declarant: {
+    accord_rgpd?: boolean | undefined;
+    email: string;
+    nom: string;
+    prenom: string;
+    telephone: string;
+  };
+  endOfPeriod?: string;
+  entreprise?: EntrepriseType;
+  year?: number | undefined;
+};
 
-const repartitionEquilibreeDefault: RepartitionEquilibreeForm = {
+const formDataDefault: RepartitionEquilibreeForm = {
   declarant: {
     email: "",
     prenom: "",
@@ -27,48 +40,29 @@ const repartitionEquilibreeDefault: RepartitionEquilibreeForm = {
   year: undefined,
 };
 
-// TODO: add properties for the future pages
-type RepartitionEquilibreeForm = {
-  declarant: {
-    accord_rgpd: boolean | undefined;
-    email: string;
-    nom: string;
-    prenom: string;
-    telephone: string;
-  };
-  endOfPeriod?: string;
-  entreprise?: EntrepriseType;
-  year?: number | undefined;
+type FormDataStore = {
+  formData: RepartitionEquilibreeForm;
+  resetFormData: () => void;
+  saveFormData: (data: Partial<RepartitionEquilibreeForm>) => void;
 };
 
-export const save = (data: Partial<RepartitionEquilibreeForm>) => {
-  const actualForm = get();
-
-  localStorage.setItem(KEY, JSON.stringify({ ...actualForm, ...data }));
-};
-
-export const get = () => {
-  const data = localStorage.getItem(KEY);
-
-  return data === null ? {} : JSON.parse(data);
-};
-
-export const destroy = () => {
-  localStorage.removeItem(KEY);
-};
-
-export const useFormManager = () => {
-  const [formData, setFormData] = useState<RepartitionEquilibreeForm>(repartitionEquilibreeDefault);
-
-  const resetFormData = () => {
-    destroy();
-    setFormData(repartitionEquilibreeDefault);
-  };
-
-  // Get data from local storage on component's mount.
-  useEffect(() => {
-    setFormData(get());
-  }, []);
-
-  return { formData, saveFormData: save, resetFormData };
-};
+export const useFormManager = create<FormDataStore>()(
+  persist(
+    (set, get) => ({
+      formData: formDataDefault,
+      saveFormData: (data: Partial<RepartitionEquilibreeForm>) => set({ formData: { ...get().formData, ...data } }),
+      resetFormData: () =>
+        set(
+          state => ({
+            formData: formDataDefault, // Reset to the form default.
+            saveFormData: state.saveFormData, // Preserve these actions in state.
+            resetFormData: state.resetFormData, // Preserve these actions in state.
+          }),
+          true, // We replace the entire state instead of only merging with current state.
+        ),
+    }),
+    {
+      name: "ega-repeq-form", // name of item in the storage (must be unique)
+    },
+  ),
+);
