@@ -11,9 +11,13 @@ type FormState = {
     prenom: string;
     telephone: string;
   };
+  ecartsCadresFemmes?: number;
+  ecartsCadresHommes?: number;
   endOfPeriod?: string;
   entreprise?: EntrepriseType;
   hasWebsite: boolean;
+  isEcartsCadresCalculable?: boolean;
+  motifEcartsCadresNonCalculable?: string;
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;
@@ -28,6 +32,8 @@ const formDataDefault: FormState = {
     telephone: "",
     accord_rgpd: undefined,
   },
+  ecartsCadresFemmes: undefined,
+  ecartsCadresHommes: undefined,
   endOfPeriod: "",
   entreprise: {
     adresse: "",
@@ -41,6 +47,8 @@ const formDataDefault: FormState = {
     siren: "",
   },
   hasWebsite: true,
+  isEcartsCadresCalculable: true,
+  motifEcartsCadresNonCalculable: undefined,
   publishingContent: undefined,
   publishingDate: undefined,
   publishingWebsiteUrl: undefined,

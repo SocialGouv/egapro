@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
+import { strRadioToBool } from "@common/utils/string";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   Alert,
@@ -56,11 +57,6 @@ const formSchema = z
   });
 
 type FormType = z.infer<typeof formSchema>;
-
-const strRadioToBool = (radioInput: string): boolean => {
-  if (radioInput === "true") return true;
-  return false;
-};
 
 const Publication: NextPageWithLayout = () => {
   const router = useRouter();

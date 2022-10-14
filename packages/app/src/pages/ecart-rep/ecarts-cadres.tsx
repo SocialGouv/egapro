@@ -1,5 +1,13 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
+import React, { useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
+import { strRadioToBool } from "@common/utils/string";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   Alert,
@@ -16,6 +24,7 @@ import {
   FormButton,
   FormGroup,
   FormGroupLabel,
+  FormGroupMessage,
   FormInput,
   FormLayout,
   FormLayoutButtonGroup,
@@ -29,10 +38,91 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
+import { formatZodErrors } from "@common/utils/debug";
 
 const title = "Écarts de représentation";
 
+const formSchema = z
+  .object({
+    isEcartsCadresCalculable: z.union([z.literal("true"), z.literal("false")]),
+    motifEcartsCadresNonCalculable: z.string().trim().optional(),
+    ecartsCadresHommes: z.number().optional(),
+    ecartsCadresFemmes: z.number().optional(),
+  })
+  .superRefine(
+    ({ isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresHommes, ecartsCadresFemmes }, ctx) => {
+      if (isEcartsCadresCalculable === "true" && !ecartsCadresHommes) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Le pourcentage d'hommes parmi les cadres dirigeants est obligatoire",
+          path: ["ecartsCadresHommes"],
+        });
+      }
+      if (isEcartsCadresCalculable === "true" && !ecartsCadresFemmes) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Le pourcentage de femmes parmi les cadres dirigeants est obligatoire",
+          path: ["ecartsCadresFemmes"],
+        });
+      }
+      if (isEcartsCadresCalculable === "false" && !motifEcartsCadresNonCalculable) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Le motif de non calculabilité et obligatoire",
+          path: ["motifEcartsCadresNonCalculable"],
+        });
+      }
+    },
+  );
+
+type FormType = z.infer<typeof formSchema>;
+
 const EcartsCadres: NextPageWithLayout = () => {
+  const router = useRouter();
+  const { formData, saveFormData } = useFormManager();
+  const {
+    formState: { errors, isDirty, isValid, isSubmitted },
+    handleSubmit,
+    register,
+    reset,
+    watch,
+  } = useForm<FormType>({
+    mode: "onBlur",
+    resolver: zodResolver(formSchema),
+  });
+
+  const isEcartsCadresCalculable = watch("isEcartsCadresCalculable");
+
+  const resetForm = useCallback(() => {
+    if (formData) {
+      reset({
+        isEcartsCadresCalculable: formData?.isEcartsCadresCalculable ? "true" : "false",
+        motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
+        ecartsCadresFemmes: formData?.ecartsCadresFemmes,
+        ecartsCadresHommes: formData?.ecartsCadresHommes,
+      });
+    }
+  }, [reset, formData]);
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
+
+  const onSubmit = async ({
+    isEcartsCadresCalculable,
+    motifEcartsCadresNonCalculable,
+    ecartsCadresFemmes,
+    ecartsCadresHommes,
+  }: FormType) => {
+    saveFormData({
+      isEcartsCadresCalculable: strRadioToBool(isEcartsCadresCalculable),
+      motifEcartsCadresNonCalculable,
+      ecartsCadresFemmes,
+      ecartsCadresHommes,
+    });
+    router.push("/ecart-rep/ecarts-membres");
+  };
+
   return (
     <>
       <h1>{title}</h1>
@@ -44,46 +134,73 @@ const EcartsCadres: NextPageWithLayout = () => {
           ou un seul cadre dirigeant.
         </p>
       </Alert>
-      <form>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <FormRadioGroup inline>
-            <FormRadioGroupLegend id="representation-gap">
+            <FormRadioGroupLegend id="isEcartsCadresCalculable">
               L’écart de représentation est-il calculable&nbsp;?
             </FormRadioGroupLegend>
             <FormRadioGroupContent>
-              <FormRadioGroupInput id="is-calculable" name="calculable">
+              <FormRadioGroupInput
+                {...register("isEcartsCadresCalculable")}
+                id="yes"
+                name="isEcartsCadresCalculable"
+                value="true"
+              >
                 Oui
               </FormRadioGroupInput>
-              <FormRadioGroupInput id="is-not-calculable" name="calculable">
+              <FormRadioGroupInput
+                {...register("isEcartsCadresCalculable")}
+                id="no"
+                name="isEcartsCadresCalculable"
+                value="false"
+              >
                 Non
               </FormRadioGroupInput>
             </FormRadioGroupContent>
           </FormRadioGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="percentage-of-women">
-              Pourcentage de femmes parmi les cadres dirigeants
-            </FormGroupLabel>
-            <FormInput id="percentage-of-women" type="number" />
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="percentage-of-men">
-              Pourcentage d'hommes parmi les cadres dirigeants
-            </FormGroupLabel>
-            <FormInput id="percentage-of-men" type="number" />
-          </FormGroup>
-          <FormGroup>
-            <FormGroupLabel htmlFor="not-calculability-reason">Motif de non calculabilité</FormGroupLabel>
-            <FormSelect id="not-calculability-reason">
-              <option value="0">Il n'y a aucun cadre dirigeant</option>
-              <option value="1">Il n'y a qu'un seul cadre dirigeant</option>
-            </FormSelect>
-          </FormGroup>
+          <pre>{formatZodErrors(errors as any)}</pre>
+          <pre>{JSON.stringify(watch(), null, 2)}</pre>
+
+          {isEcartsCadresCalculable === "true" ? (
+            <>
+              <FormGroup>
+                <FormGroupLabel htmlFor="ecartsCadresFemmes">
+                  Pourcentage de femmes parmi les cadres dirigeants
+                </FormGroupLabel>
+                <FormInput id="ecartsCadresFemmes" type="number" {...register("ecartsCadresFemmes")} />
+                {errors.ecartsCadresFemmes && (
+                  <FormGroupMessage id="ecartsCadresFemmes-message-error">
+                    {errors.ecartsCadresFemmes.message}
+                  </FormGroupMessage>
+                )}
+              </FormGroup>
+              <FormGroup>
+                <FormGroupLabel htmlFor="ecartsCadresHommes">
+                  Pourcentage d'hommes parmi les cadres dirigeants
+                </FormGroupLabel>
+                <FormInput id="ecartsCadresHommes" type="number" {...register("ecartsCadresHommes")} />
+                {errors.ecartsCadresHommes && (
+                  <FormGroupMessage id="ecartsCadresHommes-message-error">
+                    {errors.ecartsCadresHommes.message}
+                  </FormGroupMessage>
+                )}
+              </FormGroup>
+            </>
+          ) : (
+            <FormGroup>
+              <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
+              <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
+                <option value="0">Il n'y a aucun cadre dirigeant</option>
+                <option value="1">Il n'y a qu'un seul cadre dirigeant</option>
+              </FormSelect>
+            </FormGroup>
+          )}
           <FormLayoutButtonGroup>
-            {/* TODO: add real path */}
-            <NextLink href="/" passHref>
+            <NextLink href="/ecart-rep/periode-reference" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </NextLink>
-            <FormButton isDisabled>Suivant</FormButton>
+            <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
