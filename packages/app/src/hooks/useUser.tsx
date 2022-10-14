@@ -1,61 +1,96 @@
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
-import useSWR from "swr";
+import { useCallback, useEffect } from "react";
+import create from "zustand";
+import { persist } from "zustand/middleware";
+import { useMe } from "./useMe";
 
-import { fetcher } from "../common/utils/fetcher";
-
-// TODO: type à confirmer par rapport au endpoint /!\
-type DeclarationSummary = {
-  declared_at: number | null;
-  modified_at: number;
-  name: string | null;
-  siren: string;
-  year: number;
+type UserStore = {
+  _hasHydrated: boolean;
+  setHasHydrated: (state: any) => void;
+  setToken: (token: string) => void;
+  token: string;
 };
 
-type TokenInfoType = {
-  déclarations: DeclarationSummary[];
-  email: string;
-  ownership: string[];
-  staff: boolean;
-};
+export const useUserStore = create<UserStore>()(
+  persist(
+    set => ({
+      _hasHydrated: false,
+      setHasHydrated: state => {
+        set({
+          _hasHydrated: state,
+        });
+      },
+      token: "",
+      setToken: (token: string) => set({ token }),
+    }),
+    {
+      name: "userStore", // name of item in the storage (must be unique)
 
-export const useUser = (props?: { redirectTo: string } | undefined) => {
-  const redirectTo = props?.redirectTo;
+      onRehydrateStorage: () => state => {
+        state?.setHasHydrated(true);
+      },
+    },
+  ),
+);
+
+/**
+ * Hook to get the user data, to login with a token in an URL and to redirect to a page if no token is found.
+ *
+ * Usage:
+ * useUser({ redirectTo: "/authPage" }) => redirect to /authPage if no token are found in local storage
+ * useUser({ checkTokenInUrl: true }) => make a Next page able to detect & use a token in URL and put it in local storage in order to login automatically
+ * const {
+ *  user, // get user data
+ *  error, // SWR error if any in fetching user data
+ *  logout, // function to logout
+ *  isAuthenticated, // helper to know if the user is authenticated
+ * } = useUser()
+ *
+ */
+export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string } = {}) => {
+  const redirectTo = props.redirectTo;
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean | null>(null);
-  const { data: user, error } = useSWR<TokenInfoType>(!token ? null : "/me", fetcher);
+
+  const hasHydrated = useUserStore(state => state._hasHydrated);
+  const token = useUserStore(state => state.token);
+  const setToken = useUserStore(state => state.setToken);
+
+  const { user, error } = useMe(token);
 
   const logout = useCallback(() => {
     console.debug("logout");
-    localStorage.setItem("token", "");
-    setToken(null);
+    setToken("");
+  }, [setToken]);
 
-    if (redirectTo) router.push(redirectTo);
-  }, [redirectTo, router]);
-
-  const login = (token: string) => {
-    console.debug("dans login");
-    setLoading(true);
-    localStorage.setItem("token", token);
-    setToken(token);
-  };
-
+  // Automatic login via URL.
   useEffect(() => {
-    setToken(localStorage.getItem("token"));
-  }, [logout, redirectTo]);
+    if (props.checkTokenInURL) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
 
+      // Check also loading to not attempt a login call if a precedent login call is already initiated.
+      if (token) {
+        console.debug("Token trouvé dans l'URL. Tentative de connexion...");
+        setToken(token || "");
+        // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
+        router.push({ search: "" });
+      }
+    }
+  });
+
+  // Automatic redirect if not authenticated.
   useEffect(() => {
-    if (user || error) setLoading(false);
-  }, [user, error]);
+    if (props.redirectTo) {
+      if (hasHydrated && !token) {
+        if (redirectTo) router.push(redirectTo);
+      }
+    }
+  }, [hasHydrated, token, redirectTo, router, props.redirectTo]);
 
   return {
     user,
     error,
-    login,
     logout,
-    loading,
     isAuthenticated: Boolean(user?.email),
   };
 };

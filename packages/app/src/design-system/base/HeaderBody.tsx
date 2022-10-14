@@ -12,7 +12,7 @@ export type HeaderBodyProps = {
 };
 
 export const HeaderBody = ({ isMobileMenuOpen, showMenuMobile, mobileMenuId, buttonMobileMenuId }: HeaderBodyProps) => {
-  const { isAuthenticated, logout } = useUser({ redirectTo: "/ecart-rep/email" });
+  const { isAuthenticated, logout } = useUser();
 
   const disconnectUser = () => {
     logout();
