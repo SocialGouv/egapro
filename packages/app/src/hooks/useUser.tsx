@@ -2,11 +2,10 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import create from "zustand";
 import { persist } from "zustand/middleware";
+
 import { useMe } from "./useMe";
 
 type UserStore = {
-  _hasHydrated: boolean;
-  setHasHydrated: (state: any) => void;
   setToken: (token: string) => void;
   token: string;
 };
@@ -14,21 +13,11 @@ type UserStore = {
 export const useUserStore = create<UserStore>()(
   persist(
     set => ({
-      _hasHydrated: false,
-      setHasHydrated: state => {
-        set({
-          _hasHydrated: state,
-        });
-      },
       token: "",
       setToken: (token: string) => set({ token }),
     }),
     {
       name: "userStore", // name of item in the storage (must be unique)
-
-      onRehydrateStorage: () => state => {
-        state?.setHasHydrated(true);
-      },
     },
   ),
 );
@@ -51,7 +40,6 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   const redirectTo = props.redirectTo;
   const router = useRouter();
 
-  const hasHydrated = useUserStore(state => state._hasHydrated);
   const token = useUserStore(state => state.token);
   const setToken = useUserStore(state => state.setToken);
 
@@ -81,11 +69,11 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   // Automatic redirect if not authenticated.
   useEffect(() => {
     if (props.redirectTo) {
-      if (hasHydrated && !token) {
+      if (!token) {
         if (redirectTo) router.push(redirectTo);
       }
     }
-  }, [hasHydrated, token, redirectTo, router, props.redirectTo]);
+  }, [token, redirectTo, router, props.redirectTo]);
 
   return {
     user,
