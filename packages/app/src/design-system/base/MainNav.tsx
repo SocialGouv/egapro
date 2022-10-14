@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 
 export type MainNavProps = PropsWithChildren<Record<never, never>>;
@@ -11,13 +12,15 @@ export const MainNav = ({ children }: MainNavProps) => {
   );
 };
 
-export type MainNavItemProps = PropsWithChildren<{ href: string; isCurrent?: boolean }>;
+export type MainNavItemProps = PropsWithChildren<{ href: string }>;
 
-export const MainNavItem = ({ children, href, isCurrent }: MainNavItemProps) => {
+export const MainNavItem = ({ children, href }: MainNavItemProps) => {
+  const router = useRouter();
+  const currentRoute = router.pathname;
   return (
     <li className="fr-nav__item">
       <Link href={href}>
-        <a className="fr-nav__link" aria-current={isCurrent && "page"}>
+        <a className="fr-nav__link" aria-current={href === `/${currentRoute.split("/")[1]}` ? "page" : undefined}>
           {children}
         </a>
       </Link>
