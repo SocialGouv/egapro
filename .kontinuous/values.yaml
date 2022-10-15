@@ -1,3 +1,6 @@
+global:
+  imageRepository: ""
+
 app:
   ~chart: app
   # ~needs: [build-app]
