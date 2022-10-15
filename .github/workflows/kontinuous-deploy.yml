@@ -68,8 +68,8 @@ jobs:
               REACT_APP_DECLARATION_URL="https://${{ needs.vars.outputs.host }}/index/declaration"
               REACT_APP_VERSION="${{ needs.vars.outputs.gitbranch }}"
               PUBLIC_URL: "/index"PUBLIC_URL: "/index"
-          - imagePackage: storybook
-            dockerfile: packages/app/.storybook/Dockerfile
+          # - imagePackage: storybook
+          #   dockerfile: packages/app/.storybook/Dockerfile
 
 
     steps:
