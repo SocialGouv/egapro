@@ -6,6 +6,6 @@ dependencies:
     options:
       registry: "ghcr.io/socialgouv"
 
-environmentPatterns:
-  prod: false
-  dev: "!v*"
+# environmentPatterns:
+#   prod: false
+#   dev: "!v*"
