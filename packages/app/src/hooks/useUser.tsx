@@ -7,8 +7,6 @@ import { useFormManager } from "../services/apiClient/form-manager";
 import { useMe } from "./useMe";
 
 type UserStore = {
-  _hasHydrated: boolean;
-  setHasHydrated: (state: any) => void;
   setToken: (token: string) => void;
   token: string;
 };
@@ -16,21 +14,11 @@ type UserStore = {
 export const useUserStore = create<UserStore>()(
   persist(
     set => ({
-      _hasHydrated: false,
-      setHasHydrated: state => {
-        set({
-          _hasHydrated: state,
-        });
-      },
       token: "",
       setToken: (token: string) => set({ token }),
     }),
     {
       name: "userStore", // name of item in the storage (must be unique)
-
-      onRehydrateStorage: () => state => {
-        state?.setHasHydrated(true);
-      },
     },
   ),
 );
@@ -53,7 +41,6 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   const redirectTo = props.redirectTo;
   const router = useRouter();
 
-  const hasHydrated = useUserStore(state => state._hasHydrated);
   const { token, setToken } = useUserStore(state => state);
   const { user, error } = useMe(token);
 
@@ -86,11 +73,11 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   // Automatic redirect if not authenticated and redirectTo is present.
   useEffect(() => {
     if (props.redirectTo) {
-      if (hasHydrated && !token) {
+      if (!token) {
         if (redirectTo) router.push(redirectTo);
       }
     }
-  }, [hasHydrated, token, redirectTo, router, props.redirectTo]);
+  }, [token, redirectTo, router, props.redirectTo]);
 
   return {
     user,
