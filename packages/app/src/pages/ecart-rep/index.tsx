@@ -68,8 +68,8 @@ export const EcartRep: NextPageWithLayout = () => (
                   <h2 className="fr-card__title">Besoin d’aide&nbsp;?</h2>
                   <div className="fr-card__desc">
                     <div>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisl, duis ac egestas donec tincidunt
-                      lorem. Sodales risus amet nisl sed. Init tartatum designsystemus.
+                      Pour avoir plus d'informations sur le calcul et la publication de vos écarts éventuels de
+                      représentation femmes-hommes, vous pouvez consulter le site internet du Ministère du Travail.
                     </div>
                   </div>
                 </div>
