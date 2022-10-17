@@ -8,7 +8,8 @@ import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import { strRadioToBool } from "@common/utils/string";
+import type { RadioInputValues } from "@common/utils/form";
+import { strRadioToBool } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   Alert,
@@ -44,44 +45,28 @@ const title = "Écarts de représentation";
 
 const formSchema = z
   .object({
-    isEcartsCadresCalculable: z.union([z.literal("true"), z.literal("false")]),
+    isEcartsCadresCalculable: z.union([z.literal("oui"), z.literal("non")]),
     motifEcartsCadresNonCalculable: z.string().trim().optional(),
-    ecartsCadresFemmes: z
-      .union([
-        z
-          .string()
-          .trim()
-          .transform(ecart => (ecart ? Number(ecart) : 0)),
-        z.number(),
-      ])
-      .optional(),
-    ecartsCadresHommes: z
-      .union([
-        z
-          .string()
-          .trim()
-          .transform(ecart => (ecart ? Number(ecart) : 0)),
-        z.number(),
-      ])
-      .optional(),
+    ecartsCadresFemmes: z.number().optional(),
+    ecartsCadresHommes: z.number().optional(),
   })
   .superRefine(
     ({ isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresHommes, ecartsCadresFemmes }, ctx) => {
-      if (isEcartsCadresCalculable === "true" && !ecartsCadresHommes) {
+      if (isEcartsCadresCalculable === "oui" && typeof ecartsCadresHommes === "undefined") {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Le pourcentage d'hommes parmi les cadres dirigeants est obligatoire",
           path: ["ecartsCadresHommes"],
         });
       }
-      if (isEcartsCadresCalculable === "true" && !ecartsCadresFemmes) {
+      if (isEcartsCadresCalculable === "oui" && typeof ecartsCadresFemmes === "undefined") {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Le pourcentage de femmes parmi les cadres dirigeants est obligatoire",
           path: ["ecartsCadresFemmes"],
         });
       }
-      if (isEcartsCadresCalculable === "false" && !motifEcartsCadresNonCalculable) {
+      if (isEcartsCadresCalculable === "non" && typeof motifEcartsCadresNonCalculable === "undefined") {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Le motif de non calculabilité et obligatoire",
@@ -113,7 +98,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   const resetForm = useCallback(() => {
     if (formData) {
       reset({
-        isEcartsCadresCalculable: formData?.isEcartsCadresCalculable ? "true" : "false",
+        isEcartsCadresCalculable: formData?.isEcartsCadresCalculable ? "oui" : "non",
         motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
         ecartsCadresFemmes: formData?.ecartsCadresFemmes,
         ecartsCadresHommes: formData?.ecartsCadresHommes,
@@ -127,12 +112,15 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   const percentageAutoComplete = (event: SyntheticEvent) => {
     const inputChanged = event.currentTarget;
+    const inputChangedValue = (inputChanged as HTMLInputElement).valueAsNumber;
     if (inputChanged.id === "ecartsCadresFemmes") {
-      setValue("ecartsCadresHommes", 100 - (inputChanged as HTMLInputElement).valueAsNumber, { shouldValidate: true });
+      setValue("ecartsCadresFemmes", inputChangedValue);
+      setValue("ecartsCadresHommes", 100 - inputChangedValue, { shouldValidate: true });
       return;
     }
     if (inputChanged.id === "ecartsCadresHommes") {
-      setValue("ecartsCadresFemmes", 100 - (inputChanged as HTMLInputElement).valueAsNumber, { shouldValidate: true });
+      setValue("ecartsCadresHommes", inputChangedValue);
+      setValue("ecartsCadresFemmes", 100 - inputChangedValue, { shouldValidate: true });
       return;
     }
   };
@@ -143,7 +131,7 @@ const EcartsCadres: NextPageWithLayout = () => {
     ecartsCadresFemmes,
     ecartsCadresHommes,
   }: FormType) => {
-    const isEcartsCadresCalculableBoolVal = strRadioToBool(isEcartsCadresCalculable);
+    const isEcartsCadresCalculableBoolVal = strRadioToBool(isEcartsCadresCalculable as RadioInputValues);
     saveFormData({
       isEcartsCadresCalculable: isEcartsCadresCalculableBoolVal,
       motifEcartsCadresNonCalculable: isEcartsCadresCalculableBoolVal ? undefined : motifEcartsCadresNonCalculable,
@@ -173,24 +161,24 @@ const EcartsCadres: NextPageWithLayout = () => {
             <FormRadioGroupContent>
               <FormRadioGroupInput
                 {...register("isEcartsCadresCalculable")}
-                id="yes"
+                id="oui"
                 name="isEcartsCadresCalculable"
-                value="true"
+                value="oui"
               >
                 Oui
               </FormRadioGroupInput>
               <FormRadioGroupInput
                 {...register("isEcartsCadresCalculable")}
-                id="no"
+                id="non"
                 name="isEcartsCadresCalculable"
-                value="false"
+                value="non"
               >
                 Non
               </FormRadioGroupInput>
             </FormRadioGroupContent>
           </FormRadioGroup>
 
-          {isEcartsCadresCalculable === "true" ? (
+          {isEcartsCadresCalculable === "oui" ? (
             <>
               <FormGroup>
                 <FormGroupLabel htmlFor="ecartsCadresFemmes">
@@ -201,6 +189,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                   type="number"
                   {...register("ecartsCadresFemmes")}
                   onBlur={percentageAutoComplete}
+                  aria-describedby="ecartsCadresFemmes-message-error"
                 />
                 {errors.ecartsCadresFemmes && (
                   <FormGroupMessage id="ecartsCadresFemmes-message-error">
@@ -217,6 +206,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                   type="number"
                   {...register("ecartsCadresHommes")}
                   onBlur={percentageAutoComplete}
+                  aria-describedby="ecartsCadresHommes-message-error"
                 />
                 {errors.ecartsCadresHommes && (
                   <FormGroupMessage id="ecartsCadresHommes-message-error">
