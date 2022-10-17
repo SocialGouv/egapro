@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 
+import { useConfig } from "../../hooks";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -10,8 +11,19 @@ const title = "Informations entreprise";
 const InformationsEntreprise: NextPageWithLayout = () => {
   // No need to use React Hook Form here, because we only show read only data.
   const { formData } = useFormManager();
+  const { config } = useConfig();
 
   const router = useRouter();
+
+  const REGIONS = config?.REGIONS;
+  const DEPARTEMENTS = config?.DEPARTEMENTS;
+  const NAF = config?.NAF;
+
+  const { région: codeRegion, département: codeDepartement, code_naf: codeNaf } = formData.entreprise || {};
+
+  const regionLabel = codeRegion ? (!REGIONS ? codeRegion : REGIONS[codeRegion]) : "";
+  const departementLabel = codeDepartement ? (!DEPARTEMENTS ? codeDepartement : DEPARTEMENTS[codeDepartement]) : "";
+  const nafLabel = codeNaf ? (!NAF ? codeNaf : codeNaf + " - " + NAF[codeNaf]) : "";
 
   // useEffect(() => {
   //   if (!isAuthenticated) router.push("/ecart-rep/email");
@@ -40,15 +52,15 @@ const InformationsEntreprise: NextPageWithLayout = () => {
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="code-naf">Code NAF</FormGroupLabel>
-            <FormInput id="code-naf" type="text" readOnly value={formData.entreprise?.code_naf} />
+            <FormInput id="code-naf" type="text" readOnly value={nafLabel} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="region">Région</FormGroupLabel>
-            <FormInput id="region" type="text" readOnly value={formData.entreprise?.région} />
+            <FormInput id="region" type="text" readOnly value={regionLabel} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="departement">Département</FormGroupLabel>
-            <FormInput id="departement" type="text" readOnly value={formData.entreprise?.département} />
+            <FormInput id="departement" type="text" readOnly value={departementLabel} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="adresse">Adresse</FormGroupLabel>
