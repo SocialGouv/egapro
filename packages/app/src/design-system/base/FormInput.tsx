@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { forwardRef } from "react";
 
 import type { IconStyles } from "../utils/icon-styles";
+import styles from "./FormInput.module.css";
 
 export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   icon?: IconStyles;
@@ -17,7 +18,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     <div className={clsx("fr-input-wrap", icon, type === "date" && "fr-icon-calendar-line")}>
       <input
         id={id}
-        className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid")}
+        className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.date)}
         type={type}
         disabled={isDisabled}
         aria-describedby={`${id}-msg`}

@@ -27,11 +27,6 @@ const AssujettiPage: NextPageWithLayout = () => {
         publication et de la déclaration de leur Index de l’égalité professionnelle.
       </p>
 
-      <p>
-        Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé pour
-        la déclaration ou un des emails rattachés au Siren de votre entreprise.
-      </p>
-
       <form noValidate>
         <FormRadioGroup>
           <FormRadioGroupInput
