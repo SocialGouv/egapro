@@ -11,6 +11,7 @@ export * from "./base/FormCheckbox";
 export * from "./base/FormGroup";
 export * from "./base/FormInput";
 export * from "./base/FormRadio";
+export * from "./base/Grid";
 export * from "./base/FormTextarea";
 export * from "./base/Header";
 export * from "./base/Modale";

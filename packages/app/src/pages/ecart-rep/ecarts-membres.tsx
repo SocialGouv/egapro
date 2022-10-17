@@ -9,7 +9,8 @@ import {
   CardBody,
   CardBodyContent,
   CardBodyContentDescription,
-  CardBodyContentLegend,
+  CardBodyContentDetails,
+  CardBodyContentStart,
   CardBodyContentTitle,
   CardBodyFooter,
   FormButton,
@@ -23,6 +24,8 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
   FormSelect,
+  Grid,
+  GridCol,
   Link,
   LinkGroup,
 } from "@design-system";
@@ -82,26 +85,33 @@ const EcartsMembres: NextPageWithLayout = () => {
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
-      <Card mt="4w">
-        <CardBody>
-          <CardBodyContent>
-            <CardBodyContentLegend icon="fr-icon-arrow-right-line">Définition</CardBodyContentLegend>
-            <CardBodyContentTitle>Membres des instances dirigeantes</CardBodyContentTitle>
-            <CardBodyContentDescription>
-              Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout acte
-              ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la direction
-              générale dans l'exercice de leurs missions.
-            </CardBodyContentDescription>
-          </CardBodyContent>
-          <CardBodyFooter>
-            <LinkGroup>
-              <Link target="_blank" href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044566715">
-                En savoir plus
-              </Link>
-            </LinkGroup>
-          </CardBodyFooter>
-        </CardBody>
-      </Card>
+      <Grid mt="4w">
+        <GridCol>
+          <Card>
+            <CardBody>
+              <CardBodyContent>
+                <CardBodyContentStart>
+                  <CardBodyContentDetails icon="fr-icon-arrow-right-line">Définition</CardBodyContentDetails>
+                </CardBodyContentStart>
+
+                <CardBodyContentTitle>Membres des instances dirigeantes</CardBodyContentTitle>
+                <CardBodyContentDescription>
+                  Est considérée comme instance dirigeante toute instance mise en place au sein de la société, par tout
+                  acte ou toute pratique sociétaire, aux fins d'assister régulièrement les organes chargés de la
+                  direction générale dans l'exercice de leurs missions.
+                </CardBodyContentDescription>
+              </CardBodyContent>
+              <CardBodyFooter>
+                <LinkGroup>
+                  <Link target="_blank" href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044566715">
+                    En savoir plus
+                  </Link>
+                </LinkGroup>
+              </CardBodyFooter>
+            </CardBody>
+          </Card>
+        </GridCol>
+      </Grid>
     </>
   );
 };

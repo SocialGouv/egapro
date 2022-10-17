@@ -5,7 +5,7 @@ import type { SpacingProps } from "../utils/spacing";
 export type BoxProps = PropsWithChildren<
   React.HTMLAttributes<HTMLDivElement> &
     SpacingProps & {
-      as?: "article" | "div" | "footer";
+      as?: "article" | "div" | "footer" | "section";
       className?: string;
     }
 >;
@@ -31,18 +31,18 @@ export const Box = ({
   return (
     <HtmlTag
       className={clsx(
-        mt && `fr-mt-md-${mt}`,
-        mb && `fr-mb-md-${mb}`,
-        ml && `fr-ml-md-${ml}`,
-        mr && `fr-mr-md-${mr}`,
-        mx && `fr-mx-md-${mx}`,
-        my && `fr-my-md-${my}`,
-        pt && `fr-pt-md-${pt}`,
-        pb && `fr-pb-md-${pb}`,
-        pl && `fr-pl-md-${pl}`,
-        pr && `fr-pr-md-${pr}`,
-        px && `fr-px-md-${px}`,
-        py && `fr-py-md-${py}`,
+        mt && `fr-mt-${mt}`,
+        mb && `fr-mb-${mb}`,
+        ml && `fr-ml-${ml}`,
+        mr && `fr-mr-${mr}`,
+        mx && `fr-mx-${mx}`,
+        my && `fr-my-${my}`,
+        pt && `fr-pt-${pt}`,
+        pb && `fr-pb-${pb}`,
+        pl && `fr-pl-${pl}`,
+        pr && `fr-pr-${pr}`,
+        px && `fr-px-${px}`,
+        py && `fr-py-${py}`,
         className,
       )}
       {...rest}

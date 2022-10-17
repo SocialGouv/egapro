@@ -5,18 +5,26 @@ import type { IconStyles } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
-import styles from "./Card.module.css";
-
 export type CardProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
+    isEnlargeLink?: boolean;
+    isHorizontal?: boolean;
+    noBorder?: boolean;
     size?: "lg" | "sm";
   }
 >;
 
-export const Card = ({ children, size, ...rest }: CardProps) => {
+export const Card = ({ children, size, isEnlargeLink, noBorder, isHorizontal, ...rest }: CardProps) => {
   return (
     <Box
-      className={clsx("fr-card", size === "sm" && "fr-card--sm", size === "lg" && "fr-card--lg", styles.card)}
+      className={clsx(
+        "fr-card",
+        size === "sm" && "fr-card--sm",
+        size === "lg" && "fr-card--lg",
+        isEnlargeLink && "fr-enlarge-link",
+        noBorder && "fr-card--no-border",
+        isHorizontal && "fr-card--horizontal",
+      )}
       {...rest}
     >
       {children}
@@ -30,6 +38,14 @@ export const CardBody = ({ children }: PropsWithChildren<Record<never, never>>) 
 
 export const CardBodyContent = ({ children }: PropsWithChildren<Record<never, never>>) => (
   <div className="fr-card__content">{children}</div>
+);
+
+export const CardBodyContentEnd = ({ children }: PropsWithChildren<Record<never, never>>) => (
+  <div className="fr-card__end">{children}</div>
+);
+
+export const CardBodyContentStart = ({ children }: PropsWithChildren<Record<never, never>>) => (
+  <div className="fr-card__start">{children}</div>
 );
 
 export type CardBodyContentTitleProps = PropsWithChildren<{
@@ -46,12 +62,18 @@ export const CardBodyContentDescription = ({ children }: PropsWithChildren<Recor
 
 export type CardBodyContentLegendProps = PropsWithChildren<{ icon?: IconStyles }>;
 
-export const CardBodyContentLegend = ({ children, icon }: CardBodyContentLegendProps) => (
-  <div className="fr-card__start">
-    <p className={clsx("fr-card__detail", icon)}>{children}</p>
-  </div>
+export const CardBodyContentDetails = ({ children, icon }: CardBodyContentLegendProps) => (
+  <p className={clsx("fr-card__detail", icon)}>{children}</p>
 );
 
 export const CardBodyFooter = ({ children }: PropsWithChildren<Record<never, never>>) => (
   <div className="fr-card__footer">{children}</div>
+);
+
+export const CardHeader = ({ children }: PropsWithChildren<Record<never, never>>) => (
+  <div className="fr-card__header">{children}</div>
+);
+
+export const CardHeaderImg = ({ children }: PropsWithChildren<Record<never, never>>) => (
+  <div className="fr-card__img">{children}</div>
 );
