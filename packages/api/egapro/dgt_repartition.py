@@ -1,6 +1,5 @@
 """DGT specific utils"""
 
-from asyncio.trsock import TransportSocket
 import re
 from datetime import date
 
@@ -10,8 +9,7 @@ from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from progressist import ProgressBar
 
-from egapro import config, constants, db, models
-from egapro.schema import SCHEMA
+from egapro import config, constants, db
 from egapro.utils import flatten, remove_one_year
 
 
