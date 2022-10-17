@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetcher } from "@common/utils/fetcher";
+import { fetcher } from "../common/utils/fetcher";
 
 // TODO: type à confirmer par rapport au endpoint /!\
 type DeclarationSummary = {
