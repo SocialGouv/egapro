@@ -62,7 +62,7 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
 
         resetFormData(); // Remove data in local storage on each new connection.
 
-        setToken(token || "");
+        setToken(token);
 
         // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
         router.push({ search: "" });
