@@ -27,7 +27,7 @@ const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."),
     endOfPeriod: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
-      message: "La date de fin de période de référence est de la forme jj/mm/aaaa.",
+      message: "La date de fin de la période de référence est de la forme jj/mm/aaaa.",
     }),
   })
   .superRefine(({ year, endOfPeriod }, ctx) => {
@@ -87,7 +87,7 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   const onSubmit = async ({ endOfPeriod }: FormType) => {
     saveFormData({ endOfPeriod });
-    router.push("/ecart-rep/ecart-representation");
+    router.push("/ecart-rep/ecarts-cadres");
   };
 
   return (
@@ -131,7 +131,7 @@ const PeriodeReference: NextPageWithLayout = () => {
             </FormButton>
           </FormGroup>
           <FormLayoutButtonGroup>
-            <Link href="entreprise" passHref>
+            <Link href="/ecart-rep/entreprise" passHref>
               <ButtonAsLink size="sm" variant="secondary">
                 Précédent
               </ButtonAsLink>
