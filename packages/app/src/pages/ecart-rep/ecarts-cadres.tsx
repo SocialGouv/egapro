@@ -8,7 +8,6 @@ import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import { formatZodErrors } from "@common/utils/debug";
 import { strRadioToBool } from "@common/utils/string";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
