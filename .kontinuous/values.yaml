@@ -88,6 +88,8 @@ project:
       command: egapro export-public-data /mnt/files/index-egalite-fh.csv
     - name: dump-dgt
       command: egapro dump-dgt /mnt/files/dgt.xlsx
+    - name: dump-dgt-repartition
+      command: egapro dump-dgt-repartition /mnt/files/dgt-repartition.xlsx
     - name: full
       command: egapro full /mnt/files/full.ndjson
     - name: export-indexes
@@ -105,6 +107,7 @@ project:
       - index-egalite-fh.csv
     restricted:
       - dgt.xlsx
+      - dgt-repartition.xlsx
       - full.ndjson
       - indexes.csv
 
