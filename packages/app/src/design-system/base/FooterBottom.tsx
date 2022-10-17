@@ -7,7 +7,7 @@ export const FooterBottom = ({ children }: PropsWithChildren) => {
       <div className="fr-footer__bottom-copy">
         <p>
           Sauf mention contraire, tous les contenus de ce site sont sous{" "}
-          <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">
+          <a href="https://github.com/SocialGouv/egapro/blob/master/LICENSE" target="_blank" rel="noreferrer">
             licence Apache 2.0
           </a>
         </p>
