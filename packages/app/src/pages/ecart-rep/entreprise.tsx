@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 
 import { useConfig } from "../../hooks";
+import { useUser } from "../../hooks/useUser";
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -9,6 +10,8 @@ import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayou
 const title = "Informations entreprise";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
+
   // No need to use React Hook Form here, because we only show read only data.
   const { formData } = useFormManager();
   const { config } = useConfig();
@@ -24,12 +27,6 @@ const InformationsEntreprise: NextPageWithLayout = () => {
   const regionLabel = codeRegion ? (!REGIONS ? codeRegion : REGIONS[codeRegion]) : "";
   const departementLabel = codeDepartement ? (!DEPARTEMENTS ? codeDepartement : DEPARTEMENTS[codeDepartement]) : "";
   const nafLabel = codeNaf ? (!NAF ? codeNaf : codeNaf + " - " + NAF[codeNaf]) : "";
-
-  // useEffect(() => {
-  //   if (!isAuthenticated) router.push("/ecart-rep/email");
-  // }, [isAuthenticated, router]);
-
-  if (!formData?.entreprise?.siren) return <p>Loading...</p>;
 
   return (
     <>

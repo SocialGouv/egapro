@@ -1,11 +1,11 @@
-import { useUser } from "./AuthContext";
+import { useUser } from "../hooks/useUser";
 
 export const MailtoLinkForNonOwner = () => {
-  const { email } = useUser();
+  const { user } = useUser();
 
   return (
     <>
-      <p>Le Siren saisi n'est pas rattaché à votre email de connexion ({email}).</p>
+      <p>Le Siren saisi n'est pas rattaché à votre email de connexion ({user?.email}).</p>
       <p>
         Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à{" "}
         <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.

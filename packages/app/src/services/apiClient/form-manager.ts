@@ -1,10 +1,26 @@
-import { useEffect, useState } from "react";
+import create from "zustand";
+import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
-const KEY = "répartition-équilibrée-form";
+type FormState = {
+  declarant: {
+    accord_rgpd?: boolean | undefined;
+    email: string;
+    nom: string;
+    prenom: string;
+    telephone: string;
+  };
+  endOfPeriod?: string;
+  entreprise?: EntrepriseType;
+  hasWebsite: boolean;
+  publishingContent?: string;
+  publishingDate?: string;
+  publishingWebsiteUrl?: string;
+  year?: number | undefined;
+};
 
-const repartitionEquilibreeDefault: RepartitionEquilibreeForm = {
+const formDataDefault: FormState = {
   declarant: {
     email: "",
     prenom: "",
@@ -31,52 +47,23 @@ const repartitionEquilibreeDefault: RepartitionEquilibreeForm = {
   year: undefined,
 };
 
-// TODO: add properties for the future pages
-type RepartitionEquilibreeForm = {
-  declarant: {
-    accord_rgpd: boolean | undefined;
-    email: string;
-    nom: string;
-    prenom: string;
-    telephone: string;
-  };
-  endOfPeriod?: string;
-  entreprise?: EntrepriseType;
-  hasWebsite: boolean;
-  publishingContent?: string;
-  publishingDate?: string;
-  publishingWebsiteUrl?: string;
-  year?: number | undefined;
+type FormActions = {
+  resetFormData: () => void;
+  saveFormData: (data: Partial<FormState>) => void;
 };
 
-export const save = (data: Partial<RepartitionEquilibreeForm>) => {
-  const actualForm = get();
-
-  localStorage.setItem(KEY, JSON.stringify({ ...actualForm, ...data }));
-};
-
-export const get = () => {
-  const data = localStorage.getItem(KEY);
-
-  return data === null ? {} : JSON.parse(data);
-};
-
-export const destroy = () => {
-  localStorage.removeItem(KEY);
-};
-
-export const useFormManager = () => {
-  const [formData, setFormData] = useState<RepartitionEquilibreeForm>(repartitionEquilibreeDefault);
-
-  const resetFormData = () => {
-    destroy();
-    setFormData(repartitionEquilibreeDefault);
-  };
-
-  // Get data from local storage on component's mount.
-  useEffect(() => {
-    setFormData(get());
-  }, []);
-
-  return { formData, saveFormData: save, resetFormData };
-};
+export const useFormManager = create<FormActions & { formData: FormState }>()(
+  persist(
+    (set, get) => ({
+      formData: formDataDefault,
+      saveFormData: (data: Partial<FormState>) => set({ formData: { ...get().formData, ...data } }),
+      resetFormData: () =>
+        set({
+          formData: formDataDefault,
+        }),
+    }),
+    {
+      name: "ega-repeq-form", // name of item in the storage (must be unique)
+    },
+  ),
+);
