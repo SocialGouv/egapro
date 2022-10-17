@@ -1,12 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import type { SyntheticEvent } from "react";
 import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
+import { formatZodErrors } from "@common/utils/debug";
 import { strRadioToBool } from "@common/utils/string";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -38,7 +40,6 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
-import { formatZodErrors } from "@common/utils/debug";
 
 const title = "Écarts de représentation";
 
@@ -46,8 +47,24 @@ const formSchema = z
   .object({
     isEcartsCadresCalculable: z.union([z.literal("true"), z.literal("false")]),
     motifEcartsCadresNonCalculable: z.string().trim().optional(),
-    ecartsCadresHommes: z.number().optional(),
-    ecartsCadresFemmes: z.number().optional(),
+    ecartsCadresFemmes: z
+      .union([
+        z
+          .string()
+          .trim()
+          .transform(ecart => (ecart ? Number(ecart) : 0)),
+        z.number(),
+      ])
+      .optional(),
+    ecartsCadresHommes: z
+      .union([
+        z
+          .string()
+          .trim()
+          .transform(ecart => (ecart ? Number(ecart) : 0)),
+        z.number(),
+      ])
+      .optional(),
   })
   .superRefine(
     ({ isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresHommes, ecartsCadresFemmes }, ctx) => {
@@ -85,6 +102,7 @@ const EcartsCadres: NextPageWithLayout = () => {
     handleSubmit,
     register,
     reset,
+    setValue,
     watch,
   } = useForm<FormType>({
     mode: "onBlur",
@@ -107,6 +125,18 @@ const EcartsCadres: NextPageWithLayout = () => {
   useEffect(() => {
     resetForm();
   }, [resetForm]);
+
+  const percentageAutoComplete = (event: SyntheticEvent) => {
+    const inputChanged = event.currentTarget;
+    if (inputChanged.id === "ecartsCadresFemmes") {
+      setValue("ecartsCadresHommes", 100 - (inputChanged as HTMLInputElement).valueAsNumber, { shouldValidate: true });
+      return;
+    }
+    if (inputChanged.id === "ecartsCadresHommes") {
+      setValue("ecartsCadresFemmes", 100 - (inputChanged as HTMLInputElement).valueAsNumber, { shouldValidate: true });
+      return;
+    }
+  };
 
   const onSubmit = async ({
     isEcartsCadresCalculable,
@@ -159,8 +189,6 @@ const EcartsCadres: NextPageWithLayout = () => {
               </FormRadioGroupInput>
             </FormRadioGroupContent>
           </FormRadioGroup>
-          <pre>{formatZodErrors(errors as any)}</pre>
-          <pre>{JSON.stringify(watch(), null, 2)}</pre>
 
           {isEcartsCadresCalculable === "true" ? (
             <>
@@ -168,7 +196,12 @@ const EcartsCadres: NextPageWithLayout = () => {
                 <FormGroupLabel htmlFor="ecartsCadresFemmes">
                   Pourcentage de femmes parmi les cadres dirigeants
                 </FormGroupLabel>
-                <FormInput id="ecartsCadresFemmes" type="number" {...register("ecartsCadresFemmes")} />
+                <FormInput
+                  id="ecartsCadresFemmes"
+                  type="number"
+                  {...register("ecartsCadresFemmes")}
+                  onBlur={percentageAutoComplete}
+                />
                 {errors.ecartsCadresFemmes && (
                   <FormGroupMessage id="ecartsCadresFemmes-message-error">
                     {errors.ecartsCadresFemmes.message}
@@ -179,7 +212,12 @@ const EcartsCadres: NextPageWithLayout = () => {
                 <FormGroupLabel htmlFor="ecartsCadresHommes">
                   Pourcentage d'hommes parmi les cadres dirigeants
                 </FormGroupLabel>
-                <FormInput id="ecartsCadresHommes" type="number" {...register("ecartsCadresHommes")} />
+                <FormInput
+                  id="ecartsCadresHommes"
+                  type="number"
+                  {...register("ecartsCadresHommes")}
+                  onBlur={percentageAutoComplete}
+                />
                 {errors.ecartsCadresHommes && (
                   <FormGroupMessage id="ecartsCadresHommes-message-error">
                     {errors.ecartsCadresHommes.message}
