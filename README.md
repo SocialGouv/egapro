@@ -95,6 +95,7 @@ Le fichier index-egalite-fh.csv est généré tous les jours et accessible sans 
 Les fichiers suivants, sont accessibles uniquement si authentifié ou pour certaines adresses IP (voir la liste blanche dans `.kontinuous/values.yaml`).
 
 - dgt.xlsx
+- dgt-repartition.xlsx
 - full.ndjson
 - indexes.csv
 

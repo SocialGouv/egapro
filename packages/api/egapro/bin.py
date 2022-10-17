@@ -33,16 +33,16 @@ from egapro.utils import json_dumps
 
 @minicli.cli
 async def dump_dgt(path: Path, max_rows: int = None):
-    repartition_path = path.with_stem(f"{path.stem}_representation")
+    wb = await dgt.as_xlsx(max_rows)
+    print("Writing the dgt XLSX to", path)
+    wb.save(path)
 
-    workbooks = {
-        #path: await dgt.as_xlsx(max_rows),
-        repartition_path: await dgt_repartition.as_xlsx(max_rows)
-    }
-    for wbpath in workbooks:
-        print("Writing the XLSX to", wbpath)
-        workbooks[wbpath].save(wbpath)
-    print("Done")
+
+@minicli.cli
+async def dump_dgt_repartition(path: Path, max_rows: int = None):
+    wb = await dgt_repartition.as_xlsx(max_rows)
+    print("Writing the dgt_repartition XLSX to", path)
+    wb.save(path)
 
 
 @minicli.cli
