@@ -1,5 +1,6 @@
 """DGT specific utils"""
 
+from asyncio.trsock import TransportSocket
 import re
 from datetime import date
 
@@ -59,7 +60,14 @@ async def get_headers_columns():
             ("Date_publication", "déclaration.publication.date", isodate),
             ("Site_internet_publication", "déclaration.publication.url"),
             ("Modalites_publication", "déclaration.publication.modalités"),
-            # TODO ADD REPARTITION INDICATORS AND REMOVE THOSE BELOW
+            ("Cadres_calculable", "indicateurs.répartition_équilibrée.cadres_calculable"),
+            ("Cadres_motif_non_calculable", "indicateurs.répartition_équilibrée.motif_nc_cadres"),
+            ("Cadres_pourcentage_femmes", "indicateurs.répartition_équilibrée.pct_f_cadres"),
+            ("Cadres_pourcentage_hommes", "indicateurs.répartition_équilibrée.pct_h_cadres"),
+            ("Membres_calculable", "indicateurs.répartition_équilibrée.membres_calculable"),
+            ("Membres_motif_non_calculable", "indicateurs.répartition_équilibrée.motif_nc_membres"),
+            ("Membres_pourcentage_femmes", "indicateurs.répartition_équilibrée.pct_f_membres"),
+            ("Membres_pourcentage_hommes", "indicateurs.répartition_équilibrée.pct_h_membres")
         ]
     )
     headers = []
@@ -110,14 +118,10 @@ async def as_xlsx(max_rows=None, debug=False):
 def prepare_record(data):
     # Before flattening.
     data["URL_declaration"] = f"'{config.DOMAIN}{data.uri}"
-    effectif = data["entreprise"]["effectif"]["tranche"]
     prepare_declaration(data["déclaration"])
 
     if "indicateurs" in data:
-        pass
-        # TODO fonctions ici une fois faites
-        #prepare_remunerations(data["indicateurs"]["rémunérations"])
-        #prepare_conges_maternite(data["indicateurs"]["congés_maternité"])
+        prepare_indicateurs(data["indicateurs"]["répartition_équilibrée"])
     return flatten(data, flatten_lists=True)
 
 
@@ -129,9 +133,24 @@ def prepare_declaration(data):
         )
         data["fin_période_référence"] = date.fromisoformat(fin_periode_reference)
 
-# TODO PREPARE INDICATEURS REPARTITION HERE
-# def prepare_conges_maternite(data):
-#     calculable = not data.get("non_calculable")
-#     data["non_calculable_bool"] = calculable
-#     if not calculable:
-#         data["note"] = "nc"
+def translate_motif_enum(str):
+    enum = {
+        "aucun_cadre_dirigeant": "Aucun cadre dirigeant",
+        "un_seul_cadre_dirigeant": "Un seul cadre dirigeant",
+        "aucune_instance_dirigeante": "Aucune instance dirigeante"
+    }
+    return enum[str] if str in enum else None
+
+def prepare_indicateurs(data):
+    pct_f_cadres, pct_h_cadres = data.get("pourcentage_femmes_cadres"), data.get("pourcentage_hommes_cadres")
+    pct_f_membres, pct_h_membres = data.get("pourcentage_femmes_membres"), data.get("pourcentage_hommes_membres")
+    motif_nc_cadres, motif_nc_membres = data.get("motif_non_calculabilité_cadres"), data.get("motif_non_calculabilité_membres")
+    motif_nc_cadres = translate_motif_enum(motif_nc_cadres)
+    motif_nc_membres = translate_motif_enum(motif_nc_membres)
+
+    data["pct_f_cadres"], data["pct_h_cadres"] = pct_f_cadres, pct_h_cadres
+    data["pct_f_membres"], data["pct_h_membres"] = pct_f_membres, pct_h_membres
+    data["cadres_calculable"] = "Non" if motif_nc_cadres else "Oui"
+    data["membres_calculable"] = "Non" if motif_nc_membres else "Oui"
+    data["motif_nc_cadres"] = motif_nc_cadres
+    data["motif_nc_membres"] = motif_nc_membres
