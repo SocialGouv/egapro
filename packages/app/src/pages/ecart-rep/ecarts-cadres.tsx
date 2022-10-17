@@ -9,7 +9,8 @@ import {
   CardBody,
   CardBodyContent,
   CardBodyContentDescription,
-  CardBodyContentLegend,
+  CardBodyContentDetails,
+  CardBodyContentStart,
   CardBodyContentTitle,
   CardBodyFooter,
   FormButton,
@@ -23,6 +24,8 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
   FormSelect,
+  Grid,
+  GridCol,
   Link,
   LinkGroup,
 } from "@design-system";
@@ -84,28 +87,34 @@ const EcartsCadres: NextPageWithLayout = () => {
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
-      <Card mt="4w">
-        <CardBody>
-          <CardBodyContent>
-            <CardBodyContentLegend icon="fr-icon-arrow-right-line">Définition</CardBodyContentLegend>
-            <CardBodyContentTitle>Cadres dirigeants</CardBodyContentTitle>
-            <CardBodyContentDescription>
-              Sont considérés comme ayant la qualité de cadre dirigeant les cadres auxquels sont confiées des
-              responsabilités dont l'importance implique une grande indépendance dans l'organisation de leur emploi du
-              temps, qui sont habilités à prendre des décisions de façon largement autonome et qui perçoivent une
-              rémunération se situant dans les niveaux les plus élevés des systèmes de rémunération pratiqués dans leur
-              entreprise ou établissement.
-            </CardBodyContentDescription>
-          </CardBodyContent>
-          <CardBodyFooter>
-            <LinkGroup>
-              <Link href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902439/" target="_blank">
-                En savoir plus
-              </Link>
-            </LinkGroup>
-          </CardBodyFooter>
-        </CardBody>
-      </Card>
+      <Grid mt="4w">
+        <GridCol>
+          <Card>
+            <CardBody>
+              <CardBodyContent>
+                <CardBodyContentStart>
+                  <CardBodyContentDetails icon="fr-icon-arrow-right-line">Définition</CardBodyContentDetails>
+                </CardBodyContentStart>
+                <CardBodyContentTitle>Cadres dirigeants</CardBodyContentTitle>
+                <CardBodyContentDescription>
+                  Sont considérés comme ayant la qualité de cadre dirigeant les cadres auxquels sont confiées des
+                  responsabilités dont l'importance implique une grande indépendance dans l'organisation de leur emploi
+                  du temps, qui sont habilités à prendre des décisions de façon largement autonome et qui perçoivent une
+                  rémunération se situant dans les niveaux les plus élevés des systèmes de rémunération pratiqués dans
+                  leur entreprise ou établissement.
+                </CardBodyContentDescription>
+              </CardBodyContent>
+              <CardBodyFooter>
+                <LinkGroup>
+                  <Link href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902439/" target="_blank">
+                    En savoir plus
+                  </Link>
+                </LinkGroup>
+              </CardBodyFooter>
+            </CardBody>
+          </Card>
+        </GridCol>
+      </Grid>
     </>
   );
 };
