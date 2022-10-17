@@ -144,11 +144,12 @@ const EcartsCadres: NextPageWithLayout = () => {
     ecartsCadresFemmes,
     ecartsCadresHommes,
   }: FormType) => {
+    const isEcartsCadresCalculableBoolVal = strRadioToBool(isEcartsCadresCalculable);
     saveFormData({
-      isEcartsCadresCalculable: strRadioToBool(isEcartsCadresCalculable),
-      motifEcartsCadresNonCalculable,
-      ecartsCadresFemmes,
-      ecartsCadresHommes,
+      isEcartsCadresCalculable: isEcartsCadresCalculableBoolVal,
+      motifEcartsCadresNonCalculable: isEcartsCadresCalculableBoolVal ? undefined : motifEcartsCadresNonCalculable,
+      ecartsCadresFemmes: isEcartsCadresCalculableBoolVal ? ecartsCadresFemmes : undefined,
+      ecartsCadresHommes: isEcartsCadresCalculableBoolVal ? ecartsCadresHommes : undefined,
     });
     router.push("/ecart-rep/ecarts-membres");
   };
