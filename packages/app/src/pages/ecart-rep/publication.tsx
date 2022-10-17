@@ -36,7 +36,7 @@ const formSchema = z
     publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
       message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
     }),
-    publishingWebsiteUrl: z.string().trim().url().optional(),
+    publishingWebsiteUrl: z.string().trim().optional(),
   })
   .superRefine(({ hasWebsite, publishingContent, publishingWebsiteUrl }, ctx) => {
     if (hasWebsite === "true" && !publishingWebsiteUrl) {
@@ -49,7 +49,7 @@ const formSchema = z
     if (hasWebsite === "false" && !publishingContent) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "La description des modalités de communication des écarts est oblicatoire",
+        message: "La description des modalités de communication des écarts est obligatoire",
         path: ["publishingContent"],
       });
     }
