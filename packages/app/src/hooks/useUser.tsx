@@ -18,7 +18,7 @@ export const useUserStore = create<UserStore>()(
       setToken: (token: string) => set({ token }),
     }),
     {
-      name: "userStore", // name of item in the storage (must be unique)
+      name: "ega-token", // name of item in the storage (must be unique)
     },
   ),
 );
@@ -28,7 +28,7 @@ export const useUserStore = create<UserStore>()(
  *
  * Usage:
  * useUser({ redirectTo: "/authPage" }) => redirect to /authPage if no token are found in local storage
- * useUser({ checkTokenInUrl: true }) => make a Next page able to detect & use a token in URL and put it in local storage in order to login automatically
+ * useUser({ checkTokenInUrl: true }) => for a Next page, to be able to detect & use a token in URL and put it in local storage in order to login automatically
  * const {
  *  user, // get user data
  *  error, // SWR error if any in fetching user data

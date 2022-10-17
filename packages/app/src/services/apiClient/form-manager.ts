@@ -3,8 +3,7 @@ import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
-//TODO: add properties for the future pages
-type RepartitionEquilibreeForm = {
+type FormState = {
   declarant: {
     accord_rgpd?: boolean | undefined;
     email: string;
@@ -21,7 +20,7 @@ type RepartitionEquilibreeForm = {
   year?: number | undefined;
 };
 
-const formDataDefault: RepartitionEquilibreeForm = {
+const formDataDefault: FormState = {
   declarant: {
     email: "",
     prenom: "",
@@ -48,26 +47,20 @@ const formDataDefault: RepartitionEquilibreeForm = {
   year: undefined,
 };
 
-type FormDataStore = {
-  formData: RepartitionEquilibreeForm;
+type FormActions = {
   resetFormData: () => void;
-  saveFormData: (data: Partial<RepartitionEquilibreeForm>) => void;
+  saveFormData: (data: Partial<FormState>) => void;
 };
 
-export const useFormManager = create<FormDataStore>()(
+export const useFormManager = create<FormActions & { formData: FormState }>()(
   persist(
     (set, get) => ({
       formData: formDataDefault,
-      saveFormData: (data: Partial<RepartitionEquilibreeForm>) => set({ formData: { ...get().formData, ...data } }),
+      saveFormData: (data: Partial<FormState>) => set({ formData: { ...get().formData, ...data } }),
       resetFormData: () =>
-        set(
-          state => ({
-            formData: formDataDefault, // Reset to the form default.
-            saveFormData: state.saveFormData, // Preserve these actions in state.
-            resetFormData: state.resetFormData, // Preserve these actions in state.
-          }),
-          true, // We replace the entire state instead of only merging with current state.
-        ),
+        set({
+          formData: formDataDefault,
+        }),
     }),
     {
       name: "ega-repeq-form", // name of item in the storage (must be unique)
