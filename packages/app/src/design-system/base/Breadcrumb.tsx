@@ -3,9 +3,7 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 
-export type BreadcrumbProps = PropsWithChildren<Record<never, never>>;
-
-export const Breadcrumb = ({ children }: BreadcrumbProps) => {
+export const Breadcrumb = ({ children }: PropsWithChildren) => {
   const [isExpanded, setIsExpanded] = useState(false);
   return (
     <nav role="navigation" className="fr-breadcrumb" aria-label="vous êtes ici :">

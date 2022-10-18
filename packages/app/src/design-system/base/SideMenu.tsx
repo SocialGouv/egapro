@@ -43,13 +43,9 @@ export const SideMenu = ({ buttonLabel, children }: SideMenuProps) => {
   );
 };
 
-export type SideMenuTitleProps = PropsWithChildren<Record<never, never>>;
+export const SideMenuTitle = ({ children }: PropsWithChildren) => <div className="fr-sidemenu__title">{children}</div>;
 
-export const SideMenuTitle = ({ children }: SideMenuTitleProps) => <div className="fr-sidemenu__title">{children}</div>;
-
-export type SideMenuListProps = PropsWithChildren<Record<never, never>>;
-
-export const SideMenuList = ({ children }: SideMenuListProps) => <ul className="fr-sidemenu__list">{children}</ul>;
+export const SideMenuList = ({ children }: PropsWithChildren) => <ul className="fr-sidemenu__list">{children}</ul>;
 
 export type SideMenuLinkProps = PropsWithChildren<
   React.AnchorHTMLAttributes<HTMLAnchorElement> & {

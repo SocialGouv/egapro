@@ -20,7 +20,7 @@ export const FormLayout = ({ className, children, ...rest }: FormLayoutProps) =>
   );
 };
 
-export const FormLayoutButtonGroup = ({ children }: PropsWithChildren<Record<never, never>>) => {
+export const FormLayoutButtonGroup = ({ children }: PropsWithChildren) => {
   return (
     <ButtonGroup inline="mobile-up" className={styles["btns-group"]}>
       {children}

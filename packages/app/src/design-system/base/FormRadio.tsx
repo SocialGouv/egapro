@@ -52,9 +52,7 @@ export const FormRadioGroupLegend = ({ children, id }: FormRadioGroupLegendProps
   </legend>
 );
 
-export type FormRadioGroupContentProps = PropsWithChildren<Record<never, never>>;
-
-export const FormRadioGroupContent = ({ children }: FormRadioGroupContentProps) => (
+export const FormRadioGroupContent = ({ children }: PropsWithChildren) => (
   <div className="fr-fieldset__content">{children}</div>
 );
 

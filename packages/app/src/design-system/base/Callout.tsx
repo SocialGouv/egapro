@@ -32,9 +32,7 @@ export const CalloutTitle = ({ children, className, titleAs: HtmlTag = "p" }: Ca
   return <HtmlTag className={clsx("fr-callout__title", styles.title, className)}>{children}</HtmlTag>;
 };
 
-export type CalloutContentProps = PropsWithChildren<Record<never, never>>;
-
-export const CalloutContent = ({ children }: CalloutContentProps) => {
+export const CalloutContent = ({ children }: PropsWithChildren) => {
   return <div className={clsx("fr-callout__text")}>{children}</div>;
 };
 
