@@ -119,16 +119,16 @@ const DeclarantPage: NextPageWithLayout = () => {
               <FormGroupLabel htmlFor="email">Email</FormGroupLabel>
               <FormInput id="email" type="text" readOnly {...register("email")} />
             </FormGroup>
-             <FormGroup>
-            <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
-              J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
-              vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
-              consulter nos <a href="#">Conditions Générales d'Utilisation</a>.
-            </FormCheckbox>
-            {errors.accord_rgpd && (
-              <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
-            )}
-          </FormGroup>
+            <FormGroup>
+              <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
+                J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
+                vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
+                consulter nos <a href="#">Conditions Générales d'Utilisation</a>.
+              </FormCheckbox>
+              {errors.accord_rgpd && (
+                <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
+              )}
+            </FormGroup>
             <FormLayoutButtonGroup>
               <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/commencer")}>
                 Précédent
