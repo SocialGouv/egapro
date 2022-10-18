@@ -20,7 +20,7 @@ export const Grid = ({ children, haveGutters, justifyCenter, ...rest }: GridProp
 
 type ColsNumberType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
-export type GridColProps = PropsWithChildren<Record<never, never>> & {
+export type GridColProps = PropsWithChildren & {
   className?: string;
   lg?: ColsNumberType;
   md?: ColsNumberType;

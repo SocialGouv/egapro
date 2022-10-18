@@ -66,7 +66,6 @@ const PeriodeReference: NextPageWithLayout = () => {
       year: formData?.year === undefined ? undefined : String(formData?.year),
     });
     // formData needed otherwise localstorage data is not loaded
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, formData]);
 
   useEffect(() => {
