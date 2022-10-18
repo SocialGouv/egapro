@@ -5,7 +5,7 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { MotifEcartsCadresNonCalculableValues, useFormManager } from "../../services/apiClient/form-manager";
+import { motifEcartsCadresNonCalculableValues, useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { strRadioToBool } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -44,7 +44,7 @@ const title = "Écarts de représentation";
 const formSchema = z
   .object({
     isEcartsCadresCalculable: z.union([z.literal("oui"), z.literal("non")]),
-    motifEcartsCadresNonCalculable: z.enum(MotifEcartsCadresNonCalculableValues).optional(),
+    motifEcartsCadresNonCalculable: z.enum(motifEcartsCadresNonCalculableValues).optional(),
     ecartsCadresFemmes: z
       .number()
       .nonnegative({ message: "Le pourcentage doit être positif" })
@@ -264,8 +264,8 @@ const EcartsCadres: NextPageWithLayout = () => {
             <FormGroup>
               <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
               <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
-                <option value={MotifEcartsCadresNonCalculableValues[0]}>Il n'y a aucun cadre dirigeant</option>
-                <option value={MotifEcartsCadresNonCalculableValues[1]}>Il n'y a qu'un seul cadre dirigeant</option>
+                <option value={motifEcartsCadresNonCalculableValues[0]}>Il n'y a aucun cadre dirigeant</option>
+                <option value={motifEcartsCadresNonCalculableValues[1]}>Il n'y a qu'un seul cadre dirigeant</option>
               </FormSelect>
             </FormGroup>
           )}

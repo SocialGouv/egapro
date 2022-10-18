@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
-export const MotifEcartsCadresNonCalculableValues = ["aucun cadre dirigeant", "un seul cadre dirigeant"] as const;
+export const motifEcartsCadresNonCalculableValues = ["aucun cadre dirigeant", "un seul cadre dirigeant"] as const;
 
 type FormState = {
   declarant: {
@@ -19,7 +19,7 @@ type FormState = {
   entreprise?: EntrepriseType;
   hasWebsite: boolean;
   isEcartsCadresCalculable?: boolean;
-  motifEcartsCadresNonCalculable?: typeof MotifEcartsCadresNonCalculableValues[number];
+  motifEcartsCadresNonCalculable?: typeof motifEcartsCadresNonCalculableValues[number];
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;
