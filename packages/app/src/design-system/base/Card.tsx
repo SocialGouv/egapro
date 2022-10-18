@@ -32,19 +32,13 @@ export const Card = ({ children, size, isEnlargeLink, noBorder, isHorizontal, ..
   );
 };
 
-export const CardBody = ({ children }: PropsWithChildren<Record<never, never>>) => (
-  <div className="fr-card__body">{children}</div>
-);
+export const CardBody = ({ children }: PropsWithChildren) => <div className="fr-card__body">{children}</div>;
 
-export const CardBodyContent = ({ children }: PropsWithChildren<Record<never, never>>) => (
-  <div className="fr-card__content">{children}</div>
-);
+export const CardBodyContent = ({ children }: PropsWithChildren) => <div className="fr-card__content">{children}</div>;
 
-export const CardBodyContentEnd = ({ children }: PropsWithChildren<Record<never, never>>) => (
-  <div className="fr-card__end">{children}</div>
-);
+export const CardBodyContentEnd = ({ children }: PropsWithChildren) => <div className="fr-card__end">{children}</div>;
 
-export const CardBodyContentStart = ({ children }: PropsWithChildren<Record<never, never>>) => (
+export const CardBodyContentStart = ({ children }: PropsWithChildren) => (
   <div className="fr-card__start">{children}</div>
 );
 
@@ -56,7 +50,7 @@ export const CardBodyContentTitle = ({ children, titleAs: HtmlTag = "p" }: CardB
   return <HtmlTag className="fr-card__title">{children}</HtmlTag>;
 };
 
-export const CardBodyContentDescription = ({ children }: PropsWithChildren<Record<never, never>>) => (
+export const CardBodyContentDescription = ({ children }: PropsWithChildren) => (
   <p className="fr-card__desc">{children}</p>
 );
 
@@ -66,14 +60,8 @@ export const CardBodyContentDetails = ({ children, icon }: CardBodyContentLegend
   <p className={clsx("fr-card__detail", icon)}>{children}</p>
 );
 
-export const CardBodyFooter = ({ children }: PropsWithChildren<Record<never, never>>) => (
-  <div className="fr-card__footer">{children}</div>
-);
+export const CardBodyFooter = ({ children }: PropsWithChildren) => <div className="fr-card__footer">{children}</div>;
 
-export const CardHeader = ({ children }: PropsWithChildren<Record<never, never>>) => (
-  <div className="fr-card__header">{children}</div>
-);
+export const CardHeader = ({ children }: PropsWithChildren) => <div className="fr-card__header">{children}</div>;
 
-export const CardHeaderImg = ({ children }: PropsWithChildren<Record<never, never>>) => (
-  <div className="fr-card__img">{children}</div>
-);
+export const CardHeaderImg = ({ children }: PropsWithChildren) => <div className="fr-card__img">{children}</div>;

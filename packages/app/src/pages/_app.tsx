@@ -8,8 +8,6 @@ import { useEffect } from "react";
 
 import React from "react";
 
-import { AuthContextProvider } from "@components/AuthContext";
-
 export type NextPageWithLayout = AppProps["Component"] & {
   getLayout?: (props: PropsWithChildren) => JSX.Element;
 };
@@ -30,11 +28,9 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   const Layout = Component.getLayout ?? (({ children }) => <>{children}</>);
 
   return (
-    <AuthContextProvider>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </AuthContextProvider>
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
   );
 };
 

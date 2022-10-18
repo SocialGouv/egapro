@@ -43,7 +43,7 @@ export const checkSiren = async (siren: string, year: number) => {
   try {
     return await memoizedValidateSiren(siren, year);
   } catch (error: unknown) {
-    console.log(error);
+    console.error(error);
 
     throw new Error(error instanceof Error ? error.message : "Erreur dans checkSiren");
   }

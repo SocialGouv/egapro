@@ -2,9 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 
-export type MainNavProps = PropsWithChildren<Record<never, never>>;
-
-export const MainNav = ({ children }: MainNavProps) => {
+export const MainNav = ({ children }: PropsWithChildren) => {
   return (
     <nav className="fr-nav" id="header-navigation" role="navigation" aria-label="Menu principal">
       <ul className="fr-nav__list">{children}</ul>

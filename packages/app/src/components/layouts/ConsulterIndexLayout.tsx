@@ -7,8 +7,7 @@ import { theme } from "../../theme";
 import { Footer } from "../ds/Footer";
 import { Header } from "../ds/Header";
 
-// eslint-disable-next-line @typescript-eslint/ban-types -- no props
-export const ConsulterIndexLayout = ({ children }: PropsWithChildren<{}>) => {
+export const ConsulterIndexLayout = ({ children }: PropsWithChildren) => {
   return (
     <ChakraProvider theme={theme}>
       <Flex direction="column" minHeight="100vh">

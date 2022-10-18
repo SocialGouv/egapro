@@ -8,7 +8,6 @@ import type { PropsWithChildren } from "react";
 import React from "react";
 import styles from "./RepartitionEquilibreeLayout.module.css";
 
-import { AsideLink } from "./RepartitionEquilibreeStartLayout";
 import {
   App,
   Box,
@@ -20,55 +19,57 @@ import {
   CardHeader,
   CardHeaderImg,
   Container,
-  ContentWithAside,
-  ContentWithAsideMain,
-  ContentWithAsideSideMenu,
   Grid,
   GridCol,
-  SideMenu,
-  SideMenuCollapse,
-  SideMenuList,
-  SideMenuTitle,
+  Stepper,
+  StepperDetails,
+  StepperTitle,
 } from "@design-system";
+
+const STEPS = [
+  "/commencer",
+  "/declarant",
+  "/entreprise",
+  "/periode-reference",
+  "/ecarts-cadres",
+  "/ecarts-membres",
+  "/publication",
+  "/validation",
+];
+
+const STEPS_TITLE = [
+  "Commencer",
+  "Informations déclarant",
+  "Informations entreprise",
+  "Période de Référence",
+  "Écarts de représentation - Cadres dirigeants",
+  "Écarts de représentation - Membres des instances dirigeantes",
+  "Publication",
+  "Validation de vos écarts",
+];
 
 // Layout for authenticated users (i.e. the wizard).
 export const RepartitionEquilibreeLayout = ({
   children,
   haveBottomSection,
 }: PropsWithChildren<{ haveBottomSection?: boolean }>) => {
-  const router = useRouter();
-  const currentRoute = router.pathname;
+  const { pathname } = useRouter();
+
+  const foundStep = STEPS.findIndex(stepName => pathname.endsWith(stepName));
+  const currentStep = foundStep > -1 ? foundStep : null;
+
   return (
     <App>
-      <Container>
-        <ContentWithAside>
-          <ContentWithAsideSideMenu>
-            <SideMenu buttonLabel={"Dans cette rubrique"}>
-              <SideMenuTitle>Répartition équilibrée</SideMenuTitle>
-              <SideMenuList>
-                <AsideLink path="commencer">Commencer ou accéder à une déclaration</AsideLink>
-                <AsideLink path="declarant">Informations déclarant</AsideLink>
-                <AsideLink path="entreprise">Informations entreprise</AsideLink>
-                <AsideLink path="#">Période de référence</AsideLink>
-                <SideMenuCollapse
-                  isExpandedDefault
-                  title="Écarts de représentation"
-                  isCurrent={
-                    currentRoute === "/ecart-rep/ecarts-cadres" || currentRoute === "/ecart-rep/ecarts-membres"
-                  }
-                >
-                  <AsideLink path="ecarts-cadres">Cadres dirigeants</AsideLink>
-                  <AsideLink path="ecarts-membres">Membres des instances dirigeantes</AsideLink>
-                </SideMenuCollapse>
-                <AsideLink path="#">Publication</AsideLink>
-                <AsideLink path="#">Récapitulatif</AsideLink>
-                <AsideLink path="#">Validation</AsideLink>
-                <AsideLink path="#">Transmission</AsideLink>
-              </SideMenuList>
-            </SideMenu>
-          </ContentWithAsideSideMenu>
-          <ContentWithAsideMain>{children}</ContentWithAsideMain>
-        </ContentWithAside>
+      <Container py="6w">
+        {currentStep !== null && (
+          <Stepper mb="6w">
+            <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>
+              {STEPS_TITLE[currentStep]}
+            </StepperTitle>
+            {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
+          </Stepper>
+        )}
+        {children}
       </Container>
       {haveBottomSection && (
         <Box py="9w" className={styles.gradient}>

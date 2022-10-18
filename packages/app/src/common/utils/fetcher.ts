@@ -1,4 +1,5 @@
 import { ApiError } from "next/dist/server/api-utils";
+import { useUserStore } from "../../hooks/useUser";
 import type { Any } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -33,7 +34,7 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
     ...options,
     headers: {
       ...options?.headers,
-      "API-KEY": localStorage.token,
+      "API-KEY": useUserStore.getState().token,
     },
   };
 
