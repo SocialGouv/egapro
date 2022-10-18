@@ -69,9 +69,7 @@ export const ModaleTitle = ({ as = "h1", children }: ModaleTitleProps) => (
   </Dialog.Title>
 );
 
-export type ModaleContentProps = PropsWithChildren<Record<never, never>>;
-
-export const ModaleContent = ({ children }: ModaleContentProps) => <div>{children}</div>;
+export const ModaleContent = ({ children }: PropsWithChildren) => <div>{children}</div>;
 
 export type ModaleButtonProps = FormButtonProps;
 
