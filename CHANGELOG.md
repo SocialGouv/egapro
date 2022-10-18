@@ -1,3 +1,10 @@
+## [2.22.7](https://github.com/SocialGouv/egapro/compare/v2.22.6...v2.22.7) (2022-10-18)
+
+
+### Bug Fixes
+
+* None cell issue in objectives pdf (prod) ([#1181](https://github.com/SocialGouv/egapro/issues/1181)) ([720ddea](https://github.com/SocialGouv/egapro/commit/720ddea1f5321cc384b8c91c62b41d8cdb206ee3))
+
 ## [2.22.6](https://github.com/SocialGouv/egapro/compare/v2.22.5...v2.22.6) (2022-10-13)
 
 
