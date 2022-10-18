@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import type { SyntheticEvent } from "react";
 import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -47,8 +46,16 @@ const formSchema = z
   .object({
     isEcartsCadresCalculable: z.union([z.literal("oui"), z.literal("non")]),
     motifEcartsCadresNonCalculable: z.string().trim().optional(),
-    ecartsCadresFemmes: z.number().optional(),
-    ecartsCadresHommes: z.number().optional(),
+    ecartsCadresFemmes: z
+      .number()
+      .positive({ message: "Le pourcentage doit être positif" })
+      .lte(100, { message: "Le pourcentage maximum est 100" })
+      .optional(),
+    ecartsCadresHommes: z
+      .number()
+      .positive({ message: "Le pourcentage doit être positif" })
+      .lte(100, { message: "Le pourcentage maximum est 100" })
+      .optional(),
   })
   .superRefine(
     ({ isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresHommes, ecartsCadresFemmes }, ctx) => {
@@ -110,22 +117,27 @@ const EcartsCadres: NextPageWithLayout = () => {
     resetForm();
   }, [resetForm]);
 
-  const percentageAutoComplete = (event: SyntheticEvent) => {
+  // TODO: unit tests
+  const syncPercentages = (event: React.FormEvent<HTMLInputElement>) => {
     const inputChanged = event.currentTarget;
-    const inputChangedValue = (inputChanged as HTMLInputElement).valueAsNumber;
-    if (inputChanged.id === "ecartsCadresFemmes") {
-      setValue("ecartsCadresFemmes", inputChangedValue);
-      setValue("ecartsCadresHommes", 100 - inputChangedValue, { shouldValidate: true });
+    const inputChangedNumberValue = inputChanged.valueAsNumber;
+
+    if (inputChangedNumberValue && inputChanged.id === "ecartsCadresFemmes") {
+      setValue("ecartsCadresFemmes", inputChangedNumberValue, { shouldValidate: true });
+      if (inputChangedNumberValue > 0 && inputChangedNumberValue < 100) {
+        setValue("ecartsCadresHommes", 100 - inputChangedNumberValue, { shouldValidate: true });
+      }
       return;
     }
-    if (inputChanged.id === "ecartsCadresHommes") {
-      setValue("ecartsCadresHommes", inputChangedValue);
-      setValue("ecartsCadresFemmes", 100 - inputChangedValue, { shouldValidate: true });
-      return;
+    if (inputChangedNumberValue && inputChanged.id === "ecartsCadresHommes") {
+      setValue("ecartsCadresHommes", inputChangedNumberValue, { shouldValidate: true });
+      if (inputChangedNumberValue > 0 && inputChangedNumberValue < 100) {
+        setValue("ecartsCadresFemmes", 100 - inputChangedNumberValue, { shouldValidate: true });
+      }
     }
   };
 
-  const onSubmit = async ({
+  const onSubmit = ({
     isEcartsCadresCalculable,
     motifEcartsCadresNonCalculable,
     ecartsCadresFemmes,
@@ -185,10 +197,12 @@ const EcartsCadres: NextPageWithLayout = () => {
                   Pourcentage de femmes parmi les cadres dirigeants
                 </FormGroupLabel>
                 <FormInput
+                  {...register("ecartsCadresFemmes")}
                   id="ecartsCadresFemmes"
                   type="number"
-                  {...register("ecartsCadresFemmes")}
-                  onBlur={percentageAutoComplete}
+                  min="0"
+                  max="100"
+                  onBlur={syncPercentages}
                   aria-describedby="ecartsCadresFemmes-message-error"
                 />
                 {errors.ecartsCadresFemmes && (
@@ -202,10 +216,12 @@ const EcartsCadres: NextPageWithLayout = () => {
                   Pourcentage d'hommes parmi les cadres dirigeants
                 </FormGroupLabel>
                 <FormInput
+                  {...register("ecartsCadresHommes")}
                   id="ecartsCadresHommes"
                   type="number"
-                  {...register("ecartsCadresHommes")}
-                  onBlur={percentageAutoComplete}
+                  min="0"
+                  max="100"
+                  onBlur={syncPercentages}
                   aria-describedby="ecartsCadresHommes-message-error"
                 />
                 {errors.ecartsCadresHommes && (
