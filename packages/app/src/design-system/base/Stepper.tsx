@@ -40,9 +40,7 @@ export const StepperTitle = ({ currentStep, numberOfSteps, children, titleAs: Ht
   );
 };
 
-export type StepperDetailsProps = PropsWithChildren<Record<never, never>>;
-
-export const StepperDetails = ({ children }: StepperDetailsProps) => {
+export const StepperDetails = ({ children }: PropsWithChildren) => {
   return (
     <p className="fr-stepper__details">
       <span className="fr-text--bold">Étape suivante&nbsp;:</span> {children}
