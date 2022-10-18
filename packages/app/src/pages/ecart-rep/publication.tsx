@@ -8,7 +8,6 @@ import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import type { RadioInputValues } from "@common/utils/form";
 import { strRadioToBool } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -92,7 +91,7 @@ const Publication: NextPageWithLayout = () => {
 
   const onSubmit = async ({ hasWebsite, publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
     saveFormData({
-      hasWebsite: strRadioToBool(hasWebsite as RadioInputValues),
+      hasWebsite: strRadioToBool(hasWebsite),
       publishingContent,
       publishingDate,
       publishingWebsiteUrl,

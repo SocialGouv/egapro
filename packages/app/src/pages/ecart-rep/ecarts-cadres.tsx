@@ -7,7 +7,6 @@ import { z } from "zod";
 
 import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
-import type { RadioInputValues } from "@common/utils/form";
 import { strRadioToBool } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -45,7 +44,9 @@ const title = "Écarts de représentation";
 const formSchema = z
   .object({
     isEcartsCadresCalculable: z.union([z.literal("oui"), z.literal("non")]),
-    motifEcartsCadresNonCalculable: z.string().trim().optional(),
+    motifEcartsCadresNonCalculable: z
+      .union([z.literal("aucun cadre dirigeant"), z.literal("un seul cadre dirigeant")])
+      .optional(),
     ecartsCadresFemmes: z
       .number()
       .positive({ message: "Le pourcentage doit être positif" })
@@ -143,7 +144,7 @@ const EcartsCadres: NextPageWithLayout = () => {
     ecartsCadresFemmes,
     ecartsCadresHommes,
   }: FormType) => {
-    const isEcartsCadresCalculableBoolVal = strRadioToBool(isEcartsCadresCalculable as RadioInputValues);
+    const isEcartsCadresCalculableBoolVal = strRadioToBool(isEcartsCadresCalculable);
     saveFormData({
       isEcartsCadresCalculable: isEcartsCadresCalculableBoolVal,
       motifEcartsCadresNonCalculable: isEcartsCadresCalculableBoolVal ? undefined : motifEcartsCadresNonCalculable,
@@ -235,8 +236,8 @@ const EcartsCadres: NextPageWithLayout = () => {
             <FormGroup>
               <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
               <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
-                <option value="0">Il n'y a aucun cadre dirigeant</option>
-                <option value="1">Il n'y a qu'un seul cadre dirigeant</option>
+                <option value="aucun cadre dirigeant">Il n'y a aucun cadre dirigeant</option>
+                <option value="un seul cadre dirigeant">Il n'y a qu'un seul cadre dirigeant</option>
               </FormSelect>
             </FormGroup>
           )}

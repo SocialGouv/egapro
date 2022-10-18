@@ -17,7 +17,7 @@ type FormState = {
   entreprise?: EntrepriseType;
   hasWebsite: boolean;
   isEcartsCadresCalculable?: boolean;
-  motifEcartsCadresNonCalculable?: string;
+  motifEcartsCadresNonCalculable?: "aucun cadre dirigeant" | "un seul cadre dirigeant";
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;
