@@ -144,6 +144,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   const clearEcartsCadres = () => {
     setValue("ecartsCadresFemmes", undefined);
     setValue("ecartsCadresHommes", undefined, { shouldValidate: true });
+    setValue("motifEcartsCadresNonCalculable", motifEcartsCadresNonCalculableValues[0], { shouldValidate: true });
   };
 
   const onChangeRadioInput = (event: React.FormEvent<HTMLInputElement>) => {
