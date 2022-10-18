@@ -8,17 +8,7 @@ import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
 
-import {
-  App,
-  Container,
-  ContentWithAside,
-  ContentWithAsideMain,
-  ContentWithAsideSideMenu,
-  SideMenu,
-  SideMenuLink,
-  SideMenuList,
-  SideMenuTitle,
-} from "@design-system";
+import { App, Container, SideMenuLink } from "@design-system";
 
 // Layout for unauthenticated users.
 
@@ -36,24 +26,10 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types -- no props
-export const RepartitionEquilibreeStartLayout = ({ children }: PropsWithChildren<{}>) => {
+export const RepartitionEquilibreeStartLayout = ({ children }: PropsWithChildren) => {
   return (
     <App>
-      <Container>
-        <ContentWithAside>
-          <ContentWithAsideSideMenu>
-            <SideMenu buttonLabel={"Dans cette rubrique"}>
-              <SideMenuTitle>Répartition équilibrée</SideMenuTitle>
-              <SideMenuList>
-                <AsideLink path="assujetti">Êtes-vous assujetti&nbsp;?</AsideLink>
-                <AsideLink path="email">Validation de l’email</AsideLink>
-              </SideMenuList>
-            </SideMenu>
-          </ContentWithAsideSideMenu>
-          <ContentWithAsideMain>{children}</ContentWithAsideMain>
-        </ContentWithAside>
-      </Container>
+      <Container py="6w">{children}</Container>
     </App>
   );
 };
