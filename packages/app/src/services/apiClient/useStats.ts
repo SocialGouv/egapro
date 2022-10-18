@@ -1,7 +1,7 @@
 import useSWR from "swr";
 
-import { buildUrlParamsString } from "@common/utils/url";
-import { fetcher } from "@services/apiClient";
+import { buildUrlParamsString } from "../../common/utils/url";
+import { fetcher } from "../../services/apiClient";
 import type { FetcherReturn } from "@services/apiClient";
 
 export type StatsType = {
