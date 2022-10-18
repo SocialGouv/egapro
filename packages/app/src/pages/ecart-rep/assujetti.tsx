@@ -1,6 +1,7 @@
 import NextLink from "next/link";
 import { useState } from "react";
 
+import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { ButtonAsLink, Callout, FormRadioGroup, FormRadioGroupInput, Link } from "@design-system";
@@ -9,6 +10,7 @@ const title = "Êtes-vous assujetti ?";
 
 const AssujettiPage: NextPageWithLayout = () => {
   const [isAssujetti, setAssujetti] = useState("oui");
+  const { isAuthenticated } = useUser();
 
   function handleAssujettiChange(e: React.ChangeEvent<HTMLInputElement>) {
     setAssujetti(e.target.value);
@@ -59,7 +61,7 @@ const AssujettiPage: NextPageWithLayout = () => {
           </NextLink>
         </Callout>
       )) || (
-        <NextLink href="/ecart-rep/email" passHref>
+        <NextLink href={isAuthenticated ? "/ecart-rep/commencer" : "/ecart-rep/email"} passHref>
           <ButtonAsLink>Suivant</ButtonAsLink>
         </NextLink>
       )}
