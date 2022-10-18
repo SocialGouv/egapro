@@ -10,6 +10,7 @@ import { useUser } from "@components/AuthContext";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import {
   FormButton,
+  FormCheckbox,
   FormGroup,
   FormGroupLabel,
   FormInput,
@@ -84,7 +85,7 @@ const DeclarantPage: NextPageWithLayout = () => {
   return (
     <>
       <h1>{title}</h1>
-      <p>Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email</p>
+      <p>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone</p>
 
       <FormLayout>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -128,17 +129,11 @@ const DeclarantPage: NextPageWithLayout = () => {
             <FormInput id="email" type="text" readOnly {...register("email")} />
           </FormGroup>
           <FormGroup>
-            <FormGroupLabel htmlFor="accord_rgpd">
+            <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
               J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
               vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
-              consulter nos Conditions Générales d'Utilisation.
-            </FormGroupLabel>
-            <input
-              type="checkbox"
-              id="accord_rgpd"
-              {...register("accord_rgpd")}
-              aria-describedby="accord_rgpd-message-error"
-            />
+              consulter nos <a href="#">Conditions Générales d'Utilisation</a>.
+            </FormCheckbox>
             {errors.accord_rgpd && (
               <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
             )}
