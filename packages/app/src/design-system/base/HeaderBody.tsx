@@ -1,9 +1,8 @@
 import Link from "next/link";
 
-import { useUser } from "../../hooks/useUser";
-import { useFormManager } from "../../services/apiClient/form-manager";
 import { FormButton } from "./FormButton";
 import { Logo } from "./Logo";
+import { useFormManager, useUser } from "@services/apiClient";
 
 export type HeaderBodyProps = {
   buttonMobileMenuId: string;

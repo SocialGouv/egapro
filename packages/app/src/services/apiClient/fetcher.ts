@@ -1,6 +1,7 @@
 import { ApiError } from "next/dist/server/api-utils";
-import { useUserStore } from "../../hooks/useUser";
-import type { Any } from "./types";
+
+import type { Any } from "../../common/utils/types";
+import { useUserStore } from "./useUser";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

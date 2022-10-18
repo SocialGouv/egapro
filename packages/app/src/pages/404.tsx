@@ -3,6 +3,7 @@ import { push } from "@socialgouv/matomo-next";
 import Head from "next/head";
 import { useEffect } from "react";
 import type { NextPageWithLayout } from "./_app";
+
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 
 const NotFoundPage: NextPageWithLayout = () => {

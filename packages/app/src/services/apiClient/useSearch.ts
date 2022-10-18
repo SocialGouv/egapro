@@ -2,9 +2,9 @@ import moize from "moize";
 import useSWRInfinite from "swr/infinite";
 
 import type { SWRInfiniteKeyLoader } from "swr/infinite";
-import type { FetcherInfiniteReturn } from "../common/utils/fetcher";
+import type { FetcherInfiniteReturn } from "./fetcher";
 
-import { fetcher } from "../common/utils/fetcher";
+import { fetcher } from "./fetcher";
 import type { CompaniesType, CompanyType } from "@common/models/company";
 import { buildUrlParams } from "@common/utils/url";
 

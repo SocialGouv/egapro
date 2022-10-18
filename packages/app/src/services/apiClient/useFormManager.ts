@@ -3,6 +3,8 @@ import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
+const motifEcartsCadresNonCalculableValues = ["aucun cadre dirigeant", "un seul cadre dirigeant"] as const;
+
 type FormState = {
   declarant: {
     accord_rgpd?: boolean | undefined;
@@ -14,6 +16,7 @@ type FormState = {
   endOfPeriod?: string;
   entreprise?: EntrepriseType;
   hasWebsite: boolean;
+  motifEcartsCadresNonCalculable?: typeof motifEcartsCadresNonCalculableValues;
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;

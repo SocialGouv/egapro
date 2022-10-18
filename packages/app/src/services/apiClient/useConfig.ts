@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
-
-import type { FetcherReturnImmutable } from "../common/utils/fetcher";
-import { fetcher } from "../common/utils/fetcher";
+import type { FetcherReturnImmutable } from "./fetcher";
+import { fetcher } from "./fetcher";
 
 export type ConfigTypeApi = {
   DEPARTEMENTS: Record<string, string>;

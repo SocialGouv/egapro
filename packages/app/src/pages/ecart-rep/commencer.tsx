@@ -5,9 +5,6 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
-import { useFormManager } from "../../services/apiClient/form-manager";
-import { checkSiren, fetchSiren, ownersForSiren } from "../../services/apiClient/siren";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
@@ -23,6 +20,7 @@ import {
   FormLayoutButtonGroup,
   Alert,
 } from "@design-system";
+import { checkSiren, fetchSiren, ownersForSiren, useFormManager, useUser } from "@services/apiClient";
 
 const title = "Commencer ou accéder à une déclaration";
 
