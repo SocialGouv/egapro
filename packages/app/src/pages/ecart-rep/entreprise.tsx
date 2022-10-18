@@ -2,10 +2,10 @@ import { useRouter } from "next/router";
 
 import { useConfig } from "../../hooks";
 import { useUser } from "../../hooks/useUser";
-import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
+import { useFormManager } from "@services/apiClient/form-manager";
 
 const title = "Informations entreprise";
 

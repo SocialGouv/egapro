@@ -9,7 +9,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
   FormSelect,
-} from "@/design-system";
+} from "@design-system";
 
 export default {
   title: "Layout/FormLayout",

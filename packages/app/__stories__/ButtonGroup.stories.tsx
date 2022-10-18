@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { ButtonGroup, FormButton } from "@/design-system";
+import { ButtonGroup, FormButton } from "@design-system";
 
 export default {
   title: "Base/ButtonGroup",

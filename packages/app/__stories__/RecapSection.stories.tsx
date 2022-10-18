@@ -7,7 +7,7 @@ import {
   RecapSectionTitle,
   RecapSectionItemLegend,
   RecapSectionItemContent,
-} from "@/design-system";
+} from "@design-system";
 
 export default {
   title: "Base/RecapSection",

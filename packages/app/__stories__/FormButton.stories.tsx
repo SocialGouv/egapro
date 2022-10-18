@@ -1,7 +1,7 @@
 import { action } from "@storybook/addon-actions";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormButton } from "@/design-system";
+import { FormButton } from "@design-system";
 
 export default {
   title: "Base/Form/FormButton",

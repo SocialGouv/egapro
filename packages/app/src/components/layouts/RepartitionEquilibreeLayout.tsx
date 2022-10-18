@@ -6,10 +6,10 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
+import { App } from "./App";
 import styles from "./RepartitionEquilibreeLayout.module.css";
 
 import {
-  App,
   Box,
   Card,
   CardBody,
@@ -91,7 +91,7 @@ export const RepartitionEquilibreeLayout = ({
                   <CardHeader>
                     <CardHeaderImg>
                       {/* TODO: Add real image */}
-                      <img
+                      <img // eslint-disable-line @next/next/no-img-element -- placeholder image to change
                         className="fr-responsive-img"
                         src="https://www.systeme-de-design.gouv.fr/img/placeholder.16x9.png"
                         alt=""

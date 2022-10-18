@@ -3,8 +3,8 @@ import { useCallback, useEffect } from "react";
 import create from "zustand";
 import { persist } from "zustand/middleware";
 
-import { useFormManager } from "../services/apiClient/form-manager";
 import { useMe } from "./useMe";
+import { useFormManager } from "@services/apiClient/form-manager";
 
 type UserStore = {
   setToken: (token: string) => void;

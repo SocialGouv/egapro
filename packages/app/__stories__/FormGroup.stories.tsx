@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormInput, FormGroup, FormSelect, FormGroupLabel, FormGroupMessage } from "@/design-system";
+import { FormInput, FormGroup, FormSelect, FormGroupLabel, FormGroupMessage } from "@design-system";
 
 export default {
   title: "Base/Form/FormGroup",

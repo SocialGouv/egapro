@@ -1,5 +1,5 @@
 import { render } from "./utils";
-import { Banner } from "@/components/ds/Banner";
+import { Banner } from "@components/ds/Banner";
 
 beforeAll(() => {
   Object.defineProperty(window, "matchMedia", {

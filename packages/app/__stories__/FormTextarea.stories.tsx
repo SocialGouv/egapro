@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormTextarea } from "@/design-system";
+import { FormTextarea } from "@design-system";
 
 export default {
   title: "Base/Form/FormTextarea",

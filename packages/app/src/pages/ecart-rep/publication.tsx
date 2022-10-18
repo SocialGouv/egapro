@@ -6,7 +6,6 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -26,6 +25,7 @@ import {
   FormRadioGroupLegend,
   FormTextarea,
 } from "@design-system";
+import { useFormManager } from "@services/apiClient/form-manager";
 
 const title = "Publication";
 
