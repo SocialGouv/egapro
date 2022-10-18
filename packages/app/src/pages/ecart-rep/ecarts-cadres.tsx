@@ -5,7 +5,7 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useFormManager } from "../../services/apiClient/form-manager";
+import { MotifEcartsCadresNonCalculableValues, useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { strRadioToBool } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -44,17 +44,15 @@ const title = "Écarts de représentation";
 const formSchema = z
   .object({
     isEcartsCadresCalculable: z.union([z.literal("oui"), z.literal("non")]),
-    motifEcartsCadresNonCalculable: z
-      .union([z.literal("aucun cadre dirigeant"), z.literal("un seul cadre dirigeant")])
-      .optional(),
+    motifEcartsCadresNonCalculable: z.enum(MotifEcartsCadresNonCalculableValues).optional(),
     ecartsCadresFemmes: z
       .number()
-      .positive({ message: "Le pourcentage doit être positif" })
+      .nonnegative({ message: "Le pourcentage doit être positif" })
       .lte(100, { message: "Le pourcentage maximum est 100" })
       .optional(),
     ecartsCadresHommes: z
       .number()
-      .positive({ message: "Le pourcentage doit être positif" })
+      .nonnegative({ message: "Le pourcentage doit être positif" })
       .lte(100, { message: "Le pourcentage maximum est 100" })
       .optional(),
   })
@@ -90,6 +88,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const {
+    clearErrors,
     formState: { errors, isDirty, isValid, isSubmitted },
     handleSubmit,
     register,
@@ -97,7 +96,6 @@ const EcartsCadres: NextPageWithLayout = () => {
     setValue,
     watch,
   } = useForm<FormType>({
-    mode: "onBlur",
     resolver: zodResolver(formSchema),
   });
 
@@ -121,21 +119,41 @@ const EcartsCadres: NextPageWithLayout = () => {
   // TODO: unit tests
   const syncPercentages = (event: React.FormEvent<HTMLInputElement>) => {
     const inputChanged = event.currentTarget;
+    const inputChangedStringValue = event.currentTarget.value;
     const inputChangedNumberValue = inputChanged.valueAsNumber;
 
-    if (inputChangedNumberValue && inputChanged.id === "ecartsCadresFemmes") {
+    if (inputChangedStringValue?.length > 0 && inputChanged.id === "ecartsCadresFemmes") {
       setValue("ecartsCadresFemmes", inputChangedNumberValue, { shouldValidate: true });
-      if (inputChangedNumberValue > 0 && inputChangedNumberValue < 100) {
+      if (inputChangedNumberValue >= 0 && inputChangedNumberValue <= 100) {
         setValue("ecartsCadresHommes", 100 - inputChangedNumberValue, { shouldValidate: true });
       }
       return;
     }
-    if (inputChangedNumberValue && inputChanged.id === "ecartsCadresHommes") {
+    if (inputChangedStringValue?.length > 0 && inputChanged.id === "ecartsCadresHommes") {
       setValue("ecartsCadresHommes", inputChangedNumberValue, { shouldValidate: true });
-      if (inputChangedNumberValue > 0 && inputChangedNumberValue < 100) {
+      if (inputChangedNumberValue >= 0 && inputChangedNumberValue <= 100) {
         setValue("ecartsCadresFemmes", 100 - inputChangedNumberValue, { shouldValidate: true });
       }
     }
+  };
+
+  const clearMotif = () => {
+    setValue("motifEcartsCadresNonCalculable", undefined);
+  };
+
+  const clearEcartsCadres = () => {
+    setValue("ecartsCadresFemmes", undefined);
+    setValue("ecartsCadresHommes", undefined, { shouldValidate: true });
+  };
+
+  const onChangeRadioInput = (event: React.FormEvent<HTMLInputElement>) => {
+    const inputRadioValue = event.currentTarget.value;
+    if (inputRadioValue === "oui") {
+      clearMotif();
+    } else {
+      clearEcartsCadres();
+    }
+    clearErrors();
   };
 
   const onSubmit = ({
@@ -173,7 +191,9 @@ const EcartsCadres: NextPageWithLayout = () => {
             </FormRadioGroupLegend>
             <FormRadioGroupContent>
               <FormRadioGroupInput
-                {...register("isEcartsCadresCalculable")}
+                {...register("isEcartsCadresCalculable", {
+                  onChange: event => onChangeRadioInput(event),
+                })}
                 id="oui"
                 name="isEcartsCadresCalculable"
                 value="oui"
@@ -181,7 +201,9 @@ const EcartsCadres: NextPageWithLayout = () => {
                 Oui
               </FormRadioGroupInput>
               <FormRadioGroupInput
-                {...register("isEcartsCadresCalculable")}
+                {...register("isEcartsCadresCalculable", {
+                  onChange: event => onChangeRadioInput(event),
+                })}
                 id="non"
                 name="isEcartsCadresCalculable"
                 value="non"
@@ -198,12 +220,15 @@ const EcartsCadres: NextPageWithLayout = () => {
                   Pourcentage de femmes parmi les cadres dirigeants
                 </FormGroupLabel>
                 <FormInput
-                  {...register("ecartsCadresFemmes")}
+                  {...register("ecartsCadresFemmes", {
+                    onChange: event => {
+                      syncPercentages(event);
+                    },
+                  })}
                   id="ecartsCadresFemmes"
                   type="number"
                   min="0"
                   max="100"
-                  onBlur={syncPercentages}
                   aria-describedby="ecartsCadresFemmes-message-error"
                 />
                 {errors.ecartsCadresFemmes && (
@@ -217,12 +242,15 @@ const EcartsCadres: NextPageWithLayout = () => {
                   Pourcentage d'hommes parmi les cadres dirigeants
                 </FormGroupLabel>
                 <FormInput
-                  {...register("ecartsCadresHommes")}
+                  {...register("ecartsCadresHommes", {
+                    onChange: event => {
+                      syncPercentages(event);
+                    },
+                  })}
                   id="ecartsCadresHommes"
                   type="number"
                   min="0"
                   max="100"
-                  onBlur={syncPercentages}
                   aria-describedby="ecartsCadresHommes-message-error"
                 />
                 {errors.ecartsCadresHommes && (
@@ -236,8 +264,8 @@ const EcartsCadres: NextPageWithLayout = () => {
             <FormGroup>
               <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
               <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
-                <option value="aucun cadre dirigeant">Il n'y a aucun cadre dirigeant</option>
-                <option value="un seul cadre dirigeant">Il n'y a qu'un seul cadre dirigeant</option>
+                <option value={MotifEcartsCadresNonCalculableValues[0]}>Il n'y a aucun cadre dirigeant</option>
+                <option value={MotifEcartsCadresNonCalculableValues[1]}>Il n'y a qu'un seul cadre dirigeant</option>
               </FormSelect>
             </FormGroup>
           )}
