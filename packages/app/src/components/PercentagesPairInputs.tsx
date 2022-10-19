@@ -53,6 +53,7 @@ export const PercentagesPairInputs = ({ input1, input2 }: { input1: Input; input
           type="number"
           min="0"
           max="100"
+          step="0.1"
           aria-describedby={`${label1}-message-error`}
         />
         {errors[label1] && (
@@ -72,6 +73,7 @@ export const PercentagesPairInputs = ({ input1, input2 }: { input1: Input; input
           type="number"
           min="0"
           max="100"
+          step="0.1"
           aria-describedby={`${label2}-message-error`}
         />
         {errors[label2] && (
