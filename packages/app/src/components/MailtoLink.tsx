@@ -1,4 +1,4 @@
-import { useUser } from "../hooks/useUser";
+import { useUser } from "@services/apiClient";
 
 export const MailtoLinkForNonOwner = () => {
   const { user } = useUser();
