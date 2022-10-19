@@ -119,20 +119,19 @@ const EcartsCadres: NextPageWithLayout = () => {
   // TODO: unit tests
   const syncPercentages = (event: React.FormEvent<HTMLInputElement>) => {
     const inputChanged = event.currentTarget;
-    const inputChangedStringValue = event.currentTarget.value;
-    const inputChangedNumberValue = inputChanged.valueAsNumber;
+    const inputValue = inputChanged.valueAsNumber;
 
-    if (inputChangedStringValue?.length > 0 && inputChanged.id === "ecartsCadresFemmes") {
-      setValue("ecartsCadresFemmes", inputChangedNumberValue, { shouldValidate: true });
-      if (inputChangedNumberValue >= 0 && inputChangedNumberValue <= 100) {
-        setValue("ecartsCadresHommes", 100 - inputChangedNumberValue, { shouldValidate: true });
-      }
-      return;
-    }
-    if (inputChangedStringValue?.length > 0 && inputChanged.id === "ecartsCadresHommes") {
-      setValue("ecartsCadresHommes", inputChangedNumberValue, { shouldValidate: true });
-      if (inputChangedNumberValue >= 0 && inputChangedNumberValue <= 100) {
-        setValue("ecartsCadresFemmes", 100 - inputChangedNumberValue, { shouldValidate: true });
+    if (!isNaN(inputValue)) {
+      if (inputChanged.id === "ecartsCadresFemmes") {
+        setValue("ecartsCadresFemmes", inputValue, { shouldValidate: true });
+        if (inputValue >= 0 && inputValue <= 100) {
+          setValue("ecartsCadresHommes", 100 - inputValue, { shouldValidate: true });
+        }
+      } else if (inputChanged.id === "ecartsCadresHommes") {
+        setValue("ecartsCadresHommes", inputValue, { shouldValidate: true });
+        if (inputValue >= 0 && inputValue <= 100) {
+          setValue("ecartsCadresFemmes", 100 - inputValue, { shouldValidate: true });
+        }
       }
     }
   };
