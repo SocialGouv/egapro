@@ -6,7 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { strRadioToBool } from "@common/utils/form";
+import { radioBoolToString, radioStringToBool } from "@common/utils/form";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -105,7 +105,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   const resetForm = useCallback(() => {
     if (formData) {
       reset({
-        isEcartsCadresCalculable: formData?.isEcartsCadresCalculable ? "oui" : "non",
+        isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
         motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
         ecartsCadresFemmes: formData?.ecartsCadresFemmes,
         ecartsCadresHommes: formData?.ecartsCadresHommes,
@@ -123,7 +123,7 @@ const EcartsCadres: NextPageWithLayout = () => {
     ecartsCadresFemmes,
     ecartsCadresHommes,
   }: FormType) => {
-    const isEcartsCadresCalculableBoolVal = strRadioToBool(isEcartsCadresCalculable);
+    const isEcartsCadresCalculableBoolVal = radioStringToBool(isEcartsCadresCalculable);
 
     saveFormData({
       isEcartsCadresCalculable: isEcartsCadresCalculableBoolVal,
