@@ -177,8 +177,8 @@ const EcartsCadres: NextPageWithLayout = () => {
 
             {isEcartsCadresCalculable === "oui" ? (
               <PercentagesPairInputs
-                input1={{ label: "ecartsCadresFemmes", title: "Pourcentage de femmes parmi les cadres dirigeants" }}
-                input2={{ label: "ecartsCadresHommes", title: "Pourcentage d'hommes parmi les cadres dirigeants" }}
+                firstInput={{ label: "ecartsCadresFemmes", title: "Pourcentage de femmes parmi les cadres dirigeants" }}
+                secondInput={{ label: "ecartsCadresHommes", title: "Pourcentage d'hommes parmi les cadres dirigeants" }}
               />
             ) : (
               <FormGroup>
