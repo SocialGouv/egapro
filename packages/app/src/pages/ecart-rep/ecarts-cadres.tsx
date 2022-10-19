@@ -6,7 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { radioBoolToString, radioStringToBool } from "@common/utils/form";
+import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -42,18 +42,10 @@ const title = "Écarts de représentation";
 
 const formSchema = z
   .object({
-    isEcartsCadresCalculable: z.union([z.literal("oui"), z.literal("non")]),
+    isEcartsCadresCalculable: zodRadioInputSchema,
     motifEcartsCadresNonCalculable: z.enum(motifEcartsCadresNonCalculableValues).optional(),
-    ecartsCadresFemmes: z
-      .number()
-      .nonnegative({ message: "Le pourcentage doit être positif" })
-      .lte(100, { message: "Le pourcentage maximum est 100" })
-      .optional(),
-    ecartsCadresHommes: z
-      .number()
-      .nonnegative({ message: "Le pourcentage doit être positif" })
-      .lte(100, { message: "Le pourcentage maximum est 100" })
-      .optional(),
+    ecartsCadresFemmes: zodPercentageSchema,
+    ecartsCadresHommes: zodPercentageSchema,
   })
   .superRefine(
     ({ isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresHommes, ecartsCadresFemmes }, ctx) => {

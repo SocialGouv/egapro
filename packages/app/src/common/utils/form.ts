@@ -1,6 +1,15 @@
-export const RadioInputValues = ["non", "oui"] as const;
+import { z } from "zod";
 
-export const radioStringToBool = (radioInput: typeof RadioInputValues[number]): boolean => radioInput === "oui";
+export const zodRadioInputSchema = z.union([z.literal("oui"), z.literal("non")]);
 
-export const radioBoolToString = (value: boolean | undefined): typeof RadioInputValues[number] =>
-  value ? "oui" : "non";
+export const zodPercentageSchema = z
+  .number()
+  .nonnegative({ message: "Le pourcentage doit être positif" })
+  .lte(100, { message: "Le pourcentage maximum est 100" })
+  .optional();
+
+export type RadioInputValueType = z.infer<typeof zodRadioInputSchema>;
+
+export const radioStringToBool = (radioInput: RadioInputValueType): boolean => radioInput === "oui";
+
+export const radioBoolToString = (value: boolean | undefined): RadioInputValueType => (value ? "oui" : "non");
