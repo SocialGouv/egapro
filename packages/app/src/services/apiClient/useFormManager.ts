@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
 
-const motifEcartsCadresNonCalculableValues = ["aucun cadre dirigeant", "un seul cadre dirigeant"] as const;
+export const motifEcartsCadresNonCalculableValues = ["aucun cadre dirigeant", "un seul cadre dirigeant"] as const;
 
 type FormState = {
   declarant: {
@@ -13,10 +13,13 @@ type FormState = {
     prenom: string;
     telephone: string;
   };
+  ecartsCadresFemmes?: number;
+  ecartsCadresHommes?: number;
   endOfPeriod?: string;
   entreprise?: EntrepriseType;
   hasWebsite: boolean;
-  motifEcartsCadresNonCalculable?: typeof motifEcartsCadresNonCalculableValues;
+  isEcartsCadresCalculable?: boolean;
+  motifEcartsCadresNonCalculable?: typeof motifEcartsCadresNonCalculableValues[number];
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;
@@ -31,6 +34,8 @@ const formDataDefault: FormState = {
     telephone: "",
     accord_rgpd: undefined,
   },
+  ecartsCadresFemmes: undefined,
+  ecartsCadresHommes: undefined,
   endOfPeriod: "",
   entreprise: {
     adresse: "",
@@ -44,6 +49,8 @@ const formDataDefault: FormState = {
     siren: "",
   },
   hasWebsite: true,
+  isEcartsCadresCalculable: true,
+  motifEcartsCadresNonCalculable: undefined,
   publishingContent: undefined,
   publishingDate: undefined,
   publishingWebsiteUrl: undefined,

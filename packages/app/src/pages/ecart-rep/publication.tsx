@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
+import { strRadioToBool } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   Alert,
@@ -31,7 +32,7 @@ const title = "Publication";
 
 const formSchema = z
   .object({
-    hasWebsite: z.union([z.literal("true"), z.literal("false")]),
+    hasWebsite: z.union([z.literal("oui"), z.literal("non")]),
     publishingContent: z.string().trim().optional(),
     publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
       message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
@@ -39,14 +40,14 @@ const formSchema = z
     publishingWebsiteUrl: z.string().trim().optional(),
   })
   .superRefine(({ hasWebsite, publishingContent, publishingWebsiteUrl }, ctx) => {
-    if (hasWebsite === "true" && !publishingWebsiteUrl) {
+    if (hasWebsite === "oui" && !publishingWebsiteUrl) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "L'adresse exacte de la page internet est obligatoire",
         path: ["publishingWebsiteUrl"],
       });
     }
-    if (hasWebsite === "false" && !publishingContent) {
+    if (hasWebsite === "non" && !publishingContent) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La description des modalités de communication des écarts est obligatoire",
@@ -56,11 +57,6 @@ const formSchema = z
   });
 
 type FormType = z.infer<typeof formSchema>;
-
-const strRadioToBool = (radioInput: string): boolean => {
-  if (radioInput === "true") return true;
-  return false;
-};
 
 const Publication: NextPageWithLayout = () => {
   const router = useRouter();
@@ -81,7 +77,7 @@ const Publication: NextPageWithLayout = () => {
   const resetForm = useCallback(() => {
     if (formData) {
       reset({
-        hasWebsite: formData?.hasWebsite ? "true" : "false",
+        hasWebsite: formData?.hasWebsite ? "oui" : "non",
         publishingContent: formData?.publishingContent,
         publishingDate: formData?.publishingDate === undefined ? undefined : formData?.publishingDate,
         publishingWebsiteUrl: formData?.publishingWebsiteUrl,
@@ -130,15 +126,15 @@ const Publication: NextPageWithLayout = () => {
               Avez-vous un site Internet pour publier les écarts calculables&nbsp;?
             </FormRadioGroupLegend>
             <FormRadioGroupContent>
-              <FormRadioGroupInput {...register("hasWebsite")} id="yes" name="hasWebsite" value="true">
+              <FormRadioGroupInput {...register("hasWebsite")} id="oui" name="hasWebsite" value="oui">
                 Oui
               </FormRadioGroupInput>
-              <FormRadioGroupInput {...register("hasWebsite")} id="no" name="hasWebsite" value="false">
+              <FormRadioGroupInput {...register("hasWebsite")} id="non" name="hasWebsite" value="non">
                 Non
               </FormRadioGroupInput>
             </FormRadioGroupContent>
           </FormRadioGroup>
-          {hasWebsite === "true" ? (
+          {hasWebsite === "oui" ? (
             <FormGroup>
               <FormGroupLabel htmlFor="publishingWebsiteUrl">
                 Indiquer l'adresse exacte de la page Internet (URL) sur laquelle seront publiés les écarts calculables
