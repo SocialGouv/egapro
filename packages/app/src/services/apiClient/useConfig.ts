@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
+
 import type { FetcherReturnImmutable } from "./fetcher";
 import { fetcher } from "./fetcher";
 

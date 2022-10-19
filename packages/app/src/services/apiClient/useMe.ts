@@ -1,4 +1,5 @@
 import useSWR from "swr";
+
 import { fetcher } from "./fetcher";
 
 // TODO: type à confirmer par rapport au endpoint /!\

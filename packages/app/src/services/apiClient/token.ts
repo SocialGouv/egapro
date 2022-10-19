@@ -1,4 +1,4 @@
-import { fetcher } from "../../services/apiClient/fetcher";
+import { fetcher } from "./fetcher";
 
 export const requestEmailForToken = (email: string, url: string) =>
   fetcher("/token", {
