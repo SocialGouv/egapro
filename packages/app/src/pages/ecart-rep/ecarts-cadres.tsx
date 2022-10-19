@@ -5,7 +5,6 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { motifEcartsCadresNonCalculableValues, useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { strRadioToBool } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -38,6 +37,7 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
+import { motifEcartsCadresNonCalculableValues, useFormManager } from "@services/apiClient";
 
 const title = "Écarts de représentation";
 
@@ -164,6 +164,7 @@ const EcartsCadres: NextPageWithLayout = () => {
     ecartsCadresHommes,
   }: FormType) => {
     const isEcartsCadresCalculableBoolVal = strRadioToBool(isEcartsCadresCalculable);
+
     saveFormData({
       isEcartsCadresCalculable: isEcartsCadresCalculableBoolVal,
       motifEcartsCadresNonCalculable: isEcartsCadresCalculableBoolVal ? undefined : motifEcartsCadresNonCalculable,
@@ -225,6 +226,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                     onChange: event => {
                       syncPercentages(event);
                     },
+                    valueAsNumber: true,
                   })}
                   id="ecartsCadresFemmes"
                   type="number"
@@ -247,6 +249,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                     onChange: event => {
                       syncPercentages(event);
                     },
+                    valueAsNumber: true,
                   })}
                   id="ecartsCadresHommes"
                   type="number"
