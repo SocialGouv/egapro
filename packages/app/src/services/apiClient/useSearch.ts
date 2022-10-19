@@ -6,7 +6,7 @@ import type { FetcherInfiniteReturn } from "./fetcher";
 
 import { fetcher } from "./fetcher";
 import type { CompaniesType, CompanyType } from "@common/models/company";
-import { buildUrlParams } from "@common/utils/url";
+import { buildUrlParams } from "../../common/utils/url";
 
 export type SearchCompanyParams = {
   departement?: string;
