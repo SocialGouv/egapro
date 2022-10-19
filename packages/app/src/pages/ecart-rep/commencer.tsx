@@ -24,8 +24,6 @@ import {
   Alert,
 } from "@design-system";
 
-const title = "Commencer ou accéder à une déclaration";
-
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 
 const formSchema = z
@@ -118,11 +116,11 @@ const CommencerPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-
       <p>
-        Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
-        correspondantes à la déclaration.
+        <b>
+          Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
+          correspondantes à la déclaration.
+        </b>
       </p>
 
       <div ref={animationParent} style={{ marginBottom: 20 }}>

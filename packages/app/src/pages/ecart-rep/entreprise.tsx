@@ -7,8 +7,6 @@ import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
 
-const title = "Informations entreprise";
-
 const InformationsEntreprise: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
@@ -29,11 +27,11 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-
       <p>
-        Les informations relatives à l'entreprise (raison sociale, Code NAF, Adresse complète) sont renseignées
-        automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).
+        <b>
+          Les informations relatives à l'entreprise (raison sociale, Code NAF, Adresse complète) sont renseignées
+          automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).
+        </b>
       </p>
 
       <form noValidate>

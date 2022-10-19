@@ -27,8 +27,6 @@ import {
   FormTextarea,
 } from "@design-system";
 
-const title = "Publication";
-
 const formSchema = z
   .object({
     hasWebsite: z.union([z.literal("true"), z.literal("false")]),
@@ -105,7 +103,6 @@ const Publication: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
       <Alert mb="4w">
         <AlertTitle as="h2">Obligation de transparence</AlertTitle>
         <p>

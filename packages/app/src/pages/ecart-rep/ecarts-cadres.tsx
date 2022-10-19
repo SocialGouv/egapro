@@ -30,13 +30,9 @@ import {
   LinkGroup,
 } from "@design-system";
 
-const title = "Écarts de représentation";
-
 const EcartsCadres: NextPageWithLayout = () => {
   return (
     <>
-      <h1>{title}</h1>
-      <h2>Cadres dirigeants</h2>
       <Alert mb="4w">
         <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
         <p>
