@@ -18,11 +18,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
         {...rest}
         ref={ref}
       >
-        {placeholder && (
-          <option value={value} disabled hidden>
-            {placeholder}
-          </option>
-        )}
+        {placeholder && <option value="">{placeholder}</option>}
         {children}
       </select>
     );

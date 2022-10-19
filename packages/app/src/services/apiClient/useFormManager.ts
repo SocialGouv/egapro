@@ -48,7 +48,7 @@ const formDataDefault: FormState = {
     siren: "",
   },
   hasWebsite: true,
-  isEcartsCadresCalculable: true,
+  isEcartsCadresCalculable: undefined,
   motifEcartsCadresNonCalculable: undefined,
   publishingContent: undefined,
   publishingDate: undefined,

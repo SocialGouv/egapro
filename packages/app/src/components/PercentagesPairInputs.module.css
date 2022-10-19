@@ -1,0 +1,13 @@
+.percentage {
+    position: relative;
+}
+
+.percentage:after {
+    content: '%';
+    display: block;
+    position: absolute;
+    top: -32px;
+    left: 50px;
+    z-index: 2;
+}
+
