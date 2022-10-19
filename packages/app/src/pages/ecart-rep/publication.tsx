@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { strRadioToBool } from "@common/utils/form";
+import { radioBoolToString, radioStringToBool, zodRadioInputSchema } from "@common/utils/form";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   Alert,
@@ -32,7 +32,7 @@ const title = "Publication";
 
 const formSchema = z
   .object({
-    hasWebsite: z.union([z.literal("oui"), z.literal("non")]),
+    hasWebsite: zodRadioInputSchema,
     publishingContent: z.string().trim().optional(),
     publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
       message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
@@ -77,7 +77,7 @@ const Publication: NextPageWithLayout = () => {
   const resetForm = useCallback(() => {
     if (formData) {
       reset({
-        hasWebsite: formData?.hasWebsite ? "oui" : "non",
+        hasWebsite: radioBoolToString(formData?.hasWebsite),
         publishingContent: formData?.publishingContent,
         publishingDate: formData?.publishingDate === undefined ? undefined : formData?.publishingDate,
         publishingWebsiteUrl: formData?.publishingWebsiteUrl,
@@ -91,7 +91,7 @@ const Publication: NextPageWithLayout = () => {
 
   const onSubmit = async ({ hasWebsite, publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
     saveFormData({
-      hasWebsite: strRadioToBool(hasWebsite),
+      hasWebsite: radioStringToBool(hasWebsite),
       publishingContent,
       publishingDate,
       publishingWebsiteUrl,
