@@ -4,11 +4,12 @@ import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColor
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-import type { UseStatsParams } from "../hooks";
-import { filterDepartements, useConfig, useStats } from "../hooks";
 import { ButtonAction } from "./ds/ButtonAction";
 import { capitalize } from "@common/utils/string";
 import { buildUrlParamsString } from "@common/utils/url";
+import type { UseStatsParams } from "@services/apiClient";
+import { useStats, filterDepartements } from "@services/apiClient";
+import { useConfig } from "@services/apiClient";
 
 export const FilterSelect = ({ name, onChange, value, children, ...rest }: SelectProps) => {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100");
