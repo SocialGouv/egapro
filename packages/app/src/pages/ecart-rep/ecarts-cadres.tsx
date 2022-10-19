@@ -2,11 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { strRadioToBool } from "@common/utils/form";
+import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   Alert,
@@ -23,8 +24,6 @@ import {
   FormButton,
   FormGroup,
   FormGroupLabel,
-  FormGroupMessage,
-  FormInput,
   FormLayout,
   FormLayoutButtonGroup,
   FormRadioGroup,
@@ -82,22 +81,24 @@ const formSchema = z
     },
   );
 
-type FormType = z.infer<typeof formSchema>;
+export type FormType = z.infer<typeof formSchema>;
 
 const EcartsCadres: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
+  const methods = useForm<FormType>({
+    resolver: zodResolver(formSchema),
+  });
+
   const {
     clearErrors,
-    formState: { errors, isDirty, isValid, isSubmitted },
+    formState: { isDirty, isValid, isSubmitted },
     handleSubmit,
     register,
     reset,
     setValue,
     watch,
-  } = useForm<FormType>({
-    resolver: zodResolver(formSchema),
-  });
+  } = methods;
 
   const isEcartsCadresCalculable = watch("isEcartsCadresCalculable");
 
@@ -115,26 +116,6 @@ const EcartsCadres: NextPageWithLayout = () => {
   useEffect(() => {
     resetForm();
   }, [resetForm]);
-
-  // TODO: unit tests
-  const syncPercentages = (event: React.FormEvent<HTMLInputElement>) => {
-    const inputChanged = event.currentTarget;
-    const inputValue = inputChanged.valueAsNumber;
-
-    if (!isNaN(inputValue)) {
-      if (inputChanged.id === "ecartsCadresFemmes") {
-        setValue("ecartsCadresFemmes", inputValue, { shouldValidate: true });
-        if (inputValue >= 0 && inputValue <= 100) {
-          setValue("ecartsCadresHommes", 100 - inputValue, { shouldValidate: true });
-        }
-      } else if (inputChanged.id === "ecartsCadresHommes") {
-        setValue("ecartsCadresHommes", inputValue, { shouldValidate: true });
-        if (inputValue >= 0 && inputValue <= 100) {
-          setValue("ecartsCadresFemmes", 100 - inputValue, { shouldValidate: true });
-        }
-      }
-    }
-  };
 
   const onSubmit = ({
     isEcartsCadresCalculable,
@@ -175,98 +156,56 @@ const EcartsCadres: NextPageWithLayout = () => {
           ou un seul cadre dirigeant.
         </p>
       </Alert>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <FormLayout>
-          <FormRadioGroup inline>
-            <FormRadioGroupLegend id="isEcartsCadresCalculable">
-              L’écart de représentation est-il calculable&nbsp;?
-            </FormRadioGroupLegend>
-            <FormRadioGroupContent>
-              <FormRadioGroupInput
-                {...register("isEcartsCadresCalculable")}
-                id="oui"
-                name="isEcartsCadresCalculable"
-                value="oui"
-              >
-                Oui
-              </FormRadioGroupInput>
-              <FormRadioGroupInput
-                {...register("isEcartsCadresCalculable")}
-                id="non"
-                name="isEcartsCadresCalculable"
-                value="non"
-              >
-                Non
-              </FormRadioGroupInput>
-            </FormRadioGroupContent>
-          </FormRadioGroup>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <FormLayout>
+            <FormRadioGroup inline>
+              <FormRadioGroupLegend id="isEcartsCadresCalculable">
+                L’écart de représentation est-il calculable&nbsp;?
+              </FormRadioGroupLegend>
+              <FormRadioGroupContent>
+                <FormRadioGroupInput
+                  {...register("isEcartsCadresCalculable")}
+                  id="oui"
+                  name="isEcartsCadresCalculable"
+                  value="oui"
+                >
+                  Oui
+                </FormRadioGroupInput>
+                <FormRadioGroupInput
+                  {...register("isEcartsCadresCalculable")}
+                  id="non"
+                  name="isEcartsCadresCalculable"
+                  value="non"
+                >
+                  Non
+                </FormRadioGroupInput>
+              </FormRadioGroupContent>
+            </FormRadioGroup>
 
-          {isEcartsCadresCalculable === "oui" ? (
-            <>
+            {isEcartsCadresCalculable === "oui" ? (
+              <PercentagesPairInputs
+                input1={{ label: "ecartsCadresFemmes", title: "Pourcentage de femmes parmi les cadres dirigeants" }}
+                input2={{ label: "ecartsCadresHommes", title: "Pourcentage d'hommes parmi les cadres dirigeants" }}
+              />
+            ) : (
               <FormGroup>
-                <FormGroupLabel htmlFor="ecartsCadresFemmes">
-                  Pourcentage de femmes parmi les cadres dirigeants
-                </FormGroupLabel>
-                <FormInput
-                  {...register("ecartsCadresFemmes", {
-                    onChange: event => {
-                      syncPercentages(event);
-                    },
-                    valueAsNumber: true,
-                  })}
-                  id="ecartsCadresFemmes"
-                  type="number"
-                  min="0"
-                  max="100"
-                  aria-describedby="ecartsCadresFemmes-message-error"
-                />
-                {errors.ecartsCadresFemmes && (
-                  <FormGroupMessage id="ecartsCadresFemmes-message-error">
-                    {errors.ecartsCadresFemmes.message}
-                  </FormGroupMessage>
-                )}
+                <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
+                <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
+                  <option value={motifEcartsCadresNonCalculableValues[0]}>Il n'y a aucun cadre dirigeant</option>
+                  <option value={motifEcartsCadresNonCalculableValues[1]}>Il n'y a qu'un seul cadre dirigeant</option>
+                </FormSelect>
               </FormGroup>
-              <FormGroup>
-                <FormGroupLabel htmlFor="ecartsCadresHommes">
-                  Pourcentage d'hommes parmi les cadres dirigeants
-                </FormGroupLabel>
-                <FormInput
-                  {...register("ecartsCadresHommes", {
-                    onChange: event => {
-                      syncPercentages(event);
-                    },
-                    valueAsNumber: true,
-                  })}
-                  id="ecartsCadresHommes"
-                  type="number"
-                  min="0"
-                  max="100"
-                  aria-describedby="ecartsCadresHommes-message-error"
-                />
-                {errors.ecartsCadresHommes && (
-                  <FormGroupMessage id="ecartsCadresHommes-message-error">
-                    {errors.ecartsCadresHommes.message}
-                  </FormGroupMessage>
-                )}
-              </FormGroup>
-            </>
-          ) : (
-            <FormGroup>
-              <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
-              <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
-                <option value={motifEcartsCadresNonCalculableValues[0]}>Il n'y a aucun cadre dirigeant</option>
-                <option value={motifEcartsCadresNonCalculableValues[1]}>Il n'y a qu'un seul cadre dirigeant</option>
-              </FormSelect>
-            </FormGroup>
-          )}
-          <FormLayoutButtonGroup>
-            <NextLink href="/ecart-rep/periode-reference" passHref>
-              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-            </NextLink>
-            <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
-          </FormLayoutButtonGroup>
-        </FormLayout>
-      </form>
+            )}
+            <FormLayoutButtonGroup>
+              <NextLink href="/ecart-rep/periode-reference" passHref>
+                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+              </NextLink>
+              <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
+            </FormLayoutButtonGroup>
+          </FormLayout>
+        </form>
+      </FormProvider>
       <Grid mt="4w">
         <GridCol>
           <Card>
