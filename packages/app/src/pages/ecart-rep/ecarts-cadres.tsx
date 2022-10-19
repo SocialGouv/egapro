@@ -137,26 +137,6 @@ const EcartsCadres: NextPageWithLayout = () => {
     }
   };
 
-  const clearMotif = () => {
-    setValue("motifEcartsCadresNonCalculable", undefined);
-  };
-
-  const clearEcartsCadres = () => {
-    setValue("ecartsCadresFemmes", undefined);
-    setValue("ecartsCadresHommes", undefined, { shouldValidate: true });
-    setValue("motifEcartsCadresNonCalculable", motifEcartsCadresNonCalculableValues[0], { shouldValidate: true });
-  };
-
-  const onChangeRadioInput = (event: React.FormEvent<HTMLInputElement>) => {
-    const inputRadioValue = event.currentTarget.value;
-    if (inputRadioValue === "oui") {
-      clearMotif();
-    } else {
-      clearEcartsCadres();
-    }
-    clearErrors();
-  };
-
   const onSubmit = ({
     isEcartsCadresCalculable,
     motifEcartsCadresNonCalculable,
@@ -173,6 +153,17 @@ const EcartsCadres: NextPageWithLayout = () => {
     });
     router.push("/ecart-rep/ecarts-membres");
   };
+
+  useEffect(() => {
+    if (isEcartsCadresCalculable === "oui") {
+      setValue("motifEcartsCadresNonCalculable", undefined, { shouldValidate: true });
+    } else {
+      setValue("ecartsCadresFemmes", undefined, { shouldValidate: true });
+      setValue("ecartsCadresHommes", undefined, { shouldValidate: true });
+      setValue("motifEcartsCadresNonCalculable", motifEcartsCadresNonCalculableValues[0], { shouldValidate: true });
+    }
+    clearErrors();
+  }, [clearErrors, isEcartsCadresCalculable, setValue]);
 
   return (
     <>
@@ -193,9 +184,7 @@ const EcartsCadres: NextPageWithLayout = () => {
             </FormRadioGroupLegend>
             <FormRadioGroupContent>
               <FormRadioGroupInput
-                {...register("isEcartsCadresCalculable", {
-                  onChange: event => onChangeRadioInput(event),
-                })}
+                {...register("isEcartsCadresCalculable")}
                 id="oui"
                 name="isEcartsCadresCalculable"
                 value="oui"
@@ -203,9 +192,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                 Oui
               </FormRadioGroupInput>
               <FormRadioGroupInput
-                {...register("isEcartsCadresCalculable", {
-                  onChange: event => onChangeRadioInput(event),
-                })}
+                {...register("isEcartsCadresCalculable")}
                 id="non"
                 name="isEcartsCadresCalculable"
                 value="non"
