@@ -2,7 +2,6 @@ import { useFormContext } from "react-hook-form";
 
 import { FormGroup, FormGroupLabel, FormGroupMessage } from "../design-system/base/FormGroup";
 import { FormInput } from "../design-system/base/FormInput";
-// import styles from "./PercentagesPairInputs.module.css";
 
 type Input = {
   label: string;
@@ -16,6 +15,7 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
   const {
     setValue,
     register,
+    watch,
     formState: { errors },
   } = useFormContext<Record<string, number>>();
 
@@ -39,6 +39,9 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
     }
   };
 
+  const firstInputValue = watch(firstInput.label);
+  const secondInputValue = watch(secondInput.label);
+
   return (
     <>
       <FormGroup>
@@ -53,8 +56,8 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
           id={firstLabel}
           type="percentage"
           aria-describedby={`${firstLabel}-message-error`}
+          value={firstInputValue}
         />
-        {/* <div className={styles.percentage} /> */}
         {errors[firstLabel] && (
           <FormGroupMessage id={`${firstLabel}-message-error`}>{errors[firstLabel]?.message}</FormGroupMessage>
         )}
@@ -71,8 +74,8 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
           id={secondLabel}
           type="percentage"
           aria-describedby={`${secondLabel}-message-error`}
+          value={secondInputValue}
         />
-        {/* <div className={styles.percentage} /> */}
         {errors[secondLabel] && (
           <FormGroupMessage id={`${secondLabel}-message-error`}>{errors[secondLabel]?.message}</FormGroupMessage>
         )}

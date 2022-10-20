@@ -1,13 +1,11 @@
 import clsx from "clsx";
-import type { HTMLInputTypeAttribute, RefObject } from "react";
-import { forwardRef, useState } from "react";
+import type { HTMLInputTypeAttribute } from "react";
+import { forwardRef } from "react";
 
 import type { IconStyles } from "../utils/icon-styles";
 import styles from "./FormInput.module.css";
 
 type FormInputCustomTypes = HTMLInputTypeAttribute | "percentage";
-
-type InputValue = number | string | readonly string[] | undefined;
 
 export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   icon?: IconStyles;
@@ -15,21 +13,14 @@ export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   isDisabled?: boolean;
   isError?: boolean;
   isValid?: boolean;
-  ref?: RefObject<HTMLInputElement>;
   type?: FormInputCustomTypes;
 };
 
+const PercentageCharacter = () => <div className={styles.percentage} />;
+
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
-  ({ type = "text", isError, isValid, isDisabled, icon, id, onChange, ...rest }, ref) => {
-    const [inputValue, setInputValue] = useState<InputValue>();
-
+  ({ type = "text", isError, isValid, isDisabled, icon, id, ...rest }, ref) => {
     if (type === "percentage") {
-      const onChangeWrapper = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setInputValue(value);
-        return onChange && onChange(event);
-      };
-
       return (
         <div className="fr-input-wrap">
           <input
@@ -43,10 +34,9 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             aria-describedby={`${id}-msg`}
             aria-invalid={isError || "false"}
             ref={ref}
-            onChange={onChange ? onChangeWrapper : undefined}
             {...rest}
           />
-          {inputValue && <div className={styles.percentage} />}
+          {!isNaN(rest?.value as number) ? <PercentageCharacter /> : null}
         </div>
       );
     }
@@ -60,7 +50,6 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           aria-describedby={`${id}-msg`}
           aria-invalid={isError || "false"}
           ref={ref}
-          onChange={onChange}
           {...rest}
         />
       </div>

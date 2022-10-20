@@ -83,6 +83,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const methods = useForm<FormType>({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
   });
 
@@ -100,21 +101,12 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   const resetForm = useCallback(() => {
     if (formData) {
-      const potentialValuesFromLocalstorage = {
-        isEcartsCadresCalculable:
-          typeof formData?.isEcartsCadresCalculable !== "undefined" &&
-          radioBoolToString(formData?.isEcartsCadresCalculable),
-        motifEcartsCadresNonCalculable:
-          typeof formData?.motifEcartsCadresNonCalculable !== "undefined" && formData?.motifEcartsCadresNonCalculable,
+      reset({
+        isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
+        motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
         ecartsCadresFemmes: formData?.ecartsCadresFemmes,
         ecartsCadresHommes: formData?.ecartsCadresHommes,
-      };
-      const valuesToReset = Object.entries(potentialValuesFromLocalstorage).reduce((acc: any, [key, val]) => {
-        if (val) acc[key] = val;
-        return acc;
-      }, {});
-
-      reset(valuesToReset);
+      });
     }
   }, [reset, formData]);
 
@@ -141,18 +133,17 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   useEffect(() => {
     if (isEcartsCadresCalculable === "oui") {
-      setValue("motifEcartsCadresNonCalculable", undefined, { shouldTouch: false });
+      setValue("motifEcartsCadresNonCalculable", undefined, { shouldValidate: true });
     } else {
-      setValue("ecartsCadresFemmes", undefined, { shouldTouch: false });
-      setValue("ecartsCadresHommes", undefined, { shouldTouch: false });
-      setValue("motifEcartsCadresNonCalculable", undefined, { shouldTouch: false });
+      setValue("ecartsCadresFemmes", undefined, { shouldValidate: true });
+      setValue("ecartsCadresHommes", undefined, { shouldValidate: true });
     }
     clearErrors();
   }, [clearErrors, isEcartsCadresCalculable, setValue]);
 
   return (
     <>
-      {isEcartsCadresCalculable === null && (
+      {isEcartsCadresCalculable === undefined && (
         <Alert mb="4w">
           <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
           <p>
@@ -200,13 +191,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                 <FormSelect
                   id="motifEcartsCadresNonCalculable"
                   placeholder="Sélectionnez une option"
-                  {...register("motifEcartsCadresNonCalculable", {
-                    onChange: event => {
-                      const content = event.currentTarget.value;
-                      const valueToSet = content === "" ? undefined : content;
-                      setValue("motifEcartsCadresNonCalculable", valueToSet, { shouldValidate: true });
-                    },
-                  })}
+                  {...register("motifEcartsCadresNonCalculable")}
                   aria-describedby="motifEcartsCadresNonCalculable-message-error"
                 >
                   <option value={motifNonCalculabiliteCadresOptions[0].value}>
@@ -216,6 +201,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                     {motifNonCalculabiliteCadresOptions[1].label}
                   </option>
                 </FormSelect>
+
                 {errors.motifEcartsCadresNonCalculable && (
                   <FormGroupMessage id="motifEcartsCadresNonCalculable-message-error">
                     {errors.motifEcartsCadresNonCalculable.message}
