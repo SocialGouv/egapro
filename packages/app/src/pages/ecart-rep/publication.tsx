@@ -28,8 +28,6 @@ import {
 } from "@design-system";
 import { useFormManager } from "@services/apiClient";
 
-const title = "Publication";
-
 const formSchema = z
   .object({
     hasWebsite: zodRadioInputSchema,
@@ -101,7 +99,6 @@ const Publication: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
       <Alert mb="4w">
         <AlertTitle as="h2">Obligation de transparence</AlertTitle>
         <p>

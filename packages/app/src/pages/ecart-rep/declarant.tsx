@@ -19,8 +19,6 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-const title = "Informations déclarant";
-
 const formSchema = z.object({
   nom: z.string().min(1, { message: "Le nom est requis" }),
   prenom: z.string().min(1, { message: "Le prénom est requis" }),
@@ -73,8 +71,9 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-      <p>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone</p>
+      <p>
+        <b>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone.</b>
+      </p>
 
       <ClientAuthenticatedOnly>
         <FormLayout>

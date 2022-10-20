@@ -61,15 +61,19 @@ export const RepartitionEquilibreeLayout = ({
   return (
     <App>
       <Container py="6w">
-        {currentStep !== null && (
-          <Stepper mb="6w">
-            <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>
-              {STEPS_TITLE[currentStep]}
-            </StepperTitle>
-            {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
-          </Stepper>
-        )}
-        {children}
+        <Grid justifyCenter>
+          <GridCol md={10} lg={8}>
+            {currentStep !== null && (
+              <Stepper mb="6w">
+                <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>
+                  {STEPS_TITLE[currentStep]}
+                </StepperTitle>
+                {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
+              </Stepper>
+            )}
+            {children}
+          </GridCol>
+        </Grid>
       </Container>
       {haveBottomSection && (
         <Box py="9w" className={styles.gradient}>
