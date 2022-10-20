@@ -29,8 +29,11 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
+import { useUser } from "@services/apiClient";
 
 const EcartsMembres: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
+
   return (
     <>
       <Alert mb="4w">
