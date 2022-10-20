@@ -21,6 +21,7 @@ export * from "./base/Logo";
 export * from "./base/MainNav";
 export * from "./base/SideMenu";
 export * from "./base/Stepper";
+export * from "./base/SkipLinks";
 export * from "./base/RecapSection";
 export * from "./base/FormSelect";
 export * from "./layout/App";
