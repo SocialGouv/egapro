@@ -9,7 +9,7 @@ import { FooterBottomItem } from "../../design-system/base/FooterBottomItem";
 import { FooterBottomLink } from "../../design-system/base/FooterBottomLink";
 import { FooterContentLink } from "../../design-system/base/FooterContentLink";
 import styles from "./App.module.css";
-import { ButtonAsLink, Logo } from "@design-system";
+import { ButtonAsLink, Logo, SkipLinks, SkipLinksItem } from "@design-system";
 import { FormButton } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
@@ -30,6 +30,11 @@ export const App = ({ children }: PropsWithChildren) => {
 
   return (
     <div className={styles.app}>
+      <SkipLinks>
+        <SkipLinksItem href="#content">Contenu</SkipLinksItem>
+        <SkipLinksItem href="#header">Menu</SkipLinksItem>
+        <SkipLinksItem href="#footer">Pied de page</SkipLinksItem>
+      </SkipLinks>
       <header role="banner" className="fr-header" id="header">
         <div className="fr-header__body">
           <div className="fr-container">
