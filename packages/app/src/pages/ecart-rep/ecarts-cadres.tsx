@@ -39,7 +39,7 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
-import { useFormManager } from "@services/apiClient";
+import { useFormManager, useUser } from "@services/apiClient";
 
 // Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value;
 export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"] as const;
@@ -80,6 +80,7 @@ const formSchema = z
 export type FormType = z.infer<typeof formSchema>;
 
 const EcartsCadres: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const methods = useForm<FormType>({

@@ -26,7 +26,7 @@ import {
   FormRadioGroupLegend,
   FormTextarea,
 } from "@design-system";
-import { useFormManager } from "@services/apiClient";
+import { useFormManager, useUser } from "@services/apiClient";
 
 const formSchema = z
   .object({
@@ -58,6 +58,8 @@ type FormType = z.infer<typeof formSchema>;
 
 const Publication: NextPageWithLayout = () => {
   const router = useRouter();
+  useUser({ redirectTo: "/ecart-rep/email" });
+
   const { formData, saveFormData } = useFormManager();
   const {
     formState: { errors, isDirty, isValid, isSubmitted },
