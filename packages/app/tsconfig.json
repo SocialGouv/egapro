@@ -16,7 +16,10 @@
       ],
       "@design-system": [
         "packages/app/src/design-system/index"
-      ]
+      ],
+      "@services/*": [
+        "packages/app/src/services/*"
+      ],
     }
   },
   "include": [

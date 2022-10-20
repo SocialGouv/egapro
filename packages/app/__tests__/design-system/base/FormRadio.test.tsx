@@ -5,7 +5,7 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
   FormRadioGroupValidationMessage,
-} from "@/design-system/base/FormRadio";
+} from "@design-system";
 
 test("should match snapshot", () => {
   const view = render(

@@ -1,80 +1,76 @@
-import NextLink from "next/link";
-import { FooterBody } from "./FooterBody";
-import { FooterBodyItem } from "./FooterBodyItem";
-import { FooterBottom } from "./FooterBottom";
-import { FooterBottomItem } from "./FooterBottomItem";
-import { FooterBottomLink } from "./FooterBottomLink";
-import { FooterContentLink } from "./FooterContentLink";
-import { Logo } from "./Logo";
+import type { PropsWithChildren } from "react";
+import { Container } from "../layout/Container";
 
-export const Footer = () => {
+export const Footer = ({ children }: PropsWithChildren) => (
+  <footer className="fr-footer" role="contentinfo" id="footer">
+    <Container>{children}</Container>
+  </footer>
+);
+
+export type FooterBodyProps = {
+  description: string;
+  items?: React.ReactNode;
+  logo: React.ReactNode;
+};
+
+export const FooterBody = ({ children }: PropsWithChildren) => <div className="fr-footer__body">{children}</div>;
+
+export const FooterBodyBrand = ({ children }: PropsWithChildren) => {
+  return <div className="fr-footer__brand fr-enlarge-link">{children}</div>;
+};
+
+export const FooterBodyContent = ({ children }: PropsWithChildren) => {
+  return <div className="fr-footer__content">{children}</div>;
+};
+
+export const FooterBodyContentDescription = ({ children }: PropsWithChildren) => {
+  return <p className="fr-footer__content-desc">{children}</p>;
+};
+
+export const FooterBodyContentItems = ({ children }: PropsWithChildren) => {
+  return <ul className="fr-footer__content-list">{children}</ul>;
+};
+
+export const FooterBodyItem = ({ children }: PropsWithChildren) => {
+  return <li className="fr-footer__content-item">{children}</li>;
+};
+
+export const FooterBottom = ({ children }: PropsWithChildren) => {
   return (
-    <footer className="fr-footer" role="contentinfo" id="footer">
-      <div className="fr-container">
-        <FooterBody
-          logo={
-            <NextLink href="/">
-              <a>
-                <Logo />
-              </a>
-            </NextLink>
-          }
-          description="Représentation Équilibrée a été développé par les équipes de la fabrique numérique des ministères sociaux."
-          items={
-            <>
-              <FooterBodyItem>
-                <FooterContentLink
-                  href=" https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Télécharger la liste des référents au format xlsx"
-                >
-                  Télécharger la liste des référents
-                </FooterContentLink>
-              </FooterBodyItem>
-              <FooterBodyItem>
-                <FooterContentLink
-                  href=" https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/?id_mot=2004#liste-faq"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Consulter l'aide
-                </FooterContentLink>
-              </FooterBodyItem>
-              <FooterBodyItem>
-                <FooterContentLink
-                  href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Donner votre avis
-                </FooterContentLink>
-              </FooterBodyItem>
-              <FooterBodyItem>
-                <FooterContentLink
-                  href="https://github.com/SocialGouv/egapro/tree/v2.11.4"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Contribuer sur Github
-                </FooterContentLink>
-              </FooterBodyItem>
-            </>
-          }
-        />
-        <FooterBottom>
-          <>
-            <FooterBottomItem>
-              <NextLink href="/cgu" passHref>
-                <FooterBottomLink>CGU</FooterBottomLink>
-              </NextLink>
-            </FooterBottomItem>
-            <FooterBottomItem>
-              <FooterBottomLink href="#">Mentions légales</FooterBottomLink>
-            </FooterBottomItem>
-          </>
-        </FooterBottom>
+    <div className="fr-footer__bottom">
+      <ul className="fr-footer__bottom-list">{children}</ul>
+      <div className="fr-footer__bottom-copy">
+        <p>
+          Sauf mention contraire, tous les contenus de ce site sont sous{" "}
+          <a href="https://github.com/SocialGouv/egapro/blob/master/LICENSE" target="_blank" rel="noreferrer">
+            licence Apache 2.0
+          </a>
+        </p>
       </div>
-    </footer>
+    </div>
+  );
+};
+
+export const FooterBottomItem = ({ children }: PropsWithChildren) => {
+  return <li className="fr-footer__bottom-item">{children}</li>;
+};
+
+export type FooterBottomLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
+export const FooterBottomLink = ({ children, ...rest }: FooterBottomLinkProps) => {
+  return (
+    <a className="fr-footer__bottom-link" {...rest}>
+      {children}
+    </a>
+  );
+};
+
+export type FooterContentLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
+export const FooterContentLink = ({ children, ...rest }: FooterContentLinkProps) => {
+  return (
+    <a className="fr-footer__content-link" {...rest}>
+      {children}
+    </a>
   );
 };

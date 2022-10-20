@@ -1,5 +1,5 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Box } from "@/design-system";
+import { Box } from "@design-system";
 
 export default {
   title: "Base/Box",

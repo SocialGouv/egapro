@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { ImgEcartRep } from "@/design-system";
+import { ImgEcartRep } from "@design-system";
 
 export default {
   title: "Img/ImgEcartRep",

@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Box, FormCheckbox } from "@/design-system";
+import { Box, FormCheckbox } from "@design-system";
 
 export default {
   title: "Base/Form/FormCheckbox",

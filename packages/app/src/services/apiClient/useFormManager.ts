@@ -2,8 +2,10 @@ import create from "zustand";
 import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
-
-export const motifEcartsCadresNonCalculableValues = ["aucun cadre dirigeant", "un seul cadre dirigeant"] as const;
+import type {
+  motifNonCalculabiliteCadresOptions,
+  motifNonCalculabiliteMembresOptions,
+} from "@common/models/repartition-equilibree";
 
 type FormState = {
   declarant: {
@@ -15,11 +17,15 @@ type FormState = {
   };
   ecartsCadresFemmes?: number;
   ecartsCadresHommes?: number;
+  ecartsMembresFemmes?: number;
+  ecartsMembresHommes?: number;
   endOfPeriod?: string;
   entreprise?: EntrepriseType;
   hasWebsite: boolean;
   isEcartsCadresCalculable?: boolean;
-  motifEcartsCadresNonCalculable?: typeof motifEcartsCadresNonCalculableValues[number];
+  isEcartsMembresCalculable?: boolean;
+  motifEcartsCadresNonCalculable?: typeof motifNonCalculabiliteCadresOptions[number]["value"];
+  motifEcartsMembresNonCalculable?: typeof motifNonCalculabiliteMembresOptions[number]["value"];
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;
@@ -36,6 +42,8 @@ const formDataDefault: FormState = {
   },
   ecartsCadresFemmes: undefined,
   ecartsCadresHommes: undefined,
+  ecartsMembresFemmes: undefined,
+  ecartsMembresHommes: undefined,
   endOfPeriod: "",
   entreprise: {
     adresse: "",
@@ -49,8 +57,10 @@ const formDataDefault: FormState = {
     siren: "",
   },
   hasWebsite: true,
-  isEcartsCadresCalculable: true,
+  isEcartsCadresCalculable: undefined,
+  isEcartsMembresCalculable: undefined,
   motifEcartsCadresNonCalculable: undefined,
+  motifEcartsMembresNonCalculable: undefined,
   publishingContent: undefined,
   publishingDate: undefined,
   publishingWebsiteUrl: undefined,

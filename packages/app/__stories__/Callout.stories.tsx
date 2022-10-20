@@ -1,6 +1,6 @@
 import { action } from "@storybook/addon-actions";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Callout, CalloutButton, CalloutContent, CalloutTitle } from "@/design-system";
+import { Callout, CalloutButton, CalloutContent, CalloutTitle } from "@design-system";
 
 export default {
   title: "Base/Callout",

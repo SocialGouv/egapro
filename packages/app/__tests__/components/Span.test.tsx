@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { Span } from "@/components/Span";
+import { Span } from "@components/Span";
 
 test("should display Span component", () => {
   render(<Span name="world" />);

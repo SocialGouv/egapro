@@ -9,7 +9,7 @@ import {
   SideMenuLink,
   SideMenuList,
   SideMenuTitle,
-} from "@/design-system";
+} from "@design-system";
 
 export default {
   title: "Layout/ContentWithAside",

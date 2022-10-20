@@ -15,6 +15,7 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
   const {
     setValue,
     register,
+    watch,
     formState: { errors },
   } = useFormContext<Record<string, number>>();
 
@@ -27,16 +28,19 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
       if (inputChanged.id === firstLabel) {
         setValue(firstLabel, inputValue, { shouldValidate: true });
         if (inputValue >= 0 && inputValue <= 100) {
-          setValue(secondLabel, 100 - inputValue, { shouldValidate: true });
+          setValue(secondLabel, Number(Number(100 - inputValue).toFixed(1)), { shouldValidate: true });
         }
       } else if (inputChanged.id === secondLabel) {
         setValue(secondLabel, inputValue, { shouldValidate: true });
         if (inputValue >= 0 && inputValue <= 100) {
-          setValue(firstLabel, 100 - inputValue, { shouldValidate: true });
+          setValue(firstLabel, Number(Number(100 - inputValue).toFixed(1)), { shouldValidate: true });
         }
       }
     }
   };
+
+  const firstInputValue = watch(firstInput.label);
+  const secondInputValue = watch(secondInput.label);
 
   return (
     <>
@@ -50,11 +54,9 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
             valueAsNumber: true,
           })}
           id={firstLabel}
-          type="number"
-          min="0"
-          max="100"
-          step="0.1"
+          type="percentage"
           aria-describedby={`${firstLabel}-message-error`}
+          value={firstInputValue}
         />
         {errors[firstLabel] && (
           <FormGroupMessage id={`${firstLabel}-message-error`}>{errors[firstLabel]?.message}</FormGroupMessage>
@@ -70,11 +72,9 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
             valueAsNumber: true,
           })}
           id={secondLabel}
-          type="number"
-          min="0"
-          max="100"
-          step="0.1"
+          type="percentage"
           aria-describedby={`${secondLabel}-message-error`}
+          value={secondInputValue}
         />
         {errors[secondLabel] && (
           <FormGroupMessage id={`${secondLabel}-message-error`}>{errors[secondLabel]?.message}</FormGroupMessage>

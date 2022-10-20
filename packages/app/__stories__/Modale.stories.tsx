@@ -1,7 +1,7 @@
 import { action } from "@storybook/addon-actions";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Modale, ModaleButton, ModaleContent, ModaleTitle } from "@/design-system";
+import { Modale, ModaleButton, ModaleContent, ModaleTitle } from "@design-system";
 
 export default {
   title: "Base/Modale",

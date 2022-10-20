@@ -47,9 +47,27 @@ type PublicationRepartitionEquilibree = {
   url?: string | undefined;
 };
 
+export const motifNonCalculabiliteCadresOptions = [
+  {
+    label: "Aucun cadre dirigeant",
+    value: "aucun_cadre_dirigeant",
+  },
+  {
+    label: "Un seul cadre dirigeant",
+    value: "un_seul_cadre_dirigeant",
+  },
+] as const;
+
+export const motifNonCalculabiliteMembresOptions = [
+  {
+    label: "Aucune instance dirigeante",
+    value: "aucune_instance_dirigeante",
+  },
+] as const;
+
 type IndicateursRepartitionEquilibree = {
-  motif_non_calculabilité_cadres: "aucun_cadre_dirigeant" | "un_seul_cadre_dirigeant" | undefined;
-  motif_non_calculabilité_membres: "aucune_instance_dirigeante" | undefined;
+  motif_non_calculabilité_cadres: typeof motifNonCalculabiliteCadresOptions[number]["value"] | undefined;
+  motif_non_calculabilité_membres: typeof motifNonCalculabiliteMembresOptions[number]["value"] | undefined;
   pourcentage_femmes_cadres: number;
   pourcentage_femmes_membres: number;
   pourcentage_hommes_cadres: number;

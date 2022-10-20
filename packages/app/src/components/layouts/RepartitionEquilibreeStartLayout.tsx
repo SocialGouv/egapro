@@ -8,7 +8,8 @@ import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
 
-import { App, Container, Grid, GridCol, SideMenuLink } from "@design-system";
+import { App } from "./App";
+import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 
 // Layout for unauthenticated users.
 

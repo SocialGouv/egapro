@@ -6,7 +6,9 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
+import { motifNonCalculabiliteCadresOptions } from "@common/models/repartition-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
+
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -24,6 +26,7 @@ import {
   FormButton,
   FormGroup,
   FormGroupLabel,
+  FormGroupMessage,
   FormLayout,
   FormLayoutButtonGroup,
   FormRadioGroup,
@@ -36,9 +39,10 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
-import { motifEcartsCadresNonCalculableValues, useFormManager } from "@services/apiClient";
+import { useFormManager, useUser } from "@services/apiClient";
 
-const title = "Écarts de représentation";
+// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value;
+export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"] as const;
 
 const formSchema = z
   .object({
@@ -66,7 +70,7 @@ const formSchema = z
       if (isEcartsCadresCalculable === "non" && typeof motifEcartsCadresNonCalculable === "undefined") {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Le motif de non calculabilité et obligatoire",
+          message: "Le motif de non calculabilité est obligatoire",
           path: ["motifEcartsCadresNonCalculable"],
         });
       }
@@ -76,15 +80,17 @@ const formSchema = z
 export type FormType = z.infer<typeof formSchema>;
 
 const EcartsCadres: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const methods = useForm<FormType>({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
   });
 
   const {
     clearErrors,
-    formState: { isDirty, isValid, isSubmitted },
+    formState: { isDirty, isValid, isSubmitted, errors },
     handleSubmit,
     register,
     reset,
@@ -132,20 +138,22 @@ const EcartsCadres: NextPageWithLayout = () => {
     } else {
       setValue("ecartsCadresFemmes", undefined, { shouldValidate: true });
       setValue("ecartsCadresHommes", undefined, { shouldValidate: true });
-      setValue("motifEcartsCadresNonCalculable", motifEcartsCadresNonCalculableValues[0], { shouldValidate: true });
     }
     clearErrors();
   }, [clearErrors, isEcartsCadresCalculable, setValue]);
 
   return (
     <>
-      <Alert mb="4w">
-        <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
-        <p>
-          Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y aucun
-          ou un seul cadre dirigeant.
-        </p>
-      </Alert>
+      {isEcartsCadresCalculable === undefined && (
+        <Alert mb="4w">
+          <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
+          <p>
+            Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y
+            aucun ou un seul cadre dirigeant.
+          </p>
+        </Alert>
+      )}
+
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
@@ -172,19 +180,34 @@ const EcartsCadres: NextPageWithLayout = () => {
                 </FormRadioGroupInput>
               </FormRadioGroupContent>
             </FormRadioGroup>
-
-            {isEcartsCadresCalculable === "oui" ? (
+            {isEcartsCadresCalculable === "oui" && (
               <PercentagesPairInputs
                 firstInput={{ label: "ecartsCadresFemmes", title: "Pourcentage de femmes parmi les cadres dirigeants" }}
                 secondInput={{ label: "ecartsCadresHommes", title: "Pourcentage d'hommes parmi les cadres dirigeants" }}
               />
-            ) : (
+            )}
+            {isEcartsCadresCalculable === "non" && (
               <FormGroup>
                 <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
-                <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
-                  <option value={motifEcartsCadresNonCalculableValues[0]}>Il n'y a aucun cadre dirigeant</option>
-                  <option value={motifEcartsCadresNonCalculableValues[1]}>Il n'y a qu'un seul cadre dirigeant</option>
+                <FormSelect
+                  id="motifEcartsCadresNonCalculable"
+                  placeholder="Sélectionnez une option"
+                  {...register("motifEcartsCadresNonCalculable")}
+                  aria-describedby="motifEcartsCadresNonCalculable-message-error"
+                >
+                  <option value={motifNonCalculabiliteCadresOptions[0].value}>
+                    {motifNonCalculabiliteCadresOptions[0].label}
+                  </option>
+                  <option value={motifNonCalculabiliteCadresOptions[1].value}>
+                    {motifNonCalculabiliteCadresOptions[1].label}
+                  </option>
                 </FormSelect>
+
+                {errors.motifEcartsCadresNonCalculable && (
+                  <FormGroupMessage id="motifEcartsCadresNonCalculable-message-error">
+                    {errors.motifEcartsCadresNonCalculable.message}
+                  </FormGroupMessage>
+                )}
               </FormGroup>
             )}
             <FormLayoutButtonGroup>
@@ -196,6 +219,7 @@ const EcartsCadres: NextPageWithLayout = () => {
           </FormLayout>
         </form>
       </FormProvider>
+
       <Grid mt="4w">
         <GridCol>
           <Card>

@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 
+import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
@@ -23,6 +24,11 @@ const InformationsEntreprise: NextPageWithLayout = () => {
   const departementLabel = codeDepartement ? (!DEPARTEMENTS ? codeDepartement : DEPARTEMENTS[codeDepartement]) : "";
   const nafLabel = codeNaf ? (!NAF ? codeNaf : codeNaf + " - " + NAF[codeNaf]) : "";
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    router.push("/ecart-rep/periode-reference");
+  };
+
   return (
     <>
       <p>
@@ -32,7 +38,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
         </b>
       </p>
 
-      <form noValidate>
+      <form noValidate onSubmit={e => handleSubmit(e)}>
         <FormLayout>
           <FormGroup>
             <FormGroupLabel htmlFor="siren">Siren</FormGroupLabel>
@@ -74,9 +80,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/declarant")}>
               Précédent
             </FormButton>
-            <FormButton type="button" onClick={() => router.push("/ecart-rep/periode-reference")}>
-              Suivant
-            </FormButton>
+            <FormButton type="submit">Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>

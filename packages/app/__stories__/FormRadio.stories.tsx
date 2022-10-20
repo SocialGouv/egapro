@@ -5,7 +5,7 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
   FormRadioGroupValidationMessage,
-} from "@/design-system";
+} from "@design-system";
 
 export default {
   title: "Base/Form/FormRadioGroup",
