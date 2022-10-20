@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import Link from "next/link";
+import NextLink from "next/link";
 import { useState } from "react";
 import type { PropsWithChildren } from "react";
 import { FooterBody } from "../../design-system/base/FooterBody";
@@ -8,11 +8,10 @@ import { FooterBottom } from "../../design-system/base/FooterBottom";
 import { FooterBottomItem } from "../../design-system/base/FooterBottomItem";
 import { FooterBottomLink } from "../../design-system/base/FooterBottomLink";
 import { FooterContentLink } from "../../design-system/base/FooterContentLink";
-import { useUser } from "../../hooks/useUser";
 import styles from "./App.module.css";
 import { ButtonAsLink, Logo } from "@design-system";
 import { FormButton } from "@design-system";
-import { useFormManager } from "@services/apiClient/form-manager";
+import { useFormManager, useUser } from "@services/apiClient";
 
 // TODO move to _app.tsx when migration is done
 // TODO explode FooterBody component here
@@ -55,11 +54,11 @@ export const App = ({ children }: PropsWithChildren) => {
                   </div>
                 </div>
                 <div className="fr-header__service">
-                  <Link href="/">
+                  <NextLink href="/">
                     <a title="Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion">
                       <p className="fr-header__service-title">Egapro</p>
                     </a>
-                  </Link>
+                  </NextLink>
                   <p className="fr-header__service-tagline">
                     Index de l’égalité professionnelle et répartition équilibrée femmes – hommes
                   </p>
@@ -98,9 +97,9 @@ export const App = ({ children }: PropsWithChildren) => {
             <div className="fr-header__menu-links">
               <ul className="fr-btns-group">
                 <li>
-                  <Link href="/login" passHref>
+                  <NextLink href="/login" passHref>
                     <ButtonAsLink iconLeft="fr-icon-user-fill">Se connecter</ButtonAsLink>
-                  </Link>
+                  </NextLink>
                 </li>
               </ul>
             </div>
@@ -114,11 +113,11 @@ export const App = ({ children }: PropsWithChildren) => {
         <div className="fr-container">
           <FooterBody
             logo={
-              <Link href="/">
+              <NextLink href="/">
                 <a>
                   <Logo />
                 </a>
-              </Link>
+              </NextLink>
             }
             description="Représentation Équilibrée a été développé par les équipes de la fabrique numérique des ministères sociaux."
             items={
@@ -166,7 +165,9 @@ export const App = ({ children }: PropsWithChildren) => {
           <FooterBottom>
             <>
               <FooterBottomItem>
-                <FooterBottomLink href="#">Plan du site</FooterBottomLink>
+                <NextLink href="/cgu" passHref>
+                  <FooterBottomLink>CGU</FooterBottomLink>
+                </NextLink>
               </FooterBottomItem>
               <FooterBottomItem>
                 <FooterBottomLink href="#">Mentions légales</FooterBottomLink>

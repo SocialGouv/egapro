@@ -14,12 +14,9 @@ import {
   RecapSectionTitle,
 } from "@design-system";
 
-const title = "Validation de vos écarts";
-
 const Validation: NextPageWithLayout = () => {
   return (
     <>
-      <h1>{title}</h1>
       <p>
         Vous êtes sur le point de valider la procédure vous permettant de transmettre aux services du ministre chargé du
         travail vos écarts éventuels de représentation femmes-hommes conformément aux dispositions de l’

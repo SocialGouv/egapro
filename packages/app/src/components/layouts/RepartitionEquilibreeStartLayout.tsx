@@ -9,7 +9,7 @@ import type { PropsWithChildren } from "react";
 import React from "react";
 
 import { App } from "./App";
-import { Container, SideMenuLink } from "@design-system";
+import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 
 // Layout for unauthenticated users.
 
@@ -30,7 +30,13 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
 export const RepartitionEquilibreeStartLayout = ({ children }: PropsWithChildren) => {
   return (
     <App>
-      <Container py="6w">{children}</Container>
+      <Container py="6w">
+        <Grid justifyCenter>
+          <GridCol md={10} lg={8}>
+            {children}
+          </GridCol>
+        </Grid>
+      </Container>
     </App>
   );
 };

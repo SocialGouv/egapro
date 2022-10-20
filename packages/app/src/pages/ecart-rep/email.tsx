@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { ClientOnly } from "@components/ClientOnly";
@@ -20,7 +19,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-import { requestEmailForToken } from "@services/apiClient/token";
+import { requestEmailForToken, useUser } from "@services/apiClient";
 
 const title = "Validation de l'email";
 

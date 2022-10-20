@@ -5,7 +5,6 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
@@ -21,10 +20,7 @@ import {
   FormLayoutButtonGroup,
   Alert,
 } from "@design-system";
-import { useFormManager } from "@services/apiClient/form-manager";
-import { checkSiren, fetchSiren, ownersForSiren } from "@services/apiClient/siren";
-
-const title = "Commencer ou accéder à une déclaration";
+import { checkSiren, fetchSiren, ownersForSiren, useFormManager, useUser } from "@services/apiClient";
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 
@@ -118,11 +114,11 @@ const CommencerPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-
       <p>
-        Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
-        correspondantes à la déclaration.
+        <b>
+          Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
+          correspondantes à la déclaration.
+        </b>
       </p>
 
       <div ref={animationParent} style={{ marginBottom: 20 }}>

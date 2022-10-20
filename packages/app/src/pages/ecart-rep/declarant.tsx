@@ -1,15 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   FormButton,
+  FormCheckbox,
   FormGroup,
   FormGroupLabel,
   FormInput,
@@ -17,9 +18,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-import { useFormManager } from "@services/apiClient/form-manager";
-
-const title = "Informations déclarant";
+import { useFormManager, useUser } from "@services/apiClient";
 
 const formSchema = z.object({
   nom: z.string().min(1, { message: "Le nom est requis" }),
@@ -73,8 +72,9 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-      <p>Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email</p>
+      <p>
+        <b>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone.</b>
+      </p>
 
       <ClientAuthenticatedOnly>
         <FormLayout>
@@ -119,17 +119,15 @@ const DeclarantPage: NextPageWithLayout = () => {
               <FormInput id="email" type="text" readOnly {...register("email")} />
             </FormGroup>
             <FormGroup>
-              <FormGroupLabel htmlFor="accord_rgpd">
+              <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
                 J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
                 vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
-                consulter nos Conditions Générales d'Utilisation.
-              </FormGroupLabel>
-              <input
-                type="checkbox"
-                id="accord_rgpd"
-                {...register("accord_rgpd")}
-                aria-describedby="accord_rgpd-message-error"
-              />
+                consulter nos{" "}
+                <NextLink href="/cgu">
+                  <a>Conditions Générales d'Utilisation</a>
+                </NextLink>
+                .
+              </FormCheckbox>
               {errors.accord_rgpd && (
                 <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
               )}
