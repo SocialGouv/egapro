@@ -21,8 +21,6 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-const title = "Période de référence";
-
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."),
@@ -88,8 +86,6 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-
       <ClientAuthenticatedOnly>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
