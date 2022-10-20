@@ -1,6 +1,6 @@
 import moize from "moize";
 
-import { fetcher } from "@common/utils/fetcher";
+import { fetcher } from "./fetcher";
 
 export type EntrepriseType = {
   adresse?: string;

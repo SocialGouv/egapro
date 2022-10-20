@@ -24,12 +24,9 @@ import {
 } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
 
-import type { SearchCompanyParams } from "../../hooks";
-import { useSearch } from "../../hooks";
-import { filterDepartements, useConfig, useCallbackOnMount } from "../../hooks";
 import type { NextPageWithLayout } from "../_app";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
@@ -37,6 +34,8 @@ import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
 import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
+import type { SearchCompanyParams } from "@services/apiClient";
+import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig();
@@ -387,10 +386,11 @@ const SearchPage: NextPageWithLayout = () => {
 
   const { q, region, departement, section_naf } = inputs;
 
-  const reset = useCallbackOnMount(() => {
+  const reset = useCallback(() => {
     setDepartements(filterDepartements(config));
     setSearch({});
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // inital load of departments.

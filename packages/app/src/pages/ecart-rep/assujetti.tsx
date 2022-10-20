@@ -1,10 +1,10 @@
 import NextLink from "next/link";
 import { useState } from "react";
 
-import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { ButtonAsLink, Callout, FormRadioGroup, FormRadioGroupInput, Link } from "@design-system";
+import { useUser } from "@services/apiClient";
 
 const title = "Êtes-vous assujetti ?";
 
