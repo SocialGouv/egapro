@@ -159,15 +159,6 @@ export const App = ({ children }: PropsWithChildren) => {
               </FooterBodyItem>
               <FooterBodyItem>
                 <FooterContentLink
-                  href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Donner votre avis
-                </FooterContentLink>
-              </FooterBodyItem>
-              <FooterBodyItem>
-                <FooterContentLink
                   href="https://github.com/SocialGouv/egapro/tree/v2.11.4"
                   target="_blank"
                   rel="noreferrer"
