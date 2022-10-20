@@ -38,7 +38,7 @@ const AssujettiPage: NextPageWithLayout = () => {
             checked={isAssujetti === "oui"}
             onChange={handleAssujettiChange}
           >
-            oui, je suis concerné.e
+            oui, je suis concerné
           </FormRadioGroupInput>
           <FormRadioGroupInput
             id="non"
@@ -47,7 +47,7 @@ const AssujettiPage: NextPageWithLayout = () => {
             checked={isAssujetti === "non"}
             onChange={handleAssujettiChange}
           >
-            non, je ne suis pas concerné.e
+            non, je ne suis pas concerné
           </FormRadioGroupInput>
         </FormRadioGroup>
       </form>
