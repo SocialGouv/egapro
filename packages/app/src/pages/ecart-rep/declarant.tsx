@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -123,7 +124,11 @@ const DeclarantPage: NextPageWithLayout = () => {
               <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
                 J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
                 vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
-                consulter nos <a href="#">Conditions Générales d'Utilisation</a>.
+                consulter nos{" "}
+                <NextLink href="/cgu">
+                  <a>Conditions Générales d'Utilisation</a>
+                </NextLink>
+                .
               </FormCheckbox>
               {errors.accord_rgpd && (
                 <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
