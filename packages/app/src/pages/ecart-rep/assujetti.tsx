@@ -1,10 +1,10 @@
 import NextLink from "next/link";
 import { useState } from "react";
 
-import { useUser } from "../../hooks/useUser";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { ButtonAsLink, Callout, FormRadioGroup, FormRadioGroupInput, Link } from "@design-system";
+import { useUser } from "@services/apiClient";
 
 const title = "Êtes-vous assujetti ?";
 
@@ -38,7 +38,7 @@ const AssujettiPage: NextPageWithLayout = () => {
             checked={isAssujetti === "oui"}
             onChange={handleAssujettiChange}
           >
-            oui, je suis concerné.e
+            oui, je suis concerné
           </FormRadioGroupInput>
           <FormRadioGroupInput
             id="non"
@@ -47,7 +47,7 @@ const AssujettiPage: NextPageWithLayout = () => {
             checked={isAssujetti === "non"}
             onChange={handleAssujettiChange}
           >
-            non, je ne suis pas concerné.e
+            non, je ne suis pas concerné
           </FormRadioGroupInput>
         </FormRadioGroup>
       </form>

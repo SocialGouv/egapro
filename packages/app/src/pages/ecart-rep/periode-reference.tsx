@@ -6,8 +6,6 @@ import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
-import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -21,8 +19,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-
-const title = "Période de référence";
+import { useFormManager, useUser } from "@services/apiClient";
 
 const formSchema = z
   .object({
@@ -89,8 +86,6 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-
       <ClientAuthenticatedOnly>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>

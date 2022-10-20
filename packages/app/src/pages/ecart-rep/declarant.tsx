@@ -5,8 +5,6 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUser } from "../../hooks/useUser";
-import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -20,8 +18,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-
-const title = "Informations déclarant";
+import { useFormManager, useUser } from "@services/apiClient";
 
 const formSchema = z.object({
   nom: z.string().min(1, { message: "Le nom est requis" }),
@@ -75,8 +72,9 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-      <p>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone</p>
+      <p>
+        <b>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone.</b>
+      </p>
 
       <ClientAuthenticatedOnly>
         <FormLayout>

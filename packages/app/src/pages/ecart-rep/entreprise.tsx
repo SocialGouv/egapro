@@ -1,13 +1,9 @@
 import { useRouter } from "next/router";
 
-import { useConfig } from "../../hooks";
-import { useUser } from "../../hooks/useUser";
-import { useFormManager } from "../../services/apiClient/form-manager";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
-
-const title = "Informations entreprise";
+import { useConfig, useFormManager, useUser } from "@services/apiClient";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
@@ -29,11 +25,11 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
-
       <p>
-        Les informations relatives à l'entreprise (raison sociale, Code NAF, Adresse complète) sont renseignées
-        automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).
+        <b>
+          Les informations relatives à l'entreprise (raison sociale, Code NAF, Adresse complète) sont renseignées
+          automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).
+        </b>
       </p>
 
       <form noValidate>
