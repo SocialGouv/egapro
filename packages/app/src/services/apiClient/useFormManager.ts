@@ -2,8 +2,7 @@ import create from "zustand";
 import { persist } from "zustand/middleware";
 
 import type { EntrepriseType } from "./siren";
-
-export const motifEcartsCadresNonCalculableValues = ["aucun cadre dirigeant", "un seul cadre dirigeant"] as const;
+import type { motifNonCalculabiliteCadresOptions } from "@common/models/repartition-equilibree";
 
 type FormState = {
   declarant: {
@@ -19,7 +18,7 @@ type FormState = {
   entreprise?: EntrepriseType;
   hasWebsite: boolean;
   isEcartsCadresCalculable?: boolean;
-  motifEcartsCadresNonCalculable?: typeof motifEcartsCadresNonCalculableValues[number];
+  motifEcartsCadresNonCalculable?: typeof motifNonCalculabiliteCadresOptions[number]["value"];
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;

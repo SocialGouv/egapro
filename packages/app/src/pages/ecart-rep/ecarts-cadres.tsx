@@ -6,7 +6,9 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
+import { motifNonCalculabiliteCadresOptions } from "@common/models/repartition-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
+
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -36,9 +38,10 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
-import { motifEcartsCadresNonCalculableValues, useFormManager } from "@services/apiClient";
+import { useFormManager } from "@services/apiClient";
 
-const title = "Écarts de représentation";
+// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value;
+export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"] as const;
 
 const formSchema = z
   .object({
@@ -182,8 +185,12 @@ const EcartsCadres: NextPageWithLayout = () => {
               <FormGroup>
                 <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
                 <FormSelect id="motifEcartsCadresNonCalculable" {...register("motifEcartsCadresNonCalculable")}>
-                  <option value={motifEcartsCadresNonCalculableValues[0]}>Il n'y a aucun cadre dirigeant</option>
-                  <option value={motifEcartsCadresNonCalculableValues[1]}>Il n'y a qu'un seul cadre dirigeant</option>
+                  <option value={motifNonCalculabiliteCadresOptions[0].value}>
+                    {motifNonCalculabiliteCadresOptions[0].label}
+                  </option>
+                  <option value={motifNonCalculabiliteCadresOptions[1].value}>
+                    {motifNonCalculabiliteCadresOptions[1].label}
+                  </option>
                 </FormSelect>
               </FormGroup>
             )}
