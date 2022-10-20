@@ -1,5 +1,5 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { SkipLinks, SkipLinksItem } from "@/design-system";
+import { SkipLinks, SkipLinksItem } from "@design-system";
 
 export default {
   title: "Base/SkipLinks",

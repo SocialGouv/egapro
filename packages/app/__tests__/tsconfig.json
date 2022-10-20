@@ -1,20 +1,25 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./",
+    "baseUrl": "../src/",
     "paths": {
-      "@/*": [
-        "../src/*"
-      ],
       "@common/*": [
-        "../src/common/*"
+        "./common/*"
       ],
       "@components/*": [
-        "../src/components/*"
+        "./components/*"
+      ],
+      "@design-system": [
+        "./design-system/index"
+      ],
+      "@services/*": [
+        "./services/*"
+      ],
+      "@/*": [
+        "./*"
       ]
     }
   },
-  // override tests folder exclusion
   "exclude": [
     "../node_modules",
     "../__stories__/"

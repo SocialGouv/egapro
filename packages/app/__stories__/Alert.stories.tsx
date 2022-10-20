@@ -1,5 +1,5 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Alert, AlertTitle } from "@/design-system";
+import { Alert, AlertTitle } from "@design-system";
 
 export default {
   title: "Base/Alert",

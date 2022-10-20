@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { FormSelect } from "@/design-system";
+import { FormSelect } from "@design-system";
 
 export default {
   title: "Base/Form/FormSelect",

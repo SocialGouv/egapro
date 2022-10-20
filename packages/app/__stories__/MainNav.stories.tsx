@@ -1,6 +1,6 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { MainNav, MainNavItem } from "@/design-system";
+import { MainNav, MainNavItem } from "@design-system";
 
 export default {
   title: "Base/MainNav",

@@ -1,5 +1,5 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Grid, GridCol } from "@/design-system";
+import { Grid, GridCol } from "@design-system";
 
 export default {
   title: "Base/Grid",

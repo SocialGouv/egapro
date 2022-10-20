@@ -11,7 +11,7 @@ import {
   CardBodyFooter,
   Link,
   LinkGroup,
-} from "@/design-system";
+} from "@design-system";
 
 export default {
   title: "Base/Card",

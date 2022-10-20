@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { Callout, CalloutButton, CalloutContent, CalloutTitle } from "@/design-system/base/Callout";
+import { Callout, CalloutButton, CalloutContent, CalloutTitle } from "@design-system";
 
 test("should match snapshot", () => {
   const mockClick = jest.fn();

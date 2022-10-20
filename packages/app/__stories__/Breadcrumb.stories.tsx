@@ -1,5 +1,5 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Breadcrumb, BreadcrumbItem } from "@/design-system";
+import { Breadcrumb, BreadcrumbItem } from "@design-system";
 
 export default {
   title: "Base/Breadcrumb",

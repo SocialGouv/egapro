@@ -1,6 +1,5 @@
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-
-import { ImgHome } from "@/design-system";
+import { ImgHome } from "@design-system";
 
 export default {
   title: "Img/ImgHome",
