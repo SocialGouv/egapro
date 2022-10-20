@@ -102,8 +102,10 @@ const EcartsCadres: NextPageWithLayout = () => {
     if (formData) {
       const potentialValuesFromLocalstorage = {
         isEcartsCadresCalculable:
-          formData?.isEcartsCadresCalculable && radioBoolToString(formData?.isEcartsCadresCalculable),
-        motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
+          typeof formData?.isEcartsCadresCalculable !== "undefined" &&
+          radioBoolToString(formData?.isEcartsCadresCalculable),
+        motifEcartsCadresNonCalculable:
+          typeof formData?.motifEcartsCadresNonCalculable !== "undefined" && formData?.motifEcartsCadresNonCalculable,
         ecartsCadresFemmes: formData?.ecartsCadresFemmes,
         ecartsCadresHommes: formData?.ecartsCadresHommes,
       };
@@ -150,13 +152,16 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   return (
     <>
-      <Alert mb="4w">
-        <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
-        <p>
-          Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y aucun
-          ou un seul cadre dirigeant.
-        </p>
-      </Alert>
+      {isEcartsCadresCalculable === null && (
+        <Alert mb="4w">
+          <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
+          <p>
+            Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y
+            aucun ou un seul cadre dirigeant.
+          </p>
+        </Alert>
+      )}
+
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
@@ -227,36 +232,35 @@ const EcartsCadres: NextPageWithLayout = () => {
           </FormLayout>
         </form>
       </FormProvider>
-      {isEcartsCadresCalculable === null && (
-        <Grid mt="4w">
-          <GridCol>
-            <Card>
-              <CardBody>
-                <CardBodyContent>
-                  <CardBodyContentStart>
-                    <CardBodyContentDetails icon="fr-icon-arrow-right-line">Définition</CardBodyContentDetails>
-                  </CardBodyContentStart>
-                  <CardBodyContentTitle>Cadres dirigeants</CardBodyContentTitle>
-                  <CardBodyContentDescription>
-                    Sont considérés comme ayant la qualité de cadre dirigeant les cadres auxquels sont confiées des
-                    responsabilités dont l'importance implique une grande indépendance dans l'organisation de leur
-                    emploi du temps, qui sont habilités à prendre des décisions de façon largement autonome et qui
-                    perçoivent une rémunération se situant dans les niveaux les plus élevés des systèmes de rémunération
-                    pratiqués dans leur entreprise ou établissement.
-                  </CardBodyContentDescription>
-                </CardBodyContent>
-                <CardBodyFooter>
-                  <LinkGroup>
-                    <Link href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902439/" target="_blank">
-                      En savoir plus
-                    </Link>
-                  </LinkGroup>
-                </CardBodyFooter>
-              </CardBody>
-            </Card>
-          </GridCol>
-        </Grid>
-      )}
+
+      <Grid mt="4w">
+        <GridCol>
+          <Card>
+            <CardBody>
+              <CardBodyContent>
+                <CardBodyContentStart>
+                  <CardBodyContentDetails icon="fr-icon-arrow-right-line">Définition</CardBodyContentDetails>
+                </CardBodyContentStart>
+                <CardBodyContentTitle>Cadres dirigeants</CardBodyContentTitle>
+                <CardBodyContentDescription>
+                  Sont considérés comme ayant la qualité de cadre dirigeant les cadres auxquels sont confiées des
+                  responsabilités dont l'importance implique une grande indépendance dans l'organisation de leur emploi
+                  du temps, qui sont habilités à prendre des décisions de façon largement autonome et qui perçoivent une
+                  rémunération se situant dans les niveaux les plus élevés des systèmes de rémunération pratiqués dans
+                  leur entreprise ou établissement.
+                </CardBodyContentDescription>
+              </CardBodyContent>
+              <CardBodyFooter>
+                <LinkGroup>
+                  <Link href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902439/" target="_blank">
+                    En savoir plus
+                  </Link>
+                </LinkGroup>
+              </CardBodyFooter>
+            </CardBody>
+          </Card>
+        </GridCol>
+      </Grid>
     </>
   );
 };

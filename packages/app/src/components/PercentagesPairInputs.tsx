@@ -2,7 +2,7 @@ import { useFormContext } from "react-hook-form";
 
 import { FormGroup, FormGroupLabel, FormGroupMessage } from "../design-system/base/FormGroup";
 import { FormInput } from "../design-system/base/FormInput";
-import styles from "./PercentagesPairInputs.module.css";
+// import styles from "./PercentagesPairInputs.module.css";
 
 type Input = {
   label: string;
@@ -51,13 +51,10 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
             valueAsNumber: true,
           })}
           id={firstLabel}
-          type="number"
-          min="0"
-          max="100"
-          step="0.1"
+          type="percentage"
           aria-describedby={`${firstLabel}-message-error`}
         />
-        <div className={styles.percentage} />
+        {/* <div className={styles.percentage} /> */}
         {errors[firstLabel] && (
           <FormGroupMessage id={`${firstLabel}-message-error`}>{errors[firstLabel]?.message}</FormGroupMessage>
         )}
@@ -72,13 +69,10 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
             valueAsNumber: true,
           })}
           id={secondLabel}
-          type="number"
-          min="0"
-          max="100"
-          step="0.1"
+          type="percentage"
           aria-describedby={`${secondLabel}-message-error`}
         />
-        <div className={styles.percentage} />
+        {/* <div className={styles.percentage} /> */}
         {errors[secondLabel] && (
           <FormGroupMessage id={`${secondLabel}-message-error`}>{errors[secondLabel]?.message}</FormGroupMessage>
         )}
