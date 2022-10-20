@@ -1,4 +1,4 @@
-import Link from "next/link";
+import NextLink from "next/link";
 import { FooterBody } from "./FooterBody";
 import { FooterBodyItem } from "./FooterBodyItem";
 import { FooterBottom } from "./FooterBottom";
@@ -13,11 +13,11 @@ export const Footer = () => {
       <div className="fr-container">
         <FooterBody
           logo={
-            <Link href="/">
+            <NextLink href="/">
               <a>
                 <Logo />
               </a>
-            </Link>
+            </NextLink>
           }
           description="Représentation Équilibrée a été développé par les équipes de la fabrique numérique des ministères sociaux."
           items={
@@ -65,7 +65,9 @@ export const Footer = () => {
         <FooterBottom>
           <>
             <FooterBottomItem>
-              <FooterBottomLink href="#">Plan du site</FooterBottomLink>
+              <NextLink href="/cgu" passHref>
+                <FooterBottomLink>CGU</FooterBottomLink>
+              </NextLink>
             </FooterBottomItem>
             <FooterBottomItem>
               <FooterBottomLink href="#">Mentions légales</FooterBottomLink>
