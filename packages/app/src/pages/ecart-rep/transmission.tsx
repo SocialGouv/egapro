@@ -1,4 +1,5 @@
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 
 import type { NextPageWithLayout } from "../_app";
@@ -18,10 +19,19 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
+import { useFormManager } from "@services/apiClient";
 
 const title = "Transmission de la procédure";
 
 const Transmission: NextPageWithLayout = () => {
+  const router = useRouter();
+  const { resetFormData } = useFormManager();
+
+  const initNewRepartition = () => {
+    resetFormData();
+    router.push("./commencer");
+  };
+
   return (
     <>
       <h1>{title}</h1>
@@ -47,7 +57,7 @@ const Transmission: NextPageWithLayout = () => {
           <ButtonGroup inline="mobile-up">
             <FormButton variant="secondary">Renvoyer l'accusé de réception</FormButton>
             <NextLink href="/ecart-rep/assujetti/" passHref>
-              <ButtonAsLink>Effectuer une nouvelle déclaration</ButtonAsLink>
+              <ButtonAsLink onClick={initNewRepartition}>Effectuer une nouvelle déclaration</ButtonAsLink>
             </NextLink>
           </ButtonGroup>
         </form>
