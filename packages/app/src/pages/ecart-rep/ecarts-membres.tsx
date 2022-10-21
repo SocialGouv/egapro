@@ -34,7 +34,7 @@ const EcartsMembres: NextPageWithLayout = () => {
   return (
     <>
       <Alert mb="4w">
-        <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
+        <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
         <p>
           "Les écarts de représentation femmes-hommes parmi les membres des instances dirigeantes sont incalculables
           lorsqu'il n'y a pas d'instance dirigeante.
