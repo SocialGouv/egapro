@@ -180,6 +180,11 @@ export const App = ({ children }: PropsWithChildren) => {
               <FooterBottomLink>Mentions légales</FooterBottomLink>
             </NextLink>
           </FooterBottomItem>
+          <FooterBottomItem>
+            <NextLink href="/politique-de-confidentialite" passHref>
+              <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
+            </NextLink>
+          </FooterBottomItem>
         </FooterBottom>
       </Footer>
     </div>
