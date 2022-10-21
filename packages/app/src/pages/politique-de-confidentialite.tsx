@@ -23,12 +23,12 @@ const PrivacyPolicy: NextPageWithLayout = () => {
               <p>La présente Plateforme traite les données personnelles suivantes&nbsp;:</p>
               <ul>
                 <li>
-                  Pour les utilisateurs de l’Index Egapro concernant les inégalités salariales : nom, prénom, numéro de
-                  téléphone, adresse e-mail.
+                  Pour les utilisateurs de l’Index Egapro concernant les inégalités salariales&nbsp;: nom, prénom,
+                  numéro de téléphone, adresse e-mail.
                 </li>
                 <li>
                   Pour les utilisateurs de l’Index Egapro concernant la répartition équilibrée femmes-hommes dans les
-                  services dirigeants : nom, prénom, numéro de téléphone, adresse e-mail.
+                  services dirigeants&nbsp;: nom, prénom, numéro de téléphone, adresse e-mail.
                 </li>
               </ul>
               <h2>Finalités</h2>
@@ -102,7 +102,7 @@ const PrivacyPolicy: NextPageWithLayout = () => {
                 <li>Droit de rectification.</li>
               </ul>
               <p>
-                Vous pouvez exercer ces droits en écrivant à  
+                Vous pouvez exercer ces droits en écrivant à{" "}
                 <a href="mailto:index@travail.gouv.fr">index@travail.gouv.fr</a>.
               </p>
               <p>
@@ -120,7 +120,7 @@ const PrivacyPolicy: NextPageWithLayout = () => {
               </p>
               <p>
                 Vous avez la possibilité de vous opposer à un traitement de vos données personnelles. Pour vous aider
-                dans votre démarche, vous trouverez ici un modèle de courrier élaboré par la Cnil.
+                dans votre démarche, vous trouverez ici un modèle de courrier élaboré par la Cnil.
               </p>
               <h3 className="fr-text--xl">Délais de réponse</h3>
               <p>
