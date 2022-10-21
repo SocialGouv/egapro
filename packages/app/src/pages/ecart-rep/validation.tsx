@@ -1,5 +1,4 @@
 import NextLink from "next/link";
-import { useRouter } from "next/router";
 import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
 import {
@@ -25,7 +24,7 @@ import { useFormManager, putRepartition } from "@services/apiClient";
 const title = "Validation de vos écarts";
 
 const Validation: NextPageWithLayout = () => {
-  const router = useRouter();
+  //const router = useRouter();
   const { formData } = useFormManager();
 
   const formatMotif = (motif: string) => {
