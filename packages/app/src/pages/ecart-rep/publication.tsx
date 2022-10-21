@@ -26,7 +26,9 @@ import {
   FormRadioGroupLegend,
   FormTextarea,
 } from "@design-system";
-import { useFormManager } from "@services/apiClient";
+import { useFormManager, useUser } from "@services/apiClient";
+
+const URL_REGEX = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/i;
 
 const formSchema = z
   .object({
@@ -38,12 +40,20 @@ const formSchema = z
     publishingWebsiteUrl: z.string().trim().optional(),
   })
   .superRefine(({ hasWebsite, publishingContent, publishingWebsiteUrl }, ctx) => {
-    if (hasWebsite === "oui" && !publishingWebsiteUrl) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "L'adresse exacte de la page internet est obligatoire",
-        path: ["publishingWebsiteUrl"],
-      });
+    if (hasWebsite === "oui") {
+      if (!publishingWebsiteUrl) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "L'adresse exacte de la page internet est obligatoire",
+          path: ["publishingWebsiteUrl"],
+        });
+      } else if (!new RegExp(URL_REGEX).test(publishingWebsiteUrl)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "L'adresse de la page internet est invalide",
+          path: ["publishingWebsiteUrl"],
+        });
+      }
     }
     if (hasWebsite === "non" && !publishingContent) {
       ctx.addIssue({
@@ -58,6 +68,8 @@ type FormType = z.infer<typeof formSchema>;
 
 const Publication: NextPageWithLayout = () => {
   const router = useRouter();
+  useUser({ redirectTo: "/ecart-rep/email" });
+
   const { formData, saveFormData } = useFormManager();
   const {
     formState: { errors, isDirty, isValid, isSubmitted },

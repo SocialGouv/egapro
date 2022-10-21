@@ -95,8 +95,8 @@ export const EcartRep: NextPageWithLayout = () => (
                   </CardBodyContentStart>
                   <CardBodyContentTitle titleAs="h2">Besoin d’aide&nbsp;?</CardBodyContentTitle>
                   <CardBodyContentDescription>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisl, duis ac egestas donec tincidunt
-                    lorem. Sodales risus amet nisl sed. Init tartatum designsystemus.
+                    Pour avoir plus d'informations sur le calcul et la publication de vos écarts éventuels de
+                    représentation femmes-hommes, vous pouvez consulter le site internet du Ministère du Travail.
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>

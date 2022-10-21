@@ -13,8 +13,11 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@design-system";
+import { useUser } from "@services/apiClient";
 
 const Validation: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
+
   return (
     <>
       <p>
