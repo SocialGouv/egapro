@@ -3,14 +3,24 @@ import Head from "next/head";
 import NextLink from "next/link";
 import { useState } from "react";
 import type { PropsWithChildren } from "react";
-import { FooterBody } from "../../design-system/base/FooterBody";
-import { FooterBodyItem } from "../../design-system/base/FooterBodyItem";
-import { FooterBottom } from "../../design-system/base/FooterBottom";
-import { FooterBottomItem } from "../../design-system/base/FooterBottomItem";
-import { FooterBottomLink } from "../../design-system/base/FooterBottomLink";
-import { FooterContentLink } from "../../design-system/base/FooterContentLink";
 import styles from "./App.module.css";
-import { ButtonAsLink, Logo, SkipLinks, SkipLinksItem } from "@design-system";
+import {
+  ButtonAsLink,
+  Footer,
+  FooterBody,
+  FooterBodyBrand,
+  FooterBodyContent,
+  FooterBodyContentDescription,
+  FooterBodyContentItems,
+  FooterBodyItem,
+  FooterBottom,
+  FooterBottomItem,
+  FooterBottomLink,
+  FooterContentLink,
+  Logo,
+  SkipLinks,
+  SkipLinksItem,
+} from "@design-system";
 import { FormButton } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
@@ -123,73 +133,63 @@ export const App = ({ children }: PropsWithChildren) => {
         <main role="main" id="content" className={styles.content}>
           {children}
         </main>
-        <footer className="fr-footer" role="contentinfo" id="footer">
-          <div className="fr-container">
-            <FooterBody
-              logo={
-                <NextLink href="/">
-                  <a>
-                    <Logo />
-                  </a>
-                </NextLink>
-              }
-              description="Représentation Équilibrée a été développé par les équipes de la fabrique numérique des ministères sociaux."
-              items={
-                <>
-                  <FooterBodyItem>
-                    <FooterContentLink
-                      href=" https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                      target="_blank"
-                      rel="noreferrer"
-                      title="Télécharger la liste des référents au format xlsx"
-                    >
-                      Télécharger la liste des référents
-                    </FooterContentLink>
-                  </FooterBodyItem>
-                  <FooterBodyItem>
-                    <FooterContentLink
-                      href=" https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/?id_mot=2004#liste-faq"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Consulter l'aide
-                    </FooterContentLink>
-                  </FooterBodyItem>
-                  <FooterBodyItem>
-                    <FooterContentLink
-                      href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Donner votre avis
-                    </FooterContentLink>
-                  </FooterBodyItem>
-                  <FooterBodyItem>
-                    <FooterContentLink
-                      href="https://github.com/SocialGouv/egapro/tree/v2.11.4"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Contribuer sur Github
-                    </FooterContentLink>
-                  </FooterBodyItem>
-                </>
-              }
-            />
-            <FooterBottom>
-              <>
-                <FooterBottomItem>
-                  <NextLink href="/cgu" passHref>
-                    <FooterBottomLink>CGU</FooterBottomLink>
-                  </NextLink>
-                </FooterBottomItem>
-                <FooterBottomItem>
-                  <FooterBottomLink href="#">Mentions légales</FooterBottomLink>
-                </FooterBottomItem>
-              </>
-            </FooterBottom>
-          </div>
-        </footer>
+        <Footer>
+          <FooterBody>
+            <FooterBodyBrand>
+              <NextLink href="/">
+                <a>
+                  <Logo />
+                </a>
+              </NextLink>
+            </FooterBodyBrand>
+            <FooterBodyContent>
+              <FooterBodyContentDescription>
+                Représentation Équilibrée a été développé par les équipes de la fabrique numérique des ministères
+                sociaux.
+              </FooterBodyContentDescription>
+              <FooterBodyContentItems>
+                <FooterBodyItem>
+                  <FooterContentLink
+                    href=" https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Télécharger la liste des référents au format xlsx"
+                  >
+                    Télécharger la liste des référents
+                  </FooterContentLink>
+                </FooterBodyItem>
+                <FooterBodyItem>
+                  <FooterContentLink
+                    href=" https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/?id_mot=2004#liste-faq"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Consulter l'aide
+                  </FooterContentLink>
+                </FooterBodyItem>
+                <FooterBodyItem>
+                  <FooterContentLink
+                    href="https://github.com/SocialGouv/egapro/tree/v2.11.4"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Contribuer sur Github
+                  </FooterContentLink>
+                </FooterBodyItem>
+              </FooterBodyContentItems>
+            </FooterBodyContent>
+          </FooterBody>
+          <FooterBottom>
+            <FooterBottomItem>
+              <NextLink href="/cgu" passHref>
+                <FooterBottomLink>CGU</FooterBottomLink>
+              </NextLink>
+            </FooterBottomItem>
+            <FooterBottomItem>
+              <FooterBottomLink href="#">Mentions légales</FooterBottomLink>
+            </FooterBottomItem>
+          </FooterBottom>
+        </Footer>
       </div>
     </>
   );
