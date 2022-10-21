@@ -25,7 +25,7 @@ const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."),
     endOfPeriod: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
-      message: "La date de fin de la période de référence est de la forme jj/mm/aaaa.",
+      message: "La date de fin de la période de référence doit être au format jj/mm/aaaa.",
     }),
   })
   .superRefine(({ year, endOfPeriod }, ctx) => {
@@ -33,7 +33,7 @@ const formSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
+          "La date de fin de la période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
         path: ["endOfPeriod"],
       });
     }
