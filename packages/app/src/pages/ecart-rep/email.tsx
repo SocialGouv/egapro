@@ -139,8 +139,8 @@ const EmailPage: NextPageWithLayout = () => {
               <FormLayout>
                 <FormGroup>
                   <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
-                  <FormInput id="email" type="email" {...register("email")} />
-                  {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
+                  <FormInput aria-describedby="email-msg" id="email" type="email" {...register("email")} />
+                  {errors.email?.message && <FormGroupMessage id="email-msg">{errors.email.message}</FormGroupMessage>}
                 </FormGroup>
                 <FormLayoutButtonGroup>
                   <FormButton
