@@ -21,8 +21,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.date)}
         type={type}
         disabled={isDisabled}
-        aria-describedby={`${id}-msg`}
-        aria-invalid={isError || "false"}
+        aria-invalid={isError ? "true" : undefined}
         ref={ref}
         {...rest}
       />
