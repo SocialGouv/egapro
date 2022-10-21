@@ -7,7 +7,7 @@ import type {
   motifNonCalculabiliteMembresOptions,
 } from "@common/models/repartition-equilibree";
 
-type FormState = {
+export type FormState = {
   declarant: {
     accord_rgpd?: boolean | undefined;
     email: string;
