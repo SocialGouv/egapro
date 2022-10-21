@@ -26,7 +26,7 @@ const title = "Validation de l'email";
 const ERROR_COLLAPSE_TIMEOUT = 5000;
 
 const formSchema = z.object({
-  email: z.string().min(1, "L'adresse mail est requise.").email({ message: "L'adresse mail est invalide." }),
+  email: z.string().min(1, "L'adresse email est requise.").email({ message: "L'adresse email est invalide." }),
 });
 
 // Infer the TS type according to the zod schema.
@@ -74,7 +74,7 @@ const EmailPage: NextPageWithLayout = () => {
     try {
       setFeatureStatus({ type: "loading" });
       await requestEmailForToken(email, `${window.location.origin}/ecart-rep/commencer?token=`);
-      setFeatureStatus({ type: "success", message: "Un mail vous a été envoyé." });
+      setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({
         type: "error",
@@ -110,14 +110,14 @@ const EmailPage: NextPageWithLayout = () => {
 
         {featureStatus.type === "success" && (
           <>
-            <p>Vous allez recevoir un mail sur l'adresse mail que vous avez indiquée à l'étape précédente.</p>
+            <p>Vous allez recevoir un email sur l'adresse email que vous avez indiquée à l'étape précédente.</p>
 
             <p>
-              <strong>Ouvrez ce mail et cliquez sur le lien de validation.</strong>
+              <strong>Ouvrez ce email et cliquez sur le lien de validation.</strong>
             </p>
             <p>
-              Si vous ne recevez pas ce mail sous peu, il se peut que l'email saisi (<strong>{email}</strong>) soit
-              incorrect, ou bien que le mail ait été déplacé dans votre dossier de courriers indésirables ou dans le
+              Si vous ne recevez pas ce email sous peu, il se peut que l'email saisi (<strong>{email}</strong>) soit
+              incorrect, ou bien que le email ait été déplacé dans votre dossier de courriers indésirables ou dans le
               dossier SPAM.
             </p>
             <p>En cas d'échec, la procédure devra être reprise avec un autre email.</p>

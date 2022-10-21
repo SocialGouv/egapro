@@ -46,7 +46,7 @@ const Validation: NextPageWithLayout = () => {
             <RecapSectionItemContent>Lætitia Collombet</RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>
-            <RecapSectionItemLegend>Adresse mail</RecapSectionItemLegend>
+            <RecapSectionItemLegend>Adresse email</RecapSectionItemLegend>
             <RecapSectionItemContent>laetitia.collombet@travail.gouv.f</RecapSectionItemContent>
           </RecapSectionItem>
         </RecapSectionItems>
