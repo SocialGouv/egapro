@@ -11,7 +11,7 @@ type DeclarationSummary = {
   year: number;
 };
 
-type TokenInfoType = {
+export type TokenInfoType = {
   déclarations: DeclarationSummary[];
   email: string;
   ownership: string[];

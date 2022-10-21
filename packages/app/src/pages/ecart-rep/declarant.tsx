@@ -122,7 +122,7 @@ const DeclarantPage: NextPageWithLayout = () => {
             </FormGroup>
             <FormGroup>
               <FormGroupLabel htmlFor="email">Email</FormGroupLabel>
-              <FormInput id="email" type="text" readOnly {...register("email")} />
+              <FormInput data-testid="email" id="email" type="text" readOnly {...register("email")} />
             </FormGroup>
             <FormGroup>
               <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
