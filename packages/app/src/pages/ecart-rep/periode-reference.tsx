@@ -120,7 +120,7 @@ const PeriodeReference: NextPageWithLayout = () => {
                 <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
               )}
               <br />
-              <FormButton type="button" onClick={handleClick}>
+              <FormButton variant="secondary" size="sm" onClick={handleClick}>
                 Sélectionner la fin de l'année civile
               </FormButton>
             </FormGroup>

@@ -10,10 +10,15 @@ export default {
 const Template: ComponentStory<typeof FormGroup> = args => (
   <FormGroup {...args}>
     <FormGroupLabel htmlFor="xxx">Label champ de saisie</FormGroupLabel>
-    <FormInput id="xxx" isValid={args.isValid} isError={args.isError} />
-    {args.isError && <FormGroupMessage id="xxx">Texte d’erreur obligatoire</FormGroupMessage>}
+    <FormInput
+      aria-describedby={args.isValid || args.isError ? "xxx-msg" : undefined}
+      id="xxx"
+      isValid={args.isValid}
+      isError={args.isError}
+    />
+    {args.isError && <FormGroupMessage id="xxx-msg">Texte d’erreur obligatoire</FormGroupMessage>}
     {args.isValid && (
-      <FormGroupMessage id="xxx" isValid>
+      <FormGroupMessage id="xxx-msg" isValid>
         Texte de validation
       </FormGroupMessage>
     )}
