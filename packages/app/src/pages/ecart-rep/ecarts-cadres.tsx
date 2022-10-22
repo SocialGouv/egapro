@@ -146,14 +146,13 @@ const EcartsCadres: NextPageWithLayout = () => {
     <>
       {isEcartsCadresCalculable === undefined && (
         <Alert mb="4w">
-          <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
+          <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
           <p>
             Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y
             aucun ou un seul cadre dirigeant.
           </p>
         </Alert>
       )}
-
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
