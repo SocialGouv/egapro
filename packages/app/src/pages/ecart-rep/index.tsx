@@ -11,8 +11,6 @@ import {
   CardBody,
   CardBodyContent,
   CardBodyContentDescription,
-  CardBodyContentDetails,
-  CardBodyContentStart,
   CardBodyContentTitle,
   Container,
   Grid,
@@ -69,9 +67,6 @@ export const EcartRep: NextPageWithLayout = () => (
             <Card>
               <CardBody>
                 <CardBodyContent>
-                  <CardBodyContentStart>
-                    <CardBodyContentDetails>Suis-je éligible&nbsp;?</CardBodyContentDetails>
-                  </CardBodyContentStart>
                   <CardBodyContentTitle titleAs="h2">Transmission de déclaration</CardBodyContentTitle>
                   <CardBodyContentDescription>
                     Les entreprises qui emploient au moins 1 000 salariés pour le troisième exercice consécutif doivent
@@ -88,11 +83,6 @@ export const EcartRep: NextPageWithLayout = () => (
             <Card>
               <CardBody>
                 <CardBodyContent>
-                  <CardBodyContentStart>
-                    <CardBodyContentDetails>
-                      Déclaration de vos écarts éventuels de représentation femmes-hommes
-                    </CardBodyContentDetails>
-                  </CardBodyContentStart>
                   <CardBodyContentTitle titleAs="h2">Besoin d’aide&nbsp;?</CardBodyContentTitle>
                   <CardBodyContentDescription>
                     Pour avoir plus d'informations sur le calcul et la publication de vos écarts éventuels de

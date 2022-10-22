@@ -26,7 +26,7 @@ const formSchema = z.object({
   telephone: z
     .string()
     .min(1, { message: "Le téléphone est requis" })
-    .regex(/\d{10}/gi, "Le téléphone doit être composé de 10 chiffres"),
+    .regex(/\d{10}/gi, "Le numéro de téléphone doit être composé de 10 chiffres"),
   email: z.string().email(),
   accord_rgpd: z.boolean().refine(accord_rgpd => accord_rgpd, { message: "L'accord est requis" }),
 });

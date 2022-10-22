@@ -186,7 +186,14 @@ export const App = ({ children }: PropsWithChildren) => {
               </NextLink>
             </FooterBottomItem>
             <FooterBottomItem>
-              <FooterBottomLink href="#">Mentions légales</FooterBottomLink>
+              <NextLink href="/mentions-legales" passHref>
+                <FooterBottomLink>Mentions légales</FooterBottomLink>
+              </NextLink>
+            </FooterBottomItem>
+            <FooterBottomItem>
+              <NextLink href="/politique-de-confidentialite" passHref>
+                <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
+              </NextLink>
             </FooterBottomItem>
           </FooterBottom>
         </Footer>

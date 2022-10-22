@@ -3,6 +3,7 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
@@ -21,6 +22,7 @@ import {
   Container,
   Grid,
   GridCol,
+  ImgHome,
   Stepper,
   StepperDetails,
   StepperTitle,
@@ -84,7 +86,9 @@ export const RepartitionEquilibreeLayout = ({
                   <CardBody>
                     <CardBodyContent>
                       <CardBodyContentTitle>
-                        <a href="#">Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?</a>
+                        <NextLink href="/">
+                          <a>Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?</a>
+                        </NextLink>
                       </CardBodyContentTitle>
                       <CardBodyContentDescription>
                         Toutes les entreprises d’au moins 50 salariés doivent calculer et publier leur Index de
@@ -94,12 +98,7 @@ export const RepartitionEquilibreeLayout = ({
                   </CardBody>
                   <CardHeader>
                     <CardHeaderImg>
-                      {/* TODO: Add real image */}
-                      <img // eslint-disable-line @next/next/no-img-element -- placeholder image to change
-                        className="fr-responsive-img"
-                        src="https://www.systeme-de-design.gouv.fr/img/placeholder.16x9.png"
-                        alt=""
-                      />
+                      <ImgHome />
                     </CardHeaderImg>
                   </CardHeader>
                 </Card>

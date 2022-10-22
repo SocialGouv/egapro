@@ -3,7 +3,7 @@ import type { NextPageWithLayout } from "./_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import { Container, Grid, GridCol } from "@design-system";
 
-const Home: NextPageWithLayout = () => {
+const Cgu: NextPageWithLayout = () => {
   return (
     <>
       <Head>
@@ -136,8 +136,8 @@ const Home: NextPageWithLayout = () => {
   );
 };
 
-Home.getLayout = ({ children }) => {
+Cgu.getLayout = ({ children }) => {
   return <BasicLayout>{children}</BasicLayout>;
 };
 
-export default Home;
+export default Cgu;

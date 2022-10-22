@@ -60,7 +60,7 @@ const Validation: NextPageWithLayout = () => {
               </RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
-              <RecapSectionItemLegend>Adresse mail</RecapSectionItemLegend>
+              <RecapSectionItemLegend>Adresse email</RecapSectionItemLegend>
               <RecapSectionItemContent>{formData?.declarant.email}</RecapSectionItemContent>
             </RecapSectionItem>
           </RecapSectionItems>
