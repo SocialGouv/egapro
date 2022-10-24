@@ -84,6 +84,6 @@ describe("isValidSiren", () => {
   })
 
   test("returns an error message for a not allowed user", async () => {
-    await expect(validator("234567891")).resolves.toBe("L'email saisi n'est pas rattaché au Siren de votre entreprise.")
+    await expect(validator("234567891")).resolves.toBe("Le Siren saisi n'est pas rattaché à votre email de connexion.")
   })
 })
