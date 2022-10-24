@@ -75,14 +75,10 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
               // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
               setErrorMessage(
                 <>
-                  <Text>L'email saisi n'est pas rattaché au Siren de votre entreprise. </Text>
+                  <Text>Le Siren saisi n'est pas rattaché à votre email de connexion ({email}).</Text>
                   <Text mt="4">
-                    Vous devez faire faire une demande rattachement en indiquant votre Siren et email en cliquant&nbsp;
-                    <MailtoLink siren={siren} email={email}>
-                      ici
-                    </MailtoLink>
-                    &nbsp;(si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à
-                    dgt.ega-pro@travail.gouv.fr).
+                    Vous devez faire faire une demande de rattachement en nous envoyant votre Siren et votre email à
+                    <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.
                   </Text>
                 </>,
               )

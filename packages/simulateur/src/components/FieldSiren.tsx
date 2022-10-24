@@ -20,7 +20,7 @@ const moizeConfig = {
 
 const memoizedValidateSiren = moize(moizeConfig)(validateSiren)
 
-const NOT_ALLOWED_MESSAGE = "L'email saisi n'est pas rattaché au Siren de votre entreprise."
+const NOT_ALLOWED_MESSAGE = "Le Siren saisi n'est pas rattaché à votre email de connexion."
 
 const UNKNOWN_SIREN =
   "Ce SIREN n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
@@ -132,6 +132,13 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
     meta?.error === NOT_ALLOWED_MESSAGE ||
     meta?.error === UNKNOWN_SIREN
 
+  const notAllowedErrorForAuthenticatedUser = !email
+    ? NOT_ALLOWED_MESSAGE
+    : NOT_ALLOWED_MESSAGE.slice(0, NOT_ALLOWED_MESSAGE.length - 1) + `(${email})`
+
+  const buildLabelError = (error: string) =>
+    error === NOT_ALLOWED_MESSAGE ? notAllowedErrorForAuthenticatedUser : error
+
   return (
     <InputGroup
       isReadOnly={readOnly}
@@ -142,17 +149,11 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
       message={{
         error: (
           <>
-            <div>{field.meta.error}</div>
+            <div>{buildLabelError(field.meta.error)}</div>
             {field.meta.error === NOT_ALLOWED_MESSAGE && (
               <div style={{ marginTop: 10 }}>
-                Pour poursuivre votre déclaration, vous devez faire une demande de rattachement en cliquant&nbsp;
-                <MailtoLink siren={field.input.value} email={email}>
-                  ici
-                </MailtoLink>
-                .
-                <br />
-                (si ce lien ne fonctionne pas, vous pouvez nous envoyer votre Siren et email à<br />
-                dgt.ega-pro@travail.gouv.fr).
+                Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à
+                <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.
               </div>
             )}
           </>
