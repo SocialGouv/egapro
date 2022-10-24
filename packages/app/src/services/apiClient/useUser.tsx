@@ -73,11 +73,11 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   // Automatic redirect if not authenticated and redirectTo is present.
   useEffect(() => {
     if (props.redirectTo) {
-      if (!token) {
+      if (!token || error) {
         if (redirectTo) router.push(redirectTo);
       }
     }
-  }, [token, redirectTo, router, props.redirectTo]);
+  }, [error, token, redirectTo, router, props.redirectTo]);
 
   return {
     user,
