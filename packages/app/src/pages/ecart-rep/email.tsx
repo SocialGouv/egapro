@@ -121,7 +121,9 @@ const EmailPage: NextPageWithLayout = () => {
               dossier SPAM.
             </p>
             <p>En cas d'échec, la procédure devra être reprise avec un autre mail.</p>
-            <FormButton onClick={() => setFeatureStatus({ type: "idle" })}>Réessayer</FormButton>
+            <FormButton type="button" onClick={() => setFeatureStatus({ type: "idle" })}>
+              Réessayer
+            </FormButton>
           </>
         )}
 
@@ -143,10 +145,7 @@ const EmailPage: NextPageWithLayout = () => {
                   {errors.email?.message && <FormGroupMessage id="email-msg">{errors.email.message}</FormGroupMessage>}
                 </FormGroup>
                 <FormLayoutButtonGroup>
-                  <FormButton
-                    type="submit"
-                    isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}
-                  >
+                  <FormButton isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}>
                     Envoyer
                   </FormButton>
                 </FormLayoutButtonGroup>

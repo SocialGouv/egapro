@@ -1,9 +1,18 @@
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 
 import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
-import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
+import {
+  FormButton,
+  FormGroup,
+  FormInput,
+  FormGroupLabel,
+  FormLayout,
+  FormLayoutButtonGroup,
+  ButtonAsLink,
+} from "@design-system";
 import { useConfig, useFormManager, useUser } from "@services/apiClient";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
@@ -77,10 +86,10 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormInput id="code-pays" type="text" readOnly value={formData.entreprise?.code_pays || ""} />
           </FormGroup>
           <FormLayoutButtonGroup>
-            <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/declarant")}>
-              Précédent
-            </FormButton>
-            <FormButton type="submit">Suivant</FormButton>
+            <NextLink href="/ecart-rep/declarant" passHref>
+              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+            </NextLink>
+            <FormButton>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
