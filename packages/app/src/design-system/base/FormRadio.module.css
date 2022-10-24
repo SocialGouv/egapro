@@ -1,3 +1,3 @@
-input[type=radio]:read-only + label {
+.input:read-only + label {
     pointer-events: none;
 }

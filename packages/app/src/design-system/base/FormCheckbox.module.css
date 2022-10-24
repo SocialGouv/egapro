@@ -2,6 +2,6 @@
   color: var(--error-425-625);
 }
 
-input[type=checkbox]:read-only + label {
+.input:read-only + label {
     pointer-events: none;
 }
