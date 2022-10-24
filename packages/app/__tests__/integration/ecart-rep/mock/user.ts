@@ -14,7 +14,7 @@ export const FAKE_USER: TokenInfoType = {
   ownership: [FAKE_SIREN, BOULANGERIE_EDEN_SIREN],
 };
 
-jest.mock("@services/apiClient/useUser", () => ({
+export const useUserMock = (isConnected: boolean) => ({
   useUserStore() {
     return {
       setToken: () => void 0,
@@ -22,11 +22,20 @@ jest.mock("@services/apiClient/useUser", () => ({
     };
   },
   useUser() {
-    return {
-      isAuthenticated: true,
-      logout: () => void 0,
-      user: FAKE_USER,
-      error: void 0,
-    };
+    if (isConnected) {
+      return {
+        isAuthenticated: true,
+        logout: () => void 0,
+        user: FAKE_USER,
+        error: void 0,
+      };
+    } else {
+      return {
+        isAuthenticated: false,
+        logout: () => void 0,
+        user: void 0,
+        error: void 0,
+      };
+    }
   },
-}));
+});

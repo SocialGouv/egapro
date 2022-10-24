@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { PropsWithChildren } from "react";
+import type { AriaRole, PropsWithChildren } from "react";
 
 import type { IconStyles } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
@@ -12,6 +12,7 @@ export type CalloutProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
     className?: string;
     icon?: IconStyles;
+    role?: AriaRole;
   }
 >;
 
