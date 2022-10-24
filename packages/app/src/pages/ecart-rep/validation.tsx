@@ -1,4 +1,5 @@
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
 import {
@@ -24,7 +25,7 @@ import { useFormManager, putRepartition } from "@services/apiClient";
 const title = "Validation de vos écarts";
 
 const Validation: NextPageWithLayout = () => {
-  //const router = useRouter();
+  const router = useRouter();
   const { formData } = useFormManager();
 
   const formatMotif = (motif: string) => {
@@ -38,7 +39,7 @@ const Validation: NextPageWithLayout = () => {
   const validateForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     putRepartition(formData);
-    //router.push("/ecart-rep/transmission");
+    router.push("/ecart-rep/transmission");
   };
 
   return (
@@ -180,15 +181,13 @@ const Validation: NextPageWithLayout = () => {
             </RecapSectionItem>
           </RecapSectionItems>
         </RecapSection>
-        <form>
+        <form noValidate onSubmit={e => validateForm(e)}>
           <FormLayout>
             <FormLayoutButtonGroup>
               <NextLink href="/ecart-rep/publication" passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
-              <FormButton type="submit" onClick={validateForm}>
-                Valider et transmettre les résultats
-              </FormButton>
+              <FormButton type="submit">Valider et transmettre les résultats</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
