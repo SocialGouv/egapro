@@ -151,7 +151,7 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
             <div>{buildLabelError(field.meta.error)}</div>
             {field.meta.error === NOT_ALLOWED_MESSAGE && (
               <div style={{ marginTop: 10 }}>
-                Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à
+                Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à{" "}
                 <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.
               </div>
             )}
