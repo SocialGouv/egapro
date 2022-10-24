@@ -76,28 +76,23 @@ type IndicateursRepartitionEquilibree = {
 
 const assertValidFormState = (state: FormState): void => {
   const requiredValues = [
-    // state.publishingDate,
     state.year,
     state.endOfPeriod,
+    state.declarant.email,
+    state.declarant.nom,
+    state.declarant.prenom,
+    state.declarant.telephone,
     state.entreprise?.adresse,
     state.entreprise?.code_naf,
-    // WAIT FOR POM : why no code_pays in entreprise ?
-    // state.entreprise?.code_pays,
     state.entreprise?.commune,
     state.entreprise?.département,
     state.entreprise?.raison_sociale,
     state.entreprise?.région,
     state.entreprise?.siren,
-    // state.motifEcartsCadresNonCalculable,
-    // state.motifEcartsMembresNonCalculable,
-    state.ecartsCadresFemmes,
-    state.ecartsCadresHommes,
-    // WAIT FOR JOHANN
-    // state.ecartsMembresFemmes,
-    // state.ecartsMembresHommes,
+    state.motifEcartsCadresNonCalculable || (state.ecartsCadresFemmes && state.ecartsCadresHommes),
+    state.motifEcartsMembresNonCalculable || (state.ecartsMembresFemmes && state.ecartsMembresHommes),
   ];
-  console.log("req_vals");
-  console.log(requiredValues);
+
   requiredValues.map(value => {
     if (!value) throw new Error("Invalid Form State");
   });
@@ -143,11 +138,8 @@ export const buildRepartition = (state: FormState): RepartitionEquilibreeDataFie
   };
 
   const répartition_équilibrée: IndicateursRepartitionEquilibree = {
-    motif_non_calculabilité_cadres: state.motifEcartsCadresNonCalculable as
-      | "aucun_cadre_dirigeant"
-      | "un_seul_cadre_dirigeant"
-      | undefined,
-    motif_non_calculabilité_membres: state.motifEcartsMembresNonCalculable as "aucune_instance_dirigeante" | undefined,
+    motif_non_calculabilité_cadres: state.motifEcartsCadresNonCalculable,
+    motif_non_calculabilité_membres: state.motifEcartsMembresNonCalculable,
     pourcentage_femmes_cadres: state.ecartsCadresFemmes as number,
     pourcentage_hommes_cadres: state.ecartsCadresHommes as number,
     pourcentage_femmes_membres: state.ecartsMembresFemmes as number,

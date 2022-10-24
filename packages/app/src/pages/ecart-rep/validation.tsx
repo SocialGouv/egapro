@@ -1,6 +1,11 @@
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
+import {
+  motifNonCalculabiliteCadresOptions,
+  motifNonCalculabiliteMembresOptions,
+} from "@common/models/repartition-equilibree";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -23,7 +28,16 @@ const Validation: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData } = useFormManager();
 
-  const validateForm = async () => {
+  const formatMotif = (motif: string) => {
+    const found =
+      motifNonCalculabiliteCadresOptions.find(e => e.value === motif) ||
+      motifNonCalculabiliteMembresOptions.find(e => e.value === motif);
+
+    return found?.label;
+  };
+
+  const validateForm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     putRepartition(formData);
     //router.push("/ecart-rep/transmission");
   };
@@ -109,7 +123,7 @@ const Validation: NextPageWithLayout = () => {
               <RecapSectionItem>
                 <RecapSectionItemLegend>Motif de non calculabilité</RecapSectionItemLegend>
                 <RecapSectionItemContent>
-                  {formData?.motifEcartsCadresNonCalculable.toUpperCase()}
+                  {formatMotif(formData?.motifEcartsCadresNonCalculable)}
                 </RecapSectionItemContent>
               </RecapSectionItem>
             </RecapSectionItems>
@@ -133,7 +147,7 @@ const Validation: NextPageWithLayout = () => {
               <RecapSectionItem>
                 <RecapSectionItemLegend>Motif de non calculabilité</RecapSectionItemLegend>
                 <RecapSectionItemContent>
-                  {formData?.motifEcartsMembresNonCalculable.toUpperCase()}
+                  {formatMotif(formData?.motifEcartsMembresNonCalculable)}
                 </RecapSectionItemContent>
               </RecapSectionItem>
             </RecapSectionItems>
@@ -173,7 +187,9 @@ const Validation: NextPageWithLayout = () => {
               <NextLink href="/ecart-rep/publication" passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
-              <FormButton onClick={validateForm}>Valider et transmettre les résultats</FormButton>
+              <FormButton type="submit" onClick={validateForm}>
+                Valider et transmettre les résultats
+              </FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
