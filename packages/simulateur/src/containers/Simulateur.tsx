@@ -15,7 +15,6 @@ import ErrorMessage from "../components/ErrorMessage"
 
 import { Text } from "@chakra-ui/react"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
-import MailtoLink from "../components/MailtoLink"
 import { logToSentry } from "../utils/sentry"
 import { sirenIsFree } from "../utils/siren"
 import AskEmail from "../views/AskEmail"

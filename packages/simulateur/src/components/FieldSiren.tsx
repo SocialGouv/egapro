@@ -7,7 +7,6 @@ import { ownersForSiren, validateSiren } from "../utils/api"
 import { composeValidators, required, ValidatorFunction } from "../utils/formHelpers"
 import { useUser } from "./AuthContext"
 import InputGroup from "./ds/InputGroup"
-import MailtoLink from "./MailtoLink"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres."
