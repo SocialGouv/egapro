@@ -25,7 +25,13 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         <div className="fr-input-wrap">
           <input
             id={id}
-            className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.date)}
+            className={clsx(
+              "fr-input",
+              isError && "fr-input--error",
+              isValid && "fr-input--valid",
+              styles.date,
+              styles.input,
+            )}
             type="number"
             min="0"
             max="100"
@@ -43,7 +49,13 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       <div className={clsx("fr-input-wrap", icon, type === "date" && "fr-icon-calendar-line")}>
         <input
           id={id}
-          className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.date)}
+          className={clsx(
+            "fr-input",
+            isError && "fr-input--error",
+            isValid && "fr-input--valid",
+            styles.date,
+            styles.input,
+          )}
           type={type}
           disabled={isDisabled}
           aria-invalid={isError ? "true" : undefined}

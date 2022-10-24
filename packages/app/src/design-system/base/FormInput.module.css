@@ -1,4 +1,4 @@
-.date[type="date"]::-webkit-calendar-picker-indicator{
+.input[type="date"]::-webkit-calendar-picker-indicator{
     opacity: 0;
     width: 2.5rem;
     z-index: 0;
