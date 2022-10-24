@@ -3,7 +3,6 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
@@ -86,9 +85,9 @@ export const RepartitionEquilibreeLayout = ({
                   <CardBody>
                     <CardBodyContent>
                       <CardBodyContentTitle>
-                        <NextLink href="/">
-                          <a>Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?</a>
-                        </NextLink>
+                        <a href="https://index-egapro.travail.gouv.fr">
+                          Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?
+                        </a>
                       </CardBodyContentTitle>
                       <CardBodyContentDescription>
                         Toutes les entreprises d’au moins 50 salariés doivent calculer et publier leur Index de
