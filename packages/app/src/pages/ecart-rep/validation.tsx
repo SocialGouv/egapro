@@ -28,7 +28,7 @@ const Validation: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData } = useFormManager();
 
-  const formatMotif = (motif: string) => {
+  const formatMotif = (motif: string): string | undefined => {
     const found =
       motifNonCalculabiliteCadresOptions.find(e => e.value === motif) ||
       motifNonCalculabiliteMembresOptions.find(e => e.value === motif);
