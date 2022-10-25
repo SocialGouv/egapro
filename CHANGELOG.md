@@ -1,3 +1,10 @@
+# [2.23.0](https://github.com/SocialGouv/egapro/compare/v2.22.7...v2.23.0) (2022-10-25)
+
+
+### Features
+
+* update wording when user has no ownership ([#1225](https://github.com/SocialGouv/egapro/issues/1225)) ([b677f02](https://github.com/SocialGouv/egapro/commit/b677f022c175e3562784146494e01352757bfd8e))
+
 ## [2.22.7](https://github.com/SocialGouv/egapro/compare/v2.22.6...v2.22.7) (2022-10-18)
 
 
