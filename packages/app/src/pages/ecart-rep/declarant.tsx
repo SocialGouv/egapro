@@ -17,6 +17,7 @@ import {
   FormGroupMessage,
   FormLayout,
   FormLayoutButtonGroup,
+  ButtonAsLink,
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
@@ -133,9 +134,9 @@ const DeclarantPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
-              <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/commencer")}>
-                Précédent
-              </FormButton>
+              <NextLink href="/ecart-rep/commencer" passHref>
+                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+              </NextLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </form>

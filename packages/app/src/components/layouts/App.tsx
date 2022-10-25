@@ -93,7 +93,7 @@ export const App = ({ children }: PropsWithChildren) => {
                     <div className="fr-header__tools-links">
                       <ul className="fr-btns-group">
                         <li>
-                          <FormButton variant="secondary" onClick={disconnectUser}>
+                          <FormButton type="button" variant="secondary" onClick={disconnectUser}>
                             Se déconnecter
                           </FormButton>
                         </li>
