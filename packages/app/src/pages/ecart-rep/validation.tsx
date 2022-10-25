@@ -22,7 +22,7 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@design-system";
-import { useFormManager, putRepartitionEquilibree } from "@services/apiClient";
+import { useFormManager, putRepartitionEquilibree, useConfig, formatAdresse } from "@services/apiClient";
 
 const title = "Validation de vos écarts";
 
@@ -33,6 +33,9 @@ const Validation: NextPageWithLayout = () => {
   const { formData } = useFormManager();
   const [globalError, setGlobalError] = useState("");
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
+  const { config } = useConfig();
+
+  const { nafLabelFromCode } = config;
 
   const formatMotif = (motif: string): string | undefined => {
     const found =
@@ -116,11 +119,14 @@ const Validation: NextPageWithLayout = () => {
           </RecapSectionItem>
           <RecapSectionItem>
             <RecapSectionItemLegend>Code NAF</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.entreprise?.code_naf}</RecapSectionItemContent>
+            <RecapSectionItemContent>{nafLabelFromCode(formData.entreprise?.code_naf)}</RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>
             <RecapSectionItemLegend>Adresse</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.entreprise?.adresse}</RecapSectionItemContent>
+            <RecapSectionItemContent>
+              {formData.entreprise &&
+                formatAdresse(formData.entreprise).map(element => <div key={element}>{element}</div>)}
+            </RecapSectionItemContent>
           </RecapSectionItem>
         </RecapSectionItems>
       </RecapSection>
