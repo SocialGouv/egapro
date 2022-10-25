@@ -2,11 +2,13 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
 import type { NextPageWithLayout } from "../_app";
 import {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
 } from "@common/models/repartition-equilibree";
+import { formatIsoToFr } from "@common/utils/date";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -142,7 +144,9 @@ const Validation: NextPageWithLayout = () => {
               Date de fin de la période de douze mois consécutifs correspondant à l’exercice comptable pour le calcul
               des écarts
             </RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.endOfPeriod}</RecapSectionItemContent>
+            <RecapSectionItemContent>
+              {formData.endOfPeriod && formatIsoToFr(formData.endOfPeriod)}
+            </RecapSectionItemContent>
           </RecapSectionItem>
         </RecapSectionItems>
       </RecapSection>
@@ -180,11 +184,15 @@ const Validation: NextPageWithLayout = () => {
         ) : (
           <RecapSectionItems>
             <RecapSectionItem>
-              <RecapSectionItemLegend>Pourcentage de femmes parmi les cadres dirigeants</RecapSectionItemLegend>
+              <RecapSectionItemLegend>
+                Pourcentage de femmes parmi les membres des instances dirigeantes
+              </RecapSectionItemLegend>
               <RecapSectionItemContent>{formData.ecartsMembresFemmes}&nbsp;%</RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
-              <RecapSectionItemLegend>Pourcentage d’hommes parmi les cadres dirigeants</RecapSectionItemLegend>
+              <RecapSectionItemLegend>
+                Pourcentage d’hommes parmi les membres des instances dirigeantes
+              </RecapSectionItemLegend>
               <RecapSectionItemContent>{formData.ecartsMembresHommes}&nbsp;%</RecapSectionItemContent>
             </RecapSectionItem>
           </RecapSectionItems>
@@ -195,7 +203,9 @@ const Validation: NextPageWithLayout = () => {
         <RecapSectionItems>
           <RecapSectionItem>
             <RecapSectionItemLegend>Date de publication</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.publishingDate}</RecapSectionItemContent>
+            <RecapSectionItemContent>
+              {formData.publishingDate && formatIsoToFr(formData.publishingDate)}
+            </RecapSectionItemContent>
           </RecapSectionItem>
           <RecapSectionItem>
             <RecapSectionItemLegend>Site internet de publication</RecapSectionItemLegend>
