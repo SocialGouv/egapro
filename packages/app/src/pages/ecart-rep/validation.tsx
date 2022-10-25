@@ -28,7 +28,7 @@ const Validation: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData } = useFormManager();
 
-  const formatMotif = (motif: string) => {
+  const formatMotif = (motif: string): string | undefined => {
     const found =
       motifNonCalculabiliteCadresOptions.find(e => e.value === motif) ||
       motifNonCalculabiliteMembresOptions.find(e => e.value === motif);
@@ -67,20 +67,23 @@ const Validation: NextPageWithLayout = () => {
         accusé de réception par email.
       </p>
       <h2 className="fr-mt-6w">Récapitulatif</h2>
-      <p>Déclaration des écarts de représentation Femmes/Hommes pour l’année 2023 au titre des données 2022.</p>
       <ClientAuthenticatedOnly>
+        <p>
+          Déclaration des écarts de représentation Femmes/Hommes pour l’année {formData.year && formData.year + 1} au
+          titre des données {formData.year}.
+        </p>
         <RecapSection>
           <RecapSectionTitle>Informations déclarant</RecapSectionTitle>
           <RecapSectionItems>
             <RecapSectionItem>
               <RecapSectionItemLegend>Nom Prénom</RecapSectionItemLegend>
               <RecapSectionItemContent>
-                {formData?.declarant.nom}&nbsp;{formData?.declarant.prenom}
+                {formData.declarant.nom}&nbsp;{formData.declarant.prenom}
               </RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
               <RecapSectionItemLegend>Adresse email</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.declarant.email}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.declarant.email}</RecapSectionItemContent>
             </RecapSectionItem>
           </RecapSectionItems>
         </RecapSection>
@@ -89,19 +92,19 @@ const Validation: NextPageWithLayout = () => {
           <RecapSectionItems>
             <RecapSectionItem>
               <RecapSectionItemLegend>Raison sociale</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.entreprise?.raison_sociale}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.entreprise?.raison_sociale}</RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
               <RecapSectionItemLegend>Siren</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.entreprise?.siren}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.entreprise?.siren}</RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
               <RecapSectionItemLegend>Code NAF</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.entreprise?.code_naf}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.entreprise?.code_naf}</RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
               <RecapSectionItemLegend>Adresse</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.entreprise?.adresse}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.entreprise?.adresse}</RecapSectionItemContent>
             </RecapSectionItem>
           </RecapSectionItems>
         </RecapSection>
@@ -110,25 +113,25 @@ const Validation: NextPageWithLayout = () => {
           <RecapSectionItems>
             <RecapSectionItem>
               <RecapSectionItemLegend>Année au titre de laquelle les écarts sont calculés</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.year}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.year}</RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
               <RecapSectionItemLegend>
                 Date de fin de la période de douze mois consécutifs correspondant à l’exercice comptable pour le calcul
                 des écarts
               </RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.endOfPeriod}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.endOfPeriod}</RecapSectionItemContent>
             </RecapSectionItem>
           </RecapSectionItems>
         </RecapSection>
         <RecapSection>
           <RecapSectionTitle>Écart de représentation parmi les cadres dirigeants</RecapSectionTitle>
-          {formData?.motifEcartsCadresNonCalculable ? (
+          {formData.motifEcartsCadresNonCalculable ? (
             <RecapSectionItems>
               <RecapSectionItem>
                 <RecapSectionItemLegend>Motif de non calculabilité</RecapSectionItemLegend>
                 <RecapSectionItemContent>
-                  {formatMotif(formData?.motifEcartsCadresNonCalculable)}
+                  {formatMotif(formData.motifEcartsCadresNonCalculable)}
                 </RecapSectionItemContent>
               </RecapSectionItem>
             </RecapSectionItems>
@@ -136,23 +139,23 @@ const Validation: NextPageWithLayout = () => {
             <RecapSectionItems>
               <RecapSectionItem>
                 <RecapSectionItemLegend>Pourcentage de femmes parmi les cadres dirigeants</RecapSectionItemLegend>
-                <RecapSectionItemContent>{formData?.ecartsCadresFemmes}&nbsp;%</RecapSectionItemContent>
+                <RecapSectionItemContent>{formData.ecartsCadresFemmes}&nbsp;%</RecapSectionItemContent>
               </RecapSectionItem>
               <RecapSectionItem>
                 <RecapSectionItemLegend>Pourcentage d’hommes parmi les cadres dirigeants</RecapSectionItemLegend>
-                <RecapSectionItemContent>{formData?.ecartsCadresHommes}&nbsp;%</RecapSectionItemContent>
+                <RecapSectionItemContent>{formData.ecartsCadresHommes}&nbsp;%</RecapSectionItemContent>
               </RecapSectionItem>
             </RecapSectionItems>
           )}
         </RecapSection>
         <RecapSection>
           <RecapSectionTitle>Écart de représentation parmi les membres des instances dirigeantes</RecapSectionTitle>
-          {formData?.motifEcartsMembresNonCalculable ? (
+          {formData.motifEcartsMembresNonCalculable ? (
             <RecapSectionItems>
               <RecapSectionItem>
                 <RecapSectionItemLegend>Motif de non calculabilité</RecapSectionItemLegend>
                 <RecapSectionItemContent>
-                  {formatMotif(formData?.motifEcartsMembresNonCalculable)}
+                  {formatMotif(formData.motifEcartsMembresNonCalculable)}
                 </RecapSectionItemContent>
               </RecapSectionItem>
             </RecapSectionItems>
@@ -160,11 +163,11 @@ const Validation: NextPageWithLayout = () => {
             <RecapSectionItems>
               <RecapSectionItem>
                 <RecapSectionItemLegend>Pourcentage de femmes parmi les cadres dirigeants</RecapSectionItemLegend>
-                <RecapSectionItemContent>{formData?.ecartsMembresFemmes}&nbsp;%</RecapSectionItemContent>
+                <RecapSectionItemContent>{formData.ecartsMembresFemmes}&nbsp;%</RecapSectionItemContent>
               </RecapSectionItem>
               <RecapSectionItem>
                 <RecapSectionItemLegend>Pourcentage d’hommes parmi les cadres dirigeants</RecapSectionItemLegend>
-                <RecapSectionItemContent>{formData?.ecartsMembresHommes}&nbsp;%</RecapSectionItemContent>
+                <RecapSectionItemContent>{formData.ecartsMembresHommes}&nbsp;%</RecapSectionItemContent>
               </RecapSectionItem>
             </RecapSectionItems>
           )}
@@ -174,15 +177,15 @@ const Validation: NextPageWithLayout = () => {
           <RecapSectionItems>
             <RecapSectionItem>
               <RecapSectionItemLegend>Date de publication</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.publishingDate}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.publishingDate}</RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
               <RecapSectionItemLegend>Site internet de publication</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.publishingWebsiteUrl}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.publishingWebsiteUrl}</RecapSectionItemContent>
             </RecapSectionItem>
             <RecapSectionItem>
               <RecapSectionItemLegend>Modalités de communication auprès des salariés</RecapSectionItemLegend>
-              <RecapSectionItemContent>{formData?.publishingContent}</RecapSectionItemContent>
+              <RecapSectionItemContent>{formData.publishingContent}</RecapSectionItemContent>
             </RecapSectionItem>
           </RecapSectionItems>
         </RecapSection>
