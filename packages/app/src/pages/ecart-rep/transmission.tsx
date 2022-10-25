@@ -55,7 +55,9 @@ const Transmission: NextPageWithLayout = () => {
       <Box mt="6w">
         <form>
           <ButtonGroup inline="mobile-up">
-            <FormButton variant="secondary">Renvoyer l'accusé de réception</FormButton>
+            <FormButton type="button" variant="secondary">
+              Renvoyer l'accusé de réception
+            </FormButton>
             <NextLink href="/ecart-rep/assujetti/" passHref>
               <ButtonAsLink onClick={initNewRepartition}>Effectuer une nouvelle déclaration</ButtonAsLink>
             </NextLink>

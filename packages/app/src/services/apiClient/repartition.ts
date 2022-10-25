@@ -18,3 +18,6 @@ export const putRepartition = (data: FormState) => {
     }),
   });
 };
+
+export const fetchRepartitionEquilibree = (siren: string, year: number) =>
+  fetcher(`/repartition-equilibree/${siren}/${year}`);

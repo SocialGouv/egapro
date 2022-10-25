@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import Link from "next/link";
+import NextLink from "next/link";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 
@@ -27,9 +27,9 @@ export type BreadcrumbItemProps = PropsWithChildren<{ href?: string; isCurrent?:
 export const BreadcrumbItem = ({ href, isCurrent, children }: BreadcrumbItemProps) => (
   <li>
     {href ? (
-      <Link href={href} passHref>
+      <NextLink href={href} passHref>
         <a className="fr-breadcrumb__link">{children}</a>
-      </Link>
+      </NextLink>
     ) : (
       <a aria-current={isCurrent && "page"} className="fr-breadcrumb__link">
         {children}

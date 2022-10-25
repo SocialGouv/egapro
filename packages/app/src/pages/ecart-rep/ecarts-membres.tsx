@@ -129,7 +129,14 @@ const EcartsMembres: NextPageWithLayout = () => {
       ecartsMembresFemmes: isEcartsMembresCalculableBoolVal ? ecartsMembresFemmes : undefined,
       ecartsMembresHommes: isEcartsMembresCalculableBoolVal ? ecartsMembresHommes : undefined,
     });
-    router.push("/ecart-rep/publication");
+
+    // Skip directly to validation page if all indicators are not calculable.
+    const nextPage =
+      isEcartsMembresCalculableBoolVal === false && formData?.isEcartsCadresCalculable === false
+        ? "/ecart-rep/validation"
+        : "/ecart-rep/publication";
+
+    router.push(nextPage);
   };
 
   useEffect(() => {
