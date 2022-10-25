@@ -9,7 +9,7 @@ import { useUser } from "./AuthContext"
 import InputGroup from "./ds/InputGroup"
 
 const nineDigits: ValidatorFunction = (value) =>
-  value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres."
+  value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro Siren de 9 chiffres."
 
 const moizeConfig = {
   maxSize: 1000,
@@ -22,13 +22,13 @@ const memoizedValidateSiren = moize(moizeConfig)(validateSiren)
 const NOT_ALLOWED_MESSAGE = "Le Siren saisi n'est pas rattaché à votre email de connexion."
 
 const UNKNOWN_SIREN =
-  "Ce SIREN n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
+  "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
 
-const CLOSED_SIREN = "Le SIREN saisi correspond à une entreprise fermée, veuillez vérifier votre saisie."
+const CLOSED_SIREN = "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie."
 
-const INVALID_SIREN = "Le SIREN est invalide."
+const INVALID_SIREN = "Le Siren est invalide."
 
-const FOREIGN_SIREN = "Le SIREN saisi correspond à une entreprise étrangère."
+const FOREIGN_SIREN = "Le Siren saisi correspond à une entreprise étrangère."
 
 async function checkSiren(siren: string, year: number) {
   try {
@@ -133,7 +133,7 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
 
   const notAllowedErrorForAuthenticatedUser = !email
     ? NOT_ALLOWED_MESSAGE
-    : NOT_ALLOWED_MESSAGE.slice(0, NOT_ALLOWED_MESSAGE.length - 1) + `(${email})`
+    : NOT_ALLOWED_MESSAGE.slice(0, NOT_ALLOWED_MESSAGE.length - 1) + ` (${email}).`
 
   const buildLabelError = (error: string) =>
     error === NOT_ALLOWED_MESSAGE ? notAllowedErrorForAuthenticatedUser : error
