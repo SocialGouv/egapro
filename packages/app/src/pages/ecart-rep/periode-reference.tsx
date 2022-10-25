@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, getYear, formatISO, isValid, parseISO } from "date-fns";
-import Link from "next/link";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -120,19 +120,17 @@ const PeriodeReference: NextPageWithLayout = () => {
                 <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
               )}
               <br />
-              <FormButton variant="secondary" size="sm" onClick={handleClick}>
+              <FormButton type="button" variant="secondary" size="sm" onClick={handleClick}>
                 Sélectionner la fin de l'année civile
               </FormButton>
             </FormGroup>
             <FormLayoutButtonGroup>
-              <Link href="entreprise" passHref>
+              <NextLink href="entreprise" passHref>
                 <ButtonAsLink size="sm" variant="secondary">
                   Précédent
                 </ButtonAsLink>
-              </Link>
-              <FormButton type="submit" isDisabled={!isValid || (isSubmitted && !isDirty)}>
-                Suivant
-              </FormButton>
+              </NextLink>
+              <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>

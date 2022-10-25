@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isValid, parseISO } from "date-fns";
-import Link from "next/link";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -178,9 +178,9 @@ const Publication: NextPageWithLayout = () => {
             </FormGroup>
           )}
           <FormLayoutButtonGroup>
-            <Link href="/ecart-rep/ecarts-membres" passHref>
+            <NextLink href="/ecart-rep/ecarts-membres" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-            </Link>
+            </NextLink>
             <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>

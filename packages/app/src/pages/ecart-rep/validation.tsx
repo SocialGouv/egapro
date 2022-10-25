@@ -195,7 +195,7 @@ const Validation: NextPageWithLayout = () => {
               <NextLink href={previousPage} passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
-              <FormButton type="submit">Valider et transmettre les résultats</FormButton>
+              <FormButton>Valider et transmettre les résultats</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
