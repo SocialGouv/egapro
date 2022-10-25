@@ -98,7 +98,7 @@ async def as_xlsx(max_rows=None, debug=False):
         records = records[:max_rows]
     wb = Workbook(write_only=not debug)
     ws = wb.create_sheet()
-    ws.title = "BDD REPRESENTATION"
+    ws.title = "BDD REPONDANTS"
     wb.active = ws
 
     headers, columns = await get_headers_columns()

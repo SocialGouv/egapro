@@ -89,7 +89,7 @@ project:
     - name: dump-dgt
       command: egapro dump-dgt /mnt/files/dgt.xlsx
     - name: dump-dgt-repartition
-      command: egapro dump-dgt-repartition /mnt/files/dgt-repartition.xlsx
+      command: egapro dump-dgt-repartition /mnt/files/dgt-representation.xlsx
     - name: full
       command: egapro full /mnt/files/full.ndjson
     - name: export-indexes
