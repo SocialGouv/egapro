@@ -207,14 +207,17 @@ const Validation: NextPageWithLayout = () => {
               {formData.publishingDate && formatIsoToFr(formData.publishingDate)}
             </RecapSectionItemContent>
           </RecapSectionItem>
-          <RecapSectionItem>
-            <RecapSectionItemLegend>Site internet de publication</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.publishingWebsiteUrl}</RecapSectionItemContent>
-          </RecapSectionItem>
-          <RecapSectionItem>
-            <RecapSectionItemLegend>Modalités de communication auprès des salariés</RecapSectionItemLegend>
-            <RecapSectionItemContent>{formData.publishingContent}</RecapSectionItemContent>
-          </RecapSectionItem>
+          {formData.hasWebsite ? (
+            <RecapSectionItem>
+              <RecapSectionItemLegend>Site internet de publication</RecapSectionItemLegend>
+              <RecapSectionItemContent>{formData.publishingWebsiteUrl}</RecapSectionItemContent>
+            </RecapSectionItem>
+          ) : (
+            <RecapSectionItem>
+              <RecapSectionItemLegend>Modalités de communication auprès des salariés</RecapSectionItemLegend>
+              <RecapSectionItemContent>{formData.publishingContent}</RecapSectionItemContent>
+            </RecapSectionItem>
+          )}
         </RecapSectionItems>
       </RecapSection>
 
