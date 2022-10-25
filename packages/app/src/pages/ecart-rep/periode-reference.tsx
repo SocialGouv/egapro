@@ -2,12 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, getYear, formatISO, isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
+import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -50,24 +50,15 @@ const PeriodeReference: NextPageWithLayout = () => {
     formState: { errors, isDirty, isValid, isSubmitted },
     handleSubmit,
     register,
-    reset,
     setValue,
   } = useForm<FormType>({
     mode: "onBlur",
     resolver: zodResolver(formSchema),
-  });
-
-  const resetForm = useCallback(() => {
-    reset({
+    defaultValues: {
       endOfPeriod: formData?.endOfPeriod === undefined ? undefined : formData?.endOfPeriod,
       year: formData?.year === undefined ? undefined : String(formData?.year),
-    });
-    // formData needed otherwise localstorage data is not loaded
-  }, [reset, formData]);
-
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
+    },
+  });
 
   const handleClick = () => {
     if (formData?.year) {
@@ -86,7 +77,7 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   return (
     <>
-      <ClientAuthenticatedOnly>
+      <ClientOnly>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
             <FormGroup>
@@ -136,7 +127,7 @@ const PeriodeReference: NextPageWithLayout = () => {
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
-      </ClientAuthenticatedOnly>
+      </ClientOnly>
     </>
   );
 };
