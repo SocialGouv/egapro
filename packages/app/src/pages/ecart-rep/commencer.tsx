@@ -1,7 +1,8 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ApiError } from "next/dist/server/api-utils";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -20,7 +21,14 @@ import {
   FormLayoutButtonGroup,
   Alert,
 } from "@design-system";
-import { checkSiren, fetchSiren, ownersForSiren, useFormManager, useUser } from "@services/apiClient";
+import {
+  checkSiren,
+  fetchRepartitionEquilibree,
+  fetchSiren,
+  ownersForSiren,
+  useFormManager,
+  useUser,
+} from "@services/apiClient";
 
 const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 
@@ -64,6 +72,8 @@ const CommencerPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
+  const [isAlreadyPresent, setAlreadyPresent] = useState(false);
+  const [globalError, setGlobalError] = useState("");
 
   const {
     register,
@@ -97,6 +107,23 @@ const CommencerPage: NextPageWithLayout = () => {
       }
     };
 
+    try {
+      const repeq = await fetchRepartitionEquilibree(siren, Number(year));
+      if (repeq) {
+        setAlreadyPresent(true);
+        return;
+      }
+    } catch (error) {
+      if (error instanceof ApiError && error.statusCode === 404) {
+        // We can safely ignore this error, because this is the normal case.
+      } else {
+        // We can't continue in this case, because the backend is not ready.
+        console.error("Unexpected API error", error);
+        setGlobalError("Le service est indisponible pour l'instant. Veuillez réessayer plus tard.");
+        return;
+      }
+    }
+
     if (formData.entreprise?.siren && siren !== formData.entreprise.siren) {
       if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
         // Start a new declaration of repartition.
@@ -122,6 +149,8 @@ const CommencerPage: NextPageWithLayout = () => {
       </p>
 
       <div ref={animationParent} style={{ marginBottom: 20 }}>
+        {globalError && <Alert type="error">{globalError}</Alert>}
+        {isAlreadyPresent && <Alert type="error">Une déclaration pour ce Siren a déjà été validée et transmise.</Alert>}
         {errors.siren && errors.siren.message === OWNER_ERROR && (
           <Alert type="error">
             <MailtoLinkForNonOwner />
