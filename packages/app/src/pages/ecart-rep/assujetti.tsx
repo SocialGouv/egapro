@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
-import { ButtonAsLink, Callout, FormRadioGroup, FormRadioGroupInput, Link } from "@design-system";
+import { ButtonAsLink, Callout, FormRadioGroup, FormRadioGroupInput } from "@design-system";
 import { useUser } from "@services/apiClient";
 
 const title = "Êtes-vous assujetti ?";
@@ -57,7 +57,7 @@ const AssujettiPage: NextPageWithLayout = () => {
           Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
           les femmes et les hommes.{" "}
           <NextLink href="/ecart-rep/" passHref>
-            <Link>Retour à la page d'accueil.</Link>
+            <ButtonAsLink>Retour à la page d'accueil.</ButtonAsLink>
           </NextLink>
         </Callout>
       )) || (
