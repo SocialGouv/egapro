@@ -42,6 +42,11 @@ const Validation: NextPageWithLayout = () => {
     router.push("/ecart-rep/transmission");
   };
 
+  const previousPage =
+    formData?.isEcartsMembresCalculable === false && formData?.isEcartsCadresCalculable === false
+      ? "/ecart-rep/ecarts-membres"
+      : "/ecart-rep/publication";
+
   return (
     <>
       <h1>{title}</h1>
@@ -184,7 +189,7 @@ const Validation: NextPageWithLayout = () => {
         <form noValidate onSubmit={e => validateForm(e)}>
           <FormLayout>
             <FormLayoutButtonGroup>
-              <NextLink href="/ecart-rep/publication" passHref>
+              <NextLink href={previousPage} passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
               <FormButton type="submit">Valider et transmettre les résultats</FormButton>
