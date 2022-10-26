@@ -195,7 +195,6 @@ const EcartsMembres: NextPageWithLayout = () => {
                 <FormGroupLabel htmlFor="motifEcartsMembresNonCalculable">Motif de non calculabilité</FormGroupLabel>
                 <FormSelect
                   id="motifEcartsMembresNonCalculable"
-                  placeholder="Sélectionnez une option"
                   {...register("motifEcartsMembresNonCalculable")}
                   aria-describedby="motifEcartsMembresNonCalculable-message-error"
                 >
