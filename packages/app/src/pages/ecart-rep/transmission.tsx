@@ -18,6 +18,7 @@ import {
   FormButton,
   Grid,
   GridCol,
+  ImgSuccess,
 } from "@design-system";
 import { useFormManager } from "@services/apiClient";
 
@@ -34,6 +35,11 @@ const Transmission: NextPageWithLayout = () => {
 
   return (
     <>
+      <Grid justifyCenter>
+        <GridCol sm={8} md={5}>
+          <ImgSuccess />
+        </GridCol>
+      </Grid>
       <h1>{title}</h1>
       <p>
         Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
