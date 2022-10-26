@@ -259,6 +259,23 @@ async def resend_objectifs_receipt(request, response, siren, year):
     response.status = 204
 
 
+@app.route("/repartition-equilibree/{siren}/{year}/receipt", methods=["POST"])
+@tokens.require
+@ensure_owner
+async def resend_repartition_receipt(request, response, siren, year):
+    try:
+        record = await db.repartition.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No répartition équilibrée with siren {siren} and year {year}")
+    owners = await db.ownership.emails(siren)
+    if not owners:  # Staff member
+        owners = request["email"]
+    data = record.data
+    url = request.domain + data.uri
+    emails.repartition.send(owners, url=url, **data)
+    response.status = 204
+
+
 @app.route("/ownership/{siren}", methods=["GET"])
 @tokens.require
 @ensure_owner
@@ -440,7 +457,7 @@ async def put_repartition(request, response, siren, year):
             if not owners:  # Staff member
                 owners = request["email"]
             url = request.domain + data.uri
-            emails.success.send(owners, url=url, **data)
+            emails.repartition.send(owners, url=url, **data)
 
 @app.route("/search")
 async def search(request, response):
