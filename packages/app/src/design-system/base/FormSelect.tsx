@@ -18,8 +18,11 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
         {...rest}
         ref={ref}
       >
-        {/* TODO: ne marche pas avec un disabled hidden pour le placeholder ??  */}
-        {placeholder && <option value="">{placeholder}</option>}
+        {placeholder && (
+          <option value="" disabled hidden>
+            {placeholder}
+          </option>
+        )}
 
         {children}
       </select>
