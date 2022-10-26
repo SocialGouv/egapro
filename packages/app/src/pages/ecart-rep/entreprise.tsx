@@ -1,9 +1,18 @@
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 
 import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
-import { FormButton, FormGroup, FormInput, FormGroupLabel, FormLayout, FormLayoutButtonGroup } from "@design-system";
+import {
+  FormButton,
+  FormGroup,
+  FormInput,
+  FormGroupLabel,
+  FormLayout,
+  FormLayoutButtonGroup,
+  ButtonAsLink,
+} from "@design-system";
 import { useConfig, useFormManager, useUser } from "@services/apiClient";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
@@ -13,16 +22,9 @@ const InformationsEntreprise: NextPageWithLayout = () => {
   // No need to use React Hook Form here, because we only show read only data.
   const { formData } = useFormManager();
   const { config } = useConfig();
+  const { regionLabelFromCode, departementLabelFromCode, nafLabelFromCode } = config;
 
-  const REGIONS = config?.REGIONS;
-  const DEPARTEMENTS = config?.DEPARTEMENTS;
-  const NAF = config?.NAF;
-
-  const { région: codeRegion, département: codeDepartement, code_naf: codeNaf } = formData.entreprise || {};
-
-  const regionLabel = codeRegion ? (!REGIONS ? codeRegion : REGIONS[codeRegion]) : "";
-  const departementLabel = codeDepartement ? (!DEPARTEMENTS ? codeDepartement : DEPARTEMENTS[codeDepartement]) : "";
-  const nafLabel = codeNaf ? (!NAF ? codeNaf : codeNaf + " - " + NAF[codeNaf]) : "";
+  const { région, département, code_naf } = formData.entreprise || {};
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -50,15 +52,15 @@ const InformationsEntreprise: NextPageWithLayout = () => {
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="code-naf">Code NAF</FormGroupLabel>
-            <FormInput id="code-naf" type="text" readOnly value={nafLabel || ""} />
+            <FormInput id="code-naf" type="text" readOnly value={nafLabelFromCode(code_naf)} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="region">Région</FormGroupLabel>
-            <FormInput id="region" type="text" readOnly value={regionLabel || ""} />
+            <FormInput id="region" type="text" readOnly value={regionLabelFromCode(région)} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="departement">Département</FormGroupLabel>
-            <FormInput id="departement" type="text" readOnly value={departementLabel || ""} />
+            <FormInput id="departement" type="text" readOnly value={departementLabelFromCode(département)} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="adresse">Adresse</FormGroupLabel>
@@ -77,10 +79,10 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormInput id="code-pays" type="text" readOnly value={formData.entreprise?.code_pays || ""} />
           </FormGroup>
           <FormLayoutButtonGroup>
-            <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/declarant")}>
-              Précédent
-            </FormButton>
-            <FormButton type="submit">Suivant</FormButton>
+            <NextLink href="/ecart-rep/declarant" passHref>
+              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+            </NextLink>
+            <FormButton>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>

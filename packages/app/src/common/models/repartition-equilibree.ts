@@ -38,7 +38,7 @@ export type RepartitionEquilibreeDataField = {
 type DeclarationRepartitionEquilibree = {
   année_indicateurs: number;
   fin_période_référence: string;
-  publication: PublicationRepartitionEquilibree;
+  publication?: PublicationRepartitionEquilibree | undefined;
 };
 
 type PublicationRepartitionEquilibree = {
@@ -115,14 +115,14 @@ export const buildRepartition = (state: FormState): RepartitionEquilibreeDataFie
 
   const publication: PublicationRepartitionEquilibree = {
     date: state.publishingDate as string, // todo: replace later with zod schema
-    modalités: state.publishingContent,
-    url: state.publishingWebsiteUrl,
+    ...(!state.hasWebsite && { modalités: state.publishingContent }),
+    ...(state.hasWebsite && { url: state.publishingWebsiteUrl }),
   };
 
   const déclaration: DeclarationRepartitionEquilibree = {
     année_indicateurs: state.year as number,
     fin_période_référence: state.endOfPeriod as string,
-    publication,
+    ...((!state.motifEcartsCadresNonCalculable || !state.motifEcartsMembresNonCalculable) && { publication }),
   };
 
   const entreprise: Entreprise = {

@@ -21,7 +21,7 @@ export const RecapSectionItem = ({ children }: PropsWithChildren) => <li>{childr
 
 export const RecapSectionItemLegend = ({ children }: PropsWithChildren) => (
   <>
-    <strong>{children}</strong>&nbsp;:
+    <strong>{children}</strong>&nbsp;
   </>
 );
 

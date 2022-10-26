@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
+import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   FormButton,
@@ -17,6 +17,7 @@ import {
   FormGroupMessage,
   FormLayout,
   FormLayoutButtonGroup,
+  ButtonAsLink,
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
@@ -46,20 +47,25 @@ const DeclarantPage: NextPageWithLayout = () => {
   } = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: user?.email,
-    },
+    // Using defaultValues would not be enough here, because we fetch user.email asynchronously and so it is not present at rehydration time. So we use reset API below.
   });
 
   const resetAsyncForm = useCallback(async () => {
     reset({
-      email: user?.email,
       nom: formData?.declarant?.nom,
       prenom: formData?.declarant?.prenom,
       telephone: formData?.declarant?.telephone,
       accord_rgpd: formData?.declarant?.accord_rgpd,
+      email: user?.email,
     });
-  }, [reset, formData, user?.email]);
+  }, [
+    formData?.declarant?.accord_rgpd,
+    formData?.declarant?.nom,
+    formData?.declarant?.prenom,
+    formData?.declarant?.telephone,
+    reset,
+    user?.email,
+  ]);
 
   useEffect(() => {
     resetAsyncForm();
@@ -76,7 +82,7 @@ const DeclarantPage: NextPageWithLayout = () => {
         <b>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone.</b>
       </p>
 
-      <ClientAuthenticatedOnly>
+      <ClientOnly>
         <FormLayout>
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <FormGroup>
@@ -133,14 +139,14 @@ const DeclarantPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
-              <FormButton type="button" variant="secondary" onClick={() => router.push("/ecart-rep/commencer")}>
-                Précédent
-              </FormButton>
+              <NextLink href="/ecart-rep/commencer" passHref>
+                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+              </NextLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </form>
         </FormLayout>
-      </ClientAuthenticatedOnly>
+      </ClientOnly>
     </>
   );
 };
