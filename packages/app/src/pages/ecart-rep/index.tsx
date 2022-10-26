@@ -67,7 +67,7 @@ export const EcartRep: NextPageWithLayout = () => (
             <Card>
               <CardBody>
                 <CardBodyContent>
-                  <CardBodyContentTitle titleAs="h2">Transmission de déclaration</CardBodyContentTitle>
+                  <CardBodyContentTitle titleAs="h2">Êtes-vous assujetti&nbsp;?</CardBodyContentTitle>
                   <CardBodyContentDescription>
                     Les entreprises qui emploient au moins 1 000 salariés pour le troisième exercice consécutif doivent
                     publier et déclarer chaque année au plus tard le 1er mars leurs écarts éventuels de représentation
@@ -90,7 +90,11 @@ export const EcartRep: NextPageWithLayout = () => (
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>
-                  <ButtonAsLink variant="secondary" href="https://travail-emploi.gouv.fr/" target="_blank">
+                  <ButtonAsLink
+                    variant="secondary"
+                    href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/"
+                    target="_blank"
+                  >
                     Consulter le site du Ministère du Travail
                   </ButtonAsLink>
                 </CardBodyFooter>

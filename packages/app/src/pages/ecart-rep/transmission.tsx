@@ -55,7 +55,7 @@ const Transmission: NextPageWithLayout = () => {
       </p>
       <p>
         Si vous ne recevez pas cet accusé, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre dossier de
-        courriers indésirables, vous pouvez aussi <a>demander d’envoyer à nouveau l’accusé de réception</a>.
+        courriers indésirables.
       </p>
       <p>Nous vous remercions de votre transmission.</p>
       <Box mt="6w">

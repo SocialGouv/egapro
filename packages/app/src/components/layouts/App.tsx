@@ -84,7 +84,7 @@ export const App = ({ children }: PropsWithChildren) => {
                       </a>
                     </NextLink>
                     <p className="fr-header__service-tagline">
-                      Index de l’égalité professionnelle et répartition équilibrée femmes – hommes
+                      Index de l’égalité professionnelle et représentation équilibrée femmes – hommes
                     </p>
                   </div>
                 </div>
