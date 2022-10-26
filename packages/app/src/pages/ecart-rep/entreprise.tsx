@@ -22,16 +22,9 @@ const InformationsEntreprise: NextPageWithLayout = () => {
   // No need to use React Hook Form here, because we only show read only data.
   const { formData } = useFormManager();
   const { config } = useConfig();
+  const { regionLabelFromCode, departementLabelFromCode, nafLabelFromCode } = config;
 
-  const REGIONS = config?.REGIONS;
-  const DEPARTEMENTS = config?.DEPARTEMENTS;
-  const NAF = config?.NAF;
-
-  const { région: codeRegion, département: codeDepartement, code_naf: codeNaf } = formData.entreprise || {};
-
-  const regionLabel = codeRegion ? (!REGIONS ? codeRegion : REGIONS[codeRegion]) : "";
-  const departementLabel = codeDepartement ? (!DEPARTEMENTS ? codeDepartement : DEPARTEMENTS[codeDepartement]) : "";
-  const nafLabel = codeNaf ? (!NAF ? codeNaf : codeNaf + " - " + NAF[codeNaf]) : "";
+  const { région, département, code_naf } = formData.entreprise || {};
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -59,15 +52,15 @@ const InformationsEntreprise: NextPageWithLayout = () => {
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="code-naf">Code NAF</FormGroupLabel>
-            <FormInput id="code-naf" type="text" readOnly value={nafLabel || ""} />
+            <FormInput id="code-naf" type="text" readOnly value={nafLabelFromCode(code_naf)} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="region">Région</FormGroupLabel>
-            <FormInput id="region" type="text" readOnly value={regionLabel || ""} />
+            <FormInput id="region" type="text" readOnly value={regionLabelFromCode(région)} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="departement">Département</FormGroupLabel>
-            <FormInput id="departement" type="text" readOnly value={departementLabel || ""} />
+            <FormInput id="departement" type="text" readOnly value={departementLabelFromCode(département)} />
           </FormGroup>
           <FormGroup>
             <FormGroupLabel htmlFor="adresse">Adresse</FormGroupLabel>

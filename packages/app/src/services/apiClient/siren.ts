@@ -14,6 +14,10 @@ export type EntrepriseType = {
   siren?: string;
 };
 
+export const formatAdresse = (entreprise: EntrepriseType) => {
+  return [entreprise.adresse, entreprise.code_postal, entreprise.commune];
+};
+
 export const fetchSiren = async (siren: string, year?: number | undefined) => {
   const url = year ? `/validate-siren?siren=${siren}&year=${year}` : `/validate-siren?siren=${siren}`;
 

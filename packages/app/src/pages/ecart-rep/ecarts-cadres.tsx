@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -9,6 +9,7 @@ import type { NextPageWithLayout } from "../_app";
 import { motifNonCalculabiliteCadresOptions } from "@common/models/repartition-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
 
+import { ClientOnly } from "@components/ClientOnly";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -86,6 +87,12 @@ const EcartsCadres: NextPageWithLayout = () => {
   const methods = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
+      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
+      ecartsCadresFemmes: formData?.ecartsCadresFemmes,
+      ecartsCadresHommes: formData?.ecartsCadresHommes,
+    },
   });
 
   const {
@@ -93,27 +100,11 @@ const EcartsCadres: NextPageWithLayout = () => {
     formState: { isDirty, isValid, isSubmitted, errors },
     handleSubmit,
     register,
-    reset,
     setValue,
     watch,
   } = methods;
 
   const isEcartsCadresCalculable = watch("isEcartsCadresCalculable");
-
-  const resetForm = useCallback(() => {
-    if (formData) {
-      reset({
-        isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
-        motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
-        ecartsCadresFemmes: formData?.ecartsCadresFemmes,
-        ecartsCadresHommes: formData?.ecartsCadresHommes,
-      });
-    }
-  }, [reset, formData]);
-
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
 
   const onSubmit = ({
     isEcartsCadresCalculable,
@@ -143,7 +134,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   }, [clearErrors, isEcartsCadresCalculable, setValue]);
 
   return (
-    <>
+    <ClientOnly>
       {isEcartsCadresCalculable === undefined && (
         <Alert mb="4w">
           <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
@@ -247,7 +238,7 @@ const EcartsCadres: NextPageWithLayout = () => {
           </Card>
         </GridCol>
       </Grid>
-    </>
+    </ClientOnly>
   );
 };
 
