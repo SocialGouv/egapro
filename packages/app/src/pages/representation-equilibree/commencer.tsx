@@ -36,11 +36,11 @@ const OWNER_ERROR = "Erreur : vous n'avez pas les droits sur ce Siren";
 
 const formSchema = z
   .object({
-    year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
+    year: z.string().min(1, "L'année est requise"), // No control needed because this is a select with options we provide.
     siren: z
       .string()
       .min(1, { message: "Le Siren est requis" })
-      .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres."),
+      .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres"),
   })
   .superRefine(async ({ year, siren }, ctx) => {
     if (siren && siren.length === 9) {
@@ -50,7 +50,7 @@ const formSchema = z
         console.error("error", error);
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: error instanceof Error ? error.message : "Le Siren est invalide.",
+          message: error instanceof Error ? error.message : "Le Siren est invalide",
           path: ["siren"],
         });
         return z.NEVER; // Abort early when there is an error in the first API call.
