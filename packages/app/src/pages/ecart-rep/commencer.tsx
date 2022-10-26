@@ -2,12 +2,13 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ApiError } from "next/dist/server/api-utils";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
+import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -79,22 +80,14 @@ const CommencerPage: NextPageWithLayout = () => {
     register,
     handleSubmit,
     setValue,
-    reset,
     formState: { errors, isSubmitted, isValid, isSubmitting },
   } = useForm<FormType>({
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
-  });
-
-  const resetAsyncForm = useCallback(async () => {
-    reset({
+    defaultValues: {
       siren: formData?.entreprise?.siren,
       year: formData?.year === undefined ? undefined : String(formData?.year),
-    });
-  }, [reset, formData]);
-
-  useEffect(() => {
-    resetAsyncForm();
-  }, [resetAsyncForm]);
+    },
+  });
 
   const onSubmit = async ({ year, siren }: FormType) => {
     const startFresh = async () => {
@@ -140,7 +133,7 @@ const CommencerPage: NextPageWithLayout = () => {
   };
 
   return (
-    <>
+    <ClientOnly>
       <p>
         <b>
           Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
@@ -199,7 +192,7 @@ const CommencerPage: NextPageWithLayout = () => {
           </FormLayout>
         </form>
       </ClientAuthenticatedOnly>
-    </>
+    </ClientOnly>
   );
 };
 

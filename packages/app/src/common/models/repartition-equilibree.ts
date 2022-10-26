@@ -115,8 +115,8 @@ export const buildRepartition = (state: FormState): RepartitionEquilibreeDataFie
 
   const publication: PublicationRepartitionEquilibree = {
     date: state.publishingDate as string, // todo: replace later with zod schema
-    modalités: state.publishingContent,
-    url: state.publishingWebsiteUrl,
+    ...(!state.hasWebsite && { modalités: state.publishingContent }),
+    ...(state.hasWebsite && { url: state.publishingWebsiteUrl }),
   };
 
   const déclaration: DeclarationRepartitionEquilibree = {
