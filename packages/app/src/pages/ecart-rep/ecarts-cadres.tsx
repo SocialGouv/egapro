@@ -54,19 +54,38 @@ const formSchema = z
   })
   .superRefine(
     ({ isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresHommes, ecartsCadresFemmes }, ctx) => {
-      if (isEcartsCadresCalculable === "oui" && typeof ecartsCadresHommes === "undefined") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Le pourcentage d'hommes parmi les cadres dirigeants est obligatoire",
-          path: ["ecartsCadresHommes"],
-        });
-      }
-      if (isEcartsCadresCalculable === "oui" && typeof ecartsCadresFemmes === "undefined") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Le pourcentage de femmes parmi les cadres dirigeants est obligatoire",
-          path: ["ecartsCadresFemmes"],
-        });
+      if (isEcartsCadresCalculable === "oui") {
+        if (typeof ecartsCadresHommes === "undefined") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Le pourcentage d'hommes parmi les cadres dirigeants est obligatoire",
+            path: ["ecartsCadresHommes"],
+          });
+        }
+        if (typeof ecartsCadresFemmes === "undefined") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Le pourcentage de femmes parmi les cadres dirigeants est obligatoire",
+            path: ["ecartsCadresFemmes"],
+          });
+        }
+        if (typeof ecartsCadresHommes !== "undefined" && typeof ecartsCadresFemmes !== "undefined") {
+          // This should not happen since the inputs are of type number but it is safer.
+          if (isNaN(ecartsCadresHommes) || isNaN(ecartsCadresFemmes)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Les pourcentages doivent être des nombres",
+              path: ["ecartsCadresFemmes"],
+            });
+          }
+          if (Number(ecartsCadresHommes) + Number(ecartsCadresFemmes) !== 100) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "La somme des pourcentages doit être de 100%",
+              path: ["ecartsCadresFemmes"],
+            });
+          }
+        }
       }
       if (isEcartsCadresCalculable === "non" && typeof motifEcartsCadresNonCalculable === "undefined") {
         ctx.addIssue({
