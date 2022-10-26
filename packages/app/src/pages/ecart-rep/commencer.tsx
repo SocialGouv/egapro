@@ -36,29 +36,34 @@ const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
-    siren: z.string().regex(/^[0-9]{9}$/, "Le Siren est invalide."),
+    siren: z
+      .string()
+      .min(1, { message: "Le Siren est requis" })
+      .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres."),
   })
   .superRefine(async ({ year, siren }, ctx) => {
-    if (!year || !siren) return false;
-    try {
-      await checkSiren(siren, Number(year));
-    } catch (error: unknown) {
-      console.error("error", error);
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: error instanceof Error ? error.message : "Le n° Siren est invalide",
-        path: ["siren"],
-      });
-    }
-    try {
-      await ownersForSiren(siren);
-    } catch (error: unknown) {
-      console.error("error", error);
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: OWNER_ERROR,
-        path: ["siren"],
-      });
+    if (siren && siren.length === 9) {
+      try {
+        await checkSiren(siren, Number(year));
+      } catch (error: unknown) {
+        console.error("error", error);
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: error instanceof Error ? error.message : "Le Siren est invalide.",
+          path: ["siren"],
+        });
+        return z.NEVER; // Abort early when there is an error in the first API call.
+      }
+      try {
+        await ownersForSiren(siren);
+      } catch (error: unknown) {
+        console.error("error", error);
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: OWNER_ERROR,
+          path: ["siren"],
+        });
+      }
     }
   });
 
@@ -82,6 +87,7 @@ const CommencerPage: NextPageWithLayout = () => {
     setValue,
     formState: { errors, isSubmitted, isValid, isSubmitting },
   } = useForm<FormType>({
+    mode: "onChange",
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
     defaultValues: {
       siren: formData?.entreprise?.siren,
