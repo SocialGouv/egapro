@@ -19,11 +19,12 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
-import { useFormManager } from "@services/apiClient";
+import { useFormManager, useUser } from "@services/apiClient";
 
 const title = "Transmission de la procédure";
 
 const Transmission: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { resetFormData } = useFormManager();
 
