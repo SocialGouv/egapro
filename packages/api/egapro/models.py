@@ -101,6 +101,7 @@ class Data(dict):
 
     @property
     def uri(self):
+        # URIs for: simulateur | repartition | declaration
         if self.get("source") == "simulateur":
             return f"/index/simulateur/{self.id}"
         elif self.get("indicateurs"):
