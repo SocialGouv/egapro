@@ -42,8 +42,8 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-// Ensure the following variable is in sync with motifNonCalculabiliteMembresOptions[number].value;
-export const motifEcartsMembresNonCalculableValues = ["aucune_instance_dirigeante"] as const;
+// Ensure the following variable is in sync with motifNonCalculabiliteMembresOptions[number].value + add "" as the placeholder needed when no choice is made at start.
+export const motifEcartsMembresNonCalculableValues = ["aucune_instance_dirigeante", ""] as const;
 
 const formSchema = z
   .object({
@@ -89,7 +89,7 @@ const EcartsMembres: NextPageWithLayout = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       isEcartsMembresCalculable: radioBoolToString(formData?.isEcartsMembresCalculable),
-      motifEcartsMembresNonCalculable: formData?.motifEcartsMembresNonCalculable,
+      motifEcartsMembresNonCalculable: formData?.motifEcartsMembresNonCalculable || "", // Use "" to select the placeholder if no choice is made at start.
       ecartsMembresFemmes: formData?.ecartsMembresFemmes,
       ecartsMembresHommes: formData?.ecartsMembresHommes,
     },
@@ -116,7 +116,10 @@ const EcartsMembres: NextPageWithLayout = () => {
 
     saveFormData({
       isEcartsMembresCalculable: isEcartsMembresCalculableBoolVal,
-      motifEcartsMembresNonCalculable: isEcartsMembresCalculableBoolVal ? undefined : motifEcartsMembresNonCalculable,
+      motifEcartsMembresNonCalculable:
+        isEcartsMembresCalculableBoolVal || !motifEcartsMembresNonCalculable
+          ? undefined
+          : motifEcartsMembresNonCalculable,
       ecartsMembresFemmes: isEcartsMembresCalculableBoolVal ? ecartsMembresFemmes : undefined,
       ecartsMembresHommes: isEcartsMembresCalculableBoolVal ? ecartsMembresHommes : undefined,
     });
@@ -195,6 +198,7 @@ const EcartsMembres: NextPageWithLayout = () => {
                 <FormGroupLabel htmlFor="motifEcartsMembresNonCalculable">Motif de non calculabilité</FormGroupLabel>
                 <FormSelect
                   id="motifEcartsMembresNonCalculable"
+                  placeholder="Sélectionnez une option"
                   {...register("motifEcartsMembresNonCalculable")}
                   aria-describedby="motifEcartsMembresNonCalculable-message-error"
                 >

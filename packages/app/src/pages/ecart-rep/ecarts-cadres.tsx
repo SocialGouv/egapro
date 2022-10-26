@@ -42,8 +42,8 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value;
-export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"] as const;
+// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value + add "" as the placeholder needed when no choice is made at start.
+export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant", ""] as const;
 
 const formSchema = z
   .object({
@@ -89,7 +89,7 @@ const EcartsCadres: NextPageWithLayout = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
-      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
+      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable || "", // Use "" to select the placeholder if no choice is made at start.
       ecartsCadresFemmes: formData?.ecartsCadresFemmes,
       ecartsCadresHommes: formData?.ecartsCadresHommes,
     },
@@ -116,7 +116,8 @@ const EcartsCadres: NextPageWithLayout = () => {
 
     saveFormData({
       isEcartsCadresCalculable: isEcartsCadresCalculableBoolVal,
-      motifEcartsCadresNonCalculable: isEcartsCadresCalculableBoolVal ? undefined : motifEcartsCadresNonCalculable,
+      motifEcartsCadresNonCalculable:
+        isEcartsCadresCalculableBoolVal || !motifEcartsCadresNonCalculable ? undefined : motifEcartsCadresNonCalculable,
       ecartsCadresFemmes: isEcartsCadresCalculableBoolVal ? ecartsCadresFemmes : undefined,
       ecartsCadresHommes: isEcartsCadresCalculableBoolVal ? ecartsCadresHommes : undefined,
     });
@@ -181,6 +182,7 @@ const EcartsCadres: NextPageWithLayout = () => {
                 <FormGroupLabel htmlFor="motifEcartsCadresNonCalculable">Motif de non calculabilité</FormGroupLabel>
                 <FormSelect
                   id="motifEcartsCadresNonCalculable"
+                  placeholder="Sélectionnez une option"
                   {...register("motifEcartsCadresNonCalculable")}
                   aria-describedby="motifEcartsCadresNonCalculable-message-error"
                 >

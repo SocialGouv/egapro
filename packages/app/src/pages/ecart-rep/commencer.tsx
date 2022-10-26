@@ -85,7 +85,7 @@ const CommencerPage: NextPageWithLayout = () => {
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
     defaultValues: {
       siren: formData?.entreprise?.siren,
-      year: formData?.year === undefined ? undefined : String(formData?.year),
+      year: formData?.year === undefined ? "" : String(formData?.year),
     },
   });
 
