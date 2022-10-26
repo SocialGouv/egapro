@@ -8,6 +8,7 @@ export const zodPercentageSchema = z
   .number({ required_error: INVALID_PERCENTAGE, invalid_type_error: INVALID_PERCENTAGE })
   .nonnegative({ message: "Le pourcentage doit être positif" })
   .lte(100, { message: "Le pourcentage maximum est 100" })
+  .multipleOf(0.1, { message: "Le pourcentage n'a au maximum qu'un chiffre après la virgule" })
   .optional();
 
 export type RadioInputValueType = z.infer<typeof zodRadioInputSchema>;
