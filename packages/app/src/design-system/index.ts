@@ -26,6 +26,7 @@ export * from "./base/SkipLinks";
 export * from "./base/Stepper";
 export * from "./img/ImgEcartRep";
 export * from "./img/ImgHome";
+export * from "./img/ImgSuccess";
 export * from "./layout/Container";
 export * from "./layout/ContentWithAside";
 export * from "./layout/FormLayout";

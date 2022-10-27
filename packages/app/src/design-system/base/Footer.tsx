@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from "react";
+import { forwardRef } from "react";
 import { Container } from "../layout/Container";
 
 export const Footer = ({ children }: PropsWithChildren) => (
@@ -55,15 +56,17 @@ export const FooterBottomItem = ({ children }: PropsWithChildren) => {
   return <li className="fr-footer__bottom-item">{children}</li>;
 };
 
-export type FooterBottomLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+export const FooterBottomLink = forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>(
+  ({ children, ...rest }, ref) => {
+    return (
+      <a className="fr-footer__bottom-link" ref={ref} {...rest}>
+        {children}
+      </a>
+    );
+  },
+);
 
-export const FooterBottomLink = ({ children, ...rest }: FooterBottomLinkProps) => {
-  return (
-    <a className="fr-footer__bottom-link" {...rest}>
-      {children}
-    </a>
-  );
-};
+FooterBottomLink.displayName = "FooterBottomLink";
 
 export type FooterContentLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
