@@ -45,10 +45,10 @@ function useAdressLabel({ departement, region }: { departement?: string; region?
   const { DEPARTEMENTS, REGIONS } = config;
 
   let result = "";
-  if (departement) {
+  if (departement && DEPARTEMENTS) {
     result = DEPARTEMENTS[departement];
   }
-  if (region) {
+  if (region && REGIONS) {
     result += ", " + REGIONS[region];
   }
   return result;

@@ -2,12 +2,13 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ApiError } from "next/dist/server/api-utils";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
+import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -35,29 +36,34 @@ const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
-    siren: z.string().regex(/^[0-9]{9}$/, "Le Siren est invalide."),
+    siren: z
+      .string()
+      .min(1, { message: "Le Siren est requis" })
+      .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres."),
   })
   .superRefine(async ({ year, siren }, ctx) => {
-    if (!year || !siren) return false;
-    try {
-      await checkSiren(siren, Number(year));
-    } catch (error: unknown) {
-      console.error("error", error);
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: error instanceof Error ? error.message : "Le n° Siren est invalide",
-        path: ["siren"],
-      });
-    }
-    try {
-      await ownersForSiren(siren);
-    } catch (error: unknown) {
-      console.error("error", error);
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: OWNER_ERROR,
-        path: ["siren"],
-      });
+    if (siren && siren.length === 9) {
+      try {
+        await checkSiren(siren, Number(year));
+      } catch (error: unknown) {
+        console.error("error", error);
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: error instanceof Error ? error.message : "Le Siren est invalide.",
+          path: ["siren"],
+        });
+        return z.NEVER; // Abort early when there is an error in the first API call.
+      }
+      try {
+        await ownersForSiren(siren);
+      } catch (error: unknown) {
+        console.error("error", error);
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: OWNER_ERROR,
+          path: ["siren"],
+        });
+      }
     }
   });
 
@@ -79,22 +85,15 @@ const CommencerPage: NextPageWithLayout = () => {
     register,
     handleSubmit,
     setValue,
-    reset,
     formState: { errors, isSubmitted, isValid, isSubmitting },
   } = useForm<FormType>({
+    mode: "onChange",
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
-  });
-
-  const resetAsyncForm = useCallback(async () => {
-    reset({
+    defaultValues: {
       siren: formData?.entreprise?.siren,
-      year: formData?.year === undefined ? undefined : String(formData?.year),
-    });
-  }, [reset, formData]);
-
-  useEffect(() => {
-    resetAsyncForm();
-  }, [resetAsyncForm]);
+      year: formData?.year === undefined ? "" : String(formData?.year),
+    },
+  });
 
   const onSubmit = async ({ year, siren }: FormType) => {
     const startFresh = async () => {
@@ -140,7 +139,7 @@ const CommencerPage: NextPageWithLayout = () => {
   };
 
   return (
-    <>
+    <ClientOnly>
       <p>
         <b>
           Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
@@ -199,7 +198,7 @@ const CommencerPage: NextPageWithLayout = () => {
           </FormLayout>
         </form>
       </ClientAuthenticatedOnly>
-    </>
+    </ClientOnly>
   );
 };
 

@@ -16,8 +16,6 @@ export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   type?: FormInputCustomTypes;
 };
 
-const PercentageCharacter = () => <div className={styles.percentage} />;
-
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ type = "text", isError, isValid, isDisabled, icon, id, ...rest }, ref) => {
     if (type === "percentage") {
@@ -35,7 +33,6 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             ref={ref}
             {...rest}
           />
-          {!isNaN(rest?.value as number) ? <PercentageCharacter /> : null}
         </div>
       );
     }

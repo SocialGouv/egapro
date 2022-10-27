@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -9,6 +9,7 @@ import type { NextPageWithLayout } from "../_app";
 import { motifNonCalculabiliteMembresOptions } from "@common/models/repartition-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
 
+import { ClientOnly } from "@components/ClientOnly";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -41,8 +42,8 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-// Ensure the following variable is in sync with motifNonCalculabiliteMembresOptions[number].value;
-export const motifEcartsMembresNonCalculableValues = ["aucune_instance_dirigeante"] as const;
+// Ensure the following variable is in sync with motifNonCalculabiliteMembresOptions[number].value + add "" as the placeholder needed when no choice is made at start.
+export const motifEcartsMembresNonCalculableValues = ["aucune_instance_dirigeante", ""] as const;
 
 const formSchema = z
   .object({
@@ -86,6 +87,12 @@ const EcartsMembres: NextPageWithLayout = () => {
   const methods = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      isEcartsMembresCalculable: radioBoolToString(formData?.isEcartsMembresCalculable),
+      motifEcartsMembresNonCalculable: formData?.motifEcartsMembresNonCalculable || "", // Use "" to select the placeholder if no choice is made at start.
+      ecartsMembresFemmes: formData?.ecartsMembresFemmes,
+      ecartsMembresHommes: formData?.ecartsMembresHommes,
+    },
   });
 
   const {
@@ -93,27 +100,11 @@ const EcartsMembres: NextPageWithLayout = () => {
     formState: { isDirty, isValid, isSubmitted, errors },
     handleSubmit,
     register,
-    reset,
     setValue,
     watch,
   } = methods;
 
   const isEcartsMembresCalculable = watch("isEcartsMembresCalculable");
-
-  const resetForm = useCallback(() => {
-    if (formData) {
-      reset({
-        isEcartsMembresCalculable: radioBoolToString(formData?.isEcartsMembresCalculable),
-        motifEcartsMembresNonCalculable: formData?.motifEcartsMembresNonCalculable,
-        ecartsMembresFemmes: formData?.ecartsMembresFemmes,
-        ecartsMembresHommes: formData?.ecartsMembresHommes,
-      });
-    }
-  }, [reset, formData]);
-
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
 
   const onSubmit = ({
     isEcartsMembresCalculable,
@@ -125,7 +116,10 @@ const EcartsMembres: NextPageWithLayout = () => {
 
     saveFormData({
       isEcartsMembresCalculable: isEcartsMembresCalculableBoolVal,
-      motifEcartsMembresNonCalculable: isEcartsMembresCalculableBoolVal ? undefined : motifEcartsMembresNonCalculable,
+      motifEcartsMembresNonCalculable:
+        isEcartsMembresCalculableBoolVal || !motifEcartsMembresNonCalculable
+          ? undefined
+          : motifEcartsMembresNonCalculable,
       ecartsMembresFemmes: isEcartsMembresCalculableBoolVal ? ecartsMembresFemmes : undefined,
       ecartsMembresHommes: isEcartsMembresCalculableBoolVal ? ecartsMembresHommes : undefined,
     });
@@ -150,7 +144,7 @@ const EcartsMembres: NextPageWithLayout = () => {
   }, [clearErrors, isEcartsMembresCalculable, setValue]);
 
   return (
-    <>
+    <ClientOnly>
       {isEcartsMembresCalculable === undefined && (
         <Alert mb="4w">
           <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
@@ -257,7 +251,7 @@ const EcartsMembres: NextPageWithLayout = () => {
           </Card>
         </GridCol>
       </Grid>
-    </>
+    </ClientOnly>
   );
 };
 
