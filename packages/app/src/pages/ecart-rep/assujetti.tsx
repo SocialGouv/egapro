@@ -53,11 +53,11 @@ const AssujettiPage: NextPageWithLayout = () => {
       </form>
 
       {(isAssujetti === "non" && (
-        <Callout>
+        <Callout role="complementary">
           Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
           les femmes et les hommes.{" "}
           <NextLink href="/ecart-rep/" passHref>
-            <ButtonAsLink>Retour à la page d'accueil.</ButtonAsLink>
+            <ButtonAsLink>Retour à la page d'accueil</ButtonAsLink>
           </NextLink>
         </Callout>
       )) || (

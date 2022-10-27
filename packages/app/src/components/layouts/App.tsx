@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import type { PropsWithChildren } from "react";
 import styles from "./App.module.css";
 import {
-  ButtonAsLink,
   Footer,
   FooterBody,
   FooterBodyBrand,
@@ -84,19 +83,21 @@ export const App = ({ children }: PropsWithChildren) => {
                     <div className="fr-header__logo">
                       <Logo />
                     </div>
-                    <div className="fr-header__navbar">
-                      <button
-                        className="fr-btn--menu fr-btn"
-                        data-fr-opened={isMenuOpen}
-                        aria-controls={mobileMenuId}
-                        aria-haspopup="menu"
-                        id={buttonMobileMenuId}
-                        title="Menu"
-                        onClick={() => setIsMenuOpen(true)}
-                      >
-                        Menu
-                      </button>
-                    </div>
+                    {isAuthenticated && (
+                      <div className="fr-header__navbar">
+                        <button
+                          className="fr-btn--menu fr-btn"
+                          data-fr-opened={isMenuOpen}
+                          aria-controls={mobileMenuId}
+                          aria-haspopup="menu"
+                          id={buttonMobileMenuId}
+                          title="Menu"
+                          onClick={() => setIsMenuOpen(true)}
+                        >
+                          Menu
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="fr-header__service">
                     <NextLink href="/">
@@ -125,31 +126,33 @@ export const App = ({ children }: PropsWithChildren) => {
               </div>
             </div>
           </div>
-          <div
-            className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")}
-            id={mobileMenuId}
-            aria-labelledby={buttonMobileMenuId}
-          >
-            <div className="fr-container">
-              <button
-                className="fr-btn--close fr-btn"
-                aria-controls={mobileMenuId}
-                title="Fermer"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Fermer
-              </button>
-              <div className="fr-header__menu-links">
-                <ul className="fr-btns-group">
-                  <li>
-                    <NextLink href="/login" passHref>
-                      <ButtonAsLink iconLeft="fr-icon-user-fill">Se connecter</ButtonAsLink>
-                    </NextLink>
-                  </li>
-                </ul>
+          {isAuthenticated && (
+            <div
+              className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")}
+              id={mobileMenuId}
+              aria-labelledby={buttonMobileMenuId}
+            >
+              <div className="fr-container">
+                <button
+                  className="fr-btn--close fr-btn"
+                  aria-controls={mobileMenuId}
+                  title="Fermer"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Fermer
+                </button>
+                <div className="fr-header__menu-links">
+                  <ul className="fr-btns-group">
+                    <li>
+                      <FormButton type="button" variant="secondary" onClick={disconnectUser}>
+                        Se déconnecter
+                      </FormButton>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </header>
         <main role="main" id="content" className={styles.content}>
           {children}
