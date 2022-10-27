@@ -21,6 +21,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
   Alert,
+  AlertTitle,
 } from "@design-system";
 import {
   checkSiren,
@@ -31,7 +32,7 @@ import {
   useUser,
 } from "@services/apiClient";
 
-const OWNER_ERROR = "Vous n'avez pas les droits sur ce Siren";
+const OWNER_ERROR = "Erreur : vous n'avez pas les droits sur ce Siren";
 
 const formSchema = z
   .object({
@@ -147,11 +148,20 @@ const CommencerPage: NextPageWithLayout = () => {
         </b>
       </p>
 
-      <div ref={animationParent} style={{ marginBottom: 20 }}>
-        {globalError && <Alert type="error">{globalError}</Alert>}
-        {isAlreadyPresent && <Alert type="error">Une déclaration pour ce Siren a déjà été validée et transmise.</Alert>}
+      <div ref={animationParent}>
+        {!globalError && (
+          <Alert type="error" size="sm" mb="4w">
+            <p>{globalError}</p>
+          </Alert>
+        )}
+        {isAlreadyPresent && (
+          <Alert type="error" size="sm" mb="4w">
+            <p>Erreur&nbsp;: une déclaration pour ce Siren a déjà été validée et transmise.</p>
+          </Alert>
+        )}
         {errors.siren && errors.siren.message === OWNER_ERROR && (
-          <Alert type="error">
+          <Alert type="error" mb="4w">
+            <AlertTitle>Erreur</AlertTitle>
             <MailtoLinkForNonOwner />
           </Alert>
         )}
