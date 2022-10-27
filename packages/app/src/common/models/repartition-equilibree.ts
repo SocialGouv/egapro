@@ -74,6 +74,7 @@ type IndicateursRepartitionEquilibree = {
   pourcentage_hommes_membres: number;
 };
 
+// TODO: better assert for the state. For example, foreign society have a country code but no region, etc..
 const assertValidFormState = (state: FormState): void => {
   const requiredValues = [
     state.year,
@@ -84,10 +85,10 @@ const assertValidFormState = (state: FormState): void => {
     state.declarant.telephone,
     state.entreprise?.adresse,
     state.entreprise?.code_naf,
-    state.entreprise?.commune,
-    state.entreprise?.département,
+    // state.entreprise?.commune,
+    // state.entreprise?.département,
+    // state.entreprise?.région,
     state.entreprise?.raison_sociale,
-    state.entreprise?.région,
     state.entreprise?.siren,
     state.motifEcartsCadresNonCalculable || (state.ecartsCadresFemmes && state.ecartsCadresHommes),
     state.motifEcartsMembresNonCalculable || (state.ecartsMembresFemmes && state.ecartsMembresHommes),
