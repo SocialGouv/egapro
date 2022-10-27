@@ -40,6 +40,7 @@ export const App = ({ children }: PropsWithChildren) => {
   };
 
   const setTheme = useCallback(() => {
+    console.log("setTheme");
     const askForDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const isDark = document.documentElement.getAttribute("data-fr-theme") === "dark";
     if (askForDark) {
@@ -53,9 +54,10 @@ export const App = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     setTheme();
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => setTheme());
+    const handleChange = () => setTheme();
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", handleChange);
     return function cleanup() {
-      window.removeEventListener("change", () => setTheme());
+      window.removeEventListener("change", handleChange);
     };
   }, [setTheme]);
 
