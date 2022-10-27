@@ -95,4 +95,23 @@ export const IsError: ComponentStory<typeof FormRadioGroup> = args => {
   );
 };
 
+export const IsReadOnly: ComponentStory<typeof FormRadioGroup> = args => {
+  return (
+    <FormRadioGroup ariaLabelledby="legendId oooo" {...args}>
+      <FormRadioGroupLegend id="legendId">Légende</FormRadioGroupLegend>
+      <FormRadioGroupContent>
+        <FormRadioGroupInput id="inputId1" name="inputName" readOnly>
+          radio 1
+        </FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId2" name="inputName" readOnly>
+          radio 2
+        </FormRadioGroupInput>
+        <FormRadioGroupInput id="inputId3" name="inputName" readOnly>
+          radio 3
+        </FormRadioGroupInput>
+      </FormRadioGroupContent>
+    </FormRadioGroup>
+  );
+};
+
 // TODO: add stories for FormRadioGroupInputProps : "checked", "onChange", "value"
