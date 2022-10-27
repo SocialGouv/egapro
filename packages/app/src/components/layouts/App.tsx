@@ -40,7 +40,6 @@ export const App = ({ children }: PropsWithChildren) => {
   };
 
   const setTheme = useCallback(() => {
-    console.log("setTheme");
     const askForDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const isDark = document.documentElement.getAttribute("data-fr-theme") === "dark";
     if (askForDark) {
