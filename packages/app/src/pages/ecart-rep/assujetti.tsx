@@ -51,9 +51,8 @@ const AssujettiPage: NextPageWithLayout = () => {
           </FormRadioGroupInput>
         </FormRadioGroup>
       </form>
-
       {(isAssujetti === "non" && (
-        <Callout>
+        <Callout role="complementary">
           <CalloutContent>
             Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
             les femmes et les hommes.
