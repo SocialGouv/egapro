@@ -5,9 +5,10 @@ import { useRouter } from "next/router";
 import type { NextPageWithLayout } from "../../../_app";
 import { formatTimestampToFr } from "@common/utils/date";
 import { normalizeQueryParam } from "@common/utils/router";
+import { StaffOnly } from "@components/AuthenticatedOnly";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import { Alert } from "@design-system";
-import { useRepartitionEquilibree, useUser } from "@services/apiClient";
+import { useRepartitionEquilibree } from "@services/apiClient";
 
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
@@ -15,7 +16,6 @@ const title = "Répartition équilibrée";
 
 const RepartitionEquilibreeDetailPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser({ redirectTo: "/ecart-rep/email" });
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const siren = normalizeQueryParam(router.query.siren);
@@ -23,16 +23,11 @@ const RepartitionEquilibreeDetailPage: NextPageWithLayout = () => {
 
   const { repeq, error } = useRepartitionEquilibree(siren, year);
 
-  // useEffect(() => {
-  //   if (!user?.staff) router.push("/ecart-rep/email");
-  // }, [user?.staff, router]);
-
   return (
-    <>
+    <StaffOnly>
       <h1>{title}</h1>
-
       <div ref={animationParent} style={{ marginBottom: 20 }}>
-        {error && <Alert type="error">{error}</Alert>}
+        {error && <Alert type="error">{error?.message || "Erreur générale"}</Alert>}
       </div>
 
       {!repeq ? (
@@ -49,7 +44,7 @@ const RepartitionEquilibreeDetailPage: NextPageWithLayout = () => {
           name={false}
         />
       )}
-    </>
+    </StaffOnly>
   );
 };
 

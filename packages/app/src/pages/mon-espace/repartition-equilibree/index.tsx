@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 import type { NextPageWithLayout } from "../../_app";
+import { StaffOnly } from "@components/AuthenticatedOnly";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
 import {
   FormButton,
@@ -20,13 +21,8 @@ type FormType = { siren: string; year: string };
 
 const RepartitionEquilibreeListPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/ecart-rep/email" });
   const { register, handleSubmit } = useForm<FormType>({});
-
-  // TODO: problème avec ce contrôle. Au début, user est vide donc user.staff ne peut pas être donné, mais ça ne veut pas dire qu'il ne sera pas à true plus tard...
-  // useEffect(() => {
-  //   if (!user?.staff) router.push("/ecart-rep/email");
-  // }, [user?.staff, router]);
 
   const onSubmit = (data: FormType) => {
     const { siren, year } = data;
@@ -35,7 +31,7 @@ const RepartitionEquilibreeListPage: NextPageWithLayout = () => {
   };
 
   return (
-    <>
+    <StaffOnly>
       <h1>{title}</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -63,7 +59,7 @@ const RepartitionEquilibreeListPage: NextPageWithLayout = () => {
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
-    </>
+    </StaffOnly>
   );
 };
 
