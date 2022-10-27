@@ -1,21 +1,18 @@
-import type { Screen } from "@testing-library/react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import AssujetiPage from "@/pages/ecart-rep/assujetti";
 
-describe("Assujetti Page", () => {
-  const getRadioInputOui = (screen: Screen): HTMLInputElement =>
-    screen.getByRole("radio", { name: /oui, je suis concerné/i });
-  const getRadioInputNon = (screen: Screen): HTMLInputElement =>
-    screen.getByRole("radio", { name: /non, je ne suis pas concerné/i });
+const getRadioInputOui = (): HTMLInputElement => screen.getByRole("radio", { name: /oui, je suis concerné/i });
+const getRadioInputNon = (): HTMLInputElement => screen.getByRole("radio", { name: /non, je ne suis pas concerné/i });
 
+describe("Assujetti Page", () => {
   it("should select OUI by default", () => {
     render(<AssujetiPage />);
-    const inputRadioOui: HTMLInputElement = getRadioInputOui(screen);
+    const inputRadioOui: HTMLInputElement = getRadioInputOui();
     expect(inputRadioOui.checked).toBeTruthy();
 
-    const inputRadioNon: HTMLInputElement = getRadioInputNon(screen);
+    const inputRadioNon: HTMLInputElement = getRadioInputNon();
     expect(inputRadioNon.checked).toBeFalsy();
 
     expect(screen.queryByRole("link", { name: /Retour à la page d'accueil/i })).toBeNull();
@@ -26,8 +23,8 @@ describe("Assujetti Page", () => {
   it("should hide Suivant button", async () => {
     // given
     render(<AssujetiPage />);
-    const inputRadioOui: HTMLInputElement = getRadioInputOui(screen);
-    const inputRadioNon: HTMLInputElement = getRadioInputNon(screen);
+    const inputRadioOui: HTMLInputElement = getRadioInputOui();
+    const inputRadioNon: HTMLInputElement = getRadioInputNon();
 
     // when
     await userEvent.click(inputRadioNon);

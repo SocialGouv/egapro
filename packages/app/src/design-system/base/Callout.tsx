@@ -1,20 +1,21 @@
 import clsx from "clsx";
-import type { AriaRole, PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 
 import type { IconStyles } from "../utils/icon-styles";
 import type { MarginProps } from "../utils/spacing";
+import type { BoxProps } from "./Box";
 import { Box } from "./Box";
 import styles from "./Callout.module.css";
 import type { FormButtonProps } from "./FormButton";
 import { FormButton } from "./FormButton";
 
-export type CalloutProps = PropsWithChildren<
-  Omit<MarginProps, "ml" | "mr" | "mx"> & {
-    className?: string;
-    icon?: IconStyles;
-    role?: AriaRole;
-  }
->;
+export type CalloutProps = BoxProps &
+  PropsWithChildren<
+    Omit<MarginProps, "ml" | "mr" | "mx"> & {
+      className?: string;
+      icon?: IconStyles;
+    }
+  >;
 
 export const Callout = ({ children, icon, className, ...rest }: CalloutProps) => {
   return (
