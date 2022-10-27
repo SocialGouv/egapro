@@ -82,7 +82,7 @@ const PeriodeReference: NextPageWithLayout = () => {
           <FormLayout>
             <FormGroup>
               <FormGroupLabel htmlFor="year">
-                Année au titre de laquelle les écarts de représentation sont calculés.
+                Année au titre de laquelle les écarts de représentation sont calculés
               </FormGroupLabel>
               <FormInput
                 id="year"
