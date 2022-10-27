@@ -1,13 +1,11 @@
 import type { PropsWithChildren } from "react";
-import { useEffect, useState } from "react";
 import React from "react";
+import { useMountedState } from "react-use";
 
 export const ClientOnly = ({ children, ...delegated }: PropsWithChildren<unknown>) => {
-  const [hasMounted, setHasMounted] = useState(false);
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-  if (!hasMounted) {
+  const isMounted = useMountedState();
+
+  if (!isMounted) {
     return null;
   }
   return <div {...delegated}>{children}</div>;
