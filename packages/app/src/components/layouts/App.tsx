@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import Head from "next/head";
 import NextLink from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { PropsWithChildren } from "react";
 import styles from "./App.module.css";
 import {
@@ -37,6 +37,27 @@ export const App = ({ children }: PropsWithChildren) => {
     logout();
     resetFormData();
   };
+
+  const setTheme = useCallback(() => {
+    const askForDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = document.documentElement.getAttribute("data-fr-theme") === "dark";
+    if (askForDark) {
+      if (isDark) return;
+      document.documentElement.setAttribute("data-fr-theme", "dark");
+    } else {
+      if (!isDark) return;
+      document.documentElement.setAttribute("data-fr-theme", "light");
+    }
+  }, []);
+
+  useEffect(() => {
+    setTheme();
+    const handleChange = () => setTheme();
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", handleChange);
+    return function cleanup() {
+      window.removeEventListener("change", handleChange);
+    };
+  }, [setTheme]);
 
   return (
     <>
