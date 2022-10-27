@@ -17,7 +17,7 @@ export const FAKE_USER: TokenInfoType = {
 export const useUserMock = (isConnected: boolean) => ({
   useUserStore() {
     return {
-      setToken: () => void 0,
+      setToken: () => undefined,
       token: "ega-token",
     };
   },
@@ -25,16 +25,16 @@ export const useUserMock = (isConnected: boolean) => ({
     if (isConnected) {
       return {
         isAuthenticated: true,
-        logout: () => void 0,
+        logout: () => undefined,
         user: FAKE_USER,
-        error: void 0,
+        error: undefined,
       };
     } else {
       return {
         isAuthenticated: false,
-        logout: () => void 0,
-        user: void 0,
-        error: void 0,
+        logout: () => undefined,
+        user: undefined,
+        error: undefined,
       };
     }
   },
