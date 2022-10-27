@@ -21,5 +21,7 @@ type TokenInfoType = {
 export const useMe = (token: string | undefined) => {
   const { data: user, error } = useSWR<TokenInfoType>(!token ? null : "/me", fetcher);
 
-  return { user, error };
+  const loading = token && !user && !error;
+
+  return { user, error, loading };
 };
