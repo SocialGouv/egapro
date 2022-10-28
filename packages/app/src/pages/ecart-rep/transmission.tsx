@@ -20,7 +20,7 @@ import {
   GridCol,
   ImgSuccess,
 } from "@design-system";
-import { useFormManager, useUser, fetchRepartitionEquilibreePdf } from "@services/apiClient";
+import { useFormManager, useUser, fetchRepartitionEquilibreeSendEmail } from "@services/apiClient";
 
 const title = "Transmission de la procédure";
 
@@ -33,11 +33,11 @@ const Transmission: NextPageWithLayout = () => {
     resetFormData();
     router.push("./commencer");
   };
-  const downloadPdf = (e: React.SyntheticEvent) => {
+
+  const sendReceipt = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (formData.entreprise?.siren && formData.year) {
-      console.log("in fetch");
-      fetchRepartitionEquilibreePdf(formData.entreprise.siren, formData.year);
+      fetchRepartitionEquilibreeSendEmail(formData.entreprise.siren, formData.year);
     }
   };
 
@@ -69,7 +69,7 @@ const Transmission: NextPageWithLayout = () => {
       <Box mt="6w">
         <form>
           <ButtonGroup inline="mobile-up">
-            <FormButton type="button" variant="secondary">
+            <FormButton type="button" variant="secondary" onClick={sendReceipt}>
               Renvoyer l'accusé de réception
             </FormButton>
             <NextLink href="/ecart-rep/assujetti/" passHref>
@@ -84,11 +84,11 @@ const Transmission: NextPageWithLayout = () => {
             <CardBody>
               <CardBodyContent>
                 <CardBodyContentTitle>
-                  <a href="#" onClick={downloadPdf}>
-                    Télécharger le récapitulatif
-                  </a>
+                  <a href="#">Télécharger le récapitulatif</a>
                 </CardBodyContentTitle>
-                <CardBodyContentDescription>Année 2022 au titre des données 2021.</CardBodyContentDescription>
+                <CardBodyContentDescription>
+                  Année {formData.year && formData.year + 1} au titre des données {formData.year}.
+                </CardBodyContentDescription>
                 <CardBodyContentEnd>
                   <CardBodyContentDetails>PDF – 30 Ko</CardBodyContentDetails>
                 </CardBodyContentEnd>
