@@ -1,13 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endOfYear, getYear, formatISO, isValid, parseISO } from "date-fns";
-import Link from "next/link";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
+import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -25,7 +25,7 @@ const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."),
     endOfPeriod: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
-      message: "La date de fin de la période de référence est de la forme jj/mm/aaaa.",
+      message: "La date de fin de la période de référence doit être au format jj/mm/aaaa.",
     }),
   })
   .superRefine(({ year, endOfPeriod }, ctx) => {
@@ -33,7 +33,7 @@ const formSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          "La date de fin de période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
+          "La date de fin de la période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
         path: ["endOfPeriod"],
       });
     }
@@ -50,24 +50,15 @@ const PeriodeReference: NextPageWithLayout = () => {
     formState: { errors, isDirty, isValid, isSubmitted },
     handleSubmit,
     register,
-    reset,
     setValue,
   } = useForm<FormType>({
     mode: "onBlur",
     resolver: zodResolver(formSchema),
-  });
-
-  const resetForm = useCallback(() => {
-    reset({
+    defaultValues: {
       endOfPeriod: formData?.endOfPeriod === undefined ? undefined : formData?.endOfPeriod,
       year: formData?.year === undefined ? undefined : String(formData?.year),
-    });
-    // formData needed otherwise localstorage data is not loaded
-  }, [reset, formData]);
-
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
+    },
+  });
 
   const handleClick = () => {
     if (formData?.year) {
@@ -86,12 +77,12 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   return (
     <>
-      <ClientAuthenticatedOnly>
+      <ClientOnly>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
             <FormGroup>
               <FormGroupLabel htmlFor="year">
-                Année au titre de laquelle les écarts de représentation sont calculés.
+                Année au titre de laquelle les écarts de représentation sont calculés
               </FormGroupLabel>
               <FormInput
                 id="year"
@@ -120,23 +111,21 @@ const PeriodeReference: NextPageWithLayout = () => {
                 <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
               )}
               <br />
-              <FormButton type="button" onClick={handleClick}>
+              <FormButton type="button" variant="secondary" size="sm" onClick={handleClick}>
                 Sélectionner la fin de l'année civile
               </FormButton>
             </FormGroup>
             <FormLayoutButtonGroup>
-              <Link href="entreprise" passHref>
+              <NextLink href="entreprise" passHref>
                 <ButtonAsLink size="sm" variant="secondary">
                   Précédent
                 </ButtonAsLink>
-              </Link>
-              <FormButton type="submit" isDisabled={!isValid || (isSubmitted && !isDirty)}>
-                Suivant
-              </FormButton>
+              </NextLink>
+              <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
-      </ClientAuthenticatedOnly>
+      </ClientOnly>
     </>
   );
 };

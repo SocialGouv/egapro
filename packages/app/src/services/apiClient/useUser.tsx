@@ -42,7 +42,7 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   const router = useRouter();
 
   const { token, setToken } = useUserStore(state => state);
-  const { user, error } = useMe(token);
+  const { user, error, loading } = useMe(token);
 
   const { resetFormData } = useFormManager();
 
@@ -62,7 +62,7 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
 
         resetFormData(); // Remove data in local storage on each new connection.
 
-        setToken(token);
+        setToken(token); // Order a re render of this hook.
 
         // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
         router.push({ search: "" });
@@ -73,16 +73,17 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
   // Automatic redirect if not authenticated and redirectTo is present.
   useEffect(() => {
     if (props.redirectTo) {
-      if (!token) {
+      if (!token || error) {
         if (redirectTo) router.push(redirectTo);
       }
     }
-  }, [token, redirectTo, router, props.redirectTo]);
+  }, [error, token, redirectTo, router, props.redirectTo]);
 
   return {
     user,
     error,
     logout,
     isAuthenticated: Boolean(user?.email),
+    loading,
   };
 };

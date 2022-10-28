@@ -13,7 +13,15 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
   ({ id, children, isError, isDisabled, ...inputProps }, ref) => {
     return (
       <div className={clsx("fr-checkbox-group", isError && styles.error)}>
-        <input type="checkbox" id={id} name={id} ref={ref} {...inputProps} disabled={isDisabled} />
+        <input
+          type="checkbox"
+          id={id}
+          name={id}
+          ref={ref}
+          className={styles.input}
+          {...inputProps}
+          disabled={isDisabled}
+        />
         <label className="fr-label" htmlFor={id}>
           {children}
         </label>

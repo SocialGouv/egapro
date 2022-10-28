@@ -26,7 +26,7 @@ const title = "Validation de l'email";
 const ERROR_COLLAPSE_TIMEOUT = 5000;
 
 const formSchema = z.object({
-  email: z.string().min(1, "L'adresse mail est requise.").email({ message: "L'adresse mail est invalide." }),
+  email: z.string().min(1, "L'adresse email est requise.").email({ message: "L'adresse email est invalide." }),
 });
 
 // Infer the TS type according to the zod schema.
@@ -74,7 +74,7 @@ const EmailPage: NextPageWithLayout = () => {
     try {
       setFeatureStatus({ type: "loading" });
       await requestEmailForToken(email, `${window.location.origin}/ecart-rep/commencer?token=`);
-      setFeatureStatus({ type: "success", message: "Un mail vous a été envoyé." });
+      setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({
         type: "error",
@@ -110,7 +110,7 @@ const EmailPage: NextPageWithLayout = () => {
 
         {featureStatus.type === "success" && (
           <>
-            <p>Vous allez recevoir un mail sur l'adresse mail que vous avez indiquée à l'étape précédente.</p>
+            <p>Vous allez recevoir un mail sur l'adresse email que vous avez indiquée à l'étape précédente.</p>
 
             <p>
               <strong>Ouvrez ce mail et cliquez sur le lien de validation.</strong>
@@ -121,7 +121,9 @@ const EmailPage: NextPageWithLayout = () => {
               dossier SPAM.
             </p>
             <p>En cas d'échec, la procédure devra être reprise avec un autre email.</p>
-            <FormButton onClick={() => setFeatureStatus({ type: "idle" })}>Réessayer</FormButton>
+            <FormButton type="button" onClick={() => setFeatureStatus({ type: "idle" })}>
+              Réessayer
+            </FormButton>
           </>
         )}
 
@@ -139,14 +141,11 @@ const EmailPage: NextPageWithLayout = () => {
               <FormLayout>
                 <FormGroup>
                   <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
-                  <FormInput id="email" type="email" {...register("email")} />
-                  {errors.email?.message && <FormGroupMessage id="email">{errors.email.message}</FormGroupMessage>}
+                  <FormInput aria-describedby="email-msg" id="email" type="email" {...register("email")} />
+                  {errors.email?.message && <FormGroupMessage id="email-msg">{errors.email.message}</FormGroupMessage>}
                 </FormGroup>
                 <FormLayoutButtonGroup>
-                  <FormButton
-                    type="submit"
-                    isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}
-                  >
+                  <FormButton isDisabled={featureStatus.type === "loading" || !isDirty || (isSubmitted && !isValid)}>
                     Envoyer
                   </FormButton>
                 </FormLayoutButtonGroup>

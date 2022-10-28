@@ -16,8 +16,6 @@ export type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   type?: FormInputCustomTypes;
 };
 
-const PercentageCharacter = () => <div className={styles.percentage} />;
-
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ type = "text", isError, isValid, isDisabled, icon, id, ...rest }, ref) => {
     if (type === "percentage") {
@@ -25,18 +23,16 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         <div className="fr-input-wrap">
           <input
             id={id}
-            className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.date)}
+            className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.input)}
             type="number"
             min="0"
             max="100"
             step="0.1"
             disabled={isDisabled}
-            aria-describedby={`${id}-msg`}
-            aria-invalid={isError || "false"}
+            aria-invalid={isError ? "true" : undefined}
             ref={ref}
             {...rest}
           />
-          {!isNaN(rest?.value as number) ? <PercentageCharacter /> : null}
         </div>
       );
     }
@@ -44,11 +40,10 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       <div className={clsx("fr-input-wrap", icon, type === "date" && "fr-icon-calendar-line")}>
         <input
           id={id}
-          className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.date)}
+          className={clsx("fr-input", isError && "fr-input--error", isValid && "fr-input--valid", styles.input)}
           type={type}
           disabled={isDisabled}
-          aria-describedby={`${id}-msg`}
-          aria-invalid={isError || "false"}
+          aria-invalid={isError ? "true" : undefined}
           ref={ref}
           {...rest}
         />

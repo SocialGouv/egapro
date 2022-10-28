@@ -1,4 +1,4 @@
-.date[type="date"]::-webkit-calendar-picker-indicator{
+.input[type="date"]::-webkit-calendar-picker-indicator{
     opacity: 0;
     width: 2.5rem;
     z-index: 0;
@@ -8,17 +8,4 @@
     top: 0;
     bottom: 0;
     height: 100%;
-}
-
-.percentage {
-    position: relative;
-}
-
-.percentage:after {
-    content: '%';
-    display: block;
-    position: absolute;
-    top: -32px;
-    left: 50px;
-    z-index: 2;
 }

@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isValid, parseISO } from "date-fns";
-import Link from "next/link";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { radioBoolToString, radioStringToBool, zodRadioInputSchema } from "@common/utils/form";
+import { ClientOnly } from "@components/ClientOnly";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
   Alert,
@@ -28,6 +29,8 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
+const URL_REGEX = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/i;
+
 const formSchema = z
   .object({
     hasWebsite: zodRadioInputSchema,
@@ -38,12 +41,20 @@ const formSchema = z
     publishingWebsiteUrl: z.string().trim().optional(),
   })
   .superRefine(({ hasWebsite, publishingContent, publishingWebsiteUrl }, ctx) => {
-    if (hasWebsite === "oui" && !publishingWebsiteUrl) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "L'adresse exacte de la page internet est obligatoire",
-        path: ["publishingWebsiteUrl"],
-      });
+    if (hasWebsite === "oui") {
+      if (!publishingWebsiteUrl) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "L'adresse exacte de la page internet est obligatoire",
+          path: ["publishingWebsiteUrl"],
+        });
+      } else if (!new RegExp(URL_REGEX).test(publishingWebsiteUrl)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "L'adresse de la page internet est invalide",
+          path: ["publishingWebsiteUrl"],
+        });
+      }
     }
     if (hasWebsite === "non" && !publishingContent) {
       ctx.addIssue({
@@ -65,29 +76,19 @@ const Publication: NextPageWithLayout = () => {
     formState: { errors, isDirty, isValid, isSubmitted },
     handleSubmit,
     register,
-    reset,
     watch,
   } = useForm<FormType>({
-    mode: "onBlur",
+    mode: "onChange",
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      hasWebsite: radioBoolToString(formData?.hasWebsite),
+      publishingContent: formData?.publishingContent,
+      publishingDate: formData?.publishingDate === undefined ? undefined : formData?.publishingDate,
+      publishingWebsiteUrl: formData?.publishingWebsiteUrl,
+    },
   });
 
   const hasWebsite = watch("hasWebsite");
-
-  const resetForm = useCallback(() => {
-    if (formData) {
-      reset({
-        hasWebsite: radioBoolToString(formData?.hasWebsite),
-        publishingContent: formData?.publishingContent,
-        publishingDate: formData?.publishingDate === undefined ? undefined : formData?.publishingDate,
-        publishingWebsiteUrl: formData?.publishingWebsiteUrl,
-      });
-    }
-  }, [reset, formData]);
-
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
 
   const onSubmit = async ({ hasWebsite, publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
     saveFormData({
@@ -100,7 +101,7 @@ const Publication: NextPageWithLayout = () => {
   };
 
   return (
-    <>
+    <ClientOnly>
       <Alert mb="4w">
         <AlertTitle as="h2">Obligation de transparence</AlertTitle>
         <p>
@@ -168,14 +169,14 @@ const Publication: NextPageWithLayout = () => {
             </FormGroup>
           )}
           <FormLayoutButtonGroup>
-            <Link href="/ecart-rep/ecarts-membres" passHref>
+            <NextLink href="/ecart-rep/ecarts-membres" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-            </Link>
+            </NextLink>
             <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
-    </>
+    </ClientOnly>
   );
 };
 

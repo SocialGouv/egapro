@@ -36,5 +36,8 @@ IsValid.args = { ...Default.args, isValid: true };
 export const IsDisabled = Template.bind({});
 IsDisabled.args = { ...Default.args, isDisabled: true };
 
+export const IsReadOnly = Template.bind({});
+IsReadOnly.args = { ...Default.args, readOnly: true };
+
 export const WithIcon = Template.bind({});
 WithIcon.args = { ...Default.args, icon: "fr-icon-warning-line" };

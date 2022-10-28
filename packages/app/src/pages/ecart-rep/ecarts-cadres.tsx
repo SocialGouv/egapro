@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -9,6 +9,7 @@ import type { NextPageWithLayout } from "../_app";
 import { motifNonCalculabiliteCadresOptions } from "@common/models/repartition-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
 
+import { ClientOnly } from "@components/ClientOnly";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
 import {
@@ -41,7 +42,7 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value;
+// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value.
 export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"] as const;
 
 const formSchema = z
@@ -79,13 +80,24 @@ const formSchema = z
 
 export type FormType = z.infer<typeof formSchema>;
 
+// A less strict type than FormType, which accepts null value to represent form inputs at start (undefined is reserved for React to mean that the field is uncontrolled).
+export type LaxFormType = {
+  [Key in keyof FormType]: FormType[Key] | null;
+};
+
 const EcartsCadres: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
-  const methods = useForm<FormType>({
+  const methods = useForm<LaxFormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
+      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable || null, // Using null will let the form to use the first option which is the disabled placeholder.
+      ecartsCadresFemmes: formData?.ecartsCadresFemmes || null,
+      ecartsCadresHommes: formData?.ecartsCadresHommes || null,
+    },
   });
 
   const {
@@ -93,39 +105,23 @@ const EcartsCadres: NextPageWithLayout = () => {
     formState: { isDirty, isValid, isSubmitted, errors },
     handleSubmit,
     register,
-    reset,
     setValue,
     watch,
   } = methods;
 
   const isEcartsCadresCalculable = watch("isEcartsCadresCalculable");
 
-  const resetForm = useCallback(() => {
-    if (formData) {
-      reset({
-        isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
-        motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable,
-        ecartsCadresFemmes: formData?.ecartsCadresFemmes,
-        ecartsCadresHommes: formData?.ecartsCadresHommes,
-      });
-    }
-  }, [reset, formData]);
+  const onSubmit = (formdata: LaxFormType) => {
+    // At this point, we passed the zod validation so the data are now compliant with FormType so casting is safe.
+    const { isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresFemmes, ecartsCadresHommes } =
+      formdata as FormType;
 
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
-
-  const onSubmit = ({
-    isEcartsCadresCalculable,
-    motifEcartsCadresNonCalculable,
-    ecartsCadresFemmes,
-    ecartsCadresHommes,
-  }: FormType) => {
     const isEcartsCadresCalculableBoolVal = radioStringToBool(isEcartsCadresCalculable);
 
     saveFormData({
       isEcartsCadresCalculable: isEcartsCadresCalculableBoolVal,
-      motifEcartsCadresNonCalculable: isEcartsCadresCalculableBoolVal ? undefined : motifEcartsCadresNonCalculable,
+      motifEcartsCadresNonCalculable:
+        isEcartsCadresCalculableBoolVal || !motifEcartsCadresNonCalculable ? undefined : motifEcartsCadresNonCalculable,
       ecartsCadresFemmes: isEcartsCadresCalculableBoolVal ? ecartsCadresFemmes : undefined,
       ecartsCadresHommes: isEcartsCadresCalculableBoolVal ? ecartsCadresHommes : undefined,
     });
@@ -133,6 +129,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   };
 
   useEffect(() => {
+    // Using setValue to undefined, is the way to tell RHF to ignore these inputs in the submit phase. So, we not really set the value undefined, we just ignore them.
     if (isEcartsCadresCalculable === "oui") {
       setValue("motifEcartsCadresNonCalculable", undefined, { shouldValidate: true });
     } else {
@@ -143,17 +140,16 @@ const EcartsCadres: NextPageWithLayout = () => {
   }, [clearErrors, isEcartsCadresCalculable, setValue]);
 
   return (
-    <>
-      {isEcartsCadresCalculable === undefined && (
+    <ClientOnly>
+      {isEcartsCadresCalculable === null && (
         <Alert mb="4w">
-          <AlertTitle as="h3">Motifs de non calculabilité</AlertTitle>
+          <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
           <p>
             Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y
             aucun ou un seul cadre dirigeant.
           </p>
         </Alert>
       )}
-
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
@@ -248,7 +244,7 @@ const EcartsCadres: NextPageWithLayout = () => {
           </Card>
         </GridCol>
       </Grid>
-    </>
+    </ClientOnly>
   );
 };
 

@@ -7,3 +7,4 @@ export * from "./useMe";
 export * from "./useSearch";
 export * from "./useStats";
 export * from "./useUser";
+export * from "./repartition";
