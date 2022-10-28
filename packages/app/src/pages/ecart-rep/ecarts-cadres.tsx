@@ -42,8 +42,8 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value + add "" as the placeholder needed when no choice is made at start.
-export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant", ""] as const;
+// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value.
+export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"] as const;
 
 const formSchema = z
   .object({
@@ -80,18 +80,23 @@ const formSchema = z
 
 export type FormType = z.infer<typeof formSchema>;
 
+// A less strict type than FormType, which accepts null value to represent form inputs at start (undefined is reserved for React to mean that the field is uncontrolled).
+export type LaxFormType = {
+  [Key in keyof FormType]: FormType[Key] | null;
+};
+
 const EcartsCadres: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
-  const methods = useForm<FormType>({
+  const methods = useForm<LaxFormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
-      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable || "", // Use "" to select the placeholder if no choice is made at start.
-      ecartsCadresFemmes: formData?.ecartsCadresFemmes,
-      ecartsCadresHommes: formData?.ecartsCadresHommes,
+      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable || null, // Using null will let the form to use the first option which is the disabled placeholder.
+      ecartsCadresFemmes: formData?.ecartsCadresFemmes || null,
+      ecartsCadresHommes: formData?.ecartsCadresHommes || null,
     },
   });
 
@@ -106,12 +111,11 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   const isEcartsCadresCalculable = watch("isEcartsCadresCalculable");
 
-  const onSubmit = ({
-    isEcartsCadresCalculable,
-    motifEcartsCadresNonCalculable,
-    ecartsCadresFemmes,
-    ecartsCadresHommes,
-  }: FormType) => {
+  const onSubmit = (formdata: LaxFormType) => {
+    // At this point, we passed the zod validation so the data are now compliant with FormType so casting is safe.
+    const { isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresFemmes, ecartsCadresHommes } =
+      formdata as FormType;
+
     const isEcartsCadresCalculableBoolVal = radioStringToBool(isEcartsCadresCalculable);
 
     saveFormData({
@@ -125,6 +129,7 @@ const EcartsCadres: NextPageWithLayout = () => {
   };
 
   useEffect(() => {
+    // Using setValue to undefined, is the way to tell RHF to ignore these inputs in the submit phase. So, we not really set the value undefined, we just ignore them.
     if (isEcartsCadresCalculable === "oui") {
       setValue("motifEcartsCadresNonCalculable", undefined, { shouldValidate: true });
     } else {
@@ -136,7 +141,7 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   return (
     <ClientOnly>
-      {isEcartsCadresCalculable === undefined && (
+      {isEcartsCadresCalculable === null && (
         <Alert mb="4w">
           <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
           <p>

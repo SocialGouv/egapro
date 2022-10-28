@@ -1,6 +1,7 @@
 import NextLink from "next/link";
 
 import type { NextPageWithLayout } from "./_app";
+import styles from "./index.module.css";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
   Box,
@@ -20,7 +21,7 @@ import {
 const Home: NextPageWithLayout = () => {
   return (
     <section>
-      <Box pt="9w" pb="4w" style={{ background: "#f6f6f6" }}>
+      <Box pt="9w" pb="4w" className={styles.hero}>
         <Container>
           <Grid haveGutters>
             <GridCol lg={7}>
@@ -55,7 +56,13 @@ const Home: NextPageWithLayout = () => {
                     Calculer et/ou déclarer votre index de l'égalité professionnelle entre les femmes et les hommes.
                   </CardBodyContentDescription>
                   <CardBodyContentDescription>
-                    <a href="#">Pour plus d'informations sur l'index Egapro</a>
+                    <a
+                      href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Pour plus d'informations sur l'index Egapro
+                    </a>
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>
@@ -70,12 +77,18 @@ const Home: NextPageWithLayout = () => {
             <Card>
               <CardBody>
                 <CardBodyContent>
-                  <CardBodyContentTitle titleAs="h2">Répartition équilibrée femmes-hommes</CardBodyContentTitle>
+                  <CardBodyContentTitle titleAs="h2">Représentation équilibrée femmes-hommes</CardBodyContentTitle>
                   <CardBodyContentDescription>
                     Déclarer vos écarts de représentation entre les femmes et les hommes dans les postes de direction.
                   </CardBodyContentDescription>
                   <CardBodyContentDescription>
-                    <a href="#">Pour plus d'informations sur la répartition équilibrée</a>
+                    <a
+                      href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Pour plus d'informations sur la représentation équilibrée
+                    </a>
                   </CardBodyContentDescription>
                 </CardBodyContent>
                 <CardBodyFooter>

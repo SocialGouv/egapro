@@ -18,12 +18,14 @@ import {
   FormButton,
   Grid,
   GridCol,
+  ImgSuccess,
 } from "@design-system";
-import { useFormManager } from "@services/apiClient";
+import { useFormManager, useUser } from "@services/apiClient";
 
 const title = "Transmission de la procédure";
 
 const Transmission: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { resetFormData } = useFormManager();
 
@@ -34,6 +36,11 @@ const Transmission: NextPageWithLayout = () => {
 
   return (
     <>
+      <Grid justifyCenter>
+        <GridCol sm={8} md={5}>
+          <ImgSuccess />
+        </GridCol>
+      </Grid>
       <h1>{title}</h1>
       <p>
         Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
@@ -49,7 +56,7 @@ const Transmission: NextPageWithLayout = () => {
       </p>
       <p>
         Si vous ne recevez pas cet accusé, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre dossier de
-        courriers indésirables, vous pouvez aussi <a>demander d’envoyer à nouveau l’accusé de réception</a>.
+        courriers indésirables.
       </p>
       <p>Nous vous remercions de votre transmission.</p>
       <Box mt="6w">

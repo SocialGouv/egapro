@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { ClientAuthenticatedOnly } from "@components/ClientAuthenticatedOnly";
+import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
@@ -167,7 +167,7 @@ const CommencerPage: NextPageWithLayout = () => {
         )}
       </div>
 
-      <ClientAuthenticatedOnly>
+      <AuthenticatedOnly>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>
             <FormGroup>
@@ -207,7 +207,7 @@ const CommencerPage: NextPageWithLayout = () => {
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
-      </ClientAuthenticatedOnly>
+      </AuthenticatedOnly>
     </ClientOnly>
   );
 };

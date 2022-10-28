@@ -26,6 +26,7 @@ exports[`should match snapshot 1`] = `
               class="fr-radio-group"
             >
               <input
+                class="input"
                 id="inputId1"
                 name="inputName"
                 type="radio"
@@ -41,6 +42,7 @@ exports[`should match snapshot 1`] = `
               class="fr-radio-group"
             >
               <input
+                class="input"
                 id="inputId2"
                 name="inputName"
                 type="radio"
@@ -56,6 +58,7 @@ exports[`should match snapshot 1`] = `
               class="fr-radio-group"
             >
               <input
+                class="input"
                 id="inputId3"
                 name="inputName"
                 type="radio"
@@ -100,6 +103,7 @@ exports[`should match snapshot 1`] = `
             class="fr-radio-group"
           >
             <input
+              class="input"
               id="inputId1"
               name="inputName"
               type="radio"
@@ -115,6 +119,7 @@ exports[`should match snapshot 1`] = `
             class="fr-radio-group"
           >
             <input
+              class="input"
               id="inputId2"
               name="inputName"
               type="radio"
@@ -130,6 +135,7 @@ exports[`should match snapshot 1`] = `
             class="fr-radio-group"
           >
             <input
+              class="input"
               id="inputId3"
               name="inputName"
               type="radio"

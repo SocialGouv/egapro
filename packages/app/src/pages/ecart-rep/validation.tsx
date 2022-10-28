@@ -24,13 +24,14 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@design-system";
-import { useFormManager, putRepartitionEquilibree, useConfig, formatAdresse } from "@services/apiClient";
+import { useFormManager, putRepartitionEquilibree, useConfig, formatAdresse, useUser } from "@services/apiClient";
 
 const title = "Validation de vos écarts";
 
 const SERVER_ERROR = `Erreur : problème lors de l'envoi de la répartition équilibrée.`;
 
 const Validation: NextPageWithLayout = () => {
+  useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData } = useFormManager();
   const [globalError, setGlobalError] = useState("");
