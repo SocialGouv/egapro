@@ -28,7 +28,7 @@ import { useFormManager, putRepartitionEquilibree, useConfig, formatAdresse, use
 
 const title = "Validation de vos écarts";
 
-const SERVER_ERROR = "Problème lors de l'envoi de la répartition équilibrée.";
+const SERVER_ERROR = `Erreur : problème lors de l'envoi de la répartition équilibrée.`;
 
 const Validation: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
@@ -68,8 +68,12 @@ const Validation: NextPageWithLayout = () => {
     <ClientOnly>
       <h1>{title}</h1>
 
-      <div ref={animationParent} style={{ marginBottom: 20 }}>
-        {globalError && <Alert type="error">{globalError}</Alert>}
+      <div ref={animationParent}>
+        {globalError && (
+          <Alert type="error" size="sm" mb="4w">
+            <p>{globalError}</p>
+          </Alert>
+        )}
       </div>
 
       <p>

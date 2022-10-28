@@ -89,23 +89,17 @@ const EmailPage: NextPageWithLayout = () => {
 
       <ClientOnly>
         {featureStatus.type !== "success" && (
-          <>
-            <Alert type="info">
-              <AlertTitle>Information</AlertTitle>
-              <p>{informationMessage}</p>
-            </Alert>
-            <br />
-          </>
+          <Alert type="info" mb="4w">
+            <AlertTitle>Information</AlertTitle>
+            <p>{informationMessage}</p>
+          </Alert>
         )}
 
         {featureStatus.type === "error" && (
-          <>
-            <Alert type="error">
-              <AlertTitle>Erreur</AlertTitle>
-              <p>{featureStatus.message}</p>
-            </Alert>
-            <br />
-          </>
+          <Alert type="error" mb="4w">
+            <AlertTitle>Erreur</AlertTitle>
+            <p>{featureStatus.message}</p>
+          </Alert>
         )}
 
         {featureStatus.type === "success" && (

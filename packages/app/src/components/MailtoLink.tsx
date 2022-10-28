@@ -8,7 +8,10 @@ export const MailtoLinkForNonOwner = () => {
       <p>Le Siren saisi n'est pas rattaché à votre email de connexion ({user?.email}).</p>
       <p>
         Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à{" "}
-        <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.
+        <a style={{ whiteSpace: "nowrap" }} href="mailto:dgt.ega-pro@travail.gouv.fr">
+          dgt.ega-pro@travail.gouv.fr
+        </a>
+        .
       </p>
     </>
   );
