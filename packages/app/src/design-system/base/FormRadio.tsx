@@ -5,7 +5,6 @@ import React from "react";
 import type { MarginProps } from "../utils/spacing";
 
 import { Box } from "./Box";
-import styles from "./FormRadio.module.css";
 
 export type FormRadioGroupProps = PropsWithChildren<
   Omit<MarginProps, "ml" | "mr" | "mx"> & {
@@ -67,7 +66,7 @@ export const FormRadioGroupInput = forwardRef<HTMLInputElement, FormRadioGroupIn
   ({ children, id, ...inputProps }, ref) => {
     return (
       <div className="fr-radio-group">
-        <input id={id} type="radio" ref={ref} className={styles.input} {...inputProps} />
+        <input id={id} type="radio" ref={ref} {...inputProps} />
         <label className="fr-label" htmlFor={id}>
           {children}
         </label>
