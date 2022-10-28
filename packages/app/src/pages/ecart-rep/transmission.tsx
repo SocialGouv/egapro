@@ -36,7 +36,7 @@ const Transmission: NextPageWithLayout = () => {
 
   return (
     <>
-      <Grid justifyCenter>
+      <Grid justifyCenter mb="4w">
         <GridCol sm={8} md={5}>
           <ImgSuccess />
         </GridCol>
