@@ -45,6 +45,3 @@ IsDisabled.args = {
   ...Default.args,
   isDisabled: true,
 };
-
-export const IsReadOnly = Template.bind({});
-IsReadOnly.args = { ...Default.args, readOnly: true };
