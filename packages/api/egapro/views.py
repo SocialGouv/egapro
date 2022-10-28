@@ -274,7 +274,7 @@ async def resend_repartition_receipt(request, response, siren, year):
     data = record.data
     url = request.domain + data.uri
     emails.repartition.send(owners, url=url, **data)
-    response.status = 204
+    response.status = 200
 
 
 @app.route("/repartition-equilibree/{siren}/{year}/pdf", methods=["GET"])
@@ -283,9 +283,6 @@ async def send_repartition_pdf(request, response, siren, year):
         record = await db.repartition.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No répartition équilibrée with siren {siren} and year {year}")
-    owners = await db.ownership.emails(siren)
-    if not owners:  # Staff member
-        owners = request["email"]
     data = record.data
     pdf = repartition.main(data)
     response.headers['Content-Type'] = 'application/pdf'
