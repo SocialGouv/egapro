@@ -20,18 +20,25 @@ import {
   GridCol,
   ImgSuccess,
 } from "@design-system";
-import { useFormManager, useUser } from "@services/apiClient";
+import { useFormManager, useUser, fetchRepartitionEquilibreePdf } from "@services/apiClient";
 
 const title = "Transmission de la procédure";
 
 const Transmission: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
-  const { resetFormData } = useFormManager();
+  const { formData, resetFormData } = useFormManager();
 
   const initNewRepartition = () => {
     resetFormData();
     router.push("./commencer");
+  };
+  const downloadPdf = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (formData.entreprise?.siren && formData.year) {
+      console.log("in fetch");
+      fetchRepartitionEquilibreePdf(formData.entreprise.siren, formData.year);
+    }
   };
 
   return (
@@ -77,11 +84,13 @@ const Transmission: NextPageWithLayout = () => {
             <CardBody>
               <CardBodyContent>
                 <CardBodyContentTitle>
-                  <a href="#">Télécharger le récapitulatif</a>
+                  <a href="#" onClick={downloadPdf}>
+                    Télécharger le récapitulatif
+                  </a>
                 </CardBodyContentTitle>
                 <CardBodyContentDescription>Année 2022 au titre des données 2021.</CardBodyContentDescription>
                 <CardBodyContentEnd>
-                  <CardBodyContentDetails>PDF – 61,88 Ko</CardBodyContentDetails>
+                  <CardBodyContentDetails>PDF – 30 Ko</CardBodyContentDetails>
                 </CardBodyContentEnd>
               </CardBodyContent>
             </CardBody>
