@@ -25,15 +25,6 @@ export const putRepartitionEquilibree = async (data: FormState) => {
 export const fetchRepartitionEquilibree = (siren: string, year: number) =>
   fetcher(`/repartition-equilibree/${siren}/${year}`);
 
-export const fetchRepartitionEquilibreePdf = (siren: string, year: number) => {
-  console.log("in fetcher");
-  const pdf = fetcher(`/repartition-equilibree/${siren}/${year}/pdf`, {
-    headers: {
-      "Content-Type": "application/pdf",
-    },
-  });
-  return pdf;
-};
 export const fetchRepartitionEquilibreeSendEmail = (siren: string, year: number) =>
   fetcher(`/repartition-equilibree/${siren}/${year}/receipt`, { method: "POST" });
 

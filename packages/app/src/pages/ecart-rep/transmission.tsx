@@ -1,9 +1,10 @@
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useMemo, useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import type { FormButtonProps } from "@design-system";
 import {
   Box,
   ButtonAsLink,
@@ -20,7 +21,7 @@ import {
   GridCol,
   ImgSuccess,
 } from "@design-system";
-import { useFormManager, useUser, fetchRepartitionEquilibreeSendEmail } from "@services/apiClient";
+import { useFormManager, useUser, fetchRepartitionEquilibreeSendEmail, getLink } from "@services/apiClient";
 
 const title = "Transmission de la procédure";
 
@@ -28,18 +29,26 @@ const Transmission: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, resetFormData } = useFormManager();
+  const [receiptProcessing, setReceiptProcessing] = useState(false);
 
   const initNewRepartition = () => {
     resetFormData();
     router.push("./commencer");
   };
 
-  const sendReceipt = (e: React.SyntheticEvent) => {
+  const sendReceipt: NonNullable<FormButtonProps["onClick"]> = async e => {
     e.preventDefault();
     if (formData.entreprise?.siren && formData.year) {
-      fetchRepartitionEquilibreeSendEmail(formData.entreprise.siren, formData.year);
+      setReceiptProcessing(true);
+      await fetchRepartitionEquilibreeSendEmail(formData.entreprise.siren, formData.year);
+      setReceiptProcessing(false);
     }
   };
+
+  const downloadPdfLink = useMemo(
+    () => getLink(`/repartition-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`),
+    [formData.entreprise?.siren, formData.year],
+  );
 
   return (
     <>
@@ -69,8 +78,8 @@ const Transmission: NextPageWithLayout = () => {
       <Box mt="6w">
         <form>
           <ButtonGroup inline="mobile-up">
-            <FormButton type="button" variant="secondary" onClick={sendReceipt}>
-              Renvoyer l'accusé de réception
+            <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
+              {receiptProcessing ? "Accusé en cours d'envoi..." : "Renvoyer l'accusé de réception"}
             </FormButton>
             <NextLink href="/ecart-rep/assujetti/" passHref>
               <ButtonAsLink onClick={initNewRepartition}>Effectuer une nouvelle déclaration</ButtonAsLink>
@@ -78,25 +87,28 @@ const Transmission: NextPageWithLayout = () => {
           </ButtonGroup>
         </form>
       </Box>
-      <Grid mt="6w">
-        <GridCol lg={6}>
-          <Card size="sm" isEnlargeLink>
-            <CardBody>
-              <CardBodyContent>
-                <CardBodyContentTitle>
-                  <a href="#">Télécharger le récapitulatif</a>
-                </CardBodyContentTitle>
-                <CardBodyContentDescription>
-                  Année {formData.year && formData.year + 1} au titre des données {formData.year}.
-                </CardBodyContentDescription>
-                <CardBodyContentEnd>
-                  <CardBodyContentDetails>PDF – 30 Ko</CardBodyContentDetails>
-                </CardBodyContentEnd>
-              </CardBodyContent>
-            </CardBody>
-          </Card>
-        </GridCol>
-      </Grid>
+      {formData.entreprise?.siren && (
+        <Grid mt="6w">
+          <GridCol lg={6}>
+            <Card size="sm" isEnlargeLink>
+              <CardBody>
+                <CardBodyContent>
+                  <CardBodyContentTitle>
+                    <a href={downloadPdfLink}>Télécharger le récapitulatif</a>
+                  </CardBodyContentTitle>
+                  <CardBodyContentDescription>
+                    {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                    Année {formData.year! + 1} au titre des données {formData.year}.
+                  </CardBodyContentDescription>
+                  <CardBodyContentEnd>
+                    <CardBodyContentDetails>PDF</CardBodyContentDetails>
+                  </CardBodyContentEnd>
+                </CardBodyContent>
+              </CardBody>
+            </Card>
+          </GridCol>
+        </Grid>
+      )}
     </>
   );
 };
