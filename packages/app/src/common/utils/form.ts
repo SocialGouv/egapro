@@ -1,14 +1,59 @@
 import { z } from "zod";
 
-export const zodRadioInputSchema = z.union([z.literal("oui"), z.literal("non")]);
+export const zodRadioInputSchema = z.string().transform((val, ctx) => {
+  if (val !== "oui" && val !== "non") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Le champ est requis",
+    });
+    return z.NEVER;
+  }
+  return val;
+});
 
 const INVALID_PERCENTAGE = "Le champ est requis";
 
 export const zodPercentageSchema = z
-  .number({ required_error: INVALID_PERCENTAGE, invalid_type_error: INVALID_PERCENTAGE })
-  .nonnegative({ message: "Le pourcentage doit être positif" })
-  .lte(100, { message: "Le pourcentage maximum est 100" })
-  .multipleOf(0.1, { message: "Le pourcentage n'a au maximum qu'un chiffre après la virgule" })
+  .string()
+  .transform((val, ctx) => {
+    const percentage = parseFloat(val);
+
+    if (isNaN(percentage)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: INVALID_PERCENTAGE,
+      });
+      return z.NEVER;
+    }
+
+    if (percentage < 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le pourcentage doit être positif",
+      });
+      return z.NEVER;
+    }
+
+    if (percentage > 100) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le pourcentage maximum est 100",
+      });
+      return z.NEVER;
+    }
+
+    const parts = val.split(".");
+
+    if (parts.length > 1 && parts[1].length > 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le pourcentage n'a au maximum qu'un chiffre après la virgule",
+      });
+      return z.NEVER;
+    }
+
+    return percentage;
+  })
   .optional();
 
 export type RadioInputValueType = z.infer<typeof zodRadioInputSchema>;

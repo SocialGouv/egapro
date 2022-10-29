@@ -42,13 +42,23 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-// Ensure the following variable is in sync with motifNonCalculabiliteCadresOptions[number].value.
-export const motifEcartsCadresNonCalculableValues = ["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"] as const;
-
 const formSchema = z
   .object({
     isEcartsCadresCalculable: zodRadioInputSchema,
-    motifEcartsCadresNonCalculable: z.enum(motifEcartsCadresNonCalculableValues).optional(),
+    motifEcartsCadresNonCalculable: z
+      .string()
+      .transform((val, ctx) => {
+        // Ensure the following values are in sync with motifNonCalculabiliteCadresOptions[number].value.
+        if (val !== "aucun_cadre_dirigeant" && val !== "un_seul_cadre_dirigeant") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Le champ est requiss",
+          });
+          return z.NEVER;
+        }
+        return val;
+      })
+      .optional(),
     ecartsCadresFemmes: zodPercentageSchema,
     ecartsCadresHommes: zodPercentageSchema,
   })
@@ -78,25 +88,21 @@ const formSchema = z
     },
   );
 
-export type FormType = z.infer<typeof formSchema>;
-
-// A less strict type than FormType, which accepts null value to represent form inputs at start (undefined is reserved for React to mean that the field is uncontrolled).
-export type LaxFormType = {
-  [Key in keyof FormType]: FormType[Key] | null;
-};
+export type FormTypeOutput = z.infer<typeof formSchema>;
+export type FormTypeInput = z.input<typeof formSchema>;
 
 const EcartsCadres: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
-  const methods = useForm<LaxFormType>({
+  const methods = useForm<FormTypeInput>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       isEcartsCadresCalculable: radioBoolToString(formData?.isEcartsCadresCalculable),
-      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable || null, // Using null will let the form to use the first option which is the disabled placeholder.
-      ecartsCadresFemmes: formData?.ecartsCadresFemmes || null,
-      ecartsCadresHommes: formData?.ecartsCadresHommes || null,
+      motifEcartsCadresNonCalculable: formData?.motifEcartsCadresNonCalculable || "",
+      ecartsCadresFemmes: String(formData?.ecartsCadresFemmes) || "",
+      ecartsCadresHommes: String(formData?.ecartsCadresHommes) || "",
     },
   });
 
@@ -111,10 +117,10 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   const isEcartsCadresCalculable = watch("isEcartsCadresCalculable");
 
-  const onSubmit = (formdata: LaxFormType) => {
+  const onSubmit = (data: FormTypeInput) => {
     // At this point, we passed the zod validation so the data are now compliant with FormType so casting is safe.
     const { isEcartsCadresCalculable, motifEcartsCadresNonCalculable, ecartsCadresFemmes, ecartsCadresHommes } =
-      formdata as FormType;
+      data as FormTypeOutput;
 
     const isEcartsCadresCalculableBoolVal = radioStringToBool(isEcartsCadresCalculable);
 
