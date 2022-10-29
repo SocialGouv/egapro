@@ -147,7 +147,7 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   return (
     <ClientOnly>
-      {isEcartsCadresCalculable === null && (
+      {isEcartsCadresCalculable === "" && (
         <Alert mb="4w">
           <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
           <p>

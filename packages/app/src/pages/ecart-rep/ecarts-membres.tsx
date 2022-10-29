@@ -42,13 +42,23 @@ import {
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
-// Ensure the following variable is in sync with motifNonCalculabiliteMembresOptions[number].value.
-export const motifEcartsMembresNonCalculableValues = ["aucune_instance_dirigeante"] as const;
-
 const formSchema = z
   .object({
     isEcartsMembresCalculable: zodRadioInputSchema,
-    motifEcartsMembresNonCalculable: z.enum(motifEcartsMembresNonCalculableValues).optional(),
+    motifEcartsMembresNonCalculable: z
+      .string()
+      .transform((val, ctx) => {
+        // Ensure the following values are in sync with motifNonCalculabiliteMembresOptions[number].value.
+        if (val !== "aucune_instance_dirigeante") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Le champ est requiss",
+          });
+          return z.NEVER;
+        }
+        return val;
+      })
+      .optional(),
     ecartsMembresFemmes: zodPercentageSchema,
     ecartsMembresHommes: zodPercentageSchema,
   })
@@ -78,25 +88,21 @@ const formSchema = z
     },
   );
 
-export type FormType = z.infer<typeof formSchema>;
-
-// A less strict type than FormType, which accepts null value to represent form inputs at start (undefined is reserved for React to mean that the field is uncontrolled).
-export type LaxFormType = {
-  [Key in keyof FormType]: FormType[Key] | null;
-};
+export type FormTypeOutput = z.infer<typeof formSchema>;
+export type FormTypeInput = z.input<typeof formSchema>;
 
 const EcartsMembres: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
-  const methods = useForm<LaxFormType>({
+  const methods = useForm<FormTypeInput>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       isEcartsMembresCalculable: radioBoolToString(formData?.isEcartsMembresCalculable),
-      motifEcartsMembresNonCalculable: formData?.motifEcartsMembresNonCalculable || null, // Using null will let the form to use the first option which is the disabled placeholder.
-      ecartsMembresFemmes: formData?.ecartsMembresFemmes || null,
-      ecartsMembresHommes: formData?.ecartsMembresHommes || null,
+      motifEcartsMembresNonCalculable: formData?.motifEcartsMembresNonCalculable || "",
+      ecartsMembresFemmes: String(formData?.ecartsMembresFemmes) || "",
+      ecartsMembresHommes: String(formData?.ecartsMembresHommes) || "",
     },
   });
 
@@ -111,10 +117,10 @@ const EcartsMembres: NextPageWithLayout = () => {
 
   const isEcartsMembresCalculable = watch("isEcartsMembresCalculable");
 
-  const onSubmit = (data: LaxFormType) => {
+  const onSubmit = (data: FormTypeInput) => {
     // At this point, we passed the zod validation so the data are now compliant with FormType so casting is safe.
     const { isEcartsMembresCalculable, motifEcartsMembresNonCalculable, ecartsMembresFemmes, ecartsMembresHommes } =
-      data as FormType;
+      data as FormTypeOutput;
 
     const isEcartsMembresCalculableBoolVal = radioStringToBool(isEcartsMembresCalculable);
 
@@ -123,7 +129,7 @@ const EcartsMembres: NextPageWithLayout = () => {
       motifEcartsMembresNonCalculable:
         isEcartsMembresCalculableBoolVal || !motifEcartsMembresNonCalculable
           ? undefined
-          : motifEcartsMembresNonCalculable,
+          : (motifEcartsMembresNonCalculable as typeof motifNonCalculabiliteMembresOptions[number]["value"]), // To fix bug zod/TS. Why the literals are inferred in ecarts-cadres and not here ?
       ecartsMembresFemmes: isEcartsMembresCalculableBoolVal ? ecartsMembresFemmes : undefined,
       ecartsMembresHommes: isEcartsMembresCalculableBoolVal ? ecartsMembresHommes : undefined,
     });
@@ -150,7 +156,7 @@ const EcartsMembres: NextPageWithLayout = () => {
 
   return (
     <ClientOnly>
-      {isEcartsMembresCalculable === undefined && (
+      {isEcartsMembresCalculable === "" && (
         <Alert mb="4w">
           <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
           <p>

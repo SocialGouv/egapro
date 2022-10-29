@@ -60,5 +60,5 @@ export type RadioInputValueType = z.infer<typeof zodRadioInputSchema>;
 
 export const radioStringToBool = (radioInput: RadioInputValueType): boolean => radioInput === "oui";
 
-export const radioBoolToString = (value: boolean | undefined): RadioInputValueType | undefined =>
-  value === true ? "oui" : value === false ? "non" : undefined;
+export const radioBoolToString = (value: boolean | undefined): RadioInputValueType | "" =>
+  value === true ? "oui" : value === false ? "non" : "";
