@@ -36,12 +36,12 @@ const Transmission: NextPageWithLayout = () => {
 
   return (
     <>
-      <Grid justifyCenter mb="4w">
-        <GridCol sm={8} md={5}>
+      <h1>{title}</h1>
+      <Grid justifyCenter mb="4w" mt="4w">
+        <GridCol sm={6} md={5}>
           <ImgSuccess />
         </GridCol>
       </Grid>
-      <h1>{title}</h1>
       <p>
         Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
         femmes-hommes conformément aux dispositions de l’
