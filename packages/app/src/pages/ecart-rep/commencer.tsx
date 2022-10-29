@@ -149,7 +149,7 @@ const CommencerPage: NextPageWithLayout = () => {
       </p>
 
       <div ref={animationParent}>
-        {!globalError && (
+        {globalError && (
           <Alert type="error" size="sm" mb="4w">
             <p>{globalError}</p>
           </Alert>
