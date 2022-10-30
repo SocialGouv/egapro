@@ -88,8 +88,8 @@ const formSchema = z
     },
   );
 
-export type FormTypeOutput = z.infer<typeof formSchema>;
 export type FormTypeInput = z.input<typeof formSchema>;
+export type FormTypeOutput = z.infer<typeof formSchema>;
 
 const EcartsCadres: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
