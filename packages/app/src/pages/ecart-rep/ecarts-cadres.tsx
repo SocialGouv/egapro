@@ -48,8 +48,7 @@ const formSchema = z
     motifEcartsCadresNonCalculable: z
       .string()
       .transform((val, ctx) => {
-        // Ensure the following values are in sync with motifNonCalculabiliteCadresOptions[number].value.
-        if (val !== "aucun_cadre_dirigeant" && val !== "un_seul_cadre_dirigeant") {
+        if (!motifNonCalculabiliteCadresOptions.find(elt => elt.value === val)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Le champ est requiss",
@@ -89,7 +88,10 @@ const formSchema = z
   );
 
 export type FormTypeInput = z.input<typeof formSchema>;
-export type FormTypeOutput = z.infer<typeof formSchema>;
+// Fix TS limit to infer correct litterals in zod definition.
+export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsCadresNonCalculable"> & {
+  motifEcartsCadresNonCalculable: typeof motifNonCalculabiliteCadresOptions[number]["value"];
+};
 
 const EcartsCadres: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });

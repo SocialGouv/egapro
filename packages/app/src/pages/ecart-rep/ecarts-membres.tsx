@@ -48,8 +48,7 @@ const formSchema = z
     motifEcartsMembresNonCalculable: z
       .string()
       .transform((val, ctx) => {
-        // Ensure the following values are in sync with motifNonCalculabiliteMembresOptions[number].value.
-        if (val !== "aucune_instance_dirigeante") {
+        if (!motifNonCalculabiliteMembresOptions.find(elt => elt.value === val)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Le champ est requiss",
@@ -89,7 +88,11 @@ const formSchema = z
   );
 
 export type FormTypeInput = z.input<typeof formSchema>;
-export type FormTypeOutput = z.infer<typeof formSchema>;
+
+// Fix TS limit to infer correct litterals in zod definition.
+export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsMembresNonCalculable"> & {
+  motifEcartsMembresNonCalculable: typeof motifNonCalculabiliteMembresOptions[number]["value"];
+};
 
 const EcartsMembres: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
@@ -129,7 +132,7 @@ const EcartsMembres: NextPageWithLayout = () => {
       motifEcartsMembresNonCalculable:
         isEcartsMembresCalculableBoolVal || !motifEcartsMembresNonCalculable
           ? undefined
-          : (motifEcartsMembresNonCalculable as typeof motifNonCalculabiliteMembresOptions[number]["value"]), // To fix bug zod/TS. Why the literals are inferred in ecarts-cadres and not here ?
+          : motifEcartsMembresNonCalculable,
       ecartsMembresFemmes: isEcartsMembresCalculableBoolVal ? ecartsMembresFemmes : undefined,
       ecartsMembresHommes: isEcartsMembresCalculableBoolVal ? ecartsMembresHommes : undefined,
     });
