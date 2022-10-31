@@ -218,7 +218,7 @@ const EcartsCadres: NextPageWithLayout = () => {
               <NextLink href="/ecart-rep/periode-reference" passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
-              <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
+              <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>

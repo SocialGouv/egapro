@@ -212,7 +212,7 @@ const CommencerPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
-              <FormButton isDisabled={(isSubmitted && !isValid) || isSubmitting}>Suivant</FormButton>
+              <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
