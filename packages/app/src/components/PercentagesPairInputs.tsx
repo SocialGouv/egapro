@@ -15,32 +15,28 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
   const {
     setValue,
     register,
-    watch,
     formState: { errors },
-  } = useFormContext<Record<string, number>>();
+  } = useFormContext<Record<string, string>>();
 
   // TODO: unit tests
   const syncPercentages = (event: React.FormEvent<HTMLInputElement>) => {
     const inputChanged = event.currentTarget;
-    const inputValue = inputChanged.valueAsNumber;
+    const inputValueAsNumber = parseFloat(inputChanged.valueAsNumber.toFixed(1));
 
-    if (!isNaN(inputValue)) {
+    if (!isNaN(inputValueAsNumber)) {
       if (inputChanged.id === firstLabel) {
-        setValue(firstLabel, inputValue, { shouldValidate: true });
-        if (inputValue >= 0 && inputValue <= 100) {
-          setValue(secondLabel, Number(Number(100 - inputValue).toFixed(1)), { shouldValidate: true });
+        setValue(firstLabel, String(inputValueAsNumber), { shouldValidate: true });
+        if (inputValueAsNumber >= 0 && inputValueAsNumber <= 100) {
+          setValue(secondLabel, (100 - inputValueAsNumber).toFixed(1), { shouldValidate: true });
         }
       } else if (inputChanged.id === secondLabel) {
-        setValue(secondLabel, inputValue, { shouldValidate: true });
-        if (inputValue >= 0 && inputValue <= 100) {
-          setValue(firstLabel, Number(Number(100 - inputValue).toFixed(1)), { shouldValidate: true });
+        setValue(secondLabel, String(inputValueAsNumber), { shouldValidate: true });
+        if (inputValueAsNumber >= 0 && inputValueAsNumber <= 100) {
+          setValue(firstLabel, (100 - inputValueAsNumber).toFixed(1), { shouldValidate: true });
         }
       }
     }
   };
-
-  const firstInputValue = watch(firstInput.label);
-  const secondInputValue = watch(secondInput.label);
 
   return (
     <>
@@ -48,15 +44,11 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
         <FormGroupLabel htmlFor={firstLabel}>{firstTitle}</FormGroupLabel>
         <FormInput
           {...register(firstLabel, {
-            onChange: event => {
-              syncPercentages(event);
-            },
-            valueAsNumber: true,
+            onChange: syncPercentages,
           })}
           id={firstLabel}
           type="percentage"
           aria-describedby={`${firstLabel}-message-error`}
-          value={isNaN(firstInputValue) ? "" : firstInputValue}
         />
         {errors[firstLabel] && (
           <FormGroupMessage id={`${firstLabel}-message-error`}>{errors[firstLabel]?.message}</FormGroupMessage>
@@ -66,15 +58,11 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
         <FormGroupLabel htmlFor={secondLabel}>{secondTitle}</FormGroupLabel>
         <FormInput
           {...register(secondLabel, {
-            onChange: event => {
-              syncPercentages(event);
-            },
-            valueAsNumber: true,
+            onChange: syncPercentages,
           })}
           id={secondLabel}
           type="percentage"
           aria-describedby={`${secondLabel}-message-error`}
-          value={isNaN(secondInputValue) ? "" : secondInputValue}
         />
         {errors[secondLabel] && (
           <FormGroupMessage id={`${secondLabel}-message-error`}>{errors[secondLabel]?.message}</FormGroupMessage>
