@@ -65,7 +65,8 @@ const formSchema = z
     }
   });
 
-type FormType = z.infer<typeof formSchema>;
+export type FormTypeInput = z.input<typeof formSchema>;
+export type FormTypeOutput = z.infer<typeof formSchema>;
 
 const Publication: NextPageWithLayout = () => {
   const router = useRouter();
@@ -77,7 +78,7 @@ const Publication: NextPageWithLayout = () => {
     handleSubmit,
     register,
     watch,
-  } = useForm<FormType>({
+  } = useForm<FormTypeInput>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,7 +91,9 @@ const Publication: NextPageWithLayout = () => {
 
   const hasWebsite = watch("hasWebsite");
 
-  const onSubmit = async ({ hasWebsite, publishingContent, publishingDate, publishingWebsiteUrl }: FormType) => {
+  const onSubmit = async (data: FormTypeInput) => {
+    const { hasWebsite, publishingContent, publishingDate, publishingWebsiteUrl } = data as FormTypeOutput;
+
     saveFormData({
       hasWebsite: radioStringToBool(hasWebsite),
       publishingContent,
