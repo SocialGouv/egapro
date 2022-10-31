@@ -1,4 +1,5 @@
 import useSWR from "swr";
+
 import { fetcher } from "./fetcher";
 import type { FormState } from "./useFormManager";
 import { useUser } from "./useUser";
@@ -32,7 +33,6 @@ export const useRepartitionEquilibree = (siren: string, year: number) => {
   const { isAuthenticated } = useUser();
   const { data: repeq, error } = useSWR<RepartitionEquilibreeAPI>(
     !siren || !year || !isAuthenticated ? null : `/repartition-equilibree/${siren}/${year}`,
-    fetcher,
   );
 
   return { repeq, error };

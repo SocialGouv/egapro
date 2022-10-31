@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
 
 import type { FetcherReturnImmutable } from "./fetcher";
-import { fetcher } from "./fetcher";
 
 export type ConfigTypeApi = {
   DEPARTEMENTS?: Record<string, string> | undefined;
@@ -47,7 +46,7 @@ export const filterDepartements = (config: ConfigTypeFormatted, region?: string)
 };
 
 export const useConfig = (): FetcherReturnImmutable & { config: ConfigTypeFormatted } => {
-  const { data, error } = useSWRImmutable<ConfigTypeApi>("/config", fetcher);
+  const { data, error } = useSWRImmutable<ConfigTypeApi>("/config");
 
   const isLoading = !data && !error;
   const isError = Boolean(error);

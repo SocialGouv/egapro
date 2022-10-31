@@ -1,7 +1,5 @@
 import useSWR from "swr";
 
-import { fetcher } from "./fetcher";
-
 // TODO: type à confirmer par rapport au endpoint /!\
 type DeclarationSummary = {
   declared_at: number | null;
@@ -19,9 +17,7 @@ export type TokenInfoType = {
 };
 
 export const useMe = (token: string | undefined) => {
-  const { data: user, error } = useSWR<TokenInfoType>(!token ? null : "/me", fetcher);
-
-  const loading = token && !user && !error;
+  const { data: user, error, isValidating: loading } = useSWR<TokenInfoType>(!token ? null : "/me");
 
   return { user, error, loading };
 };

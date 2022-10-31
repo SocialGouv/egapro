@@ -34,6 +34,7 @@ export const useUserStore = create<UserStore>()(
  *  error, // SWR error if any in fetching user data
  *  logout, // function to logout
  *  isAuthenticated, // helper to know if the user is authenticated
+ *  loading, // true if the asynchron fetch to get user information is in progress
  * } = useUser()
  *
  */

@@ -1,7 +1,6 @@
 import useSWR from "swr";
 
 import { buildUrlParamsString } from "../../common/utils/url";
-import { fetcher } from "./fetcher";
 import type { FetcherReturn } from "@services/apiClient";
 
 export type StatsType = {
@@ -22,7 +21,7 @@ export const useStats = (params?: UseStatsParams): FetcherReturn & { stats: Stat
   const urlParams = buildUrlParamsString(params);
   const key = "/stats?" + urlParams;
 
-  const { data, error, mutate } = useSWR<StatsType>(key, fetcher);
+  const { data, error, mutate } = useSWR<StatsType>(key);
 
   const isLoading = !data && !error;
   const isError = Boolean(error);
