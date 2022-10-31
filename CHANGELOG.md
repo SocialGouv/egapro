@@ -1,3 +1,86 @@
+## [2.23.1](https://github.com/SocialGouv/egapro/compare/v2.23.0...v2.23.1) (2022-10-31)
+
+
+### Bug Fixes
+
+* pdf ticket unmerge (prod) ([#1273](https://github.com/SocialGouv/egapro/issues/1273)) ([437eecf](https://github.com/SocialGouv/egapro/commit/437eecfd5e10ec7df032f2a9455ccce24838b9da))
+
+# [2.23.0](https://github.com/SocialGouv/egapro/compare/v2.22.7...v2.23.0) (2022-10-25)
+
+
+### Features
+
+* update wording when user has no ownership ([#1225](https://github.com/SocialGouv/egapro/issues/1225)) ([b677f02](https://github.com/SocialGouv/egapro/commit/b677f022c175e3562784146494e01352757bfd8e))
+
+## [2.22.7](https://github.com/SocialGouv/egapro/compare/v2.22.6...v2.22.7) (2022-10-18)
+
+
+### Bug Fixes
+
+* None cell issue in objectives pdf (prod) ([#1181](https://github.com/SocialGouv/egapro/issues/1181)) ([720ddea](https://github.com/SocialGouv/egapro/commit/720ddea1f5321cc384b8c91c62b41d8cdb206ee3))
+
+## [2.22.6](https://github.com/SocialGouv/egapro/compare/v2.22.5...v2.22.6) (2022-10-13)
+
+
+### Bug Fixes
+
+* planRelance was required even for decla before 2021. Fixed ([#1159](https://github.com/SocialGouv/egapro/issues/1159)) ([08128df](https://github.com/SocialGouv/egapro/commit/08128df87d835d1bb450c118a266e4317da20902))
+
+## [2.22.5](https://github.com/SocialGouv/egapro/compare/v2.22.4...v2.22.5) (2022-10-07)
+
+
+### Bug Fixes
+
+* add new logo ([#1126](https://github.com/SocialGouv/egapro/issues/1126)) ([a63a194](https://github.com/SocialGouv/egapro/commit/a63a1947dbb764c4f292381c9a09a8e21997ebe7))
+
+## [2.22.4](https://github.com/SocialGouv/egapro/compare/v2.22.3...v2.22.4) (2022-10-06)
+
+
+### Bug Fixes
+
+* bug on mesures correction + CSE ([#1108](https://github.com/SocialGouv/egapro/issues/1108)) ([0fcee84](https://github.com/SocialGouv/egapro/commit/0fcee84fe14e2fe1ad777d1a86b64ac6b7df7277))
+
+## [2.22.3](https://github.com/SocialGouv/egapro/compare/v2.22.2...v2.22.3) (2022-10-04)
+
+
+### Bug Fixes
+
+* typo sur Pourcentages ([#1110](https://github.com/SocialGouv/egapro/issues/1110)) ([7cdc328](https://github.com/SocialGouv/egapro/commit/7cdc32862892985930a14087b162b60f7c8f1791))
+
+## [2.22.2](https://github.com/SocialGouv/egapro/compare/v2.22.1...v2.22.2) (2022-09-28)
+
+
+### Bug Fixes
+
+* restore fetch all years functionality ([#1066](https://github.com/SocialGouv/egapro/issues/1066)) ([b6b2485](https://github.com/SocialGouv/egapro/commit/b6b24855bc7a9379e185144bacbb6a128ff10d53))
+
+## [2.22.1](https://github.com/SocialGouv/egapro/compare/v2.22.0...v2.22.1) (2022-09-22)
+
+
+### Bug Fixes
+
+* revert [#1042](https://github.com/SocialGouv/egapro/issues/1042) ([d18f6c1](https://github.com/SocialGouv/egapro/commit/d18f6c1b9e9fe222bd9434fdd368e3a459cce1ef))
+
+# [2.22.0](https://github.com/SocialGouv/egapro/compare/v2.21.1...v2.22.0) (2022-09-22)
+
+
+### Features
+
+* **app:** New select component ([#1042](https://github.com/SocialGouv/egapro/issues/1042)) ([c270322](https://github.com/SocialGouv/egapro/commit/c27032234809daa1cb9d2a91f3f5f7b43b6af343))
+
+## [2.21.1](https://github.com/SocialGouv/egapro/compare/v2.21.0...v2.21.1) (2022-09-20)
+
+
+### Bug Fixes
+
+* **ci:** remove type-check validation because why not ([e1cea56](https://github.com/SocialGouv/egapro/commit/e1cea56c6a317a5edc6c6049deb956c847b24a55))
+
+# [2.21.0](https://github.com/SocialGouv/egapro/compare/v2.14...v2.21.0) (2022-09-20)
+
+
+### Chores
+
+* switch master branches
 # [2.14.0](https://github.com/SocialGouv/egapro/compare/v2.13.1...v2.14.0) (2022-09-09)
 
 

@@ -301,11 +301,12 @@ def main(data):
         (
             "",
             data.path("indicateurs.promotions.objectif_de_progression"),
-        ),
-    ) if effectif_tranche != "50:250" else (
-        (None, None),
-        (None, None),
+        )
     )
+
+    if effectif_tranche == "50:250":
+        indicateur2_cell = ((None, None), (None, None))
+        indicateur3_cell = ((None, None), (None, None))
 
     indicateur2et3_cell = (
         (
@@ -318,7 +319,7 @@ def main(data):
             ),
         )
         if effectif_tranche == "50:250"
-        else ((None, None), (None, None))
+        else (None, None)
     )
 
     if index is not None and date_pub_objectifs is not None:
