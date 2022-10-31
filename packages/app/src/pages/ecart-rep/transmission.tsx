@@ -36,12 +36,13 @@ const Transmission: NextPageWithLayout = () => {
     router.push("./commencer");
   };
 
-  const sendReceipt: NonNullable<FormButtonProps["onClick"]> = async e => {
+  const sendReceipt: NonNullable<FormButtonProps["onClick"]> = e => {
     e.preventDefault();
     if (formData.entreprise?.siren && formData.year) {
       setReceiptProcessing(true);
-      await fetchRepartitionEquilibreeSendEmail(formData.entreprise.siren, formData.year);
-      setReceiptProcessing(false);
+      fetchRepartitionEquilibreeSendEmail(formData.entreprise.siren, formData.year).finally(() =>
+        setReceiptProcessing(false),
+      );
     }
   };
 
@@ -79,7 +80,7 @@ const Transmission: NextPageWithLayout = () => {
         <form>
           <ButtonGroup inline="mobile-up">
             <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
-              {receiptProcessing ? "Accusé en cours d'envoi..." : "Renvoyer l'accusé de réception"}
+              {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
             </FormButton>
             <NextLink href="/ecart-rep/assujetti/" passHref>
               <ButtonAsLink onClick={initNewRepartition}>Effectuer une nouvelle déclaration</ButtonAsLink>

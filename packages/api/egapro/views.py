@@ -274,7 +274,7 @@ async def resend_repartition_receipt(request, response, siren, year):
     data = record.data
     url = request.domain + data.uri
     emails.repartition.send(owners, url=url, **data)
-    response.status = 200
+    response.status = 204
 
 
 @app.route("/repartition-equilibree/{siren}/{year}/pdf", methods=["GET"])

@@ -80,5 +80,5 @@ export const fetcher = async <T>(key: string, options?: RequestInit): Promise<T>
 
 // TODO: move to a better place 🖤
 export const getLink = (uri: string): string => {
-  return new URL(uri, API_URL).toString();
+  return API_URL + uri;
 };
