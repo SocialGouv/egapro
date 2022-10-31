@@ -5,3 +5,5 @@ CREATE INDEX IF NOT EXISTS idx_region ON search(region);
 CREATE INDEX IF NOT EXISTS idx_departement ON search(departement);
 CREATE INDEX IF NOT EXISTS idx_naf ON search(section_naf);
 CREATE INDEX IF NOT EXISTS idx_declared_at ON search (declared_at);
+CREATE INDEX IF NOT EXISTS idx_email ON repartition_equilibree((data->'déclarant'->'email'));
+CREATE INDEX IF NOT EXISTS idx_siren ON repartition_equilibree(siren);
