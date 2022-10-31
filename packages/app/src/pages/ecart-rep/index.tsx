@@ -62,7 +62,7 @@ export const EcartRep: NextPageWithLayout = () => (
             <ImgEcartRep />
           </GridCol>
         </Grid>
-        <Grid haveGutters mt="6w">
+        <Grid haveGutters mt="5w">
           <GridCol lg={6}>
             <Card>
               <CardBody>
@@ -102,7 +102,7 @@ export const EcartRep: NextPageWithLayout = () => (
             </Card>
           </GridCol>
         </Grid>
-        <Box mt="5w">
+        <Box mt="9w">
           <Alert type="warning">
             <AlertTitle>Calendrier exceptionnel en 2022</AlertTitle>
             <p>
@@ -111,7 +111,7 @@ export const EcartRep: NextPageWithLayout = () => (
             </p>
           </Alert>
         </Box>
-        <Box mt="5w">
+        <Box mt="9w">
           <Callout>
             <CalloutContent>
               <ul>
