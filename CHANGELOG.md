@@ -1,3 +1,10 @@
+## [2.23.1](https://github.com/SocialGouv/egapro/compare/v2.23.0...v2.23.1) (2022-10-31)
+
+
+### Bug Fixes
+
+* pdf ticket unmerge (prod) ([#1273](https://github.com/SocialGouv/egapro/issues/1273)) ([437eecf](https://github.com/SocialGouv/egapro/commit/437eecfd5e10ec7df032f2a9455ccce24838b9da))
+
 # [2.23.0](https://github.com/SocialGouv/egapro/compare/v2.22.7...v2.23.0) (2022-10-25)
 
 
