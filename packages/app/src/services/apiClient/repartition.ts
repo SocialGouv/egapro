@@ -25,6 +25,9 @@ export const putRepartitionEquilibree = async (data: FormState) => {
 export const fetchRepartitionEquilibree = (siren: string, year: number) =>
   fetcher(`/repartition-equilibree/${siren}/${year}`);
 
+export const fetchRepartitionEquilibreeSendEmail = (siren: string, year: number) =>
+  fetcher(`/repartition-equilibree/${siren}/${year}/receipt`, { method: "POST" });
+
 export const useRepartitionEquilibree = (siren: string, year: number) => {
   const { isAuthenticated } = useUser();
   const { data: repeq, error } = useSWR<RepartitionEquilibreeAPI>(
