@@ -11,6 +11,7 @@ from stdnum.fr.siren import is_valid as siren_is_valid
 
 from . import config, constants, db, emails, helpers, models, tokens, utils, schema
 from . import loggers
+from egapro.pdf import repartition
 
 
 class Request(BaseRequest):
@@ -276,6 +277,20 @@ async def resend_repartition_receipt(request, response, siren, year):
     response.status = 204
 
 
+@app.route("/repartition-equilibree/{siren}/{year}/pdf", methods=["GET"])
+async def send_repartition_pdf(request, response, siren, year):
+    try:
+        record = await db.repartition.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No répartition équilibrée with siren {siren} and year {year}")
+    data = record.data
+    pdf = repartition.main(data)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}.pdf"
+    response.body = bytes(pdf[0].output())
+    return response
+
+
 @app.route("/ownership/{siren}", methods=["GET"])
 @tokens.require
 @ensure_owner
@@ -432,7 +447,6 @@ async def put_repartition(request, response, siren, year):
     if not data["déclarant"].get("email"):
         data["déclarant"]["email"] = declarant
     schema.validate(data.raw)
-    helpers.compute_notes(data)
     schema.cross_validate(data.raw, rep_eq=True)
     try:
         current = await db.repartition.get(siren, year)
