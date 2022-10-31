@@ -107,7 +107,7 @@ project:
       - index-egalite-fh.csv
     restricted:
       - dgt.xlsx
-      - dgt-repartition.xlsx
+      - dgt-representation.xlsx
       - full.ndjson
       - indexes.csv
 
