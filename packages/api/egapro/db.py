@@ -88,9 +88,9 @@ class repartition(table):
     @classmethod
     async def get(cls, siren, year):
         return await cls.fetchrow(
-            f"SELECT * FROM {cls.table_name} WHERE siren=$1 AND year=$2", siren, int(year)        
+            f"SELECT * FROM {cls.table_name} WHERE siren=$1 AND year=$2", siren, int(year)
         )
-    
+
     @classmethod
     async def get_declared_at(cls, siren, year):
         try:
@@ -101,7 +101,7 @@ class repartition(table):
             )
         except NoData:
             return None
-    
+
     @classmethod
     async def put(cls, siren, year, data, modified_at=None):
         data = models.Data(data)
@@ -115,12 +115,12 @@ class repartition(table):
         data["entreprise"]["siren"] = siren
         ft = helpers.extract_ft(data)
         declared_at = await cls.get_declared_at(siren, year)
-        
+
         if not declared_at:
             declared_at = modified_at
         if declared_at:
             data["déclaration"]["date"] = declared_at.isoformat()
-        
+
         query = sql.insert_repartition
         args = (siren, year, modified_at, declared_at, data.raw, ft)
         async with cls.pool.acquire() as conn:
@@ -451,6 +451,7 @@ async def init():
         raise RuntimeError(f"CRITICAL Cannot connect to DB: {err}")
     async with table.pool.acquire() as conn:
         await conn.execute(sql.init)
+        await conn.execute(sql.create_indexes)
 
 
 async def create_indexes():

@@ -45,10 +45,8 @@ class PDF(fpdf.FPDF):
 
         align = "R" if key != " " else "L"
         self.set_font("Marianne", "", 11)
-        self.multi_cell(
-            value_width, height, value, ln=3, align=align, max_line_height=5
-        )
-        self.ln(height)
+        self.multi_cell(value_width, height, value, ln=3, align=align, max_line_height=5)
+        self.ln(height*1.25)
 
     def write_headline(self, value):
         self.ln(8)
@@ -72,7 +70,7 @@ class PDF(fpdf.FPDF):
             height, key_width, value_width = self.compute_row_height(key, value)
             h += height
             table.append((key, value, height, key_width, value_width))
-        self._perform_page_break_if_need_be(h)
+        self.add_page() if title == "Objectifs de progression" else self._perform_page_break_if_need_be(h)
         self.write_headline(title)
         for key, value, height, key_width, value_width in table:
             self.write_pair(key, value, height, key_width, value_width)

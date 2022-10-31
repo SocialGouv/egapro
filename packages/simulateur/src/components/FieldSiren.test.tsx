@@ -75,15 +75,15 @@ describe("isValidSiren", () => {
   })
 
   test("returns an error message for an invalid siren", async () => {
-    expect(validator("005720784a")).toBe("Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres.")
-    expect(validator("a")).toBe("Ce champ n'est pas valide, renseignez un numéro SIREN de 9 chiffres.")
+    expect(validator("005720784a")).toBe("Ce champ n'est pas valide, renseignez un numéro Siren de 9 chiffres.")
+    expect(validator("a")).toBe("Ce champ n'est pas valide, renseignez un numéro Siren de 9 chiffres.")
     expect(validator("")).toBe("Ce champ ne peut être vide")
     await expect(validator("000000000")).resolves.toBe(
-      "Ce SIREN n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle.",
+      "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle.",
     )
   })
 
   test("returns an error message for a not allowed user", async () => {
-    await expect(validator("234567891")).resolves.toBe("L'email saisi n'est pas rattaché au Siren de votre entreprise.")
+    await expect(validator("234567891")).resolves.toBe("Le Siren saisi n'est pas rattaché à votre email de connexion.")
   })
 })

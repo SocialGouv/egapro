@@ -84,3 +84,14 @@ export const messageMesureCorrection = (
     ? `** L’écart de taux ${ecartDe} est en faveur des hommes tandis que l’écart de rémunération est en faveur des femmes, donc l’écart de taux ${ecartDe} est considéré comme une mesure de correction. La note obtenue est de ${noteMax}.`
     : ""
 }
+
+/**
+ * Helper to know if the index is "calculable".
+ * Also used as a type predicate to remove the undefined in condition.
+ *
+ * @param noteIndex
+ * @returns number only
+ */
+export const estCalculable = (noteIndex: number | undefined): noteIndex is number => {
+  return noteIndex !== undefined
+}

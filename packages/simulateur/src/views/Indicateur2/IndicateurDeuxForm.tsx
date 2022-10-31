@@ -164,7 +164,7 @@ const IndicateurDeuxForm: FunctionComponent<IndicateurDeuxFormProps> = ({
 
             {values.presenceAugmentation === "true" && (
               <BlocForm
-                title="Poucentage d'augmentations"
+                title="Pourcentage d'augmentations"
                 // footer={[
                 //   displayFractionPercent(totalTauxAugmentationFemmes),
                 //   displayFractionPercent(totalTauxAugmentationHommes)
