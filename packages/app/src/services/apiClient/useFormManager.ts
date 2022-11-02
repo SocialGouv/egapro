@@ -5,7 +5,7 @@ import type { EntrepriseType } from "./siren";
 import type {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
-} from "@common/models/repartition-equilibree";
+} from "@common/models/representation-equilibree";
 
 export type FormState = {
   declarant: {

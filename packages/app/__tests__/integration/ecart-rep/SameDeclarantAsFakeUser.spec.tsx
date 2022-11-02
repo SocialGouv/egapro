@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { FAKE_USER, useUserMock } from "./mock/user";
-import DeclarantPage from "@/pages/ecart-rep/declarant";
+import DeclarantPage from "@/pages/representation-equilibree/declarant";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));

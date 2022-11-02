@@ -24,7 +24,7 @@ export * from "./base/SideMenu";
 export * from "./base/SkipLinks";
 export * from "./base/SkipLinks";
 export * from "./base/Stepper";
-export * from "./img/ImgEcartRep";
+export * from "./img/ImgRepresentationEquilibree";
 export * from "./img/ImgHome";
 export * from "./img/ImgSuccess";
 export * from "./layout/Container";

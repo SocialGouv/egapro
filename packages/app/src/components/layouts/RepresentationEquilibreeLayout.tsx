@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
 import { App } from "./App";
-import styles from "./RepartitionEquilibreeLayout.module.css";
+import styles from "./RepresentationEquilibreeLayout.module.css";
 
 import {
   Box,
@@ -50,7 +50,7 @@ const STEPS_TITLE = [
 ];
 
 // Layout for authenticated users (i.e. the wizard).
-export const RepartitionEquilibreeLayout = ({
+export const RepresentationEquilibreeLayout = ({
   children,
   haveBottomSection,
 }: PropsWithChildren<{ haveBottomSection?: boolean }>) => {
@@ -85,7 +85,7 @@ export const RepartitionEquilibreeLayout = ({
                   <CardBody>
                     <CardBodyContent>
                       <CardBodyContentTitle>
-                        <a href="https://index-egapro.travail.gouv.fr">
+                        <a href="https://egapro.travail.gouv.fr">
                           Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?
                         </a>
                       </CardBodyContentTitle>

@@ -11,7 +11,7 @@ from stdnum.fr.siren import is_valid as siren_is_valid
 
 from . import config, constants, db, emails, helpers, models, tokens, utils, schema
 from . import loggers
-from egapro.pdf import repartition
+from egapro.pdf import representation
 
 
 class Request(BaseRequest):
@@ -260,31 +260,31 @@ async def resend_objectifs_receipt(request, response, siren, year):
     response.status = 204
 
 
-@app.route("/repartition-equilibree/{siren}/{year}/receipt", methods=["POST"])
+@app.route("/representation-equilibree/{siren}/{year}/receipt", methods=["POST"])
 @tokens.require
 @ensure_owner
-async def resend_repartition_receipt(request, response, siren, year):
+async def resend_representation_receipt(request, response, siren, year):
     try:
-        record = await db.repartition.get(siren, year)
+        record = await db.representation.get(siren, year)
     except db.NoData:
-        raise HttpError(404, f"No répartition équilibrée with siren {siren} and year {year}")
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     owners = await db.ownership.emails(siren)
     if not owners:  # Staff member
         owners = request["email"]
     data = record.data
     url = request.domain + data.uri
-    emails.repartition.send(owners, url=url, **data)
+    emails.representation.send(owners, url=url, **data)
     response.status = 204
 
 
-@app.route("/repartition-equilibree/{siren}/{year}/pdf", methods=["GET"])
-async def send_repartition_pdf(request, response, siren, year):
+@app.route("/representation-equilibree/{siren}/{year}/pdf", methods=["GET"])
+async def send_representation_pdf(request, response, siren, year):
     try:
-        record = await db.repartition.get(siren, year)
+        record = await db.representation.get(siren, year)
     except db.NoData:
-        raise HttpError(404, f"No répartition équilibrée with siren {siren} and year {year}")
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     data = record.data
-    pdf = repartition.main(data)
+    pdf = representation.main(data)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}.pdf"
     response.body = bytes(pdf[0].output())
@@ -389,7 +389,7 @@ async def send_token(request, response):
     if request.ip in config.ALLOWED_IPS:
         response.json = {"token": token}
     else:
-        url = request.json.get("url", f"{request.domain}/index/declaration/?token=")
+        url = request.json.get("url", f"{request.domain}/index-egapro/declaration/?token=")
         link = f"{url}{token}"
         if "localhost" in link or "127.0.0.1" in link:
             print(link)
@@ -411,24 +411,24 @@ async def get_token(request, response):
     response.json = {"token": token}
 
 
-@app.route("/repartition-equilibree/{siren}/{year}", methods=["GET"])
+@app.route("/representation-equilibree/{siren}/{year}", methods=["GET"])
 @tokens.require
 @add_error(403, constants.ERROR_ENSURE_OWNER)
 @ensure_owner
-async def get_repartition(request, response, siren, year):
+async def get_representation(request, response, siren, year):
     try:
-        record = await db.repartition.get(siren, year)
+        record = await db.representation.get(siren, year)
     except db.NoData:
-        raise HttpError(404, f"No répartition équilibrée with siren {siren} and year {year}")
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     resource = record.as_resource()
     if record.data.path("déclarant.nom"):
         await helpers.patch_from_recherche_entreprises(resource["data"])
     response.json = resource
 
-@app.route("/repartition-equilibree/{siren}/{year}", methods=["PUT"])
+@app.route("/representation-equilibree/{siren}/{year}", methods=["PUT"])
 @tokens.require
 @ensure_owner
-async def put_repartition(request, response, siren, year):
+async def put_representation(request, response, siren, year):
     try:
         year = int(year)
     except ValueError:
@@ -449,7 +449,7 @@ async def put_repartition(request, response, siren, year):
     schema.validate(data.raw)
     schema.cross_validate(data.raw, rep_eq=True)
     try:
-        current = await db.repartition.get(siren, year)
+        current = await db.representation.get(siren, year)
     except db.NoData:
         current = None
     else:
@@ -458,7 +458,7 @@ async def put_repartition(request, response, siren, year):
         expired = declared_at and declared_at < utils.remove_one_year(utils.utcnow())
         if expired and not request["staff"]:
             raise HttpError(403, "Le délai de modification est écoulé.")
-    await db.repartition.put(siren, year, data)
+    await db.representation.put(siren, year, data)
     response.status = 204
     if not request["staff"]:
         await db.ownership.put(siren, request["email"])
@@ -471,7 +471,7 @@ async def put_repartition(request, response, siren, year):
             if not owners:  # Staff member
                 owners = request["email"]
             url = request.domain + data.uri
-            emails.repartition.send(owners, url=url, **data)
+            emails.representation.send(owners, url=url, **data)
 
 @app.route("/search")
 async def search(request, response):

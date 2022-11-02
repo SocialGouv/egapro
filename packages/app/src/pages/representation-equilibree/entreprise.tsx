@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 
 import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   FormButton,
   FormGroup,
@@ -16,7 +16,7 @@ import {
 import { useConfig, useFormManager, useUser } from "@services/apiClient";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
 
   // No need to use React Hook Form here, because we only show read only data.
@@ -28,7 +28,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    router.push("/ecart-rep/periode-reference");
+    router.push("/representation-equilibree/periode-reference");
   };
 
   return (
@@ -79,7 +79,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
             <FormInput id="code-pays" type="text" readOnly value={formData.entreprise?.code_pays || ""} />
           </FormGroup>
           <FormLayoutButtonGroup>
-            <NextLink href="/ecart-rep/declarant" passHref>
+            <NextLink href="/representation-equilibree/declarant" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </NextLink>
             <FormButton>Suivant</FormButton>
@@ -91,7 +91,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 };
 
 InformationsEntreprise.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default InformationsEntreprise;
