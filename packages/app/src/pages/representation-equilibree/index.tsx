@@ -19,10 +19,10 @@ import {
   AlertTitle,
   Callout,
   CalloutContent,
-  ImgEcartRep,
+  ImgRepresentationEquilibree,
 } from "@design-system";
 
-export const EcartRep: NextPageWithLayout = () => (
+export const RepresentationEquilibree: NextPageWithLayout = () => (
   <>
     <Head>
       <title>Déclaration des écarts de représentation F/H dans les postes de direction</title>
@@ -59,7 +59,7 @@ export const EcartRep: NextPageWithLayout = () => (
             </NextLink>
           </GridCol>
           <GridCol lg={5}>
-            <ImgEcartRep />
+            <ImgRepresentationEquilibree />
           </GridCol>
         </Grid>
         <Grid haveGutters mt="5w">
@@ -143,8 +143,8 @@ export const EcartRep: NextPageWithLayout = () => (
   </>
 );
 
-EcartRep.getLayout = ({ children }) => {
+RepresentationEquilibree.getLayout = ({ children }) => {
   return <BasicLayout>{children}</BasicLayout>;
 };
 
-export default EcartRep;
+export default RepresentationEquilibree;

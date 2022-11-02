@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
   FormGroup,
@@ -131,7 +131,7 @@ const PeriodeReference: NextPageWithLayout = () => {
 };
 
 PeriodeReference.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default PeriodeReference;

@@ -58,14 +58,14 @@ async def get_headers_columns():
             ("Date_publication", "déclaration.publication.date", isodate),
             ("Site_internet_publication", "déclaration.publication.url"),
             ("Modalites_publication", "déclaration.publication.modalités"),
-            ("Cadres_calculable", "indicateurs.répartition_équilibrée.cadres_calculable"),
-            ("Cadres_motif_non_calculable", "indicateurs.répartition_équilibrée.motif_nc_cadres"),
-            ("Cadres_pourcentage_femmes", "indicateurs.répartition_équilibrée.pct_f_cadres"),
-            ("Cadres_pourcentage_hommes", "indicateurs.répartition_équilibrée.pct_h_cadres"),
-            ("Membres_calculable", "indicateurs.répartition_équilibrée.membres_calculable"),
-            ("Membres_motif_non_calculable", "indicateurs.répartition_équilibrée.motif_nc_membres"),
-            ("Membres_pourcentage_femmes", "indicateurs.répartition_équilibrée.pct_f_membres"),
-            ("Membres_pourcentage_hommes", "indicateurs.répartition_équilibrée.pct_h_membres")
+            ("Cadres_calculable", "indicateurs.représentation_équilibrée.cadres_calculable"),
+            ("Cadres_motif_non_calculable", "indicateurs.représentation_équilibrée.motif_nc_cadres"),
+            ("Cadres_pourcentage_femmes", "indicateurs.représentation_équilibrée.pct_f_cadres"),
+            ("Cadres_pourcentage_hommes", "indicateurs.représentation_équilibrée.pct_h_cadres"),
+            ("Membres_calculable", "indicateurs.représentation_équilibrée.membres_calculable"),
+            ("Membres_motif_non_calculable", "indicateurs.représentation_équilibrée.motif_nc_membres"),
+            ("Membres_pourcentage_femmes", "indicateurs.représentation_équilibrée.pct_f_membres"),
+            ("Membres_pourcentage_hommes", "indicateurs.représentation_équilibrée.pct_h_membres")
         ]
     )
     headers = []
@@ -92,7 +92,7 @@ async def as_xlsx(max_rows=None, debug=False):
     :debug:             Turn on debug to be able to read the generated Workbook
     """
     print("Reading from DB")
-    records = await db.repartition.all()
+    records = await db.representation.all()
     print("Flattening JSON")
     if max_rows:
         records = records[:max_rows]
@@ -119,7 +119,7 @@ def prepare_record(data):
     prepare_declaration(data["déclaration"])
 
     if "indicateurs" in data:
-        prepare_indicateurs(data["indicateurs"]["répartition_équilibrée"])
+        prepare_indicateurs(data["indicateurs"]["représentation_équilibrée"])
     return flatten(data, flatten_lists=True)
 
 

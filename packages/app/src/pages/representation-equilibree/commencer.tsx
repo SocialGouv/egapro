@@ -10,7 +10,7 @@ import type { NextPageWithLayout } from "../_app";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   FormButton,
   FormGroup,
@@ -25,7 +25,7 @@ import {
 } from "@design-system";
 import {
   checkSiren,
-  fetchRepartitionEquilibree,
+  fetchRepresentationEquilibree,
   fetchSiren,
   ownersForSiren,
   useFormManager,
@@ -87,7 +87,7 @@ const CommencerPage: NextPageWithLayout = () => {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isSubmitted, isValid, isSubmitting },
+    formState: { errors, isValid },
   } = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
@@ -117,7 +117,7 @@ const CommencerPage: NextPageWithLayout = () => {
     };
 
     try {
-      const repeq = await fetchRepartitionEquilibree(siren, Number(year));
+      const repeq = await fetchRepresentationEquilibree(siren, Number(year));
       if (repeq) {
         setAlreadyPresent(true);
         return;
@@ -135,7 +135,7 @@ const CommencerPage: NextPageWithLayout = () => {
 
     if (formData.entreprise?.siren && siren !== formData.entreprise.siren) {
       if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
-        // Start a new declaration of repartition.
+        // Start a new declaration of representation.
         resetFormData();
         await startFresh();
       } else {
@@ -222,7 +222,7 @@ const CommencerPage: NextPageWithLayout = () => {
 };
 
 CommencerPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default CommencerPage;

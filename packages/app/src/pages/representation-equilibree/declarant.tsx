@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   FormButton,
   FormCheckbox,
@@ -152,7 +152,7 @@ const DeclarantPage: NextPageWithLayout = () => {
 };
 
 DeclarantPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default DeclarantPage;

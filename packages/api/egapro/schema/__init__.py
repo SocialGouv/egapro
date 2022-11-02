@@ -59,8 +59,8 @@ def _repeq_cross_validate(data):
         assert data.path(path), f"Le champ {path} doit être défini"
 
     percentages = [
-        ("indicateurs.répartition_équilibrée.pourcentage_femmes_cadres", "indicateurs.répartition_équilibrée.pourcentage_hommes_cadres"),
-        ("indicateurs.répartition_équilibrée.pourcentage_femmes_membres", "indicateurs.répartition_équilibrée.pourcentage_hommes_membres")
+        ("indicateurs.représentation_équilibrée.pourcentage_femmes_cadres", "indicateurs.représentation_équilibrée.pourcentage_hommes_cadres"),
+        ("indicateurs.représentation_équilibrée.pourcentage_femmes_membres", "indicateurs.représentation_équilibrée.pourcentage_hommes_membres")
     ]
 
     pct_missing = any(bool(data.path(x)) ^ bool(data.path(y)) for (x, y) in percentages)

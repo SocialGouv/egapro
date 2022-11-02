@@ -136,7 +136,7 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
           </FormStack>
           {readOnly ? (
             <ActionBar>
-              <ButtonSimulatorLink to="/index/declaration" label="Suivant" />
+              <ButtonSimulatorLink to="/index-egapro/declaration" label="Suivant" />
               &emsp;
               {informationsDeclarant.formValidated === "Valid" && (
                 <ButtonAction

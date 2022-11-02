@@ -37,7 +37,7 @@ class DeclarationRecord(Record):
         data = self.get("draft") or self.get("data")
         return models.Data(data)
 
-class RepartitionRecord(Record):
+class RepresentationRecord(Record):
     fields = ["siren", "year", "data", "modified_at", "declared_at"]
 
     @property
@@ -77,9 +77,9 @@ class table:
         async with cls.pool.acquire() as conn:
             return await conn.execute(sql, *params)
 
-class repartition(table):
-    record_class = RepartitionRecord
-    table_name = "repartition_equilibree"
+class representation(table):
+    record_class = RepresentationRecord
+    table_name = "representation_equilibree"
 
     @classmethod
     async def all(cls):
@@ -121,7 +121,7 @@ class repartition(table):
         if declared_at:
             data["déclaration"]["date"] = declared_at.isoformat()
 
-        query = sql.insert_repartition
+        query = sql.insert_representation
         args = (siren, year, modified_at, declared_at, data.raw, ft)
         async with cls.pool.acquire() as conn:
             await conn.execute(query, *args)

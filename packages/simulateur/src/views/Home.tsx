@@ -87,7 +87,7 @@ const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => 
                 formulaire suivant."
           action={
             <ButtonLinkNoRouter
-              to={process.env.REACT_APP_DECLARATION_URL || "/index/declaration/"}
+              to={process.env.REACT_APP_DECLARATION_URL || "/index-egapro/declaration/"}
               label="Déclarer directement"
               fullWidth
             />

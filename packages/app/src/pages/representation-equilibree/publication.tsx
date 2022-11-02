@@ -9,7 +9,7 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../_app";
 import { radioBoolToString, radioStringToBool, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
   AlertTitle,
@@ -74,7 +74,7 @@ const Publication: NextPageWithLayout = () => {
 
   const { formData, saveFormData } = useFormManager();
   const {
-    formState: { errors, isDirty, isValid, isSubmitted },
+    formState: { errors, isValid },
     handleSubmit,
     register,
     watch,
@@ -184,7 +184,7 @@ const Publication: NextPageWithLayout = () => {
 };
 
 Publication.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default Publication;

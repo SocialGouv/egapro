@@ -18,7 +18,7 @@ COPY packages/simulateur/src ./src
 ARG REACT_APP_EGAPRO_API_URL=https://egapro-preprod.dev.fabrique.social.gouv.fr/api
 ENV REACT_APP_EGAPRO_API_URL=$REACT_APP_EGAPRO_API_URL
 
-ARG REACT_APP_DECLARATION_URL="/index/declaration/"
+ARG REACT_APP_DECLARATION_URL="/index-egapro/declaration/"
 ENV REACT_APP_DECLARATION_URL=$REACT_APP_DECLARATION_URL
 
 ARG REACT_APP_SENTRY_DSN=https://b2f84ee9dc6044abbeb0f417f4335a26@sentry.fabrique.social.gouv.fr/48

@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
+import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
   Alert,
   AlertTitle,
@@ -153,7 +153,7 @@ const EmailPage: NextPageWithLayout = () => {
 };
 
 EmailPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
 };
 
 export default EmailPage;

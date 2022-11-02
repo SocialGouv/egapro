@@ -2,7 +2,7 @@ import NextLink from "next/link";
 import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
-import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
+import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { ButtonAsLink, Callout, CalloutContent, FormRadioGroup, FormRadioGroupInput } from "@design-system";
 import { useUser } from "@services/apiClient";
 
@@ -71,7 +71,7 @@ const AssujettiPage: NextPageWithLayout = () => {
 };
 
 AssujettiPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
 };
 
 export default AssujettiPage;

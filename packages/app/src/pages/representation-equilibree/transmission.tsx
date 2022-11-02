@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import type { FormButtonProps } from "@design-system";
 import {
   Box,
@@ -21,7 +21,7 @@ import {
   GridCol,
   ImgSuccess,
 } from "@design-system";
-import { useFormManager, useUser, fetchRepartitionEquilibreeSendEmail, getLink } from "@services/apiClient";
+import { useFormManager, useUser, fetchRepresentationEquilibreeSendEmail, getLink } from "@services/apiClient";
 
 const title = "Transmission de la procédure";
 
@@ -31,7 +31,7 @@ const Transmission: NextPageWithLayout = () => {
   const { formData, resetFormData } = useFormManager();
   const [receiptProcessing, setReceiptProcessing] = useState(false);
 
-  const initNewRepartition = () => {
+  const initNewRepresentation = () => {
     resetFormData();
     router.push("./commencer");
   };
@@ -40,14 +40,14 @@ const Transmission: NextPageWithLayout = () => {
     e.preventDefault();
     if (formData.entreprise?.siren && formData.year) {
       setReceiptProcessing(true);
-      fetchRepartitionEquilibreeSendEmail(formData.entreprise.siren, formData.year).finally(() =>
+      fetchRepresentationEquilibreeSendEmail(formData.entreprise.siren, formData.year).finally(() =>
         setReceiptProcessing(false),
       );
     }
   };
 
   const downloadPdfLink = useMemo(
-    () => getLink(`/repartition-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`),
+    () => getLink(`/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`),
     [formData.entreprise?.siren, formData.year],
   );
 
@@ -83,7 +83,7 @@ const Transmission: NextPageWithLayout = () => {
               {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
             </FormButton>
             <NextLink href="/ecart-rep/assujetti/" passHref>
-              <ButtonAsLink onClick={initNewRepartition}>Effectuer une nouvelle déclaration</ButtonAsLink>
+              <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
             </NextLink>
           </ButtonGroup>
         </form>
@@ -115,7 +115,7 @@ const Transmission: NextPageWithLayout = () => {
 };
 
 Transmission.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout haveBottomSection={true}>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout haveBottomSection={true}>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default Transmission;

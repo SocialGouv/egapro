@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 
 import type { NextPageWithLayout } from "../../_app";
 import { StaffOnly } from "@components/AuthenticatedOnly";
-import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
+import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
   FormButton,
   FormGroup,
@@ -15,19 +15,19 @@ import {
 } from "@design-system";
 import { useUser } from "@services/apiClient";
 
-const title = "Recherche de répartition équilibrée";
+const title = "Recherche de représentation équilibrée";
 
 type FormType = { siren: string; year: string };
 
-const RepartitionEquilibreeListPage: NextPageWithLayout = () => {
+const RepresentationEquilibreeListPage: NextPageWithLayout = () => {
   const router = useRouter();
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
   const { register, handleSubmit } = useForm<FormType>({});
 
   const onSubmit = (data: FormType) => {
     const { siren, year } = data;
 
-    router.push(`./repartition-equilibree/${siren}/${year}`);
+    router.push(`./representation-equilibree/${siren}/${year}`);
   };
 
   return (
@@ -63,8 +63,8 @@ const RepartitionEquilibreeListPage: NextPageWithLayout = () => {
   );
 };
 
-RepartitionEquilibreeListPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+RepresentationEquilibreeListPage.getLayout = ({ children }) => {
+  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
 };
 
-export default RepartitionEquilibreeListPage;
+export default RepresentationEquilibreeListPage;

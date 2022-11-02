@@ -26,7 +26,7 @@ declaration:
   probesPath: /index.html
   containerPort: 8080
   host: "{{ .Values.global.host }}"
-  .ingress.path: /index/declaration(/|$)(.*)
+  .ingress.path: /index-egapro/declaration(/|$)(.*)
   .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
@@ -37,7 +37,7 @@ simulateur:
   probesPath: /index.html
   containerPort: 8080
   host: "{{ .Values.global.host }}"
-  .ingress.path: /index(/|$)(.*)
+  .ingress.path: /index-egapro(/|$)(.*)
   .ingress.rewriteTarget: /$2
   certSecretName: api-crt
 
@@ -88,8 +88,8 @@ project:
       command: egapro export-public-data /mnt/files/index-egalite-fh.csv
     - name: dump-dgt
       command: egapro dump-dgt /mnt/files/dgt.xlsx
-    - name: dump-dgt-repartition
-      command: egapro dump-dgt-repartition /mnt/files/dgt-representation.xlsx
+    - name: dump-dgt-representation
+      command: egapro dump-dgt-representation /mnt/files/dgt-representation.xlsx
     - name: full
       command: egapro full /mnt/files/full.ndjson
     - name: export-indexes
@@ -146,7 +146,7 @@ jobs:
         imagePackage: declaration
         context: packages/declaration
         buildArgs:
-          BASE_URL: "https://{{ .Values.global.host }}/index/declaration"
+          BASE_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
 
     build-simulateur:
@@ -158,9 +158,9 @@ jobs:
         dockerfile: packages/simulateur/Dockerfile
         buildArgs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
-          REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index/declaration"
+          REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
           REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
-          PUBLIC_URL: "/index"
+          PUBLIC_URL: "/index-egapro"
 
 deactivate:
   jobs-deactivate:

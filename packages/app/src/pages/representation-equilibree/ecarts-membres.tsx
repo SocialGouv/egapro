@@ -6,12 +6,12 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { motifNonCalculabiliteMembresOptions } from "@common/models/repartition-equilibree";
+import { motifNonCalculabiliteMembresOptions } from "@common/models/representation-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
 
 import { ClientOnly } from "@components/ClientOnly";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
   AlertTitle,
@@ -111,7 +111,7 @@ const EcartsMembres: NextPageWithLayout = () => {
 
   const {
     clearErrors,
-    formState: { isDirty, isValid, isSubmitted, errors },
+    formState: { isValid, errors },
     handleSubmit,
     register,
     setValue,
@@ -270,7 +270,7 @@ const EcartsMembres: NextPageWithLayout = () => {
 };
 
 EcartsMembres.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default EcartsMembres;

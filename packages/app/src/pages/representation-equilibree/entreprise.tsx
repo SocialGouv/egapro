@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 
 import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   FormButton,
   FormGroup,
@@ -91,7 +91,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 };
 
 InformationsEntreprise.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default InformationsEntreprise;

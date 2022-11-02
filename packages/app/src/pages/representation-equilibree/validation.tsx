@@ -7,10 +7,10 @@ import type { NextPageWithLayout } from "../_app";
 import {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
-} from "@common/models/repartition-equilibree";
+} from "@common/models/representation-equilibree";
 import { formatIsoToFr } from "@common/utils/date";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
   ButtonAsLink,
@@ -24,11 +24,11 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@design-system";
-import { useFormManager, putRepartitionEquilibree, useConfig, formatAdresse, useUser } from "@services/apiClient";
+import { useFormManager, putRepresentationEquilibree, useConfig, formatAdresse, useUser } from "@services/apiClient";
 
 const title = "Validation de vos écarts";
 
-const SERVER_ERROR = `Erreur : problème lors de l'envoi de la répartition équilibrée.`;
+const SERVER_ERROR = `Erreur : problème lors de l'envoi de la représentation équilibrée.`;
 
 const Validation: NextPageWithLayout = () => {
   useUser({ redirectTo: "/ecart-rep/email" });
@@ -48,9 +48,9 @@ const Validation: NextPageWithLayout = () => {
     return found?.label;
   };
 
-  const sendRepartitionEquilibree = async () => {
+  const sendRepresentationEquilibree = async () => {
     try {
-      await putRepartitionEquilibree(formData);
+      await putRepresentationEquilibree(formData);
       router.push("/ecart-rep/transmission");
     } catch (error) {
       console.error(error);
@@ -231,7 +231,7 @@ const Validation: NextPageWithLayout = () => {
           <NextLink href={previousPage} passHref>
             <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
           </NextLink>
-          <FormButton onClick={sendRepartitionEquilibree}>Valider et transmettre les résultats</FormButton>
+          <FormButton onClick={sendRepresentationEquilibree}>Valider et transmettre les résultats</FormButton>
         </FormLayoutButtonGroup>
       </FormLayout>
     </ClientOnly>
@@ -239,7 +239,7 @@ const Validation: NextPageWithLayout = () => {
 };
 
 Validation.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default Validation;

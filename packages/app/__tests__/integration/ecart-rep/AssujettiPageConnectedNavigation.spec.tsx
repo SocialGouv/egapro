@@ -5,7 +5,7 @@ import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
 import { useUserMock } from "./mock/user";
-import AssujetiPage from "@/pages/ecart-rep/assujetti";
+import AssujetiPage from "@/pages/representation-equilibree/assujetti";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
@@ -39,7 +39,7 @@ describe("Assujetti Page : connected mode ", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/ecart-rep/commencer", { shallow: false });
+      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/commencer", { shallow: false });
     });
   });
 });
