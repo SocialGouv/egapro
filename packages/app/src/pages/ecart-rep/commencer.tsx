@@ -2,7 +2,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ApiError } from "next/dist/server/api-utils";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -86,6 +86,7 @@ const CommencerPage: NextPageWithLayout = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitted, isValid, isSubmitting },
   } = useForm<FormType>({
     mode: "onChange",
@@ -95,6 +96,14 @@ const CommencerPage: NextPageWithLayout = () => {
       year: formData?.year === undefined ? "" : String(formData?.year),
     },
   });
+
+  const siren = watch("siren");
+
+  useEffect(() => {
+    // Clean errors on Siren change.
+    setAlreadyPresent(false);
+    setGlobalError("");
+  }, [siren]);
 
   const onSubmit = async ({ year, siren }: FormType) => {
     const startFresh = async () => {
@@ -203,7 +212,7 @@ const CommencerPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
-              <FormButton isDisabled={(isSubmitted && !isValid) || isSubmitting}>Suivant</FormButton>
+              <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>
