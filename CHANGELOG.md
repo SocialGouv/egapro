@@ -1,3 +1,10 @@
+## [2.24.4](https://github.com/SocialGouv/egapro/compare/v2.24.3...v2.24.4) (2022-11-02)
+
+
+### Bug Fixes
+
+* linter ([176bd55](https://github.com/SocialGouv/egapro/commit/176bd550184e2eb647c5d47c142537abe8574a79))
+
 ## [2.24.3](https://github.com/SocialGouv/egapro/compare/v2.24.2...v2.24.3) (2022-11-02)
 
 
