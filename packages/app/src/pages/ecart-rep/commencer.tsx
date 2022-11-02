@@ -188,7 +188,7 @@ const CommencerPage: NextPageWithLayout = () => {
                 placeholder="Sélectionnez une année"
                 {...register("year")}
                 isError={Boolean(errors.year)}
-                aria-describedby="year-message-error"
+                aria-describedby={errors.year && "year-message-error"}
               >
                 <option value="2021">2021</option>
               </FormSelect>
@@ -204,7 +204,7 @@ const CommencerPage: NextPageWithLayout = () => {
                 type="text"
                 {...register("siren")}
                 isError={Boolean(errors.siren)}
-                aria-describedby="siren-message-error"
+                aria-describedby={errors.siren && "siren-message-error"}
                 maxLength={9}
               />
               {errors.siren && errors.siren.message !== OWNER_ERROR && (
