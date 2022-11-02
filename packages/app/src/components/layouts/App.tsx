@@ -168,8 +168,8 @@ export const App = ({ children }: PropsWithChildren) => {
             </FooterBodyBrand>
             <FooterBodyContent>
               <FooterBodyContentDescription>
-                Représentation Équilibrée a été développé par les équipes de la fabrique numérique des ministères
-                sociaux.
+                Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique
+                des ministères sociaux
               </FooterBodyContentDescription>
               <FooterBodyContentItems>
                 <FooterBodyItem>
