@@ -21,13 +21,13 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   const router = useRouter();
   const currentRoute = router.pathname;
   return (
-    <NextLink href={`/ecart-rep/${path}/`} passHref>
-      <SideMenuLink isCurrent={currentRoute === `/ecart-rep/${path}`}>{children}</SideMenuLink>
+    <NextLink href={`/representation-equilibree/${path}/`} passHref>
+      <SideMenuLink isCurrent={currentRoute === `/representation-equilibree/${path}`}>{children}</SideMenuLink>
     </NextLink>
   );
 };
 
-export const RepartitionEquilibreeStartLayout = ({ children }: PropsWithChildren) => {
+export const RepresentationEquilibreeStartLayout = ({ children }: PropsWithChildren) => {
   return (
     <App>
       <Container py="6w">

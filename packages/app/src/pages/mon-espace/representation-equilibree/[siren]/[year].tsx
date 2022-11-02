@@ -6,22 +6,22 @@ import type { NextPageWithLayout } from "../../../_app";
 import { formatTimestampToFr } from "@common/utils/date";
 import { normalizeQueryParam } from "@common/utils/router";
 import { StaffOnly } from "@components/AuthenticatedOnly";
-import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
+import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { Alert } from "@design-system";
-import { useRepartitionEquilibree } from "@services/apiClient";
+import { useRepresentationEquilibree } from "@services/apiClient";
 
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
-const title = "Répartition équilibrée";
+const title = "Représentation équilibrée";
 
-const RepartitionEquilibreeDetailPage: NextPageWithLayout = () => {
+const RepresentationEquilibreeDetailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const siren = normalizeQueryParam(router.query.siren);
   const year = Number(normalizeQueryParam(router.query.year));
 
-  const { repeq, error } = useRepartitionEquilibree(siren, year);
+  const { repeq, error } = useRepresentationEquilibree(siren, year);
 
   return (
     <StaffOnly>
@@ -31,7 +31,7 @@ const RepartitionEquilibreeDetailPage: NextPageWithLayout = () => {
       </div>
 
       {!repeq ? (
-        <p>{`Aucune répartition équilibrée trouvée pour le Siren ${siren} et l'année ${year}`}</p>
+        <p>{`Aucune représentation équilibrée trouvée pour le Siren ${siren} et l'année ${year}`}</p>
       ) : (
         <DynamicReactJson
           src={{
@@ -48,8 +48,8 @@ const RepartitionEquilibreeDetailPage: NextPageWithLayout = () => {
   );
 };
 
-RepartitionEquilibreeDetailPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+RepresentationEquilibreeDetailPage.getLayout = ({ children }) => {
+  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
 };
 
-export default RepartitionEquilibreeDetailPage;
+export default RepresentationEquilibreeDetailPage;

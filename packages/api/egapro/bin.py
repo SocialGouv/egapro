@@ -17,7 +17,7 @@ from egapro import (
     constants,
     db,
     dgt,
-    dgt_repartition,
+    dgt_representation,
     emails,
     exporter,
     helpers,
@@ -39,9 +39,9 @@ async def dump_dgt(path: Path, max_rows: int = None):
 
 
 @minicli.cli
-async def dump_dgt_repartition(path: Path, max_rows: int = None):
-    wb = await dgt_repartition.as_xlsx(max_rows)
-    print("Writing the dgt_repartition XLSX to", path)
+async def dump_dgt_representation(path: Path, max_rows: int = None):
+    wb = await dgt_representation.as_xlsx(max_rows)
+    print("Writing the dgt_representation XLSX to", path)
     wb.save(path)
 
 

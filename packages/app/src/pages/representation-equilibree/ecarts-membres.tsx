@@ -6,12 +6,12 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { motifNonCalculabiliteMembresOptions } from "@common/models/repartition-equilibree";
+import { motifNonCalculabiliteMembresOptions } from "@common/models/representation-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
 
 import { ClientOnly } from "@components/ClientOnly";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
   AlertTitle,
@@ -95,7 +95,7 @@ export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsMembre
 };
 
 const EcartsMembres: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const methods = useForm<FormTypeInput>({
@@ -111,7 +111,7 @@ const EcartsMembres: NextPageWithLayout = () => {
 
   const {
     clearErrors,
-    formState: { isDirty, isValid, isSubmitted, errors },
+    formState: { isValid, errors },
     handleSubmit,
     register,
     setValue,
@@ -140,8 +140,8 @@ const EcartsMembres: NextPageWithLayout = () => {
     // Skip directly to validation page if all indicators are not calculable.
     const nextPage =
       isEcartsMembresCalculableBoolVal === false && formData?.isEcartsCadresCalculable === false
-        ? "/ecart-rep/validation"
-        : "/ecart-rep/publication";
+        ? "/representation-equilibree/validation"
+        : "/representation-equilibree/publication";
 
     router.push(nextPage);
   };
@@ -231,7 +231,7 @@ const EcartsMembres: NextPageWithLayout = () => {
               </FormGroup>
             )}
             <FormLayoutButtonGroup>
-              <NextLink href="/ecart-rep/ecarts-cadres" passHref>
+              <NextLink href="/representation-equilibree/ecarts-cadres" passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
@@ -272,7 +272,7 @@ const EcartsMembres: NextPageWithLayout = () => {
 };
 
 EcartsMembres.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default EcartsMembres;

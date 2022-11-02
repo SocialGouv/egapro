@@ -2,7 +2,8 @@ import NextLink from "next/link";
 import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
-import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
+
+import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
   ButtonAsLink,
   Callout,
@@ -11,6 +12,7 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
 } from "@design-system";
+
 import { useUser } from "@services/apiClient";
 
 const title = "Êtes-vous assujetti ?";
@@ -67,12 +69,15 @@ const AssujettiPage: NextPageWithLayout = () => {
             Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre
             les femmes et les hommes.
           </CalloutContent>
-          <NextLink href="/ecart-rep/" passHref>
+          <NextLink href="/representation-equilibree/" passHref>
             <ButtonAsLink>Retour à la page d'accueil</ButtonAsLink>
           </NextLink>
         </Callout>
       )) || (
-        <NextLink href={isAuthenticated ? "/ecart-rep/commencer" : "/ecart-rep/email"} passHref>
+        <NextLink
+          href={isAuthenticated ? "/representation-equilibree/commencer" : "/representation-equilibree/email"}
+          passHref
+        >
           <ButtonAsLink>Suivant</ButtonAsLink>
         </NextLink>
       )}
@@ -81,7 +86,7 @@ const AssujettiPage: NextPageWithLayout = () => {
 };
 
 AssujettiPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
 };
 
 export default AssujettiPage;
