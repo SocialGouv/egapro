@@ -1,14 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { motifNonCalculabiliteCadresOptions } from "@common/models/representation-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
-
 import { ClientOnly } from "@components/ClientOnly";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
@@ -149,15 +148,13 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   return (
     <ClientOnly>
-      {isEcartsCadresCalculable === "" && (
-        <Alert mb="4w">
-          <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
-          <p>
-            Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y
-            aucun ou un seul cadre dirigeant.
-          </p>
-        </Alert>
-      )}
+      <Alert mb="4w">
+        <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
+        <p>
+          Les écarts de représentation Femmes-Hommes parmi les cadres dirigeants sont incalculables lorsqu'il n'y aucun
+          ou un seul cadre dirigeant.
+        </p>
+      </Alert>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FormLayout>

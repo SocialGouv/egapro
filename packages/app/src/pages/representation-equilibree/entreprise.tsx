@@ -1,17 +1,17 @@
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-
 import type { FormEvent } from "react";
+
 import type { NextPageWithLayout } from "../_app";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
+  ButtonAsLink,
   FormButton,
   FormGroup,
-  FormInput,
   FormGroupLabel,
+  FormInput,
   FormLayout,
   FormLayoutButtonGroup,
-  ButtonAsLink,
 } from "@design-system";
 import { useConfig, useFormManager, useUser } from "@services/apiClient";
 

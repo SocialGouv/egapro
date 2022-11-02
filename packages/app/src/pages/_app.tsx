@@ -1,13 +1,12 @@
-import "@fontsource/gabriela";
 import "@fontsource/cabin";
+import "@fontsource/gabriela";
 
 import { init } from "@socialgouv/matomo-next";
 import type { AppProps } from "next/app";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
-
-import React from "react";
 import { SWRConfig } from "swr";
+
 import { fetcher } from "@services/apiClient";
 
 export type NextPageWithLayout = AppProps["Component"] & {
