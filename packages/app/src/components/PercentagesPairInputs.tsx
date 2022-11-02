@@ -48,7 +48,7 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
           })}
           id={firstLabel}
           type="percentage"
-          aria-describedby={`${firstLabel}-message-error`}
+          aria-describedby={errors[firstLabel] && `${firstLabel}-message-error`}
         />
         {errors[firstLabel] && (
           <FormGroupMessage id={`${firstLabel}-message-error`}>{errors[firstLabel]?.message}</FormGroupMessage>
@@ -62,7 +62,7 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
           })}
           id={secondLabel}
           type="percentage"
-          aria-describedby={`${secondLabel}-message-error`}
+          aria-describedby={errors[secondLabel] && `${secondLabel}-message-error`}
         />
         {errors[secondLabel] && (
           <FormGroupMessage id={`${secondLabel}-message-error`}>{errors[secondLabel]?.message}</FormGroupMessage>

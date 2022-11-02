@@ -127,11 +127,7 @@ export const App = ({ children }: PropsWithChildren) => {
             </div>
           </div>
           {isAuthenticated && (
-            <div
-              className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")}
-              id={mobileMenuId}
-              aria-labelledby={buttonMobileMenuId}
-            >
+            <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
               <div className="fr-container">
                 <button
                   className="fr-btn--close fr-btn"
@@ -168,8 +164,8 @@ export const App = ({ children }: PropsWithChildren) => {
             </FooterBodyBrand>
             <FooterBodyContent>
               <FooterBodyContentDescription>
-                Représentation Équilibrée a été développé par les équipes de la fabrique numérique des ministères
-                sociaux.
+                Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique
+                des ministères sociaux
               </FooterBodyContentDescription>
               <FooterBodyContentItems>
                 <FooterBodyItem>
@@ -180,15 +176,6 @@ export const App = ({ children }: PropsWithChildren) => {
                     title="Télécharger la liste des référents au format xlsx"
                   >
                     Télécharger la liste des référents
-                  </FooterContentLink>
-                </FooterBodyItem>
-                <FooterBodyItem>
-                  <FooterContentLink
-                    href=" https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/?id_mot=2004#liste-faq"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Consulter l'aide
                   </FooterContentLink>
                 </FooterBodyItem>
                 <FooterBodyItem>

@@ -90,7 +90,7 @@ const PeriodeReference: NextPageWithLayout = () => {
                 {...register("year")}
                 isError={Boolean(errors.year)}
                 readOnly
-                aria-describedby="year-message-error-msg"
+                aria-describedby={errors.year && "year-message-error-msg"}
               />
               {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
             </FormGroup>
@@ -105,7 +105,7 @@ const PeriodeReference: NextPageWithLayout = () => {
                 {...register("endOfPeriod")}
                 isError={Boolean(errors.endOfPeriod)}
                 placeholder="Sélectionner une date"
-                aria-describedby="endOfPeriod-message-error"
+                aria-describedby={errors.endOfPeriod && "endOfPeriod-message-error"}
               />
               {errors.endOfPeriod && (
                 <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
