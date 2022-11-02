@@ -127,11 +127,7 @@ export const App = ({ children }: PropsWithChildren) => {
             </div>
           </div>
           {isAuthenticated && (
-            <div
-              className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")}
-              id={mobileMenuId}
-              aria-labelledby={buttonMobileMenuId}
-            >
+            <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
               <div className="fr-container">
                 <button
                   className="fr-btn--close fr-btn"
