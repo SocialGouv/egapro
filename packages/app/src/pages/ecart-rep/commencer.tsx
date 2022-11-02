@@ -160,12 +160,14 @@ const CommencerPage: NextPageWithLayout = () => {
       <div ref={animationParent}>
         {globalError && (
           <Alert type="error" size="sm" mb="4w">
+            <AlertTitle>Erreur</AlertTitle>
             <p>{globalError}</p>
           </Alert>
         )}
         {isAlreadyPresent && (
           <Alert type="error" size="sm" mb="4w">
-            <p>Erreur&nbsp;: une déclaration pour ce Siren a déjà été validée et transmise.</p>
+            <AlertTitle>Erreur</AlertTitle>
+            <p>Une déclaration pour ce Siren a déjà été validée et transmise.</p>
           </Alert>
         )}
         {errors.siren && errors.siren.message === OWNER_ERROR && (
