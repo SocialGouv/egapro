@@ -142,7 +142,7 @@ const Publication: NextPageWithLayout = () => {
                 id="publishingWebsiteUrl"
                 placeholder="https://"
                 {...register("publishingWebsiteUrl")}
-                aria-describedby="publishingWebsiteUrl-message-error"
+                aria-describedby={errors.publishingWebsiteUrl && "publishingWebsiteUrl-message-error"}
               />
               {errors.publishingWebsiteUrl && (
                 <FormGroupMessage id="publishingWebsiteUrl-message-error">
@@ -158,7 +158,7 @@ const Publication: NextPageWithLayout = () => {
               <FormTextarea
                 id="publishingContent"
                 {...register("publishingContent")}
-                aria-describedby="publishingContent-message-error"
+                aria-describedby={errors.publishingContent && "publishingContent-message-error"}
               />
               {errors.publishingContent && (
                 <FormGroupMessage id="publishingContent-message-error">

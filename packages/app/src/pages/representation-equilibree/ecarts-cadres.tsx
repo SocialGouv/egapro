@@ -194,7 +194,9 @@ const EcartsCadres: NextPageWithLayout = () => {
                   id="motifEcartsCadresNonCalculable"
                   placeholder="Sélectionnez une option"
                   {...register("motifEcartsCadresNonCalculable")}
-                  aria-describedby="motifEcartsCadresNonCalculable-message-error"
+                  aria-describedby={
+                    errors.motifEcartsCadresNonCalculable && "motifEcartsCadresNonCalculable-message-error"
+                  }
                 >
                   <option value={motifNonCalculabiliteCadresOptions[0].value}>
                     {motifNonCalculabiliteCadresOptions[0].label}

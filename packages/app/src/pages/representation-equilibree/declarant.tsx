@@ -92,7 +92,7 @@ const DeclarantPage: NextPageWithLayout = () => {
                 type="text"
                 isError={Boolean(errors.nom)}
                 {...register("nom")}
-                aria-describedby="nom-message-error"
+                aria-describedby={errors.nom && "nom-message-error"}
               />
               {errors.nom && <FormGroupMessage id="nom-message-error">{errors.nom.message}</FormGroupMessage>}
             </FormGroup>
@@ -103,7 +103,7 @@ const DeclarantPage: NextPageWithLayout = () => {
                 type="text"
                 isError={Boolean(errors.prenom)}
                 {...register("prenom")}
-                aria-describedby="prenom-message-error"
+                aria-describedby={errors.prenom && "prenom-message-error"}
               />
               {errors.prenom && <FormGroupMessage id="prenom-message-error">{errors.prenom.message}</FormGroupMessage>}
             </FormGroup>
@@ -114,7 +114,7 @@ const DeclarantPage: NextPageWithLayout = () => {
                 type="tel"
                 isError={Boolean(errors.telephone)}
                 {...register("telephone")}
-                aria-describedby="telephone-message-error"
+                aria-describedby={errors.telephone && "telephone-message-error"}
               />
               {errors.telephone && (
                 <FormGroupMessage id="telephone-message-error">{errors.telephone.message}</FormGroupMessage>
@@ -125,7 +125,11 @@ const DeclarantPage: NextPageWithLayout = () => {
               <FormInput id="email" type="text" readOnly {...register("email")} />
             </FormGroup>
             <FormGroup>
-              <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
+              <FormCheckbox
+                id="accord_rgpd"
+                {...register("accord_rgpd")}
+                aria-describedby={errors.accord_rgpd && "accord_rgpd-message-error"}
+              >
                 J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
                 vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
                 consulter nos{" "}

@@ -211,7 +211,9 @@ const EcartsMembres: NextPageWithLayout = () => {
                   id="motifEcartsMembresNonCalculable"
                   placeholder="Sélectionnez une option"
                   {...register("motifEcartsMembresNonCalculable")}
-                  aria-describedby="motifEcartsMembresNonCalculable-message-error"
+                  aria-describedby={
+                    errors.motifEcartsMembresNonCalculable && "motifEcartsMembresNonCalculable-message-error"
+                  }
                 >
                   <option value={motifNonCalculabiliteMembresOptions[0].value}>
                     {motifNonCalculabiliteMembresOptions[0].label}
