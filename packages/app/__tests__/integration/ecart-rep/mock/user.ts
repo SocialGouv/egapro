@@ -6,12 +6,13 @@ export const FAKE_SIREN = "23274530763485";
  * @link https://www.pappers.fr/entreprise/boulangerie-eden-833169014
  */
 const BOULANGERIE_EDEN_SIREN = "833169014";
+const BOULANGER_SAS = "905292694";
 
 export const FAKE_USER: TokenInfoType = {
   staff: true,
   déclarations: [],
   email: "test@test.com",
-  ownership: [FAKE_SIREN, BOULANGERIE_EDEN_SIREN],
+  ownership: [FAKE_SIREN, BOULANGERIE_EDEN_SIREN, BOULANGER_SAS],
 };
 
 export const useUserMock = (isConnected: boolean) => {
