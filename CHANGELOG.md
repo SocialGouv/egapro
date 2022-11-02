@@ -1,3 +1,10 @@
+## [2.24.3](https://github.com/SocialGouv/egapro/compare/v2.24.2...v2.24.3) (2022-11-02)
+
+
+### Bug Fixes
+
+* **dns:** return to index-egapro until dns refresh ([445334a](https://github.com/SocialGouv/egapro/commit/445334ad4256339101b2aadfa74a99a4df9b5f7a))
+
 ## [2.24.2](https://github.com/SocialGouv/egapro/compare/v2.24.1...v2.24.2) (2022-11-02)
 
 
