@@ -15,6 +15,7 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
   const {
     setValue,
     register,
+    setFocus,
     formState: { errors },
   } = useFormContext<Record<string, string>>();
 
@@ -25,15 +26,21 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
 
     if (!isNaN(inputValueAsNumber)) {
       if (inputChanged.id === firstLabel) {
-        setValue(firstLabel, String(inputValueAsNumber), { shouldValidate: true });
+        setValue(firstLabel, String(inputValueAsNumber));
         if (inputValueAsNumber >= 0 && inputValueAsNumber <= 100) {
-          setValue(secondLabel, (100 - inputValueAsNumber).toFixed(1), { shouldValidate: true });
+          setValue(secondLabel, (100 - inputValueAsNumber).toFixed(1));
         }
+        // Hack to ensure that focus cursor is on the last character. W/o it, if we type "3,2" and remove the last chararcter, the focuse is at start.
+        setFocus(secondLabel);
+        setFocus(firstLabel);
       } else if (inputChanged.id === secondLabel) {
-        setValue(secondLabel, String(inputValueAsNumber), { shouldValidate: true });
+        setValue(secondLabel, String(inputValueAsNumber));
         if (inputValueAsNumber >= 0 && inputValueAsNumber <= 100) {
-          setValue(firstLabel, (100 - inputValueAsNumber).toFixed(1), { shouldValidate: true });
+          setValue(firstLabel, (100 - inputValueAsNumber).toFixed(1));
         }
+        // Hack to ensure that focus cursor is on the last character.
+        setFocus(firstLabel);
+        setFocus(secondLabel);
       }
     }
   };
