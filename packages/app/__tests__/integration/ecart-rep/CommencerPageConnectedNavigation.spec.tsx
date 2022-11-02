@@ -5,7 +5,7 @@ import singletonRouter from "next/router";
 
 import { NOT_LINKED_SIREN, VALID_SIREN } from "./mock/server-handlers";
 import { useUserMock } from "./mock/user";
-import CommencerPage from "@/pages/ecart-rep/commencer";
+import CommencerPage from "@/pages/representation-equilibree/commencer";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
