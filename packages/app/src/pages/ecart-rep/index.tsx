@@ -106,8 +106,9 @@ export const EcartRep: NextPageWithLayout = () => (
           <Alert type="warning">
             <AlertTitle>Calendrier exceptionnel en 2022</AlertTitle>
             <p>
-              En 2022, pour la première année d’application, les entreprises ont jusqu’au 1er septembre 2022 pour
-              procéder à cette publication.
+              Pour la première année d'application, les entreprises ont eu jusqu’au 1er septembre pour publier leurs
+              résultats sur leur site internet, ou auprès de leurs salariés à défaut de site internet, et les
+              transmettre au CSE.
             </p>
           </Alert>
         </Box>
