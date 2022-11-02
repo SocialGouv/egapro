@@ -4,21 +4,21 @@ import NextLink from "next/link";
 import type { NextPageWithLayout } from "../_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
+  Alert,
+  AlertTitle,
   Box,
   ButtonAsLink,
+  Callout,
+  CalloutContent,
   Card,
-  CardBodyFooter,
   CardBody,
   CardBodyContent,
   CardBodyContentDescription,
   CardBodyContentTitle,
+  CardBodyFooter,
   Container,
   Grid,
   GridCol,
-  Alert,
-  AlertTitle,
-  Callout,
-  CalloutContent,
   ImgRepresentationEquilibree,
 } from "@design-system";
 

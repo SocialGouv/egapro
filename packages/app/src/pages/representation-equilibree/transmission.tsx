@@ -1,6 +1,6 @@
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
@@ -21,7 +21,7 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
-import { useFormManager, useUser, fetchRepresentationEquilibreeSendEmail, getLink } from "@services/apiClient";
+import { fetchRepresentationEquilibreeSendEmail, getLink, useFormManager, useUser } from "@services/apiClient";
 
 const title = "Votre déclaration a été transmise";
 
