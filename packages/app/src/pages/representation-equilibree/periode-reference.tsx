@@ -24,8 +24,8 @@ import { useFormManager, useUser } from "@services/apiClient";
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."),
-    endOfPeriod: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
-      message: "La date de fin de la période de référence doit être au format jj/mm/aaaa.",
+    endOfPeriod: z.string().refine(val => isValid(parseISO(val)), {
+      message: "La date de fin de la période de référence n'est pas valide.",
     }),
   })
   .superRefine(({ year, endOfPeriod }, ctx) => {
