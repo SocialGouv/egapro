@@ -1,3 +1,10 @@
+## [2.24.1](https://github.com/SocialGouv/egapro/compare/v2.24.0...v2.24.1) (2022-11-02)
+
+
+### Bug Fixes
+
+* update ingress config and better version in footer ([8573af8](https://github.com/SocialGouv/egapro/commit/8573af82d06622f491d83035d7e6f6ff356c0535))
+
 # [2.24.0](https://github.com/SocialGouv/egapro/compare/v2.23.1...v2.24.0) (2022-11-02)
 
 
