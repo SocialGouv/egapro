@@ -180,8 +180,6 @@ async def test_basic_representation_should_save_data(client, body, monkeypatch):
             },
             "déclaration": {
                 "année_indicateurs": 2019,
-                "points_calculables": 0,
-                "points": 0,
                 "fin_période_référence": "2019-12-31",
                 "publication": {"date": "2020-11-01", "modalités": "Affichage"},
             },
@@ -356,7 +354,7 @@ async def test_invalid_representation_data_should_raise_on_put(client, monkeypat
     assert resp.status == 422
     assert json.loads(resp.body) == {
         "error": "data must contain "
-        "['source', 'déclaration', 'déclarant', 'entreprise'] properties",
+        "['déclaration', 'déclarant', 'entreprise'] properties",
     }
     assert capture_message.called_once
 
@@ -393,10 +391,7 @@ async def test_put_representation_with_invalid_region(client, body):
 async def test_put_representation_without_source(client, body):
     del body["source"]
     resp = await client.put("/representation-equilibree/514027945/2019", body=body)
-    assert resp.status == 422
-    assert json.loads(resp.body) == {
-        "error": "data must contain ['source', 'déclaration', 'déclarant', 'entreprise'] properties"
-    }
+    assert resp.status == 204
 
 
 async def test_non_staff_cannot_delete(client, representation):
