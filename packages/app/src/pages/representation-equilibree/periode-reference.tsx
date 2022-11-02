@@ -1,21 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { endOfYear, getYear, formatISO, isValid, parseISO } from "date-fns";
+import { endOfYear, formatISO, getYear } from "date-fns";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
+import { zodDateSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
-  FormGroup,
-  FormGroupMessage,
-  FormGroupLabel,
-  FormInput,
   FormButton,
+  FormGroup,
+  FormGroupLabel,
+  FormGroupMessage,
+  FormInput,
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
@@ -24,9 +24,7 @@ import { useFormManager, useUser } from "@services/apiClient";
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."),
-    endOfPeriod: z.string().refine(val => isValid(parseISO(val)), {
-      message: "La date de fin de la période de référence n'est pas valide.",
-    }),
+    endOfPeriod: zodDateSchema,
   })
   .superRefine(({ year, endOfPeriod }, ctx) => {
     if (getYear(new Date(endOfPeriod)) !== Number(year)) {
@@ -47,12 +45,12 @@ const PeriodeReference: NextPageWithLayout = () => {
   const { formData, saveFormData } = useFormManager();
 
   const {
-    formState: { errors, isDirty, isValid, isSubmitted },
+    formState: { errors, isValid },
     handleSubmit,
     register,
     setValue,
   } = useForm<FormType>({
-    mode: "onBlur",
+    mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       endOfPeriod: formData?.endOfPeriod === undefined ? undefined : formData?.endOfPeriod,
@@ -121,7 +119,7 @@ const PeriodeReference: NextPageWithLayout = () => {
                   Précédent
                 </ButtonAsLink>
               </NextLink>
-              <FormButton isDisabled={!isValid || (isSubmitted && !isDirty)}>Suivant</FormButton>
+              <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>
         </form>

@@ -1,4 +1,9 @@
+import { isValid, parseISO } from "date-fns";
 import { z } from "zod";
+
+export const zodDateSchema = z.string().refine(val => isValid(parseISO(val)), {
+  message: "La date n'est pas valide.",
+});
 
 export const zodRadioInputSchema = z.string().transform((val, ctx) => {
   if (val !== "oui" && val !== "non") {

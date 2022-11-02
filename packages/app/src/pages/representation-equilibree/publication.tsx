@@ -1,13 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isValid, parseISO } from "date-fns";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
-import { radioBoolToString, radioStringToBool, zodRadioInputSchema } from "@common/utils/form";
+import { radioBoolToString, radioStringToBool, zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
@@ -35,9 +33,7 @@ const formSchema = z
   .object({
     hasWebsite: zodRadioInputSchema,
     publishingContent: z.string().trim().optional(),
-    publishingDate: z.string().refine(val => isValid(val) || isValid(parseISO(val)), {
-      message: "La date de publication des écart calculables est de la forme jj/mm/aaaa.",
-    }),
+    publishingDate: zodDateSchema,
     publishingWebsiteUrl: z.string().trim().optional(),
   })
   .superRefine(({ hasWebsite, publishingContent, publishingWebsiteUrl }, ctx) => {
