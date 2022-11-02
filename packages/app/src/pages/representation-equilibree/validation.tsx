@@ -13,6 +13,7 @@ import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
+  AlertTitle,
   ButtonAsLink,
   FormButton,
   FormLayout,
@@ -28,7 +29,7 @@ import { formatAdresse, putRepresentationEquilibree, useConfig, useFormManager, 
 
 const title = "Validation de vos écarts";
 
-const SERVER_ERROR = `Erreur : problème lors de l'envoi de la représentation équilibrée.`;
+const SERVER_ERROR = `Problème lors de l'envoi de la représentation équilibrée.`;
 
 const Validation: NextPageWithLayout = () => {
   useUser({ redirectTo: "/representation-equilibree/email" });
@@ -71,6 +72,7 @@ const Validation: NextPageWithLayout = () => {
       <div ref={animationParent}>
         {globalError && (
           <Alert type="error" size="sm" mb="4w">
+            <AlertTitle>Erreur</AlertTitle>
             <p>{globalError}</p>
           </Alert>
         )}
