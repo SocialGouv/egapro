@@ -44,8 +44,8 @@ const Accessibilite = () => {
       </Heading>
       <Text>
         Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du site
-        Internet index-egapro.travail.gouv.fr pour être orienté vers une alternative accessible ou obtenir le contenu sous une
-        autre forme.
+        Internet index-egapro.travail.gouv.fr pour être orienté vers une alternative accessible ou obtenir le contenu
+        sous une autre forme.
       </Text>
       <Text mt={2}>
         E-mail&nbsp;:{" "}
