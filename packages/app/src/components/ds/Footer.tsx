@@ -3,7 +3,7 @@ import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/rea
 import type { FC } from "react";
 import React from "react";
 
-import packageConfig from "../../../package.json";
+import packageConfig from "../../../../../package.json";
 import { Logo } from "./Logo";
 import { TextLink } from "./TextLink";
 

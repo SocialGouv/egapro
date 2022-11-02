@@ -4,7 +4,7 @@ import { Box, Container, List, ListItem, Text, Link } from "@chakra-ui/react"
 
 import Logo from "./ds/Logo"
 import TextLink from "./ds/TextLink"
-import packageConfig from "../../package.json"
+import packageConfig from "../../../../package.json"
 
 function Footer() {
   const version = process.env.REACT_APP_VERSION || packageConfig.version
