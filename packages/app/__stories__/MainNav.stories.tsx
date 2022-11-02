@@ -9,11 +9,9 @@ export default {
 
 const Template: ComponentStory<typeof MainNav> = () => (
   <MainNav>
-    <MainNavItem href="/" isCurrent>
-      Accueil
-    </MainNavItem>
-    <MainNavItem href="/index">Calcul d'index</MainNavItem>
-    <MainNavItem href="/ecart-rep">Représentation équilibrée</MainNavItem>
+    <MainNavItem href="/">Accueil</MainNavItem>
+    <MainNavItem href="/index-egapro">Calcul d'index</MainNavItem>
+    <MainNavItem href="/representation-equilibree">Représentation équilibrée</MainNavItem>
   </MainNav>
 );
 

@@ -10,7 +10,7 @@ import type { NextPageWithLayout } from "../_app";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   FormButton,
   FormGroup,
@@ -25,7 +25,7 @@ import {
 } from "@design-system";
 import {
   checkSiren,
-  fetchRepartitionEquilibree,
+  fetchRepresentationEquilibree,
   fetchSiren,
   ownersForSiren,
   useFormManager,
@@ -75,7 +75,7 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/ecart-rep/email", checkTokenInURL: true });
+  useUser({ redirectTo: "/representation-equilibree/email", checkTokenInURL: true });
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
@@ -87,7 +87,7 @@ const CommencerPage: NextPageWithLayout = () => {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isSubmitted, isValid, isSubmitting },
+    formState: { errors, isValid },
   } = useForm<FormType>({
     mode: "onChange",
     resolver: zodResolver(formSchema), // Configuration the validation with the zod schema.
@@ -110,14 +110,14 @@ const CommencerPage: NextPageWithLayout = () => {
       try {
         const entreprise = await fetchSiren(siren, Number(year));
         saveFormData({ entreprise, year: Number(year) });
-        router.push("/ecart-rep/declarant");
+        router.push("/representation-equilibree/declarant");
       } catch (error) {
         console.error("erreur dans fetchSiren");
       }
     };
 
     try {
-      const repeq = await fetchRepartitionEquilibree(siren, Number(year));
+      const repeq = await fetchRepresentationEquilibree(siren, Number(year));
       if (repeq) {
         setAlreadyPresent(true);
         return;
@@ -135,7 +135,7 @@ const CommencerPage: NextPageWithLayout = () => {
 
     if (formData.entreprise?.siren && siren !== formData.entreprise.siren) {
       if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
-        // Start a new declaration of repartition.
+        // Start a new declaration of representation.
         resetFormData();
         await startFresh();
       } else {
@@ -224,7 +224,7 @@ const CommencerPage: NextPageWithLayout = () => {
 };
 
 CommencerPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default CommencerPage;
