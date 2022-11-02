@@ -36,7 +36,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser({ redirectTo: "/ecart-rep/email" });
+  const { user } = useUser({ redirectTo: "/representation-equilibree/email" });
   const { formData, saveFormData } = useFormManager();
 
   const {
@@ -73,7 +73,7 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   const onSubmit = async ({ nom, prenom, telephone, email, accord_rgpd }: FormType) => {
     saveFormData({ declarant: { prenom: prenom, nom: nom, telephone: telephone, email, accord_rgpd } });
-    router.push("/ecart-rep/entreprise");
+    router.push("/representation-equilibree/entreprise");
   };
 
   return (
@@ -139,7 +139,7 @@ const DeclarantPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
-              <NextLink href="/ecart-rep/commencer" passHref>
+              <NextLink href="/representation-equilibree/commencer" passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>

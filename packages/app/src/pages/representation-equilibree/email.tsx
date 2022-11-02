@@ -40,7 +40,7 @@ const EmailPage: NextPageWithLayout = () => {
   const { user } = useUser();
   const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
   // Si la personne est authentifiée, on reroute sur commencer.
-  if (user) router.push("/ecart-rep/commencer");
+  if (user) router.push("/representation-equilibree/commencer");
 
   const {
     register,
@@ -73,7 +73,7 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, `${window.location.origin}/ecart-rep/commencer?token=`);
+      await requestEmailForToken(email, `${window.location.origin}/representation-equilibree/commencer?token=`);
       setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({

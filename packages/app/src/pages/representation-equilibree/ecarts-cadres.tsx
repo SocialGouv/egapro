@@ -94,7 +94,7 @@ export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsCadres
 };
 
 const EcartsCadres: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const methods = useForm<FormTypeInput>({
@@ -133,7 +133,7 @@ const EcartsCadres: NextPageWithLayout = () => {
       ecartsCadresFemmes: isEcartsCadresCalculableBoolVal ? ecartsCadresFemmes : undefined,
       ecartsCadresHommes: isEcartsCadresCalculableBoolVal ? ecartsCadresHommes : undefined,
     });
-    router.push("/ecart-rep/ecarts-membres");
+    router.push("/representation-equilibree/ecarts-membres");
   };
 
   useEffect(() => {
@@ -215,7 +215,7 @@ const EcartsCadres: NextPageWithLayout = () => {
               </FormGroup>
             )}
             <FormLayoutButtonGroup>
-              <NextLink href="/ecart-rep/periode-reference" passHref>
+              <NextLink href="/representation-equilibree/periode-reference" passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>

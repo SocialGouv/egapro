@@ -54,7 +54,7 @@ export const RepresentationEquilibree: NextPageWithLayout = () => (
               <strong>membres des instances dirigeantes</strong> des grandes entreprises, accompagnée d’une{" "}
               <strong>obligation de transparence</strong> en la matière.
             </p>
-            <NextLink href="/ecart-rep/assujetti/" passHref>
+            <NextLink href="/representation-equilibree/assujetti/" passHref>
               <ButtonAsLink>Déclarer les écarts éventuels de représentation femmes-hommes</ButtonAsLink>
             </NextLink>
           </GridCol>

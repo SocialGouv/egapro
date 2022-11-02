@@ -26,7 +26,7 @@ import { useFormManager, useUser, fetchRepresentationEquilibreeSendEmail, getLin
 const title = "Transmission de la procédure";
 
 const Transmission: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData, resetFormData } = useFormManager();
   const [receiptProcessing, setReceiptProcessing] = useState(false);
@@ -82,7 +82,7 @@ const Transmission: NextPageWithLayout = () => {
             <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
               {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
             </FormButton>
-            <NextLink href="/ecart-rep/assujetti/" passHref>
+            <NextLink href="/representation-equilibree/assujetti/" passHref>
               <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
             </NextLink>
           </ButtonGroup>

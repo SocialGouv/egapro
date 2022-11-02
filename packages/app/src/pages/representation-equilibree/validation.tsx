@@ -31,7 +31,7 @@ const title = "Validation de vos écarts";
 const SERVER_ERROR = `Erreur : problème lors de l'envoi de la représentation équilibrée.`;
 
 const Validation: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData } = useFormManager();
   const [globalError, setGlobalError] = useState("");
@@ -51,7 +51,7 @@ const Validation: NextPageWithLayout = () => {
   const sendRepresentationEquilibree = async () => {
     try {
       await putRepresentationEquilibree(formData);
-      router.push("/ecart-rep/transmission");
+      router.push("/representation-equilibree/transmission");
     } catch (error) {
       console.error(error);
       setGlobalError(SERVER_ERROR);
@@ -61,8 +61,8 @@ const Validation: NextPageWithLayout = () => {
 
   const previousPage =
     formData?.isEcartsMembresCalculable === false && formData?.isEcartsCadresCalculable === false
-      ? "/ecart-rep/ecarts-membres"
-      : "/ecart-rep/publication";
+      ? "/representation-equilibree/ecarts-membres"
+      : "/representation-equilibree/publication";
 
   return (
     <ClientOnly>

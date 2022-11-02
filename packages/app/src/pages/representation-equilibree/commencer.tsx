@@ -75,7 +75,7 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/ecart-rep/email", checkTokenInURL: true });
+  useUser({ redirectTo: "/representation-equilibree/email", checkTokenInURL: true });
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
@@ -110,7 +110,7 @@ const CommencerPage: NextPageWithLayout = () => {
       try {
         const entreprise = await fetchSiren(siren, Number(year));
         saveFormData({ entreprise, year: Number(year) });
-        router.push("/ecart-rep/declarant");
+        router.push("/representation-equilibree/declarant");
       } catch (error) {
         console.error("erreur dans fetchSiren");
       }
