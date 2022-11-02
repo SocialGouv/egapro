@@ -44,10 +44,10 @@ export const FormRadioGroup = ({
   );
 };
 
-export type FormRadioGroupLegendProps = PropsWithChildren<{ id: string }>;
+export type FormRadioGroupLegendProps = PropsWithChildren<{ className?: string; id: string }>;
 
-export const FormRadioGroupLegend = ({ children, id }: FormRadioGroupLegendProps) => (
-  <legend className="fr-fieldset__legend fr-text--regular" id={id}>
+export const FormRadioGroupLegend = ({ children, id, className }: FormRadioGroupLegendProps) => (
+  <legend className={clsx("fr-fieldset__legend fr-text--regular", className)} id={id}>
     {children}
   </legend>
 );
