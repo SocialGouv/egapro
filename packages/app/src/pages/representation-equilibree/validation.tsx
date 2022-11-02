@@ -24,7 +24,7 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@design-system";
-import { useFormManager, putRepresentationEquilibree, useConfig, formatAdresse, useUser } from "@services/apiClient";
+import { formatAdresse, putRepresentationEquilibree, useConfig, useFormManager, useUser } from "@services/apiClient";
 
 const title = "Validation de vos écarts";
 

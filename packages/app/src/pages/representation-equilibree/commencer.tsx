@@ -2,7 +2,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ApiError } from "next/dist/server/api-utils";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -12,16 +12,16 @@ import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
-  FormButton,
-  FormGroup,
-  FormGroupMessage,
-  FormInput,
-  FormGroupLabel,
-  FormSelect,
-  FormLayout,
-  FormLayoutButtonGroup,
   Alert,
   AlertTitle,
+  FormButton,
+  FormGroup,
+  FormGroupLabel,
+  FormGroupMessage,
+  FormInput,
+  FormLayout,
+  FormLayoutButtonGroup,
+  FormSelect,
 } from "@design-system";
 import {
   checkSiren,

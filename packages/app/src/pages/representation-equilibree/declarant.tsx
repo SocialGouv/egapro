@@ -9,15 +9,15 @@ import type { NextPageWithLayout } from "../_app";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
+  ButtonAsLink,
   FormButton,
   FormCheckbox,
   FormGroup,
   FormGroupLabel,
-  FormInput,
   FormGroupMessage,
+  FormInput,
   FormLayout,
   FormLayoutButtonGroup,
-  ButtonAsLink,
 } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
 
