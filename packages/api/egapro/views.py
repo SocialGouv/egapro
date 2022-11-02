@@ -286,7 +286,7 @@ async def send_representation_pdf(request, response, siren, year):
     data = record.data
     pdf = representation.main(data)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}.pdf"
+    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
     response.body = bytes(pdf[0].output())
     return response
 
