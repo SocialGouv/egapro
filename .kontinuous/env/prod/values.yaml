@@ -1,11 +1,12 @@
 global:
-  host: egapro.travail.gouv.fr
+  host: index-egapro.travail.gouv.fr
+  # host: egapro.travail.gouv.fr
   sentryFront: "https://92bd32ba4e6411eb95f19aaf3eb391a2@sentry.fabrique.social.gouv.fr/49"
 
 app:
   redirectFrom:
-    - "index-egapro.travail.gouv.fr"
     - "egapro.fabrique.social.gouv.fr"
+    # - "index-egapro.travail.gouv.fr"
 
 
 api:

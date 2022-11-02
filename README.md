@@ -2,7 +2,7 @@
 
 ## URL
 
-Prod : <https://egapro.travail.gouv.fr/>
+Prod : <https://index-egapro.travail.gouv.fr/>
 
 Préprod : <https://egapro-preprod.dev.fabrique.social.gouv.fr/>
 

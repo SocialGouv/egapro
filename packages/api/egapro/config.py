@@ -26,7 +26,7 @@ SENTRY_DSN = ""
 FLAVOUR = "local"
 API_ENTREPRISES = ""
 ALLOWED_IPS = []
-DOMAIN = "https://egapro.travail.gouv.fr"
+DOMAIN = "https://index-egapro.travail.gouv.fr"
 READONLY = False
 
 

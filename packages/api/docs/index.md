@@ -2,7 +2,7 @@
 
 ## Schéma
 
-- jsonschema : [https://egapro.travail.gouv.fr/api/jsonschema.json](https://egapro.travail.gouv.fr/api/jsonschema.json)
+- jsonschema : [https://index-egapro.travail.gouv.fr/api/jsonschema.json](https://index-egapro.travail.gouv.fr/api/jsonschema.json)
 - Une version un peu plus "human readable" du schéma: [https://github.com/SocialGouv/egapro-api/blob/schema/egapro/schema/raw.yml](https://github.com/SocialGouv/egapro-api/blob/schema/egapro/schema/raw.yml)
 
 À noter:
@@ -12,7 +12,7 @@
 ## Racine de l'API
 
 - Dev: `https://dev.egapro.fabrique.social.gouv.fr/api`
-- Prod: `https://egapro.travail.gouv.fr/api`
+- Prod: `https://index-egapro.travail.gouv.fr/api`
 
 ## Endpoints
 
