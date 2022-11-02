@@ -180,15 +180,6 @@ export const App = ({ children }: PropsWithChildren) => {
                 </FooterBodyItem>
                 <FooterBodyItem>
                   <FooterContentLink
-                    href=" https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes/?id_mot=2004#liste-faq"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Consulter l'aide
-                  </FooterContentLink>
-                </FooterBodyItem>
-                <FooterBodyItem>
-                  <FooterContentLink
                     href="https://github.com/SocialGouv/egapro/tree/v2.11.4"
                     target="_blank"
                     rel="noreferrer"
