@@ -5,8 +5,9 @@ import React, { useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import type { FormButtonProps } from "@design-system";
+import { TileSuccessTitle } from "@design-system";
+import { TileSuccess } from "@design-system";
 import {
-  Box,
   ButtonAsLink,
   ButtonGroup,
   Card,
@@ -19,11 +20,10 @@ import {
   FormButton,
   Grid,
   GridCol,
-  ImgSuccess,
 } from "@design-system";
 import { useFormManager, useUser, fetchRepresentationEquilibreeSendEmail, getLink } from "@services/apiClient";
 
-const title = "Transmission de la procédure";
+const title = "Votre déclaration a été transmise";
 
 const Transmission: NextPageWithLayout = () => {
   useUser({ redirectTo: "/representation-equilibree/email" });
@@ -52,13 +52,8 @@ const Transmission: NextPageWithLayout = () => {
   );
 
   return (
-    <>
-      <h1>{title}</h1>
-      <Grid justifyCenter mb="4w" mt="4w">
-        <GridCol sm={6} md={5}>
-          <ImgSuccess />
-        </GridCol>
-      </Grid>
+    <TileSuccess>
+      <TileSuccessTitle titleAs="h1">{title}</TileSuccessTitle>
       <p>
         Vous avez transmis aux services du ministre chargé du travail vos écarts éventuels de représentation
         femmes-hommes conformément aux dispositions de l’
@@ -76,21 +71,23 @@ const Transmission: NextPageWithLayout = () => {
         courriers indésirables.
       </p>
       <p>Nous vous remercions de votre transmission.</p>
-      <Box mt="6w">
-        <form>
-          <ButtonGroup inline="mobile-up">
-            <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
-              {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
-            </FormButton>
-            <NextLink href="/representation-equilibree/assujetti/" passHref>
-              <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
-            </NextLink>
-          </ButtonGroup>
-        </form>
-      </Box>
+      <Grid mt="6w" justifyCenter>
+        <GridCol md={10} lg={8}>
+          <form>
+            <ButtonGroup>
+              <FormButton type="button" variant="secondary" onClick={sendReceipt} disabled={receiptProcessing}>
+                {receiptProcessing ? "Accusé en cours d'envoi ..." : "Renvoyer l'accusé de réception"}
+              </FormButton>
+              <NextLink href="/representation-equilibree/assujetti/" passHref>
+                <ButtonAsLink onClick={initNewRepresentation}>Effectuer une nouvelle déclaration</ButtonAsLink>
+              </NextLink>
+            </ButtonGroup>
+          </form>
+        </GridCol>
+      </Grid>
       {formData.entreprise?.siren && (
-        <Grid mt="6w">
-          <GridCol lg={6}>
+        <Grid mt="6w" justifyCenter>
+          <GridCol md={10} lg={8}>
             <Card size="sm" isEnlargeLink>
               <CardBody>
                 <CardBodyContent>
@@ -110,7 +107,7 @@ const Transmission: NextPageWithLayout = () => {
           </GridCol>
         </Grid>
       )}
-    </>
+    </TileSuccess>
   );
 };
 
