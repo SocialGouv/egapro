@@ -1,3 +1,10 @@
+## [2.24.2](https://github.com/SocialGouv/egapro/compare/v2.24.1...v2.24.2) (2022-11-02)
+
+
+### Bug Fixes
+
+* rollback import global package ([f4b1f25](https://github.com/SocialGouv/egapro/commit/f4b1f2554343bf8359e85f2109728edee61b9a04))
+
 ## [2.24.1](https://github.com/SocialGouv/egapro/compare/v2.24.0...v2.24.1) (2022-11-02)
 
 
