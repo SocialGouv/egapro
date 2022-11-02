@@ -2,6 +2,7 @@ import { useFormContext } from "react-hook-form";
 
 import { FormGroup, FormGroupLabel, FormGroupMessage } from "../design-system/base/FormGroup";
 import { FormInput } from "../design-system/base/FormInput";
+import { formatPrettyFloat, truncFloatToOneDecimal } from "@common/utils/number";
 
 type Input = {
   label: string;
@@ -22,21 +23,21 @@ export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput:
   // TODO: unit tests
   const syncPercentages = (event: React.FormEvent<HTMLInputElement>) => {
     const inputChanged = event.currentTarget;
-    const inputValueAsNumber = parseFloat(inputChanged.valueAsNumber.toFixed(1));
+    const inputValueAsNumber = truncFloatToOneDecimal(inputChanged.valueAsNumber);
 
     if (!isNaN(inputValueAsNumber)) {
       if (inputChanged.id === firstLabel) {
         setValue(firstLabel, String(inputValueAsNumber));
         if (inputValueAsNumber >= 0 && inputValueAsNumber <= 100) {
-          setValue(secondLabel, (100 - inputValueAsNumber).toFixed(1));
+          setValue(secondLabel, formatPrettyFloat(100 - inputValueAsNumber));
         }
-        // Hack to ensure that focus cursor is on the last character. W/o it, if we type "3,2" and remove the last chararcter, the focuse is at start.
+        // Hack to ensure that focus cursor is on the last character. W/o it, if we type "3,2" and remove the last character, the focus is at the start.
         setFocus(secondLabel);
         setFocus(firstLabel);
       } else if (inputChanged.id === secondLabel) {
         setValue(secondLabel, String(inputValueAsNumber));
         if (inputValueAsNumber >= 0 && inputValueAsNumber <= 100) {
-          setValue(firstLabel, (100 - inputValueAsNumber).toFixed(1));
+          setValue(firstLabel, formatPrettyFloat(100 - inputValueAsNumber));
         }
         // Hack to ensure that focus cursor is on the last character.
         setFocus(firstLabel);
