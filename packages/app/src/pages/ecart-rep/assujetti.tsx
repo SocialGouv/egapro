@@ -3,7 +3,14 @@ import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
-import { ButtonAsLink, Callout, CalloutContent, FormRadioGroup, FormRadioGroupInput } from "@design-system";
+import {
+  ButtonAsLink,
+  Callout,
+  CalloutContent,
+  FormRadioGroup,
+  FormRadioGroupInput,
+  FormRadioGroupLegend,
+} from "@design-system";
 import { useUser } from "@services/apiClient";
 
 const title = "Êtes-vous assujetti ?";
@@ -31,6 +38,9 @@ const AssujettiPage: NextPageWithLayout = () => {
 
       <form noValidate>
         <FormRadioGroup>
+          <FormRadioGroupLegend id="assujetti" className="fr-sr-only">
+            {title}
+          </FormRadioGroupLegend>
           <FormRadioGroupInput
             id="oui"
             name="assujetti"
