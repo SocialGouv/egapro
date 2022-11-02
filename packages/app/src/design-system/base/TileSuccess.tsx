@@ -11,6 +11,8 @@ export const TileSuccess = ({ children }: PropsWithChildren) => (
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="fr-mb-2w fr-mt-1w fr-mb-md-4w fr-mt-md-2w"
+      focusable="false"
+      aria-hidden="true"
     >
       <path
         fillRule="evenodd"
