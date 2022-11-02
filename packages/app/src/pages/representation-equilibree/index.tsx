@@ -19,10 +19,10 @@ import {
   AlertTitle,
   Callout,
   CalloutContent,
-  ImgEcartRep,
+  ImgRepresentationEquilibree,
 } from "@design-system";
 
-export const EcartRep: NextPageWithLayout = () => (
+export const RepresentationEquilibree: NextPageWithLayout = () => (
   <>
     <Head>
       <title>Déclaration des écarts de représentation F/H dans les postes de direction</title>
@@ -54,12 +54,12 @@ export const EcartRep: NextPageWithLayout = () => (
               <strong>membres des instances dirigeantes</strong> des grandes entreprises, accompagnée d’une{" "}
               <strong>obligation de transparence</strong> en la matière.
             </p>
-            <NextLink href="/ecart-rep/assujetti/" passHref>
+            <NextLink href="/representation-equilibree/assujetti/" passHref>
               <ButtonAsLink>Déclarer les écarts éventuels de représentation femmes-hommes</ButtonAsLink>
             </NextLink>
           </GridCol>
           <GridCol lg={5}>
-            <ImgEcartRep />
+            <ImgRepresentationEquilibree />
           </GridCol>
         </Grid>
         <Grid haveGutters mt="5w">
@@ -106,8 +106,9 @@ export const EcartRep: NextPageWithLayout = () => (
           <Alert type="warning">
             <AlertTitle>Calendrier exceptionnel en 2022</AlertTitle>
             <p>
-              En 2022, pour la première année d’application, les entreprises ont jusqu’au 1er septembre 2022 pour
-              procéder à cette publication.
+              Pour la première année d'application, les entreprises ont eu jusqu’au 1er septembre pour publier leurs
+              résultats sur leur site internet, ou auprès de leurs salariés à défaut de site internet, et les
+              transmettre au CSE.
             </p>
           </Alert>
         </Box>
@@ -143,8 +144,8 @@ export const EcartRep: NextPageWithLayout = () => (
   </>
 );
 
-EcartRep.getLayout = ({ children }) => {
+RepresentationEquilibree.getLayout = ({ children }) => {
   return <BasicLayout>{children}</BasicLayout>;
 };
 
-export default EcartRep;
+export default RepresentationEquilibree;

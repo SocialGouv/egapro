@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeStartLayout } from "@components/layouts/RepartitionEquilibreeStartLayout";
+import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
   Alert,
   AlertTitle,
@@ -40,7 +40,7 @@ const EmailPage: NextPageWithLayout = () => {
   const { user } = useUser();
   const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
   // Si la personne est authentifiée, on reroute sur commencer.
-  if (user) router.push("/ecart-rep/commencer");
+  if (user) router.push("/representation-equilibree/commencer");
 
   const {
     register,
@@ -73,7 +73,7 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, `${window.location.origin}/ecart-rep/commencer?token=`);
+      await requestEmailForToken(email, `${window.location.origin}/representation-equilibree/commencer?token=`);
       setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({
@@ -135,7 +135,12 @@ const EmailPage: NextPageWithLayout = () => {
               <FormLayout>
                 <FormGroup>
                   <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
-                  <FormInput aria-describedby="email-msg" id="email" type="email" {...register("email")} />
+                  <FormInput
+                    aria-describedby={errors.email && "email-msg"}
+                    id="email"
+                    type="email"
+                    {...register("email")}
+                  />
                   {errors.email?.message && <FormGroupMessage id="email-msg">{errors.email.message}</FormGroupMessage>}
                 </FormGroup>
                 <FormLayoutButtonGroup>
@@ -153,7 +158,7 @@ const EmailPage: NextPageWithLayout = () => {
 };
 
 EmailPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeStartLayout>{children}</RepartitionEquilibreeStartLayout>;
+  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
 };
 
 export default EmailPage;

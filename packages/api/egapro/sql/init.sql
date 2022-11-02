@@ -10,9 +10,13 @@ END;$$;
 CREATE TABLE IF NOT EXISTS declaration
 (siren TEXT, year INT, modified_at TIMESTAMP WITH TIME ZONE, declared_at TIMESTAMP WITH TIME ZONE, declarant TEXT, data JSONB, draft JSONB, legacy JSONB, ft TSVECTOR,
 PRIMARY KEY (siren, year));
+-- change name from repartition to representation
 CREATE TABLE IF NOT EXISTS repartition_equilibree
 (siren TEXT, year INT, modified_at TIMESTAMP WITH TIME ZONE, declared_at TIMESTAMP WITH TIME ZONE, data JSONB, ft TSVECTOR,
 PRIMARY KEY (siren, year));
+CREATE TABLE IF NOT EXISTS representation_equilibree AS TABLE repartition_equilibree;
+DROP TABLE IF EXISTS repartition_equilibree;
+--
 CREATE TABLE IF NOT EXISTS simulation
 (id uuid PRIMARY KEY, modified_at TIMESTAMP WITH TIME ZONE, data JSONB);
 CREATE TABLE IF NOT EXISTS search

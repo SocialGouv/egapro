@@ -62,20 +62,20 @@ const Cgu: NextPageWithLayout = () => {
               </p>
               <p>La plateforme propose également une FAQ et un moteur de recherche.</p>
               <h3 className="fr-text--xl">
-                Index EgaPro sur la répartition équilibrée entre hommes et femmes au sein des postes dirigeants des
+                Index EgaPro sur la représentation équilibrée entre hommes et femmes au sein des postes dirigeants des
                 grandes entreprises
               </h3>
               <p>
-                EgaPro a mis en place une déclaration sur la répartition équilibrée afin qu’elle soit transmise au
+                EgaPro a mis en place une déclaration sur la représentation équilibrée afin qu’elle soit transmise au
                 Ministère du Travail. Tout utilisateur, sans se créer de compte, peut remplir des informations le
                 concernant, des informations concernant son entreprise en prenant en compte la période de référence, les
                 écarts de représentation. Le déclarant renseigne son nom, prénom, son adresse e-mail, son numéro de
                 téléphone mais également le numéro SIREN de son entreprise afin de réaliser sa déclaration concernant la
-                répartition équilibrée.
+                représentation équilibrée.
               </p>
               <p>
                 Le code du logiciel est libre, et peut donc être vérifié et amélioré par tous&nbsp;:{" "}
-                <a href="https://index-egapro.travail.gouv.fr/">https://index-egapro.travail.gouv.fr/</a>
+                <a href="https://egapro.travail.gouv.fr/">https://egapro.travail.gouv.fr/</a>
               </p>
               <h2>Responsabilités</h2>
               <h3 className="fr-text--xl">EgaPro</h3>

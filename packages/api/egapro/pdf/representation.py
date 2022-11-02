@@ -77,23 +77,23 @@ def main(data):
     )
     pdf.write_table("Période de référence", cells)
 
-    non_calculable = data.path("indicateurs.répartition_équilibrée.motif_non_calculabilité_cadres")
+    non_calculable = data.path("indicateurs.représentation_équilibrée.motif_non_calculabilité_cadres")
     if non_calculable:
         cells = [("Motif de non calculabilité", non_calculable)]
     else:
         cells = (
-            ("Pourcentage de femmes parmi les cadres dirigeants", f"{data.path('indicateurs.répartition_équilibrée.pourcentage_femmes_cadres')} %"),
-            ("Pourcentage d'hommes parmi les cadres dirigeants", f"{data.path('indicateurs.répartition_équilibrée.pourcentage_hommes_cadres')} %"),
+            ("Pourcentage de femmes parmi les cadres dirigeants", f"{data.path('indicateurs.représentation_équilibrée.pourcentage_femmes_cadres')} %"),
+            ("Pourcentage d'hommes parmi les cadres dirigeants", f"{data.path('indicateurs.représentation_équilibrée.pourcentage_hommes_cadres')} %"),
         )
     pdf.write_table("Ecart de représentation parmi les cadres dirigeants", cells)
 
-    non_calculable = data.path("indicateurs.répartition_équilibrée.motif_non_calculabilité_membres")
+    non_calculable = data.path("indicateurs.représentation_équilibrée.motif_non_calculabilité_membres")
     if non_calculable:
         cells = [("Motif de non calculabilité", non_calculable)]
     else:
         cells = (
-            ("Pourcentage de femmes parmi les membres des instances dirigeantes", f"{data.path('indicateurs.répartition_équilibrée.pourcentage_femmes_membres')} %"),
-            ("Pourcentage d'hommes parmi les membres des instances dirigeantes", f"{data.path('indicateurs.répartition_équilibrée.pourcentage_hommes_membres')} %"),
+            ("Pourcentage de femmes parmi les membres des instances dirigeantes", f"{data.path('indicateurs.représentation_équilibrée.pourcentage_femmes_membres')} %"),
+            ("Pourcentage d'hommes parmi les membres des instances dirigeantes", f"{data.path('indicateurs.représentation_équilibrée.pourcentage_hommes_membres')} %"),
         )
     pdf.write_table("Ecart de représentation parmi les membres des instances dirigeantes", cells)
 

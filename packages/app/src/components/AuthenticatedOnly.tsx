@@ -6,7 +6,7 @@ import { Alert, AlertTitle } from "../design-system/base/Alert";
 import { useUser } from "@services/apiClient";
 
 export const AuthenticatedOnly = ({ children, ...delegated }: PropsWithChildren<unknown>) => {
-  const { isAuthenticated, loading } = useUser({ redirectTo: "/ecart-rep/email" });
+  const { isAuthenticated, loading } = useUser({ redirectTo: "/representation-equilibree/email" });
 
   if (loading || !isAuthenticated) return null;
 
@@ -14,7 +14,7 @@ export const AuthenticatedOnly = ({ children, ...delegated }: PropsWithChildren<
 };
 
 export const StaffOnly = ({ children, ...delegated }: PropsWithChildren<unknown>) => {
-  const { user, loading } = useUser({ redirectTo: "/ecart-rep/email" });
+  const { user, loading } = useUser({ redirectTo: "/representation-equilibree/email" });
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   if (loading || !user) return null;

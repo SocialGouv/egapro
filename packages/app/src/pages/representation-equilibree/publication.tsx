@@ -9,7 +9,7 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../_app";
 import { radioBoolToString, radioStringToBool, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
   AlertTitle,
@@ -70,11 +70,11 @@ export type FormTypeOutput = z.infer<typeof formSchema>;
 
 const Publication: NextPageWithLayout = () => {
   const router = useRouter();
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
 
   const { formData, saveFormData } = useFormManager();
   const {
-    formState: { errors, isDirty, isValid, isSubmitted },
+    formState: { errors, isValid },
     handleSubmit,
     register,
     watch,
@@ -100,7 +100,7 @@ const Publication: NextPageWithLayout = () => {
       publishingDate,
       publishingWebsiteUrl,
     });
-    router.push("/ecart-rep/validation");
+    router.push("/representation-equilibree/validation");
   };
 
   return (
@@ -146,7 +146,7 @@ const Publication: NextPageWithLayout = () => {
                 id="publishingWebsiteUrl"
                 placeholder="https://"
                 {...register("publishingWebsiteUrl")}
-                aria-describedby="publishingWebsiteUrl-message-error"
+                aria-describedby={errors.publishingWebsiteUrl && "publishingWebsiteUrl-message-error"}
               />
               {errors.publishingWebsiteUrl && (
                 <FormGroupMessage id="publishingWebsiteUrl-message-error">
@@ -162,7 +162,7 @@ const Publication: NextPageWithLayout = () => {
               <FormTextarea
                 id="publishingContent"
                 {...register("publishingContent")}
-                aria-describedby="publishingContent-message-error"
+                aria-describedby={errors.publishingContent && "publishingContent-message-error"}
               />
               {errors.publishingContent && (
                 <FormGroupMessage id="publishingContent-message-error">
@@ -172,7 +172,7 @@ const Publication: NextPageWithLayout = () => {
             </FormGroup>
           )}
           <FormLayoutButtonGroup>
-            <NextLink href="/ecart-rep/ecarts-membres" passHref>
+            <NextLink href="/representation-equilibree/ecarts-membres" passHref>
               <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
             </NextLink>
             <FormButton isDisabled={!isValid}>Suivant</FormButton>
@@ -184,7 +184,7 @@ const Publication: NextPageWithLayout = () => {
 };
 
 Publication.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default Publication;

@@ -474,8 +474,8 @@ async def test_confirmed_declaration_should_send_email(client, monkeypatch, body
     assert sender.call_count == 1
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
-    assert "/index/declaration/?siren=514027945&year=2019" in txt
-    assert "/index/declaration/?siren=514027945&year=2019" in html
+    assert "/index-egapro/declaration/?siren=514027945&year=2019" in txt
+    assert "/index-egapro/declaration/?siren=514027945&year=2019" in html
     assert sender.call_args.kwargs["reply_to"] == "Foo Bar <foo@baz.fr>"
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2020.pdf"
 

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import AssujetiPage from "@/pages/ecart-rep/assujetti";
+import AssujetiPage from "@/pages/representation-equilibree/assujetti";
 
 // for radio inputs, cast is mandatory to have access to checked attribute
 const getRadioInputOui = () => screen.getByRole("radio", { name: /oui, je suis concerné/i }) as HTMLInputElement;

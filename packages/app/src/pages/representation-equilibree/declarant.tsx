@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   FormButton,
   FormCheckbox,
@@ -36,7 +36,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser({ redirectTo: "/ecart-rep/email" });
+  const { user } = useUser({ redirectTo: "/representation-equilibree/email" });
   const { formData, saveFormData } = useFormManager();
 
   const {
@@ -73,7 +73,7 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   const onSubmit = async ({ nom, prenom, telephone, email, accord_rgpd }: FormType) => {
     saveFormData({ declarant: { prenom: prenom, nom: nom, telephone: telephone, email, accord_rgpd } });
-    router.push("/ecart-rep/entreprise");
+    router.push("/representation-equilibree/entreprise");
   };
 
   return (
@@ -92,7 +92,7 @@ const DeclarantPage: NextPageWithLayout = () => {
                 type="text"
                 isError={Boolean(errors.nom)}
                 {...register("nom")}
-                aria-describedby="nom-message-error"
+                aria-describedby={errors.nom && "nom-message-error"}
               />
               {errors.nom && <FormGroupMessage id="nom-message-error">{errors.nom.message}</FormGroupMessage>}
             </FormGroup>
@@ -103,7 +103,7 @@ const DeclarantPage: NextPageWithLayout = () => {
                 type="text"
                 isError={Boolean(errors.prenom)}
                 {...register("prenom")}
-                aria-describedby="prenom-message-error"
+                aria-describedby={errors.prenom && "prenom-message-error"}
               />
               {errors.prenom && <FormGroupMessage id="prenom-message-error">{errors.prenom.message}</FormGroupMessage>}
             </FormGroup>
@@ -114,7 +114,7 @@ const DeclarantPage: NextPageWithLayout = () => {
                 type="tel"
                 isError={Boolean(errors.telephone)}
                 {...register("telephone")}
-                aria-describedby="telephone-message-error"
+                aria-describedby={errors.telephone && "telephone-message-error"}
               />
               {errors.telephone && (
                 <FormGroupMessage id="telephone-message-error">{errors.telephone.message}</FormGroupMessage>
@@ -125,7 +125,11 @@ const DeclarantPage: NextPageWithLayout = () => {
               <FormInput id="email" type="text" readOnly {...register("email")} />
             </FormGroup>
             <FormGroup>
-              <FormCheckbox id="accord_rgpd" {...register("accord_rgpd")} aria-describedby="accord_rgpd-message-error">
+              <FormCheckbox
+                id="accord_rgpd"
+                {...register("accord_rgpd")}
+                aria-describedby={errors.accord_rgpd && "accord_rgpd-message-error"}
+              >
                 J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
                 vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
                 consulter nos{" "}
@@ -139,7 +143,7 @@ const DeclarantPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
-              <NextLink href="/ecart-rep/commencer" passHref>
+              <NextLink href="/representation-equilibree/commencer" passHref>
                 <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
               </NextLink>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
@@ -152,7 +156,7 @@ const DeclarantPage: NextPageWithLayout = () => {
 };
 
 DeclarantPage.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default DeclarantPage;

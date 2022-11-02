@@ -1,8 +1,8 @@
 import type { COUNTIES, COUNTRIES, NAF, REGIONS } from "@common/dict";
 import type { FormState } from "@services/apiClient";
 
-export type RepartitionEquilibreeAPI = {
-  data: RepartitionEquilibreeDataField;
+export type RepresentationEquilibreeAPI = {
+  data: RepresentationEquilibreeDataField;
   declared_at: number;
   modified_at: number;
   siren: string;
@@ -28,20 +28,20 @@ type Entreprise = {
   siren: string;
 };
 
-export type RepartitionEquilibreeDataField = {
+export type RepresentationEquilibreeDataField = {
   déclarant: Declarant;
-  déclaration: DeclarationRepartitionEquilibree;
+  déclaration: DeclarationRepresentationEquilibree;
   entreprise: Entreprise;
-  répartition_équilibrée: IndicateursRepartitionEquilibree;
+  représentation_équilibrée: IndicateursRepresentationEquilibree;
 };
 
-type DeclarationRepartitionEquilibree = {
+type DeclarationRepresentationEquilibree = {
   année_indicateurs: number;
   fin_période_référence: string;
-  publication?: PublicationRepartitionEquilibree | undefined;
+  publication?: PublicationRepresentationEquilibree | undefined;
 };
 
-type PublicationRepartitionEquilibree = {
+type PublicationRepresentationEquilibree = {
   date: string;
   modalités?: string | undefined;
   url?: string | undefined;
@@ -65,7 +65,7 @@ export const motifNonCalculabiliteMembresOptions = [
   },
 ] as const;
 
-type IndicateursRepartitionEquilibree = {
+type IndicateursRepresentationEquilibree = {
   motif_non_calculabilité_cadres: typeof motifNonCalculabiliteCadresOptions[number]["value"] | undefined;
   motif_non_calculabilité_membres: typeof motifNonCalculabiliteMembresOptions[number]["value"] | undefined;
   pourcentage_femmes_cadres: number;
@@ -100,11 +100,11 @@ const assertValidFormState = (state: FormState): void => {
 };
 
 /*
- * Transform the form data in repartition.
+ * Transform the form data in representation.
  *
- * @param state the state of the repartition (Form state)
+ * @param state the state of the representation (Form state)
  */
-export const buildRepartition = (state: FormState): RepartitionEquilibreeDataField => {
+export const buildRepresentation = (state: FormState): RepresentationEquilibreeDataField => {
   assertValidFormState(state);
 
   const déclarant: Declarant = {
@@ -114,13 +114,13 @@ export const buildRepartition = (state: FormState): RepartitionEquilibreeDataFie
     téléphone: state.declarant.telephone,
   };
 
-  const publication: PublicationRepartitionEquilibree = {
+  const publication: PublicationRepresentationEquilibree = {
     date: state.publishingDate as string, // todo: replace later with zod schema
     ...(!state.hasWebsite && { modalités: state.publishingContent }),
     ...(state.hasWebsite && { url: state.publishingWebsiteUrl }),
   };
 
-  const déclaration: DeclarationRepartitionEquilibree = {
+  const déclaration: DeclarationRepresentationEquilibree = {
     année_indicateurs: state.year as number,
     fin_période_référence: state.endOfPeriod as string,
     ...((!state.motifEcartsCadresNonCalculable || !state.motifEcartsMembresNonCalculable) && { publication }),
@@ -138,7 +138,7 @@ export const buildRepartition = (state: FormState): RepartitionEquilibreeDataFie
     siren: state.entreprise?.siren as string,
   };
 
-  const répartition_équilibrée: IndicateursRepartitionEquilibree = {
+  const représentation_équilibrée: IndicateursRepresentationEquilibree = {
     motif_non_calculabilité_cadres: state.motifEcartsCadresNonCalculable,
     motif_non_calculabilité_membres: state.motifEcartsMembresNonCalculable,
     pourcentage_femmes_cadres: state.ecartsCadresFemmes as number,
@@ -147,5 +147,5 @@ export const buildRepartition = (state: FormState): RepartitionEquilibreeDataFie
     pourcentage_hommes_membres: state.ecartsMembresHommes as number,
   };
 
-  return { déclarant, déclaration, entreprise, répartition_équilibrée };
+  return { déclarant, déclaration, entreprise, représentation_équilibrée };
 };

@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { ClientOnly } from "@components/ClientOnly";
-import { RepartitionEquilibreeLayout } from "@components/layouts/RepartitionEquilibreeLayout";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
   FormGroup,
@@ -43,7 +43,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const PeriodeReference: NextPageWithLayout = () => {
   const router = useRouter();
-  useUser({ redirectTo: "/ecart-rep/email" });
+  useUser({ redirectTo: "/representation-equilibree/email" });
   const { formData, saveFormData } = useFormManager();
 
   const {
@@ -72,7 +72,7 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   const onSubmit = async ({ endOfPeriod }: FormType) => {
     saveFormData({ endOfPeriod });
-    router.push("/ecart-rep/ecarts-cadres");
+    router.push("/representation-equilibree/ecarts-cadres");
   };
 
   return (
@@ -90,7 +90,7 @@ const PeriodeReference: NextPageWithLayout = () => {
                 {...register("year")}
                 isError={Boolean(errors.year)}
                 readOnly
-                aria-describedby="year-message-error-msg"
+                aria-describedby={errors.year && "year-message-error-msg"}
               />
               {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
             </FormGroup>
@@ -105,7 +105,7 @@ const PeriodeReference: NextPageWithLayout = () => {
                 {...register("endOfPeriod")}
                 isError={Boolean(errors.endOfPeriod)}
                 placeholder="Sélectionner une date"
-                aria-describedby="endOfPeriod-message-error"
+                aria-describedby={errors.endOfPeriod && "endOfPeriod-message-error"}
               />
               {errors.endOfPeriod && (
                 <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
@@ -131,7 +131,7 @@ const PeriodeReference: NextPageWithLayout = () => {
 };
 
 PeriodeReference.getLayout = ({ children }) => {
-  return <RepartitionEquilibreeLayout>{children}</RepartitionEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
 };
 
 export default PeriodeReference;
