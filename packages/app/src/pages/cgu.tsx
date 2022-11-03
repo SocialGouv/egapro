@@ -75,7 +75,7 @@ const Cgu: NextPageWithLayout = () => {
               </p>
               <p>
                 Le code du logiciel est libre, et peut donc être vérifié et amélioré par tous&nbsp;:{" "}
-                <a href="https://index-egapro.travail.gouv.fr/">https://index-egapro.travail.gouv.fr/</a>
+                <a href="https://egapro.travail.gouv.fr/">https://egapro.travail.gouv.fr/</a>
               </p>
               <h2>Responsabilités</h2>
               <h3 className="fr-text--xl">EgaPro</h3>

@@ -23,7 +23,7 @@ async function request(method, uri, body, options = {}) {
 }
 
 function redirect(url) {
-  location.href = url
+  location.replace(url)
 }
 
 function buildSelectOptions(select, list, value) {
