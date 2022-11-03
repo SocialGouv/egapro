@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
-import { FAKE_SIREN, useUserMock } from "./mock/user";
+import { FAKE_SIREN, MALFORMED_SIREN, useUserMock } from "./mock/user";
 import CommencerPage from "@/pages/representation-equilibree/commencer";
 
 jest.mock("next/router", () => require("next-router-mock"));
@@ -55,8 +55,9 @@ describe("Commencer Page", () => {
 
     // when
     await userEvent.selectOptions(inputYear, "2021");
-    fireEvent.change(inputSiren, { target: { value: FAKE_SIREN } });
-    await userEvent.click(submitButton);
+    expect(inputYear).toHaveValue("2021");
+    fireEvent.change(inputSiren, { target: { value: MALFORMED_SIREN } });
+    expect(inputSiren).toHaveValue(MALFORMED_SIREN);
 
     // expected
     expect(submitButton).toBeDisabled();
@@ -65,8 +66,7 @@ describe("Commencer Page", () => {
     });
   });
 
-  // TODO: error message is displayed on change, waitFor 
-  it.skip("should display errors SIREN does not exist", async () => {
+  it("should display errors SIREN does not exist", async () => {
     // given
     render(
       <RouterContext.Provider value={singletonRouter}>
@@ -86,12 +86,14 @@ describe("Commencer Page", () => {
 
     // when
     await userEvent.selectOptions(inputYear, "2021");
-    fireEvent.change(inputSiren, { target: { value: "123456789" } });
+    expect(inputYear).toHaveValue("2021");
+    fireEvent.change(inputSiren, { target: { value: FAKE_SIREN } });
+    expect(inputSiren).toHaveValue(FAKE_SIREN);
 
     // expected
     expect(submitButton).toBeDisabled();
     await waitFor(() => {
-      expect(screen.getByText("Numéro SIREN invalide: 123456789")).toBeInTheDocument();
+      expect(screen.getByText("Numéro SIREN invalide: " + FAKE_SIREN)).toBeInTheDocument();
     });
   });
 });

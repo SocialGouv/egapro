@@ -1,7 +1,9 @@
 import type { TokenInfoType } from "@services/apiClient";
 
-export const FAKE_SIREN = "23274530763485";
-
+export const MALFORMED_SIREN = "23274530763485";
+export const FAKE_SIREN = "232745307";
+export const NOT_LINKED_SIREN = "504920166";
+export const VALID_SIREN = "905292694";
 /**
  * @link https://www.pappers.fr/entreprise/boulangerie-eden-833169014
  */
@@ -11,7 +13,7 @@ const BOULANGER_SAS = "905292694";
 export const FAKE_USER: TokenInfoType = {
   staff: true,
   déclarations: [],
-  email: "test@test.com",
+  email: "demo@travail.gouv.fr",
   ownership: [FAKE_SIREN, BOULANGERIE_EDEN_SIREN, BOULANGER_SAS],
 };
 
