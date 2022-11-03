@@ -1,3 +1,10 @@
+# [2.25.0](https://github.com/SocialGouv/egapro/compare/v2.24.7...v2.25.0) (2022-11-03)
+
+
+### Features
+
+* add consistent titles for app ([656f63d](https://github.com/SocialGouv/egapro/commit/656f63dfcc852f8e9607d87712cd2cf825304a51)), closes [#1309](https://github.com/SocialGouv/egapro/issues/1309)
+
 ## [2.24.7](https://github.com/SocialGouv/egapro/compare/v2.24.6...v2.24.7) (2022-11-03)
 
 
