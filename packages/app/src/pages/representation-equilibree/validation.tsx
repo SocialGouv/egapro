@@ -241,7 +241,7 @@ const Validation: NextPageWithLayout = () => {
 };
 
 Validation.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Validation">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default Validation;

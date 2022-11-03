@@ -224,7 +224,7 @@ const CommencerPage: NextPageWithLayout = () => {
 };
 
 CommencerPage.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Commencer">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default CommencerPage;

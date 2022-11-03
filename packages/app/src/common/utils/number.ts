@@ -1,5 +1,14 @@
-// Format a float to get rid of .0 if it is an integer value.
+/**
+ * Format a float to get rid of useless decimals.
+ *
+ * @example
+ * ```ts
+ * formatPrettyFloat(12.0); // "12"
+ * ```
+ */
 export const formatPrettyFloat = (float: number) => (Number.isInteger(float) ? float.toFixed(0) : float.toFixed(1));
 
-// Truncate to only have 1 decimal.
+/**
+ * Truncate a float to only have 1 decimal.
+ */
 export const truncFloatToOneDecimal = (float: number) => Math.trunc(float * 10) / 10;

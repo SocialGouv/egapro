@@ -129,7 +129,7 @@ const PeriodeReference: NextPageWithLayout = () => {
 };
 
 PeriodeReference.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Période de référence">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default PeriodeReference;

@@ -156,7 +156,7 @@ const DeclarantPage: NextPageWithLayout = () => {
 };
 
 DeclarantPage.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Informations déclarant">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default DeclarantPage;

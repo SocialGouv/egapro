@@ -22,7 +22,6 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
@@ -427,10 +426,6 @@ const SearchPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <Head>
-        <title>Recherche - Index Egapro</title>
-      </Head>
-
       <form onSubmit={handleSubmit} style={{ textAlign: "center" }}>
         <Heading fontFamily="gabriela" as="h1" size="lg" mb="8">
           Rechercher l'index de l'égalité professionnelle d'une entreprise
@@ -519,6 +514,6 @@ const SearchPage: NextPageWithLayout = () => {
   );
 };
 
-SearchPage.getLayout = ({ children }) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+SearchPage.getLayout = ({ children }) => <ConsulterIndexLayout title="Recherche">{children}</ConsulterIndexLayout>;
 
 export default SearchPage;

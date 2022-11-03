@@ -256,7 +256,11 @@ const EcartsCadres: NextPageWithLayout = () => {
 };
 
 EcartsCadres.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return (
+    <RepresentationEquilibreeLayout title="Écarts de représentation parmi les cadres dirigeants">
+      {children}
+    </RepresentationEquilibreeLayout>
+  );
 };
 
 export default EcartsCadres;

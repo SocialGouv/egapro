@@ -112,7 +112,11 @@ const Transmission: NextPageWithLayout = () => {
 };
 
 Transmission.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout haveBottomSection={true}>{children}</RepresentationEquilibreeLayout>;
+  return (
+    <RepresentationEquilibreeLayout haveBottomSection={true} title="Transmission">
+      {children}
+    </RepresentationEquilibreeLayout>
+  );
 };
 
 export default Transmission;

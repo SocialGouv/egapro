@@ -269,7 +269,11 @@ const EcartsMembres: NextPageWithLayout = () => {
 };
 
 EcartsMembres.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return (
+    <RepresentationEquilibreeLayout title="Écarts de représentation parmi les membres des instances dirigeantes">
+      {children}
+    </RepresentationEquilibreeLayout>
+  );
 };
 
 export default EcartsMembres;
