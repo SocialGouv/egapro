@@ -1,3 +1,10 @@
+## [2.24.7](https://github.com/SocialGouv/egapro/compare/v2.24.6...v2.24.7) (2022-11-03)
+
+
+### Bug Fixes
+
+* **declaration:** redirect not working (fixes [#1311](https://github.com/SocialGouv/egapro/issues/1311)) ([ce4a8e3](https://github.com/SocialGouv/egapro/commit/ce4a8e3c5a6d23b176d767eaa31c935a60c7db6c))
+
 ## [2.24.6](https://github.com/SocialGouv/egapro/compare/v2.24.5...v2.24.6) (2022-11-03)
 
 
