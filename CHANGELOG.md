@@ -1,3 +1,10 @@
+## [2.24.5](https://github.com/SocialGouv/egapro/compare/v2.24.4...v2.24.5) (2022-11-03)
+
+
+### Bug Fixes
+
+* bug with generate token button ([#1312](https://github.com/SocialGouv/egapro/issues/1312)) ([d3b34dc](https://github.com/SocialGouv/egapro/commit/d3b34dcaf0c31a62a83f51f782e5a4106483bdfe))
+
 ## [2.24.4](https://github.com/SocialGouv/egapro/compare/v2.24.3...v2.24.4) (2022-11-02)
 
 
