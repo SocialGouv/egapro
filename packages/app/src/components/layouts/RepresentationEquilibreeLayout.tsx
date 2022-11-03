@@ -85,7 +85,7 @@ export const RepresentationEquilibreeLayout = ({
                   <CardBody>
                     <CardBodyContent>
                       <CardBodyContentTitle>
-                        <a href="https://index-egapro.travail.gouv.fr">
+                        <a href="https://egapro.travail.gouv.fr">
                           Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?
                         </a>
                       </CardBodyContentTitle>
