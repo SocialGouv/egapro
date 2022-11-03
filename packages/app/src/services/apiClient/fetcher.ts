@@ -68,12 +68,12 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
 };
 
 /**
- * Fetcher to call the Egapro API
+ * Fetcher to call the Egapro API.
  *
  * @param key the path to use after the API_URL (named key because it is used in cache for useSWR)
  * @param options the request options (optional)
  */
-export const fetcher = async <T>(key: string, options?: RequestInit): Promise<T> => {
+export const fetcher = <T>(key: string, options?: RequestInit): Promise<T> => {
   // TODO: better typings relation with genericFetch
   return genericFetch(API_URL + key, options);
 };

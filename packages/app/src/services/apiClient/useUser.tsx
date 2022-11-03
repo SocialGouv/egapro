@@ -26,17 +26,26 @@ export const useUserStore = create<UserStore>()(
 /**
  * Hook to get the user data, to login with a token in an URL and to redirect to a page if no token is found.
  *
- * Usage:
- * useUser({ redirectTo: "/authPage" }) => redirect to /authPage if no token are found in local storage
- * useUser({ checkTokenInUrl: true }) => for a Next page, to be able to detect & use a token in URL and put it in local storage in order to login automatically
- * const {
- *  user, // get user data
- *  error, // SWR error if any in fetching user data
- *  logout, // function to logout
- *  isAuthenticated, // helper to know if the user is authenticated
- *  loading, // true if the asynchron fetch to get user information is in progress
- * } = useUser()
+ * @example
+ * ```ts
+ * useUser({ redirectTo: "/authPage" }); => redirects to /authPage if no token are found in local storage
+ * ```
  *
+ * @example
+ * ```ts
+ * useUser({ checkTokenInUrl: true }); => for a Next page, allows to detect & use a token in URL and put it in local storage in order to login automatically
+ * ```
+ *
+ * @example
+ * ```ts
+ * const {
+ *  user,            // user data
+ *  error,           // potential useSWR error in fetching user data
+ *  logout,          // function to logout
+ *  isAuthenticated, // helper to know if the user is authenticated
+ *  loading,         // boolean set as true if the asynchron fetch to get user information is in progress
+ * } = useUser();
+ * ```
  */
 export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string } = {}) => {
   const redirectTo = props.redirectTo;
