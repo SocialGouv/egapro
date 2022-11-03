@@ -27,7 +27,7 @@ import { generateImpersonateToken } from "../../utils/api"
 
 const title = "Générer le token pour un utilisateur"
 
-const URL_SIMU = "/nouvelle-simulation"
+const URL_SIMU = "/index-egapro/nouvelle-simulation"
 const URL_DECLA = "/index-egapro/declaration/"
 
 const getOrigin = window?.location?.origin || ""
@@ -130,25 +130,30 @@ const GenererTokenUtilisateurPage = () => {
                 <VStack spacing="8" mt="16">
                   <HStack>
                     <PrimaryButton variant="outline" size="sm" minW={0} onClick={onCopySimu}>
-                      {hasCopiedSimu ? (
-                        <>Lien&nbsp;copié&nbsp;👍</>
-                      ) : (
-                        <>
-                          <LinkIcon mr="2" /> Lien d'authentification vers le simulateur
-                        </>
-                      )}
+                      <Text>
+                        {hasCopiedSimu ? (
+                          "Lien copié 👍"
+                        ) : (
+                          <>
+                            <LinkIcon mr="2" />
+                            Lien d'authentification vers le simulateur
+                          </>
+                        )}
+                      </Text>
                     </PrimaryButton>
                   </HStack>
 
                   <HStack mt={2}>
                     <PrimaryButton variant="outline" size="sm" minW={0} onClick={onCopyDecla}>
-                      {hasCopiedDecla ? (
-                        <>Lien&nbsp;copié&nbsp;👍</>
-                      ) : (
-                        <>
-                          <LinkIcon mr="2" /> Lien d'authentification vers la déclaration
-                        </>
-                      )}
+                      <Text>
+                        {hasCopiedDecla ? (
+                          "Lien copié 👍"
+                        ) : (
+                          <>
+                            <LinkIcon mr="2" /> Lien d'authentification vers la déclaration
+                          </>
+                        )}
+                      </Text>
                     </PrimaryButton>
                   </HStack>
                 </VStack>
