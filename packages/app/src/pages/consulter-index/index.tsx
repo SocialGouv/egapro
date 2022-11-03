@@ -11,7 +11,6 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { format } from "date-fns";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { HiDownload } from "react-icons/hi";
@@ -82,34 +81,26 @@ function DownloadCsvFileZone() {
     runEffect();
   }, []);
 
-  return (
-    <>
-      {dateCsv && (
-        <Center w="100vw" paddingTop="0" paddingBottom="12">
-          <Flex justify="center" align="center" mx={["4", "0"]} direction={["column", "row"]}>
-            <Text fontSize={["md", "lg"]} mr={["0", "6"]} mb={["4", "0"]} textAlign="center">
-              Télécharger le fichier des entreprises au {dateCsv}
-            </Text>
+  return dateCsv ? (
+    <Center w="100vw" paddingTop="0" paddingBottom="12">
+      <Flex justify="center" align="center" mx={["4", "0"]} direction={["column", "row"]}>
+        <Text fontSize={["md", "lg"]} mr={["0", "6"]} mb={["4", "0"]} textAlign="center">
+          Télécharger le fichier des entreprises au {dateCsv}
+        </Text>
 
-            <LinkBox>
-              <LinkOverlay href="/index-egalite-fh.csv">
-                <ButtonAction variant="outline" leftIcon={<HiDownload />} label="Télécharger (CSV)" />
-              </LinkOverlay>
-            </LinkBox>
-          </Flex>
-        </Center>
-      )}
-    </>
-  );
+        <LinkBox>
+          <LinkOverlay href="/index-egalite-fh.csv">
+            <ButtonAction variant="outline" leftIcon={<HiDownload />} label="Télécharger (CSV)" />
+          </LinkOverlay>
+        </LinkBox>
+      </Flex>
+    </Center>
+  ) : null;
 }
 
 const HomePage: NextPageWithLayout = () => {
   return (
     <VStack spacing={["3", "6"]}>
-      <Head>
-        <title>Index Egapro</title>
-      </Head>
-
       <FormSearchSiren />
       <Box h="8" />
 
@@ -120,6 +111,6 @@ const HomePage: NextPageWithLayout = () => {
   );
 };
 
-HomePage.getLayout = ({ children }) => <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+HomePage.getLayout = ({ children }) => <ConsulterIndexLayout title="Consulter">{children}</ConsulterIndexLayout>;
 
 export default HomePage;

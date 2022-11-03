@@ -1,17 +1,22 @@
 import { Box, Container, Flex } from "@chakra-ui/layout";
 import { ChakraProvider } from "@chakra-ui/react";
+import Head from "next/head";
 import type { PropsWithChildren } from "react";
 import React from "react";
 import { theme } from "../../theme";
 
 import { Footer } from "../ds/Footer";
-import { Header } from "../ds/Header";
-
-export const ConsulterIndexLayout = ({ children }: PropsWithChildren) => {
+/**
+ * Layout for consulter pages.
+ */
+export const ConsulterIndexLayout = ({ children, title }: PropsWithChildren & { title?: string | undefined }) => {
   return (
     <ChakraProvider theme={theme}>
       <Flex direction="column" minHeight="100vh">
-        <Header />
+        <Head>
+          <title>{title && title + " - "} Egapro</title>
+        </Head>
+
         <Box as="main" role="main" id="main" flexGrow={1} pt={10}>
           <Container maxW="container.lg">{children}</Container>
         </Box>

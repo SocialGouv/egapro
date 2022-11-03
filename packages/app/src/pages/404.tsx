@@ -4,8 +4,7 @@ import Head from "next/head";
 import { useEffect } from "react";
 
 import type { NextPageWithLayout } from "./_app";
-
-import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
+import { BasicLayout } from "@components/layouts/BasicLayout";
 
 const NotFoundPage: NextPageWithLayout = () => {
   useEffect(() => {
@@ -15,7 +14,7 @@ const NotFoundPage: NextPageWithLayout = () => {
   return (
     <>
       <Head>
-        <title>Page non trouvée - Index Egapro</title>
+        <title>Page non trouvée - Egapro</title>
       </Head>
 
       <Box textAlign="center" mt="8">
@@ -28,7 +27,7 @@ const NotFoundPage: NextPageWithLayout = () => {
 };
 
 NotFoundPage.getLayout = ({ children }) => {
-  return <ConsulterIndexLayout>{children}</ConsulterIndexLayout>;
+  return <BasicLayout>{children}</BasicLayout>;
 };
 
 export default NotFoundPage;
