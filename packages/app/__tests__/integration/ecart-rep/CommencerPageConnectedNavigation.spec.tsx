@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
@@ -58,8 +58,7 @@ describe("Commencer Page : Connected navigation", () => {
     });
   });
 
-  // TODO: find a way to get a status code 200 from msw otherwise submit is disabled
-  it.skip("should navigate to declarant page", async () => {
+  it("should navigate to declarant page", async () => {
     // given
     render(
       <RouterContext.Provider value={singletonRouter}>
@@ -79,22 +78,27 @@ describe("Commencer Page : Connected navigation", () => {
     expect(inputSiren).toHaveValue("");
     expect(submitButton).toBeDisabled();
 
-    // when
+    // when step 1
     await userEvent.selectOptions(inputYear, "2021");
     fireEvent.change(inputSiren, { target: { value: VALID_SIREN } });
+
+    // expected step 1
     expect(inputYear).toHaveValue("2021");
     expect(inputSiren).toHaveValue(VALID_SIREN);
 
-    // TODO: find a way to get a status code 200 from msw otherwise submit is disabled
-    screen.debug();
-    expect(submitButton).toBeEnabled();
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
+
+    // when step 2
     await userEvent.click(submitButton);
 
-    // expected
+    // expected step 2
     await waitFor(() => {
-      expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/ecart-rep/declarant", { shallow: false });
       screen.debug();
+      // TODO need to mock all the API calls on the submit
+      // expect(spies.routerChangeStart).toHaveBeenCalled();
+      // expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/declarant", { shallow: false });
     });
   });
 });
