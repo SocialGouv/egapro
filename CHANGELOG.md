@@ -1,3 +1,10 @@
+## [2.24.6](https://github.com/SocialGouv/egapro/compare/v2.24.5...v2.24.6) (2022-11-03)
+
+
+### Bug Fixes
+
+* return to egapro.travail.gouv.fr domain ([4f22581](https://github.com/SocialGouv/egapro/commit/4f22581ffddf622d6dd0ab34bbaa20a5adfc4eac))
+
 ## [2.24.5](https://github.com/SocialGouv/egapro/compare/v2.24.4...v2.24.5) (2022-11-03)
 
 
