@@ -62,7 +62,7 @@ describe("Commencer Page", () => {
     // expected
     expect(submitButton).toBeDisabled();
     await waitFor(() => {
-      expect(screen.getByText("Le Siren est formé de 9 chiffres")).toBeInTheDocument();
+      expect(screen.getByText("Le Siren est formé de 9 chiffres.")).toBeInTheDocument();
     });
   });
 
