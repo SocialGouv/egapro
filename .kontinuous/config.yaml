@@ -8,6 +8,9 @@ dependencies:
     import: SocialGouv/kontinuous/plugins/fabrique
     dependencies:
       contrib:
+        preDeploy:
+          cleanFailed:
+            enabled: false
         deploySidecars:
           failfast:
             enabled: false
