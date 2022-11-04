@@ -1,5 +1,5 @@
 import { useToast, UseToastOptions } from "@chakra-ui/toast"
-import React, { useState, useEffect, useCallback, ChangeEvent, ChangeEventHandler } from "react"
+import { useState, useEffect, useCallback, ChangeEvent, ChangeEventHandler } from "react"
 import { AlertMessageType } from "../globals"
 
 export function useDebounce(value: any, delay: number) {
@@ -134,7 +134,7 @@ export function useSoloToastMessage(id: string, message: AlertMessageType | null
 
   const toastMessage = showToastMessageNoDuplicate(toast, toastId, options)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (message) {
       toastMessage(message)
     } else {

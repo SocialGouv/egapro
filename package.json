@@ -1,10 +1,12 @@
 {
   "name": "~egapro-dev",
-  "version": "2.14.0",
+  "version": "2.25.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "engines": {
     "node": "16"
   },
@@ -16,6 +18,7 @@
     "dev:declaration": "docker-compose build declaration && docker-compose up declaration",
     "dev:simulateur": "yarn workspace simulateur run dev",
     "dev:maildev": "docker-compose up --build maildev",
+    "dev:storybook": "yarn workspace app start-storybook -p 6006",
     "docker:prod": "docker-compose -f docker-compose.build.yml up --build",
     "egapro": "docker exec -it $(basename $PWD)_api_1 egapro",
     "egapro:local": "packages/api/egapro/bin/egapro",

@@ -13,7 +13,7 @@ import { Field } from "react-final-form"
 
 import { isFieldHasError } from "../../utils/formHelpers"
 
-type Props = FormControlProps & {
+export type TextareaCounterProps = FormControlProps & {
   label: string
   placeholder?: string
   isLabelHidden?: boolean
@@ -37,7 +37,7 @@ type Props = FormControlProps & {
   }
 }
 
-const TextareaCounter: React.FC<Props> = ({
+const TextareaCounter = ({
   label,
   placeholder,
   fieldName,
@@ -48,7 +48,7 @@ const TextareaCounter: React.FC<Props> = ({
   showRemainingCharacters = false,
   width = "auto",
   ...rest
-}) => {
+}: TextareaCounterProps) => {
   const [successColor] = useToken("colors", ["gray.500"])
   const [warningColor] = useToken("colors", ["orange.400"])
 

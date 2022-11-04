@@ -9,8 +9,10 @@ ARG NEXT_PUBLIC_IS_PRODUCTION_DEPLOYMENT
 ENV NEXT_PUBLIC_IS_PRODUCTION_DEPLOYMENT $NEXT_PUBLIC_IS_PRODUCTION_DEPLOYMENT
 ARG NEXT_PUBLIC_HOST
 ENV NEXT_PUBLIC_HOST $NEXT_PUBLIC_HOST
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL $NEXT_PUBLIC_API_URL
 
-WORKDIR /app
+WORKDIR /app/packages/app
 
 COPY packages/app/package.json yarn.lock ./
 
@@ -35,13 +37,13 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-COPY --from=builder /app/next.config.js .
-COPY --from=builder /app/package.json .
-COPY --from=builder /app/.env.production .
-COPY --from=builder /app/.env.development .
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder --chown=node:node /app/.next ./.next
+COPY --from=builder /app/packages/app/next.config.js .
+COPY --from=builder /app/packages/app/package.json .
+COPY --from=builder /app/packages/app/.env.production .
+COPY --from=builder /app/packages/app/.env.development .
+COPY --from=builder /app/packages/app/public ./public
+COPY --from=builder /app/packages/app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/packages/app/.next ./.next
 
 USER 1001
 

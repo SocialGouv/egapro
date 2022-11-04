@@ -1,5 +1,5 @@
-import React, { FunctionComponent } from "react"
-import { useState, ReactNode } from "react"
+import React, { PropsWithChildren } from "react"
+import { useState } from "react"
 import { Box, VStack, StackDivider, Text } from "@chakra-ui/react"
 
 import FAQSearchBox from "./components/FAQSearchBox"
@@ -8,11 +8,7 @@ import FAQTitle2 from "./components/FAQTitle2"
 
 import faqDataFuse from "./utils/faqFuse"
 
-interface FAQSearchProps {
-  children: ReactNode
-}
-
-const FAQSearch: FunctionComponent<FAQSearchProps> = ({ children }) => {
+const FAQSearch = ({ children }: PropsWithChildren) => {
   const [searchTerm, setSearchTerm] = useState("")
 
   const fuseResults = searchTerm !== "" ? faqDataFuse.search(searchTerm) : null

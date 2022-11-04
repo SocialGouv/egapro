@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react"
+import React from "react"
 import { Text, Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react"
 
 import { useTitle } from "../utils/hooks"
@@ -6,7 +6,7 @@ import Page from "../components/Page"
 
 const title = "Accessibilité"
 
-const Accessibilite: FunctionComponent = () => {
+const Accessibilite = () => {
   useTitle(title)
 
   return (
@@ -22,12 +22,12 @@ const Accessibilite: FunctionComponent = () => {
         À cette fin, il met en œuvre la stratégie et l'action suivante&nbsp;: réalisation d'un audit de conformité à
         l'été de l'année 2021.
       </Text>
-      <Text mt={2}>Cette déclaration d'accessibilité s'applique au site Internet index-egapro.travail.gouv.fr.</Text>
+      <Text mt={2}>Cette déclaration d'accessibilité s'applique au site Internet egapro.travail.gouv.fr.</Text>
       <Heading as="h2" size="md" mb={3} mt={6}>
         État de conformité
       </Heading>
       <Text>
-        Le site Internet index-egapro.travail.gouv.fr n'est pas encore en conformité avec le référentiel général
+        Le site Internet egapro.travail.gouv.fr n'est pas encore en conformité avec le référentiel général
         d'amélioration de l'accessibilité (RGAA). Le site n'a pas encore été audité.
       </Text>
       <Text mt={2}>Nous tâchons de rendre dès la conception, ce site accessible à toutes et à tous.</Text>
@@ -44,8 +44,8 @@ const Accessibilite: FunctionComponent = () => {
       </Heading>
       <Text>
         Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du site
-        Internet index-egapro.travail.gouv.fr pour être orienté vers une alternative accessible ou obtenir le contenu
-        sous une autre forme.
+        Internet egapro.travail.gouv.fr pour être orienté vers une alternative accessible ou obtenir le contenu sous une
+        autre forme.
       </Text>
       <Text mt={2}>
         E-mail&nbsp;:{" "}

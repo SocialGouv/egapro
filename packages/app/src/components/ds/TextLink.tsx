@@ -1,14 +1,13 @@
 import type { LinkProps } from "@chakra-ui/react";
 import { Link } from "@chakra-ui/react";
 import NextLink from "next/link";
-import type { FC } from "react";
 import React from "react";
 
 export type TextLinkProps = LinkProps & {
   to: string;
 };
 
-export const TextLink: FC<TextLinkProps> = ({ isExternal, children, to, ...rest }) => {
+export const TextLink = ({ isExternal, children, to, ...rest }: TextLinkProps) => {
   if (isExternal) {
     return (
       <Link href={to} textDecoration="underline" color="inherit" isExternal {...rest}>

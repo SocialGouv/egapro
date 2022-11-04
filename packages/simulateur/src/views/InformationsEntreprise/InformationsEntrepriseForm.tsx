@@ -94,6 +94,7 @@ interface InformationsEntrepriseFormProps {
   updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
   validateInformationsEntreprise: (valid: FormState) => void
   alreadyDeclared: boolean
+  year: number
 }
 
 const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({
@@ -102,6 +103,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
   updateInformationsEntreprise,
   validateInformationsEntreprise,
   alreadyDeclared,
+  year,
 }) => {
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
@@ -223,6 +225,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                 label="SIREN"
                 name="siren"
                 readOnly={readOnly}
+                year={year}
                 updateSirenData={(sirenData: EntrepriseType) =>
                   form.batch(() => {
                     form.change("nomEntreprise", sirenData.raison_sociale || "")
@@ -282,6 +285,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                             siren={`${entrepriseUES}.siren`}
                             index={index}
                             readOnly={readOnly}
+                            year={year}
                             updateSirenData={(sirenData: EntrepriseType) =>
                               form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
                             }

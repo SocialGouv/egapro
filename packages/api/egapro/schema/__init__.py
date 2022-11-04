@@ -33,12 +33,41 @@ def validate(data):
         raise ValueError(err)
 
 
-def cross_validate(data):
-    try:
-        _cross_validate(data)
-    except AssertionError as err:
-        raise ValueError(err)
+def cross_validate(data, rep_eq=False):
+    if not rep_eq:
+        try:
+            _cross_validate(data)
+        except AssertionError as err:
+            raise ValueError(err)
+    else:
+        try:
+            _repeq_cross_validate(data)
+        except AssertionError as err:
+            raise ValueError(err)
 
+def _repeq_cross_validate(data):
+    data = Data(data)
+
+    required = [
+        "entreprise.code_naf",
+        "déclarant.prénom",
+        "déclarant.nom",
+        "déclarant.téléphone",
+    ]
+
+    for path in required:
+        assert data.path(path), f"Le champ {path} doit être défini"
+
+    percentages = [
+        ("indicateurs.représentation_équilibrée.pourcentage_femmes_cadres", "indicateurs.représentation_équilibrée.pourcentage_hommes_cadres"),
+        ("indicateurs.représentation_équilibrée.pourcentage_femmes_membres", "indicateurs.représentation_équilibrée.pourcentage_hommes_membres")
+    ]
+
+    pct_missing = any(bool(data.path(x)) ^ bool(data.path(y)) for (x, y) in percentages)
+    assert not pct_missing, f"Les paires de pourcentages doivent être respectées."
+
+    pct_eq_100 = all(not(data.path(x) and data.path(y)) or data.path(x) + data.path(y) == 100 for (x,y) in percentages)
+    assert pct_eq_100, f"Les pourcentages doivent additionner à 100"
 
 def _cross_validate(data):
     data = Data(data)
@@ -293,7 +322,7 @@ def extrapolate(definition):
             out["maximum"] = type_(max_)
         return out
     if "|" in definition:
-        enum = definition.split("|")
+        enum = [value for value in definition.split("|") if value]
         return {"type": "string", "enum": enum}
     if definition.startswith("[") and definition.endswith("]"):
         values = definition[1:-1].split(",")

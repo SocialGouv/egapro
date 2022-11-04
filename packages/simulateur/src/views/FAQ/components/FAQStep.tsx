@@ -1,10 +1,10 @@
-import React, { FunctionComponent, ReactNode } from "react"
+import React, { PropsWithChildren, ReactNode } from "react"
 import { Box, Flex } from "@chakra-ui/react"
 import IconBulletWrapper, { IconBulletWrapperProps } from "../../../components/ds/IconBulletWrapper"
 
-type FAQStepProp = { children: ReactNode; icon: ReactNode } & IconBulletWrapperProps
+export type FAQStepProp = PropsWithChildren<{ icon: ReactNode } & IconBulletWrapperProps>
 
-const FAQStep: FunctionComponent<FAQStepProp> = ({ children, icon, isValid }) => (
+const FAQStep = ({ children, icon, isValid }: FAQStepProp) => (
   <Flex>
     <Box
       pt={4}

@@ -1,37 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`should match snapshot 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": <body>
-    <div
-      id="chakra-toast-portal"
-    >
-      <ul
-        id="chakra-toast-manager-top"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
-      />
-      <ul
-        id="chakra-toast-manager-top-left"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-top-right"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom-left"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom-right"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-    </div>
     <div>
       <footer
         class="css-1dthsy1"
@@ -50,13 +22,13 @@ Object {
               <a
                 class="chakra-link css-1xbuty4"
                 href="https://travail-emploi.gouv.fr/"
-                rel="noopener noreferrer"
+                rel="noopener"
                 target="_blank"
               >
                 <img
                   alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                   class="chakra-image css-6t4orf"
-                  src="/consulter-index/icons/marianne.svg"
+                  src="/icons/marianne.svg"
                 />
               </a>
             </div>
@@ -70,7 +42,7 @@ Object {
                 <a
                   class="chakra-link css-0"
                   href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                  rel="noopener noreferrer"
+                  rel="noopener"
                   target="_blank"
                 >
                   <div
@@ -120,7 +92,7 @@ Object {
               <a
                 class="chakra-link css-1qsits3"
                 href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-                rel="noopener noreferrer"
+                rel="noopener"
                 target="_blank"
               >
                 donnez-nous votre avis
@@ -129,7 +101,7 @@ Object {
               <a
                 class="chakra-link css-1qsits3"
                 href="https://github.com/SocialGouv/egapro/tree/1.21.0"
-                rel="noopener noreferrer"
+                rel="noopener"
                 target="_blank"
               >
                 contribuez sur Github
@@ -158,13 +130,13 @@ Object {
             <a
               class="chakra-link css-1xbuty4"
               href="https://travail-emploi.gouv.fr/"
-              rel="noopener noreferrer"
+              rel="noopener"
               target="_blank"
             >
               <img
                 alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                 class="chakra-image css-6t4orf"
-                src="/consulter-index/icons/marianne.svg"
+                src="/icons/marianne.svg"
               />
             </a>
           </div>
@@ -178,7 +150,7 @@ Object {
               <a
                 class="chakra-link css-0"
                 href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                rel="noopener noreferrer"
+                rel="noopener"
                 target="_blank"
               >
                 <div
@@ -228,7 +200,7 @@ Object {
             <a
               class="chakra-link css-1qsits3"
               href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-              rel="noopener noreferrer"
+              rel="noopener"
               target="_blank"
             >
               donnez-nous votre avis
@@ -237,7 +209,7 @@ Object {
             <a
               class="chakra-link css-1qsits3"
               href="https://github.com/SocialGouv/egapro/tree/1.21.0"
-              rel="noopener noreferrer"
+              rel="noopener"
               target="_blank"
             >
               contribuez sur Github

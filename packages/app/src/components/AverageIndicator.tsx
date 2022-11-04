@@ -1,16 +1,17 @@
 import { InfoOutlineIcon } from "@chakra-ui/icons";
 import type { SelectProps } from "@chakra-ui/react";
 import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColorModeValue } from "@chakra-ui/react";
-import { capitalize } from "@common/utils/string";
-import { buildUrlParamsString } from "@common/utils/url";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-import type { StatsParams } from "../hooks";
-import { filterDepartements, useConfig, useStats } from "../hooks";
 import { ButtonAction } from "./ds/ButtonAction";
+import { capitalize } from "@common/utils/string";
+import { buildUrlParamsString } from "@common/utils/url";
+import type { UseStatsParams } from "@services/apiClient";
+import { useStats, filterDepartements } from "@services/apiClient";
+import { useConfig } from "@services/apiClient";
 
-export function FilterSelect({ name, onChange, value, children, ...rest }: SelectProps) {
+export const FilterSelect = ({ name, onChange, value, children, ...rest }: SelectProps) => {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100");
   const bgSelect = useColorModeValue("white", "blue.700");
 
@@ -19,15 +20,25 @@ export function FilterSelect({ name, onChange, value, children, ...rest }: Selec
       {children}
     </Select>
   );
+<<<<<<< HEAD
 }
 
 export function AverageIndicator() {
+=======
+};
+
+export const AverageIndicator = () => {
+>>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb
   const router = useRouter();
   const bgColor = useColorModeValue("blue.100", "blue.800");
 
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [], PUBLIC_YEARS_TRIES = [], LAST_PUBLIC_YEAR = "" } = config ?? {};
+<<<<<<< HEAD
   const [filters, setFilters] = useState<StatsParams>({});
+=======
+  const [filters, setFilters] = useState<UseStatsParams>({});
+>>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb
   const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
   const { stats, isLoading } = useStats(filters);
 
@@ -59,7 +70,11 @@ export function AverageIndicator() {
     setFilters({ ...filters, departement, [name]: value });
   }
 
+<<<<<<< HEAD
   const getValue = (name: keyof StatsParams) => filters[name] || "";
+=======
+  const getValue = (name: keyof UseStatsParams) => filters[name] || "";
+>>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb
 
   return (
     <Center bgColor={bgColor} w="100vw" py={8}>
@@ -147,9 +162,13 @@ export function AverageIndicator() {
           mt={8}
           label="Voir les entreprises"
           type="submit"
-          onClick={() => router.push(`/recherche${urlSearchParams ? `?${urlSearchParams}` : ""}`)}
+          onClick={() => router.push(`./consulter-index/recherche${urlSearchParams ? `?${urlSearchParams}` : ""}`)}
         />
       </Box>
     </Center>
   );
+<<<<<<< HEAD
 }
+=======
+};
+>>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb

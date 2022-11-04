@@ -17,6 +17,7 @@ from egapro import (
     constants,
     db,
     dgt,
+    dgt_representation,
     emails,
     exporter,
     helpers,
@@ -33,9 +34,15 @@ from egapro.utils import json_dumps
 @minicli.cli
 async def dump_dgt(path: Path, max_rows: int = None):
     wb = await dgt.as_xlsx(max_rows)
-    print("Writing the XLSX to", path)
+    print("Writing the dgt XLSX to", path)
     wb.save(path)
-    print("Done")
+
+
+@minicli.cli
+async def dump_dgt_representation(path: Path, max_rows: int = None):
+    wb = await dgt_representation.as_xlsx(max_rows)
+    print("Writing the dgt_representation XLSX to", path)
+    wb.save(path)
 
 
 @minicli.cli

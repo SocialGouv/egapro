@@ -1,23 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
-import { ReactNode } from "react"
-
-interface Props {
-  style?: any
-  children?: ReactNode
-}
-
-function Cell({ style, children }: Props) {
-  return <div css={[styles.cell, style]}>{children}</div>
-}
-
-function Cell2({ style, children }: Props) {
-  return <div css={[styles.cell2, style]}>{children}</div>
-}
-
-function CellHead({ style, children }: Props) {
-  return <div css={[styles.cellHead, style]}>{children}</div>
-}
+import { PropsWithChildren } from "react"
 
 const styles = {
   cell: css({
@@ -36,4 +19,18 @@ const styles = {
   }),
 }
 
-export { Cell, Cell2, CellHead }
+export type CellProps = PropsWithChildren<{
+  style?: any
+}>
+
+export const Cell = ({ style, children }: CellProps) => {
+  return <div css={[styles.cell, style]}>{children}</div>
+}
+
+export const Cell2 = ({ style, children }: CellProps) => {
+  return <div css={[styles.cell2, style]}>{children}</div>
+}
+
+export const CellHead = ({ style, children }: CellProps) => {
+  return <div css={[styles.cellHead, style]}>{children}</div>
+}

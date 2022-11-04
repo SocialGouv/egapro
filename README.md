@@ -2,7 +2,7 @@
 
 ## URL
 
-Prod : <https://index-egapro.travail.gouv.fr/>
+Prod : <https://egapro.travail.gouv.fr/>
 
 Préprod : <https://egapro-preprod.dev.fabrique.social.gouv.fr/>
 
@@ -25,8 +25,9 @@ yarn dev:maildev
 ```
 
 - [api         -> http://localhost:2626](http://localhost:2626)
-- [app         -> http://localhost:3000/consulter-index/](http://localhost:3000/consulter-index/)
-- [simulateur  -> http://localhost:3001](http://localhost:3001)
+- [app         -> http://localhost:3000](http://localhost:3000)
+- `simulateur` requires running `api` locally or `REACT_APP_EGAPRO_API_URL`to be set:
+  - [simulateur  -> http://localhost:3001/simulateur/nouvelle-simulation](http://localhost:3001/simulateur/nouvelle-simulation)
 - [declaration -> http://localhost:4000](http://localhost:4000)
 - [maildev     -> http://localhost:1080](http://localhost:1080)
 
@@ -52,6 +53,13 @@ Cette commande lance le linter, la compilation des types TS et les tests.
 
 ## FAQ
 
+### Comment lancer la compilation TS ?
+
+```bash
+cd packages/app
+yarn workspace app run tsc
+```
+
 ### Comment ajouter une librairie dans un workspace ?
 
 ````bash
@@ -63,6 +71,14 @@ yarn workspace simulateur add moment
 ````bash
 yarn workspace simulateur run test
 ````
+
+### Comment lancer la déclaration en local ?
+
+```bash
+yarn dev:api
+yarn dev:maildev
+yarn dev:declaration
+```
 
 ### Comment lancer un script dans tous les workspaces ?
 
@@ -87,6 +103,7 @@ Le fichier index-egalite-fh.csv est généré tous les jours et accessible sans 
 Les fichiers suivants, sont accessibles uniquement si authentifié ou pour certaines adresses IP (voir la liste blanche dans `.kontinuous/values.yaml`).
 
 - dgt.xlsx
+- dgt-representation.xlsx
 - full.ndjson
 - indexes.csv
 

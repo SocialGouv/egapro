@@ -1,4 +1,4 @@
-import React from "react"
+import { useEffect } from "react"
 import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
 import { useCheckTokenInURL } from "../components/AuthContext"
 import { ActionType, AppState } from "../globals"
@@ -24,12 +24,12 @@ function ResetPage({ dispatch, state }: ResetPageProps): null {
 
   useCheckTokenInURL()
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch({ type: "resetState" })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to subscribe to dispatch changes.
   }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (state === undefined) {
       postIndicatorsDatas({})
         .then(({ jsonBody: { id } }) => {

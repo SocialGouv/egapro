@@ -47,7 +47,7 @@ function PrivateRoute({ children, staffOnly, ...rest }: RouteProps & { staffOnly
 
   if (staffOnly && !staff) return <Redirect to="/tableauDeBord/mes-declarations" />
 
-  return <Route {...rest} render={() => children} />
+  return <Route {...rest} render={() => children as React.ReactNode} />
 }
 
 function DashboardRoutes() {

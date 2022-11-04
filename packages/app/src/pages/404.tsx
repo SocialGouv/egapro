@@ -1,10 +1,12 @@
 import { Box, Text } from "@chakra-ui/react";
 import { push } from "@socialgouv/matomo-next";
-import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect } from "react";
 
-const NotFoundPage: NextPage = () => {
+import type { NextPageWithLayout } from "./_app";
+import { BasicLayout } from "@components/layouts/BasicLayout";
+
+const NotFoundPage: NextPageWithLayout = () => {
   useEffect(() => {
     push(["trackEvent", "404", "Page non trouvée"]);
   }, []);
@@ -12,7 +14,7 @@ const NotFoundPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Page non trouvée - Index Egapro</title>
+        <title>Page non trouvée - Egapro</title>
       </Head>
 
       <Box textAlign="center" mt="8">
@@ -22,6 +24,10 @@ const NotFoundPage: NextPage = () => {
       </Box>
     </>
   );
+};
+
+NotFoundPage.getLayout = ({ children }) => {
+  return <BasicLayout>{children}</BasicLayout>;
 };
 
 export default NotFoundPage;

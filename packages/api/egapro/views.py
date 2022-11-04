@@ -11,6 +11,7 @@ from stdnum.fr.siren import is_valid as siren_is_valid
 
 from . import config, constants, db, emails, helpers, models, tokens, utils, schema
 from . import loggers
+from egapro.pdf import representation
 
 
 class Request(BaseRequest):
@@ -86,6 +87,14 @@ async def on_headers(request, response):
     if request.method not in ["GET", "OPTIONS"]:
         raise HttpError(405, "Ooops, le site est en maintenance")
 
+def add_error(err_type, err_msg):
+    def decorator(view):
+        @wraps(view)
+        async def wrapper(request, response, siren, *args, **kwargs):
+            request["error"] = (err_type, err_msg)
+            return await view(request, response, siren, *args, **kwargs)
+        return wrapper
+    return decorator
 
 def ensure_owner(view):
     @wraps(view)
@@ -100,8 +109,11 @@ def ensure_owner(view):
                 "Non owner (%s) accessing owned resource %s %s", declarant, siren, args
             )
             if not request["staff"]:
-                msg = f"Vous n'avez pas les droits nécessaires pour le siren {siren}"
-                raise HttpError(403, msg)
+                if "error" not in request:
+                    msg = f"Vous n'avez pas les droits nécessaires pour le siren {siren}"
+                    raise HttpError(403, msg)
+                else:
+                    raise HttpError(*request["error"])
         return await view(request, response, siren, *args, **kwargs)
 
     return wrapper
@@ -166,6 +178,7 @@ async def declare(request, response, siren, year):
             emails.success.send(owners, url=url, **data)
 
 @tokens.require
+@ensure_owner
 @app.route("/declarations/{siren}", methods=["GET"])
 async def get_declarations(request, response, siren):
     declarations = []
@@ -245,6 +258,37 @@ async def resend_objectifs_receipt(request, response, siren, year):
     data = record.data
     emails.objectives.send(owners, **data)
     response.status = 204
+
+
+@app.route("/representation-equilibree/{siren}/{year}/receipt", methods=["POST"])
+@tokens.require
+@ensure_owner
+async def resend_representation_receipt(request, response, siren, year):
+    try:
+        record = await db.representation.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
+    owners = await db.ownership.emails(siren)
+    if not owners:  # Staff member
+        owners = request["email"]
+    data = record.data
+    url = request.domain + data.uri
+    emails.representation.send(owners, url=url, **data)
+    response.status = 204
+
+
+@app.route("/representation-equilibree/{siren}/{year}/pdf", methods=["GET"])
+async def send_representation_pdf(request, response, siren, year):
+    try:
+        record = await db.representation.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
+    data = record.data
+    pdf = representation.main(data)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
+    response.body = bytes(pdf[0].output())
+    return response
 
 
 @app.route("/ownership/{siren}", methods=["GET"])
@@ -345,7 +389,7 @@ async def send_token(request, response):
     if request.ip in config.ALLOWED_IPS:
         response.json = {"token": token}
     else:
-        url = request.json.get("url", f"{request.domain}/declaration/?token=")
+        url = request.json.get("url", f"{request.domain}/index-egapro/declaration/?token=")
         link = f"{url}{token}"
         if "localhost" in link or "127.0.0.1" in link:
             print(link)
@@ -366,6 +410,68 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
+
+@app.route("/representation-equilibree/{siren}/{year}", methods=["GET"])
+@tokens.require
+@add_error(403, constants.ERROR_ENSURE_OWNER)
+@ensure_owner
+async def get_representation(request, response, siren, year):
+    try:
+        record = await db.representation.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
+    resource = record.as_resource()
+    if record.data.path("déclarant.nom"):
+        await helpers.patch_from_recherche_entreprises(resource["data"])
+    response.json = resource
+
+@app.route("/representation-equilibree/{siren}/{year}", methods=["PUT"])
+@tokens.require
+@ensure_owner
+async def put_representation(request, response, siren, year):
+    try:
+        year = int(year)
+    except ValueError:
+        raise HttpError(422, f"Ce n'est pas une année valide: `{year}`")
+    if not siren_is_valid(siren):
+        raise HttpError(422, f"Numéro SIREN invalide: {siren}")
+    if year not in constants.YEARS:
+        years = ", ".join([str(y) for y in constants.YEARS])
+        raise HttpError(
+            422, f"Il est possible de déclarer seulement pour les années {years}"
+        )
+    data = request.data
+    declarant = request["email"]
+    data.setdefault("déclarant", {})
+    # Use token email as default for declarant email.
+    if not data["déclarant"].get("email"):
+        data["déclarant"]["email"] = declarant
+    schema.validate(data.raw)
+    schema.cross_validate(data.raw, rep_eq=True)
+    try:
+        current = await db.representation.get(siren, year)
+    except db.NoData:
+        current = None
+    else:
+        # Do not force new declarant, in case this is a staff person editing
+        declared_at = current["declared_at"]
+        expired = declared_at and declared_at < utils.remove_one_year(utils.utcnow())
+        if expired and not request["staff"]:
+            raise HttpError(403, "Le délai de modification est écoulé.")
+    await db.representation.put(siren, year, data)
+    response.status = 204
+    if not request["staff"]:
+        await db.ownership.put(siren, request["email"])
+        # Do not send the success email on update for now (we send too much emails that
+        # are unwanted, mainly because when someone loads the frontend app a PUT is
+        # automatically sent, without any action from the user.)
+        loggers.logger.info(f"{siren}/{year} BY {declarant} FROM {request.ip}")
+        if not current:
+            owners = await db.ownership.emails(siren)
+            if not owners:  # Staff member
+                owners = request["email"]
+            url = request.domain + data.uri
+            emails.representation.send(owners, url=url, **data)
 
 @app.route("/search")
 async def search(request, response):
@@ -432,7 +538,7 @@ async def get_jsonschema(request, response):
 async def validate_siren(request, response):
     siren = request.query.get("siren")
     year = request.query.get("year", default=constants.INVALID_YEAR)
-    
+
     try:
         year = int(year)
     except ValueError:

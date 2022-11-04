@@ -1,14 +1,13 @@
 import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { Box, Container, Flex, Link, List, ListItem, Text } from "@chakra-ui/react";
-import NextLink from "next/link";
+import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/react";
 import React from "react";
 
 import packageConfig from "../../../package.json";
 import { Logo } from "./Logo";
 import { TextLink } from "./TextLink";
 
-export const Footer: React.FC = () => {
-  const version = process.env.NEXT_PUBLIC_VERSION || packageConfig.version;
+export const Footer = () => {
+  const version = process.env.REACT_APP_VERSION || packageConfig.version;
 
   return (
     <Box

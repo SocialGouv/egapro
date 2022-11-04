@@ -5,9 +5,9 @@
 # key: 12:24 # this is a range
 # description comes after the # on the property definition
 # $schema: http://json-schema.org/draft-07/schema#
-# $id: https://index-egapro.travail.gouv.fr/schema.json
+# $id: https://egapro.travail.gouv.fr/schema.json
 id: string
-+source: solen|simulateur|formulaire|api
+source: solen|simulateur|formulaire|api
 +déclaration:
   =date: date-time # Date de validation et de transmission des résultats au service Egapro
   publication:
@@ -98,3 +98,10 @@ indicateurs:
     population_favorable: femmes|hommes|egalite
     =note: integer
     objectif_de_progression: string
+  représentation_équilibrée:
+    pourcentage_femmes_cadres: number
+    pourcentage_hommes_cadres: number
+    pourcentage_femmes_membres: number
+    pourcentage_hommes_membres: number
+    motif_non_calculabilité_cadres: aucun_cadre_dirigeant|un_seul_cadre_dirigeant
+    motif_non_calculabilité_membres: aucune_instance_dirigeante|

@@ -1,5 +1,5 @@
 import { Flex, FormControl, FormLabel, Select } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
+import React, { useState } from "react"
 
 import { useTitle } from "../../utils/hooks"
 
@@ -12,13 +12,13 @@ import { SinglePageLayout } from "../../containers/SinglePageLayout"
 
 const title = "Mes entreprises"
 
-const MesEntreprises: FunctionComponent = () => {
+const MesEntreprises = () => {
   useTitle(title)
 
   const { ownership: sirens } = useUser()
   const orderedSirens = sirens.sort()
 
-  const [chosenSiren, setChosenSiren] = React.useState(orderedSirens?.[0] || "")
+  const [chosenSiren, setChosenSiren] = useState(orderedSirens?.[0] || "")
 
   return (
     <SinglePageLayout>

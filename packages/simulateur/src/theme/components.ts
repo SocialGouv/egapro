@@ -29,9 +29,9 @@ const components = {
       },
       variants: {
         outline: (props: StyleFunctionProps) => ({
-          ...defaultTheme.components.Input.variants.outline(props),
+          ...defaultTheme.components.Input.variants?.outline(props),
           field: {
-            ...defaultTheme.components.Input.variants.outline(props).field,
+            ...defaultTheme.components.Input.variants?.outline(props).field,
             borderColor: "gray.400",
             background: "white",
             _readOnly: {
@@ -41,9 +41,9 @@ const components = {
           },
         }),
         outlinePrimary: (props: StyleFunctionProps) => ({
-          ...defaultTheme.components.Input.variants.outline(props),
+          ...defaultTheme.components.Input.variants?.outline(props),
           field: {
-            ...defaultTheme.components.Input.variants.outline(props).field,
+            ...defaultTheme.components.Input.variants?.outline(props).field,
             borderColor: "primary.400",
             background: "primary.50",
             _hover: {
@@ -64,9 +64,9 @@ const components = {
     Select: {
       variants: {
         outline: (props: StyleFunctionProps) => ({
-          ...defaultTheme.components.Input.variants.outline(props),
+          ...defaultTheme.components.Input.variants?.outline(props),
           field: {
-            ...defaultTheme.components.Input.variants.outline(props).field,
+            ...defaultTheme.components.Input.variants?.outline(props).field,
             borderColor: "gray.400",
             background: "white",
             _readOnly: {

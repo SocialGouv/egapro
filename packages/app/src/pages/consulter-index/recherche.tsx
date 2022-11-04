@@ -1,3 +1,4 @@
+import type { ParsedUrlQuery } from "querystring";
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   Alert,
@@ -21,20 +22,19 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React, { useCallback, useEffect, useState } from "react";
+import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
+
+import type { NextPageWithLayout } from "../_app";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
 import { Banner } from "@components/ds/Banner";
 import { ButtonAction } from "@components/ds/ButtonAction";
-import type { NextPage } from "next";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import type { ParsedUrlQuery } from "querystring";
-import React, { useEffect, useState } from "react";
-import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
-
-import type { SearchCompanyParams } from "../../hooks";
-import { filterDepartements, useCallbackOnMount, useConfig, useSearch } from "../../hooks";
+import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
+import type { SearchCompanyParams } from "@services/apiClient";
+import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig();
@@ -44,10 +44,10 @@ function useAdressLabel({ departement, region }: { departement?: string; region?
   const { DEPARTEMENTS, REGIONS } = config;
 
   let result = "";
-  if (departement) {
+  if (departement && DEPARTEMENTS) {
     result = DEPARTEMENTS[departement];
   }
-  if (region) {
+  if (region && REGIONS) {
     result += ", " + REGIONS[region];
   }
   return result;
@@ -372,7 +372,7 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQuery) {
   };
 }
 
-export const SearchPage: NextPage = () => {
+const SearchPage: NextPageWithLayout = () => {
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
 
@@ -385,10 +385,11 @@ export const SearchPage: NextPage = () => {
 
   const { q, region, departement, section_naf } = inputs;
 
-  const reset = useCallbackOnMount(() => {
+  const reset = useCallback(() => {
     setDepartements(filterDepartements(config));
     setSearch({});
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // inital load of departments.
@@ -406,7 +407,7 @@ export const SearchPage: NextPage = () => {
   function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
 
-    router.replace({ pathname: "/consulter-index/recherche", query: search });
+    router.replace({ pathname: "./recherche", query: search });
   }
 
   function handleChange(event: React.SyntheticEvent) {
@@ -425,10 +426,6 @@ export const SearchPage: NextPage = () => {
 
   return (
     <>
-      <Head>
-        <title>Recherche - Index Egapro</title>
-      </Head>
-
       <form onSubmit={handleSubmit} style={{ textAlign: "center" }}>
         <Heading fontFamily="gabriela" as="h1" size="lg" mb="8">
           Rechercher l'index de l'égalité professionnelle d'une entreprise
@@ -516,5 +513,7 @@ export const SearchPage: NextPage = () => {
     </>
   );
 };
+
+SearchPage.getLayout = ({ children }) => <ConsulterIndexLayout title="Recherche">{children}</ConsulterIndexLayout>;
 
 export default SearchPage;

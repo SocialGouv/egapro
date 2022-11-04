@@ -1,5 +1,5 @@
 import { Flex, FormControl, FormLabel, Select } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
+import React from "react"
 import { useHistory, useParams } from "react-router-dom"
 
 import { useTitle } from "../../utils/hooks"
@@ -13,7 +13,7 @@ import { SinglePageLayout } from "../../containers/SinglePageLayout"
 
 const title = "Mes déclarations"
 
-const MesDeclarations: FunctionComponent = () => {
+const MesDeclarations = () => {
   useTitle(title)
   const history = useHistory()
 

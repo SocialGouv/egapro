@@ -8,7 +8,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { FiInfo } from "react-icons/fi";
 
 export const Banner = () => {

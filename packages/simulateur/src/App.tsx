@@ -37,7 +37,7 @@ const ErrorFallback: FunctionComponent<ErrorFallbackProps> = ({ error, resetErro
   )
 }
 
-const history = createBrowserHistory()
+const history = createBrowserHistory({ basename: process.env.PUBLIC_URL })
 
 const piwik: any = new ReactPiwik({
   url: "matomo.fabrique.social.gouv.fr",
@@ -48,7 +48,7 @@ const piwik: any = new ReactPiwik({
 // track the initial pageview
 ReactPiwik.push(["trackPageView"])
 
-const App: FunctionComponent = () => {
+const App = () => {
   const [state, dispatchReducer] = useReducer(AppReducer, undefined)
 
   const dispatch = useCallback(

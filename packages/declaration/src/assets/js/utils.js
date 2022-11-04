@@ -23,7 +23,7 @@ async function request(method, uri, body, options = {}) {
 }
 
 function redirect(url) {
-  location.href = url
+  location.replace(url)
 }
 
 function buildSelectOptions(select, list, value) {
@@ -134,6 +134,8 @@ validateNotAllEmpty = message => {
 checkSirenValidity = async event => {
   const target = event.target
 
+  const year = app.annee || new Date().getFullYear
+
   checkPatternValidity(event)
   if (target.validity.patternMismatch) {
     // We already treated this case in `checkPatternValidity`
@@ -155,7 +157,7 @@ checkSirenValidity = async event => {
   const wrapper = target.parentNode
   wrapper.classList.add("loading")
   wrapper.setAttribute('aria-busy', 'true')
-  const response = await getSirenData(target.value)
+  const response = await getSirenData(target.value, year)
   wrapper.classList.remove("loading")
   wrapper.removeAttribute('aria-busy')
   const raisonSocialeField = getRaisonSocialeField(target)
@@ -176,10 +178,8 @@ checkSirenValidity = async event => {
   target.reportValidity()
 }
 
-getSirenData = async value => {
-  const response = await request('GET', `/validate-siren?siren=${value}`)
-  return response
-}
+getSirenData = async (siren, year) => request('GET', `/validate-siren?siren=${siren}&year=${year}`)
+
 
 getRaisonSocialeField = sirenField => {
   // Return the field associated to the given siren field name

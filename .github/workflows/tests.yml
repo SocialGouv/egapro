@@ -29,10 +29,10 @@ jobs:
 
       - name: Down for tests API
         run: docker-compose down
-      
+
       - name: Run tests coverage for app
         run: yarn workspace app run test:coverage
-      
+
       - name: SonarCloud scan for app
         uses: SonarSource/sonarcloud-github-action@master
         env:

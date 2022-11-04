@@ -1,5 +1,5 @@
 import { Box, Grid, GridItem, Heading, Spinner, Text } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
+import React, { FunctionComponent, PropsWithChildren } from "react"
 import { Form } from "react-final-form"
 import { useHistory, useParams } from "react-router-dom"
 import { z } from "zod"
@@ -39,7 +39,7 @@ import { dateToString, parseDate } from "../../utils/date"
 import { updateDeclarationWithObjectifsMesures } from "../../utils/declarationBuilder"
 import { useToastMessage } from "../../utils/hooks"
 
-const Title: React.FC = ({ children }) => (
+const Title = ({ children }: PropsWithChildren) => (
   <Box>
     <Heading as="h2" size="md" mt="6">
       {children}

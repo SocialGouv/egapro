@@ -1,37 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`should match snapshot 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": <body>
-    <div
-      id="chakra-toast-portal"
-    >
-      <ul
-        id="chakra-toast-manager-top"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
-      />
-      <ul
-        id="chakra-toast-manager-top-left"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-top-right"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom-left"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
-      />
-      <ul
-        id="chakra-toast-manager-bottom-right"
-        style="position: fixed; z-index: 5500; pointer-events: none; display: flex; flex-direction: column;"
-      />
-    </div>
     <div>
       <header
         class="css-3p1eay"
@@ -83,13 +55,13 @@ Object {
               <a
                 class="chakra-link css-13o7eu2"
                 href="https://travail-emploi.gouv.fr/"
-                rel="noopener noreferrer"
+                rel="noopener"
                 target="_blank"
               >
                 <img
                   alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                   class="chakra-image css-6t4orf"
-                  src="/consulter-index/icons/marianne.svg"
+                  src="/icons/marianne.svg"
                 />
               </a>
             </div>
@@ -164,13 +136,13 @@ Object {
             <a
               class="chakra-link css-13o7eu2"
               href="https://travail-emploi.gouv.fr/"
-              rel="noopener noreferrer"
+              rel="noopener"
               target="_blank"
             >
               <img
                 alt="Aller à la page d'accueil du Ministère du travail, de l'emploi et de l'insertion"
                 class="chakra-image css-6t4orf"
-                src="/consulter-index/icons/marianne.svg"
+                src="/icons/marianne.svg"
               />
             </a>
           </div>

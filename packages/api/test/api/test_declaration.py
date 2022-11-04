@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from egapro import db, schema, utils
+from egapro import db, schema, utils, constants
 
 pytestmark = pytest.mark.asyncio
 
@@ -375,6 +375,8 @@ async def test_cannot_load_not_owned_declaration(client, declaration):
     assert resp.status == 403
     assert json.loads(resp.body) == {
         "error": "Vous n'avez pas les droits nécessaires pour le siren 514027945"
+    } or {
+        "error": constants.ERROR_ENSURE_OWNER
     }
 
 
@@ -472,8 +474,8 @@ async def test_confirmed_declaration_should_send_email(client, monkeypatch, body
     assert sender.call_count == 1
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
-    assert "/declaration/?siren=514027945&year=2019" in txt
-    assert "/declaration/?siren=514027945&year=2019" in html
+    assert "/index-egapro/declaration/?siren=514027945&year=2019" in txt
+    assert "/index-egapro/declaration/?siren=514027945&year=2019" in html
     assert sender.call_args.kwargs["reply_to"] == "Foo Bar <foo@baz.fr>"
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2020.pdf"
 
@@ -548,7 +550,7 @@ async def test_invalid_declaration_data_should_raise_on_put(client, monkeypatch)
     assert resp.status == 422
     assert json.loads(resp.body) == {
         "error": "data must contain "
-        "['source', 'déclaration', 'déclarant', 'entreprise'] properties",
+        "['déclaration', 'déclarant', 'entreprise'] properties",
     }
     assert capture_message.called_once
 
@@ -947,10 +949,7 @@ async def test_put_declaration_with_invalid_region(client, body):
 async def test_put_declaration_without_source(client, body):
     del body["source"]
     resp = await client.put("/declaration/514027945/2019", body=body)
-    assert resp.status == 422
-    assert json.loads(resp.body) == {
-        "error": "data must contain ['source', 'déclaration', 'déclarant', 'entreprise'] properties"
-    }
+    assert resp.status == 204
 
 
 async def test_get_empty_entreprise_should_sync_with_api_entreprises(

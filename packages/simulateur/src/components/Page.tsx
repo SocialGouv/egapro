@@ -1,13 +1,12 @@
-import React, { FunctionComponent, ReactNode } from "react"
+import React, { PropsWithChildren } from "react"
 import { Box, Heading, Text } from "@chakra-ui/react"
 
-interface PageProps {
+export type PageProps = PropsWithChildren<{
   title: string
   tagline?: string | Array<string>
-  children: ReactNode
-}
+}>
 
-const Page: FunctionComponent<PageProps> = ({ title, tagline, children }) => {
+const Page = ({ title, tagline, children }: PageProps) => {
   return (
     <>
       <Heading as="h1" size="lg">

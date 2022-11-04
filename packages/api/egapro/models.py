@@ -101,9 +101,13 @@ class Data(dict):
 
     @property
     def uri(self):
+        # URIs for: simulateur | representation | declaration
         if self.get("source") == "simulateur":
-            return f"/simulateur/{self.id}"
-        return f"/declaration/?siren={self.siren}&year={self.year}"
+            return f"/index-egapro/simulateur/{self.id}"
+        elif self.get("indicateurs"):
+            if "représentation_équilibrée" in self.get("indicateurs"):
+                return f"/representation-equilibree/commencer"
+        return f"/index-egapro/declaration/?siren={self.siren}&year={self.year}"
 
     def path(self, path):
         data = self

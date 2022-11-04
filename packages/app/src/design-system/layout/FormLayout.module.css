@@ -1,0 +1,14 @@
+@media (min-width: 48em) {
+    .form {
+        max-width: 37.5rem;
+    }
+}
+
+.form > * + * {
+    margin-top: 1.6rem;
+}
+
+
+.btns-group {
+    margin-top: 2.5rem!important;
+}

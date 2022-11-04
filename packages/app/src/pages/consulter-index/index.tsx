@@ -10,14 +10,15 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
-import { AverageIndicator } from "@components/AverageIndicator";
-import { ButtonAction } from "@components/ds/ButtonAction";
 import { format } from "date-fns";
-import type { NextPage } from "next";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { HiDownload } from "react-icons/hi";
+
+import type { NextPageWithLayout } from "../_app";
+import { AverageIndicator } from "@components/AverageIndicator";
+import { ButtonAction } from "@components/ds/ButtonAction";
+import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 
 async function getDateCsv(): Promise<string> {
   try {
@@ -45,13 +46,13 @@ function FormSearchSiren() {
 
     const { q } = Object.fromEntries(data);
 
-    router.push("/consulter-index/recherche" + (q ? `?q=${q}` : ""));
+    router.push("consulter-index/recherche" + (q ? `?q=${q}` : ""));
   }
 
   return (
     <form onSubmit={handleSubmit} style={{ textAlign: "center" }} ref={formRef} noValidate>
       <Heading as="h1" fontFamily="gabriela" size="lg" mb={["8", "12"]} mt={["0", "4"]}>
-        Rechercher l'index de l'égalité professionnelle d'une entreprise
+        Consulter l'index de l'égalité professionnelle d'une entreprise
       </Heading>
       <Box>
         <Flex align="center" justifyContent="center" mx={["0", "16"]}>
@@ -80,34 +81,26 @@ function DownloadCsvFileZone() {
     runEffect();
   }, []);
 
-  return (
-    <>
-      {dateCsv && (
-        <Center w="100vw" paddingTop="0" paddingBottom="12">
-          <Flex justify="center" align="center" mx={["4", "0"]} direction={["column", "row"]}>
-            <Text fontSize={["md", "lg"]} mr={["0", "6"]} mb={["4", "0"]} textAlign="center">
-              Télécharger le fichier des entreprises au {dateCsv}
-            </Text>
+  return dateCsv ? (
+    <Center w="100vw" paddingTop="0" paddingBottom="12">
+      <Flex justify="center" align="center" mx={["4", "0"]} direction={["column", "row"]}>
+        <Text fontSize={["md", "lg"]} mr={["0", "6"]} mb={["4", "0"]} textAlign="center">
+          Télécharger le fichier des entreprises au {dateCsv}
+        </Text>
 
-            <LinkBox>
-              <LinkOverlay href="/index-egalite-fh.csv">
-                <ButtonAction variant="outline" leftIcon={<HiDownload />} label="Télécharger (CSV)" />
-              </LinkOverlay>
-            </LinkBox>
-          </Flex>
-        </Center>
-      )}
-    </>
-  );
+        <LinkBox>
+          <LinkOverlay href="/index-egalite-fh.csv">
+            <ButtonAction variant="outline" leftIcon={<HiDownload />} label="Télécharger (CSV)" />
+          </LinkOverlay>
+        </LinkBox>
+      </Flex>
+    </Center>
+  ) : null;
 }
 
-const ConsulterIndex: NextPage = () => {
+const HomePage: NextPageWithLayout = () => {
   return (
     <VStack spacing={["3", "6"]}>
-      <Head>
-        <title>Index Egapro</title>
-      </Head>
-
       <FormSearchSiren />
       <Box h="8" />
 
@@ -118,4 +111,6 @@ const ConsulterIndex: NextPage = () => {
   );
 };
 
-export default ConsulterIndex;
+HomePage.getLayout = ({ children }) => <ConsulterIndexLayout title="Consulter">{children}</ConsulterIndexLayout>;
+
+export default HomePage;

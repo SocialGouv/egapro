@@ -1,4 +1,4 @@
-import React, { useCallback, FunctionComponent } from "react"
+import React, { useCallback, FunctionComponent, PropsWithChildren } from "react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionIndicateurQuatreData } from "../../globals"
@@ -91,7 +91,7 @@ const IndicateurQuatre: FunctionComponent<IndicateurQuatreProps> = ({ state, dis
   )
 }
 
-const PageIndicateurQuatre: FunctionComponent = ({ children }) => (
+const PageIndicateurQuatre = ({ children }: PropsWithChildren) => (
   <Page
     title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
     tagline="Renseignez le nombre de salariées en congé maternité durant la période de référence et ayant reçu une augmentation à leur retour."

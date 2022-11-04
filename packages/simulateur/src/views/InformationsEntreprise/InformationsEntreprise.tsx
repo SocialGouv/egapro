@@ -1,4 +1,4 @@
-import React, { useCallback, ReactNode, FunctionComponent } from "react"
+import React, { useCallback, PropsWithChildren } from "react"
 import { RouteComponentProps, useParams } from "react-router-dom"
 
 import { AppState, FormState, ActionType, ActionInformationsEntrepriseData } from "../../globals"
@@ -15,13 +15,27 @@ interface InformationsEntrepriseProps extends RouteComponentProps {
   dispatch: (action: ActionType) => void
 }
 
+const PageInformationsEntreprise = ({ children }: PropsWithChildren) => {
+  return (
+    <Page
+      title={title}
+      tagline={[
+        "Renseignez le périmètre retenu pour le calcul de l'index (Entreprise ou UES), le numéro Siren de l'entreprise déclarante, ainsi que les informations concernant l'UES.",
+        "Les informations relatives à l'entreprise (Raison sociale, Code NAF, Adresse complète) sont renseignées automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).",
+      ]}
+    >
+      {children}
+    </Page>
+  )
+}
+
 type Params = {
   code: string
 }
 
 const title = "Informations entreprise/UES"
 
-const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = ({ state, dispatch }) => {
+const InformationsEntreprise = ({ state, dispatch }: InformationsEntrepriseProps) => {
   useTitle(title)
   const { code } = useParams<Params>()
 
@@ -39,6 +53,8 @@ const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = (
 
   const alreadyDeclared = declaration?.data?.id === code
 
+  const year = state?.informations?.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+
   return (
     <PageInformationsEntreprise>
       <LayoutFormAndResult
@@ -49,25 +65,12 @@ const InformationsEntreprise: FunctionComponent<InformationsEntrepriseProps> = (
             updateInformationsEntreprise={updateInformationsEntreprise}
             validateInformationsEntreprise={validateInformationsEntreprise}
             alreadyDeclared={alreadyDeclared}
+            year={year}
           />
         }
         childrenResult={null}
       />
     </PageInformationsEntreprise>
-  )
-}
-
-const PageInformationsEntreprise: FunctionComponent<{ children: ReactNode }> = ({ children }) => {
-  return (
-    <Page
-      title={title}
-      tagline={[
-        "Renseignez le périmètre retenu pour le calcul de l'index (Entreprise ou UES), le numéro Siren de l'entreprise déclarante, ainsi que les informations concernant l'UES.",
-        "Les informations relatives à l'entreprise (Raison sociale, Code NAF, Adresse complète) sont renseignées automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).",
-      ]}
-    >
-      {children}
-    </Page>
   )
 }
 
