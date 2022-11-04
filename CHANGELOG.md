@@ -1,3 +1,10 @@
+# [2.26.0](https://github.com/SocialGouv/egapro/compare/v2.25.0...v2.26.0) (2022-11-04)
+
+
+### Features
+
+* integration tests  for page commencer ([#1317](https://github.com/SocialGouv/egapro/issues/1317)) ([5f3cf8b](https://github.com/SocialGouv/egapro/commit/5f3cf8b1439307bbca63e494193fa121d2d50c37))
+
 # [2.25.0](https://github.com/SocialGouv/egapro/compare/v2.24.7...v2.25.0) (2022-11-03)
 
 
