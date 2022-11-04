@@ -1,32 +1,10 @@
 projectName: egapro
 repositoryName: egapro
 
-deployWithPlugin: kubectl
-
 dependencies:
   fabrique:
     import: SocialGouv/kontinuous/plugins/fabrique
-    dependencies:
-      contrib:
-        preDeploy:
-          cleanFailed:
-            enabled: false
-        deploySidecars:
-          failfast:
-            enabled: false
-          stern:
-            enabled: true
-          progressing:
-            enabled: true
-        patches:
-          needsUsingInitcontainers:
-            enabled: true
-          needsUsingKapp:
-            enabled: false
-          filterDisableKapp:
-            enabled: true
-          reloader:
-            enabled: true
+    extends: [deployWithKubectl]
 
 environmentPatterns:
   prod: false
