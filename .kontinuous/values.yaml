@@ -116,7 +116,7 @@ jobs:
   ~chart: jobs
   runs:
     build-app:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build-buildkit
       memoryLimit: 14Gi
       memoryRequest: 2Gi
       with:
@@ -126,7 +126,7 @@ jobs:
           NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
 
     build-storybook:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build-buildkit
       memoryLimit: 8Gi
       memoryRequest: 2Gi
       with:
@@ -135,13 +135,13 @@ jobs:
 
 
     build-api:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build-buildkit
       with:
         imagePackage: api
         context: packages/api
 
     build-declaration:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build-buildkit
       with:
         imagePackage: declaration
         context: packages/declaration
@@ -150,7 +150,7 @@ jobs:
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
 
     build-simulateur:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: SocialGouv/kontinuous/plugins/contrib/jobs/build-buildkit
       memoryLimit: 10Gi
       memoryRequest: 2Gi
       with:
