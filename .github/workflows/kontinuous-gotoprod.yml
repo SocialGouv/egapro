@@ -1,4 +1,4 @@
-name: Go to Production
+name: Production
 on:
   push:
     tags:
@@ -9,6 +9,6 @@ concurrency:
   group: ${{ github.workflow }}
 
 jobs:
-  kontinuous:
+  deploy:
     uses: SocialGouv/kontinuous/.github/workflows/workflow-gotoprod-manual.yaml@v1
     secrets: inherit
