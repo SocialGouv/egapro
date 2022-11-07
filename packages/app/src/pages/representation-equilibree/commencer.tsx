@@ -39,7 +39,7 @@ const formSchema = z
     year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
     siren: z
       .string()
-      .min(1, { message: "Le Siren est requis" })
+      .min(1, { message: "Le Siren est requis." })
       .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres."),
   })
   .superRefine(async ({ year, siren }, ctx) => {
@@ -224,7 +224,7 @@ const CommencerPage: NextPageWithLayout = () => {
 };
 
 CommencerPage.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Commencer">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default CommencerPage;

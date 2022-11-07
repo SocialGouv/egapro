@@ -16,6 +16,16 @@ export type TokenInfoType = {
   staff: boolean;
 };
 
+/**
+ * Hook to get the user information.
+ *
+ * @param token The token value
+ *
+ * @example
+ * ```ts
+ * const { user, error, loading } = useMe();
+ * ```
+ */
 export const useMe = (token: string | undefined) => {
   const { data: user, error, isValidating: loading } = useSWR<TokenInfoType>(!token ? null : "/me");
 

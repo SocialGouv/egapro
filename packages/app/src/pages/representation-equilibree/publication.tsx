@@ -180,7 +180,7 @@ const Publication: NextPageWithLayout = () => {
 };
 
 Publication.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Publication">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default Publication;

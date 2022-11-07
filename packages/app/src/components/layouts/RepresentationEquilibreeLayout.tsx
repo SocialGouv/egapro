@@ -3,6 +3,7 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
+import Head from "next/head";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import React from "react";
@@ -49,11 +50,14 @@ const STEPS_TITLE = [
   "Validation de vos écarts",
 ];
 
-// Layout for authenticated users (i.e. the wizard).
+/**
+ * Layout for authenticated users in représentation équilibrée.
+ */
 export const RepresentationEquilibreeLayout = ({
+  title,
   children,
   haveBottomSection,
-}: PropsWithChildren<{ haveBottomSection?: boolean }>) => {
+}: PropsWithChildren<{ haveBottomSection?: boolean; title?: string | undefined }>) => {
   const { pathname } = useRouter();
 
   const foundStep = STEPS.findIndex(stepName => pathname.endsWith(stepName));
@@ -61,6 +65,9 @@ export const RepresentationEquilibreeLayout = ({
 
   return (
     <App>
+      <Head>
+        <title>{title && title + " - "} Représentation équilibrée Egapro</title>
+      </Head>
       <Container py="6w">
         <Grid justifyCenter>
           <GridCol md={10} lg={8}>
@@ -85,7 +92,7 @@ export const RepresentationEquilibreeLayout = ({
                   <CardBody>
                     <CardBodyContent>
                       <CardBodyContentTitle>
-                        <a href="https://index-egapro.travail.gouv.fr">
+                        <a href="https://egapro.travail.gouv.fr">
                           Avez-vous déclaré l’index égalité professionnelle F/H&nbsp;?
                         </a>
                       </CardBodyContentTitle>

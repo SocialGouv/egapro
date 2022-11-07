@@ -3,6 +3,7 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
+import Head from "next/head";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
@@ -27,9 +28,16 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   );
 };
 
-export const RepresentationEquilibreeStartLayout = ({ children }: PropsWithChildren) => {
+export const RepresentationEquilibreeStartLayout = ({
+  children,
+  title,
+}: PropsWithChildren & { title?: string | undefined }) => {
   return (
     <App>
+      <Head>
+        <title>{title && title + " - "} Représentation équilibrée Egapro</title>
+      </Head>
+
       <Container py="6w">
         <Grid justifyCenter>
           <GridCol md={10} lg={8}>

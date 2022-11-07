@@ -91,7 +91,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 };
 
 InformationsEntreprise.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Informations entreprise">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default InformationsEntreprise;

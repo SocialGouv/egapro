@@ -72,6 +72,14 @@ type FormActions = {
   saveFormData: (data: Partial<FormState>) => void;
 };
 
+/**
+ * Hook to get and handle the state of the form.
+ *
+ * @example
+ * ```ts
+ * const { formData, saveFormData, resetFormData } = useFormManager();
+ * ```
+ */
 export const useFormManager = create<FormActions & { formData: FormState }>()(
   persist(
     (set, get) => ({

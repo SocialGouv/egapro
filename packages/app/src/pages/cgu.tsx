@@ -8,7 +8,6 @@ const Cgu: NextPageWithLayout = () => {
   return (
     <>
       <Head>
-        <title>Conditions d’utilisation</title>
         <meta
           name="description"
           content="Les présentes conditions générales d’utilisation (dites «CGU») fixent le cadre juridique de la Plateforme EgaPro et définissent les conditions d’accès et d’utilisation des services par l’Utilisateur."
@@ -76,7 +75,7 @@ const Cgu: NextPageWithLayout = () => {
               </p>
               <p>
                 Le code du logiciel est libre, et peut donc être vérifié et amélioré par tous&nbsp;:{" "}
-                <a href="https://index-egapro.travail.gouv.fr/">https://index-egapro.travail.gouv.fr/</a>
+                <a href="https://egapro.travail.gouv.fr/">https://egapro.travail.gouv.fr/</a>
               </p>
               <h2>Responsabilités</h2>
               <h3 className="fr-text--xl">EgaPro</h3>
@@ -138,7 +137,7 @@ const Cgu: NextPageWithLayout = () => {
 };
 
 Cgu.getLayout = ({ children }) => {
-  return <BasicLayout>{children}</BasicLayout>;
+  return <BasicLayout title="Conditions d’utilisation">{children}</BasicLayout>;
 };
 
 export default Cgu;

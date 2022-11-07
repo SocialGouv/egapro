@@ -62,7 +62,6 @@ export const App = ({ children }: PropsWithChildren) => {
   return (
     <>
       <Head>
-        <title>Egapro</title>
         <meta
           name="description"
           content="Egapro permet aux entreprises de mesurer, en toute transparence, les écarts de rémunération entre les sexes et de mettre en évidence leurs points de progression."

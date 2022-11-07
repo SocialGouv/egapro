@@ -1,3 +1,31 @@
+# [2.26.0](https://github.com/SocialGouv/egapro/compare/v2.25.0...v2.26.0) (2022-11-04)
+
+
+### Features
+
+* integration tests  for page commencer ([#1317](https://github.com/SocialGouv/egapro/issues/1317)) ([5f3cf8b](https://github.com/SocialGouv/egapro/commit/5f3cf8b1439307bbca63e494193fa121d2d50c37))
+
+# [2.25.0](https://github.com/SocialGouv/egapro/compare/v2.24.7...v2.25.0) (2022-11-03)
+
+
+### Features
+
+* add consistent titles for app ([656f63d](https://github.com/SocialGouv/egapro/commit/656f63dfcc852f8e9607d87712cd2cf825304a51)), closes [#1309](https://github.com/SocialGouv/egapro/issues/1309)
+
+## [2.24.7](https://github.com/SocialGouv/egapro/compare/v2.24.6...v2.24.7) (2022-11-03)
+
+
+### Bug Fixes
+
+* **declaration:** redirect not working (fixes [#1311](https://github.com/SocialGouv/egapro/issues/1311)) ([ce4a8e3](https://github.com/SocialGouv/egapro/commit/ce4a8e3c5a6d23b176d767eaa31c935a60c7db6c))
+
+## [2.24.6](https://github.com/SocialGouv/egapro/compare/v2.24.5...v2.24.6) (2022-11-03)
+
+
+### Bug Fixes
+
+* return to egapro.travail.gouv.fr domain ([4f22581](https://github.com/SocialGouv/egapro/commit/4f22581ffddf622d6dd0ab34bbaa20a5adfc4eac))
+
 ## [2.24.5](https://github.com/SocialGouv/egapro/compare/v2.24.4...v2.24.5) (2022-11-03)
 
 
