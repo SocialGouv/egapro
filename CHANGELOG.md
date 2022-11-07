@@ -1,3 +1,10 @@
+## [2.26.1](https://github.com/SocialGouv/egapro/compare/v2.26.0...v2.26.1) (2022-11-07)
+
+
+### Bug Fixes
+
+* storybook dockerfile ([#1330](https://github.com/SocialGouv/egapro/issues/1330)) ([eaebd85](https://github.com/SocialGouv/egapro/commit/eaebd858359b4b6b82eeb744bedcc992e3ddee47))
+
 # [2.26.0](https://github.com/SocialGouv/egapro/compare/v2.25.0...v2.26.0) (2022-11-04)
 
 
