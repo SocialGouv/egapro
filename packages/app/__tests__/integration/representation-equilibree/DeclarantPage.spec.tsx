@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
@@ -27,7 +27,7 @@ describe("Déclarant page", () => {
   it(`should render email input filled with connected user email`, () => {
     render(<DeclarantPage />);
 
-    const nameInput = screen.getByTestId("nom"); // no other choice because of non ambiguous search param : nom from prénom
+    const nameInput = screen.getByLabelText(/^Nom/i);
     const firstNameInput = screen.getByLabelText(/Prénom/i);
     const phoneNumber = screen.getByRole("textbox", {
       name: /numéro de téléphone/i,
@@ -50,7 +50,7 @@ describe("Déclarant page", () => {
   it(`should display all form validation errors`, async () => {
     render(<DeclarantPage />);
 
-    const nameInput = screen.getByTestId("nom"); // no other choice because of non ambiguous search param : nom from prénom
+    const nameInput = screen.getByLabelText(/^Nom/i);
     const firstNameInput = screen.getByLabelText(/Prénom/i);
     const phoneNumber = screen.getByRole("textbox", {
       name: /numéro de téléphone/i,
@@ -69,25 +69,27 @@ describe("Déclarant page", () => {
     expect(checkboxInput).not.toBeChecked();
     expect(submitButton).toBeDisabled();
 
-    // when
+    // when step 1
     await userEvent.type(nameInput, "A");
     await userEvent.type(firstNameInput, "A");
     await userEvent.type(phoneNumber, "1");
-    fireEvent.change(nameInput, { target: { value: "" } });
-    fireEvent.change(firstNameInput, { target: { value: "" } });
-    fireEvent.change(phoneNumber, { target: { value: "" } });
 
-    // expected
+    // when step 2
+    await userEvent.clear(nameInput);
+    await userEvent.clear(firstNameInput);
+    await userEvent.clear(phoneNumber);
+
+    // expected step 2
     await waitFor(() => {
       expect(screen.getByText(/Le nom est requis/i)).toBeInTheDocument();
       expect(screen.getByText(/Le prénom est requis/i)).toBeInTheDocument();
       expect(screen.getByText(/Le téléphone est requis/i)).toBeInTheDocument();
     });
 
-    // when step 2
-    fireEvent.change(phoneNumber, { target: { value: "A" } });
+    // when step 3
+    await userEvent.type(phoneNumber, "A");
 
-    // expected step 2
+    // expected step 3
     await waitFor(() => {
       expect(screen.getByText(/Le numéro de téléphone doit être composé de 10 chiffres/i)).toBeInTheDocument();
     });
@@ -100,7 +102,7 @@ describe("Déclarant page", () => {
       </RouterContext.Provider>,
     );
 
-    const nameInput = screen.getByTestId("nom"); // no other choice because of non ambiguous search param : nom from prénom
+    const nameInput = screen.getByLabelText(/^Nom/i);
     const firstNameInput = screen.getByLabelText(/Prénom/i);
     const phoneNumber = screen.getByRole("textbox", {
       name: /numéro de téléphone/i,
@@ -127,7 +129,6 @@ describe("Déclarant page", () => {
 
     // expected
     await waitFor(() => {
-      screen.debug();
       expect(submitButton).toBeEnabled();
     });
 
@@ -152,7 +153,7 @@ describe("Déclarant page", () => {
     expect(backButton).toBeInTheDocument();
 
     // when
-    fireEvent.click(backButton);
+    await userEvent.click(backButton);
 
     // expected
     await waitFor(() => {

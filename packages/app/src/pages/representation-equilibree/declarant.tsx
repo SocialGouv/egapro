@@ -93,7 +93,6 @@ const DeclarantPage: NextPageWithLayout = () => {
                 isError={Boolean(errors.nom)}
                 {...register("nom")}
                 aria-describedby={errors.nom && "nom-message-error"}
-                data-testid="nom"
               />
               {errors.nom && <FormGroupMessage id="nom-message-error">{errors.nom.message}</FormGroupMessage>}
             </FormGroup>
