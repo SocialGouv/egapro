@@ -32,7 +32,7 @@ export type RepresentationEquilibreeDataField = {
   déclarant: Declarant;
   déclaration: DeclarationRepresentationEquilibree;
   entreprise: Entreprise;
-  représentation_équilibrée: IndicateursRepresentationEquilibree;
+  indicateurs: { représentation_équilibrée: IndicateursRepresentationEquilibree };
 };
 
 type DeclarationRepresentationEquilibree = {
@@ -147,5 +147,44 @@ export const buildRepresentation = (state: FormState): RepresentationEquilibreeD
     pourcentage_hommes_membres: state.ecartsMembresHommes as number,
   };
 
-  return { déclarant, déclaration, entreprise, représentation_équilibrée };
+  return { déclarant, déclaration, entreprise, indicateurs: { représentation_équilibrée } };
+};
+
+export const buildFormState = (declaration: RepresentationEquilibreeDataField): FormState => {
+  const {
+    déclarant,
+    déclaration,
+    entreprise,
+    indicateurs: { représentation_équilibrée },
+  } = declaration;
+
+  const state = {} as Partial<FormState>;
+
+  const declarant: FormState["declarant"] = {
+    email: déclarant.email,
+    nom: déclarant.nom,
+    prenom: déclarant.prénom,
+    telephone: déclarant.téléphone,
+  };
+
+  state.publishingDate = déclaration.publication?.date;
+  state.publishingContent = déclaration.publication?.modalités;
+  state.publishingWebsiteUrl = déclaration.publication?.url;
+  state.hasWebsite = Boolean(state.publishingWebsiteUrl);
+
+  state.year = déclaration.année_indicateurs;
+  state.endOfPeriod = déclaration.fin_période_référence;
+
+  state.motifEcartsCadresNonCalculable = représentation_équilibrée.motif_non_calculabilité_cadres;
+  state.motifEcartsMembresNonCalculable = représentation_équilibrée.motif_non_calculabilité_membres;
+  state.ecartsCadresFemmes = représentation_équilibrée.pourcentage_femmes_cadres;
+  state.ecartsCadresHommes = représentation_équilibrée.pourcentage_hommes_cadres;
+  state.ecartsMembresFemmes = représentation_équilibrée.pourcentage_femmes_membres;
+  state.ecartsMembresHommes = représentation_équilibrée.pourcentage_hommes_membres;
+
+  return {
+    declarant,
+    entreprise: entreprise as FormState["entreprise"],
+    ...(state as Omit<FormState, "declarant" | "entreprise">),
+  };
 };

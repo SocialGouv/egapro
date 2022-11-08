@@ -29,10 +29,12 @@ export type FormState = {
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;
+  status: "creation" | "edition";
   year?: number | undefined;
 };
 
 const formDataDefault: FormState = {
+  status: "creation",
   declarant: {
     email: "",
     prenom: "",
@@ -92,6 +94,7 @@ export const useFormManager = create<FormActions & { formData: FormState }>()(
     }),
     {
       name: "ega-repeq-form", // name of item in the storage (must be unique)
+      getStorage: () => sessionStorage, // formData are removed when user is disconnected
     },
   ),
 );
