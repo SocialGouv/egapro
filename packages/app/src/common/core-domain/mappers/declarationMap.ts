@@ -1,7 +1,7 @@
+import type { DeclarationRaw } from "@api/core-domain/infra/db/raw";
 import type { Mapper } from "@common/shared-domain";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
-import type { DeclarationRaw } from "api/core-domain/infra/db/raw";
 
 import { Declaration } from "../domain/Declaration";
 import { DeclarationData } from "../domain/DeclarationData";
@@ -171,7 +171,6 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
 };
 
 function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
-  /* eslint-disable @typescript-eslint/consistent-type-imports */
   type Categories = NonNullable<import("@common/models/generated").Remunerations["catégories"]>[number];
   type Entreprise = import("@common/models/generated").Entreprise[number];
   type Tranche = NonNullable<import("@common/models/generated").Effectif["tranche"]>;

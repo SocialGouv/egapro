@@ -13,4 +13,3 @@ export const isTruthy = (v?: string): boolean => !!v && ["yes", "true", "1"].inc
  * Tests a value against "no", 0, "0", "false" ignoring case.
  */
 export const isFalsy = (v?: string): boolean => !v || ["no", "false", "0"].includes(v.toLowerCase());
-

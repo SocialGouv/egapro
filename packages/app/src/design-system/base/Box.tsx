@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
+
 import type { SpacingProps } from "../utils/spacing";
 
 export type BoxProps = PropsWithChildren<

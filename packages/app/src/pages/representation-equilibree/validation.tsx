@@ -1,9 +1,3 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import NextLink from "next/link";
-import { useRouter } from "next/router";
-import { useState } from "react";
-
-import type { NextPageWithLayout } from "../_app";
 import {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
@@ -25,7 +19,13 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { formatAdresse, putRepresentationEquilibree, useConfig, useFormManager, useUser } from "@services/apiClient";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+
+import type { NextPageWithLayout } from "../_app";
 
 const title = "Validation de vos écarts";
 

@@ -1,7 +1,7 @@
+import type { FetcherReturn } from "@services/apiClient";
 import useSWR from "swr";
 
 import { buildUrlParamsString } from "../../common/utils/url";
-import type { FetcherReturn } from "@services/apiClient";
 
 export type StatsType = {
   avg: number;

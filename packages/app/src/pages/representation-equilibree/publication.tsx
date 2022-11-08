@@ -1,10 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import NextLink from "next/link";
-import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-import type { NextPageWithLayout } from "../_app";
 import { radioBoolToString, radioStringToBool, zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
@@ -25,7 +18,14 @@ import {
   FormRadioGroupLegend,
   FormTextarea,
 } from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormManager, useUser } from "@services/apiClient";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import type { NextPageWithLayout } from "../_app";
 
 const URL_REGEX = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/i;
 

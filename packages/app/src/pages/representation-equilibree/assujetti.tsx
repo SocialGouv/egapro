@@ -1,8 +1,3 @@
-import NextLink from "next/link";
-import { useState } from "react";
-
-import type { NextPageWithLayout } from "../_app";
-
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
   ButtonAsLink,
@@ -12,8 +7,11 @@ import {
   FormRadioGroupInput,
   FormRadioGroupLegend,
 } from "@design-system";
-
 import { useUser } from "@services/apiClient";
+import NextLink from "next/link";
+import { useState } from "react";
+
+import type { NextPageWithLayout } from "../_app";
 
 const title = "Êtes-vous assujetti ?";
 

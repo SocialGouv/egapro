@@ -21,6 +21,18 @@ const config = {
         forbid: [">", "}"],
       },
     ],
+    "no-restricted-imports": [
+      "error",
+      {
+        paths: [
+          {
+            name: "react",
+            importNames: ["default"],
+            message: 'Import "React" par défaut déjà géré par Next.',
+          },
+        ],
+      },
+    ],
     "jsx-a11y/anchor-is-valid": "off",
     "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
@@ -57,14 +69,44 @@ const config = {
   overrides: [
     {
       files: ["**/*.ts?(x)"],
-      extends: ["plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended"],
+      extends: [
+        "plugin:@typescript-eslint/recommended",
+        // MORE STRICT
+        // "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      ],
       plugins: ["@typescript-eslint", "typescript-sort-keys"],
+      parserOptions: {
+        project: ["tsconfig.json"],
+        sourceType: "module",
+      },
+      settings: {
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ["tsconfig.json"],
+          },
+        },
+      },
       rules: {
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": [
           "error",
           {
             default: "array-simple",
+          },
+        ],
+        "no-restricted-imports": "off",
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "react",
+                importNames: ["default"],
+                message: 'Import "React" par défaut déjà géré par Next.',
+                allowTypeImports: true,
+              },
+            ],
           },
         ],
         "@typescript-eslint/ban-ts-comment": "error",
@@ -99,6 +141,8 @@ const config = {
           "error",
           {
             prefer: "type-imports",
+            // TODO: enable on new @typescript-eslint/eslint-plugin release (> 5.42.1)
+            // fixStyle: "inline-type-imports",
           },
         ],
         "@typescript-eslint/sort-type-union-intersection-members": "warn",

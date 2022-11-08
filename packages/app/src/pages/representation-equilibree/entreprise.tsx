@@ -1,8 +1,3 @@
-import NextLink from "next/link";
-import { useRouter } from "next/router";
-import type { FormEvent } from "react";
-
-import type { NextPageWithLayout } from "../_app";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -14,6 +9,11 @@ import {
   FormLayoutButtonGroup,
 } from "@design-system";
 import { useConfig, useFormManager, useUser } from "@services/apiClient";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+import type { FormEvent } from "react";
+
+import type { NextPageWithLayout } from "../_app";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
   useUser({ redirectTo: "/representation-equilibree/email" });

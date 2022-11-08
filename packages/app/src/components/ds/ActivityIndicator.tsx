@@ -1,9 +1,8 @@
 import type { BoxProps } from "@chakra-ui/react";
 import { Box, keyframes } from "@chakra-ui/react";
 import type { FunctionComponent } from "react";
-import React from "react";
 
-interface ActivityIndicatorProps {
+export interface ActivityIndicatorProps {
   color?: string;
   size?: number;
 }

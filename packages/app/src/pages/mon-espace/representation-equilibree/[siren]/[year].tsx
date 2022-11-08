@@ -1,14 +1,14 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-
-import type { NextPageWithLayout } from "../../../_app";
 import { formatTimestampToFr } from "@common/utils/date";
 import { normalizeQueryParam } from "@common/utils/router";
 import { StaffOnly } from "@components/AuthenticatedOnly";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { Alert } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useRepresentationEquilibree } from "@services/apiClient";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+
+import type { NextPageWithLayout } from "../../../_app";
 
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 

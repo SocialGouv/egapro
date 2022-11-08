@@ -1,9 +1,9 @@
+import { DB } from "@api/core-domain/infra/db/knex";
 import type { Declaration, DeclarationPK } from "@common/core-domain/domain/Declaration";
 import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { Any } from "@common/utils/types";
-import { DB } from "api/core-domain/infra/db/knex";
 import {} from "net";
 
 import type { IDeclarationRepo } from "../IDeclarationRepo";

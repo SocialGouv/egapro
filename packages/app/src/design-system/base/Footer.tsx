@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from "react";
 import { forwardRef } from "react";
+
 import { Container } from "../layout/Container";
 
 export const Footer = ({ children }: PropsWithChildren) => (

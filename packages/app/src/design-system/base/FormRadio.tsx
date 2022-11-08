@@ -1,9 +1,8 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
 import { forwardRef } from "react";
-import React from "react";
-import type { MarginProps } from "../utils/spacing";
 
+import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
 
 export type FormRadioGroupProps = PropsWithChildren<

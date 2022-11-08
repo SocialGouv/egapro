@@ -1,16 +1,7 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ApiError } from "next/dist/server/api-utils";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-import type { NextPageWithLayout } from "../_app";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
-import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
+import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import {
   Alert,
   AlertTitle,
@@ -23,6 +14,8 @@ import {
   FormLayoutButtonGroup,
   FormSelect,
 } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   checkSiren,
   fetchRepresentationEquilibree,
@@ -31,6 +24,13 @@ import {
   useFormManager,
   useUser,
 } from "@services/apiClient";
+import { ApiError } from "next/dist/server/api-utils";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import type { NextPageWithLayout } from "../_app";
 
 const OWNER_ERROR = "Erreur : vous n'avez pas les droits sur ce Siren";
 

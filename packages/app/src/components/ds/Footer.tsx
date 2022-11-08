@@ -1,6 +1,5 @@
 import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { Box, Container, List, ListItem, Text, Link, Flex } from "@chakra-ui/react";
-import React from "react";
+import { Box, Container, Flex, Link, List, ListItem, Text } from "@chakra-ui/react";
 
 import packageConfig from "../../../package.json";
 import { Logo } from "./Logo";

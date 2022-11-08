@@ -5,6 +5,7 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
+
 import { App } from "./App";
 
 /**

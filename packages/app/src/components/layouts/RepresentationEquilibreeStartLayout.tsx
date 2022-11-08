@@ -3,18 +3,15 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
+import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 import Head from "next/head";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
-import React from "react";
 
 import { App } from "./App";
-import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 
-// Layout for unauthenticated users.
-
-type AsideLinkProps = PropsWithChildren<{
+export type AsideLinkProps = PropsWithChildren<{
   path: string;
 }>;
 
@@ -28,10 +25,10 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   );
 };
 
-export const RepresentationEquilibreeStartLayout = ({
-  children,
-  title,
-}: PropsWithChildren & { title?: string | undefined }) => {
+/**
+ * Layout for unauthenticated users.
+ */
+export const RepresentationEquilibreeStartLayout = ({ children, title }: PropsWithChildren & { title?: string }) => {
   return (
     <App>
       <Head>

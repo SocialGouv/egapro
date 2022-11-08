@@ -3,7 +3,6 @@ import type { PropsWithChildren } from "react";
 
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
-
 import styles from "./Stepper.module.css";
 
 export type StepperProps = PropsWithChildren<Omit<MarginProps, "ml" | "mr" | "mx">>;

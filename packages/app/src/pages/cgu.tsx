@@ -1,8 +1,8 @@
+import { BasicLayout } from "@components/layouts/BasicLayout";
+import { Container, Grid, GridCol } from "@design-system";
 import Head from "next/head";
 
 import type { NextPageWithLayout } from "./_app";
-import { BasicLayout } from "@components/layouts/BasicLayout";
-import { Container, Grid, GridCol } from "@design-system";
 
 const Cgu: NextPageWithLayout = () => {
   return (

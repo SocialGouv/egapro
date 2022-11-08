@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
+
 import type { MarginProps } from "../utils/spacing";
 import { Box } from "./Box";
-
 import styles from "./Grid.module.css";
 
 export type GridProps = PropsWithChildren<

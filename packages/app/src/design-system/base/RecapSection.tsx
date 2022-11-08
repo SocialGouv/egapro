@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
-import { Box } from "./Box";
 
+import { Box } from "./Box";
 import styles from "./RecapSection.module.css";
 
 export const RecapSection = ({ children, ...rest }: PropsWithChildren) => (

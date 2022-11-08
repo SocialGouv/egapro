@@ -3,17 +3,17 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         /**
-         * Dist: `https://dev.egapro.fabrique.social.gouv.fr/api`  
+         * Dist: `https://egapro-preprod.dev.fabrique.social.gouv.fr/api`  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_API_URL?: string;
         /**
-         * No dist value.  
+         * Dist: `<dev>`  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_MATOMO_URL?: string;
         /**
-         * No dist value.  
+         * Dist: `<dev>`  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_MATOMO_SITE_ID?: string;

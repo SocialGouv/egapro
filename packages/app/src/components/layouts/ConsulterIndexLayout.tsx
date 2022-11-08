@@ -1,12 +1,12 @@
 import { Box, Container, Flex } from "@chakra-ui/layout";
 import { ChakraProvider } from "@chakra-ui/react";
+import { Header } from "@components/ds/Header";
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
-import React from "react";
-import { theme } from "../../theme";
 
+import { theme } from "../../theme";
 import { Footer } from "../ds/Footer";
-import { Header } from "@components/ds/Header";
+
 /**
  * Layout for consulter pages.
  */

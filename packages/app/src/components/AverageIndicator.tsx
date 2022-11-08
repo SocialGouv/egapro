@@ -1,15 +1,14 @@
 import { InfoOutlineIcon } from "@chakra-ui/icons";
 import type { SelectProps } from "@chakra-ui/react";
 import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColorModeValue } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
-
-import { ButtonAction } from "./ds/ButtonAction";
 import { capitalize } from "@common/utils/string";
 import { buildUrlParamsString } from "@common/utils/url";
 import type { UseStatsParams } from "@services/apiClient";
-import { useStats, filterDepartements } from "@services/apiClient";
-import { useConfig } from "@services/apiClient";
+import { filterDepartements, useConfig, useStats } from "@services/apiClient";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
+import { ButtonAction } from "./ds/ButtonAction";
 
 export const FilterSelect = ({ name, onChange, value, children, ...rest }: SelectProps) => {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100");
@@ -20,25 +19,15 @@ export const FilterSelect = ({ name, onChange, value, children, ...rest }: Selec
       {children}
     </Select>
   );
-<<<<<<< HEAD
-}
-
-export function AverageIndicator() {
-=======
 };
 
 export const AverageIndicator = () => {
->>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb
   const router = useRouter();
   const bgColor = useColorModeValue("blue.100", "blue.800");
 
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [], PUBLIC_YEARS_TRIES = [], LAST_PUBLIC_YEAR = "" } = config ?? {};
-<<<<<<< HEAD
-  const [filters, setFilters] = useState<StatsParams>({});
-=======
   const [filters, setFilters] = useState<UseStatsParams>({});
->>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb
   const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
   const { stats, isLoading } = useStats(filters);
 
@@ -58,8 +47,8 @@ export const AverageIndicator = () => {
 
   const getAverage = () => (!stats ? "" : stats?.avg?.toFixed(0));
 
-  function handleChange(event: React.SyntheticEvent) {
-    const { name, value } = event.currentTarget as HTMLInputElement;
+  const handleChange: SelectProps["onChange"] = event => {
+    const { name, value } = event.currentTarget;
 
     let departement = getValue("departement");
 
@@ -68,13 +57,9 @@ export const AverageIndicator = () => {
       departement = "";
     }
     setFilters({ ...filters, departement, [name]: value });
-  }
+  };
 
-<<<<<<< HEAD
-  const getValue = (name: keyof StatsParams) => filters[name] || "";
-=======
   const getValue = (name: keyof UseStatsParams) => filters[name] || "";
->>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb
 
   return (
     <Center bgColor={bgColor} w="100vw" py={8}>
@@ -167,8 +152,4 @@ export const AverageIndicator = () => {
       </Box>
     </Center>
   );
-<<<<<<< HEAD
-}
-=======
 };
->>>>>>> 614a370fd54e75789e0e390e92296f49e9a4eafb

@@ -3,13 +3,6 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
-import Head from "next/head";
-import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
-import React from "react";
-import { App } from "./App";
-import styles from "./RepresentationEquilibreeLayout.module.css";
-
 import {
   Box,
   Card,
@@ -27,6 +20,12 @@ import {
   StepperDetails,
   StepperTitle,
 } from "@design-system";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import type { PropsWithChildren } from "react";
+
+import { App } from "./App";
+import styles from "./RepresentationEquilibreeLayout.module.css";
 
 const STEPS = [
   "/commencer",
