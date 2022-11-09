@@ -16,7 +16,7 @@ type Declarant = {
   téléphone: string;
 };
 
-type Entreprise = {
+export type Entreprise = {
   adresse: string;
   code_naf: keyof typeof NAF;
   code_pays?: keyof typeof COUNTRIES | undefined;
@@ -37,6 +37,7 @@ export type RepresentationEquilibreeDataField = {
 
 type DeclarationRepresentationEquilibree = {
   année_indicateurs: number;
+  date?: string;
   fin_période_référence: string;
   publication?: PublicationRepresentationEquilibree | undefined;
 };

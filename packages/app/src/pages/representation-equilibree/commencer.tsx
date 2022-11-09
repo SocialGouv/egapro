@@ -110,7 +110,7 @@ const CommencerPage: NextPageWithLayout = () => {
       const formState = await fetchRepresentationEquilibreeAsFormState(siren, year);
       if (formState) {
         saveFormData({ ...formState, status: "edition" });
-        router.push("/representation-equilibree/recapitulatif");
+        router.push(`/representation-equilibree/${siren}/${year}`);
         return;
       }
       // Otherwise, this is a creation, so we begin with fetchin firm's data.
@@ -135,7 +135,7 @@ const CommencerPage: NextPageWithLayout = () => {
     if (siren === formData.entreprise.siren) {
       router.push(
         formData.status === "edition"
-          ? "/representation-equilibree/recapitulatif"
+          ? `/representation-equilibree/${siren}/${year}`
           : "/representation-equilibree/declarant",
       );
       return;
