@@ -108,7 +108,6 @@ const CommencerPage: NextPageWithLayout = () => {
     try {
       // Synchronise with potential data in DB.
       const formState = await fetchRepresentationEquilibreeAsFormState(siren, year);
-      console.log("formState", formState);
       if (formState) {
         saveFormData({ ...formState, status: "edition" });
         router.push("/representation-equilibree/recapitulatif");
@@ -151,6 +150,14 @@ const CommencerPage: NextPageWithLayout = () => {
       // Rollback to the old Siren.
       setValue("siren", formData.entreprise.siren);
       return;
+    }
+  };
+
+  const confirmResetFormData = () => {
+    if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le formulaire ?")) {
+      resetFormData();
+      setValue("siren", "");
+      setValue("year", "");
     }
   };
 
@@ -220,6 +227,14 @@ const CommencerPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
+              <FormButton
+                type="button"
+                variant="secondary"
+                onClick={confirmResetFormData}
+                disabled={!formData?.entreprise?.siren}
+              >
+                Réinitialiser
+              </FormButton>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>

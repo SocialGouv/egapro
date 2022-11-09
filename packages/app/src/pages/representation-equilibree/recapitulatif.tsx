@@ -1,4 +1,3 @@
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 
 import type { NextPageWithLayout } from "../_app";
@@ -10,7 +9,6 @@ import { formatIsoToFr } from "@common/utils/date";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
-  ButtonAsLink,
   FormButton,
   FormLayout,
   FormLayoutButtonGroup,
@@ -23,7 +21,7 @@ import {
 } from "@design-system";
 import { formatAdresse, useConfig, useFormManager, useUser } from "@services/apiClient";
 
-const title = "Récapitulatif";
+const title = "Récapitulatif de la Représentation Équilibrée";
 
 const Validation: NextPageWithLayout = () => {
   useUser({ redirectTo: "/representation-equilibree/email" });
@@ -40,11 +38,6 @@ const Validation: NextPageWithLayout = () => {
 
     return found?.label;
   };
-
-  const previousPage =
-    formData?.isEcartsMembresCalculable === false && formData?.isEcartsCadresCalculable === false
-      ? "/representation-equilibree/ecarts-membres"
-      : "/representation-equilibree/publication";
 
   return (
     <ClientOnly>
@@ -205,9 +198,9 @@ const Validation: NextPageWithLayout = () => {
 
       <FormLayout>
         <FormLayoutButtonGroup>
-          <NextLink href={previousPage} passHref>
-            <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
-          </NextLink>
+          <FormButton onClick={() => router.push("/representation-equilibree/commencer")} variant="secondary">
+            Précédent
+          </FormButton>
           <FormButton onClick={() => router.push("/representation-equilibree/declarant")}>Modifier</FormButton>
         </FormLayoutButtonGroup>
       </FormLayout>
