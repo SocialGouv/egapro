@@ -37,7 +37,7 @@ const schema = z.object({
   year: zodYearSchema,
 });
 
-const Validation: NextPageWithLayout = () => {
+const Recapitulatif: NextPageWithLayout = () => {
   const { user, loading } = useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { siren: sirenQuery, year: yearQuery } = router.query;
@@ -79,19 +79,22 @@ const Validation: NextPageWithLayout = () => {
 
     return found?.label;
   };
+
   const { déclarant, entreprise, indicateurs, déclaration } =
     repeq?.data || ({} as Partial<RepresentationEquilibreeAPI["data"]>);
 
   // TODO : à gérer dans une ErrorBoundary?
-  if (globalError)
+  if (globalError || error)
     return (
       <div ref={animationParent}>
         <Alert type="error" size="sm" mb="4w">
           <AlertTitle>Erreur</AlertTitle>
-          <p>{globalError}</p>
+          <p>{globalError || error}</p>
         </Alert>
       </div>
     );
+
+  if (sirenQuery === undefined) return null;
 
   if (!repeq) <p>Aucune répartition équilibrée n'a été trouvée.</p>;
 
@@ -263,14 +266,16 @@ const Validation: NextPageWithLayout = () => {
           <FormButton onClick={() => router.push("/representation-equilibree/commencer")} variant="secondary">
             Précédent
           </FormButton>
-          <FormButton onClick={() => router.push("/representation-equilibree/declarant")}>Modifier</FormButton>
+          <FormButton onClick={() => router.push("/representation-equilibree/declarant")} disabled={olderThanOneYear}>
+            Modifier
+          </FormButton>
         </FormLayoutButtonGroup>
       </FormLayout>
     </>
   );
 };
 
-Validation.getLayout = ({ children }) => {
+Recapitulatif.getLayout = ({ children }) => {
   return (
     <RepresentationEquilibreeLayout title="Validation">
       <ClientOnly>
@@ -281,4 +286,4 @@ Validation.getLayout = ({ children }) => {
   );
 };
 
-export default Validation;
+export default Recapitulatif;
