@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
+import { zodSirenSchema } from "@common/utils/form";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
@@ -36,10 +37,7 @@ const OWNER_ERROR = "Erreur : vous n'avez pas les droits sur ce Siren";
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
-    siren: z
-      .string()
-      .min(1, { message: "Le Siren est requis." })
-      .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres."),
+    siren: zodSirenSchema,
   })
   .superRefine(async ({ year, siren }, ctx) => {
     if (siren && siren.length === 9) {
