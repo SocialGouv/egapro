@@ -8,7 +8,6 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../_app";
 import { zodSirenSchema } from "@common/utils/form";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
-import { ClientOnly } from "@components/ClientOnly";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
@@ -160,7 +159,7 @@ const CommencerPage: NextPageWithLayout = () => {
   };
 
   return (
-    <ClientOnly>
+    <AuthenticatedOnly>
       <p>
         <b>
           Si vous souhaitez visualiser ou modifier une déclaration déjà transmise, veuillez saisir les informations
@@ -189,61 +188,63 @@ const CommencerPage: NextPageWithLayout = () => {
         )}
       </div>
 
-      <AuthenticatedOnly>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <FormLayout>
-            <FormGroup>
-              <FormGroupLabel htmlFor="year">
-                Année au titre de laquelle les écarts de représentation sont calculés
-              </FormGroupLabel>
-              <FormSelect
-                id="year"
-                placeholder="Sélectionnez une année"
-                {...register("year")}
-                isError={Boolean(errors.year)}
-                aria-describedby={errors.year && "year-message-error"}
-              >
-                <option value="2021">2021</option>
-              </FormSelect>
-              {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
-            </FormGroup>
-            <FormGroup>
-              <FormGroupLabel htmlFor="siren" hint="9 chiffres">
-                Numéro Siren de l'entreprise
-              </FormGroupLabel>
-              <FormInput
-                id="siren"
-                placeholder="Ex: 504920166, 403461742, 403696735"
-                type="text"
-                {...register("siren")}
-                isError={Boolean(errors.siren)}
-                aria-describedby={errors.siren && "siren-message-error"}
-                maxLength={9}
-              />
-              {errors.siren && errors.siren.message !== OWNER_ERROR && (
-                <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>
-              )}
-            </FormGroup>
-            <FormLayoutButtonGroup>
-              <FormButton
-                type="button"
-                variant="secondary"
-                onClick={confirmResetFormData}
-                disabled={!formData?.entreprise?.siren}
-              >
-                Réinitialiser
-              </FormButton>
-              <FormButton isDisabled={!isValid}>Suivant</FormButton>
-            </FormLayoutButtonGroup>
-          </FormLayout>
-        </form>
-      </AuthenticatedOnly>
-    </ClientOnly>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <FormLayout>
+          <FormGroup>
+            <FormGroupLabel htmlFor="year">
+              Année au titre de laquelle les écarts de représentation sont calculés
+            </FormGroupLabel>
+            <FormSelect
+              id="year"
+              placeholder="Sélectionnez une année"
+              {...register("year")}
+              isError={Boolean(errors.year)}
+              aria-describedby={errors.year && "year-message-error"}
+            >
+              <option value="2021">2021</option>
+            </FormSelect>
+            {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="siren" hint="9 chiffres">
+              Numéro Siren de l'entreprise
+            </FormGroupLabel>
+            <FormInput
+              id="siren"
+              placeholder="Ex: 504920166, 403461742, 403696735"
+              type="text"
+              {...register("siren")}
+              isError={Boolean(errors.siren)}
+              aria-describedby={errors.siren && "siren-message-error"}
+              maxLength={9}
+            />
+            {errors.siren && errors.siren.message !== OWNER_ERROR && (
+              <FormGroupMessage id="siren-message-error">{errors.siren.message}</FormGroupMessage>
+            )}
+          </FormGroup>
+          <FormLayoutButtonGroup>
+            <FormButton
+              type="button"
+              variant="secondary"
+              onClick={confirmResetFormData}
+              disabled={!formData?.entreprise?.siren}
+            >
+              Réinitialiser
+            </FormButton>
+            <FormButton isDisabled={!isValid}>Suivant</FormButton>
+          </FormLayoutButtonGroup>
+        </FormLayout>
+      </form>
+    </AuthenticatedOnly>
   );
 };
 
 CommencerPage.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout title="Commencer">{children}</RepresentationEquilibreeLayout>;
+  return (
+    <RepresentationEquilibreeLayout disableAuth={true} title="Commencer">
+      {children}
+    </RepresentationEquilibreeLayout>
+  );
 };
 
 export default CommencerPage;

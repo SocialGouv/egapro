@@ -10,6 +10,8 @@ import React from "react";
 import { App } from "./App";
 import styles from "./RepresentationEquilibreeLayout.module.css";
 
+import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
+import { ClientOnly } from "@components/ClientOnly";
 import {
   Box,
   Card,
@@ -57,7 +59,8 @@ export const RepresentationEquilibreeLayout = ({
   title,
   children,
   haveBottomSection,
-}: PropsWithChildren<{ haveBottomSection?: boolean; title?: string | undefined }>) => {
+  disableAuth,
+}: PropsWithChildren<{ disableAuth?: boolean; haveBottomSection?: boolean; title?: string | undefined }>) => {
   const { pathname } = useRouter();
 
   const foundStep = STEPS.findIndex(stepName => pathname.endsWith(stepName));
@@ -79,7 +82,7 @@ export const RepresentationEquilibreeLayout = ({
                 {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
               </Stepper>
             )}
-            {children}
+            <ClientOnly>{disableAuth ? children : <AuthenticatedOnly>{children}</AuthenticatedOnly>}</ClientOnly>
           </GridCol>
         </Grid>
       </Container>

@@ -13,10 +13,9 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-import { useConfig, useFormManager, useUser } from "@services/apiClient";
+import { useConfig, useFormManager } from "@services/apiClient";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
 
   // No need to use React Hook Form here, because we only show read only data.

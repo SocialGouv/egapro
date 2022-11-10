@@ -1,35 +1,35 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 
-import type { RepresentationEquilibreeDataField } from "@common/models/representation-equilibree";
-import { buildRepresentation } from "@common/models/representation-equilibree";
-import { ClientOnly } from "@components/ClientOnly";
+import { assertValidFormState, buildRepresentation } from "@common/models/representation-equilibree";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { Alert, AlertTitle, ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
-import { putRepresentationEquilibree, useFormManager, useUser } from "@services/apiClient";
+import { putRepresentationEquilibree, useFormManager } from "@services/apiClient";
 
 const title = "Validation de vos écarts";
 
 const SERVER_ERROR = `Problème lors de l'envoi de la représentation équilibrée.`;
 
 const Validation: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData } = useFormManager();
   const [globalError, setGlobalError] = useState("");
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
-  const [data, setData] = useState<RepresentationEquilibreeDataField>();
-
-  useEffect(() => {
-    setData(buildRepresentation(formData));
-  }, [formData]);
-
+  let data;
+  // Hack to prevent to prerender on the server.
+  // The problem is formData is not null so buildRepresentation is tried and failed.
+  try {
+    assertValidFormState(formData);
+    data = buildRepresentation(formData);
+  } catch (error) {
+    console.debug("Error is possible in SSR");
+  }
   const sendRepresentationEquilibree = async () => {
     try {
       await putRepresentationEquilibree(formData);
@@ -47,7 +47,7 @@ const Validation: NextPageWithLayout = () => {
       : "/representation-equilibree/publication";
 
   return (
-    <ClientOnly>
+    <>
       <h1>{title}</h1>
 
       <div ref={animationParent}>
@@ -87,7 +87,7 @@ const Validation: NextPageWithLayout = () => {
           <FormButton onClick={sendRepresentationEquilibree}>Valider et transmettre les résultats</FormButton>
         </FormLayoutButtonGroup>
       </FormLayout>
-    </ClientOnly>
+    </>
   );
 };
 

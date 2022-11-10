@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { radioBoolToString, radioStringToBool, zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
-import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
@@ -25,7 +24,7 @@ import {
   FormRadioGroupLegend,
   FormTextarea,
 } from "@design-system";
-import { useFormManager, useUser } from "@services/apiClient";
+import { useFormManager } from "@services/apiClient";
 
 const URL_REGEX = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/i;
 
@@ -66,9 +65,8 @@ export type FormTypeOutput = z.infer<typeof formSchema>;
 
 const Publication: NextPageWithLayout = () => {
   const router = useRouter();
-  useUser({ redirectTo: "/representation-equilibree/email" });
-
   const { formData, saveFormData } = useFormManager();
+
   const {
     formState: { errors, isValid },
     handleSubmit,
@@ -100,7 +98,7 @@ const Publication: NextPageWithLayout = () => {
   };
 
   return (
-    <ClientOnly>
+    <>
       <Alert mb="4w">
         <AlertTitle as="h2">Obligation de transparence</AlertTitle>
         <p>
@@ -175,7 +173,7 @@ const Publication: NextPageWithLayout = () => {
           </FormLayoutButtonGroup>
         </FormLayout>
       </form>
-    </ClientOnly>
+    </>
   );
 };
 

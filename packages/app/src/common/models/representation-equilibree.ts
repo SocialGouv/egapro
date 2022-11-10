@@ -76,7 +76,7 @@ type IndicateursRepresentationEquilibree = {
 };
 
 // TODO: better assert for the state. For example, foreign society have a country code but no region, etc..
-const assertValidFormState = (state: FormState): void => {
+export const assertValidFormState = (state: FormState): void => {
   const requiredValues = [
     state.year,
     state.endOfPeriod,
