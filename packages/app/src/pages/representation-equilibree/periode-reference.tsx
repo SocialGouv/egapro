@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { zodDateSchema } from "@common/utils/form";
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -73,6 +74,8 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   return (
     <>
+      <AlertEdition />
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <FormLayout>
           <FormGroup>

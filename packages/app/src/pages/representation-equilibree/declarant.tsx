@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -77,6 +78,7 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   return (
     <>
+      <AlertEdition />
       <p>
         <b>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone.</b>
       </p>

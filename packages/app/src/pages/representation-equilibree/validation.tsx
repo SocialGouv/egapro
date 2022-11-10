@@ -2,22 +2,22 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import invariant from "tiny-invariant";
 
 import type { NextPageWithLayout } from "../_app";
 
-import { assertValidFormState, buildRepresentation } from "@common/models/representation-equilibree";
+import { assertValidFormState, buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
+import { AlertEdition } from "@components/AlertEdition";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { Alert, AlertTitle, ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
-import { putRepresentationEquilibree, useFormManager } from "@services/apiClient";
-
-const title = "Validation de vos écarts";
+import { fetchRepresentationEquilibree, putRepresentationEquilibree, useFormManager } from "@services/apiClient";
 
 const SERVER_ERROR = `Problème lors de l'envoi de la représentation équilibrée.`;
 
 const Validation: NextPageWithLayout = () => {
   const router = useRouter();
-  const { formData } = useFormManager();
+  const { formData, saveFormData } = useFormManager();
   const [globalError, setGlobalError] = useState("");
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
@@ -32,7 +32,15 @@ const Validation: NextPageWithLayout = () => {
   }
   const sendRepresentationEquilibree = async () => {
     try {
+      invariant(formData.entreprise?.siren !== undefined, "Le Siren doit forcément être présent.");
+      invariant(formData.year !== undefined, "L'année doit forcément être présente.");
+
       await putRepresentationEquilibree(formData);
+
+      const repeq = await fetchRepresentationEquilibree(formData.entreprise.siren, formData.year);
+      if (repeq) {
+        saveFormData({ ...buildFormState(repeq.data), status: "edition" });
+      }
       router.push("/representation-equilibree/transmission");
     } catch (error) {
       console.error(error);
@@ -48,7 +56,7 @@ const Validation: NextPageWithLayout = () => {
 
   return (
     <>
-      <h1>{title}</h1>
+      <AlertEdition />
 
       <div ref={animationParent}>
         {globalError && (

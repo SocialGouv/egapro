@@ -8,6 +8,7 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../_app";
 import { motifNonCalculabiliteCadresOptions } from "@common/models/representation-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
+import { AlertEdition } from "@components/AlertEdition";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
@@ -146,6 +147,8 @@ const EcartsCadres: NextPageWithLayout = () => {
 
   return (
     <>
+      <AlertEdition />
+
       <Alert mb="4w">
         <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
         <p>

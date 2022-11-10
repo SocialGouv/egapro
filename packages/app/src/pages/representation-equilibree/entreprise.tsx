@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import type { FormEvent } from "react";
 
 import type { NextPageWithLayout } from "../_app";
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -32,6 +33,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 
   return (
     <>
+      <AlertEdition />
       <p>
         <b>
           Les informations relatives à l'entreprise (raison sociale, Code NAF, Adresse complète) sont renseignées

@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { radioBoolToString, radioStringToBool, zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Alert,
@@ -99,6 +100,8 @@ const Publication: NextPageWithLayout = () => {
 
   return (
     <>
+      <AlertEdition />
+
       <Alert mb="4w">
         <AlertTitle as="h2">Obligation de transparence</AlertTitle>
         <p>
