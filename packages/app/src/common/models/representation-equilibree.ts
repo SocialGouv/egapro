@@ -166,6 +166,7 @@ export const buildFormState = (declaration: RepresentationEquilibreeDataField): 
     nom: déclarant.nom,
     prenom: déclarant.prénom,
     telephone: déclarant.téléphone,
+    accord_rgpd: true, // This data is not stored in DB but is implicitly true.
   };
 
   state.publishingDate = déclaration.publication?.date;
@@ -178,6 +179,9 @@ export const buildFormState = (declaration: RepresentationEquilibreeDataField): 
 
   state.motifEcartsCadresNonCalculable = représentation_équilibrée.motif_non_calculabilité_cadres;
   state.motifEcartsMembresNonCalculable = représentation_équilibrée.motif_non_calculabilité_membres;
+  state.isEcartsCadresCalculable = state.motifEcartsCadresNonCalculable === undefined;
+  state.isEcartsMembresCalculable = state.motifEcartsMembresNonCalculable === undefined;
+
   state.ecartsCadresFemmes = représentation_équilibrée.pourcentage_femmes_cadres;
   state.ecartsCadresHommes = représentation_équilibrée.pourcentage_hommes_cadres;
   state.ecartsMembresFemmes = représentation_équilibrée.pourcentage_femmes_membres;
