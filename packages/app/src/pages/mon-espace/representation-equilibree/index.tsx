@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 import type { NextPageWithLayout } from "../../_app";
-import { StaffOnly } from "@components/AuthenticatedOnly";
+import { StaffOnly } from "@components/StaffOnly";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
   FormButton,

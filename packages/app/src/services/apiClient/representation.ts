@@ -27,11 +27,15 @@ export const fetchRepresentationEquilibreeSendEmail = (siren: string, year: numb
 
 export const useRepresentationEquilibree = (siren: string, year: number) => {
   const { isAuthenticated } = useUser();
-  const { data: repeq, error } = useSWR<RepresentationEquilibreeAPI>(
+  const {
+    data: repeq,
+    error,
+    isValidating: loading,
+  } = useSWR<RepresentationEquilibreeAPI>(
     !siren || !year || !isAuthenticated ? null : `/representation-equilibree/${siren}/${year}`,
   );
 
-  return { repeq, error };
+  return { repeq, error, loading };
 };
 
 // Helper over fetchRepresentationEquilibree to manage 404 error as a regular case & transform in a FormState.
