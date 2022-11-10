@@ -77,8 +77,3 @@ export const fetcher = <T>(key: string, options?: RequestInit): Promise<T> => {
   // TODO: better typings relation with genericFetch
   return genericFetch(API_URL + key, options);
 };
-
-// TODO: move to a better place 🖤
-export const getLink = (uri: string): string => {
-  return API_URL + uri;
-};

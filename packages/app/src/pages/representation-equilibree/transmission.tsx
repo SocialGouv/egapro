@@ -1,6 +1,6 @@
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
@@ -21,7 +21,7 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
-import { fetchRepresentationEquilibreeSendEmail, getLink, useFormManager, useUser } from "@services/apiClient";
+import { API_URL, fetchRepresentationEquilibreeSendEmail, useFormManager, useUser } from "@services/apiClient";
 
 const title = "Votre déclaration a été transmise";
 
@@ -45,11 +45,6 @@ const Transmission: NextPageWithLayout = () => {
       );
     }
   };
-
-  const downloadPdfLink = useMemo(
-    () => getLink(`/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`),
-    [formData.entreprise?.siren, formData.year],
-  );
 
   return (
     <TileSuccess>
@@ -92,7 +87,9 @@ const Transmission: NextPageWithLayout = () => {
               <CardBody>
                 <CardBodyContent>
                   <CardBodyContentTitle>
-                    <a href={downloadPdfLink}>Télécharger le récapitulatif</a>
+                    <a href={`${API_URL}/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`}>
+                      Télécharger le récapitulatif
+                    </a>
                   </CardBodyContentTitle>
                   <CardBodyContentDescription>
                     {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
