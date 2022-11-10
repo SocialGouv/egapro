@@ -1,10 +1,11 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 
+import type { RepresentationEquilibreeDataField } from "@common/models/representation-equilibree";
 import { buildRepresentation } from "@common/models/representation-equilibree";
 import { ClientOnly } from "@components/ClientOnly";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
@@ -22,6 +23,12 @@ const Validation: NextPageWithLayout = () => {
   const { formData } = useFormManager();
   const [globalError, setGlobalError] = useState("");
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
+
+  const [data, setData] = useState<RepresentationEquilibreeDataField>();
+
+  useEffect(() => {
+    setData(buildRepresentation(formData));
+  }, [formData]);
 
   const sendRepresentationEquilibree = async () => {
     try {
@@ -70,7 +77,7 @@ const Validation: NextPageWithLayout = () => {
       </p>
       <h2 className="fr-mt-6w">Récapitulatif</h2>
 
-      <DetailRepresentationEquilibree data={buildRepresentation(formData)} />
+      {data && <DetailRepresentationEquilibree data={data} />}
 
       <FormLayout>
         <FormLayoutButtonGroup>
