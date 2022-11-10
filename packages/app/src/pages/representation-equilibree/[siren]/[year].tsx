@@ -11,8 +11,21 @@ import { OwnersOnly } from "@components/OwnersOnly";
 import { ParamsChecker } from "@components/ParamsChecker";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
-import { FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
-import { useRepresentationEquilibree } from "@services/apiClient";
+import {
+  Card,
+  CardBody,
+  CardBodyContent,
+  CardBodyContentDescription,
+  CardBodyContentDetails,
+  CardBodyContentEnd,
+  CardBodyContentTitle,
+  FormButton,
+  FormLayout,
+  FormLayoutButtonGroup,
+  Grid,
+  GridCol,
+} from "@design-system";
+import { API_URL, useRepresentationEquilibree } from "@services/apiClient";
 
 const title = "Récapitulatif de la Représentation Équilibrée";
 
@@ -48,11 +61,33 @@ const RepresentationEquilibreeWithNavigation = ({ siren, year }: { siren: string
           <FormButton onClick={() => router.push("/representation-equilibree/commencer")} variant="secondary">
             Précédent
           </FormButton>
-          <FormButton onClick={() => router.push("/representation-equilibree/declarant")} disabled={olderThanOneYear}>
-            Modifier
-          </FormButton>
+          {!olderThanOneYear && (
+            <FormButton onClick={() => router.push("/representation-equilibree/declarant")} disabled={olderThanOneYear}>
+              Modifier
+            </FormButton>
+          )}
         </FormLayoutButtonGroup>
       </FormLayout>
+
+      <Grid mt="6w" justifyCenter>
+        <GridCol md={10} lg={8}>
+          <Card size="sm" isEnlargeLink>
+            <CardBody>
+              <CardBodyContent>
+                <CardBodyContentTitle>
+                  <a href={`${API_URL}/representation-equilibree/${siren}/${year}/pdf`}>Télécharger le récapitulatif</a>
+                </CardBodyContentTitle>
+                <CardBodyContentDescription>
+                  Année {year + 1} au titre des données {year}.
+                </CardBodyContentDescription>
+                <CardBodyContentEnd>
+                  <CardBodyContentDetails>PDF</CardBodyContentDetails>
+                </CardBodyContentEnd>
+              </CardBodyContent>
+            </CardBody>
+          </Card>
+        </GridCol>
+      </Grid>
     </>
   );
 };
