@@ -1,3 +1,10 @@
+# [2.27.0](https://github.com/SocialGouv/egapro/compare/v2.26.1...v2.27.0) (2022-11-10)
+
+
+### Features
+
+* add a page for recapitulatif of repartition équilibrée ([#1333](https://github.com/SocialGouv/egapro/issues/1333)) ([3bbb01d](https://github.com/SocialGouv/egapro/commit/3bbb01d636f02b6218491fcdc9d0c93c71842b3f))
+
 ## [2.26.1](https://github.com/SocialGouv/egapro/compare/v2.26.0...v2.26.1) (2022-11-07)
 
 
