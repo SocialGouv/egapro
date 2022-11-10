@@ -47,8 +47,7 @@ export const useUserStore = create<UserStore>()(
  * } = useUser();
  * ```
  */
-export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string } = {}) => {
-  const redirectTo = props.redirectTo;
+export const useUser = ({ checkTokenInURL, redirectTo }: { checkTokenInURL?: boolean; redirectTo?: string } = {}) => {
   const router = useRouter();
 
   const { token, setToken } = useUserStore(state => state);
@@ -63,7 +62,7 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
 
   // Automatic login via URL if checkTokenInURL is present.
   useEffect(() => {
-    if (props.checkTokenInURL) {
+    if (checkTokenInURL) {
       const token = new URLSearchParams(window.location.search).get("token");
 
       // Check also loading to not attempt a login call if a precedent login call is already initiated.
@@ -78,16 +77,16 @@ export const useUser = (props: { checkTokenInURL?: boolean; redirectTo?: string 
         router.push({ search: "" });
       }
     }
-  }, [token, resetFormData, props.checkTokenInURL, router, setToken]);
+  }, [token, resetFormData, checkTokenInURL, router, setToken]);
 
   // Automatic redirect if not authenticated and redirectTo is present.
   useEffect(() => {
-    if (props.redirectTo) {
+    if (redirectTo) {
       if (!token || error) {
         if (redirectTo) router.push(redirectTo);
       }
     }
-  }, [error, token, redirectTo, router, props.redirectTo]);
+  }, [error, token, redirectTo, router]);
 
   return {
     user,
