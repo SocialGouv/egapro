@@ -1,4 +1,5 @@
 import { rest } from "msw";
+import { validEnterprise } from "./useFormManagerMock";
 import { FAKE_SIREN, NOT_LINKED_SIREN, VALID_SIREN } from "./user";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -9,6 +10,11 @@ const handlers = [
     if (searchParams.has("siren") && searchParams.get("siren") === FAKE_SIREN) {
       return res(ctx.status(422), ctx.json({ error: "Num\u00e9ro SIREN invalide: " + FAKE_SIREN }));
     }
+
+    if (searchParams.has("siren") && searchParams.get("siren") === VALID_SIREN) {
+      return res(ctx.status(200), ctx.json(validEnterprise));
+    }
+
     const enterprise = {
       adresse: "",
       code_naf: "",
