@@ -74,15 +74,19 @@ export const RepresentationEquilibreeLayout = ({
       <Container py="6w">
         <Grid justifyCenter>
           <GridCol md={10} lg={8}>
-            {currentStep !== null && (
-              <Stepper mb="6w">
-                <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>
-                  {STEPS_TITLE[currentStep]}
-                </StepperTitle>
-                {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
-              </Stepper>
-            )}
-            <ClientOnly>{disableAuth ? children : <AuthenticatedOnly>{children}</AuthenticatedOnly>}</ClientOnly>
+            <ClientOnly>
+              <AuthenticatedOnly disableAuth={disableAuth}>
+                {currentStep !== null && (
+                  <Stepper mb="6w">
+                    <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>
+                      {STEPS_TITLE[currentStep]}
+                    </StepperTitle>
+                    {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
+                  </Stepper>
+                )}
+                {children}
+              </AuthenticatedOnly>
+            </ClientOnly>
           </GridCol>
         </Grid>
       </Container>
