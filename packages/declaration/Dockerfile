@@ -2,11 +2,9 @@ FROM jekyll/jekyll:4 as builder
 
 WORKDIR /home/jekyll
 
-USER 1000
 COPY . .
 
 ENV GEM_HOME=/home/jekyll/gems
-
 
 ARG EGAPRO_API_URL
 ENV EGAPRO_API_URL=${EGAPRO_API_URL}
