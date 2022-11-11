@@ -2,6 +2,8 @@ FROM jekyll/jekyll:4 as builder
 
 WORKDIR /home/jekyll
 
+USER root
+
 COPY . .
 
 ENV GEM_HOME=/home/jekyll/gems
