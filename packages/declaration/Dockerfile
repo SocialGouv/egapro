@@ -2,7 +2,8 @@ FROM jekyll/jekyll:4 as builder
 
 WORKDIR /home/jekyll
 
-COPY --chown 1000:1000 . .
+USER 1000
+COPY . .
 
 ENV GEM_HOME=/home/jekyll/gems
 
