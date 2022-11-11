@@ -94,6 +94,8 @@ project:
       command: egapro full /mnt/files/full.ndjson
     - name: export-indexes
       command: egapro export-indexes /mnt/files/indexes.csv
+    - name: export-csv
+      command: egapro export-csv /mnt/files/dgt-representation.csv
   whitelist:
     # DigDash dev
     - "94.23.250.213"
@@ -108,6 +110,7 @@ project:
     restricted:
       - dgt.xlsx
       - dgt-representation.xlsx
+      - dgt-representation.csv
       - full.ndjson
       - indexes.csv
 
