@@ -1,3 +1,4 @@
+import type { Entreprise } from "@common/models/representation-equilibree";
 import moize from "moize";
 
 import { fetcher } from "./fetcher";
@@ -14,7 +15,7 @@ export type EntrepriseType = {
   siren?: string;
 };
 
-export const formatAdresse = (entreprise: EntrepriseType) => {
+export const formatAdresse = (entreprise: Entreprise | EntrepriseType) => {
   return [entreprise.adresse, entreprise.code_postal, entreprise.commune];
 };
 

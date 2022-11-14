@@ -1,6 +1,6 @@
 import { formatTimestampToFr } from "@common/utils/date";
 import { normalizeQueryParam } from "@common/utils/router";
-import { StaffOnly } from "@components/AuthenticatedOnly";
+import { StaffOnly } from "@components/StaffOnly";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { Alert } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -14,6 +14,7 @@ const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
 const title = "Représentation équilibrée";
 
+// TODO: Remove or refactor with DetailRepartitionEquilibree component.
 const RepresentationEquilibreeDetailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();

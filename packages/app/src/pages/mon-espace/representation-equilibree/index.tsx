@@ -1,5 +1,5 @@
-import { StaffOnly } from "@components/AuthenticatedOnly";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
+import { StaffOnly } from "@components/StaffOnly";
 import {
   FormButton,
   FormGroup,

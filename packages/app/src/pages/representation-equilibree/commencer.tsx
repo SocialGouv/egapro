@@ -1,3 +1,4 @@
+import { zodSirenSchema } from "@common/utils/form";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
@@ -18,13 +19,12 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   checkSiren,
-  fetchRepresentationEquilibree,
+  fetchRepresentationEquilibreeAsFormState,
   fetchSiren,
   ownersForSiren,
   useFormManager,
   useUser,
 } from "@services/apiClient";
-import { ApiError } from "next/dist/server/api-utils";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -37,10 +37,7 @@ const OWNER_ERROR = "Erreur : vous n'avez pas les droits sur ce Siren";
 const formSchema = z
   .object({
     year: z.string().min(1, "L'année est requise."), // No control needed because this is a select with options we provide.
-    siren: z
-      .string()
-      .min(1, { message: "Le Siren est requis" })
-      .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres."),
+    siren: zodSirenSchema,
   })
   .superRefine(async ({ year, siren }, ctx) => {
     if (siren && siren.length === 9) {
@@ -75,7 +72,7 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/representation-equilibree/email", checkTokenInURL: true });
+  useUser({ checkTokenInURL: true });
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
@@ -105,46 +102,60 @@ const CommencerPage: NextPageWithLayout = () => {
     setGlobalError("");
   }, [siren]);
 
-  const onSubmit = async ({ year, siren }: FormType) => {
-    const startFresh = async () => {
-      try {
-        const entreprise = await fetchSiren(siren, Number(year));
-        saveFormData({ entreprise, year: Number(year) });
-        router.push("/representation-equilibree/declarant");
-      } catch (error) {
-        console.error("erreur dans fetchSiren");
-      }
-    };
-
+  const saveAndGoNext = async (siren: string, year: number) => {
     try {
-      const repeq = await fetchRepresentationEquilibree(siren, Number(year));
-      if (repeq) {
-        setAlreadyPresent(true);
+      // Synchronise with potential data in DB.
+      const formState = await fetchRepresentationEquilibreeAsFormState(siren, year);
+      if (formState) {
+        saveFormData({ ...formState, status: "edition" });
+        router.push(`/representation-equilibree/${siren}/${year}`);
         return;
       }
+      // Otherwise, this is a creation, so we begin with fetchin firm's data.
+      const entreprise = await fetchSiren(siren, Number(year));
+      saveFormData({ entreprise, year: Number(year), status: "creation" });
+      router.push("/representation-equilibree/declarant");
+      return;
     } catch (error) {
-      if (error instanceof ApiError && error.statusCode === 404) {
-        // We can safely ignore this error, because this is the normal case.
-      } else {
-        // We can't continue in this case, because the backend is not ready.
-        console.error("Unexpected API error", error);
-        setGlobalError("Le service est indisponible pour l'instant. Veuillez réessayer plus tard.");
-        return;
-      }
+      // We can't continue in this case, because the backend is not ready.
+      console.error("Unexpected API error", error);
+      setGlobalError("Le service est indisponible pour l'instant. Veuillez réessayer plus tard.");
     }
+  };
 
-    if (formData.entreprise?.siren && siren !== formData.entreprise.siren) {
-      if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
-        // Start a new declaration of representation.
-        resetFormData();
-        await startFresh();
-      } else {
-        // Rollback.
-        setValue("siren", formData.entreprise.siren);
-        return;
-      }
+  const onSubmit = async ({ year, siren }: FormType) => {
+    // If no data are present in session storage.
+    if (!formData.entreprise?.siren) {
+      await saveAndGoNext(siren, Number(year));
+      return;
+    }
+    // If data are present in session storage and Siren has not been changed.
+    if (siren === formData.entreprise.siren) {
+      router.push(
+        formData.status === "edition"
+          ? `/representation-equilibree/${siren}/${year}`
+          : "/representation-equilibree/declarant",
+      );
+      return;
+    }
+    // If Siren has been changed, we ask the user if the user really want to erase the data.
+    if (confirm(buildConfirmMessage(formData.entreprise.siren))) {
+      // Start a new declaration of representation.
+      resetFormData();
+      await saveAndGoNext(siren, Number(year));
+      return;
     } else {
-      await startFresh();
+      // Rollback to the old Siren.
+      setValue("siren", formData.entreprise.siren);
+      return;
+    }
+  };
+
+  const confirmResetFormData = () => {
+    if (confirm("Les données ne sont pas sauvegardées, êtes-vous sûr de vouloir réinitialiser le formulaire ?")) {
+      resetFormData();
+      setValue("siren", "");
+      setValue("year", "");
     }
   };
 
@@ -214,6 +225,14 @@ const CommencerPage: NextPageWithLayout = () => {
               )}
             </FormGroup>
             <FormLayoutButtonGroup>
+              <FormButton
+                type="button"
+                variant="secondary"
+                onClick={confirmResetFormData}
+                disabled={!formData?.entreprise?.siren}
+              >
+                Réinitialiser
+              </FormButton>
               <FormButton isDisabled={!isValid}>Suivant</FormButton>
             </FormLayoutButtonGroup>
           </FormLayout>

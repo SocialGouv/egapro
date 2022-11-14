@@ -3,7 +3,7 @@ import { ApiError } from "next/dist/server/api-utils";
 import type { Any } from "../../common/utils/types";
 import { useUserStore } from "./useUser";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
 
@@ -76,9 +76,4 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
 export const fetcher = <T>(key: string, options?: RequestInit): Promise<T> => {
   // TODO: better typings relation with genericFetch
   return genericFetch(API_URL + key, options);
-};
-
-// TODO: move to a better place 🖤
-export const getLink = (uri: string): string => {
-  return API_URL + uri;
 };

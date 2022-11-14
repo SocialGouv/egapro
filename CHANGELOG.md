@@ -1,3 +1,24 @@
+# [2.27.0](https://github.com/SocialGouv/egapro/compare/v2.26.1...v2.27.0) (2022-11-10)
+
+
+### Features
+
+* add a page for recapitulatif of repartition équilibrée ([#1333](https://github.com/SocialGouv/egapro/issues/1333)) ([3bbb01d](https://github.com/SocialGouv/egapro/commit/3bbb01d636f02b6218491fcdc9d0c93c71842b3f))
+
+## [2.26.1](https://github.com/SocialGouv/egapro/compare/v2.26.0...v2.26.1) (2022-11-07)
+
+
+### Bug Fixes
+
+* storybook dockerfile ([#1330](https://github.com/SocialGouv/egapro/issues/1330)) ([eaebd85](https://github.com/SocialGouv/egapro/commit/eaebd858359b4b6b82eeb744bedcc992e3ddee47))
+
+# [2.26.0](https://github.com/SocialGouv/egapro/compare/v2.25.0...v2.26.0) (2022-11-04)
+
+
+### Features
+
+* integration tests  for page commencer ([#1317](https://github.com/SocialGouv/egapro/issues/1317)) ([5f3cf8b](https://github.com/SocialGouv/egapro/commit/5f3cf8b1439307bbca63e494193fa121d2d50c37))
+
 # [2.25.0](https://github.com/SocialGouv/egapro/compare/v2.24.7...v2.25.0) (2022-11-03)
 
 
