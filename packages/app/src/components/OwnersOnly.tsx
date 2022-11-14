@@ -1,9 +1,8 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useUser } from "@services/apiClient";
 import type { PropsWithChildren } from "react";
-import React from "react";
 
 import { Alert, AlertTitle } from "../design-system/base/Alert";
-import { useUser } from "@services/apiClient";
 
 export const OwnersOnly = ({
   children,

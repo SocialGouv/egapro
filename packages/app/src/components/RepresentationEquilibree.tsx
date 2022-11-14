@@ -1,3 +1,11 @@
+import type { RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
+import {
+  motifNonCalculabiliteCadresOptions,
+  motifNonCalculabiliteMembresOptions,
+} from "@common/models/representation-equilibree";
+import { formatIsoToFr } from "@common/utils/date";
+import { formatAdresse, useConfig } from "@services/apiClient";
+
 import {
   RecapSection,
   RecapSectionItem,
@@ -6,13 +14,6 @@ import {
   RecapSectionItems,
   RecapSectionTitle,
 } from "../design-system/base/RecapSection";
-import type { RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
-import {
-  motifNonCalculabiliteCadresOptions,
-  motifNonCalculabiliteMembresOptions,
-} from "@common/models/representation-equilibree";
-import { formatIsoToFr } from "@common/utils/date";
-import { formatAdresse, useConfig } from "@services/apiClient";
 
 /**
  * Stateless component to display Représentation équilibrée's informations.

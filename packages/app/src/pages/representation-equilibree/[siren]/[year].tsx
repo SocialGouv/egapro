@@ -1,16 +1,10 @@
-import { add, isAfter } from "date-fns";
-import { useRouter } from "next/router";
-import { z } from "zod";
-
-import type { NextPageWithLayout } from "../../_app";
-
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { OwnersOnly } from "@components/OwnersOnly";
 import { ParamsChecker } from "@components/ParamsChecker";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
-import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   Card,
   CardBody,
@@ -26,6 +20,11 @@ import {
   GridCol,
 } from "@design-system";
 import { API_URL, useRepresentationEquilibree } from "@services/apiClient";
+import { add, isAfter } from "date-fns";
+import { useRouter } from "next/router";
+import { z } from "zod";
+
+import type { NextPageWithLayout } from "../../_app";
 
 const title = "Récapitulatif de la Représentation Équilibrée";
 

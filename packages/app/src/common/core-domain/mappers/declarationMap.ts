@@ -1,4 +1,15 @@
 import type { DeclarationRaw } from "@api/core-domain/infra/db/raw";
+import type {
+  AnneeIndicateur,
+  CategoriesSimples,
+  CodeNaf,
+  CodePays,
+  Departement,
+  Effectif,
+  Entreprise as Entreprises,
+  Region,
+  Remunerations,
+} from "@common/models/generated";
 import type { Mapper } from "@common/shared-domain";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
@@ -171,16 +182,11 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
 };
 
 function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
-  type Categories = NonNullable<import("@common/models/generated").Remunerations["catégories"]>[number];
-  type Entreprise = import("@common/models/generated").Entreprise[number];
-  type Tranche = NonNullable<import("@common/models/generated").Effectif["tranche"]>;
-  type AnneeIndicateur = import("@common/models/generated").AnneeIndicateur;
-  type CodeNaf = import("@common/models/generated").CodeNaf;
-  type CodePays = import("@common/models/generated").CodePays;
-  type Departement = import("@common/models/generated").Departement;
-  type Region = import("@common/models/generated").Region;
+  type Categories = NonNullable<Remunerations["catégories"]>[number];
+  type Entreprise = Entreprises[number];
+  type Tranche = NonNullable<Effectif["tranche"]>;
 
-  const defaultCategories: import("@common/models/generated").CategoriesSimples = [null, null, null, null];
+  const defaultCategories: CategoriesSimples = [null, null, null, null];
   return {
     déclarant: {
       email: data.declarant.email.getValue(),

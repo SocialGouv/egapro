@@ -1,7 +1,7 @@
 import { formatTimestampToFr } from "@common/utils/date";
 import { normalizeQueryParam } from "@common/utils/router";
-import { StaffOnly } from "@components/StaffOnly";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
+import { StaffOnly } from "@components/StaffOnly";
 import { Alert } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useRepresentationEquilibree } from "@services/apiClient";
