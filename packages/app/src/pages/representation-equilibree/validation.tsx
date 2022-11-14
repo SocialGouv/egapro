@@ -6,7 +6,7 @@ import invariant from "tiny-invariant";
 
 import type { NextPageWithLayout } from "../_app";
 
-import { assertValidFormState, buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
+import { buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
 import { AlertEdition } from "@components/AlertEdition";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
@@ -25,10 +25,9 @@ const Validation: NextPageWithLayout = () => {
   // Hack to prevent to prerender on the server.
   // The problem is formData is not null so buildRepresentation is tried and failed.
   try {
-    assertValidFormState(formData);
     data = buildRepresentation(formData);
   } catch (error) {
-    console.debug("Error is possible in SSR");
+    console.debug("An error is possible in SSR, we can ignore it.");
   }
   const sendRepresentationEquilibree = async () => {
     try {
