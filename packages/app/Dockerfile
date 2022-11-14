@@ -32,9 +32,6 @@ RUN yarn build && \
 # Runner
 FROM node:$NODE_VERSION AS runner
 
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL $NEXT_PUBLIC_API_URL
-
 WORKDIR /app
 
 ENV NODE_ENV production
