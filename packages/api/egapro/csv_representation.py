@@ -16,7 +16,7 @@ from egapro.utils import flatten, remove_one_year
 def isodatetime(val):
     if not val:
         return None
-    # Excel doesn't know nothing about timezone, so let's transpose.
+    # Excel doesn't know anything about timezone, so let's transpose.
     when = arrow.get(val).to("Europe/Paris").naive
     return when
 
