@@ -1,3 +1,10 @@
+# [2.28.0](https://github.com/SocialGouv/egapro/compare/v2.27.0...v2.28.0) (2022-11-14)
+
+
+### Features
+
+* édition d'une repeq avec un bandeau sur toutes les pages ([#1351](https://github.com/SocialGouv/egapro/issues/1351)) ([e85fcb6](https://github.com/SocialGouv/egapro/commit/e85fcb6f840e0a97bdb3ec641605f449df1af59f))
+
 # [2.27.0](https://github.com/SocialGouv/egapro/compare/v2.26.1...v2.27.0) (2022-11-10)
 
 
