@@ -50,7 +50,7 @@ const formSchema = z
         if (!motifNonCalculabiliteCadresOptions.find(elt => elt.value === val)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Le champ est requiss",
+            message: "Le champ est requis",
           });
           return z.NEVER;
         }
