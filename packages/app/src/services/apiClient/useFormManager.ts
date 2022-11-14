@@ -8,6 +8,7 @@ import type {
 } from "@common/models/representation-equilibree";
 
 export type FormState = {
+  date?: string | undefined; // Only filled by the backend.
   declarant: {
     accord_rgpd?: boolean | undefined;
     email: string;

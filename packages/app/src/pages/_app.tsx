@@ -32,6 +32,7 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
     <SWRConfig
       value={{
         fetcher,
+        revalidateOnFocus: false,
         onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
           // Never retry on 401 Unauthorized.
           if (error.statusCode === 401) return;

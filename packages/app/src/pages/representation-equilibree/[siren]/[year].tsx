@@ -5,8 +5,6 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../../_app";
 
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
-import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
-import { ClientOnly } from "@components/ClientOnly";
 import { OwnersOnly } from "@components/OwnersOnly";
 import { ParamsChecker } from "@components/ParamsChecker";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
@@ -106,16 +104,14 @@ const RecapitulatifPage: NextPageWithLayout = () => {
   const year = Number(yearQuery as string);
 
   return (
-    <ClientOnly>
+    <>
       <h1>{title}</h1>
-      <AuthenticatedOnly>
-        <ParamsChecker schema={schemaParams}>
-          <OwnersOnly siren={siren}>
-            <RepresentationEquilibreeWithNavigation siren={siren} year={year} />
-          </OwnersOnly>
-        </ParamsChecker>
-      </AuthenticatedOnly>
-    </ClientOnly>
+      <ParamsChecker schema={schemaParams}>
+        <OwnersOnly siren={siren}>
+          <RepresentationEquilibreeWithNavigation siren={siren} year={year} />
+        </OwnersOnly>
+      </ParamsChecker>
+    </>
   );
 };
 

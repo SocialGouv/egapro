@@ -21,12 +21,11 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
-import { API_URL, fetchRepresentationEquilibreeSendEmail, useFormManager, useUser } from "@services/apiClient";
+import { API_URL, fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
 
 const title = "Votre déclaration a été transmise";
 
 const Transmission: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData, resetFormData } = useFormManager();
   const [receiptProcessing, setReceiptProcessing] = useState(false);

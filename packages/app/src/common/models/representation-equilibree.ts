@@ -76,7 +76,7 @@ type IndicateursRepresentationEquilibree = {
 };
 
 // TODO: better assert for the state. For example, foreign society have a country code but no region, etc..
-const assertValidFormState = (state: FormState): void => {
+export const assertValidFormState = (state: FormState): void => {
   const requiredValues = [
     state.year,
     state.endOfPeriod,
@@ -122,6 +122,7 @@ export const buildRepresentation = (state: FormState): RepresentationEquilibreeD
   };
 
   const déclaration: DeclarationRepresentationEquilibree = {
+    date: state.date,
     année_indicateurs: state.year as number,
     fin_période_référence: state.endOfPeriod as string,
     ...((!state.motifEcartsCadresNonCalculable || !state.motifEcartsMembresNonCalculable) && { publication }),
@@ -168,6 +169,8 @@ export const buildFormState = (declaration: RepresentationEquilibreeDataField): 
     telephone: déclarant.téléphone,
     accord_rgpd: true, // This data is not stored in DB but is implicitly true.
   };
+
+  if (declaration.déclaration.date) state.date = declaration.déclaration.date;
 
   state.publishingDate = déclaration.publication?.date;
   state.publishingContent = déclaration.publication?.modalités;
