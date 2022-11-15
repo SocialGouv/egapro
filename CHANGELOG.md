@@ -1,3 +1,10 @@
+# [2.29.0](https://github.com/SocialGouv/egapro/compare/v2.28.1...v2.29.0) (2022-11-15)
+
+
+### Features
+
+* add publication date check ([#1371](https://github.com/SocialGouv/egapro/issues/1371)) ([9ea5ad2](https://github.com/SocialGouv/egapro/commit/9ea5ad2f825658b27cd788a1c845d2fcad9acc61)), closes [#1357](https://github.com/SocialGouv/egapro/issues/1357) [#1356](https://github.com/SocialGouv/egapro/issues/1356) [#1369](https://github.com/SocialGouv/egapro/issues/1369)
+
 ## [2.28.1](https://github.com/SocialGouv/egapro/compare/v2.28.0...v2.28.1) (2022-11-15)
 
 
