@@ -7,6 +7,9 @@ import { theme } from "../../theme";
 
 import { Footer } from "../ds/Footer";
 import { Header } from "@components/ds/Header";
+
+const DEFAULT_TITLE = "Egapro";
+
 /**
  * Layout for consulter pages.
  */
@@ -14,7 +17,7 @@ export const ConsulterIndexLayout = ({ children, title }: PropsWithChildren & { 
   return (
     <ChakraProvider theme={theme}>
       <Head>
-        <title>{title && title + " - "} Egapro</title>
+        <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
       <Flex direction="column" minHeight="100vh">
         <Header />

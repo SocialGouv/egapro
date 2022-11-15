@@ -28,6 +28,8 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   );
 };
 
+const DEFAULT_TITLE = "Egapro";
+
 export const RepresentationEquilibreeStartLayout = ({
   children,
   title,
@@ -35,7 +37,7 @@ export const RepresentationEquilibreeStartLayout = ({
   return (
     <App>
       <Head>
-        <title>{title && title + " - "} Représentation équilibrée Egapro</title>
+        <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
 
       <Container py="6w">
