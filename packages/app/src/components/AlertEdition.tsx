@@ -14,7 +14,7 @@ export const AlertEdition = () => {
   return (
     <Alert type="warning" size="sm" mb="4w">
       <AlertTitle>Attention</AlertTitle>
-      {!olderThanOneYear ? (
+      {olderThanOneYear ? (
         <p>
           Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est écoulé.
         </p>
