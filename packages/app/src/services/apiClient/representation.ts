@@ -27,13 +27,11 @@ export const fetchRepresentationEquilibreeSendEmail = (siren: string, year: numb
 
 export const useRepresentationEquilibree = (siren: string, year: number) => {
   const { isAuthenticated } = useUser();
-  const {
-    data: repeq,
-    error,
-    isValidating: loading,
-  } = useSWR<RepresentationEquilibreeAPI>(
+  const { data: repeq, error } = useSWR<RepresentationEquilibreeAPI>(
     !siren || !year || !isAuthenticated ? null : `/representation-equilibree/${siren}/${year}`,
   );
+
+  const loading = !siren || !year || !isAuthenticated ? false : !repeq && !error ? true : false;
 
   return { repeq, error, loading };
 };

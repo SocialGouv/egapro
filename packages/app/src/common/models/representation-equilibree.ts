@@ -91,8 +91,10 @@ export const assertValidFormState = (state: FormState): void => {
     // state.entreprise?.région,
     state.entreprise?.raison_sociale,
     state.entreprise?.siren,
-    state.motifEcartsCadresNonCalculable || (state.ecartsCadresFemmes && state.ecartsCadresHommes),
-    state.motifEcartsMembresNonCalculable || (state.ecartsMembresFemmes && state.ecartsMembresHommes),
+    state.motifEcartsCadresNonCalculable ||
+      (state.ecartsCadresFemmes !== undefined && state.ecartsCadresHommes !== undefined),
+    state.motifEcartsMembresNonCalculable ||
+      (state.ecartsMembresFemmes !== undefined && state.ecartsMembresHommes !== undefined),
   ];
 
   requiredValues.map(value => {
