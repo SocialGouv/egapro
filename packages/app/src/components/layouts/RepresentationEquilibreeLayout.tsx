@@ -52,6 +52,8 @@ const STEPS_TITLE = [
   "Validation de vos écarts",
 ];
 
+const DEFAULT_TITLE = "Représentation équilibrée Egapro";
+
 /**
  * Layout for authenticated users in représentation équilibrée.
  */
@@ -69,7 +71,7 @@ export const RepresentationEquilibreeLayout = ({
   return (
     <App>
       <Head>
-        <title>{title && title + " - "} Représentation équilibrée Egapro</title>
+        <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
       <Container py="6w">
         <Grid justifyCenter>
