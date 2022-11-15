@@ -77,10 +77,10 @@ describe("Ecarts membres page", () => {
       name: /suivant/i,
     });
 
-    // when step 1
+    // when clicks "Oui"
     await userEvent.click(ouiInput);
 
-    // expected 1
+    // expected
     await waitFor(() => {
       expect(ouiInput).toBeChecked();
       expect(nonInput).not.toBeChecked();
@@ -134,13 +134,13 @@ describe("Ecarts membres page", () => {
         name: /motif de non calculabilité/i,
       }),
     ).not.toBeInTheDocument();
-    // when step 1
+    // when clicks "Non"
     await userEvent.click(nonInput);
 
     const motif = screen.getByRole("combobox", {
       name: /motif de non calculabilité/i,
     });
-    // expected 1
+    // expected
     await waitFor(() => {
       expect(ouiInput).not.toBeChecked();
       expect(nonInput).toBeChecked();
@@ -173,10 +173,10 @@ describe("Ecarts membres page", () => {
       name: /suivant/i,
     });
 
-    // when step 1
+    // when user clicks "Oui"
     await userEvent.click(ouiInput);
 
-    // expected 1
+    // expected
     const percentFemmes = screen.getByRole("spinbutton", {
       name: /pourcentage de femmes parmi les membres des instances dirigeantes/i,
     });
@@ -194,11 +194,11 @@ describe("Ecarts membres page", () => {
       expect(submitButton).toBeDisabled();
     });
 
-    // when step 2
+    // when user type women percentage first
 
     await userEvent.type(percentFemmes, "30");
 
-    // expected step 2
+    // expected
     await waitFor(() => {
       expect(percentHommes).toHaveValue(70);
       expect(submitButton).toBeEnabled();
@@ -231,13 +231,13 @@ describe("Ecarts membres page", () => {
       name: /suivant/i,
     });
 
-    // when step 1
+    // when user clicks "Non"
     await userEvent.click(nonInput);
 
     const motif = screen.getByRole("combobox", {
       name: /motif de non calculabilité/i,
     });
-    // expected 1
+    // expected
     await waitFor(() => {
       expect(ouiInput).not.toBeChecked();
       expect(nonInput).toBeChecked();
@@ -248,16 +248,16 @@ describe("Ecarts membres page", () => {
     });
 
     expect(motif).toHaveValue("");
-    // when step 2
+    // when user selects "aucune_instance_dirigeante"
     await userEvent.selectOptions(motif, "aucune_instance_dirigeante");
 
-    // expected step 2
+    // expected
     expect(submitButton).toBeEnabled();
 
-    // when step 3
+    // when user clicks on submit
     await userEvent.click(submitButton);
 
-    // expected step 3
+    // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
       expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/publication", {
