@@ -2,8 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { isAfter, parseISO } from "date-fns";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useMount } from "react-use";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
@@ -92,10 +92,13 @@ const Publication: NextPageWithLayout = () => {
     },
   });
 
-  useMount(() => {
+  useEffect(() => {
     // We run the validation because we need to show an error if publication date is before end of period, at React hydration.
-    trigger();
-  });
+    // We use the fact that other infos are already present in formData, to differenciate whether this page has been previously filled or not.
+    if (formData?.publishingContent || formData?.publishingWebsiteUrl) {
+      trigger();
+    }
+  }, [formData?.publishingWebsiteUrl, formData?.publishingContent, trigger]);
 
   const hasWebsite = watch("hasWebsite");
 
