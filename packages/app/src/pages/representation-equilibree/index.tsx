@@ -25,7 +25,6 @@ import {
 export const RepresentationEquilibree: NextPageWithLayout = () => (
   <>
     <Head>
-      <title>Déclaration des écarts de représentation F/H dans les postes de direction</title>
       <meta
         name="description"
         content="La loi du 24 décembre 2021 visant à accélérer l’égalité économique et professionnelle a créé une obligation de représentation équilibrée entre les femmes et les hommes parmi les cadres dirigeants et les membres des instances dirigeantes des grandes entreprises, accompagnée d’une obligation de transparence en la matière."
@@ -145,7 +144,11 @@ export const RepresentationEquilibree: NextPageWithLayout = () => (
 );
 
 RepresentationEquilibree.getLayout = ({ children }) => {
-  return <BasicLayout>{children}</BasicLayout>;
+  return (
+    <BasicLayout title="Déclaration des écarts de représentation F/H dans les postes de direction">
+      {children}
+    </BasicLayout>
+  );
 };
 
 export default RepresentationEquilibree;
