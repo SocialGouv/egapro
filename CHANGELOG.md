@@ -1,3 +1,10 @@
+## [2.28.1](https://github.com/SocialGouv/egapro/compare/v2.28.0...v2.28.1) (2022-11-15)
+
+
+### Bug Fixes
+
+* validating-swr + issue [#1350](https://github.com/SocialGouv/egapro/issues/1350) ([#1358](https://github.com/SocialGouv/egapro/issues/1358)) ([9b39e1e](https://github.com/SocialGouv/egapro/commit/9b39e1e6d443da061bd48b13a67ebf7c24b63993))
+
 # [2.28.0](https://github.com/SocialGouv/egapro/compare/v2.27.0...v2.28.0) (2022-11-14)
 
 
