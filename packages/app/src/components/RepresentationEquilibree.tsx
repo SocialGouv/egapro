@@ -37,14 +37,16 @@ export const DetailRepresentationEquilibree = ({ data }: { data: RepresentationE
         Déclaration des écarts de représentation Femmes/Hommes pour l’année {déclaration.année_indicateurs + 1} au titre
         des données {déclaration.année_indicateurs}.
       </p>
-      <RecapSection>
-        <RecapSectionTitle>Date de déclaration</RecapSectionTitle>
-        <RecapSectionItems>
-          <RecapSectionItem>
-            <RecapSectionItemContent>{déclaration?.date && formatIsoToFr(déclaration?.date)}</RecapSectionItemContent>
-          </RecapSectionItem>
-        </RecapSectionItems>
-      </RecapSection>{" "}
+      {déclaration?.date && (
+        <RecapSection>
+          <RecapSectionTitle>Date de déclaration</RecapSectionTitle>
+          <RecapSectionItems>
+            <RecapSectionItem>
+              <RecapSectionItemContent>{déclaration?.date && formatIsoToFr(déclaration?.date)}</RecapSectionItemContent>
+            </RecapSectionItem>
+          </RecapSectionItems>
+        </RecapSection>
+      )}
       <RecapSection>
         <RecapSectionTitle>Informations déclarant</RecapSectionTitle>
         <RecapSectionItems>
