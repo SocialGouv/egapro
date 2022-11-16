@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
+import { formatIsoToFr } from "@common/utils/date";
 import { radioBoolToString, radioStringToBool, zodDateSchema, zodRadioInputSchema } from "@common/utils/form";
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
@@ -39,7 +40,11 @@ const formSchemaBuilder = ({ endOfPeriod }: FormState) =>
       publishingContent: z.string().trim().optional(),
       publishingDate: zodDateSchema.refine(
         date => (endOfPeriod ? isAfter(parseISO(date), parseISO(endOfPeriod)) : true),
-        { message: "La date de publication ne peut précéder la date de fin de période de référence" },
+        {
+          message: `La date de publication ne peut précéder la date de fin de la période de référence ${
+            endOfPeriod ? "(" + formatIsoToFr(endOfPeriod) + ")" : ""
+          }`,
+        },
       ),
       publishingWebsiteUrl: z.string().trim().optional(),
     })
