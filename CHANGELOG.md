@@ -1,3 +1,10 @@
+## [2.29.1](https://github.com/SocialGouv/egapro/compare/v2.29.0...v2.29.1) (2022-11-16)
+
+
+### Bug Fixes
+
+* use simpleLabel instead of label for API recherche entreprise ([#1375](https://github.com/SocialGouv/egapro/issues/1375)) ([419620c](https://github.com/SocialGouv/egapro/commit/419620c91bee77df17a4d3800953792aec850798))
+
 # [2.29.0](https://github.com/SocialGouv/egapro/compare/v2.28.1...v2.29.0) (2022-11-15)
 
 
