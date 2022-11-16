@@ -1,3 +1,10 @@
+# [2.30.0](https://github.com/SocialGouv/egapro/compare/v2.29.1...v2.30.0) (2022-11-16)
+
+
+### Features
+
+* improve error mesage for date publication ([#1380](https://github.com/SocialGouv/egapro/issues/1380)) ([a0f897f](https://github.com/SocialGouv/egapro/commit/a0f897f638e92ce82a2dbf1ee62265a0188fdc87))
+
 ## [2.29.1](https://github.com/SocialGouv/egapro/compare/v2.29.0...v2.29.1) (2022-11-16)
 
 
