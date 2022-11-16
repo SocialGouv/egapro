@@ -3,7 +3,6 @@
 import re
 from datetime import date
 
-import arrow
 from naf import DB as NAF
 from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
@@ -11,26 +10,6 @@ from progressist import ProgressBar
 
 from egapro import config, constants, db
 from egapro.utils import flatten, remove_one_year
-
-
-def isodatetime(val):
-    if not val:
-        return None
-    # Excel doesn't know anything about timezone, so let's transpose.
-    when = arrow.get(val).to("Europe/Paris").naive
-    return when
-
-
-def isodate(val):
-    if not val:
-        return None
-    return date.fromisoformat(val)
-
-
-def code_naf(code):
-    if not code:
-        return None
-    return f"{code} - {NAF[code]}"
 
 
 async def get_headers_columns():
@@ -59,6 +38,8 @@ async def get_headers_columns():
 
 WHITE_SPACES = re.compile(r"\s+")
 
+def code_naf(code):
+    return None if not code else f"{code} - {NAF[code]}"
 
 def clean_cell(value):
     if isinstance(value, str):
