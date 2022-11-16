@@ -8,7 +8,7 @@ import { z } from "zod";
 import type { NextPageWithLayout } from "../_app";
 import { motifNonCalculabiliteCadresOptions } from "@common/models/representation-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
-import { ClientOnly } from "@components/ClientOnly";
+import { AlertEdition } from "@components/AlertEdition";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
@@ -39,7 +39,7 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
-import { useFormManager, useUser } from "@services/apiClient";
+import { useFormManager } from "@services/apiClient";
 
 const formSchema = z
   .object({
@@ -50,7 +50,7 @@ const formSchema = z
         if (!motifNonCalculabiliteCadresOptions.find(elt => elt.value === val)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Le champ est requiss",
+            message: "Le champ est requis",
           });
           return z.NEVER;
         }
@@ -93,7 +93,6 @@ export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsCadres
 };
 
 const EcartsCadres: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const methods = useForm<FormTypeInput>({
@@ -147,7 +146,9 @@ const EcartsCadres: NextPageWithLayout = () => {
   }, [clearErrors, isEcartsCadresCalculable, setValue]);
 
   return (
-    <ClientOnly>
+    <>
+      <AlertEdition />
+
       <Alert mb="4w">
         <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
         <p>
@@ -251,12 +252,16 @@ const EcartsCadres: NextPageWithLayout = () => {
           </Card>
         </GridCol>
       </Grid>
-    </ClientOnly>
+    </>
   );
 };
 
 EcartsCadres.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return (
+    <RepresentationEquilibreeLayout title="Écarts de représentation parmi les cadres dirigeants">
+      {children}
+    </RepresentationEquilibreeLayout>
+  );
 };
 
 export default EcartsCadres;

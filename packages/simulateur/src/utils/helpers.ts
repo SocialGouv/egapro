@@ -35,7 +35,7 @@ export function displayFractionPercent(num: number, digits = 2): string {
 }
 
 export function displayFractionPercentWithEmptyData(num?: number, digits = 2): string {
-  return num ? displayFractionPercent(num, digits) : "0%"
+  return num ? displayFractionPercent(num, digits) : ""
 }
 
 export function displayPercent(num: number, digits = 1): string {

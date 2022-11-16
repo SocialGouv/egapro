@@ -16,7 +16,7 @@ type Declarant = {
   téléphone: string;
 };
 
-type Entreprise = {
+export type Entreprise = {
   adresse: string;
   code_naf: keyof typeof NAF;
   code_pays?: keyof typeof COUNTRIES | undefined;
@@ -32,11 +32,12 @@ export type RepresentationEquilibreeDataField = {
   déclarant: Declarant;
   déclaration: DeclarationRepresentationEquilibree;
   entreprise: Entreprise;
-  représentation_équilibrée: IndicateursRepresentationEquilibree;
+  indicateurs: { représentation_équilibrée: IndicateursRepresentationEquilibree };
 };
 
 type DeclarationRepresentationEquilibree = {
   année_indicateurs: number;
+  date?: string;
   fin_période_référence: string;
   publication?: PublicationRepresentationEquilibree | undefined;
 };
@@ -75,7 +76,7 @@ type IndicateursRepresentationEquilibree = {
 };
 
 // TODO: better assert for the state. For example, foreign society have a country code but no region, etc..
-const assertValidFormState = (state: FormState): void => {
+export const assertValidFormState = (state: FormState): void => {
   const requiredValues = [
     state.year,
     state.endOfPeriod,
@@ -90,8 +91,10 @@ const assertValidFormState = (state: FormState): void => {
     // state.entreprise?.région,
     state.entreprise?.raison_sociale,
     state.entreprise?.siren,
-    state.motifEcartsCadresNonCalculable || (state.ecartsCadresFemmes && state.ecartsCadresHommes),
-    state.motifEcartsMembresNonCalculable || (state.ecartsMembresFemmes && state.ecartsMembresHommes),
+    state.motifEcartsCadresNonCalculable ||
+      (state.ecartsCadresFemmes !== undefined && state.ecartsCadresHommes !== undefined),
+    state.motifEcartsMembresNonCalculable ||
+      (state.ecartsMembresFemmes !== undefined && state.ecartsMembresHommes !== undefined),
   ];
 
   requiredValues.map(value => {
@@ -121,6 +124,7 @@ export const buildRepresentation = (state: FormState): RepresentationEquilibreeD
   };
 
   const déclaration: DeclarationRepresentationEquilibree = {
+    date: state.date,
     année_indicateurs: state.year as number,
     fin_période_référence: state.endOfPeriod as string,
     ...((!state.motifEcartsCadresNonCalculable || !state.motifEcartsMembresNonCalculable) && { publication }),
@@ -147,5 +151,50 @@ export const buildRepresentation = (state: FormState): RepresentationEquilibreeD
     pourcentage_hommes_membres: state.ecartsMembresHommes as number,
   };
 
-  return { déclarant, déclaration, entreprise, représentation_équilibrée };
+  return { déclarant, déclaration, entreprise, indicateurs: { représentation_équilibrée } };
+};
+
+export const buildFormState = (declaration: RepresentationEquilibreeDataField): FormState => {
+  const {
+    déclarant,
+    déclaration,
+    entreprise,
+    indicateurs: { représentation_équilibrée },
+  } = declaration;
+
+  const state = {} as Partial<FormState>;
+
+  const declarant: FormState["declarant"] = {
+    email: déclarant.email,
+    nom: déclarant.nom,
+    prenom: déclarant.prénom,
+    telephone: déclarant.téléphone,
+    accord_rgpd: true, // This data is not stored in DB but is implicitly true.
+  };
+
+  if (declaration.déclaration.date) state.date = declaration.déclaration.date;
+
+  state.publishingDate = déclaration.publication?.date;
+  state.publishingContent = déclaration.publication?.modalités;
+  state.publishingWebsiteUrl = déclaration.publication?.url;
+  state.hasWebsite = Boolean(state.publishingWebsiteUrl);
+
+  state.year = déclaration.année_indicateurs;
+  state.endOfPeriod = déclaration.fin_période_référence;
+
+  state.motifEcartsCadresNonCalculable = représentation_équilibrée.motif_non_calculabilité_cadres;
+  state.motifEcartsMembresNonCalculable = représentation_équilibrée.motif_non_calculabilité_membres;
+  state.isEcartsCadresCalculable = state.motifEcartsCadresNonCalculable === undefined;
+  state.isEcartsMembresCalculable = state.motifEcartsMembresNonCalculable === undefined;
+
+  state.ecartsCadresFemmes = représentation_équilibrée.pourcentage_femmes_cadres;
+  state.ecartsCadresHommes = représentation_équilibrée.pourcentage_hommes_cadres;
+  state.ecartsMembresFemmes = représentation_équilibrée.pourcentage_femmes_membres;
+  state.ecartsMembresHommes = représentation_équilibrée.pourcentage_hommes_membres;
+
+  return {
+    declarant,
+    entreprise: entreprise as FormState["entreprise"],
+    ...(state as Omit<FormState, "declarant" | "entreprise">),
+  };
 };

@@ -1,6 +1,19 @@
 import { isValid, parseISO } from "date-fns";
 import { z } from "zod";
 
+export const zodSirenSchema = z
+  .string()
+  .min(1, { message: "Le Siren est requis." })
+  .regex(/^[0-9]{9}$/, "Le Siren est formé de 9 chiffres.");
+
+// TODO: make 2020 a constant or better, fetch the authorized years in /config endpoint (see useConfig).
+export const zodYearSchema = z
+  .string()
+  .min(1, "L'année est requise.")
+  .refine(year => !isNaN(parseInt(year, 10)) && parseInt(year, 10) > 2020, {
+    message: "L'année doit être un nombre supérieur à 2020",
+  });
+
 export const zodDateSchema = z.string().refine(val => isValid(parseISO(val)), {
   message: "La date n'est pas valide.",
 });

@@ -14,8 +14,6 @@ COPY packages/app  ./
 
 RUN yarn build-storybook
 
-RUN chown 1000:1000 -R .
-
 # SERVER
 FROM ghcr.io/socialgouv/docker/nginx4spa:7.1.0
 

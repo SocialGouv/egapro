@@ -8,6 +8,7 @@ import type {
 } from "@common/models/representation-equilibree";
 
 export type FormState = {
+  date?: string | undefined; // Only filled by the backend.
   declarant: {
     accord_rgpd?: boolean | undefined;
     email: string;
@@ -29,10 +30,12 @@ export type FormState = {
   publishingContent?: string;
   publishingDate?: string;
   publishingWebsiteUrl?: string;
+  status: "creation" | "edition";
   year?: number | undefined;
 };
 
 const formDataDefault: FormState = {
+  status: "creation",
   declarant: {
     email: "",
     prenom: "",
@@ -72,6 +75,14 @@ type FormActions = {
   saveFormData: (data: Partial<FormState>) => void;
 };
 
+/**
+ * Hook to get and handle the state of the form.
+ *
+ * @example
+ * ```ts
+ * const { formData, saveFormData, resetFormData } = useFormManager();
+ * ```
+ */
 export const useFormManager = create<FormActions & { formData: FormState }>()(
   persist(
     (set, get) => ({
@@ -84,6 +95,7 @@ export const useFormManager = create<FormActions & { formData: FormState }>()(
     }),
     {
       name: "ega-repeq-form", // name of item in the storage (must be unique)
+      getStorage: () => sessionStorage, // formData are removed when user is disconnected
     },
   ),
 );

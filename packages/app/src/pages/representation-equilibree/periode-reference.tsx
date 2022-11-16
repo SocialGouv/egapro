@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 import { zodDateSchema } from "@common/utils/form";
-import { ClientOnly } from "@components/ClientOnly";
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -19,7 +19,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-import { useFormManager, useUser } from "@services/apiClient";
+import { useFormManager } from "@services/apiClient";
 
 const formSchema = z
   .object({
@@ -41,7 +41,6 @@ type FormType = z.infer<typeof formSchema>;
 
 const PeriodeReference: NextPageWithLayout = () => {
   const router = useRouter();
-  useUser({ redirectTo: "/representation-equilibree/email" });
   const { formData, saveFormData } = useFormManager();
 
   const {
@@ -75,61 +74,61 @@ const PeriodeReference: NextPageWithLayout = () => {
 
   return (
     <>
-      <ClientOnly>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <FormLayout>
-            <FormGroup>
-              <FormGroupLabel htmlFor="year">
-                Année au titre de laquelle les écarts de représentation sont calculés
-              </FormGroupLabel>
-              <FormInput
-                id="year"
-                type="text"
-                {...register("year")}
-                isError={Boolean(errors.year)}
-                readOnly
-                aria-describedby={errors.year && "year-message-error-msg"}
-              />
-              {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
-            </FormGroup>
-            <FormGroup>
-              <FormGroupLabel htmlFor="endOfPeriod">
-                Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul
-                des écarts
-              </FormGroupLabel>
-              <FormInput
-                id="endOfPeriod"
-                type="date"
-                {...register("endOfPeriod")}
-                isError={Boolean(errors.endOfPeriod)}
-                placeholder="Sélectionner une date"
-                aria-describedby={errors.endOfPeriod && "endOfPeriod-message-error"}
-              />
-              {errors.endOfPeriod && (
-                <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
-              )}
-              <br />
-              <FormButton type="button" variant="secondary" size="sm" onClick={handleClick}>
-                Sélectionner la fin de l'année civile
-              </FormButton>
-            </FormGroup>
-            <FormLayoutButtonGroup>
-              <NextLink href="entreprise" passHref>
-                <ButtonAsLink size="sm" variant="secondary">
-                  Précédent
-                </ButtonAsLink>
-              </NextLink>
-              <FormButton isDisabled={!isValid}>Suivant</FormButton>
-            </FormLayoutButtonGroup>
-          </FormLayout>
-        </form>
-      </ClientOnly>
+      <AlertEdition />
+
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <FormLayout>
+          <FormGroup>
+            <FormGroupLabel htmlFor="year">
+              Année au titre de laquelle les écarts de représentation sont calculés
+            </FormGroupLabel>
+            <FormInput
+              id="year"
+              type="text"
+              {...register("year")}
+              isError={Boolean(errors.year)}
+              readOnly
+              aria-describedby={errors.year && "year-message-error-msg"}
+            />
+            {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="endOfPeriod">
+              Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul
+              des écarts
+            </FormGroupLabel>
+            <FormInput
+              id="endOfPeriod"
+              type="date"
+              {...register("endOfPeriod")}
+              isError={Boolean(errors.endOfPeriod)}
+              placeholder="Sélectionner une date"
+              aria-describedby={errors.endOfPeriod && "endOfPeriod-message-error"}
+            />
+            {errors.endOfPeriod && (
+              <FormGroupMessage id="endOfPeriod-message-error">{errors.endOfPeriod.message}</FormGroupMessage>
+            )}
+            <br />
+            <FormButton type="button" variant="secondary" size="sm" onClick={handleClick}>
+              Sélectionner la fin de l'année civile
+            </FormButton>
+          </FormGroup>
+          <FormLayoutButtonGroup>
+            <NextLink href="entreprise" passHref>
+              <ButtonAsLink size="sm" variant="secondary">
+                Précédent
+              </ButtonAsLink>
+            </NextLink>
+            <FormButton isDisabled={!isValid}>Suivant</FormButton>
+          </FormLayoutButtonGroup>
+        </FormLayout>
+      </form>
     </>
   );
 };
 
 PeriodeReference.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout>{children}</RepresentationEquilibreeLayout>;
+  return <RepresentationEquilibreeLayout title="Période de référence">{children}</RepresentationEquilibreeLayout>;
 };
 
 export default PeriodeReference;
