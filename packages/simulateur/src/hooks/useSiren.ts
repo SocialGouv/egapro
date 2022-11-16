@@ -4,6 +4,7 @@ import { genericErrorMessage } from "../utils/makeMessage"
 import { FetcherReturn } from "./types"
 
 const API_SOCIAL_GOUV_SIREN = "https://search-recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/"
+// const API_SOCIAL_GOUV_SIREN = "https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/"
 
 /**
  * Fetcher to call the Egapro API
@@ -16,7 +17,7 @@ const fetcherSiren = async (siren: string) => {
 }
 
 type ReturnApiType = {
-  label: string
+  simpleLabel: string
   firstMatchingEtablissement: { address: string }
 }
 
@@ -32,7 +33,9 @@ export function useSiren(siren: string): FetcherReturn & { entreprise: any } {
   const isLoading = !data && !error
   const isError = Boolean(error)
 
-  const entreprise = data ? { raison_sociale: data.label, adresse: data.firstMatchingEtablissement?.address } : null
+  const entreprise = data
+    ? { raison_sociale: data.simpleLabel, adresse: data.firstMatchingEtablissement?.address }
+    : null
 
   return { entreprise, error, message: genericErrorMessage(error), isLoading, isError, mutate }
 }
