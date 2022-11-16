@@ -3,8 +3,7 @@ import { genericFetch } from "../utils/fetcher"
 import { genericErrorMessage } from "../utils/makeMessage"
 import { FetcherReturn } from "./types"
 
-const API_SOCIAL_GOUV_SIREN = "https://search-recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/"
-// const API_SOCIAL_GOUV_SIREN = "https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/"
+const API_SOCIAL_GOUV_SIREN = "https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/"
 
 /**
  * Fetcher to call the Egapro API
@@ -13,7 +12,9 @@ const API_SOCIAL_GOUV_SIREN = "https://search-recherche-entreprises.fabrique.soc
  * @param options the request options (optional)
  */
 const fetcherSiren = async (siren: string) => {
-  return genericFetch(API_SOCIAL_GOUV_SIREN + siren)
+  return genericFetch(API_SOCIAL_GOUV_SIREN + siren, {
+    headers: { Referer: "egapro" },
+  })
 }
 
 type ReturnApiType = {
