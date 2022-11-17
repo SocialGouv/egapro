@@ -43,6 +43,9 @@ const handlers = [
       ctx.json({ error: "No représentation équilibrée with siren " + VALID_SIREN + " and year 2021" }),
     );
   }),
+  rest.post(API_URL + "/representation-equilibree/" + VALID_SIREN + "/2021/receipt", async (req, res, ctx) => {
+    return res(ctx.status(204));
+  }),
 ];
 
 export { handlers };
