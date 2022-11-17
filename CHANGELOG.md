@@ -1,3 +1,10 @@
+# [2.31.0](https://github.com/SocialGouv/egapro/compare/v2.30.0...v2.31.0) (2022-11-17)
+
+
+### Features
+
+* closes Simu/décla : ajouter un contrôle sur l'indicateur Ecart taux d'augmentation [#1341](https://github.com/SocialGouv/egapro/issues/1341) ([#1384](https://github.com/SocialGouv/egapro/issues/1384)) ([5d1ca89](https://github.com/SocialGouv/egapro/commit/5d1ca89c195a0e98dedce5e4c635bab6ae0037de))
+
 # [2.30.0](https://github.com/SocialGouv/egapro/compare/v2.29.1...v2.30.0) (2022-11-16)
 
 
