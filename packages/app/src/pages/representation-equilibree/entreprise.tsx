@@ -1,3 +1,4 @@
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -8,7 +9,7 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
-import { useConfig, useFormManager, useUser } from "@services/apiClient";
+import { useConfig, useFormManager } from "@services/apiClient";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import type { FormEvent } from "react";
@@ -16,7 +17,6 @@ import type { FormEvent } from "react";
 import type { NextPageWithLayout } from "../_app";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
 
   // No need to use React Hook Form here, because we only show read only data.
@@ -33,6 +33,7 @@ const InformationsEntreprise: NextPageWithLayout = () => {
 
   return (
     <>
+      <AlertEdition />
       <p>
         <b>
           Les informations relatives à l'entreprise (raison sociale, Code NAF, Adresse complète) sont renseignées

@@ -1,3 +1,45 @@
+# [2.31.0](https://github.com/SocialGouv/egapro/compare/v2.30.0...v2.31.0) (2022-11-17)
+
+
+### Features
+
+* closes Simu/décla : ajouter un contrôle sur l'indicateur Ecart taux d'augmentation [#1341](https://github.com/SocialGouv/egapro/issues/1341) ([#1384](https://github.com/SocialGouv/egapro/issues/1384)) ([5d1ca89](https://github.com/SocialGouv/egapro/commit/5d1ca89c195a0e98dedce5e4c635bab6ae0037de))
+
+# [2.30.0](https://github.com/SocialGouv/egapro/compare/v2.29.1...v2.30.0) (2022-11-16)
+
+
+### Features
+
+* improve error mesage for date publication ([#1380](https://github.com/SocialGouv/egapro/issues/1380)) ([a0f897f](https://github.com/SocialGouv/egapro/commit/a0f897f638e92ce82a2dbf1ee62265a0188fdc87))
+
+## [2.29.1](https://github.com/SocialGouv/egapro/compare/v2.29.0...v2.29.1) (2022-11-16)
+
+
+### Bug Fixes
+
+* use simpleLabel instead of label for API recherche entreprise ([#1375](https://github.com/SocialGouv/egapro/issues/1375)) ([419620c](https://github.com/SocialGouv/egapro/commit/419620c91bee77df17a4d3800953792aec850798))
+
+# [2.29.0](https://github.com/SocialGouv/egapro/compare/v2.28.1...v2.29.0) (2022-11-15)
+
+
+### Features
+
+* add publication date check ([#1371](https://github.com/SocialGouv/egapro/issues/1371)) ([9ea5ad2](https://github.com/SocialGouv/egapro/commit/9ea5ad2f825658b27cd788a1c845d2fcad9acc61)), closes [#1357](https://github.com/SocialGouv/egapro/issues/1357) [#1356](https://github.com/SocialGouv/egapro/issues/1356) [#1369](https://github.com/SocialGouv/egapro/issues/1369)
+
+## [2.28.1](https://github.com/SocialGouv/egapro/compare/v2.28.0...v2.28.1) (2022-11-15)
+
+
+### Bug Fixes
+
+* validating-swr + issue [#1350](https://github.com/SocialGouv/egapro/issues/1350) ([#1358](https://github.com/SocialGouv/egapro/issues/1358)) ([9b39e1e](https://github.com/SocialGouv/egapro/commit/9b39e1e6d443da061bd48b13a67ebf7c24b63993))
+
+# [2.28.0](https://github.com/SocialGouv/egapro/compare/v2.27.0...v2.28.0) (2022-11-14)
+
+
+### Features
+
+* édition d'une repeq avec un bandeau sur toutes les pages ([#1351](https://github.com/SocialGouv/egapro/issues/1351)) ([e85fcb6](https://github.com/SocialGouv/egapro/commit/e85fcb6f840e0a97bdb3ec641605f449df1af59f))
+
 # [2.27.0](https://github.com/SocialGouv/egapro/compare/v2.26.1...v2.27.0) (2022-11-10)
 
 

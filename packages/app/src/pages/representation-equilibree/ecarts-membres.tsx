@@ -1,6 +1,6 @@
 import { motifNonCalculabiliteMembresOptions } from "@common/models/representation-equilibree";
 import { radioBoolToString, radioStringToBool, zodPercentageSchema, zodRadioInputSchema } from "@common/utils/form";
-import { ClientOnly } from "@components/ClientOnly";
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { PercentagesPairInputs } from "@components/PercentagesPairInputs";
 import {
@@ -32,7 +32,7 @@ import {
   LinkGroup,
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormManager, useUser } from "@services/apiClient";
+import { useFormManager } from "@services/apiClient";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -94,7 +94,6 @@ export type FormTypeOutput = Omit<z.infer<typeof formSchema>, "motifEcartsMembre
 };
 
 const EcartsMembres: NextPageWithLayout = () => {
-  useUser({ redirectTo: "/representation-equilibree/email" });
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
   const methods = useForm<FormTypeInput>({
@@ -157,7 +156,9 @@ const EcartsMembres: NextPageWithLayout = () => {
   }, [clearErrors, isEcartsMembresCalculable, setValue]);
 
   return (
-    <ClientOnly>
+    <>
+      <AlertEdition />
+
       <Alert mb="4w">
         <AlertTitle as="h2">Motifs de non calculabilité</AlertTitle>
         <p>
@@ -264,7 +265,7 @@ const EcartsMembres: NextPageWithLayout = () => {
           </Card>
         </GridCol>
       </Grid>
-    </ClientOnly>
+    </>
   );
 };
 

@@ -25,14 +25,16 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   );
 };
 
-/**
- * Layout for unauthenticated users.
- */
-export const RepresentationEquilibreeStartLayout = ({ children, title }: PropsWithChildren & { title?: string }) => {
+const DEFAULT_TITLE = "Egapro";
+
+export const RepresentationEquilibreeStartLayout = ({
+  children,
+  title,
+}: PropsWithChildren & { title?: string | undefined }) => {
   return (
     <App>
       <Head>
-        <title>{title && title + " - "} Représentation équilibrée Egapro</title>
+        <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
 
       <Container py="6w">

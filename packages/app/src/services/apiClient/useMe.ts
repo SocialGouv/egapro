@@ -27,7 +27,9 @@ export type TokenInfoType = {
  * ```
  */
 export const useMe = (token: string | undefined) => {
-  const { data: user, error, isValidating: loading } = useSWR<TokenInfoType>(!token ? null : "/me");
+  const { data: user, error } = useSWR<TokenInfoType>(!token ? null : "/me");
+
+  const loading = !token ? false : !user && !error ? true : false;
 
   return { user, error, loading };
 };

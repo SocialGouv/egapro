@@ -8,6 +8,8 @@ import type { PropsWithChildren } from "react";
 
 import { App } from "./App";
 
+const DEFAULT_TITLE = "Egapro";
+
 /**
  * Layout for unauthenticated users (standalone pages, etc.).
  */
@@ -15,7 +17,7 @@ export const BasicLayout = ({ children, title }: PropsWithChildren & { title?: s
   return (
     <App>
       <Head>
-        <title key="title">{title && title + " - "} Egapro</title>
+        <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
       {children}
     </App>

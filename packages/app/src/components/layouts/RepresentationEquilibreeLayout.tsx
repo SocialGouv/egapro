@@ -3,6 +3,8 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 
+import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
+import { ClientOnly } from "@components/ClientOnly";
 import {
   Box,
   Card,
@@ -49,6 +51,8 @@ const STEPS_TITLE = [
   "Validation de vos écarts",
 ];
 
+const DEFAULT_TITLE = "Représentation équilibrée Egapro";
+
 /**
  * Layout for authenticated users in représentation équilibrée.
  */
@@ -56,7 +60,8 @@ export const RepresentationEquilibreeLayout = ({
   title,
   children,
   haveBottomSection,
-}: PropsWithChildren<{ haveBottomSection?: boolean; title?: string | undefined }>) => {
+  disableAuth,
+}: PropsWithChildren<{ disableAuth?: boolean; haveBottomSection?: boolean; title?: string | undefined }>) => {
   const { pathname } = useRouter();
 
   const foundStep = STEPS.findIndex(stepName => pathname.endsWith(stepName));
@@ -65,20 +70,24 @@ export const RepresentationEquilibreeLayout = ({
   return (
     <App>
       <Head>
-        <title>{title && title + " - "} Représentation équilibrée Egapro</title>
+        <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
       <Container py="6w">
         <Grid justifyCenter>
           <GridCol md={10} lg={8}>
-            {currentStep !== null && (
-              <Stepper mb="6w">
-                <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>
-                  {STEPS_TITLE[currentStep]}
-                </StepperTitle>
-                {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
-              </Stepper>
-            )}
-            {children}
+            <ClientOnly>
+              <AuthenticatedOnly disableAuth={disableAuth}>
+                {currentStep !== null && (
+                  <Stepper mb="6w">
+                    <StepperTitle currentStep={currentStep + 1} numberOfSteps={STEPS.length}>
+                      {STEPS_TITLE[currentStep]}
+                    </StepperTitle>
+                    {STEPS_TITLE[currentStep + 1] && <StepperDetails>{STEPS_TITLE[currentStep + 1]}</StepperDetails>}
+                  </Stepper>
+                )}
+                {children}
+              </AuthenticatedOnly>
+            </ClientOnly>
           </GridCol>
         </Grid>
       </Container>

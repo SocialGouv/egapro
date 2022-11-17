@@ -8,6 +8,7 @@ import { persist } from "zustand/middleware";
 import type { EntrepriseType } from "./siren";
 
 export type FormState = {
+  date?: string | undefined; // Only filled by the backend.
   declarant: {
     accord_rgpd?: boolean | undefined;
     email: string;

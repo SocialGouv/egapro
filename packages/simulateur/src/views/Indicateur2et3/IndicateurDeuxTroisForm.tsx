@@ -35,6 +35,36 @@ import { calendarYear, dateToString, parseDate, Year } from "../../utils/date"
 
 const validator = composeValidators(required, mustBeNumber, mustBeInteger, minNumber(0))
 
+const validateForm = ({
+  presenceAugmentationPromotion,
+  nombreAugmentationPromotionFemmes,
+  nombreAugmentationPromotionHommes,
+  periodeDeclaration,
+}: {
+  presenceAugmentationPromotion: string
+  nombreAugmentationPromotionFemmes: string
+  nombreAugmentationPromotionHommes: string
+  periodeDeclaration: string
+}) => {
+  // This case can't happen normally because it is supposed to be intercepted by validator function.
+  if (presenceAugmentationPromotion === "false") {
+    return undefined
+  }
+
+  const nombreFemmes = parseInt(nombreAugmentationPromotionFemmes, 10)
+  const nombreHommes = parseInt(nombreAugmentationPromotionHommes, 10)
+
+  if (isNaN(nombreFemmes) || isNaN(nombreHommes)) {
+    return undefined
+  }
+  if (nombreFemmes + nombreHommes === 0) {
+    return {
+      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
+    }
+  }
+  return
+}
+
 interface IndicateurDeuxTroisForProps {
   finPeriodeReference: string
   presenceAugmentationPromotion: boolean
@@ -98,17 +128,24 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
     <Form
       onSubmit={onSubmit}
       initialValues={initialValues}
+      validate={validateForm}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
       initialValuesEqual={() => true}
     >
-      {({ handleSubmit, values, hasValidationErrors, submitFailed }) => (
+      {({ handleSubmit, values, hasValidationErrors, errors, submitFailed }) => (
         <form onSubmit={handleSubmit}>
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (
-              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+              <FormError
+                message={
+                  errors?.notAll0
+                    ? errors.notAll0
+                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                }
+              />
             )}
             <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">Sur quelle période souhaitez-vous calculer votre indicateur&nbsp;?</FormLabel>

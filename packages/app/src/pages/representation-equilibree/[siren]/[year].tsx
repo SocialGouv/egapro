@@ -1,6 +1,4 @@
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
-import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
-import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { OwnersOnly } from "@components/OwnersOnly";
 import { ParamsChecker } from "@components/ParamsChecker";
@@ -105,16 +103,14 @@ const RecapitulatifPage: NextPageWithLayout = () => {
   const year = Number(yearQuery as string);
 
   return (
-    <ClientOnly>
+    <>
       <h1>{title}</h1>
-      <AuthenticatedOnly>
-        <ParamsChecker schema={schemaParams}>
-          <OwnersOnly siren={siren}>
-            <RepresentationEquilibreeWithNavigation siren={siren} year={year} />
-          </OwnersOnly>
-        </ParamsChecker>
-      </AuthenticatedOnly>
-    </ClientOnly>
+      <ParamsChecker schema={schemaParams}>
+        <OwnersOnly siren={siren}>
+          <RepresentationEquilibreeWithNavigation siren={siren} year={year} />
+        </OwnersOnly>
+      </ParamsChecker>
+    </>
   );
 };
 

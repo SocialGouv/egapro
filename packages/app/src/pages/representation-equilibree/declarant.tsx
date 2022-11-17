@@ -1,4 +1,4 @@
-import { ClientOnly } from "@components/ClientOnly";
+import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
   ButtonAsLink,
@@ -36,7 +36,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const DeclarantPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const { user } = useUser({ redirectTo: "/representation-equilibree/email" });
+  const { user } = useUser();
   const { formData, saveFormData } = useFormManager();
 
   const {
@@ -78,79 +78,78 @@ const DeclarantPage: NextPageWithLayout = () => {
 
   return (
     <>
+      <AlertEdition />
       <p>
         <b>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone.</b>
       </p>
 
-      <ClientOnly>
-        <FormLayout>
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <FormGroup>
-              <FormGroupLabel htmlFor="nom">Nom du déclarant</FormGroupLabel>
-              <FormInput
-                id="nom"
-                type="text"
-                isError={Boolean(errors.nom)}
-                {...register("nom")}
-                aria-describedby={errors.nom && "nom-message-error"}
-              />
-              {errors.nom && <FormGroupMessage id="nom-message-error">{errors.nom.message}</FormGroupMessage>}
-            </FormGroup>
-            <FormGroup>
-              <FormGroupLabel htmlFor="prenom">Prénom du déclarant</FormGroupLabel>
-              <FormInput
-                id="prenom"
-                type="text"
-                isError={Boolean(errors.prenom)}
-                {...register("prenom")}
-                aria-describedby={errors.prenom && "prenom-message-error"}
-              />
-              {errors.prenom && <FormGroupMessage id="prenom-message-error">{errors.prenom.message}</FormGroupMessage>}
-            </FormGroup>
-            <FormGroup>
-              <FormGroupLabel htmlFor="telephone">Numéro de téléphone</FormGroupLabel>
-              <FormInput
-                id="telephone"
-                type="tel"
-                isError={Boolean(errors.telephone)}
-                {...register("telephone")}
-                aria-describedby={errors.telephone && "telephone-message-error"}
-              />
-              {errors.telephone && (
-                <FormGroupMessage id="telephone-message-error">{errors.telephone.message}</FormGroupMessage>
-              )}
-            </FormGroup>
-            <FormGroup>
-              <FormGroupLabel htmlFor="email">Email</FormGroupLabel>
-              <FormInput id="email" type="text" readOnly {...register("email")} />
-            </FormGroup>
-            <FormGroup>
-              <FormCheckbox
-                id="accord_rgpd"
-                {...register("accord_rgpd")}
-                aria-describedby={errors.accord_rgpd && "accord_rgpd-message-error"}
-              >
-                J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
-                vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
-                consulter nos{" "}
-                <NextLink href="/cgu">
-                  <a>Conditions Générales d'Utilisation</a>
-                </NextLink>
-                .
-              </FormCheckbox>
-              {errors.accord_rgpd && (
-                <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
-              )}
-            </FormGroup>
-            <FormLayoutButtonGroup>
-              <NextLink href="/representation-equilibree/commencer" passHref>
-                <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+      <FormLayout>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <FormGroup>
+            <FormGroupLabel htmlFor="nom">Nom du déclarant</FormGroupLabel>
+            <FormInput
+              id="nom"
+              type="text"
+              isError={Boolean(errors.nom)}
+              {...register("nom")}
+              aria-describedby={errors.nom && "nom-message-error"}
+            />
+            {errors.nom && <FormGroupMessage id="nom-message-error">{errors.nom.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="prenom">Prénom du déclarant</FormGroupLabel>
+            <FormInput
+              id="prenom"
+              type="text"
+              isError={Boolean(errors.prenom)}
+              {...register("prenom")}
+              aria-describedby={errors.prenom && "prenom-message-error"}
+            />
+            {errors.prenom && <FormGroupMessage id="prenom-message-error">{errors.prenom.message}</FormGroupMessage>}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="telephone">Numéro de téléphone</FormGroupLabel>
+            <FormInput
+              id="telephone"
+              type="tel"
+              isError={Boolean(errors.telephone)}
+              {...register("telephone")}
+              aria-describedby={errors.telephone && "telephone-message-error"}
+            />
+            {errors.telephone && (
+              <FormGroupMessage id="telephone-message-error">{errors.telephone.message}</FormGroupMessage>
+            )}
+          </FormGroup>
+          <FormGroup>
+            <FormGroupLabel htmlFor="email">Email</FormGroupLabel>
+            <FormInput id="email" type="text" readOnly {...register("email")} />
+          </FormGroup>
+          <FormGroup>
+            <FormCheckbox
+              id="accord_rgpd"
+              {...register("accord_rgpd")}
+              aria-describedby={errors.accord_rgpd && "accord_rgpd-message-error"}
+            >
+              J'accepte l'utilisation de mes données à caractère personnel pour réaliser des statistiques et pour
+              vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
+              consulter nos{" "}
+              <NextLink href="/cgu">
+                <a>Conditions Générales d'Utilisation</a>
               </NextLink>
-              <FormButton isDisabled={!isValid}>Suivant</FormButton>
-            </FormLayoutButtonGroup>
-          </form>
-        </FormLayout>
-      </ClientOnly>
+              .
+            </FormCheckbox>
+            {errors.accord_rgpd && (
+              <FormGroupMessage id="accord_rgpd-message-error">{errors.accord_rgpd.message}</FormGroupMessage>
+            )}
+          </FormGroup>
+          <FormLayoutButtonGroup>
+            <NextLink href="/representation-equilibree/commencer" passHref>
+              <ButtonAsLink variant="secondary">Précédent</ButtonAsLink>
+            </NextLink>
+            <FormButton isDisabled={!isValid}>Suivant</FormButton>
+          </FormLayoutButtonGroup>
+        </form>
+      </FormLayout>
     </>
   );
 };
