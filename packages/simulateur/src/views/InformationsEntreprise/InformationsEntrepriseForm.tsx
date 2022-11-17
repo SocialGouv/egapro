@@ -66,27 +66,37 @@ const validateForm = ({
   nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
 })
 
-const calculator = createDecorator({
-  field: "nombreEntreprises",
-  updates: {
-    entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
-      adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES),
-  },
-})
+// // // Update state when change on nombreEntreprises is made.
+// // const calculator = createDecorator({
+// //   field: "nombreEntreprises",
+// //   updates: {
+// //     entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
+// //       adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES),
+// //   },
+// // })
 
-const adaptEntreprisesUESSize = (nombreEntreprises: string, entreprisesUES: Array<EntrepriseUES>) => {
-  if (validateNombreEntreprises(nombreEntreprises) === undefined) {
-    // Il faut une entreprise à déclarer de moins vu que l'entreprise déclarant pour le compte de l'UES a déjà renseigné ses infos
-    const newSize = Number(nombreEntreprises) - 1
-    while (newSize > entreprisesUES.length) {
-      // Augmenter la taille de l'array si nécessaire
-      entreprisesUES.push({ nom: "", siren: "" })
-    }
-    // Réduire la taille de l'array si nécessaire
-    entreprisesUES.length = newSize
-  }
-  return entreprisesUES
-}
+// // const adaptEntreprisesUESSize = (nombreEntreprises: string, entreprisesUES: Array<EntrepriseUES>) => {
+// //   console.log("dans adapt", nombreEntreprises)
+// //   if (validateNombreEntreprises(nombreEntreprises) === undefined) {
+// //     // Il faut une entreprise à déclarer de moins vu que l'entreprise déclarant pour le compte de l'UES a déjà renseigné ses infos
+// //     const newSizeEntreprisesUES = Number(nombreEntreprises) - 1
+
+// //     while (newSizeEntreprisesUES > entreprisesUES.length) {
+// //       // Augmenter la taille de l'array si nécessaire
+// //       entreprisesUES.push({ nom: "", siren: "" })
+// //     }
+// //     // Réduire la taille de l'array si nécessaire
+// //     // entreprisesUES.length = newSizeEntreprisesUES
+// //     //entreprisesUES.splice(newSizeEntreprisesUES)
+// //     entreprisesUES = entreprisesUES.slice(0, newSizeEntreprisesUES)
+// //   }
+
+//   console.log("end of adaptEntreprisesUESSize xxx")
+
+//   entreprisesUES.forEach((elt) => console.log("entreprise", elt))
+
+//   return entreprisesUES
+// }
 
 interface InformationsEntrepriseFormProps {
   informationsEntreprise: AppState["informationsEntreprise"]
@@ -138,6 +148,8 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       entreprisesUES,
     } = formData
 
+    console.log("dans saveForm", entreprisesUES)
+
     updateInformationsEntreprise({
       nomEntreprise: nomEntreprise,
       siren: siren,
@@ -160,27 +172,25 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
     validateInformationsEntreprise("Valid")
   }
 
-  // Form mutator utilisé par le composant NombreEntreprise pour ne changer la
-  // valeur du state qu'une fois la confirmation validée
-  const newNombreEntreprises = (
-    [name, newValue]: [string, string],
-    state: MutableState<any>,
-    { changeValue }: Tools<any>,
-  ) => {
-    changeValue(state, name, () => newValue)
-  }
+  // TODO: supprimer le traitement /décorateur qui met à jour le nombre d'entreprise.
+  // À la place, fait un bouton qui ajoute des entreprises 1 par 1. Et faire un champ readonly qui ne fait que compter les entreprises déjà renseignées.
+
+  // Marche mieux, mais je suis toujours obligé de mettre le updateSirenData, sinon on ne récupère pas la raison sociale.
+  // Aussi, fait une erreur sur nombre d'entreprise qui dit qu'il est vide.
+  // Quit si trop pénible. Il faudra le refaire en RHF, ça sera plus facile de raisonner. Car ici, on voit que ce sont des renders qui ressuscite les entreprises qu'on vient de supprimer...
+
+  console.log("entrepriseUES", informationsEntreprise.entreprisesUES)
 
   return (
     <Form
       onSubmit={onSubmit}
       mutators={{
         // potentially other mutators could be merged here
-        newNombreEntreprises,
         ...arrayMutators,
       }}
       initialValues={initialValues}
       validate={validateForm}
-      decorators={[calculator]}
+      // decorators={[calculator]}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
@@ -264,13 +274,10 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                   errorText="le nom de l'UES n'est pas valide"
                   readOnly={readOnly}
                 />
-                <NombreEntreprises
-                  fieldName="nombreEntreprises"
-                  label="Nombre d'entreprises composant l'UES (le déclarant compris)"
-                  entreprisesUES={informationsEntreprise.entreprisesUES}
-                  newNombreEntreprises={form.mutators.newNombreEntreprises}
-                  readOnly={readOnly}
-                />
+                <NombreEntreprises readOnly={readOnly} />
+                <button onClick={() => form.mutators.push("entreprisesUES", { nom: "", siren: "" })}>
+                  Ajouter une entreprise à l'UES
+                </button>
                 <Text>
                   Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)
                 </Text>
@@ -279,17 +286,20 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                     return (
                       <>
                         {fields.map((entrepriseUES, index) => (
-                          <EntrepriseUESInput
-                            key={entrepriseUES}
-                            nom={`${entrepriseUES}.nom`}
-                            siren={`${entrepriseUES}.siren`}
-                            index={index}
-                            readOnly={readOnly}
-                            year={year}
-                            updateSirenData={(sirenData: EntrepriseType) =>
-                              form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
-                            }
-                          />
+                          <>
+                            <EntrepriseUESInput
+                              key={entrepriseUES}
+                              nom={`${entrepriseUES}.nom`}
+                              siren={`${entrepriseUES}.siren`}
+                              index={index}
+                              readOnly={readOnly}
+                              year={year}
+                              updateSirenData={(sirenData: EntrepriseType) =>
+                                form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
+                              }
+                            />
+                            <button onClick={() => fields.remove(index)}>❌</button>
+                          </>
                         ))}
                       </>
                     )
@@ -318,6 +328,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
               <FormSubmit />
             </ActionBar>
           )}
+          <pre>{JSON.stringify(values, null, 2)}</pre>
         </form>
       )}
     </Form>
