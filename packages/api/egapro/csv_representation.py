@@ -16,11 +16,12 @@ async def get_headers_columns():
     """Return a tuple of lists of (header_names, column_names) that we want in the export."""
     header_labels = (
         [
+            ("Annee_ecarts", "déclaration.année_indicateurs"),
+            ("SIREN", "entreprise.siren"),
+            ("Nom_Entreprise", "entreprise.raison_sociale"),
+            ("Region", "entreprise.région"),
             ("Departement", "entreprise.département", constants.DEPARTEMENTS.get),
             ("Pays", "entreprise.code_pays", constants.PAYS_ISO_TO_LIB.get),
-            ("Annee_ecarts", "déclaration.année_indicateurs"),
-            ("Nom_Entreprise", "entreprise.raison_sociale"),
-            ("SIREN", "entreprise.siren"),
             ("Code_NAF", "entreprise.code_naf", code_naf),
             ("Cadres_pourcentage_femmes", "indicateurs.représentation_équilibrée.pct_f_cadres"),
             ("Cadres_pourcentage_hommes", "indicateurs.représentation_équilibrée.pct_h_cadres"),

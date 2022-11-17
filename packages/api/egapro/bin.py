@@ -33,7 +33,7 @@ from egapro.utils import json_dumps
 
 
 @minicli.cli
-async def export_csv(path: Path, max_rows: int = None):
+async def export_representation(path: Path, max_rows: int = None):
     wb = await csv_representation.as_xlsx(max_rows)
     print("Writing the dgt XLSX to", path)
     wb.save(path)
