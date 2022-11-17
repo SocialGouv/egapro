@@ -9,6 +9,10 @@ type Input = {
   title: string;
 };
 
+/**
+ * Component managed by React Hook Form to handle pair of percentages.
+ * One input triggers the computation of the other value.
+ */
 export const PercentagesPairInputs = ({ firstInput, secondInput }: { firstInput: Input; secondInput: Input }) => {
   const { label: firstLabel, title: firstTitle } = firstInput;
   const { label: secondLabel, title: secondTitle } = secondInput;
