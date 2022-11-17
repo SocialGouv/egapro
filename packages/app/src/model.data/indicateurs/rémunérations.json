@@ -3,7 +3,7 @@
   "$id": "#rémunérations",
   "allOf": [
     {
-      "$ref": "./base_indicateur.json#/definitions/with_population_favorable"
+      "$ref": "./base_indicateur_noté.json#/definitions/with_population_favorable"
     },
     {
       "type": "object",

@@ -1,6 +1,7 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
 import { JsonEntity } from "@common/shared-domain";
 
+import { BalancedRepresentation } from "./indicators/BalancedRepresentation";
 import { HighRemunerationsIndicator } from "./indicators/HighRemunerationsIndicator";
 import { MaternityLeavesIndicator } from "./indicators/MaternityLeavesIndicator";
 import { RemunerationsIndicator } from "./indicators/RemunerationsIndicator";
@@ -8,6 +9,7 @@ import { SalaryRaisesAndPromotionsIndicator } from "./indicators/SalaryRaisesAnd
 import { SalaryRaisesOrPromotionsIndicator } from "./indicators/SalaryRaisesOrPromotionsIndicator";
 
 export interface IndicatorsProps {
+  balancedRepresentation?: BalancedRepresentation;
   highRemunerations?: HighRemunerationsIndicator;
   maternityLeaves?: MaternityLeavesIndicator;
   promotions?: SalaryRaisesOrPromotionsIndicator;
@@ -47,6 +49,11 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
     return this.props.highRemunerations;
   }
 
+  /** `représentation_équilibrée` */
+  get balancedRepresentation(): BalancedRepresentation | undefined {
+    return this.props.balancedRepresentation;
+  }
+
   public getAllIndicators() {
     return [
       this.remunerations,
@@ -55,6 +62,10 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
       this.maternityLeaves,
       this.highRemunerations,
     ] as const;
+  }
+
+  public getAllIndicatorsWithBalancedRepresentation() {
+    return [...this.getAllIndicators(), this.balancedRepresentation] as const;
   }
 
   public fromJson(json: EntityPropsToJson<IndicatorsProps>) {
@@ -81,6 +92,11 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
 
     if (json.highRemunerations)
       props.highRemunerations = HighRemunerationsIndicator.fromJson<HighRemunerationsIndicator>(json.highRemunerations);
+
+    if (json.balancedRepresentation)
+      props.balancedRepresentation = BalancedRepresentation.fromJson<BalancedRepresentation>(
+        json.balancedRepresentation,
+      );
 
     return new Indicators(props) as this;
   }

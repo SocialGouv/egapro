@@ -11,3 +11,12 @@ export interface DeclarationRaw {
   siren: string;
   year: number;
 }
+
+export interface RepresentationEquilibreeRaw {
+  data?: DeclarationDataRaw;
+  declared_at: string;
+  ft: string;
+  modified_at: string;
+  siren: string;
+  year: number;
+}

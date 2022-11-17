@@ -12,7 +12,7 @@ export interface DeclarationDataProps {
   declarant: Declarant;
   declaration: DeclarationInfo;
   indicators?: Indicators;
-  source: DeclarationSource;
+  source?: DeclarationSource;
 }
 
 export class DeclarationData extends JsonEntity<DeclarationDataProps> {
@@ -31,7 +31,7 @@ export class DeclarationData extends JsonEntity<DeclarationDataProps> {
     return this.props.declaration;
   }
 
-  get source(): DeclarationSource {
+  get source(): DeclarationSource | undefined {
     return this.props.source;
   }
 
@@ -44,10 +44,10 @@ export class DeclarationData extends JsonEntity<DeclarationDataProps> {
     const props: DeclarationDataProps = {
       declarant: Declarant.fromJson(json.declarant),
       declaration: DeclarationInfo.fromJson(json.declaration),
-      source: new DeclarationSource(json.source),
       company: Company.fromJson(json.company),
     };
 
+    if (json.source) props.source = new DeclarationSource(json.source);
     if (json.indicators) props.indicators = Indicators.fromJson<Indicators>(json.indicators);
 
     return new DeclarationData(props, json.id) as typeof this;

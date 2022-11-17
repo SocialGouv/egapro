@@ -1,9 +1,10 @@
 import { config } from "@common/config";
-import knex from "knex";
+import type { Knex } from "knex";
+import { knex } from "knex";
 
-import type { DeclarationRaw } from "./raw";
+import type { DeclarationRaw, RepresentationEquilibreeRaw } from "./raw";
 
-export const DB = knex({
+export const knexConfig: Knex.Config = {
   client: "pg",
   connection: {
     host: config.api.postgres.host,
@@ -14,10 +15,13 @@ export const DB = knex({
     ssl: config.api.postgres.ssl,
   },
   pool: { min: config.api.postgres.poolMinSize, max: config.api.postgres.poolMaxSize },
-});
+};
+
+export const DB = knex(knexConfig);
 
 declare module "knex/types/tables" {
   interface Tables {
     declaration: DeclarationRaw;
+    representation_equilibree: RepresentationEquilibreeRaw;
   }
 }

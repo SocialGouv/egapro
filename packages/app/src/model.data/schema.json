@@ -163,6 +163,9 @@
         },
         "hautes_rémunérations": {
           "$ref": "./indicateurs/hautes_rémunérations.json"
+        },
+        "représentation_équilibrée": {
+          "$ref": "./indicateurs/représentation_équilibrée.json"
         }
       },
       "additionalProperties": false
@@ -170,7 +173,6 @@
   },
   "additionalProperties": false,
   "required": [
-    "source",
     "déclaration",
     "déclarant",
     "entreprise"

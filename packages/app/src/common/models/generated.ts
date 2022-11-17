@@ -1084,7 +1084,7 @@ export type Remunerations = WithPopulationFavorable & {
     };
   }[];
 };
-export type WithPopulationFavorable = BaseIndicateur & {
+export type WithPopulationFavorable = BaseIndicateurNote & {
   population_favorable?: PopulationFavorable;
 };
 export type PopulationFavorable = "femmes" | "hommes" | "egalite";
@@ -1126,7 +1126,7 @@ export type AugmentationsEtPromotions = WithPopulationFavorable & {
 /**
  * Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
  */
-export type CongesMaternite = BaseIndicateur & {
+export type CongesMaternite = BaseIndicateurNote & {
   non_calculable?: "absrcm" | "absaugpdtcm" | "am";
 };
 /**
@@ -1141,7 +1141,7 @@ export type HautesRemunerations = WithPopulationFavorable & {
 
 export interface DeclarationDTO {
   id?: string;
-  source: "solen" | "simulateur" | "formulaire" | "api";
+  source?: "solen" | "simulateur" | "formulaire" | "api";
   déclaration: {
     /**
      * Date de validation et de transmission des résultats au service Egapro
@@ -1208,6 +1208,7 @@ export interface DeclarationDTO {
     augmentations_et_promotions?: AugmentationsEtPromotions;
     congés_maternité?: CongesMaternite;
     hautes_rémunérations?: HautesRemunerations;
+    représentation_équilibrée?: RepresentationEquilibree;
   };
 }
 export interface Publication {
@@ -1235,8 +1236,16 @@ export interface Ues {
   nom?: string;
   entreprises?: Entreprise;
 }
-export interface BaseIndicateur {
+export interface BaseIndicateurNote {
   résultat?: number;
   note?: number;
   objectif_de_progression?: string;
+}
+export interface RepresentationEquilibree {
+  pourcentage_femmes_cadres?: number;
+  pourcentage_hommes_cadres?: number;
+  pourcentage_femmes_membres?: number;
+  pourcentage_hommes_membres?: number;
+  motif_non_calculabilité_cadres?: "aucun_cadre_dirigeant" | "un_seul_cadre_dirigeant";
+  motif_non_calculabilité_membres?: "aucune_instance_dirigeante";
 }

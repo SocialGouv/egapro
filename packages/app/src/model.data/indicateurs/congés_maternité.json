@@ -3,7 +3,7 @@
   "$id": "#congés_maternité",
   "allOf": [
     {
-      "$ref": "./base_indicateur.json#/definitions/base"
+      "$ref": "./base_indicateur_noté.json#/definitions/base"
     },
     {
       "type": "object",

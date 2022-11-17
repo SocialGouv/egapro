@@ -150,6 +150,18 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
                     percentScore: raw.data.indicateurs?.augmentations_et_promotions.note_en_pourcentage,
                   }
                 : void 0,
+              balancedRepresentation: raw.data.indicateurs?.représentation_équilibrée
+                ? {
+                    executiveMenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_hommes_cadres,
+                    executiveWomenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_femmes_cadres,
+                    memberMenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_hommes_membres,
+                    memberWomenPercent: raw.data.indicateurs?.représentation_équilibrée.pourcentage_femmes_membres,
+                    notComputableReasonExecutives:
+                      raw.data.indicateurs?.représentation_équilibrée.motif_non_calculabilité_cadres,
+                    notComputableReasonMembers:
+                      raw.data.indicateurs?.représentation_équilibrée.motif_non_calculabilité_membres,
+                  }
+                : void 0,
             },
           })
         : void 0,
@@ -236,7 +248,7 @@ function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
         nom: data.company.ues?.name,
       },
     },
-    source: data.source.getValue(),
+    source: data.source?.getValue(),
     id: data.id,
     indicateurs: {
       augmentations: {
@@ -294,6 +306,14 @@ function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
         })),
         date_consultation_cse: data.indicators?.remunerations?.cseConsultationDate?.toISOString(),
         mode: data.indicators?.remunerations?.mode?.getValue(),
+      },
+      représentation_équilibrée: {
+        motif_non_calculabilité_cadres: data.indicators?.balancedRepresentation?.notComputableReasonExecutives as Any,
+        motif_non_calculabilité_membres: data.indicators?.balancedRepresentation?.notComputableReasonMembers as Any,
+        pourcentage_femmes_cadres: data.indicators?.balancedRepresentation?.executiveWomenPercent?.getValue(),
+        pourcentage_femmes_membres: data.indicators?.balancedRepresentation?.memberWomenPercent?.getValue(),
+        pourcentage_hommes_cadres: data.indicators?.balancedRepresentation?.executiveMenPercent?.getValue(),
+        pourcentage_hommes_membres: data.indicators?.balancedRepresentation?.memberMenPercent?.getValue(),
       },
     },
   };

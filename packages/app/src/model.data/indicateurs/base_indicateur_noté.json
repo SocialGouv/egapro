@@ -3,7 +3,7 @@
   "type": "object",
   "definitions": {
     "base": {
-      "$id": "#base_indicateur",
+      "$id": "#base_indicateur_noté",
       "type": "object",
       "additionalProperties": false,
       "properties": {
