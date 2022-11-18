@@ -53,9 +53,7 @@ const IndicateurUnTypeForm: FunctionComponent<IndicateurUnTypeFormProps> = ({ co
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             <FormControl isReadOnly={readOnly}>
-              <FormLabel as="div">
-                Tranche d'effectifs assujettis de l'entreprise ou de l'unité économique et sociale (UES)
-              </FormLabel>
+              <FormLabel as="div">Modalité de calcul choisie pour cet indicateur</FormLabel>
               <InputRadioGroup defaultValue={values.modaliteDeclaration}>
                 <Stack>
                   <InputRadio value="csp" fieldName="modaliteDeclaration" choiceValue="csp" isReadOnly={readOnly}>
