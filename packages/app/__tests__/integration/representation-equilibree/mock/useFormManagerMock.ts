@@ -71,12 +71,27 @@ const formData = {
   year: 2021,
 };
 
-export const useFormManagerMockValidationPageData = () => {
+export const useFormManagerMockPublishingPageData = () => {
   return {
     useFormManager: () => {
       return {
         ...useFormManagerCommon,
         formData,
+      };
+    },
+  };
+};
+
+export const useFormManagerMockValidationPageData = () => {
+  return {
+    useFormManager: () => {
+      return {
+        ...useFormManagerCommon,
+        formData: {
+          ...formData,
+          publishingDate: "2023-01-25",
+          publishingWebsiteUrl: "test.com",
+        },
       };
     },
   };
