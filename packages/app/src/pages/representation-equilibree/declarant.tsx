@@ -134,7 +134,7 @@ const DeclarantPage: NextPageWithLayout = () => {
               vérifier la validité de ma déclaration. Pour en savoir plus sur l'usage de ces données, vous pouvez
               consulter nos{" "}
               <NextLink href="/cgu">
-                <a>Conditions Générales d'Utilisation</a>
+                <a target="_blank">Conditions Générales d'Utilisation</a>
               </NextLink>
               .
             </FormCheckbox>
