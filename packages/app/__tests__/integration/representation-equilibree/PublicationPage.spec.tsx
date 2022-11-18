@@ -3,13 +3,13 @@ import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
-import { useFormManagerMockValidationPageData } from "./mock/useFormManagerMock";
+import { useFormManagerMockPublishingPageData } from "./mock/useFormManagerMock";
 import { useUserMock } from "./mock/user";
 import PublicationPage from "@/pages/representation-equilibree/publication";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
-jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidationPageData());
+jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockPublishingPageData());
 
 describe("Publication page", () => {
   const spies: any = {};
