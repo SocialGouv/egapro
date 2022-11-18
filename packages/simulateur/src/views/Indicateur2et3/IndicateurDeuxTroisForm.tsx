@@ -174,7 +174,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
                     choiceValue="troisPeriodesReference"
                     isReadOnly={readOnly}
                   >
-                    Période de référence de 3 ans (du ${threeYears} au {dateFinPeriodeReference})
+                    Période de référence de 3 ans (du {threeYears} au {dateFinPeriodeReference})
                   </InputRadio>
                 </Stack>
               </InputRadioGroup>
