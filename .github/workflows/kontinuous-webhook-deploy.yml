@@ -11,6 +11,23 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: build (using kontinuous)
+        uses: socialgouv/kontinuous/.github/actions/deploy-via-webhook@v1
+        with:
+          chart: build-images
+          ignore: build-images
+          token: ${{ secrets.GITHUB_TOKEN }}
+          webhookToken: ${{ secrets.KUBEWEBHOOK_TOKEN }}
+          triggerWebhook: true
+
   deploy:
-    uses: SocialGouv/kontinuous/.github/workflows/workflow-webhook.yaml@v1
+    needs: [build]
+    uses: socialgouv/kontinuous/.github/workflows/workflow-webhook.yaml@v1
     secrets: inherit
+    with:
+      chart: deploy
+      ignoreProjectTemplates: true
+      triggerWebhook: true

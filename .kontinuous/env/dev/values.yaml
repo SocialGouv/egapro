@@ -1,5 +1,6 @@
 api:
-  ~needs: [build-api,create-db]
+  # ~needs: [build-api,create-db]
+  ~needs: [create-db]
   vars:
     EGAPRO_SEND_EMAILS: "True"
     EGAPRO_SMTP_HOST: maildev
@@ -11,6 +12,7 @@ api:
 maildev: {}
 
 jobs-dev:
+  ~chart-group: deploy
   runs:
     create-db:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/create-db

@@ -1,6 +1,7 @@
 app:
   ~chart: app
-  ~needs: [build-app]
+  ~chart-group: deploy
+  # ~needs: [build-app]
   imagePackage: app
   probesPath: /healthz
   containerPort: 3000
@@ -10,7 +11,8 @@ app:
 
 storybook:
   ~chart: app
-  ~needs: [build-storybook]
+  ~chart-group: deploy
+  # ~needs: [build-storybook]
   imagePackage: storybook
   probesPath: /
   containerPort: 8080
@@ -21,7 +23,8 @@ storybook:
 
 declaration:
   ~chart: app
-  ~needs: [build-declaration]
+  ~chart-group: deploy
+  # ~needs: [build-declaration]
   imagePackage: declaration
   probesPath: /index.html
   containerPort: 8080
@@ -32,7 +35,8 @@ declaration:
 
 simulateur:
   ~chart: app
-  ~needs: [build-simulateur]
+  ~chart-group: deploy
+  # ~needs: [build-simulateur]
   imagePackage: simulateur
   probesPath: /index.html
   containerPort: 8080
@@ -43,7 +47,8 @@ simulateur:
 
 api:
   ~chart: app
-  ~needs: [build-api]
+  ~chart-group: deploy
+  # ~needs: [build-api]
   imagePackage: api
   probesPath: /healthz
   containerPort: 2626
@@ -69,6 +74,7 @@ api:
 
 files:
   ~chart: app
+  ~chart-group: deploy
   image: ghcr.io/socialgouv/docker/nginx:7.0.1
   containerPort: 8080
   probesPort: 8080
@@ -114,6 +120,7 @@ project:
 
 jobs:
   ~chart: jobs
+  ~chart-group: build-images
   runs:
     build-app:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
