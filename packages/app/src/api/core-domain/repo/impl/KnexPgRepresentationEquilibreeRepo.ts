@@ -41,7 +41,7 @@ export class KnexPgRepresentationEquilibreeRepo implements IRepresentationEquili
   public delete(item: RepresentationEquilibree): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public exists(id: RepresentationEquilibreePK): Promise<boolean> {
+  public exists([siren, year]: RepresentationEquilibreePK): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<RepresentationEquilibree[]> {

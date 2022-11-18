@@ -178,7 +178,6 @@ function reprensentationEquilibreeDataToDTO(data: DeclarationData): DeclarationD
         nom: data.company.ues?.name,
       },
     },
-    id: data.id,
     indicateurs: {
       représentation_équilibrée: {
         motif_non_calculabilité_cadres: data.indicators?.balancedRepresentation?.notComputableReasonExecutives as Any,
