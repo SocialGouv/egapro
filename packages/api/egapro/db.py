@@ -92,6 +92,13 @@ class representation(table):
         )
 
     @classmethod
+    async def get_with_siren(cls, siren):
+        print("SIREN:", siren)
+        return await cls.fetchrow(
+            f"SELECT * FROM {cls.table_name} WHERE siren=$1", siren
+        )
+
+    @classmethod
     async def get_declared_at(cls, siren, year):
         try:
             return await cls.fetchval(

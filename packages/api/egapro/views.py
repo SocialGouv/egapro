@@ -410,6 +410,65 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
+def makefilter(region, dept, naf):
+    def apply_filters(x):
+        is_valid = True
+
+        if region is None and dept is None and naf is None:
+            return True
+
+        if region is not None:
+            if x["data"]["entreprise"]["région"] != region:
+                is_valid = False
+        if dept is not None:
+            if x["data"]["entreprise"]["département"] != dept:
+                is_valid = False
+        if naf is not None:
+            if x["data"]["entreprise"]["code_naf"] != naf:
+                is_valid = False
+        return is_valid
+    return apply_filters
+
+@app.route("/representation-equilibree/search", methods=["GET"])
+async def search_repeq(request, response):
+    siren = request.query['q'][0]
+    limit = request.query.int("limit", 10)
+    region = request.query.get("region", None)
+    dept = request.query.get("departement", None)
+    naf = request.query.get("code_naf", None)
+
+    repartitions = []
+    years = sorted(constants.YEARS, reverse=True)
+
+    for year in years:
+        try:
+            print("siren", siren, "year", year)
+            record = await db.representation.get(siren, year)
+
+            resource = record.as_resource()
+            print("RESOURCE", resource['data']['entreprise']['région'])
+            if record.data.path("déclarant.nom"):
+                await helpers.patch_from_recherche_entreprises(resource["data"])
+            repartitions.append(resource)
+        except:
+            pass
+        if len(repartitions) == limit:
+            break
+
+    if not repartitions:
+        raise HttpError(404, f"No declarations with siren {siren} for any year")
+
+    repartitions = filter(makefilter(region, dept, naf), repartitions)
+    response.json = repartitions
+    # try:
+    #     record = await db.representation.get_with_siren(siren)
+    #     print("RECORD", record)
+    # except db.NoData:
+    #     raise HttpError(404, f"No représentation équilibrée with siren {siren}")
+    # resource = record.as_resource()
+    # if record.data.path("déclarant.nom"):
+    #     await helpers.patch_from_recherche_entreprises(resource["data"])
+    # response.json = resource
 
 @app.route("/representation-equilibree/{siren}/{year}", methods=["GET"])
 @tokens.require
