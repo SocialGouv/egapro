@@ -1,4 +1,4 @@
-import escapeStringRegexp from "escape-string-regexp";
+import { escapeStringRegexp } from "@common/utils/string";
 
 import { SimpleStringValueObject } from "./SimpleStringValueObject";
 

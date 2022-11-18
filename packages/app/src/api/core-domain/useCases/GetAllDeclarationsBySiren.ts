@@ -18,7 +18,7 @@ export class GetAllDeclarationsBySiren implements UseCase<Input, DeclarationDTO[
       const validatedSiren = new Siren(siren);
       return (await this.declarationRepo.getAllBySiren(validatedSiren)).map(declarationMap.toDTO);
     } catch (error: unknown) {
-      throw new GetAllDeclarationsBySirenError("Cannot get all configs", error as Error);
+      throw new GetAllDeclarationsBySirenError("Cannot get all declarations", error as Error);
     }
   }
 }

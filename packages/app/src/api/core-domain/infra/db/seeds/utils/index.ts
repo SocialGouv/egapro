@@ -86,6 +86,4 @@ export const getRandomDeclarationRepEq = () => {
 const getRandomNafCode = () => _.sample(Object.keys(NAF))!;
 const getRandomRegion = () => _.sample(Object.keys(REGIONS))!;
 const getRandomCounty = (region?: keyof typeof REGIONS) =>
-  region
-    ? (_.sample(Object.keys(REGIONS_TO_COUNTIES[region])) as keyof typeof COUNTIES)
-    : _.sample(Object.keys(COUNTIES))!;
+  region ? _.sample(REGIONS_TO_COUNTIES[region]) : _.sample(Object.keys(COUNTIES))!;

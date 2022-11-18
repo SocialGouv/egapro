@@ -1,6 +1,7 @@
 import { config } from "@common/config";
 import type { Knex } from "knex";
 import { knex } from "knex";
+import path from "path";
 
 import type { DeclarationRaw, RepresentationEquilibreeRaw } from "./raw";
 
@@ -14,10 +15,15 @@ export const knexConfig: Knex.Config = {
     password: config.api.postgres.password,
     ssl: config.api.postgres.ssl,
   },
+  seeds: {
+    directory: path.resolve(__dirname, "./seeds"),
+    recursive: false,
+  },
   pool: { min: config.api.postgres.poolMinSize, max: config.api.postgres.poolMaxSize },
 };
 
-export const DB = knex(knexConfig);
+let DB: Knex | null = null;
+export const getDatabase = () => (DB ??= knex(knexConfig));
 
 declare module "knex/types/tables" {
   interface Tables {
