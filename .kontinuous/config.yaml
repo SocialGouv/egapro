@@ -7,3 +7,6 @@ dependencies:
 environmentPatterns:
   prod: false
   dev: "!v*"
+
+webhhookMountSecrets:
+  - mattermost-webhook
