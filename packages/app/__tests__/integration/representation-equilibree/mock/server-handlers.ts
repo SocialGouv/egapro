@@ -4,6 +4,12 @@ import { FAKE_SIREN, NOT_LINKED_SIREN, VALID_SIREN } from "./user";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const receiptResponse = jest.fn();
+
+receiptResponse.mockImplementation(async (req, res, ctx) => {
+  return res(ctx.status(204));
+});
+
 const handlers = [
   rest.get(API_URL + "/validate-siren", async (req, res, ctx) => {
     const { searchParams } = req.url;
@@ -34,18 +40,20 @@ const handlers = [
   rest.get(API_URL + "/ownership/" + NOT_LINKED_SIREN, async (req, res, ctx) => {
     return res(
       ctx.status(403),
-      ctx.json({ error: "Vous n'avez pas les droits n\u00e9cessaires pour le siren " + NOT_LINKED_SIREN }),
+      ctx.json({
+        error: "Vous n'avez pas les droits n\u00e9cessaires pour le siren " + NOT_LINKED_SIREN,
+      }),
     );
   }),
   rest.get(API_URL + "/representation-equilibree/" + VALID_SIREN + "/2021", async (req, res, ctx) => {
     return res(
       ctx.status(404),
-      ctx.json({ error: "No représentation équilibrée with siren " + VALID_SIREN + " and year 2021" }),
+      ctx.json({
+        error: "No représentation équilibrée with siren " + VALID_SIREN + " and year 2021",
+      }),
     );
   }),
-  rest.post(API_URL + "/representation-equilibree/" + VALID_SIREN + "/2021/receipt", async (req, res, ctx) => {
-    return res(ctx.status(204));
-  }),
+  rest.post(API_URL + "/representation-equilibree/" + VALID_SIREN + "/2021/receipt", receiptResponse),
 ];
 
-export { handlers };
+export { handlers, receiptResponse };
