@@ -57,7 +57,7 @@ const validateForm = ({
         parsedDatePublication > parsedFinPeriodeReference
           ? undefined
           : {
-              correspondanceFinPeriodeReference: `La date ne peut précéder la fin de la période de référence (${finPeriodeReference})`,
+              correspondanceFinPeriodeReference: `La date ne peut précéder la date de fin de la période de référence (${finPeriodeReference})`,
             },
       publicationSurSiteInternet:
         publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
