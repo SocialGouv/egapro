@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { Box, VStack, Text, Tooltip, Button, Link } from "@chakra-ui/react"
+import { Box, VStack, Text, Tooltip, Button } from "@chakra-ui/react"
 import { RouteComponentProps } from "react-router-dom"
 
 import { AppState } from "../../globals"
