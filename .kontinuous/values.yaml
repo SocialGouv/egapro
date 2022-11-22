@@ -7,6 +7,19 @@ app:
   host: "{{ .Values.global.host }}"
   .ingress.path: /
   certSecretName: api-crt
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: "staff"
+  vars:
+    EGAPRO_DBHOST: "$(PGHOST)"
+    EGAPRO_DBNAME: "$(PGDATABASE)"
+    EGAPRO_DBPORT: "$(PGPORT)"
+    EGAPRO_DBUSER: "$(PGUSER)"
+    EGAPRO_DBPASS: "$(PGPASSWORD)"
+    EGAPRO_DBSSL: "$(PGSSLMODE)"
+    EGAPRO_SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
 
 storybook:
   ~chart: app
