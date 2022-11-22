@@ -13,7 +13,13 @@ export const knexConfig: Knex.Config = {
     database: config.api.postgres.db,
     user: config.api.postgres.user,
     password: config.api.postgres.password,
-    ssl: config.api.postgres.ssl,
+    // ssl: config.api.postgres.ssl,
+    ssl: config.api.postgres.ssl
+      ? {
+          rejectUnauthorized: false,
+        }
+      : false,
+    debug: true,
   },
   seeds: {
     directory: path.resolve(__dirname, "./seeds"),
@@ -23,7 +29,20 @@ export const knexConfig: Knex.Config = {
 };
 
 let DB: Knex | null = null;
-export const getDatabase = () => (DB ??= knex(knexConfig));
+export const getDatabase = () => {
+  DB ??= knex(knexConfig);
+
+  DB.raw("SELECT 1")
+    .then(() => {
+      console.log("PostgreSQL connected");
+    })
+    .catch(e => {
+      console.log("PostgreSQL not connected");
+      console.error(e);
+    });
+
+  return DB;
+};
 
 declare module "knex/types/tables" {
   interface Tables {
