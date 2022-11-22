@@ -3,14 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
-import { useFormManagerMock } from "./mock/useFormManagerMock";
 import { NOT_LINKED_SIREN, VALID_SIREN } from "./mock/user";
 import { useUserMock } from "./mock/user";
 import CommencerPage from "@/pages/representation-equilibree/commencer";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
-jest.mock("@services/apiClient/useFormManager", () => useFormManagerMock());
 
 describe("Commencer Page : Connected navigation", () => {
   const spies: any = {};

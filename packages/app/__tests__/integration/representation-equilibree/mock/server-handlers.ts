@@ -1,6 +1,6 @@
 import { rest } from "msw";
 import { validEnterprise } from "./useFormManagerMock";
-import { FAKE_SIREN, NOT_LINKED_SIREN, VALID_SIREN } from "./user";
+import { FAKE_SIREN, NOT_LINKED_SIREN, VALID_SIREN, VALID_SIREN2 } from "./user";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -53,7 +53,13 @@ const handlers = [
       }),
     );
   }),
-  rest.post(API_URL + "/representation-equilibree/" + VALID_SIREN + "/2021/receipt", receiptResponse),
+  rest.get(API_URL + "/representation-equilibree/" + VALID_SIREN2 + "/2021", async (req, res, ctx) => {
+    return res(ctx.status(204));
+  }),
+  rest.put(API_URL + "/representation-equilibree/" + VALID_SIREN2 + "/2021", async (req, res, ctx) => {
+    return res(ctx.status(204));
+  }),
+  rest.post(API_URL + "/representation-equilibree/" + VALID_SIREN2 + "/2021/receipt", receiptResponse),
 ];
 
 export { handlers, receiptResponse };

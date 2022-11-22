@@ -3,13 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
-import { useFormManagerMock } from "./mock/useFormManagerMock";
 import { FAKE_USER, useUserMock } from "./mock/user";
 import DeclarantPage from "@/pages/representation-equilibree/declarant";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
-jest.mock("@services/apiClient/useFormManager", () => useFormManagerMock());
 
 describe("Déclarant page", () => {
   const spies: any = {};

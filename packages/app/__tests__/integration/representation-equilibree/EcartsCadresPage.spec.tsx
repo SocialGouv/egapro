@@ -3,13 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
-import { useFormManagerMockValidData } from "./mock/useFormManagerMock";
 import { useUserMock } from "./mock/user";
 import EcartsCadres from "@/pages/representation-equilibree/ecarts-cadres";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
-jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidData());
 
 describe("Ecarts cadres page", () => {
   const spies: any = {};
