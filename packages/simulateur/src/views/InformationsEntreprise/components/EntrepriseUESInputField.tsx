@@ -57,7 +57,9 @@ const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({ nom, s
             )}
           />
         )}
-        <FakeInputGroup label="Nom de l'entreprise">{entreprise?.raison_sociale}</FakeInputGroup>
+        <FakeInputGroup label="Nom de l'entreprise" title={entreprise?.raison_sociale}>
+          {entreprise?.raison_sociale}
+        </FakeInputGroup>
       </SimpleGrid>
     </FormControl>
   )
