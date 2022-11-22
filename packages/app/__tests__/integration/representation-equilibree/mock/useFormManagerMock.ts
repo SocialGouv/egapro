@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { VALID_SIREN } from "./user";
+import { VALID_SIREN, VALID_SIREN2 } from "./user";
 
 const useFormManagerCommon = {
   resetFormData: () => {},
@@ -17,15 +17,15 @@ export const validEnterprise = {
   siren: VALID_SIREN,
 };
 
-export const useFormManagerMock = () => {
-  return {
-    useFormManager: () => {
-      return {
-        ...useFormManagerCommon,
-        formData: {},
-      };
-    },
-  };
+export const validEntreprise2 = {
+  raison_sociale: "BOULANGERIES PAUL",
+  code_naf: "10.71A",
+  région: "32",
+  département: "59",
+  adresse: "BATIMENT D.E 344 AV DE LA MARNE",
+  commune: "MARCQ-EN-BAROEUL",
+  code_postal: "59700",
+  siren: VALID_SIREN2,
 };
 
 export const useFormManagerMockValidData = () => {
@@ -42,6 +42,7 @@ export const useFormManagerMockValidData = () => {
   };
 };
 
+// used for publishing, validation and transmission pages tests
 const formData = {
   declarant: {
     prenom: "test",
@@ -55,16 +56,7 @@ const formData = {
   ecartsMembresFemmes: 4,
   ecartsMembresHommes: 96,
   endOfPeriod: "2021-12-31",
-  entreprise: {
-    raison_sociale: "BOULANGERIES PAUL",
-    code_naf: "10.71A",
-    région: "32",
-    département: "59",
-    adresse: "BATIMENT D.E 344 AV DE LA MARNE",
-    commune: "MARCQ-EN-BAROEUL",
-    code_postal: "59700",
-    siren: "403052111",
-  },
+  entreprise: validEntreprise2,
   hasWebsite: true,
   isEcartsCadresCalculable: true,
   isEcartsMembresCalculable: true,
