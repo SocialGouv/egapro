@@ -70,6 +70,7 @@
     "@tsconfig/node16": "^1.0.3",
     "@types/dotenv": "^8.2.0",
     "@types/node": "16",
+    "@types/pg": "^8.6.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^8.3.4",
