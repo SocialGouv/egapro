@@ -8,6 +8,11 @@ const nextConfig = {
         source: "/healthz",
         destination: "/api/health",
       },
+      // TODO: remove when api v2 is enabled
+      {
+        source: "/apiv2/:path*",
+        destination: "/api/:path*",
+      },
     ];
   },
   async headers() {
