@@ -1,3 +1,24 @@
+## [2.32.1](https://github.com/SocialGouv/egapro/compare/v2.32.0...v2.32.1) (2022-11-22)
+
+
+### Bug Fixes
+
+* problems with percentage ([#1395](https://github.com/SocialGouv/egapro/issues/1395)) ([747d6c1](https://github.com/SocialGouv/egapro/commit/747d6c1a7a7bb4d8da01711ed76a34ad63225a55))
+
+# [2.32.0](https://github.com/SocialGouv/egapro/compare/v2.31.1...v2.32.0) (2022-11-22)
+
+
+### Features
+
+* add xls export ([#1354](https://github.com/SocialGouv/egapro/issues/1354)) ([e49267b](https://github.com/SocialGouv/egapro/commit/e49267bd37c88d57d1000bd3a86f2f53b6443bb1))
+
+## [2.31.1](https://github.com/SocialGouv/egapro/compare/v2.31.0...v2.31.1) (2022-11-21)
+
+
+### Bug Fixes
+
+* wording [#1348](https://github.com/SocialGouv/egapro/issues/1348) ([#1393](https://github.com/SocialGouv/egapro/issues/1393)) ([5c3b47c](https://github.com/SocialGouv/egapro/commit/5c3b47c5d82a75002f4d0d77ad002a1e70d253a6))
+
 # [2.31.0](https://github.com/SocialGouv/egapro/compare/v2.30.0...v2.31.0) (2022-11-17)
 
 

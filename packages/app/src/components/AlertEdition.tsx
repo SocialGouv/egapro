@@ -21,8 +21,8 @@ export const AlertEdition = () => {
         </p>
       ) : (
         <p>
-          Vous éditez une déclaration déjà transmise. Vous pouvez la modifier et elle remplacera l'actuelle une fois
-          validée à la dernière étape.
+          Vous êtes en train de modifier une déclaration validée et transmise. Vos modifications ne seront enregistrées
+          que lorsque vous l'aurez à nouveau validée et transmise à la dernière étape.
         </p>
       )}
       <LinkGroup>

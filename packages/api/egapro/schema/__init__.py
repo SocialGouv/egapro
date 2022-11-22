@@ -63,8 +63,12 @@ def _repeq_cross_validate(data):
         ("indicateurs.représentation_équilibrée.pourcentage_femmes_membres", "indicateurs.représentation_équilibrée.pourcentage_hommes_membres")
     ]
 
-    pct_missing = any(bool(data.path(x)) ^ bool(data.path(y)) for (x, y) in percentages)
-    assert not pct_missing, f"Les paires de pourcentages doivent être respectées."
+    for pair in percentages:
+        x,y = pair[0], pair[1]
+        condition1 = data.path(x) is not None and data.path(y) is None
+        condition2 = data.path(y) is not None and data.path(x) is None
+        assert not condition1, f"Les paires de pourcentages doivent être respectées."
+        assert not condition2, f"Les paires de pourcentages doivent être respectées."
 
     pct_eq_100 = all(not(data.path(x) and data.path(y)) or data.path(x) + data.path(y) == 100 for (x,y) in percentages)
     assert pct_eq_100, f"Les pourcentages doivent additionner à 100"

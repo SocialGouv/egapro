@@ -28,6 +28,7 @@ export * from "./base/TileSuccess";
 export * from "./img/ImgHome";
 export * from "./img/ImgRepresentationEquilibree";
 export * from "./img/ImgSuccess";
+export * from "./img/ImgJDMA";
 export * from "./layout/Container";
 export * from "./layout/ContentWithAside";
 export * from "./layout/FormLayout";
