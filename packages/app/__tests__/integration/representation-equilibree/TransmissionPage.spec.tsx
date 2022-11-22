@@ -4,13 +4,13 @@ import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
 import { receiptResponse } from "./mock/server-handlers";
-import { useFormManagerMockValidData } from "./mock/useFormManagerMock";
+import { useFormManagerMockValidationPageData } from "./mock/useFormManagerMock";
 import { useUserMock } from "./mock/user";
 import TransmissionPage from "@/pages/representation-equilibree/transmission";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
-jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidData());
+jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidationPageData());
 
 describe("Transmission page", () => {
   const spies: any = {};
