@@ -1,6 +1,6 @@
-import { FormControl, FormLabel, SimpleGrid } from "@chakra-ui/react"
-import React, { FunctionComponent } from "react"
-import { useField } from "react-final-form"
+import { Box, FormControl, FormLabel, Input, SimpleGrid, Text } from "@chakra-ui/react"
+import React, { FunctionComponent, useEffect } from "react"
+import { useField, useForm } from "react-final-form"
 
 import { EntrepriseUES } from "../../../globals"
 import { composeValidators, required } from "../../../utils/formHelpers"
@@ -21,15 +21,21 @@ const checkDuplicates = (value: string, allValues: any) => {
   const sirenList = allValues.entreprisesUES.map((entreprise: EntrepriseUES) => entreprise.siren)
   sirenList.push(allValues.siren)
   if (sirenList.filter((siren: string) => siren === value).length >= 2) {
-    return "ce numéro SIREN est déjà utilisé"
+    return "Ce numéro Siren est déjà utilisé"
   }
   return undefined
 }
 
 const EntrepriseUESInput: FunctionComponent<EntrepriseUESInputProps> = ({ nom, siren, index, readOnly, year }) => {
-  const nomField = useField(nom)
   const sirenField = useField(siren)
+  const nomField = useField(nom)
   const { entreprise } = useSiren(sirenField.input.value)
+
+  const form = useForm()
+
+  useEffect(() => {
+    form.change(nom, entreprise?.raison_sociale || "")
+  }, [entreprise, form, nom])
 
   return (
     <FormControl isInvalid={hasFieldError(nomField.meta)}>

@@ -13,8 +13,6 @@ const atLeastTwo: ValidatorFunction = (value) =>
 export const validator = composeValidators(atLeastTwo)
 
 function NombreEntreprises({ readOnly }: { readOnly: boolean }) {
-  // const formState = useFormState()
-
   return (
     <Field name="nombreEntreprises" validate={validator}>
       {({ input, meta }) => (
