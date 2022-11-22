@@ -15033,6 +15033,11 @@ postgres-interval@^1.1.0:
   dependencies:
     xtend "^4.0.0"
 
+postgres@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/postgres/-/postgres-3.3.2.tgz#91f2e209e4a08ca7101eb7178734e4c0e4d23eb3"
+  integrity sha512-NaPqFpUC6C7aCQkJXLvuO/3RKNKL4en8opY53YrcXK3//xXra6CZ2qX6290lxuQ1dW1LbRGYCmsawRlCxSBonQ==
+
 prelude-ls@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
