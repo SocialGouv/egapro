@@ -1,13 +1,13 @@
-import { Box, FormControl, FormLabel, Input, SimpleGrid, Text } from "@chakra-ui/react"
+import { FormControl, FormLabel, SimpleGrid } from "@chakra-ui/react"
 import React, { FunctionComponent, useEffect } from "react"
 import { useField, useForm } from "react-final-form"
 
-import { EntrepriseUES } from "../../../globals"
-import { composeValidators, required } from "../../../utils/formHelpers"
 import FakeInputGroup from "../../../components/ds/FakeInputGroup"
 import FieldSiren, { sirenValidator } from "../../../components/FieldSiren"
 import { hasFieldError } from "../../../components/Input"
+import { EntrepriseUES } from "../../../globals"
 import { useSiren } from "../../../hooks/useSiren"
+import { composeValidators, required } from "../../../utils/formHelpers"
 
 type EntrepriseUESInputProps = {
   nom: string
