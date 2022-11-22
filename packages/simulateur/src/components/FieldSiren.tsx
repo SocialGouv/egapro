@@ -100,7 +100,7 @@ type FieldSirenProps = {
   name: string
   label: string
   readOnly: boolean
-  updateSirenData: (sirenData: EntrepriseType) => void
+  updateSirenData?: (sirenData: EntrepriseType) => void
   validator?: ValidatorFunction
   year: number
 }
@@ -109,7 +109,8 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
   name,
   label,
   readOnly,
-  updateSirenData,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  updateSirenData = () => {},
   validator,
   year,
 }) => {

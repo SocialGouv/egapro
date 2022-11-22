@@ -1,39 +1,31 @@
-import React, { FunctionComponent } from "react"
-import { FormControl, FormLabel, Text } from "@chakra-ui/react"
-import { MutableState, Tools } from "final-form"
+import { Box, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react"
 import arrayMutators from "final-form-arrays"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import createDecorator from "final-form-calculate"
 import { FieldArray } from "react-final-form-arrays"
 
-import {
-  AppState,
-  FormState,
-  ActionInformationsEntrepriseData,
-  Structure,
-  EntrepriseUES,
-  EntrepriseType,
-} from "../../globals"
+import { ActionInformationsEntrepriseData, AppState, EntrepriseType, FormState, Structure } from "../../globals"
 
 import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 
-import ButtonAction from "../../components/ds/ButtonAction"
-import { IconEdit } from "../../components/ds/Icons"
-import InputRadio from "../../components/ds/InputRadio"
-import InputRadioGroup from "../../components/ds/InputRadioGroup"
-import FormStack from "../../components/ds/FormStack"
-import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import createDecorator from "final-form-calculate"
 import ActionBar from "../../components/ActionBar"
 import { codeNafFromCode } from "../../components/CodeNaf"
+import ButtonAction from "../../components/ds/ButtonAction"
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import FormStack from "../../components/ds/FormStack"
+import { IconEdit, IconPlusCircle } from "../../components/ds/Icons"
+import InputRadio from "../../components/ds/InputRadio"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FieldSiren from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
-import NombreEntreprises, { validator as validateNombreEntreprises } from "../../components/NombreEntreprises"
+import NombreEntreprises from "../../components/NombreEntreprises"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import EntrepriseUESInput from "./components/EntrepriseUESInputField"
-import FormError from "../../components/FormError"
 import TextField from "../../components/TextField"
+import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -66,55 +58,34 @@ const validateForm = ({
   nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
 })
 
-// // // Update state when change on nombreEntreprises is made.
-// // const calculator = createDecorator({
-// //   field: "nombreEntreprises",
-// //   updates: {
-// //     entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
-// //       adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES),
-// //   },
-// // })
-
-// // const adaptEntreprisesUESSize = (nombreEntreprises: string, entreprisesUES: Array<EntrepriseUES>) => {
-// //   console.log("dans adapt", nombreEntreprises)
-// //   if (validateNombreEntreprises(nombreEntreprises) === undefined) {
-// //     // Il faut une entreprise à déclarer de moins vu que l'entreprise déclarant pour le compte de l'UES a déjà renseigné ses infos
-// //     const newSizeEntreprisesUES = Number(nombreEntreprises) - 1
-
-// //     while (newSizeEntreprisesUES > entreprisesUES.length) {
-// //       // Augmenter la taille de l'array si nécessaire
-// //       entreprisesUES.push({ nom: "", siren: "" })
-// //     }
-// //     // Réduire la taille de l'array si nécessaire
-// //     // entreprisesUES.length = newSizeEntreprisesUES
-// //     //entreprisesUES.splice(newSizeEntreprisesUES)
-// //     entreprisesUES = entreprisesUES.slice(0, newSizeEntreprisesUES)
-// //   }
-
-//   console.log("end of adaptEntreprisesUESSize xxx")
-
-//   entreprisesUES.forEach((elt) => console.log("entreprise", elt))
-
-//   return entreprisesUES
-// }
+// Update state when change on nombreEntreprises is made.
+const updateNombreEntreprises = createDecorator({
+  field: "entreprisesUES",
+  updates: {
+    nombreEntreprises: (entreprisesUES) => {
+      return entreprisesUES.length + 1
+    },
+  },
+})
 
 interface InformationsEntrepriseFormProps {
-  informationsEntreprise: AppState["informationsEntreprise"]
-  readOnly: boolean
-  updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
-  validateInformationsEntreprise: (valid: FormState) => void
+  state: AppState
+  update: (data: ActionInformationsEntrepriseData) => void
+  validate: (valid: FormState) => void
   alreadyDeclared: boolean
-  year: number
 }
 
 const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({
-  informationsEntreprise,
-  readOnly,
-  updateInformationsEntreprise,
-  validateInformationsEntreprise,
+  state,
+  update,
+  validate,
   alreadyDeclared,
-  year,
 }) => {
+  const informationsEntreprise = state.informationsEntreprise
+  const readOnly = state.informationsEntreprise.formValidated === "Valid"
+
+  const year = state?.informations?.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
     siren: informationsEntreprise.siren,
@@ -148,9 +119,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       entreprisesUES,
     } = formData
 
-    console.log("dans saveForm", entreprisesUES)
-
-    updateInformationsEntreprise({
+    update({
       nomEntreprise: nomEntreprise,
       siren: siren,
       codeNaf: codeNaf,
@@ -169,28 +138,18 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateInformationsEntreprise("Valid")
+    validate("Valid")
   }
-
-  // TODO: supprimer le traitement /décorateur qui met à jour le nombre d'entreprise.
-  // À la place, fait un bouton qui ajoute des entreprises 1 par 1. Et faire un champ readonly qui ne fait que compter les entreprises déjà renseignées.
-
-  // Marche mieux, mais je suis toujours obligé de mettre le updateSirenData, sinon on ne récupère pas la raison sociale.
-  // Aussi, fait une erreur sur nombre d'entreprise qui dit qu'il est vide.
-  // Quit si trop pénible. Il faudra le refaire en RHF, ça sera plus facile de raisonner. Car ici, on voit que ce sont des renders qui ressuscite les entreprises qu'on vient de supprimer...
-
-  console.log("entrepriseUES", informationsEntreprise.entreprisesUES)
 
   return (
     <Form
       onSubmit={onSubmit}
       mutators={{
-        // potentially other mutators could be merged here
         ...arrayMutators,
       }}
       initialValues={initialValues}
       validate={validateForm}
-      // decorators={[calculator]}
+      decorators={[updateNombreEntreprises]}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
@@ -275,9 +234,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                   readOnly={readOnly}
                 />
                 <NombreEntreprises readOnly={readOnly} />
-                <button onClick={() => form.mutators.push("entreprisesUES", { nom: "", siren: "" })}>
-                  Ajouter une entreprise à l'UES
-                </button>
+
                 <Text>
                   Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)
                 </Text>
@@ -286,25 +243,34 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                     return (
                       <>
                         {fields.map((entrepriseUES, index) => (
-                          <>
+                          <Flex key={entrepriseUES} justifyContent="center" alignItems="start">
                             <EntrepriseUESInput
-                              key={entrepriseUES}
                               nom={`${entrepriseUES}.nom`}
                               siren={`${entrepriseUES}.siren`}
                               index={index}
                               readOnly={readOnly}
                               year={year}
-                              updateSirenData={(sirenData: EntrepriseType) =>
-                                form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
-                              }
                             />
-                            <button onClick={() => fields.remove(index)}>❌</button>
-                          </>
+                            {!readOnly && (
+                              <Box style={{ marginLeft: 10, marginTop: 65 }}>
+                                <button onClick={() => fields.remove(index)}>❌</button>
+                              </Box>
+                            )}
+                          </Flex>
                         ))}
                       </>
                     )
                   }}
                 </FieldArray>
+                {!readOnly && (
+                  <ButtonAction
+                    size="md"
+                    variant="outline"
+                    label="Ajouter une entreprise à l'UES"
+                    onClick={() => form.mutators.push("entreprisesUES", { nom: "", siren: "" })}
+                    leftIcon={<IconPlusCircle />}
+                  />
+                )}
               </>
             )}
           </FormStack>
@@ -317,7 +283,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"
-                  onClick={() => validateInformationsEntreprise("None")}
+                  onClick={() => validate("None")}
                   variant="link"
                   size="sm"
                 />
@@ -328,7 +294,6 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
               <FormSubmit />
             </ActionBar>
           )}
-          <pre>{JSON.stringify(values, null, 2)}</pre>
         </form>
       )}
     </Form>

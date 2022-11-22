@@ -53,19 +53,15 @@ const InformationsEntreprise = ({ state, dispatch }: InformationsEntrepriseProps
 
   const alreadyDeclared = declaration?.data?.id === code
 
-  const year = state?.informations?.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
-
   return (
     <PageInformationsEntreprise>
       <LayoutFormAndResult
         childrenForm={
           <InformationsEntrepriseForm
-            informationsEntreprise={state.informationsEntreprise}
-            readOnly={state.informationsEntreprise.formValidated === "Valid"}
-            updateInformationsEntreprise={updateInformationsEntreprise}
-            validateInformationsEntreprise={validateInformationsEntreprise}
+            state={state}
+            update={updateInformationsEntreprise}
+            validate={validateInformationsEntreprise}
             alreadyDeclared={alreadyDeclared}
-            year={year}
           />
         }
         childrenResult={null}
