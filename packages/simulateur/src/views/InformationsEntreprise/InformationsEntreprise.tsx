@@ -1,13 +1,11 @@
-import React, { useCallback, PropsWithChildren } from "react"
+import React, { PropsWithChildren, useCallback } from "react"
 import { RouteComponentProps, useParams } from "react-router-dom"
 
-import { AppState, FormState, ActionType, ActionInformationsEntrepriseData } from "../../globals"
+import { ActionInformationsEntrepriseData, ActionType, AppState, FormState } from "../../globals"
 
-import { useTitle } from "../../utils/hooks"
 import { useDeclaration } from "../../hooks/useDeclaration"
-
+import { useTitle } from "../../utils/hooks"
 import Page from "../../components/Page"
-import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import InformationsEntrepriseForm from "./InformationsEntrepriseForm"
 
 interface InformationsEntrepriseProps extends RouteComponentProps {
@@ -55,16 +53,11 @@ const InformationsEntreprise = ({ state, dispatch }: InformationsEntrepriseProps
 
   return (
     <PageInformationsEntreprise>
-      <LayoutFormAndResult
-        childrenForm={
-          <InformationsEntrepriseForm
-            state={state}
-            update={updateInformationsEntreprise}
-            validate={validateInformationsEntreprise}
-            alreadyDeclared={alreadyDeclared}
-          />
-        }
-        childrenResult={null}
+      <InformationsEntrepriseForm
+        state={state}
+        update={updateInformationsEntreprise}
+        validate={validateInformationsEntreprise}
+        alreadyDeclared={alreadyDeclared}
       />
     </PageInformationsEntreprise>
   )
