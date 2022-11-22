@@ -231,19 +231,6 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
             </Tooltip>
           </Box>
         </ActionBar>
-
-        <Box mt={8}>
-          <Link
-            href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-            isExternal
-          >
-            <img
-              src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg"
-              alt="Je donne mon avis"
-              title="Je donne mon avis sur cette démarche"
-            />
-          </Link>
-        </Box>
       </Box>
     </Page>
   )

@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import type { FormButtonProps } from "@design-system";
-import { TileSuccessTitle } from "@design-system";
+import { TileSuccessTitle, ImgJDMA } from "@design-system";
 import { TileSuccess } from "@design-system";
 import {
   ButtonAsLink,
@@ -103,6 +103,18 @@ const Transmission: NextPageWithLayout = () => {
           </GridCol>
         </Grid>
       )}
+      <Grid mt="6w" justifyCenter haveGutters>
+        <GridCol md={10} lg={8} className="fr-enlarge-link">
+          <a
+            // TODO: separate component with key as env
+            href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3494?&view-mode=formulaire-avis&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <ImgJDMA />
+          </a>
+        </GridCol>
+      </Grid>
     </TileSuccess>
   );
 };
