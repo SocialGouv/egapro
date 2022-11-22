@@ -99,13 +99,6 @@ export const Footer: FC = () => {
           </Text>
           <Text fontSize="sm" mt={1}>
             Pour nous aider à l'améliorer{" "}
-            <TextLink
-              to="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-              isExternal
-            >
-              donnez-nous votre avis
-            </TextLink>
-            {", "}
             <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
               contribuez sur Github
             </TextLink>
