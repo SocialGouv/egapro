@@ -1,3 +1,10 @@
+# [2.32.0](https://github.com/SocialGouv/egapro/compare/v2.31.1...v2.32.0) (2022-11-22)
+
+
+### Features
+
+* add xls export ([#1354](https://github.com/SocialGouv/egapro/issues/1354)) ([e49267b](https://github.com/SocialGouv/egapro/commit/e49267bd37c88d57d1000bd3a86f2f53b6443bb1))
+
 ## [2.31.1](https://github.com/SocialGouv/egapro/compare/v2.31.0...v2.31.1) (2022-11-21)
 
 
