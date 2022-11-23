@@ -1,7 +1,5 @@
 import { ensureEnvVar as baseEnsureEnvVar } from "@common/utils/os";
 
-import { isTruthy } from "./utils/string";
-
 const ensureEnvVar = baseEnsureEnvVar<ProcessEnvCustomKeys>;
 const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {
   if (typeof window === "undefined") {
@@ -26,7 +24,7 @@ export const config = {
       password: ensureApiEnvVar("POSTGRES_PASSWORD"),
       db: ensureApiEnvVar("POSTGRES_DB"),
       port: +ensureApiEnvVar("POSTGRES_PORT", "-1"),
-      ssl: isTruthy(ensureApiEnvVar("POSTGRES_SSL", "0")),
+      ssl: ensureApiEnvVar("POSTGRES_SSLMODE", "prefer") as "prefer" | "require",
       poolMinSize: +ensureApiEnvVar("POSTGRES_POOL_MIN_SIZE", "2"),
       poolMaxSize: +ensureApiEnvVar("POSTGRES_POOL_MAX_SIZE", "10"),
     },

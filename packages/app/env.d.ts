@@ -83,10 +83,10 @@ declare namespace NodeJS {
          */
         POSTGRES_HOST?: string;
         /**
-         * Dist: `false`  
+         * Dist: `prefer`  
          * {@link [Local Env Dist](.env.development)}
          */
-        POSTGRES_SSL?: string;
+        POSTGRES_SSLMODE?: string;
         /**
          * Dist: `2`  
          * {@link [Local Env Dist](.env.development)}
@@ -186,7 +186,7 @@ declare type ProcessEnvCustomKeys =
     | 'POSTGRES_DB'
     | 'POSTGRES_PORT'
     | 'POSTGRES_HOST'
-    | 'POSTGRES_SSL'
+    | 'POSTGRES_SSLMODE'
     | 'POSTGRES_POOL_MIN_SIZE'
     | 'POSTGRES_POOL_MAX_SIZE'
     | 'EGAPRRO_READONLY'

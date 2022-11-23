@@ -8,5 +8,5 @@ export const sql = postgres({
   username: config.api.postgres.user,
   password: config.api.postgres.password,
   max: config.api.postgres.poolMaxSize,
-  ssl: "require",
+  ssl: config.api.postgres.ssl,
 });

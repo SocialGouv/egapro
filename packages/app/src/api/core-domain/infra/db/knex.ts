@@ -21,7 +21,7 @@ export const knexConfig: Knex.Config = {
     database: config.api.postgres.db,
     user: config.api.postgres.user,
     password: config.api.postgres.password,
-    ssl: config.api.postgres.ssl ? "require" : false,
+    ssl: config.api.postgres.ssl,
     debug: true,
   },
   seeds: {
