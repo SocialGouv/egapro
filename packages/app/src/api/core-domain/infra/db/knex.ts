@@ -3,15 +3,12 @@ import type { Knex } from "knex";
 import { knex } from "knex";
 import path from "path";
 import { defaults } from "pg";
-import { inspect } from "util";
 
 import type { DeclarationRaw, RepresentationEquilibreeRaw } from "./raw";
 
 if (config.api.postgres.ssl) {
   defaults.ssl = true;
 }
-
-console.log(inspect(config));
 
 export const knexConfig: Knex.Config = {
   client: "pg",
@@ -32,20 +29,7 @@ export const knexConfig: Knex.Config = {
 };
 
 let DB: Knex | null = null;
-export const getDatabase = () => {
-  DB ??= knex(knexConfig);
-
-  DB.raw("SELECT 1")
-    .then(() => {
-      console.log("PostgreSQL connected");
-    })
-    .catch(e => {
-      console.log("PostgreSQL not connected");
-      console.error(e);
-    });
-
-  return DB;
-};
+export const getDatabase = () => (DB ??= knex(knexConfig));
 
 declare module "knex/types/tables" {
   interface Tables {
