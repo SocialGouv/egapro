@@ -3,12 +3,15 @@ import type { Knex } from "knex";
 import { knex } from "knex";
 import path from "path";
 import { defaults } from "pg";
+import { inspect } from "util";
 
 import type { DeclarationRaw, RepresentationEquilibreeRaw } from "./raw";
 
 if (config.api.postgres.ssl) {
   defaults.ssl = true;
 }
+
+console.log(inspect(config));
 
 export const knexConfig: Knex.Config = {
   client: "pg",
@@ -18,12 +21,7 @@ export const knexConfig: Knex.Config = {
     database: config.api.postgres.db,
     user: config.api.postgres.user,
     password: config.api.postgres.password,
-    // SSL connection is required. Please specify SSL options and retry
-    ssl: config.api.postgres.ssl
-      ? {
-          rejectUnauthorized: false,
-        }
-      : false,
+    ssl: config.api.postgres.ssl ? "require" : false,
     debug: true,
   },
   seeds: {

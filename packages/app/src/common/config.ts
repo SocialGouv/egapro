@@ -38,5 +38,5 @@ interface ServicesConfig {
 }
 
 export const services: ServicesConfig = {
-  db: "postgres",
+  db: "knex-pg",
 };
