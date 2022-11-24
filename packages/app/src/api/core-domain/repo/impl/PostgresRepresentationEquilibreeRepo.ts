@@ -23,8 +23,8 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
 
   public async getAllBySiren(siren: Siren): Promise<RepresentationEquilibree[]> {
     try {
-      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()} limit ${
-        this.requestLimit
+      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${
+        this.postgresLimit
       }`;
 
       return raw.map(reprensentationEquilibreeMap.toDomain);
@@ -45,7 +45,7 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<RepresentationEquilibree[]> {
-    const raw = await this.sql`select * from ${this.table} limit ${this.requestLimit}`;
+    const raw = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
 
     return raw.map(reprensentationEquilibreeMap.toDomain) as unknown as RepresentationEquilibree[];
   }
@@ -85,5 +85,10 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
     const ret = this.nextRequestLimit ?? 0;
     this.nextRequestLimit = 0;
     return ret;
+  }
+
+  private get postgresLimit() {
+    const limit = this.requestLimit;
+    return limit > 0 ? sql`limit ${limit}` : sql``;
   }
 }

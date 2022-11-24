@@ -17,7 +17,7 @@ export class GetRepresentationEquilibreeBySiren implements UseCase<Input, Declar
     try {
       const validatedSiren = new Siren(siren);
       const representationEquilibrees = await this.reprensentationEquilibreeRepo.getAllBySiren(validatedSiren);
-      return representationEquilibrees.map(reprensentationEquilibreeMap.toDTO);
+      return representationEquilibrees.map(reprensentationEquilibreeMap.toDTO).filter(d => d) as DeclarationDTO[];
     } catch (error: unknown) {
       throw new GetRepresentationEquilibreeBySirenError(
         "Cannot fetch desired representation equilibrees by given SIREN",

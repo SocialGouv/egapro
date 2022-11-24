@@ -19,7 +19,7 @@ import { Siren } from "../domain/valueObjects/Siren";
 import type { DeclarationDTO } from "../dtos/DeclarationDTO";
 
 export const reprensentationEquilibreeMap: Required<
-  Mapper<RepresentationEquilibree, DeclarationDTO, RepresentationEquilibreeRaw>
+  Mapper<RepresentationEquilibree, DeclarationDTO | null, RepresentationEquilibreeRaw>
 > = {
   // TODO convert without validation if perf are not good
   toDomain(raw) {
@@ -105,11 +105,11 @@ export const reprensentationEquilibreeMap: Required<
 
   toDTO(obj) {
     const data = obj.data;
-    if (!data) {
-      throw new TypeError("A Declaration entity should have either a data or a draft property");
+    if (data) {
+      return reprensentationEquilibreeDataToDTO(data);
     }
 
-    return reprensentationEquilibreeDataToDTO(data);
+    return null;
   },
 
   toPersistence(obj) {
@@ -151,7 +151,7 @@ function reprensentationEquilibreeDataToDTO(data: DeclarationData): DeclarationD
         date_publication_objectifs: data.declaration.publication?.objectivesPublishDate?.toISOString(),
         modalités: data.declaration.publication?.modalities,
         modalités_objectifs_mesures: data.declaration.publication?.objectivesMeasuresModalities,
-        url: data.declaration.publication?.url?.getValue(),
+        url: data.declaration.publication?.url,
       },
       période_suffisante: data.declaration.sufficientPeriod,
     },

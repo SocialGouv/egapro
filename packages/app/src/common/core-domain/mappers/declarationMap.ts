@@ -19,7 +19,7 @@ import { DeclarationData } from "../domain/DeclarationData";
 import { Siren } from "../domain/valueObjects/Siren";
 import type { DeclarationDTO } from "../dtos/DeclarationDTO";
 
-export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, DeclarationRaw>> = {
+export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null, DeclarationRaw>> = {
   // TODO convert without validation if perf are not good
   toDomain(raw) {
     return new Declaration({
@@ -170,11 +170,11 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO, Declar
 
   toDTO(obj) {
     const data = obj.data ?? obj.draft;
-    if (!data) {
-      throw new TypeError("A Declaration entity should have either a data or a draft property");
+    if (data) {
+      return declarationDataToDTO(data);
     }
 
-    return declarationDataToDTO(data);
+    return null;
   },
 
   toPersistence(obj) {
@@ -221,7 +221,7 @@ function declarationDataToDTO(data: DeclarationData): DeclarationDTO {
         date_publication_objectifs: data.declaration.publication?.objectivesPublishDate?.toISOString(),
         modalités: data.declaration.publication?.modalities,
         modalités_objectifs_mesures: data.declaration.publication?.objectivesMeasuresModalities,
-        url: data.declaration.publication?.url?.getValue(),
+        url: data.declaration.publication?.url,
       },
       période_suffisante: data.declaration.sufficientPeriod,
     },

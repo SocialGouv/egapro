@@ -16,7 +16,9 @@ export class GetAllDeclarationsBySiren implements UseCase<Input, DeclarationDTO[
   public async execute({ siren }: Input): Promise<DeclarationDTO[]> {
     try {
       const validatedSiren = new Siren(siren);
-      return (await this.declarationRepo.getAllBySiren(validatedSiren)).map(declarationMap.toDTO);
+      return (await this.declarationRepo.getAllBySiren(validatedSiren))
+        .map(declarationMap.toDTO)
+        .filter(d => d) as DeclarationDTO[];
     } catch (error: unknown) {
       throw new GetAllDeclarationsBySirenError("Cannot get all declarations", error as Error);
     }

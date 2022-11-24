@@ -1,6 +1,5 @@
 import type { EntityPropsToJson } from "@common/shared-domain";
 import { JsonEntity } from "@common/shared-domain";
-import { Url } from "@common/shared-domain/domain/valueObjects";
 
 export interface PublicationProps {
   date?: Date;
@@ -8,7 +7,7 @@ export interface PublicationProps {
   modalities?: string;
   objectivesMeasuresModalities?: string;
   objectivesPublishDate?: Date;
-  url?: Url;
+  url?: string;
 }
 
 export class Publication extends JsonEntity<PublicationProps, never> {
@@ -37,7 +36,7 @@ export class Publication extends JsonEntity<PublicationProps, never> {
     return this.props.objectivesPublishDate;
   }
 
-  get url(): Url | undefined {
+  get url(): string | undefined {
     return this.props.url;
   }
 
@@ -45,12 +44,12 @@ export class Publication extends JsonEntity<PublicationProps, never> {
     const props: PublicationProps = {
       modalities: json.modalities,
       objectivesMeasuresModalities: json.objectivesMeasuresModalities,
+      url: json.url,
     };
 
     if (json.date) props.date = new Date(json.date);
     if (json.measuresPublishDate) props.measuresPublishDate = new Date(json.measuresPublishDate);
     if (json.objectivesPublishDate) props.objectivesPublishDate = new Date(json.objectivesPublishDate);
-    if (json.url) props.url = new Url(json.url);
 
     return new Publication(props) as this;
   }

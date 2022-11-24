@@ -20,8 +20,8 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
   public async getAllBySiren(siren: Siren): Promise<Declaration[]> {
     try {
-      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()} limit ${
-        this.requestLimit
+      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${
+        this.postgresLimit
       }`;
 
       return raw.map(declarationMap.toDomain);
@@ -42,7 +42,7 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<Declaration[]> {
-    const [...raw] = await this.sql`select * from ${this.table} limit ${this.requestLimit}`;
+    const [...raw] = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
 
     return raw.map(declarationMap.toDomain);
   }
@@ -86,5 +86,10 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     const ret = this.nextRequestLimit ?? 0;
     this.nextRequestLimit = 0;
     return ret;
+  }
+
+  private get postgresLimit() {
+    const limit = this.requestLimit;
+    return limit > 0 ? sql`limit ${limit}` : sql``;
   }
 }
