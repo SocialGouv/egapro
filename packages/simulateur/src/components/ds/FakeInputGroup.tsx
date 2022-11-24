@@ -5,11 +5,12 @@ export type FakeInputGroupProps = PropsWithChildren<{
   label: string
   message?: string | React.ReactElement
   textAlign?: "left" | "center" | "right"
+  title?: string
 }>
 
-const FakeInputGroup = ({ label, children, message, textAlign }: FakeInputGroupProps) => {
+const FakeInputGroup = ({ label, children, message, textAlign, title }: FakeInputGroupProps) => {
   return (
-    <Box>
+    <Box title={title}>
       <FormLabel as="div">{label}</FormLabel>
       <Input as={Box} isReadOnly py={2} sx={{ borderColor: "transparent !important" }}>
         <Text noOfLines={1} {...(textAlign && { textAlign })}>

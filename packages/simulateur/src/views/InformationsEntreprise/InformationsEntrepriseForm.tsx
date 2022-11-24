@@ -1,39 +1,31 @@
-import React, { FunctionComponent } from "react"
-import { FormControl, FormLabel, Text } from "@chakra-ui/react"
-import { MutableState, Tools } from "final-form"
+import { Box, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react"
 import arrayMutators from "final-form-arrays"
+import React, { FunctionComponent } from "react"
 import { Form } from "react-final-form"
-import createDecorator from "final-form-calculate"
 import { FieldArray } from "react-final-form-arrays"
 
-import {
-  AppState,
-  FormState,
-  ActionInformationsEntrepriseData,
-  Structure,
-  EntrepriseUES,
-  EntrepriseType,
-} from "../../globals"
+import { ActionInformationsEntrepriseData, AppState, EntrepriseType, FormState, Structure } from "../../globals"
 
 import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
 
-import ButtonAction from "../../components/ds/ButtonAction"
-import { IconEdit } from "../../components/ds/Icons"
-import InputRadio from "../../components/ds/InputRadio"
-import InputRadioGroup from "../../components/ds/InputRadioGroup"
-import FormStack from "../../components/ds/FormStack"
-import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import createDecorator from "final-form-calculate"
 import ActionBar from "../../components/ActionBar"
 import { codeNafFromCode } from "../../components/CodeNaf"
+import ButtonAction from "../../components/ds/ButtonAction"
+import FakeInputGroup from "../../components/ds/FakeInputGroup"
+import FormStack from "../../components/ds/FormStack"
+import { IconEdit, IconPlusCircle } from "../../components/ds/Icons"
+import InputRadio from "../../components/ds/InputRadio"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FieldSiren from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
+import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
-import NombreEntreprises, { validator as validateNombreEntreprises } from "../../components/NombreEntreprises"
+import NombreEntreprises from "../../components/NombreEntreprises"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import EntrepriseUESInput from "./components/EntrepriseUESInputField"
-import FormError from "../../components/FormError"
 import TextField from "../../components/TextField"
+import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -66,45 +58,34 @@ const validateForm = ({
   nomUES: structure === "Unité Economique et Sociale (UES)" ? validate(nomUES) : undefined,
 })
 
-const calculator = createDecorator({
-  field: "nombreEntreprises",
+// Update state when change on nombreEntreprises is made.
+const updateNombreEntreprises = createDecorator({
+  field: "entreprisesUES",
   updates: {
-    entreprisesUES: (nombreEntreprises, { entreprisesUES }: any) =>
-      adaptEntreprisesUESSize(nombreEntreprises, entreprisesUES),
+    nombreEntreprises: (entreprisesUES) => {
+      return entreprisesUES.length + 1
+    },
   },
 })
 
-const adaptEntreprisesUESSize = (nombreEntreprises: string, entreprisesUES: Array<EntrepriseUES>) => {
-  if (validateNombreEntreprises(nombreEntreprises) === undefined) {
-    // Il faut une entreprise à déclarer de moins vu que l'entreprise déclarant pour le compte de l'UES a déjà renseigné ses infos
-    const newSize = Number(nombreEntreprises) - 1
-    while (newSize > entreprisesUES.length) {
-      // Augmenter la taille de l'array si nécessaire
-      entreprisesUES.push({ nom: "", siren: "" })
-    }
-    // Réduire la taille de l'array si nécessaire
-    entreprisesUES.length = newSize
-  }
-  return entreprisesUES
-}
-
 interface InformationsEntrepriseFormProps {
-  informationsEntreprise: AppState["informationsEntreprise"]
-  readOnly: boolean
-  updateInformationsEntreprise: (data: ActionInformationsEntrepriseData) => void
-  validateInformationsEntreprise: (valid: FormState) => void
+  state: AppState
+  update: (data: ActionInformationsEntrepriseData) => void
+  validate: (valid: FormState) => void
   alreadyDeclared: boolean
-  year: number
 }
 
 const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormProps> = ({
-  informationsEntreprise,
-  readOnly,
-  updateInformationsEntreprise,
-  validateInformationsEntreprise,
+  state,
+  update,
+  validate,
   alreadyDeclared,
-  year,
 }) => {
+  const informationsEntreprise = state.informationsEntreprise
+  const readOnly = state.informationsEntreprise.formValidated === "Valid"
+
+  const year = state?.informations?.anneeDeclaration || new Date().getFullYear() // fallback but this case should not happen.
+
   const initialValues = {
     nomEntreprise: informationsEntreprise.nomEntreprise,
     siren: informationsEntreprise.siren,
@@ -138,7 +119,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
       entreprisesUES,
     } = formData
 
-    updateInformationsEntreprise({
+    update({
       nomEntreprise: nomEntreprise,
       siren: siren,
       codeNaf: codeNaf,
@@ -157,30 +138,18 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
 
   const onSubmit = (formData: any) => {
     saveForm(formData)
-    validateInformationsEntreprise("Valid")
-  }
-
-  // Form mutator utilisé par le composant NombreEntreprise pour ne changer la
-  // valeur du state qu'une fois la confirmation validée
-  const newNombreEntreprises = (
-    [name, newValue]: [string, string],
-    state: MutableState<any>,
-    { changeValue }: Tools<any>,
-  ) => {
-    changeValue(state, name, () => newValue)
+    validate("Valid")
   }
 
   return (
     <Form
       onSubmit={onSubmit}
       mutators={{
-        // potentially other mutators could be merged here
-        newNombreEntreprises,
         ...arrayMutators,
       }}
       initialValues={initialValues}
       validate={validateForm}
-      decorators={[calculator]}
+      decorators={[updateNombreEntreprises]}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
       // we don't want to block string value
@@ -264,13 +233,8 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                   errorText="le nom de l'UES n'est pas valide"
                   readOnly={readOnly}
                 />
-                <NombreEntreprises
-                  fieldName="nombreEntreprises"
-                  label="Nombre d'entreprises composant l'UES (le déclarant compris)"
-                  entreprisesUES={informationsEntreprise.entreprisesUES}
-                  newNombreEntreprises={form.mutators.newNombreEntreprises}
-                  readOnly={readOnly}
-                />
+                <NombreEntreprises readOnly={readOnly} />
+
                 <Text>
                   Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)
                 </Text>
@@ -279,22 +243,34 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                     return (
                       <>
                         {fields.map((entrepriseUES, index) => (
-                          <EntrepriseUESInput
-                            key={entrepriseUES}
-                            nom={`${entrepriseUES}.nom`}
-                            siren={`${entrepriseUES}.siren`}
-                            index={index}
-                            readOnly={readOnly}
-                            year={year}
-                            updateSirenData={(sirenData: EntrepriseType) =>
-                              form.change(`${entrepriseUES}.nom`, sirenData.raison_sociale || "")
-                            }
-                          />
+                          <Flex key={entrepriseUES} justifyContent="center" alignItems="start">
+                            <EntrepriseUESInput
+                              nom={`${entrepriseUES}.nom`}
+                              siren={`${entrepriseUES}.siren`}
+                              index={index}
+                              readOnly={readOnly}
+                              year={year}
+                            />
+                            {!readOnly && (
+                              <Box style={{ marginLeft: 10, marginTop: 65 }}>
+                                <button onClick={() => fields.remove(index)}>❌</button>
+                              </Box>
+                            )}
+                          </Flex>
                         ))}
                       </>
                     )
                   }}
                 </FieldArray>
+                {!readOnly && (
+                  <ButtonAction
+                    size="md"
+                    variant="outline"
+                    label="Ajouter une entreprise à l'UES"
+                    onClick={() => form.mutators.push("entreprisesUES", { nom: "", siren: "" })}
+                    leftIcon={<IconPlusCircle />}
+                  />
+                )}
               </>
             )}
           </FormStack>
@@ -307,7 +283,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                 <ButtonAction
                   leftIcon={<IconEdit />}
                   label="Modifier les données saisies"
-                  onClick={() => validateInformationsEntreprise("None")}
+                  onClick={() => validate("None")}
                   variant="link"
                   size="sm"
                 />
