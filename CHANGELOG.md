@@ -1,3 +1,10 @@
+## [2.32.4](https://github.com/SocialGouv/egapro/compare/v2.32.3...v2.32.4) (2022-11-24)
+
+
+### Bug Fixes
+
+* resend-receipt for updated simulations ([#1405](https://github.com/SocialGouv/egapro/issues/1405)) ([0894703](https://github.com/SocialGouv/egapro/commit/0894703c47f8c18e446686034c2edf4796a3e1c9))
+
 ## [2.32.3](https://github.com/SocialGouv/egapro/compare/v2.32.2...v2.32.3) (2022-11-24)
 
 
