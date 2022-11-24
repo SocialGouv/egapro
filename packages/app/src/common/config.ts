@@ -15,6 +15,7 @@ export const config = {
     siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",
   },
   api: {
+    env: ensureApiEnvVar("EGAPRO_ENV", "dev") as "dev" | "preprod" | "prod",
     maildev: {
       smtpPort: +ensureApiEnvVar("MAILER_SMTP_PORT", "1025"),
     },

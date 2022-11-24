@@ -3,6 +3,8 @@ global:
   sentryFront: "https://92bd32ba4e6411eb95f19aaf3eb391a2@sentry.fabrique.social.gouv.fr/49"
 
 app:
+  vars:
+    EGAPRO_ENV: prod
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
     - "index-egapro.travail.gouv.fr"

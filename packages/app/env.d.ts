@@ -98,20 +98,25 @@ declare namespace NodeJS {
          */
         POSTGRES_POOL_MAX_SIZE?: string;
         /**
+         * Dist: `dev`  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        EGAPRO_ENV?: string;
+        /**
          * Dist: `false`  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_READONLY?: string;
+        EGAPRO_READONLY?: string;
         /**
          * Dist: `https://index-egapro.travail.gouv.fr`  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_DOMAIN?: string;
+        EGAPRO_DOMAIN?: string;
         /**
          * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_STAFF?: string;
+        EGAPRO_STAFF?: string;
         /**
          * Dist: `false`  
          * {@link [Local Env Dist](.env.development)}
@@ -121,27 +126,27 @@ declare namespace NodeJS {
          * Dist: `https://entreprise.api.gouv.fr/v2/`  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_API_ENTREPRISES_URL?: string;
+        EGAPRO_API_ENTREPRISES_URL?: string;
         /**
          * Dist: `https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/`  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_API_RECHERCHE_ENTREPRISES_URL?: string;
+        EGAPRO_API_RECHERCHE_ENTREPRISES_URL?: string;
         /**
          * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_BASE_URL?: string;
+        EGAPRO_BASE_URL?: string;
         /**
          * Dist: `Egapro`  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_SITE_DESCRIPTION?: string;
+        EGAPRO_SITE_DESCRIPTION?: string;
         /**
          * Dist: `*`  
          * {@link [Local Env Dist](.env.development)}
          */
-        EGAPRRO_ALLOW_ORIGIN?: string;
+        EGAPRO_ALLOW_ORIGIN?: string;
         /**
          * Dist: `sikretfordevonly`  
          * {@link [Local Env Dist](.env.development)}
@@ -189,15 +194,16 @@ declare type ProcessEnvCustomKeys =
     | 'POSTGRES_SSLMODE'
     | 'POSTGRES_POOL_MIN_SIZE'
     | 'POSTGRES_POOL_MAX_SIZE'
-    | 'EGAPRRO_READONLY'
-    | 'EGAPRRO_DOMAIN'
-    | 'EGAPRRO_STAFF'
+    | 'EGAPRO_ENV'
+    | 'EGAPRO_READONLY'
+    | 'EGAPRO_DOMAIN'
+    | 'EGAPRO_STAFF'
     | 'EGAPRO_USE_API_ENTREPRISE'
-    | 'EGAPRRO_API_ENTREPRISES_URL'
-    | 'EGAPRRO_API_RECHERCHE_ENTREPRISES_URL'
-    | 'EGAPRRO_BASE_URL'
-    | 'EGAPRRO_SITE_DESCRIPTION'
-    | 'EGAPRRO_ALLOW_ORIGIN'
+    | 'EGAPRO_API_ENTREPRISES_URL'
+    | 'EGAPRO_API_RECHERCHE_ENTREPRISES_URL'
+    | 'EGAPRO_BASE_URL'
+    | 'EGAPRO_SITE_DESCRIPTION'
+    | 'EGAPRO_ALLOW_ORIGIN'
     | 'SECURITY_JWT_SECRET'
     | 'SECURITY_JWT_ALGORITHM'
     | 'SECURITY_ALLOWED_IPS'
