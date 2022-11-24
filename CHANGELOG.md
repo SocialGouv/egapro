@@ -1,3 +1,10 @@
+## [2.32.3](https://github.com/SocialGouv/egapro/compare/v2.32.2...v2.32.3) (2022-11-24)
+
+
+### Bug Fixes
+
+* problem wording when structure changes between Entreprise and UES ([#1404](https://github.com/SocialGouv/egapro/issues/1404)) ([8b09e27](https://github.com/SocialGouv/egapro/commit/8b09e273a2a277aa6c2be1638d6708fa8c525e50)), closes [#1144](https://github.com/SocialGouv/egapro/issues/1144)
+
 ## [2.32.2](https://github.com/SocialGouv/egapro/compare/v2.32.1...v2.32.2) (2022-11-24)
 
 
