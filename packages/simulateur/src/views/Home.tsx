@@ -3,7 +3,7 @@ import { RouteComponentProps } from "react-router-dom"
 import { Heading, SimpleGrid } from "@chakra-ui/react"
 
 import { ActionType } from "../globals"
-import { postIndicatorsDatas } from "../utils/api"
+import { postSimulation } from "../utils/api"
 
 import ButtonAction from "../components/ds/ButtonAction"
 import ButtonLinkNoRouter from "../components/ds/ButtonLinkNoRouter"
@@ -24,7 +24,7 @@ const Home: FunctionComponent<HomeProps> = ({ history, location, dispatch }) => 
     setLoading(true)
     dispatch({ type: "resetState" })
 
-    postIndicatorsDatas({})
+    postSimulation({})
       .then(({ jsonBody: { id } }) => {
         setLoading(false)
 
