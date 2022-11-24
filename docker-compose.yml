@@ -104,7 +104,7 @@ services:
     restart: always
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${APIV2_PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+      PGADMIN_DEFAULT_EMAIL: ${APIV2_PGADMIN_DEFAULT_EMAIL:-admin}
       PGADMIN_DEFAULT_PASSWORD: ${APIV2_PGADMIN_DEFAULT_PASSWORD:-admin}
     ports:
       - ${APIV2_PGADMIN_PORT:-5050}:80

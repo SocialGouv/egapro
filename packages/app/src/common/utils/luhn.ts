@@ -4,7 +4,7 @@ export const checksum = (num: number | string) => {
     .reverse()
     .map(x => parseInt(x));
   const [lastDigit, ...digits] = arr;
-  let sum = digits.reduce((acc, val, i) => acc + (i % 2 ? val : (val * 2) % 9 || 9), 0);
+  let sum = digits.reduce((acc, val, i) => (i % 2 !== 0 ? acc + val : acc + ((val * 2) % 9) || 9), 0);
   sum += lastDigit;
   return sum % 10;
 };

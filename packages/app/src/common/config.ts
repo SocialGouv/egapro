@@ -32,9 +32,9 @@ export const config = {
 } as const;
 
 interface ServicesConfig {
-  db: "knex-pg" | "mock" | "postgres" | "prisma";
+  db: "mock" | "postgres" | "prisma";
 }
 
 export const services: ServicesConfig = {
-  db: "knex-pg",
+  db: "postgres",
 };

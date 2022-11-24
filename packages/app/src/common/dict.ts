@@ -3,7 +3,7 @@ import type { SimpleObject } from "./utils/types";
 
 export const FIRST_YEAR = 2018 as const;
 
-export const CURRENT_YEAR = new Date().getFullYear() - 1;
+export const CURRENT_YEAR = new Date().getFullYear();
 export const YEARS = new Array(CURRENT_YEAR - FIRST_YEAR).fill(null).map((_, idx) => FIRST_YEAR + idx);
 
 export const INVALID_YEAR = 0 as const;
