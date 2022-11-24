@@ -119,7 +119,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
   const displayNC = !estCalculable(noteIndex) && after2020 ? " aux indicateurs calculables" : ""
-  const isUES = Boolean(state.informationsEntreprise.nomUES)
+  const isUES = Boolean(state.informationsEntreprise.structure !== "Entreprise")
 
   const initialValues = {
     mesuresCorrection: declaration.mesuresCorrection,
