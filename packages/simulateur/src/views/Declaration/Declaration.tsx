@@ -20,7 +20,7 @@ import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import Page from "../../components/Page"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
+import { putDeclaration, putSimulation } from "../../utils/api"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
@@ -290,7 +290,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
     const data = buildDeclarationFromSimulation({ id: code, state })
 
     try {
-      await putIndicatorsDatas(code, state)
+      await putSimulation(code, state)
       await putDeclaration(data)
       setApiError(undefined)
       setDeclaring(false)

@@ -84,11 +84,11 @@ const putResource = (pathname: string, body: Record<string, any>) => fetchResour
 
 /////////////
 
-export const getIndicatorsDatas = (id: string) => getResource(`/simulation/${id}`)
+export const getSimulation = (id: string) => getResource(`/simulation/${id}`)
 
-export const postIndicatorsDatas = (data: AppState | Record<string, never>) => postResource("/simulation", data)
+export const postSimulation = (data: AppState | Record<string, never>) => postResource("/simulation", data)
 
-export const putIndicatorsDatas = (id: string, data: AppState) => putResource(`/simulation/${id}`, { id, data })
+export const putSimulation = (id: string, data: AppState) => putResource(`/simulation/${id}`, { id, data })
 
 export const putDeclaration = (declaration: DeclarationDataField) => {
   const { entreprise, déclaration } = declaration
