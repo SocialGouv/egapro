@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { RouteComponentProps, useHistory, useLocation } from "react-router-dom"
 import { useCheckTokenInURL } from "../components/AuthContext"
 import { ActionType, AppState } from "../globals"
-import { postIndicatorsDatas } from "../utils/api"
+import { postSimulation } from "../utils/api"
 
 /**
  * Virtual page, used to reset the state and redirect on a fresh simulation page.
@@ -31,7 +31,7 @@ function ResetPage({ dispatch, state }: ResetPageProps): null {
 
   useEffect(() => {
     if (state === undefined) {
-      postIndicatorsDatas({})
+      postSimulation({})
         .then(({ jsonBody: { id } }) => {
           history.push(`/simulateur/${id}`, location.state ? location.state : {})
         })

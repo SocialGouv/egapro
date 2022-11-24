@@ -20,7 +20,7 @@ import InfoBlock from "../../components/ds/InfoBlock"
 import LayoutFormAndResult from "../../components/LayoutFormAndResult"
 import Page from "../../components/Page"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
-import { putDeclaration, putIndicatorsDatas } from "../../utils/api"
+import { putDeclaration, putSimulation, resendReceipt } from "../../utils/api"
 import { calculNoteIndex } from "../../utils/calculsEgaProIndex"
 import calculIndicateurCinq from "../../utils/calculsEgaProIndicateurCinq"
 import calculIndicateurDeux, { calculEcartTauxAugmentationParCSP } from "../../utils/calculsEgaProIndicateurDeux"
@@ -39,6 +39,7 @@ import totalNombreSalaries from "../../utils/totalNombreSalaries"
 import RecapitulatifIndex from "../Recapitulatif/RecapitulatifIndex"
 import DeclarationForm from "./DeclarationForm"
 import { useUser } from "../../components/AuthContext"
+import { useDeclaration } from "../../hooks/useDeclaration"
 
 function buildHelpers(state: AppState) {
   const trancheEffectifs = state.informations.trancheEffectifs
@@ -236,6 +237,11 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
   const [declaring, setDeclaring] = useState(false)
   const [apiError, setApiError] = useState<string | undefined>(undefined)
 
+  const { declaration: previousDeclaration } = useDeclaration(
+    state.informationsEntreprise.siren,
+    state.informations.anneeDeclaration,
+  )
+
   const updateDeclaration = useCallback(
     (data: ActionDeclarationData) => dispatch({ type: "updateDeclaration", data }),
     [dispatch],
@@ -290,8 +296,14 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
     const data = buildDeclarationFromSimulation({ id: code, state })
 
     try {
-      await putIndicatorsDatas(code, state)
+      await putSimulation(code, state)
       await putDeclaration(data)
+      // Send email is intentionnaly skipped in API when we update a simulation/delaration.
+      // The reason resides in how declaration frontend is written (with draft mode that simu doesn't use)...
+      // So for simulation, we need to see if a previous declaration exists, and if so, resend all by ourselves.
+      if (previousDeclaration) {
+        await resendReceipt(data.entreprise.siren, data.déclaration.année_indicateurs)
+      }
       setApiError(undefined)
       setDeclaring(false)
       // Refresh authentification infos because the user may get another ownership now.
