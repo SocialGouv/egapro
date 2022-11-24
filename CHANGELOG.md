@@ -1,3 +1,10 @@
+## [2.32.2](https://github.com/SocialGouv/egapro/compare/v2.32.1...v2.32.2) (2022-11-24)
+
+
+### Bug Fixes
+
+* clean management for array of entreprises in ues ([#1402](https://github.com/SocialGouv/egapro/issues/1402)) ([e133490](https://github.com/SocialGouv/egapro/commit/e13349032ad2eeb7229179ccd07e7404bc586ab2))
+
 ## [2.32.1](https://github.com/SocialGouv/egapro/compare/v2.32.0...v2.32.1) (2022-11-22)
 
 
