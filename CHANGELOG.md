@@ -1,3 +1,10 @@
+## [2.32.5](https://github.com/SocialGouv/egapro/compare/v2.32.4...v2.32.5) (2022-11-25)
+
+
+### Bug Fixes
+
+* better existing statement message ([#1406](https://github.com/SocialGouv/egapro/issues/1406)) ([c29bb2d](https://github.com/SocialGouv/egapro/commit/c29bb2d8bbbbb44697d0cff49168ca748b71a62f))
+
 ## [2.32.4](https://github.com/SocialGouv/egapro/compare/v2.32.3...v2.32.4) (2022-11-24)
 
 
