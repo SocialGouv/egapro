@@ -433,13 +433,13 @@ const SearchPage: NextPageWithLayout = () => {
         </Heading>
         <Box mt={4} maxW="container.md" mx="auto">
           <Input
-            placeholder="Saisissez le nom ou le SIREN d'une entreprise"
+            placeholder="Saisissez le nom ou le Siren d'une entreprise"
             size="md"
             name="q"
             type="text"
             onChange={handleChange}
             value={getValue("q")}
-            aria-label="filtre sur le nom ou le SIREN de l'entreprise"
+            aria-label="filtre sur le nom ou le Siren de l'entreprise"
           />
           <HStack mt="2">
             <Text fontSize="sm" mx="3">

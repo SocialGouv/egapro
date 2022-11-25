@@ -20,7 +20,7 @@ export class GetRepresentationEquilibreeBySiren implements UseCase<Input, Declar
       return representationEquilibrees.map(reprensentationEquilibreeMap.toDTO).filter(d => d) as DeclarationDTO[];
     } catch (error: unknown) {
       throw new GetRepresentationEquilibreeBySirenError(
-        "Cannot fetch desired representation equilibrees by given SIREN",
+        "Cannot fetch desired representation equilibrees by given Siren",
         error as Error,
       );
     }

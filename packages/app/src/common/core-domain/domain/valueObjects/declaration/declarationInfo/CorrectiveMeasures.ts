@@ -8,10 +8,10 @@ export class CorrectiveMeasures extends Enum<typeof CorrectiveMeasures.Enum> {
 export namespace CorrectiveMeasures {
   export enum Enum {
     /** Mesures envisagées */
-    ENVISAGED = "me",
+    CONSIDERED = "me",
     /** Mesures mises en œuvre */
     IMPLEMENTED = "mmo",
     /** Mesures non envisagées */
-    NOT_ENVISAGED = "mne",
+    NOT_CONSIDERED = "mne",
   }
 }

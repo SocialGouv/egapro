@@ -58,7 +58,7 @@ function FormSearchSiren() {
       <Box>
         <Flex align="center" justifyContent="center" mx={["0", "16"]}>
           <Input
-            placeholder="Saisissez le nom ou le SIREN d'une entreprise"
+            placeholder="Saisissez le nom ou le Siren d'une entreprise"
             size="lg"
             name="q"
             type="text"

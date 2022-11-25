@@ -1,9 +1,9 @@
 import { SimpleStringValueObject } from "./SimpleStringValueObject";
 
-const REG_URL = /^http.*/i;
+const REGEX_URL = /^http.*/i;
 
 export class Url extends SimpleStringValueObject<Url> {
   constructor(url: string) {
-    super(url, REG_URL);
+    super(url, REGEX_URL);
   }
 }
