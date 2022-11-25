@@ -185,15 +185,6 @@ exports[`should match snapshot 1`] = `
                  
                 <a
                   class="chakra-link css-18ktbam"
-                  href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-                  rel="noopener"
-                  target="_blank"
-                >
-                  donnez-nous votre avis
-                </a>
-                , 
-                <a
-                  class="chakra-link css-18ktbam"
                   href="https://github.com/SocialGouv/egapro/tree/1.21.0"
                   rel="noopener"
                   target="_blank"
@@ -428,15 +419,6 @@ exports[`should match snapshot 1`] = `
             >
               Pour nous aider à l'améliorer
                
-              <a
-                class="chakra-link css-18ktbam"
-                href="https://voxusagers.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=73366ddb13d498f4c77d01c2983bab48"
-                rel="noopener"
-                target="_blank"
-              >
-                donnez-nous votre avis
-              </a>
-              , 
               <a
                 class="chakra-link css-18ktbam"
                 href="https://github.com/SocialGouv/egapro/tree/1.21.0"

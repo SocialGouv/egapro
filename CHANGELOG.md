@@ -1,3 +1,52 @@
+## [2.32.5](https://github.com/SocialGouv/egapro/compare/v2.32.4...v2.32.5) (2022-11-25)
+
+
+### Bug Fixes
+
+* better existing statement message ([#1406](https://github.com/SocialGouv/egapro/issues/1406)) ([c29bb2d](https://github.com/SocialGouv/egapro/commit/c29bb2d8bbbbb44697d0cff49168ca748b71a62f))
+
+## [2.32.4](https://github.com/SocialGouv/egapro/compare/v2.32.3...v2.32.4) (2022-11-24)
+
+
+### Bug Fixes
+
+* resend-receipt for updated simulations ([#1405](https://github.com/SocialGouv/egapro/issues/1405)) ([0894703](https://github.com/SocialGouv/egapro/commit/0894703c47f8c18e446686034c2edf4796a3e1c9))
+
+## [2.32.3](https://github.com/SocialGouv/egapro/compare/v2.32.2...v2.32.3) (2022-11-24)
+
+
+### Bug Fixes
+
+* problem wording when structure changes between Entreprise and UES ([#1404](https://github.com/SocialGouv/egapro/issues/1404)) ([8b09e27](https://github.com/SocialGouv/egapro/commit/8b09e273a2a277aa6c2be1638d6708fa8c525e50)), closes [#1144](https://github.com/SocialGouv/egapro/issues/1144)
+
+## [2.32.2](https://github.com/SocialGouv/egapro/compare/v2.32.1...v2.32.2) (2022-11-24)
+
+
+### Bug Fixes
+
+* clean management for array of entreprises in ues ([#1402](https://github.com/SocialGouv/egapro/issues/1402)) ([e133490](https://github.com/SocialGouv/egapro/commit/e13349032ad2eeb7229179ccd07e7404bc586ab2))
+
+## [2.32.1](https://github.com/SocialGouv/egapro/compare/v2.32.0...v2.32.1) (2022-11-22)
+
+
+### Bug Fixes
+
+* problems with percentage ([#1395](https://github.com/SocialGouv/egapro/issues/1395)) ([747d6c1](https://github.com/SocialGouv/egapro/commit/747d6c1a7a7bb4d8da01711ed76a34ad63225a55))
+
+# [2.32.0](https://github.com/SocialGouv/egapro/compare/v2.31.1...v2.32.0) (2022-11-22)
+
+
+### Features
+
+* add xls export ([#1354](https://github.com/SocialGouv/egapro/issues/1354)) ([e49267b](https://github.com/SocialGouv/egapro/commit/e49267bd37c88d57d1000bd3a86f2f53b6443bb1))
+
+## [2.31.1](https://github.com/SocialGouv/egapro/compare/v2.31.0...v2.31.1) (2022-11-21)
+
+
+### Bug Fixes
+
+* wording [#1348](https://github.com/SocialGouv/egapro/issues/1348) ([#1393](https://github.com/SocialGouv/egapro/issues/1393)) ([5c3b47c](https://github.com/SocialGouv/egapro/commit/5c3b47c5d82a75002f4d0d77ad002a1e70d253a6))
+
 # [2.31.0](https://github.com/SocialGouv/egapro/compare/v2.30.0...v2.31.0) (2022-11-17)
 
 

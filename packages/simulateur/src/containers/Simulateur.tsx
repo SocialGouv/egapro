@@ -5,7 +5,7 @@ import { Redirect, Route, Switch, useParams } from "react-router-dom"
 
 import { ActionType, AppState } from "../globals"
 
-import { getIndicatorsDatas, putIndicatorsDatas } from "../utils/api"
+import { getSimulation, putSimulation } from "../utils/api"
 import globalStyles from "../utils/globalStyles"
 import { useDebounceEffect } from "../utils/hooks"
 import { isUserGrantedForSiren } from "../utils/user"
@@ -54,9 +54,9 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
       setErrorMessage(undefined)
 
       try {
-        const indicatorsData = await getIndicatorsDatas(code)
+        const simulation = await getSimulation(code)
 
-        const simuData = indicatorsData?.jsonBody?.data
+        const simuData = simulation?.jsonBody?.data
 
         const siren =
           simuData?.informationsEntreprise?.formValidated === "Valid" ? simuData?.informationsEntreprise?.siren : null
@@ -118,7 +118,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
     2000,
     (debouncedState) => {
       if (debouncedState) {
-        putIndicatorsDatas(code, debouncedState).catch((error) => {
+        putSimulation(code, debouncedState).catch((error) => {
           setLoading(false)
           const message =
             error.jsonBody && error.jsonBody.error

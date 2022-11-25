@@ -18,6 +18,7 @@ from egapro import (
     db,
     dgt,
     dgt_representation,
+    csv_representation,
     emails,
     exporter,
     helpers,
@@ -29,6 +30,13 @@ from egapro import (
 from egapro.pdf import declaration as declaration_receipt
 from egapro.exporter import dump  # noqa: expose to minicli
 from egapro.utils import json_dumps
+
+
+@minicli.cli
+async def export_representation(path: Path, max_rows: int = None):
+    wb = await csv_representation.as_xlsx(max_rows)
+    print("Writing the dgt XLSX to", path)
+    wb.save(path)
 
 
 @minicli.cli

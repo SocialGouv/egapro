@@ -4,6 +4,7 @@ export const MALFORMED_SIREN = "23274530763485";
 export const FAKE_SIREN = "232745307";
 export const NOT_LINKED_SIREN = "504920166";
 export const VALID_SIREN = "905292694";
+export const VALID_SIREN2 = "403052111";
 /**
  * @link https://www.pappers.fr/entreprise/boulangerie-eden-833169014
  */
