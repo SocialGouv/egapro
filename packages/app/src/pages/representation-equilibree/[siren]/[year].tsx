@@ -10,6 +10,8 @@ import { ParamsChecker } from "@components/ParamsChecker";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
+  Alert,
+  AlertTitle,
   Card,
   CardBody,
   CardBodyContent,
@@ -48,10 +50,10 @@ const RepresentationEquilibreeWithNavigation = ({ siren, year }: { siren: string
           Cette déclaration a été validée et transmise, et elle n'est plus modifiable car le délai d'un an est écoulé.
         </p>
       ) : (
-        <p>
-          Vous pouvez modifier cette déclaration et elle remplacera l'actuelle une fois validée et transmise à la
-          dernière étape.
-        </p>
+        <Alert mb="4w">
+          <AlertTitle as="h2">Cette déclaration a été validée et transmise.</AlertTitle>
+          <p>Vous pouvez la modifier, une fois validée et transmise, elle remplacera la déclaration actuelle</p>
+        </Alert>
       )}
       <DetailRepresentationEquilibree data={repeq?.data} />
       <FormLayout>
