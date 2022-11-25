@@ -44,5 +44,11 @@
       "filename": true
     },
   ],
-  "docker.languageserver.formatter.ignoreMultilineInstructions": true
+  "docker.languageserver.formatter.ignoreMultilineInstructions": true,
+  "python.autoComplete.extraPaths": [
+    "packages/api/"
+  ],
+  "python.analysis.autoImportCompletions": true,
+  "python.defaultInterpreterPath": "packages/api/venv/bin/python",
+  "python.analysis.typeCheckingMode": "off"
 }
