@@ -81,12 +81,12 @@ class table:
         async with cls.pool.acquire() as conn:
             return await conn.execute(sql, *params)
 
-class representation(table):
+class representation_equilibree(table):
     record_class = RepresentationRecord
     table_name = "representation_equilibree"
 
     @classmethod
-    async def all(cls) -> list[RepresentationRecord]:
+    async def all(cls):
         return await cls.fetch(f"SELECT * from {cls.table_name}")
 
     @classmethod
@@ -136,6 +136,7 @@ class representation(table):
         args = (siren, year, modified_at, declared_at, data.raw, ft)
         async with cls.pool.acquire() as conn:
             await conn.execute(query, *args)
+            await search_representation_equilibree.index(data)
 
     @classmethod
     def public_data(cls, data):
@@ -484,7 +485,7 @@ class search_representation_equilibree(table):
         row = dict(row)
         data = row.pop("data")[0]
         return {
-            **representation.public_data(data),
+            **representation_equilibree.public_data(data),
             **dict(row),
             "label": data["entreprise"].get("raison_sociale"),
         }

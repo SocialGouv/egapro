@@ -265,7 +265,7 @@ async def resend_objectifs_receipt(request, response, siren, year):
 @ensure_owner
 async def resend_representation_receipt(request, response, siren, year):
     try:
-        record = await db.representation.get(siren, year)
+        record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     owners = await db.ownership.emails(siren)
@@ -280,7 +280,7 @@ async def resend_representation_receipt(request, response, siren, year):
 @app.route("/representation-equilibree/{siren}/{year}/pdf", methods=["GET"])
 async def send_representation_pdf(request, response, siren, year):
     try:
-        record = await db.representation.get(siren, year)
+        record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     data = record.data
@@ -458,7 +458,7 @@ async def search_representation_equilibree(request: Request, response: Response)
 @ensure_owner
 async def get_representation(request, response, siren, year):
     try:
-        record = await db.representation.get(siren, year)
+        record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     resource = record.as_resource()
@@ -490,7 +490,7 @@ async def put_representation(request, response, siren, year):
     schema.validate(data.raw)
     schema.cross_validate(data.raw, rep_eq=True)
     try:
-        current = await db.representation.get(siren, year)
+        current = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         current = None
     else:
@@ -499,7 +499,7 @@ async def put_representation(request, response, siren, year):
         expired = declared_at and declared_at < utils.remove_one_year(utils.utcnow())
         if expired and not request["staff"]:
             raise HttpError(403, "Le délai de modification est écoulé.")
-    await db.representation.put(siren, year, data)
+    await db.representation_equilibree.put(siren, year, data)
     response.status = 204
     if not request["staff"]:
         await db.ownership.put(siren, request["email"])

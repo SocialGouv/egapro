@@ -142,7 +142,7 @@ async def reindex():
     for record in bar_declaration.iter(records_declaration):
         await db.search.index(record.data)
     await db.search_representation_equilibree.truncate()
-    records_reprensentation_equilibree = await db.representation.all()
+    records_reprensentation_equilibree = await db.representation_equilibree.all()
     bar_reprensentation_equilibree = progressist.ProgressBar(prefix="Reindexing representation equilibree", total=len(records_reprensentation_equilibree), throttle=100)
     for record in bar_reprensentation_equilibree.iter(records_reprensentation_equilibree):
         await db.search_representation_equilibree.index(record.data)

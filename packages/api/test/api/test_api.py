@@ -97,10 +97,9 @@ async def test_search_endpoint(client):
     assert len(json.loads(resp.body)["data"]) == 1
 
 async def test_search_representation_equilibree_endpoint(client):
-    await db.representation.put(
+    await db.representation_equilibree.put(
         "12345671",
         2020,
-        "foo@bar.org",
         {
             "déclaration": {"année_indicateurs": 2020},
             "entreprise": {
@@ -108,7 +107,7 @@ async def test_search_representation_equilibree_endpoint(client):
             },
         },
     )
-    resp = await client.get("/search?q=bio")
+    resp = await client.get("/representation-equilibree/search?q=bio")
     assert resp.status == 200
     assert json.loads(resp.body) == {
         "data": [
@@ -118,7 +117,6 @@ async def test_search_representation_equilibree_endpoint(client):
                     "département": None,
                     "région": None,
                     "code_naf": None,
-                    "effectif": None,
                     "siren": "12345671",
                 },
                 "pourcentage_femmes_cadres": {"2020": None},
@@ -130,10 +128,10 @@ async def test_search_representation_equilibree_endpoint(client):
         ],
         "count": 1,
     }
-    resp = await client.get("/search?q=bio&limit=1")
+    resp = await client.get("/representation-equilibree/search?q=bio&limit=1")
     assert resp.status == 200
     assert len(json.loads(resp.body)["data"]) == 1
-    resp = await client.get("/search")
+    resp = await client.get("/representation-equilibree/search")
     assert resp.status == 200
     assert len(json.loads(resp.body)["data"]) == 1
 
