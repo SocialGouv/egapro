@@ -14,20 +14,22 @@ jobs:
       - name: Checkout Commit
         uses: actions/checkout@v2
 
-      - name: Setup Node
-        uses: ./.github/actions/setup-node
+      # - name: Setup Node
+      #   uses: ./.github/actions/setup-node
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9.7'
 
-      - name: Install Dependencies
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile --force --non-interactive
+      # - name: Install Dependencies
+      #   if: steps.cache-dependencies.outputs.cache-hit != 'true'
+      #   run: yarn install --frozen-lockfile --force --non-interactive
 
       - name: Up for tests API
-        run: docker-compose up --build -d api db test_db
+        run: |
+          scripts/postinstall
+          docker-compose up --build -d api db test_db
 
       - name: Check types
         run: yarn check-all
@@ -35,14 +37,14 @@ jobs:
       - name: Down for tests API
         run: docker-compose down
 
-      - name: Run tests coverage for app
-        run: yarn workspace app run test:coverage
+      # - name: Run tests coverage for app
+      #   run: yarn workspace app run test:coverage
 
-      - name: SonarCloud scan for app
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: SonarCloud scan for app
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 

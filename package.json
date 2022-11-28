@@ -26,7 +26,7 @@
     "fresh-install": "scripts/fresh-install",
     "check-all": "scripts/check-all",
     "postinstall": "scripts/postinstall",
-    "test:api:docker": "docker exec -it $(basename $PWD)_api_1 /usr/local/bin/py.test -vv --cov",
+    "test:api:docker": "docker exec -it $(basename $PWD)_api_1 py.test -vv --cov",
     "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov"
   },
   "devDependencies": {
