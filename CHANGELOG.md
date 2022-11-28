@@ -1,3 +1,10 @@
+# [2.33.0](https://github.com/SocialGouv/egapro/compare/v2.32.6...v2.33.0) (2022-11-28)
+
+
+### Features
+
+* add search endpoint repeq ([#1394](https://github.com/SocialGouv/egapro/issues/1394)) ([7b56fa5](https://github.com/SocialGouv/egapro/commit/7b56fa5f2dd55aff7839eaff69309e5797541a82))
+
 ## [2.32.6](https://github.com/SocialGouv/egapro/compare/v2.32.5...v2.32.6) (2022-11-28)
 
 
