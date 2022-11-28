@@ -7,7 +7,7 @@ from difflib import SequenceMatcher
 
 import httpx
 
-from egapro import config, constants, schema, utils
+from egapro import config, constants, schema
 from egapro.loggers import logger
 from egapro.schema.utils import clean_readonly
 
@@ -232,7 +232,8 @@ async def load_from_recherche_entreprises(siren, year=constants.INVALID_YEAR):
         return await load_from_api_entreprises(siren, year)
     logger.debug("Calling Recherche Entreprises for siren %s", siren)
     url = f"https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/{siren}"
-    data = await get(url)
+    headers = {'Referer': 'egapro'}
+    data = await get(url, headers=headers)
     if not data:
         return {}
     raison_sociale = data.get("simpleLabel")
@@ -278,7 +279,8 @@ async def load_from_api_entreprises(siren, year=constants.INVALID_YEAR):
         "recipient": "egapro",
         "object": "egapro",
     }
-    data = await get(url, params=params)
+    headers = {'Referer': 'egapro'}
+    data = await get(url, params=params, headers=headers)
     if not data:
         return {}
     entreprise = data.get("entreprise", {})
