@@ -340,7 +340,7 @@ async def patch_from_recherche_entreprises(data):
                 entreprise.setdefault(key, value)
 
 
-def compare_str(wanted, candidate):
+def compare_str(wanted: str, candidate: str):
     candidate = candidate.lower()
     if wanted == candidate:
         return 1
@@ -349,7 +349,7 @@ def compare_str(wanted, candidate):
     return SequenceMatcher(a=wanted, b=candidate).ratio()
 
 
-def compute_label(query, label, *others):
+def compute_label(query: str, label: str, *others):
     if not others:
         return label
     query = query.lower()
@@ -363,7 +363,7 @@ def compute_label(query, label, *others):
     return label
 
 
-def code_insee_to_departement(code):
+def code_insee_to_departement(code: str):
     if not code:
         return None
     if code.startswith("97"):

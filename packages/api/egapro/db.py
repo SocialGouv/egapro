@@ -1,3 +1,4 @@
+from typing import Union
 import uuid
 from datetime import datetime
 
@@ -7,8 +8,8 @@ from asyncstdlib.functools import lru_cache
 from asyncpg.exceptions import DuplicateDatabaseError, PostgresError
 import ujson as json
 
-from . import config, models, sql, utils, helpers
-from .loggers import logger
+from egapro import config, models, sql, utils, helpers
+from egapro.loggers import logger
 
 
 class NoData(Exception):
@@ -47,17 +48,18 @@ class RepresentationRecord(Record):
 
 class table:
 
-    conn = None
-    pool = None
+    pool: asyncpg.pool.Pool = None
     record_class = Record
 
     @classmethod
-    async def fetch(cls, sql, *params):
+    async def fetch(cls, sql: str, *params):
+        conn: asyncpg.connection.Connection
         async with cls.pool.acquire() as conn:
             return await conn.fetch(sql, *params, record_class=cls.record_class)
 
     @classmethod
-    async def fetchrow(cls, sql, *params):
+    async def fetchrow(cls, sql: str, *params):
+        conn: asyncpg.connection.Connection
         async with cls.pool.acquire() as conn:
             row = await conn.fetchrow(sql, *params, record_class=cls.record_class)
         if not row:
@@ -65,7 +67,8 @@ class table:
         return row
 
     @classmethod
-    async def fetchval(cls, sql, *params):
+    async def fetchval(cls, sql: str, *params):
+        conn: asyncpg.connection.Connection
         async with cls.pool.acquire() as conn:
             row = await conn.fetchval(sql, *params)
         if row is None:
@@ -73,7 +76,8 @@ class table:
         return row
 
     @classmethod
-    async def execute(cls, sql, *params):
+    async def execute(cls, sql: str, *params):
+        conn: asyncpg.connection.Connection
         async with cls.pool.acquire() as conn:
             return await conn.execute(sql, *params)
 
@@ -82,7 +86,7 @@ class representation(table):
     table_name = "representation_equilibree"
 
     @classmethod
-    async def all(cls):
+    async def all(cls) -> list[RepresentationRecord]:
         return await cls.fetch(f"SELECT * from {cls.table_name}")
 
     @classmethod
@@ -133,9 +137,26 @@ class representation(table):
         async with cls.pool.acquire() as conn:
             await conn.execute(query, *args)
 
+    @classmethod
+    def public_data(cls, data):
+        data = models.Data(data)
+        raison_sociale = data.company
+        siren = data.siren
+        out = {
+            "entreprise": {
+                "raison_sociale": raison_sociale,
+                "siren": siren,
+                "région": data.path("entreprise.région"),
+                "département": data.path("entreprise.département"),
+                "code_naf": data.path("entreprise.code_naf"),
+            },
+        }
+        return out
+
 
 class declaration(table):
     record_class = DeclarationRecord
+    table_name = "declaration"
 
     @classmethod
     async def all(cls):
@@ -145,26 +166,26 @@ class declaration(table):
     async def completed(cls):
         # Do not select draft in this request, as it must reflect the declarations state
         return await cls.fetch(
-            "SELECT data, legacy, modified_at FROM declaration "
+            f"SELECT data, legacy, modified_at FROM {cls.table_name} "
             "WHERE declared_at IS NOT NULL ORDER BY declared_at DESC"
         )
 
     @classmethod
     async def get(cls, siren, year):
         return await cls.fetchrow(
-            "SELECT * FROM declaration WHERE siren=$1 AND year=$2", siren, int(year)
+            f"SELECT * FROM {cls.table_name} WHERE siren=$1 AND year=$2", siren, int(year)
         )
 
     @classmethod
     async def delete(cls, siren, year):
         return await cls.execute(
-            "DELETE FROM declaration WHERE siren=$1 AND year=$2", siren, int(year)
+            f"DELETE FROM {cls.table_name} WHERE siren=$1 AND year=$2", siren, int(year)
         )
 
     @classmethod
     async def get_last(cls, siren):
         return await cls.fetchrow(
-            "SELECT data FROM declaration "
+            f"SELECT data FROM {cls.table_name} "
             "WHERE siren=$1 AND data IS NOT NULL ORDER BY year DESC LIMIT 1",
             siren,
         )
@@ -173,7 +194,7 @@ class declaration(table):
     async def get_declared_at(cls, siren, year):
         try:
             return await cls.fetchval(
-                "SELECT declared_at FROM declaration WHERE siren=$1 AND year=$2",
+                f"SELECT declared_at FROM {cls.table_name} WHERE siren=$1 AND year=$2",
                 siren,
                 int(year),
             )
@@ -214,7 +235,7 @@ class declaration(table):
         return [
             cls.metadata(r)
             for r in await cls.fetch(
-                "SELECT * FROM declaration WHERE siren = any($1::text[])", sirens
+                f"SELECT * FROM {cls.table_name} WHERE siren = any($1::text[])", sirens
             )
         ]
 
@@ -253,12 +274,14 @@ class declaration(table):
 
 
 class ownership(table):
+    table_name = "ownership"
+
     @classmethod
     async def put(cls, siren, email):
         email = email.lower()
         async with cls.pool.acquire() as conn:
             created = await conn.fetchval(
-                "INSERT INTO ownership (siren, email) VALUES ($1, $2) "
+                f"INSERT INTO {cls.table_name} (siren, email) VALUES ($1, $2) "
                 "ON CONFLICT DO NOTHING RETURNING true",
                 siren,
                 email,
@@ -270,7 +293,7 @@ class ownership(table):
     async def delete(cls, siren, email):
         async with cls.pool.acquire() as conn:
             deleted = await conn.fetchval(
-                "DELETE FROM ownership WHERE siren=$1 AND email=$2 RETURNING true",
+                f"DELETE FROM {cls.table_name} WHERE siren=$1 AND email=$2 RETURNING true",
                 siren,
                 email,
             )
@@ -279,21 +302,22 @@ class ownership(table):
 
     @classmethod
     async def emails(cls, siren):
-        records = await cls.fetch("SELECT email FROM ownership WHERE siren=$1", siren)
+        records = await cls.fetch(f"SELECT email FROM {cls.table_name} WHERE siren=$1", siren)
         return [r["email"] for r in records]
 
     @classmethod
     async def sirens(cls, email):
-        records = await cls.fetch("SELECT siren FROM ownership WHERE email=$1", email)
+        records = await cls.fetch(f"SELECT siren FROM {cls.table_name} WHERE email=$1", email)
         return [r["siren"] for r in records]
 
 
 class simulation(table):
     record_class = SimulationRecord
+    table_name = "simulation"
 
     @classmethod
     async def get(cls, uuid):
-        return await cls.fetchrow("SELECT * FROM simulation WHERE id=$1", uuid)
+        return await cls.fetchrow(f"SELECT * FROM {cls.table_name} WHERE id=$1", uuid)
 
     @classmethod
     async def put(cls, uuid, data, modified_at=None):
@@ -302,7 +326,7 @@ class simulation(table):
             modified_at = utils.utcnow()
         async with cls.pool.acquire() as conn:
             await conn.execute(
-                "INSERT INTO simulation (id, modified_at, data) VALUES ($1, $2, $3) "
+                f"INSERT INTO {cls.table_name} (id, modified_at, data) VALUES ($1, $2, $3) "
                 "ON CONFLICT (id) DO UPDATE SET modified_at = $2, data = $3",
                 uuid,
                 modified_at,
@@ -420,6 +444,88 @@ class search(table):
         others = [o["raison_sociale"] for o in others]
         return helpers.compute_label(query, nom_ues, declarante, *others)
 
+class search_representation_equilibree(table):
+    table_name = "search_representation_equilibree"
+
+    @classmethod
+    async def index(cls, data: models.Data):
+        if not data.is_public():
+            return
+        ft = helpers.extract_ft(data)
+        siren = data.siren
+        year = data.year
+        region = data.path("entreprise.région")
+        departement = data.path("entreprise.département")
+        code_naf = data.path("entreprise.code_naf")
+        section_naf = None
+        if code_naf:
+            try:
+                section_naf = NAF[code_naf].section.code
+            except KeyError:
+                pass
+        declared_at = datetime.fromisoformat(data.path("déclaration.date"))
+        async with cls.pool.acquire() as conn:
+            try:
+                await conn.execute(
+                    sql.index_representation_equilibree,
+                    siren,
+                    year,
+                    declared_at,
+                    ft,
+                    region,
+                    departement,
+                    section_naf,
+                )
+            except PostgresError as err:
+                logger.error(f"Cannot index representation equilibree {siren}/{year}: {err}")
+
+    @classmethod
+    def as_json(cls, row, query):
+        row = dict(row)
+        data = row.pop("data")[0]
+        return {
+            **representation.public_data(data),
+            **dict(row),
+            "label": data["entreprise"].get("raison_sociale"),
+        }
+
+    @classmethod
+    @lru_cache(maxsize=1024)
+    async def run(cls, query: Union[str, None] = None, limit=10, offset=0, **filters: str):
+        args = [limit, offset]
+        args, where = cls.build_query(args, query, **filters)
+        rows = await cls.fetch(sql.search_representation_equilibree.format(where=where), *args)
+        return [cls.as_json(row, query) for row in rows]
+
+    @classmethod
+    async def count(cls, query=None, **filters):
+        tpl = "SELECT COUNT(DISTINCT(siren)) as count FROM {table} {where}"
+        args, where = cls.build_query([], query, **filters)
+        return await cls.fetchval(tpl.format(where=where, table=cls.table_name), *args)
+
+    @staticmethod
+    def build_query(args: list[str], query: Union[str, None] = None, **filters: str):
+        where = []
+        table_name = search_representation_equilibree.table_name
+
+        if query and len(query) == 9 and query.isdigit():
+            filters["siren"] = query
+            query = None
+        elif query:
+            query = utils.prepare_query(query)
+            args.append(query)
+            where.append(f"{table_name}.ft @@ to_tsquery('ftdict', ${len(args)})")
+        for name, value in filters.items():
+            if value is not None:
+                args.append(value)
+                where.append(f"{table_name}.{name}=${len(args)}")
+        if where:
+            where = "WHERE " + " AND ".join(where)
+        return args, where or ""
+
+    @classmethod
+    async def truncate(cls):
+        await cls.execute(f"TRUNCATE table {cls.table_name}")
 
 class archive(table):
     @classmethod

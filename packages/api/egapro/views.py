@@ -4,13 +4,13 @@ from traceback import print_exc
 
 from naf import DB as NAF
 from roll import Roll, HttpError
-from roll import Request as BaseRequest
+from roll import Request as BaseRequest, Response
 from asyncpg.exceptions import DataError
 from roll.extensions import cors, options
 from stdnum.fr.siren import is_valid as siren_is_valid
 
-from . import config, constants, db, emails, helpers, models, tokens, utils, schema
-from . import loggers
+from egapro import config, constants, db, emails, helpers, models, tokens, utils, schema
+from egapro import loggers
 from egapro.pdf import representation
 
 
@@ -430,45 +430,27 @@ def makefilter(region, dept, naf):
     return apply_filters
 
 @app.route("/representation-equilibree/search", methods=["GET"])
-async def search_repeq(request, response):
-    siren = request.query['q'][0]
+async def search_representation_equilibree(request: Request, response: Response):
+    q = request.query.get("q", "").strip()
     limit = request.query.int("limit", 10)
+    offset = request.query.int("offset", 0)
+    section_naf = request.query.get("section_naf", None)
+    departement = request.query.get("departement", None)
     region = request.query.get("region", None)
-    dept = request.query.get("departement", None)
-    naf = request.query.get("code_naf", None)
-
-    repartitions = []
-    years = sorted(constants.YEARS, reverse=True)
-
-    for year in years:
-        try:
-            print("siren", siren, "year", year)
-            record = await db.representation.get(siren, year)
-
-            resource = record.as_resource()
-            print("RESOURCE", resource['data']['entreprise']['région'])
-            if record.data.path("déclarant.nom"):
-                await helpers.patch_from_recherche_entreprises(resource["data"])
-            repartitions.append(resource)
-        except:
-            pass
-        if len(repartitions) == limit:
-            break
-
-    if not repartitions:
-        raise HttpError(404, f"No declarations with siren {siren} for any year")
-
-    repartitions = filter(makefilter(region, dept, naf), repartitions)
-    response.json = repartitions
-    # try:
-    #     record = await db.representation.get_with_siren(siren)
-    #     print("RECORD", record)
-    # except db.NoData:
-    #     raise HttpError(404, f"No représentation équilibrée with siren {siren}")
-    # resource = record.as_resource()
-    # if record.data.path("déclarant.nom"):
-    #     await helpers.patch_from_recherche_entreprises(resource["data"])
-    # response.json = resource
+    results = await db.search_representation_equilibree.run(
+        query=q,
+        limit=limit,
+        offset=offset,
+        section_naf=section_naf,
+        departement=departement,
+        region=region,
+    )
+    response.json = {
+        "data": results,
+        "count": await db.search_representation_equilibree.count(
+            query=q, section_naf=section_naf, departement=departement, region=region
+        ),
+    }
 
 @app.route("/representation-equilibree/{siren}/{year}", methods=["GET"])
 @tokens.require

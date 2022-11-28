@@ -50,5 +50,8 @@
   ],
   "python.analysis.autoImportCompletions": true,
   "python.defaultInterpreterPath": "packages/api/venv/bin/python",
-  "python.analysis.typeCheckingMode": "off"
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.extraPaths": [
+    "packages/api/"
+  ]
 }
