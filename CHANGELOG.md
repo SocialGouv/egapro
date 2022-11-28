@@ -1,3 +1,10 @@
+## [2.32.6](https://github.com/SocialGouv/egapro/compare/v2.32.5...v2.32.6) (2022-11-28)
+
+
+### Bug Fixes
+
+* add referer before calling entreprise api ([#1407](https://github.com/SocialGouv/egapro/issues/1407)) ([fea76cc](https://github.com/SocialGouv/egapro/commit/fea76cc490628ff4b42a174e83be49e9458e179b))
+
 ## [2.32.5](https://github.com/SocialGouv/egapro/compare/v2.32.4...v2.32.5) (2022-11-25)
 
 
