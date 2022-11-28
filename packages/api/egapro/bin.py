@@ -28,7 +28,7 @@ from egapro import (
     loggers,
 )
 from egapro.pdf import declaration as declaration_receipt
-from egapro.exporter import dump  # noqa: expose to minicli
+from egapro.exporter import dump  # pyright: ignore
 from egapro.utils import json_dumps
 
 
@@ -56,6 +56,15 @@ async def dump_dgt_representation(path: Path, max_rows: int = None):
 @minicli.cli
 async def search(q, verbose=False):
     rows = await db.search.run(q)
+    for row in rows:
+        data = models.Data(row)
+        print(f"{data.siren} | {data.year} | {data.company}")
+        if verbose:
+            print(row)
+
+@minicli.cli
+async def search_representation_equilibree(q, verbose=False):
+    rows = await db.search_representation_equilibree.run(q)
     for row in rows:
         data = models.Data(row)
         print(f"{data.siren} | {data.year} | {data.company}")
@@ -129,10 +138,18 @@ async def reindex():
     """Reindex Full Text search."""
     await db.search.truncate()
     records = await db.declaration.completed()
-    bar = progressist.ProgressBar(prefix="Reindexing", total=len(records), throttle=100)
+    bar = progressist.ProgressBar(prefix="Reindexing declarations", total=len(records), throttle=100)
     for record in bar.iter(records):
         await db.search.index(record.data)
 
+@minicli.cli
+async def reindex_representation_equilibree():
+    """Reindex Full Text search_representation_equilibree."""
+    await db.search_representation_equilibree.truncate()
+    records = await db.representation_equilibree.all()
+    bar = progressist.ProgressBar(prefix="Reindexing representation equilibree", total=len(records), throttle=100)
+    for record in bar.iter(records):
+        await db.search_representation_equilibree.index(record.data)
 
 @minicli.cli
 def serve(reload=False):

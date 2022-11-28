@@ -2,7 +2,8 @@
   "recommendations": [
     "editorconfig.editorconfig",
     "dbaeumer.vscode-eslint",
-    "vscode-icons-team.vscode-icons"
+    "vscode-icons-team.vscode-icons",
+    // "ms-python.python" // enable when working on python
   ],
   "unwantedRecommendations": [
     "nrwl.angular-console",

@@ -82,6 +82,73 @@ async def test_search(client):
     results = await db.search.run("bio", limit=1)
     assert len(results) == 1
 
+async def test_search_representation_equilibree(client):
+    rows = [
+        ("123456781", "Total"),
+        ("123456782", "Somme"),
+        ("123456783", "Biocoop"),
+        ("123456784", "Bio c bon"),
+        ("123456785", "Bio c pas bon"),
+        ("123456786", "Pyrénées"),
+        ("123456787", "Decathlon"),
+    ]
+    for siren, nom in rows:
+        await db.representation_equilibree.put(
+            siren,
+            2019,
+            {
+                "entreprise": {
+                    "raison_sociale": nom,
+                    "code_naf": "33.11Z",
+                    "département": "77",
+                    "région": "11",
+                },
+                "déclaration": {"date": datetime.now()},
+            },
+        )
+    results = await db.search_representation_equilibree.run("total")
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "raison_sociale": "Total",
+            "département": "77",
+            "région": "11",
+            "siren": "123456781",
+            "code_naf": "33.11Z",
+        },
+        "pourcentage_femmes_cadres": {"2019": None},
+        "pourcentage_hommes_cadres": {"2019": None},
+        "pourcentage_femmes_membres": {"2019": None},
+        "pourcentage_hommes_membres": {"2019": None},
+        "label": "Total",
+    }
+    results = await db.search_representation_equilibree.run("pyrenées")
+    assert len(results) == 1
+    results = await db.search_representation_equilibree.run("décathlon")
+    assert len(results) == 1
+    results = await db.search_representation_equilibree.run("bio")
+    assert len(results) == 3
+    results = await db.search_representation_equilibree.run("bio", limit=1)
+    assert len(results) == 1
+
+
+async def test_company_should_return_a_rep_eq_percent_for_each_year(representation_equilibree):
+    await representation_equilibree(
+        company="Mala Bar",
+        siren="87654321",
+        year=2019,
+    )
+    await representation_equilibree(
+        company="Mala Bar",
+        siren="87654321",
+        year=2018,
+    )
+    results = await db.search_representation_equilibree.run("bar")
+    assert len(results) == 1
+    assert set(results[0]["pourcentage_femmes_cadres"].keys()) == {"2018", "2019"}
+    assert set(results[0]["pourcentage_hommes_cadres"].keys()) == {"2018", "2019"}
+    assert set(results[0]["pourcentage_femmes_membres"].keys()) == {"2018", "2019"}
+    assert set(results[0]["pourcentage_hommes_membres"].keys()) == {"2018", "2019"}
 
 async def test_company_should_return_a_note_for_each_year(declaration):
     await declaration(
@@ -253,6 +320,48 @@ async def test_search_with_filters(client):
         "label": "Open Bar",
     }
 
+async def test_search_representation_equilibree_with_filters(client):
+    await db.representation_equilibree.put(
+        "123456781",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Oran Bar",
+                "département": "77",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    await db.representation_equilibree.put(
+        "987654321",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Open Bar",
+                "département": "78",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    results = await db.search_representation_equilibree.run("bar", departement="78", region="11")
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "département": "78",
+            "raison_sociale": "Open Bar",
+            "région": "11",
+            "siren": "987654321",
+            "code_naf": None,
+        },
+        "pourcentage_femmes_cadres": {"2019": None},
+        "pourcentage_hommes_cadres": {"2019": None},
+        "pourcentage_femmes_membres": {"2019": None},
+        "pourcentage_hommes_membres": {"2019": None},
+        "label": "Open Bar",
+    }
+
 
 async def test_search_from_section_naf(client):
     await db.declaration.put(
@@ -307,8 +416,52 @@ async def test_search_from_section_naf(client):
         "label": "Open Bar",
     }
 
+async def test_search_representation_equilibree_from_section_naf(client):
+    await db.representation_equilibree.put(
+        "123456781",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Oran Bar",
+                "département": "77",
+                "région": "11",
+                "code_naf": "33.11Z",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    await db.representation_equilibree.put(
+        "987654321",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Open Bar",
+                "département": "78",
+                "région": "11",
+                "code_naf": "47.11F",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    results = await db.search_representation_equilibree.run("bar", section_naf="G")
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "département": "78",
+            "raison_sociale": "Open Bar",
+            "région": "11",
+            "siren": "987654321",
+            "code_naf": "47.11F",
+        },
+        "pourcentage_femmes_cadres": {"2019": None},
+        "pourcentage_hommes_cadres": {"2019": None},
+        "pourcentage_femmes_membres": {"2019": None},
+        "pourcentage_hommes_membres": {"2019": None},
+        "label": "Open Bar",
+    }
 
-async def test_filters_without_query(client):
+
+async def test_search_filters_without_query(client):
     await db.declaration.put(
         "123456781",
         2019,
@@ -359,6 +512,47 @@ async def test_filters_without_query(client):
         "label": "Open Bar",
     }
 
+async def test_search_representation_equilibree_filters_without_query(client):
+    await db.representation_equilibree.put(
+        "123456781",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Oran Bar",
+                "département": "77",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    await db.representation_equilibree.put(
+        "987654321",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Open Bar",
+                "département": "78",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    results = await db.search_representation_equilibree.run(departement="78", region="11")
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "département": "78",
+            "raison_sociale": "Open Bar",
+            "région": "11",
+            "code_naf": None,
+            "siren": "987654321",
+        },
+        "pourcentage_femmes_cadres": {"2019": None},
+        "pourcentage_hommes_cadres": {"2019": None},
+        "pourcentage_femmes_membres": {"2019": None},
+        "pourcentage_hommes_membres": {"2019": None},
+        "label": "Open Bar",
+    }
 
 async def test_search_with_offset(client):
     await db.declaration.put(
@@ -434,6 +628,65 @@ async def test_search_with_offset(client):
         "label": "Oran Bar",
     }
 
+async def test_search_representation_equilibree_with_offset(client):
+    await db.representation_equilibree.put(
+        "123456781",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Oran Bar",
+                "département": "77",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    await db.representation_equilibree.put(
+        "987654321",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Open Bar",
+                "département": "78",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+        },
+    )
+    results = await db.search_representation_equilibree.run(region="11")
+    assert len(results) == 2
+    results = await db.search_representation_equilibree.run(region="11", limit=1)
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "département": "78",
+            "raison_sociale": "Open Bar",
+            "code_naf": None,
+            "région": "11",
+            "siren": "987654321",
+        },
+        "pourcentage_femmes_cadres": {"2019": None},
+        "pourcentage_hommes_cadres": {"2019": None},
+        "pourcentage_femmes_membres": {"2019": None},
+        "pourcentage_hommes_membres": {"2019": None},
+        "label": "Open Bar",
+    }
+    results = await db.search_representation_equilibree.run(region="11", limit=1, offset=1)
+    assert len(results) == 1
+    assert results[0] == {
+        "entreprise": {
+            "département": "77",
+            "raison_sociale": "Oran Bar",
+            "région": "11",
+            "siren": "123456781",
+            "code_naf": None,
+        },
+        "pourcentage_femmes_cadres": {"2019": None},
+        "pourcentage_hommes_cadres": {"2019": None},
+        "pourcentage_femmes_membres": {"2019": None},
+        "pourcentage_hommes_membres": {"2019": None},
+        "label": "Oran Bar",
+    }
 
 async def test_search_with_siren(declaration):
     await declaration(
@@ -443,6 +696,17 @@ async def test_search_with_siren(declaration):
         "987654321", year=2019, entreprise={"effectif": {"tranche": "1000:"}}
     )
     results = await db.search.run("987654321")
+    assert len(results) == 1
+    assert results[0]["entreprise"]["siren"] == "987654321"
+
+async def test_search_representation_equilibree_with_siren(representation_equilibree):
+    await representation_equilibree(
+        "123456712", year=2019, entreprise={}
+    )
+    await representation_equilibree(
+        "987654321", year=2019, entreprise={}
+    )
+    results = await db.search_representation_equilibree.run("987654321")
     assert len(results) == 1
     assert results[0]["entreprise"]["siren"] == "987654321"
 
@@ -471,8 +735,32 @@ async def test_count_with_query(declaration):
     count = await db.search.count(query="bar")
     assert count == 2
 
+async def test_count_representation_equilibree_with_query(representation_equilibree):
+    await representation_equilibree(
+        "123456712",
+        year=2019,
+        company="Zanzi Bar",
+        entreprise={},
+    )
+    await representation_equilibree(
+        "987654321",
+        year=2019,
+        company="Sli Bar",
+        entreprise={},
+    )
+    await representation_equilibree(
+        "123456782",
+        year=2019,
+        company="Foo Foo",
+        entreprise={},
+    )
+    count = await db.search_representation_equilibree.count()
+    assert count == 3
+    count = await db.search_representation_equilibree.count(query="bar")
+    assert count == 2
 
-async def test_amp_and_parens_are_excaped(declaration):
+
+async def test_search_amp_and_parens_are_excaped(declaration):
     await declaration(
         "123456712",
         year=2019,
@@ -480,4 +768,14 @@ async def test_amp_and_parens_are_excaped(declaration):
         entreprise={"effectif": {"tranche": "1000:"}},
     )
     results = await db.search.run(query="zanzi & (bar)")
+    assert len(results)
+
+async def test_search_representation_equilibree_amp_and_parens_are_excaped(representation_equilibree):
+    await representation_equilibree(
+        "123456712",
+        year=2019,
+        company="Zanzi & (Bar)",
+        entreprise={},
+    )
+    results = await db.search_representation_equilibree.run(query="zanzi & (bar)")
     assert len(results)

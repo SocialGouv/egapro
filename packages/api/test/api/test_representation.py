@@ -111,9 +111,9 @@ async def test_put_representation_with_json_list_and_namespace(client):
     assert resp.status == 422
 
 
-async def test_cannot_put_in_readonly(client, representation, monkeypatch, body):
+async def test_cannot_put_in_readonly(client, representation_equilibree, monkeypatch, body):
     monkeypatch.setattr("egapro.config.READONLY", True)
-    await representation(
+    await representation_equilibree(
         "514027945",
         2019,
         "foo@bar.org",
@@ -202,7 +202,7 @@ async def test_basic_representation_should_save_data(client, body, monkeypatch):
 
 async def test_basic_representation_should_remove_data_namespace_if_present(client, body):
     await client.put("/representation-equilibree/514027945/2019", body={"data": body})
-    data = await db.representation.get("514027945", "2019")
+    data = await db.representation_equilibree.get("514027945", "2019")
     del data["data"]["déclaration"]["date"]
     del body["déclaration"]["date"]
     assert set(data["data"].keys()) == {
@@ -225,8 +225,8 @@ async def test_entreprise_adresse_is_not_mandatory(client, body):
     assert "adresse" not in data["data"]["entreprise"]
 
 
-async def test_cannot_load_not_owned_representation(client, representation):
-    await representation("514027945", 2019, "foo@bar.baz")
+async def test_cannot_load_not_owned_representation(client, representation_equilibree):
+    await representation_equilibree("514027945", 2019, "foo@bar.baz")
 
     client.login("other@email.com")
     resp = await client.get("/representation-equilibree/514027945/2019")
@@ -238,8 +238,8 @@ async def test_cannot_load_not_owned_representation(client, representation):
     }
 
 
-async def test_staff_can_load_not_owned_representation(client, monkeypatch, representation):
-    await representation(siren="514027945", year=2019, owner="foo@bar.baz")
+async def test_staff_can_load_not_owned_representation(client, monkeypatch, representation_equilibree):
+    await representation_equilibree(siren="514027945", year=2019, owner="foo@bar.baz")
     monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
     client.login("Staff@email.com")
     resp = await client.get("/representation-equilibree/514027945/2019")
@@ -247,15 +247,15 @@ async def test_staff_can_load_not_owned_representation(client, monkeypatch, repr
 
 
 async def test_staff_can_put_not_owned_representation(
-    client, monkeypatch, representation, body
+    client, monkeypatch, representation_equilibree, body
 ):
-    await representation(siren="514027945", year=2019, owner="foo@bar.baz")
+    await representation_equilibree(siren="514027945", year=2019, owner="foo@bar.baz")
     monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
     client.login("Staff@email.com")
     body["entreprise"]["raison_sociale"] = "New Name"
     resp = await client.put("/representation-equilibree/514027945/2019", body)
     assert resp.status == 204
-    saved = await db.representation.get(siren="514027945", year=2019)
+    saved = await db.representation_equilibree.get(siren="514027945", year=2019)
     assert saved["data"]["entreprise"]["raison_sociale"] == "New Name"
     # Staff should not be set as owner.
     assert await db.ownership.emails("514027945") == ["foo@bar.baz"]
@@ -278,7 +278,7 @@ async def test_owner_check_is_lower_case(client, body):
     body["entreprise"]["raison_sociale"] = "newnew"
     resp = await client.put("/representation-equilibree/514027945/2019", body=body)
     assert resp.status == 204
-    record = await db.representation.get("514027945", 2019)
+    record = await db.representation_equilibree.get("514027945", 2019)
     assert record["data"]["entreprise"]["raison_sociale"] == "newnew"
 
 
@@ -287,7 +287,7 @@ async def test_declaring_twice_should_not_duplicate(client, app, body):
     assert resp.status == 204
     resp = await client.put("/representation-equilibree/514027945/2019", body=body)
     assert resp.status == 204
-    async with db.representation.pool.acquire() as conn:
+    async with db.representation_equilibree.pool.acquire() as conn:
         rows = await conn.fetch(
             "SELECT data FROM representation_equilibree WHERE siren=$1 and year=$2",
             "514027945",
@@ -394,17 +394,17 @@ async def test_put_representation_without_source(client, body):
     assert resp.status == 204
 
 
-async def test_non_staff_cannot_delete(client, representation):
+async def test_non_staff_cannot_delete(client, representation_equilibree):
     client.login("foo@bar.org")
-    await representation("514027945", 2019, "foo@bar.org")
+    await representation_equilibree("514027945", 2019, "foo@bar.org")
     resp = await client.delete("/representation-equilibree/514027945/2019")
     assert resp.status == 403 or 405
     assert json.loads(resp.body) == {"error": "Vous n'avez pas l'autorisation"} or {"error": "Method Not Allowed"}
 
 
-async def test_staff_can_delete(client, representation, monkeypatch):
+async def test_staff_can_delete(client, representation_equilibree, monkeypatch):
     monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
     client.login("Staff@email.com")
-    await representation("514027945", 2019, "foo@bar.org")
+    await representation_equilibree("514027945", 2019, "foo@bar.org")
     resp = await client.delete("/representation-equilibree/514027945/2019")
     assert resp.status == 204 or 405
