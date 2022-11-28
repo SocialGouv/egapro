@@ -2,10 +2,9 @@
 
 set -e
 
-# TODO
-# yarn workspaces run lint
-# yarn workspaces run build --no-lint
-# yarn workspaces run test --watchAll=false
+yarn workspaces run lint
+yarn workspaces run build --no-lint
+yarn workspace simulateur run test --watchAll=false
 
 # Tests API
 yarn test:api
