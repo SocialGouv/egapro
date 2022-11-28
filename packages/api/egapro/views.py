@@ -410,25 +410,6 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
-def makefilter(region, dept, naf):
-    def apply_filters(x):
-        is_valid = True
-
-        if region is None and dept is None and naf is None:
-            return True
-
-        if region is not None:
-            if x["data"]["entreprise"]["région"] != region:
-                is_valid = False
-        if dept is not None:
-            if x["data"]["entreprise"]["département"] != dept:
-                is_valid = False
-        if naf is not None:
-            if x["data"]["entreprise"]["code_naf"] != naf:
-                is_valid = False
-        return is_valid
-    return apply_filters
-
 @app.route("/representation-equilibree/search", methods=["GET"])
 async def search_representation_equilibree(request: Request, response: Response):
     q = request.query.get("q", "").strip()

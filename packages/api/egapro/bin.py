@@ -137,16 +137,19 @@ async def create_indexes():
 async def reindex():
     """Reindex Full Text search."""
     await db.search.truncate()
-    records_declaration = await db.declaration.completed()
-    bar_declaration = progressist.ProgressBar(prefix="Reindexing declarations", total=len(records_declaration), throttle=100)
-    for record in bar_declaration.iter(records_declaration):
+    records = await db.declaration.completed()
+    bar = progressist.ProgressBar(prefix="Reindexing declarations", total=len(records), throttle=100)
+    for record in bar.iter(records):
         await db.search.index(record.data)
-    await db.search_representation_equilibree.truncate()
-    records_reprensentation_equilibree = await db.representation_equilibree.all()
-    bar_reprensentation_equilibree = progressist.ProgressBar(prefix="Reindexing representation equilibree", total=len(records_reprensentation_equilibree), throttle=100)
-    for record in bar_reprensentation_equilibree.iter(records_reprensentation_equilibree):
-        await db.search_representation_equilibree.index(record.data)
 
+@minicli.cli
+async def reindex_representation_equilibree():
+    """Reindex Full Text search_representation_equilibree."""
+    await db.search_representation_equilibree.truncate()
+    records = await db.representation_equilibree.all()
+    bar = progressist.ProgressBar(prefix="Reindexing representation equilibree", total=len(records), throttle=100)
+    for record in bar.iter(records):
+        await db.search_representation_equilibree.index(record.data)
 
 @minicli.cli
 def serve(reload=False):
