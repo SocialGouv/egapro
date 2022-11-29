@@ -123,6 +123,8 @@ async def test_search_representation_equilibree_endpoint(client):
                 "pourcentage_hommes_cadres": {"2020": None},
                 "pourcentage_femmes_membres": {"2020": None},
                 "pourcentage_hommes_membres": {"2020": None},
+                "motif_non_calculabilité_cadres": {"2020": None},
+                "motif_non_calculabilité_membres": {"2020": None},
                 "label": "Bio c Bon",
             },
         ],
