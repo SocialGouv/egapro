@@ -1,3 +1,10 @@
+# [2.35.0](https://github.com/SocialGouv/egapro/compare/v2.34.0...v2.35.0) (2022-11-29)
+
+
+### Features
+
+* **api:** change search format by year ([0eb64a3](https://github.com/SocialGouv/egapro/commit/0eb64a3b8e03d1e97eee5c951962744622b4efa0))
+
 # [2.34.0](https://github.com/SocialGouv/egapro/compare/v2.33.3...v2.34.0) (2022-11-29)
 
 
