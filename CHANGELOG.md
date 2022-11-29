@@ -1,3 +1,10 @@
+# [2.34.0](https://github.com/SocialGouv/egapro/compare/v2.33.3...v2.34.0) (2022-11-29)
+
+
+### Features
+
+* **api:** add not computable reason to repeq search output ([283b6ff](https://github.com/SocialGouv/egapro/commit/283b6ff69c903af41ab0f6745a8ecf20aef9c883))
+
 ## [2.33.3](https://github.com/SocialGouv/egapro/compare/v2.33.2...v2.33.3) (2022-11-29)
 
 
