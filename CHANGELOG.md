@@ -1,3 +1,10 @@
+## [2.33.2](https://github.com/SocialGouv/egapro/compare/v2.33.1...v2.33.2) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** send receipt after repeq edit ([#1411](https://github.com/SocialGouv/egapro/issues/1411)) ([c7ed4ba](https://github.com/SocialGouv/egapro/commit/c7ed4ba28d7a62367b60664ba3cd03082b73899b))
+
 ## [2.33.1](https://github.com/SocialGouv/egapro/compare/v2.33.0...v2.33.1) (2022-11-29)
 
 
