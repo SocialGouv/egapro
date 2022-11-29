@@ -1,3 +1,31 @@
+## [2.33.2](https://github.com/SocialGouv/egapro/compare/v2.33.1...v2.33.2) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** send receipt after repeq edit ([#1411](https://github.com/SocialGouv/egapro/issues/1411)) ([c7ed4ba](https://github.com/SocialGouv/egapro/commit/c7ed4ba28d7a62367b60664ba3cd03082b73899b))
+
+## [2.33.1](https://github.com/SocialGouv/egapro/compare/v2.33.0...v2.33.1) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** handle floats and float string in jsonb after repeqsearch ([#1409](https://github.com/SocialGouv/egapro/issues/1409)) ([4a36ee7](https://github.com/SocialGouv/egapro/commit/4a36ee7a225e324f263d63e3e3009215649fc0ca))
+
+# [2.33.0](https://github.com/SocialGouv/egapro/compare/v2.32.6...v2.33.0) (2022-11-28)
+
+
+### Features
+
+* add search endpoint repeq ([#1394](https://github.com/SocialGouv/egapro/issues/1394)) ([7b56fa5](https://github.com/SocialGouv/egapro/commit/7b56fa5f2dd55aff7839eaff69309e5797541a82))
+
+## [2.32.6](https://github.com/SocialGouv/egapro/compare/v2.32.5...v2.32.6) (2022-11-28)
+
+
+### Bug Fixes
+
+* add referer before calling entreprise api ([#1407](https://github.com/SocialGouv/egapro/issues/1407)) ([fea76cc](https://github.com/SocialGouv/egapro/commit/fea76cc490628ff4b42a174e83be49e9458e179b))
+
 ## [2.32.5](https://github.com/SocialGouv/egapro/compare/v2.32.4...v2.32.5) (2022-11-25)
 
 

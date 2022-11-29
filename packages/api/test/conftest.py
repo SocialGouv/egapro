@@ -23,7 +23,8 @@ def pytest_configure(config):
             await conn.execute("DROP TABLE IF EXISTS search")
             await conn.execute("DROP TABLE IF EXISTS archive")
             await conn.execute("DROP TABLE IF EXISTS ownership")
-            await conn.execute("DROP TABLE IF EXISTS representation_equilibree")
+            await conn.execute("DROP TABLE IF EXISTS representation_equilibree CASCADE")
+            await conn.execute("DROP TABLE IF EXISTS search_representation_equilibree")
         await db.init()
 
     asyncio.run(configure())
@@ -44,7 +45,8 @@ def pytest_runtest_setup(item):
             await conn.execute("TRUNCATE TABLE search;")
             await conn.execute("TRUNCATE TABLE archive;")
             await conn.execute("TRUNCATE TABLE ownership;")
-            await conn.execute("TRUNCATE TABLE representation_equilibree;")
+            await conn.execute("TRUNCATE TABLE representation_equilibree CASCADE;")
+            await conn.execute("TRUNCATE TABLE search_representation_equilibree;")
         await db.terminate()
 
         helpers.get_entreprise_details.cache_clear()
@@ -58,7 +60,7 @@ def app():  # Requested by Roll testing utilities.
 
 
 @pytest.fixture
-def representation():
+def representation_equilibree():
     async def factory(
         siren="123456782",
         year=2020,
@@ -79,7 +81,7 @@ def representation():
         data["déclarant"].setdefault("email", owner)
         data["déclarant"].setdefault("prénom", "Martin")
         data["déclarant"].setdefault("nom", "Martine")
-        await db.representation.put(siren, year, data, modified_at=modified_at)
+        await db.representation_equilibree.put(siren, year, data, modified_at=modified_at)
         await db.ownership.put(siren, owner)
         return data
 

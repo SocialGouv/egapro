@@ -55,7 +55,7 @@ async def as_xlsx(max_rows=None, debug=False):
     :debug:             Turn on debug to be able to read the generated Workbook
     """
     print("Reading from DB")
-    records = await db.representation.all()
+    records = await db.representation_equilibree.all()
     print("Flattening JSON")
     if max_rows:
         records = records[:max_rows]

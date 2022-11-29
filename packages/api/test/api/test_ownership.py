@@ -36,11 +36,11 @@ async def test_add_owner(client, monkeypatch):
     client.login("staff@email.com")
     resp = await client.put("/ownership/123456782/ba@na.na")
     assert resp.status == 204
-    assert await db.ownership.emails("123456782") == [
-        "foo@bar.baz",
-        "foo@foo.foo",
-        "ba@na.na",
-    ]
+    inserted = await db.ownership.emails("123456782")
+    assert len(inserted) == 3
+    assert "foo@bar.baz" in inserted
+    assert "foo@foo.foo" in inserted
+    assert "ba@na.na" in inserted
 
 
 async def test_delete_owner(client):
