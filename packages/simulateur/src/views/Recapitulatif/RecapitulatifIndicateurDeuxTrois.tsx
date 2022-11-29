@@ -36,16 +36,6 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
   tauxAugmentationPromotionFemmes,
   tauxAugmentationPromotionHommes,
 }) => {
-  if (!effectifsIndicateurDeuxTroisCalculable) {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
-        text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
-      />
-    )
-  }
-
   if (indicateurDeuxTroisFormValidated !== "Valid") {
     return (
       <InfoBlock
@@ -57,6 +47,16 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
             <TextSimulatorLink to="/indicateur2et3" label="Valider les données" />
           </>
         }
+      />
+    )
+  }
+
+  if (!effectifsIndicateurDeuxTroisCalculable) {
+    return (
+      <InfoBlock
+        type="warning"
+        title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
+        text="Malheureusement votre indicateur n’est pas calculable car les effectifs comprennent moins de 5 femmes ou moins de 5 hommes."
       />
     )
   }
