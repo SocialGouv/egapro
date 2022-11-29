@@ -484,16 +484,12 @@ async def put_representation(request, response, siren, year):
     response.status = 204
     if not request["staff"]:
         await db.ownership.put(siren, request["email"])
-        # Do not send the success email on update for now (we send too much emails that
-        # are unwanted, mainly because when someone loads the frontend app a PUT is
-        # automatically sent, without any action from the user.)
         loggers.logger.info(f"{siren}/{year} BY {declarant} FROM {request.ip}")
-        if not current:
-            owners = await db.ownership.emails(siren)
-            if not owners:  # Staff member
-                owners = request["email"]
-            url = request.domain + data.uri
-            emails.representation.send(owners, url=url, **data)
+        owners = await db.ownership.emails(siren)
+        if not owners:  # Staff member
+            owners = request["email"]
+        url = request.domain + data.uri
+        emails.representation.send(owners, url=url, **data)
 
 @app.route("/search")
 async def search(request, response):
