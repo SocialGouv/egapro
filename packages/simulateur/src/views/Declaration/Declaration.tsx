@@ -331,6 +331,8 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
   }, [code, declaring, state])
 
   if (!state.informations.periodeSuffisante) {
+    const allFormsFilled = isFormValid(state.informationsEntreprise) && isFormValid(state.informationsDeclarant)
+
     return (
       <PageDeclaration>
         <LayoutFormAndResult
@@ -340,15 +342,36 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
                 type="warning"
                 text="Vous ne disposez pas d'une période de référence de 12 mois consécutifs, vos indicateurs et votre index ne sont pas calculables."
               />
-              <DeclarationForm
-                state={state}
-                noteIndex={noteIndex}
-                updateDeclaration={updateDeclaration}
-                resetDeclaration={resetDeclaration}
-                validateDeclaration={validateDeclaration}
-                apiError={apiError}
-                declaring={declaring}
-              />
+
+              {allFormsFilled ? (
+                <DeclarationForm
+                  state={state}
+                  noteIndex={noteIndex}
+                  updateDeclaration={updateDeclaration}
+                  resetDeclaration={resetDeclaration}
+                  validateDeclaration={validateDeclaration}
+                  apiError={apiError}
+                  declaring={declaring}
+                />
+              ) : (
+                <>
+                  <Heading as="h2" size="md" mt={6}>
+                    Les pages suivantes ne sont pas validées
+                  </Heading>
+                  <UnorderedList mt={2}>
+                    {!isFormValid(state.informationsEntreprise) && (
+                      <ListItem>
+                        <TextSimulatorLink to="/informations-entreprise" label="Informations entreprise/UES" />
+                      </ListItem>
+                    )}
+                    {!isFormValid(state.informationsDeclarant) && (
+                      <ListItem>
+                        <TextSimulatorLink to="/informations-declarant" label="Informations déclarant" />
+                      </ListItem>
+                    )}
+                  </UnorderedList>
+                </>
+              )}
             </>
           }
           childrenResult={null}
@@ -373,7 +396,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
           text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes."
         />
         <Heading as="h2" size="md" mt={6}>
-          Les formulaires suivants ne sont pas validés
+          Les pages suivantes ne sont pas validées
         </Heading>
         <UnorderedList mt={2}>
           {!isFormValid(state.informations) && (
