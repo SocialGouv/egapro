@@ -1,3 +1,10 @@
+## [2.33.1](https://github.com/SocialGouv/egapro/compare/v2.33.0...v2.33.1) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** handle floats and float string in jsonb after repeqsearch ([#1409](https://github.com/SocialGouv/egapro/issues/1409)) ([4a36ee7](https://github.com/SocialGouv/egapro/commit/4a36ee7a225e324f263d63e3e3009215649fc0ca))
+
 # [2.33.0](https://github.com/SocialGouv/egapro/compare/v2.32.6...v2.33.0) (2022-11-28)
 
 
