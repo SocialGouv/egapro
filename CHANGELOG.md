@@ -1,3 +1,10 @@
+## [2.33.3](https://github.com/SocialGouv/egapro/compare/v2.33.2...v2.33.3) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** close public get decla - Fixes [#1151](https://github.com/SocialGouv/egapro/issues/1151) ([8858ec1](https://github.com/SocialGouv/egapro/commit/8858ec113d1898e747c95d2bfa25bae63db10f44))
+
 ## [2.33.2](https://github.com/SocialGouv/egapro/compare/v2.33.1...v2.33.2) (2022-11-29)
 
 
