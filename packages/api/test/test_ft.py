@@ -779,3 +779,27 @@ async def test_search_representation_equilibree_amp_and_parens_are_excaped(repre
     )
     results = await db.search_representation_equilibree.run(query="zanzi & (bar)")
     assert len(results)
+
+async def test_search_representation_equilibree_percent_with_weird_float():
+    await db.representation_equilibree.put(
+        "987654321",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Le Regalia",
+                "département": "75",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+            "indicateurs": {
+                "représentation_équilibrée": {
+                    "pourcentage_femmes_cadres": "49.1",
+                    "pourcentage_hommes_cadres": "50,9",
+                    "pourcentage_femmes_membres": 49.1,
+                    "pourcentage_hommes_membres": 50.9
+                }
+            }
+        },
+    )
+    results = await db.search_representation_equilibree.run(query="regalia")
+    assert len(results)
