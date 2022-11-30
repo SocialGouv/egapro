@@ -1,3 +1,17 @@
+# [2.36.0](https://github.com/SocialGouv/egapro/compare/v2.35.1...v2.36.0) (2022-11-30)
+
+
+### Features
+
+* search repeq ([#1412](https://github.com/SocialGouv/egapro/issues/1412)) ([c37f16e](https://github.com/SocialGouv/egapro/commit/c37f16e57e17d554f2016f8e14abe074620cb030))
+
+## [2.35.1](https://github.com/SocialGouv/egapro/compare/v2.35.0...v2.35.1) (2022-11-30)
+
+
+### Bug Fixes
+
+* **declaration:** redirect to tableau de bord not working (fixes [#1414](https://github.com/SocialGouv/egapro/issues/1414)) ([01546c2](https://github.com/SocialGouv/egapro/commit/01546c21e59d916644854bbf51cf2a5111e39cc5))
+
 # [2.35.0](https://github.com/SocialGouv/egapro/compare/v2.34.0...v2.35.0) (2022-11-29)
 
 

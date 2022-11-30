@@ -6,7 +6,6 @@ export type FormSelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   isDisabled?: boolean;
   isError?: boolean;
   isValid?: boolean;
-  placeholder?: string;
 };
 
 export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
