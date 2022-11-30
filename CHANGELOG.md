@@ -1,3 +1,24 @@
+# [2.35.0](https://github.com/SocialGouv/egapro/compare/v2.34.0...v2.35.0) (2022-11-29)
+
+
+### Features
+
+* **api:** change search format by year ([0eb64a3](https://github.com/SocialGouv/egapro/commit/0eb64a3b8e03d1e97eee5c951962744622b4efa0))
+
+# [2.34.0](https://github.com/SocialGouv/egapro/compare/v2.33.3...v2.34.0) (2022-11-29)
+
+
+### Features
+
+* **api:** add not computable reason to repeq search output ([283b6ff](https://github.com/SocialGouv/egapro/commit/283b6ff69c903af41ab0f6745a8ecf20aef9c883))
+
+## [2.33.3](https://github.com/SocialGouv/egapro/compare/v2.33.2...v2.33.3) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** close public get decla - Fixes [#1151](https://github.com/SocialGouv/egapro/issues/1151) ([8858ec1](https://github.com/SocialGouv/egapro/commit/8858ec113d1898e747c95d2bfa25bae63db10f44))
+
 ## [2.33.2](https://github.com/SocialGouv/egapro/compare/v2.33.1...v2.33.2) (2022-11-29)
 
 
