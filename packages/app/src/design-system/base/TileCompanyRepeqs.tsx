@@ -30,10 +30,10 @@ export type TileCompanyRepeqsProps = {
 };
 
 export const TileCompanyRepeqs = ({ location, title, siren, data }: TileCompanyRepeqsProps) => {
-  const rowsNumberStepper = 4;
-  const [rowsNumber, setRowsNumber] = useState(rowsNumberStepper);
-  const handleMoreRow = () => {
-    setRowsNumber(rowsNumber + rowsNumberStepper);
+  const rowsDefault = 4;
+  const [rowsNumber, setRowsNumber] = useState(rowsDefault);
+  const handleMoreRows = () => {
+    setRowsNumber(rowsNumber + rowsDefault);
   };
   return (
     <TileCompany>
@@ -68,7 +68,7 @@ export const TileCompanyRepeqs = ({ location, title, siren, data }: TileCompanyR
           ))}
         </TileCompanyTableBody>
       </TileCompanyTable>
-      {rowsNumber < data?.length && <TileCompanyLoadMore onClick={handleMoreRow} />}
+      {rowsNumber < data?.length && <TileCompanyLoadMore onClick={handleMoreRows} />}
     </TileCompany>
   );
 };
