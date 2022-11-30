@@ -1,0 +1,153 @@
+.tile {
+    padding: 0.75rem;
+    border: 1px solid var(--border-default-grey);
+
+}
+
+.title {
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+    color: var(--text-title-grey);
+}
+
+.siren {
+    font-size: 0.75rem;
+}
+
+.location {
+    display: flex;
+    gap: .25rem;
+    font-size: 0.875rem;
+}
+
+@media (prefers-color-scheme: light) {
+    .location [class^=fr-icon-] {
+        color: #CECECE;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .location [class^=fr-icon-] {
+        color: var(--border-default-grey);
+    }
+}
+
+
+.table {
+    margin-top: 1rem;
+    overflow: auto;
+}
+
+.table table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    text-align: center;
+    border-top: 1px solid var(--border-default-grey);
+}
+
+.table::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 0;
+}
+
+.tableHead {
+    border-bottom: 1px solid var(--border-default-grey);
+
+}
+
+.tableHeadCol {
+    line-height: 1.25;
+    font-weight: 400;
+    padding: .625rem 1rem;
+    font-size: 0.875rem;
+}
+
+.tableHeadCol:not(:last-child) {
+    border-right: 1px solid var(--border-default-grey);
+}
+
+.tableHeadColMedium {
+    font-weight: 700;
+}
+
+@media (min-width: 36em) {
+    .tableHeadColMedium {
+        font-size: 1rem;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .tableBodyRow:nth-child(even) {
+        background: var(--grey-975-75);
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .tableBodyRow:nth-child(even) {
+        background: #fafafa;
+    }
+}
+
+.tableBodyRowCol {
+    font-weight: 400;
+    padding: 1rem;
+    font-size: 0.875rem;
+}
+
+.tableBodyRowCol:not(:last-child) {
+    border-right: 1px solid var(--border-default-grey);
+}
+
+.tablePercent {
+
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+}
+
+.tablePercent > *{
+    flex-grow: 1;
+    padding: 0 1rem;
+}
+
+.tablePercentData {
+    line-height: 1;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.tablePercentDataUnit {
+    font-size: 1rem;
+}
+
+.tablePercentLegend {
+    line-height: 1;
+    font-size: 0.75rem;
+}
+
+.tablePercentNoData {
+    color: #888
+}
+
+.tableYear {
+    line-height: 1.25;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.tableYearLegend {
+    line-height: 1.25;
+    font-size: 0.75rem;
+    color: #7B7B7B
+}
+
+.tableCompanyLoadMore {
+    margin-top: 0.75rem;
+    text-align: center
+}
