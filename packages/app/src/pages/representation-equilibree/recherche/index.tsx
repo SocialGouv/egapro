@@ -1,5 +1,4 @@
 import type { ParsedUrlQueryInput } from "querystring";
-import { format } from "date-fns";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -22,23 +21,9 @@ import {
 
 import { filterDepartements } from "@services/apiClient";
 import { useConfig } from "@services/apiClient";
+import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
 import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
-
-async function getDateCsv(): Promise<string> {
-  try {
-    const responseCsv = await fetch("/index-egalite-fh.csv", { method: "HEAD" });
-    const date = responseCsv?.headers?.get("last-modified");
-
-    if (date) {
-      const lastModified = new Date(date);
-      return format(lastModified, "dd/MM/yyyy");
-    }
-  } catch (error) {
-    console.error("Error on fetch HEAD /index-egalite-fh.csv", error);
-  }
-  return "";
-}
 
 type FormTypeInput = {
   departement: string;
@@ -110,7 +95,7 @@ function FormSearchSiren() {
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
   const params = normalizeInputs(router.query);
   const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
-  const { repeqs, error, isLoading } = useSearchRepeqs(params);
+  const { repeqs, error, isLoading, size, setSize } = useSearchRepeqs(params);
 
   const {
     formState: { errors },
@@ -235,26 +220,34 @@ function FormSearchSiren() {
       </form>
 
       <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />
+
+      {repeqs?.data?.length < repeqs?.count && (
+        <div style={{ marginTop: 20 }}>
+          <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
+            Voir les résultats suivants
+          </FormButton>
+        </div>
+      )}
     </>
   );
 }
 
-function DownloadCsvFileZone() {
-  const [dateCsv, setDateCsv] = useState("");
+function DownloadFileZone() {
+  const [dateFile, setDateFile] = useState("");
 
   useEffect(() => {
     async function runEffect() {
-      setDateCsv(await getDateCsv());
+      setDateFile(await getLastModifiedDateFile("/dgt-export-representation.xlsx"));
     }
     runEffect();
   }, []);
 
-  return dateCsv ? (
+  return dateFile ? (
     <>
       <div style={{ display: "flex" }}>
-        <div>Télécharger le fichier des entreprises au {dateCsv}</div>
+        <div>Télécharger le fichier des représentations équilibrées au {dateFile}</div>
 
-        <a href="">Télécharger (CSV)</a>
+        <a href="">Télécharger (xslx)</a>
       </div>
     </>
   ) : null;
@@ -265,7 +258,7 @@ const HomePage: NextPageWithLayout = () => {
     <Box>
       <FormSearchSiren />
 
-      <DownloadCsvFileZone />
+      <DownloadFileZone />
     </Box>
   );
 };
