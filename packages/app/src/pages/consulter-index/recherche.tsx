@@ -35,23 +35,8 @@ import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 import type { SearchCompanyParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
+import { useAdressLabel } from "@services/apiClient/useAdressLabel";
 
-function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
-  const { config } = useConfig();
-
-  if (!config) return "";
-
-  const { DEPARTEMENTS, REGIONS } = config;
-
-  let result = "";
-  if (departement && DEPARTEMENTS) {
-    result = DEPARTEMENTS[departement];
-  }
-  if (region && REGIONS) {
-    result += ", " + REGIONS[region];
-  }
-  return result;
-}
 const workforceLabels: Record<TrancheType, string[]> = {
   "50:250": ["50 à 250", "salariés"],
   "251:999": ["251 à 999", "salariés"],

@@ -1,7 +1,7 @@
 import type { ParsedUrlQueryInput } from "querystring";
 import { format } from "date-fns";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { NextPageWithLayout } from "../../_app";
 import { capitalize } from "@common/utils/string";
@@ -13,12 +13,17 @@ import {
   FormGroupLabel,
   FormGroupMessage,
   FormInput,
-  FormLayout,
   FormLayoutButtonGroup,
   FormSelect,
+  Alert,
+  TileCompanyRepeqs,
+  AlertTitle,
 } from "@design-system";
+
 import { filterDepartements } from "@services/apiClient";
 import { useConfig } from "@services/apiClient";
+import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
+import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
 
 async function getDateCsv(): Promise<string> {
   try {
@@ -56,12 +61,56 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQueryInput) {
   };
 }
 
+const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading: boolean; repeqs: RepeqsType }) => {
+  if (isLoading) return <Alert type="info">Recherche en cours</Alert>;
+
+  if (error) {
+    return (
+      <div style={{ marginTop: 40 }}>
+        <Alert type="error">Il y a eu une erreur lors de la recherche.</Alert>
+      </div>
+    );
+  }
+
+  if (!repeqs || isLoading) {
+    return null;
+  }
+
+  if (repeqs.count === 0) {
+    return (
+      <div style={{ marginTop: 40 }}>
+        <Alert type="info">
+          <AlertTitle as="h1">Aucune entreprise trouvée.</AlertTitle>
+          <p>Veuillez modifier vos résultats de recherche.</p>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {!repeqs?.count ? null : (
+        <div style={{ marginTop: 10 }}>
+          {repeqs?.data?.length} {repeqs?.count > 10 ? `sur ${repeqs?.count}` : ""} résultat
+          {repeqs?.count > 1 ? "s" : ""}
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 15 }}>
+        {repeqs.data.map(repeq => (
+          <TileCompanyRepeqs key={repeq.entreprise.siren} {...repeq} />
+        ))}
+      </div>
+    </>
+  );
+};
+
 function FormSearchSiren() {
   const router = useRouter();
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
   const params = normalizeInputs(router.query);
   const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
+  const { repeqs, error, isLoading } = useSearchRepeqs(params);
 
   const {
     formState: { errors },
@@ -70,17 +119,25 @@ function FormSearchSiren() {
     reset,
     watch,
     setValue,
-  } = useForm<FormTypeInput>(); // Using defaultValues would not be enough here, because we fetch user.email asynchronously and so it is not present at rehydration time. So we use reset API below.
+  } = useForm<FormTypeInput>(); // Using defaultValues would not be enough here, because we fetch params.query which is not present at the first rehydration time (see Next.js docs). So we use reset API below.
+
+  const resetInputs = useCallback(
+    (params: ReturnType<typeof normalizeInputs>) => {
+      console.log("params dans resetInputs", params);
+      reset({
+        region: params.region || "",
+        departement: params.departement || "",
+        naf: params.naf || "",
+        q: params.q || "",
+      });
+    },
+    [reset],
+  );
 
   // Sync form data with URL params.
   useEffect(() => {
-    reset({
-      region: params.region || "",
-      departement: params.departement || "",
-      naf: params.naf || "",
-      q: params.q || "",
-    });
-  }, [reset, params?.region, params?.departement, params?.naf, params?.q]);
+    resetInputs({ region: params.region, departement: params.departement, naf: params.naf, q: params.q });
+  }, [resetInputs, params.region, params.departement, params.naf, params.q]);
 
   const regionSelected = watch("region");
 
@@ -99,7 +156,7 @@ function FormSearchSiren() {
       <h2>Rechercher la représentation équilibrée d'une entreprise</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <FormLayout>
+        <div>
           <div>
             <FormGroup>
               <FormGroupLabel htmlFor="q">Nom ou numéro Siren de l’entreprise</FormGroupLabel>
@@ -112,7 +169,7 @@ function FormSearchSiren() {
               {errors.q && <FormGroupMessage id="q-message-error">{errors.q.message}</FormGroupMessage>}
             </FormGroup>
           </div>
-          <div style={{ display: "flex", gap: 20 }}>
+          <div style={{ display: "flex", gap: 20, marginTop: 20 }}>
             <div style={{ flexShrink: 1, flexBasis: "33%" }}>
               <FormGroup>
                 <FormSelect
@@ -162,20 +219,20 @@ function FormSearchSiren() {
           </div>
 
           <FormLayoutButtonGroup>
-            <FormButton>Rechercher</FormButton>
+            <FormButton isDisabled={isLoading}>Rechercher</FormButton>
             <FormButton
               variant="secondary"
               type="reset"
-              onClick={() =>
-                router.replace({ pathname: "/representation-equilibree/recherche", query: { region: "" } })
-              }
+              isDisabled={isLoading || !Object.values(watch()).filter(Boolean).length}
+              onClick={() => resetInputs({})}
             >
               Réinitialiser
             </FormButton>
           </FormLayoutButtonGroup>
-        </FormLayout>
+        </div>
       </form>
-      <pre>{JSON.stringify(watch(), null, 2)}</pre>
+
+      <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />
     </>
   );
 }
