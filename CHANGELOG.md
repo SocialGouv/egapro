@@ -1,3 +1,10 @@
+# [2.37.0](https://github.com/SocialGouv/egapro/compare/v2.36.0...v2.37.0) (2022-11-30)
+
+
+### Features
+
+* add TileCompany component ([#1413](https://github.com/SocialGouv/egapro/issues/1413)) ([590586b](https://github.com/SocialGouv/egapro/commit/590586bf9adde01d70d80b2de1a1caff3b244103))
+
 # [2.36.0](https://github.com/SocialGouv/egapro/compare/v2.35.1...v2.36.0) (2022-11-30)
 
 
