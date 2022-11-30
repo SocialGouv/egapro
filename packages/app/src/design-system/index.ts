@@ -26,6 +26,7 @@ export * from "./base/SkipLinks";
 export * from "./base/Stepper";
 export * from "./base/TileSuccess";
 export * from "./base/TileCompany";
+export * from "./base/TileCompanyRepeqs";
 export * from "./img/ImgRepresentationEquilibree";
 export * from "./img/ImgHome";
 export * from "./img/ImgSuccess";

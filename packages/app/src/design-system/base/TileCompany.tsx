@@ -5,11 +5,11 @@ import style from "./TileCompany.module.css";
 
 export const TileCompany = ({ children }: PropsWithChildren) => <div className={style.tile}>{children}</div>;
 
-export type TileSuccessTitleProps = PropsWithChildren<{
+export type TileCompanyTitleProps = PropsWithChildren<{
   titleAs?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p";
 }>;
 
-export const TileCompanyTitle = ({ children, titleAs: HtmlTag = "h2" }: TileSuccessTitleProps) => {
+export const TileCompanyTitle = ({ children, titleAs: HtmlTag = "h2" }: TileCompanyTitleProps) => {
   return <HtmlTag className={style.title}>{children}</HtmlTag>;
 };
 
@@ -68,7 +68,7 @@ export const TileCompanyPercent = ({ children }: PropsWithChildren) => (
   <div className={style.tablePercent}>{children}</div>
 );
 
-export type TileCompanyPercentDataProps = {
+type TileCompanyPercentDataProps = {
   legend: string;
   number?: number;
 };
@@ -89,7 +89,7 @@ export const TileCompanyPercentData = ({ number, legend }: TileCompanyPercentDat
   </div>
 );
 
-export type TileCompanyLoadMoreProps = {
+type TileCompanyLoadMoreProps = {
   onClick: VoidFunction;
 };
 
