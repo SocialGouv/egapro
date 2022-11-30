@@ -218,17 +218,19 @@ function FormSearchSiren() {
             </div>
           </div>
 
-          <FormLayoutButtonGroup>
-            <FormButton isDisabled={isLoading}>Rechercher</FormButton>
-            <FormButton
-              variant="secondary"
-              type="reset"
-              isDisabled={isLoading || !Object.values(watch()).filter(Boolean).length}
-              onClick={() => resetInputs({})}
-            >
-              Réinitialiser
-            </FormButton>
-          </FormLayoutButtonGroup>
+          <div style={{ marginBottom: 20 }}>
+            <FormLayoutButtonGroup>
+              <FormButton isDisabled={isLoading}>Rechercher</FormButton>
+              <FormButton
+                variant="secondary"
+                type="reset"
+                isDisabled={isLoading || !Object.values(watch()).filter(Boolean).length}
+                onClick={() => resetInputs({})}
+              >
+                Réinitialiser
+              </FormButton>
+            </FormLayoutButtonGroup>
+          </div>
         </div>
       </form>
 
