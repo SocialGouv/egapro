@@ -9,57 +9,44 @@ export default {
 export const Default: ComponentStory<typeof TileCompanyRepeqs> = () => {
   return (
     <TileCompanyRepeqs
-      title="EDF PEI production électrique insulaire SAS SIEGE"
-      siren="489967687"
-      location="Hauts-de-Seine, Île-de-France"
-      data={[
-        { year: 2022, executivesManagers: { women: 55, men: 45 }, governingMembers: { women: 25, men: 75 } },
-        { year: 2021, executivesManagers: { women: 32, men: 67 }, governingMembers: { women: 10, men: 90 } },
-        {
-          year: 2020,
-          executivesManagers: { women: 30, men: 70 },
-          governingMembers: { women: undefined, men: undefined },
+      entreprise={{
+        département: "Hauts-de-Seine",
+        région: "Île-de-France",
+        raison_sociale: "EDF PEI production électrique insulaire SAS SIEGE",
+        siren: "489967687",
+      }}
+      représentation_équilibrée={{
+        "2017": {
+          pourcentage_femmes_cadres: "10",
+          pourcentage_femmes_membres: null,
+          pourcentage_hommes_cadres: "90",
+          pourcentage_hommes_membres: null,
         },
-        {
-          year: 2019,
-          executivesManagers: { women: 24, men: 76 },
-          governingMembers: { women: undefined, men: undefined },
+        "2018": {
+          pourcentage_femmes_cadres: "16",
+          pourcentage_femmes_membres: null,
+          pourcentage_hommes_cadres: "84",
+          pourcentage_hommes_membres: null,
         },
-      ]}
-    />
-  );
-};
-
-export const withButtonLoadMore: ComponentStory<typeof TileCompanyRepeqs> = () => {
-  return (
-    <TileCompanyRepeqs
-      title="EDF PEI production électrique insulaire SAS SIEGE"
-      siren="489967687"
-      location="Hauts-de-Seine, Île-de-France"
-      data={[
-        { year: 2022, executivesManagers: { women: 55, men: 45 }, governingMembers: { women: 25, men: 75 } },
-        { year: 2021, executivesManagers: { women: 32, men: 67 }, governingMembers: { women: 10, men: 90 } },
-        {
-          year: 2020,
-          executivesManagers: { women: 30, men: 70 },
-          governingMembers: { women: undefined, men: undefined },
+        "2019": {
+          pourcentage_femmes_cadres: "10",
+          pourcentage_femmes_membres: "22",
+          pourcentage_hommes_cadres: "78",
+          pourcentage_hommes_membres: "90",
         },
-        {
-          year: 2019,
-          executivesManagers: { women: 24, men: 76 },
-          governingMembers: { women: undefined, men: undefined },
+        "2020": {
+          pourcentage_femmes_cadres: "25",
+          pourcentage_femmes_membres: "33",
+          pourcentage_hommes_cadres: "75",
+          pourcentage_hommes_membres: "77",
         },
-        {
-          year: 2018,
-          executivesManagers: { women: 23, men: 77 },
-          governingMembers: { women: undefined, men: undefined },
+        "2021": {
+          pourcentage_femmes_cadres: "43",
+          pourcentage_femmes_membres: "40",
+          pourcentage_hommes_cadres: "57",
+          pourcentage_hommes_membres: "60",
         },
-        {
-          year: 2017,
-          executivesManagers: { women: 12, men: 88 },
-          governingMembers: { women: undefined, men: undefined },
-        },
-      ]}
+      }}
     />
   );
 };
