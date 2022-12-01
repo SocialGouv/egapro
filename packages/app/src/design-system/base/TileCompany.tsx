@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
+
 import { FormButton } from "./FormButton";
 import style from "./TileCompany.module.css";
 
