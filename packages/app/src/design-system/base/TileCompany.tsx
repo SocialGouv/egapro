@@ -14,9 +14,7 @@ export const TileCompanyTitle = ({ children, titleAs: HtmlTag = "h2" }: TileComp
   return <HtmlTag className={style.title}>{children}</HtmlTag>;
 };
 
-export const TileCompanySiren = ({ children }: PropsWithChildren) => (
-  <div className={style.siren}>Siren&nbsp;: {children}</div>
-);
+export const TileCompanySiren = ({ children }: PropsWithChildren) => <div className={style.siren}>{children}</div>;
 
 export const TileCompanyLocation = ({ children }: PropsWithChildren) => (
   <div className={style.location}>
@@ -71,7 +69,7 @@ export const TileCompanyPercent = ({ children }: PropsWithChildren) => (
 
 type TileCompanyPercentDataProps = {
   legend: string;
-  number?: number;
+  number: number | null;
 };
 
 export const TileCompanyPercentData = ({ number, legend }: TileCompanyPercentDataProps) => (
