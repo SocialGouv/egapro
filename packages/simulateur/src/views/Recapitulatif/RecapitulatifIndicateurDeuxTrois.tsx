@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
+import { Table, TableCaption, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react"
 
 import { FormState } from "../../globals"
 import { displayFractionPercentWithEmptyData, displaySexeSurRepresente } from "../../utils/helpers"
@@ -43,8 +43,12 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
         title="Indicateur écart de taux d'augmentations entre les femmes et les hommes"
         text={
           <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur2et3" label="Valider les données" />
+            <Text>
+              L’indicateur ne peut être calculé car vous n’avez pas validé les informations nécessaires à son calcul.
+            </Text>
+            <Text mt={1}>
+              <TextSimulatorLink to="/indicateur2et3" label="Valider les informations" />
+            </Text>
           </>
         }
       />

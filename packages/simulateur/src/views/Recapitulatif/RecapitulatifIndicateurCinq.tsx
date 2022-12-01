@@ -5,6 +5,7 @@ import { FormState } from "../../globals"
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { Text } from "@chakra-ui/react"
 
 interface RecapitulatifIndicateurCinqProps {
   indicateurCinqFormValidated: FormState
@@ -26,8 +27,12 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
         title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations."
         text={
           <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur5" label="Valider les données" />
+            <Text>
+              L’indicateur ne peut être calculé car vous n’avez pas validé les informations nécessaires à son calcul.
+            </Text>
+            <Text mt={1}>
+              <TextSimulatorLink to="/indicateur5" label="Valider les informations" />
+            </Text>
           </>
         }
       />

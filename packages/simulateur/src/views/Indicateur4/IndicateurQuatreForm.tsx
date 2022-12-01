@@ -83,7 +83,7 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (
-              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+              <FormError message="L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés." />
             )}
             <RadiosBoolean
               fieldName="presenceCongeMat"

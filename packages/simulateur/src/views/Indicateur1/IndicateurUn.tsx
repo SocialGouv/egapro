@@ -33,7 +33,7 @@ const IndicateurUn: FunctionComponent<IndicateurUnProps> = ({ state, dispatch })
       <PageIndicateurUn>
         <InfoBlock
           type="warning"
-          title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
+          title="Vous devez valider les effectifs pris en compte pour le calcul avant d’accéder à cet indicateur."
           text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
         />
       </PageIndicateurUn>

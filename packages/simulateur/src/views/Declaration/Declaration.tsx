@@ -392,7 +392,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
       <PageDeclaration>
         <InfoBlock
           type="warning"
-          title="Vous devez renseigner tous les indicateurs ainsi que les informations relatives à la déclaration avant de pouvoir valider"
+          title="Vous ne pouvez pas déclarer car toutes les pages relatives au calcul de l’index et à la déclaration ne sont pas validées."
           text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes."
         />
         <Heading as="h2" size="md" mt={6}>
