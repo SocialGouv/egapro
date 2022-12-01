@@ -69,7 +69,7 @@ export const TileCompanyPercent = ({ children }: PropsWithChildren) => (
 
 type TileCompanyPercentDataProps = {
   legend: string;
-  number?: number;
+  number: number | null;
 };
 
 export const TileCompanyPercentData = ({ number, legend }: TileCompanyPercentDataProps) => (

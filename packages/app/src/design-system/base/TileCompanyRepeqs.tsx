@@ -1,7 +1,7 @@
-import { useAdressLabel } from "@services/apiClient/useAdressLabel";
-import type { RepeqType } from "@services/apiClient/useSearchRepeqs";
 import { useState } from "react";
 
+import { useAdressLabel } from "../../services/apiClient/useAdressLabel";
+import type { RepeqType } from "../../services/apiClient/useSearchRepeqs";
 import {
   TileCompany,
   TileCompanyLoadMore,
