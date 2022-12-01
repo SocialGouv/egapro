@@ -340,7 +340,11 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
             <>
               <InfoBlock
                 type="warning"
-                text="Vous ne disposez pas d'une période de référence de 12 mois consécutifs, vos indicateurs et votre index ne sont pas calculables."
+                text={
+                  !allFormsFilled
+                    ? "Vous ne pouvez pas déclarer car toutes les pages relatives à la déclaration ne sont pas validées."
+                    : "Vous ne disposez pas d'une période de référence de 12 mois consécutifs, vos indicateurs et votre index ne sont pas calculables."
+                }
               />
 
               {allFormsFilled ? (
