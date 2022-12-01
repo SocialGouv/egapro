@@ -11,6 +11,9 @@
       "@components/*": [
         "packages/app/src/components/*"
       ],
+      "@api/*": [
+        "packages/app/src/api/*"
+      ],
       "@services/*": [
         "packages/app/src/services/*"
       ],
@@ -19,8 +22,15 @@
       ]
     }
   },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+    },
+    "transpileOnly": true
+  },
   "include": [
     "next-env.d.ts",
+    "env.d.ts",
     "**/*.ts",
     "**/*.tsx"
   ],

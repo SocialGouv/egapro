@@ -1,8 +1,8 @@
+import { BasicLayout } from "@components/layouts/BasicLayout";
+import { Container, Grid, GridCol } from "@design-system";
 import Head from "next/head";
 
 import type { NextPageWithLayout } from "./_app";
-import { BasicLayout } from "@components/layouts/BasicLayout";
-import { Container, Grid, GridCol } from "@design-system";
 
 const Cgu: NextPageWithLayout = () => {
   return (
@@ -70,7 +70,7 @@ const Cgu: NextPageWithLayout = () => {
                 Ministère du Travail. Tout utilisateur, sans se créer de compte, peut remplir des informations le
                 concernant, des informations concernant son entreprise en prenant en compte la période de référence, les
                 écarts de représentation. Le déclarant renseigne son nom, prénom, son adresse e-mail, son numéro de
-                téléphone mais également le numéro SIREN de son entreprise afin de réaliser sa déclaration concernant la
+                téléphone mais également le numéro Siren de son entreprise afin de réaliser sa déclaration concernant la
                 représentation équilibrée.
               </p>
               <p>

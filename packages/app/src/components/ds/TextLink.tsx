@@ -1,7 +1,6 @@
 import type { LinkProps } from "@chakra-ui/react";
 import { Link } from "@chakra-ui/react";
 import NextLink from "next/link";
-import React from "react";
 
 export type TextLinkProps = LinkProps & {
   to: string;

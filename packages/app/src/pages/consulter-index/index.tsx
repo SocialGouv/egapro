@@ -10,15 +10,16 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
-import { format } from "date-fns";
-import { useRouter } from "next/router";
-import React, { useEffect, useRef, useState } from "react";
-import { HiDownload } from "react-icons/hi";
-
-import type { NextPageWithLayout } from "../_app";
 import { AverageIndicator } from "@components/AverageIndicator";
 import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
+import { format } from "date-fns";
+import { useRouter } from "next/router";
+import type { DOMAttributes } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HiDownload } from "react-icons/hi";
+
+import type { NextPageWithLayout } from "../_app";
 
 async function getDateCsv(): Promise<string> {
   try {
@@ -40,14 +41,14 @@ function FormSearchSiren() {
   const formRef = useRef(null);
   const bgSelect = useColorModeValue("white", "blue.700");
 
-  function handleSubmit(event: React.SyntheticEvent) {
+  const handleSubmit: DOMAttributes<HTMLFormElement>["onSubmit"] = event => {
     event.preventDefault();
     const data = new FormData(formRef.current || undefined);
 
     const { q } = Object.fromEntries(data);
 
     router.push("consulter-index/recherche" + (q ? `?q=${q}` : ""));
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} style={{ textAlign: "center" }} ref={formRef} noValidate>
@@ -57,7 +58,7 @@ function FormSearchSiren() {
       <Box>
         <Flex align="center" justifyContent="center" mx={["0", "16"]}>
           <Input
-            placeholder="Saisissez le nom ou le SIREN d'une entreprise"
+            placeholder="Saisissez le nom ou le Siren d'une entreprise"
             size="lg"
             name="q"
             type="text"

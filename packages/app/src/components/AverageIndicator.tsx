@@ -1,15 +1,14 @@
 import { InfoOutlineIcon } from "@chakra-ui/icons";
 import type { SelectProps } from "@chakra-ui/react";
 import { Box, Center, Container, Select, Spinner, Stack, Text, Tooltip, useColorModeValue } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
-
-import { ButtonAction } from "./ds/ButtonAction";
 import { capitalize } from "@common/utils/string";
 import { buildUrlParamsString } from "@common/utils/url";
 import type { UseStatsParams } from "@services/apiClient";
-import { useStats, filterDepartements } from "@services/apiClient";
-import { useConfig } from "@services/apiClient";
+import { filterDepartements, useConfig, useStats } from "@services/apiClient";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
+import { ButtonAction } from "./ds/ButtonAction";
 
 export const FilterSelect = ({ name, onChange, value, children, ...rest }: SelectProps) => {
   const borderSelect = useColorModeValue("cyan.200", "cyan.100");
@@ -48,8 +47,8 @@ export const AverageIndicator = () => {
 
   const getAverage = () => (!stats ? "" : stats?.avg?.toFixed(0));
 
-  function handleChange(event: React.SyntheticEvent) {
-    const { name, value } = event.currentTarget as HTMLInputElement;
+  const handleChange: SelectProps["onChange"] = event => {
+    const { name, value } = event.currentTarget;
 
     let departement = getValue("departement");
 
@@ -58,7 +57,7 @@ export const AverageIndicator = () => {
       departement = "";
     }
     setFilters({ ...filters, departement, [name]: value });
-  }
+  };
 
   const getValue = (name: keyof UseStatsParams) => filters[name] || "";
 

@@ -1,6 +1,5 @@
 import { Flex, LinkBox, LinkOverlay, Spacer } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
-import React from "react";
 
 export type LinkButtonProps = PropsWithChildren<{
   color?: string;

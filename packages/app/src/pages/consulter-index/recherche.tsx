@@ -1,4 +1,3 @@
-import type { ParsedUrlQuery } from "querystring";
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   Alert,
@@ -22,11 +21,6 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
-import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
-
-import type { NextPageWithLayout } from "../_app";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
@@ -35,6 +29,13 @@ import { ButtonAction } from "@components/ds/ButtonAction";
 import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 import type { SearchCompanyParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
+import { useRouter } from "next/router";
+import type { ParsedUrlQuery } from "querystring";
+import type { ChangeEventHandler, DOMAttributes } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { HiOutlineLocationMarker, HiOutlineOfficeBuilding } from "react-icons/hi";
+
+import type { NextPageWithLayout } from "../_app";
 
 function useAdressLabel({ departement, region }: { departement?: string; region?: string }) {
   const { config } = useConfig();
@@ -404,13 +405,13 @@ const SearchPage: NextPageWithLayout = () => {
     setSearch({ q, region, departement, section_naf });
   }, [q, region, departement, section_naf, config]);
 
-  function handleSubmit(event: React.SyntheticEvent) {
+  const handleSubmit: DOMAttributes<HTMLFormElement>["onSubmit"] = event => {
     event.preventDefault();
 
     router.replace({ pathname: "./recherche", query: search });
-  }
+  };
 
-  function handleChange(event: React.SyntheticEvent) {
+  const handleChange: ChangeEventHandler = event => {
     const { name, value } = event.currentTarget as HTMLInputElement;
 
     let departement = getValue("departement");
@@ -420,7 +421,7 @@ const SearchPage: NextPageWithLayout = () => {
       departement = "";
     }
     setSearch({ ...search, departement, [name]: value });
-  }
+  };
 
   const getValue = (name: keyof SearchCompanyParams) => search[name] || "";
 
@@ -432,13 +433,13 @@ const SearchPage: NextPageWithLayout = () => {
         </Heading>
         <Box mt={4} maxW="container.md" mx="auto">
           <Input
-            placeholder="Saisissez le nom ou le SIREN d'une entreprise"
+            placeholder="Saisissez le nom ou le Siren d'une entreprise"
             size="md"
             name="q"
             type="text"
             onChange={handleChange}
             value={getValue("q")}
-            aria-label="filtre sur le nom ou le SIREN de l'entreprise"
+            aria-label="filtre sur le nom ou le Siren de l'entreprise"
           />
           <HStack mt="2">
             <Text fontSize="sm" mx="3">

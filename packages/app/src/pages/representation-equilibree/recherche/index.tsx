@@ -1,9 +1,3 @@
-import type { ParsedUrlQueryInput } from "querystring";
-import { format } from "date-fns";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import type { NextPageWithLayout } from "../../_app";
 import { capitalize } from "@common/utils/string";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
@@ -17,8 +11,14 @@ import {
   FormLayoutButtonGroup,
   FormSelect,
 } from "@design-system";
-import { filterDepartements } from "@services/apiClient";
-import { useConfig } from "@services/apiClient";
+import { filterDepartements, useConfig } from "@services/apiClient";
+import { format } from "date-fns";
+import { useRouter } from "next/router";
+import type { ParsedUrlQueryInput } from "querystring";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import type { NextPageWithLayout } from "../../_app";
 
 async function getDateCsv(): Promise<string> {
   try {

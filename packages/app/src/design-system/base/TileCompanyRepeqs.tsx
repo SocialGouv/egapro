@@ -1,4 +1,6 @@
+import type { RepeqType } from "@services/apiClient/useSearchRepeqs";
 import { useState } from "react";
+
 import {
   TileCompany,
   TileCompanyLoadMore,
@@ -15,7 +17,6 @@ import {
   TileCompanyTitle,
   TileCompanyYear,
 } from "./TileCompany";
-import type { RepeqType } from "@services/apiClient/useSearchRepeqs";
 
 export type data = { men?: number; women?: number };
 

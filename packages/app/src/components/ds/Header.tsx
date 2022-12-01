@@ -1,13 +1,11 @@
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { Box, Container, Link, Flex, Text, ListItem, List, HStack, Button, useColorMode } from "@chakra-ui/react";
+import { Box, Button, Container, Flex, HStack, Link, List, ListItem, Text, useColorMode } from "@chakra-ui/react";
+import { isOpenFeature } from "@common/utils/feature";
 import NextLink from "next/link";
-import type { FC } from "react";
-import React from "react";
 
 import { Logo } from "./Logo";
-import { isOpenFeature } from "@common/utils/feature";
 
-export const Header: FC = () => {
+export const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (

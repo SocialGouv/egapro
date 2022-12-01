@@ -1,7 +1,3 @@
-import Head from "next/head";
-import NextLink from "next/link";
-
-import type { NextPageWithLayout } from "../_app";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
   Alert,
@@ -21,6 +17,10 @@ import {
   GridCol,
   ImgRepresentationEquilibree,
 } from "@design-system";
+import Head from "next/head";
+import NextLink from "next/link";
+
+import type { NextPageWithLayout } from "../_app";
 
 export const RepresentationEquilibree: NextPageWithLayout = () => (
   <>

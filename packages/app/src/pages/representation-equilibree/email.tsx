@@ -1,10 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-import type { NextPageWithLayout } from "../_app";
 import type { FeatureStatus } from "@common/utils/feature";
 import { ClientOnly } from "@components/ClientOnly";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
@@ -19,7 +12,14 @@ import {
   FormLayout,
   FormLayoutButtonGroup,
 } from "@design-system";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { requestEmailForToken, useUser } from "@services/apiClient";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import type { NextPageWithLayout } from "../_app";
 
 const title = "Validation de l'email";
 

@@ -4,13 +4,6 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
 import "@gouvfr/dsfr/dist/utility/icons/icons-map/icons-map.min.css";
 
-import Head from "next/head";
-import { useRouter } from "next/router";
-import type { PropsWithChildren } from "react";
-import React from "react";
-import { App } from "./App";
-import styles from "./RepresentationEquilibreeLayout.module.css";
-
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { ClientOnly } from "@components/ClientOnly";
 import {
@@ -30,6 +23,12 @@ import {
   StepperDetails,
   StepperTitle,
 } from "@design-system";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import type { PropsWithChildren } from "react";
+
+import { App } from "./App";
+import styles from "./RepresentationEquilibreeLayout.module.css";
 
 const STEPS = [
   "/commencer",

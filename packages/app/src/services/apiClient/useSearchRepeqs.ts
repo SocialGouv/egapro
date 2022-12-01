@@ -1,15 +1,14 @@
-import moize from "moize";
-import useSWRInfinite from "swr/infinite";
-
-import type { SWRInfiniteKeyLoader } from "swr/infinite";
-import { buildUrlParams } from "../../common/utils/url";
-import type { FetcherInfiniteReturn } from "./fetcher";
-
-import { fetcher } from "./fetcher";
 import type {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
 } from "@common/models/representation-equilibree";
+import moize from "moize";
+import type { SWRInfiniteKeyLoader } from "swr/infinite";
+import useSWRInfinite from "swr/infinite";
+
+import { buildUrlParams } from "../../common/utils/url";
+import type { FetcherInfiniteReturn } from "./fetcher";
+import { fetcher } from "./fetcher";
 
 export type RepeqType = {
   entreprise: {

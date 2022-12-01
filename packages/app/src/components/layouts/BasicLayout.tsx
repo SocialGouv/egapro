@@ -6,6 +6,7 @@ import "@gouvfr/dsfr/dist/utility/icons/icons-map/icons-map.min.css";
 
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
+
 import { App } from "./App";
 
 const DEFAULT_TITLE = "Egapro";

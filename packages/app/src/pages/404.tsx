@@ -1,9 +1,9 @@
 import { Box, Text } from "@chakra-ui/react";
+import { BasicLayout } from "@components/layouts/BasicLayout";
 import { push } from "@socialgouv/matomo-next";
 import { useEffect } from "react";
 
 import type { NextPageWithLayout } from "./_app";
-import { BasicLayout } from "@components/layouts/BasicLayout";
 
 const NotFoundPage: NextPageWithLayout = () => {
   useEffect(() => {
