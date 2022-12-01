@@ -10,16 +10,16 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
+import { AverageIndicator } from "@components/AverageIndicator";
+import { ButtonAction } from "@components/ds/ButtonAction";
+import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
+import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 import { useRouter } from "next/router";
 import type { DOMAttributes } from "react";
 import { useEffect, useRef, useState } from "react";
 import { HiDownload } from "react-icons/hi";
 
 import type { NextPageWithLayout } from "../_app";
-import { AverageIndicator } from "@components/AverageIndicator";
-import { ButtonAction } from "@components/ds/ButtonAction";
-import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
-import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 
 function FormSearchSiren() {
   const router = useRouter();

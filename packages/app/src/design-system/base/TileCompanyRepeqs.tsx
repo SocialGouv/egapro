@@ -1,3 +1,4 @@
+import { useAdressLabel } from "@services/apiClient/useAdressLabel";
 import type { RepeqType } from "@services/apiClient/useSearchRepeqs";
 import { useState } from "react";
 
@@ -17,8 +18,6 @@ import {
   TileCompanyTitle,
   TileCompanyYear,
 } from "./TileCompany";
-import { useAdressLabel } from "@services/apiClient/useAdressLabel";
-import type { RepeqType } from "@services/apiClient/useSearchRepeqs";
 
 export type data = { men?: number; women?: number };
 

@@ -1,11 +1,8 @@
-import type { ParsedUrlQueryInput } from "querystring";
-import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import type { NextPageWithLayout } from "../../_app";
 import { capitalize } from "@common/utils/string";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
+  Alert,
+  AlertTitle,
   Box,
   FormButton,
   FormGroup,
@@ -14,16 +11,18 @@ import {
   FormInput,
   FormLayoutButtonGroup,
   FormSelect,
-  Alert,
   TileCompanyRepeqs,
-  AlertTitle,
 } from "@design-system";
-
-import { filterDepartements } from "@services/apiClient";
-import { useConfig } from "@services/apiClient";
+import { filterDepartements, useConfig } from "@services/apiClient";
 import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
 import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
 import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
+import { useRouter } from "next/router";
+import type { ParsedUrlQueryInput } from "querystring";
+import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import type { NextPageWithLayout } from "../../_app";
 
 type FormTypeInput = {
   departement: string;
