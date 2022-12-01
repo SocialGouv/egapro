@@ -1,3 +1,10 @@
+# [2.39.0](https://github.com/SocialGouv/egapro/compare/v2.38.0...v2.39.0) (2022-12-01)
+
+
+### Features
+
+* recherche for repeq ([#1415](https://github.com/SocialGouv/egapro/issues/1415)) ([1b61790](https://github.com/SocialGouv/egapro/commit/1b617901f89a2846cd88669a1604b2204a81489f))
+
 # [2.38.0](https://github.com/SocialGouv/egapro/compare/v2.37.0...v2.38.0) (2022-12-01)
 
 
