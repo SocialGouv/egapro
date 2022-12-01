@@ -4,13 +4,13 @@ from traceback import print_exc
 
 from naf import DB as NAF
 from roll import Roll, HttpError
-from roll import Request as BaseRequest
+from roll import Request as BaseRequest, Response
 from asyncpg.exceptions import DataError
 from roll.extensions import cors, options
 from stdnum.fr.siren import is_valid as siren_is_valid
 
-from . import config, constants, db, emails, helpers, models, tokens, utils, schema
-from . import loggers
+from egapro import config, constants, db, emails, helpers, models, tokens, utils, schema
+from egapro import loggers
 from egapro.pdf import representation
 
 
@@ -177,9 +177,9 @@ async def declare(request, response, siren, year):
             url = request.domain + data.uri
             emails.success.send(owners, url=url, **data)
 
+@app.route("/declarations/{siren}", methods=["GET"])
 @tokens.require
 @ensure_owner
-@app.route("/declarations/{siren}", methods=["GET"])
 async def get_declarations(request, response, siren):
     declarations = []
     limit = request.query.int("limit", 10)
@@ -265,7 +265,7 @@ async def resend_objectifs_receipt(request, response, siren, year):
 @ensure_owner
 async def resend_representation_receipt(request, response, siren, year):
     try:
-        record = await db.representation.get(siren, year)
+        record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     owners = await db.ownership.emails(siren)
@@ -280,7 +280,7 @@ async def resend_representation_receipt(request, response, siren, year):
 @app.route("/representation-equilibree/{siren}/{year}/pdf", methods=["GET"])
 async def send_representation_pdf(request, response, siren, year):
     try:
-        record = await db.representation.get(siren, year)
+        record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     data = record.data
@@ -410,6 +410,28 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
+@app.route("/representation-equilibree/search", methods=["GET"])
+async def search_representation_equilibree(request: Request, response: Response):
+    q = request.query.get("q", "").strip()
+    limit = request.query.int("limit", 10)
+    offset = request.query.int("offset", 0)
+    section_naf = request.query.get("section_naf", None)
+    departement = request.query.get("departement", None)
+    region = request.query.get("region", None)
+    results = await db.search_representation_equilibree.run(
+        query=q,
+        limit=limit,
+        offset=offset,
+        section_naf=section_naf,
+        departement=departement,
+        region=region,
+    )
+    response.json = {
+        "data": results,
+        "count": await db.search_representation_equilibree.count(
+            query=q, section_naf=section_naf, departement=departement, region=region
+        ),
+    }
 
 @app.route("/representation-equilibree/{siren}/{year}", methods=["GET"])
 @tokens.require
@@ -417,7 +439,7 @@ async def get_token(request, response):
 @ensure_owner
 async def get_representation(request, response, siren, year):
     try:
-        record = await db.representation.get(siren, year)
+        record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     resource = record.as_resource()
@@ -449,7 +471,7 @@ async def put_representation(request, response, siren, year):
     schema.validate(data.raw)
     schema.cross_validate(data.raw, rep_eq=True)
     try:
-        current = await db.representation.get(siren, year)
+        current = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         current = None
     else:
@@ -458,20 +480,16 @@ async def put_representation(request, response, siren, year):
         expired = declared_at and declared_at < utils.remove_one_year(utils.utcnow())
         if expired and not request["staff"]:
             raise HttpError(403, "Le délai de modification est écoulé.")
-    await db.representation.put(siren, year, data)
+    await db.representation_equilibree.put(siren, year, data)
     response.status = 204
     if not request["staff"]:
         await db.ownership.put(siren, request["email"])
-        # Do not send the success email on update for now (we send too much emails that
-        # are unwanted, mainly because when someone loads the frontend app a PUT is
-        # automatically sent, without any action from the user.)
         loggers.logger.info(f"{siren}/{year} BY {declarant} FROM {request.ip}")
-        if not current:
-            owners = await db.ownership.emails(siren)
-            if not owners:  # Staff member
-                owners = request["email"]
-            url = request.domain + data.uri
-            emails.representation.send(owners, url=url, **data)
+        owners = await db.ownership.emails(siren)
+        if not owners:  # Staff member
+            owners = request["email"]
+        url = request.domain + data.uri
+        emails.representation.send(owners, url=url, **data)
 
 @app.route("/search")
 async def search(request, response):

@@ -25,7 +25,7 @@ def remove_one_year(end):
         return (end + timedelta(days=1)).replace(end.year - 1)
 
 
-def prepare_query(query):
+def prepare_query(query: str) -> str:
     if not query:
         return query
     # TODO deal with edge cases ( | , !…)

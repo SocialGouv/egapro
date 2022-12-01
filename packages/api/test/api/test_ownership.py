@@ -17,7 +17,8 @@ async def test_get_owners(client):
     resp = await client.get("/ownership/123456782")
     assert resp.status == 200
     data = json.loads(resp.body)
-    assert data == {"owners": ["foo@bar.baz", "boo@bar.baz"]}
+    assert "owners" in data
+    assert sorted(data["owners"]) == ["boo@bar.baz", "foo@bar.baz"]
 
 
 async def test_add_owner(client, monkeypatch):
@@ -31,16 +32,16 @@ async def test_add_owner(client, monkeypatch):
     client.login("FoO@BAR.baZ")
     resp = await client.put("/ownership/123456782/foo@foo.foo")
     assert resp.status == 204
-    assert await db.ownership.emails("123456782") == ["foo@bar.baz", "foo@foo.foo"]
+    assert sorted(await db.ownership.emails("123456782")) == sorted(["foo@bar.baz", "foo@foo.foo"])
     monkeypatch.setattr("egapro.config.STAFF", ["staff@email.com"])
     client.login("staff@email.com")
     resp = await client.put("/ownership/123456782/ba@na.na")
     assert resp.status == 204
-    assert await db.ownership.emails("123456782") == [
-        "foo@bar.baz",
-        "foo@foo.foo",
-        "ba@na.na",
-    ]
+    inserted = await db.ownership.emails("123456782")
+    assert len(inserted) == 3
+    assert "foo@bar.baz" in inserted
+    assert "foo@foo.foo" in inserted
+    assert "ba@na.na" in inserted
 
 
 async def test_delete_owner(client):
