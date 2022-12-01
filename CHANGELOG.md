@@ -1,3 +1,59 @@
+# [2.37.0](https://github.com/SocialGouv/egapro/compare/v2.36.0...v2.37.0) (2022-11-30)
+
+
+### Features
+
+* add TileCompany component ([#1413](https://github.com/SocialGouv/egapro/issues/1413)) ([590586b](https://github.com/SocialGouv/egapro/commit/590586bf9adde01d70d80b2de1a1caff3b244103))
+
+# [2.36.0](https://github.com/SocialGouv/egapro/compare/v2.35.1...v2.36.0) (2022-11-30)
+
+
+### Features
+
+* search repeq ([#1412](https://github.com/SocialGouv/egapro/issues/1412)) ([c37f16e](https://github.com/SocialGouv/egapro/commit/c37f16e57e17d554f2016f8e14abe074620cb030))
+
+## [2.35.1](https://github.com/SocialGouv/egapro/compare/v2.35.0...v2.35.1) (2022-11-30)
+
+
+### Bug Fixes
+
+* **declaration:** redirect to tableau de bord not working (fixes [#1414](https://github.com/SocialGouv/egapro/issues/1414)) ([01546c2](https://github.com/SocialGouv/egapro/commit/01546c21e59d916644854bbf51cf2a5111e39cc5))
+
+# [2.35.0](https://github.com/SocialGouv/egapro/compare/v2.34.0...v2.35.0) (2022-11-29)
+
+
+### Features
+
+* **api:** change search format by year ([0eb64a3](https://github.com/SocialGouv/egapro/commit/0eb64a3b8e03d1e97eee5c951962744622b4efa0))
+
+# [2.34.0](https://github.com/SocialGouv/egapro/compare/v2.33.3...v2.34.0) (2022-11-29)
+
+
+### Features
+
+* **api:** add not computable reason to repeq search output ([283b6ff](https://github.com/SocialGouv/egapro/commit/283b6ff69c903af41ab0f6745a8ecf20aef9c883))
+
+## [2.33.3](https://github.com/SocialGouv/egapro/compare/v2.33.2...v2.33.3) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** close public get decla - Fixes [#1151](https://github.com/SocialGouv/egapro/issues/1151) ([8858ec1](https://github.com/SocialGouv/egapro/commit/8858ec113d1898e747c95d2bfa25bae63db10f44))
+
+## [2.33.2](https://github.com/SocialGouv/egapro/compare/v2.33.1...v2.33.2) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** send receipt after repeq edit ([#1411](https://github.com/SocialGouv/egapro/issues/1411)) ([c7ed4ba](https://github.com/SocialGouv/egapro/commit/c7ed4ba28d7a62367b60664ba3cd03082b73899b))
+
+## [2.33.1](https://github.com/SocialGouv/egapro/compare/v2.33.0...v2.33.1) (2022-11-29)
+
+
+### Bug Fixes
+
+* **api:** handle floats and float string in jsonb after repeqsearch ([#1409](https://github.com/SocialGouv/egapro/issues/1409)) ([4a36ee7](https://github.com/SocialGouv/egapro/commit/4a36ee7a225e324f263d63e3e3009215649fc0ca))
+
 # [2.33.0](https://github.com/SocialGouv/egapro/compare/v2.32.6...v2.33.0) (2022-11-28)
 
 
