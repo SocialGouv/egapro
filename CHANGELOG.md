@@ -1,3 +1,10 @@
+## [2.40.1](https://github.com/SocialGouv/egapro/compare/v2.40.0...v2.40.1) (2022-12-01)
+
+
+### Bug Fixes
+
+* xslx file is supposed to be in public access ([6f72e26](https://github.com/SocialGouv/egapro/commit/6f72e2673a1e573094a24051ec5ba09c78a72fa8))
+
 # [2.40.0](https://github.com/SocialGouv/egapro/compare/v2.39.0...v2.40.0) (2022-12-01)
 
 
