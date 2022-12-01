@@ -1,4 +1,4 @@
-import { reprensentationEquilibreeMap } from "@common/core-domain/mappers/reprensentationEquilibreeMap";
+import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
 import _ from "lodash";
 
 import { sql } from "../postgres";
@@ -10,7 +10,7 @@ export const seed = async function () {
 
   const randomDatas = new Array(_.random(50))
     .fill(null)
-    .map(() => reprensentationEquilibreeMap.toPersistence(getRandomDeclarationRepEq()));
+    .map(() => representationEquilibreeMap.toPersistence(getRandomDeclarationRepEq()));
 
   await sql`insert into ${sql(table)} ${sql(randomDatas)}`;
 };

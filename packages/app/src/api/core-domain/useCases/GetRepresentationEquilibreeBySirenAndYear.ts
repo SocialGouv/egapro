@@ -1,6 +1,6 @@
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { DeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
-import { reprensentationEquilibreeMap } from "@common/core-domain/mappers/reprensentationEquilibreeMap";
+import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
@@ -20,7 +20,7 @@ export class GetRepresentationEquilibreeBySirenAndYear implements UseCase<Input,
       const validatedSiren = new Siren(siren);
       const validatedYear = new PositiveNumber(+year);
       const representationEquilibree = await this.reprensentationEquilibreeRepo.getOne([validatedSiren, validatedYear]);
-      return representationEquilibree ? reprensentationEquilibreeMap.toDTO(representationEquilibree) : null;
+      return representationEquilibree ? representationEquilibreeMap.toDTO(representationEquilibree) : null;
     } catch (error: unknown) {
       throw new GetRepresentationEquilibreeBySirenAndYearError(
         "Cannot desired representation equilibree",

@@ -18,7 +18,7 @@ import { RepresentationEquilibreeData } from "../domain/RepresentationEquilibree
 import { Siren } from "../domain/valueObjects/Siren";
 import type { DeclarationDTO } from "../dtos/DeclarationDTO";
 
-export const reprensentationEquilibreeMap: Required<
+export const representationEquilibreeMap: Required<
   Mapper<RepresentationEquilibree, DeclarationDTO | null, RepresentationEquilibreeRaw>
 > = {
   // TODO convert without validation if perf are not good

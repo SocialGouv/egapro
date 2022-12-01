@@ -5,7 +5,7 @@ import type {
   RepresentationEquilibreePK,
 } from "@common/core-domain/domain/RepresentationEquilibree";
 import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import { reprensentationEquilibreeMap } from "@common/core-domain/mappers/reprensentationEquilibreeMap";
+import { representationEquilibreeMap } from "@common/core-domain/mappers/representationEquilibreeMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { Any } from "@common/utils/types";
 
@@ -27,7 +27,7 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
         this.postgresLimit
       }`;
 
-      return raw.map(reprensentationEquilibreeMap.toDomain);
+      return raw.map(representationEquilibreeMap.toDomain);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
@@ -47,7 +47,7 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
   public async getAll(): Promise<RepresentationEquilibree[]> {
     const raw = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
 
-    return raw.map(reprensentationEquilibreeMap.toDomain) as unknown as RepresentationEquilibree[];
+    return raw.map(representationEquilibreeMap.toDomain) as unknown as RepresentationEquilibree[];
   }
   public async getOne([siren, year]: RepresentationEquilibreePK): Promise<RepresentationEquilibree | null> {
     try {
@@ -56,7 +56,7 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
       } where siren=${siren.getValue()} and year=${year.getValue()} limit 1`;
 
       if (!raw) return null;
-      return reprensentationEquilibreeMap.toDomain(raw);
+      return representationEquilibreeMap.toDomain(raw);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
@@ -67,7 +67,7 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
     }
   }
   public async save(item: RepresentationEquilibree): Promise<void> {
-    const raw = reprensentationEquilibreeMap.toPersistence(item);
+    const raw = representationEquilibreeMap.toPersistence(item);
     await sql`insert into ${this.table} value ${sql(
       raw,
       "data",
