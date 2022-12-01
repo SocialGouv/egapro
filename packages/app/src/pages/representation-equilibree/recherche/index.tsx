@@ -246,7 +246,7 @@ function DownloadFileZone() {
       <div style={{ display: "flex" }}>
         <div>Télécharger le fichier des représentations équilibrées au {dateFile}</div>
 
-        <a href="">Télécharger (xslx)</a>
+        <a href="/dgt-export-representation.xlsx">Télécharger (xslx)</a>
       </div>
     </>
   ) : null;
