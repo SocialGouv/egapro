@@ -1,3 +1,10 @@
+# [2.40.0](https://github.com/SocialGouv/egapro/compare/v2.39.0...v2.40.0) (2022-12-01)
+
+
+### Features
+
+* add href for xslx file ([e0d8c5f](https://github.com/SocialGouv/egapro/commit/e0d8c5f7b2966a5590121043eebf2f0ee870aaec))
+
 # [2.39.0](https://github.com/SocialGouv/egapro/compare/v2.38.0...v2.39.0) (2022-12-01)
 
 
