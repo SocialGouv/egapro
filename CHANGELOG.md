@@ -1,3 +1,10 @@
+# [2.38.0](https://github.com/SocialGouv/egapro/compare/v2.37.0...v2.38.0) (2022-12-01)
+
+
+### Features
+
+* **apiv2:** db connector + base domain + base controllers ([#1316](https://github.com/SocialGouv/egapro/issues/1316)) ([50e8365](https://github.com/SocialGouv/egapro/commit/50e8365a214c9843b2d27ad0c5eb05aca2c3e6af))
+
 # [2.37.0](https://github.com/SocialGouv/egapro/compare/v2.36.0...v2.37.0) (2022-11-30)
 
 
