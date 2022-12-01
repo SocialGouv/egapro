@@ -10,6 +10,9 @@ END;$$;
 CREATE TABLE IF NOT EXISTS declaration
 (siren TEXT, year INT, modified_at TIMESTAMP WITH TIME ZONE, declared_at TIMESTAMP WITH TIME ZONE, declarant TEXT, data JSONB, draft JSONB, legacy JSONB, ft TSVECTOR,
 PRIMARY KEY (siren, year));
+CREATE TABLE IF NOT EXISTS representation_equilibree
+(siren TEXT, year INT, modified_at TIMESTAMP WITH TIME ZONE, declared_at TIMESTAMP WITH TIME ZONE, data JSONB, ft TSVECTOR,
+PRIMARY KEY (siren, year));
 CREATE TABLE IF NOT EXISTS simulation
 (id uuid PRIMARY KEY, modified_at TIMESTAMP WITH TIME ZONE, data JSONB);
 CREATE TABLE IF NOT EXISTS search
@@ -20,3 +23,17 @@ ALTER TABLE search ADD CONSTRAINT declaration_exists FOREIGN KEY (siren,year) RE
 CREATE TABLE IF NOT EXISTS archive
 (siren TEXT, year INT, at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), by TEXT, ip INET, data JSONB);
 CREATE TABLE IF NOT EXISTS ownership (siren TEXT, email TEXT, PRIMARY KEY (siren, email));
+
+--
+-- indexes
+--
+
+CREATE INDEX IF NOT EXISTS idx_effectifs ON declaration ((data->'entreprise'->'effectifs'->>'tranche'));
+CREATE INDEX IF NOT EXISTS idx_status ON declaration (declared_at) WHERE declared_at IS NOT NULL;
+-- CREATE INDEX IF NOT EXISTS idx_ft ON search USING GIN (ft);
+-- CREATE INDEX IF NOT EXISTS idx_region ON search(region);
+-- CREATE INDEX IF NOT EXISTS idx_departement ON search(departement);
+-- CREATE INDEX IF NOT EXISTS idx_naf ON search(section_naf);
+-- CREATE INDEX IF NOT EXISTS idx_declared_at ON search (declared_at);
+CREATE INDEX IF NOT EXISTS idx_email ON representation_equilibree((data->'déclarant'->>'email'));
+CREATE INDEX IF NOT EXISTS idx_siren ON representation_equilibree(siren);

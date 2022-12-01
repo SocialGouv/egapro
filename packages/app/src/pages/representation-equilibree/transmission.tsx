@@ -1,12 +1,5 @@
-import NextLink from "next/link";
-import { useRouter } from "next/router";
-import { useState } from "react";
-
-import type { NextPageWithLayout } from "../_app";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import type { FormButtonProps } from "@design-system";
-import { TileSuccessTitle, ImgJDMA } from "@design-system";
-import { TileSuccess } from "@design-system";
 import {
   ButtonAsLink,
   ButtonGroup,
@@ -20,8 +13,16 @@ import {
   FormButton,
   Grid,
   GridCol,
+  ImgJDMA,
+  TileSuccess,
+  TileSuccessTitle,
 } from "@design-system";
 import { API_URL, fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+
+import type { NextPageWithLayout } from "../_app";
 
 const title = "Votre déclaration a été transmise";
 

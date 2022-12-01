@@ -1,11 +1,11 @@
-import create from "zustand";
-import { persist } from "zustand/middleware";
-
-import type { EntrepriseType } from "./siren";
 import type {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
 } from "@common/models/representation-equilibree";
+import create from "zustand";
+import { persist } from "zustand/middleware";
+
+import type { EntrepriseType } from "./siren";
 
 export type FormState = {
   date?: string | undefined; // Only filled by the backend.

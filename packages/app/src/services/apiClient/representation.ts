@@ -1,11 +1,11 @@
+import type { RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
+import { buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
 import { ApiError } from "next/dist/server/api-utils";
 import useSWR from "swr";
 
 import { fetcher } from "./fetcher";
 import type { FormState } from "./useFormManager";
 import { useUser } from "./useUser";
-import { buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
-import type { RepresentationEquilibreeAPI } from "@common/models/representation-equilibree";
 
 export const putRepresentationEquilibree = async (data: FormState) => {
   const representation = buildRepresentation(data);
@@ -36,7 +36,9 @@ export const useRepresentationEquilibree = (siren: string, year: number) => {
   return { repeq, error, loading };
 };
 
-// Helper over fetchRepresentationEquilibree to manage 404 error as a regular case & transform in a FormState.
+/**
+ * Helper over {@link fetchRepresentationEquilibree} to manage 404 error as a regular case & transform in a FormState.
+ */
 export const fetchRepresentationEquilibreeAsFormState = async (siren: string, year: number) => {
   try {
     const repeq = await fetchRepresentationEquilibree(siren, year);

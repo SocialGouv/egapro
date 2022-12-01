@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://index-egapro.travail.gouv.fr/api/v2/model.data/schema-with-validation.json",
+  "$comment": "Règles de validation métier",
+  "allOf": [
+    {
+      "$ref": "./schema.json"
+    },
+    {
+      "$comment": "if validated then required fields",
+      "if": {
+        "properties": {
+          "déclaration": {
+            "properties": {
+              "brouillon": {
+                "const": false
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "entreprise": {
+            "required": [
+              "code_naf"
+            ]
+          },
+          "déclarant": {
+            "required": [
+              "prénom",
+              "nom",
+              "téléphone"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if periode_suffisante is false, then indicateurs should not be set",
+        "properties": {
+          "déclaration": {
+            "properties": {
+              "période_suffisante": {
+                "const": false
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "allOf": [
+          {
+            "properties": {
+              "indicateurs": false
+            }
+          },
+          {
+            "properties": {
+              "indicateurs": {
+                "title": "La période de référence ne permet pas de définir des indicateurs"
+              }
+            }
+          }
+        ]
+      },
+      "else": {
+        "$comment": "if periode_suffisante is true, and (année_indicateurs < 2021 || index >= 85), then indicateurs.*.objectif_de_progression should not be set",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "déclaration": {
+                  "properties": {
+                    "année_indicateurs": {
+                      "exclusiveMaximum": 2021
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "indicateurs": {
+                  "allOf": [
+                    {
+                      "patternProperties": {
+                        "^rémunérations|augmentations|promotions|augmentations_et_promotions|congés_maternité|hautes_rémunérations$": {
+                          "properties": {
+                            "objectif_de_progression": false
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "patternProperties": {
+                        "^rémunérations|augmentations|promotions|augmentations_et_promotions|congés_maternité|hautes_rémunérations$": {
+                          "properties": {
+                            "objectif_de_progression": {
+                              "title": "Les objectifs pour ce champ ne doivent pas être définis si l'année de déclaration précède 2021 ou si l'index est supérieur ou égal à 85."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "déclaration": {
+                  "properties": {
+                    "index": {
+                      "exclusiveMinimum": 85
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "indicateurs": {
+                  "allOf": [
+                    {
+                      "patternProperties": {
+                        "^rémunérations|augmentations|promotions|augmentations_et_promotions|congés_maternité|hautes_rémunérations$": {
+                          "properties": {
+                            "objectif_de_progression": false
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "patternProperties": {
+                        "^rémunérations|augmentations|promotions|augmentations_et_promotions|congés_maternité|hautes_rémunérations$": {
+                          "properties": {
+                            "objectif_de_progression": {
+                              "title": "Les objectifs pour ce champ ne doivent pas être définis si l'année de déclaration précède 2021 ou si l'index est supérieur ou égal à 85."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

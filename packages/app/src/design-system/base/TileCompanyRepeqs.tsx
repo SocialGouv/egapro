@@ -1,4 +1,6 @@
+import type { RepeqType } from "@services/apiClient/useSearchRepeqs";
 import { useState } from "react";
+
 import {
   TileCompany,
   TileCompanyLoadMore,

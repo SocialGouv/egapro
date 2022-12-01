@@ -1,9 +1,5 @@
-import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
-
-import type { NextPageWithLayout } from "../../_app";
-import { StaffOnly } from "@components/StaffOnly";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
+import { StaffOnly } from "@components/StaffOnly";
 import {
   FormButton,
   FormGroup,
@@ -14,6 +10,10 @@ import {
   FormSelect,
 } from "@design-system";
 import { useUser } from "@services/apiClient";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+
+import type { NextPageWithLayout } from "../../_app";
 
 const title = "Recherche de représentation équilibrée";
 

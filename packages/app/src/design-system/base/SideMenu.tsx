@@ -1,7 +1,7 @@
 import { Disclosure } from "@headlessui/react";
 import clsx from "clsx";
 import type { CSSProperties, PropsWithChildren } from "react";
-import { useState, forwardRef } from "react";
+import { forwardRef, useState } from "react";
 
 import { useCollapse } from "../hooks/useCollapse";
 import styles from "./SideMenu.module.css";

@@ -1,8 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { useEffect, useState } from "react";
-import React from "react";
 
-export const ClientOnly = ({ children, ...delegated }: PropsWithChildren<unknown>) => {
+export const ClientOnly = ({ children, ...delegated }: PropsWithChildren) => {
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);

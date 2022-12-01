@@ -1,8 +1,3 @@
-import NextLink from "next/link";
-import { useRouter } from "next/router";
-import type { FormEvent } from "react";
-
-import type { NextPageWithLayout } from "../_app";
 import { AlertEdition } from "@components/AlertEdition";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import {
@@ -15,6 +10,11 @@ import {
   FormLayoutButtonGroup,
 } from "@design-system";
 import { useConfig, useFormManager } from "@services/apiClient";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+import type { FormEvent } from "react";
+
+import type { NextPageWithLayout } from "../_app";
 
 const InformationsEntreprise: NextPageWithLayout = () => {
   const router = useRouter();

@@ -7,8 +7,8 @@ const config = {
     node: true,
     es2020: true,
   },
-  extends: ["eslint:recommended", "next/core-web-vitals", "prettier"],
-  plugins: ["prettier", "unused-imports"],
+  extends: ["eslint:recommended", "next/core-web-vitals", "plugin:import/recommended", "plugin:prettier/recommended"],
+  plugins: ["prettier", "unused-imports", "simple-import-sort"],
   ignorePatterns: ["!.storybook", "!**/.*.js?(x)", "node_modules"],
   rules: {
     "react/prop-types": "off",
@@ -19,6 +19,18 @@ const config = {
       "error",
       {
         forbid: [">", "}"],
+      },
+    ],
+    "no-restricted-imports": [
+      "error",
+      {
+        paths: [
+          {
+            name: "react",
+            importNames: ["default"],
+            message: 'Import "React" par défaut déjà géré par Next.',
+          },
+        ],
       },
     ],
     "jsx-a11y/anchor-is-valid": "off",
@@ -33,17 +45,15 @@ const config = {
         argsIgnorePattern: "^_",
       },
     ],
-    "import/order": [
-      "warn",
-      {
-        alphabetize: {
-          order: "asc",
-        },
-      },
-    ],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "import/order": "off",
     "import/no-default-export": "error",
     "import/no-extraneous-dependencies": "off",
     "import/no-internal-modules": "off",
+    "import/newline-after-import": "error",
+    "import/export": "off",
+    "sort-import": "off",
     "prettier/prettier": [
       "error",
       {
@@ -59,14 +69,44 @@ const config = {
   overrides: [
     {
       files: ["**/*.ts?(x)"],
-      extends: ["plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended"],
+      extends: [
+        "plugin:@typescript-eslint/recommended",
+        // MORE STRICT
+        // "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      ],
       plugins: ["@typescript-eslint", "typescript-sort-keys"],
+      parserOptions: {
+        project: ["tsconfig.json"],
+        sourceType: "module",
+      },
+      settings: {
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ["tsconfig.json"],
+          },
+        },
+      },
       rules: {
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": [
           "error",
           {
             default: "array-simple",
+          },
+        ],
+        "no-restricted-imports": "off",
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "react",
+                importNames: ["default"],
+                message: 'Import "React" par défaut déjà géré par Next.',
+                allowTypeImports: true,
+              },
+            ],
           },
         ],
         "@typescript-eslint/ban-ts-comment": "error",
@@ -101,6 +141,8 @@ const config = {
           "error",
           {
             prefer: "type-imports",
+            // TODO: enable on new @typescript-eslint/eslint-plugin release (> 5.42.1)
+            // fixStyle: "inline-type-imports",
           },
         ],
         "@typescript-eslint/sort-type-union-intersection-members": "warn",
@@ -132,7 +174,7 @@ const config = {
       },
     },
     {
-      files: ["__tests__/*.ts?(x)"],
+      files: ["__tests__/**/*.ts?(x)"],
       extends: ["plugin:testing-library/react", "plugin:jest-dom/recommended"],
       plugins: ["jest"],
       env: {

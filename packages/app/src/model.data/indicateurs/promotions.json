@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "#promotions",
+  "allOf": [
+    {
+      "$ref": "./base_indicateur_noté.json#/definitions/with_population_favorable"
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "non_calculable": {
+          "type": "string",
+          "enum": [
+            "egvi40pcet",
+            "absprom",
+            "am"
+          ]
+        },
+        "catégories": {
+          "$ref": "../common.json#/definitions/catégories_simples"
+        }
+      }
+    }
+  ],
+  "description": "Indicateur 3 relatif à l'écart de taux de promotions entre les femmes et les hommes"
+}

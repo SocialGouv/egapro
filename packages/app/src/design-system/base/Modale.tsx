@@ -1,7 +1,7 @@
 import { Dialog } from "@headlessui/react";
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
-import React, { Children } from "react";
+import { Children } from "react";
 
 import type { AuthorizedChildType } from "../utils/compatible-components";
 import { compatibleComponents } from "../utils/compatible-components";

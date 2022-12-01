@@ -1,4 +1,5 @@
 import type { theme } from "./theme";
+
 export type Props = keyof typeof theme["space"];
 
 export type SpacingProps = {

@@ -21,7 +21,7 @@ exports[`should match snapshot 1`] = `
         </div>
         <button
           aria-label="Fermer le panneau d'information"
-          class="css-tosese"
+          class="css-4abrhy"
           type="button"
         >
           <svg
@@ -98,7 +98,7 @@ exports[`should match snapshot 1`] = `
       </div>
       <button
         aria-label="Fermer le panneau d'information"
-        class="css-tosese"
+        class="css-4abrhy"
         type="button"
       >
         <svg
