@@ -38,7 +38,7 @@ async def test_simulation_get():
     # When
     record = await db.simulation.get(uuid)
     # Then
-    assert list(record.keys()) == ["id", "modified_at", "data"]
+    assert sorted(record.keys()) == ["data", "id", "modified_at"]
     assert record["data"] == {"foo": "baré"}
 
 

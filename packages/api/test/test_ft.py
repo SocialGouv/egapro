@@ -116,10 +116,16 @@ async def test_search_representation_equilibree(client):
             "siren": "123456781",
             "code_naf": "33.11Z",
         },
-        "pourcentage_femmes_cadres": {"2019": None},
-        "pourcentage_hommes_cadres": {"2019": None},
-        "pourcentage_femmes_membres": {"2019": None},
-        "pourcentage_hommes_membres": {"2019": None},
+        "représentation_équilibrée": {
+            "2019": {
+                "pourcentage_femmes_cadres": None,
+                "pourcentage_hommes_cadres": None,
+                "pourcentage_femmes_membres": None,
+                "pourcentage_hommes_membres": None,
+                "motif_non_calculabilité_cadres": None,
+                "motif_non_calculabilité_membres": None,
+            },
+        },
         "label": "Total",
     }
     results = await db.search_representation_equilibree.run("pyrenées")
@@ -145,10 +151,16 @@ async def test_company_should_return_a_rep_eq_percent_for_each_year(representati
     )
     results = await db.search_representation_equilibree.run("bar")
     assert len(results) == 1
-    assert set(results[0]["pourcentage_femmes_cadres"].keys()) == {"2018", "2019"}
-    assert set(results[0]["pourcentage_hommes_cadres"].keys()) == {"2018", "2019"}
-    assert set(results[0]["pourcentage_femmes_membres"].keys()) == {"2018", "2019"}
-    assert set(results[0]["pourcentage_hommes_membres"].keys()) == {"2018", "2019"}
+    assert set(results[0]["représentation_équilibrée"].keys()) == {"2018", "2019"}
+    for year in ["2018", "2019"]:
+        assert sorted(results[0]["représentation_équilibrée"][year].keys()) == sorted([
+            "pourcentage_femmes_cadres",
+            "pourcentage_hommes_cadres",
+            "pourcentage_femmes_membres",
+            "pourcentage_hommes_membres",
+            "motif_non_calculabilité_cadres",
+            "motif_non_calculabilité_membres",
+        ])
 
 async def test_company_should_return_a_note_for_each_year(declaration):
     await declaration(
@@ -355,10 +367,16 @@ async def test_search_representation_equilibree_with_filters(client):
             "siren": "987654321",
             "code_naf": None,
         },
-        "pourcentage_femmes_cadres": {"2019": None},
-        "pourcentage_hommes_cadres": {"2019": None},
-        "pourcentage_femmes_membres": {"2019": None},
-        "pourcentage_hommes_membres": {"2019": None},
+        "représentation_équilibrée": {
+            "2019": {
+                "pourcentage_femmes_cadres": None,
+                "pourcentage_hommes_cadres": None,
+                "pourcentage_femmes_membres": None,
+                "pourcentage_hommes_membres": None,
+                "motif_non_calculabilité_cadres": None,
+                "motif_non_calculabilité_membres": None,
+            },
+        },
         "label": "Open Bar",
     }
 
@@ -453,10 +471,16 @@ async def test_search_representation_equilibree_from_section_naf(client):
             "siren": "987654321",
             "code_naf": "47.11F",
         },
-        "pourcentage_femmes_cadres": {"2019": None},
-        "pourcentage_hommes_cadres": {"2019": None},
-        "pourcentage_femmes_membres": {"2019": None},
-        "pourcentage_hommes_membres": {"2019": None},
+        "représentation_équilibrée": {
+            "2019": {
+                "pourcentage_femmes_cadres": None,
+                "pourcentage_hommes_cadres": None,
+                "pourcentage_femmes_membres": None,
+                "pourcentage_hommes_membres": None,
+                "motif_non_calculabilité_cadres": None,
+                "motif_non_calculabilité_membres": None,
+            },
+        },
         "label": "Open Bar",
     }
 
@@ -547,10 +571,16 @@ async def test_search_representation_equilibree_filters_without_query(client):
             "code_naf": None,
             "siren": "987654321",
         },
-        "pourcentage_femmes_cadres": {"2019": None},
-        "pourcentage_hommes_cadres": {"2019": None},
-        "pourcentage_femmes_membres": {"2019": None},
-        "pourcentage_hommes_membres": {"2019": None},
+        "représentation_équilibrée": {
+            "2019": {
+                "pourcentage_femmes_cadres": None,
+                "pourcentage_hommes_cadres": None,
+                "pourcentage_femmes_membres": None,
+                "pourcentage_hommes_membres": None,
+                "motif_non_calculabilité_cadres": None,
+                "motif_non_calculabilité_membres": None,
+            },
+        },
         "label": "Open Bar",
     }
 
@@ -665,10 +695,16 @@ async def test_search_representation_equilibree_with_offset(client):
             "région": "11",
             "siren": "987654321",
         },
-        "pourcentage_femmes_cadres": {"2019": None},
-        "pourcentage_hommes_cadres": {"2019": None},
-        "pourcentage_femmes_membres": {"2019": None},
-        "pourcentage_hommes_membres": {"2019": None},
+        "représentation_équilibrée": {
+            "2019": {
+                "pourcentage_femmes_cadres": None,
+                "pourcentage_hommes_cadres": None,
+                "pourcentage_femmes_membres": None,
+                "pourcentage_hommes_membres": None,
+                "motif_non_calculabilité_cadres": None,
+                "motif_non_calculabilité_membres": None,
+            },
+        },
         "label": "Open Bar",
     }
     results = await db.search_representation_equilibree.run(region="11", limit=1, offset=1)
@@ -681,10 +717,16 @@ async def test_search_representation_equilibree_with_offset(client):
             "siren": "123456781",
             "code_naf": None,
         },
-        "pourcentage_femmes_cadres": {"2019": None},
-        "pourcentage_hommes_cadres": {"2019": None},
-        "pourcentage_femmes_membres": {"2019": None},
-        "pourcentage_hommes_membres": {"2019": None},
+        "représentation_équilibrée": {
+            "2019": {
+                "pourcentage_femmes_cadres": None,
+                "pourcentage_hommes_cadres": None,
+                "pourcentage_femmes_membres": None,
+                "pourcentage_hommes_membres": None,
+                "motif_non_calculabilité_cadres": None,
+                "motif_non_calculabilité_membres": None,
+            },
+        },
         "label": "Oran Bar",
     }
 
@@ -778,4 +820,28 @@ async def test_search_representation_equilibree_amp_and_parens_are_excaped(repre
         entreprise={},
     )
     results = await db.search_representation_equilibree.run(query="zanzi & (bar)")
+    assert len(results)
+
+async def test_search_representation_equilibree_percent_with_weird_float():
+    await db.representation_equilibree.put(
+        "987654321",
+        2019,
+        {
+            "entreprise": {
+                "raison_sociale": "Le Regalia",
+                "département": "75",
+                "région": "11",
+            },
+            "déclaration": {"date": datetime.now()},
+            "indicateurs": {
+                "représentation_équilibrée": {
+                    "pourcentage_femmes_cadres": "49.1",
+                    "pourcentage_hommes_cadres": "50,9",
+                    "pourcentage_femmes_membres": 49.1,
+                    "pourcentage_hommes_membres": 50.9
+                }
+            }
+        },
+    )
+    results = await db.search_representation_equilibree.run(query="regalia")
     assert len(results)
