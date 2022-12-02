@@ -69,6 +69,8 @@ api:
         name: "{{ .Values.global.pgSecretName }}"
     - secretRef:
         name: "staff"
+    - secretRef:
+        name: "egapro-secret"
   vars:
     EGAPRO_DBHOST: "$(PGHOST)"
     EGAPRO_DBNAME: "$(PGDATABASE)"
