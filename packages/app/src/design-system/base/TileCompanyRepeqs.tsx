@@ -1,6 +1,7 @@
-import type { RepeqType } from "@services/apiClient/useSearchRepeqs";
 import { useState } from "react";
 
+import { useAdressLabel } from "../../services/apiClient/useAdressLabel";
+import type { RepeqType } from "../../services/apiClient/useSearchRepeqs";
 import {
   TileCompany,
   TileCompanyLoadMore,
@@ -49,9 +50,7 @@ export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: 
     <TileCompany>
       <TileCompanyTitle>{raison_sociale}</TileCompanyTitle>
       <TileCompanySiren>{siren}</TileCompanySiren>
-      <TileCompanyLocation>
-        {région}, {département}
-      </TileCompanyLocation>
+      <TileCompanyLocation>{useAdressLabel({ departement: département, region: région })}</TileCompanyLocation>
       <TileCompanyTable>
         <TileCompanyTableHead>
           <TileCompanyTableHeadCol>Année</TileCompanyTableHeadCol>

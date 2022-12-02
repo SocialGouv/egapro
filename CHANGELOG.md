@@ -1,3 +1,31 @@
+## [2.40.2](https://github.com/SocialGouv/egapro/compare/v2.40.1...v2.40.2) (2022-12-02)
+
+
+### Bug Fixes
+
+* **pdf:** typo repeq (Fixes: [#1295](https://github.com/SocialGouv/egapro/issues/1295)) ([7201eb5](https://github.com/SocialGouv/egapro/commit/7201eb56fe0cb504a2c40e701b297b47b9c7635d))
+
+## [2.40.1](https://github.com/SocialGouv/egapro/compare/v2.40.0...v2.40.1) (2022-12-01)
+
+
+### Bug Fixes
+
+* xslx file is supposed to be in public access ([6f72e26](https://github.com/SocialGouv/egapro/commit/6f72e2673a1e573094a24051ec5ba09c78a72fa8))
+
+# [2.40.0](https://github.com/SocialGouv/egapro/compare/v2.39.0...v2.40.0) (2022-12-01)
+
+
+### Features
+
+* add href for xslx file ([e0d8c5f](https://github.com/SocialGouv/egapro/commit/e0d8c5f7b2966a5590121043eebf2f0ee870aaec))
+
+# [2.39.0](https://github.com/SocialGouv/egapro/compare/v2.38.0...v2.39.0) (2022-12-01)
+
+
+### Features
+
+* recherche for repeq ([#1415](https://github.com/SocialGouv/egapro/issues/1415)) ([1b61790](https://github.com/SocialGouv/egapro/commit/1b617901f89a2846cd88669a1604b2204a81489f))
+
 # [2.38.0](https://github.com/SocialGouv/egapro/compare/v2.37.0...v2.38.0) (2022-12-01)
 
 

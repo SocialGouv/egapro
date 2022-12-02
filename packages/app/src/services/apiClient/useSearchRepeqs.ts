@@ -18,16 +18,16 @@ export type RepeqType = {
     région: string;
     siren: string;
   };
-  label: string;
+  label?: string;
   représentation_équilibrée: Record<
     number,
     {
       motif_non_calculabilité_cadres: typeof motifNonCalculabiliteCadresOptions[number]["value"] | null;
       motif_non_calculabilité_membres: typeof motifNonCalculabiliteMembresOptions[number]["value"] | null;
-      pourcentage_femmes_cadres: number;
-      pourcentage_femmes_membres: number;
-      pourcentage_hommes_cadres: number;
-      pourcentage_hommes_membres: number;
+      pourcentage_femmes_cadres: number | null;
+      pourcentage_femmes_membres: number | null;
+      pourcentage_hommes_cadres: number | null;
+      pourcentage_hommes_membres: number | null;
     }
   >;
 };
