@@ -1,3 +1,10 @@
+## [2.40.2](https://github.com/SocialGouv/egapro/compare/v2.40.1...v2.40.2) (2022-12-02)
+
+
+### Bug Fixes
+
+* **pdf:** typo repeq (Fixes: [#1295](https://github.com/SocialGouv/egapro/issues/1295)) ([7201eb5](https://github.com/SocialGouv/egapro/commit/7201eb56fe0cb504a2c40e701b297b47b9c7635d))
+
 ## [2.40.1](https://github.com/SocialGouv/egapro/compare/v2.40.0...v2.40.1) (2022-12-01)
 
 
