@@ -3,14 +3,8 @@ import type { SimpleObject } from "@common/utils/types";
 import type { ServerResponse } from "http";
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 
-import type {
-  AnyUrl,
-  BackToReferer,
-  Controller,
-  ControllerRequest,
-  ControllerResponse,
-  StatusCodes,
-} from "../Controller";
+import type { AnyUrl, BackToReferer, Controller, ControllerRequest, ControllerResponse } from "../Controller";
+import { StatusCodes } from "../Controller";
 
 export type NextController<TParamKeys extends string = string> = Controller<
   TParamKeys,
@@ -23,7 +17,12 @@ export namespace NextController {
   export type Res<TController extends NextController> = Parameters<NonNullable<TController["get"]>>[1];
 }
 
-class NextControllerResponse implements ControllerResponse<NextApiResponse> {
+export interface NextControllerRequest<TParamKeys extends string = string>
+  extends ControllerRequest<TParamKeys, NextApiRequest> {
+  query: NextApiRequest["query"];
+}
+
+export class NextControllerResponse implements ControllerResponse<NextApiResponse> {
   public readonly _nodeResponse: ServerResponse;
   constructor(public readonly _res: NextApiResponse) {
     this._nodeResponse = _res;
@@ -64,7 +63,7 @@ class NextControllerResponse implements ControllerResponse<NextApiResponse> {
 
 export const handler = (controller: NextController): NextApiHandler => {
   return (req, res) => {
-    const nextControllerRequest: ControllerRequest = {
+    const nextControllerRequest: NextControllerRequest = {
       _nodeRequest: req,
       _req: req,
       body: req.body,
@@ -77,6 +76,6 @@ export const handler = (controller: NextController): NextApiHandler => {
     if (controller.post && req.method === "POST") return controller.post(nextControllerRequest, nextControllerResponse);
     if (controller.delete && req.method === "DELETE")
       return controller.delete(nextControllerRequest, nextControllerResponse);
-    return res.status(405).send(null);
+    return res.status(StatusCodes.METHOD_NOT_ALLOWED).send(null);
   };
 };

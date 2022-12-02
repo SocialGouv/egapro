@@ -1,10 +1,12 @@
+import { EnsureOwner } from "@api/core-domain/infra/db/http/next/decorator/EnsureOwner";
+import { TokenRequire } from "@api/core-domain/infra/db/http/next/decorator/TokenRequire";
 import { representationEquilibreeRepo } from "@api/core-domain/repo";
 import {
   GetRepresentationEquilibreeBySirenAndYear,
   GetRepresentationEquilibreeBySirenAndYearError,
 } from "@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear";
 import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
-import { EnsureOwner, Handler, TokenRequire } from "@api/shared-domain/infra/http/next/Decorators";
+import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
@@ -22,7 +24,7 @@ export default class RepEqSirenYearController implements BaseController {
 
     try {
       const ret = await useCase.execute({ siren, year });
-      if (ret) res.status(200).json(ret);
+      if (ret) res.status(StatusCodes.OK).json(ret);
       else res.status(StatusCodes.NOT_FOUND).send(null);
     } catch (error: unknown) {
       if (error instanceof GetRepresentationEquilibreeBySirenAndYearError) {
