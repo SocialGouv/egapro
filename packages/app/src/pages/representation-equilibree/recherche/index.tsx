@@ -65,7 +65,7 @@ const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading
       <div style={{ marginTop: 40 }}>
         <Alert type="info">
           <AlertTitle as="h1">Aucune entreprise trouvée.</AlertTitle>
-          <p>Veuillez modifier vos résultats de recherche.</p>
+          <p>Veuillez modifier votre recherche.</p>
         </Alert>
       </div>
     );
@@ -88,13 +88,20 @@ const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading
   );
 };
 
+const useIsFirstRender = () => {
+  const router = useRouter();
+
+  return Object.keys(router.query).length === 0;
+};
+
 function FormSearchSiren() {
   const router = useRouter();
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
   const params = normalizeInputs(router.query);
   const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
-  const { repeqs, error, isLoading, size, setSize } = useSearchRepeqs(params);
+  const isFirstRender = useIsFirstRender();
+  const { repeqs, error, isLoading, size, setSize } = useSearchRepeqs(isFirstRender ? undefined : params);
 
   const {
     formState: { errors },
@@ -218,7 +225,7 @@ function FormSearchSiren() {
         </div>
       </form>
 
-      <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />
+      {!isFirstRender && <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />}
 
       {repeqs?.data?.length < repeqs?.count && (
         <div style={{ marginTop: 20 }}>
@@ -243,8 +250,8 @@ function DownloadFileZone() {
 
   return dateFile ? (
     <>
-      <div style={{ display: "flex" }}>
-        <div>Télécharger le fichier des représentations équilibrées au {dateFile}</div>
+      <div style={{ display: "flex", marginTop: 30 }}>
+        <div style={{ marginRight: 20 }}>Télécharger le fichier des représentations équilibrées au {dateFile}</div>
 
         <a href="/dgt-export-representation.xlsx">Télécharger (xslx)</a>
       </div>
