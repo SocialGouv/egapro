@@ -9,6 +9,7 @@ from asyncpg.exceptions import DuplicateDatabaseError, PostgresError
 import ujson as json
 
 from egapro import config, models, sql, utils, helpers
+from egapro.constants import DEPARTEMENTS, REGIONS
 from egapro.loggers import logger
 
 
@@ -160,8 +161,11 @@ class declaration(table):
     table_name = "declaration"
 
     @classmethod
-    async def all(cls):
-        return await cls.fetch("SELECT * FROM declaration")
+    async def all(cls, year:int=None):
+        req = f"SELECT * FROM {cls.table_name}"
+        if year:
+            req += f" WHERE year={year}"
+        return await cls.fetch(req)
 
     @classmethod
     async def completed(cls):
@@ -251,7 +255,7 @@ class declaration(table):
         }
 
     @classmethod
-    def public_data(cls, data):
+    def public_entreprise_data(cls, data):
         data = models.Data(data)
         raison_sociale = data.company
         siren = data.siren
@@ -271,6 +275,56 @@ class declaration(table):
                 "effectif": {"tranche": data.path("entreprise.effectif.tranche")},
             },
         }
+        return out
+
+    @classmethod
+    def public_data(cls, data):
+        out = models.Data(data)
+        out.delete_path("source")
+        out.delete_path("déclarant")
+        out.delete_path("entreprise.adresse")
+        out.delete_path("entreprise.commune")
+        out.delete_path("entreprise.code_postal")
+        out.delete_path("entreprise.plan_relance")
+        out["entreprise"].update(région=REGIONS.get(out.path("entreprise.région")))
+        out["entreprise"].update(département=DEPARTEMENTS.get(out.path("entreprise.département")))
+
+        indicateurs = out["indicateurs"]
+        out["indicateurs"] = {
+            "promotions": {
+                "non_calculable": indicateurs["promotions"]["non_calculable"]
+            } if "non_calculable" in indicateurs["promotions"] else {
+                "note": indicateurs["promotions"]["note"]
+            },
+            "augmentations": {
+                "non_calculable": indicateurs["augmentations"]["non_calculable"]
+            } if "non_calculable" in indicateurs["augmentations"] else {
+                "note": indicateurs["augmentations"]["note"]
+            },
+            "rémunérations": {
+                "non_calculable": indicateurs["rémunérations"]["non_calculable"]
+            } if "non_calculable" in indicateurs["rémunérations"] else {
+                "note": indicateurs["rémunérations"]["note"]
+            },
+            "congés_maternité": {
+                "non_calculable": indicateurs["congés_maternité"]["non_calculable"]
+            } if "non_calculable" in indicateurs["congés_maternité"] else {
+                "note": indicateurs["congés_maternité"]["note"]
+            },
+            "hautes_rémunérations": {
+                "non_calculable": indicateurs["hautes_rémunérations"]["non_calculable"]
+            } if "non_calculable" in indicateurs["hautes_rémunérations"] else {
+                "note": indicateurs["hautes_rémunérations"]["note"]
+            }
+        }
+
+        declaration: dict = out["déclaration"]
+        out.delete_path("déclaration")
+        out["déclaration"] = {
+            "note": declaration.get("note", "NC"),
+            "année_indicateurs": declaration["année_indicateurs"]
+        }
+
         return out
 
 
@@ -385,7 +439,7 @@ class search(table):
         row = dict(row)
         data = row.pop("data")[0]
         return {
-            **declaration.public_data(data),
+            **declaration.public_entreprise_data(data),
             **dict(row),
             "label": cls.compute_label(query, data),
         }

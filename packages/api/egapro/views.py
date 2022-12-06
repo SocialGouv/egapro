@@ -202,6 +202,70 @@ async def get_declarations(request, response, siren):
         raise HttpError(404, f"No declarations with siren {siren} for any year")
     response.json = declarations
 
+@app.route("/public/declaration", methods=["GET"])
+async def get_public_all_declarations(request, response):
+    declarations = []
+    limit = request.query.int("limit", 10)
+    years = sorted(constants.YEARS, reverse=True)
+
+    stop_fetching = False
+    for year in years:
+        try:
+            records = await db.declaration.all(year)
+
+            for record in records:
+                try:
+                    resource: models.Data = record.as_resource()
+                    if record.data.path("déclaration.brouillon"):
+                        pass
+                    declarations.append(db.declaration.public_data(resource["data"]))
+                    stop_fetching = len(declarations) == limit
+                except:
+                    pass
+                if stop_fetching:
+                    break
+        except:
+            pass
+        if stop_fetching:
+            break
+
+    if not declarations:
+        raise HttpError(404, f"No declarations for any year")
+    response.json = declarations
+
+@app.route("/public/declaration/{siren}", methods=["GET"])
+async def get_public_declarations(request, response, siren):
+    declarations = []
+    limit = request.query.int("limit", 10)
+    years = sorted(constants.YEARS, reverse=True)
+
+    for year in years:
+        try:
+            record = await db.declaration.get(siren, year)
+            resource: models.Data = record.as_resource()
+            if record.data.path("déclaration.brouillon"):
+                pass
+            declarations.append(db.declaration.public_data(resource["data"]))
+        except:
+            pass
+        if len(declarations) == limit:
+            break
+
+    if not declarations:
+        raise HttpError(404, f"No declarations with siren {siren} for any year")
+    response.json = declarations
+
+@app.route("/public/declaration/{siren}/{year}", methods=["GET"])
+async def get_declaration(request, response, siren, year):
+    try:
+        record = await db.declaration.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No declaration with siren {siren} and year {year}")
+    resource: models.Data = record.as_resource()
+    if record.data.path("déclaration.brouillon"):
+        pass
+    response.json = db.declaration.public_data(resource["data"])
+
 
 @app.route("/declaration/{siren}/{year}", methods=["GET"])
 @tokens.require
@@ -574,7 +638,7 @@ async def validate_siren(request, response):
 @app.route("/entreprise/{siren}")
 async def get_entreprise_data(request, response, siren):
     record = await db.declaration.get_last(siren)
-    data = db.declaration.public_data(record.data)
+    data = db.declaration.public_entreprise_data(record.data)
     response.json = data["entreprise"]
 
 
