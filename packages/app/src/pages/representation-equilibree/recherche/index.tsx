@@ -114,7 +114,6 @@ function FormSearchSiren() {
 
   const resetInputs = useCallback(
     (params: ReturnType<typeof normalizeInputs>) => {
-      console.log("params dans resetInputs", params);
       reset({
         region: params.region || "",
         departement: params.departement || "",
@@ -216,7 +215,10 @@ function FormSearchSiren() {
                 variant="secondary"
                 type="reset"
                 isDisabled={isLoading || !Object.values(watch()).filter(Boolean).length}
-                onClick={() => resetInputs({})}
+                onClick={() => {
+                  resetInputs({});
+                  router.replace({ pathname: "/representation-equilibree/recherche", query: { q: "" } });
+                }}
               >
                 Réinitialiser
               </FormButton>
