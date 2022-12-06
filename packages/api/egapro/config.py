@@ -1,6 +1,6 @@
 import os
 
-SECRET = os.getenv("EGAPRO_SECRET")
+SECRET = "sikretfordevonly"
 JWT_ALGORITHM = "HS256"
 SEND_EMAILS = False
 SMTP_HOST = "127.0.0.1"

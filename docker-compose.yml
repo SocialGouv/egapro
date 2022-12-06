@@ -21,7 +21,6 @@ services:
       - ./packages/api:/app
       - api_egginfos:/app/egapro.egg-info
     environment:
-      EGAPRO_SECRET: "sikretfordevonly"
       EGAPRO_SEND_EMAILS: "True"
       EGAPRO_SMTP_HOST: maildev
       EGAPRO_SMTP_PORT: ${MAILDEV_SMTP_PORT}
