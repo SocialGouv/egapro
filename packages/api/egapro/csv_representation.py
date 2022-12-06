@@ -19,7 +19,7 @@ async def get_headers_columns():
             ("Annee_ecarts", "déclaration.année_indicateurs"),
             ("SIREN", "entreprise.siren"),
             ("Nom_Entreprise", "entreprise.raison_sociale"),
-            ("Region", "entreprise.région"),
+            ("Region", "entreprise.région", constants.REGIONS.get),
             ("Departement", "entreprise.département", constants.DEPARTEMENTS.get),
             ("Pays", "entreprise.code_pays", constants.PAYS_ISO_TO_LIB.get),
             ("Code_NAF", "entreprise.code_naf", code_naf),
