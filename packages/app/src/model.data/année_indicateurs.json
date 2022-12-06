@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "#année_indicateur",
+  "type": "integer",
+  "enum": [
+    2018,
+    2019,
+    2020,
+    2021
+  ]
+}

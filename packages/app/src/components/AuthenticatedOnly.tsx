@@ -1,7 +1,5 @@
-import type { PropsWithChildren } from "react";
-import React from "react";
-
 import { useUser } from "@services/apiClient";
+import type { PropsWithChildren } from "react";
 
 /**
  * Boundary component to check if user is authenticated. If not, it will be redirect to email page.

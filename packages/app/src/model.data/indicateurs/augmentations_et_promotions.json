@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "#augmentations_et_promotions",
+  "allOf": [
+    {
+      "$ref": "./base_indicateur_noté.json#/definitions/with_population_favorable"
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "non_calculable": {
+          "type": "string",
+          "enum": [
+            "egvi40pcet",
+            "absaugi",
+            "etsno5f5h",
+            "am"
+          ],
+          "description": "Trois items : Effectif des groupes valides inférieur à 40% de l'effectif total (egvi40pcet) ou Absence d'augmentations individuelles (absaugi)"
+        },
+        "résultat_nombre_salariés": {
+          "type": "number"
+        },
+        "note_en_pourcentage": {
+          "type": "number",
+          "readOnly": true
+        },
+        "note_nombre_salariés": {
+          "type": "number",
+          "readOnly": true
+        },
+        "résultat": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 100.0
+        }
+      }
+    }
+  ],
+  "description": "Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins"
+}

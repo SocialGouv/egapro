@@ -1,8 +1,8 @@
+import { formatPrettyFloat, truncFloatToOneDecimal } from "@common/utils/number";
 import { useFormContext } from "react-hook-form";
 
 import { FormGroup, FormGroupLabel, FormGroupMessage } from "../design-system/base/FormGroup";
 import { FormInput } from "../design-system/base/FormInput";
-import { formatPrettyFloat, truncFloatToOneDecimal } from "@common/utils/number";
 
 type Input = {
   label: string;

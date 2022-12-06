@@ -1,7 +1,7 @@
+import type { Entreprise } from "@common/models/representation-equilibree";
 import moize from "moize";
 
 import { fetcher } from "./fetcher";
-import type { Entreprise } from "@common/models/representation-equilibree";
 
 export type EntrepriseType = {
   adresse?: string;

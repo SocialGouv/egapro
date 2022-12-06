@@ -1,15 +1,14 @@
-import moize from "moize";
-import useSWRInfinite from "swr/infinite";
-
-import type { SWRInfiniteKeyLoader } from "swr/infinite";
-import { buildUrlParams } from "../../common/utils/url";
-import type { FetcherInfiniteReturn } from "./fetcher";
-
-import { fetcher } from "./fetcher";
 import type {
   motifNonCalculabiliteCadresOptions,
   motifNonCalculabiliteMembresOptions,
 } from "@common/models/representation-equilibree";
+import moize from "moize";
+import type { SWRInfiniteKeyLoader } from "swr/infinite";
+import useSWRInfinite from "swr/infinite";
+
+import { buildUrlParams } from "../../common/utils/url";
+import type { FetcherInfiniteReturn } from "./fetcher";
+import { fetcher } from "./fetcher";
 
 export type RepeqType = {
   entreprise: {
@@ -19,16 +18,16 @@ export type RepeqType = {
     région: string;
     siren: string;
   };
-  label: string;
+  label?: string;
   représentation_équilibrée: Record<
     number,
     {
       motif_non_calculabilité_cadres: typeof motifNonCalculabiliteCadresOptions[number]["value"] | null;
       motif_non_calculabilité_membres: typeof motifNonCalculabiliteMembresOptions[number]["value"] | null;
-      pourcentage_femmes_cadres: number;
-      pourcentage_femmes_membres: number;
-      pourcentage_hommes_cadres: number;
-      pourcentage_hommes_membres: number;
+      pourcentage_femmes_cadres: number | null;
+      pourcentage_femmes_membres: number | null;
+      pourcentage_hommes_cadres: number | null;
+      pourcentage_hommes_membres: number | null;
     }
   >;
 };

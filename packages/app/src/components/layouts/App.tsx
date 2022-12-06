@@ -1,9 +1,3 @@
-import clsx from "clsx";
-import Head from "next/head";
-import NextLink from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import type { PropsWithChildren } from "react";
-import styles from "./App.module.css";
 import {
   Footer,
   FooterBody,
@@ -16,12 +10,19 @@ import {
   FooterBottomItem,
   FooterBottomLink,
   FooterContentLink,
+  FormButton,
   Logo,
   SkipLinks,
   SkipLinksItem,
 } from "@design-system";
-import { FormButton } from "@design-system";
 import { useFormManager, useUser } from "@services/apiClient";
+import clsx from "clsx";
+import Head from "next/head";
+import NextLink from "next/link";
+import type { PropsWithChildren } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import styles from "./App.module.css";
 
 // TODO move to _app.tsx when migration is done
 // TODO explode FooterBody component here

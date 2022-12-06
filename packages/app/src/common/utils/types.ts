@@ -140,7 +140,7 @@ export type PartialKeys<T> = {
   [K in keyof T]-?: undefined extends T[K] ? K : never;
 }[keyof T];
 export type RequiredKeys<T> = Exclude<keyof T, PartialKeys<T>>;
-export type Objectize<T> = { [K in keyof T]: T[K] };
+export type Objectize<T> = { [K in keyof T]: Objectize<T[K]> };
 export type InvertPartial<T> = Objectize<
   {
     [K in RequiredKeys<T>]?: T[K];

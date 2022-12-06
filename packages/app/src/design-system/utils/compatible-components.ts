@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+
 import type { Any } from "../../common/utils/types";
 
 export type AuthorizedChildType = {

@@ -69,7 +69,7 @@ def main(data):
         "Informations entreprise", cells
     )
     cells = (
-        ("Année au titre de laquelle les indicateurs sont calculés", data.year),
+        ("Année au titre de laquelle les écarts sont calculés", data.year),
         (
             "Date de fin de la période de douze mois consécutifs correspondant à l'exercice comptable pour le calcul des écarts",
             as_date(data.path("déclaration.fin_période_référence")),

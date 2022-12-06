@@ -1,7 +1,3 @@
-import NextLink from "next/link";
-
-import type { NextPageWithLayout } from "./_app";
-import styles from "./index.module.css";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
   Box,
@@ -17,6 +13,10 @@ import {
   GridCol,
   ImgHome,
 } from "@design-system";
+import NextLink from "next/link";
+
+import type { NextPageWithLayout } from "./_app";
+import styles from "./index.module.css";
 
 const Home: NextPageWithLayout = () => {
   return (

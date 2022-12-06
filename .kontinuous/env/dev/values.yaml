@@ -8,6 +8,10 @@ api:
     EGAPRO_SMTP_PASSWORD: ""
     EGAPRO_SMTP_SSL: ""
 
+app:
+  vars:
+    EGAPRO_ENV: dev
+
 maildev: {}
 
 jobs-dev:

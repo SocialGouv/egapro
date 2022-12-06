@@ -1,13 +1,13 @@
 import "@fontsource/cabin";
 import "@fontsource/gabriela";
 
+import { config } from "@common/config";
+import { fetcher } from "@services/apiClient";
 import { init } from "@socialgouv/matomo-next";
 import type { AppProps } from "next/app";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
 import { SWRConfig } from "swr";
-
-import { fetcher } from "@services/apiClient";
 
 export type NextPageWithLayout = AppProps["Component"] & {
   getLayout?: (props: PropsWithChildren) => JSX.Element;
@@ -19,10 +19,7 @@ type AppPropsWithLayout = AppProps & {
 
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   useEffect(() => {
-    init({
-      url: process.env.NEXT_PUBLIC_MATOMO_URL ?? "",
-      siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",
-    });
+    init(config.matomo);
   }, []);
 
   // Use the layout defined at the page level, if available

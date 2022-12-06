@@ -1,17 +1,16 @@
+import { buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
+import { AlertEdition } from "@components/AlertEdition";
+import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
+import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
+import { Alert, AlertTitle, ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { fetchRepresentationEquilibree, putRepresentationEquilibree, useFormManager } from "@services/apiClient";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 
 import type { NextPageWithLayout } from "../_app";
-
-import { buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
-import { AlertEdition } from "@components/AlertEdition";
-import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
-import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
-import { Alert, AlertTitle, ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
-import { fetchRepresentationEquilibree, putRepresentationEquilibree, useFormManager } from "@services/apiClient";
 
 const SERVER_ERROR = `Problème lors de l'envoi de la représentation équilibrée.`;
 
