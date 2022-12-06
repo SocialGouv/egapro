@@ -134,7 +134,7 @@ validateNotAllEmpty = message => {
 checkSirenValidity = async event => {
   const target = event.target
 
-  const year = app.annee || new Date().getFullYear
+  const year = app.annee || new Date().getFullYear()
 
   checkPatternValidity(event)
   if (target.validity.patternMismatch) {
