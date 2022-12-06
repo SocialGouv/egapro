@@ -1,3 +1,11 @@
+## [2.42.1](https://github.com/SocialGouv/egapro/compare/v2.42.0...v2.42.1) (2022-12-06)
+
+
+### Bug Fixes
+
+* problem getFullYear in declaration ([#1435](https://github.com/SocialGouv/egapro/issues/1435)) ([5b8f4b2](https://github.com/SocialGouv/egapro/commit/5b8f4b20d3174c58e917061a3f33fd99a633b9e6))
+* **api:** repeq search various fixes ([#1436](https://github.com/SocialGouv/egapro/issues/1436)) ([ee04f9e](https://github.com/SocialGouv/egapro/commit/ee04f9e042b3979d76275134c6a502e6c01861c7))
+
 # [2.42.0](https://github.com/SocialGouv/egapro/compare/v2.41.0...v2.42.0) (2022-12-06)
 
 
