@@ -1,3 +1,10 @@
+# [2.41.0](https://github.com/SocialGouv/egapro/compare/v2.40.2...v2.41.0) (2022-12-06)
+
+
+### Features
+
+* improve search for repeq ([#1431](https://github.com/SocialGouv/egapro/issues/1431)) ([b034576](https://github.com/SocialGouv/egapro/commit/b0345765d48cf9d887da092918800748987b483a)), closes [#1326](https://github.com/SocialGouv/egapro/issues/1326)
+
 ## [2.40.2](https://github.com/SocialGouv/egapro/compare/v2.40.1...v2.40.2) (2022-12-02)
 
 
