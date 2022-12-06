@@ -83,7 +83,7 @@ const IndicateurCinqForm: FunctionComponent<IndicateurCinqFormProps> = ({
           {/* eslint-disable-next-line react/jsx-no-undef */}
           <FormStack>
             {submitFailed && hasValidationErrors && (
-              <FormError message="L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis." />
+              <FormError message="L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés." />
             )}
             <InputGroup
               fieldName="nombreSalariesFemmes"

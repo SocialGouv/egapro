@@ -99,9 +99,8 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
       // Si l'indicateurUn n'est pas calculable par coefficient, forcer le calcul par CSP
       (!effectifsIndicateurUnCalculable && state.indicateurUn.csp)) &&
     (trancheEffectifs !== "50 à 250"
-      ? (state.indicateurDeux.formValidated === "Valid" || !effectifsIndicateurDeuxCalculable) &&
-        (state.indicateurTrois.formValidated === "Valid" || !effectifsIndicateurTroisCalculable)
-      : state.indicateurDeuxTrois.formValidated === "Valid" || !effectifsIndicateurDeuxTroisCalculable) &&
+      ? state.indicateurDeux.formValidated === "Valid" && state.indicateurTrois.formValidated === "Valid"
+      : state.indicateurDeuxTrois.formValidated === "Valid") &&
     state.indicateurQuatre.formValidated === "Valid" &&
     state.indicateurCinq.formValidated === "Valid"
 

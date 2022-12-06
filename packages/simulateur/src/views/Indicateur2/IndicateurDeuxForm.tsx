@@ -51,7 +51,7 @@ const validateForm = ({
   ])
   if (allInputs.every((input) => input === "0" || input === "")) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
+      notAll0: "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés.",
     }
   }
   return

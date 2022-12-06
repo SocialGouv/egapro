@@ -38,16 +38,6 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   noteIndicateurTrois,
   correctionMeasure,
 }) => {
-  if (!effectifsIndicateurTroisCalculable) {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur écart de taux de promotions entre les femmes et les hommes"
-        text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
-      />
-    )
-  }
-
   if (indicateurTroisFormValidated !== "Valid") {
     return (
       <InfoBlock
@@ -59,6 +49,16 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
             <TextSimulatorLink to="/indicateur3" label="valider les données" />
           </>
         }
+      />
+    )
+  }
+
+  if (!effectifsIndicateurTroisCalculable) {
+    return (
+      <InfoBlock
+        type="warning"
+        title="Indicateur écart de taux de promotions entre les femmes et les hommes"
+        text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
       />
     )
   }
