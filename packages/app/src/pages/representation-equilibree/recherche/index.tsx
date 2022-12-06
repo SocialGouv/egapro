@@ -15,6 +15,7 @@ import {
 } from "@design-system";
 import { filterDepartements, useConfig } from "@services/apiClient";
 import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
+import { useIsFirstRender } from "@services/apiClient/useIsFirstRender";
 import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
 import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
 import { useRouter } from "next/router";
@@ -86,12 +87,6 @@ const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading
       </div>
     </>
   );
-};
-
-const useIsFirstRender = () => {
-  const router = useRouter();
-
-  return Object.keys(router.query).length === 0;
 };
 
 function FormSearchSiren() {
