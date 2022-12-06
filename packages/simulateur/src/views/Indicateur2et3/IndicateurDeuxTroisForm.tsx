@@ -143,7 +143,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
                 message={
                   errors?.notAll0
                     ? errors.notAll0
-                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                    : "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés."
                 }
               />
             )}

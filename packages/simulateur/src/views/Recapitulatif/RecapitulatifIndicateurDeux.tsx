@@ -38,16 +38,6 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   noteIndicateurDeux,
   correctionMeasure,
 }) => {
-  if (!effectifsIndicateurDeuxCalculable) {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
-        text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
-      />
-    )
-  }
-
   if (indicateurDeuxFormValidated !== "Valid") {
     return (
       <InfoBlock
@@ -59,6 +49,16 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
             <TextSimulatorLink to="/indicateur2" label="valider les données" />
           </>
         }
+      />
+    )
+  }
+
+  if (!effectifsIndicateurDeuxCalculable) {
+    return (
+      <InfoBlock
+        type="warning"
+        title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
+        text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
       />
     )
   }

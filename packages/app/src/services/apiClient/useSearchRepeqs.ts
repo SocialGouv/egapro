@@ -69,7 +69,8 @@ const moizedFetcher = moize(moizeConfig)(fetcher);
 export const useSearchRepeqs = (search?: SearchParams): FetcherInfiniteReturn & { repeqs: RepeqsType } => {
   const { data: repeqs, error, size, setSize } = useSWRInfinite<RepeqsType>(getKey(search), moizedFetcher);
 
-  const isLoading = !repeqs && !error;
+  const isLoading = Boolean(search) && !repeqs && !error;
+
   const isError = Boolean(error);
 
   let newData: RepeqType[] = [];

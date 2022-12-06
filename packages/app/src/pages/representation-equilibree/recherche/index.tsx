@@ -15,6 +15,7 @@ import {
 } from "@design-system";
 import { filterDepartements, useConfig } from "@services/apiClient";
 import { getLastModifiedDateFile } from "@services/apiClient/getDateFile";
+import { useIsFirstRender } from "@services/apiClient/useIsFirstRender";
 import type { RepeqsType } from "@services/apiClient/useSearchRepeqs";
 import { useSearchRepeqs } from "@services/apiClient/useSearchRepeqs";
 import { useRouter } from "next/router";
@@ -65,7 +66,7 @@ const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading
       <div style={{ marginTop: 40 }}>
         <Alert type="info">
           <AlertTitle as="h1">Aucune entreprise trouvée.</AlertTitle>
-          <p>Veuillez modifier vos résultats de recherche.</p>
+          <p>Veuillez modifier votre recherche.</p>
         </Alert>
       </div>
     );
@@ -94,7 +95,8 @@ function FormSearchSiren() {
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
   const params = normalizeInputs(router.query);
   const [departements, setDepartements] = useState<ReturnType<typeof filterDepartements>>([]);
-  const { repeqs, error, isLoading, size, setSize } = useSearchRepeqs(params);
+  const isFirstRender = useIsFirstRender();
+  const { repeqs, error, isLoading, size, setSize } = useSearchRepeqs(isFirstRender ? undefined : params);
 
   const {
     formState: { errors },
@@ -107,7 +109,6 @@ function FormSearchSiren() {
 
   const resetInputs = useCallback(
     (params: ReturnType<typeof normalizeInputs>) => {
-      console.log("params dans resetInputs", params);
       reset({
         region: params.region || "",
         departement: params.departement || "",
@@ -209,7 +210,10 @@ function FormSearchSiren() {
                 variant="secondary"
                 type="reset"
                 isDisabled={isLoading || !Object.values(watch()).filter(Boolean).length}
-                onClick={() => resetInputs({})}
+                onClick={() => {
+                  resetInputs({});
+                  router.replace({ pathname: "/representation-equilibree/recherche", query: { q: "" } });
+                }}
               >
                 Réinitialiser
               </FormButton>
@@ -218,7 +222,7 @@ function FormSearchSiren() {
         </div>
       </form>
 
-      <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />
+      {!isFirstRender && <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />}
 
       {repeqs?.data?.length < repeqs?.count && (
         <div style={{ marginTop: 20 }}>
@@ -243,8 +247,8 @@ function DownloadFileZone() {
 
   return dateFile ? (
     <>
-      <div style={{ display: "flex" }}>
-        <div>Télécharger le fichier des représentations équilibrées au {dateFile}</div>
+      <div style={{ display: "flex", marginTop: 30 }}>
+        <div style={{ marginRight: 20 }}>Télécharger le fichier des représentations équilibrées au {dateFile}</div>
 
         <a href="/dgt-export-representation.xlsx">Télécharger (xslx)</a>
       </div>
