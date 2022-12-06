@@ -1,3 +1,10 @@
+# [2.42.0](https://github.com/SocialGouv/egapro/compare/v2.41.0...v2.42.0) (2022-12-06)
+
+
+### Features
+
+* message for recapitualtif page ([#1408](https://github.com/SocialGouv/egapro/issues/1408)) ([a332d46](https://github.com/SocialGouv/egapro/commit/a332d46bd55d18be146218817d91a6703b1a814a)), closes [#1346](https://github.com/SocialGouv/egapro/issues/1346)
+
 # [2.41.0](https://github.com/SocialGouv/egapro/compare/v2.40.2...v2.41.0) (2022-12-06)
 
 
