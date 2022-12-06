@@ -45,8 +45,8 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         title="Indicateur écart de taux d’augmentations entre les femmes et les hommes"
         text={
           <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur2" label="valider les données" />
+            L’indicateur ne peut être calculé car vous n’avez pas validé les informations nécessaires à son calcul.{" "}
+            <TextSimulatorLink to="/indicateur2" label="Valider les informations" />
           </>
         }
       />

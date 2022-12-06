@@ -45,8 +45,8 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
         title="Indicateur écart de taux de promotions entre les femmes et les hommes"
         text={
           <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur3" label="valider les données" />
+            L’indicateur ne peut être calculé car vous n’avez pas validé les informations nécessaires à son calcul.{" "}
+            <TextSimulatorLink to="/indicateur3" label="Valider les informations" />
           </>
         }
       />
