@@ -9,7 +9,7 @@ concurrency:
 name: Tests
 jobs:
   check-all:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Commit
         uses: actions/checkout@v2

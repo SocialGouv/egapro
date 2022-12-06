@@ -55,7 +55,7 @@ export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: 
         <TileCompanyTableHead>
           <TileCompanyTableHeadCol>Année</TileCompanyTableHeadCol>
           <TileCompanyTableHeadCol size="md">Cadres dirigeants</TileCompanyTableHeadCol>
-          <TileCompanyTableHeadCol size="md">Membres instance dirigeante</TileCompanyTableHeadCol>
+          <TileCompanyTableHeadCol size="md">Membres instances dirigeantes</TileCompanyTableHeadCol>
         </TileCompanyTableHead>
         <TileCompanyTableBody>
           {years
@@ -64,7 +64,7 @@ export const TileCompanyRepeqs = ({ entreprise, représentation_équilibrée }: 
             .map(row => (
               <TileCompanyTableBodyRow key={row.year}>
                 <TileCompanyTableBodyRowCol>
-                  <TileCompanyYear year={row.year} />
+                  <TileCompanyYear year={row.year + 1} />
                 </TileCompanyTableBodyRowCol>
                 <TileCompanyTableBodyRowCol>
                   <TileCompanyPercent>
