@@ -7,6 +7,7 @@ import { displayPercent } from "../../utils/helpers"
 import InfoBlock from "../../components/ds/InfoBlock"
 import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { Text } from "@chakra-ui/react"
 
 interface RecapitulatifIndicateurQuatreProps {
   indicateurQuatreFormValidated: FormState
@@ -32,8 +33,12 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
         title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
         text={
           <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur4" label="Valider les données" />
+            <Text>
+              L’indicateur ne peut être calculé car vous n’avez pas validé les informations nécessaires à son calcul.
+            </Text>
+            <Text mt={1}>
+              <TextSimulatorLink to="/indicateur4" label="Valider les informations" />
+            </Text>
           </>
         }
       />

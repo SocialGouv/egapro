@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
+import { Table, TableCaption, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react"
 
 import { FormState, TranchesAges } from "../../globals"
 import { effectifEtEcartRemuGroupCsp, effectifEtEcartRemuGroupCoef } from "../../utils/calculsEgaProIndicateurUn"
@@ -34,6 +34,25 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   indicateurUnParCSP,
   noteIndicateurUn,
 }) => {
+  if (indicateurUnFormValidated !== "Valid") {
+    return (
+      <InfoBlock
+        type="warning"
+        title="Indicateur écart de rémunération entre les femmes et les hommes"
+        text={
+          <>
+            <Text>
+              L’indicateur ne peut être calculé car vous n’avez pas validé les informations nécessaires à son calcul.
+            </Text>
+            <Text mt={1}>
+              <TextSimulatorLink to="/indicateur1" label="Valider les informations" />
+            </Text>
+          </>
+        }
+      />
+    )
+  }
+
   if (!effectifsIndicateurUnCalculable) {
     const messageCalculParCSP = indicateurUnParCSP ? (
       ""
@@ -45,21 +64,6 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         type="warning"
         title="Indicateur écart de rémunération entre les femmes et les hommes"
         text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
-      />
-    )
-  }
-
-  if (indicateurUnFormValidated !== "Valid") {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur écart de rémunération entre les femmes et les hommes"
-        text={
-          <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur1" label="Valider les données" />
-          </>
-        }
       />
     )
   }
