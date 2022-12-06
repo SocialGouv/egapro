@@ -46,7 +46,7 @@ const validateForm = ({
   ])
   if (allInputs.every((input) => input === "0" || input === "")) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des promotions",
+      notAll0: "L’indicateur ne peut être calculé car certains champs ne sont pas renseignés ou sont à 0.",
     }
   }
   return
