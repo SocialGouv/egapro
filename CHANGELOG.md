@@ -1,3 +1,10 @@
+# [2.43.0](https://github.com/SocialGouv/egapro/compare/v2.42.2...v2.43.0) (2022-12-07)
+
+
+### Features
+
+* update wordings ([#1437](https://github.com/SocialGouv/egapro/issues/1437)) ([1c60c5c](https://github.com/SocialGouv/egapro/commit/1c60c5ca6f170ef307ded581a988ac4db00c5af5)), closes [#1347](https://github.com/SocialGouv/egapro/issues/1347)
+
 ## [2.42.2](https://github.com/SocialGouv/egapro/compare/v2.42.1...v2.42.2) (2022-12-07)
 
 
