@@ -5,9 +5,9 @@ import { FormState } from "../../globals"
 import { displayPercent } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
+import { indicateursInfo } from "../../config"
+import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
-import { Text } from "@chakra-ui/react"
 
 interface RecapitulatifIndicateurQuatreProps {
   indicateurQuatreFormValidated: FormState
@@ -27,22 +27,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
   noteIndicateurQuatre,
 }) => {
   if (indicateurQuatreFormValidated !== "Valid") {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-        text={
-          <>
-            <Text>
-              L’indicateur ne peut être calculé car vous n’avez pas validé les informations nécessaires à son calcul.
-            </Text>
-            <Text mt={1}>
-              <TextSimulatorLink to="/indicateur4" label="Valider les informations" />
-            </Text>
-          </>
-        }
-      />
-    )
+    return <MessageWhenInvalid indicateur="indicateur4" />
   }
 
   if (!indicateurQuatreCalculable) {
@@ -53,7 +38,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
     return (
       <InfoBlock
         type="warning"
-        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+        title={indicateursInfo.indicateur4.title}
         text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
       />
     )
@@ -61,7 +46,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
 
   return (
     <RecapBloc
-      title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+      indicateur="indicateur4"
       resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData:

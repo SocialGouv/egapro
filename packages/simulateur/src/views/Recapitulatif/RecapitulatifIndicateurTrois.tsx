@@ -1,7 +1,7 @@
-import React, { FunctionComponent } from "react"
 import { Table, TableCaption, Tbody, Td, Tr } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 
-import { FormState, CategorieSocioPro } from "../../globals"
+import { CategorieSocioPro, FormState } from "../../globals"
 
 import {
   displayFractionPercentWithEmptyData,
@@ -11,8 +11,9 @@ import {
 } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
+import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { indicateursInfo } from "../../config"
 
 interface RecapitulatifIndicateurTroisProps {
   indicateurTroisFormValidated: FormState
@@ -39,25 +40,14 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   correctionMeasure,
 }) => {
   if (indicateurTroisFormValidated !== "Valid") {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur écart de taux de promotions entre les femmes et les hommes"
-        text={
-          <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur3" label="valider les données" />
-          </>
-        }
-      />
-    )
+    return <MessageWhenInvalid indicateur="indicateur3" />
   }
 
   if (!effectifsIndicateurTroisCalculable) {
     return (
       <InfoBlock
         type="warning"
-        title="Indicateur écart de taux de promotions entre les femmes et les hommes"
+        title={indicateursInfo.indicateur3.title}
         text="Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 10 femmes et 10 hommes), représentent moins de 40% des effectifs."
       />
     )
@@ -67,7 +57,7 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
     return (
       <InfoBlock
         type="warning"
-        title="Indicateur écart de taux de promotions entre les femmes et les hommes"
+        title={indicateursInfo.indicateur3.title}
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu de promotion durant la période de référence"
       />
     )
@@ -75,7 +65,7 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
 
   return (
     <RecapBloc
-      title="Indicateur écart de taux de promotions entre les femmes et les hommes"
+      indicateur="indicateur3"
       resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData: indicateurEcartPromotion !== undefined ? displayPercent(indicateurEcartPromotion) : "--",

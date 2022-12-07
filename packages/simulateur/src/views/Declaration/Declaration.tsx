@@ -397,7 +397,6 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
         <InfoBlock
           type="warning"
           title="Vous ne pouvez pas déclarer car toutes les pages relatives au calcul de l’index et à la déclaration ne sont pas validées."
-          text="Certains des indicateurs et/ou certaines informations relatives à la déclaration sont manquantes."
         />
         <Heading as="h2" size="md" mt={6}>
           Les pages suivantes ne sont pas validées
