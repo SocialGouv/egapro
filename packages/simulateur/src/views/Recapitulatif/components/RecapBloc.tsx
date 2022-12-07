@@ -2,13 +2,14 @@ import React, { PropsWithChildren } from "react"
 
 import ResultSummary, { ResultSummaryProps } from "../../../components/ResultSummary"
 import { Grid, GridItem, Heading } from "@chakra-ui/react"
+import { indicateursInfo } from "../../../config"
 
 export type RecapBlocProps = PropsWithChildren<{
-  title: string
   resultSummary: ResultSummaryProps
+  indicateur: keyof typeof indicateursInfo
 }>
 
-const RecapBloc = ({ title, children, resultSummary }: RecapBlocProps) => {
+const RecapBloc = ({ children, resultSummary, indicateur }: RecapBlocProps) => {
   return (
     <Grid
       templateColumns={{ sm: "1fr", md: "1fr 240px" }}
@@ -21,7 +22,7 @@ const RecapBloc = ({ title, children, resultSummary }: RecapBlocProps) => {
     >
       <GridItem>
         <Heading as="h2" fontSize="xl" mb={children ? 6 : 2} mt={2}>
-          {title}
+          {indicateursInfo[indicateur].title}
         </Heading>
         {children}
       </GridItem>
