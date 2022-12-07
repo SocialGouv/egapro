@@ -289,42 +289,40 @@ class declaration(table):
         out["entreprise"].update(région=REGIONS.get(out.path("entreprise.région")))
         out["entreprise"].update(département=DEPARTEMENTS.get(out.path("entreprise.département")))
 
-        indicateurs = out["indicateurs"]
+        indic_promotions: dict = out["indicateurs"].get("promotions", {})
+        indic_augmentations_et_promotions: dict = out["indicateurs"].get("augmentations_et_promotions", {})
+        indic_rémunérations: dict = out["indicateurs"].get("rémunérations", {})
+        indic_congés_maternité: dict = out["indicateurs"].get("congés_maternité", {})
+        indic_hautes_rémunérations: dict = out["indicateurs"].get("hautes_rémunérations", {})
         out["indicateurs"] = {
             "promotions": {
-                "non_calculable": indicateurs["promotions"]["non_calculable"]
-            } if "non_calculable" in indicateurs["promotions"] else {
-                "note": indicateurs["promotions"]["note"]
+                "non_calculable": indic_promotions.get("non_calculable"),
+                "note": indic_promotions.get("note"),
+                "objectif_de_progression": indic_promotions.get("objectif_de_progression")
             },
-            "augmentations": {
-                "non_calculable": indicateurs["augmentations"]["non_calculable"]
-            } if "non_calculable" in indicateurs["augmentations"] else {
-                "note": indicateurs["augmentations"]["note"]
+            "augmentations_et_promotions": {
+                "non_calculable": indic_augmentations_et_promotions.get("non_calculable"),
+                "note": indic_augmentations_et_promotions.get("note"),
+                "objectif_de_progression": indic_augmentations_et_promotions.get("objectif_de_progression")
             },
             "rémunérations": {
-                "non_calculable": indicateurs["rémunérations"]["non_calculable"]
-            } if "non_calculable" in indicateurs["rémunérations"] else {
-                "note": indicateurs["rémunérations"]["note"]
+                "non_calculable": indic_rémunérations.get("non_calculable"),
+                "note": indic_rémunérations.get("note"),
+                "objectif_de_progression": indic_rémunérations.get("objectif_de_progression")
             },
             "congés_maternité": {
-                "non_calculable": indicateurs["congés_maternité"]["non_calculable"]
-            } if "non_calculable" in indicateurs["congés_maternité"] else {
-                "note": indicateurs["congés_maternité"]["note"]
+                "non_calculable": indic_congés_maternité.get("non_calculable"),
+                "note": indic_congés_maternité.get("note"),
+                "objectif_de_progression": indic_congés_maternité.get("objectif_de_progression")
             },
             "hautes_rémunérations": {
-                "non_calculable": indicateurs["hautes_rémunérations"]["non_calculable"]
-            } if "non_calculable" in indicateurs["hautes_rémunérations"] else {
-                "note": indicateurs["hautes_rémunérations"]["note"]
+                "non_calculable": indic_hautes_rémunérations.get("non_calculable"),
+                "note": indic_hautes_rémunérations.get("note"),
+                "objectif_de_progression": indic_hautes_rémunérations.get("objectif_de_progression"),
+                "résultat": indic_hautes_rémunérations.get("résultat"),
+                "population_favorable": indic_hautes_rémunérations.get("population_favorable")
             }
         }
-
-        out["indicateurs"]["hautes_rémunérations"]["résultat"] = indicateurs["hautes_rémunérations"]["résultat"]
-        out["indicateurs"]["hautes_rémunérations"]["population_favorable"] = indicateurs["hautes_rémunérations"].get("population_favorable")
-        out["indicateurs"]["promotions"]["objectif_de_progression"] = indicateurs["promotions"].get("objectif_de_progression")
-        out["indicateurs"]["augmentations"]["objectif_de_progression"] = indicateurs["augmentations"].get("objectif_de_progression")
-        out["indicateurs"]["rémunérations"]["objectif_de_progression"] = indicateurs["rémunérations"].get("objectif_de_progression")
-        out["indicateurs"]["congés_maternité"]["objectif_de_progression"] = indicateurs["congés_maternité"].get("objectif_de_progression")
-        out["indicateurs"]["hautes_rémunérations"]["objectif_de_progression"] = indicateurs["hautes_rémunérations"].get("objectif_de_progression")
 
         declaration: dict = out["déclaration"]
         out.delete_path("déclaration")
