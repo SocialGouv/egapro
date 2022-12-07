@@ -318,11 +318,20 @@ class declaration(table):
             }
         }
 
+        out["indicateurs"]["hautes_rémunérations"]["résultat"] = indicateurs["hautes_rémunérations"]["résultat"]
+        out["indicateurs"]["hautes_rémunérations"]["population_favorable"] = indicateurs["hautes_rémunérations"].get("population_favorable")
+        out["indicateurs"]["promotions"]["objectif_de_progression"] = indicateurs["promotions"].get("objectif_de_progression")
+        out["indicateurs"]["augmentations"]["objectif_de_progression"] = indicateurs["augmentations"].get("objectif_de_progression")
+        out["indicateurs"]["rémunérations"]["objectif_de_progression"] = indicateurs["rémunérations"].get("objectif_de_progression")
+        out["indicateurs"]["congés_maternité"]["objectif_de_progression"] = indicateurs["congés_maternité"].get("objectif_de_progression")
+        out["indicateurs"]["hautes_rémunérations"]["objectif_de_progression"] = indicateurs["hautes_rémunérations"].get("objectif_de_progression")
+
         declaration: dict = out["déclaration"]
         out.delete_path("déclaration")
         out["déclaration"] = {
-            "note": declaration.get("note", "NC"),
-            "année_indicateurs": declaration["année_indicateurs"]
+            "index": declaration.get("index"),
+            "année_indicateurs": declaration["année_indicateurs"],
+            "mesures_correctives": declaration.get("mesures_correctives")
         }
 
         return out
