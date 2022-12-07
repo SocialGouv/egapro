@@ -2,9 +2,8 @@ import React, { FunctionComponent } from "react"
 
 import { FormState } from "../../globals"
 
-import InfoBlock from "../../components/ds/InfoBlock"
+import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 interface RecapitulatifIndicateurCinqProps {
   indicateurCinqFormValidated: FormState
@@ -20,18 +19,7 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
   noteIndicateurCinq,
 }) => {
   if (indicateurCinqFormValidated !== "Valid") {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations."
-        text={
-          <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur5" label="Valider les données" />
-          </>
-        }
-      />
-    )
+    return <MessageWhenInvalid indicateur="indicateur5" />
   }
 
   const firstLineInfo =
@@ -45,7 +33,7 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
 
   return (
     <RecapBloc
-      title="Indicateur nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations."
+      indicateur="indicateur5"
       resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData:

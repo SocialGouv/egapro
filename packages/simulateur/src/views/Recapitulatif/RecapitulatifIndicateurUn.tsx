@@ -1,19 +1,21 @@
-import React, { FunctionComponent } from "react"
 import { Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
+import React, { FunctionComponent } from "react"
 
 import { FormState, TranchesAges } from "../../globals"
-import { effectifEtEcartRemuGroupCsp, effectifEtEcartRemuGroupCoef } from "../../utils/calculsEgaProIndicateurUn"
+import { effectifEtEcartRemuGroupCoef, effectifEtEcartRemuGroupCsp } from "../../utils/calculsEgaProIndicateurUn"
 
 import {
-  displayNameTranchesAges,
   displayNameCategorieSocioPro,
+  displayNameTranchesAges,
   displayPercent,
   displaySexeSurRepresente,
 } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
-import RecapBloc from "./components/RecapBloc"
 import { TextSimulatorLink } from "../../components/SimulatorLink"
+import { indicateursInfo } from "../../config"
+import MessageWhenInvalid from "./components/MessageWhenInvalid"
+import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurUnProps {
   indicateurUnFormValidated: FormState
@@ -34,6 +36,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   indicateurUnParCSP,
   noteIndicateurUn,
 }) => {
+  if (indicateurUnFormValidated !== "Valid") {
+    return <MessageWhenInvalid indicateur="indicateur1" />
+  }
+
   if (!effectifsIndicateurUnCalculable) {
     const messageCalculParCSP = indicateurUnParCSP ? (
       ""
@@ -43,23 +49,8 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
     return (
       <InfoBlock
         type="warning"
-        title="Indicateur écart de rémunération entre les femmes et les hommes"
+        title={indicateursInfo.indicateur1.title}
         text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
-      />
-    )
-  }
-
-  if (indicateurUnFormValidated !== "Valid") {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur écart de rémunération entre les femmes et les hommes"
-        text={
-          <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur1" label="Valider les données" />
-          </>
-        }
       />
     )
   }
@@ -84,7 +75,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
 
   return (
     <RecapBloc
-      title="Indicateur écart de rémunération entre les femmes et les hommes"
+      indicateur="indicateur1"
       resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData: indicateurEcartRemuneration !== undefined ? displayPercent(indicateurEcartRemuneration) : "--",

@@ -1,3 +1,39 @@
+# [2.43.0](https://github.com/SocialGouv/egapro/compare/v2.42.2...v2.43.0) (2022-12-07)
+
+
+### Features
+
+* update wordings ([#1437](https://github.com/SocialGouv/egapro/issues/1437)) ([1c60c5c](https://github.com/SocialGouv/egapro/commit/1c60c5ca6f170ef307ded581a988ac4db00c5af5)), closes [#1347](https://github.com/SocialGouv/egapro/issues/1347)
+
+## [2.42.2](https://github.com/SocialGouv/egapro/compare/v2.42.1...v2.42.2) (2022-12-07)
+
+
+### Bug Fixes
+
+* secure jwt secret ([#1439](https://github.com/SocialGouv/egapro/issues/1439)) ([6a1d32b](https://github.com/SocialGouv/egapro/commit/6a1d32bc2498ee8a26e06f7d2581712de2030527))
+
+## [2.42.1](https://github.com/SocialGouv/egapro/compare/v2.42.0...v2.42.1) (2022-12-06)
+
+
+### Bug Fixes
+
+* problem getFullYear in declaration ([#1435](https://github.com/SocialGouv/egapro/issues/1435)) ([5b8f4b2](https://github.com/SocialGouv/egapro/commit/5b8f4b20d3174c58e917061a3f33fd99a633b9e6))
+* **api:** repeq search various fixes ([#1436](https://github.com/SocialGouv/egapro/issues/1436)) ([ee04f9e](https://github.com/SocialGouv/egapro/commit/ee04f9e042b3979d76275134c6a502e6c01861c7))
+
+# [2.42.0](https://github.com/SocialGouv/egapro/compare/v2.41.0...v2.42.0) (2022-12-06)
+
+
+### Features
+
+* message for recapitualtif page ([#1408](https://github.com/SocialGouv/egapro/issues/1408)) ([a332d46](https://github.com/SocialGouv/egapro/commit/a332d46bd55d18be146218817d91a6703b1a814a)), closes [#1346](https://github.com/SocialGouv/egapro/issues/1346)
+
+# [2.41.0](https://github.com/SocialGouv/egapro/compare/v2.40.2...v2.41.0) (2022-12-06)
+
+
+### Features
+
+* improve search for repeq ([#1431](https://github.com/SocialGouv/egapro/issues/1431)) ([b034576](https://github.com/SocialGouv/egapro/commit/b0345765d48cf9d887da092918800748987b483a)), closes [#1326](https://github.com/SocialGouv/egapro/issues/1326)
+
 ## [2.40.2](https://github.com/SocialGouv/egapro/compare/v2.40.1...v2.40.2) (2022-12-02)
 
 

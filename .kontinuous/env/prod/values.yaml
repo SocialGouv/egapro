@@ -19,6 +19,8 @@ api:
     - secretRef:
         name: "staff"
     - secretRef:
+        name: "egapro-secret"
+    - secretRef:
         name: smtp
 
 jobs:

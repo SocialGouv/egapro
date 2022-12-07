@@ -5,8 +5,9 @@ import { FormState } from "../../globals"
 import { displayPercent } from "../../utils/helpers"
 
 import InfoBlock from "../../components/ds/InfoBlock"
+import { indicateursInfo } from "../../config"
+import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
-import { TextSimulatorLink } from "../../components/SimulatorLink"
 
 interface RecapitulatifIndicateurQuatreProps {
   indicateurQuatreFormValidated: FormState
@@ -26,18 +27,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
   noteIndicateurQuatre,
 }) => {
   if (indicateurQuatreFormValidated !== "Valid") {
-    return (
-      <InfoBlock
-        type="warning"
-        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
-        text={
-          <>
-            Nous ne pouvons pas calculer votre indicateur car vous n’avez pas encore validé vos données saisies.{" "}
-            <TextSimulatorLink to="/indicateur4" label="Valider les données" />
-          </>
-        }
-      />
-    )
+    return <MessageWhenInvalid indicateur="indicateur4" />
   }
 
   if (!indicateurQuatreCalculable) {
@@ -48,7 +38,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
     return (
       <InfoBlock
         type="warning"
-        title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+        title={indicateursInfo.indicateur4.title}
         text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
       />
     )
@@ -56,7 +46,7 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
 
   return (
     <RecapBloc
-      title="Indicateur pourcentage de salariées augmentées dans l'année suivant leur retour de congé maternité"
+      indicateur="indicateur4"
       resultSummary={{
         firstLineLabel: "votre résultat final est",
         firstLineData:

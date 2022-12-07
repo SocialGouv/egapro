@@ -54,8 +54,8 @@ const IndicateurTrois: FunctionComponent<IndicateurTroisProps> = ({ state, dispa
       <PageIndicateurTrois>
         <InfoBlock
           type="warning"
-          title="Vous devez renseignez vos effectifs avant d’avoir accès à cet indicateur"
-          text={<TextSimulatorLink to="/effectifs" label="Renseigner les effectifs" />}
+          title="Vous devez valider les effectifs pris en compte pour le calcul avant d’accéder à cet indicateur."
+          text={<TextSimulatorLink to="/effectifs" label="Valider les effectifs" />}
         />
       </PageIndicateurTrois>
     )
