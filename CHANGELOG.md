@@ -1,3 +1,10 @@
+## [2.42.2](https://github.com/SocialGouv/egapro/compare/v2.42.1...v2.42.2) (2022-12-07)
+
+
+### Bug Fixes
+
+* secure jwt secret ([#1439](https://github.com/SocialGouv/egapro/issues/1439)) ([6a1d32b](https://github.com/SocialGouv/egapro/commit/6a1d32bc2498ee8a26e06f7d2581712de2030527))
+
 ## [2.42.1](https://github.com/SocialGouv/egapro/compare/v2.42.0...v2.42.1) (2022-12-06)
 
 
