@@ -31,7 +31,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public delete(item: OwnershipRequest): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public exists([siren, email]: OwnershipRequestPK): Promise<boolean> {
+  public exists(id: OwnershipRequestPK): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<OwnershipRequest[]> {
@@ -40,11 +40,9 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     return raw.map(ownershipRequestMap.toDomain) as unknown as OwnershipRequest[];
   }
 
-  public async getOne([siren, email]: OwnershipRequestPK): Promise<OwnershipRequest | null> {
+  public async getOne(id: OwnershipRequestPK): Promise<OwnershipRequest | null> {
     try {
-      const [raw] = await this.sql`select * from ${
-        this.table
-      } where siren=${siren.getValue()} and email=${email.getValue()} limit 1`;
+      const [raw] = await this.sql`select * from ${this.table} where id=${id.getValue()} limit 1`;
 
       if (!raw) return null;
       return ownershipRequestMap.toDomain(raw);

@@ -1,3 +1,5 @@
+import { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
+import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
@@ -43,12 +45,13 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
 
       for (const siren of setSirens) {
         for (const email of setEmails) {
-          await this.ownershipRequestRepo.save({
+          const ownershipRequest = new OwnershipRequest({
             siren,
             email,
             askerEmail: validatedAskerEmail,
-            status: "À traiter",
+            status: new OwnershipRequestStatus(OwnershipRequestStatus.Enum.TO_PROCESS),
           });
+          await this.ownershipRequestRepo.save(ownershipRequest);
         }
       }
     } catch (error: unknown) {

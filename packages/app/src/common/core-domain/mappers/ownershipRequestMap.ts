@@ -4,7 +4,7 @@ import { Email } from "@common/shared-domain/domain/valueObjects";
 import type { Objectize } from "@common/utils/types";
 
 import { OwnershipRequest } from "../domain/OwnershipRequest";
-import type { OwnershipRequestStatus } from "../domain/OwnershipRequestStatus";
+import { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "../domain/valueObjects/Siren";
 import type { OwnershipRequestDTO } from "../dtos/OwnershipRequestDTO";
 
@@ -17,7 +17,7 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
         siren: new Siren(raw.siren),
         askerEmail: new Email(raw.asker_email),
         email: new Email(raw.email),
-        status: raw.status as OwnershipRequestStatus, // Casting is safe from persistence.
+        status: new OwnershipRequestStatus(raw.status),
         errorDetail: raw.error_detail,
       });
     },
@@ -25,22 +25,22 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
     toDTO(obj) {
       return {
         askerEmail: obj.askerEmail.getValue(),
-        modifiedAt: obj.modifiedAt.toISOString(),
-        createdAt: obj.createdAt.toISOString(),
+        modifiedAt: obj.modifiedAt!.toISOString(), // TODO handle multiple DTO depending on save/read/update
+        createdAt: obj.createdAt!.toISOString(),
         email: obj.email.getValue(),
         siren: obj.siren.getValue(),
-        status: obj.status,
+        status: obj.status.getValue(),
       };
     },
 
     toPersistence(obj) {
       return {
-        created_at: obj.createdAt.toISOString(),
-        modified_at: obj.modifiedAt.toISOString(),
+        created_at: obj.createdAt?.toISOString(),
+        modified_at: obj.modifiedAt?.toISOString(),
         siren: obj.siren.getValue(),
         asker_email: obj.askerEmail.getValue(),
         email: obj.email.getValue(),
-        status: obj.status,
+        status: obj.status.getValue(),
         error_detail: obj.errorDetail,
       } as Objectize<OwnershipRequestRaw>;
     },

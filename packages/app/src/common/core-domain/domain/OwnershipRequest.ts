@@ -1,28 +1,27 @@
-import { AggregateRoot } from "@common/shared-domain";
-import type { Email } from "@common/shared-domain/domain/valueObjects";
+import { Entity } from "@common/shared-domain";
+import type { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
 
-import type { OwnershipRequestStatus } from "./OwnershipRequestStatus";
+import type { OwnershipRequestStatus } from "./valueObjects/ownership_request/OwnershipRequestStatus";
 import type { Siren } from "./valueObjects/Siren";
 
 export interface OwnershipRequestProps {
   askerEmail: Email;
-  createdAt: Date;
+  createdAt?: Date;
   email: Email;
   errorDetail?: string;
-  modifiedAt: Date;
+  modifiedAt?: Date;
   siren: Siren;
   status: OwnershipRequestStatus;
 }
 
-// TODO(pom): Faut-il mettre une PK fonctionnelle ou simplement le id ? Si fonctionnelle, peut être rajouter createdAt, car on n'est pas à l'abri d'avoir plusieurs demandes.
-export type OwnershipRequestPK = [Siren, Email];
+export type OwnershipRequestPK = UniqueID;
 
-export class OwnershipRequest extends AggregateRoot<OwnershipRequestProps, OwnershipRequestPK> {
-  get createdAt(): Date {
+export class OwnershipRequest extends Entity<OwnershipRequestProps, OwnershipRequestPK> {
+  get createdAt(): Date | undefined {
     return this.props.createdAt;
   }
 
-  get modifiedAt(): Date {
+  get modifiedAt(): Date | undefined {
     return this.props.modifiedAt;
   }
 
