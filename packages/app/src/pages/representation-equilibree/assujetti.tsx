@@ -4,6 +4,7 @@ import {
   Callout,
   CalloutContent,
   FormRadioGroup,
+  FormRadioGroupContent,
   FormRadioGroupInput,
   FormRadioGroupLegend,
 } from "@design-system";
@@ -41,24 +42,26 @@ const AssujettiPage: NextPageWithLayout = () => {
           <FormRadioGroupLegend id="assujetti" className="fr-sr-only">
             {title}
           </FormRadioGroupLegend>
-          <FormRadioGroupInput
-            id="oui"
-            name="assujetti"
-            value="oui"
-            checked={isAssujetti === "oui"}
-            onChange={handleAssujettiChange}
-          >
-            oui, je suis concerné
-          </FormRadioGroupInput>
-          <FormRadioGroupInput
-            id="non"
-            name="assujetti"
-            value="non"
-            checked={isAssujetti === "non"}
-            onChange={handleAssujettiChange}
-          >
-            non, je ne suis pas concerné
-          </FormRadioGroupInput>
+          <FormRadioGroupContent>
+            <FormRadioGroupInput
+              id="oui"
+              name="assujetti"
+              value="oui"
+              checked={isAssujetti === "oui"}
+              onChange={handleAssujettiChange}
+            >
+              oui, je suis concerné
+            </FormRadioGroupInput>
+            <FormRadioGroupInput
+              id="non"
+              name="assujetti"
+              value="non"
+              checked={isAssujetti === "non"}
+              onChange={handleAssujettiChange}
+            >
+              non, je ne suis pas concerné
+            </FormRadioGroupInput>
+          </FormRadioGroupContent>
         </FormRadioGroup>
       </form>
       {(isAssujetti === "non" && (
