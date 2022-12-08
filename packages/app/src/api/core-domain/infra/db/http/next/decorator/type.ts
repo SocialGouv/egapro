@@ -1,10 +1,10 @@
 import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
 
-export type NextControllerMethodDecorator = <
-  TProperty extends keyof NextController,
-  TMethod extends NextController[TProperty],
+export type NextControllerMethodDecorator<TController extends NextController = NextController> = <
+  TProperty extends keyof TController,
+  TMethod extends TController[TProperty],
 >(
-  target: NextController,
+  target: TController,
   property: TProperty,
   desc: TypedPropertyDescriptor<TMethod>,
 ) => TypedPropertyDescriptor<TMethod> | void;

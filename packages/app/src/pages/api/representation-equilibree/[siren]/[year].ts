@@ -18,7 +18,7 @@ type Res = NextController.Res<BaseController>;
 export default class RepEqSirenYearController implements BaseController {
   @TokenRequire
   @EnsureOwner
-  public async get(req: Req, res: Res) {
+  public async get(req: EnsureOwner.Wrap<TokenRequire.Wrap<Req>>, res: Res) {
     const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
     const { siren, year } = req.params;
 
