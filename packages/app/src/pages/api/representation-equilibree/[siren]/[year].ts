@@ -1,5 +1,5 @@
 import { EnsureOwner } from "@api/core-domain/infra/db/http/next/decorator/EnsureOwner";
-import { TokenRequire } from "@api/core-domain/infra/db/http/next/decorator/TokenRequire";
+import { TokenV1Require } from "@api/core-domain/infra/db/http/next/decorator/TokenV1Require";
 import { representationEquilibreeRepo } from "@api/core-domain/repo";
 import {
   GetRepresentationEquilibreeBySirenAndYear,
@@ -11,12 +11,12 @@ import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
 type BaseController = NextController<"siren" | "year">;
-type Req = EnsureOwner.Wrap<TokenRequire.Wrap<NextController.Req<BaseController>>>;
+type Req = EnsureOwner.Wrap<TokenV1Require.Wrap<NextController.Req<BaseController>>>;
 type Res = NextController.Res<BaseController>;
 
 @Handler
 export default class RepEqSirenYearController implements BaseController {
-  @TokenRequire
+  @TokenV1Require
   @EnsureOwner
   public async get(req: Req, res: Res) {
     const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);

@@ -1,4 +1,5 @@
 import { ensureEnvVar as baseEnsureEnvVar } from "@common/utils/os";
+import { inspect } from "util";
 
 const ensureEnvVar = baseEnsureEnvVar<ProcessEnvCustomKeys>;
 const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {
@@ -15,9 +16,18 @@ export const config = {
     siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",
   },
   api: {
+    staff: ensureApiEnvVar("EGAPRO_STAFF", "")
+      .split(",")
+      .filter(v => v),
     env: ensureApiEnvVar("EGAPRO_ENV", "dev") as "dev" | "preprod" | "prod",
     maildev: {
       smtpPort: +ensureApiEnvVar("MAILER_SMTP_PORT", "1025"),
+    },
+    security: {
+      jwtv1: {
+        secret: ensureApiEnvVar("SECURITY_JWT_SECRET"),
+        algorithm: ensureApiEnvVar("SECURITY_JWT_ALGORITHM"),
+      },
     },
     postgres: {
       host: ensureApiEnvVar("POSTGRES_HOST"),
@@ -31,6 +41,8 @@ export const config = {
     },
   },
 } as const;
+
+console.log(inspect({ config }, false, Infinity));
 
 interface ServicesConfig {
   db: "mock" | "postgres" | "prisma";
