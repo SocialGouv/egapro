@@ -1,5 +1,4 @@
 import { ensureEnvVar as baseEnsureEnvVar } from "@common/utils/os";
-import { inspect } from "util";
 
 const ensureEnvVar = baseEnsureEnvVar<ProcessEnvCustomKeys>;
 const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {
@@ -41,8 +40,6 @@ export const config = {
     },
   },
 } as const;
-
-console.log(inspect({ config }, false, Infinity));
 
 interface ServicesConfig {
   db: "mock" | "postgres" | "prisma";
