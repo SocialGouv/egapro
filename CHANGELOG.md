@@ -1,3 +1,10 @@
+## [2.44.1](https://github.com/SocialGouv/egapro/compare/v2.44.0...v2.44.1) (2022-12-09)
+
+
+### Bug Fixes
+
+* handle nc values in repeq export (Fixes [#1443](https://github.com/SocialGouv/egapro/issues/1443)) ([3e89f1d](https://github.com/SocialGouv/egapro/commit/3e89f1d554fbd614aa3fd908b2f121d251b3316e))
+
 # [2.44.0](https://github.com/SocialGouv/egapro/compare/v2.43.0...v2.44.0) (2022-12-09)
 
 
