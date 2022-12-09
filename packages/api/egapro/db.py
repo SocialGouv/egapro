@@ -9,6 +9,7 @@ from asyncpg.exceptions import DuplicateDatabaseError, PostgresError
 import ujson as json
 
 from egapro import config, models, sql, utils, helpers
+from egapro.constants import DEPARTEMENTS, REGIONS
 from egapro.loggers import logger
 
 
@@ -160,8 +161,11 @@ class declaration(table):
     table_name = "declaration"
 
     @classmethod
-    async def all(cls):
-        return await cls.fetch("SELECT * FROM declaration")
+    async def all(cls, year:int=None):
+        req = f"SELECT * FROM {cls.table_name}"
+        if year:
+            req += f" WHERE year={year}"
+        return await cls.fetch(req)
 
     @classmethod
     async def completed(cls):
@@ -251,7 +255,7 @@ class declaration(table):
         }
 
     @classmethod
-    def public_data(cls, data):
+    def public_entreprise_data(cls, data):
         data = models.Data(data)
         raison_sociale = data.company
         siren = data.siren
@@ -271,6 +275,63 @@ class declaration(table):
                 "effectif": {"tranche": data.path("entreprise.effectif.tranche")},
             },
         }
+        return out
+
+    @classmethod
+    def public_data(cls, data):
+        out = models.Data(data)
+        out.delete_path("source")
+        out.delete_path("déclarant")
+        out.delete_path("entreprise.adresse")
+        out.delete_path("entreprise.commune")
+        out.delete_path("entreprise.code_postal")
+        out.delete_path("entreprise.plan_relance")
+        out["entreprise"].update(région=REGIONS.get(out.path("entreprise.région")))
+        out["entreprise"].update(département=DEPARTEMENTS.get(out.path("entreprise.département")))
+
+        indic_promotions: dict = out["indicateurs"].get("promotions", {})
+        indic_augmentations_et_promotions: dict = out["indicateurs"].get("augmentations_et_promotions", {})
+        indic_rémunérations: dict = out["indicateurs"].get("rémunérations", {})
+        indic_congés_maternité: dict = out["indicateurs"].get("congés_maternité", {})
+        indic_hautes_rémunérations: dict = out["indicateurs"].get("hautes_rémunérations", {})
+        out["indicateurs"] = {
+            "promotions": {
+                "non_calculable": indic_promotions.get("non_calculable"),
+                "note": indic_promotions.get("note"),
+                "objectif_de_progression": indic_promotions.get("objectif_de_progression")
+            },
+            "augmentations_et_promotions": {
+                "non_calculable": indic_augmentations_et_promotions.get("non_calculable"),
+                "note": indic_augmentations_et_promotions.get("note"),
+                "objectif_de_progression": indic_augmentations_et_promotions.get("objectif_de_progression")
+            },
+            "rémunérations": {
+                "non_calculable": indic_rémunérations.get("non_calculable"),
+                "note": indic_rémunérations.get("note"),
+                "objectif_de_progression": indic_rémunérations.get("objectif_de_progression")
+            },
+            "congés_maternité": {
+                "non_calculable": indic_congés_maternité.get("non_calculable"),
+                "note": indic_congés_maternité.get("note"),
+                "objectif_de_progression": indic_congés_maternité.get("objectif_de_progression")
+            },
+            "hautes_rémunérations": {
+                "non_calculable": indic_hautes_rémunérations.get("non_calculable"),
+                "note": indic_hautes_rémunérations.get("note"),
+                "objectif_de_progression": indic_hautes_rémunérations.get("objectif_de_progression"),
+                "résultat": indic_hautes_rémunérations.get("résultat"),
+                "population_favorable": indic_hautes_rémunérations.get("population_favorable")
+            }
+        }
+
+        declaration: dict = out["déclaration"]
+        out.delete_path("déclaration")
+        out["déclaration"] = {
+            "index": declaration.get("index"),
+            "année_indicateurs": declaration["année_indicateurs"],
+            "mesures_correctives": declaration.get("mesures_correctives")
+        }
+
         return out
 
 
@@ -385,7 +446,7 @@ class search(table):
         row = dict(row)
         data = row.pop("data")[0]
         return {
-            **declaration.public_data(data),
+            **declaration.public_entreprise_data(data),
             **dict(row),
             "label": cls.compute_label(query, data),
         }
