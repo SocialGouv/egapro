@@ -1,5 +1,7 @@
 from naf import DB as NAF
 
+from egapro.utils import delete_keypath
+
 from . import constants
 
 
@@ -114,3 +116,6 @@ class Data(dict):
         for sub in path.split("."):
             data = data.get(sub, {})
         return data if data or data in [False, 0] else None
+
+    def delete_path(self, path: str):
+        delete_keypath(self, path)

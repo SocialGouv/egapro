@@ -91,3 +91,14 @@ def official_round(i):
     So for example, 0.01 should be rounded to 0, while 0.1 should be rounded to 1.
     """
     return round(float(i) + 0.5 - 0.049)
+
+def delete_keypath(obj: dict, path: str):
+    data = obj
+    keys = path.split(".")
+    last_key = keys.pop()
+    for sub in keys:
+        data = data.get(sub, {})
+    if last_key in data:
+        del data[last_key]
+    return obj
+
