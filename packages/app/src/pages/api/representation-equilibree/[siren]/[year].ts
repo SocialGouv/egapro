@@ -11,14 +11,14 @@ import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
 type BaseController = NextController<"siren" | "year">;
-type Req = NextController.Req<BaseController>;
+type Req = EnsureOwner.Wrap<TokenRequire.Wrap<NextController.Req<BaseController>>>;
 type Res = NextController.Res<BaseController>;
 
 @Handler
 export default class RepEqSirenYearController implements BaseController {
   @TokenRequire
   @EnsureOwner
-  public async get(req: EnsureOwner.Wrap<TokenRequire.Wrap<Req>>, res: Res) {
+  public async get(req: Req, res: Res) {
     const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
     const { siren, year } = req.params;
 
