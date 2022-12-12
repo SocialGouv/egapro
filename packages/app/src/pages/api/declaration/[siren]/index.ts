@@ -1,5 +1,5 @@
 import { EnsureOwner } from "@api/core-domain/infra/db/http/next/decorator/EnsureOwner";
-import { TokenV1Require } from "@api/core-domain/infra/db/http/next/decorator/TokenV1Require";
+import { LegacyTokenRequire } from "@api/core-domain/infra/db/http/next/decorator/LegacyTokenRequire";
 import { declarationRepo } from "@api/core-domain/repo";
 import {
   GetAllDeclarationsBySiren,
@@ -11,12 +11,12 @@ import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
 type BaseController = NextController<"siren">;
-type Req = EnsureOwner.Wrap<TokenV1Require.Wrap<NextController.Req<BaseController>>>;
+type Req = EnsureOwner.Wrap<LegacyTokenRequire.Wrap<NextController.Req<BaseController>>>;
 type Res = NextController.Res<BaseController>;
 
 @Handler
 export default class DeclarationSirenController implements BaseController {
-  @TokenV1Require
+  @LegacyTokenRequire
   @EnsureOwner
   public async get(req: Req, res: Res) {
     const useCase = new GetAllDeclarationsBySiren(declarationRepo);

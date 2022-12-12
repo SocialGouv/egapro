@@ -4,14 +4,14 @@ import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
-import type { TokenV1Require } from "./TokenV1Require";
+import type { LegacyTokenRequire } from "./LegacyTokenRequire";
 import type { NextControllerMethodDecorator } from "./type";
 
 type SirenController = NextController<"siren">;
-type OwnerReq = TokenV1Require.Wrap<EnsureOwner.Wrap<NextController.Req<SirenController>>>;
+type OwnerReq = LegacyTokenRequire.Wrap<EnsureOwner.Wrap<NextController.Req<SirenController>>>;
 
 /**
- * Includes `TokenV1Require`
+ * Ensure given logged user is "owner" of the Siren in an asked resource.
  */
 export const EnsureOwner: NextControllerMethodDecorator<SirenController> = (target, _property, desc) => {
   const originalMethod = desc.value;

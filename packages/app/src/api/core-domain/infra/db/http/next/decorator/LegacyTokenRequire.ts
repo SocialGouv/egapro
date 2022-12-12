@@ -7,9 +7,11 @@ import { JsonWebTokenError, TokenExpiredError, verify as jwtVerify } from "jsonw
 
 import type { NextControllerMethodDecorator } from "./type";
 
-class TokenV1RequireError extends AppError {}
+class LegacyTokenRequireError extends AppError {}
 
-// -- jwt handling for readonly cross api tokens
+/**
+ * JWT handling for readonly cross api tokens
+ */
 const readToken = (token: string) => {
   try {
     const decoded = jwtVerify(token, config.api.security.jwtv1.secret, {
@@ -18,20 +20,22 @@ const readToken = (token: string) => {
 
     const email = decoded.sub;
 
-    if (!email) throw new TokenV1RequireError("No email found in token.");
+    if (!email) throw new LegacyTokenRequireError("No email found in token.");
 
     return email.toLowerCase();
   } catch (error: unknown) {
     if (error instanceof JsonWebTokenError || error instanceof TokenExpiredError) {
-      throw new TokenV1RequireError(error.message, error);
+      throw new LegacyTokenRequireError(error.message, error);
     } else throw error;
   }
 };
-//
 
-type TokenReq = TokenV1Require.Wrap<NextController.Req<NextController>>;
+type TokenReq = LegacyTokenRequire.Wrap<NextController.Req<NextController>>;
 
-export const TokenV1Require: NextControllerMethodDecorator = (target, property, desc) => {
+/**
+ * Verify a token from "v1" API and returns {@link StatusCodes.UNAUTHORIZED} if not valid.
+ */
+export const LegacyTokenRequire: NextControllerMethodDecorator = (target, property, desc) => {
   const originalMethod = desc.value;
   desc.value = (async (req: TokenReq, res) => {
     req.egapro ??= {} as typeof req.egapro;
@@ -58,6 +62,6 @@ export const TokenV1Require: NextControllerMethodDecorator = (target, property, 
   return desc;
 };
 
-export namespace TokenV1Require {
+export namespace LegacyTokenRequire {
   export type Wrap<TReq> = TReq & { egapro: { email: string; staff: boolean } };
 }

@@ -17,11 +17,21 @@ export namespace NextController {
   export type Res<TController extends NextController> = Parameters<NonNullable<TController["get"]>>[1];
 }
 
+/**
+ * Nextjs version of a {@link ControllerRequest}.
+ *
+ * Ensure that `query` is typed like {@link NextApiRequest}'s.
+ */
 export interface NextControllerRequest<TParamKeys extends string = string>
   extends ControllerRequest<TParamKeys, NextApiRequest> {
   query: NextApiRequest["query"];
 }
 
+/**
+ * Nextjs version of a {@link ControllerResponse}.
+ *
+ * Wrap classic nextjs response method with generic signatures.
+ */
 export class NextControllerResponse implements ControllerResponse<NextApiResponse> {
   public readonly _nodeResponse: ServerResponse;
   constructor(public readonly _res: NextApiResponse) {
@@ -61,6 +71,10 @@ export class NextControllerResponse implements ControllerResponse<NextApiRespons
   }
 }
 
+/**
+ * Convert a {@link NextController} instance into a single {@link NextApiHandler} function.
+ * It also ensures http verb routing.
+ */
 export const handler = (controller: NextController): NextApiHandler => {
   return (req, res) => {
     const nextControllerRequest: NextControllerRequest = {
@@ -71,8 +85,13 @@ export const handler = (controller: NextController): NextApiHandler => {
       query: req.query,
     };
     const nextControllerResponse = new NextControllerResponse(res);
+    if (controller.options && req.method === "OPTIONS")
+      return controller.options(nextControllerRequest, nextControllerResponse);
+    if (controller.head && req.method === "HEAD") return controller.head(nextControllerRequest, nextControllerResponse);
     if (controller.get && req.method === "GET") return controller.get(nextControllerRequest, nextControllerResponse);
     if (controller.put && req.method === "PUT") return controller.put(nextControllerRequest, nextControllerResponse);
+    if (controller.patch && req.method === "PATCH")
+      return controller.patch(nextControllerRequest, nextControllerResponse);
     if (controller.post && req.method === "POST") return controller.post(nextControllerRequest, nextControllerResponse);
     if (controller.delete && req.method === "DELETE")
       return controller.delete(nextControllerRequest, nextControllerResponse);

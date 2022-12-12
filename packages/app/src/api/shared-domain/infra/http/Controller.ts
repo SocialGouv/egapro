@@ -5,6 +5,12 @@ import { StatusCodes } from "http-status-codes";
 interface QueryString {
   [key: string]: QueryString | QueryString[] | string[] | string | undefined;
 }
+
+/**
+ * Generic {@link Controller} request object.
+ *
+ * Exposes basic infos and wraps original request and native node request.
+ */
 export interface ControllerRequest<TParamKeys extends string = string, TOriginalRequest = Any> {
   _nodeRequest: IncomingMessage;
   _req: TOriginalRequest;
@@ -15,6 +21,13 @@ export interface ControllerRequest<TParamKeys extends string = string, TOriginal
 
 export type AnyUrl = UniqueString<string>;
 export type BackToReferer = "back";
+
+/**
+ * Generic {@link Controller} response object.
+ *
+ * Simplifies and standardizes methods used in controllers. It also
+ * wraps original response and native node response.
+ */
 export interface ControllerResponse<TOriginalResponse = Any> {
   _nodeResponse: ServerResponse;
   _res: TOriginalResponse;
@@ -28,9 +41,15 @@ export interface ControllerResponse<TOriginalResponse = Any> {
   status(code: StatusCodes): ControllerResponse;
 }
 
+/**
+ * Standard controller. Implementing a method ensures its http verb availability.
+ */
 export interface Controller<TParamKeys extends string = string, TOriginalRequest = Any, TOriginalResponse = Any> {
   delete?(req: ControllerRequest<TParamKeys, TOriginalRequest>, res: ControllerResponse<TOriginalResponse>): pvoid;
   get?(req: ControllerRequest<TParamKeys, TOriginalRequest>, res: ControllerResponse<TOriginalResponse>): pvoid;
+  head?(req: ControllerRequest<TParamKeys, TOriginalRequest>, res: ControllerResponse<TOriginalResponse>): pvoid;
+  options?(req: ControllerRequest<TParamKeys, TOriginalRequest>, res: ControllerResponse<TOriginalResponse>): pvoid;
+  patch?(req: ControllerRequest<TParamKeys, TOriginalRequest>, res: ControllerResponse<TOriginalResponse>): pvoid;
   post?(req: ControllerRequest<TParamKeys, TOriginalRequest>, res: ControllerResponse<TOriginalResponse>): pvoid;
   put?(req: ControllerRequest<TParamKeys, TOriginalRequest>, res: ControllerResponse<TOriginalResponse>): pvoid;
 }
