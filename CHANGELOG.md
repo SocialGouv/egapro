@@ -1,3 +1,10 @@
+# [2.45.0](https://github.com/SocialGouv/egapro/compare/v2.44.1...v2.45.0) (2022-12-12)
+
+
+### Features
+
+* **apiv2:** advanced controllers ([#1419](https://github.com/SocialGouv/egapro/issues/1419)) ([8f5ce13](https://github.com/SocialGouv/egapro/commit/8f5ce13413ed816cddef0ef549e5b10bdd9bbd3c))
+
 ## [2.44.1](https://github.com/SocialGouv/egapro/compare/v2.44.0...v2.44.1) (2022-12-09)
 
 
