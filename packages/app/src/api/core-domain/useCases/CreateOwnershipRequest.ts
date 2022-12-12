@@ -28,7 +28,7 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
           const validatedSiren = new Siren(siren);
           setSirens.add(validatedSiren);
         } catch (error) {
-          console.error(`Error for Siren ${siren}`);
+          console.error(`Error for Siren ${siren}`, error);
         }
       }
 
@@ -51,6 +51,7 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
             askerEmail: validatedAskerEmail,
             status: new OwnershipRequestStatus(OwnershipRequestStatus.Enum.TO_PROCESS),
           });
+
           await this.ownershipRequestRepo.save(ownershipRequest);
         }
       }

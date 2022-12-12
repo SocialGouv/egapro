@@ -35,13 +35,10 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
 
     toPersistence(obj) {
       return {
-        created_at: obj.createdAt?.toISOString(),
-        modified_at: obj.modifiedAt?.toISOString(),
         siren: obj.siren.getValue(),
         asker_email: obj.askerEmail.getValue(),
         email: obj.email.getValue(),
         status: obj.status.getValue(),
-        error_detail: obj.errorDetail,
       } as Objectize<OwnershipRequestRaw>;
     },
   };

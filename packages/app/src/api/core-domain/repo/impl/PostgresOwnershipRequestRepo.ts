@@ -1,8 +1,9 @@
 import { sql } from "@api/core-domain/infra/db/postgres";
 import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
-import type { OwnershipRequest, OwnershipRequestPK } from "@common/core-domain/domain/OwnershipRequest";
+import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
+import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
 
 import type { IOwnershipRequestRepo } from "../IOwnershipRequestRepo";
@@ -31,7 +32,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public delete(item: OwnershipRequest): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public exists(id: OwnershipRequestPK): Promise<boolean> {
+  public exists(id: UniqueID): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<OwnershipRequest[]> {
@@ -40,7 +41,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     return raw.map(ownershipRequestMap.toDomain) as unknown as OwnershipRequest[];
   }
 
-  public async getOne(id: OwnershipRequestPK): Promise<OwnershipRequest | null> {
+  public async getOne(id: UniqueID): Promise<OwnershipRequest | null> {
     try {
       const [raw] = await this.sql`select * from ${this.table} where id=${id.getValue()} limit 1`;
 
@@ -58,14 +59,15 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   public async save(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
-    await sql`insert into ${this.table} ${sql(
+
+    await sql`insert into ${this.table} (siren, email, asker_email, status) values ${sql(
       raw,
       "siren",
       "email",
       "asker_email",
       "status",
-      "error_detail",
-    )} on conflict ${sql(["siren", "email"])} do update set ${sql(raw, "modified_at", "status", "error_detail")}`;
+    )}`;
+    // on conflict ${sql(["siren", "email"])} do update set ${sql(raw)}`.describe();
   }
 
   // See Multiple updates in one query in https://www.npmjs.com/package/postgres#queries

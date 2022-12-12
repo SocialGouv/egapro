@@ -14,9 +14,7 @@ export interface OwnershipRequestProps {
   status: OwnershipRequestStatus;
 }
 
-export type OwnershipRequestPK = UniqueID;
-
-export class OwnershipRequest extends Entity<OwnershipRequestProps, OwnershipRequestPK> {
+export class OwnershipRequest extends Entity<OwnershipRequestProps, UniqueID> {
   get createdAt(): Date | undefined {
     return this.props.createdAt;
   }
