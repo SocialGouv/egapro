@@ -20,3 +20,8 @@ export interface RepresentationEquilibreeRaw {
   siren: string;
   year: number;
 }
+
+export interface OwnershipRaw {
+  email: string;
+  siren: string;
+}

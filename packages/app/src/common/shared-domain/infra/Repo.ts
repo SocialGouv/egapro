@@ -1,8 +1,8 @@
 import type { Any } from "../../utils/types";
 import type { Entity } from "../domain";
 
-export interface SimpleRepo {
-  getAll(): Promise<Any[]>;
+export interface SimpleRepo<T extends Entity<Any, Any> = Any> {
+  getAll(): Promise<T[]>;
 }
 
 export interface Repo<T extends Entity<Any, Any>, ID = NonNullable<T["id"]>> extends SimpleRepo {

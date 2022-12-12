@@ -12,6 +12,8 @@ app:
         name: "{{ .Values.global.pgSecretName }}"
     - secretRef:
         name: "staff"
+    - secretRef:
+        name: "egapro-secret"
   vars:
     POSTGRES_HOST: "$(PGHOST)"
     POSTGRES_DB: "$(PGDATABASE)"
@@ -19,6 +21,7 @@ app:
     POSTGRES_USER: "$(PGUSER)"
     POSTGRES_PASSWORD: "$(PGPASSWORD)"
     POSTGRES_SSLMODE: "$(PGSSLMODE)"
+    SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
 
 storybook:
