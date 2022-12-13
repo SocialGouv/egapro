@@ -3,6 +3,7 @@ import { CreateOwnershipRequest, CreateOwnershipRequestError } from "@api/core-d
 import { ValidationError } from "@common/shared-domain";
 import type { NextApiHandler } from "next";
 
+// TODO: switch later to controller class
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== "PUT") {
     return res.status(405).send(null);

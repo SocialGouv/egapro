@@ -69,13 +69,6 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     )}`;
   }
 
-  // See Multiple updates in one query in https://www.npmjs.com/package/postgres#queries
-  // ON CONFLICT with excluded row. https://stackoverflow.com/a/68133518/2728710
-  public async saveAll(items: OwnershipRequest[]): Promise<void> {
-    // const raws = items.map(item => ownershipRequestMap.toPersistence(item));
-    throw new Error("Method not implemented.");
-  }
-
   public update(item: OwnershipRequest): Promise<void> {
     return this.save(item);
   }
