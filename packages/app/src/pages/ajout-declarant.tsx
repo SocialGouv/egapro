@@ -79,7 +79,12 @@ const AddDeclarer: NextPageWithLayout = () => {
                 <FormLayout>
                   <FormGroup isError={Boolean(errors.user_email)}>
                     <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
-                    <FormInput aria-describedby={"email-msg"} id="email" type="email" {...register("user_email")} />
+                    <FormInput
+                      aria-describedby={errors.user_email && "email-msg"}
+                      id="email"
+                      type="email"
+                      {...register("user_email")}
+                    />
                     {errors.user_email && (
                       <FormGroupMessage id="nom-message-error">{errors.user_email.message}</FormGroupMessage>
                     )}
@@ -91,7 +96,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                     >
                       Numéro(s) Siren
                     </FormGroupLabel>
-                    <FormTextarea aria-describedby={"siren-msg"} id="siren" {...register("sirens")} />
+                    <FormTextarea aria-describedby={errors.sirens && "siren-msg"} id="siren" {...register("sirens")} />
                     {errors.sirens && (
                       <FormGroupMessage id="nom-message-error">{errors.sirens.message}</FormGroupMessage>
                     )}
@@ -103,7 +108,11 @@ const AddDeclarer: NextPageWithLayout = () => {
                     >
                       emails
                     </FormGroupLabel>
-                    <FormTextarea aria-describedby={"declarer-email-msg"} id="declarer-email" {...register("emails")} />
+                    <FormTextarea
+                      aria-describedby={errors.emails && "declarer-email-msg"}
+                      id="declarer-email"
+                      {...register("emails")}
+                    />
                     {errors.emails && (
                       <FormGroupMessage id="nom-message-error">{errors.emails.message}</FormGroupMessage>
                     )}
