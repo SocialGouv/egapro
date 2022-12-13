@@ -26,6 +26,7 @@ export interface OwnershipRequestRaw {
   created_at: string;
   email: string;
   error_detail?: string;
+  id: string;
   modified_at: string;
   siren: string;
   status: string;

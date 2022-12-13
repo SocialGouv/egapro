@@ -9,6 +9,7 @@ export interface OwnershipRequestProps {
   createdAt?: Date;
   email: Email;
   errorDetail?: string;
+  id?: UniqueID;
   modifiedAt?: Date;
   siren: Siren;
   status: OwnershipRequestStatus;

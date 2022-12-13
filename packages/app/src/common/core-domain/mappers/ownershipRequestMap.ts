@@ -1,44 +1,45 @@
 import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
 import type { Mapper } from "@common/shared-domain";
-import { Email } from "@common/shared-domain/domain/valueObjects";
+import { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Objectize } from "@common/utils/types";
 
 import { OwnershipRequest } from "../domain/OwnershipRequest";
 import { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "../domain/valueObjects/Siren";
-import type { OwnershipRequestDTO } from "../dtos/OwnershipRequestDTO";
+import type { OwnershipRequestSelectDTO } from "../dtos/OwnershipRequestDTO";
 
-export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipRequestDTO | null, OwnershipRequestRaw>> =
-  {
-    toDomain(raw) {
-      return new OwnershipRequest({
-        createdAt: new Date(raw.created_at),
-        modifiedAt: new Date(raw.modified_at),
-        siren: new Siren(raw.siren),
-        askerEmail: new Email(raw.asker_email),
-        email: new Email(raw.email),
-        status: new OwnershipRequestStatus(raw.status),
-        errorDetail: raw.error_detail,
-      });
-    },
+export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipRequestSelectDTO, OwnershipRequestRaw>> = {
+  toDomain(raw) {
+    return new OwnershipRequest({
+      id: new UniqueID(raw.id),
+      createdAt: new Date(raw.created_at),
+      modifiedAt: new Date(raw.modified_at),
+      siren: new Siren(raw.siren),
+      askerEmail: new Email(raw.asker_email),
+      email: new Email(raw.email),
+      status: new OwnershipRequestStatus(raw.status),
+      errorDetail: raw.error_detail,
+    });
+  },
 
-    toDTO(obj) {
-      return {
-        askerEmail: obj.askerEmail.getValue(),
-        modifiedAt: obj.modifiedAt!.toISOString(), // TODO handle multiple DTO depending on save/read/update
-        createdAt: obj.createdAt!.toISOString(),
-        email: obj.email.getValue(),
-        siren: obj.siren.getValue(),
-        status: obj.status.getValue(),
-      };
-    },
+  toDTO(obj) {
+    return {
+      id: obj.id!.getValue(), // We always want to build a DTO from a complete model, so we can be sure to have id, createdAt and modifiedAt.
+      askerEmail: obj.askerEmail.getValue(),
+      modifiedAt: obj.modifiedAt!.toISOString(), // We always want to build a DTO from a complete model, so we can be sure to have id, createdAt and modifiedAt.
+      createdAt: obj.createdAt!.toISOString(), // We always want to build a DTO from a complete model, so we can be sure to have id, createdAt and modifiedAt.
+      email: obj.email.getValue(),
+      siren: obj.siren.getValue(),
+      status: obj.status.getValue(),
+    };
+  },
 
-    toPersistence(obj) {
-      return {
-        siren: obj.siren.getValue(),
-        asker_email: obj.askerEmail.getValue(),
-        email: obj.email.getValue(),
-        status: obj.status.getValue(),
-      } as Objectize<OwnershipRequestRaw>;
-    },
-  };
+  toPersistence(obj) {
+    return {
+      siren: obj.siren.getValue(),
+      asker_email: obj.askerEmail.getValue(),
+      email: obj.email.getValue(),
+      status: obj.status.getValue(),
+    } as Objectize<OwnershipRequestRaw>;
+  },
+};
