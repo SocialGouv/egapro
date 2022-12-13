@@ -103,8 +103,8 @@ def translate_motif_enum(str):
     return enum[str] if str in enum else None
 
 def prepare_indicateurs(data):
-    pct_f_cadres, pct_h_cadres = data.get("pourcentage_femmes_cadres"), data.get("pourcentage_hommes_cadres")
-    pct_f_membres, pct_h_membres = data.get("pourcentage_femmes_membres"), data.get("pourcentage_hommes_membres")
+    pct_f_cadres, pct_h_cadres = data.get("pourcentage_femmes_cadres", "NC"), data.get("pourcentage_hommes_cadres", "NC")
+    pct_f_membres, pct_h_membres = data.get("pourcentage_femmes_membres", "NC"), data.get("pourcentage_hommes_membres", "NC")
     motif_nc_cadres, motif_nc_membres = data.get("motif_non_calculabilité_cadres"), data.get("motif_non_calculabilité_membres")
     motif_nc_cadres = translate_motif_enum(motif_nc_cadres)
     motif_nc_membres = translate_motif_enum(motif_nc_membres)

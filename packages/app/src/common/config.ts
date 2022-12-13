@@ -15,9 +15,18 @@ export const config = {
     siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",
   },
   api: {
+    staff: ensureApiEnvVar("EGAPRO_STAFF", "")
+      .split(",")
+      .filter(v => v),
     env: ensureApiEnvVar("EGAPRO_ENV", "dev") as "dev" | "preprod" | "prod",
     maildev: {
       smtpPort: +ensureApiEnvVar("MAILER_SMTP_PORT", "1025"),
+    },
+    security: {
+      jwtv1: {
+        secret: ensureApiEnvVar("SECURITY_JWT_SECRET"),
+        algorithm: ensureApiEnvVar("SECURITY_JWT_ALGORITHM"),
+      },
     },
     postgres: {
       host: ensureApiEnvVar("POSTGRES_HOST"),
