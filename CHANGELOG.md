@@ -1,3 +1,10 @@
+## [2.45.2](https://github.com/SocialGouv/egapro/compare/v2.45.1...v2.45.2) (2022-12-13)
+
+
+### Bug Fixes
+
+* modify index export content ([#1457](https://github.com/SocialGouv/egapro/issues/1457)) ([361ddcc](https://github.com/SocialGouv/egapro/commit/361ddcc7da37de2cc5e66d88cd8d8d9f25833bda))
+
 ## [2.45.1](https://github.com/SocialGouv/egapro/compare/v2.45.0...v2.45.1) (2022-12-12)
 
 
