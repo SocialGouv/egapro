@@ -67,7 +67,6 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
       "asker_email",
       "status",
     )}`;
-    // on conflict ${sql(["siren", "email"])} do update set ${sql(raw)}`.describe();
   }
 
   // See Multiple updates in one query in https://www.npmjs.com/package/postgres#queries
