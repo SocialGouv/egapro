@@ -6,9 +6,9 @@ import type { Objectize } from "@common/utils/types";
 import { OwnershipRequest } from "../domain/OwnershipRequest";
 import { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "../domain/valueObjects/Siren";
-import type { OwnershipRequestSelectDTO } from "../dtos/OwnershipRequestDTO";
+import type { OwnershipRequestDTO } from "../dtos/OwnershipRequestDTO";
 
-export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipRequestSelectDTO, OwnershipRequestRaw>> = {
+export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipRequestDTO, OwnershipRequestRaw>> = {
   toDomain(raw) {
     return new OwnershipRequest({
       id: new UniqueID(raw.id),

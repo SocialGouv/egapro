@@ -3,6 +3,7 @@ import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
+import { ValidationError } from "@common/shared-domain/domain";
 import { Email } from "@common/shared-domain/domain/valueObjects";
 
 import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
@@ -18,6 +19,10 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
 
   public async execute({ sirens, emails, askerEmail }: Input): Promise<void> {
     try {
+      if (!Array.isArray(sirens) || !Array.isArray(emails)) {
+        throw new ValidationError("Error for sirens or emails. Array is expected.");
+      }
+
       const validatedAskerEmail = new Email(askerEmail);
 
       const setSirens = new Set<Siren>();
@@ -41,8 +46,7 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
         }
       }
 
-      // Add in ownership-request all pairs of Siren/email.
-
+      // Add all pairs of Siren/email in ownership-request.
       for (const siren of setSirens) {
         for (const email of setEmails) {
           const ownershipRequest = new OwnershipRequest({

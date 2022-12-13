@@ -8,9 +8,7 @@ const handler: NextApiHandler = async (req, res) => {
     return res.status(405).send(null);
   }
 
-  const body = req.body;
-
-  const { sirens, emails, askerEmail } = body;
+  const { sirens, emails, askerEmail } = req.body;
 
   try {
     const useCase = new CreateOwnershipRequest(ownershipRequestRepo);
