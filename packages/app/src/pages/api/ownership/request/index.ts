@@ -12,14 +12,19 @@ const handler: NextApiHandler = async (req, res) => {
 
   try {
     const useCase = new CreateOwnershipRequest(ownershipRequestRepo);
-    const ret = await useCase.execute({ sirens, emails, askerEmail });
-    res.status(200).json(ret);
+    await useCase.execute({ sirens, emails, askerEmail });
+    res.status(200).json({});
   } catch (error: unknown) {
     if (error instanceof CreateOwnershipRequestError) {
       if (error.previousError instanceof ValidationError) {
-        return res.status(422).send(error.previousError.message);
+        return res.status(422).json({ errorMessage: error.previousError.message });
       }
-      res.status(400).send(error.appErrorList().map(e => e.message));
+      res.status(400).json({
+        errorMessage: error
+          .appErrorList()
+          .map(e => e.message)
+          .join(" | "),
+      });
     } else {
       console.error(error);
       res.status(500).send(null);
