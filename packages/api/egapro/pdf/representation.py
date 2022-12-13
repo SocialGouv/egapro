@@ -60,7 +60,7 @@ def main(data):
     adresse = [data["entreprise"].get(k) for k in ("adresse", "code_postal", "commune")]
     adresse = " ".join(v for v in adresse if v)
     cells = [
-        ("Raison sociale", data.company),
+        ("Raison sociale", data.company_name),
         ("Siren", data.siren),
         ("Code NAF", data.naf),
         ("Adresse", adresse),

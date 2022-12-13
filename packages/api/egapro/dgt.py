@@ -341,7 +341,7 @@ def ues_data(sheet, data):
             tranche,
             nom,
             data.siren,
-            data.company,
+            data.company_name,
             data.path("entreprise.raison_sociale"),
             data.siren,
         ]
@@ -358,7 +358,7 @@ def ues_data(sheet, data):
                 tranche,
                 nom,
                 data.siren,
-                data.company,
+                data.company_name,
                 ues["raison_sociale"],
                 ues["siren"],
             ]

@@ -142,7 +142,7 @@ class representation_equilibree(table):
     @classmethod
     def public_data(cls, data):
         data = models.Data(data)
-        raison_sociale = data.company
+        raison_sociale = data.company_name
         siren = data.siren
         out = {
             "entreprise": {
@@ -257,7 +257,7 @@ class declaration(table):
     @classmethod
     def public_entreprise_data(cls, data):
         data = models.Data(data)
-        raison_sociale = data.company
+        raison_sociale = data.company_name
         siren = data.siren
         ues = data.path("entreprise.ues")
         if ues:
