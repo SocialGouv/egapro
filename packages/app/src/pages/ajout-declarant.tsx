@@ -86,36 +86,36 @@ const AddDeclarer: NextPageWithLayout = () => {
                       {...register("user_email")}
                     />
                     {errors.user_email && (
-                      <FormGroupMessage id="nom-message-error">{errors.user_email.message}</FormGroupMessage>
+                      <FormGroupMessage id="email-msg">{errors.user_email.message}</FormGroupMessage>
                     )}
                   </FormGroup>
                   <FormGroup isError={Boolean(errors.sirens)}>
                     <FormGroupLabel
-                      htmlFor="siren"
+                      htmlFor="sirens"
                       hint="Le numéro Siren se compose de 9 chiffres sans espace, il est possible d’ajouter plusieurs Siren séparées par des virgules sans espace."
                     >
                       Numéro(s) Siren
                     </FormGroupLabel>
-                    <FormTextarea aria-describedby={errors.sirens && "siren-msg"} id="siren" {...register("sirens")} />
-                    {errors.sirens && (
-                      <FormGroupMessage id="nom-message-error">{errors.sirens.message}</FormGroupMessage>
-                    )}
+                    <FormTextarea
+                      aria-describedby={errors.sirens && "sirens-msg"}
+                      id="sirens"
+                      {...register("sirens")}
+                    />
+                    {errors.sirens && <FormGroupMessage id="sirens-msg">{errors.sirens.message}</FormGroupMessage>}
                   </FormGroup>
                   <FormGroup isError={Boolean(errors.emails)}>
                     <FormGroupLabel
-                      htmlFor="declarer-email"
+                      htmlFor="emails"
                       hint="Il est possible d’ajouter plusieurs emails séparées par des virgules sans espace."
                     >
                       emails
                     </FormGroupLabel>
                     <FormTextarea
-                      aria-describedby={errors.emails && "declarer-email-msg"}
-                      id="declarer-email"
+                      aria-describedby={errors.emails && "emails-msg"}
+                      id="emails"
                       {...register("emails")}
                     />
-                    {errors.emails && (
-                      <FormGroupMessage id="nom-message-error">{errors.emails.message}</FormGroupMessage>
-                    )}
+                    {errors.emails && <FormGroupMessage id="emails-msg">{errors.emails.message}</FormGroupMessage>}
                   </FormGroup>
                   <FormLayoutButtonGroup>
                     <FormButton isDisabled={!isValid}>Envoyer ma demande</FormButton>
