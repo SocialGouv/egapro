@@ -73,7 +73,7 @@ def main(data):
     cells = [
         ("Structure", data.structure),
         ("Tranche effectifs", constants.EFFECTIFS.get(tranche_effectif)),
-        ("Raison sociale", data.company_name),
+        ("Raison sociale", data.company),
         ("Siren", data.siren),
         ("Code NAF", data.naf),
         ("Adresse", adresse),
@@ -266,7 +266,7 @@ def main(data):
         ),
         (
             "Résultat final sur 100 points",
-            data.note if data.note is not None else "Non calculable",
+            data.grade if data.grade is not None else "Non calculable",
         ),
         (
             "Mesures de corrections prévues",

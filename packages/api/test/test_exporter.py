@@ -1014,10 +1014,10 @@ async def test_export_public_data(declaration):
     await exporter.public_data(out)
     out.seek(0)
     assert out.read() == (
-        "Raison Sociale;SIREN;Année;Note;Structure;Nom UES;Entreprises UES (SIREN);Région;Département;Pays\r\n"
-        "Mirabar;87654321;2019;26;Entreprise;;;Auvergne-Rhône-Alpes;Drôme;FRANCE\r\n"
-        "FooBar;87654322;2018;26;Entreprise;;;Auvergne-Rhône-Alpes;Drôme;FRANCE\r\n"
-        "KaramBar;87654324;2020;26;Entreprise;;;Auvergne-Rhône-Alpes;Drôme;FRANCE\r\n"
+        "Année;Structure;Tranche d'effectifs;SIREN;Raison Sociale;Nom UES;Entreprises UES (SIREN);Région;Département;Pays;Code NAF;Note Ecart rémunération;Note Ecart taux d'augmentation;Note Ecart taux de promotion;Note Retour congé maternité;Note Hautes rémunérations;Note Index\r\n"
+        "2019;Entreprise;1000:;87654321;Mirabar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
+        "2018;Entreprise;1000:;87654322;FooBar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
+        "2020;Entreprise;251:999;87654324;KaramBar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
     )
 
 
@@ -1028,7 +1028,7 @@ async def test_export_ues_public_data(declaration):
         year=2019,
         entreprise={
             "ues": {
-                "raison_sociale": "MiraFoo",
+                "nom": "MiraFoo",
                 "entreprises": [
                     {"raison_sociale": "MiraBaz", "siren": "315710251"},
                     {"raison_sociale": "MiraPouet", "siren": "315710251"},
@@ -1041,8 +1041,8 @@ async def test_export_ues_public_data(declaration):
     await exporter.public_data(out)
     out.seek(0)
     assert out.read() == (
-        "Raison Sociale;SIREN;Année;Note;Structure;Nom UES;Entreprises UES (SIREN);Région;Département;Pays\r\n"
-        "Mirabar;87654321;2019;26;Unité Economique et Sociale (UES);MiraFoo;MiraBaz (315710251),MiraPouet (315710251);Auvergne-Rhône-Alpes;Drôme;FRANCE\r\n"
+        "Année;Structure;Tranche d'effectifs;SIREN;Raison Sociale;Nom UES;Entreprises UES (SIREN);Région;Département;Pays;Code NAF;Note Ecart rémunération;Note Ecart taux d'augmentation;Note Ecart taux de promotion;Note Retour congé maternité;Note Hautes rémunérations;Note Index\r\n"
+        "2019;Unité Economique et Sociale (UES);1000:;87654321;Mirabar;MiraFoo;MiraBaz (315710251),MiraPouet (315710251);Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
     )
 
 
@@ -1062,8 +1062,8 @@ async def test_export_public_data_with_foreign_company(declaration):
     await exporter.public_data(out)
     out.seek(0)
     assert out.read() == (
-        "Raison Sociale;SIREN;Année;Note;Structure;Nom UES;Entreprises UES (SIREN);Région;Département;Pays\r\n"
-        "Total Recall;123456782;2020;26;Entreprise;;;;;BELGIQUE\r\n"
+        "Année;Structure;Tranche d'effectifs;SIREN;Raison Sociale;Nom UES;Entreprises UES (SIREN);Région;Département;Pays;Code NAF;Note Ecart rémunération;Note Ecart taux d'augmentation;Note Ecart taux de promotion;Note Retour congé maternité;Note Hautes rémunérations;Note Index\r\n"
+        "2020;Entreprise;50:250;123456782;Total Recall;;;;;BELGIQUE;;NC;NC;NC;NC;NC;NC;26\r\n"
     )
 
 

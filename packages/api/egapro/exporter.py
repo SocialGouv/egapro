@@ -62,10 +62,10 @@ async def public_data(path: Path):
             [
                 data.year,
                 data.structure,
-                data.get("entreprise.effectif.tranche"),
+                data.path("entreprise.effectif.tranche"),
                 data.siren,
-                data.company_name,
-                data.ues_name,
+                data.company,
+                data.ues,
                 ues,
                 constants.REGIONS.get(data.region),
                 constants.DEPARTEMENTS.get(data.departement),
@@ -73,13 +73,13 @@ async def public_data(path: Path):
                     data.path("entreprise.code_pays"), "FRANCE"
                 ),
                 data.naf,
-                data.get("indicateurs.rémunérations.note", "NC"),
-                data.get("indicateurs.augmentations.note", "NC"),
-                data.get("indicateurs.promotions.note", "NC"),
-                data.get("indicateurs.augmentations_et_promotions.note", "NC"),
-                data.get("indicateurs.congés_maternité.note", "NC"),
-                data.get("indicateurs.hautes_rémunérations.note", "NC"),
-                data.note or "NC",
+                data.path("indicateurs.rémunérations.note") or "NC",
+                data.path("indicateurs.augmentations.note") or "NC",
+                data.path("indicateurs.promotions.note") or "NC",
+                data.path("indicateurs.augmentations_et_promotions.note") or "NC",
+                data.path("indicateurs.congés_maternité.note") or "NC",
+                data.path("indicateurs.hautes_rémunérations.note") or "NC",
+                data.grade or "NC",
             ]
         )
     writer.writerows(rows)

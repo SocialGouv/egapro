@@ -58,7 +58,7 @@ async def search(q, verbose=False):
     rows = await db.search.run(q)
     for row in rows:
         data = models.Data(row)
-        print(f"{data.siren} | {data.year} | {data.company_name}")
+        print(f"{data.siren} | {data.year} | {data.company}")
         if verbose:
             print(row)
 
@@ -67,7 +67,7 @@ async def search_representation_equilibree(q, verbose=False):
     rows = await db.search_representation_equilibree.run(q)
     for row in rows:
         data = models.Data(row)
-        print(f"{data.siren} | {data.year} | {data.company_name}")
+        print(f"{data.siren} | {data.year} | {data.company}")
         if verbose:
             print(row)
 

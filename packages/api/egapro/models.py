@@ -75,7 +75,7 @@ class Data(dict):
         return f"{code} - {NAF[code]}"
 
     @property
-    def company_name(self) -> str:
+    def company(self) -> str:
         return self.path("entreprise.raison_sociale")
 
     @property
@@ -95,11 +95,11 @@ class Data(dict):
         )
 
     @property
-    def ues_name(self) -> str:
+    def ues(self) -> str:
         return self.path("entreprise.ues.nom")
 
     @property
-    def note(self):
+    def grade(self):
         return self.path("déclaration.index")
 
     @property
