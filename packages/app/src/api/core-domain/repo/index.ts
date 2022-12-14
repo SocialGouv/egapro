@@ -9,10 +9,10 @@ import type { IOwnershipRepo } from "./IOwnershipRepo";
 import type { IOwnershipRequestRepo } from "./IOwnershipRequestRepo";
 import type { IRepresentationEquilibreeRepo } from "./IRepresentationEquilibreeRepo";
 
-let declarationRepo: IDeclarationRepo;
-let representationEquilibreeRepo: IRepresentationEquilibreeRepo;
-let ownershipRequestRepo: IOwnershipRequestRepo;
-let ownershipRepo: IOwnershipRepo;
+export let declarationRepo: IDeclarationRepo;
+export let representationEquilibreeRepo: IRepresentationEquilibreeRepo;
+export let ownershipRequestRepo: IOwnershipRequestRepo;
+export let ownershipRepo: IOwnershipRepo;
 
 if (services.db === "postgres") {
   declarationRepo = new PostgresDeclarationRepo();
@@ -20,5 +20,3 @@ if (services.db === "postgres") {
   ownershipRequestRepo = new PostgresOwnershipRequestRepo();
   ownershipRepo = new PostgresOwnershipRepo();
 }
-
-export { declarationRepo, ownershipRepo, ownershipRequestRepo, representationEquilibreeRepo };
