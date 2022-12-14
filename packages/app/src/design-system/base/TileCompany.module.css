@@ -42,7 +42,8 @@
 }
 
 .table table {
-    width: 100%;
+    table-layout:fixed;
+    min-width: 100%;
     border-collapse: collapse;
     border-spacing: 0;
     text-align: center;
@@ -66,7 +67,10 @@
     font-weight: 400;
     padding: .625rem 1rem;
     font-size: 0.875rem;
+     white-space: nowrap;
 }
+
+
 
 .tableHeadCol:not(:last-child) {
     border-right: 1px solid var(--border-default-grey);
@@ -98,6 +102,7 @@
     font-weight: 400;
     padding: 1rem;
     font-size: 0.875rem;
+    white-space: nowrap;
 }
 
 .tableBodyRowCol:not(:last-child) {
@@ -105,7 +110,6 @@
 }
 
 .tablePercent {
-
     display: flex;
     justify-content: center;
     justify-items: center;
@@ -116,9 +120,10 @@
     padding: 0 1rem;
 }
 
+.tableYear,
 .tablePercentData {
-    line-height: 1;
-    font-size: 2rem;
+    line-height: 1.25;
+    font-size: 1.5rem;
     font-weight: 700;
 }
 
@@ -135,12 +140,6 @@
     color: #888
 }
 
-.tableYear {
-    line-height: 1.5;
-    font-size: 1.75rem;
-    font-weight: 700;
-}
-
 .tableYearLegend {
     line-height: 1.25;
     font-size: 0.75rem;
@@ -151,4 +150,15 @@
     padding-top: 0.75rem;
     text-align: center;
     border-top: 1px solid var(--border-default-grey);
+}
+
+
+@media (min-width: 36em) {
+    .tablePercentData,
+    .tableYear {
+        font-size: 1.75rem;
+    }
+    .tableHeadCol:first-child {
+        width: 10rem;
+    }
 }

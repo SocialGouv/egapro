@@ -4,12 +4,12 @@ import {
   Alert,
   AlertTitle,
   Box,
+  ButtonGroup,
   FormButton,
   FormGroup,
   FormGroupLabel,
   FormGroupMessage,
   FormInput,
-  FormLayoutButtonGroup,
   FormSelect,
   TileCompanyRepeqs,
 } from "@design-system";
@@ -51,9 +51,9 @@ const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading
 
   if (error) {
     return (
-      <div style={{ marginTop: 40 }}>
-        <Alert type="error">Il y a eu une erreur lors de la recherche.</Alert>
-      </div>
+      <Alert size="sm" type="error" mt="3w">
+        <p>Il y a eu une erreur lors de la recherche.</p>
+      </Alert>
     );
   }
 
@@ -63,29 +63,29 @@ const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading
 
   if (repeqs.count === 0) {
     return (
-      <div style={{ marginTop: 40 }}>
-        <Alert type="info">
-          <AlertTitle as="h1">Aucune entreprise trouvée.</AlertTitle>
-          <p>Veuillez modifier votre recherche.</p>
-        </Alert>
-      </div>
+      <Alert type="info" mt="3w">
+        <AlertTitle as="h2">Aucune entreprise trouvée.</AlertTitle>
+        <p>Veuillez modifier votre recherche.</p>
+      </Alert>
     );
   }
 
   return (
-    <>
+    <div className="fr-mt-3w">
       {!repeqs?.count ? null : (
-        <div style={{ marginTop: 10 }}>
+        <p>
           {repeqs?.data?.length} {repeqs?.count > 10 ? `sur ${repeqs?.count}` : ""} résultat
           {repeqs?.count > 1 ? "s" : ""}
-        </div>
+        </p>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 15 }}>
+      <div className="fr-grid-row fr-grid-row--gutters">
         {repeqs.data.map(repeq => (
-          <TileCompanyRepeqs key={repeq.entreprise.siren} {...repeq} />
+          <div key={repeq.entreprise.siren} className="fr-col-12">
+            <TileCompanyRepeqs {...repeq} />
+          </div>
         ))}
       </div>
-    </>
+    </div>
   );
 };
 
@@ -138,11 +138,11 @@ function FormSearchSiren() {
 
   return (
     <>
-      <h2>Rechercher la représentation équilibrée d'une entreprise</h2>
+      <h1 className="fr-h2">Rechercher la représentation équilibrée d'une entreprise</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div>
-          <div>
+        <div className="fr-grid-row fr-grid-row--gutters">
+          <div className="fr-col-12">
             <FormGroup>
               <FormGroupLabel htmlFor="q">Nom ou numéro Siren de l’entreprise</FormGroupLabel>
               <FormInput
@@ -154,57 +154,55 @@ function FormSearchSiren() {
               {errors.q && <FormGroupMessage id="q-message-error">{errors.q.message}</FormGroupMessage>}
             </FormGroup>
           </div>
-          <div style={{ display: "flex", gap: 20, marginTop: 20 }}>
-            <div style={{ flexShrink: 1, flexBasis: "33%" }}>
-              <FormGroup>
-                <FormSelect
-                  id="region"
-                  {...register("region")}
-                  aria-describedby={errors.region && "region-message-error"}
-                >
-                  <option value="">Région</option>
-                  {REGIONS_TRIES.map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </FormSelect>
-              </FormGroup>
-            </div>
-
-            <div style={{ flexShrink: 1, flexBasis: "33%" }}>
-              <FormGroup>
-                <FormSelect
-                  id="departement"
-                  {...register("departement")}
-                  aria-describedby={errors.departement && "departement-message-error"}
-                >
-                  <option value="">Département</option>
-                  {departements.map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </FormSelect>
-              </FormGroup>
-            </div>
-
-            <div style={{ flexShrink: 1, flexBasis: "33%" }}>
-              <FormGroup>
-                <FormSelect id="naf" {...register("naf")} aria-describedby={errors.naf && "naf-message-error"}>
-                  <option value="">Secteur d'activité</option>
-                  {SECTIONS_NAF_TRIES.map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {capitalize(value)}
-                    </option>
-                  ))}
-                </FormSelect>
-              </FormGroup>
-            </div>
+          <div className="fr-col-12 fr-col-sm-4">
+            <FormGroup>
+              <FormSelect
+                id="region"
+                {...register("region")}
+                aria-describedby={errors.region && "region-message-error"}
+              >
+                <option value="">Région</option>
+                {REGIONS_TRIES.map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
+                ))}
+              </FormSelect>
+            </FormGroup>
           </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <FormLayoutButtonGroup>
+          <div className="fr-col-12 fr-col-sm-4">
+            <FormGroup>
+              <FormSelect
+                id="departement"
+                {...register("departement")}
+                aria-describedby={errors.departement && "departement-message-error"}
+              >
+                <option value="">Département</option>
+                {departements.map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
+                ))}
+              </FormSelect>
+            </FormGroup>
+          </div>
+
+          <div className="fr-col-12 fr-col-sm-4">
+            <FormGroup>
+              <FormSelect id="naf" {...register("naf")} aria-describedby={errors.naf && "naf-message-error"}>
+                <option value="">Secteur d'activité</option>
+                {SECTIONS_NAF_TRIES.map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {capitalize(value)}
+                  </option>
+                ))}
+              </FormSelect>
+            </FormGroup>
+          </div>
+
+          <div className="fr-col-12">
+            <ButtonGroup inline="mobile-up">
               <FormButton isDisabled={isLoading}>Rechercher</FormButton>
               <FormButton
                 variant="secondary"
@@ -217,7 +215,7 @@ function FormSearchSiren() {
               >
                 Réinitialiser
               </FormButton>
-            </FormLayoutButtonGroup>
+            </ButtonGroup>
           </div>
         </div>
       </form>
@@ -225,7 +223,7 @@ function FormSearchSiren() {
       {!isFirstRender && <DisplayRepeqs repeqs={repeqs} error={error} isLoading={isLoading} />}
 
       {repeqs?.data?.length < repeqs?.count && (
-        <div style={{ marginTop: 20 }}>
+        <div className="fr-mt-3w">
           <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
             Voir les résultats suivants
           </FormButton>
@@ -246,13 +244,11 @@ function DownloadFileZone() {
   }, []);
 
   return dateFile ? (
-    <>
-      <div style={{ display: "flex", marginTop: 30 }}>
-        <div style={{ marginRight: 20 }}>Télécharger le fichier des représentations équilibrées au {dateFile}</div>
-
-        <a href="/dgt-export-representation.xlsx">Télécharger (xslx)</a>
-      </div>
-    </>
+    <p className="fr-mt-3w">
+      <a href="/dgt-export-representation.xlsx">
+        Télécharger le fichier des représentations équilibrées au {dateFile} (xslx)
+      </a>
+    </p>
   ) : null;
 }
 
@@ -260,7 +256,6 @@ const HomePage: NextPageWithLayout = () => {
   return (
     <Box>
       <FormSearchSiren />
-
       <DownloadFileZone />
     </Box>
   );

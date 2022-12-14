@@ -1,4 +1,7 @@
+from typing import Literal, Union
 from naf import DB as NAF
+
+from egapro.utils import delete_keypath
 
 from . import constants
 
@@ -57,11 +60,11 @@ class Data(dict):
                 return None
 
     @property
-    def siren(self):
+    def siren(self) -> str:
         return self.path("entreprise.siren")
 
     @property
-    def email(self):
+    def email(self) -> str:
         return self.path("déclarant.email")
 
     @property
@@ -72,7 +75,7 @@ class Data(dict):
         return f"{code} - {NAF[code]}"
 
     @property
-    def company(self):
+    def company(self) -> str:
         return self.path("entreprise.raison_sociale")
 
     @property
@@ -84,7 +87,7 @@ class Data(dict):
         return self.path("entreprise.département")
 
     @property
-    def structure(self):
+    def structure(self) -> str:
         return (
             "Unité Economique et Sociale (UES)"
             if self.path("entreprise.ues.entreprises")
@@ -92,8 +95,8 @@ class Data(dict):
         )
 
     @property
-    def ues(self):
-        return self.path("entreprise.ues.raison_sociale")
+    def ues(self) -> str:
+        return self.path("entreprise.ues.nom")
 
     @property
     def grade(self):
@@ -114,3 +117,6 @@ class Data(dict):
         for sub in path.split("."):
             data = data.get(sub, {})
         return data if data or data in [False, 0] else None
+
+    def delete_path(self, path: str):
+        delete_keypath(self, path)

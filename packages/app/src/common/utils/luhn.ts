@@ -1,11 +1,18 @@
 export const checksum = (num: number | string) => {
-  const arr = `${num}`
-    .split("")
-    .reverse()
-    .map(x => parseInt(x));
-  const [lastDigit, ...digits] = arr;
-  let sum = digits.reduce((acc, val, i) => (i % 2 !== 0 ? acc + val : acc + ((val * 2) % 9) || 9), 0);
-  sum += lastDigit;
+  const code = `${num}`;
+  const len = code.length;
+  const parity = len % 2;
+  let sum = 0;
+  for (let i = len - 1; i >= 0; i--) {
+    let d = parseInt(code.charAt(i));
+    if (i % 2 == parity) {
+      d *= 2;
+    }
+    if (d > 9) {
+      d -= 9;
+    }
+    sum += d;
+  }
   return sum % 10;
 };
 

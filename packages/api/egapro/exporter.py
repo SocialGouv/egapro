@@ -5,7 +5,7 @@ from pathlib import Path
 
 import ujson as json
 
-from egapro import constants, db, sql, utils
+from egapro import constants, db, models, sql, utils
 
 
 async def dump(path: Path):
@@ -30,21 +30,28 @@ async def public_data(path: Path):
     writer = csv.writer(path, delimiter=";")
     writer.writerow(
         [
-            "Raison Sociale",
-            "SIREN",
             "Année",
-            "Note",
             "Structure",
+            "Tranche d'effectifs",
+            "SIREN",
+            "Raison Sociale",
             "Nom UES",
             "Entreprises UES (SIREN)",
             "Région",
             "Département",
             "Pays",
+            "Code NAF",
+            "Note Ecart rémunération",
+            "Note Ecart taux d'augmentation",
+            "Note Ecart taux de promotion",
+            "Note Retour congé maternité",
+            "Note Hautes rémunérations",
+            "Note Index",
         ]
     )
     rows = []
     for record in records:
-        data = record.data
+        data: models.Data = record.data
         ues = ",".join(
             [
                 f"{company['raison_sociale']} ({company['siren']})"
@@ -53,11 +60,11 @@ async def public_data(path: Path):
         )
         rows.append(
             [
-                data.company,
-                data.siren,
                 data.year,
-                data.grade,
                 data.structure,
+                data.path("entreprise.effectif.tranche"),
+                data.siren,
+                data.company,
                 data.ues,
                 ues,
                 constants.REGIONS.get(data.region),
@@ -65,6 +72,14 @@ async def public_data(path: Path):
                 constants.PAYS_ISO_TO_LIB.get(
                     data.path("entreprise.code_pays"), "FRANCE"
                 ),
+                data.naf,
+                data.path("indicateurs.rémunérations.note") or "NC",
+                data.path("indicateurs.augmentations.note") or "NC",
+                data.path("indicateurs.promotions.note") or "NC",
+                data.path("indicateurs.augmentations_et_promotions.note") or "NC",
+                data.path("indicateurs.congés_maternité.note") or "NC",
+                data.path("indicateurs.hautes_rémunérations.note") or "NC",
+                data.grade or "NC",
             ]
         )
     writer.writerows(rows)

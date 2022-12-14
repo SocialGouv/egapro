@@ -2,6 +2,8 @@
   "extends": "@tsconfig/next/tsconfig.json",
   "compilerOptions": {
     "strict": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
     // to trick auto imports
     "baseUrl": "../../",
     "paths": {

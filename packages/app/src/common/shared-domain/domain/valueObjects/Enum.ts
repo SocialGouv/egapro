@@ -1,11 +1,11 @@
-import type { Any } from "@common/utils/types";
+import type { Any, UnknownMapping } from "@common/utils/types";
 
 import { enumHasValueGuard } from "../../../utils/enum";
 import { ValidationError } from "../ValidationError";
 import { ValueObject } from "../ValueObject";
 
 export abstract class Enum<TEnum extends object> extends ValueObject<TEnum[keyof TEnum]> {
-  constructor(private value: Enum.ToString<TEnum> | TEnum[keyof TEnum], protected enumObject: TEnum) {
+  constructor(private value: Enum.ToString<TEnum> | TEnum[keyof TEnum] | UnknownMapping, protected enumObject: TEnum) {
     super();
     this.validate();
   }

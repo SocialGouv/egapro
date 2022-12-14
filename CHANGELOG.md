@@ -1,3 +1,52 @@
+## [2.46.1](https://github.com/SocialGouv/egapro/compare/v2.46.0...v2.46.1) (2022-12-14)
+
+
+### Bug Fixes
+
+* better TileCompany UI ([#1442](https://github.com/SocialGouv/egapro/issues/1442)) ([e50b0a2](https://github.com/SocialGouv/egapro/commit/e50b0a22c04406395fb5ab5595a77ce4ace91736))
+
+# [2.46.0](https://github.com/SocialGouv/egapro/compare/v2.45.2...v2.46.0) (2022-12-14)
+
+
+### Features
+
+* PUT endpoint /ownership-request ([#1444](https://github.com/SocialGouv/egapro/issues/1444)) ([ae5878c](https://github.com/SocialGouv/egapro/commit/ae5878c73f712c7b287235f9c79fa5139a1752ff))
+
+## [2.45.2](https://github.com/SocialGouv/egapro/compare/v2.45.1...v2.45.2) (2022-12-13)
+
+
+### Bug Fixes
+
+* modify index export content ([#1457](https://github.com/SocialGouv/egapro/issues/1457)) ([361ddcc](https://github.com/SocialGouv/egapro/commit/361ddcc7da37de2cc5e66d88cd8d8d9f25833bda))
+
+## [2.45.1](https://github.com/SocialGouv/egapro/compare/v2.45.0...v2.45.1) (2022-12-12)
+
+
+### Bug Fixes
+
+* ha ([#1455](https://github.com/SocialGouv/egapro/issues/1455)) ([378866c](https://github.com/SocialGouv/egapro/commit/378866ca5598bfbf229605c5c51690e762273fb8))
+
+# [2.45.0](https://github.com/SocialGouv/egapro/compare/v2.44.1...v2.45.0) (2022-12-12)
+
+
+### Features
+
+* **apiv2:** advanced controllers ([#1419](https://github.com/SocialGouv/egapro/issues/1419)) ([8f5ce13](https://github.com/SocialGouv/egapro/commit/8f5ce13413ed816cddef0ef549e5b10bdd9bbd3c))
+
+## [2.44.1](https://github.com/SocialGouv/egapro/compare/v2.44.0...v2.44.1) (2022-12-09)
+
+
+### Bug Fixes
+
+* handle nc values in repeq export (Fixes [#1443](https://github.com/SocialGouv/egapro/issues/1443)) ([3e89f1d](https://github.com/SocialGouv/egapro/commit/3e89f1d554fbd614aa3fd908b2f121d251b3316e))
+
+# [2.44.0](https://github.com/SocialGouv/egapro/compare/v2.43.0...v2.44.0) (2022-12-09)
+
+
+### Features
+
+* add public route for decla ([#1438](https://github.com/SocialGouv/egapro/issues/1438)) ([f816076](https://github.com/SocialGouv/egapro/commit/f8160762e7e315a82cf6d39ef8215657302c022a))
+
 # [2.43.0](https://github.com/SocialGouv/egapro/compare/v2.42.2...v2.43.0) (2022-12-07)
 
 
