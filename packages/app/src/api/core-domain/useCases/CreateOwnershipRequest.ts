@@ -14,10 +14,22 @@ interface Input {
   sirens: string[];
 }
 
-export class CreateOwnershipRequest implements UseCase<Input, void> {
+const buildErrorMessage = (error: unknown, label: string, value: string) => {
+  let message = `Error for ${label} ${value}`;
+
+  if (error instanceof Error) {
+    message = `${message} | ${error.message}`;
+  }
+  console.error(message);
+  return message;
+};
+
+type WarningsType = { emails: string[]; sirens: string[] };
+
+export class CreateOwnershipRequest implements UseCase<Input, WarningsType> {
   constructor(private readonly ownershipRequestRepo: IOwnershipRequestRepo) {}
 
-  public async execute({ sirens, emails, askerEmail }: Input): Promise<void> {
+  public async execute({ sirens, emails, askerEmail }: Input): Promise<WarningsType> {
     try {
       if (!Array.isArray(sirens) || !Array.isArray(emails)) {
         throw new ValidationError("Error for sirens or emails. Array is expected.");
@@ -28,12 +40,14 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
       const setSirens = new Set<Siren>();
       const setEmails = new Set<Email>();
 
+      const warnings: WarningsType = { sirens: [], emails: [] };
+
       for (const siren of sirens) {
         try {
           const validatedSiren = new Siren(siren);
           setSirens.add(validatedSiren);
         } catch (error) {
-          console.error(`Error for Siren ${siren}`, error);
+          warnings.sirens.push(buildErrorMessage(error, "Siren", siren));
         }
       }
 
@@ -42,7 +56,7 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
           const validatedEmail = new Email(email);
           setEmails.add(validatedEmail);
         } catch (error) {
-          console.error(`Error for email ${email}`);
+          warnings.emails.push(buildErrorMessage(error, "email", email));
         }
       }
 
@@ -59,6 +73,7 @@ export class CreateOwnershipRequest implements UseCase<Input, void> {
           await this.ownershipRequestRepo.save(ownershipRequest);
         }
       }
+      return warnings;
     } catch (error: unknown) {
       throw new CreateOwnershipRequestError("Cannot create a ownership request", error as Error);
     }

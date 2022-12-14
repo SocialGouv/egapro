@@ -13,8 +13,8 @@ const handler: NextApiHandler = async (req, res) => {
 
   try {
     const useCase = new CreateOwnershipRequest(ownershipRequestRepo);
-    await useCase.execute({ sirens, emails, askerEmail });
-    res.status(200).json({});
+    const warnings = await useCase.execute({ sirens, emails, askerEmail });
+    res.status(200).json({ warnings });
   } catch (error: unknown) {
     if (error instanceof CreateOwnershipRequestError) {
       if (error.previousError instanceof ValidationError) {
