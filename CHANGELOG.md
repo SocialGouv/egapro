@@ -1,3 +1,10 @@
+# [2.46.0](https://github.com/SocialGouv/egapro/compare/v2.45.2...v2.46.0) (2022-12-14)
+
+
+### Features
+
+* PUT endpoint /ownership-request ([#1444](https://github.com/SocialGouv/egapro/issues/1444)) ([ae5878c](https://github.com/SocialGouv/egapro/commit/ae5878c73f712c7b287235f9c79fa5139a1752ff))
+
 ## [2.45.2](https://github.com/SocialGouv/egapro/compare/v2.45.1...v2.45.2) (2022-12-13)
 
 
