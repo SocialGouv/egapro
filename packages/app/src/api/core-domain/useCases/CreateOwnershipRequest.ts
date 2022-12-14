@@ -1,3 +1,4 @@
+import { ErrorDetailTuple } from "@common/core-domain/domain/ErrorDetailTuple";
 import { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
@@ -24,12 +25,10 @@ const buildErrorMessage = (error: unknown, label: string, value: string) => {
   return message;
 };
 
-type WarningsType = { emails: string[]; sirens: string[] };
-
-export class CreateOwnershipRequest implements UseCase<Input, WarningsType> {
+export class CreateOwnershipRequest implements UseCase<Input, ErrorDetailTuple[]> {
   constructor(private readonly ownershipRequestRepo: IOwnershipRequestRepo) {}
 
-  public async execute({ sirens, emails, askerEmail }: Input): Promise<WarningsType> {
+  public async execute({ sirens, emails, askerEmail }: Input): Promise<ErrorDetailTuple[]> {
     try {
       if (!Array.isArray(sirens) || !Array.isArray(emails)) {
         throw new ValidationError("Error for sirens or emails. Array is expected.");
@@ -37,37 +36,46 @@ export class CreateOwnershipRequest implements UseCase<Input, WarningsType> {
 
       const validatedAskerEmail = new Email(askerEmail);
 
-      const setSirens = new Set<Siren>();
-      const setEmails = new Set<Email>();
+      // Store as a tuple : first element is the validated one, if any. The second element is the original one, if validation failed.
+      const setOfSirens = new Set<[Siren | undefined, ErrorDetailTuple | undefined]>();
+      const setOfEmails = new Set<[Email | undefined, ErrorDetailTuple | undefined]>();
 
-      const warnings: WarningsType = { sirens: [], emails: [] };
+      const warnings: ErrorDetailTuple[] = [];
 
       for (const siren of sirens) {
         try {
           const validatedSiren = new Siren(siren);
-          setSirens.add(validatedSiren);
+          setOfSirens.add([validatedSiren, undefined]);
         } catch (error) {
-          warnings.sirens.push(buildErrorMessage(error, "Siren", siren));
+          const message = new ErrorDetailTuple(["INVALID_SIREN", buildErrorMessage(error, "Siren", siren)]);
+          warnings.push(message);
+          setOfSirens.add([undefined, message]);
         }
       }
 
       for (const email of emails) {
         try {
           const validatedEmail = new Email(email);
-          setEmails.add(validatedEmail);
+          setOfEmails.add([validatedEmail, undefined]);
         } catch (error) {
-          warnings.emails.push(buildErrorMessage(error, "email", email));
+          const message = new ErrorDetailTuple(["INVALID_EMAIL", buildErrorMessage(error, "email", email)]);
+          warnings.push(message);
+          setOfEmails.add([undefined, message]);
         }
       }
 
+      const statusOK = new OwnershipRequestStatus(OwnershipRequestStatus.Enum.TO_PROCESS);
+      const statusError = new OwnershipRequestStatus(OwnershipRequestStatus.Enum.ERROR);
+
       // Add all pairs of Siren/email in ownership-request.
-      for (const siren of setSirens) {
-        for (const email of setEmails) {
+      for (const siren of setOfSirens) {
+        for (const email of setOfEmails) {
           const ownershipRequest = new OwnershipRequest({
-            siren,
-            email,
+            siren: siren[0],
+            email: email[0],
             askerEmail: validatedAskerEmail,
-            status: new OwnershipRequestStatus(OwnershipRequestStatus.Enum.TO_PROCESS),
+            status: siren[1] || email[1] ? statusError : statusOK,
+            errorDetail: siren[1] || email[1],
           });
 
           await this.ownershipRequestRepo.save(ownershipRequest);
