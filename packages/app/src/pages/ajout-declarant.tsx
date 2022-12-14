@@ -13,8 +13,8 @@ import {
   GridCol,
 } from "@design-system";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormManager, useUser } from "@services/apiClient";
-import { useCallback, useEffect } from "react";
+import { useUser } from "@services/apiClient";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -23,7 +23,7 @@ import type { NextPageWithLayout } from "./_app";
 type FormType = z.infer<typeof formSchema>;
 
 const formSchema = z.object({
-  user_email: z.string().email({ message: "L'adresse email est invalide." }),
+  askerEmail: z.string().email({ message: "L'adresse email est invalide." }),
   emails: z
     .string()
     .regex(
@@ -35,7 +35,6 @@ const formSchema = z.object({
 
 const AddDeclarer: NextPageWithLayout = () => {
   const { user } = useUser();
-  const { formData } = useFormManager();
 
   const {
     register,
@@ -47,19 +46,13 @@ const AddDeclarer: NextPageWithLayout = () => {
     resolver: zodResolver(formSchema),
   });
 
-  const resetAsyncForm = useCallback(async () => {
-    reset({
-      sirens: formData?.entreprise?.siren,
-      user_email: user?.email,
-      emails: formData?.declarant?.email,
-    });
-  }, [formData?.declarant?.email, formData?.entreprise?.siren, reset, user?.email]);
-
   useEffect(() => {
-    resetAsyncForm();
-  }, [resetAsyncForm]);
+    reset({
+      askerEmail: user?.email,
+    });
+  }, [reset, user?.email]);
 
-  const onSubmit = async ({ user_email, emails, sirens }: FormType) => {
+  const onSubmit = async ({ askerEmail: user_email, emails, sirens }: FormType) => {
     console.log({ user_email: user_email, emails: emails.replace(/\s/g, "").split(","), sirens: sirens.split(",") });
   };
 
@@ -71,22 +64,21 @@ const AddDeclarer: NextPageWithLayout = () => {
             <GridCol md={10} lg={8}>
               <h1>Demande d’ajout de nouveaux déclarants</h1>
               <p>
-                Écrire un texte explicatif sur la procédure d’ajout de nouveaux déclarants. Lorem ipsum dolor sit amet,
-                consectetur adipiscing elit. Sed iaculis eu erat eu placerat. Phasellus eleifend malesuada odio eget
-                consectetur.
+                Renseignez le(s) numéro(s) Siren ainsi que l'email du (des) déclarant(s) que vous souhaitez rattacher
+                au(x) numéro(s) Siren.
               </p>
               <form onSubmit={handleSubmit(onSubmit)} noValidate>
                 <FormLayout>
-                  <FormGroup isError={Boolean(errors.user_email)}>
-                    <FormGroupLabel htmlFor="email">Adresse email</FormGroupLabel>
+                  <FormGroup isError={Boolean(errors.askerEmail)}>
+                    <FormGroupLabel htmlFor="email">Email demandeur</FormGroupLabel>
                     <FormInput
-                      aria-describedby={errors.user_email && "email-msg"}
+                      aria-describedby={errors.askerEmail && "email-msg"}
                       id="email"
                       type="email"
-                      {...register("user_email")}
+                      {...register("askerEmail")}
                     />
-                    {errors.user_email && (
-                      <FormGroupMessage id="email-msg">{errors.user_email.message}</FormGroupMessage>
+                    {errors.askerEmail && (
+                      <FormGroupMessage id="email-msg">{errors.askerEmail.message}</FormGroupMessage>
                     )}
                   </FormGroup>
                   <FormGroup isError={Boolean(errors.sirens)}>
@@ -108,7 +100,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                       htmlFor="emails"
                       hint="Il est possible d’ajouter plusieurs emails séparées par des virgules sans espace."
                     >
-                      emails
+                      Email(s) déclarant(s)
                     </FormGroupLabel>
                     <FormTextarea
                       aria-describedby={errors.emails && "emails-msg"}
