@@ -1,3 +1,10 @@
+## [2.46.1](https://github.com/SocialGouv/egapro/compare/v2.46.0...v2.46.1) (2022-12-14)
+
+
+### Bug Fixes
+
+* better TileCompany UI ([#1442](https://github.com/SocialGouv/egapro/issues/1442)) ([e50b0a2](https://github.com/SocialGouv/egapro/commit/e50b0a22c04406395fb5ab5595a77ce4ace91736))
+
 # [2.46.0](https://github.com/SocialGouv/egapro/compare/v2.45.2...v2.46.0) (2022-12-14)
 
 
