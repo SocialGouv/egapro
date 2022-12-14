@@ -1,3 +1,10 @@
+# [2.47.0](https://github.com/SocialGouv/egapro/compare/v2.46.1...v2.47.0) (2022-12-14)
+
+
+### Features
+
+* add AddDeclarer static page ([#1456](https://github.com/SocialGouv/egapro/issues/1456)) ([4d49d31](https://github.com/SocialGouv/egapro/commit/4d49d31f04d9ccad6fe3143dee5a56d0021acb3a))
+
 ## [2.46.1](https://github.com/SocialGouv/egapro/compare/v2.46.0...v2.46.1) (2022-12-14)
 
 
