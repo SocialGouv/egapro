@@ -1,24 +1,20 @@
 import { buildFormState, buildRepresentation } from "@common/models/representation-equilibree";
 import { AlertEdition } from "@components/AlertEdition";
+import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { DetailRepresentationEquilibree } from "@components/RepresentationEquilibree";
-import { Alert, AlertTitle, ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { ButtonAsLink, FormButton, FormLayout, FormLayoutButtonGroup } from "@design-system";
 import { fetchRepresentationEquilibree, putRepresentationEquilibree, useFormManager } from "@services/apiClient";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import invariant from "tiny-invariant";
 
 import type { NextPageWithLayout } from "../_app";
 
-const SERVER_ERROR = `Problème lors de l'envoi de la représentation équilibrée.`;
-
 const Validation: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData, saveFormData } = useFormManager();
-  const [globalError, setGlobalError] = useState("");
-  const [animationParent] = useAutoAnimate<HTMLDivElement>();
+  const { setFeatureStatus } = useFeatureStatus({ reset: true });
 
   let data;
   // Hack to prevent to prerender on the server.
@@ -41,9 +37,7 @@ const Validation: NextPageWithLayout = () => {
       }
       router.push("/representation-equilibree/transmission");
     } catch (error) {
-      console.error(error);
-      setGlobalError(SERVER_ERROR);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setFeatureStatus({ type: "error", message: "Problème lors de l'envoi de la représentation équilibrée." });
     }
   };
 
@@ -56,14 +50,7 @@ const Validation: NextPageWithLayout = () => {
     <>
       <AlertEdition />
 
-      <div ref={animationParent}>
-        {globalError && (
-          <Alert type="error" size="sm" mb="4w">
-            <AlertTitle>Erreur</AlertTitle>
-            <p>{globalError}</p>
-          </Alert>
-        )}
-      </div>
+      <AlertFeatureStatus type="error" title="Erreur" />
 
       <p>
         Vous êtes sur le point de valider la procédure vous permettant de transmettre aux services du ministre chargé du
@@ -98,7 +85,11 @@ const Validation: NextPageWithLayout = () => {
 };
 
 Validation.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeLayout title="Validation">{children}</RepresentationEquilibreeLayout>;
+  return (
+    <RepresentationEquilibreeLayout title="Validation">
+      <FeatureStatusProvider>{children}</FeatureStatusProvider>
+    </RepresentationEquilibreeLayout>
+  );
 };
 
 export default Validation;
