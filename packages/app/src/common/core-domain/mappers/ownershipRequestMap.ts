@@ -14,11 +14,11 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
       id: new UniqueID(raw.id),
       createdAt: new Date(raw.created_at),
       modifiedAt: new Date(raw.modified_at),
-      siren: new Siren(raw.siren),
+      siren: raw.siren !== null ? new Siren(raw.siren) : undefined,
       askerEmail: new Email(raw.asker_email),
-      email: new Email(raw.email),
+      email: raw.email !== null ? new Email(raw.email) : undefined,
       status: new OwnershipRequestStatus(raw.status),
-      errorDetail: raw.error_detail,
+      errorDetail: raw.error_detail !== null ? raw.error_detail : undefined,
     });
   },
 
@@ -28,18 +28,19 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
       askerEmail: obj.askerEmail.getValue(),
       modifiedAt: obj.modifiedAt!.toISOString(), // We always want to build a DTO from a complete model, so we can be sure to have id, createdAt and modifiedAt.
       createdAt: obj.createdAt!.toISOString(), // We always want to build a DTO from a complete model, so we can be sure to have id, createdAt and modifiedAt.
-      email: obj.email.getValue(),
-      siren: obj.siren.getValue(),
+      email: obj.email?.getValue(),
+      siren: obj.siren?.getValue(),
       status: obj.status.getValue(),
     };
   },
 
   toPersistence(obj) {
     return {
-      siren: obj.siren.getValue(),
+      siren: obj.siren?.getValue() || null,
       asker_email: obj.askerEmail.getValue(),
-      email: obj.email.getValue(),
+      email: obj.email?.getValue() || null,
       status: obj.status.getValue(),
+      error_detail: obj.errorDetail ? [obj.errorDetail.errorCode, obj.errorDetail.errorMessage] : null,
     } as Objectize<OwnershipRequestRaw>;
   },
 };

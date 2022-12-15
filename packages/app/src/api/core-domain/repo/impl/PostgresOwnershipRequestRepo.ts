@@ -60,12 +60,13 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async save(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    await sql`insert into ${this.table} (siren, email, asker_email, status) values ${sql(
+    await sql`insert into ${this.table} (siren, email, asker_email, status, error_detail) values ${sql(
       raw,
       "siren",
       "email",
       "asker_email",
       "status",
+      "error_detail",
     )}`;
   }
 
