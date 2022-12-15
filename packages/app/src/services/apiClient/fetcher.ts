@@ -3,7 +3,8 @@ import { ApiError } from "next/dist/server/api-utils";
 import type { Any } from "../../common/utils/types";
 import { useUserStore } from "./useUser";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL_V1 = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL_V2 = process.env.NEXT_PUBLIC_API_V2_URL;
 
 export const EXPIRED_TOKEN_MESSAGE = "Invalid token : need to login again";
 
@@ -34,6 +35,7 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
   options = {
     ...options,
     headers: {
+      "Content-Type": "application/json",
       ...options?.headers,
       "API-KEY": useUserStore.getState().token,
     },
@@ -70,10 +72,20 @@ const genericFetch = async (endpoint: string, options?: RequestInit) => {
 /**
  * Fetcher to call the Egapro API.
  *
- * @param key the path to use after the API_URL (named key because it is used in cache for useSWR)
+ * @param key the path to use after the API URL (named key because it is used in cache for useSWR)
  * @param options the request options (optional)
  */
 export const fetcher = <T>(key: string, options?: RequestInit): Promise<T> => {
   // TODO: better typings relation with genericFetch
-  return genericFetch(API_URL + key, options);
+  return genericFetch(API_URL_V1 + key, options);
+};
+
+/**
+ * Fetcher to call the Egapro API v2.
+ *
+ * @param key the path to use after the API URL (named key because it is used in cache for useSWR)
+ * @param options the request options (optional)
+ */
+export const fetcherV2 = <T>(key: string, options?: RequestInit): Promise<T> => {
+  return genericFetch(API_URL_V2 + key, options);
 };
