@@ -1,3 +1,10 @@
+# [2.49.0](https://github.com/SocialGouv/egapro/compare/v2.48.2...v2.49.0) (2022-12-15)
+
+
+### Features
+
+* add FeatureStatus context ([#1462](https://github.com/SocialGouv/egapro/issues/1462)) ([e713449](https://github.com/SocialGouv/egapro/commit/e71344955c09800a7125091f34b1366fd2bc3aa1))
+
 ## [2.48.2](https://github.com/SocialGouv/egapro/compare/v2.48.1...v2.48.2) (2022-12-15)
 
 
