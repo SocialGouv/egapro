@@ -35,6 +35,8 @@ const formSchema = z.object({
   sirens: z.string().regex(/^\d{9}(,\d{9})*$/, { message: "Le Siren est composé de 9 chiffres sans espace." }),
 });
 
+const title = "Demande d’ajout de nouveaux déclarants";
+
 const AddDeclarer: NextPageWithLayout = () => {
   const { user } = useUser();
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
@@ -52,8 +54,6 @@ const AddDeclarer: NextPageWithLayout = () => {
   useEffect(() => {
     reset({
       askerEmail: user?.email,
-      sirens: "123456789",
-      emails: "toto@titi.Fr",
     });
   }, [reset, user?.email]);
 
@@ -75,7 +75,7 @@ const AddDeclarer: NextPageWithLayout = () => {
       <Container py="8w">
         <Grid justifyCenter>
           <GridCol md={10} lg={8}>
-            <h1>Demande d’ajout de nouveaux déclarants</h1>
+            <h1>{title}</h1>
 
             <AlertFeatureStatus type="error" title="Erreur" />
 
@@ -158,7 +158,7 @@ const AddDeclarer: NextPageWithLayout = () => {
 
 AddDeclarer.getLayout = ({ children }) => {
   return (
-    <BasicLayout title="Demande d’ajout de nouveaux déclarants">
+    <BasicLayout title={title}>
       <FeatureStatusProvider>{children}</FeatureStatusProvider>
     </BasicLayout>
   );

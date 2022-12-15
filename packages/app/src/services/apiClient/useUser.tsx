@@ -33,7 +33,7 @@ export const useUserStore = create<UserStore>()(
  *
  * @example
  * ```ts
- * useUser({ checkTokenInUrl: true }); => for a Next page, allows to detect & use a token in URL and put it in local storage in order to login automatically
+ * useUser({ checkTokenInUrl: true }); => for a Next page, it allows to detect & use a token in URL and put it in local storage in order to login automatically
  * ```
  *
  * @example
