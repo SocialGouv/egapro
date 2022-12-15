@@ -23,7 +23,7 @@ export const ConsulterIndexLayout = ({ children, title }: PropsWithChildren & { 
         <Box as="main" role="main" id="main" flexGrow={1} pt={10}>
           <Container maxW="container.lg">{children}</Container>
         </Box>
-        <Footer />
+        <Footer consultationMode />
       </Flex>
     </ChakraProvider>
   );
