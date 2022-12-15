@@ -1,3 +1,4 @@
+import type { Any } from "@common/utils/types";
 import clsx from "clsx";
 import type { PropsWithChildren } from "react";
 
@@ -72,21 +73,24 @@ type TileCompanyPercentDataProps = {
   number: number | null;
 };
 
-export const TileCompanyPercentData = ({ number, legend }: TileCompanyPercentDataProps) => (
-  <div>
-    <div className={clsx(style.tablePercentData, !number && style.tablePercentNoData)}>
-      {number ? (
-        <>
-          <span>{number}</span>
-          <span className={style.tablePercentDataUnit}>&nbsp;%</span>
-        </>
-      ) : (
-        <span>NC</span>
-      )}
+export const TileCompanyPercentData = ({ number, legend }: TileCompanyPercentDataProps) => {
+  const isNumber = !Number.isNaN(parseInt(number as Any));
+  return (
+    <div>
+      <div className={clsx(style.tablePercentData, !isNumber && style.tablePercentNoData)}>
+        {isNumber ? (
+          <>
+            <span>{number}</span>
+            <span className={style.tablePercentDataUnit}>&nbsp;%</span>
+          </>
+        ) : (
+          <span>NC</span>
+        )}
+      </div>
+      <div className={clsx(style.tablePercentLegend, !isNumber && style.tablePercentNoData)}>{legend}</div>
     </div>
-    <div className={clsx(style.tablePercentLegend, !number && style.tablePercentNoData)}>{legend}</div>
-  </div>
-);
+  );
+};
 
 type TileCompanyLoadMoreProps = {
   onClick: VoidFunction;
