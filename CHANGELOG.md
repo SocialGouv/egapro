@@ -1,3 +1,10 @@
+## [2.48.2](https://github.com/SocialGouv/egapro/compare/v2.48.1...v2.48.2) (2022-12-15)
+
+
+### Bug Fixes
+
+* **repeq-search:** show 0 instead of NC when 0 ([2c5378f](https://github.com/SocialGouv/egapro/commit/2c5378fdfb638f2f6f453979b4a1517f30429ad9))
+
 ## [2.48.1](https://github.com/SocialGouv/egapro/compare/v2.48.0...v2.48.1) (2022-12-15)
 
 
