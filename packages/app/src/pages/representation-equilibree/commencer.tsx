@@ -75,7 +75,6 @@ const CommencerPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
-  const [isAlreadyPresent, setAlreadyPresent] = useState(false);
   const [globalError, setGlobalError] = useState("");
 
   const {
@@ -97,7 +96,6 @@ const CommencerPage: NextPageWithLayout = () => {
 
   useEffect(() => {
     // Clean errors on Siren change.
-    setAlreadyPresent(false);
     setGlobalError("");
   }, [siren]);
 
@@ -110,7 +108,7 @@ const CommencerPage: NextPageWithLayout = () => {
         router.push(`/representation-equilibree/${siren}/${year}`);
         return;
       }
-      // Otherwise, this is a creation, so we begin with fetchin firm's data.
+      // Otherwise, this is a creation, so we begin with fetching firm's data.
       const entreprise = await fetchSiren(siren, Number(year));
       saveFormData({ entreprise, year: Number(year), status: "creation" });
       router.push("/representation-equilibree/declarant");
@@ -172,12 +170,6 @@ const CommencerPage: NextPageWithLayout = () => {
           <Alert type="error" size="sm" mb="4w">
             <AlertTitle>Erreur</AlertTitle>
             <p>{globalError}</p>
-          </Alert>
-        )}
-        {isAlreadyPresent && (
-          <Alert type="error" size="sm" mb="4w">
-            <AlertTitle>Erreur</AlertTitle>
-            <p>Une déclaration pour ce Siren a déjà été validée et transmise.</p>
           </Alert>
         )}
         {errors.siren && errors.siren.message === OWNER_ERROR && (
