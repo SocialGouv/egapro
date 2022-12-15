@@ -19,7 +19,7 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
-import { API_URL, useRepresentationEquilibree } from "@services/apiClient";
+import { API_URL_V1, useRepresentationEquilibree } from "@services/apiClient";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
 import { z } from "zod";
@@ -74,7 +74,9 @@ const RepresentationEquilibreeWithNavigation = ({ siren, year }: { siren: string
             <CardBody>
               <CardBodyContent>
                 <CardBodyContentTitle>
-                  <a href={`${API_URL}/representation-equilibree/${siren}/${year}/pdf`}>Télécharger le récapitulatif</a>
+                  <a href={`${API_URL_V1}/representation-equilibree/${siren}/${year}/pdf`}>
+                    Télécharger le récapitulatif
+                  </a>
                 </CardBodyContentTitle>
                 <CardBodyContentDescription>
                   Année {year + 1} au titre des données {year}.

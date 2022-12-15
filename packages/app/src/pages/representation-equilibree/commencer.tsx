@@ -1,5 +1,6 @@
 import { zodSirenSchema } from "@common/utils/form";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
+import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { MailtoLinkForNonOwner } from "@components/MailtoLink";
 import {
@@ -25,7 +26,7 @@ import {
   useUser,
 } from "@services/apiClient";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -75,8 +76,7 @@ const CommencerPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
-  const [isAlreadyPresent, setAlreadyPresent] = useState(false);
-  const [globalError, setGlobalError] = useState("");
+  const { setFeatureStatus } = useFeatureStatus({ reset: true });
 
   const {
     register,
@@ -96,29 +96,30 @@ const CommencerPage: NextPageWithLayout = () => {
   const siren = watch("siren");
 
   useEffect(() => {
-    // Clean errors on Siren change.
-    setAlreadyPresent(false);
-    setGlobalError("");
-  }, [siren]);
+    setFeatureStatus({ type: "idle" });
+  }, [siren, setFeatureStatus]);
 
   const saveAndGoNext = async (siren: string, year: number) => {
     try {
       // Synchronise with potential data in DB.
       const formState = await fetchRepresentationEquilibreeAsFormState(siren, year);
+
       if (formState) {
         saveFormData({ ...formState, status: "edition" });
         router.push(`/representation-equilibree/${siren}/${year}`);
         return;
       }
-      // Otherwise, this is a creation, so we begin with fetchin firm's data.
+      // Otherwise, this is a creation, so we begin with fetching firm's data.
       const entreprise = await fetchSiren(siren, Number(year));
       saveFormData({ entreprise, year: Number(year), status: "creation" });
       router.push("/representation-equilibree/declarant");
-      return;
     } catch (error) {
       // We can't continue in this case, because the backend is not ready.
       console.error("Unexpected API error", error);
-      setGlobalError("Le service est indisponible pour l'instant. Veuillez réessayer plus tard.");
+      setFeatureStatus({
+        type: "error",
+        message: "Le service est indisponible pour l'instant. Veuillez réessayer plus tard.",
+      });
     }
   };
 
@@ -167,19 +168,9 @@ const CommencerPage: NextPageWithLayout = () => {
         </b>
       </p>
 
+      <AlertFeatureStatus type="error" title="Erreur" />
+
       <div ref={animationParent}>
-        {globalError && (
-          <Alert type="error" size="sm" mb="4w">
-            <AlertTitle>Erreur</AlertTitle>
-            <p>{globalError}</p>
-          </Alert>
-        )}
-        {isAlreadyPresent && (
-          <Alert type="error" size="sm" mb="4w">
-            <AlertTitle>Erreur</AlertTitle>
-            <p>Une déclaration pour ce Siren a déjà été validée et transmise.</p>
-          </Alert>
-        )}
         {errors.siren && errors.siren.message === OWNER_ERROR && (
           <Alert type="error" mb="4w">
             <AlertTitle>Erreur</AlertTitle>
@@ -242,7 +233,7 @@ const CommencerPage: NextPageWithLayout = () => {
 CommencerPage.getLayout = ({ children }) => {
   return (
     <RepresentationEquilibreeLayout disableAuth={true} title="Commencer">
-      {children}
+      <FeatureStatusProvider>{children}</FeatureStatusProvider>
     </RepresentationEquilibreeLayout>
   );
 };

@@ -1,5 +1,4 @@
 import { isEmpty } from "@common/utils/object";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import type { ZodType } from "zod";
@@ -11,7 +10,6 @@ import { Alert, AlertTitle } from "../design-system/base/Alert";
  * It not renders children as long as the query params are incorrect.
  */
 export const ParamsChecker = ({ schema, children, ...delegated }: PropsWithChildren<unknown> & { schema: ZodType }) => {
-  const [animationParent] = useAutoAnimate<HTMLDivElement>();
   const router = useRouter();
 
   if (isEmpty(router.query)) return <p>En attente des paramètres...</p>;
@@ -24,16 +22,14 @@ export const ParamsChecker = ({ schema, children, ...delegated }: PropsWithChild
     );
 
     return (
-      <div ref={animationParent}>
-        <Alert type="error" size="sm" mb="4w">
-          <AlertTitle>Erreur</AlertTitle>
-          <ul>
-            {errors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
-        </Alert>
-      </div>
+      <Alert type="error" size="sm" mb="4w">
+        <AlertTitle>Erreur</AlertTitle>
+        <ul>
+          {errors.map((error, index) => (
+            <li key={index}>{error}</li>
+          ))}
+        </ul>
+      </Alert>
     );
   }
 

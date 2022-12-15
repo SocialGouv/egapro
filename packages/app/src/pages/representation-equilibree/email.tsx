@@ -1,5 +1,5 @@
-import type { FeatureStatus } from "@common/utils/feature";
 import { ClientOnly } from "@components/ClientOnly";
+import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import {
   Alert,
@@ -15,15 +15,12 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { requestEmailForToken, useUser } from "@services/apiClient";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "../_app";
 
 const title = "Validation de l'email";
-
-const ERROR_COLLAPSE_TIMEOUT = 5000;
 
 const formSchema = z.object({
   email: z.string().min(1, "L'adresse email est requise.").email({ message: "L'adresse email est invalide." }),
@@ -38,7 +35,8 @@ const informationMessage =
 const EmailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { user } = useUser();
-  const [featureStatus, setFeatureStatus] = useState<FeatureStatus>({ type: "idle" });
+  const { featureStatus, setFeatureStatus } = useFeatureStatus();
+
   // Si la personne est authentifiée, on reroute sur commencer.
   if (user) router.push("/representation-equilibree/commencer");
 
@@ -53,20 +51,6 @@ const EmailPage: NextPageWithLayout = () => {
       email: "",
     },
   });
-
-  // Remove error message after some timeout.
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (featureStatus.type === "error") {
-      timeoutId = setTimeout(() => {
-        setFeatureStatus({ type: "idle" });
-      }, ERROR_COLLAPSE_TIMEOUT);
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [featureStatus, setFeatureStatus]);
 
   const email = watch("email");
 
@@ -95,12 +79,7 @@ const EmailPage: NextPageWithLayout = () => {
           </Alert>
         )}
 
-        {featureStatus.type === "error" && (
-          <Alert type="error" mb="4w">
-            <AlertTitle>Erreur</AlertTitle>
-            <p>{featureStatus.message}</p>
-          </Alert>
-        )}
+        <AlertFeatureStatus title="Erreur" type="error" />
 
         {featureStatus.type === "success" && (
           <>
@@ -158,7 +137,11 @@ const EmailPage: NextPageWithLayout = () => {
 };
 
 EmailPage.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
+  return (
+    <RepresentationEquilibreeStartLayout>
+      <FeatureStatusProvider>{children}</FeatureStatusProvider>
+    </RepresentationEquilibreeStartLayout>
+  );
 };
 
 export default EmailPage;

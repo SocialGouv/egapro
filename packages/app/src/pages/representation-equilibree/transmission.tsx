@@ -17,7 +17,7 @@ import {
   TileSuccess,
   TileSuccessTitle,
 } from "@design-system";
-import { API_URL, fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
+import { API_URL_V1, fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -87,7 +87,9 @@ const Transmission: NextPageWithLayout = () => {
               <CardBody>
                 <CardBodyContent>
                   <CardBodyContentTitle>
-                    <a href={`${API_URL}/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`}>
+                    <a
+                      href={`${API_URL_V1}/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`}
+                    >
                       Télécharger le récapitulatif
                     </a>
                   </CardBodyContentTitle>
