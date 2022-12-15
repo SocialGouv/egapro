@@ -34,7 +34,8 @@
     "next-env.d.ts",
     "env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "src/api/core-domain/infra/mail/template.tsw"
   ],
   "exclude": [
     "node_modules",

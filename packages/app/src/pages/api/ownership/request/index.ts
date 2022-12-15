@@ -1,36 +1,43 @@
+import { LegacyTokenRequire } from "@api/core-domain/infra/db/http/next/decorator/LegacyTokenRequire";
 import { ownershipRequestRepo } from "@api/core-domain/repo";
 import { CreateOwnershipRequest, CreateOwnershipRequestError } from "@api/core-domain/useCases/CreateOwnershipRequest";
+import type { NextController } from "@api/shared-domain/infra/http/impl/NextController";
+import { Handler } from "@api/shared-domain/infra/http/next/Decorators";
+import type { UseCaseParameters } from "@common/shared-domain";
 import { ValidationError } from "@common/shared-domain";
-import type { NextApiHandler } from "next";
+import { StatusCodes } from "http-status-codes";
 
-// TODO: switch later to controller class
-const handler: NextApiHandler = async (req, res) => {
-  if (req.method !== "PUT") {
-    return res.status(405).send(null);
-  }
+type TokenReq = LegacyTokenRequire.Wrap<NextController.Req<NextController>>;
+type Req = NextController.Req<NextController>;
+type Res = NextController.Res<NextController>;
 
-  const { sirens, emails, askerEmail } = req.body;
-
-  try {
+@Handler
+export default class DeclarationSirenController implements NextController {
+  public async put(req: Req, res: Res) {
+    type Input = UseCaseParameters<CreateOwnershipRequest>[0];
     const useCase = new CreateOwnershipRequest(ownershipRequestRepo);
-    await useCase.execute({ sirens, emails, askerEmail });
-    res.status(200).json({});
-  } catch (error: unknown) {
-    if (error instanceof CreateOwnershipRequestError) {
-      if (error.previousError instanceof ValidationError) {
-        return res.status(422).json({ errorMessage: error.previousError.message });
+    const { sirens, emails, askerEmail } = req.body as unknown as Input;
+
+    try {
+      await useCase.execute({ sirens, emails, askerEmail });
+      res.status(StatusCodes.OK).send(null);
+    } catch (error: unknown) {
+      if (error instanceof CreateOwnershipRequestError) {
+        if (error.previousError instanceof ValidationError) {
+          return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
+        }
+        res.status(StatusCodes.BAD_REQUEST).json({
+          errorMessage: error
+            .appErrorList()
+            .map(e => e.message)
+            .join(" | "),
+        });
+      } else {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
       }
-      res.status(400).json({
-        errorMessage: error
-          .appErrorList()
-          .map(e => e.message)
-          .join(" | "),
-      });
-    } else {
-      console.error(error);
-      res.status(500).send(null);
     }
   }
-};
-
-export default handler;
+  @LegacyTokenRequire
+  public async post(req: TokenReq, res: Res) {}
+}

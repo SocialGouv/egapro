@@ -72,4 +72,26 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public update(item: OwnershipRequest): Promise<void> {
     return this.save(item);
   }
+
+  public deleteBulk(...items: OwnershipRequest[]): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  public existsMultiple(...ids: UniqueID[]): Promise<boolean[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
+    const [...raw] = await this.sql`select * from ${this.table} where uuid in (${sql(ids.map(id => id.getValue()))})`;
+
+    return raw.map(ownershipRequestMap.toDomain);
+  }
+
+  public saveBulk(...items: OwnershipRequest[]): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  public updateBulk(...items: OwnershipRequest[]): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
 }

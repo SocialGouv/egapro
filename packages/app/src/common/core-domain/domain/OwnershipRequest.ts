@@ -1,7 +1,7 @@
 import { Entity } from "@common/shared-domain";
 import type { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
 
-import type { OwnershipRequestStatus } from "./valueObjects/ownership_request/OwnershipRequestStatus";
+import { OwnershipRequestStatus } from "./valueObjects/ownership_request/OwnershipRequestStatus";
 import type { Siren } from "./valueObjects/Siren";
 
 export interface OwnershipRequestProps {
@@ -42,5 +42,13 @@ export class OwnershipRequest extends Entity<OwnershipRequestProps, UniqueID> {
 
   get errorDetail(): string | undefined {
     return this.props.errorDetail;
+  }
+
+  get shouldBeProcessed() {
+    return this.props.status.getValue() === OwnershipRequestStatus.Enum.TO_PROCESS;
+  }
+
+  get isProcessed() {
+    return this.props.status.getValue() === OwnershipRequestStatus.Enum.PROCESSED;
   }
 }

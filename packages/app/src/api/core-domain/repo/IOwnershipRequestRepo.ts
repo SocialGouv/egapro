@@ -1,4 +1,4 @@
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
-import type { Repo } from "@common/shared-domain";
+import type { BulkRepo } from "@common/shared-domain";
 
-export type IOwnershipRequestRepo = Repo<OwnershipRequest>;
+export type IOwnershipRequestRepo = BulkRepo<OwnershipRequest>;
