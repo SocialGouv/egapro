@@ -5,7 +5,11 @@ import packageConfig from "../../../package.json";
 import { Logo } from "./Logo";
 import { TextLink } from "./TextLink";
 
-export const Footer = () => {
+export interface FooterProps {
+  consultationMode?: boolean;
+}
+
+export const Footer = ({ consultationMode }: FooterProps) => {
   const version = process.env.REACT_APP_VERSION || packageConfig.version;
 
   return (
@@ -52,13 +56,15 @@ export const Footer = () => {
               },
             }}
           >
-            <ListItem>
-              <Link href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" isExternal>
-                <Flex justify="center" align="center">
-                  Télécharger la liste des référents Egapro (XLSX, 22 Ko) <ExternalLinkIcon ml={2} />
-                </Flex>
-              </Link>
-            </ListItem>
+            {!consultationMode && (
+              <ListItem>
+                <Link href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" isExternal>
+                  <Flex justify="center" align="center">
+                    Télécharger la liste des référents Egapro (XLSX, 22 Ko) <ExternalLinkIcon ml={2} />
+                  </Flex>
+                </Link>
+              </ListItem>
+            )}
             {/* <ListItem>
               <NextLink href="/mentions-legales">
                 <Link>Mentions légales</Link>
@@ -95,12 +101,18 @@ export const Footer = () => {
           <Text fontSize="sm" as="i">
             Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
           </Text>
-          <Text fontSize="sm" mt={1}>
-            Pour nous aider à l'améliorer{" "}
-            <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
-              contribuez sur Github
-            </TextLink>
-          </Text>
+          {consultationMode ? (
+            <Text fontSize="sm" mt={1}>
+              Contact : <TextLink to={"mailto:index@travail.gouv.fr"}>index@travail.gouv.fr</TextLink>
+            </Text>
+          ) : (
+            <Text fontSize="sm" mt={1}>
+              Pour nous aider à l'améliorer{" "}
+              <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
+                contribuez sur Github
+              </TextLink>
+            </Text>
+          )}
         </Box>
       </Container>
     </Box>
