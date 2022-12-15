@@ -1,3 +1,10 @@
+# [2.48.0](https://github.com/SocialGouv/egapro/compare/v2.47.0...v2.48.0) (2022-12-15)
+
+
+### Features
+
+* add warnings for PUT ownership/request ([#1461](https://github.com/SocialGouv/egapro/issues/1461)) ([8e35c08](https://github.com/SocialGouv/egapro/commit/8e35c0811ad77523cb9998571e123c4f31ee23fa))
+
 # [2.47.0](https://github.com/SocialGouv/egapro/compare/v2.46.1...v2.47.0) (2022-12-14)
 
 
