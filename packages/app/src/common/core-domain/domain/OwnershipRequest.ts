@@ -8,11 +8,10 @@ import type { Siren } from "./valueObjects/Siren";
 export interface OwnershipRequestProps {
   askerEmail: Email;
   createdAt?: Date;
-  email?: Email | undefined;
-  errorDetail?: ErrorDetailTuple | undefined;
-  id?: UniqueID;
+  email?: Email;
+  errorDetail?: ErrorDetailTuple;
   modifiedAt?: Date;
-  siren?: Siren | undefined;
+  siren?: Siren;
   status: OwnershipRequestStatus;
 }
 
@@ -46,10 +45,18 @@ export class OwnershipRequest extends Entity<OwnershipRequestProps, UniqueID> {
   }
 
   get shouldBeProcessed() {
-    return this.props.status.getValue() === OwnershipRequestStatus.Enum.TO_PROCESS;
+    return this.status.getValue() === OwnershipRequestStatus.Enum.TO_PROCESS;
   }
 
   get isProcessed() {
-    return this.props.status.getValue() === OwnershipRequestStatus.Enum.PROCESSED;
+    return this.status.getValue() === OwnershipRequestStatus.Enum.PROCESSED;
+  }
+
+  get ownershipRequested() {
+    return [this.email?.getValue() ?? "", this.siren?.getValue() ?? ""] as [email: string, siren: string];
+  }
+
+  public changeStatus(newStatus: OwnershipRequestStatus.Enum) {
+    this.props.status = new OwnershipRequestStatus(newStatus);
   }
 }

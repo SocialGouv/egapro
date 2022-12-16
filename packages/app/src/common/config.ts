@@ -54,8 +54,10 @@ export const config = {
 
 interface ServicesConfig {
   db: "mock" | "postgres" | "prisma";
+  mailer: "nodemailer";
 }
 
 export const services: ServicesConfig = {
   db: "postgres",
+  mailer: "nodemailer",
 };

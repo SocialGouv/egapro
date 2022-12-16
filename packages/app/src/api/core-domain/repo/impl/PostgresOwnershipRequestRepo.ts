@@ -1,5 +1,5 @@
-import { sql } from "@api/core-domain/infra/db/postgres";
 import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
+import { sql } from "@api/shared-domain/infra/db/postgres";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
@@ -83,7 +83,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const [...raw] = await this.sql`select * from ${this.table} where uuid in (${sql(ids.map(id => id.getValue()))})`;
+    const [...raw] = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
 
     return raw.map(ownershipRequestMap.toDomain);
   }

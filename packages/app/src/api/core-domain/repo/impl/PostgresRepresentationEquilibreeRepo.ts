@@ -1,5 +1,5 @@
-import { sql } from "@api/core-domain/infra/db/postgres";
 import type { RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
+import { sql } from "@api/shared-domain/infra/db/postgres";
 import type {
   RepresentationEquilibree,
   RepresentationEquilibreePK,

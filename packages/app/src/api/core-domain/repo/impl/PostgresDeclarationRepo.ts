@@ -1,5 +1,5 @@
-import { sql } from "@api/core-domain/infra/db/postgres";
 import type { DeclarationRaw } from "@api/core-domain/infra/db/raw";
+import { sql } from "@api/shared-domain/infra/db/postgres";
 import type { Declaration, DeclarationPK } from "@common/core-domain/domain/Declaration";
 import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";

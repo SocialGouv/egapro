@@ -10,16 +10,18 @@ import type { OwnershipRequestDTO } from "../dtos/OwnershipRequestDTO";
 
 export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipRequestDTO, OwnershipRequestRaw>> = {
   toDomain(raw) {
-    return new OwnershipRequest({
-      id: new UniqueID(raw.id),
-      createdAt: new Date(raw.created_at),
-      modifiedAt: new Date(raw.modified_at),
-      siren: raw.siren !== null ? new Siren(raw.siren) : undefined,
-      askerEmail: new Email(raw.asker_email),
-      email: raw.email !== null ? new Email(raw.email) : undefined,
-      status: new OwnershipRequestStatus(raw.status),
-      errorDetail: raw.error_detail !== null ? raw.error_detail : undefined,
-    });
+    return new OwnershipRequest(
+      {
+        createdAt: new Date(raw.created_at),
+        modifiedAt: new Date(raw.modified_at),
+        siren: raw.siren !== null ? new Siren(raw.siren) : undefined,
+        askerEmail: new Email(raw.asker_email),
+        email: raw.email !== null ? new Email(raw.email) : undefined,
+        status: new OwnershipRequestStatus(raw.status),
+        errorDetail: raw.error_detail !== null ? raw.error_detail : undefined,
+      },
+      new UniqueID(raw.id),
+    );
   },
 
   toDTO(obj) {

@@ -1,5 +1,5 @@
-import { sql } from "@api/core-domain/infra/db/postgres";
 import type { OwnershipRaw } from "@api/core-domain/infra/db/raw";
+import { sql } from "@api/shared-domain/infra/db/postgres";
 import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { Any } from "@common/utils/types";

@@ -212,6 +212,10 @@ export type RequireOnlyOne<T, Keys extends keyof T = keyof T> = {
 }[Keys] &
   Pick<T, Exclude<keyof T, Keys>>;
 
+export type NonNullableProps<T> = {
+  [P in keyof T]: NonNullable<T[P]>;
+};
+
 /**
  * Hacky type to remove readonly on each property
  */
