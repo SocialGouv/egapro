@@ -19,8 +19,8 @@ export default class DeclarationSirenController implements NextController {
     const { sirens, emails, askerEmail } = req.body as unknown as Input;
 
     try {
-      await useCase.execute({ sirens, emails, askerEmail });
-      res.status(StatusCodes.OK).send(null);
+      const warnings = await useCase.execute({ sirens, emails, askerEmail });
+      res.status(StatusCodes.OK).json({ warnings: warnings.map(warning => [warning.errorCode, warning.errorMessage]) });
     } catch (error: unknown) {
       if (error instanceof CreateOwnershipRequestError) {
         if (error.previousError instanceof ValidationError) {

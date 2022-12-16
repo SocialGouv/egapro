@@ -53,11 +53,11 @@ create table if not exists ownership_request
         constraint ownership_request_pk primary key,
     created_at   timestamp with time zone default now(),
     modified_at  timestamp with time zone default now(),
-    siren        text not null,
-    email        text not null,
+    siren        text,
+    email        text,
     asker_email  text not null,
     status       text not null,
-    error_detail text
+    error_detail JSONB
 );
 
 drop trigger if exists trigger_ownership_request_modified_at on ownership_request;

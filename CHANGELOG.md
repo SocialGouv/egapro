@@ -1,3 +1,45 @@
+# [2.49.0](https://github.com/SocialGouv/egapro/compare/v2.48.2...v2.49.0) (2022-12-15)
+
+
+### Features
+
+* add FeatureStatus context ([#1462](https://github.com/SocialGouv/egapro/issues/1462)) ([e713449](https://github.com/SocialGouv/egapro/commit/e71344955c09800a7125091f34b1366fd2bc3aa1))
+
+## [2.48.2](https://github.com/SocialGouv/egapro/compare/v2.48.1...v2.48.2) (2022-12-15)
+
+
+### Bug Fixes
+
+* **repeq-search:** show 0 instead of NC when 0 ([2c5378f](https://github.com/SocialGouv/egapro/commit/2c5378fdfb638f2f6f453979b4a1517f30429ad9))
+
+## [2.48.1](https://github.com/SocialGouv/egapro/compare/v2.48.0...v2.48.1) (2022-12-15)
+
+
+### Bug Fixes
+
+* change consulter-index footer (Fix [#1432](https://github.com/SocialGouv/egapro/issues/1432)) ([9487f81](https://github.com/SocialGouv/egapro/commit/9487f81998c030b2016f5412afa3f87a1dbb4cad))
+
+# [2.48.0](https://github.com/SocialGouv/egapro/compare/v2.47.0...v2.48.0) (2022-12-15)
+
+
+### Features
+
+* add warnings for PUT ownership/request ([#1461](https://github.com/SocialGouv/egapro/issues/1461)) ([8e35c08](https://github.com/SocialGouv/egapro/commit/8e35c0811ad77523cb9998571e123c4f31ee23fa))
+
+# [2.47.0](https://github.com/SocialGouv/egapro/compare/v2.46.1...v2.47.0) (2022-12-14)
+
+
+### Features
+
+* add AddDeclarer static page ([#1456](https://github.com/SocialGouv/egapro/issues/1456)) ([4d49d31](https://github.com/SocialGouv/egapro/commit/4d49d31f04d9ccad6fe3143dee5a56d0021acb3a))
+
+## [2.46.1](https://github.com/SocialGouv/egapro/compare/v2.46.0...v2.46.1) (2022-12-14)
+
+
+### Bug Fixes
+
+* better TileCompany UI ([#1442](https://github.com/SocialGouv/egapro/issues/1442)) ([e50b0a2](https://github.com/SocialGouv/egapro/commit/e50b0a22c04406395fb5ab5595a77ce4ace91736))
+
 # [2.46.0](https://github.com/SocialGouv/egapro/compare/v2.45.2...v2.46.0) (2022-12-14)
 
 
