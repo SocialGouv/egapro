@@ -1,11 +1,14 @@
 import { REGIONS } from "@common/dict";
-import { EnumString } from "@common/shared-domain/domain/valueObjects";
+import { TupleString } from "@common/shared-domain/domain/valueObjects";
 import { Object } from "@common/utils/overload";
+import type { UnknownMapping } from "@common/utils/types";
 
 const REGION_KEYS = Object.keys(REGIONS);
 
-export class Region extends EnumString {
-  constructor(value: string) {
+type Regions = typeof REGION_KEYS[number] | UnknownMapping;
+
+export class Region extends TupleString<typeof REGION_KEYS> {
+  constructor(value: Regions) {
     super(value, REGION_KEYS);
   }
 }

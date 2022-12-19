@@ -1,8 +1,11 @@
+import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import { ErrorDetail } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import type {
   OwnershipRequestAction,
   OwnershipRequestActionDTO,
 } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
+import type { OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
@@ -12,13 +15,13 @@ import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
 const KNOWN_ACTIONS: Array<OwnershipRequestActionDTO["action"]> = ["accept", "reject"];
 
-export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestActionDTO, void> {
+export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestActionDTO, OwnershipRequestWarningsDTO> {
   constructor(
     private readonly ownershipRequestRepo: IOwnershipRequestRepo,
     private readonly globalMailerService: IGlobalMailerService,
   ) {}
 
-  public async execute({ uuids, action }: OwnershipRequestActionDTO): Promise<void> {
+  public async execute({ uuids, action }: OwnershipRequestActionDTO): Promise<OwnershipRequestWarningsDTO> {
     if (!this.guardKnownAction(action)) {
       throw new UpdateOwnershipRequestStatusUnsuportedActionError(
         `Given action "${action}" is not known. Only "${KNOWN_ACTIONS}" are available.`,
@@ -34,11 +37,13 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
 
     const ownershipRequests = await this.ownershipRequestRepo.getMultiple(...uuids.map(uuid => new UniqueID(uuid)));
 
-    if (!ownershipRequests.length) {
+    if (!ownershipRequests.length || ownershipRequests.length !== uuids.length) {
       throw new UpdateOwnershipRequestStatusNotFoundError(
-        `No ownership requests where found with given uuids (${uuids})`,
+        `No ownership requests where found with one or all given uuids (${uuids})`,
       );
     }
+
+    const failedRequests = new Map<string, ErrorDetail>();
 
     // group requests
     const groupByAsker = new Map<string, string[]>();
@@ -59,6 +64,15 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
           groupByDeclarant.set(processable.email.getValue(), declarantGroup);
         }
       } else {
+        failedRequests.set(
+          request._required.id.getValue(),
+          new ErrorDetail([
+            "ALREADY_PROCESSED",
+            `The ownership request [${
+              request.ownershipRequested
+            }] is already with status "${request.status.getValue()}" and therefore cannot be set to "${newStatus}". No mails were sent to "asker" nor "declarants".`,
+          ]),
+        );
         console.warn(
           `Request ${request.id?.getValue()} is already with status "${request.status.getValue()}" and therefore cannot be set to "${newStatus}"`,
           request,
@@ -69,7 +83,6 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
     // process requests
     await this.globalMailerService.init();
 
-    const failedRequests: string[] = [];
     for (const [askerMail, requestIds] of groupByAsker) {
       const filteredRequests = ownershipRequests.filter(request =>
         requestIds.includes(request._required.id.getValue()),
@@ -83,15 +96,23 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
 
       if (rejected.includes(askerMail)) {
         // avoid trying to send to declarants
-        requestIds.forEach(id => failedRequests.push(id)); // TODO include reason for later save in error_detail
-        // TODO status error + 'mail not sent' as error detail
-        // + continue for other asker
+        // continue for other askers
+        requestIds.forEach(id =>
+          failedRequests.set(
+            id,
+            new ErrorDetail([
+              "EMAIL_DELIVERY_KO",
+              `Asker email ${askerMail} was rejected. No mail were sent to "declarants".`,
+            ]),
+          ),
+        );
       }
     }
 
     for (const [declarantMail, requestIds] of groupByDeclarant) {
       for (const id of requestIds) {
-        if (failedRequests.includes(id)) {
+        // confirm avoid trying to send to declarants
+        if (failedRequests.has(id)) {
           continue;
         }
 
@@ -105,16 +126,33 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
         );
 
         if (rejected.includes(declarantMail)) {
-          failedRequests.push(id); // TODO include reason for later save in error_detail
-          // TODO status error + 'mail not sent' as error detail
-          // but keep going to next declarant
-          continue;
+          failedRequests.set(
+            id,
+            new ErrorDetail(["EMAIL_DELIVERY_KO", `Declarant email ${declarantMail} was rejected.`]),
+          );
         }
 
-        foundRequest.changeStatus(newStatus);
-        await this.ownershipRequestRepo.update(foundRequest);
+        const maybeErrorDetail = failedRequests.get(id);
+        if (maybeErrorDetail) {
+          foundRequest.changeStatus(OwnershipRequestStatus.Enum.ERROR, maybeErrorDetail);
+        } else {
+          foundRequest.changeStatus(newStatus);
+        }
+
+        try {
+          await this.ownershipRequestRepo.update(foundRequest);
+        } catch (error: unknown) {
+          throw new UpdateOwnershipRequestStatusError("Cannot create an ownership request", error as Error);
+        }
       }
     }
+
+    return {
+      warnings: [...failedRequests.values()].map<ErrorDetailTuple>(warning => [
+        warning.errorCode,
+        warning.errorMessage,
+      ]),
+    };
   }
 
   private guardKnownAction(action: OwnershipRequestActionDTO["action"]): action is OwnershipRequestAction {

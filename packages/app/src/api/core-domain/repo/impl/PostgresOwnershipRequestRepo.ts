@@ -73,8 +73,6 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async update(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    console.log({ raw });
-
     await sql`update ${this.table} set ${sql(
       raw,
       "status",
@@ -91,9 +89,9 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const [...raw] = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
+    const [...raws] = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
 
-    return raw.map(ownershipRequestMap.toDomain);
+    return raws.map(ownershipRequestMap.toDomain);
   }
 
   public saveBulk(...items: OwnershipRequest[]): Promise<void> {

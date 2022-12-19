@@ -24,10 +24,8 @@ export default class DeclarationSirenController implements NextController {
     const { sirens, emails, askerEmail } = req.body as unknown as Input;
 
     try {
-      const warnings = await useCase.execute({ sirens, emails, askerEmail });
-      res
-        .status(StatusCodes.CREATED)
-        .json({ warnings: warnings.map(warning => [warning.errorCode, warning.errorMessage]) });
+      const warningsDTO = await useCase.execute({ sirens, emails, askerEmail });
+      res.status(StatusCodes.CREATED).json(warningsDTO);
     } catch (error: unknown) {
       if (error instanceof CreateOwnershipRequestError) {
         if (error.previousError instanceof ValidationError) {
@@ -53,9 +51,9 @@ export default class DeclarationSirenController implements NextController {
     const { uuids, action } = req.body as unknown as Input;
 
     try {
-      await useCase.execute({ uuids, action });
+      const warningsDTO = await useCase.execute({ uuids, action });
 
-      res.status(StatusCodes.OK).send(null);
+      res.status(StatusCodes.OK).json(warningsDTO);
     } catch (error: unknown) {
       if (error instanceof UpdateOwnershipRequestStatusError) {
         if (error.previousError instanceof ValidationError) {
