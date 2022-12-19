@@ -1,3 +1,10 @@
+## [2.49.1](https://github.com/SocialGouv/egapro/compare/v2.49.0...v2.49.1) (2022-12-19)
+
+
+### Bug Fixes
+
+* error message for all inputs not equal to 0 ([#1464](https://github.com/SocialGouv/egapro/issues/1464)) ([8f7d96b](https://github.com/SocialGouv/egapro/commit/8f7d96b7adc4ae6a3df5559fa465263b285ff5ec))
+
 # [2.49.0](https://github.com/SocialGouv/egapro/compare/v2.48.2...v2.49.0) (2022-12-15)
 
 
