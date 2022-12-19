@@ -1,3 +1,10 @@
+## [2.49.2](https://github.com/SocialGouv/egapro/compare/v2.49.1...v2.49.2) (2022-12-19)
+
+
+### Bug Fixes
+
+* remove augement_et_promotion data from export ([6503483](https://github.com/SocialGouv/egapro/commit/65034838d9008cf0b4ade5c1952042007fbfd4e6))
+
 ## [2.49.1](https://github.com/SocialGouv/egapro/compare/v2.49.0...v2.49.1) (2022-12-19)
 
 
