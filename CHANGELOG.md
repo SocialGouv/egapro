@@ -1,3 +1,10 @@
+## [2.49.3](https://github.com/SocialGouv/egapro/compare/v2.49.2...v2.49.3) (2022-12-19)
+
+
+### Bug Fixes
+
+* problem with previous button ([#1466](https://github.com/SocialGouv/egapro/issues/1466)) ([178913b](https://github.com/SocialGouv/egapro/commit/178913b2dd43ef38eaae65ce4733ba2779db59da))
+
 ## [2.49.2](https://github.com/SocialGouv/egapro/compare/v2.49.1...v2.49.2) (2022-12-19)
 
 
