@@ -9,6 +9,9 @@ import { getSystemErrorName } from "util";
 
 import type { IGlobalMailerService } from "../IGlobalMailerService";
 
+/**
+ * Specific implementation of the global mailer service with nodemailer.
+ */
 export class NodemailerGlobalMailerService implements IGlobalMailerService {
   constructor(private readonly templates: Templates) {}
 

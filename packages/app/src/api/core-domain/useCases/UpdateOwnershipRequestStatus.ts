@@ -116,6 +116,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
           continue;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- ownershipRequests is never empty
         const foundRequest = ownershipRequests.find(request => request._required.id.getValue() === id)!;
 
         const [, rejected] = await this.globalMailerService.sendMail(

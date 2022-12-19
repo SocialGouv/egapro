@@ -42,7 +42,7 @@ export const ownershipRequest_toAskerAfterRejection = (combo: Array<[email: stri
   subject: "Votre demande d'ajout de déclarants a été refusée",
   text: `Bonjour,
 
-Les emails suivants ont été refusé et n'ont donc pas été ajoutés aux numéros Siren de vos entreprises :
+Les emails suivants ont été refusés et n'ont donc pas été ajoutés aux numéros Siren de vos entreprises :
 ${combo.map(([email, siren]) => `- ${email} => ${siren}`).join("\n")}
 
 Cordialement,
@@ -54,7 +54,9 @@ ${config.api.mailer.signature}`,
       <html>
         <body>
           <p>Bonjour,</p>
-          <p>Les emails suivants ont été refusé et n'ont donc pas été ajoutés aux numéros Siren de vos entreprises :</p>
+          <p>
+            Les emails suivants ont été refusés et n'ont donc pas été ajoutés aux numéros Siren de vos entreprises :
+          </p>
           <p>
             <ul>
               {combo.map(([email, siren], idx) => (
