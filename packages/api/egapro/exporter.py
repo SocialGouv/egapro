@@ -76,7 +76,6 @@ async def public_data(path: Path):
                 data.path("indicateurs.rémunérations.note") or "NC",
                 data.path("indicateurs.augmentations.note") or "NC",
                 data.path("indicateurs.promotions.note") or "NC",
-                data.path("indicateurs.augmentations_et_promotions.note") or "NC",
                 data.path("indicateurs.congés_maternité.note") or "NC",
                 data.path("indicateurs.hautes_rémunérations.note") or "NC",
                 data.grade or "NC",
