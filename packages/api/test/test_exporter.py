@@ -1015,9 +1015,9 @@ async def test_export_public_data(declaration):
     out.seek(0)
     assert out.read() == (
         "Année;Structure;Tranche d'effectifs;SIREN;Raison Sociale;Nom UES;Entreprises UES (SIREN);Région;Département;Pays;Code NAF;Note Ecart rémunération;Note Ecart taux d'augmentation;Note Ecart taux de promotion;Note Retour congé maternité;Note Hautes rémunérations;Note Index\r\n"
-        "2019;Entreprise;1000:;87654321;Mirabar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
-        "2018;Entreprise;1000:;87654322;FooBar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
-        "2020;Entreprise;251:999;87654324;KaramBar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
+        "2019;Entreprise;1000:;87654321;Mirabar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;26\r\n"
+        "2018;Entreprise;1000:;87654322;FooBar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;26\r\n"
+        "2020;Entreprise;251:999;87654324;KaramBar;;;Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;26\r\n"
     )
 
 
@@ -1042,7 +1042,7 @@ async def test_export_ues_public_data(declaration):
     out.seek(0)
     assert out.read() == (
         "Année;Structure;Tranche d'effectifs;SIREN;Raison Sociale;Nom UES;Entreprises UES (SIREN);Région;Département;Pays;Code NAF;Note Ecart rémunération;Note Ecart taux d'augmentation;Note Ecart taux de promotion;Note Retour congé maternité;Note Hautes rémunérations;Note Index\r\n"
-        "2019;Unité Economique et Sociale (UES);1000:;87654321;Mirabar;MiraFoo;MiraBaz (315710251),MiraPouet (315710251);Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;NC;26\r\n"
+        "2019;Unité Economique et Sociale (UES);1000:;87654321;Mirabar;MiraFoo;MiraBaz (315710251),MiraPouet (315710251);Auvergne-Rhône-Alpes;Drôme;FRANCE;;NC;NC;NC;NC;NC;26\r\n"
     )
 
 
@@ -1063,7 +1063,7 @@ async def test_export_public_data_with_foreign_company(declaration):
     out.seek(0)
     assert out.read() == (
         "Année;Structure;Tranche d'effectifs;SIREN;Raison Sociale;Nom UES;Entreprises UES (SIREN);Région;Département;Pays;Code NAF;Note Ecart rémunération;Note Ecart taux d'augmentation;Note Ecart taux de promotion;Note Retour congé maternité;Note Hautes rémunérations;Note Index\r\n"
-        "2020;Entreprise;50:250;123456782;Total Recall;;;;;BELGIQUE;;NC;NC;NC;NC;NC;NC;26\r\n"
+        "2020;Entreprise;50:250;123456782;Total Recall;;;;;BELGIQUE;;NC;NC;NC;NC;NC;26\r\n"
     )
 
 
