@@ -3,6 +3,7 @@ import type { Mapper } from "@common/shared-domain";
 import { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Objectize } from "@common/utils/types";
 
+import { ErrorDetailTuple } from "../domain/ErrorDetailTuple";
 import { OwnershipRequest } from "../domain/OwnershipRequest";
 import { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "../domain/valueObjects/Siren";
@@ -18,7 +19,7 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
         askerEmail: new Email(raw.asker_email),
         email: raw.email !== null ? new Email(raw.email) : undefined,
         status: new OwnershipRequestStatus(raw.status),
-        errorDetail: raw.error_detail !== null ? raw.error_detail : undefined,
+        errorDetail: raw.error_detail !== null ? new ErrorDetailTuple(raw.error_detail) : undefined,
       },
       new UniqueID(raw.id),
     );
@@ -42,7 +43,7 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
       asker_email: obj.askerEmail.getValue(),
       email: obj.email?.getValue() || null,
       status: obj.status.getValue(),
-      error_detail: obj.errorDetail ? [obj.errorDetail.errorCode, obj.errorDetail.errorMessage] : null,
+      error_detail: obj.errorDetail ? [obj.errorDetail.errorCode, obj.errorDetail.errorMessage] : [],
     } as Objectize<OwnershipRequestRaw>;
   },
 };

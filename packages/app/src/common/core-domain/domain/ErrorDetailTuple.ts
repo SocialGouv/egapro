@@ -6,6 +6,7 @@ const errorDetailCodes = ["EMAIL_DELIVERY_KO", "INVALID_EMAIL", "INVALID_SIREN"]
 export type ErrorDetailCode = typeof errorDetailCodes[number];
 type ErrorDetailTupleProps = [ErrorDetailCode, string];
 
+// TODO @pom why this is an entity and not a value object instead?
 export class ErrorDetailTuple extends JsonEntity<ErrorDetailTupleProps> {
   get errorCode(): ErrorDetailCode {
     return this.props[0];

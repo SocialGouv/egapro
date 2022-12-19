@@ -112,7 +112,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
         }
 
         foundRequest.changeStatus(newStatus);
-        await this.ownershipRequestRepo.save(foundRequest);
+        await this.ownershipRequestRepo.update(foundRequest);
       }
     }
   }

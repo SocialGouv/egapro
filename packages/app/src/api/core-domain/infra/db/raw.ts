@@ -1,4 +1,4 @@
-import type { ErrorDetailTuple } from "@common/core-domain/domain/ErrorDetailTuple";
+import type { ErrorDetailCode } from "@common/core-domain/domain/ErrorDetailTuple";
 import type { DeclarationDTO as DeclarationDataRaw } from "@common/models/generated";
 
 export interface DeclarationRaw {
@@ -26,7 +26,7 @@ export interface OwnershipRequestRaw {
   asker_email: string;
   created_at: string;
   email: string | null;
-  error_detail: ErrorDetailTuple | null;
+  error_detail: [ErrorDetailCode, string] | null; // TODO properly type this
   id: string;
   modified_at: string;
   siren: string | null;

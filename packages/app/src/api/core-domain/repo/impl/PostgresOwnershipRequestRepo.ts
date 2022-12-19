@@ -43,7 +43,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   public async getOne(id: UniqueID): Promise<OwnershipRequest | null> {
     try {
-      const [raw] = await this.sql`select * from ${this.table} where id=${id.getValue()} limit 1`;
+      const [raw] = await this.sql`select * from ${this.table} where id = ${id.getValue()} limit 1`;
 
       if (!raw) return null;
       return ownershipRequestMap.toDomain(raw);
@@ -70,8 +70,16 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     )}`;
   }
 
-  public update(item: OwnershipRequest): Promise<void> {
-    return this.save(item);
+  public async update(item: OwnershipRequest): Promise<void> {
+    const raw = ownershipRequestMap.toPersistence(item);
+
+    console.log({ raw });
+
+    await sql`update ${this.table} set ${sql(
+      raw,
+      "status",
+      "error_detail",
+    )} where id = ${item._required.id.getValue()}`;
   }
 
   public deleteBulk(...items: OwnershipRequest[]): Promise<void> {
@@ -92,7 +100,20 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     throw new Error("Method not implemented.");
   }
 
-  public updateBulk(...items: OwnershipRequest[]): Promise<void> {
-    throw new Error("Method not implemented.");
+  // TODO: better handle column casting/coercing in "values" because temp table switch everything to text
+  public async updateBulk(...items: OwnershipRequest[]): Promise<void> {
+    const raws = items.map(ownershipRequestMap.toPersistence);
+    const values = raws.map((raw, idx) => [
+      items[idx]._required.id.getValue(),
+      raw.status,
+      raw.error_detail?.length ? JSON.stringify(raw.error_detail) : "null",
+    ]);
+
+    await this.sql`update ${
+      this.table
+    } set status = update_data.status, error_detail = cast(update_data.error_detail as jsonb)
+      from (values ${sql(values)}) as update_data (id, status, error_detail)
+      where ${this.table}.id = cast(update_data.id as uuid)
+    `;
   }
 }
