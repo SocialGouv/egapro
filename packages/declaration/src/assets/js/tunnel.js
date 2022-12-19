@@ -2,52 +2,68 @@ const form = document.getElementById("page-form");
 const progress = document.querySelector("progress");
 const previousButton = document.querySelector("a[rel=prev]");
 const nextButton = document.querySelector("button[rel=next]");
+
+const conditions = {
+    isUES: (data) => data._entreprise.structure === "ues",
+    isPeriodeSuffisante: (data) => data.déclaration.période_suffisante,
+    isCoef: (data) => data.indicateurs.rémunérations.mode === "niveau_branche" || data.indicateurs.rémunérations.mode === "niveau_autre",
+    isCSP: (data) => data.indicateurs.rémunérations.mode === "csp",
+    isTranche50_250: (data) => data.entreprise.effectif.tranche === "50:250",
+    isCalculable: (data) => data.déclaration.points_calculables >= 75 || data.déclaration.année_indicateurs >= 2020
+}
+
 const steps = [
   { name: "commencer" },
   { name: "declarant" },
   { name: "perimetre",
-    nextStep: (data) => {
-      if (data._entreprise.structure === "ues") return "ues";
-      return "informations";
-    },
+    nextStep: (data) => conditions.isUES(data) ? "ues" : "informations"
   },
   { name: "ues" },
   { name: "informations",
-      nextStep: (data) => data.déclaration.période_suffisante === false ? "validation" : "remuneration"
+      nextStep: (data) => !condition.isPeriodeSuffisante(data) ? "validation" : "remuneration",
+      backStep: (data) => conditions.isUES(data) ? "ues" : "perimetre"
   },
   { name: "remuneration",
-    nextStep: (data) => {
-      if (data.indicateurs.rémunérations.mode === "niveau_branche")
-        return "remuneration-coef";
-      if (data.indicateurs.rémunérations.mode === "niveau_autre")
-        return "remuneration-coef";
-      if (data.indicateurs.rémunérations.mode === "csp")
-        return "remuneration-csp";
-      return data.entreprise.effectif.tranche === "50:250"
+    nextStep: (data) => conditions.isCoef(data)
+        ? "remuneration-coef"
+        : conditions.isCSP(data)
+        ? "remuneration-csp"
+        : conditions.isTranche50_250(data)
         ? "augmentations-et-promotions"
-        : "augmentations";
-    },
+        : "augmentations"
   },
   { name: "remuneration-coef", nextStep: (_) => "remuneration-final" },
-  // { name: "remuneration-autre", nextStep: (_) => "remuneration-final" },
-  { name: "remuneration-csp", nextStep: (_) => "remuneration-final" },
+  { name: "remuneration-csp",
+    nextStep: (_) => "remuneration-final",
+    backStep: (_) => "remuneration"
+  },
   { name: "remuneration-final",
-    nextStep: (data) =>
-      data.entreprise.effectif.tranche === "50:250"
-        ? "augmentations-et-promotions"
-        : "augmentations",
+    nextStep: (data) => conditions.isTranche50_250(data) ? "augmentations-et-promotions" : "augmentations",
+    backStep: (data) => conditions.isCoef(data) ? "remuneration-coef" : "remuneration-csp"
   },
   // If tranche effectif is > 50:250
-  { name: "augmentations" },
+  { name: "augmentations",
+    backStep: (data) => conditions.isCoef(data) || conditions.isCSP(data) ? "remuneration-final" : "remuneration"
+  },
   { name: "promotions", nextStep: (_) => "maternite" },
   // If tranche effectif is 50:250
-  { name: "augmentations-et-promotions" },
+  { name: "augmentations-et-promotions",
+    backStep: (data) => conditions.isCoef(data) || conditions.isCSP(data) ? "remuneration-final" : "remuneration"
+  },
   //
-  { name: "maternite" },
+  { name: "maternite",
+    backStep: (data) => conditions.isTranche50_250(data) ? "augmentations-et-promotions" : "promotions"
+  },
   { name: "hautes-remunerations" },
-  { name: "note", nextStep: (data) => data.déclaration.points_calculables >= 75 || data.déclaration.année_indicateurs >= 2020 ? "resultat" : "validation" },
+  { name: "note", nextStep: (data) => conditions.isCalculable(data) ? "resultat" : "validation" },
   { name: "resultat" },
-  { name: "validation" },
+  { name: "validation",
+    backStep: (data) => !condition.isPeriodeSuffisante(data)
+        ? "informations"
+        : conditions.isCalculable(data)
+        ? "resultat"
+        : "note"
+  },
   { name: "transmission" },
 ];
 
@@ -150,7 +166,10 @@ const refreshForm = async (event) => {
 if (step > 0) {
   previousButton.onclick = (e) => {
     e.preventDefault();
-    history.back();
+    // history.back();
+    const backStep = steps[step].backStep;
+    if (backStep) return redirect(`${backStep(app.data)}.html`);
+    else return redirect(`${steps[step - 1].name}.html`);
   };
 } else {
   previousButton.onclick = (e) => {
