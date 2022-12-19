@@ -129,46 +129,7 @@ exports[`should match snapshot 1`] = `
               <ul
                 class="css-11ji3cx"
                 role="list"
-              >
-                <li
-                  class="css-0"
-                >
-                  <a
-                    class="chakra-link css-spn4bz"
-                    href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                    rel="noopener"
-                    target="_blank"
-                  >
-                    <div
-                      class="css-gmuwbf"
-                    >
-                      Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
-                      <svg
-                        class="chakra-icon css-1j5r502"
-                        focusable="false"
-                        viewBox="0 0 24 24"
-                      >
-                        <g
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-width="2"
-                        >
-                          <path
-                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                          />
-                          <path
-                            d="M15 3h6v6"
-                          />
-                          <path
-                            d="M10 14L21 3"
-                          />
-                        </g>
-                      </svg>
-                    </div>
-                  </a>
-                </li>
-              </ul>
+              />
             </div>
             <div
               class="css-1tqkm5s"
@@ -181,15 +142,12 @@ exports[`should match snapshot 1`] = `
               <p
                 class="chakra-text css-vc8k71"
               >
-                Pour nous aider à l'améliorer
-                 
+                Contact : 
                 <a
                   class="chakra-link css-18ktbam"
-                  href="https://github.com/SocialGouv/egapro/tree/1.21.0"
-                  rel="noopener"
-                  target="_blank"
+                  href="mailto:index@travail.gouv.fr"
                 >
-                  contribuez sur Github
+                  index@travail.gouv.fr
                 </a>
               </p>
             </div>
@@ -365,46 +323,7 @@ exports[`should match snapshot 1`] = `
             <ul
               class="css-11ji3cx"
               role="list"
-            >
-              <li
-                class="css-0"
-              >
-                <a
-                  class="chakra-link css-spn4bz"
-                  href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                  rel="noopener"
-                  target="_blank"
-                >
-                  <div
-                    class="css-gmuwbf"
-                  >
-                    Télécharger la liste des référents Egapro (XLSX, 22 Ko) 
-                    <svg
-                      class="chakra-icon css-1j5r502"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <g
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-width="2"
-                      >
-                        <path
-                          d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                        />
-                        <path
-                          d="M15 3h6v6"
-                        />
-                        <path
-                          d="M10 14L21 3"
-                        />
-                      </g>
-                    </svg>
-                  </div>
-                </a>
-              </li>
-            </ul>
+            />
           </div>
           <div
             class="css-1tqkm5s"
@@ -417,15 +336,12 @@ exports[`should match snapshot 1`] = `
             <p
               class="chakra-text css-vc8k71"
             >
-              Pour nous aider à l'améliorer
-               
+              Contact : 
               <a
                 class="chakra-link css-18ktbam"
-                href="https://github.com/SocialGouv/egapro/tree/1.21.0"
-                rel="noopener"
-                target="_blank"
+                href="mailto:index@travail.gouv.fr"
               >
-                contribuez sur Github
+                index@travail.gouv.fr
               </a>
             </p>
           </div>

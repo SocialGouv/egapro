@@ -44,9 +44,14 @@ const validateForm = ({
     tauxPromotionFemmes,
     tauxPromotionHommes,
   ])
-  if (allInputs.every((input) => input === "0" || input === "")) {
+  if (allInputs.every((input) => input === "0")) {
     return {
-      notAll0: "L’indicateur ne peut être calculé car certains champs ne sont pas renseignés ou sont à 0.",
+      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des promotions",
+    }
+  }
+  if (allInputs.every((input) => input === "")) {
+    return {
+      notAll0: "L’indicateur ne peut être calculé car certains champs ne sont pas renseignés.",
     }
   }
   return
