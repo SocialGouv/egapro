@@ -1,19 +1,10 @@
-import type { Any, NonNullableProps, Objectize, SimpleObject } from "../../utils/types";
+import type { Any, Objectize, SimpleObject } from "../../utils/types";
 import type { ValueObject } from "./ValueObject";
 import type { Enum } from "./valueObjects";
 
 export type UUID = string;
 export abstract class Entity<P, out Id = UUID> {
   constructor(protected readonly props: P, public readonly id?: Id) {}
-
-  /**
-   * Returns a "non nullable" version of this entity.
-   *
-   * All props are now considered set and not null nor undefined.
-   */
-  get _required() {
-    return this as unknown as Required<NonNullableProps<Omit<this, "_required">>>;
-  }
 }
 
 export abstract class JsonEntity<P, out Id = UUID> extends Entity<P, Id> {

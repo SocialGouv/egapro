@@ -1,6 +1,7 @@
 import type { IMailerService } from "@api/shared-domain/infra/mail/IMailerService";
 
-import type * as templates from "./templates";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- used in doc
+import * as templates from "./templates";
 
 /**
  * Generic interface for the global mailer service. Implement it with a dedicated mailer lib like nodemailer.

@@ -12,9 +12,9 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
 
   public async getEmailsAllBySiren(siren: Siren): Promise<string[]> {
     try {
-      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()}`;
+      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()}`;
 
-      return raw.map(owner => owner.email);
+      return raws.map(owner => owner.email);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
@@ -25,6 +25,7 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     }
   }
 
+  // TODO returns domain object instead
   public async getAll(): Promise<OwnershipRaw[]> {
     try {
       return await this.sql`select * from ${this.table}`;

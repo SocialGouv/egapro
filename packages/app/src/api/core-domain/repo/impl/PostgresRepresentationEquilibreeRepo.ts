@@ -23,11 +23,9 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
 
   public async getAllBySiren(siren: Siren): Promise<RepresentationEquilibree[]> {
     try {
-      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${
-        this.postgresLimit
-      }`;
+      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${this.postgresLimit}`;
 
-      return raw.map(representationEquilibreeMap.toDomain);
+      return raws.map(representationEquilibreeMap.toDomain);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling

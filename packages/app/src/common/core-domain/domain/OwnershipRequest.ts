@@ -49,7 +49,7 @@ export class OwnershipRequest extends Entity<OwnershipRequestProps, UniqueID> {
   }
 
   get isProcessed() {
-    return this.status.getValue() === OwnershipRequestStatus.Enum.PROCESSED;
+    return this.status.getValue() === OwnershipRequestStatus.Enum.ACCEPTED;
   }
 
   get ownershipRequested() {

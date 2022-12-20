@@ -154,6 +154,8 @@ export interface FixedLengthArray<T, TLength extends number> extends Array<T> {
   length: TLength;
 }
 
+export type IsTuple<T extends Any[]> = number extends T["length"] ? false : true;
+
 /**
  * When using abstract class, return a simulated extended class type without having to target a "real" sub class.
  */
@@ -225,3 +227,9 @@ export type UnReadOnly<T> = {
 
 // ===== Dummy type fonction and guards
 export const unreadonly = <T>(value: T): UnReadOnly<T> => value;
+/**
+ * Returns a "non nullable" version of T object.
+ *
+ * All props are now considered set and not null nor undefined.
+ */
+export const ensureRequired = <T>(value: T) => value as Required<NonNullableProps<T>>;

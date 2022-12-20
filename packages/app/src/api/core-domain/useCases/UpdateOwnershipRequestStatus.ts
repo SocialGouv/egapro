@@ -9,11 +9,12 @@ import type { OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/Owner
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { UniqueID } from "@common/shared-domain/domain/valueObjects";
+import { ensureRequired } from "@common/utils/types";
 
 import type { IGlobalMailerService } from "../infra/mail/IGlobalMailerService";
 import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 
-const KNOWN_ACTIONS: Array<OwnershipRequestActionDTO["action"]> = ["accept", "reject"];
+const KNOWN_ACTIONS: Array<OwnershipRequestActionDTO["action"]> = ["accept", "refuse"];
 
 export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestActionDTO, OwnershipRequestWarningsDTO> {
   constructor(
@@ -33,7 +34,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
     }
 
     const shouldProcess = action === "accept";
-    const newStatus = shouldProcess ? OwnershipRequestStatus.Enum.PROCESSED : OwnershipRequestStatus.Enum.REFUSED;
+    const newStatus = shouldProcess ? OwnershipRequestStatus.Enum.ACCEPTED : OwnershipRequestStatus.Enum.REFUSED;
 
     const ownershipRequests = await this.ownershipRequestRepo.getMultiple(...uuids.map(uuid => new UniqueID(uuid)));
 
@@ -50,7 +51,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
     const groupByDeclarant = new Map<string, string[]>();
     for (const request of ownershipRequests) {
       if (request.shouldBeProcessed) {
-        const processable = request._required;
+        const processable = ensureRequired(request);
         const uuid = processable.id.getValue();
 
         const askerGroup = groupByAsker.get(request.askerEmail.getValue()) ?? [];
@@ -65,7 +66,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
         }
       } else {
         failedRequests.set(
-          request._required.id.getValue(),
+          ensureRequired(request).id.getValue(),
           new ErrorDetail([
             "ALREADY_PROCESSED",
             `The ownership request [${
@@ -85,7 +86,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
 
     for (const [askerMail, requestIds] of groupByAsker) {
       const filteredRequests = ownershipRequests.filter(request =>
-        requestIds.includes(request._required.id.getValue()),
+        requestIds.includes(ensureRequired(request).id.getValue()),
       );
 
       const [, rejected] = await this.globalMailerService.sendMail(
@@ -117,13 +118,13 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- ownershipRequests is never empty
-        const foundRequest = ownershipRequests.find(request => request._required.id.getValue() === id)!;
+        const foundRequest = ownershipRequests.find(request => ensureRequired(request).id.getValue() === id)!;
 
         const [, rejected] = await this.globalMailerService.sendMail(
           "ownershipRequest_toDeclarantAfterValidation",
           { to: declarantMail },
           declarantMail,
-          foundRequest._required.siren.getValue(),
+          ensureRequired(foundRequest).siren.getValue(),
         );
 
         if (rejected.includes(declarantMail)) {

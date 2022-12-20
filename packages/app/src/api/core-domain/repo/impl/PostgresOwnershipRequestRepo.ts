@@ -5,6 +5,7 @@ import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipReques
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
+import { ensureRequired } from "@common/utils/types";
 
 import type { IOwnershipRequestRepo } from "../IOwnershipRequestRepo";
 
@@ -36,9 +37,9 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<OwnershipRequest[]> {
-    const raw = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
+    const raws = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
 
-    return raw.map(ownershipRequestMap.toDomain) as unknown as OwnershipRequest[];
+    return raws.map(ownershipRequestMap.toDomain);
   }
 
   public async getOne(id: UniqueID): Promise<OwnershipRequest | null> {
@@ -73,11 +74,9 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async update(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    await sql`update ${this.table} set ${sql(
-      raw,
-      "status",
-      "error_detail",
-    )} where id = ${item._required.id.getValue()}`;
+    await sql`update ${this.table} set ${sql(raw, "status", "error_detail")} where id = ${ensureRequired(
+      item,
+    ).id.getValue()}`;
   }
 
   public deleteBulk(...items: OwnershipRequest[]): Promise<void> {
@@ -89,7 +88,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const [...raws] = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
+    const raws = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
 
     return raws.map(ownershipRequestMap.toDomain);
   }
@@ -102,7 +101,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async updateBulk(...items: OwnershipRequest[]): Promise<void> {
     const raws = items.map(ownershipRequestMap.toPersistence);
     const values = raws.map((raw, idx) => [
-      items[idx]._required.id.getValue(),
+      ensureRequired(items[idx]).id.getValue(),
       raw.status,
       raw.error_detail?.length ? JSON.stringify(raw.error_detail) : "null",
     ]);

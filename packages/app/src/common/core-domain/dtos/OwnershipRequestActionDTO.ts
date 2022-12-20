@@ -1,7 +1,5 @@
-import type { UnknownMapping } from "@common/utils/types";
-
-export type OwnershipRequestAction = "accept" | "reject";
+export type OwnershipRequestAction = "accept" | "refuse";
 export interface OwnershipRequestActionDTO {
-  action: OwnershipRequestAction | UnknownMapping;
+  action: OwnershipRequestAction;
   uuids: string[];
 }
