@@ -1,3 +1,10 @@
+## [2.49.4](https://github.com/SocialGouv/egapro/compare/v2.49.3...v2.49.4) (2022-12-20)
+
+
+### Bug Fixes
+
+* **k8s:** add ingress annotations ([#1417](https://github.com/SocialGouv/egapro/issues/1417)) ([a1b0c07](https://github.com/SocialGouv/egapro/commit/a1b0c07f5c3aa217ff51b94e9ca64034c3139c13))
+
 ## [2.49.3](https://github.com/SocialGouv/egapro/compare/v2.49.2...v2.49.3) (2022-12-19)
 
 
