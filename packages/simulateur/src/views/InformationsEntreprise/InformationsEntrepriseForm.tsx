@@ -160,7 +160,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (
-              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+              <FormError message="Cette page ne peut être validée car tous les champs ne sont pas renseignés." />
             )}
             <FormControl isReadOnly={readOnly}>
               <FormLabel as="div">Vous déclarez en tant que</FormLabel>
