@@ -3,6 +3,7 @@ import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import type { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
+import type { SQLCount } from "@common/shared-domain";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
@@ -10,7 +11,7 @@ import type { Any } from "@common/utils/types";
 import type { IOwnershipRequestRepo } from "../IOwnershipRequestRepo";
 import { OWNERSHIP_REQUEST_SORTABLE_COLS } from "../IOwnershipRequestRepo";
 
-const buildStatusFilter = (status: OwnershipRequestStatus | undefined) =>
+const buildStatusFilter = (status?: OwnershipRequestStatus) =>
   status?.getValue() ? sql` and status = ${status?.getValue()}` : sql``;
 
 export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
@@ -110,11 +111,10 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     siren?: string;
     status?: OwnershipRequestStatus;
   }): Promise<number> {
-    // TODO: Optimiser avec un count(*). Mais comment typer le retour d'un count(*) ? La lib postgres semble attendre un tableau d'object.
-    const rows = await this.sql`select * from ${this.table} where siren like ${siren + "%"} ${buildStatusFilter(
-      status,
-    )}`;
+    const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} where siren like ${
+      siren + "%"
+    } ${buildStatusFilter(status)}`;
 
-    return rows.length;
+    return Number(count);
   }
 }
