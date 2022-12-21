@@ -59,7 +59,7 @@ const validateForm = ({
   }
   if (nombreFemmes + nombreHommes === 0) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations",
+      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations.",
     }
   }
   return

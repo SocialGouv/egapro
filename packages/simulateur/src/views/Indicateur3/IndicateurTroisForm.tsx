@@ -44,9 +44,10 @@ const validateForm = ({
     tauxPromotionFemmes,
     tauxPromotionHommes,
   ])
-  if (allInputs.every((input) => input === "0")) {
+  const filteredAllInputs = allInputs.filter((element) => element !== "")
+  if (filteredAllInputs.every((input) => input === "0")) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des promotions",
+      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des promotions.",
     }
   }
   if (allInputs.every((input) => input === "")) {
@@ -151,7 +152,7 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
                 message={
                   errors?.notAll0
                     ? errors.notAll0
-                    : "L’indicateur ne peut pas être validé si tous les champs ne sont pas remplis."
+                    : "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés."
                 }
               />
             )}
