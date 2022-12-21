@@ -2,6 +2,7 @@ import { ownershipRequestRepo } from "@api/core-domain/repo";
 import { CreateOwnershipRequest, CreateOwnershipRequestError } from "@api/core-domain/useCases/CreateOwnershipRequest";
 import { GetOwnershipRequest, GetOwnershipRequestError } from "@api/core-domain/useCases/GetOwnershipRequest";
 import { ValidationError } from "@common/shared-domain";
+import { normalizeQueryParam } from "@common/utils/url";
 import type { NextApiHandler } from "next";
 
 // TODO: switch later to controller class
@@ -45,12 +46,26 @@ const put: NextApiHandler = async (req, res) => {
 
 // TODO: Ajouter le décorateur Staff only
 const get: NextApiHandler = async (req, res) => {
-  const { siren, status, limit, offset } = req.query;
+  const {
+    siren: sirenQuery,
+    status: statusQuery,
+    limit: limitQuery,
+    offset: offsetQuery,
+    orderBy: orderByQuery,
+    orderAsc: orderAscQuery,
+  } = req.query;
+
+  const siren = normalizeQueryParam(sirenQuery);
+  const status = normalizeQueryParam(statusQuery);
+  const limit = normalizeQueryParam(limitQuery);
+  const offset = normalizeQueryParam(offsetQuery);
+  const orderBy = normalizeQueryParam(orderByQuery);
+  const orderAsc = normalizeQueryParam(orderAscQuery);
 
   try {
     const useCase = new GetOwnershipRequest(ownershipRequestRepo);
-    const ownershipRequests = await useCase.execute({ siren, status, limit, offset });
-    res.status(200).json({ ownershipRequests });
+    const ownershipRequests = await useCase.execute({ siren, status, limit, offset, orderBy, orderAsc });
+    res.status(200).json(ownershipRequests);
   } catch (error: unknown) {
     if (error instanceof GetOwnershipRequestError) {
       if (error.previousError instanceof ValidationError) {

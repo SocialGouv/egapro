@@ -8,6 +8,10 @@ import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
 
 import type { IOwnershipRequestRepo } from "../IOwnershipRequestRepo";
+import { OWNERSHIP_REQUEST_SORTABLE_COLS } from "../IOwnershipRequestRepo";
+
+const buildStatusFilter = (status: OwnershipRequestStatus | undefined) =>
+  status?.getValue() ? sql` and status = ${status?.getValue()}` : sql``;
 
 export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   private sql = sql<OwnershipRequestRaw[]>;
@@ -76,22 +80,41 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async search({
-    siren = "",
+    siren,
     status,
-    limit = 10,
-    offset = 0,
+    limit,
+    offset,
+    orderByColumn,
+    orderAsc,
   }: {
-    limit?: number;
-    offset?: number;
-    siren: string;
+    limit: number;
+    offset: number;
+    orderAsc: boolean;
+    orderByColumn: keyof typeof OWNERSHIP_REQUEST_SORTABLE_COLS;
+    siren?: string;
     status?: OwnershipRequestStatus;
   }): Promise<OwnershipRequest[]> {
-    const statusFilter = status?.getValue() ? sql` and status = ${status?.getValue()}` : sql``;
+    const orderBy = sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS[orderByColumn])}`;
 
-    const rows = await this.sql`select * from ${this.table} where siren like ${
-      siren + "%"
-    } ${statusFilter} limit ${limit} offset ${offset}`;
+    const rows = await this.sql`select * from ${this.table} where siren like ${siren + "%"} ${buildStatusFilter(
+      status,
+    )} ${orderBy} ${orderAsc ? sql`asc` : sql`desc`} limit ${limit} offset ${offset}`;
 
     return rows.map(ownershipRequestMap.toDomain);
+  }
+
+  public async countSearch({
+    siren = "",
+    status,
+  }: {
+    siren?: string;
+    status?: OwnershipRequestStatus;
+  }): Promise<number> {
+    // TODO: Optimiser avec un count(*). Mais comment typer le retour d'un count(*) ? La lib postgres semble attendre un tableau d'object.
+    const rows = await this.sql`select * from ${this.table} where siren like ${siren + "%"} ${buildStatusFilter(
+      status,
+    )}`;
+
+    return rows.length;
   }
 }
