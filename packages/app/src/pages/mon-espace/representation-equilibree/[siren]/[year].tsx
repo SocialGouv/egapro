@@ -1,5 +1,5 @@
 import { formatTimestampToFr } from "@common/utils/date";
-import { normalizeQueryParam } from "@common/utils/router";
+import { normalizeQueryParam } from "@common/utils/url";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { StaffOnly } from "@components/StaffOnly";
 import { Alert } from "@design-system";

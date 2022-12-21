@@ -1,6 +1,7 @@
 import { sql } from "@api/core-domain/infra/db/postgres";
 import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
+import type { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
 import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
@@ -72,5 +73,25 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   public update(item: OwnershipRequest): Promise<void> {
     return this.save(item);
+  }
+
+  public async search({
+    siren = "",
+    status,
+    limit = 10,
+    offset = 0,
+  }: {
+    limit?: number;
+    offset?: number;
+    siren: string;
+    status?: OwnershipRequestStatus;
+  }): Promise<OwnershipRequest[]> {
+    const statusFilter = status?.getValue() ? sql` and status = ${status?.getValue()}` : sql``;
+
+    const rows = await this.sql`select * from ${this.table} where siren like ${
+      siren + "%"
+    } ${statusFilter} limit ${limit} offset ${offset}`;
+
+    return rows.map(ownershipRequestMap.toDomain);
   }
 }

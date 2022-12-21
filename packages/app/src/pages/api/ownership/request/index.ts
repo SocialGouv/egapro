@@ -1,14 +1,24 @@
 import { ownershipRequestRepo } from "@api/core-domain/repo";
 import { CreateOwnershipRequest, CreateOwnershipRequestError } from "@api/core-domain/useCases/CreateOwnershipRequest";
+import { GetOwnershipRequest, GetOwnershipRequestError } from "@api/core-domain/useCases/GetOwnershipRequest";
 import { ValidationError } from "@common/shared-domain";
 import type { NextApiHandler } from "next";
 
 // TODO: switch later to controller class
 const handler: NextApiHandler = async (req, res) => {
-  if (req.method !== "PUT") {
+  if (!["PUT", "GET"].includes(req.method || "")) {
     return res.status(405).send(null);
   }
 
+  switch (req.method) {
+    case "PUT":
+      return put(req, res);
+    case "GET":
+      return get(req, res);
+  }
+};
+
+const put: NextApiHandler = async (req, res) => {
   const { sirens, emails, askerEmail } = req.body;
 
   try {
@@ -17,6 +27,32 @@ const handler: NextApiHandler = async (req, res) => {
     res.status(200).json({ warnings: warnings.map(warning => [warning.errorCode, warning.errorMessage]) });
   } catch (error: unknown) {
     if (error instanceof CreateOwnershipRequestError) {
+      if (error.previousError instanceof ValidationError) {
+        return res.status(422).json({ errorMessage: error.previousError.message });
+      }
+      res.status(400).json({
+        errorMessage: error
+          .appErrorList()
+          .map(e => e.message)
+          .join(" | "),
+      });
+    } else {
+      console.error(error);
+      res.status(500).send(null);
+    }
+  }
+};
+
+// TODO: Ajouter le décorateur Staff only
+const get: NextApiHandler = async (req, res) => {
+  const { siren, status, limit, offset } = req.query;
+
+  try {
+    const useCase = new GetOwnershipRequest(ownershipRequestRepo);
+    const ownershipRequests = await useCase.execute({ siren, status, limit, offset });
+    res.status(200).json({ ownershipRequests });
+  } catch (error: unknown) {
+    if (error instanceof GetOwnershipRequestError) {
       if (error.previousError instanceof ValidationError) {
         return res.status(422).json({ errorMessage: error.previousError.message });
       }
