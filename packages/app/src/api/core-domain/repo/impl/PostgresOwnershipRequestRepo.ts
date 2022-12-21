@@ -1,5 +1,6 @@
 import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
-import { sql } from "@api/shared-domain/infra/db/postgres";
+import { sql as _sql } from "@api/shared-domain/infra/db/postgres";
+import { Ownership } from "@common/core-domain/domain/Ownership";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
@@ -8,10 +9,12 @@ import type { Any } from "@common/utils/types";
 import { ensureRequired } from "@common/utils/types";
 
 import type { IOwnershipRequestRepo } from "../IOwnershipRequestRepo";
+import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";
 
 export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
-  private sql = sql<OwnershipRequestRaw[]>;
-  private table = sql("ownership_request");
+  private table = _sql("ownership_request");
+
+  constructor(private sql = _sql<OwnershipRequestRaw[]>) {}
 
   private nextRequestLimit = 0;
   public limit(limit = 10) {
@@ -27,7 +30,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   private get postgresLimit() {
     const limit = this.requestLimit;
-    return limit > 0 ? sql`limit ${limit}` : sql``;
+    return limit > 0 ? _sql`limit ${limit}` : _sql``;
   }
 
   public delete(item: OwnershipRequest): Promise<void> {
@@ -61,22 +64,44 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   public async save(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    await sql`insert into ${this.table} (siren, email, asker_email, status, error_detail) values ${sql(
-      raw,
-      "siren",
-      "email",
-      "asker_email",
-      "status",
-      "error_detail",
-    )}`;
+    await _sql`insert into ${this.table} ${_sql(raw, "siren", "email", "asker_email", "status", "error_detail")}`;
   }
 
   public async update(item: OwnershipRequest): Promise<void> {
     const raw = ownershipRequestMap.toPersistence(item);
 
-    await sql`update ${this.table} set ${sql(raw, "status", "error_detail")} where id = ${ensureRequired(
+    await _sql`update ${this.table} set ${_sql(raw, "status", "error_detail")} where id = ${ensureRequired(
       item,
     ).id.getValue()}`;
+  }
+
+  public async updateWithOwnership(item: OwnershipRequest): Promise<void> {
+    await this.sql.begin(async transac => {
+      const ownership = new Ownership({
+        email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+        siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+      });
+      const ownershipRepo = new PostgresOwnershipRepo(transac);
+      const thisRepo = new PostgresOwnershipRequestRepo(transac);
+      await thisRepo.update(item);
+      await ownershipRepo.save(ownership);
+    });
+  }
+
+  public async updateWithOwnershipBulk(...items: OwnershipRequest[]): Promise<void> {
+    await this.sql.begin(async transac => {
+      const ownerships = items.map(
+        item =>
+          new Ownership({
+            email: item.email!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+            siren: item.siren!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- let it throw
+          }),
+      );
+      const ownershipRepo = new PostgresOwnershipRepo(transac);
+      const thisRepo = new PostgresOwnershipRequestRepo(transac);
+      await thisRepo.updateBulk(...items);
+      await ownershipRepo.saveBulk(...ownerships);
+    });
   }
 
   public deleteBulk(...items: OwnershipRequest[]): Promise<void> {
@@ -88,7 +113,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
-    const raws = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
+    const raws = await this.sql`select * from ${this.table} where id in ${_sql(ids.map(id => id.getValue()))}`;
 
     return raws.map(ownershipRequestMap.toDomain);
   }
@@ -103,13 +128,13 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     const values = raws.map((raw, idx) => [
       ensureRequired(items[idx]).id.getValue(),
       raw.status,
-      raw.error_detail?.length ? JSON.stringify(raw.error_detail) : "null",
-    ]);
+      raw.error_detail,
+    ]) as Any;
 
     await this.sql`update ${
       this.table
     } set status = update_data.status, error_detail = cast(update_data.error_detail as jsonb)
-      from (values ${sql(values)}) as update_data (id, status, error_detail)
+      from (values ${_sql(values)}) as update_data (id, status, error_detail)
       where ${this.table}.id = cast(update_data.id as uuid)
     `;
   }
