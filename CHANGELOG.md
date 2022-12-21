@@ -1,3 +1,10 @@
+## [2.49.5](https://github.com/SocialGouv/egapro/compare/v2.49.4...v2.49.5) (2022-12-21)
+
+
+### Bug Fixes
+
+* problem with suivant button ([d00945e](https://github.com/SocialGouv/egapro/commit/d00945ec54d3599e9945b010c4468b20a7ae9eef))
+
 ## [2.49.4](https://github.com/SocialGouv/egapro/compare/v2.49.3...v2.49.4) (2022-12-20)
 
 
