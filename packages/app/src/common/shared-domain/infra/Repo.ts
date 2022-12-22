@@ -8,7 +8,6 @@ export interface SimpleRepo<T extends Entity<Any, Any> = Any> {
 export interface Repo<T extends Entity<Any, Any>, ID = NonNullable<T["id"]>> extends SimpleRepo {
   delete(item: T): Promise<void>;
   exists(id: ID): Promise<boolean>;
-  getAll(): Promise<T[]>;
   getOne(id: ID): Promise<T | null>;
   save(item: T): Promise<void>;
   update(item: T): Promise<void>;

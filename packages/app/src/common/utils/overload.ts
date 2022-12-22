@@ -1,4 +1,4 @@
-import type { Any, Objectize } from "./types";
+import type { Any, IsTuple, Objectize } from "./types";
 
 type Keys<T> = Objectize<Array<keyof T>>;
 type Values<T> = Objectize<Array<T[keyof T]>>;
@@ -22,8 +22,10 @@ declare global {
       this: TThis,
       callbackfn: (value: T, index: number, array: T[]) => U,
       thisArg?: Any,
-    ): ChangeTuple<TThis, U>;
+    ): IsTuple<TThis> extends true ? ChangeTuple<TThis, U> : U[];
   }
 }
 
-type ChangeTuple<TInput extends Any[], TOutputType> = { [K in keyof TInput]: TOutputType };
+export type ChangeTuple<TInput extends Any[], TOutputType> = {
+  [K in keyof TInput]: TOutputType;
+};

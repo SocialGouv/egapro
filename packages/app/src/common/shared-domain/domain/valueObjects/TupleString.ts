@@ -1,9 +1,10 @@
 import { escapeStringRegexp } from "@common/utils/string";
+import type { UnknownMapping } from "@common/utils/types";
 
 import { SimpleStringValueObject } from "./SimpleStringValueObject";
 
-export class EnumString extends SimpleStringValueObject<EnumString> {
-  constructor(value: string, strings: string[]) {
+export class TupleString<T extends readonly string[] = string[]> extends SimpleStringValueObject<TupleString<T>> {
+  constructor(value: T[number] | UnknownMapping, strings: T) {
     const escapedValues = strings.map(escapeStringRegexp).join("|");
     super(value, new RegExp(`^(${escapedValues})$`));
   }

@@ -1,4 +1,7 @@
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
-import type { Repo } from "@common/shared-domain";
+import type { BulkRepo } from "@common/shared-domain";
 
-export type IOwnershipRequestRepo = Repo<OwnershipRequest>;
+export interface IOwnershipRequestRepo extends BulkRepo<OwnershipRequest> {
+  updateWithOwnership(item: OwnershipRequest): Promise<void>;
+  updateWithOwnershipBulk(...items: OwnershipRequest[]): Promise<void>;
+}
