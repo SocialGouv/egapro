@@ -34,6 +34,7 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
       email: obj.email?.getValue(),
       siren: obj.siren?.getValue(),
       status: obj.status.getValue(),
+      errorDetail: obj.errorDetail,
     };
   },
 
