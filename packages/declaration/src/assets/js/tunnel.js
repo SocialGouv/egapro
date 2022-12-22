@@ -20,7 +20,7 @@ const steps = [
   },
   { name: "ues" },
   { name: "informations",
-      nextStep: (data) => !condition.isPeriodeSuffisante(data) ? "validation" : "remuneration",
+      nextStep: (data) => !conditions.isPeriodeSuffisante(data) ? "validation" : "remuneration",
       backStep: (data) => conditions.isUES(data) ? "ues" : "perimetre"
   },
   { name: "remuneration",
@@ -58,7 +58,7 @@ const steps = [
   { name: "note", nextStep: (data) => conditions.isCalculable(data) ? "resultat" : "validation" },
   { name: "resultat" },
   { name: "validation",
-    backStep: (data) => !condition.isPeriodeSuffisante(data)
+    backStep: (data) => !conditions.isPeriodeSuffisante(data)
         ? "informations"
         : conditions.isCalculable(data)
         ? "resultat"

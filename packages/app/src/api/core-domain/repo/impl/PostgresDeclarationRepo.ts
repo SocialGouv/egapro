@@ -1,5 +1,5 @@
-import { sql } from "@api/core-domain/infra/db/postgres";
 import type { DeclarationRaw } from "@api/core-domain/infra/db/raw";
+import { sql } from "@api/shared-domain/infra/db/postgres";
 import type { Declaration, DeclarationPK } from "@common/core-domain/domain/Declaration";
 import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
 import { declarationMap } from "@common/core-domain/mappers/declarationMap";
@@ -20,11 +20,9 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
 
   public async getAllBySiren(siren: Siren): Promise<Declaration[]> {
     try {
-      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${
-        this.postgresLimit
-      }`;
+      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${this.postgresLimit}`;
 
-      return raw.map(declarationMap.toDomain);
+      return raws.map(declarationMap.toDomain);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling
@@ -42,9 +40,9 @@ export class PostgresDeclarationRepo implements IDeclarationRepo {
     throw new Error("Method not implemented.");
   }
   public async getAll(): Promise<Declaration[]> {
-    const [...raw] = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
+    const raws = await this.sql`select * from ${this.table} ${this.postgresLimit}`;
 
-    return raw.map(declarationMap.toDomain);
+    return raws.map(declarationMap.toDomain);
   }
   public async getOne([siren, year]: DeclarationPK): Promise<Declaration | null> {
     try {

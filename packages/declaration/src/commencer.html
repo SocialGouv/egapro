@@ -59,7 +59,7 @@ prevButtonLabel: "Nouvelle déclaration"
           if (/vous n'avez pas les droits nécessaires pour le siren/i.test(response.data.error)) {
             errorSiren.style.display = "block"
 
-            errorSiren.innerHTML = `Le Siren saisi n'est pas rattaché à votre email de connexion (${localStorage.email}). <br/>Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à <span style="white-space: nowrap;">dgt.ega-pro@travail.gouv.fr</span>.`
+            errorSiren.innerHTML = `Votre email de connexion <a style="color: inherit" href="mailto:${localStorage.email}">${localStorage.email}</a> n'est pas rattaché au numéro Siren de l'entreprise. Vous devez faire une demande de rattachement en remplissant le formulaire <a style="color: inherit" href="/ajout-declarant">ici</a>.`
 
             notify.error(
               "Le Siren saisi n'est pas rattaché à votre email de connexion.",

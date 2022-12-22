@@ -1,18 +1,17 @@
 import { useUser } from "@services/apiClient";
+import NextLink from "next/link";
 
 export const MailtoLinkForNonOwner = () => {
   const { user } = useUser();
 
   return (
-    <>
-      <p>Le Siren saisi n'est pas rattaché à votre email de connexion ({user?.email}).</p>
-      <p>
-        Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à{" "}
-        <a style={{ whiteSpace: "nowrap" }} href="mailto:dgt.ega-pro@travail.gouv.fr">
-          dgt.ega-pro@travail.gouv.fr
-        </a>
-        .
-      </p>
-    </>
+    <p>
+      Votre email de connexion <a href={`mailto:${user?.email}`}>{user?.email}</a> n'est pas rattaché au numéro Siren de
+      l'entreprise. Vous devez faire une demande de rattachement en remplissant le formulaire{" "}
+      <NextLink href="/ajout-declarant">
+        <a>ici</a>
+      </NextLink>
+      .
+    </p>
   );
 };

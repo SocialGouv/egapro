@@ -3,6 +3,7 @@ layout: tunnel
 title: "Périmètre retenu pour le calcul et la publication des indicateurs"
 ---
 <h1>{{ page.title }}</h1>
+<p class="msg">L’assujettissement de l’entreprise ou de l'unité économique et sociale (UES) est défini à la date de l'obligation de publication de l'index. Le calcul des effectifs assujettis de l’entreprise ou de l'unité économique et sociale (UES) est celui prévu aux articles L.1111-2 et L.1111-3 du code du travail</p>
 
 <p>Les informations relatives à l'entreprise déclarante (Raison sociale, Code NAF, Adresse complète) sont renseignées automatiquement et sont non modifiables (source : Répertoire Sirene de l'INSEE).</p>
 
@@ -46,7 +47,7 @@ title: "Périmètre retenu pour le calcul et la publication des indicateurs"
 </fieldset>
 
 <fieldset>
-  <p>Adresse du siège de l'entreprise déclarante</p>
+  <p><strong>Adresse de l'entreprise déclarante</strong></p>
   <div class=row id="département-selector">
     <div>{% include fake_input.html name="entreprise.région" label="Région" dict="app.config.regions" %}</div>
     <div>{% include fake_input.html name="entreprise.département" label="Département" dict="app.config.departements" %}</div>

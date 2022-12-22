@@ -8,6 +8,15 @@ app:
   redirectFrom:
     - "egapro.fabrique.social.gouv.fr"
     - "index-egapro.travail.gouv.fr"
+  envFrom:
+    - secretRef:
+        name: "{{ .Values.global.pgSecretName }}"
+    - secretRef:
+        name: "staff"
+    - secretRef:
+        name: "egapro-secret"
+    - secretRef:
+        name: smtp-app
 
 
 api:

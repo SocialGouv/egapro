@@ -1,5 +1,7 @@
 import { ensureEnvVar as baseEnsureEnvVar } from "@common/utils/os";
 
+import { isTruthy } from "./utils/string";
+
 const ensureEnvVar = baseEnsureEnvVar<ProcessEnvCustomKeys>;
 const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {
   if (typeof window === "undefined") {
@@ -19,8 +21,17 @@ export const config = {
       .split(",")
       .filter(v => v),
     env: ensureApiEnvVar("EGAPRO_ENV", "dev") as "dev" | "preprod" | "prod",
-    maildev: {
-      smtpPort: +ensureApiEnvVar("MAILER_SMTP_PORT", "1025"),
+    mailer: {
+      enable: isTruthy(ensureApiEnvVar("MAILER_ENABLE", "false")),
+      host: ensureApiEnvVar("MAILER_SMTP_HOST", "127.0.0.1"),
+      smtp: {
+        port: +ensureApiEnvVar("MAILER_SMTP_PORT", "1025"),
+        password: ensureApiEnvVar("MAILER_SMTP_PASSWORD"),
+        login: ensureApiEnvVar("MAILER_SMTP_LOGIN"),
+        ssl: isTruthy(ensureApiEnvVar("MAILER_SMTP_SSL", "false")),
+      },
+      from: ensureApiEnvVar("MAILER_FROM_EMAIL", "EgaPro <index@travail.gouv.fr>"),
+      signature: ensureApiEnvVar("MAILER_EMAIL_SIGNATURE", "L’équipe Egapro"),
     },
     security: {
       jwtv1: {
@@ -43,8 +54,10 @@ export const config = {
 
 interface ServicesConfig {
   db: "mock" | "postgres" | "prisma";
+  mailer: "nodemailer";
 }
 
 export const services: ServicesConfig = {
   db: "postgres",
+  mailer: "nodemailer",
 };

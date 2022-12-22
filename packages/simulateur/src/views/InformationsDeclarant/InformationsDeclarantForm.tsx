@@ -93,7 +93,7 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
           <FormAutoSave saveForm={saveForm} />
           <FormStack>
             {submitFailed && hasValidationErrors && (
-              <FormError message="Le formulaire ne peut pas être validé si tous les champs ne sont pas remplis." />
+              <FormError message="Cette page ne peut être validée car tous les champs ne sont pas renseignés." />
             )}
             <InputGroup label="Nom du déclarant" fieldName="nom" isReadOnly={readOnly} autocomplete="family-name" />
             <InputGroup
@@ -109,7 +109,7 @@ const InformationsDeclarantForm: FunctionComponent<InformationsDeclarantFormProp
               autocomplete="tel-national"
               type="tel"
             />
-            <FakeInputGroup label="Email (fourni lors de la demande de validation de l'email)">
+            <FakeInputGroup label="Email (saisi lors de la validation de l'email)">
               {initialValues.email}
             </FakeInputGroup>
             <Field name="acceptationCGU" component="input" type="checkbox">
