@@ -3,11 +3,11 @@ import type { ValueObject } from "./ValueObject";
 import type { Enum } from "./valueObjects";
 
 export type UUID = string;
-export abstract class Entity<P, Id = UUID> {
+export abstract class Entity<P, out Id = UUID> {
   constructor(protected readonly props: P, public readonly id?: Id) {}
 }
 
-export abstract class JsonEntity<P, Id = UUID> extends Entity<P, Id> {
+export abstract class JsonEntity<P, out Id = UUID> extends Entity<P, Id> {
   public abstract fromJson(json: EntityPropsToJson<P>): typeof this;
 
   public static fromJson<T extends JsonEntity<Any>>(...args: Parameters<T["fromJson"]>): T {

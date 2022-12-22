@@ -1,5 +1,5 @@
-import { sql } from "@api/core-domain/infra/db/postgres";
 import type { RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
+import { sql } from "@api/shared-domain/infra/db/postgres";
 import type {
   RepresentationEquilibree,
   RepresentationEquilibreePK,
@@ -23,11 +23,9 @@ export class PostgresRepresentationEquilibreeRepo implements IRepresentationEqui
 
   public async getAllBySiren(siren: Siren): Promise<RepresentationEquilibree[]> {
     try {
-      const [...raw] = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${
-        this.postgresLimit
-      }`;
+      const raws = await this.sql`select * from ${this.table} where siren=${siren.getValue()} ${this.postgresLimit}`;
 
-      return raw.map(representationEquilibreeMap.toDomain);
+      return raws.map(representationEquilibreeMap.toDomain);
     } catch (error: unknown) {
       console.error(error);
       // TODO better error handling

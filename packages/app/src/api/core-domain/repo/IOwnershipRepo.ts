@@ -1,9 +1,7 @@
+import type { Ownership } from "@common/core-domain/domain/Ownership";
 import type { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import type { SimpleRepo } from "@common/shared-domain";
+import type { BulkRepo } from "@common/shared-domain";
 
-import type { OwnershipRaw } from "../infra/db/raw";
-
-export interface IOwnershipRepo extends SimpleRepo {
-  getAll(): Promise<OwnershipRaw[]>;
+export interface IOwnershipRepo extends BulkRepo<Ownership> {
   getEmailsAllBySiren(siren: Siren): Promise<string[]>;
 }

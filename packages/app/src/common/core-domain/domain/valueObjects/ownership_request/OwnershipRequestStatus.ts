@@ -8,8 +8,8 @@ export class OwnershipRequestStatus extends Enum<typeof OwnershipRequestStatus.E
 }
 export namespace OwnershipRequestStatus {
   export enum Enum {
+    ACCEPTED = "Accepté",
     ERROR = "En erreur",
-    PROCESSED = "Traité",
     REFUSED = "Refusé",
     TO_PROCESS = "À traiter",
   }
