@@ -1,3 +1,6 @@
+import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import type { CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateOwnershipRequestDTO";
+import { getDuplicates } from "@common/utils/array";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
@@ -16,23 +19,79 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@services/apiClient";
 import { putOwnershipRequest } from "@services/apiClient/ownershipRequest";
+import type { ValidationError } from "json-schema-to-typescript";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { NextPageWithLayout } from "./_app";
 
-export type OwnershipRequestFormType = z.infer<typeof formSchema>;
+const zodUniqueEmailArray = z.string().transform((val, ctx) => {
+  const splitted = val.split(",").map(v => v.trim());
+  const messages: string[] = [];
+  for (const v of splitted) {
+    try {
+      z.string().email().parse(v);
+    } catch {
+      messages.push(`L'adresse email "${v}" est invalide.`);
+    }
+  }
+
+  if (messages.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: messages.join("\n"),
+    });
+    return z.NEVER;
+  }
+
+  const duplicates = getDuplicates(splitted);
+  if (duplicates.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: duplicates.map(dup => `Le Siren "${dup}" ne doit pas être dupliqué dans la liste.`).join("\n"),
+    });
+    return z.NEVER;
+  }
+
+  return splitted;
+});
+
+const zodUniqueSirenArray = z.string().transform((val, ctx) => {
+  const splitted = val.split(",").map(v => v.trim());
+  const messages: string[] = [];
+  for (let i = 0; i < splitted.length; i++) {
+    try {
+      new Siren(splitted[i]);
+    } catch (error: unknown) {
+      messages.push(`Pour l'élément ${i + 1} : ${(error as ValidationError).message}`);
+    }
+  }
+
+  if (messages.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: messages.join("\n"),
+    });
+    return z.NEVER;
+  }
+
+  const duplicates = getDuplicates(splitted);
+  if (duplicates.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: duplicates.map(dup => `Le Siren ${dup} ne doit pas être dupliqué dans la liste.`).join("\n"),
+    });
+    return z.NEVER;
+  }
+
+  return splitted;
+});
 
 const formSchema = z.object({
   askerEmail: z.string().email({ message: "L'adresse email est invalide." }),
-  emails: z
-    .string()
-    .regex(
-      /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,10})(,\s*([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,10}))*$/,
-      { message: "L'adresse email est invalide." },
-    ),
-  sirens: z.string().regex(/^\d{9}(,\d{9})*$/, { message: "Le Siren est composé de 9 chiffres sans espace." }),
+  emails: zodUniqueEmailArray,
+  sirens: zodUniqueSirenArray,
 });
 
 const title = "Demande d’ajout de nouveaux déclarants";
@@ -46,7 +105,7 @@ const AddDeclarer: NextPageWithLayout = () => {
     handleSubmit,
     reset,
     formState: { errors, isValid },
-  } = useForm<OwnershipRequestFormType>({
+  } = useForm<CreateOwnershipRequestDTO>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
   });
@@ -57,7 +116,7 @@ const AddDeclarer: NextPageWithLayout = () => {
     });
   }, [reset, user?.email]);
 
-  const onSubmit = async (formData: OwnershipRequestFormType) => {
+  const onSubmit = async (formData: CreateOwnershipRequestDTO) => {
     try {
       setFeatureStatus({ type: "loading" });
       await putOwnershipRequest(formData);
@@ -126,7 +185,16 @@ const AddDeclarer: NextPageWithLayout = () => {
                         id="sirens"
                         {...register("sirens")}
                       />
-                      {errors.sirens && <FormGroupMessage id="sirens-msg">{errors.sirens.message}</FormGroupMessage>}
+                      {errors.sirens && (
+                        <FormGroupMessage id="sirens-msg">
+                          {errors.sirens.message?.split("\n").map(m => (
+                            <>
+                              {m}
+                              <br />
+                            </>
+                          ))}
+                        </FormGroupMessage>
+                      )}
                     </FormGroup>
                     <FormGroup isError={Boolean(errors.emails)}>
                       <FormGroupLabel
@@ -140,7 +208,16 @@ const AddDeclarer: NextPageWithLayout = () => {
                         id="emails"
                         {...register("emails")}
                       />
-                      {errors.emails && <FormGroupMessage id="emails-msg">{errors.emails.message}</FormGroupMessage>}
+                      {errors.emails && (
+                        <FormGroupMessage id="emails-msg">
+                          {errors.emails.message?.split("\n").map(m => (
+                            <>
+                              {m}
+                              <br />
+                            </>
+                          ))}
+                        </FormGroupMessage>
+                      )}
                     </FormGroup>
                     <FormLayoutButtonGroup>
                       <FormButton isDisabled={!isValid}>Envoyer ma demande</FormButton>
