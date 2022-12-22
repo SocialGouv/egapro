@@ -83,8 +83,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
       });
       const ownershipRepo = new PostgresOwnershipRepo(transac);
       const thisRepo = new PostgresOwnershipRequestRepo(transac);
-      await thisRepo.update(item);
       await ownershipRepo.save(ownership);
+      await thisRepo.update(item);
     });
   }
 
@@ -99,8 +99,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
       );
       const ownershipRepo = new PostgresOwnershipRepo(transac);
       const thisRepo = new PostgresOwnershipRequestRepo(transac);
-      await thisRepo.updateBulk(...items);
       await ownershipRepo.saveBulk(...ownerships);
+      await thisRepo.updateBulk(...items);
     });
   }
 
@@ -113,6 +113,8 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
+    const [{ count }] = await _sql<[{ count: number }]>`select count(*) from ${this.table}`;
+    console.log({ count });
     const raws = await this.sql`select * from ${this.table} where id in ${_sql(ids.map(id => id.getValue()))}`;
 
     return raws.map(ownershipRequestMap.toDomain);
