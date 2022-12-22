@@ -47,8 +47,21 @@ export class PostgresOwnershipRepo implements IOwnershipRepo {
     throw new Error("Method not implemented.");
   }
 
-  public existsMultiple(...ids: OwnershipPK[]): Promise<boolean[]> {
-    throw new Error("Method not implemented.");
+  // TODO use before creating new ownership request
+  public async existsMultiple(...ids: OwnershipPK[]): Promise<boolean[]> {
+    const sql = _sql<Array<OwnershipRaw & { exists: boolean }>>;
+    const values = ids.map(([siren, email]) => [siren.getValue(), email.getValue()]);
+
+    const raws = await sql`
+select siren, email, exists (
+  select 1
+  from ${this.table}
+  where ${this.table}.siren = exists_data.siren
+  and ${this.table}.email = exists_data.email
+) from (values ${_sql(values)}) as exists_data (siren, email)
+`;
+
+    return raws.map(raw => raw.exists);
   }
 
   public getMultiple(...ids: OwnershipPK[]): Promise<Ownership[]> {
