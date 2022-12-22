@@ -3,7 +3,7 @@ import type { GetOwnershipRequestDTO } from "@common/core-domain/dtos/OwnershipR
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
-import type { Any } from "@common/utils/types";
+import { enumHasValueGuard } from "@common/utils/enum";
 
 import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
 import { OWNERSHIP_REQUEST_SORTABLE_COLS } from "../repo/IOwnershipRequestRepo";
@@ -32,7 +32,7 @@ export class GetOwnershipRequest implements UseCase<Input, GetOwnershipRequestDT
 
     let status: OwnershipRequestStatus | undefined;
 
-    if (statusQuery && Object.values(OwnershipRequestStatus.Enum).includes(statusQuery as Any)) {
+    if (enumHasValueGuard(OwnershipRequestStatus.Enum, statusQuery)) {
       status = new OwnershipRequestStatus(statusQuery);
     } else {
       warnings.push([
