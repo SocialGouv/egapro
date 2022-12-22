@@ -1,3 +1,10 @@
+# [2.53.0](https://github.com/SocialGouv/egapro/compare/v2.52.0...v2.53.0) (2022-12-22)
+
+
+### Features
+
+* add endpoint to list all ownership requests ([#1471](https://github.com/SocialGouv/egapro/issues/1471)) ([c019267](https://github.com/SocialGouv/egapro/commit/c019267105a6cd39d5c69daa03711d8363982345))
+
 # [2.52.0](https://github.com/SocialGouv/egapro/compare/v2.51.0...v2.52.0) (2022-12-22)
 
 
