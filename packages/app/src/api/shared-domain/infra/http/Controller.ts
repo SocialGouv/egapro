@@ -14,8 +14,8 @@ interface QueryString {
 export interface ControllerRequest<TParamKeys extends string = string, TOriginalRequest = Any> {
   _nodeRequest: IncomingMessage;
   _req: TOriginalRequest;
-  body?: SimpleObject;
-  params: { [P in TParamKeys]: string };
+  body?: SimpleObject<string[] | string | undefined>;
+  params: Record<TParamKeys, string>;
   query: QueryString;
 }
 

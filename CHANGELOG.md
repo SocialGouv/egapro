@@ -1,3 +1,24 @@
+# [2.52.0](https://github.com/SocialGouv/egapro/compare/v2.51.0...v2.52.0) (2022-12-22)
+
+
+### Features
+
+* exclude repeq recherche from prod ([1455b9d](https://github.com/SocialGouv/egapro/commit/1455b9d9c81520dcb1e8c9840caa45533284540a))
+
+# [2.51.0](https://github.com/SocialGouv/egapro/compare/v2.50.0...v2.51.0) (2022-12-22)
+
+
+### Features
+
+* add mailer config to deployement ([e9c9ddf](https://github.com/SocialGouv/egapro/commit/e9c9ddfa24c0be1b0054d182f8342e522f32dc88))
+
+# [2.50.0](https://github.com/SocialGouv/egapro/compare/v2.49.5...v2.50.0) (2022-12-22)
+
+
+### Features
+
+* **apiv2:** post ownership request + mailer ([#1463](https://github.com/SocialGouv/egapro/issues/1463)) ([142e5c2](https://github.com/SocialGouv/egapro/commit/142e5c22df1234c2a687d53338fc26a5a674c83e))
+
 ## [2.49.5](https://github.com/SocialGouv/egapro/compare/v2.49.4...v2.49.5) (2022-12-21)
 
 

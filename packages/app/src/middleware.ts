@@ -12,5 +12,5 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   // TODO remove when ff is ok
-  matcher: "/apiv2/:path*",
+  matcher: ["/representation-equilibree/recherche", "/apiv2/:path*"],
 };

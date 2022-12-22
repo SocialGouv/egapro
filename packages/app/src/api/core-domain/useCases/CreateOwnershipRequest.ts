@@ -1,7 +1,9 @@
-import { ErrorDetailTuple } from "@common/core-domain/domain/ErrorDetailTuple";
 import { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
+import type { ErrorDetailTuple } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import { ErrorDetail } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
+import type { OwnershipRequestWarningsDTO } from "@common/core-domain/dtos/OwnershipRequestWarningDTO";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
 import { ValidationError } from "@common/shared-domain/domain";
@@ -25,10 +27,10 @@ const buildErrorMessage = (error: unknown, label: string, value: string) => {
   return message;
 };
 
-export class CreateOwnershipRequest implements UseCase<Input, ErrorDetailTuple[]> {
+export class CreateOwnershipRequest implements UseCase<Input, OwnershipRequestWarningsDTO> {
   constructor(private readonly ownershipRequestRepo: IOwnershipRequestRepo) {}
 
-  public async execute({ sirens, emails, askerEmail }: Input): Promise<ErrorDetailTuple[]> {
+  public async execute({ sirens, emails, askerEmail }: Input): Promise<OwnershipRequestWarningsDTO> {
     try {
       if (!Array.isArray(sirens) || !Array.isArray(emails)) {
         throw new ValidationError("Error for sirens or emails. Array is expected.");
@@ -37,19 +39,19 @@ export class CreateOwnershipRequest implements UseCase<Input, ErrorDetailTuple[]
       const validatedAskerEmail = new Email(askerEmail);
 
       // Store as a tuple : first element is the validated one, if any. The second element is the original one, if validation failed.
-      const setOfSirens = new Set<[Siren | undefined, ErrorDetailTuple | undefined]>();
-      const setOfEmails = new Set<[Email | undefined, ErrorDetailTuple | undefined]>();
+      const setOfSirens = new Set<[Siren?, ErrorDetail?]>();
+      const setOfEmails = new Set<[Email?, ErrorDetail?]>();
 
-      const warnings: ErrorDetailTuple[] = [];
+      const warnings: ErrorDetail[] = [];
 
       for (const siren of sirens) {
         try {
           const validatedSiren = new Siren(siren);
           setOfSirens.add([validatedSiren, undefined]);
-        } catch (error) {
-          const message = new ErrorDetailTuple(["INVALID_SIREN", buildErrorMessage(error, "Siren", siren)]);
-          warnings.push(message);
-          setOfSirens.add([undefined, message]);
+        } catch (error: unknown) {
+          const errorDetail = new ErrorDetail(["INVALID_SIREN", buildErrorMessage(error, "Siren", siren)]);
+          warnings.push(errorDetail);
+          setOfSirens.add([undefined, errorDetail]);
         }
       }
 
@@ -57,10 +59,10 @@ export class CreateOwnershipRequest implements UseCase<Input, ErrorDetailTuple[]
         try {
           const validatedEmail = new Email(email);
           setOfEmails.add([validatedEmail, undefined]);
-        } catch (error) {
-          const message = new ErrorDetailTuple(["INVALID_EMAIL", buildErrorMessage(error, "email", email)]);
-          warnings.push(message);
-          setOfEmails.add([undefined, message]);
+        } catch (error: unknown) {
+          const errorDetail = new ErrorDetail(["INVALID_EMAIL", buildErrorMessage(error, "email", email)]);
+          warnings.push(errorDetail);
+          setOfEmails.add([undefined, errorDetail]);
         }
       }
 
@@ -74,16 +76,16 @@ export class CreateOwnershipRequest implements UseCase<Input, ErrorDetailTuple[]
             siren: siren[0],
             email: email[0],
             askerEmail: validatedAskerEmail,
-            status: siren[1] || email[1] ? statusError : statusOK,
-            errorDetail: siren[1] || email[1],
+            status: siren[1] ?? email[1] ? statusError : statusOK,
+            errorDetail: siren[1] ?? email[1],
           });
 
           await this.ownershipRequestRepo.save(ownershipRequest);
         }
       }
-      return warnings;
+      return { warnings: warnings.map<ErrorDetailTuple>(warning => [warning.errorCode, warning.errorMessage]) };
     } catch (error: unknown) {
-      throw new CreateOwnershipRequestError("Cannot create a ownership request", error as Error);
+      throw new CreateOwnershipRequestError("Cannot create an ownership request", error as Error);
     }
   }
 }

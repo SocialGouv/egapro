@@ -1,11 +1,14 @@
 import { COUNTIES } from "@common/dict";
-import { EnumString } from "@common/shared-domain/domain/valueObjects";
+import { TupleString } from "@common/shared-domain/domain/valueObjects";
 import { Object } from "@common/utils/overload";
+import type { UnknownMapping } from "@common/utils/types";
 
 const COUNTIES_KEYS = Object.keys(COUNTIES);
 
-export class County extends EnumString {
-  constructor(value: string) {
+type Counties = typeof COUNTIES_KEYS[number] | UnknownMapping;
+
+export class County extends TupleString<typeof COUNTIES_KEYS> {
+  constructor(value: Counties) {
     super(value, COUNTIES_KEYS);
   }
 }

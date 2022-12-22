@@ -1,18 +1,17 @@
 import { Entity } from "@common/shared-domain";
 import type { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
 
-import type { ErrorDetailTuple } from "./ErrorDetailTuple";
-import type { OwnershipRequestStatus } from "./valueObjects/ownership_request/OwnershipRequestStatus";
+import type { ErrorDetail } from "./valueObjects/ownership_request/ErrorDetail";
+import { OwnershipRequestStatus } from "./valueObjects/ownership_request/OwnershipRequestStatus";
 import type { Siren } from "./valueObjects/Siren";
 
 export interface OwnershipRequestProps {
   askerEmail: Email;
   createdAt?: Date;
-  email?: Email | undefined;
-  errorDetail?: ErrorDetailTuple | undefined;
-  id?: UniqueID;
+  email?: Email;
+  errorDetail?: ErrorDetail;
   modifiedAt?: Date;
-  siren?: Siren | undefined;
+  siren?: Siren;
   status: OwnershipRequestStatus;
 }
 
@@ -41,7 +40,28 @@ export class OwnershipRequest extends Entity<OwnershipRequestProps, UniqueID> {
     return this.props.status;
   }
 
-  get errorDetail(): ErrorDetailTuple | undefined {
+  get errorDetail(): ErrorDetail | undefined {
     return this.props.errorDetail;
+  }
+
+  get shouldBeProcessed() {
+    return this.status.getValue() === OwnershipRequestStatus.Enum.TO_PROCESS;
+  }
+
+  get isProcessed() {
+    return this.status.getValue() === OwnershipRequestStatus.Enum.ACCEPTED;
+  }
+
+  get ownershipRequested() {
+    return [this.email?.getValue() ?? "", this.siren?.getValue() ?? ""] as [email: string, siren: string];
+  }
+
+  public changeStatus(newStatus: OwnershipRequestStatus.Enum.ERROR, errorDetail: ErrorDetail): void;
+  public changeStatus(newStatus: Exclude<OwnershipRequestStatus.Enum, OwnershipRequestStatus.Enum.ERROR>): void;
+  public changeStatus(newStatus: OwnershipRequestStatus.Enum, errorDetail?: ErrorDetail) {
+    this.props.status = new OwnershipRequestStatus(newStatus);
+    if (errorDetail) {
+      this.props.errorDetail = errorDetail;
+    }
   }
 }
