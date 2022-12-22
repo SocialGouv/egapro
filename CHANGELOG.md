@@ -1,3 +1,10 @@
+# [2.52.0](https://github.com/SocialGouv/egapro/compare/v2.51.0...v2.52.0) (2022-12-22)
+
+
+### Features
+
+* exclude repeq recherche from prod ([1455b9d](https://github.com/SocialGouv/egapro/commit/1455b9d9c81520dcb1e8c9840caa45533284540a))
+
 # [2.51.0](https://github.com/SocialGouv/egapro/compare/v2.50.0...v2.51.0) (2022-12-22)
 
 
