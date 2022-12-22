@@ -34,14 +34,14 @@ const FieldPlanRelance = ({ readOnly, isUES }: FieldPlanRelanceProps) => {
         label={
           isUES ? (
             <>
-              Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, en 2021
-              et/ou 2022, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission
-              « Plan de relance »&nbsp;?
+              Une ou plusieurs entreprises comprenant au moins 50 salariés au sein de l'UES a-t-elle bénéficié, depuis
+              2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021 au titre de la mission « Plan
+              de relance »&nbsp;?
             </>
           ) : (
             <>
-              Avez-vous bénéficié, en 2021 et/ou 2022, d'une aide prévue par la loi du 29 décembre 2020 de finances pour
-              2021 au titre de la mission « Plan de relance »&nbsp;?
+              Avez-vous bénéficié, depuis 2021, d'une aide prévue par la loi du 29 décembre 2020 de finances pour 2021
+              au titre de la mission « Plan de relance »&nbsp;?
             </>
           )
         }

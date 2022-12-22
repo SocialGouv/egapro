@@ -5,7 +5,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par catégorie so
 
 <hgroup>
   <h1>{{ page.title }}</h1>
-  <h3>Il faut saisir les écarts de rémunération en % <em>avant</em> application du seuil de pertinence</h3>
+  <p>Il faut saisir les écarts de rémunération en % avant application du seuil de pertinence uniquement pour les CSP et tranches d'âge pris en compte pour le calcul (zéro signifiant qu'il n'y a pas d'écart entre les femmes et les hommes). Un écart positif est à la faveur des hommes et un écart négatif est à la faveur des femmes.</p>
 </hgroup>
 
 <table>
@@ -23,7 +23,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par catégorie so
     <tr>
       <th>Ouvriers</th>
       <td>
-        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[0].nom" value="ouv" %}         
+        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[0].nom" value="ouv" %}
         {% include input.html type="number" name="indicateurs.rémunérations.catégories[0].tranches.:29" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
       </td>
       <td>
@@ -39,7 +39,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par catégorie so
     <tr>
       <th>Employés</th>
       <td>
-        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[1].nom" value="emp" %}         
+        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[1].nom" value="emp" %}
         {% include input.html type="number" name="indicateurs.rémunérations.catégories[1].tranches.:29" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
       </td>
       <td>
@@ -55,7 +55,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par catégorie so
     <tr>
       <th>Techniciens et agents de maîtrise</th>
       <td>
-        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[2].nom" value="tam" %}         
+        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[2].nom" value="tam" %}
         {% include input.html type="number" name="indicateurs.rémunérations.catégories[2].tranches.:29" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
       </td>
       <td>
@@ -71,7 +71,7 @@ title: "Ecart de rémunération entre les femmes et les hommes par catégorie so
     <tr>
       <th>Ingénieurs et cadres</th>
       <td>
-        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[3].nom" value="ic" %}         
+        {% include input.html type="hidden" name="indicateurs.rémunérations.catégories[3].nom" value="ic" %}
         {% include input.html type="number" name="indicateurs.rémunérations.catégories[3].tranches.:29" step="any" data-not-all-empty=true onblur="notifyPercentage(event)" %}
       </td>
       <td>

@@ -76,7 +76,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
                 <>
                   <Text>Le Siren saisi n'est pas rattaché à votre email de connexion ({email}).</Text>
                   <Text mt="4">
-                    Vous devez faire faire une demande de rattachement en nous envoyant votre Siren et votre email à
+                    Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à{" "}
                     <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.
                   </Text>
                 </>,

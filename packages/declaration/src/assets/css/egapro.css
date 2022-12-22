@@ -464,3 +464,14 @@ input::-webkit-inner-spin-button {
   font-size: .9rem;
   color: #202020;
 }
+
+
+.msg {
+  line-height: 1.5;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: .3rem;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+}

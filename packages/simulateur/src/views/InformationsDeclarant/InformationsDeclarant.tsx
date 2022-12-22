@@ -47,7 +47,10 @@ const InformationsDeclarant: FunctionComponent<InformationsDeclarantProps> = ({ 
 }
 
 const PageInformationsDeclarant = ({ children }: PropsWithChildren) => (
-  <Page title={title} tagline="Renseignez le nom du déclarant, ainsi que son prénom, numéro de téléphone et email">
+  <Page
+    title={title}
+    tagline="Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les services de l’inspection du travail."
+  >
     {children}
   </Page>
 )
