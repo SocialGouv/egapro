@@ -1,3 +1,10 @@
+## [2.53.1](https://github.com/SocialGouv/egapro/compare/v2.53.0...v2.53.1) (2022-12-22)
+
+
+### Bug Fixes
+
+* wording ([#1468](https://github.com/SocialGouv/egapro/issues/1468)) ([dd148ab](https://github.com/SocialGouv/egapro/commit/dd148ab6e8437622bcf8d0b92d81fd20c874dcdc))
+
 # [2.53.0](https://github.com/SocialGouv/egapro/compare/v2.52.0...v2.53.0) (2022-12-22)
 
 
