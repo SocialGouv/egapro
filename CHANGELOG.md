@@ -1,3 +1,10 @@
+# [2.51.0](https://github.com/SocialGouv/egapro/compare/v2.50.0...v2.51.0) (2022-12-22)
+
+
+### Features
+
+* add mailer config to deployement ([e9c9ddf](https://github.com/SocialGouv/egapro/commit/e9c9ddfa24c0be1b0054d182f8342e522f32dc88))
+
 # [2.50.0](https://github.com/SocialGouv/egapro/compare/v2.49.5...v2.50.0) (2022-12-22)
 
 
