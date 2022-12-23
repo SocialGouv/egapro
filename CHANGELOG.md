@@ -1,3 +1,10 @@
+## [2.53.2](https://github.com/SocialGouv/egapro/compare/v2.53.1...v2.53.2) (2022-12-23)
+
+
+### Bug Fixes
+
+* declaration jekyll ruby ([#1478](https://github.com/SocialGouv/egapro/issues/1478)) ([32c0e6b](https://github.com/SocialGouv/egapro/commit/32c0e6b47ba4514a776c91ba6a121f991a091391))
+
 ## [2.53.1](https://github.com/SocialGouv/egapro/compare/v2.53.0...v2.53.1) (2022-12-22)
 
 
