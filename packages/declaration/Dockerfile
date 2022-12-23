@@ -1,12 +1,18 @@
-FROM jekyll/jekyll:4 as builder
+ARG UBUNTU_VERSION=22.04
+FROM ubuntu:$UBUNTU_VERSION as builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ruby-full \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN gem install jekyll bundler
+
+ENV GEM_HOME=/home/jekyll/gems
 
 WORKDIR /home/jekyll
 
 COPY . .
-RUN chown 1000:1000 -R .
-
-ENV GEM_HOME=/home/jekyll/gems
-
 
 ARG EGAPRO_API_URL
 ENV EGAPRO_API_URL=${EGAPRO_API_URL}
