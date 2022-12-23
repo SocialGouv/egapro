@@ -37,6 +37,7 @@ const validateForm = ({
   presenceAugmentation,
 }: {
   tauxAugmentation: Array<{
+    validiteGroupe: boolean
     tauxAugmentationFemmes: string
     tauxAugmentationHommes: string
   }>
@@ -45,16 +46,17 @@ const validateForm = ({
   if (presenceAugmentation === "false") {
     return undefined
   }
-  const allInputs = tauxAugmentation.flatMap(({ tauxAugmentationFemmes, tauxAugmentationHommes }) => [
-    tauxAugmentationFemmes,
-    tauxAugmentationHommes,
-  ])
-  const filteredAllInputs = allInputs.filter((element) => element !== "")
-  if (filteredAllInputs.every((input) => input === "0")) {
+
+  const allInputs = tauxAugmentation
+    .filter((product) => product.validiteGroupe)
+    .flatMap(({ tauxAugmentationFemmes, tauxAugmentationHommes }) => [tauxAugmentationFemmes, tauxAugmentationHommes])
+
+  if (allInputs.every((input) => input === "0")) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations.",
+      notAll0: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
     }
   }
+
   if (allInputs.every((input) => input === "")) {
     return {
       notAll0: "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés.",

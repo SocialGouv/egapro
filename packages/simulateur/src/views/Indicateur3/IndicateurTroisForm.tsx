@@ -32,6 +32,7 @@ const validateForm = ({
   presencePromotion,
 }: {
   tauxPromotion: Array<{
+    validiteGroupe: boolean
     tauxPromotionFemmes: string
     tauxPromotionHommes: string
   }>
@@ -40,16 +41,17 @@ const validateForm = ({
   if (presencePromotion === "false") {
     return undefined
   }
-  const allInputs = tauxPromotion.flatMap(({ tauxPromotionFemmes, tauxPromotionHommes }) => [
-    tauxPromotionFemmes,
-    tauxPromotionHommes,
-  ])
-  const filteredAllInputs = allInputs.filter((element) => element !== "")
-  if (filteredAllInputs.every((input) => input === "0")) {
+
+  const allInputs = tauxPromotion
+    .filter((product) => product.validiteGroupe)
+    .flatMap(({ tauxPromotionFemmes, tauxPromotionHommes }) => [tauxPromotionFemmes, tauxPromotionHommes])
+
+  if (allInputs.every((input) => input === "0")) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des promotions.",
+      notAll0: "Tous les champs ne peuvent pas être à 0 s'il y a eu des promotions.",
     }
   }
+
   if (allInputs.every((input) => input === "")) {
     return {
       notAll0: "L’indicateur ne peut être calculé car certains champs ne sont pas renseignés.",
