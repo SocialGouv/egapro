@@ -23,7 +23,7 @@ title: "Ecart de rémunération entre les femmes et les hommes"
     <div>
       {% include radios.html
         name="indicateurs.rémunérations.mode"
-        label="Modalité de calcul de l'indicateur sur l'écart de rémunération"
+        label="Modalité choisie pour le calcul de l'indicateur sur l'écart de rémunération"
         required="true"
         block="true"
         options="niveau_branche=Par niveau ou coefficient hiérarchique en application de la classification de branche&niveau_autre=Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes&csp=Par catégorie socio-professionnelle"
@@ -49,7 +49,7 @@ title: "Ecart de rémunération entre les femmes et les hommes"
 
 <fieldset id="fieldset-cse">
   <div class=row>
-    {% include input.html type="date" name="indicateurs.rémunérations.date_consultation_cse" label="Date de consultation du CSE" required=true placeholder="aaaa-mm-jj" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" oninput="checkDate(event)" %}
+    {% include input.html type="date" name="indicateurs.rémunérations.date_consultation_cse" label="Date de consultation du CSE pour le choix de cette modalité de calcul" required=true placeholder="aaaa-mm-jj" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" oninput="checkDate(event)" %}
   </div>
 </fieldset>
 

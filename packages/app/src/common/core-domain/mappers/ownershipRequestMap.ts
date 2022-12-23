@@ -4,22 +4,25 @@ import { Email, UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Objectize } from "@common/utils/types";
 
 import { OwnershipRequest } from "../domain/OwnershipRequest";
+import { ErrorDetail } from "../domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import { Siren } from "../domain/valueObjects/Siren";
 import type { OwnershipRequestDTO } from "../dtos/OwnershipRequestDTO";
 
 export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipRequestDTO, OwnershipRequestRaw>> = {
   toDomain(raw) {
-    return new OwnershipRequest({
-      id: new UniqueID(raw.id),
-      createdAt: new Date(raw.created_at),
-      modifiedAt: new Date(raw.modified_at),
-      siren: raw.siren !== null ? new Siren(raw.siren) : undefined,
-      askerEmail: new Email(raw.asker_email),
-      email: raw.email !== null ? new Email(raw.email) : undefined,
-      status: new OwnershipRequestStatus(raw.status),
-      errorDetail: raw.error_detail !== null ? raw.error_detail : undefined,
-    });
+    return new OwnershipRequest(
+      {
+        createdAt: new Date(raw.created_at),
+        modifiedAt: new Date(raw.modified_at),
+        siren: raw.siren !== null ? new Siren(raw.siren) : undefined,
+        askerEmail: new Email(raw.asker_email),
+        email: raw.email !== null ? new Email(raw.email) : undefined,
+        status: new OwnershipRequestStatus(raw.status),
+        errorDetail: raw.error_detail?.length ? new ErrorDetail(raw.error_detail) : undefined,
+      },
+      new UniqueID(raw.id),
+    );
   },
 
   toDTO(obj) {
@@ -31,6 +34,7 @@ export const ownershipRequestMap: Required<Mapper<OwnershipRequest, OwnershipReq
       email: obj.email?.getValue(),
       siren: obj.siren?.getValue(),
       status: obj.status.getValue(),
+      errorDetail: obj.errorDetail,
     };
   },
 

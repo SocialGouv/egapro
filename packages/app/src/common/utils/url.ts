@@ -22,3 +22,13 @@ export const buildUrlParams = (params: Record<string, string[] | string> = {}): 
 export const buildUrlParamsString = (params: Record<string, string[] | string> = {}): string => {
   return buildUrlParams(params).toString();
 };
+
+/**
+ * Normalize query params to ensure to have only a string, at least an empty one.
+ */
+export const normalizeQueryParam = (queryparam: string[] | string | undefined) =>
+  queryparam === undefined || (Array.isArray(queryparam) && !queryparam.length)
+    ? ""
+    : Array.isArray(queryparam)
+    ? queryparam[0]
+    : queryparam;

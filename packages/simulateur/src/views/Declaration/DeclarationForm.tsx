@@ -25,6 +25,7 @@ import FormSubmit from "../../components/FormSubmit"
 import MesuresCorrection from "../../components/MesuresCorrection"
 import RadiosBoolean from "../../components/RadiosBoolean"
 import { estCalculable } from "../../utils/helpers"
+import InfoBlock from "../../components/ds/InfoBlock"
 
 const validateForm = ({
   finPeriodeReference,
@@ -289,9 +290,23 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
             )}
 
             {readOnly && (
-              <Text fontWeight="bold">
-                Votre déclaration est maintenant finalisée, en date du {declaration.dateDeclaration}.
-              </Text>
+              <InfoBlock
+                type="info"
+                title="Vous venez de transmettre aux services du ministre chargé du travail vos indicateurs et votre niveau de résultat en matière d’écart de rémunération entre les femmes et les hommes conformément aux dispositions de l’article D.1142-5 du code du travail."
+                text={
+                  <>
+                    <Text mt={2}>
+                      Vous allez recevoir un accusé de réception de votre transmission sur l'email que vous avez déclaré
+                      et validé précédemment. Cet accusé de réception contient un lien vous permettant de revenir sur
+                      votre simulation et déclaration.
+                    </Text>
+                    <Text mt={2}>
+                      Si vous ne recevez pas cet accusé de réception, merci de bien vérifier que celui-ci n'a pas été
+                      déplacé dans votre dossier de courriers indésirables.
+                    </Text>
+                  </>
+                }
+              />
             )}
           </FormStack>
           {readOnly ? (

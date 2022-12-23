@@ -31,7 +31,7 @@ const formSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          "La date de fin de la période de référence doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
+          "L'année de la date de fin de la période doit correspondre à l'année au titre de laquelle les écarts de représentation sont calculés",
         path: ["endOfPeriod"],
       });
     }
