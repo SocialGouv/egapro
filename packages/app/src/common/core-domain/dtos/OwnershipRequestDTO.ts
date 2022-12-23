@@ -7,3 +7,17 @@ export type OwnershipRequestDTO = {
   siren?: string | undefined;
   status: string;
 };
+
+export type GetOwnershipRequestDTO = {
+  data: OwnershipRequestDTO[];
+  params: {
+    limit: number;
+    offset: number;
+    orderAsc: boolean;
+    orderByColumn: string;
+    siren?: string;
+    status?: string;
+  };
+  totalCount: number;
+  warnings?: Array<readonly [string, string]>;
+};

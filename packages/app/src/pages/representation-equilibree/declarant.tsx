@@ -80,7 +80,10 @@ const DeclarantPage: NextPageWithLayout = () => {
     <>
       <AlertEdition />
       <p>
-        <b>Renseignez le nom du déclarant, ainsi que son prénom et numéro de téléphone.</b>
+        <b>
+          Renseignez le nom, le prénom et le numéro de téléphone du déclarant pour tout contact ultérieur par les
+          services de l’inspection du travail.
+        </b>
       </p>
 
       <FormLayout>
@@ -121,7 +124,7 @@ const DeclarantPage: NextPageWithLayout = () => {
             )}
           </FormGroup>
           <FormGroup>
-            <FormGroupLabel htmlFor="email">Email</FormGroupLabel>
+            <FormGroupLabel htmlFor="email">Email (saisi lors de la validation de l'email)</FormGroupLabel>
             <FormInput id="email" type="text" readOnly {...register("email")} />
           </FormGroup>
           <FormGroup>

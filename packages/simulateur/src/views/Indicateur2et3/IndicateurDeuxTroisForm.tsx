@@ -148,7 +148,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
               />
             )}
             <FormControl isReadOnly={readOnly}>
-              <FormLabel as="div">Sur quelle période souhaitez-vous calculer votre indicateur&nbsp;?</FormLabel>
+              <FormLabel as="div">Quelle est la période choisie pour le calcul de cet indicateur&nbsp;?</FormLabel>
               <InputRadioGroup defaultValue={values.periodeDeclaration}>
                 <Stack>
                   <InputRadio

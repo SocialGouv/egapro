@@ -10,5 +10,11 @@ api:
 app:
   vars:
     EGAPRO_ENV: preprod
+    MAILER_ENABLE: "True"
+    MAILER_SMTP_HOST: maildev
+    MAILER_SMTP_PORT: "1025"
+    MAILER_SMTP_LOGIN: ""
+    MAILER_SMTP_PASSWORD: ""
+    MAILER_SMTP_SSL: "False"
 
 maildev: {}

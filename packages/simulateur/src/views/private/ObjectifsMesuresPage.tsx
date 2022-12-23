@@ -511,7 +511,7 @@ const ObjectifsMesuresPage: FunctionComponent<Record<string, never>> = () => {
                           indicateurUnNonCalculable || noteIndicateurUn === MAX_NOTES_INDICATEURS["indicateurUn"]
                         }
                       >
-                        Écart de rémunération objectif
+                        Écart de rémunération
                       </RowProgression>
 
                       <LegalText>
