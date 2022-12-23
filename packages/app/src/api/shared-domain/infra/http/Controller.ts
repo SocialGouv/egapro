@@ -15,7 +15,7 @@ export interface ControllerRequest<TParamKeys extends string = string, TOriginal
   _nodeRequest: IncomingMessage;
   _req: TOriginalRequest;
   body?: SimpleObject<string[] | string | undefined>;
-  params: Record<TParamKeys, string>;
+  params: { [P in TParamKeys]: string };
   query: QueryString;
 }
 

@@ -1,4 +1,3 @@
-import { EnsureOwner } from "@api/core-domain/infra/db/http/next/decorator/EnsureOwner";
 import { LegacyTokenRequire } from "@api/core-domain/infra/db/http/next/decorator/LegacyTokenRequire";
 import { representationEquilibreeRepo } from "@api/core-domain/repo";
 import {
@@ -11,13 +10,12 @@ import { ValidationError } from "@common/shared-domain";
 import { StatusCodes } from "http-status-codes";
 
 type BaseController = NextController<"siren">;
-type Req = EnsureOwner.Wrap<LegacyTokenRequire.Wrap<NextController.Req<BaseController>>>;
+type Req = LegacyTokenRequire.Wrap<NextController.Req<BaseController>>;
 type Res = NextController.Res<BaseController>;
 
 @Handler
 export default class RepEqSirenController implements BaseController {
-  @LegacyTokenRequire
-  @EnsureOwner
+  @LegacyTokenRequire({ ensureOwner: true })
   public async get(req: Req, res: Res) {
     const useCase = new GetRepresentationEquilibreeBySiren(representationEquilibreeRepo);
     const { siren } = req.params;
