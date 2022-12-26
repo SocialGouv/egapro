@@ -1,3 +1,10 @@
+# [2.54.0](https://github.com/SocialGouv/egapro/compare/v2.53.2...v2.54.0) (2022-12-26)
+
+
+### Features
+
+* simple token require + staffonly + ensureowner ([#1480](https://github.com/SocialGouv/egapro/issues/1480)) ([3899847](https://github.com/SocialGouv/egapro/commit/3899847acd41f3986beced0658b8a05531a71dea))
+
 ## [2.53.2](https://github.com/SocialGouv/egapro/compare/v2.53.1...v2.53.2) (2022-12-23)
 
 
