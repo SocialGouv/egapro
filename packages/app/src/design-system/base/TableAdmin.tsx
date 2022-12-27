@@ -22,7 +22,7 @@ export interface TableAdminHeadColProps {
 export const TableAdminHeadCol = ({ children, colSpan, order, onClick }: PropsWithChildren<TableAdminHeadColProps>) => (
   <th className={style.tableHeadCol} scope="col" colSpan={colSpan} onClick={onClick}>
     {children}
-    {order && order === "asc" ? "⬆" : "⬇"}
+    {order && <span>{order === "asc" ? "⬆" : "⬇"}</span>}
   </th>
 );
 

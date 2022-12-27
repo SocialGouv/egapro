@@ -1,6 +1,6 @@
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type { GetOwnershipRequestDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import { normalizeQueryParam } from "@common/utils/url";
+import type { GetOwnershipRequestDTO, GetOwnershipRequestInputDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import { getOwnershipRequestInputDTOSchema } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import type { FormCheckboxProps, TagProps } from "@design-system";
 import {
@@ -21,7 +21,7 @@ import {
 } from "@design-system";
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 
@@ -34,22 +34,17 @@ const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant
   [OwnershipRequestStatus.Enum.ERROR]: "warning",
 };
 
-interface DisplayListeProps {
+type ToStateProps<T> = T & {
+  [K in keyof T as `set${Capitalize<K extends string ? K : never>}`]: (value: T[K]) => void;
+};
+
+interface DisplayListeProps extends ToStateProps<Omit<GetOwnershipRequestInputDTO, "limit" | "offset">> {
   error: unknown;
-  // Must be set, but can be undefined
   isCheck: string[];
   isLoading: boolean;
   itemsPerLoad: number;
-  orderAsc?: string;
-  orderBy?: string;
   requests: Omit<GetOwnershipRequestDTO, "params"> | undefined;
   setIsCheck: (isCheck: string[]) => void;
-  setOrderAscParam: (value: string) => void;
-  setOrderByParam: (value: string) => void;
-  setSirenParam: (value: string) => void;
-  setStatusParam: (value: string) => void;
-  siren?: string;
-  status?: string;
 }
 const DisplayListe = ({
   isLoading,
@@ -58,14 +53,14 @@ const DisplayListe = ({
   itemsPerLoad,
   isCheck,
   setIsCheck,
-  orderAsc,
-  setOrderAscParam,
+  order,
+  setOrder,
   orderBy,
-  setOrderByParam,
+  setOrderBy,
   siren,
-  setSirenParam,
+  setSiren,
   status,
-  setStatusParam,
+  setStatus,
 }: DisplayListeProps) => {
   const hasToProcessRequests = useMemo(
     () => requests?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
@@ -113,6 +108,8 @@ const DisplayListe = ({
     );
   }
 
+  console.log({ order, orderBy });
+
   return (
     <>
       <Box>
@@ -128,12 +125,12 @@ const DisplayListe = ({
               <FormCheckbox id="global-checkbox" onChange={handleCheckAll} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "status" ? orderAsc! : undefined}>Status</TableAdminHeadCol>
-          <TableAdminHeadCol>Demandeur</TableAdminHeadCol>
-          <TableAdminHeadCol>Date de la demande</TableAdminHeadCol>
-          <TableAdminHeadCol>Date de traitement</TableAdminHeadCol>
-          <TableAdminHeadCol>Siren</TableAdminHeadCol>
-          <TableAdminHeadCol>Email</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "status" ? order : undefined}>Status</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "askerEmail" ? order : undefined}>Demandeur</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "createdAt" ? order : undefined}>Date de la demande</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "modifiedAt" ? order : undefined}>Date de traitement</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "siren" ? order : undefined}>Siren</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "email" ? order : undefined}>Email</TableAdminHeadCol>
         </TableAdminHead>
         <TableAdminBody>
           {requests.data.map(item => (
@@ -251,14 +248,25 @@ const DisplayListe = ({
 const ListeDeclarantsPage: NextPageWithLayout = () => {
   const router = useRouter();
   const [isCheck, setIsCheck] = useState<string[]>([]);
-  const [orderAsc, setOrderAscParam] = useState(normalizeQueryParam(router.query.orderAsc) || undefined);
-  const [orderBy, setOrderByParam] = useState(normalizeQueryParam(router.query.orderBy) || undefined);
-  const [siren, setSirenParam] = useState(normalizeQueryParam(router.query.siren) || undefined);
-  const [status, setStatusParam] = useState(normalizeQueryParam(router.query.status) || undefined);
+  const parsed = getOwnershipRequestInputDTOSchema.safeParse(router.query);
+  const params = parsed.success ? parsed.data : {};
+  const [orderAsc, setOrder] = useState(params.order);
+  const [orderBy, setOrderBy] = useState(params.orderBy);
+  const [siren, setSiren] = useState(params.siren);
+  const [status, setStatus] = useState(params.status);
   const { requests, error, isLoading, size, setSize } = useListeDeclarants(
     { orderAsc, orderBy, siren, status },
     ITEMS_PER_LOAD,
   );
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setOrder(requests.params.order);
+      setOrderBy(requests.params.orderBy);
+      setSiren(requests.params.siren);
+      setStatus(requests.params.status);
+    }
+  }, [error, isLoading, requests.params.order, requests.params.orderBy, requests.params.siren, requests.params.status]);
 
   return (
     <section>
@@ -277,14 +285,14 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
           itemsPerLoad={ITEMS_PER_LOAD}
           isCheck={isCheck}
           setIsCheck={setIsCheck}
-          orderAsc={orderAsc}
-          setOrderAscParam={setOrderAscParam}
+          order={orderAsc}
+          setOrder={setOrder}
           orderBy={orderBy}
-          setOrderByParam={setOrderByParam}
+          setOrderBy={setOrderBy}
           siren={siren}
-          setSirenParam={setSirenParam}
+          setSiren={setSiren}
           status={status}
-          setStatusParam={setStatusParam}
+          setStatus={setStatus}
         />
         {requests.data.length < requests.totalCount && (
           <Box>

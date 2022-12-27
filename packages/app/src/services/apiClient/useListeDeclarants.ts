@@ -29,7 +29,7 @@ const getKey = (search?: SearchParams, itemsPerLoad = 10): SWRInfiniteKeyLoader 
 export const useListeDeclarants = (
   search?: SearchParams,
   itemsPerLoad = 10,
-): FetcherInfiniteReturn & { requests: Omit<GetOwnershipRequestDTO, "params"> } => {
+): FetcherInfiniteReturn & { requests: GetOwnershipRequestDTO } => {
   const {
     data: requests,
     error,
@@ -51,6 +51,7 @@ export const useListeDeclarants = (
       totalCount: requests?.[0].totalCount ?? 0,
       data: newData,
       warnings: requests?.[0].warnings,
+      params: requests?.[0].params ?? {},
     },
     error,
     isLoading,

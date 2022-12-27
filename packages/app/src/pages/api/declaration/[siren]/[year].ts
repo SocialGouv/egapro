@@ -1,4 +1,4 @@
-import { LegacyTokenRequire } from "@api/core-domain/infra/db/http/next/decorator/LegacyTokenRequire";
+import { LegacyTokenRequire } from "@api/core-domain/infra/http/next/decorator/LegacyTokenRequire";
 import { declarationRepo } from "@api/core-domain/repo";
 import {
   GetDeclarationBySirenAndYear,

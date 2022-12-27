@@ -1,71 +1,24 @@
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type { GetOwnershipRequestDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import type { GetOwnershipRequestDTO, GetOwnershipRequestInputDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { UseCase } from "@common/shared-domain";
 import { AppError } from "@common/shared-domain";
-import { enumHasValueGuard } from "@common/utils/enum";
 
 import type { IOwnershipRequestRepo } from "../repo/IOwnershipRequestRepo";
-import { OWNERSHIP_REQUEST_SORTABLE_COLS } from "../repo/IOwnershipRequestRepo";
 
-interface Input {
-  limit?: string;
-  offset?: string;
-  orderAsc?: string;
-  orderBy?: string;
-  siren?: string;
-  status?: string;
-}
-
-export class GetOwnershipRequest implements UseCase<Input, GetOwnershipRequestDTO> {
+export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO, GetOwnershipRequestDTO> {
   constructor(private readonly ownershipRequestRepo: IOwnershipRequestRepo) {}
 
   public async execute({
     siren,
-    status: statusQuery,
-    limit: limitQuery = "",
-    offset: offsetQuery = "",
-    orderBy: orderByQuery,
-    orderAsc: orderAscQuery,
-  }: Input): Promise<GetOwnershipRequestDTO> {
-    const warnings = [];
-
-    let status: OwnershipRequestStatus | undefined;
-
-    statusQuery ||= OwnershipRequestStatus.Enum.TO_PROCESS;
-    if (statusQuery) {
-      if (enumHasValueGuard(OwnershipRequestStatus.Enum, statusQuery)) {
-        status = new OwnershipRequestStatus(statusQuery);
-      } else {
-        warnings.push([
-          "status",
-          `'${statusQuery}' doesn't match expected values ${Object.values(OwnershipRequestStatus.Enum)
-            .map(elt => `'${elt}'`)
-            .join(", ")}`,
-        ] as const);
-      }
-    }
-
-    const orderByColumn: keyof typeof OWNERSHIP_REQUEST_SORTABLE_COLS =
-      orderByQuery && Object.keys(OWNERSHIP_REQUEST_SORTABLE_COLS).includes(orderByQuery)
-        ? (orderByQuery as keyof typeof OWNERSHIP_REQUEST_SORTABLE_COLS)
-        : "date";
-
-    if (orderByQuery && orderByQuery !== orderByColumn) {
-      warnings.push([
-        "orderBy",
-        `'${orderByQuery}' doesn't match expected values ${Object.keys(OWNERSHIP_REQUEST_SORTABLE_COLS)
-          .map(elt => `'${elt}'`)
-          .join(", ")}`,
-      ] as const);
-    }
-
-    const orderAsc = orderAscQuery !== "false";
-
-    let limit = +limitQuery;
-    limit = !isNaN(limit) && limit >= 1 && limit <= 100 ? limit : 10;
-    let offset = +offsetQuery;
-    offset = !isNaN(offset) ? offset : 0;
+    status = OwnershipRequestStatus.Enum.TO_PROCESS,
+    limit: limitQuery = 10,
+    offset: offsetQuery = 0,
+    orderBy = "createdAt",
+    order = "desc",
+  }: GetOwnershipRequestInputDTO): Promise<GetOwnershipRequestDTO> {
+    const limit = limitQuery > 0 && limitQuery <= 100 ? limitQuery : 10;
+    const offset = Math.max(offsetQuery, 0);
 
     const totalCount = await this.ownershipRequestRepo.countSearch({
       siren,
@@ -78,25 +31,24 @@ export class GetOwnershipRequest implements UseCase<Input, GetOwnershipRequestDT
         status,
         limit,
         offset,
-        orderByColumn,
-        orderAsc,
+        orderBy,
+        order,
       });
       return {
         params: {
           siren,
-          status: status?.getValue(),
+          status,
           limit,
           offset,
-          orderAsc,
-          orderByColumn,
+          order,
+          orderBy,
         },
         totalCount,
-        ...(warnings.length && { warnings }),
         data: ownershipRequests.map(ownershipRequestMap.toDTO),
       };
     } catch (error: unknown) {
       console.error(error);
-      throw new GetOwnershipRequestError("Cannot create a ownership request", error as Error);
+      throw new GetOwnershipRequestError("Cannot get ownership requests", error as Error);
     }
   }
 }

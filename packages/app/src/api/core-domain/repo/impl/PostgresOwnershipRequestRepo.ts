@@ -2,7 +2,7 @@ import type { OwnershipRequestRaw } from "@api/core-domain/infra/db/raw";
 import { sql } from "@api/shared-domain/infra/db/postgres";
 import { Ownership } from "@common/core-domain/domain/Ownership";
 import type { OwnershipRequest } from "@common/core-domain/domain/OwnershipRequest";
-import type { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
+import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { SQLCount } from "@common/shared-domain";
 import { UnexpectedRepositoryError } from "@common/shared-domain";
@@ -10,12 +10,17 @@ import type { UniqueID } from "@common/shared-domain/domain/valueObjects";
 import type { Any } from "@common/utils/types";
 import { ensureRequired } from "@common/utils/types";
 
-import type { IOwnershipRequestRepo } from "../IOwnershipRequestRepo";
-import { OWNERSHIP_REQUEST_SORTABLE_COLS } from "../IOwnershipRequestRepo";
+import type { IOwnershipRequestRepo, OwnershipSearchCriteria } from "../IOwnershipRequestRepo";
 import { PostgresOwnershipRepo } from "./PostgresOwnershipRepo";
 
-const buildStatusFilter = (status?: OwnershipRequestStatus) =>
-  status?.getValue() ? sql` and status = ${status?.getValue()}` : sql``;
+const OWNERSHIP_REQUEST_SORTABLE_COLS_MAP: Record<GetOwnershipRequestInputOrderBy, keyof OwnershipRequestRaw> = {
+  createdAt: "created_at",
+  siren: "siren",
+  askerEmail: "asker_email",
+  email: "email",
+  status: "status",
+  modifiedAt: "modified_at",
+};
 
 export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   private table = sql("ownership_request");
@@ -157,36 +162,32 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     status,
     limit,
     offset,
-    orderByColumn,
-    orderAsc,
-  }: {
-    limit: number;
-    offset: number;
-    orderAsc: boolean;
-    orderByColumn: keyof typeof OWNERSHIP_REQUEST_SORTABLE_COLS;
-    siren?: string;
-    status?: OwnershipRequestStatus;
-  }): Promise<OwnershipRequest[]> {
-    const orderBy = sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS[orderByColumn])}`;
+    orderBy,
+    order,
+  }: OwnershipSearchCriteria): Promise<OwnershipRequest[]> {
+    const sqlOrderBy =
+      orderBy && order
+        ? sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy])} ${order === "desc" ? sql`desc` : sql`asc`}`
+        : sql``;
+    const sqlLimit = limit ? sql`limit ${limit}` : sql``;
+    const sqlOffset = offset ? sql`offset ${offset}` : sql``;
+    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
 
-    const rows = await this.sql`select * from ${this.table} where siren like ${(siren || "") + "%"} ${buildStatusFilter(
-      status,
-    )} ${orderBy} ${orderAsc ? sql`asc` : sql`desc`} limit ${limit} offset ${offset}`;
+    const rows = await this.sql`select * from ${this.table} ${sqlWhereClause} ${sqlOrderBy} ${sqlLimit} ${sqlOffset}`;
 
     return rows.map(ownershipRequestMap.toDomain);
   }
 
-  public async countSearch({
-    siren = "",
-    status,
-  }: {
-    siren?: string;
-    status?: OwnershipRequestStatus;
-  }): Promise<number> {
-    const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} where siren like ${
-      siren + "%"
-    } ${buildStatusFilter(status)}`;
+  public async countSearch({ siren, status }: OwnershipSearchCriteria): Promise<number> {
+    const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
+    const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} ${sqlWhereClause}`;
 
-    return Number(count);
+    return +count;
+  }
+
+  private buildSearchWhereClause({ siren, status }: OwnershipSearchCriteria) {
+    const sqlSiren = siren ? sql`siren like ${siren}%` : sql``;
+    const sqlStatus = status ? sql`status = ${status}` : sql``;
+    return siren || status ? sql`where ${siren ? sqlSiren : sqlStatus}${siren ? ` and ${sqlStatus}}` : sql``}` : sql``;
   }
 }

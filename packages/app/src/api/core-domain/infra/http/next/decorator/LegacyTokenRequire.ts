@@ -7,7 +7,7 @@ import { StatusCodes } from "http-status-codes";
 import type { Algorithm, JwtPayload } from "jsonwebtoken";
 import { JsonWebTokenError, TokenExpiredError, verify as jwtVerify } from "jsonwebtoken";
 
-import type { NextControllerMethodDecorator } from "./type";
+import type { NextControllerMethodDecorator } from "../../../../../shared-domain/infra/http/next/type";
 
 class LegacyTokenRequireError extends AppError {}
 class LegacyTokenRequireNonOwnerError extends AppError {}
