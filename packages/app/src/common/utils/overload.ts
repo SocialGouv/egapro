@@ -4,6 +4,7 @@ type Keys<T> = Objectize<Array<keyof T>>;
 type Values<T> = Objectize<Array<T[keyof T]>>;
 
 interface ObjectOverload {
+  entries: <T>(o: ArrayLike<T> | T) => Values<{ [K in keyof T]: [K, T[K]] }>;
   getOwnPropertyNames: <T>(o: T) => Keys<T>;
   keys: <T>(o: T) => Keys<T>;
   values: <T>(o: T) => Values<T>;

@@ -1,6 +1,11 @@
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type { GetOwnershipRequestDTO, GetOwnershipRequestInputDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import type {
+  GetOwnershipRequestDTO,
+  GetOwnershipRequestInputDTO,
+  GetOwnershipRequestInputOrderBy,
+} from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { getOwnershipRequestInputDTOSchema } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import { Object } from "@common/utils/overload";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import type { FormCheckboxProps, TagProps } from "@design-system";
 import {
@@ -11,6 +16,11 @@ import {
   FormButton,
   FormCheckbox,
   FormCheckboxGroup,
+  FormGroup,
+  FormInput,
+  FormSelect,
+  Grid,
+  GridCol,
   TableAdmin,
   TableAdminBody,
   TableAdminBodyRow,
@@ -20,6 +30,7 @@ import {
   Tag,
 } from "@design-system";
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
+import _ from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 
@@ -36,6 +47,15 @@ const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant
 
 type ToStateProps<T> = T & {
   [K in keyof T as `set${Capitalize<K extends string ? K : never>}`]-?: (value: T[K]) => void;
+};
+
+const orderByNameMap: Record<GetOwnershipRequestInputOrderBy, string> = {
+  status: "Status",
+  askerEmail: "Demandeur",
+  createdAt: "Date de la demande",
+  modifiedAt: "Date de traitement",
+  siren: "Siren",
+  email: "Email",
 };
 
 interface DisplayListeProps extends ToStateProps<Omit<GetOwnershipRequestInputDTO, "limit" | "offset">> {
@@ -86,7 +106,7 @@ const DisplayListe = ({
     }
   };
 
-  if (isLoading) return <Alert type="info">Récupération des données en cours</Alert>;
+  // if (isLoading) return <Alert type="info">Récupération des données en cours</Alert>;
 
   if (error) {
     return (
@@ -108,8 +128,6 @@ const DisplayListe = ({
     );
   }
 
-  console.log({ order, orderBy });
-
   return (
     <>
       <Box>
@@ -125,30 +143,19 @@ const DisplayListe = ({
               <FormCheckbox id="global-checkbox" onChange={handleCheckAll} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
-          <TableAdminHeadCol
-            order={orderBy === "status" && order}
-            onClick={() =>
-              orderBy === "status"
-                ? setOrder(order === "asc" ? "desc" : "asc")
-                : (setOrderBy("status"), setOrder("desc"))
-            }
-          >
-            Status
-          </TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "askerEmail" && order}>Demandeur</TableAdminHeadCol>
-          <TableAdminHeadCol
-            order={orderBy === "createdAt" && order}
-            onClick={() =>
-              orderBy === "createdAt"
-                ? setOrder(order === "asc" ? "desc" : "asc")
-                : (setOrderBy("createdAt"), setOrder("desc"))
-            }
-          >
-            Date de la demande
-          </TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "modifiedAt" && order}>Date de traitement</TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "siren" && order}>Siren</TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "email" && order}>Email</TableAdminHeadCol>
+          {Object.entries(orderByNameMap).map(([orderByValue, orderByName]) => (
+            <TableAdminHeadCol
+              key={`orderByValue-${orderByValue}`}
+              order={orderBy === orderByValue && order}
+              onClick={() =>
+                orderBy === orderByValue
+                  ? setOrder(order === "asc" ? "desc" : "asc")
+                  : (setOrderBy(orderByValue), setOrder("desc"))
+              }
+            >
+              {orderByName}
+            </TableAdminHeadCol>
+          ))}
         </TableAdminHead>
         <TableAdminBody>
           {requests.data.map(item => (
@@ -267,7 +274,7 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
   const router = useRouter();
   const [isCheck, setIsCheck] = useState<string[]>([]);
   const parsed = getOwnershipRequestInputDTOSchema.safeParse(router.query);
-  const params = parsed.success ? parsed.data : {};
+  const params = useMemo(() => (parsed.success ? parsed.data : {}), [parsed]);
   const [orderAsc, setOrder] = useState(params.order);
   const [orderBy, setOrderBy] = useState(params.orderBy);
   const [siren, setSiren] = useState(params.siren);
@@ -283,19 +290,74 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
       setOrderBy(requests.params.orderBy);
       setSiren(requests.params.siren);
       setStatus(requests.params.status);
+
+      !_.isEqual(params, requests.params) &&
+        router.push({ pathname: window.location.pathname, query: requests.params });
     }
-  }, [error, isLoading, requests.params.order, requests.params.orderBy, requests.params.siren, requests.params.status]);
+  }, [
+    error,
+    isLoading,
+    params,
+    requests.params,
+    requests.params.order,
+    requests.params.orderBy,
+    requests.params.siren,
+    requests.params.status,
+    router,
+  ]);
+
+  const nextCount = Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD);
+
+  console.log({ size }, OwnershipRequestStatus.Enum);
 
   return (
     <section>
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
-        <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-          <FormButton disabled={isCheck.length === 0}>Valider les demandes</FormButton>
-          <FormButton disabled={isCheck.length === 0} variant="tertiary">
-            Refuser les demandes
-          </FormButton>
-        </ButtonGroup>
+        <form noValidate>
+          <ButtonGroup inline="mobile-up" className="fr-mb-4w">
+            <FormButton disabled={isCheck.length === 0}>Valider les demandes</FormButton>
+            <FormButton disabled={isCheck.length === 0} variant="tertiary">
+              Refuser les demandes
+            </FormButton>
+          </ButtonGroup>
+          <Grid haveGutters>
+            <GridCol sm={3}>
+              <FormGroup>
+                <FormInput id="siren-param" placeholder="Rechercher par Siren" />
+              </FormGroup>
+            </GridCol>
+            <GridCol sm={3}>
+              <FormGroup>
+                <FormSelect id="status-param">
+                  <option value="">Rechercher par Status</option>
+                  {Object.entries(OwnershipRequestStatus.Enum).map(([key, value]) => (
+                    <option key={`status-${key}`} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </FormSelect>
+              </FormGroup>
+            </GridCol>
+            <GridCol sm={3}>
+              <ButtonGroup inline="mobile-up">
+                <FormButton isDisabled={isLoading}>Rechercher</FormButton>
+                <FormButton
+                  variant="secondary"
+                  type="reset"
+                  isDisabled={isLoading}
+                  // onClick={() => {
+                  //   resetInputs({});
+                  //   router.replace({ pathname: "/representation-equilibree/recherche", query: { q: "" } });
+                  // }}
+                >
+                  Réinitialiser
+                </FormButton>
+              </ButtonGroup>
+            </GridCol>
+          </Grid>
+        </form>
+        <br />
         <DisplayListe
           requests={requests}
           error={error}
@@ -313,11 +375,12 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
           setStatus={setStatus}
         />
         {requests.data.length < requests.totalCount && (
-          <Box>
+          <Grid justifyCenter>
             <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
-              Voir les {ITEMS_PER_LOAD} demandes suivantes
+              Voir {nextCount > 1 ? `les ${nextCount}` : "la"} demande{nextCount > 1 ? "s" : ""} suivante
+              {nextCount > 1 ? "s" : ""}
             </FormButton>
-          </Box>
+          </Grid>
         )}
       </Container>
     </section>
