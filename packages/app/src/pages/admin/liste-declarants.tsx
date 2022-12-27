@@ -35,7 +35,7 @@ const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant
 };
 
 type ToStateProps<T> = T & {
-  [K in keyof T as `set${Capitalize<K extends string ? K : never>}`]: (value: T[K]) => void;
+  [K in keyof T as `set${Capitalize<K extends string ? K : never>}`]-?: (value: T[K]) => void;
 };
 
 interface DisplayListeProps extends ToStateProps<Omit<GetOwnershipRequestInputDTO, "limit" | "offset">> {
@@ -125,12 +125,30 @@ const DisplayListe = ({
               <FormCheckbox id="global-checkbox" onChange={handleCheckAll} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "status" ? order : undefined}>Status</TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "askerEmail" ? order : undefined}>Demandeur</TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "createdAt" ? order : undefined}>Date de la demande</TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "modifiedAt" ? order : undefined}>Date de traitement</TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "siren" ? order : undefined}>Siren</TableAdminHeadCol>
-          <TableAdminHeadCol order={orderBy === "email" ? order : undefined}>Email</TableAdminHeadCol>
+          <TableAdminHeadCol
+            order={orderBy === "status" && order}
+            onClick={() =>
+              orderBy === "status"
+                ? setOrder(order === "asc" ? "desc" : "asc")
+                : (setOrderBy("status"), setOrder("desc"))
+            }
+          >
+            Status
+          </TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "askerEmail" && order}>Demandeur</TableAdminHeadCol>
+          <TableAdminHeadCol
+            order={orderBy === "createdAt" && order}
+            onClick={() =>
+              orderBy === "createdAt"
+                ? setOrder(order === "asc" ? "desc" : "asc")
+                : (setOrderBy("createdAt"), setOrder("desc"))
+            }
+          >
+            Date de la demande
+          </TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "modifiedAt" && order}>Date de traitement</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "siren" && order}>Siren</TableAdminHeadCol>
+          <TableAdminHeadCol order={orderBy === "email" && order}>Email</TableAdminHeadCol>
         </TableAdminHead>
         <TableAdminBody>
           {requests.data.map(item => (

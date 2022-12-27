@@ -17,7 +17,7 @@ export const TableAdminHead = ({ children }: PropsWithChildren) => (
 export interface TableAdminHeadColProps {
   colSpan?: number;
   onClick?: ThHTMLAttributes<HTMLTableHeaderCellElement>["onClick"];
-  order?: "asc" | "desc";
+  order?: "asc" | "desc" | false;
 }
 export const TableAdminHeadCol = ({ children, colSpan, order, onClick }: PropsWithChildren<TableAdminHeadColProps>) => (
   <th className={style.tableHeadCol} scope="col" colSpan={colSpan} onClick={onClick}>
