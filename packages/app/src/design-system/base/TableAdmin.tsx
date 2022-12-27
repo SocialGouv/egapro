@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ThHTMLAttributes } from "react";
 
 import style from "./TableAdmin.module.css";
 
@@ -14,14 +14,15 @@ export const TableAdminHead = ({ children }: PropsWithChildren) => (
   </thead>
 );
 
-export const TableAdminHeadCol = ({
-  children,
-  colSpan,
-}: PropsWithChildren<{
+export interface TableAdminHeadColProps {
   colSpan?: number;
-}>) => (
-  <th className={style.tableHeadCol} scope="col" colSpan={colSpan}>
+  onClick?: ThHTMLAttributes<HTMLTableHeaderCellElement>["onClick"];
+  order?: "asc" | "desc";
+}
+export const TableAdminHeadCol = ({ children, colSpan, order, onClick }: PropsWithChildren<TableAdminHeadColProps>) => (
+  <th className={style.tableHeadCol} scope="col" colSpan={colSpan} onClick={onClick}>
     {children}
+    {order && order === "asc" ? "⬆" : "⬇"}
   </th>
 );
 

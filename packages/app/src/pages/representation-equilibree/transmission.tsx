@@ -1,3 +1,4 @@
+import { config } from "@common/config";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import type { FormButtonProps } from "@design-system";
 import {
@@ -17,7 +18,7 @@ import {
   TileSuccess,
   TileSuccessTitle,
 } from "@design-system";
-import { API_URL_V1, fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
+import { fetchRepresentationEquilibreeSendEmail, useFormManager } from "@services/apiClient";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -88,7 +89,7 @@ const Transmission: NextPageWithLayout = () => {
                 <CardBodyContent>
                   <CardBodyContentTitle>
                     <a
-                      href={`${API_URL_V1}/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`}
+                      href={`${config.api_url}/representation-equilibree/${formData.entreprise?.siren}/${formData.year}/pdf`}
                     >
                       Télécharger le récapitulatif
                     </a>

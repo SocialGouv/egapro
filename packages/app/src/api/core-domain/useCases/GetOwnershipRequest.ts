@@ -23,8 +23,8 @@ export class GetOwnershipRequest implements UseCase<Input, GetOwnershipRequestDT
   public async execute({
     siren,
     status: statusQuery,
-    limit: limitQuery,
-    offset: offsetQuery,
+    limit: limitQuery = "",
+    offset: offsetQuery = "",
     orderBy: orderByQuery,
     orderAsc: orderAscQuery,
   }: Input): Promise<GetOwnershipRequestDTO> {
@@ -32,15 +32,18 @@ export class GetOwnershipRequest implements UseCase<Input, GetOwnershipRequestDT
 
     let status: OwnershipRequestStatus | undefined;
 
-    if (enumHasValueGuard(OwnershipRequestStatus.Enum, statusQuery)) {
-      status = new OwnershipRequestStatus(statusQuery);
-    } else {
-      warnings.push([
-        "status",
-        `'${statusQuery}' doesn't match expected values ${Object.values(OwnershipRequestStatus.Enum)
-          .map(elt => `'${elt}'`)
-          .join(", ")}`,
-      ] as const);
+    statusQuery ||= OwnershipRequestStatus.Enum.TO_PROCESS;
+    if (statusQuery) {
+      if (enumHasValueGuard(OwnershipRequestStatus.Enum, statusQuery)) {
+        status = new OwnershipRequestStatus(statusQuery);
+      } else {
+        warnings.push([
+          "status",
+          `'${statusQuery}' doesn't match expected values ${Object.values(OwnershipRequestStatus.Enum)
+            .map(elt => `'${elt}'`)
+            .join(", ")}`,
+        ] as const);
+      }
     }
 
     const orderByColumn: keyof typeof OWNERSHIP_REQUEST_SORTABLE_COLS =
@@ -48,7 +51,7 @@ export class GetOwnershipRequest implements UseCase<Input, GetOwnershipRequestDT
         ? (orderByQuery as keyof typeof OWNERSHIP_REQUEST_SORTABLE_COLS)
         : "date";
 
-    if (orderByQuery !== orderByColumn) {
+    if (orderByQuery && orderByQuery !== orderByColumn) {
       warnings.push([
         "orderBy",
         `'${orderByQuery}' doesn't match expected values ${Object.keys(OWNERSHIP_REQUEST_SORTABLE_COLS)
@@ -59,9 +62,10 @@ export class GetOwnershipRequest implements UseCase<Input, GetOwnershipRequestDT
 
     const orderAsc = orderAscQuery !== "false";
 
-    const limit =
-      !isNaN(Number(limitQuery)) && Number(limitQuery) >= 1 && Number(limitQuery) <= 100 ? Number(limitQuery) : 10;
-    const offset = !isNaN(Number(offsetQuery)) ? Number(offsetQuery) : 0;
+    let limit = +limitQuery;
+    limit = !isNaN(limit) && limit >= 1 && limit <= 100 ? limit : 10;
+    let offset = +offsetQuery;
+    offset = !isNaN(offset) ? offset : 0;
 
     const totalCount = await this.ownershipRequestRepo.countSearch({
       siren,

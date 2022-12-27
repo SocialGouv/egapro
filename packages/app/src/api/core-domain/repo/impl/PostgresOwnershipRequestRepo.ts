@@ -169,7 +169,7 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
   }): Promise<OwnershipRequest[]> {
     const orderBy = sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS[orderByColumn])}`;
 
-    const rows = await this.sql`select * from ${this.table} where siren like ${siren + "%"} ${buildStatusFilter(
+    const rows = await this.sql`select * from ${this.table} where siren like ${(siren || "") + "%"} ${buildStatusFilter(
       status,
     )} ${orderBy} ${orderAsc ? sql`asc` : sql`desc`} limit ${limit} offset ${offset}`;
 

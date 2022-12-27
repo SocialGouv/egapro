@@ -7,6 +7,7 @@ export const OWNERSHIP_REQUEST_SORTABLE_COLS = {
   siren: "siren",
   demandeur: "asker_email",
   déclarant: "email",
+  status: "status",
 };
 
 export interface IOwnershipRequestRepo extends BulkRepo<OwnershipRequest> {

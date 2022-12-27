@@ -1,3 +1,4 @@
+import { normalizeQueryParam } from "@common/utils/url";
 import { ClientOnly } from "@components/ClientOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
@@ -36,9 +37,11 @@ const EmailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { user } = useUser();
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
+  const defaultRedirectTo = "/representation-equilibree/commencer";
+  const redirectTo = normalizeQueryParam(router.query.redirectTo);
 
   // Si la personne est authentifiée, on reroute sur commencer.
-  if (user) router.push("/representation-equilibree/commencer");
+  if (user) router.push(redirectTo || defaultRedirectTo);
 
   const {
     register,
@@ -57,7 +60,7 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, `${window.location.origin}/representation-equilibree/commencer?token=`);
+      await requestEmailForToken(email, `${redirectTo || new URL(defaultRedirectTo, window.location.origin)}?token=`);
       setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({

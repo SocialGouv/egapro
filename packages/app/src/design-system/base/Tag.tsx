@@ -3,12 +3,10 @@ import type { PropsWithChildren } from "react";
 
 import styles from "./Tag.module.css";
 
-export const Tag = ({
-  children,
-  variant,
-}: PropsWithChildren<{
+export interface TagProps {
   variant?: "error" | "info" | "success" | "warning";
-}>) => (
+}
+export const Tag = ({ children, variant }: PropsWithChildren<TagProps>) => (
   <div
     className={clsx(
       "fr-tag",

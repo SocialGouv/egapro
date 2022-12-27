@@ -19,7 +19,7 @@ type Res = NextController.Res<NextController>;
 @Handler
 export default class AdminOwnershipRequestController implements NextController {
   // TODO: add normalizeQueryParam equivalent to NextControllerRequest or ControllerRequest
-  // or make a @RouteZodQuery(z.schema) decorator
+  // or make a @RouteZodQuery(z.schema) decorator (like ParamsChecker component)
   @LegacyTokenRequire({ staffOnly: true })
   public async get(req: TokenReq, res: Res) {
     const {
@@ -31,12 +31,12 @@ export default class AdminOwnershipRequestController implements NextController {
       orderAsc: orderAscQuery,
     } = req.query;
 
-    const siren = normalizeQueryParam(sirenQuery);
-    const status = normalizeQueryParam(statusQuery);
-    const limit = normalizeQueryParam(limitQuery);
-    const offset = normalizeQueryParam(offsetQuery);
-    const orderBy = normalizeQueryParam(orderByQuery);
-    const orderAsc = normalizeQueryParam(orderAscQuery);
+    const siren = normalizeQueryParam(sirenQuery) || undefined;
+    const status = normalizeQueryParam(statusQuery) || undefined;
+    const limit = normalizeQueryParam(limitQuery) || undefined;
+    const offset = normalizeQueryParam(offsetQuery) || undefined;
+    const orderBy = normalizeQueryParam(orderByQuery) || undefined;
+    const orderAsc = normalizeQueryParam(orderAscQuery) || undefined;
 
     try {
       const useCase = new GetOwnershipRequest(ownershipRequestRepo);

@@ -1,11 +1,13 @@
+import type { OwnershipRequestStatus } from "../domain/valueObjects/ownership_request/OwnershipRequestStatus";
+
 export type OwnershipRequestDTO = {
   askerEmail: string;
   createdAt: string;
-  email?: string | undefined;
+  email?: string;
   id: string;
   modifiedAt: string;
-  siren?: string | undefined;
-  status: string;
+  siren?: string;
+  status: OwnershipRequestStatus.Enum;
 };
 
 export type GetOwnershipRequestDTO = {
@@ -16,7 +18,7 @@ export type GetOwnershipRequestDTO = {
     orderAsc: boolean;
     orderByColumn: string;
     siren?: string;
-    status?: string;
+    status?: OwnershipRequestStatus.Enum;
   };
   totalCount: number;
   warnings?: Array<readonly [string, string]>;
