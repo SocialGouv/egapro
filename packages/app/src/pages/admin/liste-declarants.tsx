@@ -6,6 +6,7 @@ import type {
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { getOwnershipRequestInputDTOSchema } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { Object } from "@common/utils/overload";
+import { buildUrlParams } from "@common/utils/url";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import type { FormCheckboxProps, TagProps } from "@design-system";
 import {
@@ -30,9 +31,9 @@ import {
   Tag,
 } from "@design-system";
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
-import _ from "lodash";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { useMemo, useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 
@@ -272,49 +273,62 @@ const DisplayListe = ({
 
 const ListeDeclarantsPage: NextPageWithLayout = () => {
   const router = useRouter();
-  const [isCheck, setIsCheck] = useState<string[]>([]);
   const parsed = getOwnershipRequestInputDTOSchema.safeParse(router.query);
   const params = useMemo(() => (parsed.success ? parsed.data : {}), [parsed]);
+
+  const [isCheck, setIsCheck] = useState<string[]>([]);
   const [orderAsc, setOrder] = useState(params.order);
   const [orderBy, setOrderBy] = useState(params.orderBy);
   const [siren, setSiren] = useState(params.siren);
   const [status, setStatus] = useState(params.status);
+
   const { requests, error, isLoading, size, setSize } = useListeDeclarants(
     { orderAsc, orderBy, siren, status },
     ITEMS_PER_LOAD,
   );
 
-  useEffect(() => {
-    if (!isLoading && !error) {
-      setOrder(requests.params.order);
-      setOrderBy(requests.params.orderBy);
-      setSiren(requests.params.siren);
-      setStatus(requests.params.status);
+  // useEffect(() => {
+  //   if (!isLoading && !error) {
+  //     setOrder(requests.params.order);
+  //     setOrderBy(requests.params.orderBy);
+  //     setSiren(requests.params.siren);
+  //     setStatus(requests.params.status);
 
-      !_.isEqual(params, requests.params) &&
-        router.push({ pathname: window.location.pathname, query: requests.params });
-    }
-  }, [
-    error,
-    isLoading,
-    params,
-    requests.params,
-    requests.params.order,
-    requests.params.orderBy,
-    requests.params.siren,
-    requests.params.status,
-    router,
-  ]);
+  //     !_.isEqual(params, requests.params) &&
+  //       router.push({ pathname: window.location.pathname, query: requests.params });
+  //   }
+  // }, [
+  //   error,
+  //   isLoading,
+  //   params,
+  //   requests.params,
+  //   requests.params.order,
+  //   requests.params.orderBy,
+  //   requests.params.siren,
+  //   requests.params.status,
+  //   router,
+  // ]);
 
   const nextCount = Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD);
 
-  console.log({ size }, OwnershipRequestStatus.Enum);
+  // console.log({ size }, OwnershipRequestStatus.Enum);
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.target as HTMLFormElement);
+
+    const data = Object.fromEntries(formData) as unknown as GetOwnershipRequestInputDTO;
+    console.log("data", data);
+
+    router.replace(`liste-declarants?${buildUrlParams(data)}`);
+  };
 
   return (
     <section>
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
-        <form noValidate>
+        <form noValidate onSubmit={onSubmit}>
           <ButtonGroup inline="mobile-up" className="fr-mb-4w">
             <FormButton disabled={isCheck.length === 0}>Valider les demandes</FormButton>
             <FormButton disabled={isCheck.length === 0} variant="tertiary">
@@ -324,12 +338,12 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
           <Grid haveGutters>
             <GridCol sm={3}>
               <FormGroup>
-                <FormInput id="siren-param" placeholder="Rechercher par Siren" />
+                <FormInput id="siren-param" placeholder="Rechercher par Siren" name="siren" />
               </FormGroup>
             </GridCol>
             <GridCol sm={3}>
               <FormGroup>
-                <FormSelect id="status-param">
+                <FormSelect id="status-param" name="status">
                   <option value="">Rechercher par Status</option>
                   {Object.entries(OwnershipRequestStatus.Enum).map(([key, value]) => (
                     <option key={`status-${key}`} value={value}>

@@ -1,7 +1,7 @@
 /**
  * Build an URLSearchParams from an object.
  */
-export const buildUrlParams = (params: Record<string, string[] | string> = {}): URLSearchParams => {
+export const buildUrlParams = (params: Record<string, number[] | string[] | number | string> = {}): URLSearchParams => {
   const searchParams = new URLSearchParams();
 
   const entries = Object.entries(params);
@@ -9,10 +9,10 @@ export const buildUrlParams = (params: Record<string, string[] | string> = {}): 
   for (const [key, value] of entries) {
     if (Array.isArray(value)) {
       for (const element of value) {
-        if (value) searchParams.append(key, element);
+        if (value) searchParams.append(key, String(element));
       }
     } else {
-      if (value) searchParams.set(key, value);
+      if (value) searchParams.set(key, String(value));
     }
   }
 
