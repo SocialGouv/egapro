@@ -418,11 +418,13 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
                 <TextSimulatorLink to="/indicateur1" label="Indicateur écart de rémunération" />
               </ListItem>
             )}
-          {trancheEffectifs !== "50 à 250" && !isFormValid(state.indicateurDeux) && !indicateurDeuxData.nonCalculable && (
-            <ListItem>
-              <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
-            </ListItem>
-          )}
+          {trancheEffectifs !== "50 à 250" &&
+            !isFormValid(state.indicateurDeux) &&
+            !indicateurDeuxData.nonCalculable && (
+              <ListItem>
+                <TextSimulatorLink to="/indicateur2" label="Indicateur écart de taux d'augmentations" />
+              </ListItem>
+            )}
           {trancheEffectifs !== "50 à 250" &&
             !isFormValid(state.indicateurTrois) &&
             !indicateurTroisData.nonCalculable && (
