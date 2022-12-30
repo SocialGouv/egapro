@@ -4,9 +4,8 @@ import type {
   GetOwnershipRequestInputDTO,
   GetOwnershipRequestInputOrderBy,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import { getOwnershipRequestInputDTOSchema } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import { formatIsoToFr } from "@common/utils/date";
 import { Object } from "@common/utils/overload";
-import { buildUrlParams } from "@common/utils/url";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import type { FormCheckboxProps, TagProps } from "@design-system";
 import {
@@ -30,14 +29,16 @@ import {
   TableAdminHeadCol,
   Tag,
 } from "@design-system";
-import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
-import { useRouter } from "next/router";
-import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import {
+  OwnershipRequestsSearchContextProvider,
+  useOwnershipRequestsSearchContext,
+} from "@services/apiClient/useOwnershipRequestsSearchContext";
+import type { FormEvent, MouseEventHandler } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import type { NextPageWithLayout } from "../_app";
 
-const ITEMS_PER_LOAD = 1;
+const ITEMS_PER_LOAD = 3;
 
 const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant"]> = {
   [OwnershipRequestStatus.Enum.TO_PROCESS]: "info",
@@ -46,20 +47,16 @@ const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant
   [OwnershipRequestStatus.Enum.ERROR]: "warning",
 };
 
-type ToStateProps<T> = T & {
-  [K in keyof T as `set${Capitalize<K extends string ? K : never>}`]-?: (value: T[K]) => void;
-};
+const orderByNameMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
+  ["status", "Status"],
+  ["askerEmail", "Demandeur"],
+  ["createdAt", "Date de la demande"],
+  ["modifiedAt", "Date de traitement"],
+  ["siren", "Siren"],
+  ["email", "Email"],
+]);
 
-const orderByNameMap: Record<GetOwnershipRequestInputOrderBy, string> = {
-  status: "Status",
-  askerEmail: "Demandeur",
-  createdAt: "Date de la demande",
-  modifiedAt: "Date de traitement",
-  siren: "Siren",
-  email: "Email",
-};
-
-interface DisplayListeProps extends ToStateProps<Omit<GetOwnershipRequestInputDTO, "limit" | "offset">> {
+interface DisplayListProps extends Omit<GetOwnershipRequestInputDTO, "limit" | "offset"> {
   error: unknown;
   isCheck: string[];
   isLoading: boolean;
@@ -67,28 +64,15 @@ interface DisplayListeProps extends ToStateProps<Omit<GetOwnershipRequestInputDT
   requests: Omit<GetOwnershipRequestDTO, "params"> | undefined;
   setIsCheck: (isCheck: string[]) => void;
 }
-const DisplayListe = ({
-  isLoading,
-  error,
-  requests,
-  itemsPerLoad,
-  isCheck,
-  setIsCheck,
-  order,
-  setOrder,
-  orderBy,
-  setOrderBy,
-  siren,
-  setSiren,
-  status,
-  setStatus,
-}: DisplayListeProps) => {
+const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsCheck }: DisplayListProps) => {
   const hasToProcessRequests = useMemo(
     () => requests?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
     [requests?.data],
   );
 
   const [globalCheck, setGlobalCheck] = useState(false);
+
+  const [{ orderDirection, orderBy, siren, status }] = useOwnershipRequestsSearchContext();
 
   const handleCheckAll: NonNullable<FormCheckboxProps["onChange"]> = () => {
     setGlobalCheck(!globalCheck);
@@ -107,7 +91,7 @@ const DisplayListe = ({
     }
   };
 
-  // if (isLoading) return <Alert type="info">Récupération des données en cours</Alert>;
+  if (isLoading) return <Alert type="info">Récupération des données en cours</Alert>;
 
   if (error) {
     return (
@@ -117,7 +101,7 @@ const DisplayListe = ({
     );
   }
 
-  if (!requests || isLoading) {
+  if (!requests) {
     return null;
   }
 
@@ -144,15 +128,15 @@ const DisplayListe = ({
               <FormCheckbox id="global-checkbox" onChange={handleCheckAll} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
-          {Object.entries(orderByNameMap).map(([orderByValue, orderByName]) => (
+          {Array.from(orderByNameMap).map(([orderByValue, orderByName]) => (
             <TableAdminHeadCol
               key={`orderByValue-${orderByValue}`}
-              order={orderBy === orderByValue && order}
-              onClick={() =>
-                orderBy === orderByValue
-                  ? setOrder(order === "asc" ? "desc" : "asc")
-                  : (setOrderBy(orderByValue), setOrder("desc"))
-              }
+              order={orderBy === orderByValue && orderDirection}
+              // onClick={() =>
+              //   orderBy === orderByValue
+              //     ? setOrder(order === "asc" ? "desc" : "asc")
+              //     : (setOrderBy(orderByValue), setOrder("desc"))
+              // }
             >
               {orderByName}
             </TableAdminHeadCol>
@@ -181,8 +165,8 @@ const DisplayListe = ({
               <TableAdminBodyRowCol>
                 <strong>{item.askerEmail}</strong>
               </TableAdminBodyRowCol>
-              <TableAdminBodyRowCol>{new Date(item.createdAt).toLocaleString()}</TableAdminBodyRowCol>
-              <TableAdminBodyRowCol>{new Date(item.modifiedAt).toLocaleString()}</TableAdminBodyRowCol>
+              <TableAdminBodyRowCol>{formatIsoToFr(item.createdAt)}</TableAdminBodyRowCol>
+              <TableAdminBodyRowCol>{formatIsoToFr(item.modifiedAt)}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.siren}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.email}</TableAdminBodyRowCol>
               {/* <TableAdminBodyRowCol>
@@ -272,63 +256,34 @@ const DisplayListe = ({
 };
 
 const ListeDeclarantsPage: NextPageWithLayout = () => {
-  const router = useRouter();
-  const parsed = getOwnershipRequestInputDTOSchema.safeParse(router.query);
-  const params = useMemo(() => (parsed.success ? parsed.data : {}), [parsed]);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, setState, result] = useOwnershipRequestsSearchContext();
+
+  const { error, isLoading, isError, size, setSize, requests } = result;
 
   const [isCheck, setIsCheck] = useState<string[]>([]);
-  const [orderAsc, setOrder] = useState(params.order);
-  const [orderBy, setOrderBy] = useState(params.orderBy);
-  const [siren, setSiren] = useState(params.siren);
-  const [status, setStatus] = useState(params.status);
-
-  const { requests, error, isLoading, size, setSize } = useListeDeclarants(
-    { orderAsc, orderBy, siren, status },
-    ITEMS_PER_LOAD,
-  );
-
-  // useEffect(() => {
-  //   if (!isLoading && !error) {
-  //     setOrder(requests.params.order);
-  //     setOrderBy(requests.params.orderBy);
-  //     setSiren(requests.params.siren);
-  //     setStatus(requests.params.status);
-
-  //     !_.isEqual(params, requests.params) &&
-  //       router.push({ pathname: window.location.pathname, query: requests.params });
-  //   }
-  // }, [
-  //   error,
-  //   isLoading,
-  //   params,
-  //   requests.params,
-  //   requests.params.order,
-  //   requests.params.orderBy,
-  //   requests.params.siren,
-  //   requests.params.status,
-  //   router,
-  // ]);
 
   const nextCount = Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD);
 
-  // console.log({ size }, OwnershipRequestStatus.Enum);
-
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const formData = new FormData(event.target as HTMLFormElement);
-
     const data = Object.fromEntries(formData) as unknown as GetOwnershipRequestInputDTO;
-    console.log("data", data);
+    setState({ ...state, ...data });
+  };
 
-    router.replace(`liste-declarants?${buildUrlParams(data)}`);
+  const resetForm: MouseEventHandler<HTMLButtonElement> = () => {
+    formRef.current?.reset();
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const { siren, ...rest } = state;
+    setState({ ...rest, status: OwnershipRequestStatus.Enum.TO_PROCESS });
   };
 
   return (
     <section>
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
-        <form noValidate onSubmit={onSubmit}>
+        <form noValidate onSubmit={onSubmit} ref={formRef}>
           <ButtonGroup inline="mobile-up" className="fr-mb-4w">
             <FormButton disabled={isCheck.length === 0}>Valider les demandes</FormButton>
             <FormButton disabled={isCheck.length === 0} variant="tertiary">
@@ -343,10 +298,10 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
             </GridCol>
             <GridCol sm={3}>
               <FormGroup>
-                <FormSelect id="status-param" name="status">
+                <FormSelect id="status-param" name="status" defaultValue={state.status}>
                   <option value="">Rechercher par Status</option>
                   {Object.entries(OwnershipRequestStatus.Enum).map(([key, value]) => (
-                    <option key={`status-${key}`} value={value}>
+                    <option key={key} value={value}>
                       {value}
                     </option>
                   ))}
@@ -355,16 +310,10 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
             </GridCol>
             <GridCol sm={3}>
               <ButtonGroup inline="mobile-up">
-                <FormButton isDisabled={isLoading}>Rechercher</FormButton>
-                <FormButton
-                  variant="secondary"
-                  type="reset"
-                  isDisabled={isLoading}
-                  // onClick={() => {
-                  //   resetInputs({});
-                  //   router.replace({ pathname: "/representation-equilibree/recherche", query: { q: "" } });
-                  // }}
-                >
+                <FormButton isDisabled={isLoading} type="submit">
+                  Rechercher
+                </FormButton>
+                <FormButton variant="secondary" type="reset" isDisabled={isLoading} onClick={resetForm}>
                   Réinitialiser
                 </FormButton>
               </ButtonGroup>
@@ -372,21 +321,13 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
           </Grid>
         </form>
         <br />
-        <DisplayListe
+        <DisplayList
           requests={requests}
           error={error}
           isLoading={isLoading}
           itemsPerLoad={ITEMS_PER_LOAD}
           isCheck={isCheck}
           setIsCheck={setIsCheck}
-          order={orderAsc}
-          setOrder={setOrder}
-          orderBy={orderBy}
-          setOrderBy={setOrderBy}
-          siren={siren}
-          setSiren={setSiren}
-          status={status}
-          setStatus={setStatus}
         />
         {requests.data.length < requests.totalCount && (
           <Grid justifyCenter>
@@ -402,7 +343,11 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
 };
 
 ListeDeclarantsPage.getLayout = ({ children }) => {
-  return <AdminLayout title="Liste déclarants">{children}</AdminLayout>;
+  return (
+    <AdminLayout title="Liste déclarants">
+      <OwnershipRequestsSearchContextProvider>{children}</OwnershipRequestsSearchContextProvider>
+    </AdminLayout>
+  );
 };
 
 export default ListeDeclarantsPage;
