@@ -7,8 +7,8 @@ import type { FetcherInfiniteReturn } from "./fetcher";
 import { fetcherV2 } from "./fetcher";
 
 type SearchParams = {
-  orderAsc?: string;
   orderBy?: string;
+  orderDirection?: string;
   siren?: string;
   status?: string;
 };
