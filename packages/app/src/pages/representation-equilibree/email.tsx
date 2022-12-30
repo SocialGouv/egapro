@@ -1,4 +1,4 @@
-import { normalizeQueryParam } from "@common/utils/url";
+import { normalizeRouterQuery } from "@common/utils/url";
 import { ClientOnly } from "@components/ClientOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
@@ -38,9 +38,8 @@ const EmailPage: NextPageWithLayout = () => {
   const { user } = useUser();
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
   const defaultRedirectTo = "/representation-equilibree/commencer";
-  const redirectTo = normalizeQueryParam(router.query.redirectTo);
+  const { redirectTo } = normalizeRouterQuery(router.query);
 
-  // Si la personne est authentifiée, on reroute sur commencer.
   if (user) router.push(redirectTo || defaultRedirectTo);
 
   const {
