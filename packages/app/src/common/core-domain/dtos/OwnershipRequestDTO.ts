@@ -26,7 +26,7 @@ export type GetOwnershipRequestInputDTO = z.infer<typeof getOwnershipRequestInpu
 export const getOwnershipRequestInputDTOSchema = z.object({
   limit: z.string().regex(/^\d+$/).transform(Number).optional(),
   offset: z.string().regex(/^\d+$/).transform(Number).optional(),
-  order: z.union([z.literal("asc"), z.literal("desc")]).optional(),
+  orderDirection: z.union([z.literal("asc"), z.literal("desc")]).optional(),
   orderBy: z
     .union<ZodSizedTupleFromUnion<GetOwnershipRequestInputOrderBy>>([
       z.literal("askerEmail"),

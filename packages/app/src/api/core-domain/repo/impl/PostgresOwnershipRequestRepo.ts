@@ -130,7 +130,6 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
 
   public async getMultiple(...ids: UniqueID[]): Promise<OwnershipRequest[]> {
     const [{ count }] = await sql<[{ count: number }]>`select count(*) from ${this.table}`;
-    console.log({ count });
     const raws = await this.sql`select * from ${this.table} where id in ${sql(ids.map(id => id.getValue()))}`;
 
     return raws.map(ownershipRequestMap.toDomain);
@@ -163,11 +162,13 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     limit,
     offset,
     orderBy,
-    order,
+    orderDirection,
   }: OwnershipSearchCriteria): Promise<OwnershipRequest[]> {
     const sqlOrderBy =
-      orderBy && order
-        ? sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy])} ${order === "desc" ? sql`desc` : sql`asc`}`
+      orderBy && orderDirection
+        ? sql`order by ${sql(OWNERSHIP_REQUEST_SORTABLE_COLS_MAP[orderBy])} ${
+            orderDirection === "desc" ? sql`desc` : sql`asc`
+          }`
         : sql``;
     const sqlLimit = limit ? sql`limit ${limit}` : sql``;
     const sqlOffset = offset ? sql`offset ${offset}` : sql``;
@@ -182,12 +183,13 @@ export class PostgresOwnershipRequestRepo implements IOwnershipRequestRepo {
     const sqlWhereClause = this.buildSearchWhereClause({ siren, status });
     const [{ count }] = await sql<SQLCount>`select count(*) from ${this.table} ${sqlWhereClause}`;
 
-    return +count;
+    return Number(count);
   }
 
-  private buildSearchWhereClause({ siren, status }: OwnershipSearchCriteria) {
-    const sqlSiren = siren ? sql`siren like ${siren}%` : sql``;
-    const sqlStatus = status ? sql`status = ${status}` : sql``;
-    return siren || status ? sql`where ${siren ? sqlSiren : sqlStatus}${siren ? ` and ${sqlStatus}}` : sql``}` : sql``;
+  private buildSearchWhereClause({ siren = "", status }: OwnershipSearchCriteria) {
+    const sqlSiren = sql`siren like ${siren + "%"}`;
+    const sqlStatus = status ? sql`and status=${status}` : sql``;
+
+    return sql`where ${sqlSiren} ${sqlStatus}`;
   }
 }

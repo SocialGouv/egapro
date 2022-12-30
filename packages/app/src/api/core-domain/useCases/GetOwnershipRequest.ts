@@ -1,4 +1,3 @@
-import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import type { GetOwnershipRequestDTO, GetOwnershipRequestInputDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { ownershipRequestMap } from "@common/core-domain/mappers/ownershipRequestMap";
 import type { UseCase } from "@common/shared-domain";
@@ -11,11 +10,11 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
 
   public async execute({
     siren,
-    status = OwnershipRequestStatus.Enum.TO_PROCESS,
+    status,
     limit: limitQuery = 10,
     offset: offsetQuery = 0,
     orderBy = "createdAt",
-    order = "desc",
+    orderDirection = "desc",
   }: GetOwnershipRequestInputDTO): Promise<GetOwnershipRequestDTO> {
     const limit = limitQuery > 0 && limitQuery <= 100 ? limitQuery : 10;
     const offset = Math.max(offsetQuery, 0);
@@ -32,7 +31,7 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
         limit,
         offset,
         orderBy,
-        order,
+        orderDirection,
       });
       return {
         params: {
@@ -40,7 +39,7 @@ export class GetOwnershipRequest implements UseCase<GetOwnershipRequestInputDTO,
           status,
           limit,
           offset,
-          order,
+          orderDirection,
           orderBy,
         },
         totalCount,

@@ -18,7 +18,14 @@ export type OwnershipSearchCriteria = GetOwnershipRequestInputDTO;
 
 export interface IOwnershipRequestRepo extends BulkRepo<OwnershipRequest> {
   countSearch({ siren, status }: OwnershipSearchCriteria): Promise<number>;
-  search({ siren, status, limit, offset, orderBy, order }: OwnershipSearchCriteria): Promise<OwnershipRequest[]>;
+  search({
+    siren,
+    status,
+    limit,
+    offset,
+    orderBy,
+    orderDirection,
+  }: OwnershipSearchCriteria): Promise<OwnershipRequest[]>;
   updateWithOwnership(item: OwnershipRequest): Promise<void>;
   updateWithOwnershipBulk(...items: OwnershipRequest[]): Promise<void>;
 }
