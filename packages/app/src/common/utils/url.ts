@@ -1,7 +1,9 @@
 /**
  * Build an URLSearchParams from an object.
  */
-export const buildUrlParams = (params: Record<string, number[] | string[] | number | string> = {}): URLSearchParams => {
+export const buildUrlParams = (
+  params: Record<string, boolean[] | number[] | string[] | boolean | number | string | undefined> = {},
+): URLSearchParams => {
   const searchParams = new URLSearchParams();
 
   const entries = Object.entries(params);
