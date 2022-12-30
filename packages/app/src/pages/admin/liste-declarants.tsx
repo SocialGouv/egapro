@@ -47,7 +47,7 @@ const tagVariantStatusMap: Record<OwnershipRequestStatus.Enum, TagProps["variant
   [OwnershipRequestStatus.Enum.ERROR]: "warning",
 };
 
-const orderByNameMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
+const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
   ["status", "Status"],
   ["askerEmail", "Demandeur"],
   ["createdAt", "Date de la demande"],
@@ -65,14 +65,15 @@ interface DisplayListProps extends Omit<GetOwnershipRequestInputDTO, "limit" | "
   setIsCheck: (isCheck: string[]) => void;
 }
 const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsCheck }: DisplayListProps) => {
+  const [state, setState] = useOwnershipRequestsSearchContext();
+  const { orderDirection, orderBy } = state;
+
   const hasToProcessRequests = useMemo(
     () => requests?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
     [requests?.data],
   );
 
   const [globalCheck, setGlobalCheck] = useState(false);
-
-  const [{ orderDirection, orderBy, siren, status }] = useOwnershipRequestsSearchContext();
 
   const handleCheckAll: NonNullable<FormCheckboxProps["onChange"]> = () => {
     setGlobalCheck(!globalCheck);
@@ -85,9 +86,18 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
 
   const handleCheck: NonNullable<FormCheckboxProps["onChange"]> = evt => {
     const { id, checked } = evt.target;
-    setIsCheck([...isCheck, id]);
     if (!checked) {
       setIsCheck(isCheck.filter(item => item !== id));
+    } else {
+      setIsCheck([...isCheck, id]);
+    }
+  };
+
+  const toggleOrderColumn = (columnValue: GetOwnershipRequestInputOrderBy) => {
+    if (orderBy === columnValue) {
+      setState({ ...state, orderDirection: state.orderDirection === "asc" ? "desc" : "asc" });
+    } else {
+      setState({ ...state, orderBy: columnValue, orderDirection: "desc" });
     }
   };
 
@@ -128,17 +138,13 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
               <FormCheckbox id="global-checkbox" onChange={handleCheckAll} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
-          {Array.from(orderByNameMap).map(([orderByValue, orderByName]) => (
+          {Array.from(columnsMap).map(([columnValue, columnLabel]) => (
             <TableAdminHeadCol
-              key={`orderByValue-${orderByValue}`}
-              order={orderBy === orderByValue && orderDirection}
-              // onClick={() =>
-              //   orderBy === orderByValue
-              //     ? setOrder(order === "asc" ? "desc" : "asc")
-              //     : (setOrderBy(orderByValue), setOrder("desc"))
-              // }
+              key={columnValue}
+              orderDirection={orderBy === columnValue && orderDirection}
+              onClick={() => toggleOrderColumn(columnValue)}
             >
-              {orderByName}
+              {columnLabel}
             </TableAdminHeadCol>
           ))}
         </TableAdminHead>

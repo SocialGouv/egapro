@@ -17,12 +17,17 @@ export const TableAdminHead = ({ children }: PropsWithChildren) => (
 export interface TableAdminHeadColProps {
   colSpan?: number;
   onClick?: ThHTMLAttributes<HTMLTableHeaderCellElement>["onClick"];
-  order?: "asc" | "desc" | false;
+  orderDirection?: "asc" | "desc" | false;
 }
-export const TableAdminHeadCol = ({ children, colSpan, order, onClick }: PropsWithChildren<TableAdminHeadColProps>) => (
+export const TableAdminHeadCol = ({
+  children,
+  colSpan,
+  orderDirection,
+  onClick,
+}: PropsWithChildren<TableAdminHeadColProps>) => (
   <th className={style.tableHeadCol} scope="col" colSpan={colSpan} onClick={onClick}>
     {children}
-    {order && <span>{order === "asc" ? "⬆" : "⬇"}</span>}
+    {orderDirection && <span>{orderDirection === "asc" ? "⬆" : "⬇"}</span>}
   </th>
 );
 
