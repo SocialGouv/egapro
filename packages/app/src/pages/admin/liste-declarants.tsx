@@ -1,6 +1,5 @@
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import type {
-  GetOwnershipRequestDTO,
   GetOwnershipRequestInputDTO,
   GetOwnershipRequestInputOrderBy,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
@@ -30,9 +29,9 @@ import {
   Tag,
 } from "@design-system";
 import {
-  OwnershipRequestsSearchContextProvider,
-  useOwnershipRequestsSearchContext,
-} from "@services/apiClient/useOwnershipRequestsSearchContext";
+  OwnershipRequestListContextProvider,
+  useOwnershipRequestListContext,
+} from "@services/apiClient/useOwnershipRequestListContext";
 import type { FormEvent, MouseEventHandler } from "react";
 import { useMemo, useRef, useState } from "react";
 
@@ -56,17 +55,11 @@ const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
   ["email", "Email"],
 ]);
 
-interface DisplayListProps extends Omit<GetOwnershipRequestInputDTO, "limit" | "offset"> {
-  error: unknown;
-  isCheck: string[];
-  isLoading: boolean;
-  itemsPerLoad: number;
-  requests: Omit<GetOwnershipRequestDTO, "params"> | undefined;
-  setIsCheck: (isCheck: string[]) => void;
-}
-const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsCheck }: DisplayListProps) => {
-  const [state, setState] = useOwnershipRequestsSearchContext();
-  const { orderDirection, orderBy } = state;
+const OwnershipRequestList = () => {
+  const [state, setState, result] = useOwnershipRequestListContext();
+  const { orderDirection, orderBy, checkedItems } = state;
+
+  const { requests, isLoading, error } = result;
 
   const hasToProcessRequests = useMemo(
     () => requests?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
@@ -75,21 +68,22 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
 
   const [globalCheck, setGlobalCheck] = useState(false);
 
-  const handleCheckAll: NonNullable<FormCheckboxProps["onChange"]> = () => {
+  const toggleAll: NonNullable<FormCheckboxProps["onChange"]> = () => {
     setGlobalCheck(!globalCheck);
     if (globalCheck) {
-      setIsCheck([]);
+      setState({ ...state, checkedItems: [] });
     } else {
-      setIsCheck(requests?.data.map(r => r.id) ?? []);
+      setState({ ...state, checkedItems: requests?.data.map(r => r.id) ?? [] });
     }
   };
 
-  const handleCheck: NonNullable<FormCheckboxProps["onChange"]> = evt => {
+  const toggleItem: NonNullable<FormCheckboxProps["onChange"]> = evt => {
     const { id, checked } = evt.target;
+
     if (!checked) {
-      setIsCheck(isCheck.filter(item => item !== id));
+      setState({ ...state, checkedItems: checkedItems.filter(item => item !== id) });
     } else {
-      setIsCheck([...isCheck, id]);
+      setState({ ...state, checkedItems: [...checkedItems, id] });
     }
   };
 
@@ -110,10 +104,7 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
       </Alert>
     );
   }
-
-  if (!requests) {
-    return null;
-  }
+  if (!requests) return null;
 
   if (requests.totalCount === 0) {
     return (
@@ -122,12 +113,11 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
       </Alert>
     );
   }
-
   return (
     <>
       <Box>
         <p>
-          {requests.data.length} {requests.totalCount > itemsPerLoad ? `sur ${requests.totalCount}` : ""} demande
+          {requests.data.length} {requests.totalCount > ITEMS_PER_LOAD ? `sur ${requests.totalCount}` : ""} demande
           {requests.totalCount > 1 ? "s" : ""}
         </p>
       </Box>
@@ -135,7 +125,7 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
         <TableAdminHead>
           <TableAdminHeadCol>
             <FormCheckboxGroup singleCheckbox size="sm" isDisabled={!hasToProcessRequests}>
-              <FormCheckbox id="global-checkbox" onChange={handleCheckAll} />
+              <FormCheckbox id="global-checkbox" onChange={toggleAll} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
           {Array.from(columnsMap).map(([columnValue, columnLabel]) => (
@@ -160,8 +150,8 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
                   <FormCheckbox
                     id={item.id}
                     className="request-checkbox"
-                    checked={isCheck.includes(item.id)}
-                    onChange={handleCheck}
+                    checked={checkedItems.includes(item.id)}
+                    onChange={toggleItem}
                   />
                 </FormCheckboxGroup>
               </TableAdminBodyRowCol>
@@ -180,94 +170,18 @@ const DisplayList = ({ isLoading, error, requests, itemsPerLoad, isCheck, setIsC
               </TableAdminBodyRowCol> */}
             </TableAdminBodyRow>
           ))}
-          {/* <TableAdminBodyRow>
-            <TableAdminBodyRowCol>
-              <input type="checkbox" />
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <Tag variant="info">À traiter</Tag>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <strong>jean-michel-superlong@beta.gouv.fr</strong>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>12/10/2022</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>-</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>800 168 767</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>laurent.sutterlity@beta.gouv.fr</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol />
-          </TableAdminBodyRow>
-          <TableAdminBodyRow>
-            <TableAdminBodyRowCol>
-              <input type="checkbox" disabled />
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <Tag variant="success">Traité</Tag>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <strong>jean-michel-superlong@beta.gouv.fr</strong>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>12/10/2022</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>12/10/2022</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>800 168 767</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>laurent.sutterlity@beta.gouv.fr</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <FormButton title="Éditer" iconOnly="fr-icon-edit-fill" size="sm" variant="tertiary-no-border" />
-            </TableAdminBodyRowCol>
-          </TableAdminBodyRow>
-          <TableAdminBodyRow>
-            <TableAdminBodyRowCol>
-              <input type="checkbox" disabled />
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <Tag variant="error">Refusé</Tag>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <strong>jean-michel-superlong@beta.gouv.fr</strong>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>12/10/2022</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>12/10/2022</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>800 168 767</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>laurent.sutterlity@beta.gouv.fr</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <FormButton title="Éditer" iconOnly="fr-icon-edit-fill" size="sm" variant="tertiary-no-border" />
-            </TableAdminBodyRowCol>
-          </TableAdminBodyRow>
-          <TableAdminBodyRow>
-            <TableAdminBodyRowCol>
-              <input type="checkbox" disabled />
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <Tag variant="warning">En erreur</Tag>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <strong>jean-michel-superlong@beta.gouv.fr</strong>
-            </TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>12/10/2022</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>12/10/2022</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>800 168 767</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>laurent.sutterlity@beta.gouv.fr</TableAdminBodyRowCol>
-            <TableAdminBodyRowCol>
-              <FormButton
-                title="Voir le détail"
-                iconOnly="fr-icon-information-fill"
-                size="sm"
-                variant="tertiary-no-border"
-              />
-            </TableAdminBodyRowCol>
-          </TableAdminBodyRow> */}
         </TableAdminBody>
       </TableAdmin>
     </>
   );
 };
 
-const ListeDeclarantsPage: NextPageWithLayout = () => {
+const OwnershipRequestPage: NextPageWithLayout = () => {
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, setState, result] = useOwnershipRequestsSearchContext();
+  const [state, setState, result] = useOwnershipRequestListContext();
+  const { checkedItems } = state;
 
-  const { error, isLoading, isError, size, setSize, requests } = result;
-
-  const [isCheck, setIsCheck] = useState<string[]>([]);
+  const { isLoading, size, setSize, requests } = result;
 
   const nextCount = Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD);
 
@@ -285,14 +199,25 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
     setState({ ...rest, status: OwnershipRequestStatus.Enum.TO_PROCESS });
   };
 
+  const acceptRequests = () => {
+    console.log("Acceptation des demandes", checkedItems.join(", "));
+    // fetch POST
+  };
+
+  const refuseRequests = () => {
+    console.log("Refus des demandes", checkedItems.join(", "));
+  };
+
   return (
     <section>
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
         <form noValidate onSubmit={onSubmit} ref={formRef}>
           <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-            <FormButton disabled={isCheck.length === 0}>Valider les demandes</FormButton>
-            <FormButton disabled={isCheck.length === 0} variant="tertiary">
+            <FormButton disabled={checkedItems.length === 0} onClick={acceptRequests}>
+              Valider les demandes
+            </FormButton>
+            <FormButton disabled={checkedItems.length === 0} variant="tertiary" onClick={refuseRequests}>
               Refuser les demandes
             </FormButton>
           </ButtonGroup>
@@ -327,14 +252,7 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
           </Grid>
         </form>
         <br />
-        <DisplayList
-          requests={requests}
-          error={error}
-          isLoading={isLoading}
-          itemsPerLoad={ITEMS_PER_LOAD}
-          isCheck={isCheck}
-          setIsCheck={setIsCheck}
-        />
+        <OwnershipRequestList />
         {requests.data.length < requests.totalCount && (
           <Grid justifyCenter>
             <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
@@ -348,12 +266,12 @@ const ListeDeclarantsPage: NextPageWithLayout = () => {
   );
 };
 
-ListeDeclarantsPage.getLayout = ({ children }) => {
+OwnershipRequestPage.getLayout = ({ children }) => {
   return (
     <AdminLayout title="Liste déclarants">
-      <OwnershipRequestsSearchContextProvider>{children}</OwnershipRequestsSearchContextProvider>
+      <OwnershipRequestListContextProvider>{children}</OwnershipRequestListContextProvider>
     </AdminLayout>
   );
 };
 
-export default ListeDeclarantsPage;
+export default OwnershipRequestPage;
