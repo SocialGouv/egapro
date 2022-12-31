@@ -73,7 +73,11 @@ const OwnershipRequestList = () => {
     if (globalCheck) {
       setState({ ...state, checkedItems: [] });
     } else {
-      setState({ ...state, checkedItems: requests?.data.map(r => r.id) ?? [] });
+      setState({
+        ...state,
+        checkedItems:
+          requests?.data.filter(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS).map(r => r.id) ?? [],
+      });
     }
   };
 
