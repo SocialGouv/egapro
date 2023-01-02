@@ -58,7 +58,6 @@ const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
 const OwnershipRequestList = () => {
   const [state, setState, result] = useOwnershipRequestListContext();
   const { orderDirection, orderBy, checkedItems } = state;
-
   const { requests, isLoading, error } = result;
 
   const hasToProcessRequests = useMemo(
@@ -228,7 +227,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
           <Grid haveGutters>
             <GridCol sm={3}>
               <FormGroup>
-                <FormInput id="siren-param" placeholder="Rechercher par Siren" name="siren" />
+                <FormInput id="siren-param" placeholder="Rechercher par Siren" name="siren" autoComplete="off" />
               </FormGroup>
             </GridCol>
             <GridCol sm={3}>
