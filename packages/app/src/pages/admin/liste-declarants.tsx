@@ -1,4 +1,5 @@
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
+import type { OwnershipRequestAction } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
 import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { Object } from "@common/utils/overload";
@@ -211,13 +212,16 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
     setState({ ...rest, checkedItems: [], status: OwnershipRequestStatus.Enum.TO_PROCESS });
   };
 
-  const acceptRequests = async () => {
-    console.log("Acceptation des demandes", checkedItems.join(", "));
+  const actionOnSelection = (action: OwnershipRequestAction) => async () => {
+    console.debug(`${action} des demandes`, checkedItems.join(", "));
 
     try {
       setFeatureStatus({ type: "loading" });
-      await acceptOwnershipRequest({ uuids: checkedItems, action: "accept" });
-      setFeatureStatus({ type: "success", message: "Les demandes ont bien été acceptées." });
+      await acceptOwnershipRequest({ uuids: checkedItems, action });
+      setFeatureStatus({
+        type: "success",
+        message: `Les demandes ont bien été ${action === "accept" ? "acceptées" : "refusées"}.`,
+      });
       mutate(result.requests.data.filter(request => !checkedItems.includes(request.id)));
     } catch (error: unknown) {
       console.error("Error in liste-declarants", error);
@@ -226,13 +230,9 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
         message:
           error instanceof Error && error.message
             ? error.message
-            : "Une erreur a été détectée lors de l'envoi de la demande.",
+            : `Une erreur a été détectée par le serveur lors de la demande.`,
       });
     }
-  };
-
-  const refuseRequests = () => {
-    console.log("Refus des demandes", checkedItems.join(", "));
   };
 
   return (
@@ -243,14 +243,14 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
           <ButtonGroup inline="mobile-up" className="fr-mb-4w">
             <FormButton
               disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
-              onClick={acceptRequests}
+              onClick={actionOnSelection("accept")}
             >
               Valider les demandes
             </FormButton>
             <FormButton
               disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
               variant="tertiary"
-              onClick={refuseRequests}
+              onClick={actionOnSelection("refuse")}
             >
               Refuser les demandes
             </FormButton>
