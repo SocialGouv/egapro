@@ -1,3 +1,10 @@
+## [2.54.2](https://github.com/SocialGouv/egapro/compare/v2.54.1...v2.54.2) (2023-01-02)
+
+
+### Bug Fixes
+
+* publication date ([#1475](https://github.com/SocialGouv/egapro/issues/1475)) ([14155de](https://github.com/SocialGouv/egapro/commit/14155de04fbf3c4d2cee5f1cd9310cd9ec31ba6b))
+
 ## [2.54.1](https://github.com/SocialGouv/egapro/compare/v2.54.0...v2.54.1) (2023-01-02)
 
 
