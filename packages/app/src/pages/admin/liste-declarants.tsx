@@ -5,6 +5,7 @@ import type {
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { Object } from "@common/utils/overload";
+import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import type { FormCheckboxProps, TagProps } from "@design-system";
 import {
@@ -28,6 +29,7 @@ import {
   TableAdminHeadCol,
   Tag,
 } from "@design-system";
+import { acceptOwnershipRequest } from "@services/apiClient/ownershipRequest";
 import {
   OwnershipRequestListContextProvider,
   useOwnershipRequestListContext,
@@ -183,8 +185,9 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, setState, result] = useOwnershipRequestListContext();
   const { checkedItems } = state;
+  const { isLoading, size, setSize, requests, mutate } = result;
 
-  const { isLoading, size, setSize, requests } = result;
+  const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
 
   const nextCount = Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD);
 
@@ -199,12 +202,27 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
     formRef.current?.reset();
     // eslint-disable-next-line unused-imports/no-unused-vars
     const { siren, ...rest } = state;
-    setState({ ...rest, status: OwnershipRequestStatus.Enum.TO_PROCESS });
+    setState({ ...rest, checkedItems: [], status: OwnershipRequestStatus.Enum.TO_PROCESS });
   };
 
-  const acceptRequests = () => {
+  const acceptRequests = async () => {
     console.log("Acceptation des demandes", checkedItems.join(", "));
-    // fetch POST
+
+    try {
+      setFeatureStatus({ type: "loading" });
+      await acceptOwnershipRequest({ uuids: checkedItems, action: "accept" });
+      setFeatureStatus({ type: "success", message: "Les demandes ont bien été acceptées." });
+      mutate(result.requests.data.filter(request => !checkedItems.includes(request.id)));
+    } catch (error: unknown) {
+      console.error("Error in liste-declarants", error);
+      setFeatureStatus({
+        type: "error",
+        message:
+          error instanceof Error && error.message
+            ? error.message
+            : "Une erreur a été détectée lors de l'envoi de la demande.",
+      });
+    }
   };
 
   const refuseRequests = () => {
@@ -215,15 +233,26 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
     <section>
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
-        <form noValidate onSubmit={onSubmit} ref={formRef}>
+        <form ref={formRef} noValidate onSubmit={onSubmit}>
           <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-            <FormButton disabled={checkedItems.length === 0} onClick={acceptRequests}>
+            <FormButton
+              disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+              onClick={acceptRequests}
+            >
               Valider les demandes
             </FormButton>
-            <FormButton disabled={checkedItems.length === 0} variant="tertiary" onClick={refuseRequests}>
+            <FormButton
+              disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+              variant="tertiary"
+              onClick={refuseRequests}
+            >
               Refuser les demandes
             </FormButton>
           </ButtonGroup>
+
+          <AlertFeatureStatus type="error" title="Erreur" />
+          <AlertFeatureStatus type="success" title="Succès" />
+
           <Grid haveGutters>
             <GridCol sm={3}>
               <FormGroup>
@@ -272,7 +301,9 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
 OwnershipRequestPage.getLayout = ({ children }) => {
   return (
     <AdminLayout title="Liste déclarants">
-      <OwnershipRequestListContextProvider>{children}</OwnershipRequestListContextProvider>
+      <FeatureStatusProvider>
+        <OwnershipRequestListContextProvider>{children}</OwnershipRequestListContextProvider>
+      </FeatureStatusProvider>
     </AdminLayout>
   );
 };

@@ -35,6 +35,7 @@ export const useListeDeclarants = (
     error,
     size,
     setSize,
+    mutate,
   } = useSWRInfinite<GetOwnershipRequestDTO>(getKey(search, itemsPerLoad), fetcherV2);
 
   const isError = !!error;
@@ -58,5 +59,6 @@ export const useListeDeclarants = (
     isError,
     size,
     setSize,
+    mutate,
   };
 };

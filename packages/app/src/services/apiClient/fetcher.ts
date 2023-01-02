@@ -17,6 +17,7 @@ export type FetcherReturn = {
 export type FetcherReturnImmutable = Omit<FetcherReturn, "mutate">;
 
 export type FetcherInfiniteReturn = FetcherReturnImmutable & {
+  mutate: (data: Any[]) => void;
   setSize: (size: number) => void;
   size: number;
 };

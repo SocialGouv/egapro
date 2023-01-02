@@ -1,3 +1,5 @@
+import type { OwnershipRequestAction } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
+
 import type { OwnershipRequestFormType } from "../../pages/ajout-declarant";
 import { fetcherV2 } from "./fetcher";
 
@@ -12,27 +14,17 @@ const buildPayload = (formData: OwnershipRequestFormType) => {
 export const putOwnershipRequest = async (formData: OwnershipRequestFormType) => {
   const url = `/ownership/request`;
 
-  //   throw new Error("kaboom");
-
   return fetcherV2(url, {
     method: "PUT",
     body: JSON.stringify(buildPayload(formData)),
   });
 };
 
-// export const fetchAllOwnershiprequests = (filters: any) =>
-//   fetcher(`/representation-equilibree/${siren}/${year}`) as Promise<RepresentationEquilibreeAPI>;
+export const acceptOwnershipRequest = async (payload: { action: OwnershipRequestAction; uuids: string[] }) => {
+  const url = `/admin/ownership/request`;
 
-// export const fetchRepresentationEquilibreeSendEmail = (siren: string, year: number) =>
-//   fetcher(`/representation-equilibree/${siren}/${year}/receipt`, { method: "POST" });
-
-// export const useAllOwnershipRequests = (siren: string, year: number) => {
-//   const { isAuthenticated } = useUser();
-//   const { data: repeq, error } = useSWR<RepresentationEquilibreeAPI>(
-//     !siren || !year || !isAuthenticated ? null : `/representation-equilibree/${siren}/${year}`,
-//   );
-
-//   const loading = !siren || !year || !isAuthenticated ? false : !repeq && !error ? true : false;
-
-//   return { repeq, error, loading };
-// };
+  return fetcherV2(url, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+};
