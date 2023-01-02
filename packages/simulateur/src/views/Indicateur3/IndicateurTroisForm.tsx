@@ -51,7 +51,7 @@ const validateForm = ({
   }
   if (allInputs.every((input) => input === "")) {
     return {
-      notAll0: "L’indicateur ne peut être calculé car certains champs ne sont pas renseignés.",
+      notAll0: "L’indicateur ne peut être calculé car tous les champs ne sont pas renseignés.",
     }
   }
   return
