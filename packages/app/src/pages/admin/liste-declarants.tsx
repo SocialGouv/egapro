@@ -1,8 +1,5 @@
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
-import type {
-  GetOwnershipRequestInputDTO,
-  GetOwnershipRequestInputOrderBy,
-} from "@common/core-domain/dtos/OwnershipRequestDTO";
+import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { formatIsoToFr } from "@common/utils/date";
 import { Object } from "@common/utils/overload";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
@@ -34,8 +31,9 @@ import {
   OwnershipRequestListContextProvider,
   useOwnershipRequestListContext,
 } from "@services/apiClient/useOwnershipRequestListContext";
-import type { FormEvent, MouseEventHandler } from "react";
-import { useMemo, useRef, useState } from "react";
+import type { MouseEventHandler } from "react";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
 
 import type { NextPageWithLayout } from "../_app";
 
@@ -59,7 +57,7 @@ const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
 
 const OwnershipRequestList = () => {
   const [state, setState, result] = useOwnershipRequestListContext();
-  const { orderDirection, orderBy, checkedItems } = state;
+  const { orderDirection, orderBy, checkedItems, globalCheck } = state;
   const { requests, isLoading, error } = result;
 
   const hasToProcessRequests = useMemo(
@@ -67,17 +65,15 @@ const OwnershipRequestList = () => {
     [requests?.data],
   );
 
-  const [globalCheck, setGlobalCheck] = useState(false);
-
   const toggleAll: NonNullable<FormCheckboxProps["onChange"]> = () => {
-    setGlobalCheck(!globalCheck);
     if (globalCheck) {
-      setState({ ...state, checkedItems: [] });
+      setState({ ...state, checkedItems: [], globalCheck: false });
     } else {
       setState({
         ...state,
         checkedItems:
           requests?.data.filter(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS).map(r => r.id) ?? [],
+        globalCheck: true,
       });
     }
   };
@@ -130,7 +126,7 @@ const OwnershipRequestList = () => {
         <TableAdminHead>
           <TableAdminHeadCol>
             <FormCheckboxGroup singleCheckbox size="sm" isDisabled={!hasToProcessRequests}>
-              <FormCheckbox id="global-checkbox" onChange={toggleAll} />
+              <FormCheckbox id="global-checkbox" onChange={toggleAll} checked={globalCheck} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
           {Array.from(columnsMap).map(([columnValue, columnLabel]) => (
@@ -181,25 +177,35 @@ const OwnershipRequestList = () => {
   );
 };
 
+type SearchFormType = { siren: string; status: OwnershipRequestStatus.Enum };
+
 const OwnershipRequestPage: NextPageWithLayout = () => {
-  const formRef = useRef<HTMLFormElement>(null);
   const [state, setState, result] = useOwnershipRequestListContext();
   const { checkedItems } = state;
   const { isLoading, size, setSize, requests, mutate } = result;
 
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
 
+  const {
+    handleSubmit,
+    register,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<SearchFormType>({
+    defaultValues: {
+      siren: state.siren,
+      status: state.status,
+    },
+  });
+
   const nextCount = Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
-    const data = Object.fromEntries(formData) as unknown as GetOwnershipRequestInputDTO;
+  const onSubmit = (data: SearchFormType) => {
     setState({ ...state, ...data });
   };
 
   const resetForm: MouseEventHandler<HTMLButtonElement> = () => {
-    formRef.current?.reset();
+    reset();
     // eslint-disable-next-line unused-imports/no-unused-vars
     const { siren, ...rest } = state;
     setState({ ...rest, checkedItems: [], status: OwnershipRequestStatus.Enum.TO_PROCESS });
@@ -233,7 +239,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
     <section>
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
-        <form ref={formRef} noValidate onSubmit={onSubmit}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <ButtonGroup inline="mobile-up" className="fr-mb-4w">
             <FormButton
               disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
@@ -256,12 +262,17 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
           <Grid haveGutters>
             <GridCol sm={3}>
               <FormGroup>
-                <FormInput id="siren-param" placeholder="Rechercher par Siren" name="siren" autoComplete="off" />
+                <FormInput
+                  id="siren-param"
+                  placeholder="Rechercher par Siren"
+                  autoComplete="off"
+                  {...register("siren")}
+                />
               </FormGroup>
             </GridCol>
             <GridCol sm={3}>
               <FormGroup>
-                <FormSelect id="status-param" name="status" defaultValue={state.status}>
+                <FormSelect id="status-param" {...register("status")}>
                   <option value="">Rechercher par Status</option>
                   {Object.entries(OwnershipRequestStatus.Enum).map(([key, value]) => (
                     <option key={key} value={value}>
@@ -273,7 +284,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
             </GridCol>
             <GridCol sm={3}>
               <ButtonGroup inline="mobile-up">
-                <FormButton isDisabled={isLoading} type="submit">
+                <FormButton isDisabled={isLoading || isSubmitting} type="submit">
                   Rechercher
                 </FormButton>
                 <FormButton variant="secondary" type="reset" isDisabled={isLoading} onClick={resetForm}>
