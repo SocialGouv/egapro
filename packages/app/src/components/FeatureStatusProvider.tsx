@@ -33,6 +33,7 @@ const featureStatusDefault: FeatureStatusContextType = {
 };
 
 const featureStatusContext = createContext<typeof featureStatusDefault>(featureStatusDefault);
+featureStatusContext.displayName = "FeatureStatusContext";
 
 /**
  * Context provider for FeatureStatus.
