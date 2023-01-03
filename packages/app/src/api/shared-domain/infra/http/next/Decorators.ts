@@ -23,6 +23,7 @@ export const RouteZodQuery =
       const params = schema.safeParse(req.query);
 
       if (!params.success) {
+        console.error(params.error);
         return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json(params.error.flatten().fieldErrors);
       }
 
