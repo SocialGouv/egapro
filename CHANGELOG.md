@@ -1,3 +1,10 @@
+## [2.54.3](https://github.com/SocialGouv/egapro/compare/v2.54.2...v2.54.3) (2023-01-03)
+
+
+### Bug Fixes
+
+* simu decla recap wording (Fixes [#1489](https://github.com/SocialGouv/egapro/issues/1489)) ([ab18830](https://github.com/SocialGouv/egapro/commit/ab18830b2effe9abd61c4164825ba90aac9442d2))
+
 ## [2.54.2](https://github.com/SocialGouv/egapro/compare/v2.54.1...v2.54.2) (2023-01-02)
 
 
