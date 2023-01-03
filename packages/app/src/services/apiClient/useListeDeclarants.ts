@@ -1,6 +1,5 @@
 import type { GetOwnershipRequestDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import isUndefined from "lodash/isUndefined";
-import omitBy from "lodash/omitBy";
+import { removeUndefined } from "@common/utils/object";
 import useSWR from "swr";
 
 import { fetcherV2 } from "./fetcher";
@@ -18,7 +17,7 @@ const buildKey = (search?: SearchParams, itemsPerPage = 10, pageNumber = 0) => {
   if (!search) return null;
 
   const params = new URLSearchParams({
-    ...omitBy(search, isUndefined),
+    ...removeUndefined(search),
     limit: String(itemsPerPage),
     offset: String(pageNumber * itemsPerPage),
   });
