@@ -13,7 +13,7 @@ import { isUserGrantedForSiren } from "../utils/user"
 import ActivityIndicator from "../components/ActivityIndicator"
 import ErrorMessage from "../components/ErrorMessage"
 
-import { Link, Text } from "@chakra-ui/react"
+import { Text } from "@chakra-ui/react"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 import { logToSentry } from "../utils/sentry"
 import { sirenIsFree } from "../utils/siren"

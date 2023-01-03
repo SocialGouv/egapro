@@ -472,7 +472,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
-              anneeDeclaration={state.informations.anneeDeclaration!}
+              anneeDeclaration={Number(state.informations.anneeDeclaration)}
             />
             <DeclarationForm
               state={state}

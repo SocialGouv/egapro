@@ -134,7 +134,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
-              anneeDeclaration={state.informations.anneeDeclaration!}
+              anneeDeclaration={Number(state.informations.anneeDeclaration)}
             />
             <RecapitulatifIndicateurUn
               indicateurUnFormValidated={state.indicateurUn.formValidated}
