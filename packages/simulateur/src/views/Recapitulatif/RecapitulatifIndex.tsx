@@ -59,7 +59,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
       <InfoBlock
         type="warning"
         title="Index égalité femmes-hommes"
-        text="Vous n’avez pas encore validé tous vos indicateurs, votre index ne peut être calculé."
+        text={`Vos indicateurs calculables représentent moins de 75 points, votre Index ne peut être calculé. ${totalPoint} points sur un maximum de ${totalPointCalculable} pouvant être obtenus.`}
       />
     )}
   </>
