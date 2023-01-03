@@ -22,7 +22,7 @@ const FAQIndicateur4Steps = () => (
     </FAQStep>
     <FAQStep icon={<IconGrow />}>
       <Text>
-        Si il n'y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence, l’indicateur
+        S'il n'y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence, l’indicateur
         n’est pas calculable.
       </Text>
     </FAQStep>
