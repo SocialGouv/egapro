@@ -134,6 +134,7 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
+              anneeDeclaration={state.informations.anneeDeclaration!}
             />
             <RecapitulatifIndicateurUn
               indicateurUnFormValidated={state.indicateurUn.formValidated}
@@ -208,8 +209,9 @@ const Recapitulatif: FunctionComponent<RecapitulatifProps> = ({ state }) => {
         }}
       >
         <Text>
-          La simulation est terminée. Vous pouvez si vous le souhaitez déclarer ces indicateurs en renseignant d'autres
-          informations. Il vous sera demandé un email valide pour pouvoir poursuivre.
+          Le calcul de vos indicateurs et de votre index est terminé. Vous pouvez, si vous le souhaitez, transmettre les
+          résultats obtenus aux services du ministre chargé du travail en renseignant les autres informations
+          nécessaires à la déclaration.
         </Text>
 
         <ActionBar>

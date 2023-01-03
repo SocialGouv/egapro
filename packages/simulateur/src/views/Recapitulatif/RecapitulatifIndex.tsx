@@ -8,6 +8,7 @@ interface RecapitulatifIndexProps {
   noteIndex: number | undefined
   totalPoint: number
   totalPointCalculable: number
+  anneeDeclaration: number
 }
 
 const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
@@ -15,6 +16,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
   noteIndex,
   totalPoint,
   totalPointCalculable,
+  anneeDeclaration,
 }) => (
   <>
     {allIndicateurValid ? (
@@ -38,7 +40,7 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
       ) : (
         <InfoBlock
           type="warning"
-          title="Index égalité femmes-hommes"
+          title={`Index égalité femmes-hommes en ${anneeDeclaration + 1} (au titre des données ${anneeDeclaration})`}
           text={
             <>
               <Text>
