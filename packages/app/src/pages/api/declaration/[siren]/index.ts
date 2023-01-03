@@ -24,13 +24,13 @@ export default class DeclarationSirenController implements BaseController {
       const ret = await useCase.execute({ siren });
       res.status(StatusCodes.OK).json(ret);
     } catch (error: unknown) {
+      console.error(error);
       if (error instanceof GetAllDeclarationsBySirenError) {
         if (error.previousError instanceof ValidationError) {
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
         }
         res.status(StatusCodes.BAD_REQUEST).send(error.appErrorList().map(e => e.message));
       } else {
-        console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
       }
     }

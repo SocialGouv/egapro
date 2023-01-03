@@ -20,6 +20,7 @@ export default class OwnershipRequestController implements NextController {
       const warningsDTO = await useCase.execute({ sirens, emails, askerEmail });
       res.status(StatusCodes.CREATED).json(warningsDTO);
     } catch (error: unknown) {
+      console.error(error);
       if (error instanceof CreateOwnershipRequestError) {
         if (error.previousError instanceof ValidationError) {
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
@@ -31,7 +32,6 @@ export default class OwnershipRequestController implements NextController {
             .join(" | "),
         });
       } else {
-        console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
       }
     }

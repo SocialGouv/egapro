@@ -29,6 +29,7 @@ export default class AdminOwnershipRequestController implements NextController {
       const ownershipRequests = await useCase.execute(params);
       res.status(StatusCodes.OK).json(ownershipRequests);
     } catch (error: unknown) {
+      console.error(error);
       if (error instanceof GetOwnershipRequestError) {
         if (error.previousError instanceof ValidationError) {
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ errorMessage: error.previousError.message });
@@ -40,7 +41,6 @@ export default class AdminOwnershipRequestController implements NextController {
             .join(" | "),
         });
       } else {
-        console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(null);
       }
     }
@@ -57,6 +57,7 @@ export default class AdminOwnershipRequestController implements NextController {
 
       res.status(StatusCodes.OK).json(warningsDTO);
     } catch (error: unknown) {
+      console.error(error);
       if (error instanceof UpdateOwnershipRequestStatusError) {
         if (error.previousError instanceof ValidationError) {
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.previousError.message);
@@ -68,7 +69,6 @@ export default class AdminOwnershipRequestController implements NextController {
             .join(" | "),
         });
       } else {
-        console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR);
         if (error instanceof AppError) {
           res.json({

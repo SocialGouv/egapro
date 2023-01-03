@@ -106,12 +106,14 @@ export const LegacyTokenRequire =
         }
       } catch (error: unknown) {
         if (error instanceof ValidationError) {
+          console.error(error);
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.message);
         } else if (error instanceof LegacyTokenRequireNonOwnerError) {
+          console.error(error);
           return res.status(StatusCodes.FORBIDDEN).send(error.message);
         }
 
-        console.debug(
+        console.error(
           `Invalid token on ${req._req.url} (token: ${token}, referrer: ${req._req.headers.referer})`,
           error,
         );
