@@ -22,7 +22,7 @@ title: "Publication des résultats"
 </p>
 
 <fieldset>
-    <div class=row>
+    <<<<<<< HEAD <div class=row>
         {% include input.html
         type="date"
         name="déclaration.publication.date"
@@ -32,8 +32,23 @@ title: "Publication des résultats"
         required=true
         placeholder="aaaa-mm-jj"
         pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-        oninput="checkDate(event)" %}
-    </div>
+        onfocusout="checkDate(event)" %}
+        </div>
+        =======
+        <div class=row>
+            {% include input.html
+            type="date"
+            name="déclaration.publication.date"
+            label="<span class='year-2021-and-after'>Date de publication des résultats obtenus<span
+                    class='non-calculable'>
+                    aux indicateurs calculables</span></span><span class='year-2020-and-before'>Date de publication du
+                niveau de résultat obtenu</span>"
+            required=true
+            placeholder="aaaa-mm-jj"
+            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+            oninput="checkDate(event)" %}
+        </div>
+        >>>>>>> 3d3b18ad (fix: wording (Fixes #1197))
 </fieldset>
 
 <fieldset>
@@ -90,7 +105,6 @@ title: "Publication des résultats"
             options="true=oui&false=non"
             required="required" %}
         </div>
-    </div>
 </fieldset>
 
 <script>
