@@ -22,6 +22,7 @@ export type GetOwnershipRequestDTO = {
 
 export type GetOwnershipRequestInputOrderBy = Exclude<keyof OwnershipRequestDTO, "id">;
 export type GetOwnershipRequestInputDTO = z.infer<typeof getOwnershipRequestInputDTOSchema>;
+export type GetOwnershipRequestInputSchemaDTO = z.input<typeof getOwnershipRequestInputDTOSchema>;
 
 export const getOwnershipRequestInputDTOSchema = z.object({
   limit: z.string().regex(/^\d+$/).transform(Number).optional(),

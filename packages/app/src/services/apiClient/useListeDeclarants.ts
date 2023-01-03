@@ -1,32 +1,41 @@
-import type { GetOwnershipRequestDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import { removeUndefined } from "@common/utils/object";
+import type {
+  GetOwnershipRequestDTO,
+  GetOwnershipRequestInputSchemaDTO,
+} from "@common/core-domain/dtos/OwnershipRequestDTO";
+import { removeEmpty, removeUndefined } from "@common/utils/object";
 import useSWR from "swr";
 
 import { fetcherV2 } from "./fetcher";
+import { ITEMS_PER_PAGE } from "./useOwnershipRequestListContext";
 
 type SearchParams = Partial<{
-  limit: string;
-  offset: string;
   orderBy: string;
   orderDirection: string;
+  pageNumber: number;
+  pageSize: number;
   siren: string;
   status: string;
 }>;
 
-const buildKey = (search?: SearchParams, itemsPerPage = 10, pageNumber = 0) => {
+const buildKey = (search?: SearchParams) => {
   if (!search) return null;
 
-  const params = new URLSearchParams({
-    ...removeUndefined(search),
-    limit: String(itemsPerPage),
-    offset: String(pageNumber * itemsPerPage),
-  });
+  const newSearch: SearchParams = removeEmpty(removeUndefined(search));
 
-  return `/admin/ownership/request?${params.toString()}`;
+  const pageSize = newSearch.pageSize || ITEMS_PER_PAGE;
+  const offset = newSearch?.pageNumber ? newSearch.pageNumber * pageSize : 0;
+
+  const params = new URLSearchParams({
+    offset: String(offset),
+    limit: String(pageSize),
+    ...newSearch,
+  } as GetOwnershipRequestInputSchemaDTO);
+
+  return `/admin/ownership/request/?${params.toString()}`;
 };
-// FetcherReturn & { requests?: GetOwnershipRequestDTO }
-export const useListeDeclarants = (search?: SearchParams, itemsPerLoad = 10, pageNumber = 0) => {
-  const { data, error, mutate } = useSWR<GetOwnershipRequestDTO>(buildKey(search, itemsPerLoad, pageNumber), fetcherV2);
+
+export const useListeDeclarants = (search?: SearchParams) => {
+  const { data, error, mutate } = useSWR<GetOwnershipRequestDTO>(buildKey(search), fetcherV2);
 
   const isError = !!error;
   const isLoading = !!search && !data && !isError;
