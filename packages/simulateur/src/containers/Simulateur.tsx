@@ -13,7 +13,7 @@ import { isUserGrantedForSiren } from "../utils/user"
 import ActivityIndicator from "../components/ActivityIndicator"
 import ErrorMessage from "../components/ErrorMessage"
 
-import { Text } from "@chakra-ui/react"
+import { Link, Text } from "@chakra-ui/react"
 import { useCheckTokenInURL, useUser } from "../components/AuthContext"
 import { logToSentry } from "../utils/sentry"
 import { sirenIsFree } from "../utils/siren"
@@ -31,6 +31,7 @@ import InformationsDeclarant from "../views/InformationsDeclarant"
 import InformationsEntreprise from "../views/InformationsEntreprise"
 import InformationsSimulation from "../views/InformationsSimulation"
 import Recapitulatif from "../views/Recapitulatif"
+import TextLink from "../components/ds/TextLink"
 
 interface Props {
   state: AppState | undefined
@@ -74,10 +75,10 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
               // On ne peut pas voir une simulation avec un SIREN rempli, si on est authentifiée et qu'on n'a pas les droits.
               setErrorMessage(
                 <>
-                  <Text>Le Siren saisi n'est pas rattaché à votre email de connexion ({email}).</Text>
-                  <Text mt="4">
-                    Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à{" "}
-                    <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.
+                  <Text>
+                    Votre email de connexion ({email}) n'est pas rattaché au numéro Siren de l'entreprise. Vous devez
+                    faire une demande de rattachement en remplissant le formulaire{" "}
+                    <TextLink to="/ajout-déclarant">ici</TextLink>.
                   </Text>
                 </>,
               )
