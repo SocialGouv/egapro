@@ -1,64 +1,42 @@
-import type { GetOwnershipRequestDTO, OwnershipRequestDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import { buildUrlParams } from "@common/utils/url";
-import type { SWRInfiniteKeyLoader } from "swr/infinite";
-import useSWRInfinite from "swr/infinite";
+import type { GetOwnershipRequestDTO } from "@common/core-domain/dtos/OwnershipRequestDTO";
+import isUndefined from "lodash/isUndefined";
+import omitBy from "lodash/omitBy";
+import useSWR from "swr";
 
-import type { FetcherInfiniteReturn } from "./fetcher";
 import { fetcherV2 } from "./fetcher";
 
-type SearchParams = {
-  orderBy?: string;
-  orderDirection?: string;
-  siren?: string;
-  status?: string;
+type SearchParams = Partial<{
+  limit: string;
+  offset: string;
+  orderBy: string;
+  orderDirection: string;
+  siren: string;
+  status: string;
+}>;
+
+const buildKey = (search?: SearchParams, itemsPerPage = 10, pageNumber = 0) => {
+  if (!search) return null;
+
+  const params = new URLSearchParams({
+    ...omitBy(search, isUndefined),
+    limit: String(itemsPerPage),
+    offset: String(pageNumber * itemsPerPage),
+  });
+
+  return `/admin/ownership/request?${params.toString()}`;
 };
-
-const getKey = (search?: SearchParams, itemsPerLoad = 10): SWRInfiniteKeyLoader => {
-  return (index: number) => {
-    if (!search) return null;
-
-    const searchParams = buildUrlParams(search);
-
-    if (index > 0) searchParams.set("offset", `${index * itemsPerLoad}`);
-    searchParams.set("limit", `${itemsPerLoad}`);
-
-    return `/admin/ownership/request?${searchParams.toString()}`;
-  };
-};
-
-export const useListeDeclarants = (
-  search?: SearchParams,
-  itemsPerLoad = 10,
-): FetcherInfiniteReturn & { requests: GetOwnershipRequestDTO } => {
-  const {
-    data: requests,
-    error,
-    size,
-    setSize,
-    mutate,
-  } = useSWRInfinite<GetOwnershipRequestDTO>(getKey(search, itemsPerLoad), fetcherV2);
+// FetcherReturn & { requests?: GetOwnershipRequestDTO }
+export const useListeDeclarants = (search?: SearchParams, itemsPerLoad = 10, pageNumber = 0) => {
+  const { data, error, mutate } = useSWR<GetOwnershipRequestDTO>(buildKey(search, itemsPerLoad, pageNumber), fetcherV2);
 
   const isError = !!error;
-  const isLoading = !!search && !requests && !isError;
-
-  const newData: OwnershipRequestDTO[] = [];
-
-  for (const req of requests ?? []) {
-    newData.push(...req.data);
-  }
+  const isLoading = !!search && !data && !isError;
 
   return {
-    requests: {
-      totalCount: requests?.[0].totalCount ?? 0,
-      data: newData,
-      warnings: requests?.[0].warnings,
-      params: requests?.[0].params ?? {},
-    },
+    requests: data,
     error,
     isLoading,
     isError,
-    size,
-    setSize,
     mutate,
   };
 };

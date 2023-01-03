@@ -33,7 +33,8 @@ export const OwnershipRequestListContextProvider = ({ children }: PropsWithChild
   const [formState, setFormState] = useState(initialContext);
   const { orderDirection, orderBy, siren, status } = formState;
 
-  const result = useListeDeclarants({ orderDirection, orderBy, siren, status }, ITEMS_PER_LOAD);
+  // TODO: gérer le page number et la pagination
+  const result = useListeDeclarants({ orderDirection, orderBy, siren, status }, ITEMS_PER_LOAD, 0);
 
   // Anytime user change inputs and submit, we must reset the checkboxes.
   useEffect(() => {

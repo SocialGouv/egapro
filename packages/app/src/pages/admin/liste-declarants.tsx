@@ -181,9 +181,9 @@ const OwnershipRequestList = () => {
 type SearchFormType = { siren: string; status: OwnershipRequestStatus.Enum };
 
 const OwnershipRequestPage: NextPageWithLayout = () => {
-  const [state, setState, result] = useOwnershipRequestListContext();
-  const { checkedItems } = state;
-  const { isLoading, size, setSize, requests, mutate } = result;
+  const [formState, setFormState, result] = useOwnershipRequestListContext();
+  const { checkedItems } = formState;
+  const { isLoading, requests, mutate } = result;
 
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
 
@@ -194,22 +194,22 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
     formState: { isSubmitting },
   } = useForm<SearchFormType>({
     defaultValues: {
-      siren: state.siren,
-      status: state.status,
+      siren: formState.siren,
+      status: formState.status,
     },
   });
 
-  const nextCount = Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD);
+  const nextCount = requests ? Math.min(requests.totalCount - requests.data.length, ITEMS_PER_LOAD) : undefined;
 
   const onSubmit = (data: SearchFormType) => {
-    setState({ ...state, ...data });
+    setFormState({ ...formState, ...data });
   };
 
   const resetForm: MouseEventHandler<HTMLButtonElement> = () => {
     reset();
     // eslint-disable-next-line unused-imports/no-unused-vars
-    const { siren, ...rest } = state;
-    setState({ ...rest, checkedItems: [], status: OwnershipRequestStatus.Enum.TO_PROCESS });
+    const { siren, ...rest } = formState;
+    setFormState({ ...rest, checkedItems: [], status: OwnershipRequestStatus.Enum.TO_PROCESS });
   };
 
   const actionOnSelection = (action: OwnershipRequestAction) => async () => {
@@ -222,7 +222,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
         type: "success",
         message: `Les demandes ont bien été ${action === "accept" ? "acceptées" : "refusées"}.`,
       });
-      mutate(result.requests.data.filter(request => !checkedItems.includes(request.id)));
+      if (requests) mutate({ ...requests, data: requests.data.filter(request => !checkedItems.includes(request.id)) });
     } catch (error: unknown) {
       console.error("Error in liste-declarants", error);
       setFeatureStatus({
@@ -296,14 +296,14 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
         </form>
         <br />
         <OwnershipRequestList />
-        {requests.data.length < requests.totalCount && (
+        {/* {requests && requests.data.length < requests.totalCount && (
           <Grid justifyCenter>
             <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
               Voir {nextCount > 1 ? `les ${nextCount}` : "la"} demande{nextCount > 1 ? "s" : ""} suivante
               {nextCount > 1 ? "s" : ""}
             </FormButton>
           </Grid>
-        )}
+        )} */}
       </Container>
     </section>
   );
