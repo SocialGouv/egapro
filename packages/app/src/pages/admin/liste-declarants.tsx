@@ -6,7 +6,7 @@ import { Object } from "@common/utils/overload";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
 import { AdminLayout } from "@components/layouts/AdminLayout";
 import { Pagination } from "@components/Pagination";
-import type { FormCheckboxProps, TagProps } from "@design-system";
+import type { TagProps } from "@design-system";
 import {
   Alert,
   ButtonGroup,
@@ -29,11 +29,7 @@ import {
 } from "@design-system";
 import { acceptOwnershipRequest } from "@services/apiClient/ownershipRequest";
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
-import {
-  OwnershipRequestListContextProvider,
-  useOwnershipRequestListContext,
-} from "@services/apiClient/useOwnershipRequestListContext";
-import type { MouseEventHandler } from "react";
+import { useOwnershipRequestListStore } from "@services/apiClient/useOwnershipRequestListStore";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
@@ -56,7 +52,11 @@ const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
 ]);
 
 const OwnershipRequestList = () => {
-  const { formState, setFormState } = useOwnershipRequestListContext();
+  const formState = useOwnershipRequestListStore(state => state.formState);
+  const toggleAll = useOwnershipRequestListStore(state => state.toggleAll);
+  const toggleItem = useOwnershipRequestListStore(state => state.toggleItem);
+  const toggleOrderColumn = useOwnershipRequestListStore(state => state.togglerOrderColumn);
+
   const { isLoading, requests, error } = useListeDeclarants(formState);
   const { orderDirection, orderBy, checkedItems, globalCheck } = formState;
 
@@ -64,37 +64,6 @@ const OwnershipRequestList = () => {
     () => requests?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
     [requests?.data],
   );
-
-  const toggleAll: NonNullable<FormCheckboxProps["onChange"]> = () => {
-    if (globalCheck) {
-      setFormState({ ...formState, checkedItems: [], globalCheck: false });
-    } else {
-      setFormState({
-        ...formState,
-        checkedItems:
-          requests?.data.filter(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS).map(r => r.id) ?? [],
-        globalCheck: true,
-      });
-    }
-  };
-
-  const toggleItem: NonNullable<FormCheckboxProps["onChange"]> = evt => {
-    const { id, checked } = evt.target;
-
-    if (!checked) {
-      setFormState({ ...formState, checkedItems: checkedItems.filter(item => item !== id) });
-    } else {
-      setFormState({ ...formState, checkedItems: [...checkedItems, id] });
-    }
-  };
-
-  const toggleOrderColumn = (columnValue: GetOwnershipRequestInputOrderBy) => {
-    if (orderBy === columnValue) {
-      setFormState({ ...formState, orderDirection: formState.orderDirection === "asc" ? "desc" : "asc" });
-    } else {
-      setFormState({ ...formState, orderBy: columnValue, orderDirection: "desc" });
-    }
-  };
 
   if (isLoading) return <Alert type="info">Récupération des données en cours</Alert>;
 
@@ -120,7 +89,7 @@ const OwnershipRequestList = () => {
         <TableAdminHead>
           <TableAdminHeadCol>
             <FormCheckboxGroup singleCheckbox size="sm" isDisabled={!hasToProcessRequests}>
-              <FormCheckbox id="global-checkbox" onChange={toggleAll} checked={globalCheck} />
+              <FormCheckbox id="global-checkbox" onChange={() => toggleAll(requests)} checked={globalCheck} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
           {Array.from(columnsMap).map(([columnValue, columnLabel]) => (
@@ -146,7 +115,7 @@ const OwnershipRequestList = () => {
                     id={item.id}
                     className="request-checkbox"
                     checked={checkedItems.includes(item.id)}
-                    onChange={toggleItem}
+                    onChange={event => toggleItem({ id: item.id, checked: event.target.checked })}
                   />
                 </FormCheckboxGroup>
               </TableAdminBodyRowCol>
@@ -175,7 +144,9 @@ const OwnershipRequestList = () => {
 type SearchFormType = { siren: string; status: OwnershipRequestStatus.Enum };
 
 const OwnershipRequestPage: NextPageWithLayout = () => {
-  const { formState, setFormState } = useOwnershipRequestListContext();
+  const formState = useOwnershipRequestListStore(state => state.formState);
+  const submit = useOwnershipRequestListStore(state => state.submit);
+  const reset = useOwnershipRequestListStore(state => state.reset);
   const { isLoading, requests, mutate } = useListeDeclarants(formState);
   const { checkedItems, siren, status } = formState;
 
@@ -194,16 +165,12 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
   });
 
   const onSubmit = (data: SearchFormType) => {
-    setFormState({ ...formState, ...data });
+    submit(data);
   };
   useEffect(() => {
     setValue("siren", siren || "");
     if (status) setValue("status", status);
   }, [siren, status, setValue]);
-
-  const resetForm: MouseEventHandler<HTMLButtonElement> = () => {
-    setFormState({ ...formState, siren: "", status: OwnershipRequestStatus.Enum.TO_PROCESS });
-  };
 
   const actionOnSelection = (action: OwnershipRequestAction) => async () => {
     console.debug(`${action} des demandes`, checkedItems.join(", "));
@@ -280,7 +247,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
                 <FormButton isDisabled={isLoading || isSubmitting} type="submit">
                   Rechercher
                 </FormButton>
-                <FormButton variant="secondary" type="reset" isDisabled={isLoading} onClick={resetForm}>
+                <FormButton variant="secondary" type="reset" isDisabled={isLoading} onClick={reset}>
                   Réinitialiser
                 </FormButton>
               </ButtonGroup>
@@ -305,9 +272,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
 OwnershipRequestPage.getLayout = ({ children }) => {
   return (
     <AdminLayout title="Liste déclarants">
-      <FeatureStatusProvider>
-        <OwnershipRequestListContextProvider>{children}</OwnershipRequestListContextProvider>
-      </FeatureStatusProvider>
+      <FeatureStatusProvider>{children}</FeatureStatusProvider>
     </AdminLayout>
   );
 };

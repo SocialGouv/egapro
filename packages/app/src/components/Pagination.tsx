@@ -1,5 +1,5 @@
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
-import { useOwnershipRequestListContext } from "@services/apiClient/useOwnershipRequestListContext";
+import { useOwnershipRequestListStore } from "@services/apiClient/useOwnershipRequestListStore";
 
 import { ButtonGroup } from "../design-system/base/ButtonGroup";
 import { FormButton } from "../design-system/base/FormButton";
@@ -9,7 +9,12 @@ type Props = {
 };
 
 export const Pagination = ({ className }: Props) => {
-  const { formState, setFormState } = useOwnershipRequestListContext();
+  // const { formState, setFormState } = useOwnershipRequestListContext();
+  const formState = useOwnershipRequestListStore(state => state.formState);
+  const nextPage = useOwnershipRequestListStore(state => state.nextPage);
+  const previousPage = useOwnershipRequestListStore(state => state.previousPage);
+
+  // TODO
   const { requests } = useListeDeclarants(formState);
   const { pageSize, pageNumber } = formState;
 
@@ -22,15 +27,6 @@ export const Pagination = ({ className }: Props) => {
 
   const firstElement = pageNumber * pageSize + 1;
   const lastElement = firstElement + (requests?.data.length || 0) - 1;
-
-  const goToNextPage = () => {
-    // Anytime the page number changes, we must also reset the checkboxes.
-    setFormState(state => ({ ...state, pageNumber: pageNumber + 1, checkedItems: [], globalCheck: false }));
-  };
-  const goToPreviousPage = () => {
-    // Anytime the page number changes, we must also reset the checkboxes.
-    setFormState(state => ({ ...state, pageNumber: pageNumber - 1, checkedItems: [], globalCheck: false }));
-  };
 
   return (
     <nav aria-label="Pagination" className={className}>
@@ -49,10 +45,10 @@ export const Pagination = ({ className }: Props) => {
       </div>
       <div>
         <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-          <FormButton disabled={!canGoToPreviousPage} onClick={goToPreviousPage}>
+          <FormButton disabled={!canGoToPreviousPage} onClick={previousPage}>
             Précédent
           </FormButton>
-          <FormButton disabled={!canGoToNextPage} variant="tertiary" onClick={goToNextPage}>
+          <FormButton disabled={!canGoToNextPage} variant="tertiary" onClick={nextPage}>
             Suivant
           </FormButton>
         </ButtonGroup>
