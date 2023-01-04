@@ -141,36 +141,11 @@ const OwnershipRequestList = () => {
   );
 };
 
-type SearchFormType = { siren: string; status: OwnershipRequestStatus.Enum };
-
-const OwnershipRequestPage: NextPageWithLayout = () => {
+const ActionButtons = () => {
   const formState = useOwnershipRequestListStore(state => state.formState);
-  const submit = useOwnershipRequestListStore(state => state.submit);
-  const reset = useOwnershipRequestListStore(state => state.reset);
-  const { isLoading, fetchedItems, mutate } = useListeDeclarants(formState);
-  const { checkedItems, siren, status } = formState;
-
+  const { fetchedItems, mutate } = useListeDeclarants(formState);
+  const { checkedItems } = formState;
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
-
-  const {
-    handleSubmit,
-    register,
-    setValue,
-    formState: { isSubmitting },
-  } = useForm<SearchFormType>({
-    defaultValues: {
-      siren: "",
-      status: formState.status,
-    },
-  });
-
-  const onSubmit = (data: SearchFormType) => {
-    submit(data);
-  };
-  useEffect(() => {
-    setValue("siren", siren || "");
-    if (status) setValue("status", status);
-  }, [siren, status, setValue]);
 
   const actionOnSelection = (action: OwnershipRequestAction) => async () => {
     console.debug(`${action} des demandes`, checkedItems.join(", "));
@@ -197,29 +172,68 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
   };
 
   return (
+    <>
+      <div>
+        <ButtonGroup inline="mobile-up" className="fr-mb-4w">
+          <FormButton
+            disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+            onClick={actionOnSelection("accept")}
+          >
+            Valider les demandes
+          </FormButton>
+          <FormButton
+            disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+            variant="tertiary"
+            onClick={actionOnSelection("refuse")}
+          >
+            Refuser les demandes
+          </FormButton>
+        </ButtonGroup>
+      </div>
+
+      <AlertFeatureStatus type="error" title="Erreur" />
+      <AlertFeatureStatus type="success" title="Succès" />
+    </>
+  );
+};
+
+type SearchFormType = { siren: string; status: OwnershipRequestStatus.Enum };
+
+const OwnershipRequestPage: NextPageWithLayout = () => {
+  const formState = useOwnershipRequestListStore(state => state.formState);
+  const submit = useOwnershipRequestListStore(state => state.submit);
+  const reset = useOwnershipRequestListStore(state => state.reset);
+  const { isLoading } = useListeDeclarants(formState);
+  const { siren, status } = formState;
+
+  const {
+    handleSubmit,
+    register,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<SearchFormType>({
+    defaultValues: {
+      siren: "",
+      status: formState.status,
+    },
+  });
+
+  const onSubmit = (data: SearchFormType) => {
+    submit(data);
+  };
+  useEffect(() => {
+    setValue("siren", siren || "");
+    if (status) setValue("status", status);
+  }, [siren, status, setValue]);
+
+  return (
     <section>
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
+
+        <ActionButtons />
+
         <form noValidate onSubmit={handleSubmit(onSubmit)}>
-          <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-            <FormButton
-              disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
-              onClick={actionOnSelection("accept")}
-            >
-              Valider les demandes
-            </FormButton>
-            <FormButton
-              disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
-              variant="tertiary"
-              onClick={actionOnSelection("refuse")}
-            >
-              Refuser les demandes
-            </FormButton>
-          </ButtonGroup>
-
-          <AlertFeatureStatus type="error" title="Erreur" />
-          <AlertFeatureStatus type="success" title="Succès" />
-
           <Grid haveGutters>
             <GridCol sm={3}>
               <FormGroup>
@@ -257,14 +271,6 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
         </form>
         <br />
         <OwnershipRequestList />
-        {/* {requests && requests.data.length < requests.totalCount && (
-          <Grid justifyCenter>
-            <FormButton variant="secondary" onClick={() => setSize(size + 1)}>
-              Voir {nextCount > 1 ? `les ${nextCount}` : "la"} demande{nextCount > 1 ? "s" : ""} suivante
-              {nextCount > 1 ? "s" : ""}
-            </FormButton>
-          </Grid>
-        )} */}
       </Container>
     </section>
   );
