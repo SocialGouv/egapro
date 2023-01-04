@@ -29,7 +29,7 @@ const featureStatusDefault: FeatureStatusContextType = {
     type: "idle",
   },
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setFeatureStatus: status => {},
+  setFeatureStatus: _status => {},
 };
 
 const featureStatusContext = createContext<typeof featureStatusDefault>(featureStatusDefault);
