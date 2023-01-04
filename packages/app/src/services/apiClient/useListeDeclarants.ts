@@ -2,34 +2,30 @@ import type {
   GetOwnershipRequestDTO,
   GetOwnershipRequestInputSchemaDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
-import { removeEmpty, removeUndefined } from "@common/utils/object";
 import useSWR from "swr";
 
 import { fetcherV2 } from "./fetcher";
+import type { OwnershipRequestListStoreType } from "./useOwnershipRequestListStore";
 
 const ITEMS_PER_PAGE = 10;
 
-type SearchParams = Partial<{
-  orderBy: string;
-  orderDirection: string;
-  pageNumber: number;
-  pageSize: number;
-  siren: string;
-  status: string;
-}>;
+type SearchParams = Partial<Omit<OwnershipRequestListStoreType["formState"], "checkedItems" | "globalCheck">>;
 
 const buildKey = (search?: SearchParams) => {
   if (!search) return null;
 
-  const newSearch: SearchParams = removeEmpty(removeUndefined(search));
+  const { orderBy, orderDirection, siren, status, pageNumber, pageSize } = search;
 
-  const pageSize = newSearch.pageSize || ITEMS_PER_PAGE;
-  const offset = newSearch?.pageNumber ? newSearch.pageNumber * pageSize : 0;
+  const limit = pageSize || ITEMS_PER_PAGE;
+  const offset = pageNumber ? pageNumber * limit : 0;
 
   const params = new URLSearchParams({
+    ...(search.orderBy && { orderBy }),
+    ...(search.orderDirection && { orderDirection }),
+    ...(search.siren && { siren }),
+    ...(search.status && { status }),
+    limit: String(limit),
     offset: String(offset),
-    limit: String(pageSize),
-    ...newSearch,
   } as GetOwnershipRequestInputSchemaDTO);
 
   return `/admin/ownership/request/?${params.toString()}`;

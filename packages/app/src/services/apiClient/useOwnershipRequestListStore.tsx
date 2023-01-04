@@ -2,6 +2,7 @@ import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/
 import type {
   GetOwnershipRequestDTO,
   GetOwnershipRequestInputOrderBy,
+  GetOwnershipRequestInputSchemaDTO,
 } from "@common/core-domain/dtos/OwnershipRequestDTO";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import create from "zustand";
@@ -10,28 +11,17 @@ import { immer } from "zustand/middleware/immer";
 
 export const ITEMS_PER_PAGE = 10;
 
-const initialStore: OwnershipRequestListStoreType["formState"] = {
-  pageSize: ITEMS_PER_PAGE,
-  pageNumber: 0,
-  orderDirection: "asc",
-  orderBy: "createdAt",
-  status: OwnershipRequestStatus.Enum.TO_PROCESS,
-  siren: "",
-  checkedItems: [],
-  globalCheck: false,
-};
-
 // Limit and offset are low level. They are replaced by pageSize and pageNumber for convenience.
-type OwnershipRequestListStoreType = {
+export type OwnershipRequestListStoreType = {
   formState: {
     checkedItems: string[];
     globalCheck: boolean;
-    orderBy: string;
-    orderDirection?: "asc" | "desc";
+    orderBy?: GetOwnershipRequestInputSchemaDTO["orderBy"];
+    orderDirection?: GetOwnershipRequestInputSchemaDTO["orderDirection"];
     pageNumber: number;
     pageSize: number;
-    siren: string;
-    status: OwnershipRequestStatus.Enum;
+    siren?: string;
+    status?: OwnershipRequestStatus.Enum;
   };
   nextPage: () => void;
   previousPage: () => void;
@@ -40,6 +30,17 @@ type OwnershipRequestListStoreType = {
   toggleAll: (requests: GetOwnershipRequestDTO | undefined) => void;
   toggleItem: ({ id, checked }: { checked: boolean; id: string }) => void;
   togglerOrderColumn: (columnValue: GetOwnershipRequestInputOrderBy) => void;
+};
+
+export const initialStore: OwnershipRequestListStoreType["formState"] = {
+  pageSize: ITEMS_PER_PAGE,
+  pageNumber: 0,
+  orderDirection: "asc",
+  orderBy: "createdAt",
+  status: OwnershipRequestStatus.Enum.TO_PROCESS,
+  siren: "",
+  checkedItems: [],
+  globalCheck: false,
 };
 
 export const useOwnershipRequestListStore = create<OwnershipRequestListStoreType>()(

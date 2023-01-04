@@ -1,6 +1,3 @@
-import isUndefined from "lodash/isUndefined";
-import omitBy from "lodash/omitBy";
-
 /**
  * Return true if the object has no property.
  */
@@ -13,11 +10,7 @@ export const isEmpty = (obj: Record<string, unknown>) => {
 };
 
 /**
- * Remove undefined properties of the object.
+ * Remove properties satisfying predicate on values.
  */
-export const removeUndefined = (obj: Record<string, unknown>) => omitBy(obj, isUndefined);
-
-/**
- * Remove properties with empty string values.
- */
-export const removeEmpty = (obj: Record<string, unknown>) => omitBy(obj, val => val === "");
+export const removeEntryBy = (obj: Record<string, unknown>, predicate: (val: unknown) => boolean) =>
+  Object.fromEntries(Object.entries(obj).filter(([_key, value]) => predicate(value)));
