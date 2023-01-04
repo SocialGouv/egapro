@@ -13,10 +13,10 @@ export const Pagination = ({ className }: Props) => {
   const nextPage = useOwnershipRequestListStore(state => state.nextPage);
   const previousPage = useOwnershipRequestListStore(state => state.previousPage);
 
-  const { requests } = useListeDeclarants(formState);
+  const { fetchedItems } = useListeDeclarants(formState);
   const { pageSize, pageNumber } = formState;
 
-  const totalCount = requests?.totalCount || 0;
+  const totalCount = fetchedItems?.totalCount || 0;
 
   const totalPages = Math.ceil(totalCount / (pageSize || 1));
 
@@ -24,7 +24,7 @@ export const Pagination = ({ className }: Props) => {
   const canGoToNextPage = pageNumber < totalPages - 1;
 
   const firstElement = pageNumber * pageSize + 1;
-  const lastElement = firstElement + (requests?.data.length || 0) - 1;
+  const lastElement = firstElement + (fetchedItems?.data.length || 0) - 1;
 
   return (
     <nav aria-label="Pagination" className={className}>

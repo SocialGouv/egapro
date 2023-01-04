@@ -57,12 +57,12 @@ const OwnershipRequestList = () => {
   const toggleItem = useOwnershipRequestListStore(state => state.toggleItem);
   const toggleOrderColumn = useOwnershipRequestListStore(state => state.togglerOrderColumn);
 
-  const { isLoading, requests, error } = useListeDeclarants(formState);
+  const { isLoading, fetchedItems, error } = useListeDeclarants(formState);
   const { orderDirection, orderBy, checkedItems, globalCheck } = formState;
 
   const hasToProcessRequests = useMemo(
-    () => requests?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
-    [requests?.data],
+    () => fetchedItems?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
+    [fetchedItems?.data],
   );
 
   if (isLoading) return <Alert type="info">Récupération des données en cours</Alert>;
@@ -74,9 +74,9 @@ const OwnershipRequestList = () => {
       </Alert>
     );
   }
-  if (!requests) return null;
+  if (!fetchedItems) return null;
 
-  if (requests.totalCount === 0) {
+  if (fetchedItems.totalCount === 0) {
     return (
       <Alert type="info" mt="3w">
         <p>Aucune demande d'ajout de déclarants.</p>
@@ -89,7 +89,7 @@ const OwnershipRequestList = () => {
         <TableAdminHead>
           <TableAdminHeadCol>
             <FormCheckboxGroup singleCheckbox size="sm" isDisabled={!hasToProcessRequests}>
-              <FormCheckbox id="global-checkbox" onChange={() => toggleAll(requests)} checked={globalCheck} />
+              <FormCheckbox id="global-checkbox" onChange={() => toggleAll(fetchedItems)} checked={globalCheck} />
             </FormCheckboxGroup>
           </TableAdminHeadCol>
           {Array.from(columnsMap).map(([columnValue, columnLabel]) => (
@@ -103,7 +103,7 @@ const OwnershipRequestList = () => {
           ))}
         </TableAdminHead>
         <TableAdminBody>
-          {requests.data.map(item => (
+          {fetchedItems.data.map(item => (
             <TableAdminBodyRow key={item.id}>
               <TableAdminBodyRowCol>
                 <FormCheckboxGroup
@@ -147,7 +147,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
   const formState = useOwnershipRequestListStore(state => state.formState);
   const submit = useOwnershipRequestListStore(state => state.submit);
   const reset = useOwnershipRequestListStore(state => state.reset);
-  const { isLoading, requests, mutate } = useListeDeclarants(formState);
+  const { isLoading, fetchedItems, mutate } = useListeDeclarants(formState);
   const { checkedItems, siren, status } = formState;
 
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
@@ -182,7 +182,8 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
         type: "success",
         message: `Les demandes ont bien été ${action === "accept" ? "acceptées" : "refusées"}.`,
       });
-      if (requests) mutate({ ...requests, data: requests.data.filter(request => !checkedItems.includes(request.id)) });
+      if (fetchedItems)
+        mutate({ ...fetchedItems, data: fetchedItems.data.filter(request => !checkedItems.includes(request.id)) });
     } catch (error: unknown) {
       console.error("Error in liste-declarants", error);
       setFeatureStatus({

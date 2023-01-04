@@ -6,7 +6,8 @@ import { removeEmpty, removeUndefined } from "@common/utils/object";
 import useSWR from "swr";
 
 import { fetcherV2 } from "./fetcher";
-import { ITEMS_PER_PAGE } from "./useOwnershipRequestListContext";
+
+const ITEMS_PER_PAGE = 10;
 
 type SearchParams = Partial<{
   orderBy: string;
@@ -41,7 +42,7 @@ export const useListeDeclarants = (search?: SearchParams) => {
   const isLoading = !!search && !data && !isError;
 
   return {
-    requests: data,
+    fetchedItems: data,
     error,
     isLoading,
     isError,
