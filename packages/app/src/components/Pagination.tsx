@@ -32,10 +32,12 @@ export const Pagination = ({ className }: Props) => {
   const lastElement = firstElement + (requests?.data.length || 0) - 1;
 
   const goToNextPage = () => {
-    setFormState(state => ({ ...state, pageNumber: pageNumber + 1 }));
+    // Anytime the page number changes, we must also reset the checkboxes.
+    setFormState(state => ({ ...state, pageNumber: pageNumber + 1, checkedItems: [], globalCheck: false }));
   };
   const goToPreviousPage = () => {
-    setFormState(state => ({ ...state, pageNumber: pageNumber - 1 }));
+    // Anytime the page number changes, we must also reset the checkboxes.
+    setFormState(state => ({ ...state, pageNumber: pageNumber - 1, checkedItems: [], globalCheck: false }));
   };
 
   return (

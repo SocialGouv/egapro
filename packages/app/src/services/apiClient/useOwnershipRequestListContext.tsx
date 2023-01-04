@@ -42,11 +42,6 @@ export const OwnershipRequestListContextProvider = ({ children }: PropsWithChild
     setFormState(state => ({ ...state, pageNumber: 0, checkedItems: [], globalCheck: false }));
   }, [siren, status]);
 
-  // Anytime the page number changes, we must also reset the checkboxes.
-  useEffect(() => {
-    setFormState(state => ({ ...state, pageNumber: state.pageNumber, checkedItems: [], globalCheck: false }));
-  }, [formState.pageNumber]);
-
   return (
     <OwnershipRequestListContext.Provider value={{ formState, setFormState }}>
       {children}
