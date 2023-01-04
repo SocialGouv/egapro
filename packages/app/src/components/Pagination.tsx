@@ -9,12 +9,10 @@ type Props = {
 };
 
 export const Pagination = ({ className }: Props) => {
-  // const { formState, setFormState } = useOwnershipRequestListContext();
   const formState = useOwnershipRequestListStore(state => state.formState);
   const nextPage = useOwnershipRequestListStore(state => state.nextPage);
   const previousPage = useOwnershipRequestListStore(state => state.previousPage);
 
-  // TODO
   const { requests } = useListeDeclarants(formState);
   const { pageSize, pageNumber } = formState;
 
