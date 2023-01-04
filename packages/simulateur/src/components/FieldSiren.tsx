@@ -7,6 +7,7 @@ import { ownersForSiren, validateSiren } from "../utils/api"
 import { composeValidators, required, ValidatorFunction } from "../utils/formHelpers"
 import { useUser } from "./AuthContext"
 import InputGroup from "./ds/InputGroup"
+import TextLink from "./ds/TextLink"
 
 const nineDigits: ValidatorFunction = (value) =>
   value.length === 9 ? undefined : "Ce champ n'est pas valide, renseignez un numéro Siren de 9 chiffres."
@@ -19,7 +20,8 @@ const moizeConfig = {
 
 const memoizedValidateSiren = moize(moizeConfig)(validateSiren)
 
-const NOT_ALLOWED_MESSAGE = "Le Siren saisi n'est pas rattaché à votre email de connexion."
+export const NOT_ALLOWED_MESSAGE =
+  "Votre email de connexion ({{email}}) n'est pas rattaché au numéro Siren de l'entreprise."
 
 const UNKNOWN_SIREN =
   "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."
@@ -134,7 +136,7 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
 
   const notAllowedErrorForAuthenticatedUser = !email
     ? NOT_ALLOWED_MESSAGE
-    : NOT_ALLOWED_MESSAGE.slice(0, NOT_ALLOWED_MESSAGE.length - 1) + ` (${email}).`
+    : NOT_ALLOWED_MESSAGE.replace("{{email}}", email)
 
   const buildLabelError = (error: string) =>
     error === NOT_ALLOWED_MESSAGE ? notAllowedErrorForAuthenticatedUser : error
@@ -149,13 +151,16 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
       message={{
         error: (
           <>
-            <div>{buildLabelError(field.meta.error)}</div>
-            {field.meta.error === NOT_ALLOWED_MESSAGE && (
-              <div style={{ marginTop: 10 }}>
-                Vous devez faire une demande de rattachement en nous envoyant votre Siren et votre email à{" "}
-                <span style={{ whiteSpace: "nowrap" }}>dgt.ega-pro@travail.gouv.fr</span>.
-              </div>
-            )}
+            <div>
+              {buildLabelError(field.meta.error)}
+              {field.meta.error === NOT_ALLOWED_MESSAGE && (
+                <>
+                  {" "}
+                  Vous devez faire une demande de rattachement en remplissant le formulaire{" "}
+                  <TextLink to="/ajout-déclarant">ici</TextLink>.
+                </>
+              )}
+            </div>
           </>
         ),
       }}

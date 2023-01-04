@@ -227,7 +227,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                     {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
                       <InputDateGroup
                         fieldName="dateConsultationCSE"
-                        label="Date de consultation du CSE pour l'indicateur relatif à l'écart de rémunération"
+                        label="Date de consultation du CSE pour le choix de la modalité de calcul de l’indicateur Ecart de rémunération"
                         isReadOnly={readOnly}
                       />
                     )}

@@ -67,7 +67,10 @@ const Home: NextPageWithLayout = () => {
                 </CardBodyContent>
                 <CardBodyFooter>
                   <NextLink href="/index-egapro" passHref>
-                    <ButtonAsLink>Calculer - Déclarer mon Index</ButtonAsLink>
+                    <ButtonAsLink className="fr-mr-4w">Calculer - Déclarer mon Index</ButtonAsLink>
+                  </NextLink>
+                  <NextLink href="/consulter-index" passHref>
+                    <a>Consulter l'Index</a>
                   </NextLink>
                 </CardBodyFooter>
               </CardBody>
@@ -93,7 +96,10 @@ const Home: NextPageWithLayout = () => {
                 </CardBodyContent>
                 <CardBodyFooter>
                   <NextLink href="/representation-equilibree" passHref>
-                    <ButtonAsLink>Déclarer mes Écarts</ButtonAsLink>
+                    <ButtonAsLink className="fr-mr-4w">Déclarer mes Écarts</ButtonAsLink>
+                  </NextLink>
+                  <NextLink href="/representation-equilibree/recherche" passHref>
+                    <a>Consulter les Écarts</a>
                   </NextLink>
                 </CardBodyFooter>
               </CardBody>

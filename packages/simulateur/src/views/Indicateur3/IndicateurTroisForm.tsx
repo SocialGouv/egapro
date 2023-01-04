@@ -162,7 +162,7 @@ const IndicateurTroisForm: FunctionComponent<IndicateurTroisFormProps> = ({
               fieldName="presencePromotion"
               value={values.presencePromotion}
               readOnly={readOnly}
-              label={<>Il y a t'il eu des promotions durant la période de référence&nbsp;?</>}
+              label={<>Y a-t-il eu des promotions durant la période de référence&nbsp;?</>}
             />
 
             {values.presencePromotion === "true" && (

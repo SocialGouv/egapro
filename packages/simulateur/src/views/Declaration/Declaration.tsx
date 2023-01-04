@@ -214,7 +214,7 @@ const PageDeclaration = ({ children }: PropsWithChildren) => {
   return (
     <Page
       title={title}
-      tagline="Une fois toutes les informations relatives à la déclaration fournies dans les différents formulaires, validez votre déclaration."
+      tagline="Une fois les informations renseignées, cliquez sur le bouton “Déclarer” en bas de page."
     >
       {children}
     </Page>
@@ -474,6 +474,7 @@ const Declaration = ({ code, state, dispatch }: DeclarationProps) => {
               noteIndex={noteIndex}
               totalPoint={totalPoint}
               totalPointCalculable={totalPointCalculable}
+              anneeDeclaration={Number(state.informations.anneeDeclaration)}
             />
             <DeclarationForm
               state={state}

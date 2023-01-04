@@ -1,7 +1,5 @@
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
-  Alert,
-  AlertTitle,
   Box,
   ButtonAsLink,
   Callout,
@@ -101,16 +99,6 @@ export const RepresentationEquilibree: NextPageWithLayout = () => (
             </Card>
           </GridCol>
         </Grid>
-        <Box mt="9w">
-          <Alert type="warning">
-            <AlertTitle>Calendrier exceptionnel en 2022</AlertTitle>
-            <p>
-              Pour la première année d'application, les entreprises ont eu jusqu’au 1er septembre pour publier leurs
-              résultats sur leur site internet, ou auprès de leurs salariés à défaut de site internet, et les
-              transmettre au CSE.
-            </p>
-          </Alert>
-        </Box>
         <Box mt="9w">
           <Callout>
             <CalloutContent>

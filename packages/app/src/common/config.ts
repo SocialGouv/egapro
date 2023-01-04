@@ -11,8 +11,10 @@ const ensureApiEnvVar: typeof ensureEnvVar = (key, defaultValue) => {
 };
 
 export const config = {
-  api_url: process.env.NEXT_PUBLIC_API_URL ?? "",
-  apiv2_url: process.env.NEXT_PUBLIC_API_V2_URL ?? "/apiv2",
+  api_url: process.env.NEXT_PUBLIC_API_URL ?? "/api",
+  get apiv2_url() {
+    return process.env.NEXT_PUBLIC_API_V2_URL ?? `${this.api_url}v2`;
+  },
   matomo: {
     url: process.env.NEXT_PUBLIC_MATOMO_URL ?? "",
     siteId: process.env.NEXT_PUBLIC_MATOMO_SITE_ID ?? "",

@@ -1,3 +1,24 @@
+## [2.54.5](https://github.com/SocialGouv/egapro/compare/v2.54.4...v2.54.5) (2023-01-04)
+
+
+### Bug Fixes
+
+* correct apiv2 url (Fixes [#1422](https://github.com/SocialGouv/egapro/issues/1422)) ([1ac30b8](https://github.com/SocialGouv/egapro/commit/1ac30b8752e5ebea6c338f8dfc21fd0069cd04c1))
+
+## [2.54.4](https://github.com/SocialGouv/egapro/compare/v2.54.3...v2.54.4) (2023-01-03)
+
+
+### Bug Fixes
+
+* ci check all ([3075637](https://github.com/SocialGouv/egapro/commit/3075637a86282c3b014c5f738919ec7391c341b9))
+
+## [2.54.3](https://github.com/SocialGouv/egapro/compare/v2.54.2...v2.54.3) (2023-01-03)
+
+
+### Bug Fixes
+
+* simu decla recap wording (Fixes [#1489](https://github.com/SocialGouv/egapro/issues/1489)) ([ab18830](https://github.com/SocialGouv/egapro/commit/ab18830b2effe9abd61c4164825ba90aac9442d2))
+
 ## [2.54.2](https://github.com/SocialGouv/egapro/compare/v2.54.1...v2.54.2) (2023-01-02)
 
 

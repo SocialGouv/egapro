@@ -59,7 +59,7 @@ const validateForm = ({
   }
   if (nombreFemmes + nombreHommes === 0) {
     return {
-      notAll0: "Tous les champs ne peuvent pas être à 0 si il y a eu des augmentations.",
+      notAll0: "Tous les champs ne peuvent pas être à 0 s'il y a eu des augmentations.",
     }
   }
   return
@@ -183,7 +183,7 @@ const IndicateurDeuxTroisForm: FunctionComponent<IndicateurDeuxTroisForProps> = 
               fieldName="presenceAugmentationPromotion"
               value={values.presenceAugmentationPromotion}
               readOnly={readOnly}
-              label={<>Il y a t'il eu des augmentations durant la période de déclaration&nbsp;?</>}
+              label={<>Y a-t-il eu des augmentations durant la période de déclaration&nbsp;?</>}
             />
 
             {values.presenceAugmentationPromotion === "true" && (

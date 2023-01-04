@@ -1,4 +1,4 @@
-import { sirenValidatorWithOwner } from "./FieldSiren"
+import { NOT_ALLOWED_MESSAGE, sirenValidatorWithOwner } from "./FieldSiren"
 
 jest.mock("../utils/api", () => ({
   validateSiren: (siren: string) => {
@@ -84,6 +84,6 @@ describe("isValidSiren", () => {
   })
 
   test("returns an error message for a not allowed user", async () => {
-    await expect(validator("234567891")).resolves.toBe("Le Siren saisi n'est pas rattaché à votre email de connexion.")
+    await expect(validator("234567891")).resolves.toBe(NOT_ALLOWED_MESSAGE)
   })
 })
