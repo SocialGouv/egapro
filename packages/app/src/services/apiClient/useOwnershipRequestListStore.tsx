@@ -13,6 +13,7 @@ export const ITEMS_PER_PAGE = 10;
 
 // Limit and offset are low level. They are replaced by pageSize and pageNumber for convenience.
 export type OwnershipRequestListStoreType = {
+  firstPage: () => void;
   formState: {
     checkedItems: string[];
     globalCheck: boolean;
@@ -100,6 +101,10 @@ export const useOwnershipRequestListStore = create<OwnershipRequestListStoreType
           state.formState.pageNumber = state.formState.pageNumber - 1;
           state.formState.checkedItems = [];
           state.formState.globalCheck = false;
+        }),
+      firstPage: () =>
+        set(state => {
+          state.formState.pageNumber = 0;
         }),
     })),
   ),

@@ -1,5 +1,6 @@
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
 import { useOwnershipRequestListStore } from "@services/apiClient/useOwnershipRequestListStore";
+import { useEffect } from "react";
 
 import { ButtonGroup } from "../design-system/base/ButtonGroup";
 import { FormButton } from "../design-system/base/FormButton";
@@ -10,6 +11,7 @@ type Props = {
 
 export const Pagination = ({ className }: Props) => {
   const formState = useOwnershipRequestListStore(state => state.formState);
+  const firstPage = useOwnershipRequestListStore(state => state.firstPage);
   const nextPage = useOwnershipRequestListStore(state => state.nextPage);
   const previousPage = useOwnershipRequestListStore(state => state.previousPage);
 
@@ -26,6 +28,13 @@ export const Pagination = ({ className }: Props) => {
   const firstElement = pageNumber * pageSize + 1;
   const lastElement = firstElement + (fetchedItems?.data.length || 0) - 1;
 
+  useEffect(() => {
+    // User has an empty page for some reasons (ex: user checks all items in last page), get back to first page.
+    if (fetchedItems && fetchedItems.data.length === 0 && formState.pageNumber > 0) {
+      firstPage();
+    }
+  }, [fetchedItems, firstPage, formState.pageNumber]);
+
   return (
     <nav aria-label="Pagination" className={className}>
       <div>
@@ -36,7 +45,7 @@ export const Pagination = ({ className }: Props) => {
             "1 résultat"
           ) : (
             <>
-              Éléments <span>{firstElement}</span> à <span>{lastElement}</span> des <span>{totalCount}</span> résultats
+              Éléments <span>{firstElement}</span> à <span>{lastElement}</span> sur <span>{totalCount}</span>
             </>
           )}
         </p>
