@@ -21,7 +21,7 @@ import _ from "lodash";
 //     modifiedAt: declaredAt,
 //     siren: new Siren(generateLuhnNumber(faker.random.numeric(8))),
 //     year: new PositiveNumber(new Date().getFullYear()),
-//     data: DeclarationData.fromJson<DeclarationData>({
+//     data: DeclarationData.fromJson({
 //       company: {
 //         hasRecoveryPlan,
 //       },
@@ -45,7 +45,7 @@ export const getRandomDeclarationRepEq = () => {
     modifiedAt: declaredAt,
     siren,
     year: new PositiveNumber(new Date().getFullYear()),
-    data: DeclarationData.fromJson<DeclarationData>({
+    data: DeclarationData.fromJson({
       company: {
         hasRecoveryPlan: false,
         siren: siren.getValue(),

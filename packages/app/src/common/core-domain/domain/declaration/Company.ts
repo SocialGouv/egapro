@@ -119,7 +119,7 @@ export class Company extends JsonEntity<CompanyProps, never> {
     }
 
     if (json.ues) {
-      props.ues = UES.fromJson<UES>(json.ues);
+      props.ues = UES.fromJson(json.ues);
     }
 
     if (json.workforce) {
