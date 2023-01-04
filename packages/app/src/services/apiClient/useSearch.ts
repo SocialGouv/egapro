@@ -35,7 +35,13 @@ const getKey = (search?: SearchCompanyParams) => {
 const moizedFetcher = moize(moizeConfig)(fetcher);
 
 export const useSearch = (search?: SearchCompanyParams): FetcherInfiniteReturn & { companies: CompaniesType } => {
-  const { data: companies, error, size, setSize } = useSWRInfinite<CompaniesType>(getKey(search), moizedFetcher);
+  const {
+    data: companies,
+    error,
+    size,
+    setSize,
+    mutate,
+  } = useSWRInfinite<CompaniesType>(getKey(search), moizedFetcher);
 
   const isLoading = !companies && !error;
   const isError = Boolean(error);
@@ -60,5 +66,6 @@ export const useSearch = (search?: SearchCompanyParams): FetcherInfiniteReturn &
     isError,
     size,
     setSize,
+    mutate,
   };
 };
