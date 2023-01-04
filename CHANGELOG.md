@@ -1,3 +1,10 @@
+## [2.54.5](https://github.com/SocialGouv/egapro/compare/v2.54.4...v2.54.5) (2023-01-04)
+
+
+### Bug Fixes
+
+* correct apiv2 url (Fixes [#1422](https://github.com/SocialGouv/egapro/issues/1422)) ([1ac30b8](https://github.com/SocialGouv/egapro/commit/1ac30b8752e5ebea6c338f8dfc21fd0069cd04c1))
+
 ## [2.54.4](https://github.com/SocialGouv/egapro/compare/v2.54.3...v2.54.4) (2023-01-03)
 
 
