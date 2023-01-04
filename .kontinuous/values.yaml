@@ -165,6 +165,7 @@ jobs:
         dockerfile: packages/app/Dockerfile
         buildArgs:
           NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
+          NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"
 
     build-storybook:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
