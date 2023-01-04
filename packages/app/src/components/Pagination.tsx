@@ -10,16 +10,8 @@ type Props = {
 
 export const Pagination = ({ className }: Props) => {
   const { formState, setFormState } = useOwnershipRequestListContext();
-  const { pageSize, orderDirection, orderBy, siren, status, pageNumber } = formState;
-
-  const { requests } = useListeDeclarants({
-    orderDirection,
-    orderBy,
-    siren,
-    status,
-    pageSize,
-    pageNumber,
-  });
+  const { requests } = useListeDeclarants(formState);
+  const { pageSize, pageNumber } = formState;
 
   const totalCount = requests?.totalCount || 0;
 

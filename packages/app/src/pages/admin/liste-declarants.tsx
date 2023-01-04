@@ -57,16 +57,8 @@ const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
 
 const OwnershipRequestList = () => {
   const { formState, setFormState } = useOwnershipRequestListContext();
-  const { orderDirection, orderBy, checkedItems, globalCheck, siren, status, pageSize, pageNumber } = formState;
-
-  const { isLoading, requests, error } = useListeDeclarants({
-    orderDirection,
-    orderBy,
-    siren,
-    status,
-    pageSize,
-    pageNumber,
-  });
+  const { isLoading, requests, error } = useListeDeclarants(formState);
+  const { orderDirection, orderBy, checkedItems, globalCheck } = formState;
 
   const hasToProcessRequests = useMemo(
     () => requests?.data.some(r => r.status === OwnershipRequestStatus.Enum.TO_PROCESS) ?? false,
@@ -184,16 +176,8 @@ type SearchFormType = { siren: string; status: OwnershipRequestStatus.Enum };
 
 const OwnershipRequestPage: NextPageWithLayout = () => {
   const { formState, setFormState } = useOwnershipRequestListContext();
-  const { checkedItems, orderDirection, orderBy, siren, status, pageSize, pageNumber } = formState;
-
-  const { isLoading, requests, mutate } = useListeDeclarants({
-    orderDirection,
-    orderBy,
-    siren,
-    status,
-    pageSize,
-    pageNumber,
-  });
+  const { isLoading, requests, mutate } = useListeDeclarants(formState);
+  const { checkedItems, siren, status } = formState;
 
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
 
