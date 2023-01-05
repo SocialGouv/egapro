@@ -20,7 +20,9 @@ type AppPropsWithLayout = AppProps & {
 
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   useEffect(() => {
-    init(config.matomo);
+    if (!!process.env.NEXT_PUBLIC_MATOMO_URL && !!process.env.NEXT_PUBLIC_MATOMO_SITE_ID) {
+      init(config.matomo);
+    }
   }, []);
 
   // Use the layout defined at the page level, if available
