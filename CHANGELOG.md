@@ -1,3 +1,13 @@
+## [2.54.7](https://github.com/SocialGouv/egapro/compare/v2.54.6...v2.54.7) (2023-01-05)
+
+
+### Bug Fixes
+
+* better logic for recap info wording (Fixes [#1489](https://github.com/SocialGouv/egapro/issues/1489)) ([c7d687f](https://github.com/SocialGouv/egapro/commit/c7d687fc09aa3111dbd10a086f57aee8a2f54b1a))
+* better wording for siren ownership (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([53d3a7b](https://github.com/SocialGouv/egapro/commit/53d3a7bf6686f96db16c2af434951f66b4d2d8bc))
+* change wording from déclaration to référence (Fixes [#1481](https://github.com/SocialGouv/egapro/issues/1481)) ([fe38486](https://github.com/SocialGouv/egapro/commit/fe38486a0d880b620ef9cb6e0df7da114b452a39))
+* titles wording in simu recap and decla (Fixes [#1447](https://github.com/SocialGouv/egapro/issues/1447)) (Fixes [#1448](https://github.com/SocialGouv/egapro/issues/1448)) ([dbaa51f](https://github.com/SocialGouv/egapro/commit/dbaa51f95804043500c849c2b298e8cdeafd3c90))
+
 ## [2.54.6](https://github.com/SocialGouv/egapro/compare/v2.54.5...v2.54.6) (2023-01-05)
 
 
