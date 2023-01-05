@@ -1,3 +1,57 @@
+# [2.55.0](https://github.com/SocialGouv/egapro/compare/v2.54.11...v2.55.0) (2023-01-05)
+
+
+### Features
+
+* add private repeq list route for [#1398](https://github.com/SocialGouv/egapro/issues/1398) ([c0cd641](https://github.com/SocialGouv/egapro/commit/c0cd6411d80cb0c67b92c957e4bf6b7dbf97b957))
+
+## [2.54.11](https://github.com/SocialGouv/egapro/compare/v2.54.10...v2.54.11) (2023-01-05)
+
+
+### Bug Fixes
+
+* wait for inputs error in declarant page test ([b24b14f](https://github.com/SocialGouv/egapro/commit/b24b14f27606e8ff241680b8fd5c5bc20399eb55))
+
+## [2.54.10](https://github.com/SocialGouv/egapro/compare/v2.54.9...v2.54.10) (2023-01-05)
+
+
+### Bug Fixes
+
+* remove merge tag on decla resultat page ([6db960c](https://github.com/SocialGouv/egapro/commit/6db960c1108959b1136936d5e31b5b7837179b41))
+
+## [2.54.9](https://github.com/SocialGouv/egapro/compare/v2.54.8...v2.54.9) (2023-01-05)
+
+
+### Bug Fixes
+
+* add missing clsx dep ([f6e58c5](https://github.com/SocialGouv/egapro/commit/f6e58c552c96e66499d993ae4ffe2aa807ede139))
+* fix ci for tests ([4819761](https://github.com/SocialGouv/egapro/commit/48197617f5f5d44fc4490a7dbc5c85daea238e0a))
+
+## [2.54.8](https://github.com/SocialGouv/egapro/compare/v2.54.7...v2.54.8) (2023-01-05)
+
+
+### Bug Fixes
+
+* fix tests ([ea4ad61](https://github.com/SocialGouv/egapro/commit/ea4ad614369dcefe2ae000cfd267ec6dbd7a13b1))
+
+## [2.54.7](https://github.com/SocialGouv/egapro/compare/v2.54.6...v2.54.7) (2023-01-05)
+
+
+### Bug Fixes
+
+* better logic for recap info wording (Fixes [#1489](https://github.com/SocialGouv/egapro/issues/1489)) ([c7d687f](https://github.com/SocialGouv/egapro/commit/c7d687fc09aa3111dbd10a086f57aee8a2f54b1a))
+* better wording for siren ownership (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([53d3a7b](https://github.com/SocialGouv/egapro/commit/53d3a7bf6686f96db16c2af434951f66b4d2d8bc))
+* change wording from déclaration to référence (Fixes [#1481](https://github.com/SocialGouv/egapro/issues/1481)) ([fe38486](https://github.com/SocialGouv/egapro/commit/fe38486a0d880b620ef9cb6e0df7da114b452a39))
+* titles wording in simu recap and decla (Fixes [#1447](https://github.com/SocialGouv/egapro/issues/1447)) (Fixes [#1448](https://github.com/SocialGouv/egapro/issues/1448)) ([dbaa51f](https://github.com/SocialGouv/egapro/commit/dbaa51f95804043500c849c2b298e8cdeafd3c90))
+
+## [2.54.6](https://github.com/SocialGouv/egapro/compare/v2.54.5...v2.54.6) (2023-01-05)
+
+
+### Bug Fixes
+
+* add real feature flags (Fixes [#1428](https://github.com/SocialGouv/egapro/issues/1428)) ([87ed079](https://github.com/SocialGouv/egapro/commit/87ed079af73ff151a5be9f1a13fd5b1a8f234f91))
+* wording on masculine siren/mail (Fixes [#1422](https://github.com/SocialGouv/egapro/issues/1422)) ([a5eca3b](https://github.com/SocialGouv/egapro/commit/a5eca3b743b32060415237bcd8e7f0c3a509b671))
+
 ## [2.54.5](https://github.com/SocialGouv/egapro/compare/v2.54.4...v2.54.5) (2023-01-04)
 
 

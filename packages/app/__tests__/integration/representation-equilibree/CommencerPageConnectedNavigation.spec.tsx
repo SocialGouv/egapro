@@ -3,15 +3,14 @@ import userEvent from "@testing-library/user-event";
 import { RouterContext } from "next/dist/shared/lib/router-context";
 import singletonRouter from "next/router";
 
-import { NOT_LINKED_SIREN, VALID_SIREN } from "./mock/user";
-import { useUserMock } from "./mock/user";
+import { NOT_LINKED_SIREN, VALID_SIREN, useUserMock } from "./mock/user";
 import CommencerPage from "@/pages/representation-equilibree/commencer";
 
 jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 
 describe("Commencer Page : Connected navigation", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -54,6 +53,8 @@ describe("Commencer Page : Connected navigation", () => {
     expect(inputSiren).toHaveValue(NOT_LINKED_SIREN);
     await waitFor(() => {
       expect(submitButton).toBeDisabled();
+    });
+    await waitFor(() => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
     });
   });
@@ -96,7 +97,7 @@ describe("Commencer Page : Connected navigation", () => {
     // expected step 2
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/declarant", { shallow: false });
     });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/declarant", { shallow: false });
   });
 });

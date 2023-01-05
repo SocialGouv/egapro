@@ -12,7 +12,7 @@ jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidData());
 
 describe("Entreprise page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -67,9 +67,9 @@ describe("Entreprise page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/periode-reference", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/periode-reference", {
+      shallow: false,
     });
   });
 
@@ -89,9 +89,9 @@ describe("Entreprise page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/declarant", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/declarant", {
+      shallow: false,
     });
   });
 });

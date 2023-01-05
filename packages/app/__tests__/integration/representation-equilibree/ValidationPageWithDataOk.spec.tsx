@@ -14,7 +14,7 @@ jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockValidati
 global.scrollTo = jest.fn();
 
 describe("Validation page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -54,13 +54,12 @@ describe("Validation page", () => {
     // when
     await userEvent.click(submitButton);
 
-    screen.debug();
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/transmission", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/transmission", {
+      shallow: false,
     });
   });
 
@@ -80,9 +79,9 @@ describe("Validation page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/publication", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/publication", {
+      shallow: false,
     });
   });
 });

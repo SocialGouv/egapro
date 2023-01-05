@@ -12,7 +12,7 @@ jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 jest.mock("@services/apiClient/useFormManager", () => useFormManagerMockPublishingPageData());
 
 describe("Publication page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -73,8 +73,11 @@ describe("Publication page", () => {
     // expected
     await waitFor(() => {
       expect(ouiInput).toBeChecked();
-      expect(nonInput).not.toBeChecked();
-      expect(submitButton).toBeDisabled();
+    });
+    expect(nonInput).not.toBeChecked();
+    expect(submitButton).toBeDisabled();
+
+    await waitFor(() => {
       const errorDate = screen.getByText(
         /la date de publication ne peut précéder la date de fin de la période de référence \(31\/12\/2021\)/i,
       );
@@ -111,12 +114,12 @@ describe("Publication page", () => {
     // expected
     await waitFor(() => {
       expect(datePublication).toHaveValue("");
-      expect(ouiInput).not.toBeChecked();
-      expect(nonInput).toBeChecked();
-      expect(urlInput).not.toBeInTheDocument();
-      expect(publishingContent).toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
     });
+    expect(ouiInput).not.toBeChecked();
+    expect(nonInput).toBeChecked();
+    expect(urlInput).not.toBeInTheDocument();
+    expect(publishingContent).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
   });
 
   it(`should navigate to validation page`, async () => {
@@ -147,7 +150,9 @@ describe("Publication page", () => {
     // expected step 1
     await waitFor(() => {
       expect(ouiInput).not.toBeChecked();
-      expect(nonInput).toBeChecked();
+    });
+    expect(nonInput).toBeChecked();
+    await waitFor(() => {
       expect(submitButton).toBeEnabled();
     });
 
@@ -157,9 +162,9 @@ describe("Publication page", () => {
     // expected step 2
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/validation", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/validation", {
+      shallow: false,
     });
   });
 
@@ -190,9 +195,9 @@ describe("Publication page", () => {
     // expected
     await waitFor(() => {
       expect(ouiInput).toBeChecked();
-      expect(nonInput).not.toBeChecked();
-      expect(submitButton).toBeEnabled();
     });
+    expect(nonInput).not.toBeChecked();
+    expect(submitButton).toBeEnabled();
 
     // when user submit
     await userEvent.click(submitButton);
@@ -200,9 +205,9 @@ describe("Publication page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/validation", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/validation", {
+      shallow: false,
     });
   });
 
@@ -222,9 +227,9 @@ describe("Publication page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-membres", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-membres", {
+      shallow: false,
     });
   });
 
@@ -247,9 +252,9 @@ describe("Publication page", () => {
     // expected
     await waitFor(() => {
       expect(ouiInput).toBeChecked();
-      expect(nonInput).not.toBeChecked();
-      const errorUrl = screen.getByText(/l'adresse de la page internet est invalide/i);
-      expect(errorUrl).toBeInTheDocument();
     });
+    expect(nonInput).not.toBeChecked();
+    const errorUrl = screen.getByText(/l'adresse de la page internet est invalide/i);
+    expect(errorUrl).toBeInTheDocument();
   });
 });

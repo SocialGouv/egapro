@@ -1,4 +1,5 @@
 import { rest } from "msw";
+
 import { validEnterprise } from "./useFormManagerMock";
 import { FAKE_SIREN, NOT_LINKED_SIREN, VALID_SIREN, VALID_SIREN2 } from "./user";
 

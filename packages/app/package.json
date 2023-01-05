@@ -29,6 +29,7 @@
     "@headlessui/react": "^1.7.3",
     "@hookform/resolvers": "^2.9.8",
     "@socialgouv/matomo-next": "^1.4.0",
+    "clsx": "^1.2.1",
     "date-fns": "^2.29.3",
     "final-form": "^4.20.7",
     "framer-motion": "^7",

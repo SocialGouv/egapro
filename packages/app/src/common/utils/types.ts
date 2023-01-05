@@ -255,3 +255,5 @@ export const unreadonly = <T>(value: T): UnReadOnly<T> => value;
  * All props are now considered set and not null nor undefined.
  */
 export const ensureRequired = <T>(value: T) => value as Required<NonNullableProps<T>>;
+
+export const defined = <T>(value: Nothing | T) => value as T;
