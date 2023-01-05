@@ -1,3 +1,4 @@
+import { config } from "@common/config";
 import { BasicLayout } from "@components/layouts/BasicLayout";
 import {
   Box,
@@ -13,12 +14,18 @@ import {
   GridCol,
   ImgHome,
 } from "@design-system";
+import type { GetStaticProps } from "next";
 import NextLink from "next/link";
 
 import type { NextPageWithLayout } from "./_app";
 import styles from "./index.module.css";
 
-const Home: NextPageWithLayout = () => {
+interface HomeProps {
+  /** Feature flags */
+  ff: typeof config.api.ff;
+}
+
+const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
   return (
     <section>
       <Box pt="9w" pb="4w" className={styles.hero}>
@@ -98,9 +105,11 @@ const Home: NextPageWithLayout = () => {
                   <NextLink href="/representation-equilibree" passHref>
                     <ButtonAsLink className="fr-mr-4w">Déclarer mes Écarts</ButtonAsLink>
                   </NextLink>
-                  <NextLink href="/representation-equilibree/recherche" passHref>
-                    <a>Consulter les Écarts</a>
-                  </NextLink>
+                  {ff["repeq-search"] && (
+                    <NextLink href="/representation-equilibree/recherche" passHref>
+                      <a>Consulter les Écarts</a>
+                    </NextLink>
+                  )}
                 </CardBodyFooter>
               </CardBody>
             </Card>
@@ -109,6 +118,12 @@ const Home: NextPageWithLayout = () => {
       </Container>
     </section>
   );
+};
+
+export const getStaticProps: GetStaticProps<HomeProps> = _ctx => {
+  return {
+    props: { ff: config.api.ff },
+  };
 };
 
 Home.getLayout = ({ children }) => {
