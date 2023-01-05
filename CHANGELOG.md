@@ -1,3 +1,10 @@
+# [2.55.0](https://github.com/SocialGouv/egapro/compare/v2.54.11...v2.55.0) (2023-01-05)
+
+
+### Features
+
+* add private repeq list route for [#1398](https://github.com/SocialGouv/egapro/issues/1398) ([c0cd641](https://github.com/SocialGouv/egapro/commit/c0cd6411d80cb0c67b92c957e4bf6b7dbf97b957))
+
 ## [2.54.11](https://github.com/SocialGouv/egapro/compare/v2.54.10...v2.54.11) (2023-01-05)
 
 
