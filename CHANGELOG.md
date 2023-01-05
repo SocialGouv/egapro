@@ -1,3 +1,10 @@
+## [2.54.8](https://github.com/SocialGouv/egapro/compare/v2.54.7...v2.54.8) (2023-01-05)
+
+
+### Bug Fixes
+
+* fix tests ([ea4ad61](https://github.com/SocialGouv/egapro/commit/ea4ad614369dcefe2ae000cfd267ec6dbd7a13b1))
+
 ## [2.54.7](https://github.com/SocialGouv/egapro/compare/v2.54.6...v2.54.7) (2023-01-05)
 
 
