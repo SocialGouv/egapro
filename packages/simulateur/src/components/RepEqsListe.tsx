@@ -7,7 +7,7 @@ import { formatDate } from "../utils/date"
 import { useRepEqs } from "../hooks/useRepEq"
 
 const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
-  const { repEqs, isLoading } = useRepEqs(siren)
+  const { repEqs, isLoading, message } = useRepEqs(siren)
 
   const yearsRepEqs = Object.keys(repEqs).sort().reverse()
 
@@ -19,6 +19,8 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
         </Text>
         {isLoading ? (
           <Spinner />
+        ) : message?.kind === "error" ? (
+          <Text>{message.text}</Text>
         ) : (
           <TableContainer>
             <Table variant="simple" aria-label="Liste des déclarations">
