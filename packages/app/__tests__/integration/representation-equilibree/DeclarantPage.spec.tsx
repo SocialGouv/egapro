@@ -10,7 +10,7 @@ jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 
 describe("Déclarant page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -80,9 +80,9 @@ describe("Déclarant page", () => {
     // expected step 2
     await waitFor(() => {
       expect(screen.getByText(/Le nom est requis/i)).toBeInTheDocument();
-      expect(screen.getByText(/Le prénom est requis/i)).toBeInTheDocument();
-      expect(screen.getByText(/Le téléphone est requis/i)).toBeInTheDocument();
     });
+    expect(screen.getByText(/Le prénom est requis/i)).toBeInTheDocument();
+    expect(screen.getByText(/Le téléphone est requis/i)).toBeInTheDocument();
 
     // when step 3
     await userEvent.type(phoneNumber, "A");
@@ -136,8 +136,8 @@ describe("Déclarant page", () => {
     // expected step 2
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/entreprise", { shallow: false });
     });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/entreprise", { shallow: false });
   });
 
   it("should navigate to Commencer page", async () => {
@@ -156,7 +156,7 @@ describe("Déclarant page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/commencer", { shallow: false });
     });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/commencer", { shallow: false });
   });
 });

@@ -40,6 +40,9 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   correctionMeasure,
 }) => {
   if (!effectifsIndicateurTroisCalculable) {
+    if (indicateurTroisFormValidated !== "Valid") {
+      return <MessageWhenInvalid indicateur="indicateur3" />
+    }
     return (
       <InfoBlock
         type="warning"
@@ -50,6 +53,9 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   }
 
   if (!indicateurTroisCalculable) {
+    if (indicateurTroisFormValidated !== "Valid") {
+      return <MessageWhenInvalid indicateur="indicateur3" />
+    }
     return (
       <InfoBlock
         type="warning"
@@ -57,10 +63,6 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu de promotion durant la période de référence"
       />
     )
-  }
-
-  if (indicateurTroisFormValidated !== "Valid") {
-    return <MessageWhenInvalid indicateur="indicateur3" />
   }
 
   return (

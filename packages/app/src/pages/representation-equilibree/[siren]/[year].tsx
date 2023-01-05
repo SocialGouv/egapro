@@ -1,3 +1,4 @@
+import { config } from "@common/config";
 import { zodSirenSchema, zodYearSchema } from "@common/utils/form";
 import { RepresentationEquilibreeLayout } from "@components/layouts/RepresentationEquilibreeLayout";
 import { OwnersOnly } from "@components/OwnersOnly";
@@ -19,7 +20,7 @@ import {
   Grid,
   GridCol,
 } from "@design-system";
-import { API_URL_V1, useRepresentationEquilibree } from "@services/apiClient";
+import { useRepresentationEquilibree } from "@services/apiClient";
 import { add, isAfter } from "date-fns";
 import { useRouter } from "next/router";
 import { z } from "zod";
@@ -74,7 +75,7 @@ const RepresentationEquilibreeWithNavigation = ({ siren, year }: { siren: string
             <CardBody>
               <CardBodyContent>
                 <CardBodyContentTitle>
-                  <a href={`${API_URL_V1}/representation-equilibree/${siren}/${year}/pdf`}>
+                  <a href={`${config.api_url}/representation-equilibree/${siren}/${year}/pdf`}>
                     Télécharger le récapitulatif
                   </a>
                 </CardBodyContentTitle>

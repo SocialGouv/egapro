@@ -9,7 +9,7 @@ jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 
 describe("Assujetti Page : connected mode ", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -37,7 +37,9 @@ describe("Assujetti Page : connected mode ", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/commencer", { shallow: false });
     });
+    // await waitFor(() => {
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/commencer", { shallow: false });
+    // });
   });
 });

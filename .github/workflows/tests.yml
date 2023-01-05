@@ -6,6 +6,9 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
+env:
+  NODE_ENV: test
+
 name: Tests
 jobs:
   check-all:

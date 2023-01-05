@@ -6,17 +6,21 @@ prevButtonLabel: "Nouvelle déclaration"
 <h1>{{ page.title }}</h1>
 
 <p>
-  Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations correspondantes à la déclaration.
+  Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
+  correspondantes à la déclaration.
 </p>
 
 <fieldset>
   <div class="row">
-    {% include select.html type="number" name="déclaration.année_indicateurs" label="Année au titre de laquelle les indicateurs sont calculés" required=true empty=true onchange="updateYearInState()" %}
+    {% include select.html type="number" name="déclaration.année_indicateurs" label="Année au titre de laquelle les
+    indicateurs sont calculés" required=true empty=true onchange="updateYearInState()" %}
   </div>
 </fieldset>
 <fieldset>
   <div class="row">
-    {% include input.html type="regex" name="entreprise.siren" label="Numéro Siren de l’entreprise ou de l’entreprise déclarant pour le compte de l’UES (Unité Économique et Sociale)" required="true" pattern="[0-9]{9}" placeholder="9 chiffres" oninput="checkSirenValidity(event)" %}
+    {% include input.html type="regex" name="entreprise.siren" label="Numéro Siren de l’entreprise ou de l’entreprise
+    déclarant pour le compte de l’UES (Unité Économique et Sociale)" required="true" pattern="[0-9]{9}" placeholder="9
+    chiffres" oninput="checkSirenValidity(event)" %}
   </div>
   <div id="errorSiren" style="display: none; color: red" />
 
@@ -28,8 +32,8 @@ prevButtonLabel: "Nouvelle déclaration"
     app.annee = selectField('déclaration.année_indicateurs').value
 
     var event = new Event('input', {
-        bubbles: true,
-        cancelable: true,
+      bubbles: true,
+      cancelable: true,
     });
 
     // Trigger the Siren `oninput` event handler to check validity of Siren.
@@ -59,7 +63,7 @@ prevButtonLabel: "Nouvelle déclaration"
           if (/vous n'avez pas les droits nécessaires pour le siren/i.test(response.data.error)) {
             errorSiren.style.display = "block"
 
-            errorSiren.innerHTML = `Votre email de connexion (${localStorage.email}">${localStorage.email}) n'est pas rattaché au numéro Siren de l'entreprise. Vous devez faire une demande de rattachement en remplissant le formulaire <a style="color: inherit" href="/ajout-declarant">ici</a>.`
+            errorSiren.innerHTML = `Votre email de connexion (${localStorage.email}">${localStorage.email}) n'est rattaché à aucun numéro Siren. Vous devez faire une demande de rattachement en remplissant le formulaire <a style="color: inherit" href="/ajout-declarant">ici</a>.`
 
             notify.error(
               "Le Siren saisi n'est pas rattaché à votre email de connexion.",
@@ -83,8 +87,8 @@ prevButtonLabel: "Nouvelle déclaration"
     return answer
   }
 
-  document.onready = function() {
-    const years = app.config.years.reverse().map(year => ({label: year, value: year}))
+  document.onready = function () {
+    const years = app.config.years.reverse().map(year => ({ label: year, value: year }))
     buildSelectOptions(
       selectField('déclaration.année_indicateurs'), years)
 

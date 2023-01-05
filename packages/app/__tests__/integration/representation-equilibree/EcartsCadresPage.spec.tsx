@@ -10,7 +10,7 @@ jest.mock("next/router", () => require("next-router-mock"));
 jest.mock("@services/apiClient/useUser", () => useUserMock(true));
 
 describe("Ecarts cadres page", () => {
-  const spies: any = {};
+  const spies = {} as { routerChangeStart: jest.Mock };
 
   beforeEach(() => {
     spies.routerChangeStart = jest.fn();
@@ -81,24 +81,24 @@ describe("Ecarts cadres page", () => {
     // expected
     await waitFor(() => {
       expect(ouiInput).toBeChecked();
-      expect(nonInput).not.toBeChecked();
-      expect(
-        screen.queryByRole("spinbutton", {
-          name: /pourcentage de femmes parmi les cadres dirigeants/i,
-        }),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByRole("spinbutton", {
-          name: /pourcentage d'hommes parmi les cadres dirigeants/i,
-        }),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByRole("combobox", {
-          name: /motif de non calculabilité/i,
-        }),
-      ).not.toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
     });
+    expect(nonInput).not.toBeChecked();
+    expect(
+      screen.getByRole("spinbutton", {
+        name: /pourcentage de femmes parmi les cadres dirigeants/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", {
+        name: /pourcentage d'hommes parmi les cadres dirigeants/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("combobox", {
+        name: /motif de non calculabilité/i,
+      }),
+    ).not.toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
   });
 
   it(`should show only motif input`, async () => {
@@ -141,12 +141,12 @@ describe("Ecarts cadres page", () => {
     // expected
     await waitFor(() => {
       expect(ouiInput).not.toBeChecked();
-      expect(nonInput).toBeChecked();
-      expect(percentFemmesInput).not.toBeInTheDocument();
-      expect(percentHommesInput).not.toBeInTheDocument();
-      expect(motif).toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
     });
+    expect(nonInput).toBeChecked();
+    expect(percentFemmesInput).not.toBeInTheDocument();
+    expect(percentHommesInput).not.toBeInTheDocument();
+    expect(motif).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
   });
 
   it(`should auto fill the other percentage input`, async () => {
@@ -185,12 +185,12 @@ describe("Ecarts cadres page", () => {
 
     await waitFor(() => {
       expect(ouiInput).toBeChecked();
-      expect(nonInput).not.toBeChecked();
-      expect(percentFemmes).toBeInTheDocument();
-      expect(percentHommes).toBeInTheDocument();
-      expect(motifInput).not.toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
     });
+    expect(nonInput).not.toBeChecked();
+    expect(percentFemmes).toBeInTheDocument();
+    expect(percentHommes).toBeInTheDocument();
+    expect(motifInput).not.toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
 
     // when user type women percentage first
 
@@ -199,8 +199,8 @@ describe("Ecarts cadres page", () => {
     // expected
     await waitFor(() => {
       expect(percentHommes).toHaveValue(70);
-      expect(submitButton).toBeEnabled();
     });
+    expect(submitButton).toBeEnabled();
   });
 
   it(`should navigate to ecarts-membres page`, async () => {
@@ -238,12 +238,12 @@ describe("Ecarts cadres page", () => {
     // expected
     await waitFor(() => {
       expect(ouiInput).not.toBeChecked();
-      expect(nonInput).toBeChecked();
-      expect(percentFemmesInput).not.toBeInTheDocument();
-      expect(percentHommesInput).not.toBeInTheDocument();
-      expect(motif).toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
     });
+    expect(nonInput).toBeChecked();
+    expect(percentFemmesInput).not.toBeInTheDocument();
+    expect(percentHommesInput).not.toBeInTheDocument();
+    expect(motif).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
 
     expect(motif).toHaveValue("");
     // when user selects "aucun_cadre_dirigeant"
@@ -258,9 +258,9 @@ describe("Ecarts cadres page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-membres", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/ecarts-membres", {
+      shallow: false,
     });
   });
 
@@ -280,9 +280,9 @@ describe("Ecarts cadres page", () => {
     // expected
     await waitFor(() => {
       expect(spies.routerChangeStart).toHaveBeenCalled();
-      expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/periode-reference", {
-        shallow: false,
-      });
+    });
+    expect(spies.routerChangeStart).toHaveBeenCalledWith("/representation-equilibree/periode-reference", {
+      shallow: false,
     });
   });
 });
