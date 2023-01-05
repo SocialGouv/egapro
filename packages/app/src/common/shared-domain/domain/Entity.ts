@@ -8,7 +8,7 @@ export abstract class Entity<P, out Id = UUID> {
 }
 
 export abstract class JsonEntity<P, out Id = UUID> extends Entity<P, Id> {
-  public abstract fromJson(json: EntityPropsToJson<P>): typeof this;
+  public abstract fromJson(json: EntityPropsToJson<P>): this;
 
   public static fromJson<T extends JsonEntity<Any>>(...args: Parameters<T["fromJson"]>): T {
     return this.prototype.fromJson.call(null, ...args) as T;
