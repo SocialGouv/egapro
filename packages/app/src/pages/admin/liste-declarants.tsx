@@ -27,6 +27,7 @@ import {
   TableAdminHeadCol,
   Tag,
 } from "@design-system";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { acceptOwnershipRequest } from "@services/apiClient/ownershipRequest";
 import { useListeDeclarants } from "@services/apiClient/useListeDeclarants";
 import { useOwnershipRequestListStore } from "@services/apiClient/useOwnershipRequestListStore";
@@ -205,6 +206,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
   const reset = useOwnershipRequestListStore(state => state.reset);
   const { isLoading } = useListeDeclarants(formState);
   const { siren, status } = formState;
+  const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   const {
     handleSubmit,
@@ -269,7 +271,9 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
           </Grid>
         </form>
         <br />
-        <OwnershipRequestList />
+        <div ref={animationParent}>
+          <OwnershipRequestList />
+        </div>
       </Container>
     </section>
   );
