@@ -1,3 +1,11 @@
+## [2.54.9](https://github.com/SocialGouv/egapro/compare/v2.54.8...v2.54.9) (2023-01-05)
+
+
+### Bug Fixes
+
+* add missing clsx dep ([f6e58c5](https://github.com/SocialGouv/egapro/commit/f6e58c552c96e66499d993ae4ffe2aa807ede139))
+* fix ci for tests ([4819761](https://github.com/SocialGouv/egapro/commit/48197617f5f5d44fc4490a7dbc5c85daea238e0a))
+
 ## [2.54.8](https://github.com/SocialGouv/egapro/compare/v2.54.7...v2.54.8) (2023-01-05)
 
 
