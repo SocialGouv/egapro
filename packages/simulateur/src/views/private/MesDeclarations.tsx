@@ -10,6 +10,7 @@ import InfoEntreprise from "../../components/InfoEntreprise"
 import NoSiren from "../../components/ds/NoSiren"
 import Page from "../../components/Page"
 import { SinglePageLayout } from "../../containers/SinglePageLayout"
+import RepEqsListe from "../../components/RepEqsListe"
 
 const title = "Mes déclarations"
 
@@ -55,6 +56,9 @@ const MesDeclarations = () => {
 
               <Box mt="6">
                 <DeclarationsListe siren={siren} />
+              </Box>
+              <Box mt="6">
+                <RepEqsListe siren={siren} />
               </Box>
             </Flex>
           </>
