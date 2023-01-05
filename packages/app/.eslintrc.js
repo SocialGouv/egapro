@@ -195,6 +195,7 @@ const config = {
       },
       rules: {
         "import/no-default-export": "off",
+        "simple-import-sort/imports": "off",
       },
     },
   ],

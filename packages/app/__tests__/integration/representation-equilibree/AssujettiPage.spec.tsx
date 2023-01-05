@@ -16,8 +16,8 @@ describe("Assujetti Page", () => {
     const inputRadioNon = getRadioInputNon();
     expect(inputRadioNon.checked).toBeFalsy();
 
-    expect(screen.queryByRole("link", { name: /Retour à la page d'accueil/i })).toBeNull();
-    expect(screen.queryByRole("complementary")).toBeNull();
+    expect(screen.queryByRole("link", { name: /Retour à la page d'accueil/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Suivant/i })).toBeInTheDocument();
   });
 
@@ -36,6 +36,6 @@ describe("Assujetti Page", () => {
 
     expect(screen.getByRole("link", { name: /Retour à la page d'accueil/i })).toBeInTheDocument();
     expect(screen.getByRole("complementary")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /Suivant/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /Suivant/i })).not.toBeInTheDocument();
   });
 });
