@@ -121,6 +121,7 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
 };
 
 export const getStaticProps: GetStaticProps<HomeProps> = _ctx => {
+  console.log("ff", config.api.ff);
   return {
     props: { ff: config.api.ff },
   };
