@@ -1,3 +1,10 @@
+## [2.54.11](https://github.com/SocialGouv/egapro/compare/v2.54.10...v2.54.11) (2023-01-05)
+
+
+### Bug Fixes
+
+* wait for inputs error in declarant page test ([b24b14f](https://github.com/SocialGouv/egapro/commit/b24b14f27606e8ff241680b8fd5c5bc20399eb55))
+
 ## [2.54.10](https://github.com/SocialGouv/egapro/compare/v2.54.9...v2.54.10) (2023-01-05)
 
 
