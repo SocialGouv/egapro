@@ -1,3 +1,11 @@
+## [2.54.6](https://github.com/SocialGouv/egapro/compare/v2.54.5...v2.54.6) (2023-01-05)
+
+
+### Bug Fixes
+
+* add real feature flags (Fixes [#1428](https://github.com/SocialGouv/egapro/issues/1428)) ([87ed079](https://github.com/SocialGouv/egapro/commit/87ed079af73ff151a5be9f1a13fd5b1a8f234f91))
+* wording on masculine siren/mail (Fixes [#1422](https://github.com/SocialGouv/egapro/issues/1422)) ([a5eca3b](https://github.com/SocialGouv/egapro/commit/a5eca3b743b32060415237bcd8e7f0c3a509b671))
+
 ## [2.54.5](https://github.com/SocialGouv/egapro/compare/v2.54.4...v2.54.5) (2023-01-04)
 
 
