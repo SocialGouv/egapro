@@ -11,9 +11,9 @@ export default function InfoEntreprise({ siren }: { siren: string }) {
   useSoloToastMessage("info-entreprise-toast", message)
 
   return (
-    <HStack borderWidth="3px" borderRadius="lg" as="section" spacing="4" p="6" pt="4" pb="4">
+    <HStack borderWidth="3px" borderRadius="lg" as="section" spacing="4" h="100%" px="4" pl="2">
       <Flex>
-        <IconOfficeBuilding boxSize="8" color="gray.500" />
+        <IconOfficeBuilding boxSize="6" color="gray.500" />
       </Flex>
 
       {isLoading ? (

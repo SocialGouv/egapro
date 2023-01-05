@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Flex, FormControl, FormLabel, Text, Input } from "@chakra-ui/react"
+import { Flex, FormControl, FormLabel, Text, Input, Box, Spacer } from "@chakra-ui/react"
 
 import { useTitle } from "../../utils/hooks"
 
@@ -29,17 +29,21 @@ const GererUtilisateursPage = () => {
           <Text>Vous n'êtes pas membre du staff.</Text>
         ) : (
           <>
-            <FormControl id="siren">
-              <FormLabel>SIREN</FormLabel>
-              <Input value={siren} onChange={handleChange} placeholder="Saisissez le SIREN de l'entreprise" />
-            </FormControl>
-
-            {siren?.length === 9 && (
-              <Flex mt="6" direction="column">
-                <InfoEntreprise siren={siren} />
-                <UtilisateursEntreprise siren={siren} />
-              </Flex>
-            )}
+            <Flex mt="6" direction="column">
+              <FormControl id="siren">
+                <FormLabel>SIREN</FormLabel>
+                <Flex direction="row" gap="4">
+                  <Input
+                    w="fit-content"
+                    value={siren}
+                    onChange={handleChange}
+                    placeholder="Saisissez le SIREN de l'entreprise"
+                  />
+                  <Box flex="auto">{siren?.length === 9 ? <InfoEntreprise siren={siren} /> : <Spacer />}</Box>
+                </Flex>
+              </FormControl>
+              {siren?.length === 9 && <UtilisateursEntreprise siren={siren} />}
+            </Flex>
           </>
         )}
       </Page>
