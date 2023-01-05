@@ -209,21 +209,19 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
   const {
     handleSubmit,
     register,
-    setValue,
     formState: { isSubmitting },
+    setValue,
   } = useForm<SearchFormType>({
     defaultValues: {
-      siren: "",
-      status: formState.status,
+      siren,
+      status,
     },
   });
 
-  const onSubmit = (data: SearchFormType) => {
-    submit(data);
-  };
+  // Synchronizing form inputs with store. May look unnecessary at first, but mandatory for correct behaviour of the reset button.
   useEffect(() => {
-    setValue("siren", siren || "");
-    if (status) setValue("status", status);
+    if (siren !== undefined) setValue("siren", siren);
+    if (status !== undefined) setValue("status", status);
   }, [siren, status, setValue]);
 
   return (
@@ -233,7 +231,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
 
         <ActionButtons />
 
-        <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(submit)}>
           <Grid haveGutters>
             <GridCol sm={3}>
               <FormGroup>
@@ -262,7 +260,8 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
                 <FormButton isDisabled={isLoading || isSubmitting} type="submit">
                   Rechercher
                 </FormButton>
-                <FormButton variant="secondary" type="reset" isDisabled={isLoading} onClick={reset}>
+                {/* Don't use a reset type here, it will conflict with RHF in not using the setted default values but instead, use empty siren and status. */}
+                <FormButton variant="secondary" type="button" isDisabled={isLoading} onClick={reset}>
                   Réinitialiser
                 </FormButton>
               </ButtonGroup>
