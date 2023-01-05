@@ -59,7 +59,7 @@ export function useRepEqs(siren: string): FetcherReturn & { repEqs: Record<strin
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined
 
   const { data, error, mutate } = useSWR<RepresentationEquilibreeAPI[]>(
-    normalizedSiren ? `/representation-equilibree/${normalizedSiren}` : null,
+    normalizedSiren ? `/representation-equilibree/${normalizedSiren}?limit=-1` : null,
     fetcher,
     {
       onErrorRetry: (error, _key, _config, revalidate, { retryCount }) => {

@@ -52,7 +52,7 @@ export function useDeclarations(siren: string): FetcherReturn & { declarations: 
   const normalizedSiren = siren && siren.length === 9 ? siren : undefined
 
   const { data, error, mutate } = useSWR<DeclarationAPI[]>(
-    normalizedSiren ? `/declarations/${normalizedSiren}` : null,
+    normalizedSiren ? `/declarations/${normalizedSiren}?limit=-1` : null,
     fetcher,
     {
       onErrorRetry: (error, key, config, revalidate, { retryCount }) => {

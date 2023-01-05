@@ -11,7 +11,7 @@ from stdnum.fr.siren import is_valid as siren_is_valid
 
 from egapro import config, constants, db, emails, helpers, models, tokens, utils, schema
 from egapro import loggers
-from egapro.pdf import representation
+from egapro.pdf import representation, declaration
 
 
 class Request(BaseRequest):
@@ -200,6 +200,7 @@ async def get_representation_equilibrees(request, response, siren):
 
     if not declarations:
         raise HttpError(404, f"No representation equilibree with siren {siren} for any year")
+    response.json = declarations
 
 @app.route("/declarations/{siren}", methods=["GET"])
 @tokens.require
@@ -366,13 +367,26 @@ async def resend_representation_receipt(request, response, siren, year):
 
 
 @app.route("/representation-equilibree/{siren}/{year}/pdf", methods=["GET"])
-async def send_representation_pdf(request, response, siren, year):
+async def get_representation_pdf(request, response, siren, year):
     try:
         record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     data = record.data
     pdf = representation.main(data)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
+    response.body = bytes(pdf[0].output())
+    return response
+
+@app.route("/declaration/{siren}/{year}/pdf", methods=["GET"])
+async def get_declaration_pdf(request, response, siren, year):
+    try:
+        record = await db.declaration.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
+    data = record.data
+    pdf = declaration.main(data)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
     response.body = bytes(pdf[0].output())

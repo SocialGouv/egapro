@@ -2,21 +2,9 @@ import { Box, Text } from "@chakra-ui/layout"
 import { Link, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
 import { Spinner } from "@chakra-ui/spinner"
 import React from "react"
-import { Link as RouterLink } from "react-router-dom"
 
-import type { DeclarationAPI } from "../utils/declarationBuilder"
-
-import { useDeclarations } from "../hooks/useDeclaration"
-import { buildHelpersObjectifsMesures } from "../views/private/ObjectifsMesuresPage"
-import { IconInvalid, IconValid } from "./ds/Icons"
 import { formatDate } from "../utils/date"
 import { useRepEqs } from "../hooks/useRepEq"
-
-const trancheFromApiToForm = (declaration: DeclarationAPI | undefined): string => {
-  const tranche = declaration?.data.entreprise.effectif?.tranche
-  if (!tranche) return ""
-  return tranche === "50:250" ? "Entre 50 et 250" : tranche === "251:999" ? "Entre 251 et 999" : "1000 et plus"
-}
 
 const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
   const { repEqs, isLoading } = useRepEqs(siren)
@@ -25,16 +13,13 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
 
   return (
     <Box mt="4">
-      {isLoading ? (
-        <Box m="6">
+      <Box m="6">
+        <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
+          Liste des déclarations - Représentation Équilibrée
+        </Text>
+        {isLoading ? (
           <Spinner />
-        </Box>
-      ) : (
-        <Box m="6">
-          <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
-            Liste des déclarations - Représentation Équilibrée
-          </Text>
-
+        ) : (
           <TableContainer>
             <Table variant="simple" aria-label="Liste des déclarations">
               <Thead>
@@ -53,12 +38,16 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
                 {yearsRepEqs.map((annee: string) => (
                   <Tr key={annee}>
                     <Td>
-                      <a>{siren}</a>
+                      <Link target="_blank" href={`/representation-equilibree/${siren}/${annee}`}>
+                        {siren}
+                      </Link>
                     </Td>
                     <Td>{annee}</Td>
                     <Td>{formatDate(repEqs[annee]?.data?.déclaration?.date)}</Td>
                     {repEqs[annee]?.data?.indicateurs?.représentation_équilibrée?.motif_non_calculabilité_cadres ? (
-                      <Td colSpan={2}></Td>
+                      <Td colSpan={2} textAlign="center">
+                        {repEqs[annee]?.data?.indicateurs?.représentation_équilibrée?.motif_non_calculabilité_cadres}
+                      </Td>
                     ) : (
                       <>
                         <Td>
@@ -70,7 +59,9 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
                       </>
                     )}
                     {repEqs[annee]?.data?.indicateurs?.représentation_équilibrée?.motif_non_calculabilité_membres ? (
-                      <Td colSpan={2}></Td>
+                      <Td colSpan={2} textAlign="center">
+                        {repEqs[annee]?.data?.indicateurs?.représentation_équilibrée?.motif_non_calculabilité_membres}
+                      </Td>
                     ) : (
                       <>
                         <Td>
@@ -82,15 +73,17 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
                       </>
                     )}
                     <Td>
-                      <a>Télécharger</a>
+                      <Link target="_blank" href={`/api/representation-equilibree/${siren}/${annee}/pdf`}>
+                        Télécharger
+                      </Link>
                     </Td>
                   </Tr>
                 ))}
               </Tbody>
             </Table>
           </TableContainer>
-        </Box>
-      )}
+        )}
+      </Box>
     </Box>
   )
 }
