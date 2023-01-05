@@ -81,8 +81,12 @@ describe("Déclarant page", () => {
     await waitFor(() => {
       expect(screen.getByText(/Le nom est requis/i)).toBeInTheDocument();
     });
-    expect(screen.getByText(/Le prénom est requis/i)).toBeInTheDocument();
-    expect(screen.getByText(/Le téléphone est requis/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Le prénom est requis/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/Le téléphone est requis/i)).toBeInTheDocument();
+    });
 
     // when step 3
     await userEvent.type(phoneNumber, "A");

@@ -1,3 +1,10 @@
+## [2.54.10](https://github.com/SocialGouv/egapro/compare/v2.54.9...v2.54.10) (2023-01-05)
+
+
+### Bug Fixes
+
+* remove merge tag on decla resultat page ([6db960c](https://github.com/SocialGouv/egapro/commit/6db960c1108959b1136936d5e31b5b7837179b41))
+
 ## [2.54.9](https://github.com/SocialGouv/egapro/compare/v2.54.8...v2.54.9) (2023-01-05)
 
 
