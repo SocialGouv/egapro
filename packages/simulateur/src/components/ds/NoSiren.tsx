@@ -10,8 +10,8 @@ const NoSiren: React.FC = () => {
   return (
     <>
       <Text>
-        Votre email de connexion ({email}) n'est pas rattaché au numéro Siren de l'entreprise. Vous devez faire une
-        demande de rattachement en remplissant le formulaire <TextLink to="/ajout-déclarant">ici</TextLink>.
+        Votre email de connexion ({email}) n'est rattaché à aucun numéro Siren. Vous devez faire une demande de
+        rattachement en remplissant le formulaire <TextLink to="/ajout-déclarant">ici</TextLink>.
       </Text>
     </>
   )
