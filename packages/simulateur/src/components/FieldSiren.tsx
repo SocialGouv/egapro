@@ -20,7 +20,8 @@ const moizeConfig = {
 
 const memoizedValidateSiren = moize(moizeConfig)(validateSiren)
 
-export const NOT_ALLOWED_MESSAGE = "Votre email de connexion ({{email}}) n'est rattaché à aucun numéro Siren."
+export const NOT_ALLOWED_MESSAGE =
+  "Votre email de connexion ({{email}}) n'est pas rattaché au numéro Siren de l'entreprise."
 
 const UNKNOWN_SIREN =
   "Ce Siren n'existe pas, veuillez vérifier votre saisie, sinon veuillez contacter votre référent de l'égalité professionnelle."

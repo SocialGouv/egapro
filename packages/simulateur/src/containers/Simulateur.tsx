@@ -76,8 +76,9 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
               setErrorMessage(
                 <>
                   <Text>
-                    Votre email de connexion ({email}) n'est rattaché à aucun numéro Siren. Vous devez faire une demande
-                    de rattachement en remplissant le formulaire <TextLink to="/ajout-declarant">ici</TextLink>.
+                    Votre email de connexion ({email}) n'est pas rattaché au numéro Siren de l'entreprise. Vous devez
+                    faire une demande de rattachement en remplissant le formulaire{" "}
+                    <TextLink to="/ajout-declarant">ici</TextLink>.
                   </Text>
                 </>,
               )
