@@ -48,7 +48,7 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | undefined | ReactNode>(undefined)
   const { email, isAuthenticated, loading: isLoadingAuth } = useUser()
 
-  // useEffect de récupération du token et des données de la déclaration.
+  // useEffect de récupération des données de la déclaration.
   useEffect(() => {
     async function runEffect() {
       setLoading(true)
