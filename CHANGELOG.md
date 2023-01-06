@@ -1,3 +1,39 @@
+## [2.57.6](https://github.com/SocialGouv/egapro/compare/v2.57.5...v2.57.6) (2023-01-06)
+
+
+### Bug Fixes
+
+* fix default value env handling ([8cf22aa](https://github.com/SocialGouv/egapro/commit/8cf22aa43466691b45a7145fe3237b83bd77ffee))
+
+## [2.57.5](https://github.com/SocialGouv/egapro/compare/v2.57.4...v2.57.5) (2023-01-06)
+
+
+### Bug Fixes
+
+* **cd:** clean docker build and ff/env config usage ([69bb014](https://github.com/SocialGouv/egapro/commit/69bb0149ec874e2ff2e499ac2f872014f83191a7))
+
+## [2.57.4](https://github.com/SocialGouv/egapro/compare/v2.57.3...v2.57.4) (2023-01-06)
+
+
+### Bug Fixes
+
+* default value for sha env ([ff45ca5](https://github.com/SocialGouv/egapro/commit/ff45ca508277ac96032c9d35947a225f57d47fed))
+
+## [2.57.3](https://github.com/SocialGouv/egapro/compare/v2.57.2...v2.57.3) (2023-01-06)
+
+
+### Bug Fixes
+
+* do not use location object on server side ([479aa97](https://github.com/SocialGouv/egapro/commit/479aa975c6fed80b7fa2844ec094c0085fbd030c))
+
+## [2.57.2](https://github.com/SocialGouv/egapro/compare/v2.57.1...v2.57.2) (2023-01-06)
+
+
+### Bug Fixes
+
+* finally a good wording for no ownership (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([d102144](https://github.com/SocialGouv/egapro/commit/d102144edbd7baa8c8a23d70e30a1f3ee3651fb9))
+* typo and external link for ajout-declarant (Fixes [#1497](https://github.com/SocialGouv/egapro/issues/1497)) ([fda9c55](https://github.com/SocialGouv/egapro/commit/fda9c55decfe270de21a4e90286a316593b9fa1a))
+
 ## [2.57.1](https://github.com/SocialGouv/egapro/compare/v2.57.0...v2.57.1) (2023-01-06)
 
 

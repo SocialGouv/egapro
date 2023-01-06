@@ -22,7 +22,7 @@ import styles from "./index.module.css";
 
 interface HomeProps {
   /** Feature flags */
-  ff: typeof config.api.ff;
+  ff: typeof config.ff;
 }
 
 const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
@@ -123,7 +123,7 @@ const Home: NextPageWithLayout<HomeProps> = ({ ff }) => {
 export const getStaticProps: GetStaticProps<HomeProps> = _ctx => {
   console.log("ff", config.api.ff);
   return {
-    props: { ff: config.api.ff },
+    props: { ff: config.ff },
   };
 };
 

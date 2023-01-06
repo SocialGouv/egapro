@@ -11,7 +11,11 @@ const NoSiren: React.FC = () => {
     <>
       <Text>
         Votre email de connexion ({email}) n'est rattaché à aucun numéro Siren. Vous devez faire une demande de
-        rattachement en remplissant le formulaire <TextLink to="/ajout-déclarant">ici</TextLink>.
+        rattachement en remplissant le formulaire{" "}
+        <TextLink to="/ajout-declarant" isExternal>
+          ici
+        </TextLink>
+        .
       </Text>
     </>
   )
