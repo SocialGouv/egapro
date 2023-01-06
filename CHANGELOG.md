@@ -1,3 +1,10 @@
+## [2.57.5](https://github.com/SocialGouv/egapro/compare/v2.57.4...v2.57.5) (2023-01-06)
+
+
+### Bug Fixes
+
+* **cd:** clean docker build and ff/env config usage ([69bb014](https://github.com/SocialGouv/egapro/commit/69bb0149ec874e2ff2e499ac2f872014f83191a7))
+
 ## [2.57.4](https://github.com/SocialGouv/egapro/compare/v2.57.3...v2.57.4) (2023-01-06)
 
 

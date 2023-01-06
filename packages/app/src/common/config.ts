@@ -16,9 +16,16 @@ export const config = {
     url: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_URL, ""),
     siteId: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_SITE_ID, ""),
   },
+  env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
+  get ff(): Record<FeatureFlag, boolean> {
+    return {
+      repeq: this.env !== "prod",
+      "repeq-search": this.env !== "prod",
+      apiv2: this.env !== "prod",
+    };
+  },
   api: {
     staff: ensureApiEnvVar(process.env.EGAPRO_STAFF, envVar => envVar.split(",").filter(v => v), []),
-    env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
     mailer: {
       enable: ensureApiEnvVar(process.env.MAILER_ENABLE, isTruthy, false),
       host: ensureApiEnvVar(process.env.MAILER_SMTP_HOST, "127.0.0.1"),
@@ -47,18 +54,11 @@ export const config = {
       poolMinSize: ensureApiEnvVar(process.env.POSTGRES_POOL_MIN_SIZE, Number, 2),
       poolMaxSize: ensureApiEnvVar(process.env.POSTGRES_POOL_MAX_SIZE, Number, 10),
     },
-    get ff(): Record<FeatureFlag, boolean> {
-      return {
-        repeq: this.env !== "prod",
-        "repeq-search": this.env !== "prod",
-        apiv2: this.env !== "prod",
-      };
-    },
   },
 } as const;
 
 // TODO better debug
-if (config.api.env !== "prod") {
+if (config.env !== "prod") {
   if (typeof window !== "undefined") {
     (window as Any)._egaproConfig = config;
   } else {
