@@ -1,3 +1,11 @@
+## [2.57.2](https://github.com/SocialGouv/egapro/compare/v2.57.1...v2.57.2) (2023-01-06)
+
+
+### Bug Fixes
+
+* finally a good wording for no ownership (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([d102144](https://github.com/SocialGouv/egapro/commit/d102144edbd7baa8c8a23d70e30a1f3ee3651fb9))
+* typo and external link for ajout-declarant (Fixes [#1497](https://github.com/SocialGouv/egapro/issues/1497)) ([fda9c55](https://github.com/SocialGouv/egapro/commit/fda9c55decfe270de21a4e90286a316593b9fa1a))
+
 ## [2.57.1](https://github.com/SocialGouv/egapro/compare/v2.57.0...v2.57.1) (2023-01-06)
 
 
