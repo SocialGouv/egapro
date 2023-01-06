@@ -1,3 +1,10 @@
+# [2.56.0](https://github.com/SocialGouv/egapro/compare/v2.55.0...v2.56.0) (2023-01-06)
+
+
+### Features
+
+* Add listDeclarant page ([#1465](https://github.com/SocialGouv/egapro/issues/1465)) ([1abb643](https://github.com/SocialGouv/egapro/commit/1abb643d17d352d3b16eb257f60b5091ae24f9a1))
+
 # [2.55.0](https://github.com/SocialGouv/egapro/compare/v2.54.11...v2.55.0) (2023-01-05)
 
 
