@@ -36,7 +36,7 @@ export type OwnershipRequestListStoreType = {
 export const initialStore: OwnershipRequestListStoreType["formState"] = {
   pageSize: ITEMS_PER_PAGE,
   pageNumber: 0,
-  orderDirection: "asc",
+  orderDirection: "desc",
   orderBy: "createdAt",
   status: OwnershipRequestStatus.Enum.TO_PROCESS,
   siren: "",
@@ -105,6 +105,7 @@ export const useOwnershipRequestListStore = create<OwnershipRequestListStoreType
       firstPage: () =>
         set(state => {
           state.formState.pageNumber = 0;
+          state.formState.globalCheck = false;
         }),
     })),
   ),
