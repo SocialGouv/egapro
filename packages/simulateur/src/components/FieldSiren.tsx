@@ -156,7 +156,7 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
                 <>
                   {" "}
                   Vous devez faire une demande de rattachement en remplissant le formulaire{" "}
-                  <TextLink to="/ajout-déclarant">ici</TextLink>.
+                  <TextLink to="/ajout-declarant">ici</TextLink>.
                 </>
               )}
             </div>
