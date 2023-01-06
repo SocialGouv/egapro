@@ -1,3 +1,10 @@
+## [2.57.3](https://github.com/SocialGouv/egapro/compare/v2.57.2...v2.57.3) (2023-01-06)
+
+
+### Bug Fixes
+
+* do not use location object on server side ([479aa97](https://github.com/SocialGouv/egapro/commit/479aa975c6fed80b7fa2844ec094c0085fbd030c))
+
 ## [2.57.2](https://github.com/SocialGouv/egapro/compare/v2.57.1...v2.57.2) (2023-01-06)
 
 
