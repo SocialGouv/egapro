@@ -38,6 +38,8 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+ARG NEXT_PUBLIC_GITHUB_SHA
+ENV NEXT_PUBLIC_GITHUB_SHA $NEXT_PUBLIC_GITHUB_SHA
 
 COPY --from=builder /app/packages/app/next.config.js .
 COPY --from=builder /app/packages/app/package.json .

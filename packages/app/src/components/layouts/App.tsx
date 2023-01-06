@@ -1,3 +1,4 @@
+import { config } from "@common/config";
 import {
   Footer,
   FooterBody,
@@ -180,7 +181,7 @@ export const App = ({ children }: PropsWithChildren) => {
                 </FooterBodyItem>
                 <FooterBodyItem>
                   <FooterContentLink
-                    href="https://github.com/SocialGouv/egapro/tree/v2.11.4"
+                    href={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`}
                     target="_blank"
                     rel="noreferrer"
                   >

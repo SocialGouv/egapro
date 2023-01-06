@@ -13,15 +13,20 @@ declare namespace NodeJS {
          */
         NEXT_PUBLIC_API_V2_URL?: string;
         /**
-         * Dist: `<dev>`  
+         * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_MATOMO_URL?: string;
         /**
-         * Dist: `<dev>`  
+         * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
         NEXT_PUBLIC_MATOMO_SITE_ID?: string;
+        /**
+         * No dist value.  
+         * {@link [Local Env Dist](.env.development)}
+         */
+        NEXT_PUBLIC_GITHUB_SHA?: string;
         /**
          * Dist: `false`  
          * {@link [Local Env Dist](.env.development)}
@@ -184,6 +189,7 @@ declare type ProcessEnvCustomKeys =
     | 'NEXT_PUBLIC_API_V2_URL'
     | 'NEXT_PUBLIC_MATOMO_URL'
     | 'NEXT_PUBLIC_MATOMO_SITE_ID'
+    | 'NEXT_PUBLIC_GITHUB_SHA'
     | 'MAILER_ENABLE'
     | 'MAILER_SMTP_HOST'
     | 'MAILER_SMTP_PORT'
