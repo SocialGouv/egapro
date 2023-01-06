@@ -1,3 +1,10 @@
+## [2.57.6](https://github.com/SocialGouv/egapro/compare/v2.57.5...v2.57.6) (2023-01-06)
+
+
+### Bug Fixes
+
+* fix default value env handling ([8cf22aa](https://github.com/SocialGouv/egapro/commit/8cf22aa43466691b45a7145fe3237b83bd77ffee))
+
 ## [2.57.5](https://github.com/SocialGouv/egapro/compare/v2.57.4...v2.57.5) (2023-01-06)
 
 
