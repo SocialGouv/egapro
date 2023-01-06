@@ -1,3 +1,10 @@
+## [2.57.7](https://github.com/SocialGouv/egapro/compare/v2.57.6...v2.57.7) (2023-01-06)
+
+
+### Bug Fixes
+
+* remove satisfies operator on compiled code ([c25f98e](https://github.com/SocialGouv/egapro/commit/c25f98e66eb813167aa4725f5d9431c1000bbc21))
+
 ## [2.57.6](https://github.com/SocialGouv/egapro/compare/v2.57.5...v2.57.6) (2023-01-06)
 
 
