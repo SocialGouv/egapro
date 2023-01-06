@@ -9,10 +9,8 @@ from asyncpg.exceptions import DataError
 from roll.extensions import cors, options
 from stdnum.fr.siren import is_valid as siren_is_valid
 
-from egapro import config, constants, db, emails, helpers, models, tokens, utils, schema
+from egapro import config, constants, db, emails, helpers, models, tokens, utils, schema, pdf
 from egapro import loggers
-from egapro.pdf import representation
-
 
 class Request(BaseRequest):
     def __init__(self, *args, **kwargs):
@@ -125,7 +123,7 @@ async def healthz(request, response):
     response.json = {"message": "OK"}
 
 
-@app.route("/declaration/{siren}/{year}", methods=["PUT"])
+@app.route("/declaration/{siren:digit}/{year:digit}", methods=["PUT"])
 @tokens.require
 @ensure_owner
 async def declare(request, response, siren, year):
@@ -177,7 +175,7 @@ async def declare(request, response, siren, year):
             url = request.domain + data.uri
             emails.success.send(owners, url=url, **data)
 
-@app.route("/representation-equilibree/{siren}", methods=["GET"])
+@app.route("/representation-equilibree/{siren:digit}", methods=["GET"])
 @tokens.require
 @ensure_owner
 async def get_representation_equilibrees(request, response, siren):
@@ -200,8 +198,9 @@ async def get_representation_equilibrees(request, response, siren):
 
     if not declarations:
         raise HttpError(404, f"No representation equilibree with siren {siren} for any year")
+    response.json = declarations
 
-@app.route("/declarations/{siren}", methods=["GET"])
+@app.route("/declarations/{siren:digit}", methods=["GET"])
 @tokens.require
 @ensure_owner
 async def get_declarations(request, response, siren):
@@ -257,7 +256,7 @@ async def get_public_all_declarations(request, response):
         raise HttpError(404, f"No declarations for any year")
     response.json = declarations
 
-@app.route("/public/declaration/{siren}", methods=["GET"])
+@app.route("/public/declaration/{siren:digit}", methods=["GET"])
 async def get_public_declarations(request, response, siren):
     declarations = []
     limit = request.query.int("limit", 10)
@@ -279,7 +278,7 @@ async def get_public_declarations(request, response, siren):
         raise HttpError(404, f"No declarations with siren {siren} for any year")
     response.json = declarations
 
-@app.route("/public/declaration/{siren}/{year}", methods=["GET"])
+@app.route("/public/declaration/{siren:digit}/{year:digit}", methods=["GET"])
 async def get_declaration(request, response, siren, year):
     try:
         record = await db.declaration.get(siren, year)
@@ -291,7 +290,7 @@ async def get_declaration(request, response, siren, year):
     response.json = db.declaration.public_data(resource["data"])
 
 
-@app.route("/declaration/{siren}/{year}", methods=["GET"])
+@app.route("/declaration/{siren:digit}/{year:digit}", methods=["GET"])
 @tokens.require
 @ensure_owner
 async def get_declaration(request, response, siren, year):
@@ -305,7 +304,7 @@ async def get_declaration(request, response, siren, year):
     response.json = resource
 
 
-@app.route("/declaration/{siren}/{year}", methods=["DELETE"])
+@app.route("/declaration/{siren:digit}/{year:digit}", methods=["DELETE"])
 @tokens.require
 @ensure_owner
 async def delete_declaration(request, response, siren, year):
@@ -315,7 +314,7 @@ async def delete_declaration(request, response, siren, year):
     response.status = 204
 
 
-@app.route("/declaration/{siren}/{year}/receipt", methods=["POST"])
+@app.route("/declaration/{siren:digit}/{year:digit}/receipt", methods=["POST"])
 @tokens.require
 @ensure_owner
 async def resend_receipt(request, response, siren, year):
@@ -332,7 +331,7 @@ async def resend_receipt(request, response, siren, year):
     response.status = 204
 
 
-@app.route("/declaration/{siren}/{year}/objectifs-receipt", methods=["POST"])
+@app.route("/declaration/{siren:digit}/{year:digit}/objectifs-receipt", methods=["POST"])
 @tokens.require
 @ensure_owner
 async def resend_objectifs_receipt(request, response, siren, year):
@@ -348,7 +347,7 @@ async def resend_objectifs_receipt(request, response, siren, year):
     response.status = 204
 
 
-@app.route("/representation-equilibree/{siren}/{year}/receipt", methods=["POST"])
+@app.route("/representation-equilibree/{siren:digit}/{year:digit}/receipt", methods=["POST"])
 @tokens.require
 @ensure_owner
 async def resend_representation_receipt(request, response, siren, year):
@@ -365,28 +364,41 @@ async def resend_representation_receipt(request, response, siren, year):
     response.status = 204
 
 
-@app.route("/representation-equilibree/{siren}/{year}/pdf", methods=["GET"])
+@app.route("/representation-equilibree/{siren:digit}/{year:digit}/pdf", methods=["GET"])
 async def send_representation_pdf(request, response, siren, year):
     try:
         record = await db.representation_equilibree.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
     data = record.data
-    pdf = representation.main(data)
+    pdffile = pdf.representation.main(data)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
-    response.body = bytes(pdf[0].output())
+    response.body = bytes(pdffile[0].output())
+    return response
+
+@app.route("/declaration/{siren:digit}/{year:digit}/pdf", methods=["GET"])
+async def get_declaration_pdf(request, response, siren, year):
+    try:
+        record = await db.declaration.get(siren, year)
+    except db.NoData:
+        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
+    data = record.data
+    pdffile = pdf.declaration.main(data)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
+    response.body = bytes(pdffile[0].output())
     return response
 
 
-@app.route("/ownership/{siren}", methods=["GET"])
+@app.route("/ownership/{siren:digit}", methods=["GET"])
 @tokens.require
 @ensure_owner
 async def get_owners(request, response, siren):
     response.json = {"owners": await db.ownership.emails(siren)}
 
 
-@app.route("/ownership/{siren}/{email}", methods=["PUT"])
+@app.route("/ownership/{siren:digit}/{email}", methods=["PUT"])
 @tokens.require
 @ensure_owner
 async def put_owner(request, response, siren, email):
@@ -396,7 +408,7 @@ async def put_owner(request, response, siren, email):
     response.status = 204
 
 
-@app.route("/ownership/{siren}/{email}", methods=["DELETE"])
+@app.route("/ownership/{siren:digit}/{email}", methods=["DELETE"])
 @tokens.require
 @ensure_owner
 async def delete_owner(request, response, siren, email):
@@ -521,7 +533,7 @@ async def search_representation_equilibree(request: Request, response: Response)
         ),
     }
 
-@app.route("/representation-equilibree/{siren}/{year}", methods=["GET"])
+@app.route("/representation-equilibree/{siren:digit}/{year:digit}", methods=["GET"])
 @tokens.require
 @add_error(403, constants.ERROR_ENSURE_OWNER)
 @ensure_owner
@@ -535,7 +547,7 @@ async def get_representation(request, response, siren, year):
         await helpers.patch_from_recherche_entreprises(resource["data"])
     response.json = resource
 
-@app.route("/representation-equilibree/{siren}/{year}", methods=["PUT"])
+@app.route("/representation-equilibree/{siren:digit}/{year:digit}", methods=["PUT"])
 @tokens.require
 @ensure_owner
 async def put_representation(request, response, siren, year):
@@ -659,7 +671,7 @@ async def validate_siren(request, response):
     response.json = metadata
 
 
-@app.route("/entreprise/{siren}")
+@app.route("/entreprise/{siren:digit}")
 async def get_entreprise_data(request, response, siren):
     record = await db.declaration.get_last(siren)
     data = db.declaration.public_entreprise_data(record.data)
