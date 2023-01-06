@@ -49,7 +49,6 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQueryInput) {
 
 const DisplayRepeqs = ({ repeqs, error, isLoading }: { error: unknown; isLoading: boolean; repeqs: RepeqsType }) => {
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
-  // if (isLoading) return <Alert type="info">Recherche en cours</Alert>;
   if (isLoading) return null;
 
   if (error) {

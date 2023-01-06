@@ -21,7 +21,7 @@ type AppPropsWithLayout = AppProps & {
 
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   useEffect(() => {
-    if (!!process.env.NEXT_PUBLIC_MATOMO_URL && !!process.env.NEXT_PUBLIC_MATOMO_SITE_ID) {
+    if (config.matomo.siteId) {
       init(config.matomo);
     }
   }, []);

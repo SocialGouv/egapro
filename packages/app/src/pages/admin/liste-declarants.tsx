@@ -9,6 +9,7 @@ import { Pagination } from "@components/Pagination";
 import type { TagProps } from "@design-system";
 import {
   Alert,
+  Box,
   ButtonGroup,
   Container,
   FormButton,
@@ -130,9 +131,11 @@ const OwnershipRequestList = () => {
               <TableAdminBodyRowCol>{formatIsoToFr(item.modifiedAt)}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.siren}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.email}</TableAdminBodyRowCol>
-              {/* <TableAdminBodyRowCol>
+              {/* TODO: use later if inline action buttons are needed
+              <TableAdminBodyRowCol>
                 <FormButton title="Éditer" iconOnly="fr-icon-edit-fill" size="sm" variant="tertiary-no-border" />
-              </TableAdminBodyRowCol> */}
+              </TableAdminBodyRowCol>
+              */}
             </TableAdminBodyRow>
           ))}
         </TableAdminBody>
@@ -149,6 +152,7 @@ const ActionButtons = () => {
   const { featureStatus, setFeatureStatus } = useFeatureStatus({ reset: true });
 
   const actionOnSelection = (action: OwnershipRequestAction) => async () => {
+    // TODO real logger
     console.debug(`${action} des demandes`, checkedItems.join(", "));
 
     try {
@@ -227,7 +231,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
   }, [siren, status, setValue]);
 
   return (
-    <section>
+    <Box as="section">
       <Container py="8w">
         <h1>Liste des demandes d’ajout des nouveaux déclarants</h1>
 
@@ -275,7 +279,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
           <OwnershipRequestList />
         </div>
       </Container>
-    </section>
+    </Box>
   );
 };
 

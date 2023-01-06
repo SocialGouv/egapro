@@ -10,14 +10,12 @@ export type FetcherReturn = {
   error: unknown;
   isError: boolean;
   isLoading: boolean;
-
   mutate: (data: Any) => void;
 };
 
 export type FetcherReturnImmutable = Omit<FetcherReturn, "mutate">;
 
-export type FetcherInfiniteReturn = FetcherReturnImmutable & {
-  mutate: (data: Any[]) => void;
+export type FetcherInfiniteReturn = FetcherReturn & {
   setSize: (size: number) => void;
   size: number;
 };

@@ -69,25 +69,26 @@ export const useFeatureStatus = ({ reset = false }: { reset?: boolean } = {}) =>
   return context;
 };
 
+export interface AlertFeatureStatusProps {
+  /** true to bypass the default dissmis behaviour after some time. */
+  disableAutoDismiss?: boolean;
+  /** true to bypass the default scroll motion */
+  disableScrollOnTop?: boolean;
+  /** title of the Alert */
+  title: string;
+  /** type between error and success to respond to. */
+  type: Extract<FeatureStatus["type"], "error" | "success">;
+}
+
 /**
  * Animated alert component for error or success message.
- *
- * @param type type between error and success to respond to.
- * @param title title of the Alert
- * @param disableScrollOnTop true to bypass the default scroll motion
- * @param disableAutoDismiss true to bypass the default dissmis behaviour after some time.
  */
 export const AlertFeatureStatus = ({
   type,
   title,
   disableScrollOnTop = false,
   disableAutoDismiss: disableTimer = false,
-}: {
-  disableAutoDismiss?: boolean;
-  disableScrollOnTop?: boolean;
-  title: string;
-  type: Extract<FeatureStatus["type"], "error" | "success">;
-}) => {
+}: AlertFeatureStatusProps) => {
   const { featureStatus, setFeatureStatus } = useFeatureStatus();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
