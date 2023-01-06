@@ -1,3 +1,10 @@
+# [2.57.0](https://github.com/SocialGouv/egapro/compare/v2.56.0...v2.57.0) (2023-01-06)
+
+
+### Features
+
+* change orderDirection ([7cea84f](https://github.com/SocialGouv/egapro/commit/7cea84ffa9021eddf7982f3c50a01240113aa58e))
+
 # [2.56.0](https://github.com/SocialGouv/egapro/compare/v2.55.0...v2.56.0) (2023-01-06)
 
 
