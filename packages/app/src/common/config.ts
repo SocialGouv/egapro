@@ -7,7 +7,7 @@ import type { Any } from "./utils/types";
 export type FeatureFlag = "apiv2" | "repeq-search" | "repeq";
 
 export const config = {
-  githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<github_sha>"),
+  githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
   api_url: ensureNextEnvVar(process.env.NEXT_PUBLIC_API_URL, "/api"),
   get apiv2_url() {
     return ensureNextEnvVar(process.env.NEXT_PUBLIC_API_V2_URL, `${this.api_url}v2`);
