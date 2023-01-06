@@ -86,6 +86,12 @@ yarn dev:declaration
 yarn workspaces run lint
 ````
 
+### Comment ajouter un membre dans le groupe Staff en développement ?
+
+Pour l'API v1, aller dans `.env` à la racine et renseigner la variable `EGAPRO_STAFF` (emails séparés par des virgules sans espace).
+
+Pour l'API v2, aller dans `packages/app/.env.development` et renseigner la variable `EGAPRO_STAFF` (emails séparés par des virgules sans espace).
+
 ### Quel est le maildev pour un environnement de recette ?
 
 Ajouter le préfixe `maildev-` devant l'URL.

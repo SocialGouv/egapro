@@ -27,4 +27,4 @@ export interface CachableRepo<T extends Entity<Any, Any>, ID = NonNullable<T["id
   populated: boolean;
 }
 
-export type SQLCount = [{ count: number }];
+export type SQLCount = [{ count: string }];

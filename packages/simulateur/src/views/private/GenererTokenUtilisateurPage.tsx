@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Flex,
   FormControl,
@@ -53,8 +53,13 @@ const GenererTokenUtilisateurPage = () => {
   const linkSimu = status.type === "success" ? buildUrl(status.token, "simu") : ""
   const linkDecla = status.type === "success" ? buildUrl(status.token, "decla") : ""
 
-  const { hasCopied: hasCopiedSimu, onCopy: onCopySimu } = useClipboard(linkSimu)
-  const { hasCopied: hasCopiedDecla, onCopy: onCopyDecla } = useClipboard(linkDecla)
+  const { hasCopied: hasCopiedSimu, onCopy: onCopySimu, setValue: setValueSimu } = useClipboard(linkSimu)
+  const { hasCopied: hasCopiedDecla, onCopy: onCopyDecla, setValue: setValueDecla } = useClipboard(linkDecla)
+
+  useEffect(() => {
+    setValueSimu(linkSimu)
+    setValueDecla(linkDecla)
+  }, [linkSimu, linkDecla, setValueSimu, setValueDecla])
 
   const schemaForm = z.string().email()
 

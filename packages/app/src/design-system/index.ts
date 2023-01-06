@@ -24,6 +24,8 @@ export * from "./base/SideMenu";
 export * from "./base/SkipLinks";
 export * from "./base/SkipLinks";
 export * from "./base/Stepper";
+export * from "./base/TableAdmin";
+export * from "./base/Tag";
 export * from "./base/TileCompany";
 export * from "./base/TileCompanyRepeqs";
 export * from "./base/TileSuccess";
