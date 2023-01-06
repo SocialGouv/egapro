@@ -189,23 +189,21 @@ const ActionButtons = () => {
 
   return (
     <>
-      <div>
-        <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-          <FormButton
-            disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
-            onClick={actionOnSelection("accept")}
-          >
-            Valider les demandes
-          </FormButton>
-          <FormButton
-            disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
-            variant="tertiary"
-            onClick={actionOnSelection("refuse")}
-          >
-            Refuser les demandes
-          </FormButton>
-        </ButtonGroup>
-      </div>
+      <ButtonGroup inline="mobile-up" className="fr-mb-4w">
+        <FormButton
+          disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+          onClick={actionOnSelection("accept")}
+        >
+          Valider les demandes
+        </FormButton>
+        <FormButton
+          disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+          variant="tertiary"
+          onClick={actionOnSelection("refuse")}
+        >
+          Refuser les demandes
+        </FormButton>
+      </ButtonGroup>
 
       <AlertFeatureStatus type="error" title="Erreur" />
       <AlertFeatureStatus type="success" title="Succès" />
