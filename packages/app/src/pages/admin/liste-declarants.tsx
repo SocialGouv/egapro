@@ -266,7 +266,7 @@ const OwnershipRequestPage: NextPageWithLayout = () => {
                 <FormButton isDisabled={isLoading || isSubmitting} type="submit">
                   Rechercher
                 </FormButton>
-                {/* Don't use a reset type here, it will conflict with RHF in not using the setted default values but instead, use empty siren and status. */}
+                {/* Don't use a reset type here, it will conflict with RHF in not using the set default values but instead, use empty siren and status. */}
                 <FormButton variant="secondary" type="button" isDisabled={isLoading} onClick={reset}>
                   Réinitialiser
                 </FormButton>
