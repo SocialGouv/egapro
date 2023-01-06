@@ -74,6 +74,7 @@ export class UpdateOwnershipRequestStatus implements UseCase<OwnershipRequestAct
       processableRequests.forEach(request => request.changeStatus(newStatus));
       try {
         // 1.1
+        // NB: This call to `updateWithOwnershipBulk` makes an update in `ownership` table as well, wrapped in a transaction. /!\
         await this.ownershipRequestRepo.updateWithOwnershipBulk(...processableRequests);
       } catch (error: unknown) {
         // 1.2

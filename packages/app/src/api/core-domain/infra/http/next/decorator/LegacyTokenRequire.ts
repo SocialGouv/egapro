@@ -7,7 +7,7 @@ import { StatusCodes } from "http-status-codes";
 import type { Algorithm, JwtPayload } from "jsonwebtoken";
 import { JsonWebTokenError, TokenExpiredError, verify as jwtVerify } from "jsonwebtoken";
 
-import type { NextControllerMethodDecorator } from "./type";
+import type { NextControllerMethodDecorator } from "../../../../../shared-domain/infra/http/next/type";
 
 class LegacyTokenRequireError extends AppError {}
 class LegacyTokenRequireNonOwnerError extends AppError {}
@@ -106,12 +106,14 @@ export const LegacyTokenRequire =
         }
       } catch (error: unknown) {
         if (error instanceof ValidationError) {
+          console.error(error);
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(error.message);
         } else if (error instanceof LegacyTokenRequireNonOwnerError) {
+          console.error(error);
           return res.status(StatusCodes.FORBIDDEN).send(error.message);
         }
 
-        console.debug(
+        console.error(
           `Invalid token on ${req._req.url} (token: ${token}, referrer: ${req._req.headers.referer})`,
           error,
         );

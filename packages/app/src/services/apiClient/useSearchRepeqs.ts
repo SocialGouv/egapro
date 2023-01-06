@@ -67,7 +67,7 @@ const moizedFetcher = moize(moizeConfig)(fetcher);
  * Hoook to search into representation equilibree table.
  */
 export const useSearchRepeqs = (search?: SearchParams): FetcherInfiniteReturn & { repeqs: RepeqsType } => {
-  const { data: repeqs, error, size, setSize } = useSWRInfinite<RepeqsType>(getKey(search), moizedFetcher);
+  const { data: repeqs, error, size, setSize, mutate } = useSWRInfinite<RepeqsType>(getKey(search), moizedFetcher);
 
   const isLoading = Boolean(search) && !repeqs && !error;
 
@@ -93,5 +93,6 @@ export const useSearchRepeqs = (search?: SearchParams): FetcherInfiniteReturn & 
     isError,
     size,
     setSize,
+    mutate,
   };
 };

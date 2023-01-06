@@ -9,7 +9,10 @@ import { Alert, AlertTitle } from "../design-system/base/Alert";
  * It not renders children until the authorization check is completed.
  */
 export const StaffOnly = ({ children, ...delegated }: PropsWithChildren<unknown>) => {
-  const { user, loading } = useUser({ redirectTo: "/representation-equilibree/email" });
+  const { user, loading } = useUser({
+    redirectTo: `/representation-equilibree/email?redirectTo=${encodeURI(location.href)}`,
+    checkTokenInURL: true,
+  });
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 
   if (loading || !user) return null;
