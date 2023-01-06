@@ -97,7 +97,7 @@ async def test_search_endpoint(client):
     assert len(json.loads(resp.body)["data"]) == 1
 
 async def test_search_representation_equilibree_endpoint(client):
-    await db.representation_equilibree.put(
+    ret = await db.representation_equilibree.put(
         "12345671",
         2020,
         {
@@ -107,7 +107,9 @@ async def test_search_representation_equilibree_endpoint(client):
             },
         },
     )
+    print("RET ===========", ret)
     resp = await client.get("/representation-equilibree/search?q=bio")
+    print("weqsh", resp.body)
     assert resp.status == 200
     assert json.loads(resp.body) == {
         "data": [

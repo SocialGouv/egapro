@@ -136,8 +136,11 @@ class representation_equilibree(table):
         query = sql.insert_representation
         args = (siren, year, modified_at, declared_at, data.raw, ft)
         async with cls.pool.acquire() as conn:
-            await conn.execute(query, *args)
-            await search_representation_equilibree.index(data)
+            print("========= QUERY", query)
+            retquery = await conn.execute(query, *args)
+            print("RET QUYRT", retquery)
+            searcgfest = await search_representation_equilibree.index(data)
+            print("searcgfest========", searcgfest)
 
     @classmethod
     def public_data(cls, data):
