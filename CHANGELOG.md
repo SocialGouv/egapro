@@ -1,3 +1,10 @@
+## [2.57.4](https://github.com/SocialGouv/egapro/compare/v2.57.3...v2.57.4) (2023-01-06)
+
+
+### Bug Fixes
+
+* default value for sha env ([ff45ca5](https://github.com/SocialGouv/egapro/commit/ff45ca508277ac96032c9d35947a225f57d47fed))
+
 ## [2.57.3](https://github.com/SocialGouv/egapro/compare/v2.57.2...v2.57.3) (2023-01-06)
 
 
