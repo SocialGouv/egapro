@@ -1,3 +1,10 @@
+## [2.57.1](https://github.com/SocialGouv/egapro/compare/v2.57.0...v2.57.1) (2023-01-06)
+
+
+### Bug Fixes
+
+* better apiv1 route handling ([d3d6168](https://github.com/SocialGouv/egapro/commit/d3d61683dd9b86bf584b89bacffd6d51c9478f3a))
+
 # [2.57.0](https://github.com/SocialGouv/egapro/compare/v2.56.0...v2.57.0) (2023-01-06)
 
 
