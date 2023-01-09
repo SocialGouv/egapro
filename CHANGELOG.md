@@ -1,3 +1,18 @@
+## [2.57.8](https://github.com/SocialGouv/egapro/compare/v2.57.7...v2.57.8) (2023-01-09)
+
+
+### Bug Fixes
+
+* fix immer dependency ([8d63898](https://github.com/SocialGouv/egapro/commit/8d63898c69d84d293149778dcb52fab17a23e1ed))
+* fix python tests after better routes ([7dd12cd](https://github.com/SocialGouv/egapro/commit/7dd12cd0d7b7d34c893d981018bc324acd479806))
+
+## [2.57.7](https://github.com/SocialGouv/egapro/compare/v2.57.6...v2.57.7) (2023-01-06)
+
+
+### Bug Fixes
+
+* remove satisfies operator on compiled code ([c25f98e](https://github.com/SocialGouv/egapro/commit/c25f98e66eb813167aa4725f5d9431c1000bbc21))
+
 ## [2.57.6](https://github.com/SocialGouv/egapro/compare/v2.57.5...v2.57.6) (2023-01-06)
 
 

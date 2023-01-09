@@ -76,9 +76,9 @@ async def test_wrong_year_should_raise(client, body):
 
 async def test_invalid_year_should_raise(client, body):
     resp = await client.put("/declaration/514027945/undefined", body=body)
-    assert resp.status == 422
+    assert resp.status == 404
     assert json.loads(resp.body) == {
-        "error": "Ce n'est pas une année valide: `undefined`"
+        "error": "/declaration/514027945/undefined"
     }
 
 
