@@ -30,16 +30,34 @@ export function displayNameCategorieSocioPro(categorieSocioPro: CategorieSocioPr
   }
 }
 
+/**
+ * Display a percent.
+ *
+ * @param num a number between 0 and 100.
+ * @param digits number of digits after the comma.
+ */
+export function displayPercent(num: number, digits = 1): string {
+  return num.toLocaleString("fr-FR", { maximumFractionDigits: digits }) + "%"
+}
+
+/**
+ * Display a float representing a fraction percent.
+ *
+ * @param num a number between 0 and 1.
+ * @param digits number of digits after the comma.
+ */
 export function displayFractionPercent(num: number, digits = 2): string {
   return displayPercent(num * 100, digits)
 }
 
+/**
+ * Display a float representing a fraction percent with "NC" if the number is undefined.
+ *
+ * @param num a number between 0 and 1 or undefined.
+ * @param digits number of digits after the comma.
+ */
 export function displayFractionPercentWithEmptyData(num?: number, digits = 2): string {
   return typeof num === "number" ? displayFractionPercent(num, digits) : "NC"
-}
-
-export function displayPercent(num: number, digits = 1): string {
-  return num.toLocaleString("fr-FR", { maximumFractionDigits: digits }) + "%"
 }
 
 export function displayInt(num: number): string {
