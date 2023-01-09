@@ -14,7 +14,7 @@ import { codeNafFromCode } from "../../components/CodeNaf"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FakeInputGroup from "../../components/ds/FakeInputGroup"
 import FormStack from "../../components/ds/FormStack"
-import { IconEdit, IconPlusCircle } from "../../components/ds/Icons"
+import { IconEdit, IconPlusCircle, IconWarning } from "../../components/ds/Icons"
 import InputRadio from "../../components/ds/InputRadio"
 import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FieldSiren from "../../components/FieldSiren"
@@ -26,6 +26,8 @@ import { departementFromCode, regionFromCode } from "../../components/RegionsDep
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import TextField from "../../components/TextField"
 import EntrepriseUESInput from "./components/EntrepriseUESInputField"
+import { useDeclaration } from "../../hooks/useDeclaration"
+import { timestampToFrDate } from "../../utils/date"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -101,6 +103,8 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
     nombreEntreprises: parseIntStateValue(informationsEntreprise.nombreEntreprises),
     entreprisesUES: informationsEntreprise.entreprisesUES,
   }
+
+  const { declaration } = useDeclaration(informationsEntreprise.siren, year)
 
   const saveForm = (formData: any) => {
     const {
@@ -179,19 +183,31 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
               </InputRadioGroup>
             </FormControl>
             {readOnly || alreadyDeclared ? (
-              <FakeInputGroup
-                label="SIREN"
-                message={
-                  alreadyDeclared
-                    ? "Le SIREN n'est pas modifiable car une déclaration a déjà été validée et transmise."
-                    : undefined
-                }
-              >
-                {informationsEntreprise.siren}
-              </FakeInputGroup>
+              <>
+                <FakeInputGroup
+                  label="Siren"
+                  message={
+                    alreadyDeclared
+                      ? "Le Siren n'est pas modifiable car une déclaration a déjà été validée et transmise."
+                      : undefined
+                  }
+                >
+                  {informationsEntreprise.siren}
+                </FakeInputGroup>
+                {declaration && (
+                  <Text mt={2} color="red.500" lineHeight="4">
+                    <IconWarning mr="2" />
+                    {`Attention, une déclaration pour le Siren ${informationsEntreprise.siren} et
+                    l'année ${year}, a déjà été transmise le ${timestampToFrDate(declaration.declared_at)}  par ${
+                      declaration.data.déclarant.email
+                    }`}
+                    .
+                  </Text>
+                )}
+              </>
             ) : (
               <FieldSiren
-                label="SIREN"
+                label="Siren"
                 name="siren"
                 readOnly={readOnly}
                 year={year}
