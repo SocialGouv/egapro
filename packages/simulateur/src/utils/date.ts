@@ -1,4 +1,4 @@
-import { addYears, addDays, format, parse as rootParse, parseISO } from "date-fns"
+import { addYears, addDays, format, parse as rootParse, parseISO, fromUnixTime } from "date-fns"
 
 /* Dates */
 
@@ -60,3 +60,5 @@ export function formatDate(stringDate: string | undefined): string | undefined {
 
   return format(date, "dd/MM/yyyy")
 }
+
+export const timestampToFrDate = (timestamp: number): string => format(fromUnixTime(timestamp), "dd/MM/yyyy")
