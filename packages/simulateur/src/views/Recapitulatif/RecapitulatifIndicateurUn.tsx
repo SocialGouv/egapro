@@ -5,6 +5,7 @@ import { FormState, TranchesAges } from "../../globals"
 import { effectifEtEcartRemuGroupCoef, effectifEtEcartRemuGroupCsp } from "../../utils/calculsEgaProIndicateurUn"
 
 import {
+  displayFractionPercentWithEmptyData,
   displayNameCategorieSocioPro,
   displayNameTranchesAges,
   displayPercent,
@@ -113,24 +114,16 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
               <Tr key={effectifEtEcartRemuParTranche[0].id}>
                 <Td>{effectifEtEcartRemuParTranche[0].name}</Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[0].ecartRemunerationMoyenne)}
                 </Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[1].ecartRemunerationMoyenne)}
                 </Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[2].ecartRemunerationMoyenne)}
                 </Td>
                 <Td isNumeric>
-                  {effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne
-                    ? displayPercent(effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne * 100)
-                    : ""}
+                  {displayFractionPercentWithEmptyData(effectifEtEcartRemuParTranche[3].ecartRemunerationMoyenne)}
                 </Td>
               </Tr>
             ),
