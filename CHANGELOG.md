@@ -1,3 +1,10 @@
+# [2.58.0](https://github.com/SocialGouv/egapro/compare/v2.57.8...v2.58.0) (2023-01-09)
+
+
+### Features
+
+* prevents simu when exists a decla ([#1501](https://github.com/SocialGouv/egapro/issues/1501)) ([4bf36fe](https://github.com/SocialGouv/egapro/commit/4bf36fed325722103e5e138a0635fa1f0697ddb9)), closes [#1486](https://github.com/SocialGouv/egapro/issues/1486)
+
 ## [2.57.8](https://github.com/SocialGouv/egapro/compare/v2.57.7...v2.57.8) (2023-01-09)
 
 
