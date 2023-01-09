@@ -45,8 +45,8 @@ export const initialStore: OwnershipRequestListStoreType["formState"] = {
 };
 
 export const useOwnershipRequestListStore = create<OwnershipRequestListStoreType>()(
-  devtools(
-    immer(set => ({
+  immer(
+    devtools(set => ({
       formState: initialStore,
       reset: () =>
         set(state => {
