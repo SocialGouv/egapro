@@ -5,7 +5,6 @@ import type { StateStorage } from "zustand/middleware";
 import { persist } from "zustand/middleware";
 
 import { useFormManager } from "./useFormManager";
-import type { TokenInfoType } from "./useMe";
 import { useMe } from "./useMe";
 
 const TOKEN_KEY = "ega-token";
@@ -15,7 +14,6 @@ const LEGACY_TOKEN_INFO_KEY = "tokenInfo";
 interface PersistedTokenState {
   state: {
     token: string;
-    tokenInfo: TokenInfoType;
   };
   version: number;
 }
@@ -25,13 +23,11 @@ const SyncLegacyTokenStorage: StateStorage = {
     if (key === TOKEN_KEY) {
       let currentStateToken = localStorage.getItem(key);
       const legacyToken = localStorage.getItem(LEGACY_TOKEN_KEY);
-      const legacyTokenInfo = localStorage.getItem(LEGACY_TOKEN_INFO_KEY);
       if (!currentStateToken) {
-        if (legacyToken && legacyTokenInfo) {
+        if (legacyToken) {
           currentStateToken = JSON.stringify({
             state: {
               token: legacyToken,
-              tokenInfo: legacyTokenInfo,
             },
             version: 0,
           });
@@ -40,7 +36,6 @@ const SyncLegacyTokenStorage: StateStorage = {
       } else {
         const parsedStatedToken = JSON.parse(currentStateToken) as PersistedTokenState;
         localStorage.setItem(LEGACY_TOKEN_KEY, parsedStatedToken.state.token);
-        localStorage.setItem(LEGACY_TOKEN_INFO_KEY, JSON.stringify(parsedStatedToken.state.tokenInfo));
       }
 
       return currentStateToken;
@@ -56,30 +51,27 @@ const SyncLegacyTokenStorage: StateStorage = {
   },
   setItem(key, value) {
     if (key === TOKEN_KEY) {
+      if (!value) {
+        localStorage.removeItem(LEGACY_TOKEN_KEY);
+        return localStorage.removeItem(LEGACY_TOKEN_INFO_KEY);
+      }
       const parsedStatedToken = JSON.parse(value) as PersistedTokenState;
       localStorage.setItem(LEGACY_TOKEN_KEY, parsedStatedToken.state.token);
-      localStorage.setItem(LEGACY_TOKEN_INFO_KEY, JSON.stringify(parsedStatedToken.state.tokenInfo));
     }
     localStorage.setItem(key, value);
   },
 };
 
 type UserStore = {
-  clearUser: () => void;
   setToken: (token: string) => void;
-  setTokenInfo: (tokenInfo: TokenInfoType) => void;
-  token?: string;
-  tokenInfo?: TokenInfoType;
+  token: string;
 };
 
 export const useUserStore = create<UserStore>()(
   persist(
     set => ({
-      setToken: token => set({ token }),
-      setTokenInfo: tokenInfo => set({ tokenInfo }),
-      clearUser: () => {
-        useUserStore.persist.clearStorage();
-      },
+      token: "",
+      setToken: (token: string) => set({ token }),
     }),
     {
       name: "ega-token", // name of item in the storage (must be unique)
@@ -114,52 +106,45 @@ export const useUserStore = create<UserStore>()(
  * } = useUser();
  * ```
  */
-export const useUser = ({ checkTokenInURL, redirectTo }: { checkTokenInURL?: boolean; redirectTo?: string } = {}) => {
+export const useUser = ({ redirectTo }: { redirectTo?: string } = {}) => {
   const router = useRouter();
 
-  const { token, tokenInfo, setToken, setTokenInfo, clearUser } = useUserStore(state => state);
-  const { user: meUser, error, loading } = useMe(!checkTokenInURL && tokenInfo ? undefined : token);
+  const { token, setToken } = useUserStore(state => state);
+  const { user, error, loading } = useMe(token);
 
   const { resetFormData } = useFormManager();
 
-  if (meUser) {
-    setTokenInfo(meUser);
-  }
-
   const logout = useCallback(() => {
     console.debug("logout");
-    clearUser();
-  }, [clearUser]);
+    setToken("");
+  }, [setToken]);
 
   // Automatic login via URL if checkTokenInURL is present.
   useEffect(() => {
-    if (checkTokenInURL) {
-      const token = new URLSearchParams(window.location.search).get("token");
+    const token = new URLSearchParams(window.location.search).get("token");
 
-      // Check also loading to not attempt a login call if a precedent login call is already initiated.
-      if (token) {
-        console.debug("Token trouvé dans l'URL. Tentative de connexion...");
+    // Check also loading to not attempt a login call if a precedent login call is already initiated.
+    if (token) {
+      console.debug("Token trouvé dans l'URL. Tentative de connexion...");
 
-        resetFormData(); // Remove data in local storage on each new connection.
+      resetFormData(); // Remove data in local storage on each new connection.
 
-        setToken(token); // Order a re render of this hook.
+      setToken(token); // Order a re render of this hook.
 
-        // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
-        router.push({ search: "" });
-      }
+      // Reset the token in the search params so it won't be in the URL and won't be bookmarkable (which is a bad practice?)
+      router.push({ search: "" });
     }
-  }, [token, resetFormData, checkTokenInURL, router, setToken]);
+  }, [token, resetFormData, router, setToken]);
 
   // Automatic redirect if not authenticated and redirectTo is present.
   useEffect(() => {
     if (redirectTo) {
-      if (!token || (error && !tokenInfo)) {
+      if (!token || error) {
         if (redirectTo) router.push(redirectTo);
       }
     }
-  }, [error, token, redirectTo, router, tokenInfo]);
+  }, [error, token, redirectTo, router]);
 
-  const user = meUser ?? tokenInfo;
   return {
     user,
     error,

@@ -59,7 +59,7 @@ const EmailPage: NextPageWithLayout = () => {
   const onSubmit = async ({ email }: FormType) => {
     try {
       setFeatureStatus({ type: "loading" });
-      await requestEmailForToken(email, `${redirectTo || new URL(defaultRedirectTo, window.location.origin)}?token=`);
+      await requestEmailForToken(email, `${new URL(redirectTo || defaultRedirectTo, window.location.origin)}?token=`);
       setFeatureStatus({ type: "success", message: "Un email vous a été envoyé." });
     } catch (error) {
       setFeatureStatus({

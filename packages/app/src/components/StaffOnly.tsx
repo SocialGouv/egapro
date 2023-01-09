@@ -13,7 +13,6 @@ export const StaffOnly = ({ children, ...delegated }: PropsWithChildren<unknown>
   const router = useRouter();
   const { user, loading } = useUser({
     redirectTo: `/representation-equilibree/email?redirectTo=${encodeURI(router.pathname)}`,
-    checkTokenInURL: true,
   });
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
 

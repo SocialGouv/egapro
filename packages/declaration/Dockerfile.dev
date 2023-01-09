@@ -18,4 +18,8 @@ ARG GITHUB_SHA
 ENV GITHUB_SHA=${GITHUB_SHA}
 RUN echo "GITHUB_SHA: ${GITHUB_SHA}" >> _config.yml
 
+ARG BASE_URL
+ENV BASE_URL=${BASE_URL}
+RUN echo "baseurl: ${BASE_URL}" >> _config.yml
+
 CMD ["jekyll", "serve", "--incremental"]

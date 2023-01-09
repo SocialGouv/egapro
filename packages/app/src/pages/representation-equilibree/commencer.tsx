@@ -72,7 +72,7 @@ const buildConfirmMessage = (siren: string) =>
   `Vous avez commencé une déclaration avec le Siren ${siren}. Voulez-vous commencer une nouvelle déclaration et supprimer les données déjà enregistrées ?`;
 
 const CommencerPage: NextPageWithLayout = () => {
-  useUser({ checkTokenInURL: true });
+  useUser();
   const router = useRouter();
   const { formData, saveFormData, resetFormData } = useFormManager();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();

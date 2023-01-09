@@ -50,6 +50,7 @@ services:
         EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
         EGAPRO_SIMU_URL: ${EGAPRO_SIMU_URL:-http://localhost:3001}
         GITHUB_SHA: "<dev>"
+        BASE_URL: ${BASE_URL-/index-egapro/declaration}
     volumes:
       - ./packages/declaration/_doc:/srv/jekyll/_doc
       - ./packages/declaration/src:/srv/jekyll/src
@@ -110,6 +111,13 @@ services:
       - apiv2_pgadmin:/var/lib/pgadmin
     networks:
       - apiv2
+
+  reverse_proxy:
+    image: nginx:alpine
+    volumes:
+      - ./reverse-proxy.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
 
 networks:
   apiv2:

@@ -1,10 +1,4 @@
-import "@gouvfr/dsfr/dist/dsfr.main.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-map/icons-map.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-design/icons-design.min.css";
-
+import { DsfrScript } from "@components/DsfrScript";
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
 
@@ -21,6 +15,7 @@ export const BasicLayout = ({ children, title }: PropsWithChildren & { title?: s
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
+      <DsfrScript />
       {children}
     </App>
   );
