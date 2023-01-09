@@ -1,3 +1,10 @@
+# [2.59.0](https://github.com/SocialGouv/egapro/compare/v2.58.0...v2.59.0) (2023-01-09)
+
+
+### Features
+
+* display NC for indicateur 1 on recapitulatif page ([#1502](https://github.com/SocialGouv/egapro/issues/1502)) ([2747c1f](https://github.com/SocialGouv/egapro/commit/2747c1ff14a2425b41da0cd72de9c2348c152a9c))
+
 # [2.58.0](https://github.com/SocialGouv/egapro/compare/v2.57.8...v2.58.0) (2023-01-09)
 
 
