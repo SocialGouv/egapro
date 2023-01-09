@@ -22,7 +22,7 @@ type EnsureNextEnvVar = {
 };
 type primitive = boolean | number | string;
 
-export const ensureNextEnvVar = ((envVar, transformerOrDefaultValue, defaultValue) => {
+const ensureNextEnvVar_: DefaultEnsureNextEnvVar = (envVar, transformerOrDefaultValue, defaultValue) => {
   const defaultValueToTest = typeof transformerOrDefaultValue !== "function" ? transformerOrDefaultValue : defaultValue;
   if (typeof envVar === "undefined" && typeof defaultValueToTest === "undefined") {
     throw new Error(`Some env var are not found.`, { cause: { envVar, transformerOrDefaultValue, defaultValue } });
@@ -36,12 +36,15 @@ export const ensureNextEnvVar = ((envVar, transformerOrDefaultValue, defaultValu
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- always set
   return envVar ?? transformerOrDefaultValue!;
-}) as EnsureNextEnvVar satisfies DefaultEnsureNextEnvVar;
+};
+// TODO use "satisfies"
+export const ensureNextEnvVar = ensureNextEnvVar_ as EnsureNextEnvVar;
 
-export const ensureApiEnvVar = ((key, transformerOrDefaultValue, defaultValue) => {
+const ensureApiEnvVar_: DefaultEnsureNextEnvVar = (key, transformerOrDefaultValue, defaultValue) => {
   if (typeof window === "undefined") {
-    return ensureNextEnvVar(key, transformerOrDefaultValue, defaultValue);
+    return ensureNextEnvVar_(key, transformerOrDefaultValue, defaultValue);
   }
   const defaultValueToTest = typeof transformerOrDefaultValue !== "function" ? transformerOrDefaultValue : defaultValue;
   return defined(defaultValueToTest);
-}) as EnsureNextEnvVar satisfies DefaultEnsureNextEnvVar;
+};
+export const ensureApiEnvVar = ensureApiEnvVar_ as EnsureNextEnvVar;
