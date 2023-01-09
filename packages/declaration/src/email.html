@@ -2,36 +2,44 @@
 layout: intro
 title: "Validation de l'email"
 ---
-<p>L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.</p>
+<p>L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail en cas de
+    besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.</p>
 
-<p>Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé pour la déclaration ou un des emails rattachés au Siren de votre entreprise.</p>
+<p>Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé pour la
+    déclaration ou un des emails rattachés au Siren de votre entreprise.</p>
 
 <div>
-  {% include input.html type="email" name="email" label="Adresse email" required=true %}
+    {% include input.html type="email" name="email" label="Adresse email" required=true %}
 </div>
 
-<p>Attention&nbsp;: en cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.</p>
+<p>Attention&nbsp;: en cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà
+    transmise.</p>
 
 <nav>
-  <button rel=next>Valider mon email</button>
+    <button rel=next>Valider mon email</button>
 </nav>
 
 <script>
-  document.getElementById('page-form').addEventListener('submit', async (event) => {
-    event.preventDefault()
-    const email = event.target.email.value
-    const href = window.location.href
-    const url = href.replace("email.html", "?token=")
-    const response = await request('post', '/token', { email, url })
-    if(response.ok) {
-      localStorage.email = email
-      redirect('{{ site.baseurl }}/validation-email.html')
-    } else {
-        if (response.data && response.data.error) {
-          notify.error(`Erreur lors de l'envoi de l'email: ${response.data.error}`)
+    document.getElementById('page-form').addEventListener('submit', async (event) => {
+        event.preventDefault()
+        const email = event.target.email.value
+        const href = window.location.href
+        const url = href.replace("email.html", "?token=")
+        const response = await request('post', '/token', { email, url })
+        if (response.ok) {
+            localStorage.egapro_decla_email = email
+            redirect('{{ site.baseurl }}/validation-email.html')
         } else {
-          notify.error("Erreur lors de l'envoi de l'email, veuillez vérifier que l'adresse est correcte")
+            if (response.data && response.data.error) {
+                notify.error(`Erreur lors de l'envoi de l'email: ${response.data.error}`)
+            } else {
+                notify.error("Erreur lors de l'envoi de l'email, veuillez vérifier que l'adresse est correcte")
+            }
         }
-    }
-  })
+    })
+    document.addEventListener("ready", () => {
+        if (app.token) {
+            return redirect('{{site.baseurl}}/commencer.html')
+        }
+    })
 </script>

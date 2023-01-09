@@ -88,11 +88,13 @@ function Footer() {
             },
             "@media (min-width: 1024px)": {
               marginLeft: "auto",
+              maxWidth: "40%",
             },
           }}
         >
           <Text fontSize="sm" as="i">
-            Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
+            Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des
+            ministères sociaux.
           </Text>
           <Text fontSize="sm" mt={1}>
             Pour nous aider à l'améliorer{" "}

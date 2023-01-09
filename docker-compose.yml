@@ -48,16 +48,14 @@ services:
       dockerfile: Dockerfile.dev
       args:
         EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
+        EGAPRO_SIMU_URL: ${EGAPRO_SIMU_URL:-http://localhost:3001}
+        GITHUB_SHA: "<dev>"
     volumes:
       - ./packages/declaration/_doc:/srv/jekyll/_doc
       - ./packages/declaration/src:/srv/jekyll/src
       - ./packages/declaration/favicon.ico:/srv/jekyll/_site/favicon.ico
-    # environment:
-    #   EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
     ports:
       - 4000:4000
-    depends_on:
-      - api
     restart: always
 
   db:

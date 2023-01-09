@@ -3,54 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
 <title>{{ page.title }} - {{ site.title }}</title>
-<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/egapro.css?{{site.time | date: '%s'}}" />
-
-<style>
-    span.profil {
-        -webkit-box-align: center;
-        -webkit-box-pack: center;
-        align-items: center;
-        background: #a0aec0;
-        border: 0 solid #fff;
-        border-radius: 9999px;
-        box-sizing: border-box;
-        color: #1a202c;
-        cursor: pointer;
-        display: inline-flex;
-        flex-shrink: 0;
-        font-family: Cabin, -apple-system, sans-serif;
-        font-size: calc(.8rem);
-        font-weight: 500;
-        height: 2rem;
-        justify-content: center;
-        line-height: 19.2px;
-        overflow-wrap: break-word;
-        position: relative;
-        text-align: center;
-        text-transform: uppercase;
-        vertical-align: top;
-        width: 2rem;
-        word-wrap: break-word;
-    }
-
-    svg.profil {
-        border: 0 solid #e2e8f0;
-        box-sizing: border-box;
-        color: #fff;
-        cursor: pointer;
-        display: block;
-        font-family: Cabin, -apple-system, sans-serif;
-        font-size: 12.8px;
-        font-weight: 500;
-        height: 100%;
-        line-height: 19.2px;
-        overflow-wrap: break-word;
-        text-align: center;
-        text-transform: uppercase;
-        width: 100%;
-        word-wrap: break-word;
-    }
-</style>
+<link rel="stylesheet" href="{{ '/assets/css/egapro.css' | relative_url }}?{{site.time | date: '%s'}}" />
 
 <script>
     // The declaration app is not compatible with Internet Explorer.
@@ -88,43 +41,55 @@
 </script>
 {% endif %}
 
-
-<script src="{{ site.baseurl }}/assets/js/utils.js"></script>
-
+{% if site.EGAPRO_SIMU_URL %}
 <script>
-    function redirectOnAuthentification() {
-        if (confirm('Vous allez être redirigé pour vous connnecter. Voulez-vous vous continuer ?')) {
-            window.location.href = '{{ site.baseurl }}/tableauDeBord/me-connecter'
-        }
-    }
+    EGAPRO_SIMU_URL = "{{ site.EGAPRO_SIMU_URL }}"
 </script>
+{% endif %}
 
-<header>
-    <div>
-        <a href="https://travail-emploi.gouv.fr/" target="_blank"><img src="{{ site.baseurl }}/assets/img/marianne.svg"
-                alt="Marianne"></a>
-        <hgroup>
-            <h1><a href="/" target="_blank">Index Egapro</a></h1>
-        </hgroup>
-        <p>
-            <!-- &#8209; is an unbreakable hyphen not to split the word -->
-            L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes&#8209;Hommes
-        </p>
+{% if site.GITHUB_SHA %}
+<script>
+    GITHUB_SHA = "{{ site.GITHUB_SHA }}"
+</script>
+{% endif %}
 
-        <!-- TODO : voir s'il faut ajouter ce moyen de se connecter à partir du site de déclaration-directe. Si oui, ajouter dans body > header div => `justify-content: center`
-    <div onClick="redirectOnAuthentification()">
-      <span class="profil">
-        <svg viewBox="0 0 128 128" class="profil" role="img" aria-label=" avatar">
-          <path fill="currentColor"
-            d="M103,102.1388 C93.094,111.92 79.3504,118 64.1638,118 C48.8056,118 34.9294,111.768 25,101.7892 L25,95.2 C25,86.8096 31.981,80 40.6,80 L87.4,80 C96.019,80 103,86.8096 103,95.2 L103,102.1388 Z">
-          </path>
-          <path fill="currentColor"
-            d="M63.9961647,24 C51.2938136,24 41,34.2938136 41,46.9961647 C41,59.7061864 51.2938136,70 63.9961647,70 C76.6985159,70 87,59.7061864 87,46.9961647 C87,34.2938136 76.6985159,24 63.9961647,24">
-          </path>
-        </svg>
-      </span>
-    </div>
-    -->
+
+<script src="{{ '/assets/js/utils.js' | relative_url }}"></script>
+
+<header role="banner">
+    <div class="header__container">
+        <div class="header__left">
+            <div class="logo__container header__logo">
+                <a href="https://travail-emploi.gouv.fr/" target="_blank">
+                    <img src="{{ '/assets/img/marianne.svg' | relative_url }}" alt="Marianne" width="88px">
+                </a>
+            </div>
+            <div class="header__text">
+                <a href="/" target="_blank">Index Egapro</a>
+                <p>Index de l’égalité professionnelle et représentation équilibrée femmes – hommes</p>
+            </div>
+        </div>
+        <div class="flex__spacer"></div>
+        <div class="header__right">
+            <button type="button" class="button__aslink" onClick="redirectSimulateurPage('/tableauDeBord/mon-profil')"
+                title="Accéder à votre profile">
+                <span class="button__icon">
+                    <svg viewBox="0 0 128 128" class="icon" role="img" aria-label="avatar">
+                        <path fill="currentColor"
+                            d="M103,102.1388 C93.094,111.92 79.3504,118 64.1638,118 C48.8056,118 34.9294,111.768 25,101.7892 L25,95.2 C25,86.8096 31.981,80 40.6,80 L87.4,80 C96.019,80 103,86.8096 103,95.2 L103,102.1388 Z">
+                        </path>
+                        <path fill="currentColor"
+                            d="M63.9961647,24 C51.2938136,24 41,34.2938136 41,46.9961647 C41,59.7061864 51.2938136,70 63.9961647,70 C76.6985159,70 87,59.7061864 87,46.9961647 C87,34.2938136 76.6985159,24 63.9961647,24">
+                        </path>
+                    </svg>
+                    <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" aria-hidden="true" focusable="false" class="icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg> -->
+                </span>
+                <span class="header__login" id="headerEmail"></span>
+            </button>
+        </div>
     </div>
 </header>
 
@@ -133,27 +98,50 @@
 </form>
 
 <footer>
-    <header>
-        <a href="https://travail-emploi.gouv.fr/" target="_blank">
-            <img src="{{ site.baseurl }}/assets/img/marianne.svg" alt="Marianne">
-        </a>
-    </header>
-    <nav>
-        <a href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx" target="_blank"
-            rel="noopener noreferrer">Télécharger la liste des référents Egapro (XLSX, 22 Ko)</a>
-        <a href="https://egapro.travail.gouv.fr/mentions-legales">Mentions légales</a>
-        <a href="https://egapro.travail.gouv.fr/cgu">Conditions générales d'utilisation</a>
-        <a href="https://egapro.travail.gouv.fr/politique-confidentialite">Politique de confidentialité</a>
-    </nav>
-    <footer>
-        <p>
-            Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux. Pour nous
-            aider à
-            l'améliorer
-            <a href="https://github.com/SocialGouv/egapro-declaration/tree/{{ site.version }}" target="_blank"
-                rel="noopener noreferrer">contribuez sur Github</a>
-        </p>
-    </footer>
+    <div class="footer__container">
+        <div class="footer__left">
+            <div class="logo__container footer__logo">
+                <a href="https://travail-emploi.gouv.fr/" target="_blank">
+                    <img src="{{ '/assets/img/marianne.svg' | relative_url }}" alt="Marianne">
+                </a>
+            </div>
+            <ul role="list">
+                <li>
+                    <a href="https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
+                        target="_blank" rel="noopener noreferrer">
+                        Télécharger la liste des référents Egapro (XLSX, 22Ko)
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ site.EGAPRO_SIMU_URL }}/mentions-legales">Mentions légales</a>
+                </li>
+                <li>
+                    <a href="{{ site.EGAPRO_SIMU_URL }}/a11y/declaration-accessibilite-rgaa-4-1.pdf">
+                        Accessibilité&nbsp;:&nbsp;partiellement conforme
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ site.EGAPRO_SIMU_URL }}/cgu">Conditions générales d'utilisation</a>
+                </li>
+                <li>
+                    <a href="{{ site.EGAPRO_SIMU_URL }}/politique-confidentialite">
+                        Politique de confidentialité
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="footer__right">
+            <i>
+                Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique
+                des ministères sociaux.
+            </i>
+            <p>
+                Pour nous aider à l'améliorer
+                <a href="https://github.com/SocialGouv/egapro/commit/{{ site.GITHUB_SHA }}" target="_blank"
+                    rel="noopener noreferrer">contribuez sur Github</a>
+            </p>
+        </div>
+    </div>
 </footer>
 
 <div id="toast">
@@ -178,5 +166,14 @@
     })();
 </script>
 <!-- End Matomo Code -->
+
+<script>
+    document.addEventListener("ready", () => {
+        if (app.token && app.tokenInfo) {
+            document.querySelector(".header__right").classList.add("user__connected");
+            document.querySelector("#headerEmail").textContent = app.tokenInfo.email;
+        }
+    });
+</script>
 
 </html>

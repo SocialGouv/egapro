@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   ButtonGroup,
@@ -37,7 +38,6 @@ import {
   IconLogout,
   IconMenu,
   IconOfficeBuilding,
-  IconPeople,
   IconPeopleCircle,
   IconQuestionMarkCircle,
   IconUserGroup,
@@ -109,7 +109,7 @@ const Header = () => {
                 <Link
                   href="https://travail-emploi.gouv.fr/"
                   isExternal
-                  width={isMobile ? 16 : 20}
+                  width={isMobile ? 16 : "fit-content"}
                   sx={{
                     display: "block",
                   }}
@@ -123,7 +123,7 @@ const Header = () => {
                 </Link>
                 {!isMobile && (
                   <Text fontSize="xs">
-                    L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                    Index de l’égalité professionnelle et représentation équilibrée femmes – hommes
                   </Text>
                 )}
               </Box>
@@ -133,17 +133,11 @@ const Header = () => {
               {email ? (
                 <Menu>
                   <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
-                    Menu
+                    {email}
+                    {staff && <Badge colorScheme="green">Staff</Badge>}
                   </MenuButton>
                   <MenuList zIndex={400}>
                     <MenuGroup title="Mon compte">
-                      <MenuItem
-                        as={RouterLink}
-                        to="/tableauDeBord/mon-profil"
-                        icon={<IconPeople boxSize={5} color="gray.400" />}
-                      >
-                        Mon Profil
-                      </MenuItem>
                       <MenuItem
                         as={RouterLink}
                         to="/tableauDeBord/mes-entreprises"

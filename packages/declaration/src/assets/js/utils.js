@@ -26,6 +26,10 @@ function redirect(url) {
   location.replace(url)
 }
 
+function redirectSimulateurPage(uri) {
+    redirect(`${app.simuUrl}${uri}`);
+}
+
 function buildSelectOptions(select, list, value) {
   select.innerHTML = ""
   if(select.hasAttribute('empty')) list.unshift({ value: "", label: " ––– " })
@@ -252,8 +256,16 @@ class AppStorage {
       ? 'http://localhost:2626'
       : `${location.origin}/api`;
 
+    this.simuUrl = ['localhost', '127.0.0.1'].includes(location.hostname)
+      ? 'http://localhost:3001'
+      : `${location.origin}/index-egapro`;
+
     if (window.EGAPRO_API_URL) {
       this.apiUrl = EGAPRO_API_URL
+    }
+
+    if (window.EGAPRO_SIMU_URL) {
+        this.simuUrl = EGAPRO_SIMU_URL;
     }
   }
 
@@ -270,6 +282,7 @@ class AppStorage {
     // Is remote data actually necessary as we must have local data for token anyways?
     // Recharge this.data avec les données issues de l'API.
     if(this.siren && this.annee) await this.loadRemoteData()
+    if (!this.tokenInfo) await this.loadMe();
   }
 
   resetData() {
@@ -296,6 +309,13 @@ class AppStorage {
     this.schema = response.data
   }
 
+  async loadMe() {
+    const response = await request('GET', '/me');
+    if (response.ok) {
+        this.tokenInfo = response.data;
+    }
+  }
+
   async loadLocalData() {
     Object.assign(this.data, JSON.parse(localStorage.data || '{}'))
   }
@@ -318,6 +338,31 @@ class AppStorage {
 
   get token() {
     return localStorage.token
+  }
+
+  get tokenInfo() {
+    const tokenInfo = localStorage.tokenInfo;
+    if (!tokenInfo) {
+        return;
+    }
+    try {
+        return JSON.parse(tokenInfo);
+    } catch (error) {
+        console.warn(`Cannot parse tokenInfo`, {error, tokenInfo});
+        return {};
+    }
+  }
+
+  set tokenInfo(tokenInfo) {
+    if (typeof tokenInfo === "string") {
+        localStorage.tokenInfo = tokenInfo;
+    }
+    try {
+        localStorage.tokenInfo = JSON.stringify(tokenInfo);
+        return;
+    } catch (error) {
+        console.warn(`Cannot stringify tokenInfo`, {error, tokenInfo});
+    }
   }
 
   filterSchemaData(data) {

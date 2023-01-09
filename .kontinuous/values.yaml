@@ -190,6 +190,8 @@ jobs:
         buildArgs:
           BASE_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+          EGAPRO_SIMU_URL: "https://{{ .Values.global.host }}/index-egapro"
+          GITHUB_SHA: "{{ $.Values.global.sha }}"
 
     build-simulateur:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
