@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
 <title>{{ page.title }} - {{ site.title }}</title>
-<link rel="stylesheet" href="{{ '/assets/css/egapro.css' | relative_url }}?{{site.time | date: '%s'}}" />
+<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/egapro.css?{{site.time | date: '%s'}}" />
 
 <script>
     // The declaration app is not compatible with Internet Explorer.
@@ -54,14 +54,14 @@
 {% endif %}
 
 
-<script src="{{ '/assets/js/utils.js' | relative_url }}"></script>
+<script src="{{ site.baseurl }}/assets/js/utils.js"></script>
 
 <header role="banner">
     <div class="header__container">
         <div class="header__left">
             <div class="logo__container header__logo">
                 <a href="https://travail-emploi.gouv.fr/" target="_blank">
-                    <img src="{{ '/assets/img/marianne.svg' | relative_url }}" alt="Marianne" width="88px">
+                    <img src="{{ site.baseurl }}/assets/img/marianne.svg" alt="Marianne" width="88px">
                 </a>
             </div>
             <div class="header__text">
@@ -102,7 +102,7 @@
         <div class="footer__left">
             <div class="logo__container footer__logo">
                 <a href="https://travail-emploi.gouv.fr/" target="_blank">
-                    <img src="{{ '/assets/img/marianne.svg' | relative_url }}" alt="Marianne">
+                    <img src="{{ site.baseurl }}/assets/img/marianne.svg" alt="Marianne">
                 </a>
             </div>
             <ul role="list">
