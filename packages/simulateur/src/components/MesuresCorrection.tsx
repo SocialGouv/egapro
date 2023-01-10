@@ -11,11 +11,13 @@ const choices: { [key: string]: string } = {
   mne: "Mesures non envisagées",
 }
 
-type MesuresCorrectionProps = { name: string; label: string; readOnly: boolean }
+type MesuresCorrectionProps = { readOnly: boolean }
 
-const MesuresCorrection: FunctionComponent<MesuresCorrectionProps> = ({ name, label, readOnly }) => {
+const MesuresCorrection: FunctionComponent<MesuresCorrectionProps> = ({ readOnly }) => {
+  const label = "Mesures de correction prévues à l'article D. 1142-6"
+
   return (
-    <Field name={name} validate={required} component="select">
+    <Field name="mesuresCorrection" validate={required} component="select">
       {({ input, meta }) => (
         <Fragment>
           {readOnly ? (
