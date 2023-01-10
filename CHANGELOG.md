@@ -1,3 +1,10 @@
+# [2.61.0](https://github.com/SocialGouv/egapro/compare/v2.60.0...v2.61.0) (2023-01-10)
+
+
+### Features
+
+* check CSE date after or equals to 2018 ([#1504](https://github.com/SocialGouv/egapro/issues/1504)) ([d11edb0](https://github.com/SocialGouv/egapro/commit/d11edb05f151b8d70e928d24c0a162331499c12c))
+
 # [2.60.0](https://github.com/SocialGouv/egapro/compare/v2.59.0...v2.60.0) (2023-01-10)
 
 
