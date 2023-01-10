@@ -23,33 +23,26 @@ import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
 import MesuresCorrection from "../../components/MesuresCorrection"
-import RadiosBoolean from "../../components/RadiosBoolean"
 import { estCalculable } from "../../utils/helpers"
 import InfoBlock from "../../components/ds/InfoBlock"
+import { getYear } from "date-fns"
+import { FIRST_YEAR_FOR_DECLARATION } from "../../config"
+import RequiredRadiosBoolean from "../../components/RequiredRadiosBoolean"
 
+// NB : some fields (like RadioButton Oui/Non) are only validated at field-level.
 const validateForm = ({
   finPeriodeReference,
-  anneeDeclaration,
   periodeSuffisante,
 }: {
   finPeriodeReference: string | undefined
-  anneeDeclaration: number | undefined
   periodeSuffisante: boolean | undefined
 }) => {
-  return ({
-    datePublication,
-    publicationSurSiteInternet,
-    planRelance,
-  }: {
-    datePublication: string
-    publicationSurSiteInternet?: string
-    planRelance: string | undefined
-  }) => {
-    // Make sure we don't invalidate the form if the field `datePublication`
-    // isn't present on the form (because the index can't be calculated).
-    if (!datePublication || !periodeSuffisante) return
+  return ({ datePublication, dateConsultationCSE }: { datePublication: string; dateConsultationCSE: string }) => {
+    // No validation at all, if periodeSuffisante is false.
+    if (!periodeSuffisante) return
     const parsedDatePublication = parseDate(datePublication)
     const parsedFinPeriodeReference = finPeriodeReference ? parseDate(finPeriodeReference) : undefined
+    const parsedDateCSE = parseDate(dateConsultationCSE) ? parseDate(dateConsultationCSE) : undefined
 
     return {
       datePublication:
@@ -60,11 +53,11 @@ const validateForm = ({
           : {
               correspondanceFinPeriodeReference: `La date ne peut précéder la date de fin de la période de référence (${finPeriodeReference})`,
             },
-      publicationSurSiteInternet:
-        publicationSurSiteInternet !== undefined ? undefined : "Il vous faut sélectionner un mode de publication",
-      planRelance:
-        anneeDeclaration && anneeDeclaration >= 2021 && planRelance === undefined
-          ? "Il vous faut indiquer si vous avez bénéficié du plan de relance"
+      dateConsultationCSE:
+        parsedDateCSE && getYear(parsedDateCSE) < FIRST_YEAR_FOR_DECLARATION
+          ? {
+              invalidDate: `La date de consultation du CSE doit être postérieure ou égale à ${FIRST_YEAR_FOR_DECLARATION}`,
+            }
           : undefined,
     }
   }
@@ -112,14 +105,14 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   const [errorMessage, setErrorMessage] = useState(undefined)
 
   const declaration = state.declaration
+  const estCalculableIndex = estCalculable(noteIndex)
   const indicateurUnParCSP = state.indicateurUn.csp
   const finPeriodeReference = state.informations.finPeriodeReference
   const periodeSuffisante = state.informations.periodeSuffisante
-  const anneeDeclaration = state.informations.anneeDeclaration
   const readOnly = isFormValid(state.declaration) && !declaring
   const after2020 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2020)
   const after2021 = Boolean(state.informations.anneeDeclaration && state.informations.anneeDeclaration >= 2021)
-  const displayNC = !estCalculable(noteIndex) && after2020 ? " aux indicateurs calculables" : ""
+  const displayNC = !estCalculableIndex && after2020 ? " aux indicateurs calculables" : ""
   const isUES = Boolean(state.informationsEntreprise.structure !== "Entreprise")
 
   const initialValues = {
@@ -189,7 +182,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
   return (
     <Form
       onSubmit={onSubmit}
-      validate={validateForm({ finPeriodeReference, anneeDeclaration, periodeSuffisante })}
+      validate={validateForm({ finPeriodeReference, periodeSuffisante })}
       initialValues={initialValues}
       // mandatory to not change user inputs
       // because we want to keep wrong string inside the input
@@ -207,24 +200,22 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
 
             {periodeSuffisante && (
               <>
-                {estCalculable(noteIndex) && noteIndex < 75 && (
-                  <MesuresCorrection
-                    label="Mesures de correction prévues à l'article D. 1142-6"
-                    name="mesuresCorrection"
-                    readOnly={readOnly}
-                  />
+                {estCalculableIndex && noteIndex < 75 && (
+                  // MesuresCorrection has its own validation at the component level.
+                  <MesuresCorrection readOnly={readOnly} />
                 )}
                 {!indicateurUnParCSP && (
                   <>
                     {state.informationsEntreprise.structure === "Entreprise" && (
-                      <RadiosBoolean
+                      <RequiredRadiosBoolean
                         fieldName="cseMisEnPlace"
-                        value={values.cseMisEnPlace}
                         readOnly={readOnly}
-                        label={<>Un CSE a-t-il été mis en place&nbsp;?</>}
+                        value={values.cseMisEnPlace}
+                        label="Un CSE a-t-il été mis en place&nbsp;?"
                       />
                     )}
                     {(state.informationsEntreprise.structure !== "Entreprise" || values.cseMisEnPlace === "true") && (
+                      //  InputDateGroup has its own validation at the component level.
                       <InputDateGroup
                         fieldName="dateConsultationCSE"
                         label="Date de consultation du CSE pour le choix de la modalité de calcul de l’indicateur Ecart de rémunération"
@@ -234,7 +225,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   </>
                 )}
                 {/* Show publication data only if if index is calculable for cases before 2020 and for all index (even non calculable) after. */}
-                {(estCalculable(noteIndex) || after2020) && (
+                {(estCalculableIndex || after2020) && (
                   <>
                     <InputDateGroup
                       fieldName="datePublication"
@@ -245,7 +236,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                       }
                       isReadOnly={readOnly}
                     />
-                    <RadiosBoolean
+                    <RequiredRadiosBoolean
                       fieldName="publicationSurSiteInternet"
                       value={values.publicationSurSiteInternet}
                       readOnly={readOnly}
@@ -285,6 +276,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                     )}
                   </>
                 )}
+                {/* FieldPlanRelance has its own validation at the component level. */}
                 {after2021 && <FieldPlanRelance readOnly={readOnly} isUES={isUES} />}
               </>
             )}
@@ -323,7 +315,7 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
               )}
 
               {/* Objectifs de progression et mesures de correction */}
-              {after2021 && periodeSuffisante && estCalculable(noteIndex) && noteIndex < 85 && (
+              {after2021 && periodeSuffisante && estCalculableIndex && noteIndex < 85 && (
                 <Box my="4">
                   <Divider mt="8" mb="4" />
                   <LegalText>{legalText}</LegalText>

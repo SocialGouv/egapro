@@ -27,6 +27,7 @@ const InputDateGroup = ({
   ...rest
 }: InputDateGroupProps) => {
   return (
+    // By default, the field is required and validated against the format dd/mm/yyyy.
     <Field name={fieldName} {...(autovalidation && { validate: validateDate })} component="input">
       {({ input, meta }) => (
         <FormControl
