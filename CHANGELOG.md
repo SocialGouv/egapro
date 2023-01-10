@@ -1,3 +1,10 @@
+# [2.60.0](https://github.com/SocialGouv/egapro/compare/v2.59.0...v2.60.0) (2023-01-10)
+
+
+### Features
+
+* add error detail in liste-declarant ([#1498](https://github.com/SocialGouv/egapro/issues/1498)) ([1222aa1](https://github.com/SocialGouv/egapro/commit/1222aa126fae8fa40e431abee26c66361b500b5b))
+
 # [2.59.0](https://github.com/SocialGouv/egapro/compare/v2.58.0...v2.59.0) (2023-01-09)
 
 
