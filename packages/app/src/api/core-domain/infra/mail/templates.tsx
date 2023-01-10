@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 export const ownershipRequest_toAskerAfterValidation = (
   combo: Array<[email: string, siren: string]>,
 ): MailTemplate => ({
-  subject: "Votre demande d'ajout de déclarants a été acceptée",
+  subject: "Egapro - Votre demande d'ajout de déclarants a été acceptée",
   text: `Bonjour,
 
 Les emails suivants ont été ajoutés aux numéros Siren de vos entreprises :
@@ -39,7 +39,7 @@ ${config.api.mailer.signature}`,
 });
 
 export const ownershipRequest_toAskerAfterRejection = (combo: Array<[email: string, siren: string]>): MailTemplate => ({
-  subject: "Votre demande d'ajout de déclarants a été refusée",
+  subject: "Egapro - Votre demande d'ajout de déclarants a été refusée",
   text: `Bonjour,
 
 Les emails suivants ont été refusés et n'ont donc pas été ajoutés aux numéros Siren de vos entreprises :
@@ -74,7 +74,7 @@ ${config.api.mailer.signature}`,
 });
 
 export const ownershipRequest_toDeclarantAfterValidation = (email: string, siren: string): MailTemplate => ({
-  subject: "Vous avez été ajouté en tant que déclarant",
+  subject: "Egapro - Vous avez été ajouté en tant que déclarant",
   attachments: [
     {
       path: path.resolve(process.cwd(), "public/Procedure.pour.ajouter.ou.supprimer.declarants.pdf"),
