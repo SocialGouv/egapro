@@ -7,6 +7,7 @@ export interface OwnershipRequestDTO {
   askerEmail: string;
   createdAt: string;
   email?: string;
+  errorDetail?: string;
   id: string;
   modifiedAt: string;
   siren?: string;
@@ -20,7 +21,7 @@ export type GetOwnershipRequestDTO = {
   warnings?: Array<readonly [string, string]>;
 };
 
-export type GetOwnershipRequestInputOrderBy = Exclude<keyof OwnershipRequestDTO, "id">;
+export type GetOwnershipRequestInputOrderBy = Exclude<keyof OwnershipRequestDTO, "errorDetail" | "id">;
 export type GetOwnershipRequestInputDTO = z.infer<typeof getOwnershipRequestInputDTOSchema>;
 export type GetOwnershipRequestInputSchemaDTO = z.input<typeof getOwnershipRequestInputDTOSchema>;
 
