@@ -1,3 +1,12 @@
+## [2.61.1](https://github.com/SocialGouv/egapro/compare/v2.61.0...v2.61.1) (2023-01-10)
+
+
+### Bug Fixes
+
+* change ownership email titles (Fixes [#1424](https://github.com/SocialGouv/egapro/issues/1424)) ([698c317](https://github.com/SocialGouv/egapro/commit/698c3179d7d74ced72a7aa7485e985e52739e03a))
+* declaration wrong email wording (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([5e84782](https://github.com/SocialGouv/egapro/commit/5e84782749209f85c77bb5fbf2c9a3e9f1e3d449))
+* external link in simu for ajout declarant (Fixes [#1497](https://github.com/SocialGouv/egapro/issues/1497)) ([b226fa5](https://github.com/SocialGouv/egapro/commit/b226fa5980696c4c8944d7e2de63cd6897305727))
+
 # [2.61.0](https://github.com/SocialGouv/egapro/compare/v2.60.0...v2.61.0) (2023-01-10)
 
 
