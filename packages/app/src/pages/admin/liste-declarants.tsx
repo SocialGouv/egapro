@@ -1,3 +1,5 @@
+import type { errorDetailCodes } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
+import { errorDetailLabel } from "@common/core-domain/domain/valueObjects/ownership_request/ErrorDetail";
 import { OwnershipRequestStatus } from "@common/core-domain/domain/valueObjects/ownership_request/OwnershipRequestStatus";
 import type { OwnershipRequestAction } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
 import type { GetOwnershipRequestInputOrderBy } from "@common/core-domain/dtos/OwnershipRequestDTO";
@@ -53,6 +55,13 @@ const columnsMap: Map<GetOwnershipRequestInputOrderBy, string> = new Map([
   ["email", "Email"],
 ]);
 
+const buildErrorDetailMesage = (errorDetail: string) => {
+  if (errorDetail) {
+    const [errorCode] = errorDetail.split(":");
+    return errorDetailLabel[errorCode as typeof errorDetailCodes[number]] || "";
+  }
+};
+
 const OwnershipRequestList = () => {
   const formState = useOwnershipRequestListStore(state => state.formState);
   const toggleAll = useOwnershipRequestListStore(state => state.toggleAll);
@@ -103,6 +112,7 @@ const OwnershipRequestList = () => {
               {columnLabel}
             </TableAdminHeadCol>
           ))}
+          <TableAdminHeadCol>{/* errorDetail */}</TableAdminHeadCol>
         </TableAdminHead>
         <TableAdminBody>
           {fetchedItems.data.map(item => (
@@ -131,11 +141,12 @@ const OwnershipRequestList = () => {
               <TableAdminBodyRowCol>{formatIsoToFr(item.modifiedAt)}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.siren}</TableAdminBodyRowCol>
               <TableAdminBodyRowCol>{item.email}</TableAdminBodyRowCol>
-              {/* TODO: use later if inline action buttons are needed
+
               <TableAdminBodyRowCol>
-                <FormButton title="Éditer" iconOnly="fr-icon-edit-fill" size="sm" variant="tertiary-no-border" />
+                {item.errorDetail && (
+                  <Box className="fr-fi-information-line" title={buildErrorDetailMesage(item.errorDetail)}></Box>
+                )}
               </TableAdminBodyRowCol>
-              */}
             </TableAdminBodyRow>
           ))}
         </TableAdminBody>
@@ -178,23 +189,21 @@ const ActionButtons = () => {
 
   return (
     <>
-      <div>
-        <ButtonGroup inline="mobile-up" className="fr-mb-4w">
-          <FormButton
-            disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
-            onClick={actionOnSelection("accept")}
-          >
-            Valider les demandes
-          </FormButton>
-          <FormButton
-            disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
-            variant="tertiary"
-            onClick={actionOnSelection("refuse")}
-          >
-            Refuser les demandes
-          </FormButton>
-        </ButtonGroup>
-      </div>
+      <ButtonGroup inline="mobile-up" className="fr-mb-4w">
+        <FormButton
+          disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+          onClick={actionOnSelection("accept")}
+        >
+          Valider les demandes
+        </FormButton>
+        <FormButton
+          disabled={checkedItems.length === 0 || featureStatus.type === "loading"}
+          variant="tertiary"
+          onClick={actionOnSelection("refuse")}
+        >
+          Refuser les demandes
+        </FormButton>
+      </ButtonGroup>
 
       <AlertFeatureStatus type="error" title="Erreur" />
       <AlertFeatureStatus type="success" title="Succès" />

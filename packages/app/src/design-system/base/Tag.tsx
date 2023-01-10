@@ -3,19 +3,23 @@ import type { PropsWithChildren } from "react";
 
 import styles from "./Tag.module.css";
 
-export interface TagProps {
+export type TagProps = PropsWithChildren<React.HTMLAttributes<HTMLDivElement>> & {
   variant?: "error" | "info" | "success" | "warning";
-}
-export const Tag = ({ children, variant }: PropsWithChildren<TagProps>) => (
-  <div
-    className={clsx(
-      "fr-tag",
-      variant === "info" && styles.info,
-      variant === "success" && styles.success,
-      variant === "warning" && styles.warning,
-      variant === "error" && styles.error,
-    )}
-  >
-    {children}
+};
+
+export const Tag = ({ children, variant, ...rest }: TagProps) => (
+  <div {...rest}>
+    <div
+      className={clsx(
+        "fr-tag",
+        variant === "info" && styles.info,
+        variant === "success" && styles.success,
+        variant === "warning" && styles.warning,
+        variant === "error" && styles.error,
+      )}
+      {...rest}
+    >
+      {children}
+    </div>
   </div>
 );
