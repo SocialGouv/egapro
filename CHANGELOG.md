@@ -1,3 +1,24 @@
+# [2.64.0](https://github.com/SocialGouv/egapro/compare/v2.63.0...v2.64.0) (2023-01-11)
+
+
+### Features
+
+* wording (closes [#1339](https://github.com/SocialGouv/egapro/issues/1339)) ([6b324de](https://github.com/SocialGouv/egapro/commit/6b324dec496dc79a851a3d8d5bcf42bb4f33e5d5))
+
+# [2.63.0](https://github.com/SocialGouv/egapro/compare/v2.62.0...v2.63.0) (2023-01-11)
+
+
+### Features
+
+* format date in error message in french ([2705041](https://github.com/SocialGouv/egapro/commit/27050419e11f2f040e2f134d1477575567d0498f))
+
+# [2.62.0](https://github.com/SocialGouv/egapro/compare/v2.61.2...v2.62.0) (2023-01-11)
+
+
+### Features
+
+* closes Changer le contrôle sur la date de publication et le message d'erreur [#1339](https://github.com/SocialGouv/egapro/issues/1339) ([#1507](https://github.com/SocialGouv/egapro/issues/1507)) ([df3bb57](https://github.com/SocialGouv/egapro/commit/df3bb578df50bd45dd74ba9b85d590ee9b0a2d2e))
+
 ## [2.61.2](https://github.com/SocialGouv/egapro/compare/v2.61.1...v2.61.2) (2023-01-11)
 
 
