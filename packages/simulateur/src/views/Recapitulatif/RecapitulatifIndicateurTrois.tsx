@@ -39,10 +39,11 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   noteIndicateurTrois,
   correctionMeasure,
 }) => {
+  if (indicateurTroisFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur3" />
+  }
+
   if (!effectifsIndicateurTroisCalculable) {
-    if (indicateurTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur3" />
-    }
     return (
       <InfoBlock
         type="warning"
@@ -53,9 +54,6 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   }
 
   if (!indicateurTroisCalculable) {
-    if (indicateurTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur3" />
-    }
     return (
       <InfoBlock
         type="warning"

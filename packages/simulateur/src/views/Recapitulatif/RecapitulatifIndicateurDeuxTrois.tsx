@@ -37,10 +37,11 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
   tauxAugmentationPromotionFemmes,
   tauxAugmentationPromotionHommes,
 }) => {
+  if (indicateurDeuxTroisFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2et3" />
+  }
+
   if (!effectifsIndicateurDeuxTroisCalculable) {
-    if (indicateurDeuxTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur2et3" />
-    }
     return (
       <InfoBlock
         type="warning"
@@ -51,9 +52,6 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
   }
 
   if (!indicateurDeuxTroisCalculable) {
-    if (indicateurDeuxTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur2et3" />
-    }
     return (
       <InfoBlock
         type="warning"

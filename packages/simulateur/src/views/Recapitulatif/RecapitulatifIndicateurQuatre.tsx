@@ -26,10 +26,11 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
   nombreSalarieesPeriodeAugmentation,
   noteIndicateurQuatre,
 }) => {
+  if (indicateurQuatreFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur4" />
+  }
+
   if (!indicateurQuatreCalculable) {
-    if (indicateurQuatreFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur4" />
-    }
     const messageNonCalculable =
       presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation === 0
         ? "d’augmentations salariales pendant la durée du ou des congés maternité"
