@@ -1,3 +1,10 @@
+# [2.66.0](https://github.com/SocialGouv/egapro/compare/v2.65.0...v2.66.0) (2023-01-11)
+
+
+### Features
+
+* message recapitulatif when indicateur at None state ([#1511](https://github.com/SocialGouv/egapro/issues/1511)) ([7ab30a5](https://github.com/SocialGouv/egapro/commit/7ab30a5d7bfbb16038411a1a2747ee2b62edf774))
+
 # [2.65.0](https://github.com/SocialGouv/egapro/compare/v2.64.0...v2.65.0) (2023-01-11)
 
 
