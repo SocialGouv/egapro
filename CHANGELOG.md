@@ -1,3 +1,10 @@
+# [2.64.0](https://github.com/SocialGouv/egapro/compare/v2.63.0...v2.64.0) (2023-01-11)
+
+
+### Features
+
+* wording (closes [#1339](https://github.com/SocialGouv/egapro/issues/1339)) ([6b324de](https://github.com/SocialGouv/egapro/commit/6b324dec496dc79a851a3d8d5bcf42bb4f33e5d5))
+
 # [2.63.0](https://github.com/SocialGouv/egapro/compare/v2.62.0...v2.63.0) (2023-01-11)
 
 
