@@ -1,9 +1,9 @@
-import type { Any, SimpleObject } from "@common/utils/types";
+import type { SimpleObject } from "@common/utils/types";
 import type { SendMailOptions } from "nodemailer";
 
-import type { MailTemplate } from "./type";
+import type { MailTemplateFunction } from "./type";
 
-export type Templates = SimpleObject<(...args: Any[]) => MailTemplate>;
+export type Templates = SimpleObject<MailTemplateFunction>;
 
 /**
  * Generic mailer service interface. Implement it for a specific domain.

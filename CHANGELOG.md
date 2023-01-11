@@ -1,3 +1,61 @@
+# [2.66.0](https://github.com/SocialGouv/egapro/compare/v2.65.0...v2.66.0) (2023-01-11)
+
+
+### Features
+
+* message recapitulatif when indicateur at None state ([#1511](https://github.com/SocialGouv/egapro/issues/1511)) ([7ab30a5](https://github.com/SocialGouv/egapro/commit/7ab30a5d7bfbb16038411a1a2747ee2b62edf774))
+
+# [2.65.0](https://github.com/SocialGouv/egapro/compare/v2.64.0...v2.65.0) (2023-01-11)
+
+
+### Features
+
+* allow percentage above 100 ([#1508](https://github.com/SocialGouv/egapro/issues/1508)) ([8874816](https://github.com/SocialGouv/egapro/commit/88748168ef4dccb74820a44b77b82a5eb997db8b))
+
+# [2.64.0](https://github.com/SocialGouv/egapro/compare/v2.63.0...v2.64.0) (2023-01-11)
+
+
+### Features
+
+* wording (closes [#1339](https://github.com/SocialGouv/egapro/issues/1339)) ([6b324de](https://github.com/SocialGouv/egapro/commit/6b324dec496dc79a851a3d8d5bcf42bb4f33e5d5))
+
+# [2.63.0](https://github.com/SocialGouv/egapro/compare/v2.62.0...v2.63.0) (2023-01-11)
+
+
+### Features
+
+* format date in error message in french ([2705041](https://github.com/SocialGouv/egapro/commit/27050419e11f2f040e2f134d1477575567d0498f))
+
+# [2.62.0](https://github.com/SocialGouv/egapro/compare/v2.61.2...v2.62.0) (2023-01-11)
+
+
+### Features
+
+* closes Changer le contrôle sur la date de publication et le message d'erreur [#1339](https://github.com/SocialGouv/egapro/issues/1339) ([#1507](https://github.com/SocialGouv/egapro/issues/1507)) ([df3bb57](https://github.com/SocialGouv/egapro/commit/df3bb578df50bd45dd74ba9b85d590ee9b0a2d2e))
+
+## [2.61.2](https://github.com/SocialGouv/egapro/compare/v2.61.1...v2.61.2) (2023-01-11)
+
+
+### Bug Fixes
+
+* problem with declared_at date in page informations entreprise ([4ed6f49](https://github.com/SocialGouv/egapro/commit/4ed6f49e788a7671ac531405e69e0e09b7d09d25))
+
+## [2.61.1](https://github.com/SocialGouv/egapro/compare/v2.61.0...v2.61.1) (2023-01-10)
+
+
+### Bug Fixes
+
+* change ownership email titles (Fixes [#1424](https://github.com/SocialGouv/egapro/issues/1424)) ([698c317](https://github.com/SocialGouv/egapro/commit/698c3179d7d74ced72a7aa7485e985e52739e03a))
+* declaration wrong email wording (Fixes [#1460](https://github.com/SocialGouv/egapro/issues/1460)) ([5e84782](https://github.com/SocialGouv/egapro/commit/5e84782749209f85c77bb5fbf2c9a3e9f1e3d449))
+* external link in simu for ajout declarant (Fixes [#1497](https://github.com/SocialGouv/egapro/issues/1497)) ([b226fa5](https://github.com/SocialGouv/egapro/commit/b226fa5980696c4c8944d7e2de63cd6897305727))
+
+# [2.61.0](https://github.com/SocialGouv/egapro/compare/v2.60.0...v2.61.0) (2023-01-10)
+
+
+### Features
+
+* check CSE date after or equals to 2018 ([#1504](https://github.com/SocialGouv/egapro/issues/1504)) ([d11edb0](https://github.com/SocialGouv/egapro/commit/d11edb05f151b8d70e928d24c0a162331499c12c))
+
 # [2.60.0](https://github.com/SocialGouv/egapro/compare/v2.59.0...v2.60.0) (2023-01-10)
 
 

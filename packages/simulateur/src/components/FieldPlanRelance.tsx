@@ -1,20 +1,6 @@
 import React from "react"
 import { useField } from "react-final-form"
-import { displayMetaErrors } from "../utils/form-error-helpers"
-import { required } from "../utils/formHelpers"
-import { hasFieldError } from "./Input"
-import RadiosBoolean from "./RadiosBoolean"
-
-const validate = (value: string) => {
-  const requiredError = required(value)
-  if (!requiredError) {
-    return undefined
-  } else {
-    return {
-      required: requiredError,
-    }
-  }
-}
+import RequiredRadiosBoolean from "./RequiredRadiosBoolean"
 
 export type FieldPlanRelanceProps = {
   readOnly: boolean
@@ -22,12 +8,11 @@ export type FieldPlanRelanceProps = {
 }
 
 const FieldPlanRelance = ({ readOnly, isUES }: FieldPlanRelanceProps) => {
-  const field = useField("planRelance", { validate })
-  const error = hasFieldError(field.meta)
+  const field = useField("planRelance")
 
   return (
     <>
-      <RadiosBoolean
+      <RequiredRadiosBoolean
         fieldName="planRelance"
         value={field.input.value}
         readOnly={readOnly}
@@ -46,7 +31,7 @@ const FieldPlanRelance = ({ readOnly, isUES }: FieldPlanRelanceProps) => {
           )
         }
       />
-      <p>{error && displayMetaErrors(field.meta.error)}</p>
+      {/* No need to handle errors, because it is managed by RequiredRadiosBoolean */}
     </>
   )
 }

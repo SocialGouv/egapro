@@ -194,7 +194,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                 >
                   {informationsEntreprise.siren}
                 </FakeInputGroup>
-                {declaration && (
+                {declaration && declaration.declared_at && (
                   <Text mt={2} color="red.500" lineHeight="4">
                     <IconWarning mr="2" />
                     {`Attention, une déclaration pour le Siren ${informationsEntreprise.siren} et
