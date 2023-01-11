@@ -1,3 +1,15 @@
+# [2.67.0](https://github.com/SocialGouv/egapro/compare/v2.66.0...v2.67.0) (2023-01-11)
+
+
+### Bug Fixes
+
+* error in previous refactor ([66b92df](https://github.com/SocialGouv/egapro/commit/66b92df011d718852e9bff89a30497868918801c))
+
+
+### Features
+
+* adapt wording for recap page ([#1512](https://github.com/SocialGouv/egapro/issues/1512)) ([458c27d](https://github.com/SocialGouv/egapro/commit/458c27d257c04e812927fbc6bde4124ea8c943bb))
+
 # [2.66.0](https://github.com/SocialGouv/egapro/compare/v2.65.0...v2.66.0) (2023-01-11)
 
 
