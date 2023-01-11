@@ -90,7 +90,7 @@ indicateurs:
     population_favorable: femmes|hommes|egalite
   congés_maternité: # Indicateur 4 relatif au pourcentage de salariées ayant bénéficié d'une augmentation dans l'année suivant leur retour de congé de maternité
     non_calculable: absrcm|absaugpdtcm|am
-    résultat: "0.0:"
+    résultat: "0.0:100"
     =note: integer
     objectif_de_progression: string
   hautes_rémunérations:  # Indicateur 5 relatif au nombre de salariés du sexe sous-représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
