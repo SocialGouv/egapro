@@ -16,6 +16,10 @@
             "absaugpdtcm",
             "am"
           ]
+        },
+        "résultat": {
+          "type": "number",
+          "minimum": 0.0
         }
       }
     }
