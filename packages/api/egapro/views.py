@@ -360,7 +360,7 @@ async def resend_representation_receipt(request, response, siren, year):
         owners = request["email"]
     data = record.data
     url = request.domain + data.uri
-    emails.representation.send(owners, url=url, **data)
+    emails.representation.send(owners, url=url, year=year, **data)
     response.status = 204
 
 

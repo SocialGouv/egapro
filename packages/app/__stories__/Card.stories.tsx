@@ -1,4 +1,3 @@
-import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import {
   Card,
   CardBody,
@@ -12,6 +11,7 @@ import {
   Link,
   LinkGroup,
 } from "@design-system";
+import type { ComponentMeta, ComponentStory } from "@storybook/react";
 
 export default {
   title: "Base/Card",
@@ -60,7 +60,7 @@ export const IsEnlargeLink: ComponentStory<typeof Card> = args => {
           <CardBodyContentTitle>
             <a href="#">Télécharger le récapitulatif</a>
           </CardBodyContentTitle>
-          <CardBodyContentDescription>Année 2022 au titre des données 2021.</CardBodyContentDescription>
+          <CardBodyContentDescription>Année 2023 au titre des données 2022.</CardBodyContentDescription>
           <CardBodyContentEnd>
             <CardBodyContentDetails>PDF – 61,88 Ko</CardBodyContentDetails>
           </CardBodyContentEnd>

@@ -2,7 +2,7 @@
 //Generated with generateModelsFromSchema.
 //DO NOT EDIT.
 
-export type AnneeIndicateur = 2018 | 2019 | 2020 | 2021;
+export type AnneeIndicateur = 2018 | 2019 | 2020 | 2021 | 2022;
 export type Region =
   | "01"
   | "02"

@@ -105,6 +105,7 @@ def _cross_validate(data):
             )
             periode_reference = data.path("déclaration.fin_période_référence")
 
+            # l'année 2021 ne bouge jamais pour les OP/MC
             if data.year < 2021 or index is None or index >= 85:
                 remunerations = data.path(
                     "indicateurs.rémunérations.objectif_de_progression"
@@ -213,6 +214,7 @@ def _cross_validate(data):
                     # rule 13.b
                     assert data.path(path), msg
 
+            # l'année 2021 ne bougent pas pour le plan de relance (année mise en oeuvre du plan du relance)
             if data.year >= 2021:
                 msg = "data.entreprise.plan_relance doit être défini"
                 # rule 14

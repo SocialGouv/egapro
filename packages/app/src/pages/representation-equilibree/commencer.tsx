@@ -1,3 +1,4 @@
+import { YEARS } from "@common/dict";
 import { zodSirenSchema } from "@common/utils/form";
 import { AuthenticatedOnly } from "@components/AuthenticatedOnly";
 import { AlertFeatureStatus, FeatureStatusProvider, useFeatureStatus } from "@components/FeatureStatusProvider";
@@ -192,7 +193,13 @@ const CommencerPage: NextPageWithLayout = () => {
               isError={Boolean(errors.year)}
               aria-describedby={errors.year && "year-message-error"}
             >
-              <option value="2021">2021</option>
+              {YEARS.sort()
+                .reverse()
+                .map(year => (
+                  <option value={year} key={`year-select-${year}`}>
+                    {year}
+                  </option>
+                ))}
             </FormSelect>
             {errors.year && <FormGroupMessage id="year-message-error">{errors.year.message}</FormGroupMessage>}
           </FormGroup>

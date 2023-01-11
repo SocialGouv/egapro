@@ -1,3 +1,4 @@
+import { YEARS } from "@common/dict";
 import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
 import { StaffOnly } from "@components/StaffOnly";
 import {
@@ -39,7 +40,13 @@ const RepresentationEquilibreeListPage: NextPageWithLayout = () => {
           <FormGroup>
             <FormGroupLabel htmlFor="year">Année</FormGroupLabel>
             <FormSelect id="year" {...register("year")}>
-              <option value="2021">2021</option>
+              {YEARS.sort()
+                .reverse()
+                .map(year => (
+                  <option value={year} key={`year-select-${year}`}>
+                    {year}
+                  </option>
+                ))}
             </FormSelect>
           </FormGroup>
           <FormGroup>
