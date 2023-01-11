@@ -256,35 +256,39 @@ checkDatePost2018 = event => {
   target.reportValidity()
 }
 
-checkDatePublication = event => {
-    const target = event.target
-    const min = event.target.min
+checkDatePublication = (event) => {
+    const target = event.target;
+    const min = event.target.min;
 
-    checkPatternValidity(event)
+    checkPatternValidity(event);
     if (target.validity.patternMismatch) {
-      // We already treated this case in `checkPatternValidity`
-      return
+        // We already treated this case in `checkPatternValidity`
+        return;
     }
 
     if (target.validity.valueMissing) {
-      // Keep the default browser behavior
-      return
+        // Keep the default browser behavior
+        return;
     }
 
-    const parsedDate = new Date(target.value).toString()
+    const parsedDate = new Date(target.value);
+    const minDate = new Date(min);
 
-    if (parsedDate === "Invalid Date") {
+    if (parsedDate.toString() === "Invalid Date") {
         // We check if the length is >= 2 because the list of sirens also contains the current value
-        target.setCustomValidity("Veuillez saisir une date valide au format aaaa-mm-jj (exemple : 2021-11-23)")
-      } else if (new Date(target.value) < new Date(min)) {
-        target.setCustomValidity(`La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${min})`)
+        target.setCustomValidity(
+            "Veuillez saisir une date valide au format aaaa-mm-jj (exemple : 2021-11-23)"
+        );
+    } else if (parseDate < minDate) {
+        target.setCustomValidity(
+            `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${min.toLocaleDateString(
+                "fr-FR"
+            )})`
+        );
     } else {
-      target.setCustomValidity("")
+        target.setCustomValidity("");
     }
-
-    console.log("dans la fin")
-    // target.reportValidity()
-  }
+};
 
 extractKey = flatKey => {
   // This extracts "foobar[0]" into ["foobar[0]", "foobar", "0"]
