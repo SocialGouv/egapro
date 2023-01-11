@@ -61,7 +61,18 @@ const RecapitulatifIndex: FunctionComponent<RecapitulatifIndexProps> = ({
         <InfoBlock
           type="warning"
           title={title}
-          text="Vous n’avez pas encore validé tous vos indicateurs, votre index ne peut être calculé."
+          text={
+            <>
+              <Text>
+                Vos indicateurs calculables représentent moins de 75 points, votre Index ne peut être calculé.
+              </Text>
+              <Text
+                mt={1}
+                fontStyle="italic"
+                fontSize="xs"
+              >{`${totalPoint} points sur un maximum de ${totalPointCalculable} pouvant être obtenus.`}</Text>
+            </>
+          }
         />
       )}
     </>

@@ -26,10 +26,6 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
   nombreSalarieesPeriodeAugmentation,
   noteIndicateurQuatre,
 }) => {
-  if (indicateurQuatreFormValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur4" />
-  }
-
   if (!indicateurQuatreCalculable) {
     const messageNonCalculable =
       presenceCongeMat && nombreSalarieesPeriodeAugmentation !== undefined && nombreSalarieesPeriodeAugmentation === 0
@@ -42,6 +38,10 @@ const RecapitulatifIndicateurQuatre: FunctionComponent<RecapitulatifIndicateurQu
         text={`Malheureusement votre indicateur n’est pas calculable car il n'y a pas eu ${messageNonCalculable}`}
       />
     )
+  }
+
+  if (indicateurQuatreFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur4" />
   }
 
   return (

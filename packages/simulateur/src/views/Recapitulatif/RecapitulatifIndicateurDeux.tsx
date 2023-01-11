@@ -39,10 +39,6 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   noteIndicateurDeux,
   correctionMeasure,
 }) => {
-  if (indicateurDeuxFormValidated === "None") {
-    return <MessageWhenInvalid indicateur="indicateur2" />
-  }
-
   if (!effectifsIndicateurDeuxCalculable) {
     return (
       <InfoBlock
@@ -61,6 +57,10 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d’augmentation durant la période de référence"
       />
     )
+  }
+
+  if (indicateurDeuxFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
   return (
