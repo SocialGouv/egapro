@@ -1,3 +1,10 @@
+# [2.63.0](https://github.com/SocialGouv/egapro/compare/v2.62.0...v2.63.0) (2023-01-11)
+
+
+### Features
+
+* format date in error message in french ([2705041](https://github.com/SocialGouv/egapro/commit/27050419e11f2f040e2f134d1477575567d0498f))
+
 # [2.62.0](https://github.com/SocialGouv/egapro/compare/v2.61.2...v2.62.0) (2023-01-11)
 
 
