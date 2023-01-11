@@ -1,3 +1,10 @@
+# [2.65.0](https://github.com/SocialGouv/egapro/compare/v2.64.0...v2.65.0) (2023-01-11)
+
+
+### Features
+
+* allow percentage above 100 ([#1508](https://github.com/SocialGouv/egapro/issues/1508)) ([8874816](https://github.com/SocialGouv/egapro/commit/88748168ef4dccb74820a44b77b82a5eb997db8b))
+
 # [2.64.0](https://github.com/SocialGouv/egapro/compare/v2.63.0...v2.64.0) (2023-01-11)
 
 
