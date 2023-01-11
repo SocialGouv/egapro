@@ -4,14 +4,14 @@ import { JsonEntity } from "@common/shared-domain";
 import { Company } from "./declaration/Company";
 import { Declarant } from "./declaration/Declarant";
 import { DeclarationInfo } from "./declaration/DeclarationInfo";
-import { Indicators } from "./declaration/Indicators";
+import { IndicatorsRepEq } from "./declaration/IndicatorsRepEq";
 import { DeclarationSource } from "./valueObjects/declaration/DeclarationSource";
 
 export interface RepresentationEquilibreeDataProps {
   company: Company;
   declarant: Declarant;
   declaration: DeclarationInfo;
-  indicators?: Indicators;
+  indicators?: IndicatorsRepEq;
   source?: DeclarationSource;
 }
 
@@ -36,7 +36,7 @@ export class RepresentationEquilibreeData extends JsonEntity<RepresentationEquil
   }
 
   /** `indicateurs` */
-  get indicators(): Indicators | undefined {
+  get indicators(): IndicatorsRepEq | undefined {
     return this.props.indicators;
   }
 
@@ -48,7 +48,7 @@ export class RepresentationEquilibreeData extends JsonEntity<RepresentationEquil
     };
 
     if (json.source) props.source = new DeclarationSource(json.source);
-    if (json.indicators) props.indicators = Indicators.fromJson<Indicators>(json.indicators);
+    if (json.indicators) props.indicators = IndicatorsRepEq.fromJson<IndicatorsRepEq>(json.indicators);
 
     return new RepresentationEquilibreeData(props, json.id) as typeof this;
   }

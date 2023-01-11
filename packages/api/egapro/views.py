@@ -181,7 +181,7 @@ async def declare(request, response, siren, year):
 async def get_representation_equilibrees(request, response, siren):
     declarations = []
     limit = request.query.int("limit", 10)
-    years = sorted(constants.YEARS, reverse=True)
+    years = sorted(constants.YEARS_REPEQ, reverse=True)
 
     for year in years:
         try:
@@ -557,8 +557,8 @@ async def put_representation(request, response, siren, year):
         raise HttpError(422, f"Ce n'est pas une année valide: `{year}`")
     if not siren_is_valid(siren):
         raise HttpError(422, f"Numéro SIREN invalide: {siren}")
-    if year not in constants.YEARS:
-        years = ", ".join([str(y) for y in constants.YEARS])
+    if year not in constants.YEARS_REPEQ:
+        years = ", ".join([str(y) for y in constants.YEARS_REPEQ])
         raise HttpError(
             422, f"Il est possible de déclarer seulement pour les années {years}"
         )
