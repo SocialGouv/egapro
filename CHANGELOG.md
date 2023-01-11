@@ -1,3 +1,10 @@
+## [2.61.2](https://github.com/SocialGouv/egapro/compare/v2.61.1...v2.61.2) (2023-01-11)
+
+
+### Bug Fixes
+
+* problem with declared_at date in page informations entreprise ([4ed6f49](https://github.com/SocialGouv/egapro/commit/4ed6f49e788a7671ac531405e69e0e09b7d09d25))
+
 ## [2.61.1](https://github.com/SocialGouv/egapro/compare/v2.61.0...v2.61.1) (2023-01-10)
 
 
