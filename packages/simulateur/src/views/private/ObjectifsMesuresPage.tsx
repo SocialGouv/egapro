@@ -84,7 +84,7 @@ const isDateBeforeFinPeriodeReference = (finPeriodeReference: Date | undefined) 
         return parsedDatePublication !== undefined && parsedDatePublication > finPeriodeReference
       },
       {
-        message: `La date ne peut précéder la fin de la période de référence choisie pour le calcul de votre index (${dateToString(
+        message: `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${dateToString(
           finPeriodeReference,
         )})`,
       },
