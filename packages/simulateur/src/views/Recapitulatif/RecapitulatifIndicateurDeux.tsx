@@ -39,10 +39,11 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   noteIndicateurDeux,
   correctionMeasure,
 }) => {
+  if (indicateurDeuxFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2" />
+  }
+
   if (!effectifsIndicateurDeuxCalculable) {
-    if (indicateurDeuxFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur2" />
-    }
     return (
       <InfoBlock
         type="warning"
