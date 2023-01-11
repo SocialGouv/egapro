@@ -1083,6 +1083,7 @@ export type Remunerations = WithPopulationFavorable & {
       "50:"?: number;
     };
   }[];
+  résultat?: number;
 };
 export type WithPopulationFavorable = BaseIndicateurNote & {
   population_favorable?: PopulationFavorable;
@@ -1097,6 +1098,7 @@ export type Augmentations = WithPopulationFavorable & {
    */
   non_calculable?: "egvi40pcet" | "absaugi" | "am";
   catégories?: CategoriesSimples;
+  résultat?: number;
 };
 /**
  * @minItems 4
@@ -1109,6 +1111,7 @@ export type CategoriesSimples = [number | null, number | null, number | null, nu
 export type Promotions = WithPopulationFavorable & {
   non_calculable?: "egvi40pcet" | "absprom" | "am";
   catégories?: CategoriesSimples;
+  résultat?: number;
 };
 /**
  * Indicateur 2et3 relatif à l'écart de taux d'augmentations individuelles entre les femmes et les homme pour les entreprises de 250 salariés ou moins
@@ -1128,6 +1131,7 @@ export type AugmentationsEtPromotions = WithPopulationFavorable & {
  */
 export type CongesMaternite = BaseIndicateurNote & {
   non_calculable?: "absrcm" | "absaugpdtcm" | "am";
+  résultat?: number;
 };
 /**
  * Indicateur 5 relatif au nombre de salariés du sexe sous-représenté parmi les 10 salariés ayant perçu les plus hautes rémunérations
