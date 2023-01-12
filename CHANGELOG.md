@@ -1,3 +1,10 @@
+# [2.68.0](https://github.com/SocialGouv/egapro/compare/v2.67.0...v2.68.0) (2023-01-12)
+
+
+### Features
+
+* date minus one day for error message ([908d001](https://github.com/SocialGouv/egapro/commit/908d0010f418f8bcbee89d15095c418ccec264b7))
+
 # [2.67.0](https://github.com/SocialGouv/egapro/compare/v2.66.0...v2.67.0) (2023-01-11)
 
 
