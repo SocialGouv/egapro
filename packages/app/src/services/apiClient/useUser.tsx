@@ -21,7 +21,7 @@ interface PersistedTokenState {
 const SyncLegacyTokenStorage: StateStorage = {
   getItem(key) {
     if (key === TOKEN_KEY) {
-      let currentStateToken = localStorage.getItem(key);
+      let currentStateToken = localStorage.getItem(TOKEN_KEY);
       const legacyToken = localStorage.getItem(LEGACY_TOKEN_KEY);
       if (!currentStateToken) {
         if (legacyToken) {
@@ -31,7 +31,7 @@ const SyncLegacyTokenStorage: StateStorage = {
             },
             version: 0,
           });
-          localStorage.setItem(key, currentStateToken);
+          localStorage.setItem(TOKEN_KEY, currentStateToken);
         }
       } else {
         const parsedStatedToken = JSON.parse(currentStateToken) as PersistedTokenState;
@@ -92,11 +92,6 @@ export const useUserStore = create<UserStore>()(
  *
  * @example
  * ```ts
- * useUser({ checkTokenInUrl: true }); => for a Next page, it allows to detect & use a token in URL and put it in local storage in order to login automatically
- * ```
- *
- * @example
- * ```ts
  * const {
  *  user,            // user data
  *  error,           // potential useSWR error in fetching user data
@@ -119,7 +114,7 @@ export const useUser = ({ redirectTo }: { redirectTo?: string } = {}) => {
     setToken("");
   }, [setToken]);
 
-  // Automatic login via URL if checkTokenInURL is present.
+  // Automatic login via URL.
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("token");
 
