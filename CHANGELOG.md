@@ -1,3 +1,43 @@
+## [2.68.1](https://github.com/SocialGouv/egapro/compare/v2.68.0...v2.68.1) (2023-01-12)
+
+
+### Bug Fixes
+
+* wording for recapitulatif page ([3c1d6cd](https://github.com/SocialGouv/egapro/commit/3c1d6cd02556d8ad178a848957f5515acbc5c455))
+
+# [2.68.0](https://github.com/SocialGouv/egapro/compare/v2.67.0...v2.68.0) (2023-01-12)
+
+
+### Features
+
+* date minus one day for error message ([908d001](https://github.com/SocialGouv/egapro/commit/908d0010f418f8bcbee89d15095c418ccec264b7))
+
+# [2.67.0](https://github.com/SocialGouv/egapro/compare/v2.66.0...v2.67.0) (2023-01-11)
+
+
+### Bug Fixes
+
+* error in previous refactor ([66b92df](https://github.com/SocialGouv/egapro/commit/66b92df011d718852e9bff89a30497868918801c))
+
+
+### Features
+
+* adapt wording for recap page ([#1512](https://github.com/SocialGouv/egapro/issues/1512)) ([458c27d](https://github.com/SocialGouv/egapro/commit/458c27d257c04e812927fbc6bde4124ea8c943bb))
+
+# [2.66.0](https://github.com/SocialGouv/egapro/compare/v2.65.0...v2.66.0) (2023-01-11)
+
+
+### Features
+
+* message recapitulatif when indicateur at None state ([#1511](https://github.com/SocialGouv/egapro/issues/1511)) ([7ab30a5](https://github.com/SocialGouv/egapro/commit/7ab30a5d7bfbb16038411a1a2747ee2b62edf774))
+
+# [2.65.0](https://github.com/SocialGouv/egapro/compare/v2.64.0...v2.65.0) (2023-01-11)
+
+
+### Features
+
+* allow percentage above 100 ([#1508](https://github.com/SocialGouv/egapro/issues/1508)) ([8874816](https://github.com/SocialGouv/egapro/commit/88748168ef4dccb74820a44b77b82a5eb997db8b))
+
 # [2.64.0](https://github.com/SocialGouv/egapro/compare/v2.63.0...v2.64.0) (2023-01-11)
 
 

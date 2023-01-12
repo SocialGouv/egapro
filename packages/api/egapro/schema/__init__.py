@@ -295,7 +295,7 @@ def _cross_validate(data):
         assert not data.path(f"{base}.population_favorable"), msg
 
 
-def extrapolate(definition):
+def extrapolate(definition: str):
     # TODO: arbitrate between ?key: value and key: ?value
     if definition.startswith("?"):
         return {"oneOf": [{"type": "null"}, extrapolate(definition[1:])]}
@@ -315,7 +315,7 @@ def extrapolate(definition):
         type_ = float if "." in definition else int
         out = {"type": "number" if type_ is float else "integer"}
         min_ = max_ = None
-        minmax = definition.split(":")
+        minmax = [el for el in definition.split(":") if el != ""]
         if len(minmax) == 2:
             min_, max_ = minmax
         elif definition.startswith(":"):
