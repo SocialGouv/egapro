@@ -56,6 +56,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                         to={`${
                           process.env.REACT_APP_DECLARATION_URL || "/index-egapro/declaration/"
                         }/?siren=${siren}&year=${annee}`}
+                        isExternal
                       >
                         {siren}
                       </Link>
@@ -91,7 +92,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                       )}
                     </Td>
                     <Td>
-                      <Link target="_blank" href={`/api/declaration/${siren}/${annee}/pdf`}>
+                      <Link target="_blank" href={`/api/declaration/${siren}/${annee}/pdf`} isExternal>
                         Télécharger
                       </Link>
                     </Td>
