@@ -1,4 +1,4 @@
-name: Release
+name: 🔖 Release
 
 on:
   workflow_dispatch:
@@ -25,26 +25,29 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version-file: '.nvmrc'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     - name: Restore yarn cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - name: Install dependencies
+      run: yarn install --prefer-offline --frozen-lockfile
 
     - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.SOCIALGROOVYBOT_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SOCIALGROOVYBOT_GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_push_gpgsign: false
-          git_tag_gpgsign: true
-      - name: Semantic Release
-        run: |
-          export PATH="$(pwd)/.github/bin/:$PATH"
-          yarn semantic-release
+      uses: crazy-max/ghaction-import-gpg@v5
+      with:
+        gpg_private_key: ${{ secrets.SOCIALGROOVYBOT_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.SOCIALGROOVYBOT_GPG_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+        git_push_gpgsign: false
+        git_tag_gpgsign: true
+    - name: Semantic Release
+      run: |
+        export PATH="$(pwd)/.github/bin/:$PATH"
+        yarn semantic-release

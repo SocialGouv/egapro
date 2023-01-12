@@ -30,6 +30,10 @@
     "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov"
   },
   "devDependencies": {
-    "concurrently": "^7.2.2"
+    "@semantic-release/changelog": "^6.0.2",
+    "@semantic-release/git": "^10.0.1",
+    "@socialgouv/releaserc": "^1.1.1",
+    "concurrently": "^7.2.2",
+    "semantic-release": "^19"
   }
 }
