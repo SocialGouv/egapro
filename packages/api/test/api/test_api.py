@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from egapro import db
+from egapro import db, constants
 
 pytestmark = pytest.mark.asyncio
 
@@ -146,10 +146,10 @@ async def test_search_representation_equilibree_endpoint(client):
 async def test_stats_endpoint(client):
     await db.declaration.put(
         "12345671",
-        2021,
+        constants.CURRENT_YEAR,
         "foo@bar.org",
         {
-            "déclaration": {"index": 95, "année_indicateurs": 2021},
+            "déclaration": {"index": 95, "année_indicateurs": constants.CURRENT_YEAR},
             "id": "12345678-1234-5678-9012-123456789013",
             "entreprise": {
                 "raison_sociale": "Bio c Bon",
@@ -160,10 +160,10 @@ async def test_stats_endpoint(client):
     )
     await db.declaration.put(
         "123456782",
-        2021,
+        constants.CURRENT_YEAR,
         "foo@bar.org",
         {
-            "déclaration": {"index": 93, "année_indicateurs": 2021},
+            "déclaration": {"index": 93, "année_indicateurs": constants.CURRENT_YEAR},
             "id": "12345678-1234-5678-9012-123456789012",
             "entreprise": {
                 "raison_sociale": "RoboCoop",
@@ -204,7 +204,7 @@ async def test_config_endpoint(client):
         "SECTIONS_NAF",
         "READONLY",
     ]
-    assert json.loads(resp.body)["YEARS"] == [2018, 2019, 2020, 2021]
+    assert json.loads(resp.body)["YEARS"] == constants.YEARS
     resp = await client.get("/config?key=YEARS&key=REGIONS")
     assert resp.status == 200
     assert list(json.loads(resp.body).keys()) == [

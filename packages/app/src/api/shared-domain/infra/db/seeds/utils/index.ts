@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { Declaration } from "@common/core-domain/domain/Declaration";
-import { DeclarationData } from "@common/core-domain/domain/DeclarationData";
+import { RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
+import { RepresentationEquilibreeData } from "@common/core-domain/domain/RepresentationEquilibreeData";
 import { Siren } from "@common/core-domain/domain/valueObjects/Siren";
-import { COUNTIES, NAF, REGIONS, REGIONS_TO_COUNTIES, YEARS } from "@common/dict";
+import { COUNTIES, NAF, REGIONS, REGIONS_TO_COUNTIES, YEARS_REPEQ } from "@common/dict";
 import { Email, PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { generateLuhnNumber } from "@common/utils/luhn";
 import { Object } from "@common/utils/overload";
@@ -39,13 +39,12 @@ export const getRandomDeclarationRepEq = () => {
   const executiveMenPercent = _.random(100);
   const memberMenPercent = _.random(100);
 
-  return new Declaration({
-    declarant: declarantEmail,
+  return new RepresentationEquilibree({
     declaredAt,
     modifiedAt: declaredAt,
     siren,
     year: new PositiveNumber(new Date().getFullYear()),
-    data: DeclarationData.fromJson({
+    data: RepresentationEquilibreeData.fromJson({
       company: {
         hasRecoveryPlan: false,
         siren: siren.getValue(),
@@ -66,7 +65,7 @@ export const getRandomDeclarationRepEq = () => {
       },
       declaration: {
         draft: false,
-        indicatorsYear: _.sample(YEARS)!,
+        indicatorsYear: _.sample(YEARS_REPEQ)!,
         sufficientPeriod: false,
         endReferencePeriod: new Date(declaredAt.getFullYear(), 12).toISOString(),
       },

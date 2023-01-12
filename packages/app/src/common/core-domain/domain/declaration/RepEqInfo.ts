@@ -5,22 +5,23 @@ import { PositiveNumber } from "@common/shared-domain/domain/valueObjects";
 import { CorrectiveMeasures } from "../valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { DeclarationIndex } from "../valueObjects/declaration/declarationInfo/DeclarationIndex";
 import { DeclarationIndicatorsYear } from "../valueObjects/declaration/declarationInfo/DeclarationIndicatorsYear";
+import type { RepEqIndicatorsYear } from "../valueObjects/declaration/declarationInfo/RepEqIndicatorsYear";
 import { Publication } from "./declarationInfo/Publication";
 
-export interface DeclarationInfoProps {
+export interface RepEqInfoProps {
   computablePoints?: PositiveNumber;
   correctiveMeasures?: CorrectiveMeasures;
   date?: Date;
   draft: boolean;
   endReferencePeriod?: Date;
   index?: DeclarationIndex;
-  indicatorsYear: DeclarationIndicatorsYear;
+  indicatorsYear: RepEqIndicatorsYear;
   points?: PositiveNumber;
   publication?: Publication;
   sufficientPeriod: boolean;
 }
 
-export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
+export class RepEqInfo extends JsonEntity<RepEqInfoProps, never> {
   /** `points_calculables` - Nombre total de points pouvant être obtenus */
   get computablePoints(): PositiveNumber | undefined {
     return this.props.computablePoints;
@@ -70,8 +71,8 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
     return this.props.sufficientPeriod;
   }
 
-  public fromJson(json: EntityPropsToJson<DeclarationInfoProps>) {
-    const props: DeclarationInfoProps = {
+  public fromJson(json: EntityPropsToJson<RepEqInfoProps>) {
+    const props: RepEqInfoProps = {
       draft: json.draft,
       indicatorsYear: new DeclarationIndicatorsYear(json.indicatorsYear),
       sufficientPeriod: json.sufficientPeriod,
@@ -88,8 +89,8 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
     if (json.endReferencePeriod) props.endReferencePeriod = new Date(json.endReferencePeriod);
     if (typeof json.index === "number") props.index = new DeclarationIndex(json.index);
     if (typeof json.points === "number") props.points = new PositiveNumber(json.points);
-    if (json.publication) props.publication = Publication.fromJson(json.publication);
+    if (json.publication) props.publication = Publication.fromJson<Publication>(json.publication);
 
-    return new DeclarationInfo(props) as this;
+    return new RepEqInfo(props) as this;
   }
 }
