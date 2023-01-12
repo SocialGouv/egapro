@@ -1,3 +1,10 @@
+## [2.70.2](https://github.com/SocialGouv/egapro/compare/v2.70.1...v2.70.2) (2023-01-12)
+
+
+### Bug Fixes
+
+* remove config logging ([73acdf1](https://github.com/SocialGouv/egapro/commit/73acdf1b0da9a7a3f17f8cebe215fac23f8a3ef5))
+
 ## [2.70.1](https://github.com/SocialGouv/egapro/compare/v2.70.0...v2.70.1) (2023-01-12)
 
 
