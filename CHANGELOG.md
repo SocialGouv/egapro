@@ -1,3 +1,10 @@
+## [2.70.1](https://github.com/SocialGouv/egapro/compare/v2.70.0...v2.70.1) (2023-01-12)
+
+
+### Bug Fixes
+
+* smtp-app secret ([62b38c6](https://github.com/SocialGouv/egapro/commit/62b38c6d64e53e18600a5bf39cafb71b34190603))
+
 # [2.70.0](https://github.com/SocialGouv/egapro/compare/v2.69.0...v2.70.0) (2023-01-12)
 
 
