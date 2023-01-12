@@ -4,9 +4,11 @@ on:
     branches:
       - "**"
       - "!master"
-      - "!main"
       - "!feat/**"
+      - "!feature/**"
       - "!fix/**"
+      - "!hotfix/**"
+      - "!**/review/**"
 
 concurrency:
   cancel-in-progress: true
