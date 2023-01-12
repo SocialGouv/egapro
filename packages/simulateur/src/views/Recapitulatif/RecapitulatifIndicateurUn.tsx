@@ -19,6 +19,7 @@ import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurUnProps {
+  isEffectifsFilled: boolean
   indicateurUnFormValidated: FormState
   effectifsIndicateurUnCalculable: boolean
   effectifEtEcartRemuParTranche: Array<effectifEtEcartRemuGroupCsp> | Array<effectifEtEcartRemuGroupCoef>
@@ -29,6 +30,7 @@ interface RecapitulatifIndicateurUnProps {
 }
 
 const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProps> = ({
+  isEffectifsFilled,
   indicateurUnFormValidated,
   effectifsIndicateurUnCalculable,
   effectifEtEcartRemuParTranche,
@@ -37,7 +39,11 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   indicateurUnParCSP,
   noteIndicateurUn,
 }) => {
-  if (indicateurUnFormValidated !== "None" && !effectifsIndicateurUnCalculable) {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur1" />
+  }
+
+  if (!effectifsIndicateurUnCalculable) {
     const messageCalculParCSP = indicateurUnParCSP ? (
       ""
     ) : (

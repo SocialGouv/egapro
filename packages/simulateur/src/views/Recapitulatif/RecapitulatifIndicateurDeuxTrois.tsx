@@ -12,6 +12,7 @@ import { getResults } from "../Indicateur2et3/IndicateurDeuxTrois"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 
 interface RecapitulatifIndicateurDeuxTroisProps {
+  isEffectifsFilled: boolean
   indicateurDeuxTroisFormValidated: FormState
   effectifsIndicateurDeuxTroisCalculable: boolean
   indicateurDeuxTroisCalculable: boolean
@@ -26,6 +27,7 @@ interface RecapitulatifIndicateurDeuxTroisProps {
 }
 
 const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateurDeuxTroisProps> = ({
+  isEffectifsFilled,
   indicateurDeuxTroisFormValidated,
   effectifsIndicateurDeuxTroisCalculable,
   indicateurDeuxTroisCalculable,
@@ -37,7 +39,11 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
   tauxAugmentationPromotionFemmes,
   tauxAugmentationPromotionHommes,
 }) => {
-  if (indicateurDeuxTroisFormValidated !== "None" && !effectifsIndicateurDeuxTroisCalculable) {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur2et3" />
+  }
+
+  if (!effectifsIndicateurDeuxTroisCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -47,7 +53,7 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
     )
   }
 
-  if (indicateurDeuxTroisFormValidated !== "None" && !indicateurDeuxTroisCalculable) {
+  if (!indicateurDeuxTroisCalculable) {
     return (
       <InfoBlock
         type="warning"

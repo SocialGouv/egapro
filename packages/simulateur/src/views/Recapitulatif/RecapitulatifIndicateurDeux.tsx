@@ -16,6 +16,7 @@ import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurDeuxProps {
+  isEffectifsFilled: boolean
   indicateurDeuxFormValidated: FormState
   effectifsIndicateurDeuxCalculable: boolean
   indicateurDeuxCalculable: boolean
@@ -30,6 +31,7 @@ interface RecapitulatifIndicateurDeuxProps {
 }
 
 const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeuxProps> = ({
+  isEffectifsFilled,
   indicateurDeuxFormValidated,
   effectifsIndicateurDeuxCalculable,
   indicateurDeuxCalculable,
@@ -39,7 +41,11 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   noteIndicateurDeux,
   correctionMeasure,
 }) => {
-  if (indicateurDeuxFormValidated !== "None" && !effectifsIndicateurDeuxCalculable) {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur2" />
+  }
+
+  if (!effectifsIndicateurDeuxCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -49,7 +55,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     )
   }
 
-  if (indicateurDeuxFormValidated !== "None" && !indicateurDeuxCalculable) {
+  if (!indicateurDeuxCalculable) {
     return (
       <InfoBlock
         type="warning"
