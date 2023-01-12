@@ -72,12 +72,12 @@ exports[`should match snapshot 1`] = `
                 class="chakra-link css-1n49pl7"
                 href="/"
               >
-                Index Egapro
+                Egapro
               </a>
               <p
                 class="chakra-text css-1lj023j"
               >
-                L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                Index de l’égalité professionnelle et représentation équilibrée
               </p>
             </div>
           </div>
@@ -153,12 +153,12 @@ exports[`should match snapshot 1`] = `
               class="chakra-link css-1n49pl7"
               href="/"
             >
-              Index Egapro
+              Egapro
             </a>
             <p
               class="chakra-text css-1lj023j"
             >
-              L'outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+              Index de l’égalité professionnelle et représentation équilibrée
             </p>
           </div>
         </div>

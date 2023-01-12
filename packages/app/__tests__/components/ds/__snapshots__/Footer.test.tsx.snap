@@ -82,7 +82,7 @@ exports[`should match snapshot 1`] = `
             <i
               class="chakra-text css-g5hezf"
             >
-              Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
+              Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des ministères sociaux.
             </i>
             <p
               class="chakra-text css-iesxu2"
@@ -91,7 +91,7 @@ exports[`should match snapshot 1`] = `
                
               <a
                 class="chakra-link css-1qsits3"
-                href="https://github.com/SocialGouv/egapro/tree/1.21.0"
+                href="https://github.com/SocialGouv/egapro/commit/"
                 rel="noopener"
                 target="_blank"
               >
@@ -181,7 +181,7 @@ exports[`should match snapshot 1`] = `
           <i
             class="chakra-text css-g5hezf"
           >
-            Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
+            Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des ministères sociaux.
           </i>
           <p
             class="chakra-text css-iesxu2"
@@ -190,7 +190,7 @@ exports[`should match snapshot 1`] = `
              
             <a
               class="chakra-link css-1qsits3"
-              href="https://github.com/SocialGouv/egapro/tree/1.21.0"
+              href="https://github.com/SocialGouv/egapro/commit/"
               rel="noopener"
               target="_blank"
             >
