@@ -1,3 +1,10 @@
+## [2.70.3](https://github.com/SocialGouv/egapro/compare/v2.70.2...v2.70.3) (2023-01-12)
+
+
+### Bug Fixes
+
+* add proper env from globals in kontinuous config ([af18fcd](https://github.com/SocialGouv/egapro/commit/af18fcd56aefc14083e98151c40409051b8fe62f))
+
 ## [2.70.2](https://github.com/SocialGouv/egapro/compare/v2.70.1...v2.70.2) (2023-01-12)
 
 
