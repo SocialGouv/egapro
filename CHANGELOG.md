@@ -1,3 +1,10 @@
+## [2.68.1](https://github.com/SocialGouv/egapro/compare/v2.68.0...v2.68.1) (2023-01-12)
+
+
+### Bug Fixes
+
+* wording for recapitulatif page ([3c1d6cd](https://github.com/SocialGouv/egapro/commit/3c1d6cd02556d8ad178a848957f5515acbc5c455))
+
 # [2.68.0](https://github.com/SocialGouv/egapro/compare/v2.67.0...v2.68.0) (2023-01-12)
 
 
