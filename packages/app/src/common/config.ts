@@ -1,5 +1,3 @@
-import { inspect } from "util";
-
 import { ensureApiEnvVar, ensureNextEnvVar } from "./utils/os";
 import { isTruthy } from "./utils/string";
 import type { Any } from "./utils/types";
@@ -58,16 +56,8 @@ export const config = {
 } as const;
 
 // TODO better debug
-if (config.env !== "prod") {
-  if (typeof window !== "undefined") {
-    (window as Any)._egaproConfig = config;
-  } else {
-    process.env.DEBUG_CONFIG_SHOWN ||= "0";
-    if (process.env.DEBUG_CONFIG_SHOWN === "0") {
-      console.log("== EGAPRO CONFIG", inspect(config, { getters: "get", depth: Infinity }));
-      process.env.DEBUG_CONFIG_SHOWN = "1";
-    }
-  }
+if (typeof window !== "undefined") {
+  (window as Any)._egaproConfig = config;
 }
 
 interface ServicesConfig {
