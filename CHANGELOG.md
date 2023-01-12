@@ -1,3 +1,10 @@
+# [2.70.0](https://github.com/SocialGouv/egapro/compare/v2.69.0...v2.70.0) (2023-01-12)
+
+
+### Features
+
+* add 2022 as last year of decla ([#1509](https://github.com/SocialGouv/egapro/issues/1509)) ([57db291](https://github.com/SocialGouv/egapro/commit/57db291afdf756b6b308952029cc944f63f3ba09))
+
 # [2.69.0](https://github.com/SocialGouv/egapro/compare/v2.68.1...v2.69.0) (2023-01-12)
 
 
