@@ -40,7 +40,7 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
                 {yearsRepEqs.map((annee: string) => (
                   <Tr key={annee}>
                     <Td>
-                      <Link target="_blank" href={`/representation-equilibree/${siren}/${annee}`}>
+                      <Link href={`/representation-equilibree/${siren}/${annee}`} isExternal>
                         {siren}
                       </Link>
                     </Td>
@@ -75,7 +75,7 @@ const RepEqsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
                       </>
                     )}
                     <Td>
-                      <Link target="_blank" href={`/api/representation-equilibree/${siren}/${annee}/pdf`}>
+                      <Link href={`/api/representation-equilibree/${siren}/${annee}/pdf`} isExternal>
                         Télécharger
                       </Link>
                     </Td>

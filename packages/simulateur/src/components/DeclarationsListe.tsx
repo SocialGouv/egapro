@@ -92,7 +92,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                       )}
                     </Td>
                     <Td>
-                      <Link target="_blank" href={`/api/declaration/${siren}/${annee}/pdf`} isExternal>
+                      <Link href={`/api/declaration/${siren}/${annee}/pdf`} isExternal>
                         Télécharger
                       </Link>
                     </Td>
