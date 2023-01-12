@@ -214,7 +214,7 @@ def _cross_validate(data):
                     # rule 13.b
                     assert data.path(path), msg
 
-            # l'année 2021 ne bougent pas pour le plan de relance (année mise en oeuvre du plan du relance)
+            # l'année 2021 ne bouge pas pour le plan de relance (année mise en oeuvre du plan du relance)
             if data.year >= 2021:
                 msg = "data.entreprise.plan_relance doit être défini"
                 # rule 14
