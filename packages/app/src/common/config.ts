@@ -2,7 +2,7 @@ import { ensureApiEnvVar, ensureNextEnvVar } from "./utils/os";
 import { isTruthy } from "./utils/string";
 import type { Any } from "./utils/types";
 
-export type FeatureFlag = "apiv2" | "repeq-search" | "repeq";
+export type FeatureFlag = "apiv2" | "repeq-search";
 
 export const config = {
   githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
@@ -17,7 +17,6 @@ export const config = {
   env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
   get ff(): Record<FeatureFlag, boolean> {
     return {
-      repeq: this.env !== "prod",
       "repeq-search": this.env !== "prod",
       apiv2: this.env !== "prod",
     };
