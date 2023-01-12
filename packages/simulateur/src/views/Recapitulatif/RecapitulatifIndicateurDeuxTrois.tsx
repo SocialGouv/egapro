@@ -12,6 +12,7 @@ import { getResults } from "../Indicateur2et3/IndicateurDeuxTrois"
 import MessageWhenInvalid from "./components/MessageWhenInvalid"
 
 interface RecapitulatifIndicateurDeuxTroisProps {
+  isEffectifsFilled: boolean
   indicateurDeuxTroisFormValidated: FormState
   effectifsIndicateurDeuxTroisCalculable: boolean
   indicateurDeuxTroisCalculable: boolean
@@ -26,6 +27,7 @@ interface RecapitulatifIndicateurDeuxTroisProps {
 }
 
 const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateurDeuxTroisProps> = ({
+  isEffectifsFilled,
   indicateurDeuxTroisFormValidated,
   effectifsIndicateurDeuxTroisCalculable,
   indicateurDeuxTroisCalculable,
@@ -37,10 +39,11 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
   tauxAugmentationPromotionFemmes,
   tauxAugmentationPromotionHommes,
 }) => {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur2et3" />
+  }
+
   if (!effectifsIndicateurDeuxTroisCalculable) {
-    if (indicateurDeuxTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur2et3" />
-    }
     return (
       <InfoBlock
         type="warning"
@@ -51,9 +54,6 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
   }
 
   if (!indicateurDeuxTroisCalculable) {
-    if (indicateurDeuxTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur2et3" />
-    }
     return (
       <InfoBlock
         type="warning"
@@ -61,6 +61,10 @@ const RecapitulatifIndicateurDeuxTrois: FunctionComponent<RecapitulatifIndicateu
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d'augmentation durant la période de référence"
       />
     )
+  }
+
+  if (indicateurDeuxTroisFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2et3" />
   }
 
   const results = getResults(indicateurEcartAugmentationPromotion, indicateurEcartNombreEquivalentSalaries)

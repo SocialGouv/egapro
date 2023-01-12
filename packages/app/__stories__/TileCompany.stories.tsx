@@ -1,5 +1,3 @@
-import { action } from "@storybook/addon-actions";
-import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import {
   TileCompany,
   TileCompanyLoadMore,
@@ -16,6 +14,8 @@ import {
   TileCompanyTitle,
   TileCompanyYear,
 } from "@design-system";
+import { action } from "@storybook/addon-actions";
+import type { ComponentMeta, ComponentStory } from "@storybook/react";
 
 export default {
   title: "Base/TileCompany",
@@ -64,8 +64,8 @@ export const Default: ComponentStory<typeof TileCompany> = () => {
             </TileCompanyTableBodyRowCol>
             <TileCompanyTableBodyRowCol>
               <TileCompanyPercent>
-                <TileCompanyPercentData legend="Femmes" />
-                <TileCompanyPercentData legend="Hommes" />
+                <TileCompanyPercentData number={null} legend="Femmes" />
+                <TileCompanyPercentData number={null} legend="Hommes" />
               </TileCompanyPercent>
             </TileCompanyTableBodyRowCol>
           </TileCompanyTableBodyRow>
@@ -117,8 +117,8 @@ export const ShowMoreRow: ComponentStory<typeof TileCompany> = () => {
             </TileCompanyTableBodyRowCol>
             <TileCompanyTableBodyRowCol>
               <TileCompanyPercent>
-                <TileCompanyPercentData legend="Femmes" />
-                <TileCompanyPercentData legend="Hommes" />
+                <TileCompanyPercentData number={null} legend="Femmes" />
+                <TileCompanyPercentData number={null} legend="Hommes" />
               </TileCompanyPercent>
             </TileCompanyTableBodyRowCol>
           </TileCompanyTableBodyRow>

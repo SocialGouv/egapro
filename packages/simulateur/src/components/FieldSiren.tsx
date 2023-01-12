@@ -155,9 +155,11 @@ const FieldSiren: FunctionComponent<FieldSirenProps> = ({
               {buildLabelError(field.meta.error)}
               {field.meta.error === NOT_ALLOWED_MESSAGE && (
                 <>
-                  {" "}
                   Vous devez faire une demande de rattachement en remplissant le formulaire{" "}
-                  <TextLink to="/ajout-declarant">ici</TextLink>.
+                  <TextLink to="/ajout-declarant" isExternal>
+                    ici
+                  </TextLink>
+                  .
                 </>
               )}
             </div>

@@ -16,6 +16,7 @@ import RecapBloc from "./components/RecapBloc"
 import { indicateursInfo } from "../../config"
 
 interface RecapitulatifIndicateurTroisProps {
+  isEffectifsFilled: boolean
   indicateurTroisFormValidated: FormState
   effectifsIndicateurTroisCalculable: boolean
   indicateurTroisCalculable: boolean
@@ -30,6 +31,7 @@ interface RecapitulatifIndicateurTroisProps {
 }
 
 const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTroisProps> = ({
+  isEffectifsFilled,
   indicateurTroisFormValidated,
   effectifsIndicateurTroisCalculable,
   indicateurTroisCalculable,
@@ -39,10 +41,11 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   noteIndicateurTrois,
   correctionMeasure,
 }) => {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur3" />
+  }
+
   if (!effectifsIndicateurTroisCalculable) {
-    if (indicateurTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur3" />
-    }
     return (
       <InfoBlock
         type="warning"
@@ -53,9 +56,6 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   }
 
   if (!indicateurTroisCalculable) {
-    if (indicateurTroisFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur3" />
-    }
     return (
       <InfoBlock
         type="warning"
@@ -63,6 +63,10 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu de promotion durant la période de référence"
       />
     )
+  }
+
+  if (indicateurTroisFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur3" />
   }
 
   return (

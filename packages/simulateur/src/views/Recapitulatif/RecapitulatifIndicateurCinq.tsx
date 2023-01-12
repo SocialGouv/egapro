@@ -18,7 +18,7 @@ const RecapitulatifIndicateurCinq: FunctionComponent<RecapitulatifIndicateurCinq
   indicateurNombreSalariesSexeSousRepresente,
   noteIndicateurCinq,
 }) => {
-  if (indicateurCinqFormValidated !== "Valid") {
+  if (indicateurCinqFormValidated === "None") {
     return <MessageWhenInvalid indicateur="indicateur5" />
   }
 

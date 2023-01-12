@@ -1,3 +1,4 @@
+import type { Any } from "@common/utils/types";
 import type { Attachment } from "nodemailer/lib/mailer";
 
 export type MailTemplate = {
@@ -7,3 +8,5 @@ export type MailTemplate = {
   subject: string;
   text: string;
 };
+
+export type MailTemplateFunction = (...args: Any[]) => MailTemplate;

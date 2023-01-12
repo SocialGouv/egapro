@@ -1,10 +1,8 @@
-import { inspect } from "util";
-
 import { ensureApiEnvVar, ensureNextEnvVar } from "./utils/os";
 import { isTruthy } from "./utils/string";
 import type { Any } from "./utils/types";
 
-export type FeatureFlag = "apiv2" | "repeq-search" | "repeq";
+export type FeatureFlag = "apiv2" | "repeq-search";
 
 export const config = {
   githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
@@ -19,7 +17,6 @@ export const config = {
   env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
   get ff(): Record<FeatureFlag, boolean> {
     return {
-      repeq: this.env !== "prod",
       "repeq-search": this.env !== "prod",
       apiv2: this.env !== "prod",
     };
@@ -58,16 +55,8 @@ export const config = {
 } as const;
 
 // TODO better debug
-if (config.env !== "prod") {
-  if (typeof window !== "undefined") {
-    (window as Any)._egaproConfig = config;
-  } else {
-    process.env.DEBUG_CONFIG_SHOWN ||= "0";
-    if (process.env.DEBUG_CONFIG_SHOWN === "0") {
-      console.log("== EGAPRO CONFIG", inspect(config, { getters: "get", depth: Infinity }));
-      process.env.DEBUG_CONFIG_SHOWN = "1";
-    }
-  }
+if (typeof window !== "undefined") {
+  (window as Any)._egaproConfig = config;
 }
 
 interface ServicesConfig {

@@ -7,15 +7,31 @@ import { useField } from "react-final-form"
 import { hasFieldError } from "./Input"
 import { displayMetaErrors } from "../utils/form-error-helpers"
 
-interface RadiosBooleanProps {
+import { required } from "../utils/formHelpers"
+
+const validate = (value: string) => {
+  const requiredError = required(value)
+  if (requiredError) {
+    return {
+      required: requiredError,
+    }
+  }
+}
+
+interface RequiredRadiosBooleanProps {
   readOnly: boolean
   fieldName: string
   value?: string
   label?: string | React.ReactElement
 }
 
-const RadiosBoolean: FunctionComponent<RadiosBooleanProps> = ({ readOnly, fieldName, label, value }) => {
-  const field = useField(fieldName)
+const RequiredRadiosBoolean: FunctionComponent<RequiredRadiosBooleanProps> = ({
+  readOnly,
+  fieldName,
+  label,
+  value,
+}) => {
+  const field = useField(fieldName, { validate })
   const error = hasFieldError(field.meta)
 
   return (
@@ -34,4 +50,4 @@ const RadiosBoolean: FunctionComponent<RadiosBooleanProps> = ({ readOnly, fieldN
   )
 }
 
-export default RadiosBoolean
+export default RequiredRadiosBoolean

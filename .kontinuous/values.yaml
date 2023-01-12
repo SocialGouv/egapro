@@ -30,6 +30,7 @@ app:
     POSTGRES_SSLMODE: "$(PGSSLMODE)"
     SECURITY_JWT_SECRET: "$(EGAPRO_SECRET)"
     SENTRY_DSN: "https://084bf19c0e1141ddadbc1f7b86d2eb57@sentry.fabrique.social.gouv.fr/22"
+    EGAPRO_ENV: "{{ .Values.global.env }}"
 
 storybook:
   ~chart: app
@@ -167,6 +168,7 @@ jobs:
           NEXT_PUBLIC_API_URL: "https://{{ .Values.global.host }}/api"
           NEXT_PUBLIC_API_V2_URL: "https://{{ .Values.global.host }}/apiv2"
           NEXT_PUBLIC_GITHUB_SHA: "{{ $.Values.global.sha }}"
+          EGAPRO_ENV: "{{ .Values.global.env }}"
 
     build-storybook:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build

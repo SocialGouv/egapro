@@ -19,6 +19,7 @@ import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurUnProps {
+  isEffectifsFilled: boolean
   indicateurUnFormValidated: FormState
   effectifsIndicateurUnCalculable: boolean
   effectifEtEcartRemuParTranche: Array<effectifEtEcartRemuGroupCsp> | Array<effectifEtEcartRemuGroupCoef>
@@ -29,6 +30,7 @@ interface RecapitulatifIndicateurUnProps {
 }
 
 const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProps> = ({
+  isEffectifsFilled,
   indicateurUnFormValidated,
   effectifsIndicateurUnCalculable,
   effectifEtEcartRemuParTranche,
@@ -37,10 +39,11 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   indicateurUnParCSP,
   noteIndicateurUn,
 }) => {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur1" />
+  }
+
   if (!effectifsIndicateurUnCalculable) {
-    if (indicateurUnFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur1" />
-    }
     const messageCalculParCSP = indicateurUnParCSP ? (
       ""
     ) : (
@@ -53,6 +56,10 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
         text={`Malheureusement votre indicateur n’est pas calculable car l’ensemble des groupes valables (c’est-à-dire comptant au moins 3 femmes et 3 hommes), représentent moins de 40% des effectifs. ${messageCalculParCSP}`}
       />
     )
+  }
+
+  if (indicateurUnFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur1" />
   }
 
   // @ts-ignore

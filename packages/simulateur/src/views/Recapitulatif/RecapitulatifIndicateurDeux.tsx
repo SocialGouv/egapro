@@ -16,6 +16,7 @@ import MessageWhenInvalid from "./components/MessageWhenInvalid"
 import RecapBloc from "./components/RecapBloc"
 
 interface RecapitulatifIndicateurDeuxProps {
+  isEffectifsFilled: boolean
   indicateurDeuxFormValidated: FormState
   effectifsIndicateurDeuxCalculable: boolean
   indicateurDeuxCalculable: boolean
@@ -30,6 +31,7 @@ interface RecapitulatifIndicateurDeuxProps {
 }
 
 const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeuxProps> = ({
+  isEffectifsFilled,
   indicateurDeuxFormValidated,
   effectifsIndicateurDeuxCalculable,
   indicateurDeuxCalculable,
@@ -39,10 +41,11 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   noteIndicateurDeux,
   correctionMeasure,
 }) => {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur2" />
+  }
+
   if (!effectifsIndicateurDeuxCalculable) {
-    if (indicateurDeuxFormValidated !== "Valid") {
-      return <MessageWhenInvalid indicateur="indicateur2" />
-    }
     return (
       <InfoBlock
         type="warning"
@@ -60,6 +63,10 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
         text="Malheureusement votre indicateur n’est pas calculable car il n’y a pas eu d’augmentation durant la période de référence"
       />
     )
+  }
+
+  if (indicateurDeuxFormValidated === "None") {
+    return <MessageWhenInvalid indicateur="indicateur2" />
   }
 
   return (
