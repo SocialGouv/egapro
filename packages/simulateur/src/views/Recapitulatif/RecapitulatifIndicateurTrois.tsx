@@ -16,6 +16,7 @@ import RecapBloc from "./components/RecapBloc"
 import { indicateursInfo } from "../../config"
 
 interface RecapitulatifIndicateurTroisProps {
+  isEffectifsFilled: boolean
   indicateurTroisFormValidated: FormState
   effectifsIndicateurTroisCalculable: boolean
   indicateurTroisCalculable: boolean
@@ -30,6 +31,7 @@ interface RecapitulatifIndicateurTroisProps {
 }
 
 const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTroisProps> = ({
+  isEffectifsFilled,
   indicateurTroisFormValidated,
   effectifsIndicateurTroisCalculable,
   indicateurTroisCalculable,
@@ -39,7 +41,11 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   noteIndicateurTrois,
   correctionMeasure,
 }) => {
-  if (indicateurTroisFormValidated !== "None" && !effectifsIndicateurTroisCalculable) {
+  if (!isEffectifsFilled) {
+    return <MessageWhenInvalid indicateur="indicateur3" />
+  }
+
+  if (!effectifsIndicateurTroisCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -49,7 +55,7 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
     )
   }
 
-  if (indicateurTroisFormValidated !== "None" && !indicateurTroisCalculable) {
+  if (!indicateurTroisCalculable) {
     return (
       <InfoBlock
         type="warning"
