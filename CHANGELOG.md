@@ -1,3 +1,11 @@
+## [2.70.5](https://github.com/SocialGouv/egapro/compare/v2.70.4...v2.70.5) (2023-01-12)
+
+
+### Bug Fixes
+
+* **ci:** lint release workflow ([c448717](https://github.com/SocialGouv/egapro/commit/c44871783101eba46e872fe65357879cd8d82e80))
+* upgrade kontinuous workflows ([#1503](https://github.com/SocialGouv/egapro/issues/1503)) ([c6c62f4](https://github.com/SocialGouv/egapro/commit/c6c62f4bc1ddece4c42c77f5f2f9d78e200ddea5))
+
 ## [2.70.4](https://github.com/SocialGouv/egapro/compare/v2.70.3...v2.70.4) (2023-01-12)
 
 
