@@ -118,7 +118,7 @@ const Header = () => {
                 </Link>
               </Box>
               <Box fontFamily="custom">
-                <Link as={RouterLink} to="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
+                <Link href="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
                   Egapro
                 </Link>
                 {!isMobile && (
