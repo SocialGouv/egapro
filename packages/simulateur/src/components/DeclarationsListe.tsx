@@ -52,8 +52,7 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Tr key={annee}>
                     <Td>
                       <Link
-                        as={RouterLink}
-                        to={`${
+                        href={`${
                           process.env.REACT_APP_DECLARATION_URL || "/index-egapro/declaration/"
                         }/?siren=${siren}&year=${annee}`}
                         isExternal
