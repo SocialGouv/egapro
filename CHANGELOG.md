@@ -1,3 +1,10 @@
+# [2.69.0](https://github.com/SocialGouv/egapro/compare/v2.68.1...v2.69.0) (2023-01-12)
+
+
+### Features
+
+* wording recap ([5f791a8](https://github.com/SocialGouv/egapro/commit/5f791a8e7d560aee92f964db0b2a1c14b0cd2a0d))
+
 ## [2.68.1](https://github.com/SocialGouv/egapro/compare/v2.68.0...v2.68.1) (2023-01-12)
 
 
