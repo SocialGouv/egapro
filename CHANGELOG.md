@@ -1,3 +1,10 @@
+## [2.70.4](https://github.com/SocialGouv/egapro/compare/v2.70.3...v2.70.4) (2023-01-12)
+
+
+### Bug Fixes
+
+* better feature flags ([0ef9aef](https://github.com/SocialGouv/egapro/commit/0ef9aeffd317ae41b8959c714667268241d5d387))
+
 ## [2.70.3](https://github.com/SocialGouv/egapro/compare/v2.70.2...v2.70.3) (2023-01-12)
 
 
