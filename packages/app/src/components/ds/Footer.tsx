@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Link, List, ListItem, Text } from "@chakra-ui/react";
+import { config } from "@common/config";
 
-import packageConfig from "../../../package.json";
 import { Logo } from "./Logo";
 import { TextLink } from "./TextLink";
 
@@ -10,8 +10,6 @@ export interface FooterProps {
 }
 
 export const Footer = ({ consultationMode }: FooterProps) => {
-  const version = process.env.REACT_APP_VERSION || packageConfig.version;
-
   return (
     <Box
       id="footer"
@@ -99,7 +97,8 @@ export const Footer = ({ consultationMode }: FooterProps) => {
           }}
         >
           <Text fontSize="sm" as="i">
-            Index Egapro a été développé par les équipes de la fabrique numérique des ministères sociaux
+            Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des
+            ministères sociaux.
           </Text>
           {consultationMode ? (
             <Text fontSize="sm" mt={1}>
@@ -108,7 +107,7 @@ export const Footer = ({ consultationMode }: FooterProps) => {
           ) : (
             <Text fontSize="sm" mt={1}>
               Pour nous aider à l'améliorer{" "}
-              <TextLink to={`https://github.com/SocialGouv/egapro/tree/${version}`} isExternal>
+              <TextLink to={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`} isExternal>
                 contribuez sur Github
               </TextLink>
             </Text>
