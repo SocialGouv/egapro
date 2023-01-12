@@ -3,7 +3,3 @@ repositoryName: egapro
 dependencies:
   fabrique:
     import: SocialGouv/kontinuous/plugins/fabrique
-
-environmentPatterns:
-  prod: false
-  dev: "!v*"
