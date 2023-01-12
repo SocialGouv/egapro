@@ -39,7 +39,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
   noteIndicateurDeux,
   correctionMeasure,
 }) => {
-  if (!effectifsIndicateurDeuxCalculable) {
+  if (indicateurDeuxFormValidated !== "None" && !effectifsIndicateurDeuxCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -49,7 +49,7 @@ const RecapitulatifIndicateurDeux: FunctionComponent<RecapitulatifIndicateurDeux
     )
   }
 
-  if (!indicateurDeuxCalculable) {
+  if (indicateurDeuxFormValidated !== "None" && !indicateurDeuxCalculable) {
     return (
       <InfoBlock
         type="warning"

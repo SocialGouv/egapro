@@ -39,7 +39,7 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
   noteIndicateurTrois,
   correctionMeasure,
 }) => {
-  if (!effectifsIndicateurTroisCalculable) {
+  if (indicateurTroisFormValidated !== "None" && !effectifsIndicateurTroisCalculable) {
     return (
       <InfoBlock
         type="warning"
@@ -49,7 +49,7 @@ const RecapitulatifIndicateurTrois: FunctionComponent<RecapitulatifIndicateurTro
     )
   }
 
-  if (!indicateurTroisCalculable) {
+  if (indicateurTroisFormValidated !== "None" && !indicateurTroisCalculable) {
     return (
       <InfoBlock
         type="warning"

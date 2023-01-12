@@ -278,6 +278,9 @@ checkDatePublication = (event) => {
     const parsedDate = new Date(target.value);
     const minDate = new Date(min);
 
+    const minDateMinusOneDay = new Date(minDate)
+    minDateMinusOneDay.setDate(minDateMinusOneDay.getDate() - 1)
+
     if (parsedDate.toString() === "Invalid Date") {
         // We check if the length is >= 2 because the list of sirens also contains the current value
         target.setCustomValidity(
@@ -285,7 +288,7 @@ checkDatePublication = (event) => {
         );
     } else if (parsedDate < minDate) {
         target.setCustomValidity(
-            `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${minDate.toLocaleDateString(
+            `La date ne peut précéder la date de fin de la période de référence choisie pour le calcul de votre index (${minDateMinusOneDay.toLocaleDateString(
                 "fr-FR"
             )})`
         );

@@ -37,7 +37,7 @@ const RecapitulatifIndicateurUn: FunctionComponent<RecapitulatifIndicateurUnProp
   indicateurUnParCSP,
   noteIndicateurUn,
 }) => {
-  if (!effectifsIndicateurUnCalculable) {
+  if (indicateurUnFormValidated !== "None" && !effectifsIndicateurUnCalculable) {
     const messageCalculParCSP = indicateurUnParCSP ? (
       ""
     ) : (
