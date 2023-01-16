@@ -10,7 +10,7 @@ env:
   GIT_AUTHOR_NAME: SocialGroovyBot
   GIT_COMMITTER_EMAIL: socialgroovybot@fabrique.social.gouv.fr
   GIT_COMMITTER_NAME: SocialGroovyBot
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.SOCIALGROOVYBOT_BOTO_PAT }}
 
 jobs:
   release:
@@ -21,6 +21,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+        persist-credentials: false
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
