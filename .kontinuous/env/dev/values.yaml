@@ -1,5 +1,5 @@
 api:
-  ~needs: [build-api,create-db]
+  ~needs: [build-api, create-db]
   vars:
     EGAPRO_SEND_EMAILS: "True"
     EGAPRO_SMTP_HOST: maildev
@@ -17,7 +17,9 @@ app:
     MAILER_SMTP_PASSWORD: ""
     MAILER_SMTP_SSL: "False"
 
-maildev: {}
+maildev:
+  persistence:
+    enabled: true
 
 jobs:
   runs:
