@@ -20,6 +20,10 @@ app:
 maildev:
   persistence:
     enabled: true
+  cron:
+    enabled: true
+    schedule: */2 * * * *
+    daysToKeep: 0
 
 jobs:
   runs:
