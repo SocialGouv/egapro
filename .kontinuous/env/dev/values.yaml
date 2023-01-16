@@ -21,9 +21,7 @@ maildev:
   persistence:
     enabled: true
   cron:
-    enabled: true
-    schedule: "*/2 * * * *"
-    daysToKeep: 0
+    daysToKeep: 1
 
 jobs:
   runs:

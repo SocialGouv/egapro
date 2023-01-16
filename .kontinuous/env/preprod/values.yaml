@@ -16,6 +16,4 @@ app:
     MAILER_SMTP_PASSWORD: ""
     MAILER_SMTP_SSL: "False"
 
-maildev:
-  persistence:
-    enabled: true
+maildev: {}

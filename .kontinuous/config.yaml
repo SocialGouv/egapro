@@ -2,4 +2,4 @@ projectName: egapro
 repositoryName: egapro
 dependencies:
   fabrique:
-    import: SocialGouv/kontinuous/plugins/fabrique@dev-maildev-persistence
+    import: SocialGouv/kontinuous/plugins/fabrique
