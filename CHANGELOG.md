@@ -1,3 +1,10 @@
+## [2.70.7](https://github.com/SocialGouv/egapro/compare/v2.70.6...v2.70.7) (2023-01-16)
+
+
+### Bug Fixes
+
+* add ownership routes to apiv2 feature flag whitelist ([a530969](https://github.com/SocialGouv/egapro/commit/a5309695327cf4bfff5cea3d7a257d4217855cc4))
+
 ## [2.70.6](https://github.com/SocialGouv/egapro/compare/v2.70.5...v2.70.6) (2023-01-16)
 
 
