@@ -628,7 +628,6 @@ async def stats(request, response):
         section_naf=section_naf,
         departement=departement,
         region=region,
-        year=tuple(constants.PUBLIC_YEARS),
     )
     response.json = dict(stats)
 
