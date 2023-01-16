@@ -18,7 +18,6 @@ export const config = {
   get ff() {
     return {
       "repeq-search": this.env !== "prod",
-      "decla-search-2023": this.env !== "prod",
       apiv2: {
         enabled: this.env !== "dev",
         whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin"],
