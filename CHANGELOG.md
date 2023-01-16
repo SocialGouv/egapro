@@ -1,3 +1,18 @@
+## [2.70.8](https://github.com/SocialGouv/egapro/compare/v2.70.7...v2.70.8) (2023-01-16)
+
+
+### Bug Fixes
+
+* **cd:** change github token for tag release ([f21cb79](https://github.com/SocialGouv/egapro/commit/f21cb791cd5ebaf09bd3a6b12b3f02c2f17d399a))
+* github release git commit ([e1e5aa4](https://github.com/SocialGouv/egapro/commit/e1e5aa4816c8049a48c01133458dc890b60f9ea6))
+
+## [2.70.7](https://github.com/SocialGouv/egapro/compare/v2.70.6...v2.70.7) (2023-01-16)
+
+
+### Bug Fixes
+
+* add ownership routes to apiv2 feature flag whitelist ([a530969](https://github.com/SocialGouv/egapro/commit/a5309695327cf4bfff5cea3d7a257d4217855cc4))
+
 ## [2.70.6](https://github.com/SocialGouv/egapro/compare/v2.70.5...v2.70.6) (2023-01-16)
 
 
