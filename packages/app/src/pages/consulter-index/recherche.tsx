@@ -21,6 +21,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
+import { config } from "@common/config";
 import type { CompaniesType, CompanyType, TrancheType } from "@common/models/company";
 import { capitalize } from "@common/utils/string";
 import { AlertSpinner } from "@components/ds/AlertSpinner";
@@ -30,6 +31,7 @@ import { ConsulterIndexLayout } from "@components/layouts/ConsulterIndexLayout";
 import type { SearchCompanyParams } from "@services/apiClient";
 import { filterDepartements, useConfig, useSearch } from "@services/apiClient";
 import { useAdressLabel } from "@services/apiClient/useAdressLabel";
+import type { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import type { ParsedUrlQuery } from "querystring";
 import type { ChangeEventHandler, DOMAttributes } from "react";
@@ -55,7 +57,7 @@ function UES() {
   );
 }
 
-function Company({ company }: { company: CompanyType }) {
+function Company({ company, skipCurrentYear }: { company: CompanyType; skipCurrentYear: boolean }) {
   const { isOpen, onToggle } = useDisclosure();
   const [yearSelected, setYearSelected] = useState<number>();
   const highlightColor = useColorModeValue("blue.100", "blue.800");
@@ -65,6 +67,10 @@ function Company({ company }: { company: CompanyType }) {
     .map(elt => Number(elt))
     .sort()
     .reverse();
+
+  if (skipCurrentYear) {
+    years.shift();
+  }
 
   function selectOrToggle(year: number) {
     if (yearSelected === year) {
@@ -293,7 +299,15 @@ function Company({ company }: { company: CompanyType }) {
   );
 }
 
-function DisplayCompanies({ companies, error }: { companies: CompaniesType; error: unknown }) {
+function DisplayCompanies({
+  companies,
+  error,
+  skipCurrentYear,
+}: {
+  companies: CompaniesType;
+  error: unknown;
+  skipCurrentYear: boolean;
+}) {
   if (error) {
     return (
       <Alert status="error" mt={4}>
@@ -338,7 +352,7 @@ function DisplayCompanies({ companies, error }: { companies: CompaniesType; erro
         </Box>
       )}
       {companies?.data?.map(company => (
-        <Company company={company} key={company.entreprise?.siren} />
+        <Company company={company} skipCurrentYear={skipCurrentYear} key={company.entreprise?.siren} />
       ))}
     </>
   );
@@ -358,7 +372,12 @@ function normalizeInputs(parsedUrlQuery: ParsedUrlQuery) {
   };
 }
 
-const SearchPage: NextPageWithLayout = () => {
+interface SearchPageProps {
+  /** Feature flags */
+  ff: typeof config.ff;
+}
+
+const SearchPage: NextPageWithLayout<SearchPageProps> = ({ ff }) => {
   const { config } = useConfig();
   const { REGIONS_TRIES = [], SECTIONS_NAF_TRIES = [] } = config ?? {};
 
@@ -489,7 +508,7 @@ const SearchPage: NextPageWithLayout = () => {
 
       {companies?.data?.length ? <Banner /> : null}
 
-      <DisplayCompanies companies={companies} error={error} />
+      <DisplayCompanies companies={companies} error={error} skipCurrentYear={!ff["decla-search-2023"]} />
 
       {companies?.data?.length < companies?.count && (
         <Box textAlign="center" mt="8">
@@ -498,6 +517,12 @@ const SearchPage: NextPageWithLayout = () => {
       )}
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps<SearchPageProps> = _ctx => {
+  return {
+    props: { ff: config.ff },
+  };
 };
 
 SearchPage.getLayout = ({ children }) => <ConsulterIndexLayout title="Recherche">{children}</ConsulterIndexLayout>;
