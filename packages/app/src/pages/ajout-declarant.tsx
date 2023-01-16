@@ -91,7 +91,7 @@ const AddDeclarer: NextPageWithLayout = () => {
                 </p>
                 <p>
                   Si vous ne recevez pas ce mail, merci de bien vérifier que celui-ci n’a pas été déplacé dans votre
-                  dossier de courriers indésirables."
+                  dossier de courriers indésirables.
                 </p>
               </>
             ) : (

@@ -373,7 +373,7 @@ async def send_representation_pdf(request, response, siren, year):
     data = record.data
     pdffile = pdf.representation.main(data)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
+    response.headers['Content-Disposition'] = f"attachment; filename={pdffile[1]}"
     response.body = bytes(pdffile[0].output())
     return response
 
@@ -386,7 +386,7 @@ async def get_declaration_pdf(request, response, siren, year):
     data = record.data
     pdffile = pdf.declaration.main(data)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f"attachment; filename={pdf[1]}"
+    response.headers['Content-Disposition'] = f"attachment; filename={pdffile[1]}"
     response.body = bytes(pdffile[0].output())
     return response
 
