@@ -5,6 +5,7 @@ import { ButtonProps } from "./ButtonAction"
 
 type ButtonLinkProps = ButtonProps & {
   to: string
+  target?: "_blank" | "_self" | "_parent"
 }
 
 // Link with React Router Link.
@@ -17,6 +18,7 @@ function ButtonLink({
   rightIcon,
   size = "md",
   fullWidth,
+  target,
 }: ButtonLinkProps) {
   return (
     <Button
@@ -27,6 +29,7 @@ function ButtonLink({
       leftIcon={leftIcon}
       rightIcon={rightIcon}
       size={size}
+      target={target}
       sx={{
         width: fullWidth ? "100%" : "auto",
       }}
