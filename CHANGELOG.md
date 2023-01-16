@@ -1,3 +1,11 @@
+## [2.70.6](https://github.com/SocialGouv/egapro/compare/v2.70.5...v2.70.6) (2023-01-16)
+
+
+### Bug Fixes
+
+* apiv1 pdf working again (Fixes [#1516](https://github.com/SocialGouv/egapro/issues/1516)) ([5f0bfdc](https://github.com/SocialGouv/egapro/commit/5f0bfdc745255c15f93c68dad9c817692a6e7311))
+* remove quote in ajout-declarant success message (Fixes [#1500](https://github.com/SocialGouv/egapro/issues/1500)) ([a2a8bb0](https://github.com/SocialGouv/egapro/commit/a2a8bb0f496761b08fa183ce543a7fb6ac5d1304))
+
 ## [2.70.5](https://github.com/SocialGouv/egapro/compare/v2.70.4...v2.70.5) (2023-01-12)
 
 
