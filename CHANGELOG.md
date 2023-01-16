@@ -1,3 +1,47 @@
+## [2.70.6](https://github.com/SocialGouv/egapro/compare/v2.70.5...v2.70.6) (2023-01-16)
+
+
+### Bug Fixes
+
+* apiv1 pdf working again (Fixes [#1516](https://github.com/SocialGouv/egapro/issues/1516)) ([5f0bfdc](https://github.com/SocialGouv/egapro/commit/5f0bfdc745255c15f93c68dad9c817692a6e7311))
+* remove quote in ajout-declarant success message (Fixes [#1500](https://github.com/SocialGouv/egapro/issues/1500)) ([a2a8bb0](https://github.com/SocialGouv/egapro/commit/a2a8bb0f496761b08fa183ce543a7fb6ac5d1304))
+
+## [2.70.5](https://github.com/SocialGouv/egapro/compare/v2.70.4...v2.70.5) (2023-01-12)
+
+
+### Bug Fixes
+
+* **ci:** lint release workflow ([c448717](https://github.com/SocialGouv/egapro/commit/c44871783101eba46e872fe65357879cd8d82e80))
+* upgrade kontinuous workflows ([#1503](https://github.com/SocialGouv/egapro/issues/1503)) ([c6c62f4](https://github.com/SocialGouv/egapro/commit/c6c62f4bc1ddece4c42c77f5f2f9d78e200ddea5))
+
+## [2.70.4](https://github.com/SocialGouv/egapro/compare/v2.70.3...v2.70.4) (2023-01-12)
+
+
+### Bug Fixes
+
+* better feature flags ([0ef9aef](https://github.com/SocialGouv/egapro/commit/0ef9aeffd317ae41b8959c714667268241d5d387))
+
+## [2.70.3](https://github.com/SocialGouv/egapro/compare/v2.70.2...v2.70.3) (2023-01-12)
+
+
+### Bug Fixes
+
+* add proper env from globals in kontinuous config ([af18fcd](https://github.com/SocialGouv/egapro/commit/af18fcd56aefc14083e98151c40409051b8fe62f))
+
+## [2.70.2](https://github.com/SocialGouv/egapro/compare/v2.70.1...v2.70.2) (2023-01-12)
+
+
+### Bug Fixes
+
+* remove config logging ([73acdf1](https://github.com/SocialGouv/egapro/commit/73acdf1b0da9a7a3f17f8cebe215fac23f8a3ef5))
+
+## [2.70.1](https://github.com/SocialGouv/egapro/compare/v2.70.0...v2.70.1) (2023-01-12)
+
+
+### Bug Fixes
+
+* smtp-app secret ([62b38c6](https://github.com/SocialGouv/egapro/commit/62b38c6d64e53e18600a5bf39cafb71b34190603))
+
 # [2.70.0](https://github.com/SocialGouv/egapro/compare/v2.69.0...v2.70.0) (2023-01-12)
 
 

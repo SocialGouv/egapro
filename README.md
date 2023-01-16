@@ -154,4 +154,3 @@ Les commandes vont se lancer dans l'environnement local.
 
 Si l'on veut lancer ces commandes dans un container (ex: en prod, en préprod ou dans un environnement lié à une PR), il faut se connecter au container et lancer la commande egapro.
 
-

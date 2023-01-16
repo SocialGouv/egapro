@@ -1,0 +1,20 @@
+name: 👓 Review Auto
+on:
+  push:
+    branches:
+      - "master"
+      - "feat/**"
+      - "feature/**"
+      - "fix/**"
+      - "hotfix/**"
+      - "**/review/**"
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
+
+jobs:
+  kontinuous:
+    name: "Deploy on Kubernetes 🐳"
+    uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto.yaml@v1
+    secrets: inherit

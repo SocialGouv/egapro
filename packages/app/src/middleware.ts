@@ -11,14 +11,11 @@ export async function middleware(req: NextRequest) {
   }
 
   if (
-    pathname.startsWith("/representation-equilibree") &&
-    !pathname.startsWith("/representation-equilibree/recherche") &&
-    !config.ff["repeq"]
+    pathname.startsWith("/apiv2/") &&
+    !pathname.startsWith("/apiv2/admin") &&
+    !pathname.startsWith("/apiv2/health") &&
+    !config.ff.apiv2
   ) {
-    return NextResponse.redirect(new URL("/404", req.url));
-  }
-
-  if (pathname.startsWith("/apiv2/") && !config.ff.apiv2) {
     return NextResponse.redirect(new URL("/404", req.url));
   }
 
