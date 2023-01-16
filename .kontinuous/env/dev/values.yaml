@@ -22,7 +22,7 @@ maildev:
     enabled: true
   cron:
     enabled: true
-    schedule: */2 * * * *
+    schedule: "*/2 * * * *"
     daysToKeep: 0
 
 jobs:
