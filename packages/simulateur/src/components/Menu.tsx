@@ -3,7 +3,8 @@ import { Switch, Route, Link as ReachLink } from "react-router-dom"
 import { Box, Heading, List, ListItem, Link } from "@chakra-ui/react"
 import { FormState, TrancheEffectifs } from "../globals"
 import globalStyles from "../utils/globalStyles"
-import { IconValid, IconInvalid } from "./ds/Icons"
+import { IconValid, IconInvalid, IconQuestionMarkCircle } from "./ds/Icons"
+import ButtonLink from "./ds/ButtonLink"
 
 interface CustomNavLinkProps {
   title: string
@@ -166,12 +167,27 @@ function Menu({
             },
           }) => (
             <React.Fragment>
-              <CustomNavLink
-                to={`/simulateur/${code}`}
-                title="Vos informations"
-                activeOnlyWhenExact={true}
-                onClick={onClose}
-              />
+              <List spacing={2} sx={listStyles}>
+                <ListItem mb={6}>
+                  <ButtonLink
+                    to="/aide-simulation"
+                    label="Consulter l'aide"
+                    size="sm"
+                    leftIcon={<IconQuestionMarkCircle />}
+                    variant="outline"
+                    isExternal
+                  />
+                </ListItem>
+                <ListItem>
+                  <CustomNavLink
+                    to={`/simulateur/${code}`}
+                    title="Vos informations"
+                    activeOnlyWhenExact={true}
+                    onClick={onClose}
+                  />
+                </ListItem>
+              </List>
+
               <Heading as="div" size="sm" mb={3} mt={4}>
                 Calcul de l'index
               </Heading>

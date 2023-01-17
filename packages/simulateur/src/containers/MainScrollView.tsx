@@ -18,7 +18,6 @@ import { withRouter, RouteComponentProps, Route } from "react-router-dom"
 import { AppState } from "../globals"
 
 import Menu from "../components/Menu"
-import FAQ from "../views/FAQ"
 import ButtonAction from "../components/ds/ButtonAction"
 import { IconMenu } from "../components/ds/Icons"
 
@@ -37,7 +36,6 @@ const Content = ({ children, pathname }: ContentProps) => {
       py={isLargerThan1280 ? 10 : 6}
       sx={{
         gridArea: "main",
-        borderRight: isLargerThan1280 ? "1px solid #E3E4ED" : "none",
         "@media print": {
           paddingLeft: 0,
           paddingRight: 0,
@@ -114,7 +112,7 @@ const MainScrollView = ({ children, state, location }: MainScrollViewProps) => {
           <Grid
             sx={{
               "@media screen": {
-                gridTemplateColumns: isLargerThan1280 ? "200px 1fr 380px" : isLargerThan1280 ? "200px 1fr" : "1fr",
+                gridTemplateColumns: isLargerThan1280 ? "300px 1fr 300px" : isLargerThan1280 ? "200px 1fr" : "1fr",
                 gridTemplateRows: "auto",
                 gridTemplateAreas: isLargerThan1280 ? "'nav main aside'" : isLargerThan1280 ? "'nav main'" : "'main'",
                 height: "100%",
@@ -137,20 +135,6 @@ const MainScrollView = ({ children, state, location }: MainScrollViewProps) => {
               </Box>
             )}
             <Content pathname={location.pathname}>{children}</Content>
-            {isLargerThan1280 && (
-              <Box
-                bg="white"
-                mr={isLargerThan1280 ? -3 : 0}
-                sx={{
-                  gridArea: "aside",
-                  "@media print": {
-                    display: "none",
-                  },
-                }}
-              >
-                <FAQ />
-              </Box>
-            )}
           </Grid>
         </Container>
       </Flex>
