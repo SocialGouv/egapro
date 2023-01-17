@@ -1,3 +1,10 @@
+# [2.72.0](https://github.com/SocialGouv/egapro/compare/v2.71.1...v2.72.0) (2023-01-17)
+
+
+### Features
+
+* add help page ([#1520](https://github.com/SocialGouv/egapro/issues/1520)) ([399f839](https://github.com/SocialGouv/egapro/commit/399f8392eeb1614307042df21d4d8d9972b10503))
+
 ## [2.71.1](https://github.com/SocialGouv/egapro/compare/v2.71.0...v2.71.1) (2023-01-17)
 
 
