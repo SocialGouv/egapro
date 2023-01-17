@@ -1,3 +1,10 @@
+## [2.70.9](https://github.com/SocialGouv/egapro/compare/v2.70.8...v2.70.9) (2023-01-17)
+
+
+### Bug Fixes
+
+* repeq receipt with year (Fixes [#1515](https://github.com/SocialGouv/egapro/issues/1515)) ([23c16bb](https://github.com/SocialGouv/egapro/commit/23c16bb3efe7b9ab6d798af15c771b528ae9ef94))
+
 ## [2.70.8](https://github.com/SocialGouv/egapro/compare/v2.70.7...v2.70.8) (2023-01-16)
 
 
