@@ -525,11 +525,12 @@ async def search_representation_equilibree(request: Request, response: Response)
         section_naf=section_naf,
         departement=departement,
         region=region,
+        year=tuple(constants.PUBLIC_YEARS_REPEQ),
     )
     response.json = {
         "data": results,
         "count": await db.search_representation_equilibree.count(
-            query=q, section_naf=section_naf, departement=departement, region=region
+            query=q, section_naf=section_naf, departement=departement, region=region, year=tuple(constants.PUBLIC_YEARS_REPEQ)
         ),
     }
 
@@ -606,11 +607,12 @@ async def search(request, response):
         section_naf=section_naf,
         departement=departement,
         region=region,
+        year=tuple(constants.PUBLIC_YEARS),
     )
     response.json = {
         "data": results,
         "count": await db.search.count(
-            query=q, section_naf=section_naf, departement=departement, region=region
+            query=q, section_naf=section_naf, departement=departement, region=region, year=tuple(constants.PUBLIC_YEARS)
         ),
     }
 

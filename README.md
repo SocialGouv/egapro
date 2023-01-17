@@ -12,6 +12,11 @@ Préprod : <https://egapro-preprod.dev.fabrique.social.gouv.fr/>
 yarn
 ```
 
+Si developpement Python en local :
+```bash
+yarn setup-python
+```
+
 ## Lancer
 
 One component at time
