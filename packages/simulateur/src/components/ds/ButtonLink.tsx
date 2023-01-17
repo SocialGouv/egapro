@@ -23,7 +23,6 @@ function ButtonLink({
   isExternal,
 }: ButtonLinkProps) {
   const props = {
-    to,
     colorScheme,
     variant,
     leftIcon,
@@ -33,14 +32,15 @@ function ButtonLink({
       width: fullWidth ? "100%" : "auto",
     },
   }
+
   return (
     <>
       {isExternal ? (
-        <Button as={RouterLink} {...props}>
+        <Button as={Link} {...props} href={to} isExternal>
           {label}
         </Button>
       ) : (
-        <Button as={Link} isExternal {...props}>
+        <Button as={RouterLink} {...props} to={to}>
           {label}
         </Button>
       )}
