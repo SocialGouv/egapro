@@ -1,3 +1,10 @@
+## [2.71.1](https://github.com/SocialGouv/egapro/compare/v2.71.0...v2.71.1) (2023-01-17)
+
+
+### Bug Fixes
+
+* not consistent error UI messages ([#1523](https://github.com/SocialGouv/egapro/issues/1523)) ([6bd7b05](https://github.com/SocialGouv/egapro/commit/6bd7b058ca8372af8690ceeab4eca1dca131ebe7))
+
 # [2.71.0](https://github.com/SocialGouv/egapro/compare/v2.70.9...v2.71.0) (2023-01-17)
 
 
