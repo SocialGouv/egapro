@@ -1,3 +1,15 @@
+# [2.71.0](https://github.com/SocialGouv/egapro/compare/v2.70.9...v2.71.0) (2023-01-17)
+
+
+### Bug Fixes
+
+* repeq dgt export nc pct (Fixes [#1474](https://github.com/SocialGouv/egapro/issues/1474)) ([7932ef0](https://github.com/SocialGouv/egapro/commit/7932ef0bb647283d081b594d3c027f777237a506))
+
+
+### Features
+
+* **apiv1:** make search endpoints more accurate with public years ([#1522](https://github.com/SocialGouv/egapro/issues/1522)) ([3ec3a3b](https://github.com/SocialGouv/egapro/commit/3ec3a3bb3db3e3624191897363212a38ea6c1876))
+
 ## [2.70.9](https://github.com/SocialGouv/egapro/compare/v2.70.8...v2.70.9) (2023-01-17)
 
 
