@@ -1,3 +1,10 @@
+## [2.72.1](https://github.com/SocialGouv/egapro/compare/v2.72.0...v2.72.1) (2023-01-17)
+
+
+### Bug Fixes
+
+* external button link in simu ([f19d796](https://github.com/SocialGouv/egapro/commit/f19d7968e0fd15233f1da809dfc426e4750686a7))
+
 # [2.72.0](https://github.com/SocialGouv/egapro/compare/v2.71.1...v2.72.0) (2023-01-17)
 
 
