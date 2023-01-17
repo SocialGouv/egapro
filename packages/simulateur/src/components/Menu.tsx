@@ -170,7 +170,7 @@ function Menu({
               <List spacing={2} sx={listStyles}>
                 <ListItem mb={6}>
                   <ButtonLink
-                    to={`/aide-simulation`}
+                    to="/aide-simulation"
                     label="Consulter l'aide"
                     size="sm"
                     leftIcon={<IconQuestionMarkCircle />}

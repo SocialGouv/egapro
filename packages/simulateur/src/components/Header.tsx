@@ -179,8 +179,7 @@ const Header = () => {
                         <MenuDivider />
                         <MenuGroup title="Informations">
                           <MenuItem
-                            as={RouterLink}
-                            to="./aide-simulation"
+                            to="/aide-simulation"
                             icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}
                           >
                             Consulter l'aide
@@ -196,7 +195,7 @@ const Header = () => {
                     <>
                       <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
                       <ButtonLink
-                        to="./aide-simulation"
+                        to="/aide-simulation"
                         variant="ghost"
                         label="Consulter l'aide"
                         size="xs"
@@ -213,7 +212,7 @@ const Header = () => {
                         variant="ghost"
                       />
                       <ButtonLink
-                        to="./aide-simulation"
+                        to="/aide-simulation"
                         variant="ghost"
                         label="Consulter l'aide"
                         target="_blank"
