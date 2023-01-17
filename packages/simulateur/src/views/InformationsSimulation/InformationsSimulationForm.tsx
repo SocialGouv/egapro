@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */
+import { Button, FormControl, FormErrorMessage, FormLabel, Text } from "@chakra-ui/react"
 import { FunctionComponent } from "react"
 import { Form, useField } from "react-final-form"
-import { Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
 
-import { AppState, FormState, ActionInformationsSimulationData } from "../../globals"
+import { ActionInformationsSimulationData, AppState, FormState } from "../../globals"
 
 import {
   parseBooleanFormValue,
@@ -13,21 +13,22 @@ import {
   required,
 } from "../../utils/formHelpers"
 
+import { Input as InputChakra } from "@chakra-ui/input"
+import ActionBar from "../../components/ActionBar"
+import AnneeDeclaration from "../../components/AnneeDeclaration"
 import ButtonAction from "../../components/ds/ButtonAction"
 import FormStack from "../../components/ds/FormStack"
 import { IconEdit } from "../../components/ds/Icons"
-import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import InputRadio from "../../components/ds/InputRadio"
-import ActionBar from "../../components/ActionBar"
-import AnneeDeclaration from "../../components/AnneeDeclaration"
+import InputRadioGroup from "../../components/ds/InputRadioGroup"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormSubmit from "../../components/FormSubmit"
-import Input, { hasFieldError } from "../../components/Input"
-import { ButtonSimulatorLink } from "../../components/SimulatorLink"
-import RadiosBoolean from "../../components/RadiosBoolean"
+import { hasFieldError } from "../../components/Input"
+
 import InputDateGroup from "../../components/ds/InputDateGroup"
-import { displayMetaErrors } from "../../utils/form-error-helpers"
 import FormError from "../../components/FormError"
+import RadiosBoolean from "../../components/RadiosBoolean"
+import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import { parseDate } from "../../utils/date"
 
 const validateForm = ({
@@ -89,18 +90,14 @@ const validate = (value: string) => {
 
 const FieldPeriodeSuffisante = ({ readOnly }: { readOnly: boolean }) => {
   const field = useField("periodeSuffisante", { validate })
-  const error = hasFieldError(field.meta)
 
   return (
-    <>
-      <RadiosBoolean
-        fieldName="periodeSuffisante"
-        value={field.input.value}
-        readOnly={readOnly}
-        label="Disposez-vous d'une période de 12 mois consécutifs pour le calcul de vos indicateurs ?"
-      />
-      <p>{error && displayMetaErrors(field.meta.error)}</p>
-    </>
+    <RadiosBoolean
+      fieldName="periodeSuffisante"
+      value={field.input.value}
+      readOnly={readOnly}
+      label="Disposez-vous d'une période de 12 mois consécutifs pour le calcul de vos indicateurs ?"
+    />
   )
 }
 
@@ -170,7 +167,6 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
       {({ form, handleSubmit, hasValidationErrors, submitFailed, values }) => (
         <form onSubmit={handleSubmit}>
           <FormStack>
-            {" "}
             {/* pass `onlyWhenDirty={false}` because we want the form to always
           auto save, as we update the left menu depending on the "tranche
           d'effectifs". Otherwise it would not re-update the menu when
@@ -259,17 +255,16 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
 }
 
 function FieldNomEntreprise({ readOnly }: { readOnly: boolean }) {
-  const field = useField("nomEntreprise", { validate })
+  const label = "nomEntreprise"
+  const field = useField(label, { validate })
   const error = hasFieldError(field.meta)
 
   return (
-    <div>
-      <label htmlFor={field.input.name}>Nom de la simulation (ex : nom_entreprise_date)</label>
-      <div>
-        <Input field={field} isReadOnly={readOnly} />
-      </div>
-      <p>{error && "le nom n'est pas valide"}</p>
-    </div>
+    <FormControl isInvalid={error}>
+      <FormLabel htmlFor={label}>Nom de la simulation</FormLabel>
+      <InputChakra id={label} placeholder={"Ex : nom_entreprise_date"} isReadOnly={readOnly} {...field.input} />
+      <FormErrorMessage>{error && "Le nom n'est pas valide"}</FormErrorMessage>
+    </FormControl>
   )
 }
 
