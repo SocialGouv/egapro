@@ -179,6 +179,7 @@ const Header = () => {
                         <MenuDivider />
                         <MenuGroup title="Informations">
                           <MenuItem
+                            as={Link}
                             to="/aide-simulation"
                             icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}
                           >
@@ -194,13 +195,7 @@ const Header = () => {
                   {isMobile && (
                     <>
                       <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
-                      <ButtonLink
-                        to="/aide-simulation"
-                        variant="ghost"
-                        label="Consulter l'aide"
-                        size="xs"
-                        target="_blank"
-                      />
+                      <ButtonLink to="/aide-simulation" variant="ghost" label="Consulter l'aide" size="xs" isExternal />
                     </>
                   )}
                   {isBiggerThanMobileAndSmallerThan1280 && (
@@ -215,8 +210,8 @@ const Header = () => {
                         to="/aide-simulation"
                         variant="ghost"
                         label="Consulter l'aide"
-                        target="_blank"
                         leftIcon={<IconQuestionMarkCircle />}
+                        isExternal
                       />
                     </>
                   )}

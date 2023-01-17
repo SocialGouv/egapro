@@ -175,6 +175,7 @@ function Menu({
                     size="sm"
                     leftIcon={<IconQuestionMarkCircle />}
                     variant="outline"
+                    isExternal
                   />
                 </ListItem>
                 <ListItem>
