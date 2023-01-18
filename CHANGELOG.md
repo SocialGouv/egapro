@@ -1,3 +1,10 @@
+## [2.73.2](https://github.com/SocialGouv/egapro/compare/v2.73.1...v2.73.2) (2023-01-18)
+
+
+### Bug Fixes
+
+* aide simu type (Fixes [#1399](https://github.com/SocialGouv/egapro/issues/1399)) ([fbd15ca](https://github.com/SocialGouv/egapro/commit/fbd15ca18e2a782a0b9e2b75600630e7e2d9f06c))
+
 ## [2.73.1](https://github.com/SocialGouv/egapro/compare/v2.73.0...v2.73.1) (2023-01-18)
 
 
