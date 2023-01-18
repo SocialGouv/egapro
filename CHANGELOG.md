@@ -1,3 +1,10 @@
+## [2.73.4](https://github.com/SocialGouv/egapro/compare/v2.73.3...v2.73.4) (2023-01-18)
+
+
+### Bug Fixes
+
+* update staff emails ([2d4a4bd](https://github.com/SocialGouv/egapro/commit/2d4a4bd53539fc3f99bc7800201e73c71a4fe5fa))
+
 ## [2.73.3](https://github.com/SocialGouv/egapro/compare/v2.73.2...v2.73.3) (2023-01-18)
 
 
