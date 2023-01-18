@@ -1,3 +1,10 @@
+# [2.73.0](https://github.com/SocialGouv/egapro/compare/v2.72.1...v2.73.0) (2023-01-18)
+
+
+### Features
+
+* better ues management ([#1525](https://github.com/SocialGouv/egapro/issues/1525)) ([1467c21](https://github.com/SocialGouv/egapro/commit/1467c216878a3ee82026c71b77ea9d7e9b3374ef))
+
 ## [2.72.1](https://github.com/SocialGouv/egapro/compare/v2.72.0...v2.72.1) (2023-01-17)
 
 
