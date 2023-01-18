@@ -138,7 +138,7 @@ const InformationsSimulationForm: FunctionComponent<InformationsSimulationFormPr
       trancheEffectifs,
       anneeDeclaration: parseIntFormValue(anneeDeclaration),
       ...(parseBooleanFormValue(periodeSuffisante) && { finPeriodeReference }),
-      periodeSuffisante: parseBooleanFormValue(periodeSuffisante),
+      periodeSuffisante: periodeSuffisante === undefined ? undefined : parseBooleanFormValue(periodeSuffisante),
     })
   }
 
