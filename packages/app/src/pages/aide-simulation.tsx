@@ -367,7 +367,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   <table>
                     <thead>
                       <tr>
-                        <th>Résultast obtenus</th>
+                        <th>Résultats obtenus</th>
                         <th>Nombre de points (Note sur 35)</th>
                       </tr>
                     </thead>
@@ -584,11 +584,12 @@ const AideSimulation: NextPageWithLayout = () => {
                 <p>L’indicateur n’est pas calculable :</p>
                 <ul>
                   <li>
-                    Si il n&#39;y a eu aucun retour de congé maternité (ou adoption) au cours de la période de
+                    S&#39;il n&#39;y a eu aucun retour de congé maternité (ou adoption) au cours de la période de
                     référence.
                   </li>
                   <li>
-                    Si il n&#39;y a eu aucune augmentation (individuelle ou collective) au cours des congés maternité.
+                    S&#39;il n&#39;y a eu aucune augmentation (individuelle ou collective) au cours des congés
+                    maternité.
                   </li>
                 </ul>
                 <h3 id="comment-est-calcul-l-indicateur">Comment est calculé l&#39;indicateur</h3>
