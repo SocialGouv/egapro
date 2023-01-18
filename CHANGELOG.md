@@ -1,3 +1,10 @@
+## [2.73.1](https://github.com/SocialGouv/egapro/compare/v2.73.0...v2.73.1) (2023-01-18)
+
+
+### Bug Fixes
+
+* closes [#1505](https://github.com/SocialGouv/egapro/issues/1505) on periodeSuffisante ([db4eab1](https://github.com/SocialGouv/egapro/commit/db4eab142ffb5dde42c275f2082c72b2ed99ed7d))
+
 # [2.73.0](https://github.com/SocialGouv/egapro/compare/v2.72.1...v2.73.0) (2023-01-18)
 
 
