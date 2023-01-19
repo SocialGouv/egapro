@@ -1,5 +1,5 @@
 import { BasicLayout } from "@components/layouts/BasicLayout";
-import { Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
+import { AnchorLink, Container, ContentWithChapter, Grid, GridCol, Summary, SummaryLink } from "@design-system";
 import Head from "next/head";
 
 import type { NextPageWithLayout } from "./_app";
@@ -17,7 +17,11 @@ const AideSimulation: NextPageWithLayout = () => {
               <h1>Aide pour le calcul et la déclaration de l'index égalité professionnelle femmes-hommes</h1>
               <p>
                 Pour consulter la FAQ sur le site du ministère du travail, cliquez{" "}
-                <a href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro">
+                <a
+                  href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle-discrimination-et-harcelement/indexegapro"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   ici
                 </a>
                 .
@@ -29,7 +33,6 @@ const AideSimulation: NextPageWithLayout = () => {
                 </SummaryLink>
                 <SummaryLink href="#effectifs-pris-en-compte">Effectifs pris en compte</SummaryLink>
                 <SummaryLink href="#indicateur-ecart-de-remuneration">Indicateur - écart de rémunération</SummaryLink>
-                <SummaryLink href="#comment-est-calcule-l-indicateur">Comment est calculé l’indicateur</SummaryLink>
                 <SummaryLink href="#indicateur-ecart-de-taux-d-augmentation-50-250-salaries">
                   Indicateur - écart de taux d’augmentation (50 à 250 salariés)
                 </SummaryLink>
@@ -49,9 +52,9 @@ const AideSimulation: NextPageWithLayout = () => {
                 <SummaryLink href="#publication-et-transmission">Publication et transmission</SummaryLink>
               </Summary>
               <ContentWithChapter>
-                <h2 id="champ-d-application-entree-en-vigueur-et-periode-de-reference">
+                <AnchorLink as="h2" anchor="champ-d-application-entree-en-vigueur-et-periode-de-reference">
                   Champ d'application, entrée en vigueur et période de référence
-                </h2>
+                </AnchorLink>
                 <p>
                   Toutes les entreprises et unités économiques et sociales (UES) d’au moins 50 salariés doivent calculer
                   et publier annuellement leur index de l’égalité professionnelle entre les femmes et les hommes, au
@@ -72,7 +75,9 @@ const AideSimulation: NextPageWithLayout = () => {
                   50 à 250 salariés, l’employeur peut choisir une période de référence de 3 ans maximum. Ce caractère
                   pluriannuel peut être révisé tous les 3 ans.
                 </p>
-                <h2 id="effectifs-pris-en-compte">Effectifs pris en compte</h2>
+                <AnchorLink as="h2" anchor="effectifs-pris-en-compte">
+                  Effectifs pris en compte
+                </AnchorLink>
                 <p>
                   Les effectifs pris en compte pour le calcul des indicateurs sont appréciés en effectif physique sur la
                   période de référence. Ils doivent être renseignés par{" "}
@@ -98,7 +103,9 @@ const AideSimulation: NextPageWithLayout = () => {
                     cdd &lt;6mois etc.).
                   </li>
                 </ul>
-                <h2 id="indicateur-ecart-de-remuneration">Indicateur - écart de rémunération</h2>
+                <AnchorLink as="h2" anchor="indicateur-ecart-de-remuneration">
+                  Indicateur - écart de rémunération
+                </AnchorLink>
                 <p>
                   La rémunération doit être reconstituée en <strong>équivalent temps plein</strong> sur toute la durée
                   de la période de référence.
@@ -144,7 +151,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   Si le total des effectifs des groupes pouvant être pris en compte pour le calcul de l&#39;indicateur
                   est inférieur à 40% des effectifs totaux, l&#39;indicateur et l&#39;index ne sont pas calculables.
                 </p>
-                <h2 id="comment-est-calcule-l-indicateur">Comment est calculé l’indicateur</h2>
+                <AnchorLink anchor="comment-est-calcul-l-indicateur-1">Comment est calculé l’indicateur</AnchorLink>
                 <p>
                   Seuls les groupes comprenant au moins 3 femmes et au moins 3 hommes sont pris en compte pour le calcul
                   de l&#39;indicateur.
@@ -284,9 +291,9 @@ const AideSimulation: NextPageWithLayout = () => {
                   </table>
                 </div>
 
-                <h2 id="indicateur-ecart-de-taux-d-augmentation-50-250-salaries">
+                <AnchorLink as="h2" anchor="indicateur-ecart-de-taux-d-augmentation-50-250-salaries">
                   Indicateur - écart de taux d’augmentation (50 à 250 salariés)
-                </h2>
+                </AnchorLink>
                 <p>
                   La notion d&#39;augmentation individuelle correspond à une augmentation individuelle du salaire de
                   base du salarié concerné.
@@ -313,7 +320,9 @@ const AideSimulation: NextPageWithLayout = () => {
                       Ou si l’effectif pris en compte pour le calcul des indicateurs ne comporte pas au moins 5 femmes
                       et 5 hommes
                     </p>
-                    <h3 id="comment-est-calcul-l-indicateur">Comment est calculé l&#39;indicateur</h3>
+                    <AnchorLink anchor="comment-est-calcul-l-indicateur-2-50-250">
+                      Comment est calculé l&#39;indicateur
+                    </AnchorLink>
                     <p>
                       Le calcul est possible si les effectifs pris en compte pour le calcul des indicateurs comptent au
                       moins 5 femmes et 5 hommes.
@@ -397,9 +406,9 @@ const AideSimulation: NextPageWithLayout = () => {
                     </tbody>
                   </table>
                 </div>
-                <h2 id="indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries">
+                <AnchorLink as="h2" anchor="indicateur-cart-de-taux-d-augmentation-plus-de-250-salaries">
                   Indicateur - écart de taux d’augmentation (plus de 250 salariés)
-                </h2>
+                </AnchorLink>
                 <p>
                   La notion d’
                   <strong>
@@ -425,7 +434,9 @@ const AideSimulation: NextPageWithLayout = () => {
                     des indicateurs.
                   </li>
                 </ul>
-                <h3 id="comment-est-calcul-l-indicateur">Comment est calculé l&#39;indicateur</h3>
+                <AnchorLink anchor="comment-est-calcul-l-indicateur-2-250-plus">
+                  Comment est calculé l&#39;indicateur
+                </AnchorLink>
                 <p>
                   Seuls les groupes comprenant au moins 10 hommes et 10 femmes sont pris en compte pour le calcul de
                   l&#39;indicateur.
@@ -488,9 +499,9 @@ const AideSimulation: NextPageWithLayout = () => {
                     </tbody>
                   </table>
                 </div>
-                <h2 id="indicateur-cart-de-taux-de-promotion-plus-de-250-salaries">
+                <AnchorLink as="h2" anchor="indicateur-cart-de-taux-de-promotion-plus-de-250-salaries">
                   Indicateur - écart de taux de promotion (plus de 250 salariés)
-                </h2>
+                </AnchorLink>
                 <p>La notion de promotion correspond au passage à un niveau ou coefficient hiérarchique supérieur.</p>
                 <p>Les salariés sont répartis en 4 groupes selon les quatre catégories socio-professionnelles.</p>
                 <p>
@@ -505,7 +516,9 @@ const AideSimulation: NextPageWithLayout = () => {
                     des indicateurs.
                   </li>
                 </ul>
-                <h3 id="comprendre-comment-est-calcul-l-indicateur">Comprendre comment est calculé l&#39;indicateur</h3>
+                <AnchorLink anchor="comment-est-calcul-l-indicateur-4-250-plus">
+                  Comment est calculé l&#39;indicateur
+                </AnchorLink>
                 <p>
                   Seuls les groupes comprenant au moins 10 hommes et 10 femmes sont pris en compte pour le calcul de
                   l&#39;indicateur.
@@ -568,10 +581,13 @@ const AideSimulation: NextPageWithLayout = () => {
                     </tbody>
                   </table>
                 </div>
-                <h2 id="indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite">
+                <AnchorLink
+                  as="h2"
+                  anchor="indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite"
+                >
                   Indicateur - pourcentage de salariées augmentées dans l&#39;année suivant leur retour de congé
                   maternité
-                </h2>
+                </AnchorLink>
                 <p>
                   Seules les salariées qui sont rentrées de congé maternité (ou d’adoption) durant la période de
                   référence sont prises en considération.
@@ -592,7 +608,8 @@ const AideSimulation: NextPageWithLayout = () => {
                     maternité.
                   </li>
                 </ul>
-                <h3 id="comment-est-calcul-l-indicateur">Comment est calculé l&#39;indicateur</h3>
+
+                <AnchorLink anchor="comment-est-calcul-l-indicateur-5">Comment est calculé l&#39;indicateur</AnchorLink>
                 <p>
                   L’indicateur correspond au ratio entre le nombre de salariées revenues de congé maternité ou
                   d’adoption pendant la période de référence et ayant bénéficié d’une augmentation, avant la fin de
@@ -623,14 +640,19 @@ const AideSimulation: NextPageWithLayout = () => {
                     </tbody>
                   </table>
                 </div>
-                <h2 id="indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations">
+                <AnchorLink
+                  as="h2"
+                  anchor="indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations"
+                >
                   Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
-                </h2>
+                </AnchorLink>
                 <p>
                   Le nombre de femmes et d&#39;hommes parmi les dix plus hautes rémunérations de l’entreprise ou de
                   l&#39;unité économique et sociale (UES).
                 </p>
-                <h3 id="comment-est-calcul-l-indicateur">Comment est calculé l&#39;indicateur</h3>
+                <AnchorLink anchor="comment-est-calcul-l-indicateur-10-plus-hautes-remunerations">
+                  Comment est calculé l&#39;indicateur
+                </AnchorLink>
                 <p>
                   Le nombre de salariés du sexe sous-représenté est calculé en comparant le nombre de femmes et le
                   nombre d’hommes parmi les 10 plus hautes rémunérations.
@@ -662,7 +684,9 @@ const AideSimulation: NextPageWithLayout = () => {
                     </tbody>
                   </table>
                 </div>
-                <h2 id="publication-et-transmission">Publication et transmission</h2>
+                <AnchorLink as="h2" anchor="publication-et-transmission">
+                  Publication et transmission
+                </AnchorLink>
                 <p>
                   Les entreprises doivent transmettre leurs indicateurs et leur note globale de l’Index aux services de
                   l’inspection du travail (Dreets). Pour effectuer cette transmission, l&#39;entreprise peut cliquer sur

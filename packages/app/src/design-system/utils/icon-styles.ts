@@ -11,6 +11,7 @@ export type IconStyles =
   | "fr-icon-error-fill"
   | "fr-icon-information-fill"
   | "fr-icon-line-fill"
+  | "fr-icon-link"
   | "fr-icon-success-fill"
   | "fr-icon-success-line"
   | "fr-icon-user-fill"
