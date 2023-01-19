@@ -43,8 +43,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   Indicateur - écart de taux de promotion (plus de 250 salariés)
                 </SummaryLink>
                 <SummaryLink href="#indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite">
-                  Indicateur - pourcentage de salariées augmentées dans l&#39;année suivant leur retour de congé
-                  maternité
+                  Indicateur - pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité
                 </SummaryLink>
                 <SummaryLink href="#indicateur-nombre-de-salaries-du-sexe-sous-represente-parmi-les-10-plus-hautes-remunerations">
                   Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
@@ -61,18 +60,18 @@ const AideSimulation: NextPageWithLayout = () => {
                   plus tard le 1er mars de l’année en cours, au titre de l’année précédente.
                 </p>
                 <p>
-                  L’assujettissement de l’entreprise ou de l&#39;unité économique et sociale (UES) est défini à la date
-                  de l&#39;obligation de publication de l&#39;index. Le calcul des effectifs assujettis de l’entreprise
-                  ou de l&#39;unité économique et sociale (UES) est celui prévu aux articles L.1111-2 et L.1111-3 du
-                  code du travail.
+                  L’assujettissement de l’entreprise ou de l’unité économique et sociale (UES) est défini à la date de
+                  l’obligation de publication de l’index. Le calcul des effectifs assujettis de l’entreprise ou de
+                  l’unité économique et sociale (UES) est celui prévu aux articles L.1111-2 et L.1111-3 du code du
+                  travail.
                 </p>
                 <p>
                   Les indicateurs sont calculés à partir des données de la période de référence annuelle choisie par
-                  l’entreprise ou l&#39;unité économique et sociale (UES). Cette période doit être de 12 mois
-                  consécutifs et précéder l’année de publication. Par exemple, elle doit donc nécessairement s’achever
-                  au plus tard le 31 décembre 2021 pour un Index publié en 2022. Uniquement pour l’indicateur « écart de
-                  taux d’augmentation », et uniquement pour une entreprise ou une unité économique et sociale (UES) de
-                  50 à 250 salariés, l’employeur peut choisir une période de référence de 3 ans maximum. Ce caractère
+                  l’entreprise ou l’unité économique et sociale (UES). Cette période doit être de 12 mois consécutifs et
+                  précéder l’année de publication. Par exemple, elle doit donc nécessairement s’achever au plus tard le
+                  31 décembre 2021 pour un Index publié en 2022. Uniquement pour l’indicateur « écart de taux
+                  d’augmentation », et uniquement pour une entreprise ou une unité économique et sociale (UES) de 50 à
+                  250 salariés, l’employeur peut choisir une période de référence de 3 ans maximum. Ce caractère
                   pluriannuel peut être révisé tous les 3 ans.
                 </p>
                 <AnchorLink as="h2" anchor="effectifs-pris-en-compte">
@@ -81,7 +80,7 @@ const AideSimulation: NextPageWithLayout = () => {
                 <p>
                   Les effectifs pris en compte pour le calcul des indicateurs sont appréciés en effectif physique sur la
                   période de référence. Ils doivent être renseignés par{" "}
-                  <strong>catégorie socio-professionnelle et tranche d&#39;âge</strong>.
+                  <strong>catégorie socio-professionnelle et tranche d’âge</strong>.
                 </p>
                 <p>
                   Les caractéristiques individuelles (âge, catégorie de poste) sont appréciées au dernier jour de la
@@ -93,7 +92,7 @@ const AideSimulation: NextPageWithLayout = () => {
                 <ul>
                   <li>les apprentis et les contrats de professionnalisation</li>
                   <li>
-                    les salariés mis à la disposition de l&#39;entreprise par une entreprise extérieure (dont les
+                    les salariés mis à la disposition de l’entreprise par une entreprise extérieure (dont les
                     intérimaires)
                   </li>
                   <li>les expatriés</li>
@@ -145,16 +144,16 @@ const AideSimulation: NextPageWithLayout = () => {
                 </ul>
                 <p>
                   Les groupes ne comportant pas <strong>au moins 3 femmes et 3 hommes</strong> ne doivent pas être
-                  retenus pour le calcul de l&#39;indicateur.
+                  retenus pour le calcul de l’indicateur.
                 </p>
                 <p>
-                  Si le total des effectifs des groupes pouvant être pris en compte pour le calcul de l&#39;indicateur
-                  est inférieur à 40% des effectifs totaux, l&#39;indicateur et l&#39;index ne sont pas calculables.
+                  Si le total des effectifs des groupes pouvant être pris en compte pour le calcul de l’indicateur est
+                  inférieur à 40% des effectifs totaux, l’indicateur et l’index ne sont pas calculables.
                 </p>
                 <AnchorLink anchor="comment-est-calcul-l-indicateur-1">Comment est calculé l’indicateur</AnchorLink>
                 <p>
                   Seuls les groupes comprenant au moins 3 femmes et au moins 3 hommes sont pris en compte pour le calcul
-                  de l&#39;indicateur.
+                  de l’indicateur.
                 </p>
                 <ol>
                   <li>
@@ -188,7 +187,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   </li>
                 </ol>
                 <p>
-                  <strong>Barème appliqué pour l&#39;obtention de la note à l&#39;indicateur</strong>
+                  <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
                 </p>
                 <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
                   <table>
@@ -295,63 +294,60 @@ const AideSimulation: NextPageWithLayout = () => {
                   Indicateur - écart de taux d’augmentation (50 à 250 salariés)
                 </AnchorLink>
                 <p>
-                  La notion d&#39;augmentation individuelle correspond à une augmentation individuelle du salaire de
-                  base du salarié concerné.
+                  La notion d’augmentation individuelle correspond à une augmentation individuelle du salaire de base du
+                  salarié concerné.
                 </p>
                 <p>
                   La notion d’augmentation individuelle pour le calcul de cet indicateur inclut les augmentations de
                   salaire liées à une promotion.
                 </p>
                 <p>
-                  L&#39;indicateur est calculé{" "}
-                  <strong>au niveau de l&#39;entreprise ou de l&#39;unité économique et sociale (UES)</strong>, et non
-                  par groupes de salariés.
+                  L’indicateur est calculé{" "}
+                  <strong>au niveau de l’entreprise ou de l’unité économique et sociale (UES)</strong>, et non par
+                  groupes de salariés.
                 </p>
                 <p>
-                  Pour le calcul de l&#39;indicateur, l’employeur peut choisir une période de référence pluriannuelle, à
+                  Pour le calcul de l’indicateur, l’employeur peut choisir une période de référence pluriannuelle, à
                   partir des données des deux ou trois années précédentes. Son caractère pluriannuel peut être révisé
                   tous les trois ans.
                 </p>
                 <p>L’indicateur n’est pas calculable :</p>
                 <ul>
-                  <li>Si aucune augmentation individuelle n&#39;est intervenue au cours de la période de référence</li>
+                  <li>Si aucune augmentation individuelle n’est intervenue au cours de la période de référence</li>
                   <li>
-                    <p>
-                      Ou si l’effectif pris en compte pour le calcul des indicateurs ne comporte pas au moins 5 femmes
-                      et 5 hommes
-                    </p>
-                    <AnchorLink anchor="comment-est-calcul-l-indicateur-2-50-250">
-                      Comment est calculé l&#39;indicateur
-                    </AnchorLink>
-                    <p>
-                      Le calcul est possible si les effectifs pris en compte pour le calcul des indicateurs comptent au
-                      moins 5 femmes et 5 hommes.
-                    </p>
+                    Ou si l’effectif pris en compte pour le calcul des indicateurs ne comporte pas au moins 5 femmes et
+                    5 hommes
+                  </li>
+                </ul>
+                <AnchorLink anchor="comment-est-calcul-l-indicateur-2-50-250">
+                  Comment est calculé l’indicateur
+                </AnchorLink>
+                <p>
+                  Le calcul est possible si les effectifs pris en compte pour le calcul des indicateurs comptent au
+                  moins 5 femmes et 5 hommes.
+                </p>
+                <ol>
+                  <li>
+                    <p>Le nombre de femmes et d’hommes augmentés au cours de la période de référence est calculé. </p>
                   </li>
                   <li>
-                    <p>
-                      Le nombre de femmes et d&#39;hommes augmentés au cours de la période de référence est calculé.{" "}
-                    </p>
+                    Le taux d’augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au nombre
+                    total de femmes pris en compte pour le calcul. Le taux d’augmentation des hommes est calculé en
+                    rapportant le nombre d’hommes augmentées au nombre total d’hommes pris en compte pour le calcul.
                   </li>
                   <li>
-                    Le taux d&#39;augmentation des femmes est calculé en rapportant le nombre de femmes augmentées au
-                    nombre total de femmes pris en compte pour le calcul. Le taux d&#39;augmentation des hommes est
-                    calculé en rapportant le nombre d&#39;hommes augmentées au nombre total d&#39;hommes pris en compte
-                    pour le calcul.
+                    Un premier résultat est &quot;l’écart en points de pourcentage&quot; : il s’agit de la valeur
+                    absolue de l’écart entre les deux taux calculés en 2. Par exemple, le taux d’augmentation des femmes
+                    est de 33,13% et le taux d’augmentation des hommes est de 30,00%, l’écart est ainsi de 3,13 points
+                    de pourcentage.
                   </li>
                   <li>
-                    Un premier résultat est &quot;l’écart en points de pourcentage&quot; : il s&#39;agit de la valeur
-                    absolue de l&#39;écart entre les deux taux calculés en 2. Par exemple, le taux d&#39;augmentation
-                    des femmes est de 33,13% et le taux d&#39;augmentation des hommes est de 30,00%, l&#39;écart est
-                    ainsi de 3,13 points de pourcentage.
-                  </li>
-                  <li>
-                    Un second résultat est &quot;l&#39;écart en nombre équivalent de salariés&quot; : l&#39;écart de
-                    taux calculé en 3 est appliqué au plus petit effectif entre les femmes et les hommes. Il correspond
-                    au plus petit nombre de salariés qu&#39;il aurait fallu augmenter ou ne pas augmenter pour être à
-                    égalité des taux d&#39;augmentation. Par exemple, l&#39;écart est de 3,13 points de pourcentage dans
-                    une entreprise employant 15 femmes et 20 hommes, on applique 3,13% aux 15 femmes, le nombre
-                    équivalent de salariés est ainsi de 0,4695.
+                    Un second résultat est &quot;l’écart en nombre équivalent de salariés&quot; : l’écart de taux
+                    calculé en 3 est appliqué au plus petit effectif entre les femmes et les hommes. Il correspond au
+                    plus petit nombre de salariés qu’il aurait fallu augmenter ou ne pas augmenter pour être à égalité
+                    des taux d’augmentation. Par exemple, l’écart est de 3,13 points de pourcentage dans une entreprise
+                    employant 15 femmes et 20 hommes, on applique 3,13% aux 15 femmes, le nombre équivalent de salariés
+                    est ainsi de 0,4695.
                   </li>
                   <li>
                     L’écart en points de pourcentage et le nombre équivalent de salariés sont arrondis à la première
@@ -360,17 +356,17 @@ const AideSimulation: NextPageWithLayout = () => {
                   <li>
                     Le barème est appliqué à l’écart en points de pourcentage et à l’écart en nombre équivalent de
                     salariés, et le résultat correspondant au nombre de points le plus élevé est retenu. En reprenant
-                    l&#39;exemple en 4, c&#39;est le résultat obtenu en nombre équivalent de salariés, soit 0,5 arrondi,
-                    qui sera conservée, la note finale obtenu à l&#39;indicateur est ainsi de 35 points.
+                    l’exemple en 4, c’est le résultat obtenu en nombre équivalent de salariés, soit 0,5 arrondi, qui
+                    sera conservée, la note finale obtenu à l’indicateur est ainsi de 35 points.
                   </li>
-                </ul>
+                </ol>
                 <p>
                   Si l’écart constaté joue en faveur du sexe le moins bien rémunéré (indicateur - écart de
                   rémunération), la note maximale de 35 points est attribuée à l’entreprise (considérant que l’employeur
                   a mis en place une politique de rattrapage adaptée).
                 </p>
                 <p>
-                  <strong>Barème appliqué pour l&#39;obtention de la note à l&#39;indicateur</strong>
+                  <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
                 </p>
                 <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
                   <table>
@@ -418,28 +414,28 @@ const AideSimulation: NextPageWithLayout = () => {
                   .
                 </p>
                 <p>
-                  La notion d’augmentation individuelle pour le calcul de l&#39;indicateur exclut les augmentations de
+                  La notion d’augmentation individuelle pour le calcul de l’indicateur exclut les augmentations de
                   salaires liées à une promotion.
                 </p>
                 <p>Les salariés sont répartis en 4 groupes selon les quatre catégories socio-professionnelles.</p>
                 <p>
                   Les groupes ne comportant pas <strong>au moins 10 femmes et 10 hommes</strong> ne sont pas retenus
-                  pour le calcul de l&#39;indicateur.
+                  pour le calcul de l’indicateur.
                 </p>
                 <p>L’indicateur n’est pas calculable :</p>
                 <ul>
-                  <li>Si aucune augmentation individuelle n&#39;est intervenue au cours de la période de référence.</li>
+                  <li>Si aucune augmentation individuelle n’est intervenue au cours de la période de référence.</li>
                   <li>
                     Ou si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul
                     des indicateurs.
                   </li>
                 </ul>
                 <AnchorLink anchor="comment-est-calcul-l-indicateur-2-250-plus">
-                  Comment est calculé l&#39;indicateur
+                  Comment est calculé l’indicateur
                 </AnchorLink>
                 <p>
                   Seuls les groupes comprenant au moins 10 hommes et 10 femmes sont pris en compte pour le calcul de
-                  l&#39;indicateur.
+                  l’indicateur.
                 </p>
                 <ol>
                   <li>
@@ -469,7 +465,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   a mis en place une politique de rattrapage adaptée).
                 </p>
                 <p>
-                  <strong>Barème appliqué pour l&#39;obtention de la note à l&#39;indicateur</strong>
+                  <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
                 </p>
                 <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
                   <table>
@@ -506,22 +502,22 @@ const AideSimulation: NextPageWithLayout = () => {
                 <p>Les salariés sont répartis en 4 groupes selon les quatre catégories socio-professionnelles.</p>
                 <p>
                   Les groupes ne comportant pas <strong>au moins 10 femmes et 10 hommes</strong> ne sont pas retenus
-                  pour le calcul de l&#39;indicateur.
+                  pour le calcul de l’indicateur.
                 </p>
                 <p>L’indicateur n’est pas calculable :</p>
                 <ul>
-                  <li>Si aucune promotion n&#39;est intervenue au cours de la période de référence.</li>
+                  <li>Si aucune promotion n’est intervenue au cours de la période de référence.</li>
                   <li>
                     Ou si le total des effectifs retenus est inférieur à 40% des effectifs pris en compte pour le calcul
                     des indicateurs.
                   </li>
                 </ul>
                 <AnchorLink anchor="comment-est-calcul-l-indicateur-4-250-plus">
-                  Comment est calculé l&#39;indicateur
+                  Comment est calculé l’indicateur
                 </AnchorLink>
                 <p>
                   Seuls les groupes comprenant au moins 10 hommes et 10 femmes sont pris en compte pour le calcul de
-                  l&#39;indicateur.
+                  l’indicateur.
                 </p>
                 <ol>
                   <li>
@@ -551,7 +547,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   a mis en place une politique de rattrapage adaptée).
                 </p>
                 <p>
-                  <strong>Barème appliqué pour l&#39;obtention de la note à l&#39;indicateur</strong>
+                  <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
                 </p>
                 <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
                   <table>
@@ -585,8 +581,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   as="h2"
                   anchor="indicateur-pourcentage-de-salariees-augment-es-dans-l-ann-e-suivant-leur-retour-de-cong-maternite"
                 >
-                  Indicateur - pourcentage de salariées augmentées dans l&#39;année suivant leur retour de congé
-                  maternité
+                  Indicateur - pourcentage de salariées augmentées dans l’année suivant leur retour de congé maternité
                 </AnchorLink>
                 <p>
                   Seules les salariées qui sont rentrées de congé maternité (ou d’adoption) durant la période de
@@ -594,22 +589,18 @@ const AideSimulation: NextPageWithLayout = () => {
                 </p>
                 <p>
                   Sont considérées <strong>comme augmentées</strong> toutes salariées <strong>revenues de congé</strong>{" "}
-                  maternité pendant l&#39;année de référence et ayant bénéficié d&#39;une augmentation (générale ou
+                  maternité pendant l’année de référence et ayant bénéficié d’une augmentation (générale ou
                   individuelle) à leur retour avant la fin de cette même période.
                 </p>
                 <p>L’indicateur n’est pas calculable :</p>
                 <ul>
                   <li>
-                    S&#39;il n&#39;y a eu aucun retour de congé maternité (ou adoption) au cours de la période de
-                    référence.
+                    S’il n’y a eu aucun retour de congé maternité (ou adoption) au cours de la période de référence.
                   </li>
-                  <li>
-                    S&#39;il n&#39;y a eu aucune augmentation (individuelle ou collective) au cours des congés
-                    maternité.
-                  </li>
+                  <li>S’il n’y a eu aucune augmentation (individuelle ou collective) au cours des congés maternité.</li>
                 </ul>
 
-                <AnchorLink anchor="comment-est-calcul-l-indicateur-5">Comment est calculé l&#39;indicateur</AnchorLink>
+                <AnchorLink anchor="comment-est-calcul-l-indicateur-5">Comment est calculé l’indicateur</AnchorLink>
                 <p>
                   L’indicateur correspond au ratio entre le nombre de salariées revenues de congé maternité ou
                   d’adoption pendant la période de référence et ayant bénéficié d’une augmentation, avant la fin de
@@ -618,7 +609,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   il y a eu des augmentations salariales.
                 </p>
                 <p>
-                  <strong>Barème appliqué pour l&#39;obtention de la note à l&#39;indicateur</strong>
+                  <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
                 </p>
                 <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
                   <table>
@@ -647,18 +638,18 @@ const AideSimulation: NextPageWithLayout = () => {
                   Indicateur - nombre de salariés du sexe sous-représenté parmi les 10 plus hautes rémunérations
                 </AnchorLink>
                 <p>
-                  Le nombre de femmes et d&#39;hommes parmi les dix plus hautes rémunérations de l’entreprise ou de
-                  l&#39;unité économique et sociale (UES).
+                  Le nombre de femmes et d’hommes parmi les dix plus hautes rémunérations de l’entreprise ou de l’unité
+                  économique et sociale (UES).
                 </p>
                 <AnchorLink anchor="comment-est-calcul-l-indicateur-10-plus-hautes-remunerations">
-                  Comment est calculé l&#39;indicateur
+                  Comment est calculé l’indicateur
                 </AnchorLink>
                 <p>
                   Le nombre de salariés du sexe sous-représenté est calculé en comparant le nombre de femmes et le
                   nombre d’hommes parmi les 10 plus hautes rémunérations.
                 </p>
                 <p>
-                  <strong>Barème appliqué pour l&#39;obtention de la note à l&#39;indicateur</strong>
+                  <strong>Barème appliqué pour l’obtention de la note à l’indicateur</strong>
                 </p>
                 <div className="fr-table fr-table--no-scroll fr-table--layout-fixed">
                   <table>
@@ -689,14 +680,13 @@ const AideSimulation: NextPageWithLayout = () => {
                 </AnchorLink>
                 <p>
                   Les entreprises doivent transmettre leurs indicateurs et leur note globale de l’Index aux services de
-                  l’inspection du travail (Dreets). Pour effectuer cette transmission, l&#39;entreprise peut cliquer sur
-                  le bouton &quot;Poursuivre vers la déclaration&quot; situé en bas de la page
-                  &quot;Récapitulatif&quot;.{" "}
+                  l’inspection du travail (Dreets). Pour effectuer cette transmission, l’entreprise peut cliquer sur le
+                  bouton &quot;Poursuivre vers la déclaration&quot; situé en bas de la page &quot;Récapitulatif&quot;.{" "}
                 </p>
                 <p>
-                  L&#39;index ainsi que l’ensemble des indicateurs le composant doivent être publiés de manière visible
-                  et lisible sur le site internet de l&#39;entreprise déclarante ou en l&#39;absence de site internet,
-                  communiqué aux salariés. Les résultats doivent par ailleurs être communiqués au CSE.
+                  L’index ainsi que l’ensemble des indicateurs le composant doivent être publiés de manière visible et
+                  lisible sur le site internet de l’entreprise déclarante ou en l’absence de site internet, communiqué
+                  aux salariés. Les résultats doivent par ailleurs être communiqués au CSE.
                 </p>
                 <p>
                   Si l’entreprise obtient moins de 75 points, elle doit mettre en œuvre des mesures de correction lui
@@ -721,7 +711,7 @@ const AideSimulation: NextPageWithLayout = () => {
                   moyen.
                 </p>
                 <p>
-                  <strong>Comment est calculé l&#39;index</strong>
+                  <strong>Comment est calculé l’index</strong>
                 </p>
                 <p>
                   Les indicateurs calculables doivent représenter au moins 75 points de l’Index pour que celui-ci soit
