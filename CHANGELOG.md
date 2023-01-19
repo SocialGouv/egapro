@@ -1,3 +1,10 @@
+## [2.73.6](https://github.com/SocialGouv/egapro/compare/v2.73.5...v2.73.6) (2023-01-19)
+
+
+### Bug Fixes
+
+* tests from header simu ([f17ade5](https://github.com/SocialGouv/egapro/commit/f17ade54708dd3470f53acba667e10bb6c2e0292))
+
 ## [2.73.5](https://github.com/SocialGouv/egapro/compare/v2.73.4...v2.73.5) (2023-01-19)
 
 
