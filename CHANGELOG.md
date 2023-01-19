@@ -1,3 +1,10 @@
+## [2.73.5](https://github.com/SocialGouv/egapro/compare/v2.73.4...v2.73.5) (2023-01-19)
+
+
+### Bug Fixes
+
+* menu authenticated + help simu ([e1b446f](https://github.com/SocialGouv/egapro/commit/e1b446f5b90d3a3794f008098f71f2aea1a1fe5b))
+
 ## [2.73.4](https://github.com/SocialGouv/egapro/compare/v2.73.3...v2.73.4) (2023-01-18)
 
 
