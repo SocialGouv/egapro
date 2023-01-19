@@ -1,6 +1,6 @@
 {
   "name": "~egapro-dev",
-  "version": "2.73.7",
+  "version": "2.73.8",
   "private": true,
   "workspaces": {
     "packages": [

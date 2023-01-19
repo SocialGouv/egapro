@@ -1,3 +1,10 @@
+## [2.73.8](https://github.com/SocialGouv/egapro/compare/v2.73.7...v2.73.8) (2023-01-19)
+
+
+### Bug Fixes
+
+* enhance simu help page (Fixes [#1399](https://github.com/SocialGouv/egapro/issues/1399)) ([a957c88](https://github.com/SocialGouv/egapro/commit/a957c888200f64b03c3f74e920cf5a6625a2f90a))
+
 ## [2.73.7](https://github.com/SocialGouv/egapro/compare/v2.73.6...v2.73.7) (2023-01-19)
 
 
