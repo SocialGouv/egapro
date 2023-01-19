@@ -1,3 +1,10 @@
+## [2.73.7](https://github.com/SocialGouv/egapro/compare/v2.73.6...v2.73.7) (2023-01-19)
+
+
+### Bug Fixes
+
+* bug ajout declarant. Regex allowed newlines and so add incorrect characters ([#1528](https://github.com/SocialGouv/egapro/issues/1528)) ([c38bc72](https://github.com/SocialGouv/egapro/commit/c38bc72b71bbaf447845b9c88a5a9342012ab1d3))
+
 ## [2.73.6](https://github.com/SocialGouv/egapro/compare/v2.73.5...v2.73.6) (2023-01-19)
 
 
