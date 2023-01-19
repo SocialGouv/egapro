@@ -31,13 +31,11 @@ import {
   IconOfficeBuilding,
   IconPeople,
   IconPeopleCircle,
-  IconQuestionMarkCircle,
   IconUserGroup,
 } from "./ds/Icons"
 import Logo from "./ds/Logo"
 
 const Header = () => {
-  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
   const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isMobile] = useMediaQuery("(max-width: 639px)")
