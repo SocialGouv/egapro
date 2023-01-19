@@ -1,3 +1,15 @@
+# [2.74.0](https://github.com/SocialGouv/egapro/compare/v2.73.8...v2.74.0) (2023-01-19)
+
+
+### Bug Fixes
+
+* aide simu ol instead of ul ([f011caa](https://github.com/SocialGouv/egapro/commit/f011caa219605b819ea60b4ba26cc259c8f65c38))
+
+
+### Features
+
+* add jdma button to simu and decla (Closes [#1524](https://github.com/SocialGouv/egapro/issues/1524)) ([24ae47e](https://github.com/SocialGouv/egapro/commit/24ae47e70df18fbff2015afb7f6194afd151ca09))
+
 ## [2.73.8](https://github.com/SocialGouv/egapro/compare/v2.73.7...v2.73.8) (2023-01-19)
 
 
