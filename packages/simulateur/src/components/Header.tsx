@@ -121,7 +121,7 @@ const Header = () => {
             </Flex>
             <Spacer />
             <Box>
-              {!email ? (
+              {email ? (
                 <Menu>
                   <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
                     Menu
@@ -174,20 +174,6 @@ const Header = () => {
                         </MenuGroup>
                       </>
                     )}
-                    {isSmallerThan1280 && (
-                      <>
-                        <MenuDivider />
-                        <MenuGroup title="Informations">
-                          <MenuItem
-                            as={Link}
-                            to="/aide-simulation"
-                            icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}
-                          >
-                            Consulter l'aide
-                          </MenuItem>
-                        </MenuGroup>
-                      </>
-                    )}
                   </MenuList>
                 </Menu>
               ) : (
@@ -195,7 +181,6 @@ const Header = () => {
                   {isMobile && (
                     <>
                       <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
-                      <ButtonLink to="/aide-simulation" variant="ghost" label="Consulter l'aide" size="xs" isExternal />
                     </>
                   )}
                   {isBiggerThanMobileAndSmallerThan1280 && (
@@ -205,13 +190,6 @@ const Header = () => {
                         label={"Me connecter"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
-                      />
-                      <ButtonLink
-                        to="/aide-simulation"
-                        variant="ghost"
-                        label="Consulter l'aide"
-                        leftIcon={<IconQuestionMarkCircle />}
-                        isExternal
                       />
                     </>
                   )}
