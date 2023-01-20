@@ -99,7 +99,7 @@ async def test_search_endpoint(client):
 async def test_search_representation_equilibree_endpoint(client):
     await db.representation_equilibree.put(
         "12345671",
-        2020,
+        2021,
         {
             "déclaration": {"année_indicateurs": 2020},
             "entreprise": {
@@ -121,7 +121,7 @@ async def test_search_representation_equilibree_endpoint(client):
                     "siren": "12345671",
                 },
                 "représentation_équilibrée": {
-                    "2020": {
+                    "2021": {
                         "pourcentage_femmes_cadres": None,
                         "pourcentage_hommes_cadres": None,
                         "pourcentage_femmes_membres": None,
@@ -146,10 +146,10 @@ async def test_search_representation_equilibree_endpoint(client):
 async def test_stats_endpoint(client):
     await db.declaration.put(
         "12345671",
-        constants.CURRENT_YEAR,
+        2021,
         "foo@bar.org",
         {
-            "déclaration": {"index": 95, "année_indicateurs": constants.CURRENT_YEAR},
+            "déclaration": {"index": 95, "année_indicateurs": 2021},
             "id": "12345678-1234-5678-9012-123456789013",
             "entreprise": {
                 "raison_sociale": "Bio c Bon",
@@ -160,10 +160,10 @@ async def test_stats_endpoint(client):
     )
     await db.declaration.put(
         "123456782",
-        constants.CURRENT_YEAR,
+        2021,
         "foo@bar.org",
         {
-            "déclaration": {"index": 93, "année_indicateurs": constants.CURRENT_YEAR},
+            "déclaration": {"index": 93, "année_indicateurs": 2021},
             "id": "12345678-1234-5678-9012-123456789012",
             "entreprise": {
                 "raison_sociale": "RoboCoop",

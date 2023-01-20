@@ -1,14 +1,10 @@
 import { Box, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react"
 import arrayMutators from "final-form-arrays"
+import createDecorator from "final-form-calculate"
 import React, { FunctionComponent } from "react"
-import { Form } from "react-final-form"
+import { Field, Form } from "react-final-form"
 import { FieldArray } from "react-final-form-arrays"
 
-import { ActionInformationsEntrepriseData, AppState, EntrepriseType, FormState, Structure } from "../../globals"
-
-import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
-
-import createDecorator from "final-form-calculate"
 import ActionBar from "../../components/ActionBar"
 import { codeNafFromCode } from "../../components/CodeNaf"
 import ButtonAction from "../../components/ds/ButtonAction"
@@ -21,13 +17,14 @@ import FieldSiren from "../../components/FieldSiren"
 import FormAutoSave from "../../components/FormAutoSave"
 import FormError from "../../components/FormError"
 import FormSubmit from "../../components/FormSubmit"
-import NombreEntreprises from "../../components/NombreEntreprises"
 import { departementFromCode, regionFromCode } from "../../components/RegionsDepartements"
 import { ButtonSimulatorLink } from "../../components/SimulatorLink"
 import TextField from "../../components/TextField"
-import EntrepriseUESInput from "./components/EntrepriseUESInputField"
+import { ActionInformationsEntrepriseData, AppState, EntrepriseType, FormState, Structure } from "../../globals"
 import { useDeclaration } from "../../hooks/useDeclaration"
 import { timestampToFrDate } from "../../utils/date"
+import { parseIntFormValue, parseIntStateValue, required } from "../../utils/formHelpers"
+import EntrepriseUESInput from "./components/EntrepriseUESInputField"
 
 const validate = (value: string) => {
   const requiredError = required(value)
@@ -101,7 +98,14 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
     structure: informationsEntreprise.structure,
     nomUES: informationsEntreprise.nomUES,
     nombreEntreprises: parseIntStateValue(informationsEntreprise.nombreEntreprises),
-    entreprisesUES: informationsEntreprise.entreprisesUES,
+    entreprisesUES: informationsEntreprise.entreprisesUES.length
+      ? informationsEntreprise.entreprisesUES
+      : [
+          {
+            nom: "",
+            siren: "",
+          },
+        ],
   }
 
   const { declaration } = useDeclaration(informationsEntreprise.siren, year)
@@ -249,11 +253,15 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                   errorText="le nom de l'UES n'est pas valide"
                   readOnly={readOnly}
                 />
-                <NombreEntreprises readOnly={readOnly} />
 
-                <Text>
-                  Saisie du numéro Siren des entreprises composant l'UES (ne pas inclure l'entreprise déclarante)
-                </Text>
+                <hr />
+                <Box>
+                  <Box mt="0">
+                    <Text as="b">Siren des entreprises composant l'UES</Text>
+                    &nbsp;(ne pas inclure l'entreprise déclarante)
+                  </Box>
+                </Box>
+
                 <FieldArray name="entreprisesUES">
                   {({ fields }) => {
                     return (
@@ -267,7 +275,7 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                               readOnly={readOnly}
                               year={year}
                             />
-                            {!readOnly && (
+                            {!readOnly && values.nombreEntreprises > 2 && (
                               <Box style={{ marginLeft: 10, marginTop: 65 }}>
                                 <button onClick={() => fields.remove(index)}>❌</button>
                               </Box>
@@ -287,6 +295,18 @@ const InformationsEntrepriseForm: FunctionComponent<InformationsEntrepriseFormPr
                     leftIcon={<IconPlusCircle />}
                   />
                 )}
+
+                <Box>
+                  <Box mt="6">
+                    <Field name="nombreEntreprises">
+                      {({ input }) => (
+                        <Text mb={4} textAlign="right" fontStyle={"italic"}>
+                          {input.value} entreprises composent l'UES (déclarant compris)
+                        </Text>
+                      )}
+                    </Field>
+                  </Box>
+                </Box>
               </>
             )}
           </FormStack>

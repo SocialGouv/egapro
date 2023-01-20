@@ -1,13 +1,16 @@
 import React from "react"
-import { Link } from "react-router-dom"
-import { Button } from "@chakra-ui/react"
+import { Link as RouterLink } from "react-router-dom"
+import { Button, Link } from "@chakra-ui/react"
 import { ButtonProps } from "./ButtonAction"
 
 type ButtonLinkProps = ButtonProps & {
   to: string
+  isExternal?: boolean
 }
 
-// Link with React Router Link.
+/**
+ *  Link with React Router Link or Chakra Link if isExternal.
+ */
 function ButtonLink({
   label,
   to,
@@ -17,22 +20,31 @@ function ButtonLink({
   rightIcon,
   size = "md",
   fullWidth,
+  isExternal,
 }: ButtonLinkProps) {
+  const props = {
+    colorScheme,
+    variant,
+    leftIcon,
+    rightIcon,
+    size,
+    sx: {
+      width: fullWidth ? "100%" : "auto",
+    },
+  }
+
   return (
-    <Button
-      to={to}
-      as={Link}
-      colorScheme={colorScheme}
-      variant={variant}
-      leftIcon={leftIcon}
-      rightIcon={rightIcon}
-      size={size}
-      sx={{
-        width: fullWidth ? "100%" : "auto",
-      }}
-    >
-      {label}
-    </Button>
+    <>
+      {isExternal ? (
+        <Button as={Link} {...props} href={to} isExternal>
+          {label}
+        </Button>
+      ) : (
+        <Button as={RouterLink} {...props} to={to}>
+          {label}
+        </Button>
+      )}
+    </>
   )
 }
 

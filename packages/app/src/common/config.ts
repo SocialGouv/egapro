@@ -2,7 +2,7 @@ import { ensureApiEnvVar, ensureNextEnvVar } from "./utils/os";
 import { isTruthy } from "./utils/string";
 import type { Any } from "./utils/types";
 
-export type FeatureFlag = "apiv2" | "repeq-search";
+export type FeatureFlag = keyof typeof config.ff;
 
 export const config = {
   githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
@@ -15,10 +15,13 @@ export const config = {
     siteId: ensureNextEnvVar(process.env.NEXT_PUBLIC_MATOMO_SITE_ID, ""),
   },
   env: ensureApiEnvVar<"dev" | "preprod" | "prod">(process.env.EGAPRO_ENV, "dev"),
-  get ff(): Record<FeatureFlag, boolean> {
+  get ff() {
     return {
-      "repeq-search": this.env !== "prod",
-      apiv2: this.env !== "prod",
+      "repeq-search": this.env === "dev",
+      apiv2: {
+        enabled: this.env === "dev",
+        whitelist: ["/apiv2/ownership", "/apiv2/health", "/apiv2/admin"],
+      },
     };
   },
   api: {

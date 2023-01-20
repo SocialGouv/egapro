@@ -349,6 +349,14 @@ const DeclarationForm: FunctionComponent<DeclarationFormProps> = ({
                   loading={loading}
                 />
               </ActionBar>
+              <Divider my="8" />
+              <Box>
+                <Text fontWeight="bold">Aidez-nous à améliorer cette démarche</Text>
+                <Text mb="4">Donnez-nous votre avis, cela ne prend que 2 minutes.</Text>
+                <a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/2240?&view-mode=formulaire-avis&nd_source=button-calcul-declaration&key=73366ddb13d498f4c77d01c2983bab48">
+                  <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
+                </a>
+              </Box>
             </>
           ) : (
             <ActionBar>

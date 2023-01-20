@@ -11,7 +11,11 @@ EFFECTIFS = {
     "1000:": "De 1000 ou plus",
 }
 
-PUBLIC_YEARS = YEARS
+# Always let the comment for us to switch between enabled read current year or not
+# PUBLIC_YEARS = YEARS
+PUBLIC_YEARS = [2018, 2019, 2020, 2021]
+# PUBLIC_YEARS_REPEQ = YEARS_REPEQ
+PUBLIC_YEARS_REPEQ = [2021]
 
 REGIONS = {
     "01": "Guadeloupe",

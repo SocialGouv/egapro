@@ -23,6 +23,7 @@ const AnneeDeclaration: FunctionComponent<AnneeDeclarationProps> = ({ name, labe
       optionLabel="Choisir une année"
       label={label}
       isReadOnly={readOnly}
+      message={{ error: "Ce champ ne peut être vide" }}
     />
   )
 }

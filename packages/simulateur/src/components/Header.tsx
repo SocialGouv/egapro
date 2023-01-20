@@ -4,11 +4,6 @@ import {
   Button,
   ButtonGroup,
   Container,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerOverlay,
   Flex,
   HStack,
   Link,
@@ -22,16 +17,13 @@ import {
   MenuList,
   Spacer,
   Text,
-  useDisclosure,
   useMediaQuery,
 } from "@chakra-ui/react"
 import React from "react"
 import { Link as RouterLink, useHistory } from "react-router-dom"
 
 import { LinkIcon } from "@chakra-ui/icons"
-import FAQ from "../views/FAQ"
 import { useUser } from "./AuthContext"
-import ButtonAction from "./ds/ButtonAction"
 import ButtonLink from "./ds/ButtonLink"
 import {
   IconEdit,
@@ -39,14 +31,11 @@ import {
   IconMenu,
   IconOfficeBuilding,
   IconPeopleCircle,
-  IconQuestionMarkCircle,
   IconUserGroup,
 } from "./ds/Icons"
 import Logo from "./ds/Logo"
 
 const Header = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [isSmallerThan1280] = useMediaQuery("(max-width: 1279px)")
   const [isBiggerThanMobileAndSmallerThan1280] = useMediaQuery("(min-width: 640px) and (max-width: 1279px)")
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)")
   const [isMobile] = useMediaQuery("(max-width: 639px)")
@@ -177,16 +166,6 @@ const Header = () => {
                         </MenuGroup>
                       </>
                     )}
-                    {isSmallerThan1280 && (
-                      <>
-                        <MenuDivider />
-                        <MenuGroup title="Informations">
-                          <MenuItem onClick={onOpen} icon={<IconQuestionMarkCircle boxSize={5} color="gray.400" />}>
-                            Consulter l'aide
-                          </MenuItem>
-                        </MenuGroup>
-                      </>
-                    )}
                   </MenuList>
                 </Menu>
               ) : (
@@ -194,7 +173,6 @@ const Header = () => {
                   {isMobile && (
                     <>
                       <ButtonLink to="/tableauDeBord/me-connecter" label={"Me connecter"} size="xs" variant="ghost" />
-                      <ButtonAction onClick={onOpen} label={"Consulter l'aide"} variant="ghost" size="xs" />
                     </>
                   )}
                   {isBiggerThanMobileAndSmallerThan1280 && (
@@ -202,12 +180,6 @@ const Header = () => {
                       <ButtonLink
                         to="/tableauDeBord/me-connecter"
                         label={"Me connecter"}
-                        leftIcon={<IconPeopleCircle />}
-                        variant="ghost"
-                      />
-                      <ButtonAction
-                        onClick={onOpen}
-                        label={"Consulter l'aide"}
                         leftIcon={<IconPeopleCircle />}
                         variant="ghost"
                       />
@@ -229,19 +201,6 @@ const Header = () => {
           </Flex>
         </Container>
       </Box>
-      {isSmallerThan1280 && (
-        <>
-          <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
-            <DrawerOverlay />
-            <DrawerContent>
-              <DrawerCloseButton sx={{ zIndex: 20 }} />
-              <DrawerBody p={0}>
-                <FAQ />
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-        </>
-      )}
     </>
   )
 }

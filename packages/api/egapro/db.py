@@ -409,8 +409,6 @@ class simulation(table):
 class search(table):
     @classmethod
     async def index(cls, data):
-        if not data.is_public():
-            return
         ft = helpers.extract_ft(data)
         siren = data.siren
         year = data.year
@@ -484,8 +482,15 @@ class search(table):
             where.append(f"search.ft @@ to_tsquery('ftdict', ${len(args)})")
         for name, value in filters.items():
             if value is not None:
-                args.append(value)
-                where.append(f"search.{name}=${len(args)}")
+                if (type(value) is tuple):
+                    tuple_idx = []
+                    for elt in value:
+                        args.append(elt)
+                        tuple_idx.append(f"${len(args)}")
+                    where.append(f"search.{name} in ({', '.join(tuple_idx)})")
+                else:
+                    args.append(value)
+                    where.append(f"search.{name}=${len(args)}")
         if where:
             where = "WHERE " + " AND ".join(where)
         return args, where or ""
@@ -511,8 +516,6 @@ class search_representation_equilibree(table):
 
     @classmethod
     async def index(cls, data: models.Data):
-        if not data.is_public():
-            return
         ft = helpers.extract_ft(data)
         siren = data.siren
         year = data.year
@@ -579,8 +582,15 @@ class search_representation_equilibree(table):
             where.append(f"{table_name}.ft @@ to_tsquery('ftdict', ${len(args)})")
         for name, value in filters.items():
             if value is not None:
-                args.append(value)
-                where.append(f"{table_name}.{name}=${len(args)}")
+                if (type(value) is tuple):
+                    tuple_idx = []
+                    for elt in value:
+                        args.append(elt)
+                        tuple_idx.append(f"${len(args)}")
+                    where.append(f"{table_name}.{name} in ({', '.join(tuple_idx)})")
+                else:
+                    args.append(value)
+                    where.append(f"{table_name}.{name}=${len(args)}")
         if where:
             where = "WHERE " + " AND ".join(where)
         return args, where or ""

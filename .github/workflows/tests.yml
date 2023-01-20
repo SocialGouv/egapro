@@ -27,7 +27,9 @@ jobs:
 
       - name: Install Dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile --force --non-interactive
+        run: |
+          yarn install --frozen-lockfile --force --non-interactive
+          yarn setup-python
 
       - name: Up for tests API
         run: docker-compose up --build -d api db test_db

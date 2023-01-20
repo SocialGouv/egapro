@@ -1,6 +1,6 @@
 {
   "name": "~egapro-dev",
-  "version": "2.70.6",
+  "version": "2.74.0",
   "private": true,
   "workspaces": {
     "packages": [
@@ -25,7 +25,7 @@
     "lint": "yarn workspaces run lint",
     "fresh-install": "scripts/fresh-install",
     "check-all": "scripts/check-all",
-    "postinstall": "scripts/postinstall",
+    "setup-python": "scripts/postinstall",
     "test:api:docker": "docker exec -it $(basename $PWD)_api_1 py.test -vv --cov",
     "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov",
     "reverse-proxy": "docker-compose up --build --force-recreate --remove-orphans reverse_proxy"
