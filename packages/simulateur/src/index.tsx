@@ -9,7 +9,7 @@ import * as serviceWorker from "./serviceWorker"
 if (process.env.REACT_APP_SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.REACT_APP_SENTRY_DSN,
-    release: process.env.REACT_APP_VERSION,
+    release: process.env.REACT_APP_GITHUB_SHA,
   })
 }
 

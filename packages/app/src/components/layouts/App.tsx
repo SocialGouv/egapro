@@ -1,5 +1,6 @@
 import { config } from "@common/config";
 import {
+  ButtonAsLink,
   Footer,
   FooterBody,
   FooterBodyBrand,
@@ -16,23 +17,63 @@ import {
   SkipLinks,
   SkipLinksItem,
 } from "@design-system";
+import type { TokenInfoType } from "@services/apiClient";
 import { useFormManager, useUser } from "@services/apiClient";
 import clsx from "clsx";
 import Head from "next/head";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import type { PropsWithChildren } from "react";
 import { useCallback, useEffect, useState } from "react";
 
 import styles from "./App.module.css";
 
+interface ActionButtonGroupsProps {
+  dest: string;
+  disconnectUser: VoidFunction;
+  isAuthenticated: boolean;
+  user: TokenInfoType | undefined;
+}
+
+const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: ActionButtonGroupsProps) => (
+  <ul className="fr-btns-group">
+    {isAuthenticated ? (
+      <>
+        <li>
+          <NextLink href="/index-egapro/tableauDeBord/mon-profil" passHref>
+            <ButtonAsLink iconLeft="fr-icon-account-fill">
+              {user?.email}
+              {user?.staff ? " (staff)" : ""}
+            </ButtonAsLink>
+          </NextLink>
+        </li>
+        <li>
+          <FormButton type="button" variant="secondary" iconLeft="fr-icon-lock-fill" onClick={disconnectUser}>
+            Se déconnecter
+          </FormButton>
+        </li>
+      </>
+    ) : (
+      <li>
+        <NextLink href={`/representation-equilibree/email?redirectTo=${dest}`} passHref>
+          <ButtonAsLink type="button" variant="secondary" iconLeft="fr-icon-lock-fill">
+            Se connecter
+          </ButtonAsLink>
+        </NextLink>
+      </li>
+    )}
+  </ul>
+);
+
 // TODO move to _app.tsx when migration is done
 // TODO explode FooterBody component here
 export const App = ({ children }: PropsWithChildren) => {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mobileMenuId = "mobile-menu";
   const buttonMobileMenuId = "button-mobile-menu";
 
-  const { isAuthenticated, logout } = useUser();
+  const { isAuthenticated, logout, user } = useUser();
   const { resetFormData } = useFormManager();
 
   const disconnectUser = () => {
@@ -84,21 +125,19 @@ export const App = ({ children }: PropsWithChildren) => {
                     <div className="fr-header__logo">
                       <Logo />
                     </div>
-                    {isAuthenticated && (
-                      <div className="fr-header__navbar">
-                        <button
-                          className="fr-btn--menu fr-btn"
-                          data-fr-opened={isMenuOpen}
-                          aria-controls={mobileMenuId}
-                          aria-haspopup="menu"
-                          id={buttonMobileMenuId}
-                          title="Menu"
-                          onClick={() => setIsMenuOpen(true)}
-                        >
-                          Menu
-                        </button>
-                      </div>
-                    )}
+                    <div className="fr-header__navbar">
+                      <button
+                        className="fr-btn--menu fr-btn"
+                        data-fr-opened={isMenuOpen}
+                        aria-controls={mobileMenuId}
+                        aria-haspopup="menu"
+                        id={buttonMobileMenuId}
+                        title="Menu"
+                        onClick={() => setIsMenuOpen(true)}
+                      >
+                        Menu
+                      </button>
+                    </div>
                   </div>
                   <div className="fr-header__service">
                     <NextLink href="/">
@@ -111,45 +150,39 @@ export const App = ({ children }: PropsWithChildren) => {
                     </p>
                   </div>
                 </div>
-                {isAuthenticated && (
-                  <div className="fr-header__tools">
-                    <div className="fr-header__tools-links">
-                      <ul className="fr-btns-group">
-                        <li>
-                          <FormButton type="button" variant="secondary" onClick={disconnectUser}>
-                            Se déconnecter
-                          </FormButton>
-                        </li>
-                      </ul>
-                    </div>
+                <div className="fr-header__tools">
+                  <div className="fr-header__tools-links">
+                    <ActionButtonGroups
+                      dest={router.pathname}
+                      isAuthenticated={isAuthenticated}
+                      disconnectUser={disconnectUser}
+                      user={user}
+                    />
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-          {isAuthenticated && (
-            <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
-              <div className="fr-container">
-                <button
-                  className="fr-btn--close fr-btn"
-                  aria-controls={mobileMenuId}
-                  title="Fermer"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Fermer
-                </button>
-                <div className="fr-header__menu-links">
-                  <ul className="fr-btns-group">
-                    <li>
-                      <FormButton type="button" variant="secondary" onClick={disconnectUser}>
-                        Se déconnecter
-                      </FormButton>
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+          <div className={clsx("fr-header__menu fr-modal", isMenuOpen && "fr-modal--opened")} id={mobileMenuId}>
+            <div className="fr-container">
+              <button
+                className="fr-btn--close fr-btn"
+                aria-controls={mobileMenuId}
+                title="Fermer"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Fermer
+              </button>
+              <div className="fr-header__menu-links">
+                <ActionButtonGroups
+                  dest={router.pathname}
+                  isAuthenticated={isAuthenticated}
+                  disconnectUser={disconnectUser}
+                  user={user}
+                />
+              </div>
+            </div>
+          </div>
         </header>
         <main role="main" id="content" className={styles.content}>
           {children}

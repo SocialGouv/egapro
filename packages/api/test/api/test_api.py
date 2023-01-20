@@ -108,6 +108,7 @@ async def test_search_representation_equilibree_endpoint(client):
         },
     )
     resp = await client.get("/representation-equilibree/search?q=bio")
+    print("weqsh", resp.body)
     assert resp.status == 200
     assert json.loads(resp.body) == {
         "data": [

@@ -17,9 +17,7 @@ export class IndicatorsRepEq extends JsonEntity<IndicatorsRepEqProps, never> {
     const props: IndicatorsRepEqProps = {};
 
     if (json.balancedRepresentation)
-      props.balancedRepresentation = BalancedRepresentation.fromJson<BalancedRepresentation>(
-        json.balancedRepresentation,
-      );
+      props.balancedRepresentation = BalancedRepresentation.fromJson(json.balancedRepresentation);
 
     return new IndicatorsRepEq(props) as this;
   }

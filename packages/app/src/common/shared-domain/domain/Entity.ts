@@ -10,8 +10,11 @@ export abstract class Entity<P, out Id = UUID> {
 export abstract class JsonEntity<P, out Id = UUID> extends Entity<P, Id> {
   public abstract fromJson(json: EntityPropsToJson<P>): this;
 
-  public static fromJson<T extends JsonEntity<Any>>(...args: Parameters<T["fromJson"]>): T {
-    return this.prototype.fromJson.call(null, ...args) as T;
+  public static fromJson<P, T extends JsonEntity<P, Id>, TJson extends EntityPropsToJson<P>, Id = UUID>(
+    this: new (props: P, id?: Id) => T,
+    json: TJson,
+  ): T {
+    return this.prototype.fromJson.call(null, json);
   }
 }
 

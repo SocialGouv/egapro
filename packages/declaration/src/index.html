@@ -2,42 +2,55 @@
 layout: empty
 ---
 <script>
-  // First, check the browser is compatible
-  try {
-    eval("async function _(){}")
-  }
-  catch (e) {
-    window.location.href = '{{site.baseurl}}/compatibilite.html'
-  }
+    // First, check the browser is compatible
+    try {
+        eval("async function _(){}")
+    }
+    catch (e) {
+        window.location.href = '{{site.baseurl}}/compatibilite.html'
+    }
 </script>
 
 {% if site.EGAPRO_API_URL %}
 <script>
-EGAPRO_API_URL="{{ site.EGAPRO_API_URL }}"
+    EGAPRO_API_URL = "{{ site.EGAPRO_API_URL }}"
 </script>
 {% endif %}
 
-<script src="{{ site.baseurl }}/assets/js/utils.js"></script>
+{% if site.EGAPRO_SIMU_URL %}
 <script>
-  document.onready = () => {
-    const urlParams = new URLSearchParams(location.search)
+    EGAPRO_SIMU_URL = "{{ site.EGAPRO_SIMU_URL }}"
+</script>
+{% endif %}
 
-    if (urlParams.has('token')) {
-      // Coming from an "authentication link" in the confirmation email
-      app.token = urlParams.get('token')
-      return redirect('{{site.baseurl}}/commencer.html')
-    }
-    if (urlParams.has('siren') && urlParams.has('year')) {
-      // Coming from a "declaration link" from the declaration validation email
-      app.siren = urlParams.get('siren')
-      app.annee = urlParams.get('year')
-      app.dataToLocalStorage()
-      if (app.token) {
-        return redirect('{{site.baseurl}}/commencer.html')
-      } else {
-        return redirect('{{site.baseurl}}/email.html')
-      }
-    }
-    redirect('{{site.baseurl}}/presentation.html')
-  }
+{% if site.GITHUB_SHA %}
+<script>
+    GITHUB_SHA = "{{ site.GITHUB_SHA }}"
+</script>
+{% endif %}
+
+<script src="{{site.baseurl}}/assets/js/utils.js"></script>
+<script>
+    document.addEventListener("ready", async () => {
+        const urlParams = new URLSearchParams(location.search)
+
+        if (urlParams.has('token')) {
+            // Coming from an "authentication link" in the confirmation email
+            app.token = urlParams.get('token')
+            await app.loadMe();
+            return redirect('{{site.baseurl}}/commencer.html')
+        }
+        if (urlParams.has('siren') && urlParams.has('year')) {
+            // Coming from a "declaration link" from the declaration validation email
+            app.siren = urlParams.get('siren')
+            app.annee = urlParams.get('year')
+            app.dataToLocalStorage()
+            if (app.token) {
+                return redirect('{{site.baseurl}}/commencer.html')
+            } else {
+                return redirect('{{site.baseurl}}/email.html')
+            }
+        }
+        redirect('{{site.baseurl}}/presentation.html')
+    });
 </script>

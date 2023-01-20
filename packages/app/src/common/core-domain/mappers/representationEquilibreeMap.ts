@@ -28,7 +28,7 @@ export const representationEquilibreeMap: Required<
       siren: new Siren(raw.siren),
       year: new PositiveNumber(raw.year),
       data: raw.data
-        ? RepresentationEquilibreeData.fromJson<RepresentationEquilibreeData>({
+        ? RepresentationEquilibreeData.fromJson({
             id: raw.data.id,
             company: {
               address: raw.data.entreprise.adresse,

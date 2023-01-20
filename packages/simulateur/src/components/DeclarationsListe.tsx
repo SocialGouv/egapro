@@ -18,22 +18,21 @@ const trancheFromApiToForm = (declaration: DeclarationAPI | undefined): string =
 }
 
 const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }) => {
-  const { declarations, isLoading } = useDeclarations(siren)
+  const { declarations, isLoading, message } = useDeclarations(siren)
 
   const yearsDeclarations = Object.keys(declarations).sort().reverse()
 
   return (
     <Box mt="4">
-      {isLoading ? (
-        <Box m="6">
+      <Box m="6">
+        <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
+          Liste des déclarations - Index Égalité Professionnelle
+        </Text>
+        {isLoading ? (
           <Spinner />
-        </Box>
-      ) : (
-        <Box m="6">
-          <Text fontSize="md" fontWeight="bold" color="green.500" mb="2">
-            Liste des déclarations
-          </Text>
-
+        ) : message?.kind === "error" ? (
+          <Text>{message.text}</Text>
+        ) : (
           <TableContainer>
             <Table variant="simple" aria-label="Liste des déclarations">
               <Thead>
@@ -45,12 +44,22 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                   <Th>Date de déclaration</Th>
                   <Th>Index</Th>
                   <Th>Objectifs et mesures</Th>
+                  <Th>Récap</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {yearsDeclarations.map((annee: string) => (
                   <Tr key={annee}>
-                    <Td>{siren}</Td>
+                    <Td>
+                      <Link
+                        href={`${
+                          process.env.REACT_APP_DECLARATION_URL || "/index-egapro/declaration/"
+                        }/?siren=${siren}&year=${annee}`}
+                        isExternal
+                      >
+                        {siren}
+                      </Link>
+                    </Td>
                     <Td>{annee}</Td>
                     <Td>{declarations[annee]?.data?.entreprise.ues ? "UES" : "Entreprise"}</Td>
                     <Td>{trancheFromApiToForm(declarations[annee])}</Td>
@@ -81,13 +90,18 @@ const DeclarationsListe: React.FunctionComponent<{ siren: string }> = ({ siren }
                         <Box>{statusDeclaration(declarations[annee])}</Box>
                       )}
                     </Td>
+                    <Td>
+                      <Link href={`/api/declaration/${siren}/${annee}/pdf`} isExternal>
+                        Télécharger
+                      </Link>
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>
             </Table>
           </TableContainer>
-        </Box>
-      )}
+        )}
+      </Box>
     </Box>
   )
 }

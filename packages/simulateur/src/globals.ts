@@ -532,3 +532,5 @@ export type AlertMessageType = {
   text: string
   kind: "success" | "error"
 }
+
+export * as AppModels from "./app-models.d"

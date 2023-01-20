@@ -48,8 +48,8 @@ export class RepresentationEquilibreeData extends JsonEntity<RepresentationEquil
     };
 
     if (json.source) props.source = new DeclarationSource(json.source);
-    if (json.indicators) props.indicators = IndicatorsRepEq.fromJson<IndicatorsRepEq>(json.indicators);
+    if (json.indicators) props.indicators = IndicatorsRepEq.fromJson(json.indicators);
 
-    return new RepresentationEquilibreeData(props, json.id) as typeof this;
+    return new RepresentationEquilibreeData(props, json.id) as this;
   }
 }

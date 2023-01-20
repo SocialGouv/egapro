@@ -9,6 +9,9 @@
       "@design-system": [
         "./design-system/index"
       ],
+      "@design-system/theme": [
+        "./design-system/theme"
+      ],
     },
   },
   // override stories folder exclusion

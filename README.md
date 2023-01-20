@@ -19,7 +19,7 @@ yarn setup-python
 
 ## Lancer
 
-One component at time
+Un composant à la fois :
 
 ```bash
 yarn dev:api
@@ -31,16 +31,43 @@ yarn dev:maildev
 
 - [api         -> http://localhost:2626](http://localhost:2626)
 - [app         -> http://localhost:3000](http://localhost:3000)
-- `simulateur` requires running `api` locally or `REACT_APP_EGAPRO_API_URL`to be set:
+- `simulateur` a besoin de `api` en local ou de `REACT_APP_EGAPRO_API_URL` d'être renseigné dans le fichier `packages/simulateur/.env` :
   - [simulateur  -> http://localhost:3001/simulateur/nouvelle-simulation](http://localhost:3001/simulateur/nouvelle-simulation)
 - [declaration -> http://localhost:4000](http://localhost:4000)
 - [maildev     -> http://localhost:1080](http://localhost:1080)
 
-All in one
-
+Tout en un :
 ```bash
 yarn dev
 ```
+
+## Reverse proxy iso prod
+Il est possible de configurer son environnement local eviter d'utiliser les ports et passer toutes les applications sous le même domaine.  
+Le reverse proxy est configuré à travers un nginx, mais a besoin que les composants voulu soient configurés en conséquence :
+- `api` => pas de config a ajouter
+- `app`
+  - `packages/app/.env.development.local` => `NEXT_PUBLIC_API_URL=http://localhost/api`
+  - apiv2 non supportée pour l'instant (si besoin de dev sur apiv2, passer directement par l'url classique http://localhost:3000)
+- `declaration` => copier le `.env.dist` vers `.env` (racine) si besoin, puis
+  - `BASE_URL="/index-egapro/declaration"`
+  - `EGAPRO_API_URL="https://localhost/api"` (si api locale)
+  - `EGAPRO_SIMU_URL="http://localhost/index-egapro"` (si besoin de la simu)
+- `simulateur` => copier le `packages/simulateur/.env.dist` vers `packages/simulateur/.env` si besoin, puis
+  - `REACT_APP_DECLARATION_URL="http://localhost/index-egapro/declaration"` (si besoin de la decla)
+  - `REACT_APP_EGAPRO_API_URL="https://localhost/api"` (si api locale)
+
+
+Enfin, il suffit de lancer dans une fenêtre le serveur nginx prévu :
+```bash
+yarn reverse-proxy
+```
+(maildev et la base de données ne sont pas affectés par le reverse proxy)
+
+Les adresses deviennent alors :
+- [api         -> http://localhost/api](http://localhost/api)
+- [app         -> http://localhost](http://localhost)
+- [simulateur  -> http://localhost/index-egapro/simulateur/nouvelle-simulation](http://localhost/index-egapro/simulateur/nouvelle-simulation)
+- [declaration -> http://localhost/index-egapro/declaration](http://localhost/index-egapro/declaration)
 
 ## Pour tout arrêter
 

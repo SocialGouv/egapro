@@ -1,11 +1,5 @@
-import "@gouvfr/dsfr/dist/dsfr.main.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-system/icons-system.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-user/icons-user.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-business/icons-business.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-map/icons-map.min.css";
-import "@gouvfr/dsfr/dist/utility/icons/icons-design/icons-design.min.css";
-
 import { ClientOnly } from "@components/ClientOnly";
+import { DsfrScript } from "@components/DsfrScript";
 import { StaffOnly } from "@components/StaffOnly";
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
@@ -23,6 +17,7 @@ export const AdminLayout = ({ children, title }: PropsWithChildren & { title?: s
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>
+      <DsfrScript />
 
       <ClientOnly>
         <StaffOnly>{children}</StaffOnly>

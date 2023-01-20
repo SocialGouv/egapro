@@ -43,7 +43,7 @@ services:
       args:
         EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
         EGAPRO_SENTRY_DSN: ${EGAPRO_SENTRY_DSN:-https://b2f84ee9dc6044abbeb0f417f4335a26@sentry.fabrique.social.gouv.fr/48}
-        BASE_URL: "/index-egapro"
+        BASE_URL: "/index-egapro/declaration"
     ports:
       - 4000:8080
     depends_on:

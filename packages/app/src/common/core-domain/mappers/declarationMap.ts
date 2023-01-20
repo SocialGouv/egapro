@@ -29,8 +29,7 @@ export const declarationMap: Required<Mapper<Declaration, DeclarationDTO | null,
       siren: new Siren(raw.siren),
       year: new PositiveNumber(raw.year),
       data: raw.data
-        ? DeclarationData.fromJson<DeclarationData>({
-            id: raw.data.id,
+        ? DeclarationData.fromJson({
             company: {
               address: raw.data.entreprise.adresse,
               city: raw.data.entreprise.commune,

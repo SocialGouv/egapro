@@ -192,6 +192,8 @@ jobs:
         buildArgs:
           BASE_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
           EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
+          EGAPRO_SIMU_URL: "https://{{ .Values.global.host }}/index-egapro"
+          GITHUB_SHA: "{{ $.Values.global.sha }}"
 
     build-simulateur:
       use: SocialGouv/kontinuous/plugins/contrib/jobs/build
@@ -203,7 +205,7 @@ jobs:
         buildArgs:
           REACT_APP_EGAPRO_API_URL: "https://{{ .Values.global.host }}/api"
           REACT_APP_DECLARATION_URL: "https://{{ .Values.global.host }}/index-egapro/declaration"
-          REACT_APP_VERSION: "{{ .Values.global.gitBranch }}"
+          REACT_APP_GITHUB_SHA: "{{ $.Values.global.sha }}"
           PUBLIC_URL: "/index-egapro"
 
 deactivate:

@@ -88,7 +88,7 @@ export class DeclarationInfo extends JsonEntity<DeclarationInfoProps, never> {
     if (json.endReferencePeriod) props.endReferencePeriod = new Date(json.endReferencePeriod);
     if (typeof json.index === "number") props.index = new DeclarationIndex(json.index);
     if (typeof json.points === "number") props.points = new PositiveNumber(json.points);
-    if (json.publication) props.publication = Publication.fromJson<Publication>(json.publication);
+    if (json.publication) props.publication = Publication.fromJson(json.publication);
 
     return new DeclarationInfo(props) as this;
   }

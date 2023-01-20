@@ -15,7 +15,7 @@
     "dev:apiv2db": "docker-compose up --build apiv2_db apiv2_pgadmin",
     "dev:app": "yarn workspace app run dev",
     "dev:api": "docker-compose up --build api",
-    "dev:declaration": "docker-compose build declaration && docker-compose up declaration",
+    "dev:declaration": "docker-compose up --build --force-recreate --remove-orphans declaration",
     "dev:simulateur": "yarn workspace simulateur run dev",
     "dev:maildev": "docker-compose up --build maildev",
     "dev:storybook": "yarn workspace app start-storybook -p 6006",
@@ -27,7 +27,8 @@
     "check-all": "scripts/check-all",
     "setup-python": "scripts/postinstall",
     "test:api:docker": "docker exec -it $(basename $PWD)_api_1 py.test -vv --cov",
-    "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov"
+    "test:api": "cd packages/api && EGAPRO_DBPORT=5436 EGAPRO_DBNAME=test_egapro ./venv/bin/py.test -vv --cov",
+    "reverse-proxy": "docker-compose up --build --force-recreate --remove-orphans reverse_proxy"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.2",

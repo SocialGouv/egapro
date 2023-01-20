@@ -60,27 +60,18 @@ export class Indicators extends JsonEntity<IndicatorsProps, never> {
   public fromJson(json: EntityPropsToJson<IndicatorsProps>) {
     const props: IndicatorsProps = {};
 
-    if (json.remunerations)
-      props.remunerations = RemunerationsIndicator.fromJson<RemunerationsIndicator>(json.remunerations);
+    if (json.remunerations) props.remunerations = RemunerationsIndicator.fromJson(json.remunerations);
 
-    if (json.salaryRaises)
-      props.salaryRaises = SalaryRaisesOrPromotionsIndicator.fromJson<SalaryRaisesOrPromotionsIndicator>(
-        json.salaryRaises,
-      );
+    if (json.salaryRaises) props.salaryRaises = SalaryRaisesOrPromotionsIndicator.fromJson(json.salaryRaises);
 
-    if (json.promotions)
-      props.promotions = SalaryRaisesOrPromotionsIndicator.fromJson<SalaryRaisesOrPromotionsIndicator>(json.promotions);
+    if (json.promotions) props.promotions = SalaryRaisesOrPromotionsIndicator.fromJson(json.promotions);
 
     if (json.salaryRaisesAndPromotions)
-      props.salaryRaisesAndPromotions = SalaryRaisesAndPromotionsIndicator.fromJson<SalaryRaisesAndPromotionsIndicator>(
-        json.salaryRaisesAndPromotions,
-      );
+      props.salaryRaisesAndPromotions = SalaryRaisesAndPromotionsIndicator.fromJson(json.salaryRaisesAndPromotions);
 
-    if (json.maternityLeaves)
-      props.maternityLeaves = MaternityLeavesIndicator.fromJson<MaternityLeavesIndicator>(json.maternityLeaves);
+    if (json.maternityLeaves) props.maternityLeaves = MaternityLeavesIndicator.fromJson(json.maternityLeaves);
 
-    if (json.highRemunerations)
-      props.highRemunerations = HighRemunerationsIndicator.fromJson<HighRemunerationsIndicator>(json.highRemunerations);
+    if (json.highRemunerations) props.highRemunerations = HighRemunerationsIndicator.fromJson(json.highRemunerations);
 
     return new Indicators(props) as this;
   }

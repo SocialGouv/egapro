@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   ButtonGroup,
@@ -24,15 +25,7 @@ import { Link as RouterLink, useHistory } from "react-router-dom"
 import { LinkIcon } from "@chakra-ui/icons"
 import { useUser } from "./AuthContext"
 import ButtonLink from "./ds/ButtonLink"
-import {
-  IconEdit,
-  IconLogout,
-  IconMenu,
-  IconOfficeBuilding,
-  IconPeople,
-  IconPeopleCircle,
-  IconUserGroup,
-} from "./ds/Icons"
+import { IconEdit, IconLogout, IconMenu, IconOfficeBuilding, IconPeopleCircle, IconUserGroup } from "./ds/Icons"
 import Logo from "./ds/Logo"
 
 const Header = () => {
@@ -98,7 +91,7 @@ const Header = () => {
                 <Link
                   href="https://travail-emploi.gouv.fr/"
                   isExternal
-                  width={isMobile ? 16 : 20}
+                  width={isMobile ? 16 : "fit-content"}
                   sx={{
                     display: "block",
                   }}
@@ -107,12 +100,12 @@ const Header = () => {
                 </Link>
               </Box>
               <Box fontFamily="custom">
-                <Link as={RouterLink} to="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
-                  Index Egapro
+                <Link href="/" fontSize={isMobile ? "md" : "2xl"} color="gray.900" lineHeight={1}>
+                  Egapro
                 </Link>
                 {!isMobile && (
                   <Text fontSize="xs">
-                    L’outil de calcul et de déclaration de votre index égalité professionnelle Femmes-Hommes
+                    Index de l’égalité professionnelle et représentation équilibrée femmes – hommes
                   </Text>
                 )}
               </Box>
@@ -122,17 +115,15 @@ const Header = () => {
               {email ? (
                 <Menu>
                   <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
-                    Menu
+                    {email}
+                    {staff && (
+                      <Badge ml={2} colorScheme="green">
+                        Staff
+                      </Badge>
+                    )}
                   </MenuButton>
                   <MenuList zIndex={400}>
                     <MenuGroup title="Mon compte">
-                      <MenuItem
-                        as={RouterLink}
-                        to="/tableauDeBord/mon-profil"
-                        icon={<IconPeople boxSize={5} color="gray.400" />}
-                      >
-                        Mon Profil
-                      </MenuItem>
                       <MenuItem
                         as={RouterLink}
                         to="/tableauDeBord/mes-entreprises"
