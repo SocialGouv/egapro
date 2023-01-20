@@ -41,7 +41,10 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
       <>
         <li>
           <NextLink href="/index-egapro/tableauDeBord/mon-profil" passHref>
-            <ButtonAsLink iconLeft="fr-icon-account-fill">{user?.email}</ButtonAsLink>
+            <ButtonAsLink iconLeft="fr-icon-account-fill">
+              {user?.email}
+              {user?.staff ? " (staff)" : ""}
+            </ButtonAsLink>
           </NextLink>
         </li>
         <li>

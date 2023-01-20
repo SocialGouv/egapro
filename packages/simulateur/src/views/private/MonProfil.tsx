@@ -23,8 +23,11 @@ const MonProfil = () => {
                 <VStack>
                   <Text fontSize="lg">
                     {email}
-                    {"  "}
-                    {staff && <Badge colorScheme="green">Staff</Badge>}
+                    {staff && (
+                      <Badge ml={2} colorScheme="green">
+                        Staff
+                      </Badge>
+                    )}
                   </Text>
                 </VStack>
               </Box>

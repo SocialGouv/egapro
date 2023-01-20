@@ -116,7 +116,11 @@ const Header = () => {
                 <Menu>
                   <MenuButton as={Button} variant="ghost" colorScheme="primary" leftIcon={<IconMenu boxSize={6} />}>
                     {email}
-                    {staff && <Badge colorScheme="green">Staff</Badge>}
+                    {staff && (
+                      <Badge ml={2} colorScheme="green">
+                        Staff
+                      </Badge>
+                    )}
                   </MenuButton>
                   <MenuList zIndex={400}>
                     <MenuGroup title="Mon compte">

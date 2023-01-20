@@ -38,11 +38,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
           const tokenInfo = await getTokenInfo()
 
           if (tokenInfo) {
-            const tokenInfoStr = JSON.stringify(tokenInfo?.jsonBody)
-            if (!tokenInfoStr) {
-              throw new Error("Can't save empty tokenInfo.")
-            }
-            localStorage.setItem("tokenInfo", tokenInfoStr)
+            localStorage.setItem("tokenInfo", JSON.stringify(tokenInfo?.jsonBody) || "")
 
             newContext = {
               ...context,
@@ -56,8 +52,9 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
           // If token has expired, we remove it from localStorage and state.
           console.error(error)
 
-          localStorage.removeItem("token")
-          localStorage.removeItem("tokenInfo")
+          localStorage.setItem("token", "")
+          localStorage.setItem("tokenInfo", "")
+          localStorage.setItem("ega-token", "")
         }
       }
       setContext({ ...newContext, loading: false })
@@ -75,9 +72,9 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   }, [login])
 
   const logout = useCallback(function logout() {
-    localStorage.removeItem("token")
-    localStorage.removeItem("tokenInfo")
-    localStorage.removeItem("ega-token")
+    localStorage.setItem("token", "")
+    localStorage.setItem("tokenInfo", "")
+    localStorage.setItem("ega-token", "")
     setContext({ ...initialContext, loading: false })
   }, [])
 
