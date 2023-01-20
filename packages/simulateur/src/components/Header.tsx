@@ -25,14 +25,7 @@ import { Link as RouterLink, useHistory } from "react-router-dom"
 import { LinkIcon } from "@chakra-ui/icons"
 import { useUser } from "./AuthContext"
 import ButtonLink from "./ds/ButtonLink"
-import {
-  IconEdit,
-  IconLogout,
-  IconMenu,
-  IconOfficeBuilding,
-  IconPeopleCircle,
-  IconUserGroup,
-} from "./ds/Icons"
+import { IconEdit, IconLogout, IconMenu, IconOfficeBuilding, IconPeopleCircle, IconUserGroup } from "./ds/Icons"
 import Logo from "./ds/Logo"
 
 const Header = () => {

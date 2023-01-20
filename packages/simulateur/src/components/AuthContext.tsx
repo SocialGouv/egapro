@@ -77,6 +77,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   const logout = useCallback(function logout() {
     localStorage.removeItem("token")
     localStorage.removeItem("tokenInfo")
+    localStorage.removeItem("ega-token")
     setContext({ ...initialContext, loading: false })
   }, [])
 
