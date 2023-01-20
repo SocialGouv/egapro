@@ -1,3 +1,10 @@
+# [2.75.0](https://github.com/SocialGouv/egapro/compare/v2.74.0...v2.75.0) (2023-01-20)
+
+
+### Features
+
+* migration front lot 1 ([#1496](https://github.com/SocialGouv/egapro/issues/1496)) ([1aa0beb](https://github.com/SocialGouv/egapro/commit/1aa0bebe5f776d75b10e89b0a89020a112a4837c))
+
 # [2.74.0](https://github.com/SocialGouv/egapro/compare/v2.73.8...v2.74.0) (2023-01-19)
 
 
