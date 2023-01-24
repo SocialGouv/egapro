@@ -96,7 +96,7 @@ const IndicateurQuatreForm: FunctionComponent<IndicateurQuatreFormProps> = ({
               <>
                 <InputGroup
                   fieldName="nombreSalarieesPeriodeAugmentation"
-                  label="Parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une/ou des augmentations salariales dans l'entreprise ?"
+                  label="Parmi ces retours, combien étaient en congé maternité pendant qu'il y a eu une ou des augmentations salariales dans l'entreprise ?"
                   isReadOnly={readOnly}
                   validate={validator}
                 />
