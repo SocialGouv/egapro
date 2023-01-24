@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactNode, useState } from "react"
+import React, { FunctionComponent, PropsWithChildren, ReactNode, useState } from "react"
 import { Form } from "react-final-form"
 import { z } from "zod"
 import { Box, Heading, Text, Image } from "@chakra-ui/react"
@@ -24,12 +24,11 @@ const FormInput = z.object({
 
 interface AskEmailProps {
   tagLine?: string
-  reason?: string | ReactNode
 }
 
 const title = "Validation de l'email"
 
-const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
+const AskEmail = ({ tagLine, children }: PropsWithChildren<AskEmailProps>) => {
   useTitle(title)
 
   const [loading, setLoading] = useState(false)
@@ -78,20 +77,12 @@ const AskEmail: FunctionComponent<AskEmailProps> = ({ tagLine, reason }) => {
             </>
           ) : (
             <>
-              {reason && <Text mt={2}>{reason}</Text>}
-              <Text>
-                L’email saisi doit être valide. Il sera celui sur lequel sera adressé l’accusé de réception en fin de
-                procédure et celui qui vous permettra d'accéder à votre déclaration une fois validée et transmise.
-              </Text>
-              <Text mt={2}>
-                <strong>Attention&nbsp;:</strong> en cas d'email erroné, vous ne pourrez pas remplir le formulaire ou
-                accéder à votre déclaration déjà transmise.
-              </Text>
+              {children}
               <Box mt={6} maxW="lg">
                 <form onSubmit={handleSubmit}>
                   <FormStack>
                     {errorMessage && submitFailed && hasValidationErrors && <FormError message={errorMessage} />}
-                    <InputGroup fieldName="email" label="Votre Email" type="email" />
+                    <InputGroup fieldName="email" label="Adresse email" type="email" />
                   </FormStack>
                   <ActionBar>
                     <FormSubmit loading={loading} label="Envoyer" />

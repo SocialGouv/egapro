@@ -142,7 +142,18 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
   if (isLoadingAuth) return <ActivityIndicator />
 
   if (!loading && errorMessage === "Veuillez renseigner votre email pour accéder à cette simulation-déclaration.") {
-    return <AskEmail reason={errorMessage} />
+    return (
+      <AskEmail>
+        <Text>
+          Pour accéder à cette simulation-déclaration, veuillez saisir l'email utilisé ou un des emails rattachés au
+          Siren de votre entreprise.
+        </Text>
+        <Text mt={2}>
+          <strong>Attention :</strong> en cas d'email erroné, vous ne pourrez pas accéder à cette simulation-déclaration
+          déjà transmise.
+        </Text>
+      </AskEmail>
+    )
   }
 
   if (!loading && errorMessage) {
@@ -206,7 +217,17 @@ function Simulateur({ state, dispatch }: Props): JSX.Element {
             />
             {!isAuthenticated ? (
               <Route>
-                <AskEmail />
+                <AskEmail>
+                  <Text>
+                    L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du
+                    travail en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de
+                    déclaration.
+                  </Text>
+                  <Text mt={2}>
+                    <strong>Attention :</strong> en cas d'email erroné, vous ne pourrez pas remplir le formulaire de
+                    déclaration.
+                  </Text>
+                </AskEmail>
               </Route>
             ) : (
               <Fragment>
