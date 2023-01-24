@@ -66,7 +66,7 @@ const Mire = () => {
           <Box>
             <Box>
               <Text as="p" mb="4">
-                Veuillez saisir votre email utilisé lors de la déclaration.
+                Veuillez saisir votre email.
               </Text>
               <Text as="p" mb="4">
                 Un lien vous sera envoyé pour pouvoir accéder à votre espace. Vous pourrez alors voir les entreprises
