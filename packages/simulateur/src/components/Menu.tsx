@@ -181,7 +181,7 @@ function Menu({
                 <ListItem>
                   <CustomNavLink
                     to={`/simulateur/${code}`}
-                    title="Vos informations"
+                    title="Votre simulation"
                     activeOnlyWhenExact={true}
                     onClick={onClose}
                   />
