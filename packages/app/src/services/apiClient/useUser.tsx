@@ -25,7 +25,7 @@ const SyncLegacyTokenStorage: StateStorage = {
       const legacyToken = localStorage.getItem(LEGACY_TOKEN_KEY);
       if (currentStateToken) {
         const parsedStatedToken = JSON.parse(currentStateToken) as PersistedTokenState;
-        // if not token in state, but legacy token is found, it means that we were connected from simu or decla
+        // if no token in state, but legacy token is found, it means that we were connected from simu or decla
         if (!parsedStatedToken.state.token && legacyToken) {
           console.debug("Auth state empty, but legacy token found.");
           currentStateToken = JSON.stringify({
