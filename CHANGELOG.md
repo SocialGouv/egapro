@@ -1,3 +1,16 @@
+## [2.75.1](https://github.com/SocialGouv/egapro/compare/v2.75.0...v2.75.1) (2023-01-24)
+
+
+### Bug Fixes
+
+* change logo on recap pdf (Fixes: [#1294](https://github.com/SocialGouv/egapro/issues/1294)) ([a70cad1](https://github.com/SocialGouv/egapro/commit/a70cad1d9e34aa2a15518cced51f5628426981d8))
+* change wording on email in simu (Fixes [#1445](https://github.com/SocialGouv/egapro/issues/1445)) ([b987faf](https://github.com/SocialGouv/egapro/commit/b987faf190854552091dcabf2c36799beff46326))
+* order dgt repeq by date (Fixes [#1473](https://github.com/SocialGouv/egapro/issues/1473)) ([e2ef1e4](https://github.com/SocialGouv/egapro/commit/e2ef1e4a4efa27c4ed4ebe0102d7868e9b5c4736))
+* simu wording change left menu simu link (Fixes [#1526](https://github.com/SocialGouv/egapro/issues/1526)) ([0119139](https://github.com/SocialGouv/egapro/commit/0119139975519e520d30037450c4b49adc82ab84))
+* simu wording change login (Fixes [#1529](https://github.com/SocialGouv/egapro/issues/1529)) ([02f797b](https://github.com/SocialGouv/egapro/commit/02f797b62d5811e1fd90b410adb67fe913b986a3))
+* simu wording indic 2 question (Fixes [#1483](https://github.com/SocialGouv/egapro/issues/1483)) ([6618110](https://github.com/SocialGouv/egapro/commit/6618110820529c35e2d133b3c167ec28a61eb046))
+* simu wording indic 4 remove slash (Fixes [#1485](https://github.com/SocialGouv/egapro/issues/1485)) ([2f43e63](https://github.com/SocialGouv/egapro/commit/2f43e637d755f696697b5dddf7b22acd87b0e1fb))
+
 # [2.75.0](https://github.com/SocialGouv/egapro/compare/v2.74.0...v2.75.0) (2023-01-20)
 
 
