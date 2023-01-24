@@ -91,6 +91,10 @@ class representation_equilibree(table):
         return await cls.fetch(f"SELECT * from {cls.table_name}")
 
     @classmethod
+    async def allOrderByDate(cls):
+        return await cls.fetch(f"SELECT * from {cls.table_name} ORDER BY modified_at DESC")
+
+    @classmethod
     async def get(cls, siren, year):
         return await cls.fetchrow(
             f"SELECT * FROM {cls.table_name} WHERE siren=$1 AND year=$2", siren, int(year)

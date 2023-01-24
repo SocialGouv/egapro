@@ -181,3 +181,41 @@ async def test_declaration_owned():
             "year": 2019,
         },
     ]
+
+async def test_representation_equilibree_all_ordered_by_date():
+    await db.representation_equilibree.put(
+        "12345678",
+        2020,
+        {
+            "déclaration": {"année_indicateurs": 2020},
+            "entreprise": {
+                "raison_sociale": "Company 1",
+            },
+        }
+    )
+    await db.representation_equilibree.put(
+        "87654321",
+        2020,
+        {
+            "déclaration": {"année_indicateurs": 2020},
+            "entreprise": {
+                "raison_sociale": "Company 2",
+            },
+        }
+    )
+    await db.representation_equilibree.put(
+        "87654331",
+        2020,
+        {
+            "déclaration": {"année_indicateurs": 2020},
+            "entreprise": {
+                "raison_sociale": "Company 3",
+            },
+        }
+    )
+
+    records = await db.representation_equilibree.allOrderByDate()
+    assert len(records) == 3
+    assert records[0].data.siren == "87654331"
+    assert records[1].data.siren == "87654321"
+    assert records[2].data.siren == "12345678"
