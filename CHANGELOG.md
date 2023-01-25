@@ -1,3 +1,10 @@
+## [2.78.1](https://github.com/SocialGouv/egapro/compare/v2.78.0...v2.78.1) (2023-01-25)
+
+
+### Bug Fixes
+
+* remove api from reverse_proxy config ([19d41b6](https://github.com/SocialGouv/egapro/commit/19d41b604b49635d99081eb2917ad8bad08de3c6))
+
 # [2.78.0](https://github.com/SocialGouv/egapro/compare/v2.77.0...v2.78.0) (2023-01-25)
 
 
