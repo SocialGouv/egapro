@@ -1,3 +1,10 @@
+# [2.78.0](https://github.com/SocialGouv/egapro/compare/v2.77.0...v2.78.0) (2023-01-25)
+
+
+### Features
+
+* change docker conf + README ([b95af17](https://github.com/SocialGouv/egapro/commit/b95af17fd69c89867ee5b5f6117198780625143c))
+
 # [2.77.0](https://github.com/SocialGouv/egapro/compare/v2.76.1...v2.77.0) (2023-01-25)
 
 
