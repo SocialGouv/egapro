@@ -13,6 +13,7 @@ yarn
 ```
 
 Si developpement Python en local :
+
 ```bash
 yarn setup-python
 ```
@@ -37,33 +38,42 @@ yarn dev:maildev
 - [maildev     -> http://localhost:1080](http://localhost:1080)
 
 Tout en un :
+
 ```bash
 yarn dev
 ```
 
 ## Reverse proxy iso prod
-Il est possible de configurer son environnement local eviter d'utiliser les ports et passer toutes les applications sous le même domaine.  
-Le reverse proxy est configuré à travers un nginx, mais a besoin que les composants voulu soient configurés en conséquence :
+
+Il est possible de configurer son environnement local sans renseigner les ports, en utilisant un reverse proxy.
+
+Toutes les applications seront sous le même domaine et les URL seront celles de la production.
+
+Le reverse proxy est configuré à travers un NGINX, mais a besoin que les composants voulus soient configurés en conséquence :
+
 - `api` => pas de config a ajouter
-- `app`
-  - `packages/app/.env.development.local` => `NEXT_PUBLIC_API_URL=http://localhost/api`
-  - apiv2 non supportée pour l'instant (si besoin de dev sur apiv2, passer directement par l'url classique http://localhost:3000)
-- `declaration` => copier le `.env.dist` vers `.env` (racine) si besoin, puis
+- `app` => `packages/app/.env.development.local`
+  - `NEXT_PUBLIC_API_URL=http://localhost/api`
+- apiv2 non supportée pour l'instant (si besoin de dev sur apiv2, passer directement par l'url classique http://localhost:3000)
+- `declaration` => copier `.env.dist` vers `.env` (racine) si besoin.
   - `BASE_URL="/index-egapro/declaration"`
-  - `EGAPRO_API_URL="https://localhost/api"` (si api locale)
-  - `EGAPRO_SIMU_URL="http://localhost/index-egapro"` (si besoin de la simu)
-- `simulateur` => copier le `packages/simulateur/.env.dist` vers `packages/simulateur/.env` si besoin, puis
-  - `REACT_APP_DECLARATION_URL="http://localhost/index-egapro/declaration"` (si besoin de la decla)
-  - `REACT_APP_EGAPRO_API_URL="https://localhost/api"` (si api locale)
+  - `EGAPRO_API_URL="http://localhost/api"` (si api locale)
+  - `EGAPRO_SIMU_URL="http://localhost/index-egapro"` (si besoin du simulateur)
+- `simulateur` => copier `packages/simulateur/.env.dist` vers `packages/simulateur/.env` si besoin.
+  - `PUBLIC_URL="/index-egapro"`
+  - `REACT_APP_DECLARATION_URL="http://localhost/index-egapro/declaration"` (si besoin de la déclaration)
+  - `REACT_APP_EGAPRO_API_URL="http://localhost/api"` (si api locale)
 
+Enfin, il suffit de lancer dans une fenêtre le serveur NGINX prévu :
 
-Enfin, il suffit de lancer dans une fenêtre le serveur nginx prévu :
 ```bash
 yarn reverse-proxy
 ```
-(maildev et la base de données ne sont pas affectés par le reverse proxy)
+
+Remarque : maildev et la base de données ne sont pas affectés par le reverse proxy.
 
 Les adresses deviennent alors :
+
 - [api         -> http://localhost/api](http://localhost/api)
 - [app         -> http://localhost](http://localhost)
 - [simulateur  -> http://localhost/index-egapro/simulateur/nouvelle-simulation](http://localhost/index-egapro/simulateur/nouvelle-simulation)
@@ -73,7 +83,7 @@ Les adresses deviennent alors :
 
 Faire `Ctl-C` sur tous les terminaux
 
-Remarque : pour l'API, la déclaration et maildev, on peut faire `docker-compose down`.
+Remarque : pour arrêter l'API, la déclaration ou maildev, on peut faire `docker-compose down`.
 
 ## Tests
 
@@ -158,4 +168,3 @@ yarn egapro --help
 Les commandes vont se lancer dans l'environnement local.
 
 Si l'on veut lancer ces commandes dans un container (ex: en prod, en préprod ou dans un environnement lié à une PR), il faut se connecter au container et lancer la commande egapro.
-

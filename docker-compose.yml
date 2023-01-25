@@ -50,7 +50,7 @@ services:
         EGAPRO_API_URL: ${EGAPRO_API_URL:-http://localhost:2626}
         EGAPRO_SIMU_URL: ${EGAPRO_SIMU_URL:-http://localhost:3001}
         GITHUB_SHA: "<dev>"
-        BASE_URL: ${BASE_URL-/index-egapro/declaration}
+        BASE_URL: ${BASE_URL-""}
     volumes:
       - ./packages/declaration/_doc:/srv/jekyll/_doc
       - ./packages/declaration/src:/srv/jekyll/src
