@@ -15,7 +15,7 @@
     "dev:apiv2db": "docker-compose up --build apiv2_db apiv2_pgadmin",
     "dev:app": "yarn workspace app run dev",
     "dev:api": "docker-compose up --build api",
-    "dev:declaration": "docker-compose up --build --force-recreate --remove-orphans declaration",
+    "dev:declaration": "docker-compose up --build --renew-anon-volumes --force-recreate --remove-orphans declaration",
     "dev:simulateur": "yarn workspace simulateur run dev",
     "dev:maildev": "docker-compose up --build maildev",
     "dev:storybook": "yarn workspace app start-storybook -p 6006",

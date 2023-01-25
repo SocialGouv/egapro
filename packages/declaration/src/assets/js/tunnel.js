@@ -4,7 +4,7 @@ const previousButton = document.querySelector("a[rel=prev]");
 const nextButton = document.querySelector("button[rel=next]");
 
 const conditions = {
-    isUES: (data) => data._entreprise.structure === "ues",
+    isUES: (data) => data._entreprise?.structure === "ues",
     isPeriodeSuffisante: (data) => data.déclaration.période_suffisante,
     isCoef: (data) => data.indicateurs.rémunérations.mode === "niveau_branche" || data.indicateurs.rémunérations.mode === "niveau_autre",
     isCSP: (data) => data.indicateurs.rémunérations.mode === "csp",
