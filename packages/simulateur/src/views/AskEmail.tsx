@@ -1,19 +1,19 @@
-import React, { FunctionComponent, PropsWithChildren, ReactNode, useState } from "react"
+import { Box, Heading, Image, Text } from "@chakra-ui/react"
+import React, { PropsWithChildren, useState } from "react"
 import { Form } from "react-final-form"
 import { z } from "zod"
-import { Box, Heading, Text, Image } from "@chakra-ui/react"
 
-import { useTitle } from "../utils/hooks"
 import { sendValidationEmail } from "../utils/api"
+import { useTitle } from "../utils/hooks"
 
+import ActionBar from "../components/ActionBar"
 import ButtonAction from "../components/ds/ButtonAction"
-import InputGroup from "../components/ds/InputGroup"
 import { formValidator } from "../components/ds/form-lib"
 import FormStack from "../components/ds/FormStack"
-import Page from "../components/Page"
-import ActionBar from "../components/ActionBar"
+import InputGroup from "../components/ds/InputGroup"
 import FormError from "../components/FormError"
 import FormSubmit from "../components/FormSubmit"
+import Page from "../components/Page"
 
 const FormInput = z.object({
   email: z
