@@ -92,13 +92,12 @@ function Footer() {
           }}
         >
           <Text fontSize="sm" as="i">
-            Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des
-            ministères sociaux.
+            Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique
+            numérique des ministères sociaux.
           </Text>
           <Text fontSize="sm" mt={1}>
-            Pour nous aider à l'améliorer{" "}
             <TextLink to={`https://github.com/SocialGouv/egapro/commit/${githubSha}`} isExternal>
-              contribuez sur Github
+              Contribuer sur GitHub
             </TextLink>
           </Text>
         </Box>
