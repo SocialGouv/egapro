@@ -29,8 +29,8 @@ export const EntrepriseFooter = () => {
         </FooterBodyBrand>
         <FooterBodyContent>
           <FooterBodyContentDescription>
-            Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique des
-            ministères sociaux
+            Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique
+            numérique des ministères sociaux.
           </FooterBodyContentDescription>
           <FooterBodyContentItems>
             <FooterBodyItem>

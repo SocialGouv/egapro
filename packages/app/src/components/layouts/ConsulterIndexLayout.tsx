@@ -7,7 +7,7 @@ import type { PropsWithChildren } from "react";
 import { theme } from "../../theme";
 import { Footer } from "../ds/Footer";
 
-const DEFAULT_TITLE = "Egapro";
+const DEFAULT_TITLE = "Index Egapro";
 
 /**
  * Layout for consulter pages.
@@ -23,7 +23,7 @@ export const ConsulterIndexLayout = ({ children, title }: PropsWithChildren & { 
         <Box as="main" role="main" id="main" flexGrow={1} pt={10}>
           <Container maxW="container.lg">{children}</Container>
         </Box>
-        <Footer consultationMode />
+        <Footer />
       </Flex>
     </ChakraProvider>
   );

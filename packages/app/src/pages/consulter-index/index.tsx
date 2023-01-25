@@ -97,6 +97,6 @@ const HomePage: NextPageWithLayout = () => {
   );
 };
 
-HomePage.getLayout = ({ children }) => <ConsulterIndexLayout title="Consulter">{children}</ConsulterIndexLayout>;
+HomePage.getLayout = ({ children }) => <ConsulterIndexLayout title="Recherche">{children}</ConsulterIndexLayout>;
 
 export default HomePage;
