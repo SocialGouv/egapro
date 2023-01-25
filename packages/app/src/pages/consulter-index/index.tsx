@@ -62,7 +62,7 @@ function DownloadFileZone() {
 
   useEffect(() => {
     async function runEffect() {
-      setDate(await getLastModifiedDateFile("/index-egalite-fh.csv"));
+      setDate(await getLastModifiedDateFile("/index-egalite-fh.xlsx"));
     }
     runEffect();
   }, []);
@@ -75,8 +75,8 @@ function DownloadFileZone() {
         </Text>
 
         <LinkBox>
-          <LinkOverlay href="/index-egalite-fh.csv">
-            <ButtonAction variant="outline" leftIcon={<HiDownload />} label="Télécharger (csv)" />
+          <LinkOverlay href="/index-egalite-fh.xlsx">
+            <ButtonAction variant="outline" leftIcon={<HiDownload />} label="Télécharger (Excel)" />
           </LinkOverlay>
         </LinkBox>
       </Flex>

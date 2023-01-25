@@ -125,7 +125,7 @@ files:
 project:
   apiJobs:
     - name: export-public-data
-      command: egapro export-public-data /mnt/files/index-egalite-fh.csv
+      command: egapro export-public-data /mnt/files/index-egalite-fh.xlsx
     - name: dump-dgt
       command: egapro dump-dgt /mnt/files/dgt.xlsx
     - name: dump-dgt-representation
@@ -146,7 +146,7 @@ project:
     - "217.182.142.112"
   files:
     public:
-      - index-egalite-fh.csv
+      - index-egalite-fh.xlsx
       - dgt-export-representation.xlsx
     restricted:
       - dgt.xlsx

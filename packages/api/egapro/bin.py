@@ -74,9 +74,9 @@ async def search_representation_equilibree(q, verbose=False):
 
 @minicli.cli
 async def export_public_data(path: Path):
-    print("Writing the CSV to", path)
-    with path.open("w") as f:
-        await exporter.public_data(f)
+    wb = await exporter.public_data_as_xlsx()
+    print("Writing public_data XLSX to", path)
+    wb.save(path)
     print("Done")
 
 

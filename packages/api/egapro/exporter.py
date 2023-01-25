@@ -2,6 +2,13 @@
 
 import csv
 from pathlib import Path
+import re
+from typing import Union
+from openpyxl import Workbook
+from openpyxl.worksheet._write_only import WriteOnlyWorksheet
+from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
+from progressist import ProgressBar
 
 import ujson as json
 
@@ -111,3 +118,91 @@ async def indexes(path: Path):
             ]
         )
     writer.writerows(rows)
+
+WHITE_SPACES = re.compile(r"\s+")
+def clean_cell(value):
+    if isinstance(value, str):
+        value = WHITE_SPACES.sub(" ", ILLEGAL_CHARACTERS_RE.sub("", value).strip())
+    return value
+
+tranche_effectif_map = {
+    "50:250": "50 à 250",
+    "251:999": "251 à 999",
+    "1000:": "1000 et plus",
+    "1000:00:00": "1000 et plus", # ?
+}
+async def public_data_as_xlsx(debug=False):
+    """Export des données Egapro publiques au format XSLX.
+
+    :path:          chemin vers le fichier d'export
+    """
+
+    print("Reading from DB")
+    records = await db.declaration.fetch(sql.public_declarations)
+    workbook = Workbook(write_only=not debug)
+    sheet: Union[WriteOnlyWorksheet, Worksheet] = workbook.create_sheet()
+    sheet.title = "Données publiques Index Egapro"
+    workbook.active = sheet
+    sheet.append(
+        [
+            "Année",
+            "Structure",
+            "Tranche d'effectifs",
+            "SIREN",
+            "Raison Sociale",
+            "Nom UES",
+            "Entreprises UES (SIREN)",
+            "Région",
+            "Département",
+            "Pays",
+            "Code NAF",
+            "Note Ecart rémunération",
+            "Note Ecart taux d'augmentation (hors promotion)",
+            "Note Ecart taux de promotion",
+            "Note Ecart taux d'augmentation",
+            "Note Retour congé maternité",
+            "Note Hautes rémunérations",
+            "Note Index",
+        ]
+    )
+
+    bar = ProgressBar(prefix="Computing", total=len(records))
+    for record in bar.iter(records):
+        data: models.Data = record.data
+        if not data:
+            continue
+        ues = ",".join(
+            [
+                f"{company['raison_sociale']} ({company['siren']})"
+                for company in data.path("entreprise.ues.entreprises") or []
+            ]
+        )
+        effectif = data.path("entreprise.effectif.tranche")
+        lt_250 = effectif == "50:250"
+        sheet.append(
+            [clean_cell(c) for c in
+                [
+                    data.year,
+                    data.structure,
+                    tranche_effectif_map[effectif],
+                    data.siren,
+                    data.company,
+                    data.ues,
+                    ues,
+                    constants.REGIONS.get(data.region),
+                    constants.DEPARTEMENTS.get(data.departement),
+                    constants.PAYS_ISO_TO_LIB.get(
+                        data.path("entreprise.code_pays"), "FRANCE"
+                    ),
+                    data.naf,
+                    data.path("indicateurs.rémunérations.note") or "NC",
+                    "" if lt_250 else data.path("indicateurs.augmentations.note") or "NC",
+                    "" if lt_250 else data.path("indicateurs.promotions.note") or "NC",
+                    "" if not lt_250 else data.path("indicateurs.augmentations_et_promotions.note") or "NC",
+                    data.path("indicateurs.congés_maternité.note") or "NC",
+                    data.path("indicateurs.hautes_rémunérations.note") or "NC",
+                    data.grade or "NC",
+                ]
+            ]
+        )
+    return workbook
