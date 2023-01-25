@@ -1,22 +1,5 @@
-import { config } from "@common/config";
-import {
-  ButtonAsLink,
-  Footer,
-  FooterBody,
-  FooterBodyBrand,
-  FooterBodyContent,
-  FooterBodyContentDescription,
-  FooterBodyContentItems,
-  FooterBodyItem,
-  FooterBottom,
-  FooterBottomItem,
-  FooterBottomLink,
-  FooterContentLink,
-  FormButton,
-  Logo,
-  SkipLinks,
-  SkipLinksItem,
-} from "@design-system";
+import { EntrepriseFooter } from "@components/Footers";
+import { ButtonAsLink, FormButton, Logo, SkipLinks, SkipLinksItem } from "@design-system";
 import type { TokenInfoType } from "@services/apiClient";
 import { useFormManager, useUser } from "@services/apiClient";
 import clsx from "clsx";
@@ -65,9 +48,10 @@ const ActionButtonGroups = ({ dest, disconnectUser, isAuthenticated, user }: Act
   </ul>
 );
 
-// TODO move to _app.tsx when migration is done
-// TODO explode FooterBody component here
-export const App = ({ children }: PropsWithChildren) => {
+export const App = ({
+  children,
+  footer = <EntrepriseFooter />,
+}: PropsWithChildren & { footer?: React.ReactElement }) => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mobileMenuId = "mobile-menu";
@@ -187,61 +171,7 @@ export const App = ({ children }: PropsWithChildren) => {
         <main role="main" id="content" className={styles.content}>
           {children}
         </main>
-        <Footer>
-          <FooterBody>
-            <FooterBodyBrand>
-              <NextLink href="/">
-                <a>
-                  <Logo />
-                </a>
-              </NextLink>
-            </FooterBodyBrand>
-            <FooterBodyContent>
-              <FooterBodyContentDescription>
-                Index Egapro et Représentation équilibrée ont été développés par les équipes de la fabrique numérique
-                des ministères sociaux
-              </FooterBodyContentDescription>
-              <FooterBodyContentItems>
-                <FooterBodyItem>
-                  <FooterContentLink
-                    href=" https://travail-emploi.gouv.fr/IMG/xlsx/referents_egalite_professionnelle.xlsx"
-                    target="_blank"
-                    rel="noreferrer"
-                    title="Télécharger la liste des référents au format xlsx"
-                  >
-                    Télécharger la liste des référents
-                  </FooterContentLink>
-                </FooterBodyItem>
-                <FooterBodyItem>
-                  <FooterContentLink
-                    href={`https://github.com/SocialGouv/egapro/commit/${config.githubSha}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Contribuer sur Github
-                  </FooterContentLink>
-                </FooterBodyItem>
-              </FooterBodyContentItems>
-            </FooterBodyContent>
-          </FooterBody>
-          <FooterBottom>
-            <FooterBottomItem>
-              <NextLink href="/cgu" passHref>
-                <FooterBottomLink>CGU</FooterBottomLink>
-              </NextLink>
-            </FooterBottomItem>
-            <FooterBottomItem>
-              <NextLink href="/mentions-legales" passHref>
-                <FooterBottomLink>Mentions légales</FooterBottomLink>
-              </NextLink>
-            </FooterBottomItem>
-            <FooterBottomItem>
-              <NextLink href="/politique-de-confidentialite" passHref>
-                <FooterBottomLink>Politique de confidentialité</FooterBottomLink>
-              </NextLink>
-            </FooterBottomItem>
-          </FooterBottom>
-        </Footer>
+        {footer}
       </div>
     </>
   );

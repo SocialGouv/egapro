@@ -1,4 +1,5 @@
 import { DsfrScript } from "@components/DsfrScript";
+import { PublicFooter } from "@components/Footers";
 import { Container, Grid, GridCol, SideMenuLink } from "@design-system";
 import Head from "next/head";
 import NextLink from "next/link";
@@ -21,14 +22,11 @@ export const AsideLink = ({ path, children }: AsideLinkProps) => {
   );
 };
 
-const DEFAULT_TITLE = "Représentation équilibrée Egapro";
+const DEFAULT_TITLE = "Recherche - Représentation équilibrée Egapro";
 
-export const RepresentationEquilibreeStartLayout = ({
-  children,
-  title,
-}: PropsWithChildren & { title?: string | undefined }) => {
+export const ConsultationRepeqLayout = ({ children, title }: PropsWithChildren & { title?: string | undefined }) => {
   return (
-    <App>
+    <App footer={<PublicFooter />}>
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>

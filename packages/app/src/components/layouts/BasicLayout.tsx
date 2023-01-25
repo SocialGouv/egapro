@@ -1,4 +1,5 @@
 import { DsfrScript } from "@components/DsfrScript";
+import { PublicFooter } from "@components/Footers";
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
 
@@ -11,7 +12,7 @@ const DEFAULT_TITLE = "Egapro";
  */
 export const BasicLayout = ({ children, title }: PropsWithChildren & { title?: string | undefined }) => {
   return (
-    <App>
+    <App footer={<PublicFooter />}>
       <Head>
         <title>{title ? title + " - " + DEFAULT_TITLE : DEFAULT_TITLE}</title>
       </Head>

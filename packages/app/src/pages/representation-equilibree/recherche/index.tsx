@@ -1,5 +1,5 @@
 import { capitalize } from "@common/utils/string";
-import { RepresentationEquilibreeStartLayout } from "@components/layouts/RepresentationEquilibreeStartLayout";
+import { ConsultationRepeqLayout } from "@components/layouts/ConsultationRepeqLayout";
 import {
   Alert,
   AlertTitle,
@@ -267,7 +267,7 @@ const HomePage: NextPageWithLayout = () => {
 };
 
 HomePage.getLayout = ({ children }) => {
-  return <RepresentationEquilibreeStartLayout>{children}</RepresentationEquilibreeStartLayout>;
+  return <ConsultationRepeqLayout>{children}</ConsultationRepeqLayout>;
 };
 
 export default HomePage;
