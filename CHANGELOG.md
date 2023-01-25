@@ -1,3 +1,10 @@
+# [2.76.0](https://github.com/SocialGouv/egapro/compare/v2.75.2...v2.76.0) (2023-01-25)
+
+
+### Features
+
+* footer-consultation ([#1536](https://github.com/SocialGouv/egapro/issues/1536)) ([327c40e](https://github.com/SocialGouv/egapro/commit/327c40e84d08aab05c2e141a724d1b91f904ed60)), closes [#1432](https://github.com/SocialGouv/egapro/issues/1432)
+
 ## [2.75.2](https://github.com/SocialGouv/egapro/compare/v2.75.1...v2.75.2) (2023-01-25)
 
 
