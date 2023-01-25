@@ -1,3 +1,10 @@
+# [2.77.0](https://github.com/SocialGouv/egapro/compare/v2.76.1...v2.77.0) (2023-01-25)
+
+
+### Features
+
+* refactor with consistend footer wording ([e6ef7e3](https://github.com/SocialGouv/egapro/commit/e6ef7e36de4f870ef96a28d847c390425b229690))
+
 ## [2.76.1](https://github.com/SocialGouv/egapro/compare/v2.76.0...v2.76.1) (2023-01-25)
 
 
