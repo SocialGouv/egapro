@@ -1,3 +1,10 @@
+## [2.75.2](https://github.com/SocialGouv/egapro/compare/v2.75.1...v2.75.2) (2023-01-25)
+
+
+### Bug Fixes
+
+* **declaration:** fix ues back button (Fixes [#1530](https://github.com/SocialGouv/egapro/issues/1530)) ([cf8490d](https://github.com/SocialGouv/egapro/commit/cf8490d2cc556282e0e86350879d7027e82f93dc))
+
 ## [2.75.1](https://github.com/SocialGouv/egapro/compare/v2.75.0...v2.75.1) (2023-01-24)
 
 
