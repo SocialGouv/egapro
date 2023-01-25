@@ -1,3 +1,10 @@
+# [2.79.0](https://github.com/SocialGouv/egapro/compare/v2.78.1...v2.79.0) (2023-01-25)
+
+
+### Features
+
+* switch index csv to xlsx (Closes [#1518](https://github.com/SocialGouv/egapro/issues/1518)) ([7a19dc1](https://github.com/SocialGouv/egapro/commit/7a19dc1db8ca66e2f35de819ba34afd53e1764a4))
+
 ## [2.78.1](https://github.com/SocialGouv/egapro/compare/v2.78.0...v2.78.1) (2023-01-25)
 
 
