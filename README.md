@@ -49,20 +49,21 @@ Il est possible de configurer son environnement local sans renseigner les ports,
 
 Toutes les applications seront sous le même domaine et les URL seront celles de la production.
 
+L'api peut être soit distante (e.g. api de preprod), soit locale (mais elle restera derrière son port d'origine `2626`)
+
 Le reverse proxy est configuré à travers un NGINX, mais a besoin que les composants voulus soient configurés en conséquence :
 
-- `api` => pas de config a ajouter
 - `app` => `packages/app/.env.development.local`
-  - `NEXT_PUBLIC_API_URL=http://localhost/api`
+  - `NEXT_PUBLIC_API_URL=http://localhost:2626` (si api locale)
 - apiv2 non supportée pour l'instant (si besoin de dev sur apiv2, passer directement par l'url classique http://localhost:3000)
 - `declaration` => copier `.env.dist` vers `.env` (racine) si besoin.
   - `BASE_URL="/index-egapro/declaration"`
-  - `EGAPRO_API_URL="http://localhost/api"` (si api locale)
+  - `EGAPRO_API_URL="http://localhost:2626"` (si api locale)
   - `EGAPRO_SIMU_URL="http://localhost/index-egapro"` (si besoin du simulateur)
 - `simulateur` => copier `packages/simulateur/.env.dist` vers `packages/simulateur/.env` si besoin.
   - `PUBLIC_URL="/index-egapro"`
   - `REACT_APP_DECLARATION_URL="http://localhost/index-egapro/declaration"` (si besoin de la déclaration)
-  - `REACT_APP_EGAPRO_API_URL="http://localhost/api"` (si api locale)
+  - `REACT_APP_EGAPRO_API_URL="http://localhost:2626"` (si api locale)
 
 Enfin, il suffit de lancer dans une fenêtre le serveur NGINX prévu :
 
@@ -70,11 +71,10 @@ Enfin, il suffit de lancer dans une fenêtre le serveur NGINX prévu :
 yarn reverse-proxy
 ```
 
-Remarque : maildev et la base de données ne sont pas affectés par le reverse proxy.
+Remarque : api, maildev et la base de données ne sont pas affectés par le reverse proxy.
 
 Les adresses deviennent alors :
 
-- [api         -> http://localhost/api](http://localhost/api)
 - [app         -> http://localhost](http://localhost)
 - [simulateur  -> http://localhost/index-egapro/simulateur/nouvelle-simulation](http://localhost/index-egapro/simulateur/nouvelle-simulation)
 - [declaration -> http://localhost/index-egapro/declaration](http://localhost/index-egapro/declaration)
