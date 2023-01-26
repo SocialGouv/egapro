@@ -30,9 +30,6 @@ const formSchema = z.object({
 // Infer the TS type according to the zod schema.
 type FormType = z.infer<typeof formSchema>;
 
-const informationMessage =
-  "En cas d'email erroné, vous ne pourrez pas remplir le formulaire ou accéder à votre déclaration déjà transmise.";
-
 const EmailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { user } = useUser();
@@ -74,13 +71,6 @@ const EmailPage: NextPageWithLayout = () => {
       <h1>{title}</h1>
 
       <ClientOnly>
-        {featureStatus.type !== "success" && (
-          <Alert type="info" mb="4w">
-            <AlertTitle>Information</AlertTitle>
-            <p>{informationMessage}</p>
-          </Alert>
-        )}
-
         <AlertFeatureStatus title="Erreur" type="error" />
 
         {featureStatus.type === "success" && (
@@ -104,14 +94,17 @@ const EmailPage: NextPageWithLayout = () => {
 
         {featureStatus.type !== "success" && (
           <>
-            <p>
-              L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail
-              en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.
-            </p>
-            <p>
-              Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email utilisé
-              pour la déclaration ou un des emails rattachés au Siren de votre entreprise.
-            </p>
+            <Alert type="info" mb="4w">
+              <AlertTitle>Dans le cadre d'une déclaration</AlertTitle>
+              <p>
+                L'email doit correspondre à celui de la personne à contacter par les services de l’inspection du travail
+                en cas de besoin et sera celui sur lequel sera adressé l’accusé de réception en fin de déclaration.
+              </p>
+              <p>
+                Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir l'email
+                utilisé pour la déclaration ou un des emails rattachés au Siren de votre entreprise.
+              </p>
+            </Alert>
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <FormLayout>
                 <FormGroup>
