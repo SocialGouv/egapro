@@ -1,3 +1,10 @@
+## [2.79.1](https://github.com/SocialGouv/egapro/compare/v2.79.0...v2.79.1) (2023-01-26)
+
+
+### Bug Fixes
+
+* wording email recap (Fixes [#1538](https://github.com/SocialGouv/egapro/issues/1538)) ([af089f7](https://github.com/SocialGouv/egapro/commit/af089f78097460f3b43580e25ee94fc46307ac7a))
+
 # [2.79.0](https://github.com/SocialGouv/egapro/compare/v2.78.1...v2.79.0) (2023-01-25)
 
 
