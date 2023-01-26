@@ -257,24 +257,42 @@ function loadFormValues(form) {
 }
 
 function toggleDeclarationValidatedBar() {
-  if(app.data.source === 'simulateur') {
-    document.getElementById("simulation-readonly").hidden = app.mode !== 'reading'
-  } else {
-    document.getElementById("declaration-readonly").hidden = app.mode !== 'reading'
-    document.getElementById("declaration-draft").hidden = app.mode !== 'updating'
-  }
+    if (app.mode === "creating") return
 
-  const année = app.getItem("déclaration.année_indicateurs")
-  const index = app.getItem("déclaration.index")
+    const dateDeclaration = new Date(app.getItem("déclaration.date"))
+    let now = new Date();
 
-  // index may be undefined if it is Non calculable. Don't show the bar in this case.
-  const objectifsMesuresIsVisible = année >= 2021 && index && index < 85
-  const objectifsMesuresLabel = objectifsMesuresIsVisible && index < 75
-    ? "Aller aux objectifs de progression et mesures de correction"
-    : "Aller aux objectifs de progression"
+    now.setFullYear(now.getFullYear() - 1);
 
-  document.getElementById("objectifs-mesures-button").hidden = !objectifsMesuresIsVisible
-  document.getElementById("objectifs-mesures-button").innerHTML = objectifsMesuresLabel
+    if (dateDeclaration < now) {
+        // La date de déclaration est plus ancienne qu'il y a un an, on ne permet plus de modifier la déclaration.
+        document.getElementById("declaration-frozen").hidden = false
+        return
+    }
+
+    if(app.data.source === 'simulateur') {
+        if (app.mode === "reading") {
+            document.getElementById("simulation-readonly").hidden = false
+        }
+    } else {
+        if (app.mode === "reading") {
+            document.getElementById("declaration-readonly").hidden = false
+        } else if (app.mode === "updating") {
+            document.getElementById("declaration-draft").hidden = false
+        }
+    }
+
+    const année = app.getItem("déclaration.année_indicateurs")
+    const index = app.getItem("déclaration.index")
+
+    // index may be undefined if it is Non calculable. Don't show the bar in this case.
+    const objectifsMesuresIsVisible = année >= 2021 && index && index < 85
+    const objectifsMesuresLabel = objectifsMesuresIsVisible && index < 75
+        ? "Aller aux objectifs de progression et mesures de correction"
+        : "Aller aux objectifs de progression"
+
+    document.getElementById("objectifs-mesures-button").hidden = !objectifsMesuresIsVisible
+    document.getElementById("objectifs-mesures-button").innerHTML = objectifsMesuresLabel
 }
 
 
