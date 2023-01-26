@@ -5,6 +5,7 @@ import { Box } from "@chakra-ui/react"
 import { AppState, FormState, ActionType, ActionInformationsSimulationData } from "../../globals"
 
 import { useTitle } from "../../utils/hooks"
+import { isFrozenDeclaration } from "../../utils/isFrozenDeclaration"
 import { useDeclaration } from "../../hooks/useDeclaration"
 
 import InfoBlock from "../../components/ds/InfoBlock"
@@ -38,6 +39,8 @@ const InformationsSimulation = ({ state, dispatch }: InformationsSimulationProps
   useTitle(title)
   const { code } = useParams<Params>()
 
+  const frozenDeclaration = isFrozenDeclaration(state)
+
   const updateInformationsSimulation = useCallback(
     (data: ActionInformationsSimulationData) => dispatch({ type: "updateInformationsSimulation", data }),
     [dispatch],
@@ -58,7 +61,7 @@ const InformationsSimulation = ({ state, dispatch }: InformationsSimulationProps
         childrenForm={
           <InformationsSimulationForm
             informations={state.informations}
-            readOnly={state.informations.formValidated === "Valid"}
+            readOnly={frozenDeclaration || state.informations.formValidated === "Valid"}
             updateInformationsSimulation={updateInformationsSimulation}
             validateInformationsSimulation={validateInformationsSimulation}
             alreadyDeclared={alreadyDeclared}
