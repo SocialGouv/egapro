@@ -69,8 +69,10 @@ simulateur:
   containerPort: 8080
   host: "{{ .Values.global.host }}"
   ingress:
-    path: /index-egapro(/|$)(.*)
-    rewriteTarget: /$2
+    paths:
+      - /index-egapro[/|$]()(.*)
+      - /(simulateur[/|$])(.*)
+    rewriteTarget: /$1$2
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.gouv.fr; font-src 'self'; media-src 'self' https://*.gouv.fr; img-src 'self' data: https://*.gouv.fr https://www.googletagmanager.co; prefetch-src 'self' https://*.gouv.fr; script-src 'self' https://www.googletagmanager.com https://*.gouv.fr 'unsafe-inline'  'unsafe-eval'; frame-src 'self' https://*.gouv.fr; style-src 'self' 'unsafe-inline'";
