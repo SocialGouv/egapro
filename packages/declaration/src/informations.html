@@ -56,6 +56,11 @@ title: "Informations calcul et période de référence"
     document.onready = () => {
 
         if (!app.data._déclaration) app.data._déclaration = {}
+        if (app.getItem('entreprise.raison_sociale')) {
+            // There is already a "raison sociale" saved so we did already submit this current form,
+            // so we can infer the "_entreprise.structure" data.
+            app.data._entreprise = { structure: app.data.entreprise.ues ? "ues" : "entreprise" };
+        }
 
         // If we have a previous data for période_suffisante, it is a boolean type. Otherwise, it is undefined.
         if ((typeof app.getItem('déclaration.période_suffisante')) === "boolean") {
@@ -66,6 +71,9 @@ title: "Informations calcul et période de référence"
                 // We are on legacy declarations which didn't have this field. So we check the box to see the hidden fields.
                 app.data._déclaration.période_suffisante = "oui"
             }
+        }
+        if (app.data._déclaration.période_suffisante) {
+            app.data.déclaration.période_suffisante = app.data._déclaration.période_suffisante === "oui" ? true : false
         }
 
         finPeriodeReferenceField.max = `${app.data.déclaration.année_indicateurs}-12-31`
