@@ -158,7 +158,7 @@ jobs:
   ~chart: jobs
   runs:
     build-app:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       memoryLimit: 14Gi
       memoryRequest: 2Gi
       with:
@@ -171,7 +171,7 @@ jobs:
           EGAPRO_ENV: "{{ .Values.global.env }}"
 
     build-storybook:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       memoryLimit: 8Gi
       memoryRequest: 2Gi
       with:
@@ -179,13 +179,13 @@ jobs:
         dockerfile: packages/app/.storybook/Dockerfile
 
     build-api:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       with:
         imagePackage: api
         context: packages/api
 
     build-declaration:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       with:
         imagePackage: declaration
         context: packages/declaration
@@ -196,7 +196,7 @@ jobs:
           GITHUB_SHA: "{{ $.Values.global.sha }}"
 
     build-simulateur:
-      use: SocialGouv/kontinuous/plugins/contrib/jobs/build
+      use: build
       memoryLimit: 10Gi
       memoryRequest: 2Gi
       with:
@@ -214,4 +214,3 @@ deactivate:
       deactivate:
         with:
           db: true
-          pgAdminSecretRefName: azure-pg-admin-user
